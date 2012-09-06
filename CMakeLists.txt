@@ -334,7 +334,7 @@ ENDIF( NOT MSVC )
 
 ################################################################################
 #
-# Building of external packages & examples
+# Building external packages
 #
 ################################################################################
 
@@ -348,33 +348,21 @@ ADD_SUBDIRECTORY( ./external_packages/qpOASES-3.0beta )
 #
 ADD_SUBDIRECTORY( ./external_packages/csparse )
 
-#
-# Build examples
-#
-IF( WITH_ACADO_EXAMPLES )
-	ADD_SUBDIRECTORY( ./examples )
-ENDIF( WITH_ACADO_EXAMPLES )
-
-#TODO: From CMake version 2.8.6 something more elegant can be done:
-#ADD_CUSTOM_TARGET( examples
-#	COMMAND ${CMAKE_COMMAND} -E build "./examples"
-#)
-
 ################################################################################
 #
-# Automatic testing
+# TODO Automatic testing
 #
 ################################################################################
 
 #
 # Tests
 #
-IF( WITH_TESTING )
-	ENABLE_TESTING()
-	INCLUDE( CTest )
-	SET( DBUILD_DASHBOARD_REPORTS = ON )
-	ADD_SUBDIRECTORY( ./testing/automatic_testing ${TESTING_OUTPUT_PATH} )
-ENDIF( WITH_TESTING )
+#IF( WITH_TESTING )
+#	ENABLE_TESTING()
+#	INCLUDE( CTest )
+#	SET( DBUILD_DASHBOARD_REPORTS = ON )
+#	ADD_SUBDIRECTORY( ./testing/automatic_testing ${TESTING_OUTPUT_PATH} )
+#ENDIF( WITH_TESTING )
 
 ################################################################################
 #
@@ -568,3 +556,12 @@ CONFIGURE_FILE(
 	@ONLY
 )
 
+################################################################################
+#
+# Build examples
+#
+################################################################################
+
+IF( WITH_ACADO_EXAMPLES )
+	ADD_SUBDIRECTORY( ./examples )
+ENDIF( WITH_ACADO_EXAMPLES )
