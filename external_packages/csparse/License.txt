@@ -1,0 +1,60 @@
+CSparse: a Concise Sparse matrix package.
+Copyright (c) 2006, Timothy A. Davis.
+http://www.cise.ufl.edu/research/sparse/CSparse
+
+--------------------------------------------------------------------------------
+
+CSparse is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+CSparse is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this Module; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+--------------------------------------------------------------------------------
+
+REMARK:
+
+This is not the original CSparse version but a specialized redristribution,
+which comes along with ACADO Toolkit. The following changes have been made:
+
+- This version contains only the C source-files of the original CSparse version.
+- This version has replaced the original CSparse Makefile with an ACADO specific
+  Makefile.
+- The "C style" syntax of the original CSparse version has in some files been
+  changed to a C++ compatible syntax to be able to compile the code not only
+  with C but also with C++ compilers (we tested with gcc and g++). These changes
+  boil down to "type casts" while there was no change of functionality.
+
+
+ACADO Toolkit is also released under the LGPL licence:
+
+ *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
+ *    Copyright (C) 2008-2009 by Boris Houska and Hans Joachim Ferreau, K.U.Leuven.
+ *    Developed within the Optimization in Engineering Center (OPTEC) under
+ *    supervision of Moritz Diehl. All rights reserved.
+ *
+ *    ACADO Toolkit is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation; either
+ *    version 3 of the License, or (at your option) any later version.
+ *
+ *    ACADO Toolkit is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ *
+ *    You should have received a copy of the GNU Lesser General Public
+ *    License along with ACADO Toolkit; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+--------------------------------------------------------------------------------
+
+

@@ -1,0 +1,165 @@
+
+ACADO Toolkit::SCPmethod -- A Sequential Quadratic Programming Algorithm.
+Copyright (C) 2008-2011 by Boris Houska and Hans Joachim Ferreau, K.U.Leuven.
+Developed within the Optimization in Engineering Center (OPTEC) under
+supervision of Moritz Diehl. All rights reserved.
+
+ACADO Toolkit is distributed under the terms of the GNU Lesser
+General Public License 3 in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+
+
+*** SIMULATION LOOP NO. 1 (starting at time 0.000) ***
+  1:  KKT tolerance = 0.000e+00    line search parameter = 1.000e+00    objective value = 0.0000e+00    merit function value = 0.0000e+00    
+
+*** SIMULATION LOOP NO. 2 (starting at time 0.050) ***
+  1:  KKT tolerance = 0.000e+00    line search parameter = 1.000e+00    objective value = 0.0000e+00    merit function value = 0.0000e+00    
+
+*** SIMULATION LOOP NO. 3 (starting at time 0.100) ***
+  1:  KKT tolerance = 1.078e-03    line search parameter = 1.000e+00    objective value = 8.1426e-03    merit function value = 9.4357e-03    
+
+*** SIMULATION LOOP NO. 4 (starting at time 0.150) ***
+  1:  KKT tolerance = 1.059e-09    line search parameter = 1.000e+00    objective value = 1.0581e-02    merit function value = 1.0581e-02    
+
+*** SIMULATION LOOP NO. 5 (starting at time 0.200) ***
+  1:  KKT tolerance = 3.891e-10    line search parameter = 1.000e+00    objective value = 6.2408e-03    merit function value = 6.2408e-03    
+
+*** SIMULATION LOOP NO. 6 (starting at time 0.250) ***
+  1:  KKT tolerance = 2.513e-10    line search parameter = 1.000e+00    objective value = 6.1914e-03    merit function value = 6.1914e-03    
+
+*** SIMULATION LOOP NO. 7 (starting at time 0.300) ***
+  1:  KKT tolerance = 2.212e-10    line search parameter = 1.000e+00    objective value = 5.8182e-03    merit function value = 5.8182e-03    
+
+*** SIMULATION LOOP NO. 8 (starting at time 0.350) ***
+  1:  KKT tolerance = 1.894e-10    line search parameter = 1.000e+00    objective value = 4.9514e-03    merit function value = 4.9514e-03    
+
+*** SIMULATION LOOP NO. 9 (starting at time 0.400) ***
+  1:  KKT tolerance = 1.465e-10    line search parameter = 1.000e+00    objective value = 3.6945e-03    merit function value = 3.6945e-03    
+
+*** SIMULATION LOOP NO. 10 (starting at time 0.450) ***
+  1:  KKT tolerance = 1.031e-10    line search parameter = 1.000e+00    objective value = 2.3127e-03    merit function value = 2.3127e-03    
+
+*** SIMULATION LOOP NO. 11 (starting at time 0.500) ***
+  1:  KKT tolerance = 3.638e-11    line search parameter = 1.000e+00    objective value = 1.1387e-03    merit function value = 1.1387e-03    
+
+*** SIMULATION LOOP NO. 12 (starting at time 0.550) ***
+  1:  KKT tolerance = 5.812e-12    line search parameter = 1.000e+00    objective value = 4.1430e-04    merit function value = 4.1430e-04    
+
+*** SIMULATION LOOP NO. 13 (starting at time 0.600) ***
+  1:  KKT tolerance = 3.901e-12    line search parameter = 1.000e+00    objective value = 1.1526e-04    merit function value = 1.1526e-04    
+
+*** SIMULATION LOOP NO. 14 (starting at time 0.650) ***
+  1:  KKT tolerance = 1.987e-12    line search parameter = 1.000e+00    objective value = 3.5344e-05    merit function value = 3.5344e-05    
+
+*** SIMULATION LOOP NO. 15 (starting at time 0.700) ***
+  1:  KKT tolerance = 5.073e-13    line search parameter = 1.000e+00    objective value = 1.7725e-05    merit function value = 1.7725e-05    
+
+*** SIMULATION LOOP NO. 16 (starting at time 0.750) ***
+  1:  KKT tolerance = 4.598e-13    line search parameter = 1.000e+00    objective value = 1.0126e-05    merit function value = 1.0126e-05    
+
+*** SIMULATION LOOP NO. 17 (starting at time 0.800) ***
+  1:  KKT tolerance = 2.213e-13    line search parameter = 1.000e+00    objective value = 5.1616e-06    merit function value = 5.1616e-06    
+
+*** SIMULATION LOOP NO. 18 (starting at time 0.850) ***
+  1:  KKT tolerance = 2.037e-13    line search parameter = 1.000e+00    objective value = 2.1802e-06    merit function value = 2.1802e-06    
+
+*** SIMULATION LOOP NO. 19 (starting at time 0.900) ***
+  1:  KKT tolerance = 1.451e-13    line search parameter = 1.000e+00    objective value = 1.7715e-06    merit function value = 1.7715e-06    
+
+*** SIMULATION LOOP NO. 20 (starting at time 0.950) ***
+  1:  KKT tolerance = 5.096e-14    line search parameter = 1.000e+00    objective value = 9.5942e-07    merit function value = 9.5942e-07    
+
+*** SIMULATION LOOP NO. 21 (starting at time 1.000) ***
+  1:  KKT tolerance = 3.176e-14    line search parameter = 1.000e+00    objective value = 6.5894e-07    merit function value = 6.5894e-07    
+
+*** SIMULATION LOOP NO. 22 (starting at time 1.050) ***
+  1:  KKT tolerance = 2.908e-14    line search parameter = 1.000e+00    objective value = 4.4480e-07    merit function value = 4.4480e-07    
+
+*** SIMULATION LOOP NO. 23 (starting at time 1.100) ***
+  1:  KKT tolerance = 2.316e-14    line search parameter = 1.000e+00    objective value = 2.7617e-07    merit function value = 2.7617e-07    
+
+*** SIMULATION LOOP NO. 24 (starting at time 1.150) ***
+  1:  KKT tolerance = 2.296e-14    line search parameter = 1.000e+00    objective value = 1.8923e-07    merit function value = 1.8923e-07    
+
+*** SIMULATION LOOP NO. 25 (starting at time 1.200) ***
+  1:  KKT tolerance = 2.300e-14    line search parameter = 1.000e+00    objective value = 1.2256e-07    merit function value = 1.2256e-07    
+
+*** SIMULATION LOOP NO. 26 (starting at time 1.250) ***
+  1:  KKT tolerance = 2.151e-14    line search parameter = 1.000e+00    objective value = 8.0601e-08    merit function value = 8.0601e-08    
+
+*** SIMULATION LOOP NO. 27 (starting at time 1.300) ***
+  1:  KKT tolerance = 2.120e-14    line search parameter = 1.000e+00    objective value = 5.3503e-08    merit function value = 5.3503e-08    
+
+*** SIMULATION LOOP NO. 28 (starting at time 1.350) ***
+  1:  KKT tolerance = 1.695e-14    line search parameter = 1.000e+00    objective value = 3.4963e-08    merit function value = 3.4963e-08    
+
+*** SIMULATION LOOP NO. 29 (starting at time 1.400) ***
+  1:  KKT tolerance = 1.544e-14    line search parameter = 1.000e+00    objective value = 2.3117e-08    merit function value = 2.3117e-08    
+
+*** SIMULATION LOOP NO. 30 (starting at time 1.450) ***
+  1:  KKT tolerance = 8.515e-15    line search parameter = 1.000e+00    objective value = 1.5211e-08    merit function value = 1.5211e-08    
+
+*** SIMULATION LOOP NO. 31 (starting at time 1.500) ***
+  1:  KKT tolerance = 4.360e-15    line search parameter = 1.000e+00    objective value = 1.0007e-08    merit function value = 1.0007e-08    
+
+*** SIMULATION LOOP NO. 32 (starting at time 1.550) ***
+  1:  KKT tolerance = 1.763e-15    line search parameter = 1.000e+00    objective value = 6.5981e-09    merit function value = 6.5981e-09    
+
+*** SIMULATION LOOP NO. 33 (starting at time 1.600) ***
+  1:  KKT tolerance = 1.568e-15    line search parameter = 1.000e+00    objective value = 4.3411e-09    merit function value = 4.3411e-09    
+
+*** SIMULATION LOOP NO. 34 (starting at time 1.650) ***
+  1:  KKT tolerance = 1.249e-15    line search parameter = 1.000e+00    objective value = 2.8595e-09    merit function value = 2.8595e-09    
+
+*** SIMULATION LOOP NO. 35 (starting at time 1.700) ***
+  1:  KKT tolerance = 8.304e-16    line search parameter = 1.000e+00    objective value = 1.8832e-09    merit function value = 1.8832e-09    
+
+*** SIMULATION LOOP NO. 36 (starting at time 1.750) ***
+  1:  KKT tolerance = 6.619e-16    line search parameter = 1.000e+00    objective value = 1.2398e-09    merit function value = 1.2398e-09    
+
+*** SIMULATION LOOP NO. 37 (starting at time 1.800) ***
+  1:  KKT tolerance = 4.272e-16    line search parameter = 1.000e+00    objective value = 8.1658e-10    merit function value = 8.1658e-10    
+
+*** SIMULATION LOOP NO. 38 (starting at time 1.850) ***
+  1:  KKT tolerance = 2.941e-16    line search parameter = 1.000e+00    objective value = 5.3768e-10    merit function value = 5.3768e-10    
+
+*** SIMULATION LOOP NO. 39 (starting at time 1.900) ***
+  1:  KKT tolerance = 1.529e-16    line search parameter = 1.000e+00    objective value = 3.5407e-10    merit function value = 3.5407e-10    
+
+*** SIMULATION LOOP NO. 40 (starting at time 1.950) ***
+  1:  KKT tolerance = 1.090e-16    line search parameter = 1.000e+00    objective value = 2.3316e-10    merit function value = 2.3316e-10    
+
+*** SIMULATION LOOP NO. 41 (starting at time 2.000) ***
+  1:  KKT tolerance = 6.375e-17    line search parameter = 1.000e+00    objective value = 1.5353e-10    merit function value = 1.5353e-10    
+
+*** SIMULATION LOOP NO. 42 (starting at time 2.050) ***
+  1:  KKT tolerance = 4.411e-17    line search parameter = 1.000e+00    objective value = 1.0111e-10    merit function value = 1.0111e-10    
+
+*** SIMULATION LOOP NO. 43 (starting at time 2.100) ***
+  1:  KKT tolerance = 2.874e-17    line search parameter = 1.000e+00    objective value = 6.6579e-11    merit function value = 6.6579e-11    
+
+*** SIMULATION LOOP NO. 44 (starting at time 2.150) ***
+  1:  KKT tolerance = 2.104e-17    line search parameter = 1.000e+00    objective value = 4.3842e-11    merit function value = 4.3842e-11    
+
+*** SIMULATION LOOP NO. 45 (starting at time 2.200) ***
+  1:  KKT tolerance = 1.660e-17    line search parameter = 1.000e+00    objective value = 2.8871e-11    merit function value = 2.8871e-11    
+
+*** SIMULATION LOOP NO. 46 (starting at time 2.250) ***
+  1:  KKT tolerance = 1.404e-17    line search parameter = 1.000e+00    objective value = 1.9012e-11    merit function value = 1.9012e-11    
+
+*** SIMULATION LOOP NO. 47 (starting at time 2.300) ***
+  1:  KKT tolerance = 1.261e-17    line search parameter = 1.000e+00    objective value = 1.2519e-11    merit function value = 1.2519e-11    
+
+*** SIMULATION LOOP NO. 48 (starting at time 2.350) ***
+  1:  KKT tolerance = 1.183e-17    line search parameter = 1.000e+00    objective value = 8.2440e-12    merit function value = 8.2440e-12    
+
+*** SIMULATION LOOP NO. 49 (starting at time 2.400) ***
+  1:  KKT tolerance = 1.141e-17    line search parameter = 1.000e+00    objective value = 5.4288e-12    merit function value = 5.4288e-12    
+
+*** SIMULATION LOOP NO. 50 (starting at time 2.450) ***
+  1:  KKT tolerance = 1.120e-17    line search parameter = 1.000e+00    objective value = 3.5749e-12    merit function value = 3.5749e-12    
+
+*** SIMULATION LOOP NO. 51 (starting at time 2.500) ***
+  1:  KKT tolerance = 1.112e-17    line search parameter = 1.000e+00    objective value = 2.3541e-12    merit function value = 2.3541e-12    

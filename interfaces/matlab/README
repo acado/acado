@@ -1,0 +1,27 @@
+ ________________________
+|                        |
+|    ACADO for Matlab    |    README
+|________________________|
+
+
+Website:           		   	http://www.acadotoolkit.org/matlab
+Support:					http://forum.acadotoolkit.org/
+Installation instructions: 	http://www.acadotoolkit.org/matlab/gettingstarted.php
+User Manual:               	http://www.acadotoolkit.org/download.php
+Software Licence:          	http://www.acadotoolkit.org/download.php
+
+Current version:           	See getversioninformation.m
+Changelog:                 	See changelog.txt
+
+Supported Matlab versions: 	http://www.acadotoolkit.org/matlab/requirements.php
+
+
+
+The ACADO toolkit for Matlab requires at least Matlab R2008a. 
+ Linux/Mac: At least GCC version 4.0.0 is required
+ Windows: Microsoft Visual C++ 2008 Express Edition
+
+
+
+
+Author: David Ariens ( matlab-support@acadotoolkit.org )

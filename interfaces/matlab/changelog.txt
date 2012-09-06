@@ -1,0 +1,149 @@
+ ________________________
+|                        |
+|    ACADO for Matlab    |    CHANGELOG
+|________________________|
+
+UPON RELEASE:                                                                    
+* Use the script "complete_release" in /auxiliary_stuff/release_scripts (do not
+  copy content directly because many generated files should not be part of a release)
+* Set the current SVN checkout version in getversioninformation.m
+
+
+v...
+* Bug: minimizeLSQEndTerm wasn't working properly with 2 arguments
+
+
+v2022 - 3/06/2010
+* Bug: trajectory in integrator was only giving back 2 points
+* Bug: Seeds and sensitivities are enabled again in the integrator
+* Feat: Now possible to set a custom mesh size for the results of the integrator
+* Feat: Added field "CONVERGENCE_ACHIEVED" to output struct to indicate convergence
+* Bug: Bug in periodic tracking. reference trajectory was not passed correctly
+* Feat: Introducing multi stage OCP (not yet with "transitions")
+* Feat: Introduced process.initializeAlgebraicStates(). Use this method to 
+  initialize algebraic states in NMPC environments (simulation environment)
+  ( CURRENTLY NOT ENABLED ! ) 
+* IntermediateStates are not supported any more. Use matlab variables in stead.
+
+
+v1986 - 3/06/2010 - BRANCH
+The current version is not the latest version on SVN but a branch based on
+svn version 1986 with some minor changes. Originally these changes are only
+introduced in version v2022 and later. 
+* Bug: trajectory in integrator was only giving back 2 points
+* Bug: Seeds and sensitivities are enabled again in the integrator
+* Feat: Now possible to set a custom mesh size for the results of the integrator
+* Feat: Added field "CONVERGENCE_ACHIEVED" to output struct to indicate convergence
+* Bug: Bug in periodic tracking. reference trajectory was not passed correctly
+* Feat: Introducing multi stage OCP (not yet with "transitions")
+* IntermediateStates are not supported any more. Use matlab variables in stead.
+
+
+v1983 - 16/05/2010
+* Now warnings are given if initializeDifferentialStates, -AlgebraicStates, 
+  -Parameters, -Controls or -Disturbances are not of correct size (= first column 
+  time, next column values for all elements). Warnings can be disabled by not showing 
+  warnings with identifier "ACADO:initialize". Help files are also extended.
+* Introduction "makemex" -> a system to automatically compile your own mex files.
+  See manual section "Writing and compiling your own C++ file"
+
+
+v1958 - 11/05/2010
+* Completely rewritten how matrices, vectors, doubles are stored and used in 
+  expressions. Removed .print(), replaced by .getInstuctions()
+* Feat: Now possible to use bounds equal to a Matrix, eg subjectTo(u1 == [0 1; 1 2]). 
+  First column are time points, second column the time depending reference value
+* New corrected and extended manual
+
+
+v1935 - 29/4/2010
+* Feat: f.linkMatlabDAE -> Now supporting DAE's with black-box models.  See 
+  examples\ocp\dae_optimization_tutorial_matlab
+* Feat: Now supporting discrete differential equations. Not yet for black-box models. 
+  See examples\ocp\discrete_time_rocket
+* Changed way cpp files are included in integrator. You now have to specify included 
+  files your self in MODEL_INCLUDE.m
+
+
+v1880 - 19/4/2010
+* Feat: f.linkCFunction -> now supports DAE's as well
+* !! SYNTAX FOR DAE MODELS IS CHANGED. See manual and examples
+* Bug: DAE's in integrator didn't work
+* FIRST RELEASE USER GUIDE!
+* REMARK: Blackbox DAE's (linkMatlabDAE and setCfunction with DAE) don't work yet.
+
+
+v1853 - 13/4/2010
+* Bug: Powerkite online example works again
+* linkMatlabODE now supports 2 arguments: the ODE and an optional Jacobian. 
+  linkMatlabJacobian is thus abandoned.
+* Bug: in minimizeLSQ(S,h,r) -> r can now be a matrix as well
+* Feat: its now possible to add multiple minimizeLSQ(end) terms
+* Feat: results of parameterestimation are now stored in vector out.PARAMETERS
+* Feat: static reference trajectory can now contain reference values
+* Bug: compilation didn't work under windows
+
+
+v1805 - 3/4/2010
+* algo.solve(), sim.run( ) is abandoned. Compilation will start automatically when 
+  calling END_ACADO
+* Engine: not using pointers anymore
+* Introducing linkCFunction to link a C blackbox model (see example ocp/simplerocket_c)
+
+
+v1802 - 31/03/2010
+* f.ODE() is now replaced by f.add()
+* Added support for AlgebraicState (for now only when using f.add() not yet for 
+  linking a matlab dae)
+  * See new examples ocp/dae_optimization_tutorial and ocp/dae_optimization_tutorial2
+* Introduced initializeAlgebraicStates
+
+
+v1798 - 29/03/2010
+* Added the examples folder "matlabarguments" with examples dedicated on free Mex 
+  Inputs. These Mex Inputs allow you to change bounds, matrices, starting times,... 
+  without having to recompile.
+* Powerkite online example is not working at the moment
+
+
+v1793 - 29/03/2010
+* Changes to parameter estimation
+  * obsolete ocp.minimizeLSQParameter( S, h ) -> minimizeLSQocp.minimizeLSQ( S, h, M );  
+    with M the measurement matrix
+  * OCP now requires a vector with timepoints (as in the C++ code) instead of the 
+    full matrix acado.OCP(M) ->  acado.OCP(M(:,1)')
+* Now supporting intermediate states. See examples\simulationenv\dev_dcmotor for an 
+  example
+* Now supporting controller.init() and controller.step()
+* Introduced "MexInput", allowing you to set variable inputs
+* Results are now written to the workspace (files is still an option which can be set 
+  with acadoSet('results_to_file', false))
+* Introduced initializeDisturbances()
+
+
+v1775 - 24/03/2010
+* Set seeds, get sensitivities in integrator currently disabled!
+
+
+v1774 - 23/03/2010
+* Obsolete DifferentialStates -> Use DifferentialState
+* Obsolete Parameters -> Use Parameter
+* Obsolete Controls -> Use Control
+* Obsolete Disturbances -> Use Disturbance
+* Introduced TIME
+* Obsolete algo.setVariables -> Not needed anymore
+* Obsolete algo.setProblemname -> Introduced acadoSet('problemname', 'getting_started');
+* Added more examples + added comments (tutorial style) to all basic examples
+* Simulation environment stuff can now handle 2 linked matlab ODE's (simulating and 
+  optimising)
+* SubjectTo is not based on strings anymore
+  * ocp.subjectTo( 'AT_START, x == 1.0' ); -> ocp.subjectTo( 'AT_START', x == 1.0 );
+  * ocp.subjectTo( 'AT_END, x == 1.0' ); -> ocp.subjectTo( 'AT_END', x == 1.0 );
+  * ocp.subjectTo( ' 0.1 <= p <= 2.0' ); -> ocp.subjectTo( 0.1 <= p <= 2.0 );
+  * ocp.subjectTo( ' 0.1 == p ' ); -> ocp.subjectTo( 0.1 == p );
+  * ocp.subjectTo( '0.0, r , -r , 0.0 '); -> ocp.subjectTo( 0.0, r , -r , 0.0 );
+* Complete redesign c++ file generation
+
+
+v1700
+* First Public Release

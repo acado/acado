@@ -1,0 +1,30 @@
+// -------------------------------------------
+// THIS FILE IS PART OF ACADO TOOLKIT.
+// PLEASE HAVE A LOOK INTO THE TUTORIAL FILE
+// parameter_estimation_tutorial*.cpp  TO
+// UNDERSTAND HOW MEASUREMENT DATA CAN BE
+// READ FROM A FILE AND HOW TO FIX A CONTROL
+// INPUT.
+//
+// AUTHORS: Boris Houska, Hans Joachim Ferreau
+//
+// -------------------------------------------
+
+// EXAMPLE DATA:
+// -------------
+
+TIME POINTS    MEASUREMENT OF PHI
+-----------    ------------------
+0.00000e+00    1.00000e+00
+2.72321e-01    7.33213e-01
+3.72821e-01    5.75146e-01
+7.25752e-01   -5.91794e-02
+9.06107e-01   -3.54347e-01
+1.23651e+00   -3.03056e-01
+1.42619e+00   -6.23527e-01
+1.59469e+00   -9.64208e-02
+1.72029e+00   -1.97671e-02
+2.00000e+00    9.35138e-02
+
+-----------------------------------------------------
+
