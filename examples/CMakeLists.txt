@@ -39,8 +39,6 @@
 # Usage:
 #	- TBD
 #
-# TODO:
-#	- Code generation module examples
 #
 ################################################################################
 
@@ -133,21 +131,16 @@ SET( EXAMPLE_DIRS
 	basic_data_structures/variables_grid
 #	code_generation
 	controller
-	dsoa_test_suite
 	getting_started
 	integration_algorithm
 	integrator
-#	modeling_tools
 	multi_objective
-#	multi_stage_ocp
 	my_examples
 	nlp
 	ocp
 	parameter_estimation
 	process
 	simulation_environment
-#	tisc
-#	xml
 )
 
 ################################################################################
@@ -211,3 +204,7 @@ FOREACH( DIR ${EXAMPLE_DIRS} )
 	ENDFOREACH( SRC ${SOURCES} )
 ENDFOREACH( DIR ${EXAMPLE_DIRS} )
 
+#
+# Build code generation examples
+#
+ADD_SUBDIRECTORY( ./code_generation )
