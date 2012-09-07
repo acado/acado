@@ -399,10 +399,10 @@ inline Matrix Matrix::getRows(	uint idx1,
 {
 	Matrix newMatrix;
 
-	if ( ( idx1 < 0 ) || ( idx1 >= getNumRows( ) ) )
+	if (idx1 >= getNumRows( ))
 		return newMatrix;
 
-	if ( ( idx2 < 0 ) || ( idx2 >= getNumRows( ) ) )
+	if (idx2 >= getNumRows( ))
 		return newMatrix;
 
 	if ( idx1 > idx2 )
@@ -424,10 +424,10 @@ inline Matrix Matrix::getCols(	uint idx1,
 {
 	Matrix newMatrix;
 
-	if ( ( idx1 < 0 ) || ( idx1 >= getNumCols( ) ) )
+	if (idx1 >= getNumCols( ))
 		return newMatrix;
 
-	if ( ( idx2 < 0 ) || ( idx2 >= getNumCols( ) ) )
+	if (idx2 >= getNumCols( ))
 		return newMatrix;
 
 	if ( idx1 > idx2 )

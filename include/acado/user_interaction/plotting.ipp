@@ -56,7 +56,7 @@ inline returnValue Plotting::getPlotWindow(	uint idx,
 											PlotWindow& _window
 											) const
 {
-	if ( ( idx < 0 ) || ( idx >= getNumPlotWindows( ) ) )
+	if (idx >= getNumPlotWindows( ))
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 
 	_window = plotCollection( idx );

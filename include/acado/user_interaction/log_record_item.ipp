@@ -49,7 +49,7 @@ inline const MatrixVariablesGrid& LogRecordItem::getAllValues( ) const
 inline Matrix LogRecordItem::getValue(	uint idx
 										) const
 {
-	if ( ( idx < 0 ) || ( idx >= getNumPoints( ) ) )
+	if (idx >= getNumPoints( ))
 	{
 		return emptyMatrix_;
 	}
@@ -96,7 +96,7 @@ inline returnValue LogRecordItem::getValueString(	char** valueString,
 													uint idx
 													) const
 {
-	if ( ( idx < 0 ) || ( idx >= getNumPoints( ) ) )
+	if (idx >= getNumPoints( ))
 		return SUCCESSFUL_RETURN;
 
 	return values.getMatrix( idx ).printToString( valueString, label,startString,endString,
@@ -120,7 +120,7 @@ inline uint LogRecordItem::determineStringLength( ) const
 inline uint LogRecordItem::determineStringLength(	uint idx
 													) const
 {
-	if ( ( idx < 0 ) || ( idx >= getNumPoints( ) ) )
+	if (idx >= getNumPoints( ))
 		return SUCCESSFUL_RETURN;
 
 	return values.getMatrix( idx ).determineStringLength( label,startString,endString,

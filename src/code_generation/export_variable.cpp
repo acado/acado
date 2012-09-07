@@ -1110,9 +1110,6 @@ returnValue ExportVariable::setSubmatrixOffsets(	uint _rowOffset,
 													uint _nCols
 													)
 {
-	if ( ( _rowOffset < 0 ) || ( _colOffset < 0 ) )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
-	
 	if ( _colOffset > _colDim )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 

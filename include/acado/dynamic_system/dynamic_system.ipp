@@ -47,7 +47,7 @@ inline returnValue DynamicSystem::getSubsystem(	uint stageIdx,
 	if ( ( diffEqn == 0 ) || ( outputFcn == 0 ) )
 		return ACADOERROR( RET_MEMBER_NOT_INITIALISED );
 
-	if ( ( stageIdx < 0 ) || ( stageIdx >= nDiffEqn ) )
+	if (stageIdx >= nDiffEqn)
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 
 	_diffEqn   = getDifferentialEquation( stageIdx );
@@ -84,7 +84,7 @@ inline returnValue DynamicSystem::getSwitchFunction(	uint idx,
 	if ( switchFcn == 0 )
 		return ACADOERROR( RET_MEMBER_NOT_INITIALISED );
 
-	if ( ( idx < 0 ) || ( idx > nSwitchFcn ) )
+	if (idx > nSwitchFcn)
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 
 	_switchFcn = *(switchFcn[idx]);

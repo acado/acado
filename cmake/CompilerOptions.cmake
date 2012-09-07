@@ -67,8 +67,13 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC )
 	#
 	# Compiler options from original Makefiles
 	#
-	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow -Winline" )
-	SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow -Winline" )
+	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow" )
+	SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow" )
+	
+	IF( ACADO_DEVELOPER )
+		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline" )
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Winline" )
+	ENDIF()
 
 	#
 	# Some common stuff...
@@ -96,10 +101,11 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC )
 	# Apple specifics
 	#
 	IF( APPLE )
-		# Optimize: -m64 -msse4
-		SET( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -funroll-loops -ftree-vectorize -gstabs+ -pthtread" )
-		# Optimize: -m64 -msse4
-		SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -ftree-vectorize -gstabs+ -pthtread" )
+		SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -gstabs+")
+		SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -gstabs+")
+		
+#		SET( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -funroll-loops -ftree-vectorize  -pthtread" )
+#		SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -ftree-vectorize -gstabs+ -pthtread" )
 
 		# Option for FAT
 		SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64;" )
