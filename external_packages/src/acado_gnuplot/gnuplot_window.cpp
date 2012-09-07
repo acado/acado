@@ -34,6 +34,8 @@
 
 #ifdef WIN32
 #define round( value ) floor( value + 0.5 )
+
+#include <string>
 #endif
 
 BEGIN_NAMESPACE_ACADO
@@ -279,6 +281,13 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 	returnValue returnvalue;
 
     //gnuPipe = fopen( "gnupipe.txt","w+" );
+
+#if defined(GNUPLOT_EXECUTABLE) && defined(WIN32)
+
+	//acadoFPrintf( gnuPipe,"set terminal windows;\n\n" );
+
+#endif
+
     acadoFPrintf( gnuPipe,"set multiplot;\n" );
 
 	run1 = 0;
@@ -598,6 +607,14 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 	}
 
 	acadoFPrintf( gnuPipe,"unset multiplot\n" );
+
+#if defined(GNUPLOT_EXECUTABLE) && defined(WIN32)
+
+	// acadoFPrintf( gnuPipe,"exit\n" );
+
+#endif
+
+
 	fflush( gnuPipe );
 
 
@@ -609,8 +626,17 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 		fclose( gnuPipe );
 		gnuPipe = 0;
 
+#if defined(GNUPLOT_EXECUTABLE) && defined(WIN32)
+		std::string tmp = 
+			std::string( GNUPLOT_EXECUTABLE ) + 
+			std::string(" -p acado2gnuplot_tmp.dat");
+
+		dummy = system( tmp.c_str() );
+		dummy = system("del acado2gnuplot_tmp.dat");
+#else
 		dummy = system("gnuplot -persist -background white acado2gnuplot_tmp.dat");
 		dummy = system("rm -rf acado2gnuplot_tmp.dat");
+#endif
 
 		return SUCCESSFUL_RETURN;
 	}

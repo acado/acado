@@ -120,6 +120,27 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC )
 ELSEIF( MSVC )
 	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nologo -EHsc " )
 	
+	#
+	# Check for Gnuplot installation
+	#
+	SET(GNUPLOT_EXECUTABLE_PATH "C:/gnuplot/bin" CACHE STRING
+		"Abosulute path of the Gnuplot executable."
+		FORCE
+	)
+	FIND_PROGRAM( GNUPLOT_EXECUTABLE
+		NAMES gnuplot
+		PATHS ${GNUPLOT_EXECUTABLE_PATH}
+		NO_DEFAULT_PATH
+	)
+	IF( GNUPLOT_EXECUTABLE )
+		MESSAGE( STATUS "Looking for Gnuplot executable: found." )
+	ELSE ()
+		MESSAGE( STATUS "Looking for Gnuplot executable: not found." )
+	ENDIF()
+	
+	#
+	# Some cool definitions
+	#
 	ADD_DEFINITIONS( -DWIN32 )
 	ADD_DEFINITIONS( -D__NO_COPYRIGHT__ )
 	ADD_DEFINITIONS( -Dsnprintf=_snprintf )
@@ -127,6 +148,10 @@ ELSEIF( MSVC )
 	ADD_DEFINITIONS( -Dsleep=Sleep )
 	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 	ADD_DEFINITIONS( -D__NO_PIPES__ )
+	
+	IF( GNUPLOT_EXECUTABLE )
+		ADD_DEFINITIONS( -DGNUPLOT_EXECUTABLE="${GNUPLOT_EXECUTABLE}" )
+	ENDIF()
 
 	#
 	# Enable project grouping when making Visual Studio solution
