@@ -55,9 +55,6 @@ class KalmanFilter : public Estimator
     // PUBLIC MEMBER FUNCTIONS:
     //
     public:
-        /** Default constructor. */
-        KalmanFilter( );
-
 		/** Constructor taking minimal sub-block configuration. */
         KalmanFilter(	double _samplingTime = DEFAULT_SAMPLING_TIME
 						);

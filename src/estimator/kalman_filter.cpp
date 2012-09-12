@@ -41,10 +41,6 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-KalmanFilter::KalmanFilter( ) : Estimator( )
-{
-}
-
 
 KalmanFilter::KalmanFilter(	double _samplingTime
 							) : Estimator( _samplingTime )

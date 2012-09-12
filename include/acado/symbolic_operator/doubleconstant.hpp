@@ -57,10 +57,10 @@ public:
 
 
     /** Default constructor. */
-    DoubleConstant();
+    DoubleConstant( );
 
     /** Default constructor. */
-    DoubleConstant( double value_ = 0, NeutralElement neutralElement_ = NE_ZERO);
+    DoubleConstant( double value_, NeutralElement neutralElement_ = NE_ZERO );
 
     /** Copy constructor (deep copy). */
     DoubleConstant( const DoubleConstant &arg );

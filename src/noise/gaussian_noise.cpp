@@ -139,7 +139,7 @@ returnValue GaussianNoise::init(	uint seed
 
 	/* initialize random seed: */
 	if ( seed == 0 )
-		srand( time(0) );
+		srand( (unsigned int)time(0) );
 	else
 		srand( seed );
 
