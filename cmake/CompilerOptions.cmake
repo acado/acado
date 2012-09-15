@@ -131,7 +131,6 @@ ELSEIF( MSVC )
 	#
 	SET(GNUPLOT_EXECUTABLE_PATH "C:/gnuplot/bin" CACHE STRING
 		"Abosulute path of the Gnuplot executable."
-		FORCE
 	)
 	FIND_PROGRAM( GNUPLOT_EXECUTABLE
 		NAMES gnuplot
@@ -143,6 +142,7 @@ ELSEIF( MSVC )
 	ELSE ()
 		MESSAGE( STATUS "Looking for Gnuplot executable: not found." )
 	ENDIF()
+	MARK_AS_ADVANCED( FORCE GNUPLOT_EXECUTABLE )
 	
 	#
 	# Some cool definitions
