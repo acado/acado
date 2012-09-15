@@ -52,6 +52,10 @@
 #include <acado/utils/acado_string.hpp>
 #include <acado/utils/acado_stream.hpp>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 
 BEGIN_NAMESPACE_ACADO
 

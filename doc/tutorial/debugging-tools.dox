@@ -1,0 +1,9 @@
+/*!
+\page debuggint_tools Debugging Tools
+
+There are several options available for ACADO users to help them debug their code.
+
+<ul>
+	<li>Inspecting IntermediateStates, DifferentialStates and Expressions</li>
+</ul>
+*/

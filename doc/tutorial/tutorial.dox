@@ -1,0 +1,58 @@
+/*!
+
+\page tutorial Tutorials
+
+The best way for getting started with the ACADO Toolkit is to work through the online tutorials listed below.
+
+\section tutorial_001 Standard Optimal Control Problems
+
+<ul>
+	<li>\subpage example_001</li>
+	<li>\subpage Initialization of nonlinear optimization algorithms</li>
+	<li>\subpage Algorithmic options and numerical accuracy</li>
+	<li>\subpage Storing the results of optimization algorithms</li>
+	<li>\subpage Optimal Control of hybrid- and multi-stage processes</li>
+	<li>\subpage Optimization of differential algebraic systems (DAE)</li>
+	<li>\subpage Optimal control of discrete time systems</li>
+</ul>
+
+\section tutorial_002 Multi-Objective Optimization/Optimal Control Problems
+
+<ul>
+	<li>\subpage Introduction to multi-objective optimization</li>
+	<li>\subpage Static optimization problem with two objectives</li>
+	<li>\subpage Static optimization problem with three objectives</li>
+	<li>\subpage Optimal control of a plug flow reactor with conflicting energy and conversion</li>
+</ul>
+
+\section tutorial_003 Parameter Estimation Problems
+
+<ul>
+	<li>\subpage A state and parameter estimation tutorial</li>
+</ul>
+
+\section tutorial_004 Model Predictive Control
+
+<ul>
+	<li>\subpage Setting-Up a Process for MPC Simulations</li>
+	<li>\subpage Advanced Features for Simulating a Process</li>
+	<li>\subpage Setting-Up a MPC Controller</li>
+	<li>\subpage Setting-Up More Classical Feedback Controllers</li>
+	<li>\subpage Performing a Basic Closed-Loop MPC Simulation</li>
+</ul>
+
+\section tutorial_005 Low-Level Data Structures and Global Functionality
+
+<ul>
+	<li>\subpage Using Grids and VariablesGrids</li>
+	<li>\subpage Plotting Results</li>
+</ul>
+
+\section tutorial_006 Using the ACADO Integrators Stand-Alone
+
+<ul>
+	<li>\subpage Simulation of a dynamic system</li>
+	<li>\subpage Sensitivity generation for dynamic systems</li>
+</ul>
+
+*/
