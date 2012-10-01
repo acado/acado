@@ -69,7 +69,8 @@ class ExportData
 		 */
 		ExportData(	const String& _name,
 					ExportType _type = REAL,
-					ExportStruct _dataStruct = ACADO_LOCAL
+					ExportStruct _dataStruct = ACADO_LOCAL,
+					const String& _prefix = emptyConstString
 					);
 
 		/** Copy constructor (deep copy).
@@ -107,7 +108,8 @@ class ExportData
 		 */
 		returnValue init(	const String& _name,
 							ExportType _type = REAL,
-							ExportStruct _dataStruct = ACADO_LOCAL
+							ExportStruct _dataStruct = ACADO_LOCAL,
+							const String& _prefix = emptyConstString
 							);
 
 
@@ -137,8 +139,14 @@ class ExportData
 		 */
 		returnValue	setDataStruct(	ExportStruct _dataStruct
 									);
-
-
+		/** Sets the prefix which is placed before the structure name.
+		 *
+		 *  @param[in] _prefix Prefix name.
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		returnValue setPrefix(	const String& _prefix
+								);
 		/** Returns the name of the data object.
 		 *
 		 *	\return Name of the data object
@@ -174,6 +182,12 @@ class ExportData
 		 */
 		String getDataStructString( ) const;
 		
+		/** Returns a string which contains a prefix name.
+		 *
+		 *  \return Prefix name
+		 */
+		String getPrefix( ) const;
+
 		/** Returns the full name of the data object including the possible prefix 
 		 *	of the global data struct.
 		 *
@@ -216,10 +230,23 @@ class ExportData
 
     protected:
 
-		String name;								/**< Name of the data object. */
-		ExportType type;							/**< Data type of the data object. */
-		ExportStruct dataStruct;					/**< Global data struct to which the data object belongs to (if any). */
-		String fullName;							/**< Full name of the data object including the possible prefix of the global data struct. */
+		/** Name of the data object. */
+		String name;
+
+		/**< Data type of the data object. */
+		ExportType type;
+
+		/** Prefix, which is added before the structure name*/
+		String prefix;
+
+		/**< Global data struct to which the data object belongs to (if any). */
+		ExportStruct dataStruct;
+
+		/**< Full name of the data object including the possible prefix of the global data struct. */
+		String fullName;
+
+    private:
+		returnValue setFullName( void );
 };
 
 

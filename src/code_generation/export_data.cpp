@@ -48,17 +48,18 @@ ExportData::ExportData( )
 
 ExportData::ExportData(	const String& _name,
 						ExportType _type,
-						ExportStruct _dataStruct
+						ExportStruct _dataStruct,
+						const String& _prefix
 						)
 {
-	init( _name,_type,_dataStruct );
+	init(_name, _type, _dataStruct, _prefix);
 }
 
 
 ExportData::ExportData(	const ExportData& arg
 						)
 {
-	init( arg.name,arg.type,arg.dataStruct );
+	init(arg.name, arg.type, arg.dataStruct, arg.prefix);
 }
 
 
@@ -72,7 +73,7 @@ ExportData& ExportData::operator=(	const ExportData& arg
 {
 	if( this != &arg )
 	{
-		init( arg.name,arg.type,arg.dataStruct );
+		init(arg.name, arg.type, arg.dataStruct, arg.prefix);
 	}
 
 	return *this;
@@ -81,7 +82,8 @@ ExportData& ExportData::operator=(	const ExportData& arg
 
 returnValue ExportData::init(	const String& _name,
 								ExportType _type,
-								ExportStruct _dataStruct
+								ExportStruct _dataStruct,
+								const String& _prefix
 								)
 {
 	if ( _name.isEmpty() == BT_FALSE )
@@ -91,6 +93,7 @@ returnValue ExportData::init(	const String& _name,
 	}
 
 	setType( _type );
+	setPrefix( _prefix );
 	setDataStruct( _dataStruct );
 
 	return SUCCESSFUL_RETURN;
@@ -106,15 +109,7 @@ returnValue	ExportData::setName(	const String& _name
 
 	name = _name;
 
-	if ( dataStruct == ACADO_LOCAL )
-	{
-		fullName = "";
-	}
-	else
-	{
-		fullName = getDataStructString();
-		fullName << "." << name;
-	}
+	setFullName();
 
 	return SUCCESSFUL_RETURN;
 }
@@ -124,24 +119,28 @@ returnValue	ExportData::setType(	ExportType _type
 									)
 {
 	type = _type;
+
+	setFullName();
+
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue ExportData::setPrefix(	const String& _prefix
+									)
+{
+	prefix = _prefix;
+
+	setFullName();
+
+	return SUCCESSFUL_RETURN;
+}
 
 returnValue	ExportData::setDataStruct(	ExportStruct _dataStruct
 										)
 {
 	dataStruct = _dataStruct;
 
-	if ( dataStruct == ACADO_LOCAL )
-	{
-		fullName = "";
-	}
-	else
-	{
-		fullName = getDataStructString();
-		fullName << "." << name;
-	}
+	setFullName();
 
 	return SUCCESSFUL_RETURN;
 }
@@ -153,12 +152,15 @@ String ExportData::getName( ) const
 	return name;
 }
 
-
 ExportType ExportData::getType( ) const
 {
 	return type;
 }
 
+String ExportData::getPrefix() const
+{
+	return prefix;
+}
 
 String ExportData::getTypeString(	const String& _realString,
 									const String& _intString
@@ -199,6 +201,15 @@ String ExportData::getDataStructString( ) const
 		case ACADO_VARS:
 			return (String)"vars";
 
+		case FORCES_PARAMS:
+			return (String)"params";
+
+		case FORCES_OUTPUT:
+			return (String)"output";
+
+		case FORCES_INFO:
+			return (String)"info";
+
 		default:
 			return (String)"";
 	}
@@ -220,7 +231,40 @@ String ExportData::getFullName( ) const
 //
 
 
+//
+// PRIVATE MEMBER FUNCTIONS:
+//
+returnValue ExportData::setFullName()
+{
+	if ( dataStruct == ACADO_LOCAL )
+	{
+		if ( prefix.isEmpty() == BT_FALSE )
+		{
+			fullName = prefix;
+			fullName << "_" << name;
+		}
+		else
+		{
+			fullName = "";
+		}
+	}
+	else
+	{
+		if ( prefix.isEmpty() == BT_FALSE )
+		{
+			fullName = prefix;
+			fullName << "_" << getDataStructString();
+		}
+		else
+		{
+			fullName = getDataStructString();
+		}
 
+		fullName << "." << name;
+	}
+
+	return SUCCESSFUL_RETURN;
+}
 
 CLOSE_NAMESPACE_ACADO
 

@@ -53,14 +53,15 @@ ExportIndex::ExportIndex(	const String& _name,
 							ExportType _type,
 							const int* const _value,
 							const int* const _factor,
-							const int* const _offset
+							const int* const _offset,
+							const String& _prefix
 							) : ExportData( )
 {
 	value  = 0;
 	factor = 0;
 	offset = 0;
 
-	init( _name,_type,_value,_factor,_offset );
+	init(_name, _type, _value, _factor, _offset, _prefix);
 }
 
 
@@ -71,7 +72,7 @@ ExportIndex::ExportIndex(	int _value
 	factor = 0;
 	offset = 0;
 
-	init( "run1",INT,&_value );
+	init("run1", INT, &_value, 0, 0);
 }
 
 
@@ -81,7 +82,7 @@ ExportIndex::ExportIndex( const ExportIndex& arg ) : ExportData( )
 	factor = 0;
 	offset = 0;
 
-	init( arg.name, arg.type,arg.value, arg.factor, arg.offset );
+	init(arg.name, arg.type,arg.value, arg.factor, arg.offset, arg.prefix);
 }
 
 
@@ -95,7 +96,7 @@ ExportIndex& ExportIndex::operator=( const ExportIndex& arg )
 {
 	if( this != &arg )
 	{
-		init( arg.name, arg.type, arg.value, arg.factor, arg.offset );
+		init(arg.name, arg.type, arg.value, arg.factor, arg.offset, arg.prefix);
 	}
 
 	return *this;
@@ -122,10 +123,13 @@ returnValue ExportIndex::init(	const String& _name,
 								ExportType _type,
 								const int* const _value,
 								const int* const _factor,
-								const int* const _offset
+								const int* const _offset,
+								const String& _prefix
 								)
 {
 	clear( );
+
+	ExportData::init(_name, _type, ACADO_LOCAL, _prefix);
 
 	if ( _value != 0 )
 	{
@@ -150,8 +154,6 @@ returnValue ExportIndex::init(	const String& _name,
 		else
 			offset = new int( _offset[0] );
 	}
-	
-	ExportData::init( _name,_type );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -397,7 +399,7 @@ BooleanType ExportIndex::isGiven( ) const
 
 ExportArgument ExportIndex::makeArgument( ) const
 {
-	ExportArgument tmp( name,1,1, type,ACADO_LOCAL,BT_TRUE,emptyConstExportIndex );
+	ExportArgument tmp(name, 1 , 1, type, ACADO_LOCAL, BT_TRUE, emptyConstExportIndex);
 	return tmp;
 }
 

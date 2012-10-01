@@ -87,7 +87,8 @@ class ExportVariable : public ExportArgument
 						uint _nCols = 1,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callItByValue = BT_FALSE
+						BooleanType _callItByValue = BT_FALSE,
+						const String& _prefix = emptyConstString
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -104,7 +105,8 @@ class ExportVariable : public ExportArgument
 						const Matrix& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callItByValue = BT_FALSE
+						BooleanType _callItByValue = BT_FALSE,
+						const String& _prefix = emptyConstString
 						);
 
 		/** Constructor which converts a given matrix into an ExportVariable.
@@ -163,7 +165,8 @@ class ExportVariable : public ExportArgument
 							uint _nCols = 1,
 							ExportType _type = REAL,
 							ExportStruct _dataStruct = ACADO_LOCAL,
-							BooleanType _callItByValue = BT_FALSE
+							BooleanType _callItByValue = BT_FALSE,
+							const String& _prefix = emptyConstString
 							);
 
 		/** Initializes variable with given name and type string of the variable.
@@ -182,7 +185,8 @@ class ExportVariable : public ExportArgument
 							const Matrix& _data,
 							ExportType _type = REAL,
 							ExportStruct _dataStruct = ACADO_LOCAL,
-							BooleanType _callItByValue = BT_FALSE
+							BooleanType _callItByValue = BT_FALSE,
+							const String& _prefix = emptyConstString
 							);
 
 		/** Initializes variable with given name, type string
@@ -202,7 +206,8 @@ class ExportVariable : public ExportArgument
 								uint _nCols = 1,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
-								BooleanType _callItByValue = BT_FALSE
+								BooleanType _callItByValue = BT_FALSE,
+								const String& _prefix = emptyConstString
 								);
 
 		/** Initializes variable with given name and type string of the variable.
@@ -221,7 +226,8 @@ class ExportVariable : public ExportArgument
 								const Matrix& _data,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
-								BooleanType _callItByValue = BT_FALSE
+								BooleanType _callItByValue = BT_FALSE,
+								const String& _prefix = emptyConstString
 								);
 
 

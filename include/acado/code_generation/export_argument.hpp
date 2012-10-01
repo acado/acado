@@ -88,7 +88,8 @@ class ExportArgument : public ExportData
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callByValue = BT_FALSE,
-						const ExportIndex& _addressIdx = emptyConstExportIndex
+						const ExportIndex& _addressIdx = emptyConstExportIndex,
+						const String& _prefix = emptyConstString
 						);
 
 		/** Constructor which takes the name and type of the argument.
@@ -108,7 +109,8 @@ class ExportArgument : public ExportData
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callByValue = BT_FALSE,
-						const ExportIndex& _addressIdx = emptyConstExportIndex
+						const ExportIndex& _addressIdx = emptyConstExportIndex,
+						const String& _prefix = emptyConstString
 						);
 
 // 		ExportArgument(	const ExportIndex& _arg
@@ -165,7 +167,8 @@ class ExportArgument : public ExportData
 							ExportType _type = REAL,
 							ExportStruct _dataStruct = ACADO_LOCAL,
 							BooleanType _callByValue = BT_FALSE,
-							const ExportIndex& _addressIdx = emptyConstExportIndex
+							const ExportIndex& _addressIdx = emptyConstExportIndex,
+							const String& _prefix = emptyConstString
 							);
 
 		/** Initializes argument with given name, type as well as dimensions
@@ -186,7 +189,8 @@ class ExportArgument : public ExportData
 							ExportType _type = REAL,
 							ExportStruct _dataStruct = ACADO_LOCAL,
 							BooleanType _callByValue = BT_FALSE,
-							const ExportIndex& _addressIdx = emptyConstExportIndex
+							const ExportIndex& _addressIdx = emptyConstExportIndex,
+							const String& _prefix = emptyConstString
 							);
 
 

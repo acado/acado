@@ -79,7 +79,8 @@ class ExportIndex : public ExportData
 						ExportType _type = INT,
 						const int* const _value  = 0,
 						const int* const _factor = 0,
-						const int* const _offset = 0
+						const int* const _offset = 0,
+						const String& _prefix = emptyConstString
 						);
 
 		/** Default constructor which optionally takes name and type
@@ -137,7 +138,8 @@ class ExportIndex : public ExportData
 							ExportType _type = INT,
 							const int* const _value  = 0,
 							const int* const _factor = 0,
-							const int* const _offset = 0
+							const int* const _offset = 0,
+							const String& _prefix = emptyConstString
 							);
 
 							
@@ -255,7 +257,7 @@ class ExportIndex : public ExportData
 
 
 static const int emptyConstExportIndexValue = 0;
-static const ExportIndex emptyConstExportIndex( (String)"i",INT,&emptyConstExportIndexValue );
+static const ExportIndex emptyConstExportIndex( (String)"default_index",INT,&emptyConstExportIndexValue );
 
 
 CLOSE_NAMESPACE_ACADO

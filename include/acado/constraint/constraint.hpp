@@ -64,6 +64,7 @@ class Constraint : public BoxConstraint{
 	friend class MPCexport;
 	friend class MHEexport;
 	friend class TESTExport;
+	friend class ExportNLPSolver;
 
     //
     // PUBLIC MEMBER FUNCTIONS:

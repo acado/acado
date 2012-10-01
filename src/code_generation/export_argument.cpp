@@ -58,10 +58,11 @@ ExportArgument::ExportArgument(	const String& _name,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callItByValue,
-								const ExportIndex& _addressIdx
+								const ExportIndex& _addressIdx,
+								const String& _prefix
 								) : ExportData( )
 {
-	init( _name,_nRows,_nCols,_type,_dataStruct,_callItByValue,_addressIdx );
+	init( _name,_nRows,_nCols,_type,_dataStruct,_callItByValue,_addressIdx, _prefix );
 }
 
 
@@ -70,10 +71,12 @@ ExportArgument::ExportArgument(	const String& _name,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callItByValue,
-								const ExportIndex& _addressIdx
+								const ExportIndex& _addressIdx,
+								const String& _prefix
 								) : ExportData( )
 {
-	init( _name,_data,_type,_dataStruct,_callItByValue,_addressIdx );
+	init( _name,_data,_type,
+			_dataStruct,_callItByValue,_addressIdx, _prefix );
 }
 
 
@@ -87,7 +90,8 @@ ExportArgument::ExportArgument(	const String& _name,
 ExportArgument::ExportArgument(	const ExportArgument& arg
 								) : ExportData( )
 {
-	init( arg.name, arg.data, arg.type, arg.dataStruct, arg.callItByValue, arg.addressIdx );
+	init( arg.name, arg.data, arg.type,
+			arg.dataStruct, arg.callItByValue, arg.addressIdx, arg.prefix );
 }
 
 
@@ -102,7 +106,8 @@ ExportArgument& ExportArgument::operator=(	const ExportArgument& arg
 {
 	if( this != &arg )
 	{
-		init( arg.name, arg.data, arg.type, arg.dataStruct, arg.callItByValue, arg.addressIdx );
+		init( arg.name, arg.data, arg.type,
+				arg.dataStruct, arg.callItByValue, arg.addressIdx, arg.prefix );
 	}
 
 	return *this;
@@ -118,7 +123,7 @@ ExportArgument& ExportArgument::operator=(	const Matrix& arg
 	else
 		tmp = "M";
 
-	init( tmp,arg );
+	init(tmp, arg);
 	return *this;
 }
 
@@ -137,7 +142,8 @@ returnValue ExportArgument::init(	const String& _name,
 									ExportType _type,
 									ExportStruct _dataStruct,
 									BooleanType _callItByValue,
-									const ExportIndex& _addressIdx
+									const ExportIndex& _addressIdx,
+									const String& _prefix
 									)
 {
 	clear( );
@@ -145,7 +151,7 @@ returnValue ExportArgument::init(	const String& _name,
 	data.init( _nRows,_nCols );
 	data.setAll( undefinedEntry );
 
-	ExportData::init( _name,_type,_dataStruct );
+	ExportData::init( _name,_type,_dataStruct, _prefix );
 
 	callItByValue = _callItByValue;
 	addressIdx  = _addressIdx;
@@ -159,14 +165,15 @@ returnValue ExportArgument::init(	const String& _name,
 									ExportType _type,
 									ExportStruct _dataStruct,
 									BooleanType _callItByValue,
-									const ExportIndex& _addressIdx
+									const ExportIndex& _addressIdx,
+									const String& _prefix
 									)
 {
 	clear( );
 
 	data = _data;
 
-	ExportData::init( _name,_type,_dataStruct );
+	ExportData::init( _name,_type,_dataStruct, _prefix );
 
 	callItByValue = _callItByValue;
 	addressIdx  = _addressIdx;
@@ -186,7 +193,8 @@ ExportArgument ExportArgument::getAddress(	uint rowIdx,
 	tmpAddressIdx = getTotalIdx( rowIdx,colIdx );
 
 	ExportArgument tmp(	name,getNumRows(),getNumCols(),
-						type,dataStruct,BT_FALSE,tmpAddressIdx );
+						type,dataStruct,BT_FALSE,
+						tmpAddressIdx, prefix );
 
 	return tmp;
 }
@@ -203,8 +211,12 @@ ExportArgument ExportArgument::getAddress(	const ExportIndex& rowIdx,
 	
 	ASSERT( colIdx < getNumCols() );
 	
+	ExportIndex tmpAddressIdx( "i" );
+	tmpAddressIdx = getTotalIdx( rowIdx,colIdx );
+
 	ExportArgument tmp(	name,getNumRows(),getNumCols(),
-						type,dataStruct,BT_FALSE,getTotalIdx(rowIdx,colIdx) );
+						type,dataStruct,BT_FALSE,
+						tmpAddressIdx, prefix );
 
 	return tmp;
 }
@@ -307,18 +319,31 @@ returnValue ExportArgument::exportDataDeclaration(	FILE* file,
 		return SUCCESSFUL_RETURN;
 
 	if ( ( isCalledByValue() == BT_TRUE ) && ( getDim() == 1 ) )
-			acadoFPrintf( file,"%s %s", getTypeString( _realString,_intString ).getName(),name.getName() );
+	{
+		acadoFPrintf( file,"%s %s", getTypeString( _realString,_intString ).getName(),name.getName() );
+	}
+	else
+	{
+		if (data.getNumCols() > 1 && data.getNumRows() > 1)
+		{
+			acadoFPrintf(file,"/* %s %d %s %d %s */\n", "Matrix of size:", data.getNumRows(), "x", data.getNumCols(), "(row major format)");
+		}
 		else
-			acadoFPrintf( file,"%s %s[%d]", getTypeString( _realString,_intString ).getName(),name.getName(),getDim() );
+		{
+			acadoFPrintf(file,"/* %s %d */\n", "Vector of size:", data.getNumCols() > 1 ? data.getNumCols() : data.getNumRows());
+		}
+
+		acadoFPrintf( file,"%s %s[ %d ]", getTypeString( _realString,_intString ).getName(),name.getName(),getDim() );
+	}
 
 	if ( isGiven() == BT_FALSE )
 	{
-		acadoFPrintf( file,";\n" );
+		acadoFPrintf( file,";\n\n" );
 	}
 	else
 	{
 		if ( getDim( ) == 1 )
-			acadoFPrintf( file," = %e;\n", data(0,0) );
+			acadoFPrintf( file," = %e;\n\n", data(0,0) );
 		else
 			return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 	}

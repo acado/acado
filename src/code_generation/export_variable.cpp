@@ -57,10 +57,11 @@ ExportVariable::ExportVariable(	const String& _name,
 								uint _nCols,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue
+								BooleanType _callItByValue,
+								const String& _prefix
 								)
 {
-	init( _name,_nRows,_nCols,_type,_dataStruct,_callItByValue );
+	init( _name,_nRows,_nCols,_type,_dataStruct,_callItByValue, _prefix );
 }
 
 
@@ -68,10 +69,11 @@ ExportVariable::ExportVariable(	const String& _name,
 								const Matrix& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue
+								BooleanType _callItByValue,
+								const String& _prefix
 								)
 {
-	init( _name,_data,_type,_dataStruct,_callItByValue );
+	init( _name,_data,_type,_dataStruct,_callItByValue, _prefix );
 }
 
 
@@ -140,10 +142,12 @@ returnValue ExportVariable::init(	const String& _name,
 									uint _nCols,
 									ExportType _type,
 									ExportStruct _dataStruct,
-									BooleanType _callItByValue
+									BooleanType _callItByValue,
+									const String& _prefix
 									)
 {
-	ExportArgument::init( _name,_nRows,_nCols,_type,_dataStruct,_callItByValue );
+	ExportArgument::init( _name,_nRows,_nCols,_type,_dataStruct,_callItByValue,
+			emptyConstExportIndex, _prefix );
 
 	doAccessTransposed = BT_FALSE;
 	
@@ -158,10 +162,12 @@ returnValue ExportVariable::init(	const String& _name,
 									const Matrix& _data,
 									ExportType _type,
 									ExportStruct _dataStruct,
-									BooleanType _callItByValue
+									BooleanType _callItByValue,
+									const String& _prefix
 									)
 {
-	ExportArgument::init( _name,_data,_type,_dataStruct,_callItByValue );
+	ExportArgument::init( _name,_data,_type,_dataStruct,_callItByValue,
+			emptyConstExportIndex, _prefix );
 
 	doAccessTransposed = BT_FALSE;
 	
@@ -177,10 +183,11 @@ ExportVariable& ExportVariable::setup(	const String& _name,
 										uint _nCols,
 										ExportType _type,
 										ExportStruct _dataStruct,
-										BooleanType _callItByValue
+										BooleanType _callItByValue,
+										const String& _prefix
 										)
 {
-	init( _name,_nRows,_nCols,_type,_dataStruct,_callItByValue );
+	init( _name,_nRows,_nCols,_type,_dataStruct,_callItByValue, _prefix );
 	return *this;
 }
 
@@ -189,10 +196,11 @@ ExportVariable& ExportVariable::setup(	const String& _name,
 										const Matrix& _data,
 										ExportType _type,
 										ExportStruct _dataStruct,
-										BooleanType _callItByValue
+										BooleanType _callItByValue,
+										const String& _prefix
 										)
 {
-	init( _name,_data,_type,_dataStruct,_callItByValue );
+	init( _name,_data,_type,_dataStruct,_callItByValue, _prefix );
 	return *this;
 }
 
@@ -731,7 +739,7 @@ ExportVariable ExportVariable::getRow(	uint idx
 {
 	ASSERT( isAccessedTransposed() == BT_FALSE );
 	
-	ExportVariable tmp( name,1,getNumCols( ),type,dataStruct,callItByValue );
+	ExportVariable tmp( name,1,getNumCols( ),type,dataStruct,callItByValue, prefix );
 	
 	for( uint i=0; i<getNumCols(); ++i )
 		tmp( 0,i ) = operator()( idx,i );
@@ -762,7 +770,7 @@ ExportVariable ExportVariable::getCol(	uint idx
 {
 	ASSERT( isAccessedTransposed() == BT_FALSE );
 	
-	ExportVariable tmp( name,getNumRows( ),1,type,dataStruct,callItByValue );
+	ExportVariable tmp( name,getNumRows( ),1,type,dataStruct,callItByValue, prefix );
 	
 	for( uint i=0; i<getNumRows(); ++i )
 		tmp( i,0 ) = operator()( i,idx );
@@ -799,7 +807,7 @@ ExportVariable ExportVariable::getRows(	uint idx1,
 	ASSERT( idx1 <= idx2 );
 	ASSERT( idx1 <= getNumRows( ) );
 
-	ExportVariable tmp( name,idx2-idx1,getNumCols( ),type,dataStruct,callItByValue ); // idx2-idx1+1
+	ExportVariable tmp( name,idx2-idx1,getNumCols( ),type,dataStruct,callItByValue, prefix ); // idx2-idx1+1
 	
 	for( uint i=idx1; i<idx2; ++i ) // <idx2
 		for( uint j=0; j<getNumCols(); ++j )
@@ -844,7 +852,7 @@ ExportVariable ExportVariable::getCols(	uint idx1,
 	ASSERT( idx1 <= idx2 );
 	ASSERT( idx1 <= getNumCols( ) );
 
-	ExportVariable tmp( name,getNumRows( ),idx2-idx1,type,dataStruct,callItByValue );// idx2-idx1+1
+	ExportVariable tmp( name,getNumRows( ),idx2-idx1,type,dataStruct,callItByValue, prefix );// idx2-idx1+1
 	
 	for( uint i=0; i<getNumRows(); ++i )
 		for( uint j=idx1; j<idx2; ++j )// <idx2
@@ -897,7 +905,7 @@ ExportVariable ExportVariable::getSubMatrix(	uint rowIdx1,
 	
 // 	if ( isAccessedTransposed() == BT_FALSE )
 // 	{
-		tmp.init( name,rowIdx2-rowIdx1,colIdx2-colIdx1,type,dataStruct,callItByValue );
+		tmp.init( name,rowIdx2-rowIdx1,colIdx2-colIdx1,type,dataStruct,callItByValue, prefix );
 		
 		for( uint i=rowIdx1; i<rowIdx2; ++i )
 			for( uint j=colIdx1; j<colIdx2; ++j )
@@ -1018,7 +1026,7 @@ ExportVariable ExportVariable::makeRowVector( ) const
 {
 	ASSERT( ( nRows == 0 ) && ( nCols == 0 ) );
 	
-	ExportVariable tmp( name,1,getDim(),type,dataStruct,callItByValue );
+	ExportVariable tmp( name,1,getDim(),type,dataStruct,callItByValue, prefix );
 	
 	for ( uint i=0; i<getNumRows(); ++i )
 		for ( uint j=0; j<getNumCols(); ++j )
@@ -1032,7 +1040,7 @@ ExportVariable ExportVariable::makeColVector( ) const
 {
 	ASSERT( ( nRows == 0 ) && ( nCols == 0 ) );
 	
-	ExportVariable tmp( name,getDim(),1,type,dataStruct,callItByValue );
+	ExportVariable tmp( name,getDim(),1,type,dataStruct,callItByValue, prefix );
 	
 	for ( uint i=0; i<getNumRows(); ++i )
 		for ( uint j=0; j<getNumCols(); ++j )
