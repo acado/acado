@@ -76,7 +76,6 @@
 #
 ################################################################################
 
-
 #
 # Minimum required version of cmake 
 #
@@ -257,6 +256,8 @@ SET( ACADO_SOURCE_DIRS
 	
 	# Optimal Control source folders
 	./src/code_generation
+	./src/code_generation/integrators
+	./src/code_generation/linear_solvers
 	./src/dynamic_system
 	./src/dynamic_discretization
 	./src/objective
