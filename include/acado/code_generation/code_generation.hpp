@@ -36,24 +36,24 @@
 // LIST OF HEADER FILES:
 // -----------------------------------------------------
 
-   #include <acado/code_generation/integrator_export.hpp>
-   #include <acado/code_generation/rk_export.hpp>
-   #include <acado/code_generation/erk_export.hpp>
-   #include <acado/code_generation/explicit_euler_export.hpp>
-   #include <acado/code_generation/erk2_export.hpp>
-   #include <acado/code_generation/erk3_export.hpp>
-   #include <acado/code_generation/erk4_export.hpp>
-   #include <acado/code_generation/irk_export.hpp>
-   #include <acado/code_generation/gauss_legendre2_export.hpp>
-   #include <acado/code_generation/gauss_legendre4_export.hpp>
-   #include <acado/code_generation/gauss_legendre6_export.hpp>
-   #include <acado/code_generation/gauss_legendre8_export.hpp>
-   #include <acado/code_generation/radau_IIA1_export.hpp>
-   #include <acado/code_generation/radau_IIA3_export.hpp>
-   #include <acado/code_generation/radau_IIA5_export.hpp>
-   #include <acado/code_generation/linear_solver_export.hpp>
-   #include <acado/code_generation/gaussian_elimination_export.hpp>
-   #include <acado/code_generation/householder_qr_export.hpp>
+   #include <acado/code_generation/integrators/integrator_export.hpp>
+   #include <acado/code_generation/integrators/rk_export.hpp>
+   #include <acado/code_generation/integrators/erk_export.hpp>
+   #include <acado/code_generation/integrators/explicit_euler_export.hpp>
+   #include <acado/code_generation/integrators/erk2_export.hpp>
+   #include <acado/code_generation/integrators/erk3_export.hpp>
+   #include <acado/code_generation/integrators/erk4_export.hpp>
+   #include <acado/code_generation/integrators/irk_export.hpp>
+   #include <acado/code_generation/integrators/gauss_legendre2_export.hpp>
+   #include <acado/code_generation/integrators/gauss_legendre4_export.hpp>
+   #include <acado/code_generation/integrators/gauss_legendre6_export.hpp>
+   #include <acado/code_generation/integrators/gauss_legendre8_export.hpp>
+   #include <acado/code_generation/integrators/radau_IIA1_export.hpp>
+   #include <acado/code_generation/integrators/radau_IIA3_export.hpp>
+   #include <acado/code_generation/integrators/radau_IIA5_export.hpp>
+   #include <acado/code_generation/linear_solvers/linear_solver_export.hpp>
+   #include <acado/code_generation/linear_solvers/gaussian_elimination_export.hpp>
+   #include <acado/code_generation/linear_solvers/householder_qr_export.hpp>
    #include <acado/code_generation/condensing_export.hpp>
    #include <acado/code_generation/gauss_newton_export.hpp>
    #include <acado/code_generation/auxiliary_functions_export.hpp>

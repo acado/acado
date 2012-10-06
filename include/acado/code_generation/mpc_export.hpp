@@ -36,7 +36,7 @@
 
 
 #include <acado/code_generation/export_module.hpp>
-#include <acado/code_generation/integrator_export.hpp>
+#include <acado/code_generation/integrators/integrator_export.hpp>
 #include <acado/code_generation/condensing_export.hpp>
 #include <acado/code_generation/gauss_newton_export.hpp>
 #include <acado/code_generation/auxiliary_functions_export.hpp>

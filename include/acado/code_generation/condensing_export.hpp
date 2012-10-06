@@ -38,7 +38,7 @@
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/function/function.hpp>
 #include <acado/code_generation/export_algorithm.hpp>
-#include <acado/code_generation/integrator_export.hpp>
+#include <acado/code_generation/integrators/integrator_export.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

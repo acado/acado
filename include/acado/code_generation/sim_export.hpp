@@ -36,17 +36,7 @@
 
 
 #include <acado/code_generation/export_module.hpp>
-#include <acado/code_generation/explicit_euler_export.hpp>
-#include <acado/code_generation/erk2_export.hpp>
-#include <acado/code_generation/erk3_export.hpp>
-#include <acado/code_generation/erk4_export.hpp>
-#include <acado/code_generation/gauss_legendre2_export.hpp>
-#include <acado/code_generation/gauss_legendre4_export.hpp>
-#include <acado/code_generation/gauss_legendre6_export.hpp>
-#include <acado/code_generation/gauss_legendre8_export.hpp>
-#include <acado/code_generation/radau_IIA1_export.hpp>
-#include <acado/code_generation/radau_IIA3_export.hpp>
-#include <acado/code_generation/radau_IIA5_export.hpp>
+#include <acado/code_generation/integrators/integrator_generation.hpp>
 #include <acado/code_generation/auxiliary_functions_export.hpp>
 #include <acado/code_generation/export_file.hpp>
 
@@ -78,15 +68,12 @@ class SIMexport : public ExportModule
     public:
 
 		/** Default constructor. 
-		 */
-		SIMexport( );
-
-		/** Constructor which takes OCP formulation.
 		 *
-		 *	@param[in] _ocp		OCP formulation for code export.
+		 *	@param[in] simIntervals		The number of simulation intervals.
+		 *	@param[in] totalTime		The total simulation time.
 		 */
-		SIMexport(	const OCP& _ocp
-					);
+		SIMexport( 	const uint simIntervals = 1,
+					const double totalTime = 1.0 );
 
 		/** Copy constructor (deep copy).
 		 *
@@ -173,6 +160,48 @@ class SIMexport : public ExportModule
 		 *	\return SUCCESSFUL_RETURN
 		 */								
 		virtual returnValue printDetails( BooleanType details );
+
+
+		/** Returns the differential equations in the model.
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		returnValue getDifferentialEquation( DifferentialEquation& _f ) const;
+
+
+		/** Assigns Differential Equation to be used by the integrator.
+		 *
+		 *	@param[in] f		Differential equation.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		returnValue setDifferentialEquation( const DifferentialEquation& _f );
+
+
+		/** Adds an output function.
+		 *
+		 *  \param outputEquation_ 	  an output function to be added
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		returnValue addOutput( const OutputFcn& outputEquation_ );
+
+
+		/** Sets up the output functions.
+		 *
+		 *  \param numberMeasurements	  the number of measurements per interval for each output function
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		returnValue setMeasurements( const Vector& numberMeasurements );
+
+
+		/** Returns true if there are extra outputs, specified for the integrator.
+		 *
+		 *  \return True if there are extra outputs, specified for the integrator.
+		 */
+		BooleanType hasOutputs		() const;
 
 
 
@@ -323,13 +352,17 @@ class SIMexport : public ExportModule
 
     protected:
 
+        double T;								/**< The total simulation time. */
+
 		IntegratorExport*  integrator;			/**< Module for exporting a tailored integrator. */
+		DifferentialEquation 		f;			/**< The differential equations in the model. */
+		std::vector<Grid> outputGrids;			/**< A separate grid for each output. */
+		std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
 		
 		BooleanType referenceProvided;			/**< True if the user provided a file with the reference solution. */
 		BooleanType PRINT_DETAILS;				/**< True if the user wants all the details about the results being printed. */
 		
 		static const uint factorRef = 10;		/**< The used factor in the number of integration steps to get the reference. */
-		double h;								/**< The stepsize in the OCP. */
 		uint timingSteps;						/**< The number of integration steps performed for the timing results. */
 		uint timingCalls;						/**< The number of calls to the integrate function for the timing results. */
 		
