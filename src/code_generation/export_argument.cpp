@@ -314,8 +314,12 @@ returnValue ExportArgument::exportDataDeclaration(	FILE* file,
 													int _precision
 													) const
 {
-	// variable not in use, thus no declaration necessary
+	// Variable not in use, thus no declaration necessary
 	if ( getDim( ) == 0 )
+		return SUCCESSFUL_RETURN;
+
+	// Variable will be hard-coded
+	if (isGiven() == BT_TRUE && getDataStruct() != ACADO_LOCAL)
 		return SUCCESSFUL_RETURN;
 
 	if ( ( isCalledByValue() == BT_TRUE ) && ( getDim() == 1 ) )
@@ -343,9 +347,29 @@ returnValue ExportArgument::exportDataDeclaration(	FILE* file,
 	else
 	{
 		if ( getDim( ) == 1 )
-			acadoFPrintf( file," = %e;\n\n", data(0,0) );
+		{
+			if (getType() == REAL)
+				acadoFPrintf( file," = %e;\n\n", data(0,0) );
+			else if (getType() == INT)
+				acadoFPrintf( file," = %d;\n\n", static_cast< int >(data(0,0)) );
+			else
+				return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+		}
 		else
-			return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+		{
+			acadoFPrintf( file," = " );
+
+			if (getType() == REAL)
+			{
+				data.printToFile( file, "", "{ "," };\n", 1, 16, ", ",", \n" );
+			}
+			else if (getType() == INT)
+			{
+				data.printToFile( file, "", "{ "," };\n", 5, 0, ", ",", \n" );
+			}
+			else
+				return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+		}
 	}
 
 	return SUCCESSFUL_RETURN;
