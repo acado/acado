@@ -32,6 +32,8 @@
 
 #include <acado/code_generation/sim_export.hpp>
 
+#include <acado/code_generation/export_algorithm_factory.hpp>
+
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -44,27 +46,13 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-SIMexport::SIMexport( ) : ExportModule( )
+SIMexport::SIMexport( const uint simIntervals, const double totalTime ) : ExportModule( )
 {
+	N = simIntervals;
+	T = totalTime;
 	integrator  = 0;
 	timingSteps = 100;
-	
-	_initStates = String( "initStates.txt" );
-	_controls = String( "controls.txt" );
-	_results = String( "results.txt" );
-	_ref = String( "ref.txt" );
-	referenceProvided = BT_FALSE;
-	PRINT_DETAILS = BT_TRUE;
-
-	setStatus( BS_NOT_INITIALIZED );
-}
-
-
-SIMexport::SIMexport(	const OCP& _ocp
-						) : ExportModule( _ocp )
-{
-	integrator  = 0;
-	timingSteps = 100;
+	timingCalls = 0;
 	
 	_initStates = String( "initStates.txt" );
 	_controls = String( "controls.txt" );
@@ -159,6 +147,54 @@ returnValue SIMexport::exportCode(	const String& dirName,
 }
 
 
+returnValue SIMexport::getDifferentialEquation( DifferentialEquation& _f ) const{
+
+    _f = f;
+    return SUCCESSFUL_RETURN;
+}
+
+
+returnValue SIMexport::setDifferentialEquation( const DifferentialEquation& _f )
+{
+	f = _f;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue SIMexport::addOutput( const OutputFcn& outputEquation_ ){
+
+	Expression next;
+	outputEquation_.getExpression( next );
+	outputExpressions.push_back( next );
+
+    return SUCCESSFUL_RETURN;
+}
+
+
+returnValue SIMexport::setMeasurements( const Vector& numberMeasurements ){
+
+	int i;
+	if( outputExpressions.size() != numberMeasurements.getDim() ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	outputGrids.clear();
+	for( i = 0; i < (int)numberMeasurements.getDim(); i++ ) {
+		Grid nextGrid( 0.0, 1.0, (int)numberMeasurements(i) + 1 );
+		outputGrids.push_back( nextGrid );
+	}
+
+    return SUCCESSFUL_RETURN;
+}
+
+
+BooleanType SIMexport::hasOutputs() const{
+
+	if( outputExpressions.size() == 0 ) return BT_FALSE;
+	return BT_TRUE;
+}
+
+
 
 //
 // PROTECTED MEMBER FUNCTIONS:
@@ -167,11 +203,7 @@ returnValue SIMexport::exportCode(	const String& dirName,
 returnValue SIMexport::copy(	const SIMexport& arg
 								)
 {
-	// TODO: why like this? Why the copy is made this way?
-	if ( arg.integrator != 0 )
-		integrator = arg.integrator;
-	else
-		integrator = 0;
+	integrator = arg.integrator;
 		
 	_initStates = arg._initStates;
 	_controls = arg._controls;
@@ -207,24 +239,16 @@ returnValue SIMexport::setup( )
 	get( CG_USE_C99, allowC99codegen );
 	ExportArithmeticStatement::allowC99( static_cast<BooleanType>( allowC99codegen ) );
 
-	Grid grid;
-	ocp.getGrid( grid );
-
-	DifferentialEquation f;
 	Expression rhs;
-
-	ocp.getDifferentialEquation( f );
 	f.getExpression( rhs );
 
-	h = grid.getTime(1) - grid.getTime(0); // assuming equidistant grid
-	N = grid.getNumIntervals();
 	NX = rhs.getDim() - f.getNXA();
 	NDX = f.getNDX();
 	NXA = f.getNXA();
 	NU = f.getNU();
 	NP = f.getNP();
 
-    int numSteps;
+	int numSteps;
     get( NUM_INTEGRATOR_STEPS, numSteps );
 
 	if ( numSteps <= 0 )
@@ -233,99 +257,41 @@ returnValue SIMexport::setup( )
 	int integratorType;
 	get( INTEGRATOR_TYPE, integratorType );
 
-	if ( integrator != 0 )
+	if ( integrator != NULL )
 		delete integrator;
 
-	switch( (IntegratorType)integratorType )
-	{
-		case INT_EX_EULER:
-			integrator = new ExplicitEulerExport( this,commonHeaderName );
-			break;
-		case INT_RK2:
-			integrator = new ExplicitRungeKutta2Export( this,commonHeaderName );
-			break;
-		case INT_RK3:
-			integrator = new ExplicitRungeKutta3Export( this,commonHeaderName );
-			break;
-		case INT_RK4:
-			integrator = new ExplicitRungeKutta4Export( this,commonHeaderName );
-			break;
-		case INT_IRK_GL2:
-			integrator = new GaussLegendre2Export( this,commonHeaderName );
-			break;
-		case INT_IRK_GL4:
-			integrator = new GaussLegendre4Export( this,commonHeaderName );
-			break;
-		case INT_IRK_GL6:
-			integrator = new GaussLegendre6Export( this,commonHeaderName );
-			break;
-		case INT_IRK_GL8:
-			integrator = new GaussLegendre8Export( this,commonHeaderName );
-			break;
-		case INT_IRK_RIIA1:
-			integrator = new RadauIIA1Export( this,commonHeaderName );
-			break;
-		case INT_IRK_RIIA3:
-			integrator = new RadauIIA3Export( this,commonHeaderName );
-			break;
-		case INT_IRK_RIIA5:
-			integrator = new RadauIIA5Export( this,commonHeaderName );
-			break;
-		default:
-			return ACADOERROR( RET_INVALID_OPTION );
-	}
+	integrator = IntegratorExportFactory::instance().createAlgorithm(this, commonHeaderName, static_cast<IntegratorType>(integratorType));
+
+	if ( integrator == NULL )
+		return ACADOERROR( RET_INVALID_OPTION );
 
 	integrator->setDimensions( NX,NDX,NXA,NU,NP,N );
 
 	if ( integrator->setDifferentialEquation( rhs ) != SUCCESSFUL_RETURN )
 		return RET_UNABLE_TO_EXPORT_CODE;
 
-	if ( integrator->setGrid(grid, numSteps) != SUCCESSFUL_RETURN ) {
+	Grid ocpGrid( 0.0, T, N+1 );
+	if ( integrator->setGrid(ocpGrid, numSteps) != SUCCESSFUL_RETURN ) {
 		return RET_UNABLE_TO_EXPORT_CODE;
 	}
 
 	integrator->setup( );
 	
-	if( ocp.hasOutputFunctions() ) {
-		std::vector<OutputFcn> outputFcns;
-		ocp.getOutputFunctions( outputFcns );
-		
-		std::vector<Expression> rhsOutput;
+	if( hasOutputs() ) {
 		uint i;
-		for( i = 0; i < outputFcns.size(); i++ ) {
-			Expression next;
-			outputFcns[i].getExpression( next );
-			rhsOutput.push_back( next );
-		}
-     
-		std::vector<Grid> outputGrids_;
-		ocp.getOutputGrids( outputGrids_ );
-		
-		int steps;
-		if( ocp.hasEquidistantGrid() ) {
-			steps = numSteps;
-		}
-		else {
-			Vector _numSteps;
-			ocp.getNumSteps( _numSteps );
-			steps = 0;
-			for( i = 0; i < _numSteps.getDim(); i++ ) {
-				steps += (uint)_numSteps(i);
-			}
-		}
 
 		std::vector<Grid> newGrids_;
 		if( !referenceProvided ) _refOutputFiles.clear();
 		_outputFiles.clear();
-		for( i = 0; i < outputGrids_.size(); i++ ) {
-			Grid nextGrid( 0.0, 1.0, (int) ceil((double)outputGrids_[i].getNumIntervals()/((double) numSteps) - 10.0*EPS) + 1 );
+		for( i = 0; i < outputGrids.size(); i++ ) {
+			Grid nextGrid( 0.0, 1.0, (int) ceil((double)outputGrids[i].getNumIntervals()/((double) numSteps) - 10.0*EPS) + 1 );
 			newGrids_.push_back( nextGrid );
-			
+
 			if( !referenceProvided ) _refOutputFiles.push_back( (String)"refOutput" << i << ".txt" );
 			_outputFiles.push_back( (String)"output" << i << ".txt" );
 		}
 		
-		integrator->setupOutput( newGrids_, rhsOutput );
+		integrator->setupOutput( newGrids_, outputExpressions );
 	}
 	
 	if( !integrator->hasEquidistantGrid() ) return ACADOERROR( RET_INVALID_OPTION );
@@ -340,9 +306,6 @@ returnValue SIMexport::checkConsistency( ) const
 {
 	// consistency checks:
 	// only time-continuous DAEs without parameter and disturbances supported!
-	DifferentialEquation f;
-	ocp.getDifferentialEquation( f );
-
 	if ( f.isDiscretized( ) == BT_TRUE )
 		return ACADOERROR( RET_NO_DISCRETE_ODE_FOR_CODE_EXPORT );
 	
@@ -351,11 +314,6 @@ returnValue SIMexport::checkConsistency( ) const
 		return ACADOERROR( RET_ONLY_STATES_AND_CONTROLS_FOR_CODE_EXPORT );
 
 	// only equidistant evaluation grids supported!
-	Grid grid;
-	ocp.getGrid( grid );
-	
-	if ( grid.isEquidistant( ) == BT_FALSE )
-		return ACADOERROR( RET_ONLY_EQUIDISTANT_GRID_FOR_CODE_EXPORT );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -478,12 +436,6 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 											) const
 {
 	int i;
-	Grid integratorGrid;
-	integrator->getGrid( integratorGrid );
-	std::vector<Grid> outputGrids;
-	integrator->getOutputGrids(outputGrids);
-	std::vector<Expression> outputExpressions;
-	integrator->getOutputExpressions(outputExpressions);
 	
 	if( outputFiles.size() != outputGrids.size() || outputFiles.size() != outputExpressions.size() ) return ACADOERROR( RET_INVALID_OPTION );
 	
@@ -500,14 +452,14 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 	main.addStatement( (String)"   #define NU          " << NU << "      /* number of control inputs       */\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"   #define NOUT" << i << "          " << outputExpressions[i].getDim() << "      /* number of outputs       */\n" );
-		main.addStatement( (String)"   #define NMEAS" << i << "          " << outputGrids[i].getNumIntervals()*integratorGrid.getNumIntervals() << "      /* number of measurements       */\n" );
+		main.addStatement( (String)"   #define NMEAS" << i << "          " << outputGrids[i].getNumIntervals()/N << "      /* number of measurements       */\n" );
 	}
 	if ( NP > 0 )
 		main.addStatement( (String)"   #define NP          " << NP << "      /* number of fixed parameters     */\n" );
 
 	main.addStatement( (String)"   #define JUMP           " << jumpReference  << "      /* jump for the output reference    */\n" );
-	main.addStatement( (String)"   #define N           " << N  << "      /* number of control intervals    */\n" );
-	main.addStatement( (String)"   #define h           " << h  << "      /* stepsize in the OCP    */\n" );
+	main.addStatement( (String)"   #define N           " << N  << "      /* number of simulation intervals    */\n" );
+	main.addStatement( (String)"   #define h           " << T/N  << "      /* length of one simulation interval    */\n" );
 	if( TIMING == BT_TRUE ) main.addStatement( (String)"   #define STEPS_TIMING   " << timingSteps << "      /* number of steps for the timing */\n" );
 	if( TIMING == BT_TRUE ) main.addStatement( (String)"   #define CALLS_TIMING   " << timingCalls << "      /* number of calls for the timing */\n" );
 	main.addStatement( "   #define RESULTS_NAME	  \"" << _resultsFile << "\"\n" );
@@ -679,12 +631,6 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 											) const
 {
 	int i;
-	Grid integratorGrid;
-	integrator->getGrid( integratorGrid );
-	std::vector<Grid> outputGrids;
-	integrator->getOutputGrids(outputGrids);
-	std::vector<Expression> outputExpressions;
-	integrator->getOutputExpressions(outputExpressions);
 	
     String fileName( _dirName );
     fileName << "/" << _fileName;
@@ -699,14 +645,14 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 	main.addStatement( (String)"   #define NU          " << NU << "      /* number of control inputs       */\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"   #define NOUT" << i << "          " << outputExpressions[i].getDim() << "      /* number of outputs       */\n" );
-		main.addStatement( (String)"   #define NMEAS" << i << "          " << outputGrids[i].getNumIntervals()*integratorGrid.getNumIntervals() << "      /* number of measurements       */\n" );
+		main.addStatement( (String)"   #define NMEAS" << i << "          " << outputGrids[i].getNumIntervals()/N << "      /* number of measurements       */\n" );
 	}
 
 	if ( NP > 0 )
 		main.addStatement( (String)"   #define NP          " << NP << "      /* number of fixed parameters     */\n" );
 
-	main.addStatement( (String)"   #define N           " << N  << "      /* number of control intervals    */\n" );
-	main.addStatement( (String)"   #define h           " << h  << "      /* stepsize in the OCP    */\n" );
+	main.addStatement( (String)"   #define N           " << N  << "      /* number of simulation intervals    */\n" );
+	main.addStatement( (String)"   #define h           " << T/N  << "      /* length of one simulation interval   */\n" );
 	main.addStatement( "   #define RESULTS_NAME	  \"" << _results << "\"\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"   #define OUTPUT" << i << "_NAME	  \"" << _outputFiles[i] << "\"\n" );
@@ -835,26 +781,21 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	_results = results;
 	_ref = ref;
 	uint i;
-	std::vector<Grid> outputGrids_;
-	ocp.getOutputGrids( outputGrids_ );
-	Vector meas( (uint)outputGrids_.size() );
-	Vector measRef( (uint)outputGrids_.size() );
-	for( i = 0; i < outputGrids_.size(); i++ ) {
-		meas(i) = (double)outputGrids_[i].getNumIntervals();
-		measRef(i) = (double)outputGrids_[i].getNumIntervals()*factorRef;
+	Vector meas( (uint)outputGrids.size() );
+	Vector measRef( (uint)outputGrids.size() );
+	for( i = 0; i < outputGrids.size(); i++ ) {
+		meas(i) = (double)outputGrids[i].getNumIntervals();
+		measRef(i) = (double)outputGrids[i].getNumIntervals()*factorRef;
 	}
 	
 	int numSteps;
     get( NUM_INTEGRATOR_STEPS, numSteps );
-    Grid grid;
-	ocp.getGrid( grid );
-	N = grid.getNumIntervals();
 	timingCalls = (uint) ceil((double)(timingSteps*N)/((double) numSteps) - 10.0*EPS);
 	timingSteps = (uint) ceil((double)timingCalls*((double) numSteps/((double) N)) - 10.0*EPS);
     
     if( !referenceProvided ) {
 	    // REFERENCE:
-	    ocp.setupOutput( measRef );
+	    setMeasurements( measRef );
 		set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
 		exportCode(	dirName );
 		exportTest(	dirName, String( "test.c" ), _ref, _refOutputFiles, BT_FALSE, factorRef );
@@ -862,7 +803,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	}
     
     // THE INTEGRATOR:
-    ocp.setupOutput( meas );
+    setMeasurements( meas );
 	set( NUM_INTEGRATOR_STEPS,  numSteps );
 	exportCode(	dirName );
 	if(timingSteps > 0 && timingCalls > 0) 	exportTest(	dirName, String( "test.c" ), _results, _outputFiles, BT_TRUE, 1 );
@@ -926,7 +867,7 @@ returnValue SIMexport::exportMakefile(	const String& _dirName,
 
 
 returnValue SIMexport::setReference( const String& reference, const std::vector<String>& outputReference ) {
-	if( ocp.hasOutputFunctions( ) && outputReference.size() == 0 ) {
+	if( hasOutputs() && outputReference.size() == 0 ) {
 		referenceProvided = BT_FALSE;
 		return RET_UNABLE_TO_EXPORT_CODE;
 	}
