@@ -705,7 +705,7 @@ ExportArithmeticStatement ExportVariable::operator==(	const Matrix& arg
 
 ExportVariable ExportVariable::getTranspose( ) const
 {
-	ExportVariable transposed( name,getNumCols(),getNumRows(),type,dataStruct,callItByValue );
+	ExportVariable transposed( name,getNumCols(),getNumRows(),type,dataStruct,callItByValue, prefix);
 	
 	for( uint i=0; i<getNumCols(); ++i )
 		for( uint j=0; j<getNumRows(); ++j )

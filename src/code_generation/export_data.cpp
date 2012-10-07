@@ -187,32 +187,47 @@ ExportStruct ExportData::getDataStruct( ) const
 
 String ExportData::getDataStructString( ) const
 {
+	String tmp = prefix;
+
+	if (tmp.isEmpty() == BT_FALSE)
+		tmp << "_";
+
 	switch ( dataStruct )
 	{
 		case ACADO_VARIABLES:
-			return (String)"acadoVariables";
+			tmp << "acadoVariables";
+			break;
 			
 		case ACADO_WORKSPACE:
-			return (String)"acadoWorkspace";
+			tmp << "acadoWorkspace";
+			break;
 
 		case ACADO_PARAMS:
-			return (String)"params";
+			tmp << "params";
+			break;
 			
 		case ACADO_VARS:
-			return (String)"vars";
+			tmp << "vars";
+			break;
 
 		case FORCES_PARAMS:
-			return (String)"params";
+			tmp << "params";
+			break;
 
 		case FORCES_OUTPUT:
-			return (String)"output";
+			tmp << "output";
+			break;
 
 		case FORCES_INFO:
-			return (String)"info";
+			tmp << "info";
+			break;
 
 		default:
-			return (String)"";
+			tmp << "";
+			break;
 	}
+
+	return tmp;
 }
 
 
@@ -250,15 +265,15 @@ returnValue ExportData::setFullName()
 	}
 	else
 	{
-		if ( prefix.isEmpty() == BT_FALSE )
-		{
-			fullName = prefix;
-			fullName << "_" << getDataStructString();
-		}
-		else
-		{
+//		if ( prefix.isEmpty() == BT_FALSE )
+//		{
+//			fullName = prefix;
+//			fullName << "_" << getDataStructString();
+//		}
+//		else
+//		{
 			fullName = getDataStructString();
-		}
+//		}
 
 		fullName << "." << name;
 	}
