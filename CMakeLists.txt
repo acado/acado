@@ -291,7 +291,16 @@ INCLUDE_DIRECTORIES(
 	${PROJECT_SOURCE_DIR}/include
 	${PROJECT_SOURCE_DIR}/external_packages
 	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
+	${PROJECT_BINARY_DIR}
 )
+
+################################################################################
+#
+# Configure templates
+#
+################################################################################
+
+ADD_SUBDIRECTORY( ./src/code_generation/templates )
 
 ################################################################################
 #
