@@ -291,7 +291,7 @@ INCLUDE_DIRECTORIES(
 	${PROJECT_SOURCE_DIR}/include
 	${PROJECT_SOURCE_DIR}/external_packages
 	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
-	${PROJECT_BINARY_DIR}
+	${PROJECT_BINARY_DIR}/include
 )
 
 ################################################################################
@@ -518,6 +518,7 @@ SET( ACADO_ENV_INCLUDE_DIRS
 	${PROJECT_SOURCE_DIR}/external_packages
 	${PROJECT_SOURCE_DIR}/external_packages/csparse/
 	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
+	${PROJECT_BINARY_DIR}/include
 )
 
 SET( ACADO_ENV_LIBRARY_DIRS
