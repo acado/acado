@@ -148,8 +148,10 @@ returnValue ExportForLoop::exportDataDeclaration(	FILE* file,
 													) const
 {
 	if ( doLoopUnrolling == BT_FALSE )
-		loopVariable.exportDataDeclaration( file,_realString,_intString,_precision );
+		loopVariable.exportDataDeclaration(file, _realString, _intString, _precision);
 	
+	ExportStatementBlock::exportDataDeclaration(file, _realString, _intString, _precision);
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -168,15 +170,15 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 		switch( increment )
 		{
 			case 1:
-				acadoFPrintf( file,"++%s ){\n", loopVariable.getName().getName() );
+				acadoFPrintf( file,"++%s )\n{\n", loopVariable.getName().getName() );
 				break;
 				
 			case -1:
-				acadoFPrintf( file,"--%s ){\n", loopVariable.getName().getName() );
+				acadoFPrintf( file,"--%s )\n{\n", loopVariable.getName().getName() );
 				break;
 				
 			default:
-				acadoFPrintf( file," %s+=%d ){\n", loopVariable.getName().getName(),increment );
+				acadoFPrintf( file," %s+=%d )\n{\n", loopVariable.getName().getName(),increment );
 				break;
 		}
 	}
@@ -184,7 +186,7 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 	ExportStatementBlock::exportCode( file,_realString,_intString,_precision );
 	
 	if ( doLoopUnrolling == BT_FALSE )
-		acadoFPrintf( file,"}\n");
+		acadoFPrintf( file,"\n}\n");
 
 	return SUCCESSFUL_RETURN;
 }
