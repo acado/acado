@@ -106,7 +106,7 @@ class ExportFile : public ExportStatementBlock
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportCode( ) const;
+		virtual returnValue exportCode( ) const;
 
 
 

@@ -99,6 +99,8 @@ returnValue SIMexport::exportCode(	const String& dirName,
 									int _precision
 									)
 {
+	set( QP_SOLVER, QP_NONE );
+
 	if ( setup( ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
@@ -119,6 +121,16 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		
 		if ( integratorFile.exportCode( ) != SUCCESSFUL_RETURN )
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+
+		int generateMatlabInterface;
+		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
+		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
+			String matlabInterface( dirName );
+			matlabInterface << "/integrate.c";
+			ExportTemplatedFile exportMexFun( String("integrator_mex.c.in"), matlabInterface, commonHeaderName,_realString,_intString,_precision );
+			exportMexFun.configure();
+			exportMexFun.exportCode();
+		}
 	}
 
 
@@ -338,92 +350,6 @@ returnValue SIMexport::collectFunctionDeclarations(	ExportStatementBlock& declar
 		return RET_UNABLE_TO_EXPORT_CODE;
 
 	return SUCCESSFUL_RETURN;
-}
-
-
-
-returnValue SIMexport::exportAcadoHeader(	const String& _dirName,
-											const String& _fileName,
-											const String& _realString,
-											const String& _intString,
-											int _precision
-											) const
-{
-	int operatingSystem;
-	get( OPERATING_SYSTEM,operatingSystem );
-
-	int useSinglePrecision;
-	get( USE_SINGLE_PRECISION,useSinglePrecision );
-	
-	int fixInitialState;
-	get( FIX_INITIAL_STATE,fixInitialState );
-
-
-	String fileName( _dirName );
-	fileName << "/" << _fileName;
-	ExportFile acadoHeader( fileName,"", _realString,_intString,_precision );
-
-	acadoHeader.addStatement( "#include <stdio.h>\n" );
-	acadoHeader.addStatement( "#include <math.h>\n" );
-
-	if ( (OperatingSystem)operatingSystem == OS_WINDOWS )
-	{
-		acadoHeader.addStatement( "#include <windows.h>\n" );
-	}
-	else
-	{
-		// OS_UNIX
-		acadoHeader.addStatement( "#include <time.h>\n" );
-		acadoHeader.addStatement( "#include <sys/stat.h>\n" );
-		acadoHeader.addStatement( "#include <sys/time.h>\n" );
-	}
-	acadoHeader.addLinebreak( );
-	
-	acadoHeader.addStatement( String( "typedef double " ) << _realString << ";\n" );
-	acadoHeader.addLinebreak( );
-	
-	acadoHeader.addComment( "GLOBAL VARIABLES:               " );
-	acadoHeader.addComment( "--------------------------------" );
-	acadoHeader.addStatement( "typedef struct ACADOvariables_ {\n" );
-
-	if ( collectDataDeclarations( acadoHeader,ACADO_VARIABLES ) != SUCCESSFUL_RETURN )
-		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
-
-	acadoHeader.addLinebreak( );
-	acadoHeader.addStatement( "} ACADOvariables;\n" );
-	acadoHeader.addLinebreak( 2 );
-
-	acadoHeader.addComment( "GLOBAL WORKSPACE:               " );
-	acadoHeader.addComment( "--------------------------------" );
-	acadoHeader.addStatement( "typedef struct ACADOworkspace_ {\n" );
-
-	if ( collectDataDeclarations( acadoHeader,ACADO_WORKSPACE ) != SUCCESSFUL_RETURN )
-		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
-
-	acadoHeader.addLinebreak( );
-	acadoHeader.addStatement( "} ACADOworkspace;\n" );
-	acadoHeader.addLinebreak( 2 );
-
-	acadoHeader.addComment( "GLOBAL FORWARD DECLARATIONS:         " );
-	acadoHeader.addComment( "-------------------------------------" );
-
-	if ( collectFunctionDeclarations( acadoHeader ) != SUCCESSFUL_RETURN )
-		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
-
-	acadoHeader.addComment( "-------------------------------------" );
-	acadoHeader.addLinebreak( 2 );
-
-	acadoHeader.addComment( "EXTERN DECLARATIONS:                 " );
-	acadoHeader.addComment( "-------------------------------------" );
-	acadoHeader.addStatement( "extern ACADOworkspace acadoWorkspace;\n" );
-	acadoHeader.addStatement( "extern ACADOvariables acadoVariables;\n" );
-	acadoHeader.addComment( "-------------------------------------" );
-
-	acadoHeader.addLinebreak( );
-    acadoHeader.addComment( "END OF FILE." );
-	acadoHeader.addLinebreak( );
-
-	return acadoHeader.exportCode( );
 }
 
 

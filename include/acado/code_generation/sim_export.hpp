@@ -36,6 +36,7 @@
 
 
 #include <acado/code_generation/export_module.hpp>
+#include <acado/code_generation/export_templated_file.hpp>
 #include <acado/code_generation/integrators/integrator_generation.hpp>
 #include <acado/code_generation/auxiliary_functions_export.hpp>
 #include <acado/code_generation/export_file.hpp>
@@ -179,6 +180,17 @@ class SIMexport : public ExportModule
 		returnValue setDifferentialEquation( const DifferentialEquation& _f );
 
 
+		/** Assigns model to be used by the integrator.
+		 *
+		 *	@param[in] rhs			The right-hand side.
+		 *	@param[in] diffs_rhs	The derivatives of the right-hand side.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		returnValue setDifferentialEquation( const String& rhs, const String& diffs_rhs );
+
+
 		/** Adds an output function.
 		 *
 		 *  \param outputEquation_ 	  an output function to be added
@@ -273,23 +285,6 @@ class SIMexport : public ExportModule
 		returnValue collectFunctionDeclarations(	ExportStatementBlock& declarations
 													) const;
 
-
-		/** Exports main header file for using the exported MPC algorithm.
-		 *
-		 *	@param[in] _dirName			Name of directory to be used to export file.
-		 *	@param[in] _fileName		Name of file to be exported.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
-		 *	@param[in] _precision		Number of digits to be used for exporting real values.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue exportAcadoHeader(	const String& _dirName,
-										const String& _fileName,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
-										int _precision = 16
-										) const;
 
 		/** Exports test file with template main function for using the 
 		 *  exported simulation algorithm.

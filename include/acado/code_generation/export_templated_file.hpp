@@ -109,7 +109,7 @@ class ExportTemplatedFile : public ExportFile
 		 */
 		virtual returnValue configure(  )
 		{
-			return SUCCESSFUL_RETURN;
+			return fillTemplate( );
 		}
 
 	protected:
