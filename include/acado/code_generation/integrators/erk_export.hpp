@@ -96,6 +96,17 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		virtual returnValue setDifferentialEquation( const Expression& rhs );
 
 
+		/** Assigns the model to be used by the integrator.
+		 *
+		 *	@param[in] _rhs				Name of the function, evaluating the right-hand side.
+		 *	@param[in] _diffs_rhs		Name of the function, evaluating the derivatives of the right-hand side.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		returnValue setModel( const String& _rhs, const String& _diffs_rhs );
+
+
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
 		 *
 		 *	@param[in] declarations		List of declarations.
@@ -137,6 +148,21 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		*/
 		virtual returnValue setupOutput( const std::vector<Grid> outputGrids_,
 									  const std::vector<Expression> rhs );
+
+
+		/** Sets up the output with the grids for the different output functions.									\n
+		 *                                                                      										\n
+		 *  \param outputGrids_	  		The vector containing a grid for each output function.			  			\n
+		 *  \param _outputNames 	  		The names of the output functions.									  		\n
+		 *  \param _diffs_outputNames 	The names of the functions, evaluating the derivatives of the outputs.		\n
+		 *  \param _dims_output 			The dimensions of the output functions.										\n
+		 *                                                                      										\n
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
+									  	  const std::vector<String> _outputNames,
+									  	  const std::vector<String> _diffs_outputNames,
+										  const std::vector<uint> _dims_output );
 
 
 	protected:

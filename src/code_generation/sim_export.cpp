@@ -32,6 +32,8 @@
 
 #include <acado/code_generation/sim_export.hpp>
 
+#include <acado/code_generation/templates/templates.hpp>
+
 #include <acado/code_generation/export_algorithm_factory.hpp>
 
 #ifdef WIN32
@@ -60,6 +62,7 @@ SIMexport::SIMexport( const uint simIntervals, const double totalTime ) : Export
 	_ref = String( "ref.txt" );
 	referenceProvided = BT_FALSE;
 	PRINT_DETAILS = BT_TRUE;
+	MODEL_DIMENSIONS_SET = BT_FALSE;
 
 	setStatus( BS_NOT_INITIALIZED );
 }
@@ -99,6 +102,7 @@ returnValue SIMexport::exportCode(	const String& dirName,
 									int _precision
 									)
 {
+	if (!MODEL_DIMENSIONS_SET) return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 	set( QP_SOLVER, QP_NONE );
 
 	if ( setup( ) != SUCCESSFUL_RETURN )
@@ -127,7 +131,7 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
 			String matlabInterface( dirName );
 			matlabInterface << "/integrate.c";
-			ExportTemplatedFile exportMexFun( String("integrator_mex.c.in"), matlabInterface, commonHeaderName,_realString,_intString,_precision );
+			ExportTemplatedFile exportMexFun( INTEGRATOR_MEX_TEMPLATE, matlabInterface, commonHeaderName,_realString,_intString,_precision );
 			exportMexFun.configure();
 			exportMexFun.exportCode();
 		}
@@ -159,16 +163,68 @@ returnValue SIMexport::exportCode(	const String& dirName,
 }
 
 
-returnValue SIMexport::getDifferentialEquation( DifferentialEquation& _f ) const{
+returnValue SIMexport::getModel( DifferentialEquation& _f ) const{
 
     _f = f;
     return SUCCESSFUL_RETURN;
 }
 
 
-returnValue SIMexport::setDifferentialEquation( const DifferentialEquation& _f )
+returnValue SIMexport::setModel( const DifferentialEquation& _f )
 {
-	f = _f;
+	if( rhs_ODE.isEmpty() && outputNames.size() == 0 ) {
+		f = _f;
+		Expression rhs;
+		f.getExpression( rhs );
+
+		NX = rhs.getDim() - f.getNXA();
+		NDX = f.getNDX();
+		NXA = f.getNXA();
+		NU = f.getNU();
+		NP = f.getNP();
+		MODEL_DIMENSIONS_SET = BT_TRUE;
+
+		EXPORT_RHS = BT_TRUE;
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue SIMexport::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU )
+{
+	NX = _NX;
+	NDX = _NDX;
+	NXA = _NXA;
+	NU = _NU;
+	MODEL_DIMENSIONS_SET = BT_TRUE;
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue SIMexport::setDimensions( uint _NX, uint _NU )
+{
+	setDimensions( _NX, 0, 0, _NU );
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue SIMexport::setModel( const String& fileName, const String& _rhs_ODE, const String& _diffs_ODE, const String& _rhs_DAE, const String& _diffs_DAE )
+{
+	if( outputExpressions.size() == 0 && f.getNumDynamicEquations() == 0 ) {
+		externModel = String(fileName);
+		rhs_ODE = String(_rhs_ODE);
+		diffs_ODE = String(_diffs_ODE);
+		rhs_DAE = String(_rhs_DAE);
+		diffs_DAE = String(_diffs_DAE);
+
+		EXPORT_RHS = BT_FALSE;
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -176,9 +232,29 @@ returnValue SIMexport::setDifferentialEquation( const DifferentialEquation& _f )
 
 returnValue SIMexport::addOutput( const OutputFcn& outputEquation_ ){
 
-	Expression next;
-	outputEquation_.getExpression( next );
-	outputExpressions.push_back( next );
+	if( rhs_ODE.isEmpty() && outputNames.size() == 0 ) {
+		Expression next;
+		outputEquation_.getExpression( next );
+		outputExpressions.push_back( next );
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+
+    return SUCCESSFUL_RETURN;
+}
+
+
+returnValue SIMexport::addOutput( const String& output, const String& diffs_output, const uint dim ){
+
+	if( outputExpressions.size() == 0 && f.getNumDynamicEquations() == 0 ) {
+		outputNames.push_back( output );
+		diffs_outputNames.push_back( diffs_output );
+		num_output.push_back( dim );
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
 
     return SUCCESSFUL_RETURN;
 }
@@ -187,7 +263,7 @@ returnValue SIMexport::addOutput( const OutputFcn& outputEquation_ ){
 returnValue SIMexport::setMeasurements( const Vector& numberMeasurements ){
 
 	int i;
-	if( outputExpressions.size() != numberMeasurements.getDim() ) {
+	if( outputExpressions.size() != numberMeasurements.getDim() && outputNames.size() != numberMeasurements.getDim() ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 	outputGrids.clear();
@@ -202,7 +278,7 @@ returnValue SIMexport::setMeasurements( const Vector& numberMeasurements ){
 
 BooleanType SIMexport::hasOutputs() const{
 
-	if( outputExpressions.size() == 0 ) return BT_FALSE;
+	if( outputExpressions.size() == 0 && outputNames.size() == 0 ) return BT_FALSE;
 	return BT_TRUE;
 }
 
@@ -251,15 +327,6 @@ returnValue SIMexport::setup( )
 	get( CG_USE_C99, allowC99codegen );
 	ExportArithmeticStatement::allowC99( static_cast<BooleanType>( allowC99codegen ) );
 
-	Expression rhs;
-	f.getExpression( rhs );
-
-	NX = rhs.getDim() - f.getNXA();
-	NDX = f.getNDX();
-	NXA = f.getNXA();
-	NU = f.getNU();
-	NP = f.getNP();
-
 	int numSteps;
     get( NUM_INTEGRATOR_STEPS, numSteps );
 
@@ -279,8 +346,16 @@ returnValue SIMexport::setup( )
 
 	integrator->setDimensions( NX,NDX,NXA,NU,NP,N );
 
-	if ( integrator->setDifferentialEquation( rhs ) != SUCCESSFUL_RETURN )
-		return RET_UNABLE_TO_EXPORT_CODE;
+	if( EXPORT_RHS ) {
+		Expression rhs;
+		f.getExpression( rhs );
+		if ( integrator->setDifferentialEquation( rhs ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+	}
+	else {
+		if ( integrator->setModel( rhs_ODE, diffs_ODE, rhs_DAE, diffs_DAE ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+	}
 
 	Grid ocpGrid( 0.0, T, N+1 );
 	if ( integrator->setGrid(ocpGrid, numSteps) != SUCCESSFUL_RETURN ) {
@@ -303,7 +378,12 @@ returnValue SIMexport::setup( )
 			_outputFiles.push_back( (String)"output" << i << ".txt" );
 		}
 		
-		integrator->setupOutput( newGrids_, outputExpressions );
+		if( outputExpressions.size() > 0 ) {
+			integrator->setupOutput( newGrids_, outputExpressions );
+		}
+		else {
+			integrator->setupOutput( newGrids_, outputNames, diffs_outputNames, num_output );
+		}
 	}
 	
 	if( !integrator->hasEquidistantGrid() ) return ACADOERROR( RET_INVALID_OPTION );
@@ -363,7 +443,9 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 {
 	int i;
 	
-	if( outputFiles.size() != outputGrids.size() || outputFiles.size() != outputExpressions.size() ) return ACADOERROR( RET_INVALID_OPTION );
+	if( outputFiles.size() != outputGrids.size() || (outputFiles.size() != outputExpressions.size() && outputFiles.size() != outputNames.size()) ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
 	
     String fileName( _dirName );
     fileName << "/" << _fileName;
@@ -377,7 +459,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 	main.addStatement( (String)"   #define NXA          " << NXA << "      /* number of algebraic states  */\n" );
 	main.addStatement( (String)"   #define NU          " << NU << "      /* number of control inputs       */\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"   #define NOUT" << i << "          " << outputExpressions[i].getDim() << "      /* number of outputs       */\n" );
+		main.addStatement( (String)"   #define NOUT" << i << "          " << getDimOutput( (uint) i ) << "      /* number of outputs       */\n" );
 		main.addStatement( (String)"   #define NMEAS" << i << "          " << outputGrids[i].getNumIntervals()/N << "      /* number of measurements       */\n" );
 	}
 	if ( NP > 0 )
@@ -420,8 +502,8 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"      real_t out" << i << "[NMEAS" << i << "*dimOut" << i << "];\n" );
 	}
-    main.addStatement( "      double u[NU];\n" );
-    if( NXA > 0 ) main.addStatement( "      double norm;\n" );
+    main.addStatement( "      real_t u[NU];\n" );
+    if( NXA > 0 ) main.addStatement( "      real_t norm;\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"      real_t step" << i << " = h/NMEAS" << i << ";\n" );
 	}
@@ -570,7 +652,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 	main.addStatement( (String)"   #define NXA          " << NXA << "      /* number of algebraic states  */\n" );
 	main.addStatement( (String)"   #define NU          " << NU << "      /* number of control inputs       */\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"   #define NOUT" << i << "          " << outputExpressions[i].getDim() << "      /* number of outputs       */\n" );
+		main.addStatement( (String)"   #define NOUT" << i << "          " << getDimOutput(i) << "      /* number of outputs       */\n" );
 		main.addStatement( (String)"   #define NMEAS" << i << "          " << outputGrids[i].getNumIntervals()/N << "      /* number of measurements       */\n" );
 	}
 
@@ -768,8 +850,11 @@ returnValue SIMexport::exportMakefile(	const String& _dirName,
 	Makefile.addStatement( "CC     = g++\n" );
 	Makefile.addLinebreak( );
 	Makefile.addStatement( "OBJECTS = \\\n" );
-	Makefile.addStatement( "\tintegrator.o \n \n" );
-	Makefile.addLinebreak( );
+	Makefile.addStatement( "\tintegrator.o \\\n" );
+	if( !EXPORT_RHS ) {
+		Makefile.addStatement( (String)"\t" << externModel << ".o \n" );
+	}
+	Makefile.addLinebreak( 2 );
 	Makefile.addStatement( ".PHONY: all\n" );
 	Makefile.addStatement( "all: test compare \n" );
 	Makefile.addLinebreak( );
@@ -780,6 +865,9 @@ returnValue SIMexport::exportMakefile(	const String& _dirName,
 	Makefile.addStatement( "integrator.o          : acado.h\n" );
 	Makefile.addStatement( "test.o                : acado.h\n" );
 	Makefile.addStatement( "compare.o             : acado.h\n" );
+	if( !EXPORT_RHS ) {
+		Makefile.addStatement( (String)externModel << ".o             : acado.h\n" );
+	}
 	Makefile.addLinebreak( );
 	Makefile.addStatement( "${OBJECTS} : \n" );
 	Makefile.addLinebreak( );
@@ -826,6 +914,16 @@ returnValue SIMexport::executeTest( const String& _dirName ) {
 	system( ((String) _dirName << "/./test").getName() );
 	
 	return SUCCESSFUL_RETURN;
+}
+
+
+uint SIMexport::getDimOutput( uint index ) const {
+	if( outputExpressions.size() > 0 ) {
+		return outputExpressions[index].getDim();
+	}
+	else {
+		return num_output[index];
+	}
 }
 
 

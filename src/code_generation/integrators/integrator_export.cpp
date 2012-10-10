@@ -45,12 +45,14 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 									const String& _commonHeaderName
 									) : ExportAlgorithm( _userInteraction,_commonHeaderName )
 {
+	EXPORT_RHS = BT_TRUE;
 }
 
 
 IntegratorExport::IntegratorExport(	const IntegratorExport& arg
 									) : ExportAlgorithm( arg )
 {
+	EXPORT_RHS = BT_TRUE;
 }
 
 
@@ -104,6 +106,24 @@ returnValue IntegratorExport::setGrid(	const Grid& _ocpGrid, const uint _numStep
 }
 
 
+returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _name_diffs_ODE, const String& _name_DAE, const String& _name_diffs_DAE ) {
+
+	if( (ODE.getFunctionDim() + DAE.getFunctionDim()) == 0 ) {
+		name_ODE = String(_name_ODE);
+		name_diffs_ODE = String(_name_diffs_ODE);
+		name_DAE = String(_name_DAE);
+		name_diffs_DAE = String(_name_diffs_DAE);
+
+		EXPORT_RHS = BT_FALSE;
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 
 // PROTECTED:
 
@@ -111,6 +131,7 @@ returnValue IntegratorExport::setGrid(	const Grid& _ocpGrid, const uint _numStep
 returnValue IntegratorExport::copy(	const IntegratorExport& arg
 									)
 {
+	EXPORT_RHS = arg.EXPORT_RHS;
 	grid = arg.grid;
 	numSteps = arg.numSteps;
 
@@ -157,6 +178,70 @@ returnValue IntegratorExport::getOutputGrids( std::vector<Grid>& outputGrids_ ) 
 BooleanType IntegratorExport::hasEquidistantGrid( ) const{
 	
 	return numSteps.isEmpty();
+}
+
+const String& IntegratorExport::getNameODE() const{
+	if( EXPORT_RHS ) {
+		return ODE.getName();
+	}
+	else {
+		return name_ODE;
+	}
+}
+
+const String& IntegratorExport::getNameDAE() const{
+	if( EXPORT_RHS ) {
+		return DAE.getName();
+	}
+	else {
+		return name_DAE;
+	}
+}
+
+const String& IntegratorExport::getNameOUTPUT( uint index ) const{
+	if( EXPORT_RHS ) {
+		return OUTPUTS[index].getName();
+	}
+	else {
+		return name_OUTPUTS[index];
+	}
+}
+
+uint IntegratorExport::getDimOUTPUT( uint index ) const{
+	if( EXPORT_RHS ) {
+		return outputExpressions[index].getDim();
+	}
+	else {
+		return num_OUTPUTS[index];
+	}
+}
+
+
+const String& IntegratorExport::getNameDiffsODE() const{
+	if( EXPORT_RHS ) {
+		return diffs_ODE.getName();
+	}
+	else {
+		return name_diffs_ODE;
+	}
+}
+
+const String& IntegratorExport::getNameDiffsDAE() const{
+	if( EXPORT_RHS ) {
+		return diffs_DAE.getName();
+	}
+	else {
+		return name_diffs_DAE;
+	}
+}
+
+const String& IntegratorExport::getNameDiffsOUTPUT( uint index ) const{
+	if( EXPORT_RHS ) {
+		return diffs_OUTPUTS[index].getName();
+	}
+	else {
+		return name_diffs_OUTPUTS[index];
+	}
 }
 
 

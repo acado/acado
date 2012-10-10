@@ -105,6 +105,22 @@ class IntegratorExport : public ExportAlgorithm
 		virtual returnValue setDifferentialEquation( const Expression& rhs ) = 0;
 
 
+		/** Assigns the model to be used by the integrator.
+		 *
+		 *	@param[in] _name_ODE			Name of the function, evaluating the ODE right-hand side.
+		 *	@param[in] _name_diffs_ODE		Name of the function, evaluating the derivatives of the ODE right-hand side.
+		 *	@param[in] _name_DAE			Name of the function, evaluating the right-hand side.
+		 *	@param[in] _name_diffs_DAE		Name of the function, evaluating the derivatives of the right-hand side.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		virtual returnValue setModel( 	const String& _name_ODE,
+										const String& _name_diffs_ODE,
+										const String& _name_DAE = String(),
+										const String& _name_diffs_DAE = String() );
+
+
 		/** Sets integration grid.
 		 *
 		 *	@param[in] _grid		Evaluation grid for optimal control.
@@ -160,6 +176,21 @@ class IntegratorExport : public ExportAlgorithm
 									  const std::vector<Expression> rhs ) = 0;
 
 
+        /** Sets up the output with the grids for the different output functions.									\n
+		*                                                                      										\n
+		*  \param outputGrids_	  		The vector containing a grid for each output function.			  			\n
+		*  \param _outputNames 	  		The names of the output functions.									  		\n
+		*  \param _diffs_outputNames 	The names of the functions, evaluating the derivatives of the outputs.		\n
+		*  \param _dims_output 			The dimensions of the output functions.										\n
+		*                                                                      										\n
+		*  \return SUCCESSFUL_RETURN
+		*/
+		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
+									  	  const std::vector<String> _outputNames,
+									  	  const std::vector<String> _diffs_outputNames,
+										  const std::vector<uint> _dims_output ) = 0;
+
+
 		/** Returns the grid of the integrator. 	\n
 		* 
 		*  \return SUCCESSFUL_RETURN          		\n
@@ -196,6 +227,7 @@ class IntegratorExport : public ExportAlgorithm
 
 
 
+
 	protected:
 
 		/** Copies all class members from given object.
@@ -215,7 +247,22 @@ class IntegratorExport : public ExportAlgorithm
 		virtual returnValue clear( );
 
 
+		const String& getNameODE() const;
+		const String& getNameDAE() const;
+		const String& getNameOUTPUT( uint index ) const;
+		uint   getDimOUTPUT( uint index ) const;
+		const String& getNameDiffsODE() const;
+		const String& getNameDiffsDAE() const;
+		const String& getNameDiffsOUTPUT( uint index ) const;
+
+
     protected:
+
+        BooleanType EXPORT_RHS;				/**< True if the right-hand side and their derivatives should be exported too. */
+        String name_ODE;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
+        String name_DAE;					/**< The name of the function evaluating the DAE right-hand side, if provided. */
+        String name_diffs_ODE;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+        String name_diffs_DAE;				/**< The name of the function evaluating the derivatives of the DAE right-hand side, if provided. */
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
 		Vector numSteps;					/**< The number of integration steps per shooting interval. */
@@ -223,6 +270,8 @@ class IntegratorExport : public ExportAlgorithm
 		ExportFunction integrate;			/**< Function that integrates the exported ODE. */
 		ExportODEfunction ODE;				/**< Module to export ODE. */
 		ExportODEfunction DAE;				/**< Module to export DAE. */
+		ExportODEfunction diffs_ODE;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
+		ExportODEfunction diffs_DAE;		/**< Module to export the evaluation of the derivatives of the differential algebraic equations. */
 		
 		ExportVariable  rk_num;				/**< Variable containing the number of the current integration step. */
 		ExportVariable  rk_index;			/**< Variable containing the number of the current shooting interval. */
@@ -239,7 +288,11 @@ class IntegratorExport : public ExportAlgorithm
         std::vector<Grid> outputGrids;					/**< A separate grid for each output. */
         std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
         std::vector<ExportODEfunction> OUTPUTS;			/**< Module to export output functions. */
+        std::vector<ExportODEfunction> diffs_OUTPUTS;			/**< Module to export the evaluation of the derivatives of the output functions. */
 		
+        std::vector<String> name_OUTPUTS;				/**< A separate function name for each output. */
+        std::vector<String> name_diffs_OUTPUTS;			/**< A separate function name for evaluating the derivatives of each output. */
+        std::vector<uint> num_OUTPUTS;					/**< A separate dimension for each output. */
 };
 
 

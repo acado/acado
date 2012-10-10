@@ -167,7 +167,7 @@ class SIMexport : public ExportModule
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue getDifferentialEquation( DifferentialEquation& _f ) const;
+		returnValue getModel( DifferentialEquation& _f ) const;
 
 
 		/** Assigns Differential Equation to be used by the integrator.
@@ -177,18 +177,48 @@ class SIMexport : public ExportModule
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		returnValue setDifferentialEquation( const DifferentialEquation& _f );
+		returnValue setModel( const DifferentialEquation& _f );
 
 
-		/** Assigns model to be used by the integrator.
+		/** Assigns the model to be used by the integrator.
 		 *
-		 *	@param[in] rhs			The right-hand side.
-		 *	@param[in] diffs_rhs	The derivatives of the right-hand side.
+		 *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.
+		 *	@param[in] _diffs_rhs_ODE		Name of the function, evaluating the derivatives of the ODE right-hand side.
+		 *	@param[in] _rhs_DAE				Name of the function, evaluating the DAE right-hand side.
+		 *	@param[in] _diffs_rhs_DAE		Name of the function, evaluating the derivatives of the DAE right-hand side.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		returnValue setDifferentialEquation( const String& rhs, const String& diffs_rhs );
+		virtual returnValue setModel( 	const String& fileName,
+				const String& _rhs_ODE,
+				const String& _diffs_rhs_ODE,
+				const String& _rhs_DAE = String(),
+				const String& _diffs_rhs_DAE = String() );
+
+
+		/** Assigns the model dimensions to be used by the integrator.
+		 *
+		 *	@param[in] _NX		Number of differential states.
+		 *	@param[in] _NDX		Number of differential states derivatives.
+		 *	@param[in] _NXA		Number of algebraic states.
+		 *	@param[in] _NU		Number of control inputs
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		virtual returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU );
+
+
+		/** Assigns the model dimensions to be used by the integrator.
+		 *
+		 *	@param[in] _NX		Number of differential states.
+		 *	@param[in] _NU		Number of control inputs
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		virtual returnValue setDimensions( uint _NX, uint _NU );
 
 
 		/** Adds an output function.
@@ -198,6 +228,17 @@ class SIMexport : public ExportModule
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		returnValue addOutput( const OutputFcn& outputEquation_ );
+
+
+		/** Adds an output function.
+		 *
+		 *  \param output 	  			The output function to be added.
+		 *  \param diffs_output 	  	The derivatives of the output function to be added.
+		 *  \param dim					The dimension of the output function.
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		returnValue addOutput( const String& output, const String& diffs_output, const uint dim );
 
 
 		/** Sets up the output functions.
@@ -214,6 +255,15 @@ class SIMexport : public ExportModule
 		 *  \return True if there are extra outputs, specified for the integrator.
 		 */
 		BooleanType hasOutputs		() const;
+
+
+		/** Returns the dimension of a specific output function.
+		 *
+		 *  \param index	The index of the output function.
+		 *
+		 *  \return The dimension of a specific output function.
+		 */
+		uint getDimOutput( uint index ) const;
 
 
 
@@ -347,12 +397,22 @@ class SIMexport : public ExportModule
 
     protected:
 
+        BooleanType EXPORT_RHS;					/**< True if the right-hand side and their derivatives should be exported too. */
+        BooleanType MODEL_DIMENSIONS_SET;		/**< True if the model dimensions have been set. */
         double T;								/**< The total simulation time. */
 
 		IntegratorExport*  integrator;			/**< Module for exporting a tailored integrator. */
 		DifferentialEquation 		f;			/**< The differential equations in the model. */
+		String externModel;						/**< The name of the file containing the needed functions, if provided. */
+		String rhs_ODE;							/**< The name of the function evaluating the ODE right-hand side, if provided. */
+		String diffs_ODE;						/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+		String rhs_DAE;							/**< The name of the function evaluating the DAE right-hand side, if provided. */
+		String diffs_DAE;						/**< The name of the function evaluating the derivatives of the DAE right-hand side, if provided. */
 		std::vector<Grid> outputGrids;			/**< A separate grid for each output. */
 		std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
+		std::vector<String> outputNames;				/**< A separate function name for each output. */
+		std::vector<String> diffs_outputNames;			/**< A separate function name for evaluating the derivatives of each output. */
+		std::vector<uint> num_output;					/**< A separate dimension for each output. */
 		
 		BooleanType referenceProvided;			/**< True if the user provided a file with the reference solution. */
 		BooleanType PRINT_DETAILS;				/**< True if the user wants all the details about the results being printed. */

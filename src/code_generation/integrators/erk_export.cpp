@@ -204,6 +204,14 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 }
 
 
+
+returnValue ExplicitRungeKuttaExport::setModel(	const String& _rhs, const String& _diffs_rhs ) {
+
+	// You can't use this feature yet with explicit integrators, because they need the Variational Differential Equations !
+	return ACADOERROR( RET_INVALID_OPTION );
+}
+
+
 returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock& declarations,
 													ExportStruct dataStruct
 													) const
@@ -250,6 +258,15 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 
 returnValue ExplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outputGrids_, const std::vector<Expression> rhs ) {
 	
+	return ACADOERROR( RET_INVALID_OPTION );
+}
+
+
+returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outputGrids_,
+									  	  	  	  	const std::vector<String> _outputNames,
+									  	  	  	  	const std::vector<String> _diffs_outputNames,
+									  	  	  	  	const std::vector<uint> _dims_output ) {
+
 	return ACADOERROR( RET_INVALID_OPTION );
 }
 
