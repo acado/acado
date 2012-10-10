@@ -106,7 +106,6 @@ returnValue ExportTemplatedFile::exportCode( ) const
 
 returnValue ExportTemplatedFile::fillTemplate( )
 {
-	printf((templateName << "\n").getName());
 	ifstream inputFile( templateName.getName() );
 	
 	if ( inputFile.is_open() )
