@@ -274,7 +274,7 @@ returnValue GaussNewtonExport::setup( )
 	feedbackStep.addLinebreak( );
 
 //	feedbackStep.addFunctionCall( "solve" );
-//	feedbackStep.addStatement( "retVal = (int) solve();\n" );
+	feedbackStep.addStatement( "retVal = (int) solve();\n" );
 	feedbackStep.addLinebreak( );
 
 	if ( condenser->performsFullCondensing() == BT_TRUE )
