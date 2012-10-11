@@ -71,6 +71,15 @@ ExportFunction::ExportFunction( const ExportFunction& arg ) : ExportStatementBlo
 	
 	if ( arg.functionReturnValue != 0 )
 		setReturnValue( *(arg.functionReturnValue),arg.returnAsPointer );
+
+	localVariables.resize(arg.localVariables.size(), 0);
+	for (unsigned i = 0; i < arg.localVariables.size(); ++i)
+	{
+		if ( arg.localVariables[ i ] )
+		{
+			localVariables[ i ] = arg.localVariables[ i ]->clone();
+		}
+	}
 }
 
 
@@ -91,6 +100,15 @@ ExportFunction& ExportFunction::operator=( const ExportFunction& arg )
 		
 		if ( arg.functionReturnValue != 0 )
 			setReturnValue( *(arg.functionReturnValue),arg.returnAsPointer );
+
+		localVariables.resize(arg.localVariables.size(), 0);
+		for (unsigned i = 0; i < arg.localVariables.size(); ++i)
+		{
+			if ( arg.localVariables[ i ] )
+			{
+				localVariables[ i ] = arg.localVariables[ i ]->clone();
+			}
+		}
 	}
 
 	return *this;
@@ -271,10 +289,19 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	
 	acadoFPrintf( file," %s( ", name.getName() );
 	functionArguments.exportCode( file,_realString,_intString,_precision );
-	acadoFPrintf( file," ){\n");
+	acadoFPrintf( file," )\n{\n");
+
+	if ( functionReturnValue )
+	{
+		acadoFPrintf(file, "%s ", functionReturnValue->getTypeString( _realString,_intString ).getName());
+		acadoFPrintf(file, "%s;\n", functionReturnValue->getName().getName());
+	}
+
+	for (unsigned i = 0; i < localVariables.size(); ++i)
+		localVariables[ i ]->exportDataDeclaration(file, _realString, _intString, _precision);
 
 	ExportStatementBlock::exportDataDeclaration( file,_realString,_intString,_precision );
-// 	acadoFPrintf( file,"\n");
+
 	ExportStatementBlock::exportCode( file,_realString,_intString,_precision );
 	
 	if ( functionReturnValue != 0 )
@@ -324,12 +351,28 @@ returnValue ExportFunction::clear( )
 		functionReturnValue = 0;
 	}
 	
+	for (std::vector< ExportData* >::iterator it = localVariables.begin(); it != localVariables.end(); ++it)
+		delete *it;
+	localVariables.clear();
+
 	returnAsPointer = BT_FALSE;
 
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue ExportFunction::addIndex(const ExportIndex& _index)
+{
+	localVariables.push_back( new ExportIndex( _index ) );
 
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue ExportFunction::addVariables(const ExportVariable& _variable)
+{
+	localVariables.push_back( new ExportVariable( _variable ) );
+
+	return SUCCESSFUL_RETURN;
+}
 
 
 CLOSE_NAMESPACE_ACADO

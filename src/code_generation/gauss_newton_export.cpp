@@ -264,7 +264,7 @@ returnValue GaussNewtonExport::setup( )
 
 	feedbackStep.setReturnValue(returnValueFeedbackStep);
 
-	feedbackStep.addStatement( "int retVal;\n\n" );
+//	feedbackStep.addStatement( "int retVal;\n\n" );
 
 
 	feedbackStep.addStatement( deltaX0 == x0 - x.getRows( 0,getNX() ) );
@@ -274,7 +274,7 @@ returnValue GaussNewtonExport::setup( )
 	feedbackStep.addLinebreak( );
 
 //	feedbackStep.addFunctionCall( "solve" );
-	feedbackStep.addStatement( "retVal = (int) solve();\n" );
+//	feedbackStep.addStatement( "retVal = (int) solve();\n" );
 	feedbackStep.addLinebreak( );
 
 	if ( condenser->performsFullCondensing() == BT_TRUE )
@@ -335,7 +335,7 @@ returnValue GaussNewtonExport::setup( )
 	getKKT.setup( "getKKT" );
 	getKKT.setReturnValue( tmp );
         
-	getKKT.addStatement( "real_t tmp;\n" );
+//	getKKT.addStatement( "real_t tmp;\n" );
 
 	if ( condenser->performsFullCondensing() == BT_TRUE )
 		getKKT.addStatement( tmp == (g1^xVars) );

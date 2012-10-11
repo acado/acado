@@ -101,6 +101,8 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		integrate = ExportFunction( "integrate", rk_index, rk_eta );
 	}
 
+	integrate.addIndex( run );
+
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !hasEquidistantGrid() ) {
 		integrate.addStatement( String( "int " ) << run.getName() << ";\n" );

@@ -902,6 +902,8 @@ returnValue CondensingExport::setupEvaluation( )
 	ExportIndex run( "run1" );
 	ExportForLoop loop( run, 0,getN() );
 	
+	setupQP.addIndex( run );
+
 	if ( performsSingleShooting() == BT_FALSE ) {
 		loop.addStatement( "acadoWorkspace.rk_num = 0;\n" );
 		loop.addStatement( state.getCols( 0,getNX() ) == x.getRow( run ) );
@@ -963,7 +965,7 @@ returnValue CondensingExport::setupEvaluation( )
 	getObjectiveValue.setup( "getObjectiveValue" );
 	getObjectiveValue.setReturnValue( tmp );
 
-	getObjectiveValue.addStatement( "real_t tmp = 0;\n" );
+	getObjectiveValue.addStatement( tmp == Matrix( 0 ) );
 	getObjectiveValue.addStatement( String( "real_t tmpDx[ " ) <<  getNX() << " ];\n" ) ;
 	getObjectiveValue.addStatement( String( "real_t tmpDu[ " ) <<  getNU() << " ];\n" ) ;
 	getObjectiveValue.addLinebreak( );

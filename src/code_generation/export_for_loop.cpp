@@ -147,10 +147,10 @@ returnValue ExportForLoop::exportDataDeclaration(	FILE* file,
 													int _precision
 													) const
 {
-	if ( doLoopUnrolling == BT_FALSE )
-		loopVariable.exportDataDeclaration(file, _realString, _intString, _precision);
-	
-	ExportStatementBlock::exportDataDeclaration(file, _realString, _intString, _precision);
+//	if ( doLoopUnrolling == BT_FALSE )
+//		loopVariable.exportDataDeclaration(file, _realString, _intString, _precision);
+//
+//	ExportStatementBlock::exportDataDeclaration(file, _realString, _intString, _precision);
 
 	return SUCCESSFUL_RETURN;
 }

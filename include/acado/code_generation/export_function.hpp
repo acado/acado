@@ -293,6 +293,20 @@ class ExportFunction : public ExportStatementBlock
 		 */
 		uint getNumArguments( ) const;
 
+		/** Add a new index (local) variable to the function
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 *
+		 * */
+		returnValue addIndex(	const ExportIndex& _index );
+
+		/** Add a new local variable to the function
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 *
+		 * */
+		returnValue addVariables(	const ExportVariable& _variable );
+
 
 	//
     // PROTECTED MEMBER FUNCTIONS:
@@ -315,6 +329,8 @@ class ExportFunction : public ExportStatementBlock
 
 		ExportVariable* functionReturnValue;				/**< Return value of the function (by default, if pointer is null, return value is void). */
 		BooleanType returnAsPointer;						/**< Flag indicating whether value shall be returned as pointer. */
+
+		std::vector< ExportData* > localVariables;
 };
 
 
