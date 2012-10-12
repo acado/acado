@@ -121,8 +121,6 @@ returnValue AuxiliaryFunctionsExport::setup( )
 	ExportVariable currentTime( "current_time",(Matrix)0.0 );
 	currentTime.callByValue();
 
-	getTime.addDeclaration( currentTime );
-
 	if ( (OperatingSystem)operatingSystem == OS_WINDOWS )
 	{
 		getTime.addStatement( "LARGE_INTEGER counter, frequency;\n" );

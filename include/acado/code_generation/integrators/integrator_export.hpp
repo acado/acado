@@ -247,13 +247,13 @@ class IntegratorExport : public ExportAlgorithm
 		virtual returnValue clear( );
 
 
-		const String& getNameODE() const;
-		const String& getNameDAE() const;
-		const String& getNameOUTPUT( uint index ) const;
+		const String getNameODE() const;
+		const String getNameDAE() const;
+		const String getNameOUTPUT( uint index ) const;
 		uint   getDimOUTPUT( uint index ) const;
-		const String& getNameDiffsODE() const;
-		const String& getNameDiffsDAE() const;
-		const String& getNameDiffsOUTPUT( uint index ) const;
+		const String getNameDiffsODE() const;
+		const String getNameDiffsDAE() const;
+		const String getNameDiffsOUTPUT( uint index ) const;
 
 
     protected:

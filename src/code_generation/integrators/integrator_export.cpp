@@ -180,7 +180,7 @@ BooleanType IntegratorExport::hasEquidistantGrid( ) const{
 	return numSteps.isEmpty();
 }
 
-const String& IntegratorExport::getNameODE() const{
+const String IntegratorExport::getNameODE() const{
 	if( EXPORT_RHS ) {
 		return ODE.getName();
 	}
@@ -189,7 +189,7 @@ const String& IntegratorExport::getNameODE() const{
 	}
 }
 
-const String& IntegratorExport::getNameDAE() const{
+const String IntegratorExport::getNameDAE() const{
 	if( EXPORT_RHS ) {
 		return DAE.getName();
 	}
@@ -198,7 +198,7 @@ const String& IntegratorExport::getNameDAE() const{
 	}
 }
 
-const String& IntegratorExport::getNameOUTPUT( uint index ) const{
+const String IntegratorExport::getNameOUTPUT( uint index ) const{
 	if( EXPORT_RHS ) {
 		return OUTPUTS[index].getName();
 	}
@@ -217,7 +217,7 @@ uint IntegratorExport::getDimOUTPUT( uint index ) const{
 }
 
 
-const String& IntegratorExport::getNameDiffsODE() const{
+const String IntegratorExport::getNameDiffsODE() const{
 	if( EXPORT_RHS ) {
 		return diffs_ODE.getName();
 	}
@@ -226,7 +226,7 @@ const String& IntegratorExport::getNameDiffsODE() const{
 	}
 }
 
-const String& IntegratorExport::getNameDiffsDAE() const{
+const String IntegratorExport::getNameDiffsDAE() const{
 	if( EXPORT_RHS ) {
 		return diffs_DAE.getName();
 	}
@@ -235,7 +235,7 @@ const String& IntegratorExport::getNameDiffsDAE() const{
 	}
 }
 
-const String& IntegratorExport::getNameDiffsOUTPUT( uint index ) const{
+const String IntegratorExport::getNameDiffsOUTPUT( uint index ) const{
 	if( EXPORT_RHS ) {
 		return diffs_OUTPUTS[index].getName();
 	}

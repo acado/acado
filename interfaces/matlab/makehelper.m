@@ -172,7 +172,7 @@ function [ ] = makehelper( type, optmake, varargin )
     if (MAKE)
         fprintf (1, 'Making ACADO... \n') ;
         
-       
+        addTemplates;
         
         % C++ files
         CBINFILES = [];

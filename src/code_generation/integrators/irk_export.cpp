@@ -364,6 +364,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	ExportIndex k( "k" );
 	ExportIndex run( "run" );
 	
+
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !hasEquidistantGrid() ) {
 		integrate.addStatement( String( "int " ) << run.getName() << ";\n" );
@@ -389,10 +390,11 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 			gridVariables.push_back( gridVariable );
 		}
 	}
-	
-	integrate.addStatement( String( "int i;\n" ) ); // define the index i yourself (because of bug internal loops)
-	integrate.addStatement( String( "int j;\n" ) ); // define the index j yourself (because of bug internal loops)
-	integrate.addStatement( String( "int k;\n" ) ); // define the index k yourself (because of bug internal loops)
+
+	integrate.addIndex( i );
+	integrate.addIndex( j );
+	integrate.addIndex( k );
+	integrate.addIndex( run );
 	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
 	integrate.addStatement( rk_xxx.getCols( NX+NXA,inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
 	if( CONTINUOUS_OUTPUT ) integrate.addStatement( rk_xPrev.getCols( NX+NXA,inputDim-diffsDim ) == rk_xxx.getCols( NX+NXA,inputDim-diffsDim ) );
@@ -475,7 +477,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	loop.addStatement( loop1 );
 	if( REUSE ) loop.addStatement( String( "}\n" ) );
 	
-	
+
 	// the rest (numIts) of the Newton iterations with reuse of the Jacobian (no evaluation or factorization needed)
 	ExportForLoop loop2( i,0,numIts );
 	for( run1 = 0; run1 < numStages; run1++ ) {
