@@ -43,9 +43,8 @@
 % Author: Rien Quirynen
 % Date: 2012
 
-classdef SIMexport < handle
-    properties (SetAccess='private')
-        name = 'SIMexport';
+classdef SIMexport < acado.ExportModule
+    properties (SetAccess='protected')
         
         simIntervals;
         totalTime;
@@ -155,6 +154,7 @@ classdef SIMexport < handle
                     
                 end
                 
+                getOptions(obj, cppobj);
                 
                 % DIFFERENTIAL EQUATION
                 if (~isempty(obj.model))

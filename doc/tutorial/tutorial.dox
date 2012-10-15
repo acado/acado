@@ -8,9 +8,9 @@ The best way for getting started with the ACADO Toolkit is to work through the o
 
 <ul>
 	<li>\subpage example_001</li>
-	<li>\subpage Initialization of nonlinear optimization algorithms</li>
+	<li>\subpage example_002</li>
 	<li>\subpage Algorithmic options and numerical accuracy</li>
-	<li>\subpage Storing the results of optimization algorithms</li>
+	<li>\subpage example_004</li>
 	<li>\subpage Optimal Control of hybrid- and multi-stage processes</li>
 	<li>\subpage Optimization of differential algebraic systems (DAE)</li>
 	<li>\subpage Optimal control of discrete time systems</li>

@@ -623,7 +623,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( "      end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;\n" );
 		main.addStatement( "      time = (end-start);\n" );
 		main.addLinebreak( );
-		main.addStatement( "      fprintf( stdout, \"\\n\\n AVERAGE DURATION OF ONE INTEGRATION STEP:   %.3g μs\\n\\n\", 1e6*time/STEPS_TIMING );\n" );
+		main.addStatement( "      printf( \"\\n\\n AVERAGE DURATION OF ONE INTEGRATION STEP:   %.3g μs\\n\\n\", 1e6*time/STEPS_TIMING );\n" );
 	}
     main.addLinebreak( );
 	main.addStatement( "      return 0;\n" );
@@ -708,7 +708,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addStatement( "      		nil = fscanf( file, \"%lf\", &temp );\n" );
     main.addStatement( "      		nil = fscanf( ref, \"%lf\", &temp );\n" );
     main.addStatement( "      }\n" );
-	main.addStatement( "      fprintf( stdout, \" STATES:\\n\" );\n" );
+	main.addStatement( "      printf( \" STATES:\\n\" );\n" );
     main.addLinebreak( );
     main.addStatement( "      for( i = 1; i <= N; i++ ) {\n" );
     main.addStatement( "      		nil = fscanf( file, \"%lf\", &temp );\n" );
@@ -723,7 +723,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addStatement( "      			if( isnan(x[j]) ) maxErr = sqrt(-1);\n" );
     main.addStatement( "      		}\n" );
     main.addLinebreak( );
-    if( PRINT_DETAILS ) main.addStatement( "      		fprintf( stdout, \"MAX ERROR AT %.2f s:   %.4e \\n\", i*h, maxErr );\n" );
+    if( PRINT_DETAILS ) main.addStatement( "      		printf( \"MAX ERROR AT %.2f s:   %.4e \\n\", i*h, maxErr );\n" );
     main.addStatement( "			meanErr += maxErr;\n" );
     main.addLinebreak( );
     main.addStatement( "      		for( j = 0; j < (NX+NXA)*(NX+NU); j++ ) {\n" );
@@ -732,12 +732,12 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addStatement( "      		}\n" );
     main.addStatement( "      }\n" );
     main.addStatement( "	  meanErr = meanErr/N;\n" );
-    if( PRINT_DETAILS ) main.addStatement( "      fprintf( stdout, \"\\n\" );\n" );
-    main.addStatement( "      fprintf( stdout, \"TOTAL MEAN ERROR:   %.4e \\n\", meanErr );\n" );
-    main.addStatement( "      fprintf( stdout, \"\\n\\n\" );\n" );
+    if( PRINT_DETAILS ) main.addStatement( "      printf( \"\\n\" );\n" );
+    main.addStatement( "      printf( \"TOTAL MEAN ERROR:   %.4e \\n\", meanErr );\n" );
+    main.addStatement( "      printf( \"\\n\\n\" );\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addLinebreak( );
-		main.addStatement( (String)"      fprintf( stdout, \" OUTPUT FUNCTION " << (i+1) << ":\\n\" );\n" );
+		main.addStatement( (String)"      printf( \" OUTPUT FUNCTION " << (i+1) << ":\\n\" );\n" );
 		main.addStatement( (String)"      meanErr = 0;\n" );
 		main.addStatement( (String)"      output" << i << " = fopen(OUTPUT" << i << "_NAME,\"r\");\n" );
 		main.addStatement( (String)"      refOutput" << i << " = fopen(REF_OUTPUT" << i << "_NAME,\"r\");\n" );
@@ -755,7 +755,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 		main.addStatement( (String)"      			if( isnan(out" << i << "[j]) ) maxErr = sqrt(-1);\n" );
 		main.addStatement( "      		}\n" );
 		main.addLinebreak( );
-		if( PRINT_DETAILS ) main.addStatement( (String)"      		fprintf( stdout, \"MAX ERROR AT %.2f s:   %.4e \\n\", i*step" << i << ", maxErr );\n" );
+		if( PRINT_DETAILS ) main.addStatement( (String)"      		printf( \"MAX ERROR AT %.2f s:   %.4e \\n\", i*step" << i << ", maxErr );\n" );
 		main.addStatement( "      		meanErr += maxErr;\n" );
 		main.addLinebreak( );
 		main.addStatement( (String)"      		for( j = 0; j < NOUT" << i << "*(NX+NU); j++ ) {\n" );
@@ -764,9 +764,9 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 		main.addStatement( "      		}\n" );
 		main.addStatement( "      }\n" );
 		main.addStatement( (String)"	  meanErr = meanErr/(N*NMEAS" << i << ");\n" );
-		if( PRINT_DETAILS ) main.addStatement( "      fprintf( stdout, \"\\n\" );\n" );
-		main.addStatement( "      fprintf( stdout, \"TOTAL MEAN ERROR:   %.4e \\n\", meanErr );\n" );
-		main.addStatement( "      fprintf( stdout, \"\\n\\n\" );\n" );
+		if( PRINT_DETAILS ) main.addStatement( "      printf( \"\\n\" );\n" );
+		main.addStatement( "      printf( \"TOTAL MEAN ERROR:   %.4e \\n\", meanErr );\n" );
+		main.addStatement( "      printf( \"\\n\\n\" );\n" );
 	}
     main.addLinebreak( );
     main.addStatement( "      return 0;\n" );
@@ -819,7 +819,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	executeTest( dirName );
 	
 	// THE EVALUATION:
-	system( ((String) dirName << "/./compare").getName() );
+	system( (String(dirName) << "/./compare").getName() );
 	
 	//// DELETE THE REFERENCE OUTPUT FILES:
 	//if( !referenceProvided ) {
@@ -911,7 +911,7 @@ returnValue SIMexport::executeTest( const String& _dirName ) {
 	//sleep(2); does not compile on windows!!
 	system( ((String) String("make clean -s -C ") << _dirName).getName() );
 	system( ((String) String("make -s -C ") << _dirName).getName() );
-	system( ((String) _dirName << "/./test").getName() );
+	system( (String(_dirName) << "/./test").getName() );
 	
 	return SUCCESSFUL_RETURN;
 }

@@ -1,0 +1,200 @@
+/*!
+
+\page example_002 Initialization of Nonlinear Optimization Algorithms
+ 
+When nonlinear optimization algorithms are used to solve mathematical programs often initializations are required. In some special cases, e.g. if an optimization problem is convex, no such initialization is needed as there are guarantees that the algorithm converges. However, even for such convex problems, initial guesses that are close to the optimal solution might considerably speed up the iteration progress.
+In ACADO Toolkit the implementation methods, how initializations can be provided, can basically be devided into three main variants:
+
+\li Part 1: \ref example_002_auto
+\li Part 2: \ref example_002_text
+\li Part 3: \ref example_002_data
+
+
+\section example_002_auto Using the ACADO auto-initialization
+
+The most convenient way of initializing an algorithm is by relying on the auto-initialization. This auto-initialization routine does often work for not too difficult problems, which are either convex or not too nonlinear. In the previous example \ref example_001 "Time Optimal Control of a Rocket Flight" we have already used the auto-initialization without understanding the details. The key strategy of ACADO is to use the constraints of the problem to generate an initial guess. For example the code lines
+
+\code
+ocp.subjectTo( -1.1 <= u <=  1.1   );  
+ocp.subjectTo(  5.0 <= T <= 15.0   );
+\endcode
+
+define bounds on a control input u and the horizon lengthT. If nothing else is specified, ACADO will detetect these bounds and initialize with  u(t) = 0  for all   t ∈ [0,T]   as this is the arithmetic mean between the upper and the lower bound. Similarly, the parameter T, representing in our example the duration of the rocket flight, will be initialized with T = 10. If only one bound is specified, the corresponding variable will be initialized at this bound. If no constraint has been detected the auto-initialization routine will start with 0 as an initial guess. Similarly, the differential states are initialized by the first simulation with the specified initial values.  
+
+Let us sketch the algotithmic strategy of the auto-initialization routine as follows: 
+
+- The auto-intialization routine uses the bounds on the variables to generate initial guesses. If an upper and a lower bound is given, the initial guess will be the arithmetic mean (this contains the case of an equality bound, where upper and lower bound are equal). If only one of these bounds is specified (while the other one is ± ∞) the initial guess will be equal to this bound. If there is a variable for which no bounds are specified, the initial guess will simply be 0.
+
+- The initial values for the differential equations are also generated from their bounds. However, the intermediate values are obtained by a simulation of the differential system with the initial guess for the controls, parameters, and initial states.
+
+- Bounds on the differential states are also taken into account in order to improve the heuristic. If multiple shooting is used, the multiple shooting nodes will during the simulation be projected into the feasible box, if a state bound is violated.
+
+- In contrast to bounds, general nonlinear path constraints are not regarded by the auto-initialization.
+
+Summarizing the strategy, all bounds on the variables are used to improve the initial guess. Thus, it is recommended to provide reasonable bounds for the case that auto-initialization should be used. 
+
+<em>Advantages of the auto-initialization: </em>.
+- The main advantage of the auto-initialization is that it is very convenient to use as we do not need to provide any information about the problem - beside the problem itself.
+
+- The bounds on the variables in an optimal control problem do often specify the domain in which the model has a physical meaning or interpretation. In this case, the auto-initialization leads to a kind of natural initialization.
+
+<em>Disadvantages of the auto-initialization: </em>.
+- The auto-initialization is only a heuristic which does not work in general. For nonlinear problems there is no guarantee that the heuristic leads to a convergence of the optimization routine.
+
+- If one of the bounds is changed, the initialization also changes. Thus, the algorithm might work for a given bound while it fails if this bound is changed - even if the bound is never active and would not affect the optimal solution.
+
+
+\section example_002_text Loading the initialization from a text file
+
+As an alternative to the auto-initialization it is possible to specify initial values in a simple text file. In ACADO Toolkit convenient reading routines are implemented. In order to demonstrate an example we assume that we have defined an optimal control problem "ocp" as it as been discussed in the previous tutorial \ref example_001. Now, we try to solve this optimal control problem via the following lines of code:
+
+\code
+OptimizationAlgorithm algorithm(ocp);
+
+algorithm.initializeDifferentialStates( "x.txt" );  
+algorithm.initializeControls          ( "u.txt" );
+algorithm.initializeParameters        ( "p.txt" );
+
+algorithm.solve();
+\endcode
+
+Here, the initialization for the differential states, controls, and parameters are assumed to be stored in separate files, which contain the corresponding time-series. For example these files could read as follows: 
+
+The file "x.txt":
+
+\code
+   time        s          v         m
+
+   0.00e+00  0.00e+00  0.00e+00  1.00e+00   
+   1.00e-01  2.99e-01  7.90e-01  9.90e-01 
+   2.00e-01  1.13e+00  1.42e+00  9.81e-01 
+   3.00e-01  2.33e+00  1.69e+00  9.75e-01 
+   4.00e-01  3.60e+00  1.70e+00  9.73e-01 
+   5.00e-01  4.86e+00  1.70e+00  9.70e-01 
+   6.00e-01  6.13e+00  1.70e+00  9.68e-01 
+   7.00e-01  7.39e+00  1.70e+00  9.65e-01 
+   8.00e-01  8.66e+00  1.70e+00  9.63e-01 
+   9.00e-01  9.67e+00  8.98e-01  9.58e-01 
+   1.00e+00  1.00e+01  0.00e+00  9.49e-01
+\endcode
+
+The file "u.txt":
+
+\code
+     time       u
+
+   0.00e+00  1.10e+00   
+   1.00e-01  1.10e+00
+   2.00e-01  1.10e+00
+   2.99e-01  5.78e-01
+   4.00e-01  5.78e-01
+   5.00e-01  5.78e-01
+   6.00e-01  5.78e-01
+   7.00e-01  5.78e-01
+   8.00e-01 -2.12e-01
+   9.00e-01 -1.10e+00
+   1.00e+00 -1.10e+00
+\endcode
+
+The file "p.txt":
+
+\code
+    time         T
+
+   0.00e+00  7.44e+00   
+\endcode
+
+Actually, this tutorial already describes the most difficult case: first, the time T is optimized in our example, such that the time series for the states and controls have to be rescaled to [0,1]. And second, the number of controls in the file "u.txt" is 11 - but in our example "Time Optimal Control of a Rocket Flight" we have used the default settings, i.e. 20 control intervals. Note that the ACADO toolkit does not require the files to be consistent, i.e. in the above case the missing control and state inititalizations are automatically generated by linear interpolation. Fortunately, having understood this difficult example, we have already understood everything that needs to known about initialization via text files. 
+
+Let us summarize the six important key concepts regarding the initialization via text files:
+
+- The text file for the initialization should contain a time series with the values of the time in the first column and the values of the states, controls, or parameters respectively in the remaining columns.
+
+- The number of rows, i.e. the number of time points at which an initial guess is specified, is not required to be equal to the number of control or discretization intervals of the algorithm. If there are some time points missing the corresponding values will automatically be generated by linear interpolation. In particular, the file "u.txt" could in this example also contain a different number of rows than the file "x.txt", for example.
+
+- The files may contain characters like the word "time" in our examples. ACADO Toolkit will simply ignore every character in the text which can not possibly be interpreted as a number. On the one hand, this allows to add comments to a text file; but on the other hand, we should be careful, as there might be a character in our comment which can be interpreted as a number---possibly leading to unwanted behaviour.
+
+- It is possible to combine different initialization methods. In the above situation we could for example only provide the file "u.txt". In this case, the control input u would be initialized from the file, while the initial guesses for the state vector x and the horizon length T are generated by the automatic initialization strategy.
+
+- The time points in the first column of the file do not need to be equidistant, but they are required to be strictly monotonically increasing.
+
+- For the case that the duration is a parameter to be optimized, the time series for the states and controls have to be rescaled to [0,1]. This convention is on the first view a little confusing. However, just assume that the parameters are not initialized by the user, while a time series for the control is specified. In this case, ACADO would automatically choose a horizon length T which might not be consistent with the control initialization... Thus, it has turned out that it is in fact better to introduce the convention that the time series are rescaled in order to scope with this case.
+
+Finally, we discuss the general advantages and disadvantages of the initialization method via text files: 
+
+<em>Advantages of the initialization via text files: </em>
+
+- The initialization via text files allows to exchange the initial guess without re-compiling the code as the file is read at run time.
+
+- The initialization via text files decouples the initialization of the algorithm with the formulation of the mathematical problem. For example if a bound on a variable changes within the problem, the auto-initialization would be affected, while the text file remains of course the same.
+
+<em>Disadvantages of the initialization via text files: </em>
+
+- We need a way to generate the text file with some method - e.g. with another program like MATLAB. Writing a text file by hand might be quite some work.
+
+- If an optimization problem should be initialized for many times with many different initialization (e.g. in an online context), it might not be a good idea to use text files, as reading the txt-files might be too slow. Moreover, if we like to use the ACADO Toolkit from or within another program, it is usually - depending on the situation - a rather bad design of an interface to communicate the initialization via files.
+
+
+\section example_002_data Using ACADO data structures for the initialization
+
+The third way of initializing a nonlinear optimization algorithm is based on the data structures which are available in ACADO Toolkit. The class which is needed for this purpose is called "VariablesGrid". This data class is suitable to store time series of vector valued functions. Let us explain this concept by considering the following piece of code:
+
+\code
+
+  OptimizationAlgorithm algorithm(ocp);
+
+  Grid timeGrid( 0.0, 1.0, 11 );
+
+  VariablesGrid   x_init( 3, timeGrid );
+  VariablesGrid   u_init( 1, timeGrid );
+  VariablesGrid   p_init( 1, timeGrid );
+
+  x_init(0,0 ) = 0.00e+00; x_init(1,0 ) = 0.00e+00; x_init(2,0 ) = 1.00e+00;   
+  x_init(0,1 ) = 2.99e-01; x_init(1,1 ) = 7.90e-01; x_init(2,1 ) = 9.90e-01; 
+  x_init(0,2 ) = 1.13e+00; x_init(1,2 ) = 1.42e+00; x_init(2,2 ) = 9.81e-01; 
+  x_init(0,3 ) = 2.33e+00; x_init(1,3 ) = 1.69e+00; x_init(2,3 ) = 9.75e-01; 
+  x_init(0,4 ) = 3.60e+00; x_init(1,4 ) = 1.70e+00; x_init(2,4 ) = 9.73e-01; 
+  x_init(0,5 ) = 4.86e+00; x_init(1,5 ) = 1.70e+00; x_init(2,5 ) = 9.70e-01; 
+  x_init(0,6 ) = 6.13e+00; x_init(1,6 ) = 1.70e+00; x_init(2,6 ) = 9.68e-01; 
+  x_init(0,7 ) = 7.39e+00; x_init(1,7 ) = 1.70e+00; x_init(2,7 ) = 9.65e-01; 
+  x_init(0,8 ) = 8.66e+00; x_init(1,8 ) = 1.70e+00; x_init(2,8 ) = 9.63e-01; 
+  x_init(0,9 ) = 9.67e+00; x_init(1,9 ) = 8.98e-01; x_init(2,9 ) = 9.58e-01; 
+  x_init(0,10) = 1.00e+01; x_init(1,10) = 0.00e+00; x_init(2,10) = 9.49e-01;
+
+  u_init(0,0 ) =  1.10e+00;   
+  u_init(0,1 ) =  1.10e+00;
+  u_init(0,2 ) =  1.10e+00;
+  u_init(0,3 ) =  5.78e-01;
+  u_init(0,4 ) =  5.78e-01;
+  u_init(0,5 ) =  5.78e-01;
+  u_init(0,6 ) =  5.78e-01;
+  u_init(0,7 ) =  5.78e-01;
+  u_init(0,8 ) = -2.12e-01;
+  u_init(0,9 ) = -1.10e+00;
+  u_init(0,10) = -1.10e+00;
+
+  p_init(0,0 ) =  7.44e+00;
+
+  algorithm.initializeDifferentialStates( x_init );
+  algorithm.initializeControls          ( u_init );
+  algorithm.initializeParameters        ( p_init );
+
+  algorithm.solve();
+
+\endcode
+
+Note that the above example is equivalent to the previous example with the text files. The only difference is that the initialization is not read-in but directly hard-coded in the C++ file. The class Grid is constructed with three arguments: the line   "Grid timeGrid( 0.0, 1.0, 11 ); "   constructs a grid with 11 time points that are equally distributed over the interval [0.0,1.0]. Moreover, the constructor of the VariablesGrid gets the dimensions of the function and the sampling time grid (in our example the differential states have the dimension 3, while the controls and parameters have both the dimension 1). The rest is the same as for the initialization with text files. 
+
+<em>Advantages of the initialization via ACADO data structures: </em>
+
+- The main advantage of the initialization with the ACADO data structure "VariablesGrid" is that no files are needed. This method is especially useful if the code should be used from another program or in an online context where a communication via files might be too slow.
+
+<em>Disadvantages of the initialization via ACADO data structures: </em>
+
+- The initialization is not read at run-time. I.e., if we like to change the initialization, the code must be re-compiled.
+
+Next example: \ref example_003
+
+*/
+
+

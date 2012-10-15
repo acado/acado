@@ -104,6 +104,30 @@ classdef DifferentialEquation < acado.Function
             end
             
         end
+        
+        function obj = subsasgn(obj, ind, rhs)
+            indices = cell2mat(ind.subs);
+            if(strcmp(ind.subs,':'))
+               indices = 1:length(rhs); 
+            end
+            
+            if(~strcmp(ind.type,'()'))
+                error('ERROR: only integer subscripts are currently supported.');
+            end
+            
+            if (~isempty(obj.matlabODE_fcnHandle) || ~isempty(obj.matlabDAE_fcnHandle) || ~isempty(obj.cfunction_file))
+                error('Only _one_ Matlab DAE or ODE can be linked.');
+            end
+            
+            for i = 1:length(indices)
+                if (isa(rhs(i), 'acado.Expression'))
+                
+                    obj.differentialList{indices(i)} = rhs(i);
+                else
+                    error('ERROR: Invalid DifferentialEquation.add call. <a href="matlab: help acado.DifferentialEquation.add">help acado.DifferentialEquation.add</a>');
+                end
+            end
+        end
     end
     
 end
