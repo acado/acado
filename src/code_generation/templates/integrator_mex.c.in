@@ -1,5 +1,4 @@
 #include "mex.h"
-#include "acado.h"
 
 /* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
 /* --------------------------------------------------- */

@@ -24,7 +24,8 @@
 %    Date: 2012
 % 
 
-templates = {'integrator_mex.c.in'};
+templateFiles = {'integrator_mex.c.in', 'rhs_mex.c.in'};
+templates = {'INTEGRATOR_MEX_TEMPLATE', 'RHS_MEX_TEMPLATE'};
 
 fid = fopen('../../include/acado/code_generation/templates/templates.hpp', 'w+');
 
@@ -32,7 +33,7 @@ fprintf(fid, '%s \n', ' #ifndef ACADO_TOOLKIT_TEMPLATES_HPP');
 fprintf(fid, '%s \n\n', ' #define ACADO_TOOLKIT_TEMPLATES_HPP');
 
 for i = 1:length(templates)
-    fprintf(fid, '%s', sprintf(' #define INTEGRATOR_MEX_TEMPLATE "%s/../../src/code_generation/templates/%s" \n\n', pwd, char(templates(i))));
+    fprintf(fid, '%s', sprintf(' #define %s "%s/../../src/code_generation/templates/%s" \n\n', char(templates(i)), pwd, char(templateFiles(i))));
 end
 
 fprintf(fid, '%s \n', ' #endif // ACADO_TOOLKIT_TEMPLATES_HPP');

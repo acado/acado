@@ -37,7 +37,7 @@
 % 
 classdef Vector < acado.VectorspaceElement    
     properties
-       
+       dim = 0;
     end
     
     methods
@@ -51,8 +51,10 @@ classdef Vector < acado.VectorspaceElement
                 [m n] = size(val);
                 
                 if (m == 1)
+                    obj.dim = n;
                     obj.items = val;
                 elseif (n == 1)
+                    obj.dim = m;
                     obj.items = val';
                 else
                     error('Input should be a vector');

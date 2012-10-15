@@ -129,11 +129,17 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		int generateMatlabInterface;
 		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
 		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
-			String matlabInterface( dirName );
-			matlabInterface << "/integrate.c";
-			ExportTemplatedFile exportMexFun( INTEGRATOR_MEX_TEMPLATE, matlabInterface, commonHeaderName,_realString,_intString,_precision );
+			String integrateInterface( dirName );
+			integrateInterface << "/integrate.c";
+			ExportTemplatedFile exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
 			exportMexFun.configure();
 			exportMexFun.exportCode();
+
+			String rhsInterface( dirName );
+			rhsInterface << "/rhs.c";
+			ExportTemplatedFile exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
+			exportMexFun2.configure();
+			exportMexFun2.exportCode();
 		}
 	}
 
@@ -723,7 +729,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addStatement( "      			if( isnan(x[j]) ) maxErr = sqrt(-1);\n" );
     main.addStatement( "      		}\n" );
     main.addLinebreak( );
-    if( PRINT_DETAILS ) main.addStatement( "      		printf( \"MAX ERROR AT %.2f s:   %.4e \\n\", i*h, maxErr );\n" );
+    if( PRINT_DETAILS ) main.addStatement( "      		printf( \"MAX ERROR AT %.3f s:   %.4e \\n\", i*h, maxErr );\n" );
     main.addStatement( "			meanErr += maxErr;\n" );
     main.addLinebreak( );
     main.addStatement( "      		for( j = 0; j < (NX+NXA)*(NX+NU); j++ ) {\n" );
@@ -755,7 +761,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 		main.addStatement( (String)"      			if( isnan(out" << i << "[j]) ) maxErr = sqrt(-1);\n" );
 		main.addStatement( "      		}\n" );
 		main.addLinebreak( );
-		if( PRINT_DETAILS ) main.addStatement( (String)"      		printf( \"MAX ERROR AT %.2f s:   %.4e \\n\", i*step" << i << ", maxErr );\n" );
+		if( PRINT_DETAILS ) main.addStatement( (String)"      		printf( \"MAX ERROR AT %.3f s:   %.4e \\n\", i*step" << i << ", maxErr );\n" );
 		main.addStatement( "      		meanErr += maxErr;\n" );
 		main.addLinebreak( );
 		main.addStatement( (String)"      		for( j = 0; j < NOUT" << i << "*(NX+NU); j++ ) {\n" );
@@ -820,13 +826,6 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	
 	// THE EVALUATION:
 	system( (String(dirName) << "/./compare").getName() );
-	
-	//// DELETE THE REFERENCE OUTPUT FILES:
-	//if( !referenceProvided ) {
-		//for( i = 0; i < _refOutputFiles.size(); i++ ) {
-			//system( ((String) "rm " << _refOutputFiles[i]).getName() );
-		//}
-	//}
 	
 	return SUCCESSFUL_RETURN;
 }

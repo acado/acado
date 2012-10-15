@@ -55,6 +55,11 @@ classdef AcadoMatlab < handle
             obj.instructionList{length(obj.instructionList)+1} = set;
         end
         
+        % Remove last instruction
+        function removeLastInstruction(obj)
+            obj.instructionList = obj.instructionList(1:end-1);
+        end
+        
         % Add time
         function addT(obj, set)
             if (~isempty(obj.t))
