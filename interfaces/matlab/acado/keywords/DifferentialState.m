@@ -37,7 +37,7 @@ function DifferentialState( varargin )
         error( 'Syntax is: DifferentialState x' );
 
     else
-
+        
         for k = 1 : nargin,
             VAR_NAME = varargin{k};
             VAR_ASSIGN = acado.DifferentialState(varargin{k});

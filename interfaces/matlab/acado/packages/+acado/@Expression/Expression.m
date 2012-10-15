@@ -39,8 +39,6 @@ classdef Expression < handle
         end
         
         function r = dot(obj1, b, dim)
-            obj1
-            %             r = obj1;
             r = acado.Dot(obj1);
         end
         
