@@ -1,6 +1,6 @@
 %Base class for all variables within the symbolic expressions family.
-% The class Expression serves as a base class for all symbolic variables within the 
-% symbolic expressions family. Moreover, the Expression class defines all kind of 
+% The class Expression serves as a base class for all symbolic variables within the
+% symbolic expressions family. Moreover, the Expression class defines all kind of
 % matrix and vector operations on a symbolic level.
 %
 %  Licence:
@@ -27,8 +27,8 @@
 %
 %    Author: David Ariens
 %    Date: 2010
-% 
-classdef Expression < handle   
+%
+classdef Expression < handle
     properties
         name;
     end
@@ -39,6 +39,8 @@ classdef Expression < handle
         end
         
         function r = dot(obj1, b, dim)
+            obj1
+            %             r = obj1;
             r = acado.Dot(obj1);
         end
         
@@ -50,7 +52,7 @@ classdef Expression < handle
         
         function r = mtimes(obj1,obj2)    % *
             r = acado.Product(obj1,obj2);
-        end 
+        end
         
         function r = plus(obj1,obj2)      % +
             r = acado.Addition(obj1,obj2);
@@ -127,11 +129,11 @@ classdef Expression < handle
         function r = log(obj1)            % log
             r = acado.Logarithm(obj1);
         end
-    
-	    function s = toString(obj)
-	        s = obj.name; 
-        end        
-
+        
+        function s = toString(obj)
+            s = obj.name;
+        end
+        
         function result = checkDoubleVectorMatrix(obj, r)
             
             if (isa(r, 'acado.MexInputVector'))
@@ -139,10 +141,10 @@ classdef Expression < handle
                 
             elseif(isa(r, 'acado.MexInputMatrix'))
                 result = acado.Matrix(r);
-            
+                
             elseif (isa(r, 'acado.MexInput'))
                 result = acado.DoubleConstant(r);
-            
+                
             elseif (isa(r, 'acado.Expression'))
                 result = r;
                 
@@ -157,10 +159,24 @@ classdef Expression < handle
                     result = acado.Matrix(r);
                 end
             end
-    
-        end  
+            
+        end
+        
+        function C = vertcat(varargin)
+            C = {};
+            for k = 1 : nargin,
+                C{k} = varargin{k};
+            end
+        end
+        
+        function C = horzcat(varargin)
+            C = {};
+            for k = 1 : nargin,
+                C{k} = varargin{k};
+            end
+        end
     end
-
+    
     
 end
 

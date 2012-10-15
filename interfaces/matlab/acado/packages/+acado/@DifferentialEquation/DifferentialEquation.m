@@ -118,11 +118,12 @@ classdef DifferentialEquation < acado.Function
             if (~isempty(obj.matlabODE_fcnHandle) || ~isempty(obj.matlabDAE_fcnHandle) || ~isempty(obj.cfunction_file))
                 error('Only _one_ Matlab DAE or ODE can be linked.');
             end
-            
+            global ACADO_
             for i = 1:length(indices)
-                if (isa(rhs(i), 'acado.Expression'))
-                
-                    obj.differentialList{indices(i)} = rhs(i);
+                if (isa(rhs{i}, 'acado.Equals'))
+                    obj.differentialList{indices(i)} = rhs{i};
+                elseif (isa(rhs{i}, 'acado.Expression'))
+                    obj.differentialList{indices(i)} = acado.Equals(acado.Dot(ACADO_.helper.x{indices(i)}), rhs{i});
                 else
                     error('ERROR: Invalid DifferentialEquation.add call. <a href="matlab: help acado.DifferentialEquation.add">help acado.DifferentialEquation.add</a>');
                 end
