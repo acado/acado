@@ -1,0 +1,40 @@
+#include "mex.h"
+
+/* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
+/* --------------------------------------------------- */
+   ACADOvariables acadoVariables;
+   ACADOworkspace acadoWorkspace;
+
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+
+    int i;
+    int Nx, Nt;
+    real_t *x, *f;
+    
+    Nt = mxGetM(prhs[0])*mxGetN(prhs[0]);
+    Nx = mxGetM(prhs[1])*mxGetN(prhs[1]);
+    
+    if (nrhs != 2) {
+        mexErrMsgTxt( "Check the number of input arguments !!" );
+    }
+    if (nlhs > 1) {
+        mexErrMsgTxt( "Check the number of output arguments !!" );
+    }
+    if (Nt != 1) {
+        mexErrMsgTxt( "Check the dimension of the first input argument !!" );
+    }
+    if (Nx != ACADO_NX+ACADO_NU) {
+        mexErrMsgTxt( "Check the dimension of the second input argument !!" );
+    }
+    
+    x = mxGetPr(prhs[1]);
+    
+    plhs[0] = mxCreateDoubleMatrix(ACADO_NX+ACADO_NU,1,mxREAL);
+    f = mxGetPr(plhs[0]);
+    
+    acado_rhs( x,f );
+    
+    for( i = 0; i < ACADO_NU; ++i ) {
+        f[ACADO_NX + i] = 0;
+    }
+}

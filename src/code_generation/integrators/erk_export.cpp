@@ -132,7 +132,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
 		loop.addStatement( rk_xxx.getCols( 0,rhsDim ) == rk_eta.getCols( 0,rhsDim ) + Ah.getRow(run1)*rk_kkk );
-		loop.addFunctionCall( "acado_rhs_ext", rk_xxx,rk_kkk.getAddress(run1,0) );
+		loop.addFunctionCall( diffs_ODE.getName(), rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
 	loop.addStatement( rk_ttt += Matrix(h) );
@@ -203,7 +203,16 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	// no free parameters yet!
 	// f << forwardDerivative( rhs, x ) * Gp + forwardDerivative( rhs, p );
 
-	return ODE.init( f_ODE,"acado_rhs",NX,0,NU ) & diffs_ODE.init( f,"acado_rhs_ext",NX*(1+NX+NU),0,NU );
+	int matlabInterface;
+	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
+	if (matlabInterface) {
+		return ODE.init( f_ODE,"acado_rhs",NX,0,NU ) & diffs_ODE.init( f,"acado_rhs_ext",NX*(1+NX+NU),0,NU );
+	}
+	else {
+		return diffs_ODE.init( f,"acado_rhs_ext",NX*(1+NX+NU),0,NU );
+	}
+
+
 }
 
 
@@ -234,8 +243,13 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 														) const
 {
 	declarations.addDeclaration( integrate );
-	declarations.addDeclaration( ODE );
 	declarations.addDeclaration( diffs_ODE );
+
+	int matlabInterface;
+	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
+	if (matlabInterface) {
+		declarations.addDeclaration( ODE );
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -250,9 +264,14 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 // 	if ( (PrintLevel)printLevel >= HIGH ) 
 // 		acadoPrintf( "--> Exporting %s... ",fileName.getName() );
 
-	code.addFunction( ODE );
 	code.addFunction( diffs_ODE );
 	code.addFunction( integrate );
+
+	int matlabInterface;
+	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
+	if (matlabInterface) {
+		code.addFunction( ODE );
+	}
 
 // 	if ( (PrintLevel)printLevel >= HIGH ) 
 // 		acadoPrintf( "done.\n" );
