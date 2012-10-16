@@ -912,9 +912,6 @@ returnValue CondensingExport::setupEvaluation( )
 	// no free parameters implemented yet!
 	uint uIdx = getNX() * ( 1+getNX() );
 	uint pIdx = getNX() * ( 1+getNX()+getNU() );
-	loop.addStatement( state.getCols( getNX(),uIdx ) == idX.makeVector().transpose() );
-	loop.addStatement( state.getCols( uIdx,pIdx ) == zeroXU.makeVector().transpose() );
-
 	uIdx = pIdx;
 	pIdx = pIdx + getNU();
 	loop.addStatement( state.getCols( uIdx,pIdx ) == u.getRow( run ) );
