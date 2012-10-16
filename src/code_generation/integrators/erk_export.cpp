@@ -132,7 +132,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
 		loop.addStatement( rk_xxx.getCols( 0,rhsDim ) == rk_eta.getCols( 0,rhsDim ) + Ah.getRow(run1)*rk_kkk );
-		loop.addFunctionCall( "acado_rhs", rk_xxx,rk_kkk.getAddress(run1,0) ); 
+		loop.addFunctionCall( "acado_rhs_ext", rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
 	loop.addStatement( rk_ttt += Matrix(h) );
@@ -182,9 +182,10 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	// no free parameters yet!
 	// DifferentialState Gp(NX,NP);
 
-	DifferentialEquation f;
+	DifferentialEquation f, f_ODE;
 
 	// add usual ODE
+	f_ODE << rhs;
 	f << rhs;
 /*	if ( f.getDim() != f.getNX() )
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
@@ -202,7 +203,7 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	// no free parameters yet!
 	// f << forwardDerivative( rhs, x ) * Gp + forwardDerivative( rhs, p );
 
-	return ODE.init( f,"acado_rhs",NX*(1+NX+NU),0,NU );
+	return ODE.init( f_ODE,"acado_rhs",NX,0,NU ) & diffs_ODE.init( f,"acado_rhs_ext",NX*(1+NX+NU),0,NU );
 }
 
 
@@ -218,7 +219,7 @@ returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 													ExportStruct dataStruct
 													) const
 {
-	declarations.addDeclaration( ODE.getGlobalExportVariable(),dataStruct );
+	declarations.addDeclaration( diffs_ODE.getGlobalExportVariable(),dataStruct );
 	declarations.addDeclaration( rk_ttt,dataStruct );
 	declarations.addDeclaration( rk_xxx,dataStruct );
 	declarations.addDeclaration( rk_kkk,dataStruct );
@@ -234,6 +235,7 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 {
 	declarations.addDeclaration( integrate );
 	declarations.addDeclaration( ODE );
+	declarations.addDeclaration( diffs_ODE );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -249,6 +251,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 // 		acadoPrintf( "--> Exporting %s... ",fileName.getName() );
 
 	code.addFunction( ODE );
+	code.addFunction( diffs_ODE );
 	code.addFunction( integrate );
 
 // 	if ( (PrintLevel)printLevel >= HIGH ) 
