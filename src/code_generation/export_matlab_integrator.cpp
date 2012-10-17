@@ -73,7 +73,7 @@ ExportMatlabIntegrator& ExportMatlabIntegrator::operator=(	const ExportMatlabInt
 	return *this;
 }
 
-returnValue ExportMatlabIntegrator::configure(	const uint numOutputs
+returnValue ExportMatlabIntegrator::configure(	const uint numOutputs, const uint numConsIts
 												)
 {	
 	if( numOutputs > 4 ) {
@@ -81,6 +81,7 @@ returnValue ExportMatlabIntegrator::configure(	const uint numOutputs
 	}
 	// Configure the dictionary
 	dictionary[ "@NUM_OUTPUTS@" ] =  std::string(String(numOutputs).getName());
+	dictionary[ "@CONSISTENCY_ITS@" ] =  std::string(String(numConsIts).getName());
 	
 	// And then fill a template file
 	fillTemplate();

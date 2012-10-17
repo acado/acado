@@ -352,6 +352,7 @@ enum OptionsName
 	IMPLICIT_INTEGRATOR_NUM_ALG_ITS,			/**< This is the performed number of Newton iterations in the implicit integrator to make the algebraic states consistent. */
 	IMPLICIT_INTEGRATOR_NUM_ALG_ITS_INIT,		/**< This is the performed number of Newton iterations in the implicit integrator for the initialization of the algebraic states. */
 	UNROLL_LINEAR_SOLVER,						/**< This option of the boolean type determines the unrolling of the linear solver (no unrolling recommended for larger systems). */
+	CONSISTENCY_ITERATIONS,						/**< This option specifies the number of Newton iterations, performed to make the initial values of the algebraic states consistent with those of the differential states. */
 	OPT_UNKNOWN,
 	MAX_NUM_INTEGRATOR_STEPS,
 	NUM_INTEGRATOR_STEPS,

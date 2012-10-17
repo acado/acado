@@ -201,8 +201,10 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 
 	acadoHeader.addComment( "Number of control intervals" );
 	acadoHeader.addStatement( (String)"#define ACADO_N   " << N << "\n");
-	acadoHeader.addComment( "Number of states" );
+	acadoHeader.addComment( "Number of differential states" );
 	acadoHeader.addStatement( (String)"#define ACADO_NX  " << NX << "\n" );
+	acadoHeader.addComment( "Number of algebraic states" );
+	acadoHeader.addStatement( (String)"#define ACADO_NXA  " << NXA << "\n" );
 	acadoHeader.addComment( "Number of controls" );
 	acadoHeader.addStatement( (String)"#define ACADO_NU  " << NU << "\n" );
 	acadoHeader.addComment( "Number of parameters" );
@@ -368,6 +370,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( LINEAR_ALGEBRA_SOLVER,       GAUSS_LU        );
 	addOption( UNROLL_LINEAR_SOLVER,       	BT_FALSE	    );
 	addOption( NUM_INTEGRATOR_STEPS,        30              );
+	addOption( CONSISTENCY_ITERATIONS,      2               );
 	addOption( IMPLICIT_INTEGRATOR_MODE,	IFTR 			);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	3				);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS_INIT, 0			);

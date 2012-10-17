@@ -1160,7 +1160,7 @@ returnValue ImplicitRungeKuttaExport::addDAEFunctions( ExportStatementBlock& cod
 	makeStatesConsistent.addFunctionCall( daeSolver->getNameSolveFunction(),rk_alg_A.getAddress(0,0),rk_alg_b.getAddress(0,0),rk_sol.getAddress(0,0) );
 	makeStatesConsistent.addStatement( rk_xxx.getCols( NX,NX+NXA ) += rk_sol.getSubMatrix( 0,1,0,NXA ) );
 	
-	
+	makeStatesConsistent.addIndex( i );
 	ExportForLoop loop0( i,0,numAlgItsInit-1 );
 	// update rk_alg_b:
 	loop0.addFunctionCall( getNameDAE(), rk_xxx, rk_rhsTemp.getAddress(0,NX) );
@@ -1176,7 +1176,6 @@ returnValue ImplicitRungeKuttaExport::addDAEFunctions( ExportStatementBlock& cod
 	
 	
 	// The function getNormConsistency:
-	getNormConsistency.addStatement( String( "real_t norm;\n" ) );
 	getNormConsistency.addStatement( rk_xxx.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
 	getNormConsistency.addStatement( rk_xxx.getCols( NX+NXA,inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
 	

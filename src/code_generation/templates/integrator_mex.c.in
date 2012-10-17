@@ -1,5 +1,6 @@
 #include "mex.h"
 #define NUM_OUTPUTS @NUM_OUTPUTS@
+#define CONSISTENCY_ITS @CONSISTENCY_ITS@
 
 /* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
 /* --------------------------------------------------- */
@@ -8,9 +9,9 @@
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
-    int i, j, k, N;
-    real_t *x, *xnext, *sensX, *sensU;
-    real_t next[ACADO_NX*(1+ACADO_NX+ACADO_NU)+ACADO_NU];
+    int i, j, k, Nx, Nu;
+    real_t *x, *u, *xnext, *sensX, *sensU;
+    real_t next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU];
     const char *fieldnames[3];  
     
     #if NUM_OUTPUTS > 0
@@ -43,26 +44,38 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     fieldnames[1] = "sensX";  
     fieldnames[2] = "sensU"; 
     
-    N = mxGetM(prhs[0])*mxGetN(prhs[0]);
-    
-    if (nrhs != 1) {
+    if (nrhs != 2) {
         mexErrMsgTxt( "Check the number of input arguments !" );
     }
     if (nlhs > (1+NUM_OUTPUTS)) {
         mexErrMsgTxt( "Check the number of output arguments !" );
     }
-    if (N != ACADO_NX+ACADO_NU) {
-        mexErrMsgTxt( "Check the dimension of the input argument !" );
+    
+    Nx = mxGetM(prhs[0])*mxGetN(prhs[0]);
+    Nu = mxGetM(prhs[1])*mxGetN(prhs[1]);
+    
+    if (Nx != ACADO_NX+ACADO_NXA) {
+        mexErrMsgTxt( "Check the dimension of the first input argument !" );
+    }
+    if (Nu != ACADO_NU) {
+        mexErrMsgTxt( "Check the dimension of the second input argument !" );
     }
     
     x = mxGetPr(prhs[0]);
+    u = mxGetPr(prhs[1]);
     
-    for( i = 0; i < ACADO_NX; ++i ) {
+    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
         next[i] = x[i];
     }
     for( i = 0; i < ACADO_NU; ++i ) {
-        next[ACADO_NX*(1+ACADO_NX+ACADO_NU)+i] = x[ACADO_NX+i];
+        next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
     }
+    
+    #if CONSISTENCY_ITS > 0
+          for( i = 0; i < CONSISTENCY_ITS; i++ ) {
+                makeStatesConsistent(next);
+          }
+    #endif
     
     #if NUM_OUTPUTS > 3
         integrate( next, out1, out2, out3, out4 );
@@ -77,27 +90,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     #endif
     
     plhs[0] = mxCreateStructMatrix(1, 1, 3, fieldnames);
-    mxSetField(plhs[0],0,fieldnames[0],mxCreateDoubleMatrix(ACADO_NX,1,mxREAL));
-    mxSetField(plhs[0],0,fieldnames[1],mxCreateDoubleMatrix(ACADO_NX,ACADO_NX,mxREAL));
-    mxSetField(plhs[0],0,fieldnames[2],mxCreateDoubleMatrix(ACADO_NX,ACADO_NU,mxREAL));
+    mxSetField(plhs[0],0,fieldnames[0],mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,1,mxREAL));
+    mxSetField(plhs[0],0,fieldnames[1],mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,ACADO_NX,mxREAL));
+    mxSetField(plhs[0],0,fieldnames[2],mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,ACADO_NU,mxREAL));
     
     xnext = mxGetPr(mxGetField(plhs[0],0,fieldnames[0]));
     sensX = mxGetPr(mxGetField(plhs[0],0,fieldnames[1]));
     sensU = mxGetPr(mxGetField(plhs[0],0,fieldnames[2]));
     
-    for( i = 0; i < ACADO_NX; ++i ) {
+    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
         xnext[i] = next[i];
     }
     
     /* NOTE: Matlab is column-major, while C is row-major order !! */
-    for( i = 0; i < ACADO_NX; ++i ) {
+    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
         for( j = 0; j < ACADO_NX; ++j ) {
-            sensX[j*ACADO_NX+i] = next[ACADO_NX+i*ACADO_NX+j];
+            sensX[j*(ACADO_NX+ACADO_NXA)+i] = next[ACADO_NX+ACADO_NXA+i*ACADO_NX+j];
         }
     }
-    for( i = 0; i < ACADO_NX; ++i ) {
+    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
         for( j = 0; j < ACADO_NU; ++j ) {
-            sensU[j*ACADO_NX+i] = next[ACADO_NX*(1+ACADO_NX)+i*ACADO_NU+j];
+            sensU[j*(ACADO_NX+ACADO_NXA)+i] = next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX)+i*ACADO_NU+j];
         }
     }
     

@@ -129,10 +129,14 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		int generateMatlabInterface;
 		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
 		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
+			int numConsIts;
+			get( CONSISTENCY_ITERATIONS, numConsIts );
+			if( NXA == 0 ) numConsIts = 0;
+
 			String integrateInterface( dirName );
 			integrateInterface << "/integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure(dim_outputs.size());
+			exportMexFun.configure(dim_outputs.size(), numConsIts);
 			exportMexFun.exportCode();
 
 			String rhsInterface( dirName );
