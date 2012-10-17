@@ -240,6 +240,9 @@ class ExportModule : public UserInteraction
 		uint NP;							/**< Number of parameters. */
 		uint N;								/**< Number of control intervals. */
 		
+		std::vector<uint> dim_outputs;		/**< Dimensions of the different output functions. */
+		std::vector<uint> num_meas;			/**< Number of measurements for the different output functions. */
+
 		String commonHeaderName;			/**< Name of common header file. */
 };
 

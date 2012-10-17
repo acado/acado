@@ -131,8 +131,8 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
 			String integrateInterface( dirName );
 			integrateInterface << "/integrate.c";
-			ExportTemplatedFile exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure();
+			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
+			exportMexFun.configure(dim_outputs.size());
 			exportMexFun.exportCode();
 
 			String rhsInterface( dirName );
@@ -242,6 +242,7 @@ returnValue SIMexport::addOutput( const OutputFcn& outputEquation_ ){
 		Expression next;
 		outputEquation_.getExpression( next );
 		outputExpressions.push_back( next );
+		dim_outputs.push_back( next.getDim() );
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -256,7 +257,7 @@ returnValue SIMexport::addOutput( const String& output, const String& diffs_outp
 	if( outputExpressions.size() == 0 && f.getNumDynamicEquations() == 0 ) {
 		outputNames.push_back( output );
 		diffs_outputNames.push_back( diffs_output );
-		num_output.push_back( dim );
+		dim_outputs.push_back( dim );
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -382,13 +383,14 @@ returnValue SIMexport::setup( )
 
 			if( !referenceProvided ) _refOutputFiles.push_back( (String)"refOutput" << i << ".txt" );
 			_outputFiles.push_back( (String)"output" << i << ".txt" );
+			num_meas.push_back(ceil((double)outputGrids[i].getNumIntervals()/((double) N) - 10.0*EPS));
 		}
 		
 		if( outputExpressions.size() > 0 ) {
 			integrator->setupOutput( newGrids_, outputExpressions );
 		}
 		else {
-			integrator->setupOutput( newGrids_, outputNames, diffs_outputNames, num_output );
+			integrator->setupOutput( newGrids_, outputNames, diffs_outputNames, dim_outputs );
 		}
 	}
 	
@@ -921,7 +923,7 @@ uint SIMexport::getDimOutput( uint index ) const {
 		return outputExpressions[index].getDim();
 	}
 	else {
-		return num_output[index];
+		return dim_outputs[index];
 	}
 }
 

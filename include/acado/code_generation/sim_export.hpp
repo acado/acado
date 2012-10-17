@@ -36,7 +36,7 @@
 
 
 #include <acado/code_generation/export_module.hpp>
-#include <acado/code_generation/export_templated_file.hpp>
+#include <acado/code_generation/export_matlab_integrator.hpp>
 #include <acado/code_generation/integrators/integrator_generation.hpp>
 #include <acado/code_generation/auxiliary_functions_export.hpp>
 #include <acado/code_generation/export_file.hpp>
@@ -412,7 +412,6 @@ class SIMexport : public ExportModule
 		std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
 		std::vector<String> outputNames;				/**< A separate function name for each output. */
 		std::vector<String> diffs_outputNames;			/**< A separate function name for evaluating the derivatives of each output. */
-		std::vector<uint> num_output;					/**< A separate dimension for each output. */
 		
 		BooleanType referenceProvided;			/**< True if the user provided a file with the reference solution. */
 		BooleanType PRINT_DETAILS;				/**< True if the user wants all the details about the results being printed. */

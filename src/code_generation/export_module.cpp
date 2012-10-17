@@ -207,6 +207,13 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 	acadoHeader.addStatement( (String)"#define ACADO_NU  " << NU << "\n" );
 	acadoHeader.addComment( "Number of parameters" );
 	acadoHeader.addStatement( (String)"#define ACADO_NP  " << NP << "\n" );
+	if( dim_outputs.size() != num_meas.size() ) return ACADOERROR( RET_INVALID_OPTION );
+	for( uint i = 0; i < dim_outputs.size(); i++ ) {
+		acadoHeader.addComment( String("Dimension of output ") << i+1 );
+		acadoHeader.addStatement( (String)"#define ACADO_NOUT" << i+1 << "  " << dim_outputs[i] << "\n" );
+		acadoHeader.addComment( String("Measurements of output ") << i+1 << " per shooting interval" );
+		acadoHeader.addStatement( (String)"#define ACADO_NMEAS" << i+1 << "  " << num_meas[i] << "\n" );
+	}
 	acadoHeader.addLinebreak( 2 );
 
 	acadoHeader.addComment( "GLOBAL VARIABLES:               " );
@@ -344,6 +351,9 @@ returnValue ExportModule::copy(	const ExportModule& arg
 	NP = arg.NP;
 	N  = arg.N;
 	
+	dim_outputs = arg.dim_outputs;
+	num_meas = arg.num_meas;
+
 	commonHeaderName = arg.commonHeaderName;
 
 	return SUCCESSFUL_RETURN;
