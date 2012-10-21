@@ -402,7 +402,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( CG_USE_C99,                       NO         );
 	addOption( CG_USE_VARIABLE_WEIGHTING_MATRIX, NO         );
 	addOption( CG_COMPUTE_COVARIANCE_MATRIX,     NO         );
-
+	addOption( CG_USE_OPENMP,					 NO         );
 
 	return SUCCESSFUL_RETURN;
 }

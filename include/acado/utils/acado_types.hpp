@@ -353,7 +353,8 @@ enum LogPrintMode
 
 enum OptionsName
 {
-	CG_USE_VARIABLE_WEIGHTING_MATRIX,			/**< Use variable weighting matrix S on first N nodes */
+	CG_USE_OPENMP,								/**< Use OpenMP for parallelization in multiple shooting. */
+	CG_USE_VARIABLE_WEIGHTING_MATRIX,			/**< Use variable weighting matrix S on first N shooting nodes. */
 	CG_USE_C99,									/**< Code generation is allowed (or not) to export C-code that conforms C99 standard. */
 	CG_COMPUTE_COVARIANCE_MATRIX,				/**< Enable computation of the variance-covariance matrix for the last estimate */
 	IMPLICIT_INTEGRATOR_MODE,					/**< This determines the mode of the implicit integrator (see enum ImplicitIntegratorMode). */

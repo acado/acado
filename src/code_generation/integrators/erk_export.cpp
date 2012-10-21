@@ -26,13 +26,15 @@
 
 /**
  *    \file src/code_generation/erk_export.cpp
- *    \author Rien Quirynen
+ *    \author Rien Quirynen, Milan Vukov
  *    \date 2012
  */
 
 #include <acado/code_generation/integrators/erk_export.hpp>
 
+#include <sstream>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -87,10 +89,27 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
 	rk_num = ExportVariable( "rk_num", 1, 1, INT, ACADO_WORKSPACE, BT_TRUE );
-	rk_ttt.setup( "rk_ttt", 1,1,            REAL,ACADO_WORKSPACE,BT_TRUE );
-	rk_xxx.setup( "rk_xxx", 1,inputDim,     REAL,ACADO_WORKSPACE );
-	rk_kkk.setup( "rk_kkk", rkOrder,rhsDim, REAL,ACADO_WORKSPACE );
+
+
+//	rk_ttt.setup( "rk_ttt", 1,1,            REAL,ACADO_WORKSPACE,BT_TRUE );
 	
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+	ExportStruct structWspace;
+	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
+	rk_xxx.setup("rk_xxx", 1, inputDim, REAL, structWspace);
+	rk_kkk.setup("rk_kkk", rkOrder, rhsDim, REAL, structWspace);
+
+	if ( useOMP )
+	{
+		ExportVariable auxVar;
+
+		auxVar = diffs_ODE.getGlobalExportVariable();
+		auxVar.setName( "odeAuxVar" );
+		auxVar.setDataStruct( ACADO_LOCAL );
+		diffs_ODE.setGlobalExportVariable( auxVar );
+	}
+
 	ExportIndex run( "run1" );
 
 	// setup INTEGRATE function
@@ -115,7 +134,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		integrate.addStatement( String( "int " ) << numInt.getName() << " = numSteps[" << rk_index.getName() << "];\n" );
 	}
 	
-	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
+//	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
 
 	// initialize sensitivities:
 	Matrix idX    = eye( NX );
@@ -142,7 +161,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		loop.addFunctionCall( diffs_ODE.getName(), rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
-	loop.addStatement( rk_ttt += Matrix(h) );
+//	loop.addStatement( rk_ttt += Matrix(h) );
     // end of integrator loop
 
 	if( !hasEquidistantGrid() ) {
@@ -211,15 +230,15 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	// f << forwardDerivative( rhs, x ) * Gp + forwardDerivative( rhs, p );
 
 	int matlabInterface;
-	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
+	userInteraction->get(GENERATE_MATLAB_INTERFACE, matlabInterface);
 	if (matlabInterface) {
-		return ODE.init( f_ODE,"acado_rhs",NX,0,NU ) & diffs_ODE.init( f,"acado_rhs_ext",NX*(1+NX+NU),0,NU );
-	}
-	else {
-		return diffs_ODE.init( f,"acado_rhs_ext",NX*(1+NX+NU),0,NU );
+		return ODE.init(f_ODE, "acado_rhs", NX, 0, NU)
+				& diffs_ODE.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU);
+	} else {
+		return diffs_ODE.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU);
 	}
 
-
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -236,7 +255,7 @@ returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 													) const
 {
 	declarations.addDeclaration( diffs_ODE.getGlobalExportVariable(),dataStruct );
-	declarations.addDeclaration( rk_ttt,dataStruct );
+//	declarations.addDeclaration( rk_ttt,dataStruct );
 	declarations.addDeclaration( rk_xxx,dataStruct );
 	declarations.addDeclaration( rk_kkk,dataStruct );
 	
@@ -270,6 +289,24 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 // 
 // 	if ( (PrintLevel)printLevel >= HIGH ) 
 // 		acadoPrintf( "--> Exporting %s... ",fileName.getName() );
+
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+	if ( useOMP )
+	{
+		code.addDeclaration( diffs_ODE.getGlobalExportVariable() );
+		code.addDeclaration( rk_xxx );
+		code.addDeclaration( rk_kkk );
+
+		stringstream s;
+		s << "#pragma omp threadprivate( "
+				<< diffs_ODE.getGlobalExportVariable().getFullName().getName()  << ", "
+				<< rk_xxx.getFullName().getName() << ", "
+				<< rk_kkk.getFullName().getName()
+				<< " )" << endl << endl;
+
+		code.addStatement( s.str().c_str() );
+	}
 
 	code.addFunction( diffs_ODE );
 	code.addFunction( integrate );

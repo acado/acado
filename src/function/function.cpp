@@ -571,7 +571,8 @@ returnValue Function::AD_backward( const    Vector &seed  ,
 returnValue Function::setGlobalExportVariable(const ExportVariable& var)
 {
 	// TODO: In the next iteration set the full name ;)
-	evaluationTree.setAuxVariableName(var.getName());
+	evaluationTree.setAuxVariableName( var.getName() );
+	evaluationTree.setAuxVariableStructName( var.getDataStructString() );
 
 	return SUCCESSFUL_RETURN;
 }

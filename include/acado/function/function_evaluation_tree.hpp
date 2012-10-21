@@ -468,6 +468,8 @@ public:
      /** Get the name of a auxiliary variable. Related to code export */
      returnValue getAuxVariableName( String& s ) const;
 
+     returnValue setAuxVariableStructName(const String& s);
+
 
     //
     // DATA MEMBERS:
@@ -486,6 +488,7 @@ public:
     Expression           safeCopy ;
 
     String				auxVariableName;
+    String				auxVariableStructName;
 };
 
 
