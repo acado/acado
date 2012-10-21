@@ -30,7 +30,7 @@
  *    \date 2012
  */
 
-#include <acado/code_generation/export_matlab_rhs.hpp>
+#include <acado/code_generation/integrators/export_matlab_rhs.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
