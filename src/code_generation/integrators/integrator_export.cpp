@@ -106,13 +106,11 @@ returnValue IntegratorExport::setGrid(	const Grid& _ocpGrid, const uint _numStep
 }
 
 
-returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _name_diffs_ODE, const String& _name_DAE, const String& _name_diffs_DAE ) {
+returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _name_diffs_ODE ) {
 
-	if( (ODE.getFunctionDim() + DAE.getFunctionDim()) == 0 ) {
+	if( ODE.getFunctionDim() == 0 ) {
 		name_ODE = String(_name_ODE);
 		name_diffs_ODE = String(_name_diffs_ODE);
-		name_DAE = String(_name_DAE);
-		name_diffs_DAE = String(_name_diffs_DAE);
 
 		EXPORT_RHS = BT_FALSE;
 	}
@@ -189,15 +187,6 @@ const String IntegratorExport::getNameODE() const{
 	}
 }
 
-const String IntegratorExport::getNameDAE() const{
-	if( EXPORT_RHS ) {
-		return DAE.getName();
-	}
-	else {
-		return name_DAE;
-	}
-}
-
 const String IntegratorExport::getNameOUTPUT( uint index ) const{
 	if( EXPORT_RHS ) {
 		return OUTPUTS[index].getName();
@@ -223,15 +212,6 @@ const String IntegratorExport::getNameDiffsODE() const{
 	}
 	else {
 		return name_diffs_ODE;
-	}
-}
-
-const String IntegratorExport::getNameDiffsDAE() const{
-	if( EXPORT_RHS ) {
-		return diffs_DAE.getName();
-	}
-	else {
-		return name_diffs_DAE;
 	}
 }
 

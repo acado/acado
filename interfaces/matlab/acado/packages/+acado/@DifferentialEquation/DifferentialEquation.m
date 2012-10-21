@@ -123,7 +123,7 @@ classdef DifferentialEquation < acado.Function
                 if (isa(rhs{i}, 'acado.Equals'))
                     obj.differentialList{indices(i)} = rhs{i};
                 elseif (isa(rhs{i}, 'acado.Expression'))
-                    if(indices(i) <= length(ACADO_.helper.x))
+                    if(isempty(ACADO_.helper.dx) && indices(i) <= length(ACADO_.helper.x))
                         obj.differentialList{indices(i)} = acado.Equals(acado.Dot(ACADO_.helper.x{indices(i)}), rhs{i});
                     else
                         obj.differentialList{indices(i)} = acado.Equals(acado.DoubleConstant(0), rhs{i});

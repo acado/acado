@@ -129,20 +129,16 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		int generateMatlabInterface;
 		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
 		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
-			int numConsIts;
-			get( CONSISTENCY_ITERATIONS, numConsIts );
-			if( NXA == 0 ) numConsIts = 0;
-
 			String integrateInterface( dirName );
 			integrateInterface << "/integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure(dim_outputs.size(), numConsIts);
+			exportMexFun.configure(dim_outputs.size());
 			exportMexFun.exportCode();
 
 			String rhsInterface( dirName );
 			rhsInterface << "/rhs.c";
-			ExportTemplatedFile exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun2.configure();
+			ExportMatlabRhs exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
+			exportMexFun2.configure(integrator->getNameODE());
 			exportMexFun2.exportCode();
 		}
 	}
@@ -221,14 +217,12 @@ returnValue SIMexport::setDimensions( uint _NX, uint _NU )
 }
 
 
-returnValue SIMexport::setModel( const String& fileName, const String& _rhs_ODE, const String& _diffs_ODE, const String& _rhs_DAE, const String& _diffs_DAE )
+returnValue SIMexport::setModel( const String& fileName, const String& _rhs_ODE, const String& _diffs_ODE )
 {
 	if( outputExpressions.size() == 0 && f.getNumDynamicEquations() == 0 ) {
 		externModel = String(fileName);
 		rhs_ODE = String(_rhs_ODE);
 		diffs_ODE = String(_diffs_ODE);
-		rhs_DAE = String(_rhs_DAE);
-		diffs_DAE = String(_diffs_DAE);
 
 		EXPORT_RHS = BT_FALSE;
 	}
@@ -364,7 +358,7 @@ returnValue SIMexport::setup( )
 			return RET_UNABLE_TO_EXPORT_CODE;
 	}
 	else {
-		if ( integrator->setModel( rhs_ODE, diffs_ODE, rhs_DAE, diffs_DAE ) != SUCCESSFUL_RETURN )
+		if ( integrator->setModel( rhs_ODE, diffs_ODE ) != SUCCESSFUL_RETURN )
 			return RET_UNABLE_TO_EXPORT_CODE;
 	}
 
@@ -381,13 +375,15 @@ returnValue SIMexport::setup( )
 		std::vector<Grid> newGrids_;
 		if( !referenceProvided ) _refOutputFiles.clear();
 		_outputFiles.clear();
+		num_meas.clear();
 		for( i = 0; i < outputGrids.size(); i++ ) {
-			Grid nextGrid( 0.0, 1.0, (int) ceil((double)outputGrids[i].getNumIntervals()/((double) numSteps) - 10.0*EPS) + 1 );
+			uint numOuts = (int) ceil((double)outputGrids[i].getNumIntervals()/((double) numSteps) - 10.0*EPS);
+			Grid nextGrid( 0.0, 1.0, numOuts + 1 );
 			newGrids_.push_back( nextGrid );
 
 			if( !referenceProvided ) _refOutputFiles.push_back( (String)"refOutput" << i << ".txt" );
 			_outputFiles.push_back( (String)"output" << i << ".txt" );
-			num_meas.push_back(ceil((double)outputGrids[i].getNumIntervals()/((double) N) - 10.0*EPS));
+			num_meas.push_back(ceil((double)(numOuts*numSteps)/((double) N) - 10.0*EPS));
 		}
 		
 		if( outputExpressions.size() > 0 ) {
@@ -408,6 +404,11 @@ returnValue SIMexport::setup( )
 
 returnValue SIMexport::checkConsistency( ) const
 {
+	// Number of differential state derivatives must be either zero or equal to the number of differential states:
+	if( NDX > 0 && NDX != NX ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+
 	// consistency checks:
 	// only time-continuous DAEs without parameter and disturbances supported!
 	if ( f.isDiscretized( ) == BT_TRUE )
@@ -472,7 +473,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 	main.addStatement( (String)"   #define NU          " << NU << "      /* number of control inputs       */\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"   #define NOUT" << i << "          " << getDimOutput( (uint) i ) << "      /* number of outputs       */\n" );
-		main.addStatement( (String)"   #define NMEAS" << i << "          " << outputGrids[i].getNumIntervals()/N << "      /* number of measurements       */\n" );
+		main.addStatement( (String)"   #define NMEAS" << i << "          " << num_meas[i] << "      /* number of measurements       */\n" );
 	}
 	if ( NP > 0 )
 		main.addStatement( (String)"   #define NP          " << NP << "      /* number of fixed parameters     */\n" );
@@ -574,15 +575,6 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     main.addStatement( "      			nil = fscanf( controls, \"%lf\", &x[(NX+NXA)*(1+NX+NU)+j] );\n" );
     main.addStatement( "      		}\n" );
     main.addLinebreak( );
-    if( NXA > 0 ) {
-		main.addStatement( "      		if( i == 0 ) {\n" );
-		main.addStatement( "      			norm = getNormConsistency( x );\n" );
-		main.addStatement( "      			while( norm > 1e-10 ) {\n" );
-		main.addStatement( "      				makeStatesConsistent( x );\n" );
-		main.addStatement( "      				norm = getNormConsistency( x );\n" );
-		main.addStatement( "     			}\n" );
-		main.addStatement( "      		}\n" );
-	}
     if( TIMING == BT_TRUE ) {
 		main.addStatement( "      		if( i == 0 ) {\n" );
 		main.addStatement( "      			for( j=0; j < (NX+NXA)*(1+NX+NU)+NU; j++ ) {\n" );
@@ -665,7 +657,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 	main.addStatement( (String)"   #define NU          " << NU << "      /* number of control inputs       */\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"   #define NOUT" << i << "          " << getDimOutput(i) << "      /* number of outputs       */\n" );
-		main.addStatement( (String)"   #define NMEAS" << i << "          " << outputGrids[i].getNumIntervals()/N << "      /* number of measurements       */\n" );
+		main.addStatement( (String)"   #define NMEAS" << i << "          " << num_meas[i] << "      /* number of measurements       */\n" );
 	}
 
 	if ( NP > 0 )
@@ -706,14 +698,15 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 		main.addStatement( (String)"      real_t out" << i << "[NMEAS" << i << "*NOUT" << i << "];\n" );
 		main.addStatement( (String)"      real_t refOut" << i << "[NMEAS" << i << "*NOUT" << i << "];\n" );
 	}
-    main.addStatement( "      real_t maxErr, meanErr, temp;\n" );
+    main.addStatement( "      real_t maxErr, meanErr, maxErrX, meanErrX, maxErrXA, meanErrXA, temp;\n" );
     main.addStatement( "      const ACADOworkspace_ nullWork2 = {0};\n" );
     main.addStatement( " 	  acadoWorkspace = nullWork2;\n" );
     main.addLinebreak( 2 );
 
     main.addComment( 3,"START EVALUATION RESULTS:" );
     main.addComment( 3,"----------------------------------------" );
-	main.addStatement( "      meanErr = 0;\n" );
+	main.addStatement( "      meanErrX = 0;\n" );
+	main.addStatement( "      meanErrXA = 0;\n" );
     main.addStatement( "      file = fopen(RESULTS_NAME,\"r\");\n" );
     main.addStatement( "      ref = fopen(REF_NAME,\"r\");\n" );
     main.addStatement( "      for( i = 0; i < (NX+NXA)*(1+NX+NU)+1; i++ ) {\n" );
@@ -726,26 +719,47 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addStatement( "      		nil = fscanf( file, \"%lf\", &temp );\n" );
     main.addStatement( "      		nil = fscanf( ref, \"%lf\", &temp );\n" );
     main.addLinebreak( );
-    main.addStatement( "      		maxErr = 0;\n" );
-    main.addStatement( "      		for( j = 0; j < NX+NXA; j++ ) {\n" );
+    main.addStatement( "      		maxErrX = 0;\n" );
+    main.addStatement( "      		for( j = 0; j < NX; j++ ) {\n" );
     main.addStatement( "      			nil = fscanf( file, \"%lf\", &x[j] );\n" );
     main.addStatement( "      			nil = fscanf( ref, \"%lf\", &xRef[j] );\n" );
     main.addStatement( "      			temp = fabs(x[j] - xRef[j])/fabs(xRef[j]);\n" );
-    main.addStatement( "      			if( temp > maxErr ) maxErr = temp;\n" );
-    main.addStatement( "      			if( isnan(x[j]) ) maxErr = sqrt(-1);\n" );
+    main.addStatement( "      			if( temp > maxErrX ) maxErrX = temp;\n" );
+    main.addStatement( "      			if( isnan(x[j]) ) maxErrX = sqrt(-1);\n" );
     main.addStatement( "      		}\n" );
     main.addLinebreak( );
-    if( PRINT_DETAILS ) main.addStatement( "      		printf( \"MAX ERROR AT %.3f s:   %.4e \\n\", i*h, maxErr );\n" );
-    main.addStatement( "			meanErr += maxErr;\n" );
+    main.addStatement( "      		maxErrXA = 0;\n" );
+    main.addStatement( "      		for( j = 0; j < NXA; j++ ) {\n" );
+    main.addStatement( "      			nil = fscanf( file, \"%lf\", &x[NX+j] );\n" );
+    main.addStatement( "      			nil = fscanf( ref, \"%lf\", &xRef[NX+j] );\n" );
+    main.addStatement( "      			temp = fabs(x[NX+j] - xRef[NX+j])/fabs(xRef[NX+j]);\n" );
+    main.addStatement( "      			if( temp > maxErrXA ) maxErrXA = temp;\n" );
+    main.addStatement( "      			if( isnan(x[NX+j]) ) maxErrXA = sqrt(-1);\n" );
+    main.addStatement( "      		}\n" );
+    main.addLinebreak( );
+    if( PRINT_DETAILS && NXA > 0 ) {
+    	main.addStatement( "      		printf( \"MAX ERROR AT %.3f s:   %.4e   %.4e \\n\", i*h, maxErrX, maxErrXA );\n" );
+    }
+    else if( PRINT_DETAILS ) {
+    	main.addStatement( "      		printf( \"MAX ERROR AT %.3f s:   %.4e \\n\", i*h, maxErrX );\n" );
+    }
+    main.addStatement( "			meanErrX += maxErrX;\n" );
+    main.addStatement( "			meanErrXA += maxErrXA;\n" );
     main.addLinebreak( );
     main.addStatement( "      		for( j = 0; j < (NX+NXA)*(NX+NU); j++ ) {\n" );
     main.addStatement( "      			nil = fscanf( file, \"%lf\", &temp );\n" );
     main.addStatement( "      			nil = fscanf( ref, \"%lf\", &temp );\n" );
     main.addStatement( "      		}\n" );
     main.addStatement( "      }\n" );
-    main.addStatement( "	  meanErr = meanErr/N;\n" );
+    main.addStatement( "	  meanErrX = meanErrX/N;\n" );
+    main.addStatement( "	  meanErrXA = meanErrXA/N;\n" );
     if( PRINT_DETAILS ) main.addStatement( "      printf( \"\\n\" );\n" );
-    main.addStatement( "      printf( \"TOTAL MEAN ERROR:   %.4e \\n\", meanErr );\n" );
+    if( NXA > 0 ) {
+    	main.addStatement( "      printf( \"TOTAL MEAN ERROR:   %.4e   %.4e \\n\", meanErrX, meanErrXA );\n" );
+    }
+    else {
+    	main.addStatement( "      printf( \"TOTAL MEAN ERROR:   %.4e \\n\", meanErrX );\n" );
+    }
     main.addStatement( "      printf( \"\\n\\n\" );\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addLinebreak( );

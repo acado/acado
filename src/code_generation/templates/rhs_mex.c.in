@@ -10,7 +10,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     int i;
     int Nx, Nt, Nu;
     real_t *f, *x, *u;
-    real_t y[ACADO_NX+ACADO_NXA+ACADO_NU];
+    real_t y[ACADO_NX+ACADO_NXA+ACADO_NU+ACADO_NDX];
     
     if (nrhs != 3) {
         mexErrMsgTxt( "Check the number of input arguments !!" );
@@ -26,7 +26,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (Nt != 1) {
         mexErrMsgTxt( "Check the dimension of the first input argument !!" );
     }
-    if (Nx != ACADO_NX+ACADO_NXA) {
+    if (Nx != ACADO_NX+ACADO_NXA+ACADO_NDX) {
         mexErrMsgTxt( "Check the dimension of the second input argument !!" );
     }
     if (Nu != ACADO_NU) {
@@ -41,12 +41,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     for( i = 0; i < ACADO_NU; ++i ) {
         y[ACADO_NX+ACADO_NXA+i] = u[i];
     }
+    for( i = 0; i < ACADO_NDX; ++i ) {
+        y[ACADO_NX+ACADO_NXA+ACADO_NU+i] = x[ACADO_NX+ACADO_NXA+i];
+    }
     
-    plhs[0] = mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,1,mxREAL);
+    plhs[0] = mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA+ACADO_NDX,1,mxREAL);
     f = mxGetPr(plhs[0]);
     
-    acado_rhs( y,f );
-    #if ACADO_NXA > 0
-    acado_alg_rhs( y,&f[ACADO_NX] );
-    #endif
+    @ACADO_RHS@( y,f );
+
+    for( i = 0; i < ACADO_NDX; ++i ) {
+        f[ACADO_NX+ACADO_NXA+i] = f[i];
+    }
+    for( i = 0; i < ACADO_NDX; ++i ) {
+        f[i] = x[ACADO_NX+ACADO_NXA+i];
+    }
 }
+

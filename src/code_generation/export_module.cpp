@@ -45,6 +45,7 @@ ExportModule::ExportModule( ) : UserInteraction( )
 	setupOptions( );
 
 	NX = 0; 
+	NDX = 0;
 	NXA = 0; 
 	NU = 0; 
 	NP = 0; 
@@ -59,7 +60,8 @@ ExportModule::ExportModule(	const OCP& _ocp
 { 
 	setupOptions( );
 
-	NX = 0; 
+	NX = 0;
+	NDX = 0;
 	NXA = 0; 
 	NU = 0; 
 	NP = 0; 
@@ -203,6 +205,8 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 	acadoHeader.addStatement( (String)"#define ACADO_N   " << N << "\n");
 	acadoHeader.addComment( "Number of differential states" );
 	acadoHeader.addStatement( (String)"#define ACADO_NX  " << NX << "\n" );
+	acadoHeader.addComment( "Number of differential state derivatives" );
+	acadoHeader.addStatement( (String)"#define ACADO_NDX  " << NDX << "\n" );
 	acadoHeader.addComment( "Number of algebraic states" );
 	acadoHeader.addStatement( (String)"#define ACADO_NXA  " << NXA << "\n" );
 	acadoHeader.addComment( "Number of controls" );
@@ -294,6 +298,12 @@ uint ExportModule::getNX( ) const
 }
 
 
+uint ExportModule::getNDX( ) const
+{
+	return NDX;
+}
+
+
 uint ExportModule::getNXA( ) const
 {
 	return NXA;
@@ -348,6 +358,7 @@ returnValue ExportModule::copy(	const ExportModule& arg
 	ocp = arg.ocp;
 
 	NX = arg.NX;
+	NDX = arg.NDX;
 	NXA = arg.NXA; 
 	NU = arg.NU;
 	NP = arg.NP;
@@ -370,12 +381,10 @@ returnValue ExportModule::setupOptions( )
 	addOption( LINEAR_ALGEBRA_SOLVER,       GAUSS_LU        );
 	addOption( UNROLL_LINEAR_SOLVER,       	BT_FALSE	    );
 	addOption( NUM_INTEGRATOR_STEPS,        30              );
-	addOption( CONSISTENCY_ITERATIONS,      2               );
 	addOption( IMPLICIT_INTEGRATOR_MODE,	IFTR 			);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	3				);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS_INIT, 0			);
-	addOption( IMPLICIT_INTEGRATOR_NUM_ALG_ITS,	1			);
-	addOption( IMPLICIT_INTEGRATOR_NUM_ALG_ITS_INIT, 2		);
+	addOption( INTEGRATOR_UNROLL_OUTPUT, HEURISTIC_UNROLL	);
 	addOption( SPARSE_QP_SOLUTION,          FULL_CONDENSING );
 	addOption( FIX_INITIAL_STATE,           BT_TRUE         );
 	addOption( QP_SOLVER,                   QP_QPOASES      );

@@ -1,6 +1,5 @@
 #include "mex.h"
 #define NUM_OUTPUTS @NUM_OUTPUTS@
-#define CONSISTENCY_ITS @CONSISTENCY_ITS@
 
 /* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
 /* --------------------------------------------------- */
@@ -70,12 +69,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     for( i = 0; i < ACADO_NU; ++i ) {
         next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
     }
-    
-    #if CONSISTENCY_ITS > 0
-          for( i = 0; i < CONSISTENCY_ITS; i++ ) {
-                makeStatesConsistent(next);
-          }
-    #endif
+
+    acadoWorkspace.rk_num = 0;
     
     #if NUM_OUTPUTS > 3
         integrate( next, out1, out2, out3, out4 );

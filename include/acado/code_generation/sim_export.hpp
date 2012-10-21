@@ -36,7 +36,8 @@
 
 
 #include <acado/code_generation/export_module.hpp>
-#include <acado/code_generation/export_matlab_integrator.hpp>
+#include <acado/code_generation/integrators/export_matlab_integrator.hpp>
+#include <acado/code_generation/integrators/export_matlab_rhs.hpp>
 #include <acado/code_generation/integrators/integrator_generation.hpp>
 #include <acado/code_generation/auxiliary_functions_export.hpp>
 #include <acado/code_generation/export_file.hpp>
@@ -184,17 +185,13 @@ class SIMexport : public ExportModule
 		 *
 		 *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.
 		 *	@param[in] _diffs_rhs_ODE		Name of the function, evaluating the derivatives of the ODE right-hand side.
-		 *	@param[in] _rhs_DAE				Name of the function, evaluating the DAE right-hand side.
-		 *	@param[in] _diffs_rhs_DAE		Name of the function, evaluating the derivatives of the DAE right-hand side.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
 		virtual returnValue setModel( 	const String& fileName,
 				const String& _rhs_ODE,
-				const String& _diffs_rhs_ODE,
-				const String& _rhs_DAE = String(),
-				const String& _diffs_rhs_DAE = String() );
+				const String& _diffs_rhs_ODE );
 
 
 		/** Assigns the model dimensions to be used by the integrator.
@@ -406,8 +403,6 @@ class SIMexport : public ExportModule
 		String externModel;						/**< The name of the file containing the needed functions, if provided. */
 		String rhs_ODE;							/**< The name of the function evaluating the ODE right-hand side, if provided. */
 		String diffs_ODE;						/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
-		String rhs_DAE;							/**< The name of the function evaluating the DAE right-hand side, if provided. */
-		String diffs_DAE;						/**< The name of the function evaluating the derivatives of the DAE right-hand side, if provided. */
 		std::vector<Grid> outputGrids;			/**< A separate grid for each output. */
 		std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
 		std::vector<String> outputNames;				/**< A separate function name for each output. */

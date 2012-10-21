@@ -30,6 +30,7 @@ classdef AcadoMatlab < handle
         %setVariables
         t = {};     % time (can only be one element)
         x = {};     % diff states
+        dx = {};    % diff state derivatives
         u = {};     % controls
         p = {};     % parameters
         w = {};     % disturbances
@@ -79,6 +80,25 @@ classdef AcadoMatlab < handle
             end
             
             obj.x{length(obj.x)+1} = set;
+        end
+        
+        % Add differential state derivative
+        function addDX(obj, set)
+            
+            if(~isa(set, 'acado.DifferentialState'))
+                error('ERROR: A differential state derivative must be created using an existing differential state.');
+            end
+            found = 0;
+            for i=1:length(obj.x)
+                if (strcmp(obj.x{i}.name, set.name))
+                   found = 1;
+                end
+            end
+            if ~found
+                error('The differential state derivative, you are trying to add, has no corresponding differential state.');
+            end
+            
+            obj.dx{length(obj.dx)+1} = set;
         end
         
         % Add algebraic state

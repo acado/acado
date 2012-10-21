@@ -169,6 +169,13 @@ class ExportModule : public UserInteraction
 		uint getNX( ) const;
 
 
+		/** Returns number of differential state derivatives.
+		 *
+		 *  \return Number of differential state derivatives
+		 */
+		uint getNDX( ) const;
+
+
 		/** Returns number of algebraic states.
 		 *
 		 *  \return Number of algebraic states

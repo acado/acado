@@ -175,14 +175,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 
 	protected:
-	
-		/** Exports source code for some extra functions to deal with algebraic states.
-		 *
-		 *	@param[in] code				Code block containing the extra functions.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue addDAEFunctions( ExportStatementBlock& code );
 		
 		
 		/** Initializes the matrix DD, which is used to extrapolate the variables of the IRK method to the next step.
@@ -223,6 +215,15 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		Vector evaluatePolynomial( double time );
 		
 		
+		/** Returns the coefficients of the derived polynomial, representing the derivative of the continuous output with respect to time.
+		 *
+		 *	@param[in] time				The point in the interval (0,1] for which the coefficients are returned.
+		 *
+		 *	\return Coefficients of the polynomial, corresponding the given grid point
+		 */
+		Vector evaluateDerivedPolynomial( double time );
+
+
 		/** Exports the evaluation of the coefficients of the polynomial, representing the continuous output of the integrator.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
@@ -238,6 +239,21 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportVariable& grid, 
 										const ExportIndex& indexTime, 
 										double h );
+
+
+		/** Exports the evaluation of the coefficients of the derived polynomial, representing the derivative of the continuous output with respect to time.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] variable			The variable containing the coefficients of the polynomial.
+		 *	@param[in] grid				The variable containing the grid points for the specific output.
+		 *	@param[in] indexTime		The index of the specific grid point.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue evaluateDerivedPolynomial( ExportStatementBlock& block,
+										const ExportVariable& variable,
+										const ExportVariable& grid,
+										const ExportIndex& indexTime );
 		
 		
 		/** Copies all class members from given object.
@@ -267,20 +283,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 * 	\return The performed number of Newton iterations for the initialization of the first step.
 		 */
         uint getNumItsInit() const;
-		
-		
-		/** Returns the performed number of Newton iterations to make the algebraic states consistent.
-		 * 
-		 * 	\return The performed number of Newton iterations to make the algebraic states consistent.
-		 */
-		uint getNumAlgIts() const;
-		
-		
-		/** Returns the performed number of Newton iterations for the initialization of the algebraic states in the first step.
-		 * 
-		 * 	\return The performed number of Newton iterations for the initialization of the algebraic states in the first step.
-		 */
-        uint getNumAlgItsInit() const;
 
 
     protected:
@@ -293,21 +295,15 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		uint inputDim;							/**< This is the dimension of the input to the integrator. */
 		uint numIts;							/**< This is the performed number of Newton iterations. */
 		uint numItsInit;						/**< This is the performed number of Newton iterations for the initialization of the first step. */
-		uint numAlgIts;							/**< This is the performed number of Newton iterations to make the algebraic states consistent. */
-		uint numAlgItsInit;						/**< This is the performed number of Newton iterations for the initialization of the algebraic states in the first step. */
 
 		ExportLinearSolver* solver;				/**< This is the exported linear solver that is used by the implicit Runge-Kutta method. */
-		ExportLinearSolver* daeSolver;			/**< This is the other exported linear solver that is used by the implicit Runge-Kutta method in the case of differential algebraic equations. */
         
         // DEFINITION OF THE EXPORTVARIABLES
 		ExportVariable  rk_sol;					/**< Variable containing the solution of the linear system. */
 		ExportVariable	rk_A;					/**< Variable containing the matrix of the linear system. */
 		ExportVariable	rk_b;					/**< Variable containing the right-hand side of the linear system. */
-		ExportVariable	rk_alg_A;				/**< Variable containing the matrix of the linear system for the algebraic states. */
-		ExportVariable	rk_alg_b;				/**< Variable containing the right-hand side of the linear system for the algebraic states. */
 		ExportVariable 	rk_rhsTemp;				/**< Variable containing intermediate results of evaluations of the right-hand side expression. */
 		ExportVariable  rk_diffsTemp;			/**< Variable containing intermediate results of evaluations of the derivatives of the differential equations (ordinary and algebraic). */
-		ExportVariable	rk_alg_diffsTemp;		/**< Variable containing intermediate results of evaluations of the derivatives of the differential algebraic equations. */
 		ExportVariable  rk_diffsPrev;			/**< Variable containing the sensitivities from the previous integration step. */
 		ExportVariable  rk_diffsNew;			/**< Variable containing the derivatives wrt the previous values. */
 		ExportVariable 	rk_xPrev;				/**< Variable containing the previous integrator state. */
@@ -316,13 +312,10 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportVariable  rk_diffsOutputTemp;		/**< Variable containing intermediate results of evaluations of the derivatives of an output function. */
 		std::vector<ExportVariable> rk_outputs;	/**< Variables containing the evaluations of the continuous output from the integrator. */
 		ExportVariable 	rk_outH;				/**< Variable that is used for the evaluations of the continuous output. */
+		ExportVariable 	rk_out2;				/**< Variable that is used for the evaluations of the continuous output. */
 		
 		Matrix DD;								/**< This matrix is used for the initialization of the variables for the next integration step. */
 		Matrix coeffs;							/**< This matrix contains coefficients of polynomials that are used to evaluate the continuous output (see evaluatePolynomial). */
-		
-		ExportVariable	norm;					/**< The variable that is used to return a measure for the consistency of the differential and algebraic states. */
-		ExportFunction	makeStatesConsistent;	/**< This exported function can be used to make the differential and algebraic states more consistent when needed. */
-		ExportFunction	getNormConsistency;		/**< This exported function returns a measure for the consistency of the differential and algebraic states. */
 };
 
 

@@ -53,6 +53,13 @@ classdef SIMexport < acado.ExportModule
         % DifferentialEquation
         model;
         modelDefined = 1;
+        fileName;
+        modelName;
+        modelDiffsName;
+        NX;
+        NDX;
+        NXA;
+        NU;
         
         % OutputEquation
         output = {};
@@ -138,6 +145,12 @@ classdef SIMexport < acado.ExportModule
             elseif (nargin == 2 && isa(varargin{1}, 'acado.Expression'))
                 obj.setModel({varargin{1}});
                 
+            elseif (nargin == 4 && isa(varargin{1}, 'char') && isa(varargin{2}, 'char') && isa(varargin{3}, 'char'))
+                % SIMexport.setModel( fileName, modelName, modelDiffsName );
+                obj.fileName = varargin{1};
+                obj.modelName = varargin{2};
+                obj.modelDiffsName = varargin{3};
+                
             else
                 error('ERROR: Invalid setModel. <a href="matlab: help acado.SIMexport.setModel">help acado.SIMexport.setModel</a>');
                 
@@ -207,6 +220,30 @@ classdef SIMexport < acado.ExportModule
         end
         
         
+        function setDimensions(obj, varargin)
+            
+            if (nargin == 3 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric'))
+                % SIMexport.setDimensions( NX, NU );
+                obj.NX = varargin{1};
+                obj.NDX = 0;
+                obj.NXA = 0;
+                obj.NU = varargin{2};
+                
+            elseif (nargin == 5 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric') && isa(varargin{3}, 'numeric') && isa(varargin{4}, 'numeric'))
+                % SIMexport.setDimensions( NX, NDX, NXA, NU );
+                obj.NX = varargin{1};
+                obj.NDX = varargin{2};
+                obj.NXA = varargin{3};
+                obj.NU = varargin{4};
+                
+            else
+                error('ERROR: Invalid call to setDimensions.');
+                
+            end
+            
+        end
+        
+        
         function getInstructions(obj, cppobj, get)
             
             if (get == 'B')
@@ -232,6 +269,13 @@ classdef SIMexport < acado.ExportModule
                 end
                 if (~isempty(obj.model))
                     fprintf(cppobj.fileMEX,sprintf('    %s.setModel( %s );\n', obj.name, obj.model.name));
+                elseif (~isempty(obj.fileName) && ~isempty(obj.modelName) && ~isempty(obj.modelDiffsName))
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setModel( "%s", "%s", "%s" );\n', obj.name, obj.fileName, obj.modelName, obj.modelDiffsName));
+                    if (isempty(obj.NX) || isempty(obj.NDX) || isempty(obj.NXA) || isempty(obj.NU))
+                        error('ERROR: You need to provide the dimensions of the external model !\n');
+                    else
+                        fprintf(cppobj.fileMEX,sprintf('    %s.setDimensions( %s, %s, %s, %s );\n', obj.name, num2str(obj.NX), num2str(obj.NDX), num2str(obj.NXA), num2str(obj.NU)));
+                    end
                 else
                     error('ERROR: Invalid SIMexport object in getInstructions !\n');
                 end
@@ -257,7 +301,7 @@ classdef SIMexport < acado.ExportModule
                     end
                     numOutputs = length(obj.outputName);
                     for i = 1:numOutputs
-                        fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( %s, %s, %s );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i})));
+                        fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( "%s", "%s", %s );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i})));
                     end
                 end
                 if (numOutputs > 0 && numOutputs ~= obj.meas.dim)
@@ -270,10 +314,10 @@ classdef SIMexport < acado.ExportModule
                 
                 % EXPORT (AND RUN)
                 if (obj.run == 1 & ~isempty(obj.dir))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.exportAndRun("%s");\n', obj.name, obj.dir));
+                    fprintf(cppobj.fileMEX,sprintf('    %s.exportAndRun( "%s" );\n', obj.name, obj.dir));
                     
                 elseif (~isempty(obj.dir))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.exportCode("%s");\n', obj.name, obj.dir));
+                    fprintf(cppobj.fileMEX,sprintf('    %s.exportCode( "%s" );\n', obj.name, obj.dir));
                     
                 end
                 

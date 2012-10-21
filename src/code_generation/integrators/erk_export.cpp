@@ -103,14 +103,6 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	integrate.addIndex( run );
 
-
-	// initialize sensitivities:
-	Matrix idX    = eye( NX );
-	Matrix zeroXU = zeros( NX,NU );
-	integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
-	integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
-
-
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !hasEquidistantGrid() ) {
 		integrate.addStatement( String( "int " ) << run.getName() << ";\n" );
@@ -124,6 +116,13 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	}
 	
 	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
+
+	// initialize sensitivities:
+	Matrix idX    = eye( NX );
+	Matrix zeroXU = zeros( NX,NU );
+	integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
+	integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
+
 	integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
 	integrate.addLinebreak( );
 
