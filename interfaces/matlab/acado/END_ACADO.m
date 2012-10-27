@@ -28,8 +28,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009-2010
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2009-2012
 % 
 
 % Check if there is an active model to build
@@ -41,11 +41,11 @@ ACADO_.helper.generateCPP();
 
 warning off all
 
-% Remove the ACADO package from the path
-rmpath(genpath([ACADO_.pwd filesep 'acado']));  
-addpath([ACADO_.pwd filesep 'acado']);   
-addpath([ACADO_.pwd filesep 'acado/functions']);
-addpath( genpath([ACADO_.pwd filesep 'acado' filesep 'packages']) );
+% % Remove the ACADO package from the path
+% rmpath(genpath([ACADO_.pwd filesep 'acado']));  
+% addpath([ACADO_.pwd filesep 'acado']);   
+% addpath([ACADO_.pwd filesep 'acado/functions']);
+% addpath( genpath([ACADO_.pwd filesep 'acado' filesep 'packages']) );
 
 % Clear global
 ACADO_ = {};

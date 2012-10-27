@@ -43,7 +43,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     fieldnames[1] = "sensX";  
     fieldnames[2] = "sensU"; 
     
-    if (nrhs != 2) {
+    if (nrhs != 2 && !(nrhs == 1 && ACADO_NU == 0)) {
         mexErrMsgTxt( "Check the number of input arguments !" );
     }
     if (nlhs > (1+NUM_OUTPUTS)) {
@@ -51,7 +51,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
     
     Nx = mxGetM(prhs[0])*mxGetN(prhs[0]);
-    Nu = mxGetM(prhs[1])*mxGetN(prhs[1]);
+    if (ACADO_NU > 0) {
+        Nu = mxGetM(prhs[1])*mxGetN(prhs[1]);
+    }
+    else {
+        Nu = 0;
+    }
     
     if (Nx != ACADO_NX+ACADO_NXA) {
         mexErrMsgTxt( "Check the dimension of the first input argument !" );
@@ -61,7 +66,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
     
     x = mxGetPr(prhs[0]);
-    u = mxGetPr(prhs[1]);
+    if (ACADO_NU > 0) {
+        u = mxGetPr(prhs[1]);
+    }
     
     for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
         next[i] = x[i];

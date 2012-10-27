@@ -22,8 +22,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2009-2012
 % 
 global ACADO_;
 
@@ -32,5 +32,6 @@ try
         error( ' ' );
     end
 catch
-    error( 'No active model is running. Start with BEGIN_ACADO first.' );
+    BEGIN_ACADO;
+%     error( 'No active model is running. Start with BEGIN_ACADO first.' );
 end

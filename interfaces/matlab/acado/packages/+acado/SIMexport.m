@@ -106,11 +106,17 @@ classdef SIMexport < acado.ExportModule
                 obj.dir = varargin{1};
                 obj.run = 0;
                 
+            elseif (nargin == 1)
+                % SIMexport.exportCode( );
+                obj.dir = './';
+                obj.run = 0;
+                
             else
                 error('ERROR: Invalid exportCode. <a href="matlab: help acado.SIMexport.exportCode">help acado.SIMexport.exportCode</a>');
                 
             end
             
+            END_ACADO; 
         end
         
         
@@ -126,6 +132,7 @@ classdef SIMexport < acado.ExportModule
                 
             end
             
+            END_ACADO; 
         end
         
         

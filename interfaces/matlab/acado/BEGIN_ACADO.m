@@ -25,9 +25,15 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2009-2012
 % 
+
+function BEGIN_ACADO( varargin )
+
+if ~iscellstr( varargin ) || nargin > 1
+        error( 'Syntax is: ''BEGIN_ACADO'' or ''BEGIN_ACADO  problemName''' );
+else
 
 % Check if acadoglobals function can be called.
 if ~exist('acadoglobals','file'),
@@ -41,14 +47,18 @@ if ~exist(ACADO_.pwd)
 end
 
 
-% Add OCP folder to path
-addpath( genpath([ACADO_.pwd filesep 'acado']) );
+% % Add OCP folder to path
+% addpath( genpath([ACADO_.pwd filesep 'acado']) );
 
 % A model is now active
 ACADO_.modelactive = 1;
 
 % Set current problemname
-ACADO_.problemname = 'myAcadoProblem';
+if nargin == 0
+ACADO_.problemname = 'test';
+else
+ACADO_.problemname = varargin{1}; 
+end
 
 % Write results to file?
 ACADO_.results_to_file = false;
@@ -66,3 +76,7 @@ ACADO_.count_sim = 0;
 ACADO_.count_other = 0;
 ACADO_.count_mexin = 0;
 ACADO_.count_double = 0;
+
+
+end
+end

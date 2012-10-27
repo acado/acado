@@ -158,10 +158,11 @@ function [ ] = makehelper( type, optmake, varargin )
         %delete(['acado' filesep '*' extmex '*']);
         
         fprintf (1, 'Removing ACADO folders from Matlab path... \n') ;
-        rmpath(genpath([pwd filesep BIN_FOLDER]));      % REMOVE BIN FOLDER FROM PATH 
-        rmpath(genpath([pwd filesep 'shared']));        % REMOVE SHARED ASSETS FROM PATH
-        rmpath(genpath([pwd filesep 'integrator']));    % REMOVE INTEGRATORS FROM PATH
-        rmpath(genpath([pwd filesep 'acado']));         % REMOVE OCP FROM PATH  
+        rmpath(genpath([pwd]));                         % REMOVE ALL
+%         rmpath(genpath([pwd filesep BIN_FOLDER]));      % REMOVE BIN FOLDER FROM PATH 
+%         rmpath(genpath([pwd filesep 'shared']));        % REMOVE SHARED ASSETS FROM PATH
+%         rmpath(genpath([pwd filesep 'integrator']));    % REMOVE INTEGRATORS FROM PATH
+%         rmpath(genpath([pwd filesep 'acado']));         % REMOVE OCP FROM PATH  
         
         fprintf (1, 'Clean completed. \n') ;
     end
@@ -239,9 +240,10 @@ function [ ] = makehelper( type, optmake, varargin )
         end
         
         if (type == 0 || type == 2 || type == 3)
-            addpath([pwd filesep 'acado']);   % ADD acado TO PATH. Only add top folder to path!
-            addpath([pwd filesep 'acado' filesep 'functions']);
-            addpath( genpath([pwd filesep 'acado' filesep 'packages']) );
+            addpath( genpath([pwd filesep 'acado']) );   % ADD acado TO PATH. Only add top folder to path!
+%             addpath([pwd filesep 'acado' filesep 'functions']);
+%             addpath([pwd filesep 'acado' filesep 'keywords']);
+%             addpath( genpath([pwd filesep 'acado' filesep 'packages']) );
         end
         
         fprintf (1, sprintf('\nACADO successfully compiled.\nNeeded to compile %d file(s).\n\n', counter)) ;
