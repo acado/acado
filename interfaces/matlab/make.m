@@ -75,7 +75,6 @@ if verLessThan('matlab', '7.6.0')
     error('Stopping make...');
 end
 
-    
 if (nargin ~= 0)
     makehelper(0, {}, varargin);
 else

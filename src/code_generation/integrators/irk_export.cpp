@@ -325,8 +325,12 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	}
 
 	integrate.addIndex( i );
-	integrate.addIndex( j );
-	integrate.addIndex( k );
+	if( grid.getNumIntervals() > 1 || !hasEquidistantGrid() ) {
+		integrate.addIndex( j );
+		if( rk_outputs.size() > 0 ) {
+			integrate.addIndex( k );
+		}
+	}
 	integrate.addIndex( run );
 	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
 
