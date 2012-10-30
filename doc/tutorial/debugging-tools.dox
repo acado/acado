@@ -1,9 +1,43 @@
 /*!
-\page debuggint_tools Debugging Tools
+\page debugging_tools Debugging Tools
 
 There are several options available for ACADO users to help them debug their code.
 
-<ul>
-	<li>Inspecting IntermediateStates, DifferentialStates and Expressions</li>
-</ul>
+\li Method 1: \ref dt_method_1 Exporting to a C function
+\li Method 2: \ref dt_method_2 Using a Stream
+
+In writing your model with ACADO's IntermediateStates and DifferentialStates, you are actually producing Expression trees. Several options are available to inspect these trees.
+
+\section dt_method_1 Exporting to a C function:
+
+Simply flush your Expression to a Function and flush this function into a File: 
+
+\code
+	DifferentialState x,y;
+	IntermediateState X=(some difficult expression involving x and y);
+	Function f;
+	f << X;
+	FILE *file = fopen("debug.cpp", "w" );
+	file << f;
+	flcose(file);
+\endcode
+
+The 2 DifferentialStates in the generated C code are visible as x[0] and x[1] by default. If the DifferentialStates were declared with a name, they would appear with this name in the generated C code:
+
+\code
+	DifferentialState x("x"),y("y");
+\endcode
+
+ 
+\section dt_method_2 Using a Stream:
+
+Introduce a Stream object to flush to stdout: 
+
+\code
+	DifferentialState x,y;
+	IntermediateState X=(some difficult expression involving x and y);
+	Stream s;
+	s << X;
+\endcode
+
 */

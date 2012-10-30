@@ -21,7 +21,9 @@
  *	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *	<b>More information can be found on: http://www.acadotoolkit.org</b>
- *
+ *	
+ *	\li \ref tutorial
+ *	\li \ref debugging_tools
  *
  *	@defgroup UserInterfaces 			User Interfaces         -- allow black-box users to conveniently define and solve numerical problems
  *	@defgroup UserDataStructures		User Data Structures    -- used mainly by the user to call interface functions
@@ -30,6 +32,5 @@
  *	@defgroup AlgorithmInterfaces 		Algorithm Interfaces    -- allow to link existing (numerical) algorithms to the package
  *	@defgroup AuxiliaryFunctionality	Auxiliary Functionality -- internally used by Numerical Algorithms or User Interfaces
  *	@defgroup ExternalFunctionality		External Functionality  -- to be optionally used by the ACADO Toolkit
- *
  */
 

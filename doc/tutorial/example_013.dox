@@ -1,0 +1,263 @@
+/*!
+
+\page example_013 Setting-Up an MPC Controller
+ 
+\li Part 1: \ref example_013_math
+\li Part 2: \ref example_013_impl
+\li Part 3: \ref example_013_options
+
+This tutorial explains how to setup a basic MPC controller. Again, we consider a simple actively damped quarter car model.
+
+\section example_013_math Mathematical Formulation of Model Predictive Control Problems
+
+Let  x  denote the states,  u  the control input,  p  a time-constant parameter, and  T  the time horizon of an MPC optimization problem. We are interested in tracking MPC problems, which are of the general form: 
+
+\f{eqnarray*}{
+	\displaystyle\min_{x(\cdot),u(\cdot),p} & & 
+	\int_{t_0}^{t_0 + T} \Vert h( t, x(t), u(t), p ) - \eta(t) \Vert_Q^2 \; \mathrm{d}t
+	+ \Vert m( x(t_0+T), p, t_0+T ) - \mu \Vert_P^2 \\
+	\textrm{subject to:} & & x(t_0) = x_0 \\
+	\forall t \in [t_0, t_0 + T]: & & 0 = f( t, x(t), \dot x(t), u(t), p ) \\
+	\forall t \in [t_0, t_0 + T]: & & 0 \geq s( t, x(t), u(t), p ) \\
+	& & 0      =    r( x(t_0+T), p, t_0+T )
+\f}
+
+Here, the function  f  represents the model equations,  s  the path constraints and  r  the terminal constraints. Note that in the online context, the above problem must be solved iteratively for changing  x0  and  t0 . Moreover, we assume here that the objective is given in least square form. Most of the tracking problems that arise in practice can be formulated in this form with  η  and  μ  denoting the tracking and terminal reference.
+
+\section example_013_impl Implementation of an MPC Controller for a Quarter Car
+
+The following piece of code shows how to implement an MPC controller based on this quarter car model. It comprises six main steps:
+<ol>
+	<li>Introducing all variables and constants.</li>
+	<li>Setting up the quarter car ODE model.</li>
+	<li>Setting up a least-squares objective function by defining the five components of the measurement function  h  and an appropriate weighting matrix.</li>
+	<li>Defining a complete optimal control problem (OCP) comprising the dynamic model, the objective function as well as constraints on the input.</li>
+	<li>Setting up a RealTimeAlgorithm defined by the OCP to be solved at each sampling instant together with a sampling time specifying the time lag between two sampling instants. Moreover, several options can be set and plot windows flushed.</li>
+	<li>Setting up a Controller by specifying a control law, i.e. the real-time algorithm solving our OCP in this case, and a reference trajectory to be tracked. In this example, the reference trajectory is read from a file where the value of all components are defined over time. (Note that the reference trajectory can be left away when calling the Controller constructor which is equivalent to all entries zero over the whole simulation horizon.)</li>
+</ol>
+
+\code
+#include <acado_toolkit.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
+
+int main( )
+{
+    USING_NAMESPACE_ACADO
+
+
+    // INTRODUCE THE VARIABLES:
+    // -------------------------
+    DifferentialState xB;
+    DifferentialState xW;
+    DifferentialState vB;
+    DifferentialState vW;
+
+    Control F;
+    Disturbance R;
+
+    double mB = 350.0;
+    double mW = 50.0;
+    double kS = 20000.0;
+    double kT = 200000.0;
+
+
+    // DEFINE A DIFFERENTIAL EQUATION:
+    // -------------------------------
+    DifferentialEquation f;
+
+    f << dot(xB) == vB;
+    f << dot(xW) == vW;
+    f << dot(vB) == ( -kS*xB + kS*xW + F ) / mB;
+    f << dot(vW) == ( -kT*xB - (kT+kS)*xW + kT*R - F ) / mW;
+
+
+    // DEFINE LEAST SQUARE FUNCTION:
+    // -----------------------------
+    Function h;
+
+    h << xB;
+    h << xW;
+    h << vB;
+    h << vW;
+    h << F;
+
+    // LSQ coefficient matrix
+    Matrix Q(5,5);
+    Q(0,0) = 10.0;
+    Q(1,1) = 10.0;
+    Q(2,2) = 1.0;
+    Q(3,3) = 1.0;
+    Q(4,4) = 1.0e-8;
+
+    // Reference
+    Vector r(5); 
+    r.setAll( 0.0 );
+
+
+    // DEFINE AN OPTIMAL CONTROL PROBLEM:
+    // ----------------------------------
+    const double tStart = 0.0;
+    const double tEnd   = 1.0;
+
+    OCP ocp( tStart, tEnd, 20 );
+
+    ocp.minimizeLSQ( Q, h, r );
+
+    ocp.subjectTo( f );
+
+    ocp.subjectTo( -200.0 <= F <= 200.0 );
+    ocp.subjectTo( R == 0.0 );
+
+
+    // SETTING UP THE REAL-TIME ALGORITHM:
+    // -----------------------------------
+    RealTimeAlgorithm alg( ocp,0.025 );
+    alg.set( MAX_NUM_ITERATIONS, 1 );
+    alg.set( PLOT_RESOLUTION, MEDIUM );
+
+    GnuplotWindow window;
+		window.addSubplot( xB, "Body Position [m]" );
+		window.addSubplot( xW, "Wheel Position [m]" );
+		window.addSubplot( vB, "Body Velocity [m/s]" );
+		window.addSubplot( vW, "Wheel Velocity [m/s]" );
+		window.addSubplot( F,  "Damping Force [N]" );
+		window.addSubplot( R,  "Road Excitation [m]" );
+
+    alg << window;
+
+
+    // SETUP CONTROLLER AND PERFORM A STEP:
+    // ------------------------------------
+    StaticReferenceTrajectory zeroReference( "ref.txt" );
+
+    Controller controller( alg,zeroReference );
+
+    Vector y( 4 );
+    y.setZero( );
+    y(0) = 0.01;
+
+    controller.init( 0.0,y );
+    controller.step( 0.0,y );
+
+
+    return 0;
+}
+\endcode
+
+
+The file "ref.txt" contains the data of the (trivial) reference trajectory:
+
+\code
+    DATA FILE: ref.txt
+    
+    --------------------------------------------
+    
+    TIME    xB      xW      vB      vW      F
+    
+    0.0     0.00    0.00    0.00    0.00    0.00
+    1.0     0.00    0.00    0.00    0.00    0.00
+    1.5     0.00    0.00    0.00    0.00    0.00
+    2.0     0.00    0.00    0.00    0.00    0.00
+    3.0     0.00    0.00    0.00    0.00    0.00
+    
+    --------------------------------------------
+\endcode
+
+If we run the above piece of code in ACADO, the corresponding Gnuplot output should be as follows: 
+
+\image html example_013_1.png "Simulation results"
+
+\section example_013_options List of RealTimeAlgorithm Options
+
+We end this tutorial with providing lists comprising the most common options that can be set when defining a RealTimeAlgorithm:
+
+<table border="1" cellpadding="5">
+<tr>
+         <td> <b>Option Name:</b> </td>
+         <td> <b>Option Value:</b> </td>
+         <td> <b>Short Description:</b> </td>
+</tr>
+<tr>
+         <td> MAX_NUM_ITERATIONS   </td>
+         <td> int                  </td>
+         <td> maximum number of SQP iterations <br>
+              (by default, only one SQP iteration is performed) </td>
+</tr>
+<tr>
+         <td> USE_REALTIME_ITERATIONS   </td>
+         <td> YES <br> NO               </td>
+         <td> specifying whether real-time iterations shall be used or not</td>
+</tr>
+<tr>
+         <td> USE_IMMEDIATE_FEEDBACK   </td>
+         <td> YES <br> NO               </td>
+         <td> specifying whether immediate feedback shall be given or not</td>
+</tr>
+<tr>
+         <td> KKT_TOLERANCE   </td>
+         <td> double          </td>
+         <td> termination tolerance for the optimal control algorithm </td>
+</tr>
+<tr>
+         <td> HESSIAN_APPROXIMATION          </td>
+         <td> CONSTANT_HESSIAN               <br>
+              FULL_BFGS_UPDATE               <br>
+              BLOCK_BFGS_UPDATE              <br>
+              GAUSS_NEWTON                   <br>
+              EXACT_HESSIAN                  </td>
+         <td> constant hessian (generalized gradient method) <br>
+              BFGS update of the whole hessian               <br>
+              structure-exploiting BFGS update (default)     <br>
+              Gauss-Newton Hessian approximation (only for LSQ) <br>
+              exact Hessian computation                       </td>
+</tr>
+<tr>
+         <td> DISCRETIZATION_TYPE       </td>
+         <td> SINGLE_SHOOTING        <br>
+              MULTIPLE_SHOOTING      <br>
+              COLLOCATION            </td>
+         <td> single shooting discretization             <br>
+              multiple shooting discretization (default) <br>
+              collocation (will be implemented soon)     </td>
+</tr>
+<tr>
+         <td> INTEGRATOR_TYPE </td>
+         <td> INT_RK12        <br>
+              INT_RK23        <br>
+              INT_RK45        <br>
+              INT_RK78        <br>
+              INT_BDF         </td>
+         <td> Runge Kutta integrator (adaptive Euler method)     <br>
+              Runge Kutta integrator (order 2/3, RKF )           <br>
+              Runge Kutta integrator (order 4/5, Dormand Prince) <br>
+              Runge Kutta integrator (order 7/8, Dormand Prince) <br>
+              BDF (backward differentiation formula) integrator  </td>
+</tr>
+<tr>
+         <td> INTEGRATOR_TOLERANCE   </td>
+         <td> double                 </td>
+         <td> the relative tolerance of the integrator </td>
+</tr>
+<tr>
+         <td> ABSOLUTE_TOLERANCE    </td>
+         <td> double                </td>
+         <td> the absolute tolerance of the integrator (&quot;ATOL&quot;) </td>
+</tr>
+<tr>
+         <td> LEVENBERG_MARQUARDT       </td>
+         <td> double            </td>
+         <td> value for Levenberg-Marquardt regularization  </td>
+</tr>
+<tr>
+         <td> PLOT_RESOLUTION  </td>
+         <td> LOW<br>
+              MEDIUM<br>
+              HIGH</td>
+         <td> specifying screen resolution when plotting </td>
+</tr>
+</table>
+
+
+Next example: \ref example_014
+
+*/

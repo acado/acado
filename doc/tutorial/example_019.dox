@@ -1,0 +1,69 @@
+/*!
+
+\page example_019 Sensitivity Generation for Dynamic Systems
+ 
+\li Part 1: \ref example_019_ad
+\li Part 2: \ref example_019_ext
+\li Part 3: \ref example_019_out
+
+This tutorial explains how to use the ACADO integrators stand-alone to compute first and second order sensitivities of dynamic systems. Here, numerical and automatic differentiation features are discussed.
+
+\section example_019_ad Automatic differentiation for ODE systems
+
+The easiest way to obtain sensistivities for ODE systems with ACADO is to use the symbolic syntax for the implementation of the model as in this case automatic differentiation is available. The following example demonstrates how to simulate a simple ODE model for a pendulum model and how to obtain a (first order) forward sensitivity direction by automatic differentiation: 
+
+\code
+#include <acado_integrators.hpp>
+
+int main( )
+{
+    USING_NAMESPACE_ACADO
+
+    DifferentialState      phi;   // the angle phi
+    DifferentialState     dphi;   // the first derivative of phi w.r.t time
+    Control                  F;   // a force acting on the pendulum
+    Parameter                l;   // the length of the pendulum
+    DifferentialEquation     f;   // the differential equation
+
+    const double m     = 1.0  ;   // the mass of the pendulum
+    const double g     = 9.81 ;   // the gravitational constant
+    const double alpha = 2.0  ;   // frictional constant
+
+    f << dot(phi ) == dphi;
+    f << dot(dphi) == -(m*g/l)*sin(phi) - alpha*dphi + F/(m*l);
+
+    IntegratorRK45 integrator( f );
+
+    double x_start[2] = { 1.0, 0.0 };
+    double u      [1] = { 0.0      };
+    double p      [1] = { 1.0      };
+
+    double t_start    =  0.0        ;
+    double t_end      =  2.0        ;
+
+    integrator.freezeAll();
+    integrator.set( "IntegratorPrintLevel", PL_MEDIUM );
+    integrator.integrate( x_start, p, u, t_start, t_end );
+
+    Matrix seed1(2,1);
+    seed1(0,0) = 1.0;
+    seed1(1,0) = 0.0;
+
+    integrator.setForwardSeed(&seed1,1);
+    integrator.integrateSensitivities();
+
+    return 0;
+}
+\endcode
+
+work in progress
+
+\section example_019_ext Numeric differentiation for external C-models
+
+Work in progress ...
+
+\section example_019_out Output and freezing options
+
+Work in progress ...
+
+*/

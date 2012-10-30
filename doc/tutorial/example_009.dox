@@ -1,0 +1,263 @@
+/*!
+
+\page example_009 Static Optimization Problem with Two Objectives
+
+\li Part 1: \ref example_009_math 
+\li Part 2: \ref example_009_impl 
+\li Part 2: \ref example_009_res
+ 
+This tutorial explains how to set up multi-objective optimization problems in ACADO and discusses several algorithmic settings. As an introductory example a static optimization problems with two objectives is considered.
+
+\section example_009_math Mathematical formulation
+
+For the static bi-objective problem only two scalar variables are involved:  y1  and  y2 . The aim is to simultaneously minimize these two variables. However, both are bounded and have to satisfy a nonlinear constraint.
+
+\f{eqnarray*}{
+	\displaystyle\min_{y_1, y_2} & \{ y_1, y_2 \} \\
+	\textrm{s.t.} & 0 \leq y_1 \leq 5.0 \\
+	& 0 \leq y_2 \leq 5.2 \\
+	& y_2 \geq 5 \exp( -y_1 ) + 2 \exp( -0.5 (y_1 - 3)^2 ) 
+\f}
+
+\section example_009_impl An ACADO tutorial code
+
+The following piece of code illustrates how to set up the bi-objective optimization problem mentioned above. The Pareto set is first generated with 41 points based on NBI, and filtered afterwards using the Pareto filter algorithm. Both original and the filtered Pareto set are plotted and exported. This code is available in the examples/multi_objective directory as scalar2_nbi.cpp. The WS and NNC version are called scalar2_ws.cpp and scalar2_nnc.cpp, respectively.
+
+\code
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
+ 
+int main( )
+{
+    USING_NAMESPACE_ACADO
+
+
+    // INTRODUCE THE VARIABLES:
+    // -------------------------
+    Parameter y1,y2;
+
+
+    // DEFINE AN OPTIMIZATION PROBLEM:
+    // -------------------------------
+    NLP nlp;
+    nlp.minimize( 0, y1 );
+    nlp.minimize( 1, y2 );
+
+    nlp.subjectTo( 0.0 <= y1 <= 5.0 );
+    nlp.subjectTo( 0.0 <= y2 <= 5.2 );
+    nlp.subjectTo( 0.0 <= y2 - 5.0*exp(-y1) - 2.0*exp(-0.5*(y1-3.0)*(y1-3.0)) );
+
+
+    // DEFINE A MULTI-OBJECTIVE ALGORITHM AND SOLVE THE NLP:
+    // -----------------------------------------------------
+    MultiObjectiveAlgorithm algorithm(nlp);
+
+    algorithm.set(PARETO_FRONT_GENERATION,PFG_NORMAL_BOUNDARY_INTERSECTION);
+    algorithm.set(PARETO_FRONT_DISCRETIZATION,41);
+    algorithm.set(KKT_TOLERANCE,1e-12);
+
+    // Minimize individual objective function  
+    algorithm.initializeParameters("scalar2_initial2.txt");
+    algorithm.solveSingleObjective(1);
+
+    // Minimize individual objective function
+    algorithm.initializeParameters("scalar2_initial1.txt");
+    algorithm.solveSingleObjective(0);
+
+    // Generate Pareto set 
+    algorithm.solve();
+
+
+    // GET THE RESULT FOR THE PARETO FRONT AND PLOT IT:
+    // ------------------------------------------------
+    VariablesGrid paretoFront;
+    algorithm.getParetoFront( paretoFront );
+
+    GnuplotWindow window1;
+		window1.addSubplot( paretoFront,"Pareto Front y1 vs y2", "y1","y2", PM_POINTS );
+    window1.plot( );
+
+    FILE *file = fopen("scalar2_nbi_pareto.txt","w");
+    paretoFront.print();
+    file << paretoFront;
+    fclose(file);
+
+
+    // FILTER THE PARETO FRONT AND PLOT IT:
+    // ------------------------------------
+    algorithm.getParetoFrontWithFilter( paretoFront );
+
+    GnuplotWindow window2;
+		window2.addSubplot( paretoFront,"Pareto Front (with filter) y1 vs y2", "y1","y2", PM_POINTS );
+    window2.plot( );
+
+    FILE *file2 = fopen("scalar2_nbi_pareto_filtered.txt","w");
+    paretoFront.print();
+    file2 << paretoFront;
+    fclose(file2);
+
+
+    // PRINT INFORMATION ABOUT THE ALGORITHM:
+    // --------------------------------------
+    algorithm.printInfo();
+
+    return 0;
+}
+\endcode
+
+Typical settings for multi-objective optimization: 
+
+\li The choice of scalarization method
+Currently, three approaches are available: Normal Boundary Intersection, Weighted Sum and Normalized Normal Constraint. The desired method can be selected in the option "ParetoFrontGeneration".
+
+\code
+	algorithm.set(PARETO_FRONT_GENERATION,PFG_NORMAL_BOUNDARY_INTERSECTION);
+	// algorithm.set(PARETO_FRONT_GENERATION,PFG_WEIGHTED_SUM);
+	// algorithm.set(PARETO_FRONT_GENERATION,PFG_NORMALIZED_NORMAL_CONSTRAINT);
+\endcode
+
+As both NBI and NNC require the individual minima, these points are first calculated, before the Pareto set is computed. In the current case, initial guesses are provided for both minimizations. However, for WS precomputing the individual minima is not required.
+
+\code
+	// Minimize individual objective function  
+	algorithm.initializeParameters("scalar2_initial2.txt");
+	algorithm.solveSingleObjective(1);
+
+	// Minimize individual objective function
+	algorithm.initializeParameters("scalar2_initial1.txt");
+	algorithm.solveSingleObjective(0);
+
+	// Generate Pareto set 
+	algorithm.solve();
+\endcode
+
+\li The number of Pareto points  np 
+The number of Pareto points  np  relates to the number of points between two individual minima. Hence, the number of single objective optimizations is  np  for a bi-objective case and 1/2* np *( np +1) for a tri-objective case. Or for a general multi-objective case with  m  objectives this number is 1/(2 m !)* np *( np +1)*...*( np +m-2).
+
+\code
+	algorithm.set( PARETO_FRONT_DISCRETIZATION, 41 );
+\endcode
+
+
+\li Hot-start re-initialization of the different single objective problems
+To speed-up the solution of the different single objective problems, the hot-start strategy is used by default. Here, the solution of a previous single objective optimization is used to initialize the next one. This options can be switched of as follows.
+
+\code
+	algorithm.set( PARETO_FRONT_HOTSTART, BT_FALSE );
+\endcode
+
+\li Pareto filter
+As both NBI and NNC can produce non-Pareto optimal points, a Pareto filter can be employed to remove these points. The rationale behind this Pareto filter is a pairwise comparison of the Pareto candidates.
+
+\code
+  VariablesGrid paretoFront;
+  algorithm.getParetoFront( paretoFront );
+  algorithm.getParetoFrontWithFilter( paretoFront );
+\endcode
+
+\section example_009_res Results
+
+The corresponding Pareto plot as returned by NBI looks as follows in GNUplot.
+
+\image html example_009_1.png "Simulation results"
+
+
+After filtering, part of the candidate solutions are removed and the following Pareto set is obtained.
+
+\image html example_009_2.png "Simulation results"
+
+The resulting Pareto sets (without and with filtering) are stored in separate files.
+For this example these files (scalar2_nbi_pareto.txt and scalar2_nbi_pareto_filtered.txt) 
+read as follows.
+
+The unfiltered Pareto set: 
+
+<tt>
+  5.0000000000000107e+00 3.0436030146863163e-01<BR>
+  4.8510324284838262e+00 3.9969162543346926e-01 <BR>
+  4.7133911121598349e+00 5.0571008143342888e-01 <BR>
+  4.5850420277928858e+00 6.2049642303553354e-01 <BR>
+  4.4641451993538102e+00 7.4231450122746845e-01 <BR>
+  4.3490799951888750e+00 8.6963513410666815e-01 <BR>
+  4.2384174965955932e+00 1.0011100346548896e+00 <BR>
+  4.1308712466129229e+00 1.1355253386984179e+00 <BR>
+  4.0252392043490266e+00 1.2717468346638157e+00 <BR>
+  3.9203388647649642e+00 1.4086587444524188e+00 <BR>
+  3.8149302413018202e+00 1.5450910520393359e+00 <BR>
+  3.7076137306823567e+00 1.6797231316072156e+00<BR>
+  <b> 
+  3.5966766651281867e+00 1.8109389585857820e+00 <BR>
+  3.4798329632877403e+00 1.9365814516773985e+00 <BR>
+  3.3537245489554657e+00 2.0534820257509918e+00 <BR>
+  3.2128264698077271e+00 2.1564274930433989e+00 <BR>
+  3.0465661764272487e+00 2.2354418968369805e+00 <BR>
+  2.8293166560869163e+00 2.2663443173102213e+00 <BR>
+  2.4647256611665060e+00 2.1582195159553814e+00<BR>
+  1.8584089213758319e+00 1.8220091816613602e+00<BR>
+  </b> 
+  1.5433274412816584e+00 1.7606001493726566e+00 <BR>
+  1.3462850348245228e+00 1.8105694273777062e+00 <BR>
+  1.1961741359932123e+00 1.9048219402290063e+00 <BR>
+  1.0719280625931420e+00 2.0234797662008797e+00 <BR>
+  9.6442408351665709e-01 2.1579349558683840e+00 <BR>
+  8.6883450348561131e-01 2.3036322333713701e+00 <BR>
+  7.8227023942536111e-01 2.4578455421487582e+00 <BR>
+  7.0285147784670110e-01 2.6188011436947809e+00 <BR>
+  6.2927821642303783e-01 2.7852723928143126e+00 <BR>
+  5.6060853512112774e-01 2.9563705205726105e+00 <BR>
+  4.9613430942411740e-01 3.1314273608299832e+00 <BR>
+  4.3530697468540458e-01 3.3099253035989671e+00 <BR>
+  3.7769088215086077e-01 3.4914532831144625e+00 <BR>
+  3.2293275209686878e-01 3.6756779546841978e+00 <BR>
+  2.7074096467747111e-01 3.8623241541215165e+00 <BR>
+  2.2087110100100071e-01 4.0511612547168152e+00 <BR>
+  1.7311558816070316e-01 4.2419933965831529e+00 <BR>
+  1.2729611646424321e-01 4.4346523317698354e+00 <BR>
+  8.3257976125861277e-02 4.6289920805263201e+00 <BR>
+  4.0865752270796141e-02 4.8248848692309174e+00 <BR>
+  7.6327832942979512e-17 5.0222179930764810e+00 <BR>
+</tt>
+
+The Pareto set after filtering: 
+
+<tt>
+  5.0000000000000107e+00 3.0436030146863163e-01<BR> 
+  4.8510324284838262e+00 3.9969162543346926e-01 <BR>
+  4.7133911121598349e+00 5.0571008143342888e-01 <BR>
+  4.5850420277928858e+00 6.2049642303553354e-01 <BR>
+  4.4641451993538102e+00 7.4231450122746845e-01 <BR>
+  4.3490799951888750e+00 8.6963513410666815e-01 <BR>
+  4.2384174965955932e+00 1.0011100346548896e+00 <BR>
+  4.1308712466129229e+00 1.1355253386984179e+00 <BR>
+  4.0252392043490266e+00 1.2717468346638157e+00 <BR>
+  3.9203388647649642e+00 1.4086587444524188e+00 <BR>
+  3.8149302413018202e+00 1.5450910520393359e+00 <BR>
+  3.7076137306823567e+00 1.6797231316072156e+00 <BR>
+  1.5433274412816584e+00 1.7606001493726566e+00 <BR>
+  1.3462850348245228e+00 1.8105694273777062e+00 <BR>
+  1.1961741359932123e+00 1.9048219402290063e+00 <BR>
+  1.0719280625931420e+00 2.0234797662008797e+00 <BR>
+  9.6442408351665709e-01 2.1579349558683840e+00 <BR>
+  8.6883450348561131e-01 2.3036322333713701e+00 <BR>
+  7.8227023942536111e-01 2.4578455421487582e+00 <BR>
+  7.0285147784670110e-01 2.6188011436947809e+00 <BR>
+  6.2927821642303783e-01 2.7852723928143126e+00 <BR>
+  5.6060853512112774e-01 2.9563705205726105e+00 <BR>
+  4.9613430942411740e-01 3.1314273608299832e+00 <BR>
+  4.3530697468540458e-01 3.3099253035989671e+00 <BR>
+  3.7769088215086077e-01 3.4914532831144625e+00 <BR>
+  3.2293275209686878e-01 3.6756779546841978e+00 <BR>
+  2.7074096467747111e-01 3.8623241541215165e+00 <BR>
+  2.2087110100100071e-01 4.0511612547168152e+00 <BR>
+  1.7311558816070316e-01 4.2419933965831529e+00 <BR>
+  1.2729611646424321e-01 4.4346523317698354e+00 <BR>
+  8.3257976125861277e-02 4.6289920805263201e+00 <BR>
+  4.0865752270796141e-02 4.8248848692309174e+00 <BR>
+  7.6327832942979512e-17 5.0222179930764810e+00  <BR>
+</tt>
+
+As can be seen, the non-Pareto optimal points depicted in \b bold are removed by the Pareto filter.
+
+Next example: \ref example_010
+
+*/

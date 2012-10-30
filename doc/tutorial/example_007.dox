@@ -1,0 +1,133 @@
+/*!
+
+\page example_007 Optimal Control of Discrete-Time Systems
+
+\li Part 1: \ref example_007_math 
+\li Part 2: \ref example_007_impl 
+ 
+This tutorial explains how to setup a optimal control problems for discrete time systems.
+
+\section example_007_math  Mathematical Formulation of Discrete Time Systems
+
+A discrete time system consists typically of a state sequence  (xk)  and an associated 
+time sequence  (tk)  satisfying an iteration of the form
+
+\f{eqnarray*}{
+	x_{k+1} & = & f(t_k, x_k) \\
+	t_{k+1} & = & t_k + h_k 
+\f}
+
+for  k = 1,2,...,N . Here,  hk  are given time steps. In the optimal control context, 
+the right-hand side function  f  might of course additionally depenend, on controls  uk , 
+parameters  p  etc. The rest of the formulation is analoguous to the tutorial example 
+\ref example_001  with the only difference that the continuous 
+dynamics are exchanged with the discrete-time system.
+
+\section example_007_impl Implementation of a Discrete Time Optimal Control Problem with ACADO Toolkit
+
+In the following code example, the \ref example_001 
+problem is implemented based on a discrete-time system, which can e.g. be obtained 
+by applying an Euler method with constant step size  h. Note that this example is 
+just  for demonstration. In practice, it is usually not recommended to discretize 
+continuous systems with Euler methods.
+
+\code
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
+
+int main( )
+{
+    USING_NAMESPACE_ACADO
+
+    // INTRODUCE THE VARIABLES:
+    // ------------------------------------
+    DifferentialState                v,s,m;
+    Control                          u    ;
+
+    const double t_start =    0.0;
+    const double t_end   =   10.0;
+    const double h       =   0.01;
+
+    DiscretizedDifferentialEquation  f(h) ;
+
+
+    // DEFINE A DISCRETE-TIME SYTSEM:
+    // -------------------------------
+    f << next(s) == s + h*v;
+    f << next(v) == v + h*(u-0.02*v*v)/m;
+    f << next(m) == m - h*0.01*u*u;
+
+
+    // DEFINE AN OPTIMAL CONTROL PROBLEM:
+    // ----------------------------------
+    OCP ocp( t_start, t_end, 50 );
+
+    ocp.minimizeLagrangeTerm( u*u );
+    ocp.subjectTo( f );
+
+    ocp.subjectTo( AT_START, s ==  0.0 );
+    ocp.subjectTo( AT_START, v ==  0.0 );
+    ocp.subjectTo( AT_START, m ==  1.0 );
+
+    ocp.subjectTo( AT_END  , s == 10.0 );
+    ocp.subjectTo( AT_END  , v ==  0.0 );
+
+    ocp.subjectTo( -0.01 <= v <= 1.3 );
+
+
+    // DEFINE A PLOT WINDOW:
+    // ---------------------
+    GnuplotWindow window;
+		window.addSubplot( s,"DifferentialState s" );
+		window.addSubplot( v,"DifferentialState v" );
+		window.addSubplot( m,"DifferentialState m" );
+		window.addSubplot( u,"Control u" );
+		window.addSubplot( PLOT_KKT_TOLERANCE,"KKT Tolerance" );
+		window.addSubplot( 0.5 * m * v*v,"Kinetic Energy" );
+
+
+    // DEFINE AN OPTIMIZATION ALGORITHM AND SOLVE THE OCP:
+    // ---------------------------------------------------
+    OptimizationAlgorithm algorithm(ocp);
+
+    algorithm.set( HESSIAN_APPROXIMATION, EXACT_HESSIAN );
+    algorithm.set( KKT_TOLERANCE        , 1e-10         );
+
+    algorithm << window;
+    algorithm.solve();
+
+    return 0;
+}
+\endcode
+
+In this example, the basic syntax for discrete time dynamic systems is introduced. The notation of the form 
+
+\code
+	DiscretizedDifferentialEquation f(h);
+	f << next(s) == s + h*v;
+	f << next(v) == v + h*(u-0.02*v*v)/m;
+	f << next(m) == m - h*0.01*u*u;
+\endcode
+
+defines a right hand side  f  of the form
+
+\f{eqnarray*}{
+	s_{k+1} & = & s_k + h v_k \\
+	v_{k+1} & = & v_k + h \frac{u_k -0.2 v_k^2}{m_k} \\
+	m_{k+1} & = & m_k - \frac{h}{100} u_k^2
+\f}
+
+In the current version of ACADO only constant step sizes  h  are implemented but 
+more advanced options will be made available in future versions. Note that the 
+start time, end time, step size, and the number  m  of control intervals should 
+be chosen in such a way that we have
+
+\f[
+	\frac{t_\textrm{end} - t_\textrm{start}}{h} = mn
+\f]
+
+for some integer  n.
+
+Next example: \ref example_008
+
+*/

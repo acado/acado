@@ -1,0 +1,280 @@
+/*!
+
+\page example_005 Optimal Control of Hybrid- and Multi-Stage Processes
+
+\li Part 1: \ref example_005_math
+\li Part 2: \ref example_005_guide
+\li Part 3: \ref example_005_multi
+
+This tutorial explains how to optimize over dynamic systems which have at discrete
+points jumps in the states or changes of the dynamic equations. As an guiding
+example to explain the concept we consider a simple model of a toy jojo.
+The interesting point about this jojo is that after the un-roll phase, when 
+the end of the rope is reached, the kinetic energy is suddenly absorbed by the 
+non-elastic rope while the rotational energy is preserved allowing the jojo to 
+coil up again in an opposite direction. This discrete event leads to a "jump" of 
+the velocity. The aim of this tutorial is to explain how a model with such a "jump" 
+can be formulated in a mathematical way and how to setup and solve an associated 
+optimal control problem with ACADO Toolkit. In the last part we also explain how 
+to solve general optimization problems for hybrid models.
+
+\section example_005_math Mathematical Formulation of Dynamic Multi-Stage Optimization Problems
+
+Let us define multiple stage intervals \f$ T_1, \ldots, T_n \subseteq R \f$
+and  \f$ Tk := [t_{k-1}, t_k) \f$ for all \f$ k \in K := \{ 2,\ldots, n\} \f$ and
+\f$ T_n := [t_{k-1}, t_k] \f$, where we denote with  \f$ n \geq 2 \f$ the number
+of of stages. Here we assume \f$ t_1 \leq t_2 \leq \ldots \leq t_{n+1} \f$. 
+A general multi-stage optimization problem has the following form:
+
+\f{eqnarray*}{
+	\displaystyle\min_{x(\cdot), u(\cdot), p, T} & \Phi(x(\cdot), u(\cdot), p, T) \\
+	\textrm{subject to} & \\
+	\forall t \in T_i: & 0 = F_i(t, x(t), \dot{x}(t), u(t), p), \\
+	& 0 = \lim_{t \rightarrow t_k^-} J_k(x(t), x(t_k), p), \\
+	\forall t \in T_i: & 0 \leq h_i(t, x(t), u(t), p), \\
+	& 0 = r(x(t_1), \ldots, x(t_{n+1}), p), \\
+	& \textrm{for all } i \in I, k \in K. 
+\f}
+
+where we use the index set notation  I := { 1, ..., n }. Here, the functions  Fi  
+are the model functions, while the functions  Ji  denote the transition- (or jump-)
+ functions. The function  hi  denote the constraints associated with the stages, 
+ while the function  r  is a general multi-stage boundary constraint. Note that  
+ x  denotes the state vector while  u  and  p  are the controls and parameters as 
+ usual for optimal control problems. The vector  T  contains the time points  
+ t1,  t2,  ... , tn+1 , which might be optimized, too. 
+
+Remarks: 
+
+\li If the models are standard ODE's which do not contain any algebraic states the 
+model functions Fi have the typically the form
+\f[
+	0 = F_i(t, x(t), \dot{x}(t), u(t), p) = \dot{x}(t) - f_i(t, x(t), u(t), p).
+\f]
+
+\li Analogously, if x does not contain algebraic states, the jump functions Ji 
+can often be written in an explicit form
+\f[
+	0 = J_k(x(t), x(t_k), p) = x(t_k) - j_i(x(t), p).
+\f]
+
+
+\section example_005_guide A Guiding Example: Optimal Control of a Jojo
+
+As an example for a multi-stage optimization problem, we consider a simple jojo. Here, the altitute of the jojo is denoted by the state variable y, while v = dy/dt is the associated velocity. The hand playing with the jojo is described by the altitude x, while w = dx/dt is the velocity of the hand. The distance l between hand and jojo is defined as l := x - y. As soon as the jojo is released from the hand, the equations of motion are given by
+
+\f[
+	f_1, f_2: \quad
+	\left( 
+	\begin{array}{c}
+		\dot{x}(t) \\
+		\dot{v}(t) \\
+		\dot{y}(t) \\
+		\dot{w}(t)
+	\end{array}
+	\right)
+	=
+	\left(
+	\begin{array}{c}
+		v(t)\\
+		u(t) \\
+		w(t)\\
+		-\mu g + ku + a(w-v)
+	\end{array}
+	\right)
+\f] 
+
+Here, we define the jojo's damping ratio \f$ k  :=  J / ( m r^2 + J ) \f$ as well 
+as the effective mass ratio μ := 1 - k, which depend on the inertia J, the mass 
+m and the (inner) coiling radius r of the jojo. Moreover, g denotes the acceleration 
+due to gravity while a is the jojo's coiling friction. Note that we assume here that 
+the hand can directly be controlled by the input function u.
+
+Let us assume that the sum of  r  and the total length of the rope is given by L. 
+When the distance l = x - y happens to be equal to this length L, the kinetic energy 
+of the jojo is suddenly absorbed, while for the rotational energy a conservation law 
+is satisfied. Thus, the jump is given by
+
+\f[
+	j_1: \quad
+	\left( 
+	\begin{array}{c}
+		\dot{x_1}(t) \\
+		\dot{v_1}(t) \\
+		\dot{y_1}(t) \\
+		\dot{w_1}(t)
+	\end{array}
+	\right)
+	=
+	\lim_{t\rightarrow t_1^-}
+	\left(
+	\begin{array}{c}
+		x(t)\\
+		v(t) \\
+		y(t)\\
+		kv(t) + \sqrt(k^2v(t)^2 + k(w(t)^2 - 2v(t)w(t)))
+	\end{array}
+	\right).
+\f] 
+
+In order to understand this expression, it is helpful to remark that for the passive 
+case  v = 0   (i.e. for the case that the hand is at rest during the jump) the jump
+ condition simplifies to
+ 
+ \f[
+ 	w(t_1) = - \lim_{t \rightarrow t^-_1} \sqrt(k ) w(t),
+ \f]
+ 
+ i.e. the damping ratio k measures the loss of kinetic energy for a passive jump. After the jump, the equations of motion are again given by the above dynamic system, i.e. we have  f1 = f2  in our example. 
+
+Now, our aim is to minimize the control action of the hand defined as 
+
+\f[
+	\Phi := \int_0^{t_2} u(t)^2 \textrm{d}t 
+\f]
+
+while starting and stopping the jojo under the following conditions: 
+
+\f{eqnarray*}{
+	x( 0 ) = y( 0 ) & = & 0\ \textrm{m}\\
+	v( 0 ) = w( 0 ) & = & 0\ \textrm{m}\backslash\textrm{s} \\
+	x(t_1) - y(t_1) & = & L \\
+	x(t_2) = y(t_2) & = & -0.1\ \textrm{m} \\
+	v(t_2) = w(t_2) & = & 0\ \textrm{m}\backslash\textrm{s}
+\f}
+
+I.e. we start both the hand and the jojo at rest at the position 0. Moreover at the time  t1  we require that the length of the rope is equal to  L = 1m . Finally, the jojo should be stopped when softly touching the hand   -10cm   below the starting point. Note that the durations of the two phases, represented by the time variables  t1  and  t2 , are optimized, too.
+
+\section example_005_multi Implementation of Multi Stage Optimal Control Problems with ACADO Toolkit
+
+The following piece of code shows how to implement the above optimal control problem 
+for the jojo model. In addition, a Gnuplot window is constructed, such that the results 
+can automatically be visualized: 
+
+\code
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
+
+int main( )
+{
+	USING_NAMESPACE_ACADO
+
+	// THE VARIABLES OF THE JOJO:
+	// --------------------------
+	DifferentialState          x;   // the position of the "hand"
+	DifferentialState          v;   // the velocity of the "hand"
+	DifferentialState          y;   // the position of the jojo
+	DifferentialState          w;   // the velocity of the jojo
+
+	Control                    u;   // the control action of the "hand"
+
+	Parameter                 T1;   // the duration of phase I
+	Parameter                 T2;   // the duration of phase II
+
+
+	// THE GIVEN JOJO PARAMETERS:
+	// --------------------------
+	const double       m = 0.200;   // the mass of the jojo (200g)
+	const double       J = 1e-4 ;   // the inertia of the jojo (1e-4kg*m^2)
+	const double       r = 0.010;   // the coiling radius of the jojo (1cm)
+	const double       g = 9.81 ;   // the gravitational constant (9.81m/s^2)
+    const double       a = 1e-2 ;   // the coiling friction (1e-2/s)
+    const double       L = 1.00 ;   // the length of the rope (1m)
+
+
+    // OTHER USEFUL CONSTANTS:
+    // ---------------------------
+    const double k  = J/(m*r*r+J);   // the jojo's damping ratio
+    const double mu = 1.0 - k    ;   // the effective mass ratio
+
+
+    // THE MODEL EQUATIONS FOR PHASE I:
+    // -----------------------------------
+    DifferentialEquation f1( 0.0, T1 );
+    f1 << dot(x) ==  v                   ;
+    f1 << dot(v) ==  u                   ;
+    f1 << dot(y) ==  w                   ;
+    f1 << dot(w) == -mu*g + k*u + a*(v-w);
+
+
+    // THE EQUATIONS FOR THE JUMP:
+    // ---------------------------
+    Transition        j;
+    IntermediateState z;
+
+    z = k*v;
+
+    j << x  ==  x ;
+    j << v  ==  v ;
+    j << y  ==  y ;
+    j << w  ==  z + sqrt( z*z + k*(w*w-2.0*w*v) );
+
+
+    // THE MODEL EQUATIONS FOR PHASE II:
+    // -----------------------------------
+    DifferentialEquation f2( T1, T2 );
+    f2 << dot(x) ==  v                   ;
+    f2 << dot(v) ==  u                   ;
+    f2 << dot(y) ==  w                   ;
+    f2 << dot(w) == -mu*g + k*u + a*(v-w);
+
+
+    // DEFINE AN OPTIMAL CONTROL PROBLEM:
+    // ----------------------------------
+    OCP ocp;
+    ocp.minimizeLagrangeTerm( u*u );
+
+    ocp.subjectTo( f1, 20 );
+    ocp.subjectTo( j      );
+    ocp.subjectTo( f2, 20 );
+
+    ocp.subjectTo( AT_START     , x   ==  0.00 );
+    ocp.subjectTo( AT_START     , v   ==  0.00 );
+    ocp.subjectTo( AT_START     , y   ==  0.00 );
+    ocp.subjectTo( AT_START     , w   ==  0.00 );
+
+    ocp.subjectTo( AT_TRANSITION, x-y ==  L    );
+
+    ocp.subjectTo( AT_END       , x   == -0.10 );
+    ocp.subjectTo( AT_END       , v   ==  0.00 );
+    ocp.subjectTo( AT_END       , x-y ==  0.00 );
+    ocp.subjectTo( AT_END       , w   ==  0.00 );
+
+    ocp.subjectTo( 0.0 <= T1 <= 2.0 );
+    ocp.subjectTo( 0.0 <= T2 <= 4.0 );
+
+
+    // SETUP A GNUPLOT WINDOW TO DISPLAY THE RESULTS:
+    // ---------------------------------------------------
+    GnuplotWindow window;
+		window.addSubplot( x, "POSITION OF THE HAND: x " );
+		window.addSubplot( v, "VELOCITY OF THE HAND: v " );
+		window.addSubplot( y, "POSITION OF THE JOJO: y " );
+		window.addSubplot( w, "VELOCITY OF THE JOJO: w " );
+		window.addSubplot( u, "THE CONTROL INPUT   : u " );
+
+
+    // DEFINE AN OPTIMIZATION ALGORITHM AND SOLVE THE OCP:
+    // ---------------------------------------------------
+    OptimizationAlgorithm algorithm(ocp);
+
+    algorithm << window;
+    algorithm.solve();
+
+    return 0;
+}
+\endcode
+ 
+If we run the above piece of code in ACADO, the corresponding Gnuplot output 
+should be as follows:
+
+\image html example_005_1.png "Simulation results"
+
+Note that the velocity of the hand has a peek at the time, where the jump is. 
+The velocity of the jojo is discontinous at this time. One interpretation of this 
+result is that the energy loss during the jump can be reduced by moving the hand 
+quickly upwards during this phase.
+
+Next example: \ref example_006
+
+*/

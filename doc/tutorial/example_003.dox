@@ -1,0 +1,153 @@
+/*!
+
+\page example_003 Algorithmic Options and Numerical Accuracy
+ 
+In the previous tutorials we have only used the optimization algorithms with its default settings. For optimal control problems these default settings are usually a multiple-shooting SQP type method combined with a standard Runge-Kutta integrator for the state integration. This tutorial describes how to overwrite the default settings and how to specialize the algorithm for our problems regarding both the method and its numerical accuracy settings:
+
+\li Part 1: \ref example_003_options
+\li Part 2: \ref example_003_common
+
+\section example_003_options A tutorial code with algorithmic options
+
+Let us directly start with an example on how to set some options for the simple rocket optimization problem from the first tutorial: 
+
+\code
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
+
+int main( )
+{
+	USING_NAMESPACE_ACADO
+
+	DifferentialState        s,v,m      ;	// the differential states
+	Control                  u          ;	// the control input u
+	Parameter                T          ;	// the time horizon T
+	DifferentialEquation     f( 0.0, T );	// the differential equation
+
+	//  -------------------------------------
+	OCP ocp( 0.0, T, 50 )               ;	// time horizon of the OCP: [0,T]
+											// use 50 control intervals
+	ocp.minimizeMayerTerm( T )          ;	// the time T should be optimized
+
+	f << dot(s) == v                    ;   // an implementation
+	f << dot(v) == (u-0.2*v*v)/m        ;   // of the model equations
+	f << dot(m) == -0.01*u*u            ;   // for the rocket.
+
+	ocp.subjectTo( f                   );   // minimize T s.t. the model,
+	ocp.subjectTo( AT_START, s ==  0.0 );   // the initial values for s,
+	ocp.subjectTo( AT_START, v ==  0.0 );   // v,
+	ocp.subjectTo( AT_START, m ==  1.0 );   // and m,
+
+	ocp.subjectTo( AT_END  , s == 10.0 );   // the terminal constraints for s
+	ocp.subjectTo( AT_END  , v ==  0.0 );   // and v,
+
+	ocp.subjectTo( -0.1 <= v <=  1.7   );   // as well as the bounds on v
+	ocp.subjectTo( -1.1 <= u <=  1.1   );   // the control input u,
+	ocp.subjectTo(  5.0 <= T <= 15.0   );   // and the time horizon T.
+	//  -------------------------------------
+
+	OptimizationAlgorithm algorithm(ocp);   // construct optimization algorithm,
+
+	algorithm.set( INTEGRATOR_TYPE      , INT_RK78        );
+	algorithm.set( INTEGRATOR_TOLERANCE , 1e-8            );
+	algorithm.set( DISCRETIZATION_TYPE  , SINGLE_SHOOTING );
+	algorithm.set( KKT_TOLERANCE        , 1e-4            );
+
+	algorithm.solve()                   ;   // and solve the problem.
+
+	return 0                            ;
+}
+\endcode
+
+The options which have been set in this example are first the integrator type: now, the Runge-Kutta integrator with order (7/8) will be used (instead of a Runge Kutta integrator with order 4/5, which is the default choice). In addition, the integrator tolerance has been set, while single shooting is used instead of the multiple shooting method, which would be the default choice. Finally, the KKT tolerance, which is used for the convergence criterion of the SQP algorithm, has been set to   1e-4 . Here,   1e-6  would have been the default choice. 
+
+Note that all options can be set on the optimization algorithm by using the syntax 
+
+set( <Option Name>, <Option Value> ). 
+
+An important exception are the number of control intervals which are specified in the constructor of the OCP following the definition of the time interval.
+
+\section example_003_common A brief overview of the most common options for optimal control with ACADO Toolkit
+
+<table border="1" cellpadding="5">
+<tr>
+         <td> <b>Option Name:</b> </td>
+         <td> <b>Option Value:</b> </td>
+         <td> <b>Short Description:</b> </td>
+</tr>
+<tr>
+         <td> MAX_NUM_ITERATIONS   </td>
+         <td> int                  </td>
+         <td> maximum number of SQP iterations <br>
+              (maxNumIterations = 0: only simulation) </td>
+</tr>
+<tr>
+         <td> KKT_TOLERANCE   </td>
+         <td> double          </td>
+         <td> termination tolerance for the optimal control algorithm </td>
+</tr>
+<tr>
+         <td> HESSIAN_APPROXIMATION          </td>
+         <td> CONSTANT_HESSIAN               <br>
+              FULL_BFGS_UPDATE               <br>
+              BLOCK_BFGS_UPDATE              <br>
+              GAUSS_NEWTON                   <br>
+              EXACT_HESSIAN                  </td>
+         <td> constant hessian (generalized gradient method) <br>
+              BFGS update of the whole hessian               <br>
+              structure exploiting BFGS update (default)     <br>
+              Gauss-Newton Hessian approximation (only for LSQ) <br>
+              Exact Hessians                                    </td>
+</tr>
+<tr>
+         <td> DISCRETIZATION_TYPE       </td>
+         <td> SINGLE_SHOOTING        <br>
+              MULTIPLE_SHOOTING      <br>
+              COLLOCATION            </td>
+         <td> single shooting discretization             <br>
+              multiple shooting discretization (default) <br>
+              collocation (will be implemented soon)     </td>
+</tr>
+<tr>
+         <td> INTEGRATOR_TYPE </td>
+         <td> INT_RK12        <br>
+              INT_RK23        <br>
+              INT_RK45        <br>
+              INT_RK78        <br>
+              INT_BDF         </td>
+         <td> Runge Kutta integrator (adaptive Euler method)     <br>
+              Runge Kutta integrator (order 2/3, RKF )           <br>
+              Runge Kutta integrator (order 4/5, Dormand Prince) <br>
+              Runge Kutta integrator (order 7/8, Dormand Prince) <br>
+              BDF (backward differentiation formula) integrator  </td>
+</tr>
+<tr>
+         <td> INTEGRATOR_TOLERANCE   </td>
+         <td> double                 </td>
+         <td> the relative tolerance of the integrator </td>
+</tr>
+<tr>
+         <td> ABSOLUTE_TOLERANCE    </td>
+         <td> double                </td>
+         <td> the absolute tolerance of the integrator (&quot;ATOL&quot;) </td>
+</tr>
+<tr>
+         <td> MAX_NUM_INTEGRATOR_STEPS  </td>
+         <td> int            </td>
+         <td> maximum number of integrator steps  </td>
+</tr>
+<tr>
+         <td> LEVENBERG_MARQUARDT       </td>
+         <td> double            </td>
+         <td> value for Levenberg-Marquardt regularization  </td>
+</tr>
+<tr>
+         <td> MIN_LINESEARCH_PARAMETER       </td>
+         <td> double            </td>
+         <td> minimum stepsize of the line-search globalization </td>
+</tr>
+</table>
+
+Next example: \ref example_004
+
+*/

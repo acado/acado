@@ -9,20 +9,20 @@ The best way for getting started with the ACADO Toolkit is to work through the o
 <ul>
 	<li>\subpage example_001</li>
 	<li>\subpage example_002</li>
-	<li>\subpage Algorithmic options and numerical accuracy</li>
+	<li>\subpage example_003</li>
 	<li>\subpage example_004</li>
-	<li>\subpage Optimal Control of hybrid- and multi-stage processes</li>
+	<li>\subpage example_005</li>
 	<li>\subpage Optimization of differential algebraic systems (DAE)</li>
-	<li>\subpage Optimal control of discrete time systems</li>
+	<li>\subpage example_007</li>
 </ul>
 
 \section tutorial_002 Multi-Objective Optimization/Optimal Control Problems
 
 <ul>
 	<li>\subpage Introduction to multi-objective optimization</li>
-	<li>\subpage Static optimization problem with two objectives</li>
+	<li>\subpage example_007</li>
 	<li>\subpage Static optimization problem with three objectives</li>
-	<li>\subpage Optimal control of a plug flow reactor with conflicting energy and conversion</li>
+	<li>\subpage example_009</li>
 </ul>
 
 \section tutorial_003 Parameter Estimation Problems
@@ -34,25 +34,25 @@ The best way for getting started with the ACADO Toolkit is to work through the o
 \section tutorial_004 Model Predictive Control
 
 <ul>
-	<li>\subpage Setting-Up a Process for MPC Simulations</li>
+	<li>\subpage example_011</li>
 	<li>\subpage Advanced Features for Simulating a Process</li>
-	<li>\subpage Setting-Up a MPC Controller</li>
+	<li>\subpage example_013</li>
 	<li>\subpage Setting-Up More Classical Feedback Controllers</li>
-	<li>\subpage Performing a Basic Closed-Loop MPC Simulation</li>
+	<li>\subpage example_015</li>
 </ul>
 
 \section tutorial_005 Low-Level Data Structures and Global Functionality
 
 <ul>
 	<li>\subpage Using Grids and VariablesGrids</li>
-	<li>\subpage Plotting Results</li>
+	<li>\subpage example_017</li>
 </ul>
 
 \section tutorial_006 Using the ACADO Integrators Stand-Alone
 
 <ul>
 	<li>\subpage Simulation of a dynamic system</li>
-	<li>\subpage Sensitivity generation for dynamic systems</li>
+	<li>\subpage example_019</li>
 </ul>
 
 */
