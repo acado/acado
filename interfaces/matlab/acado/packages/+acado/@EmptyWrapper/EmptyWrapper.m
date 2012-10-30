@@ -36,7 +36,7 @@ classdef EmptyWrapper < acado.Expression
     
     methods
         function obj = EmptyWrapper()
-
+            obj.zero = 1;
         end
         
         function s = toString(obj)

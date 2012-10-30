@@ -40,6 +40,7 @@ function generateCPP(obj)
     
     obj.problemname = ACADO_.problemname;
     
+    ACADO_.generatingCode = 1;
     fprintf('Writing c++ files... \n');
     
     if (~isempty(obj.instructionList))

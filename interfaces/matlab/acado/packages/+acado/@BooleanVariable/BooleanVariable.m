@@ -35,6 +35,10 @@ classdef BooleanVariable < acado.Expression
     methods
         function obj = BooleanVariable()
 
+        end
+        
+        function s = toDisplayString(obj)
+            s = toString(obj); 
         end        
 
     end

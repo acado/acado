@@ -45,12 +45,23 @@ classdef Quotient < acado.BinaryOperator
                 obj2 = acado.DoubleConstant(obj2);
             end
             
+            if obj2.zero
+               error('DIVISION BY ZERO !'); 
+            end
+            if obj1.zero
+               obj.zero; 
+            end
+            
             obj.obj1 = obj1;
             obj.obj2 = obj2;
         end
         
         function s = toString(obj)
-            s = sprintf(' (%s)/(%s) ', obj.obj1.toString, obj.obj2.toString); 
+            if obj.zero
+                s = '0';
+            else
+                s = sprintf('(%s)/(%s)', obj.obj1.toString, obj.obj2.toString); 
+            end
         end
     end
     

@@ -58,11 +58,17 @@ classdef OutputFcn < acado.Function
                 error('ERROR: only integer subscripts are currently supported.');
             end
             
-            for i = 1:length(indices)
-                if (isa(rhs{i}, 'acado.Expression'))
-                    obj.outputList{indices(i)} = rhs{i};
-                else
-                    error('ERROR: Invalid OutputFcn add call.');
+            if isa(rhs, 'cell')
+                for i = 1:length(indices)
+                    if (isa(rhs{i}, 'acado.Expression'))
+                        obj.outputList{indices(i)} = rhs{i};
+                    else
+                        error('ERROR: Invalid OutputFcn add call.');
+                    end
+                end
+            elseif isa(rhs, 'acado.Expression')
+                for i = 1:length(indices)
+                    obj.outputList{indices(i)} = rhs(i);
                 end
             end
         end

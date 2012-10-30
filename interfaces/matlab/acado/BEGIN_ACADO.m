@@ -52,6 +52,7 @@ end
 
 % A model is now active
 ACADO_.modelactive = 1;
+ACADO_.generatingCode = 0;
 
 % Set current problemname
 if nargin == 0

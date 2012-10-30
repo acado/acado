@@ -119,18 +119,30 @@ classdef DifferentialEquation < acado.Function
                 error('Only _one_ Matlab DAE or ODE can be linked.');
             end
             global ACADO_
-            for i = 1:length(indices)
-                if (isa(rhs{i}, 'acado.Equals'))
-                    obj.differentialList{indices(i)} = rhs{i};
-                elseif (isa(rhs{i}, 'acado.Expression'))
-                    if(isempty(ACADO_.helper.dx) && indices(i) <= length(ACADO_.helper.x))
-                        obj.differentialList{indices(i)} = acado.Equals(acado.Dot(ACADO_.helper.x{indices(i)}), rhs{i});
+            if isa(rhs, 'cell')
+                for i = 1:length(indices)
+                    if (isa(rhs{i}, 'acado.Equals'))
+                        obj.differentialList{indices(i)} = rhs{i};
+                    elseif (isa(rhs{i}, 'acado.Expression'))
+                        if(isempty(ACADO_.helper.dx) && indices(i) <= length(ACADO_.helper.x))
+                            obj.differentialList{indices(i)} = acado.Equals(acado.Dot(ACADO_.helper.x{indices(i)}), rhs{i});
+                        else
+                            obj.differentialList{indices(i)} = acado.Equals(acado.DoubleConstant(0), rhs{i});
+                        end
                     else
-                        obj.differentialList{indices(i)} = acado.Equals(acado.DoubleConstant(0), rhs{i});
+                        error('ERROR: Invalid DifferentialEquation.add call. <a href="matlab: help acado.DifferentialEquation.add">help acado.DifferentialEquation.add</a>');
                     end
-                else
-                    error('ERROR: Invalid DifferentialEquation.add call. <a href="matlab: help acado.DifferentialEquation.add">help acado.DifferentialEquation.add</a>');
                 end
+            elseif isa(rhs, 'acado.Expression')
+                for i = 1:length(indices)
+                    if(isempty(ACADO_.helper.dx) && indices(i) <= length(ACADO_.helper.x))
+                        obj.differentialList{indices(i)} = acado.Equals(acado.Dot(ACADO_.helper.x{indices(i)}), rhs(i));
+                    else
+                        obj.differentialList{indices(i)} = acado.Equals(acado.DoubleConstant(0), rhs(i));
+                    end
+                end
+            else
+                error('ERROR: Invalid DifferentialEquation.add call. <a href="matlab: help acado.DifferentialEquation.add">help acado.DifferentialEquation.add</a>');
             end
         end
     end

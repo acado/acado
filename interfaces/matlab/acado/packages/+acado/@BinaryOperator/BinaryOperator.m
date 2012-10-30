@@ -35,7 +35,6 @@ classdef BinaryOperator < acado.Operator
         function obj = BinaryOperator()
             
         end 
-        
        
     
     end

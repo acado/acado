@@ -85,12 +85,12 @@ classdef SIMexport < acado.ExportModule
             obj.name = strcat(obj.name, num2str(ACADO_.count_other));
             
             if (nargin == 2 )  % SIMexport( simIntervals, totalTime )
-                obj.simIntervals = acado.DoubleConstant(varargin{1});
-                obj.totalTime = acado.DoubleConstant(varargin{2});
+                obj.simIntervals = varargin{1};
+                obj.totalTime = varargin{2};
                 
             elseif (nargin == 1)  % SIMexport( totalTime )
-                obj.simIntervals = acado.DoubleConstant(1);
-                obj.totalTime = acado.DoubleConstant(varargin{1});
+                obj.simIntervals = 1;
+                obj.totalTime = varargin{1};
                 
             end
             
@@ -138,19 +138,16 @@ classdef SIMexport < acado.ExportModule
         
         function setModel(obj, varargin)
             
+            global ACADO_;
             if (nargin == 2 && isa(varargin{1}, 'acado.DifferentialEquation'))
                 % SIMexport.setModel( f );
                 obj.model = varargin{1};
                 
-            elseif (nargin == 2 && isa(varargin{1}, 'cell'))
+            elseif (nargin == 2 && (isa(varargin{1}, 'cell') || isa(varargin{1}, 'acado.Expression')))
                 obj.modelDefined = 0;
                 obj.model = acado.DifferentialEquation();
-                global ACADO_;
                 ACADO_.helper.removeLastInstruction();
                 obj.model(:) = varargin{1};
-                
-            elseif (nargin == 2 && isa(varargin{1}, 'acado.Expression'))
-                obj.setModel({varargin{1}});
                 
             elseif (nargin == 4 && isa(varargin{1}, 'char') && isa(varargin{2}, 'char') && isa(varargin{3}, 'char'))
                 % SIMexport.setModel( fileName, modelName, modelDiffsName );
@@ -162,27 +159,23 @@ classdef SIMexport < acado.ExportModule
                 error('ERROR: Invalid setModel. <a href="matlab: help acado.SIMexport.setModel">help acado.SIMexport.setModel</a>');
                 
             end
-            
         end
         
         
         function addOutput(obj, varargin)
             
+            global ACADO_;
             if (nargin == 2 && isa(varargin{1}, 'acado.OutputFcn'))
                 obj.outputDefined(end+1) = 1;
                 % SIMexport.addOutput( h );
                 obj.output{end+1} = varargin{1};
                 
-            elseif (nargin == 2 && isa(varargin{1}, 'cell'))
+            elseif (nargin == 2 && (isa(varargin{1}, 'cell') || isa(varargin{1}, 'acado.Expression')))
                 obj.outputDefined(end+1) = 0;
                 tmp = acado.OutputFcn();
-                global ACADO_;
                 ACADO_.helper.removeLastInstruction();
                 tmp(:) = varargin{1};
                 obj.output{end+1} = tmp;
-                
-            elseif (nargin == 2 && isa(varargin{1}, 'acado.Expression'))
-                obj.addOutput({varargin{1}});
                 
             elseif (nargin == 4 && isa(varargin{1}, 'char') && isa(varargin{2}, 'char') && isa(varargin{3}, 'numeric'))
                 obj.outputDefined(end+1) = 1;
@@ -257,10 +250,10 @@ classdef SIMexport < acado.ExportModule
                 
                 % HEADER
                 if (~isempty(obj.totalTime))
-                    fprintf(cppobj.fileMEX,sprintf('    SIMexport %s( %s, %s );\n', obj.name, obj.simIntervals.name, obj.totalTime.name));
+                    fprintf(cppobj.fileMEX,sprintf('    SIMexport %s( %s, %s );\n', obj.name, num2str(obj.simIntervals), num2str(obj.totalTime)));
                     
                 elseif (~isempty(obj.simIntervals))
-                    fprintf(cppobj.fileMEX,sprintf('    SIMexport %s( %s );\n', obj.name, obj.simIntervals.name));
+                    fprintf(cppobj.fileMEX,sprintf('    SIMexport %s( %s );\n', obj.name, num2str(obj.simIntervals)));
                     
                 else
                     fprintf(cppobj.fileMEX,sprintf('    SIMexport %s( );\n', obj.name));

@@ -52,13 +52,20 @@ classdef Addition < acado.BinaryOperator
 
                 obj.obj1 = varargin{1};
                 obj.obj2 = varargin{2};
-            else
-                error('Invalid addition');
+            end
+            if nargin > 0 && obj.obj1.zero && obj.obj2.zero
+               obj.zero = 1; 
             end
         end
         
         function s = toString(obj)
-            s = sprintf(' %s + %s ', obj.obj1.toString, obj.obj2.toString); 
+            if isa(obj.obj1, 'acado.EmptyWrapper') || obj.obj1.zero
+                s = sprintf('%s', obj.obj2.toString);
+            elseif isa(obj.obj2, 'acado.EmptyWrapper') || obj.obj2.zero
+                s = sprintf('%s', obj.obj1.toString);
+            else
+                s = sprintf('(%s + %s)', obj.obj1.toString, obj.obj2.toString); 
+            end
         end
     end
     

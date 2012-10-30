@@ -38,6 +38,7 @@
 classdef DoubleConstant < acado.Operator    
     properties(SetAccess='private')
         val;
+        callByValue = 0;
     end
     
     methods
@@ -45,12 +46,20 @@ classdef DoubleConstant < acado.Operator
             global ACADO_;
             
             if (isa(val, 'numeric'))
-                ACADO_.count_double = ACADO_.count_double+1;
-                                
+                   
+                obj.callByValue = 1;
                 obj.val = val;
-                obj.name = strcat('acadoconstant', num2str(ACADO_.count_double));
-                
-                ACADO_.helper.addInstruction(obj);
+                if val == 0
+                   obj.zero = 1; 
+                elseif val == 1
+                   obj.one = 1;
+                end
+%                 ACADO_.count_double = ACADO_.count_double+1;
+%                                 
+%                 obj.val = val;
+%                 obj.name = strcat('acadoconstant', num2str(ACADO_.count_double));
+%                 
+%                 ACADO_.helper.addInstruction(obj);
                 
             elseif (isa(val, 'acado.MexInput'))
                 
@@ -72,7 +81,17 @@ classdef DoubleConstant < acado.Operator
         function s = toString(obj)
             % toString is used in epxressions (eg 2 + x -> DoubleConstant +
             % DifferentialState)
-            s = obj.name; 
+            global ACADO_;
+            
+            if obj.callByValue
+                if ~isempty(ACADO_) && ACADO_.generatingCode
+                    s = strcat('(double)', num2str(obj.val));
+                else
+                    s = num2str(obj.val);
+                end
+            else
+                s = obj.name; 
+            end
             
         end
     end

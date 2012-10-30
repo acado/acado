@@ -45,12 +45,23 @@ classdef Product < acado.BinaryOperator
                 obj2 = acado.DoubleConstant(obj2);
             end
             
+            if obj1.zero || obj2.zero
+               obj.zero = 1; 
+            end
             obj.obj1 = obj1;
             obj.obj2 = obj2;
         end
         
         function s = toString(obj)
-            s = sprintf(' (%s)*(%s) ', obj.obj1.toString, obj.obj2.toString); 
+            if obj.zero
+                s = '0';
+            elseif obj.obj1.one
+                s = sprintf('%s', obj.obj2.toString);
+            elseif obj.obj2.one
+                s = sprintf('%s', obj.obj1.toString);
+            else
+                s = sprintf('%s*%s', obj.obj1.toString, obj.obj2.toString);
+            end
         end
     end
     

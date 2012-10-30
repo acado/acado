@@ -31,45 +31,135 @@
 classdef Expression < handle
     properties
         name;
+        
+        zero = 0;
+        one = 0;
     end
     
     methods
-        function obj = Expression()
+        function obj = Expression( varargin )
             
         end
         
         function r = dot(obj1, b, dim)
-            r = acado.Dot(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Dot(obj1(i,j));
+                end
+            end
         end
         
         function r = next(obj1, b, dim)
-            r = acado.Next(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Next(obj1(i,j));
+                end
+            end
         end
         
         %Matlab help: "Implementing Operators for Your Class"
         
         function r = mtimes(obj1,obj2)    % *
-            r = acado.Product(obj1,obj2);
+            if size(obj1,2) ~= size(obj2,1)
+                error('ERROR: Invalid acado.Product. Check your dimensions..');
+            end
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj2,2)
+                    r(i,j) = acado.Addition(acado.Product(obj1(i,1),obj2(1,j)));
+                    for k = 2:size(obj1,2)
+                        r(i,j) = acado.Addition(r(i,j), acado.Product(obj1(i,k),obj2(k,j)));
+                    end
+                end
+            end
+        end
+        
+        function r = times(obj1,obj2)    % .*
+            if isa(obj2,'numeric')
+                for i = 1:size(obj1,1)
+                    for j = 1:size(obj1,2)
+                        r(i,j) = acado.Addition(acado.Product(obj1(i,j),obj2));
+                    end
+                end
+            elseif isa(obj1,'numeric')
+                for i = 1:size(obj2,1)
+                    for j = 1:size(obj2,2)
+                        r(i,j) = acado.Addition(acado.Product(obj2(i,j),obj1));
+                    end
+                end
+            else
+                if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                    error('ERROR: Invalid acado.Product. Check your dimensions..');
+                end
+                for i = 1:size(obj1,1)
+                    for j = 1:size(obj1,2)
+                        r(i,j) = acado.Addition(acado.Product(obj1(i,j),obj2(i,j)));
+                    end
+                end
+            end
         end
         
         function r = plus(obj1,obj2)      % +
-            r = acado.Addition(obj1,obj2);
+            if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                error('ERROR: Invalid acado.Addition. Check your dimensions..');
+            end
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Addition(obj1(i,j),obj2(i,j));
+                end
+            end
         end
         
         function r = minus(obj1,obj2)     % -
-            r = acado.Subtraction(obj1,obj2);
+            if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                error('ERROR: Invalid acado.Addition. Check your dimensions..');
+            end
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Subtraction(obj1(i,j),obj2(i,j));
+                end
+            end
         end
         
         function r = mrdivide(obj1,obj2)  % /
+            if numel(obj1) > 1 || numel(obj2) > 1
+                error('ERROR: Invalid division !');
+            end
             r = acado.Quotient(obj1,obj2);
         end
         
+        function r = rdivide(obj1,obj2)    % .*
+            if isa(obj2,'numeric')
+                for i = 1:size(obj1,1)
+                    for j = 1:size(obj1,2)
+                        r(i,j) = acado.Addition(acado.Quotient(obj1(i,j),obj2));
+                    end
+                end
+            else
+                if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                    error('ERROR: Invalid acado.Quotient. Check your dimensions..');
+                end
+                for i = 1:size(obj1,1)
+                    for j = 1:size(obj1,2)
+                        r(i,j) = acado.Addition(acado.Quotient(obj1(i,j),obj2(i,j)));
+                    end
+                end
+            end
+        end
+        
         function r = uminus(obj1)         % -
-            r = acado.Subtraction(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Subtraction(obj1(i,j));
+                end
+            end
         end
         
         function r = uplus(obj1)          % +
-            r = acado.Addition(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Addition(obj1(i,j));
+                end
+            end
         end
         
         function r = mpower(obj1, obj2)   % ^
@@ -161,16 +251,37 @@ classdef Expression < handle
         end
         
         function C = vertcat(varargin)
-            C = {};
             for k = 1 : nargin,
-                C{k} = varargin{k};
+                C(k,1) = acado.Addition(varargin{k});
             end
         end
         
         function C = horzcat(varargin)
-            C = {};
             for k = 1 : nargin,
-                C{k} = varargin{k};
+                C(1,k) = acado.Addition(varargin{k});
+            end
+        end
+        
+        function display(x)
+            fprintf('\n%s = \n\n', inputname(1));
+            for i = 1:size(x,1)
+                for j = 1:size(x,2)
+                    fprintf('%s ', toString(x(i,j)));
+                end
+                fprintf('\n');
+            end
+            fprintf('\n');
+        end
+        
+        function out = ctranspose(in)
+            out = transpose(in);
+        end
+        
+        function out = transpose(in)
+            for i = 1:size(in,1)
+                for j = 1:size(in,2)
+                    out(j,i) = in(i,j);
+                end
             end
         end
     end
