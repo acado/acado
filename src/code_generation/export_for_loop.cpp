@@ -31,41 +31,36 @@
 
 #include <acado/code_generation/export_for_loop.hpp>
 
-
+#include <sstream>
 
 BEGIN_NAMESPACE_ACADO
+
+using namespace std;
 
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportForLoop::ExportForLoop(	const String& _loopVariable,
-								int _startValue,
-								int _finalValue,
-								int _increment,
-								BooleanType _doLoopUnrolling
-								) : ExportStatementBlock( )
-{
-	ExportIndex loopVariableTmp( _loopVariable.getName() );
-	init( loopVariableTmp,_startValue,_finalValue,_increment,_doLoopUnrolling );
-}
-
-
 ExportForLoop::ExportForLoop(	const ExportIndex& _loopVariable,
-								int _startValue,
-								int _finalValue,
-								int _increment,
+								const ExportIndex& _startValue,
+								const ExportIndex& _finalValue,
+								const ExportIndex& _increment,
 								BooleanType _doLoopUnrolling
-								) : ExportStatementBlock( )
+							) : ExportStatementBlock( ),
+									loopVariable( _loopVariable ),
+									startValue( _startValue ),
+									finalValue( _finalValue ),
+									increment( _increment ),
+									doLoopUnrolling( _doLoopUnrolling )
 {
-	init( _loopVariable,_startValue,_finalValue,_increment,_doLoopUnrolling );
+	sanityCheck();
 }
 
 
 ExportForLoop::ExportForLoop( const ExportForLoop& arg ) : ExportStatementBlock( arg )
 {
-	init( arg.loopVariable,arg.startValue,arg.finalValue,arg.increment,arg.doLoopUnrolling );
+	init(arg.loopVariable, arg.startValue, arg.finalValue, arg.increment, arg.doLoopUnrolling );
 }
 
 
@@ -80,7 +75,7 @@ ExportForLoop& ExportForLoop::operator=( const ExportForLoop& arg )
 	if ( this != &arg )
 	{
 		ExportStatementBlock::operator=( arg );
-		init( arg.loopVariable,arg.startValue,arg.finalValue,arg.increment,arg.doLoopUnrolling );
+		init(arg.loopVariable, arg.startValue, arg.finalValue, arg.increment, arg.doLoopUnrolling);
 	}
 
 	return *this;
@@ -89,53 +84,24 @@ ExportForLoop& ExportForLoop::operator=( const ExportForLoop& arg )
 
 ExportStatement* ExportForLoop::clone( ) const
 {
-	return new ExportForLoop(*this);
-}
-
-
-
-returnValue ExportForLoop::init(	const String& _loopVariable,
-									int _startValue,
-									int _finalValue,
-									int _increment,
-									BooleanType _doLoopUnrolling
-									)
-{
-	ExportIndex loopVariableTmp;
-	
-	if ( _loopVariable.isEmpty() == BT_FALSE )
-		loopVariableTmp.init( _loopVariable.getName() );
-	else
-		loopVariableTmp.init( "run1" );
-	
-	return init( loopVariableTmp,_startValue,_finalValue,_increment,_doLoopUnrolling );
+	return new ExportForLoop( *this );
 }
 
 
 returnValue ExportForLoop::init(	const ExportIndex& _loopVariable,
-									int _startValue,
-									int _finalValue,
-									int _increment,
+									const ExportIndex& _startValue,
+									const ExportIndex& _finalValue,
+									const ExportIndex&  _increment,
 									BooleanType _doLoopUnrolling
 									)
 {
-	ASSERT( _loopVariable.isGiven( ) == BT_FALSE );
-
-	clear( );
-	
-	if ( ( _startValue > _finalValue ) && ( _increment >= 0 ) )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
-	
-	if ( ( _startValue < _finalValue ) && ( _increment <= 0 ) )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
+	clear();
 
 	loopVariable = _loopVariable;
 	startValue = _startValue;
 	finalValue = _finalValue;
 	increment  = _increment;
 	doLoopUnrolling = _doLoopUnrolling;
-
-	return SUCCESSFUL_RETURN;
 }
 
 
@@ -147,9 +113,6 @@ returnValue ExportForLoop::exportDataDeclaration(	FILE* file,
 													int _precision
 													) const
 {
-//	if ( doLoopUnrolling == BT_FALSE )
-//		loopVariable.exportDataDeclaration(file, _realString, _intString, _precision);
-//
 //	ExportStatementBlock::exportDataDeclaration(file, _realString, _intString, _precision);
 
 	return SUCCESSFUL_RETURN;
@@ -162,32 +125,68 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 										int _precision
 										) const
 {
+	returnValue status = sanityCheck();
+	if (status != SUCCESSFUL_RETURN)
+		return status;
+
 	if ( doLoopUnrolling == BT_FALSE )
 	{
-		acadoFPrintf( file, "for( %s=%d; ", loopVariable.getName().getName(),startValue );
-		acadoFPrintf( file, "%s<%d; ", loopVariable.getName().getName(),finalValue );
-		
-		switch( increment )
+		stringstream s;
+
+		s << "for (" << loopVariable.getName().getName() << " = ";
+
+		if (startValue.isGiven() == BT_TRUE)
 		{
-			case 1:
-				acadoFPrintf( file,"++%s )\n{\n", loopVariable.getName().getName() );
-				break;
-				
-			case -1:
-				acadoFPrintf( file,"--%s )\n{\n", loopVariable.getName().getName() );
-				break;
-				
-			default:
-				acadoFPrintf( file," %s+=%d )\n{\n", loopVariable.getName().getName(),increment );
-				break;
+			s << startValue.getGivenValue();
 		}
+		else
+		{
+			s << startValue.getName().getName();
+		}
+		s << "; ";
+
+		s << loopVariable.getName().getName() << " < ";
+		if (finalValue.isGiven() == BT_TRUE)
+		{
+			s << finalValue.getGivenValue();
+		}
+		else
+		{
+			s << finalValue.getName().getName();
+		}
+		s << "; ";
+		
+		if (increment.isGiven() == BT_TRUE)
+		{
+			switch ( increment.getGivenValue() )
+			{
+				case 1:
+					s << "++" << loopVariable.getName().getName();
+					break;
+
+				case -1:
+					s << "--" << loopVariable.getName().getName();
+					break;
+
+				default:
+					s << loopVariable.getName().getName() << " += " << increment.getGivenValue();
+					break;
+			}
+		}
+		else
+		{
+			s << loopVariable.getName().getName() << " += " << increment.getName().getName();
+		}
+
+		s << ")" << endl << "{" << endl;
+
+		acadoFPrintf(file, "%s", s.str().c_str());
+
+		ExportStatementBlock::exportCode(file, _realString, _intString, _precision);
+
+		acadoFPrintf( file,"\n}\n");
 	}
 	
-	ExportStatementBlock::exportCode( file,_realString,_intString,_precision );
-	
-	if ( doLoopUnrolling == BT_FALSE )
-		acadoFPrintf( file,"\n}\n");
-
 	return SUCCESSFUL_RETURN;
 }
 
@@ -217,7 +216,25 @@ returnValue ExportForLoop::clear( )
 	return SUCCESSFUL_RETURN;
 }
 
+//
+// PRIVATE MEMBER FUNCTIONS:
+//
+returnValue ExportForLoop::sanityCheck() const
+{
+	if (doLoopUnrolling == BT_TRUE)
+		return ACADOERRORTEXT(RET_NOT_IMPLEMENTED_YET, "Loop unrolling is not yet implemented");
 
+	if (startValue.isGiven() == BT_TRUE && finalValue.isGiven() == BT_TRUE && increment.isGiven() == BT_TRUE)
+	{
+		if ( ( startValue.getGivenValue() > finalValue.getGivenValue() ) && ( increment.getGivenValue() >= 0 ) )
+			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Export for loop arguments are invalid");
+
+		if ( ( startValue.getGivenValue() < finalValue.getGivenValue() ) && ( increment.getGivenValue() <= 0 ) )
+			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Export for loop arguments are invalid");
+	}
+
+	return SUCCESSFUL_RETURN;
+}
 
 
 CLOSE_NAMESPACE_ACADO

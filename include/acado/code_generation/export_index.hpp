@@ -257,8 +257,10 @@ class ExportIndex : public ExportData
 
 
 static const int emptyConstExportIndexValue = 0;
-static const ExportIndex emptyConstExportIndex( (String)"default_index",INT,&emptyConstExportIndexValue );
+static const ExportIndex emptyConstExportIndex((String)"default_index", INT, &emptyConstExportIndexValue );
 
+static const int constIndexValueOne = 1;
+static const ExportIndex constExportIndexValueOne((String)"one", INT, &constIndexValueOne);
 
 CLOSE_NAMESPACE_ACADO
 

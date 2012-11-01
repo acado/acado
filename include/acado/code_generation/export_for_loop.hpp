@@ -25,7 +25,7 @@
 
 /**
 *	\file include/acado/code_generation/export_for_loop.hpp
-*	\author Hans Joachim Ferreau, Boris Houska
+*	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
 *    \date 2010-2011
 */
 
@@ -50,7 +50,7 @@ BEGIN_NAMESPACE_ACADO
  *
  *	The class ExportForLoop allows to export code of a for-loop.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class ExportForLoop : public ExportStatementBlock
 {
@@ -59,7 +59,7 @@ class ExportForLoop : public ExportStatementBlock
 	//
 	public:
 
-		/** Default constructor which optionally takes the name of the 
+		/** Default constructor which optionally takes the name of the
 		 *	loop variable as well as other loop settings.
 		 *
 		 *	@param[in] _loopVariable		Name of the loop variable.
@@ -68,26 +68,10 @@ class ExportForLoop : public ExportStatementBlock
 		 *	@param[in] _increment			Increment of the loop counter.
 		 *	@param[in] _doLoopUnrolling		Flag indicating whether loop shall be unrolled.
 		 */
-		ExportForLoop(	const String& _loopVariable = "run1",
-						int _startValue = 0,
-						int _finalValue = 0,
-						int _increment = 1,
-						BooleanType _doLoopUnrolling = BT_FALSE
-						);
-
-		/** Constructor which takes the loop variable as well as other 
-		 *	loop settings.
-		 *
-		 *	@param[in] _loopVariable		Name of the loop variable.
-		 *	@param[in] _startValue			Start value of the loop counter.
-		 *	@param[in] _finalValue			Final value of the loop counter.
-		 *	@param[in] _increment			Increment of the loop counter.
-		 *	@param[in] _doLoopUnrolling		Flag indicating whether loop shall be unrolled.
-		 */
-		ExportForLoop(	const ExportIndex& _loopVariable,
-						int _startValue = 0,
-						int _finalValue = 0,
-						int _increment = 1,
+		ExportForLoop(	const ExportIndex& _loopVariable = emptyConstExportIndex,
+						const ExportIndex& _startValue = emptyConstExportIndex,
+						const ExportIndex& _finalValue = emptyConstExportIndex,
+						const ExportIndex& _increment = constExportIndexValueOne,
 						BooleanType _doLoopUnrolling = BT_FALSE
 						);
 
@@ -115,22 +99,6 @@ class ExportForLoop : public ExportStatementBlock
 		 */
 		virtual ExportStatement* clone( ) const;
 
-
-		/** Initializes for-loop with given loop settings.
-		 *
-		 *	@param[in] _loopVariable		Name of the loop variable.
-		 *	@param[in] _startValue			Start value of the loop counter.
-		 *	@param[in] _finalValue			Final value of the loop counter.
-		 *	@param[in] _increment			Increment of the loop counter.
-		 *	@param[in] _doLoopUnrolling		Flag indicating whether loop shall be unrolled.
-		 */
-		returnValue init(	const String& _loopVariable = "run1",
-							int _startValue = 0,
-							int _finalValue = 0,
-							int _increment = 1,
-							BooleanType _doLoopUnrolling = BT_FALSE
-							);
-
 		/** Initializes for-loop with given loop settings.
 		 *
 		 *	@param[in] _loopVariable		Name of the loop variable.
@@ -140,10 +108,10 @@ class ExportForLoop : public ExportStatementBlock
 		 *	@param[in] _doLoopUnrolling		Flag indicating whether loop shall be unrolled.
 		 */
 		returnValue init(	const ExportIndex& _loopVariable,
-							int _startValue = 0,
-							int _finalValue = 0,
-							int _increment = 1,
-							BooleanType _doLoopUnrolling = BT_FALSE
+							const ExportIndex& _startValue,
+							const ExportIndex& _finalValue,
+							const ExportIndex& _increment,
+							BooleanType _doLoopUnrolling
 							);
 
 
@@ -204,19 +172,21 @@ class ExportForLoop : public ExportStatementBlock
 		 */
 		returnValue clear( );
 
+	private:
+
+		returnValue sanityCheck( void ) const;
 
 	//
 	// DATA MEMBERS:
 	//
 	protected:
 
-		ExportIndex loopVariable;					/**< Loop variable. */
+		ExportIndex loopVariable;		/**< Loop variable. */
+		ExportIndex startValue;			/**< Start value of the loop counter. */
+		ExportIndex finalValue;			/**< Final value of the loop counter. */
+		ExportIndex increment;			/**< Increment of the loop counter. */
 		
-		int startValue;								/**< Start value of the loop counter. */
-		int finalValue;								/**< Final value of the loop counter. */
-		int increment;								/**< Increment of the loop counter. */
-		
-		BooleanType doLoopUnrolling;				/**< Flag indicating whether loop shall be unrolled when exporting the code. */
+		BooleanType doLoopUnrolling;	/**< Flag indicating whether loop shall be unrolled when exporting the code. */
 };
 
 
