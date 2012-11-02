@@ -570,6 +570,39 @@ CONFIGURE_FILE(
 
 ################################################################################
 #
+# Configure include.mk script for backward compatibility
+#
+################################################################################
+
+SET( INCLUDE_MK_CPP_EXE
+	${CMAKE_CXX_COMPILER}
+)
+
+STRING(REPLACE ";" " " INCLUDE_MK_CPP_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+
+STRING(REPLACE ";" " -I" INCLUDE_MK_INCLUDE_DIRS "${ACADO_ENV_INCLUDE_DIRS}")
+SET( INCLUDE_MK_INCLUDE_DIRS 
+	"-I${INCLUDE_MK_INCLUDE_DIRS}"
+)
+
+STRING(REPLACE ";" " -L" INCLUDE_MK_LIBRARY_DIRS "${ACADO_ENV_LIBRARY_DIRS}")
+SET( INCLUDE_MK_LIBRARY_DIRS
+	"-L${INCLUDE_MK_LIBRARY_DIRS}"
+)
+
+STRING(REPLACE ";" " -l" INCLUDE_MK_LIBS "${ACADO_ENV_STATIC_LIBRARIES}")
+SET( INCLUDE_MK_LIBS
+	"-l${INCLUDE_MK_LIBS}"
+)
+
+CONFIGURE_FILE(
+	"${PROJECT_SOURCE_DIR}/cmake/include.mk.in"
+	"${PROJECT_BINARY_DIR}/include.mk"
+	@ONLY
+)
+
+################################################################################
+#
 # Build examples
 #
 ################################################################################
