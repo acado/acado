@@ -1,0 +1,120 @@
+/*!
+
+\page example_006 Optimization of Differential Algebraic Systems (DAEs)
+ 
+This tutorial explains how to solve optimal control problems for which the model equation contains not only differential, but also algebraic states.
+
+\li Part 1: \ref example_006_part1
+\li Part 2: \ref example_006_part2
+\li Part 3: \ref example_006_part3
+
+
+\section example_006_part1 Mathematical formulation of general DAE optimization problems
+
+For the general DAE formulation we summarize the differential and algebraic states of the DAE in one vector  x . Moreover, we denote by  u  the control input, by  p  a constant parameter, and by  T  the time horizon length of an DAE optimization problem. The general problem formulation reads now as follows:
+
+\f{eqnarray*}{
+	\displaystyle\min_{x(\cdot), u(\cdot), p, T} & \Phi(x(\cdot), u(\cdot), p, T) \\
+	\textrm{subject to} & \\
+	\forall t \in [0,T]: & 0 = F(t, x(t), \dot{x}(t), u(t), p), \\
+	\forall t \in [0,T]: & 0 \leq h(t, x(t), u(t), p), \\
+	& 0 = r(x(0), x(T), p)\\
+\f}
+
+Here, the function F denotes the model equation, Φ the objective functional, h the path constraints, and r the boundary constraints of the optimization problem.
+
+Remarks:
+
+\li The model function  F  can in practice often be written as
+\f[
+	0 = F(t, x(t), \dot{x}(t), u(t), p) = \left( 
+		\begin{array}{c}
+			\dot{x}(t) - f_1(t,x(t),u(t),p) \\
+			f_2(t,x(t),u(t),p) 
+		\end{array}
+		\right)
+\f]
+In this case, we say that the DAE is semi-implicit.
+
+\li Another special case, which often occurs in practice, is that the function  F  is linear in  dx/dt  such that we have
+\f[
+	0 = F(t, x(t), \dot{x}(t), u(t), p) = M(t, x(t), u(t), p)\dot{x}(t) - f(t,x(t),u(t),p)
+\f]
+for a matrix valued function M. However, in ACADO linear dependencies are automatically detected such that from the user point of view, we do not have to make a difference between linear and fully-implicit DAEs.
+
+
+\section example_006_part2 An ACADO tutorial code for semi-implicit DAEs
+
+The following piece of code illustrates how to setup a simple DAE optimization problem for the case that the DAE is semi-implicit: 
+
+\code
+  	#include <acado_optimal_control.hpp>
+    #include <include/acado_gnuplot/gnuplot_window.hpp>
+  
+    int main( ){
+  
+      USING_NAMESPACE_ACADO
+  
+      // INTRODUCE THE VARIABLES:
+      // -------------------------
+      DifferentialState     x;
+      DifferentialState     l;
+      AlgebraicState        z;
+      Control               u;
+      DifferentialEquation  f;
+  
+      const double t_start =  0.0;
+      const double t_end   = 10.0;
+  
+      // DEFINE A DIFFERENTIAL EQUATION:
+      // -------------------------------
+      f << dot(x) == -x + 0.5*x*x + u + 0.5*z;
+      f << dot(l) ==  x*x + 3.0*u*u            ;
+      f <<      0 ==  z + exp(z) - 1.0 + x     ;
+  
+  
+      // DEFINE AN OPTIMAL CONTROL PROBLEM:
+      // ----------------------------------
+      OCP ocp( t_start, t_end, 10 );
+      ocp.minimizeMayerTerm( l );
+  
+      ocp.subjectTo( f );
+      ocp.subjectTo( AT_START, x == 1.0 );
+      ocp.subjectTo( AT_START, l == 0.0 );
+  
+      GnuplotWindow window;
+        window.addSubplot(x,"DIFFERENTIAL STATE  x");
+        window.addSubplot(z,"ALGEBRAIC STATE  z"   );
+        window.addSubplot(u,"CONTROL  u"   );
+  
+  
+      // DEFINE AN OPTIMIZATION ALGORITHM AND SOLVE THE OCP:
+      // ----------------------------------------------------
+      OptimizationAlgorithm algorithm(ocp);
+  
+      algorithm.set( ABSOLUTE_TOLERANCE    , 1e-7          );
+      algorithm.set( INTEGRATOR_TOLERANCE  , 1e-7          );
+      algorithm.set( HESSIAN_APPROXIMATION , EXACT_HESSIAN );
+  
+      algorithm << window;
+      algorithm.solve();
+  
+      return 0;
+    }
+\endcode
+
+Running this example, the corresponding Gnuplot output should look as follows:
+
+\image html example_006_1.jpg "Simulation results"
+
+
+\section example_006_part3 DAE optimization options for advanced users
+
+work in progress
+
+
+Next example: \ref example_007
+
+*/
+
+

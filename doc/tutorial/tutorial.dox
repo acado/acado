@@ -12,14 +12,14 @@ The best way for getting started with the ACADO Toolkit is to work through the o
 	<li>\subpage example_003</li>
 	<li>\subpage example_004</li>
 	<li>\subpage example_005</li>
-	<li>\subpage Optimization of differential algebraic systems (DAE)</li>
+	<li>\subpage example_006</li>
 	<li>\subpage example_007</li>
 </ul>
 
 \section tutorial_002 Multi-Objective Optimization/Optimal Control Problems
 
 <ul>
-	<li>\subpage Introduction to multi-objective optimization</li>
+	<li>\subpage example_008</li>
 	<li>\subpage example_007</li>
 	<li>\subpage Static optimization problem with three objectives</li>
 	<li>\subpage example_009</li>
