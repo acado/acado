@@ -28,8 +28,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2012
 % 
 classdef Acos < acado.UnaryOperator
     
@@ -39,7 +39,9 @@ classdef Acos < acado.UnaryOperator
     
     methods
         function obj = Acos(obj1)
-            obj.obj1 = obj1;
+            if nargin > 0
+                obj.obj1 = obj1;
+            end
         end
         
         function s = toString(obj)

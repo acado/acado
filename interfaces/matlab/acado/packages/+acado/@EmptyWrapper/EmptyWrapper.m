@@ -26,8 +26,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2012
 % 
 classdef EmptyWrapper < acado.Expression   
     properties(SetAccess='private')
@@ -40,7 +40,7 @@ classdef EmptyWrapper < acado.Expression
         end
         
         function s = toString(obj)
-            s = '';
+            s = '0';
         end
     end
     

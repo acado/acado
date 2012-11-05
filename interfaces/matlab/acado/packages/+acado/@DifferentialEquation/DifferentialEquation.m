@@ -40,8 +40,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009-2010
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2009-2012
 % 
 classdef DifferentialEquation < acado.Function    
     properties(SetAccess='private')
@@ -135,10 +135,14 @@ classdef DifferentialEquation < acado.Function
                 end
             elseif isa(rhs, 'acado.Expression')
                 for i = 1:length(indices)
-                    if(isempty(ACADO_.helper.dx) && indices(i) <= length(ACADO_.helper.x))
-                        obj.differentialList{indices(i)} = acado.Equals(acado.Dot(ACADO_.helper.x{indices(i)}), rhs(i));
+                    if isa(rhs(i), 'acado.Equals')
+                        obj.differentialList{indices(i)} = rhs(i);
                     else
-                        obj.differentialList{indices(i)} = acado.Equals(acado.DoubleConstant(0), rhs(i));
+                        if(isempty(ACADO_.helper.dx) && indices(i) <= length(ACADO_.helper.x))
+                            obj.differentialList{indices(i)} = acado.Equals(acado.Dot(ACADO_.helper.x{indices(i)}), rhs(i));
+                        else
+                            obj.differentialList{indices(i)} = acado.Equals(acado.DoubleConstant(0), rhs(i));
+                        end
                     end
                 end
             else

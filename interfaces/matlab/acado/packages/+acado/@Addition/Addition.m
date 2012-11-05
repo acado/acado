@@ -29,19 +29,19 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009
-% 
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2012
+%
 classdef Addition < acado.BinaryOperator
     properties(SetAccess='private')
-
+        
     end
     
     methods
         function obj = Addition(varargin)
             if (nargin == 1)
-                obj.obj2 = varargin{1};
-                obj.obj1 = acado.EmptyWrapper();      
+                obj.obj1 = varargin{1};
+                obj.obj2 = acado.EmptyWrapper();
                 
             elseif (nargin == 2)
                 if (isa(varargin{1}, 'numeric'))
@@ -49,22 +49,41 @@ classdef Addition < acado.BinaryOperator
                 elseif (isa(varargin{2}, 'numeric'))
                     varargin{2} = acado.DoubleConstant(varargin{2});
                 end
-
+                
                 obj.obj1 = varargin{1};
                 obj.obj2 = varargin{2};
             end
             if nargin > 0 && obj.obj1.zero && obj.obj2.zero
-               obj.zero = 1; 
+                obj.zero = 1;
             end
         end
         
         function s = toString(obj)
-            if isa(obj.obj1, 'acado.EmptyWrapper') || obj.obj1.zero
+            if obj.zero
+                s = '0';
+            elseif isa(obj.obj1, 'acado.EmptyWrapper') || obj.obj1.zero
                 s = sprintf('%s', obj.obj2.toString);
             elseif isa(obj.obj2, 'acado.EmptyWrapper') || obj.obj2.zero
                 s = sprintf('%s', obj.obj1.toString);
             else
-                s = sprintf('(%s + %s)', obj.obj1.toString, obj.obj2.toString); 
+                s = sprintf('(%s + %s)', obj.obj1.toString, obj.obj2.toString);
+            end
+        end
+        
+        function jac = jacobian(obj, var)
+            if ~isvector(obj)
+                error('A jacobian can only be computed of a vector function.');
+            end
+            for i = 1:length(obj)
+                if obj(i).zero
+                    jac(i,:) = zeros(1,length(var));
+                elseif isa(obj(i).obj1, 'acado.EmptyWrapper') || obj(i).obj1.zero
+                    jac(i,:) = jacobian(obj(i).obj2, var);
+                elseif isa(obj(i).obj2, 'acado.EmptyWrapper') || obj(i).obj2.zero
+                    jac(i,:) = jacobian(obj(i).obj1, var);
+                else
+                    jac(i,:) = jacobian(obj(i).obj1, var) + jacobian(obj(i).obj2, var);
+                end
             end
         end
     end

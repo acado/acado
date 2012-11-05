@@ -30,8 +30,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2012
 %
 classdef Power < acado.BinaryOperator
     properties(SetAccess='private')
@@ -46,12 +46,45 @@ classdef Power < acado.BinaryOperator
                 obj2 = acado.DoubleConstant(obj2);
             end
             
+            if obj.obj1.zero
+               obj.zero = 1;
+            elseif obj.obj2.zero
+               obj.one = 1; 
+            end
+            
             obj.obj1 = obj1;
             obj.obj2 = obj2;
         end
         
         function s = toString(obj)
-            s = sprintf('pow(%s,%s)', obj.obj1.toString, obj.obj2.toString); 
+            global ACADO_;
+            
+            if obj.zero
+                s = '0';
+            elseif obj.one
+                s = '1';
+            elseif ~isempty(ACADO_) && ACADO_.generatingCode
+                s = sprintf('pow(%s,%s)', obj.obj1.toString, obj.obj2.toString); 
+            else
+                s = sprintf('(%s)^(%s)', obj.obj1.toString, obj.obj2.toString); 
+            end
+        end
+        
+        function jac = jacobian(obj, var)
+            if ~isvector(obj)
+                error('A jacobian can only be computed of a vector function.');
+            end
+            for i = 1:length(obj)
+                if obj(i).zero
+                    jac(i,:) = zeros(1,length(var));
+                elseif obj(i).one
+                    jac(i,:) = zeros(1,length(var));
+                elseif isa(obj(i).obj2, 'acado.DoubleConstant')
+                    jac(i,:) = obj(i).obj2*acado.Power(obj(i).obj1,obj(i).obj2.value-1)*jacobian(obj(i).obj1, var);
+                else
+                    jac(i,:) = obj(i)*(jacobian(obj(i).obj1,var)*(obj(i).obj2/obj(i).obj1) + jacobian(obj(i).obj2,var)*acado.Logarithm(obj(i).obj1));
+                end
+            end
         end
     end
     

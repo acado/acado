@@ -28,9 +28,9 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009
-% 
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2012
+%
 classdef Dot < acado.Expression
     properties(SetAccess='private')
         obj1;
@@ -38,11 +38,17 @@ classdef Dot < acado.Expression
     
     methods
         function obj = Dot(obj1)
-            obj.obj1 = obj1;
+            if nargin > 0
+                obj.obj1 = obj1;
+                global ACADO_;
+                if isa(obj1, 'acado.DifferentialState')
+                    ACADO_.helper.addDX(obj1);
+                end
+            end
         end
         
         function s = toString(obj)
-            s = sprintf('dot(%s)', obj.obj1.toString); 
+            s = sprintf('dot(%s)', obj.obj1.toString);
         end
     end
     

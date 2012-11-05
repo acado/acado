@@ -32,10 +32,10 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009-2010
-% 
-classdef DoubleConstant < acado.Operator    
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2009-2012
+%
+classdef DoubleConstant < acado.Operator
     properties(SetAccess='private')
         val;
         callByValue = 0;
@@ -43,37 +43,39 @@ classdef DoubleConstant < acado.Operator
     
     methods
         function obj = DoubleConstant(val)
-            global ACADO_;
-            
-            if (isa(val, 'numeric'))
-                   
-                obj.callByValue = 1;
-                obj.val = val;
-                if val == 0
-                   obj.zero = 1; 
-                elseif val == 1
-                   obj.one = 1;
+            if nargin > 0
+                global ACADO_;
+                
+                if (isa(val, 'numeric'))
+                    
+                    obj.callByValue = 1;
+                    obj.val = val;
+                    if val == 0
+                        obj.zero = 1;
+                    elseif val == 1
+                        obj.one = 1;
+                    end
+                    %                 ACADO_.count_double = ACADO_.count_double+1;
+                    %
+                    %                 obj.val = val;
+                    %                 obj.name = strcat('acadoconstant', num2str(ACADO_.count_double));
+                    %
+                    %                 ACADO_.helper.addInstruction(obj);
+                    
+                elseif (isa(val, 'acado.MexInput'))
+                    
+                    if (val.type ~= 1)
+                        error('MexInput should be in this case a numeric value, not a vector or matrix.');
+                    end
+                    
+                    obj.name = val.name;
+                    
+                else
+                    error('DoubleConstant expects a numeric value or a acado.MexInput');
                 end
-%                 ACADO_.count_double = ACADO_.count_double+1;
-%                                 
-%                 obj.val = val;
-%                 obj.name = strcat('acadoconstant', num2str(ACADO_.count_double));
-%                 
-%                 ACADO_.helper.addInstruction(obj);
-                
-            elseif (isa(val, 'acado.MexInput'))
-                
-                if (val.type ~= 1)
-                    error('MexInput should be in this case a numeric value, not a vector or matrix.'); 
-                end
-
-                obj.name = val.name;
-                
-            else
-                error('DoubleConstant expects a numeric value or a acado.MexInput'); 
             end
         end
-       
+        
         
         getInstructions(obj, cppobj, get)
         
@@ -90,9 +92,16 @@ classdef DoubleConstant < acado.Operator
                     s = num2str(obj.val);
                 end
             else
-                s = obj.name; 
+                s = obj.name;
             end
             
+        end
+        
+        function jac = jacobian(obj, var)
+            if ~isvector(obj)
+                error('A jacobian can only be computed of a vector function.');
+            end
+            jac = zeros(length(obj), length(var));
         end
     end
 end

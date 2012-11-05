@@ -25,8 +25,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2010
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2012
 %
 classdef Expression < handle
     properties
@@ -60,27 +60,41 @@ classdef Expression < handle
         %Matlab help: "Implementing Operators for Your Class"
         
         function r = mtimes(obj1,obj2)    % *
-            if size(obj1,2) ~= size(obj2,1)
-                error('ERROR: Invalid acado.Product. Check your dimensions..');
-            end
-            for i = 1:size(obj1,1)
-                for j = 1:size(obj2,2)
-                    r(i,j) = acado.Addition(acado.Product(obj1(i,1),obj2(1,j)));
-                    for k = 2:size(obj1,2)
-                        r(i,j) = acado.Addition(r(i,j), acado.Product(obj1(i,k),obj2(k,j)));
+            if length(obj2) == 1
+                for i = 1:size(obj1,1)
+                    for j = 1:size(obj1,2)
+                        r(i,j) = acado.Addition(acado.Product(obj1(i,j),obj2));
+                    end
+                end
+            elseif length(obj1) == 1
+                for i = 1:size(obj2,1)
+                    for j = 1:size(obj2,2)
+                        r(i,j) = acado.Addition(acado.Product(obj2(i,j),obj1));
+                    end
+                end
+            else
+                if size(obj1,2) ~= size(obj2,1)
+                    error('ERROR: Invalid acado.Product. Check your dimensions..');
+                end
+                for i = 1:size(obj1,1)
+                    for j = 1:size(obj2,2)
+                        r(i,j) = acado.Addition(acado.Product(obj1(i,1),obj2(1,j)));
+                        for k = 2:size(obj1,2)
+                            r(i,j) = acado.Addition(r(i,j), acado.Product(obj1(i,k),obj2(k,j)));
+                        end
                     end
                 end
             end
         end
         
         function r = times(obj1,obj2)    % .*
-            if isa(obj2,'numeric')
+            if length(obj2) == 1
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj1,2)
                         r(i,j) = acado.Addition(acado.Product(obj1(i,j),obj2));
                     end
                 end
-            elseif isa(obj1,'numeric')
+            elseif length(obj1) == 1
                 for i = 1:size(obj2,1)
                     for j = 1:size(obj2,2)
                         r(i,j) = acado.Addition(acado.Product(obj2(i,j),obj1));
@@ -111,7 +125,7 @@ classdef Expression < handle
         
         function r = minus(obj1,obj2)     % -
             if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
-                error('ERROR: Invalid acado.Addition. Check your dimensions..');
+                error('ERROR: Invalid acado.Subtraction. Check your dimensions..');
             end
             for i = 1:size(obj1,1)
                 for j = 1:size(obj1,2)
@@ -121,14 +135,22 @@ classdef Expression < handle
         end
         
         function r = mrdivide(obj1,obj2)  % /
-            if numel(obj1) > 1 || numel(obj2) > 1
-                error('ERROR: Invalid division !');
+            if length(obj2) == 1
+                for i = 1:size(obj1,1)
+                    for j = 1:size(obj1,2)
+                        r(i,j) = acado.Addition(acado.Quotient(obj1(i,j),obj2));
+                    end
+                end
+            else
+                if numel(obj1) > 1 || numel(obj2) > 1
+                    error('ERROR: Invalid division !');
+                end
+                r = acado.Quotient(obj1,obj2);
             end
-            r = acado.Quotient(obj1,obj2);
         end
         
-        function r = rdivide(obj1,obj2)    % .*
-            if isa(obj2,'numeric')
+        function r = rdivide(obj1,obj2)    % ./
+            if length(obj2) == 1
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj1,2)
                         r(i,j) = acado.Addition(acado.Quotient(obj1(i,j),obj2));
@@ -163,59 +185,148 @@ classdef Expression < handle
         end
         
         function r = mpower(obj1, obj2)   % ^
-            r = acado.Power(obj1, obj2);
+            if numel(obj1) > 1 || numel(obj2) > 1
+                error('ERROR: Invalid power !');
+            end
+            r = acado.Power(obj1,obj2);
+        end
+        
+        function r = power(obj1, obj2)   % .^
+            if length(obj2) == 1
+                for i = 1:size(obj1,1)
+                    for j = 1:size(obj1,2)
+                        r(i,j) = acado.Addition(acado.Power(obj1(i,j),obj2));
+                    end
+                end
+            else
+                if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                    error('ERROR: Invalid acado.Power. Check your dimensions..');
+                end
+                for i = 1:size(obj1,1)
+                    for j = 1:size(obj1,2)
+                        r(i,j) = acado.Addition(acado.Power(obj1(i,j),obj2(i,j)));
+                    end
+                end
+            end
         end
         
         function r = eq(obj1, obj2)       % ==
-            r = acado.Equals(obj1, obj2);
+            if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                error('ERROR: Invalid acado.Equals. Check your dimensions..');
+            end
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Equals(obj1(i,j),obj2(i,j));
+                end
+            end
         end
         
         function r = lt(obj1, obj2)       % <
-            r = acado.LessThan(obj1, obj2);
+            if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                error('ERROR: Invalid acado.LessThan. Check your dimensions..');
+            end
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.LessThan(obj1(i,j),obj2(i,j));
+                end
+            end
         end
         
         function r = le(obj1, obj2)       % <=
-            r = acado.LessThanEqual(obj1, obj2);
+            if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                error('ERROR: Invalid acado.LessThanEqual. Check your dimensions..');
+            end
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.LessThanEqual(obj1(i,j),obj2(i,j));
+                end
+            end
         end
         
         function r = gt(obj1, obj2)       % >
-            r = acado.GreaterThan(obj1, obj2);
+            if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                error('ERROR: Invalid acado.GreaterThan. Check your dimensions..');
+            end
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.GreaterThan(obj1(i,j),obj2(i,j));
+                end
+            end
         end
         
         function r = ge(obj1, obj2)       % >=
-            r = acado.GreaterThanEqual(obj1, obj2);
+            if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                error('ERROR: Invalid acado.GreaterThanEqual. Check your dimensions..');
+            end
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.GreaterThanEqual(obj1(i,j),obj2(i,j));
+                end
+            end
         end
         
         function r = exp(obj1)            % exp
-            r = acado.Exp(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Exp(obj1(i,j));
+                end
+            end
         end
         
         function r = acos(obj1)           % acos
-            r = acado.Acos(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Acos(obj1(i,j));
+                end
+            end
         end
         
         function r = asin(obj1)           % asin
-            r = acado.Asin(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Asin(obj1(i,j));
+                end
+            end
         end
         
         function r = atan(obj1)           % atan
-            r = acado.Atan(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Atan(obj1(i,j));
+                end
+            end
         end
         
         function r = cos(obj1)            % cos
-            r = acado.Cos(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Cos(obj1(i,j));
+                end
+            end
         end
         
         function r = sin(obj1)            % sin
-            r = acado.Sin(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Sin(obj1(i,j));
+                end
+            end
         end
         
         function r = tan(obj1)            % tan
-            r = acado.Tan(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Tan(obj1(i,j));
+                end
+            end
         end
         
         function r = log(obj1)            % log
-            r = acado.Logarithm(obj1);
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.Logarithm(obj1(i,j));
+                end
+            end
         end
         
         function s = toString(obj)
@@ -251,14 +362,54 @@ classdef Expression < handle
         end
         
         function C = vertcat(varargin)
-            for k = 1 : nargin,
-                C(k,1) = acado.Addition(varargin{k});
+            temp = varargin{1};
+            for i = 1:size(temp,1)
+                for j = 1:size(temp,2)
+                    if isa(temp(i,j), 'numeric')
+                        C(i,j) = acado.Addition(acado.DoubleConstant(temp(i,j)));
+                    else
+                        C(i,j) = acado.Addition(temp(i,j));
+                    end
+                end
+            end
+            for k = 2:nargin,
+                temp = varargin{k};
+                base = size(C,1);
+                for i = 1:size(temp,1)
+                    for j = 1:size(temp,2)
+                        if isa(temp(i,j), 'numeric')
+                            C(base+i,j) = acado.Addition(acado.DoubleConstant(temp(i,j)));
+                        else
+                            C(base+i,j) = acado.Addition(temp(i,j));
+                        end
+                    end
+                end
             end
         end
         
         function C = horzcat(varargin)
-            for k = 1 : nargin,
-                C(1,k) = acado.Addition(varargin{k});
+            temp = varargin{1};
+            for i = 1:size(temp,1)
+                for j = 1:size(temp,2)
+                    if isa(temp(i,j), 'numeric')
+                        C(i,j) = acado.Addition(acado.DoubleConstant(temp(i,j)));
+                    else
+                        C(i,j) = acado.Addition(temp(i,j));
+                    end
+                end
+            end
+            for k = 2:nargin,
+                temp = varargin{k};
+                base = size(C,2);
+                for i = 1:size(temp,1)
+                    for j = 1:size(temp,2)
+                        if isa(temp(i,j), 'numeric')
+                            C(i,base+j) = acado.Addition(acado.DoubleConstant(temp(i,j)));
+                        else
+                            C(i,base+j) = acado.Addition(temp(i,j));
+                        end
+                    end
+                end
             end
         end
         
@@ -284,8 +435,33 @@ classdef Expression < handle
                 end
             end
         end
+        
+        function out = sum(in, varargin)
+            if nargin == 1
+                out = sum(in,1);
+            elseif nargin == 2
+                if varargin{1} == 1
+                    for i = 1:size(in,2)
+                        out(1,i) = acado.Addition(in(1,i));
+                        for j = 2:size(in,1)
+                            out(1,i) = acado.Addition(out(1,i), in(j,i));
+                        end
+                    end
+                elseif varargin{1} == 2
+                    for i = 1:size(in,1)
+                        out(i,1) = acado.Addition(in(i,1));
+                        for j = 2:size(in,2)
+                            out(i,1) = acado.Addition(out(i,1), in(i,j));
+                        end
+                    end
+                else
+                    error('Unsupported use of the sum function in acado.Expression.');
+                end
+            else
+                error('Unsupported use of the sum function in acado.Expression.');
+            end
+        end
     end
-    
     
 end
 

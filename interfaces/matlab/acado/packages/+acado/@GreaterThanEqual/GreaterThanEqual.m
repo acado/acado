@@ -30,8 +30,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2012
 % 
 classdef GreaterThanEqual < acado.BooleanVariable
     properties(SetAccess='private')
@@ -40,8 +40,10 @@ classdef GreaterThanEqual < acado.BooleanVariable
     
     methods
         function obj = GreaterThanEqual(obj1, obj2)
-            obj.obj1 = obj.checkDoubleVectorMatrix(obj1);
-            obj.obj2 = obj.checkDoubleVectorMatrix(obj2);
+            if nargin > 0
+                obj.obj1 = obj.checkDoubleVectorMatrix(obj1);
+                obj.obj2 = obj.checkDoubleVectorMatrix(obj2);
+            end
         end
         
         function s = toString(obj)

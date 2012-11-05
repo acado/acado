@@ -28,24 +28,39 @@
 %
 %    Author: David Ariens
 %    Date: 2010
-% 
+%
 function  Parameter( varargin )
 
-    checkActiveModel;
+checkActiveModel;
 
-    if ~iscellstr( varargin ),
-        error( 'Syntax is: Parameter x' );
-
-    else
-
-        for k = 1 : nargin,
-            VAR_NAME = varargin{k};
-            VAR_ASSIGN = acado.Parameter(varargin{k});
-
-            assignin( 'caller', VAR_NAME, VAR_ASSIGN );
+if ~iscellstr( varargin ),
+    error( 'Syntax is: Parameter x' );
+    
+else
+    
+    for k = 1 : nargin,
+        [name N M] = readVariable(varargin{k});
+        
+        for i = 1:N
+            for j = 1:M
+                if N > 1
+                    VAR_NAME = strcat(name,num2str(i));
+                else
+                    VAR_NAME = name;
+                end
+                if M > 1
+                    VAR_NAME = strcat(VAR_NAME,num2str(j));
+                end
+                VAR_ASSIGN = acado.Parameter(VAR_NAME);
+                var(i,j) = VAR_ASSIGN;
+                
+                assignin( 'caller', VAR_NAME, VAR_ASSIGN );
+            end
         end
-
+        assignin( 'caller', name, var );
     end
+    
+end
 
 end
 

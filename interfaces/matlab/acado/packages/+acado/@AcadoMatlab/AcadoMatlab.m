@@ -22,8 +22,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2010
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2012
 % 
 classdef AcadoMatlab < handle
     properties (SetAccess='protected')
@@ -88,17 +88,25 @@ classdef AcadoMatlab < handle
             if(~isa(set, 'acado.DifferentialState'))
                 error('ERROR: A differential state derivative must be created using an existing differential state.');
             end
-            found = 0;
-            for i=1:length(obj.x)
+            foundX = 0;
+            for i = 1:length(obj.x)
                 if (strcmp(obj.x{i}.name, set.name))
-                   found = 1;
+                   foundX = 1;
                 end
             end
-            if ~found
+            if ~foundX
                 error('The differential state derivative, you are trying to add, has no corresponding differential state.');
             end
+            foundDX = 0;
+            for i = 1:length(obj.dx)
+                if (strcmp(obj.dx{i}.name, set.name))
+                   foundDX = 1;
+                end
+            end
             
-            obj.dx{length(obj.dx)+1} = set;
+            if ~foundDX
+                obj.dx{length(obj.dx)+1} = set;
+            end
         end
         
         % Add algebraic state

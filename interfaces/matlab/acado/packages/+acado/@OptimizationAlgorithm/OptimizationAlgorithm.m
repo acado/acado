@@ -41,8 +41,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2012
 % 
 classdef OptimizationAlgorithm < acado.OptimizationAlgorithmBase    
     properties(SetAccess='protected')

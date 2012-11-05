@@ -60,8 +60,8 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2009-2010
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2009-2012
 % 
 classdef OCP < acado.MultiObjectiveFunctionality    
     properties (SetAccess='private')
