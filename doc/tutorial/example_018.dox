@@ -1,0 +1,136 @@
+/*!
+
+\page example_018 Using Grids and VariablesGrids
+
+Direct methods for optimal control as implemented ACADO need to discretize possibly continuous-time problem formulations in order to yield discretized optimization problem. For adjusting the way this is done, ACADO offers the data structure "Grid" for specifying discrete time grids. Moreover, for obtaining results along the discretized time horizon, the data structure "VariablesGrid" has been introduced for user-convenience. This tutorial briefly explains how to use these data structures.
+
+\li Part 1: \ref example_018_part1
+\li Part 2: \ref example_018_part2
+
+
+\section example_018_part1 Working with Grids
+
+A "Grid" is simply an ordered set of time instants, very similar to a vector. However, it differs from a vector in two main respects: first, as time is assumed to proceed in forward direction only, the time instants need to be ordered non-decreasingly. Second, operations performed on a time grid are typically very different from the ones performed on a vector (e.g. a time grid might be shifted by a constant offset but multiplying it with a matrix does not make sense).
+In most cases, a user wants to setup an equidistant time grid with a given number of time points. This can be done as follows: 
+
+\code
+	    // Setup an equidistant Grid with 5 grid points
+	    double tStart =  0.0;
+	    double tEnd   =  2.0;
+	  
+	    Grid firstGrid( tStart,tEnd,5 );
+	    
+	    printf( "The grid consists of the following grid points:\n" );
+	    firstGrid.print();
+	    printf( "Its third grid point has time:  %f\n",firstGrid.getTime( 2 ) );
+\endcode
+
+Printing the variable "firstGrid" shows that it consist of five time points equally spaced between 0 and 2. The last line accesses and prints the time instant of the third grid point. This grid might be further manipulated, e.g.: 
+
+\code
+  // Add additional grid point at time 7
+  // (time must be greater than time at last grid point)
+  firstGrid.addTime( 7.0 );
+
+  printf( "\nNow, the grid consists of the following grid points:\n" );
+  firstGrid.print();
+  printf( "Its interval length is:  %f\n",firstGrid.getIntervalLength() );
+\endcode
+
+These lines add a sixth grid point at time instant 7. Moreover, the interval length of "firstGrid" is printed, which is defined as the time difference between the last and first grid point.
+Also specifying non-equidistant grids is simple as demonstrated in the following listing: 
+
+\code
+  // Setup an arbitrary grid with 3 grid points
+  Grid secondGrid( 3 );
+
+  secondGrid.setTime( 0,-1.0 );
+  secondGrid.setTime( 1,1.0 );
+  secondGrid.setTime( 2,5.0 );
+
+  printf( "\nThe second grid consists of the following grid points:\n" );
+  secondGrid.print();
+
+\endcode
+
+These lines set up a "secondGrid" consisting of 3 grid points and assign certain time instants -1, 1, and 5 to them.
+The Grid data structure offers many more useful features. In order to keep the presentation short, we conclude with illustrating how to merge two time grids: 
+
+\code
+  // Add grid points of first grid to that of the second one
+  secondGrid & firstGrid;
+
+  printf( "\nNow, the second grid consists of the following grid points:\n" );
+  secondGrid.print();
+  printf( "Its interval length is:  %f\n",secondGrid.getIntervalLength() );
+  printf( "Its third grid point has time:  %f\n",secondGrid.getTime( 2 ) );
+\endcode
+
+
+
+\section example_018_part2 Working with VariablesGrids
+
+The data structure VariablesGrid extends the definition of a discrete time grid. Besides the time grid itself, it allows to also store a vector at each grid point. This is particularly useful for presenting discretized trajectories, which consist of a vector sequence of given dimension along a given time grid.
+Again, we first explain how to setup an equidistant VariablesGrid: 
+
+\code
+  // Setup an equidistant VariablesGrid with 5 grid points
+  // and vectors of dimension 2 at each grid point and assign values
+  double tStart =  0.0;
+  double tEnd   =  2.0;
+
+  VariablesGrid equidistantGrid( 2,tStart,tEnd,5 );
+  equidistantGrid.setZero();
+
+  Vector v( 2 );
+  v(0) = 1.0;
+  v(1) = 2.0;
+  equidistantGrid.setVector( 1,v );
+  equidistantGrid.setVector( 2,v );
+
+  v.setAll( 5.0 );
+  equidistantGrid.setVector( 3,v );
+  equidistantGrid.setVector( 4,v );
+
+  printf( "The grid consists of the following grid points:\n" );
+  equidistantGrid.print();
+  printf( "Its number of grid points is:  %d\n",equidistantGrid.getNumPoints() );
+  printf( "Each vector has dimension:     %d\n",equidistantGrid.getNumValues() );
+\endcode
+
+Often it is more convenient to read the data of a VariablesGrid from a txt-file. This can be done as follows: 
+
+\code
+  // Construct another VariablesGrid from file
+  VariablesGrid gridFromFile( "./data.txt" );
+
+  printf( "\nThe second grid consists of the following grid points:\n" );
+  gridFromFile.print();
+
+
+  // Append (in time) grid points of second VariablesGrid to first one
+  equidistantGrid.appendTimes( gridFromFile );
+
+  printf( "\nNow, the grid consists of the following grid points:\n" );
+  equidistantGrid.print();
+  printf( "Its number of grid points is:  %d\n",equidistantGrid.getNumPoints() );
+  printf( "Each vector has dimension:     %d\n",equidistantGrid.getNumValues() );
+\endcode
+
+The file "data.txt" needs to contain exactly one grid point per line, starting with the time instant and followed by the components of the associated vector: 
+
+\code
+  3.0    30.0   31.0
+  4.0    40.0   41.0
+  5.0    50.0   51.0
+\endcode
+
+The above listing not only reads a VariablesGrid "gridFromFile" from the file "data.txt" but also shows how "gridFromFile" can be appended to the "equidistantGrid" as defined in the previous listing. 
+
+
+
+Next example: \ref example_019
+
+*/
+
+
