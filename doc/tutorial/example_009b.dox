@@ -39,7 +39,7 @@ the jacket and reactor temperatures for safety and constructive reasons.
 Note that the time  t  as independent variable has been replaced by the spatial coordinate  z , since optimal spatial profiles along the length of the reactor are required.
 
 
-\section example_009b_implAn ACADO tutorial code
+\section example_009b_impl An ACADO tutorial code
 
 The following piece of code illustrates how to set up the multi-objective optimal control problem mentioned above. NBI is used to approximate the Pareto set with 11 points. The pareto front is plotted and exported. Also all corresponding optimal state and control profiles are exported. This code is available in the examples/multi_objective directory as plug_flow_reactor_nbi.cpp. The WS and NNC version are called plug_flow_reactor_ws.cpp and plug_flow_reactor_nnc.cpp, respectively.
 
