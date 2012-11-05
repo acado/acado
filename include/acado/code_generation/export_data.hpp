@@ -35,9 +35,9 @@
 
 #include <acado/utils/acado_utils.hpp>
 
+// #include <casadi/symbolic/shared_object.hpp>
 
 BEGIN_NAMESPACE_ACADO
-
 
 /** 
  *	\brief Abstract base class to define variables to be used for exporting code
@@ -47,9 +47,9 @@ BEGIN_NAMESPACE_ACADO
  *	The class ExportData serves as an abstract base class to define variables
  *	to be used for exporting code.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-class ExportData
+class ExportData // : public CasADi::SharedObject
 {
     //
     // PUBLIC MEMBER FUNCTIONS:

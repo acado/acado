@@ -198,7 +198,7 @@ Note that this is only a simulation with user-specified control inputs; no feedb
 
 We end this tutorial with proving a list of all results that can be obtained from the Process after simulation:
 
-<table border="1" cellpadding="5">
+<table>
 <tr>
          <td> <b>Logging Name:</b> </td>
          <td> <b>Short Description:</b> </td>

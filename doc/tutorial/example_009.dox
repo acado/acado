@@ -258,6 +258,6 @@ The Pareto set after filtering:
 
 As can be seen, the non-Pareto optimal points depicted in \b bold are removed by the Pareto filter.
 
-Next example: \ref example_010
+Next example: \ref example_009a
 
 */

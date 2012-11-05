@@ -48,10 +48,10 @@ The following tutorials provide more detailed information on how to use ACADO Mu
 \li \ref example_009
 Static nonlinear bi-objective optimization problem with non-convex Pareto front. Non-Pareto optimal points returned by NNC and NBI are removed by the Pareto filter.
 
-\li \ref example_010
+\li \ref example_009a	
 Static nonlinear tri-objective optimization problem.
 
-\li \ref example_011 
+\li \ref example_009b 
 Dynamic bi-objective optimization problem
 
 Next example: \ref example_009

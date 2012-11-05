@@ -333,13 +333,13 @@ IF( NOT MSVC )
 	# Linux is assumed
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit_s
-		qpOASESextras_s csparse_s
+		qpOASESextras_s csparse_s acado_casadi_s
 	)
 ELSE( NOT MSVC )
 	# Windows, Visual Studio environment specifics...
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit_s
-		qpOASESextras csparse
+		qpOASESextras csparse acado_casadi
 	)
 ENDIF( NOT MSVC )
 
@@ -358,6 +358,11 @@ ADD_SUBDIRECTORY( ./external_packages/qpOASES-3.0beta )
 # Build csparse library
 #
 ADD_SUBDIRECTORY( ./external_packages/csparse )
+
+#
+# Build (a part of) CasADi library
+#
+ADD_SUBDIRECTORY( ./external_packages/casadi )
 
 ################################################################################
 #
@@ -439,10 +444,10 @@ SET( ACADO_CMAKE_DIR
 )
 
 SET( ACADO_STATIC_LIBRARIES
-	acado_toolkit acado_qpOASESextras acado_csparse
+	acado_toolkit acado_qpOASESextras acado_csparse acado_casadi
 )
 SET( ACADO_SHARED_LIBRARIES
-	acado_toolkit_s acado_qpOASESextras_s acado_csparse_s
+	acado_toolkit_s acado_qpOASESextras_s acado_csparse_s acado_casadi_s
 )
 
 SET( ACADO_QPOASES_EMBEDDED_SOURCES

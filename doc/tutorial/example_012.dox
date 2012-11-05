@@ -1,8 +1,8 @@
 /*!
 
-\page example_012 A State and Parameter Estimation Tutorial
+\page example_012 Advanced Features for Simulating a Process
 
-This tutorial explains how to setup a simple parameter estimation problem with ACADO. As an example a very simple pendulum model is considered. The aim is to estimate the length of the cable as well as a friction coefficient from a measurent of the excitation of the pendulum at several time points. The tutorial is divided into four parts:
+This tutorial introduces more advanced features of the ACADO Process for MPC simulations. In particular, actuator and sensor behaviour can be simulated to yield more realistic results.
 
 \li Part 1: \ref example_012_part1
 \li Part 2: \ref example_012_part2
@@ -10,176 +10,137 @@ This tutorial explains how to setup a simple parameter estimation problem with A
 \li Part 4: \ref example_012_part4
 
 
-\section example_012_part1 Mathematical Formulation of the Optimization Problem:
+\section example_012_part1 Adding a Actuator to the Process
 
-We consider a very simple pendulum model with two differential states  φ  and  ω  representing the excitation angle and the corresponding angular velocity of the pendulum respectively. Moreover, the model for the pendulum depends on two parameters: the length of the cable is denoted by  l  while the friction coefficient of the pendulum is denoted by  α . The parameter estimation problem of our interest has now the following form: 
-
-\f{eqnarray*}{
-	\displaystyle\min_{\phi,\omega,l,\alpha} & [\phi(t_1) - \eta_1]^2 + \ldots + [\phi(t_{10}) - \eta_{10}]^2 \\
-	\textrm{subject to} & \\
-	\forall t \in [0,T]: & \frac{d\phi(t)}{dt} = \omega, \\
-	\forall t \in [0,T]: & \frac{d\omega(t)}{dt} = -\frac{g}{l}\phi(t)-\alpha \omega(t), \\
-	& 0 \le \alpha \le 4, \\
-	& 0 \le l \le 2 \\
-\f}
-
-Here, we assume that the state  φ  has been measured at 10 points in time which are denoted by  t1, ..., t10  while the corresponding measurement values are   η1, ..., η10 . Note that the above formulation does not only regard the parameters  l  and  α  as free variables. The initial values of two states  φ  and  ω  are also assumed to be unknown and must be estimated from the measurements, too. 
-
-
-\section example_012_part2 Implementation of the State and Parameter Estimation Problem with ACADO Toolkit:
-
-The implementation of the above optimization problem is similar to the standard optimal control problem implementation which has been discussed in the tutorial "Time Optimal Control of a Rocket Flight". However, the main difference is now that the measurements have to be provided and that objective has a special least-squares form: 
+Actuator effects can be simulated by adding an Actuator block to the Process as demonstrated in the following code fragment: 
 
 \code
-    #include <acado_toolkit.hpp>
-    #include <include/acado_gnuplot/gnuplot_window.hpp>
-  
-    int main( ){
-  
-      USING_NAMESPACE_ACADO
-  
-      DifferentialState          phi, omega;    // the states of the pendulum
-      Parameter                  l, alpha  ;    // its length and the friction
-      const double               g = 9.81  ;    // the gravitational constant
-      DifferentialEquation       f         ;    // the model equations
-      Function                   h         ;    // the measurement function
-  
-      VariablesGrid measurements;                 // read the measurements
-      measurements = readFromFile( "data.txt" );  // from a file.
-  
-      //  --------------------------------------
-      OCP ocp(measurements.getTimePoints());    // construct an OCP
-      h << phi                             ;    // the state phi is measured
-      ocp.minimizeLSQ( h, measurements )   ;    // fit h to the data
-  
-      f << dot(phi  ) == omega             ;    // a symbolic implementation
-      f << dot(omega) == -(g/l) *sin(phi )      // of the model
-                         - alpha*omega     ;    // equations
-  
-      ocp.subjectTo( f                    );    // solve OCP s.t. the model,
-      ocp.subjectTo( 0.0 <= alpha <= 4.0  );    // the bounds on alpha
-      ocp.subjectTo( 0.0 <=   l   <= 2.0  );    // and the bounds on l.
-      //  --------------------------------------
-  
-      GnuplotWindow window;
-        window.addSubplot( phi  , "The angle phi", "time [s]", "angle [rad]" );
-        window.addSubplot( omega, "The angular velocity dphi"                );
-        window.addData( 0, measurements(0) );
-  
-      //  --------------------------------------
-      ParameterEstimationAlgorithm algorithm(ocp); // the parameter estimation
-      algorithm << window;
-      algorithm.solve();                           // solves the problem
-  
-      return 0;
-    }
+	// to be added to code fragment from previous Online Tutorial ...
+
+    // SETUP NOISE:
+    // ------------
+    Vector mean( 1 ), amplitude( 1 );
+    mean.setZero( );
+    amplitude.setAll( 50.0 );
+
+    GaussianNoise myNoise( mean,amplitude );
+
+
+    // SETUP ACTUATOR:
+    // ---------------
+    Actuator myActuator( 1,1 );
+
+    myActuator.setControlNoise( myNoise,0.1 );
+    myActuator.setControlDeadTimes( 0.1 );
+
+    myActuator.setParameterDeadTimes( 0.2 );
+
+    // ...
+
+    myProcess.setActuator( myActuator );
 \endcode
 
-Note that the measurement are in this example provided in form of the text file "data.txt" which has the following contents: 
+The code fragment shows how to setup a class generating one-dimensional, Gaussian noise with given amplitude (standard deviation) and mean. Afterwards, an Actuator accepting one control and one parameter input is defined. The previously defined noise will generated with a sampling time of 0.1 second and added to the control input. Moreover, both control and parameter inputs are delayed by the actuator by 0.1 and 0.2 seconds, respectively. 
 
-The file "data.txt"
+
+\section example_012_part2 Adding a Sensor to the Process
+
+Sensor effects can be simulated analogously by adding a Sensor block to the Process as demonstrated in the following code fragment: 
 
 \code
-	TIME POINTS    MEASUREMENT OF PHI
-    -----------    ------------------
-    0.00000e+00    1.00000e+00
-    2.72321e-01    nan
-    3.72821e-01    5.75146e-01
-    7.25752e-01   -5.91794e-02
-    9.06107e-01   -3.54347e-01
-    1.23651e+00   -3.03056e-01
-    1.42619e+00    nan
-    1.59469e+00   -9.64208e-02
-    1.72029e+00   -1.97671e-02
-    2.00000e+00    9.35138e-02
-    ---------------------------------    
-\endcode
-At two time points the measurement was not successful leading to "nan" entries in the data file. In addition, the time points at which the measurements have been taken are not equidistant. Note that ACADO detects automatically the number of valid measurements in the file. Moreover, it is not necessary to specify any dimensions while the initialization is auto-generated, too. 
-
-
-
-\section example_012_part3 A brief discussion of the results:
-
-The parameter estimation algorithm chooses by default a Gauss Newton method. Running the above piece of code leads to the following output: 
-
-\image html example_012_1.jpg
-
-Output on the terminal:
-
-\code
-	#:    KKT tol.   Obj. Value    
-    ---------------------------    
-    1:   1.564e+00   7.8507e-01    
-    2:   1.185e-03   3.1263e-03    
-    3:   8.172e-05   3.2632e-03    
-    4:   1.198e-07   3.2837e-03    
-    ---------------------------    
-                                   
-    convergence achieved.
+    	// to be added to code fragment from previous Online Tutorial ...
+    
+        // SETUP NOISE:
+        // ---------------
+        Vector mean( 1 ), amplitude( 1 );
+    
+        mean.setZero( );
+        amplitude.setAll( 0.005 );
+        UniformNoise myOutputNoise1( mean,amplitude );
+    
+        mean.setAll( 10.0 );
+        amplitude.setAll( 50.0 );
+        GaussianNoise myOutputNoise2( mean,amplitude );
+    
+    
+        // SETUP SENSOR:
+        // -------------
+        Sensor mySensor( 2 );
+    
+        mySensor.setOutputNoise( 0,myOutputNoise1,0.1 );
+        mySensor.setOutputNoise( 1,myOutputNoise2,0.1 );
+    
+        mySensor.setOutputDeadTimes( 0.2 );
+    
+        // ...
+    
+        myProcess.setSensor( mySensor );
 \endcode
 
-Note that the algorithm converges rapidly within 4 iterations as expected for a Gauss-Newton method. Recall that the Gauss-Newton method works very well for least-squares problem, where either the problem is almost linear or the least-squares residuum is small. 
+In this code fragment, noise is setup that is to added to the process ouput. Two different instances of the noise class with different means and amplitudes are instantiated and assigned to the two components of the process output. Note that to the first component uniformly-distributed noise is added, while Gaussian noise is used for the second component in order to illustrate the flexibility of the concept. Finally, all output components are delayed by a dead time of 0.2 seconds. 
 
 
-\section example_012_part4 A posteriori analysis:
 
-Once we are able to solve the parameter estimation we are usually interested in the results for the parameters. In addition, variance-covariance information about the quality of the fit is avaliable. A typical piece of code to get the output is as follows: 
+\section example_012_part3 Simulation Results
 
-\code
-  #include <acado_toolkit.hpp>
-  #include <include/acado_gnuplot/gnuplot_window.hpp>
+For completeness, we show the Gnuplot window of the quarter car process simulation from the previous Online Tutorial with the additions discussed before (and the parameter initialized at 300 to make the dead time visible): 
 
-  int main( ){
+\image html example_012_1.png
 
-    USING_NAMESPACE_ACADO
+Note that this is only a simulation with user-specified control inputs; no feedback control is applied. 
 
 
-    // ... (IMPLEMENTATION OF THE OCP AS ABOVE) ...
+\section example_012_part4 List of Process Options
 
+We end this tutorial with proving a list of the most common options that can be set when performing Process simulations:
 
-    ParameterEstimationAlgorithm algorithm(ocp);
-    algorithm.solve();
-
-
-    // GET THE OPTIMAL PARAMETERS:
-    // ---------------------------
-    VariablesGrid params;
-    algorithm.getParameters( params );
-
-    // GET THE VARIANCE COVARIANCE IN THE SOLUTION:
-    // --------------------------------------------
-    Matrix var;
-    algorithm.getParameterVarianceCovariance( var );
-
-
-    // PRINT THE RESULT ON THE TERMINAL:
-    // ---------------------------------
-    printf("\n\nResults for the parameters: \n");
-    printf("-----------------------------------------------\n");
-    printf("  l      =  %.3e +/- %.3e \n", params(0,0), sqrt( var(0,0) ) );
-    printf("  alpha  =  %.3e +/- %.3e \n", params(0,1), sqrt( var(1,1) ) );
-    printf("-----------------------------------------------\n\n\n");
-
-    return 0;
-  }
-\endcode
-
-Running the above piece of code leads to the common output for the results of a parameter estimation problem: 
-
-\code
-	Results for the parameters: 
-    -----------------------------------------------    
-       l      =  1.001e+00 +/- 1.734e-01
-       alpha  =  1.847e+00 +/- 4.059e-01
-    -----------------------------------------------    
-\endcode
-
-Note that the computation of the variance covariance matrix is based on a linear approximation in the optimal solution. The details of this strategy have originally been published by Bock [1].
-
-
-\section example_012_lit Literature:
-
-[1]   H.G. Bock. Recent advances in parameter identification techniques for ODE. In P. Deuflhard and E. Hairer, editors, Numerical Treatment of Inverse Problems in Differential and Integral Equations. Birkhaeuser, Boston, 1983. 
+<table border="1" cellpadding="5" width="100%">
+<tr>
+         <td> <b>Option Name:</b> </td>
+         <td> <b>Option Value:</b> </td>
+         <td> <b>Short Description:</b> </td>
+</tr>
+<tr>
+         <td> INTEGRATOR_TOLERANCE   </td>
+         <td> double                 </td>
+         <td> relative tolerance of the integrator </td>
+</tr>
+<tr>
+         <td> ABSOLUTE_TOLERANCE    </td>
+         <td> double                </td>
+         <td> absolute tolerance of the integrator (&quot;ATOL&quot;) </td>
+</tr>
+<tr>
+         <td> MAX_NUM_INTEGRATOR_STEPS  </td>
+         <td> int            </td>
+         <td> maximum number of integrator steps  </td>
+</tr>
+<tr>
+         <td> CONTROL_PLOTTING  </td>
+         <td> PLOT_NOMINAL<br>
+              PLOT_REAL</td>
+         <td> specifying whether nominal or actual controls shall be plotted </td>
+</tr>
+<tr>
+         <td> PARAMETER_PLOTTING  </td>
+         <td> PLOT_NOMINAL<br>
+              PLOT_REAL</td>
+         <td> specifying whether nominal or actual parameters shall be plotted </td>
+</tr>
+<tr>
+         <td> OUTPUT_PLOTTING  </td>
+         <td> PLOT_NOMINAL<br>
+              PLOT_REAL</td>
+         <td> specifying whether nominal or actual outputs shall be plotted </td>
+</tr>
+<tr>
+         <td> PLOT_RESOLUTION  </td>
+         <td> LOW<br>
+              MEDIUM<br>
+              HIGH</td>
+         <td> specifying screen resolution when plotting </td>
+</tr>
+</table>
 
 Next example: \ref example_013
 

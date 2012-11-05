@@ -1,132 +1,103 @@
 /*!
 
-\page example_018 Using Grids and VariablesGrids
-
-Direct methods for optimal control as implemented ACADO need to discretize possibly continuous-time problem formulations in order to yield discretized optimization problem. For adjusting the way this is done, ACADO offers the data structure "Grid" for specifying discrete time grids. Moreover, for obtaining results along the discretized time horizon, the data structure "VariablesGrid" has been introduced for user-convenience. This tutorial briefly explains how to use these data structures.
+\page example_018 Simulation of a Dynamic System
+ 
+This tutorial explains how to use the ACADO integrators stand-alone for the simulation of Dynamic Systems. In the current release several Runge-Kutta and a BDF integrator are available. The BDF integrator can also be used for the simulation of differential algebraic systems. All integrators allow first and second order sensitivity generation based on internal numerical or on internal automatic differentiation.
 
 \li Part 1: \ref example_018_part1
 \li Part 2: \ref example_018_part2
+\li Part 3: \ref example_018_part3
 
 
-\section example_018_part1 Working with Grids
+\section example_018_part1 Simulation of a simple ODE
 
-A "Grid" is simply an ordered set of time instants, very similar to a vector. However, it differs from a vector in two main respects: first, as time is assumed to proceed in forward direction only, the time instants need to be ordered non-decreasingly. Second, operations performed on a time grid are typically very different from the ones performed on a vector (e.g. a time grid might be shifted by a constant offset but multiplying it with a matrix does not make sense).
-In most cases, a user wants to setup an equidistant time grid with a given number of time points. This can be done as follows: 
-
-\code
-	    // Setup an equidistant Grid with 5 grid points
-	    double tStart =  0.0;
-	    double tEnd   =  2.0;
-	  
-	    Grid firstGrid( tStart,tEnd,5 );
-	    
-	    printf( "The grid consists of the following grid points:\n" );
-	    firstGrid.print();
-	    printf( "Its third grid point has time:  %f\n",firstGrid.getTime( 2 ) );
-\endcode
-
-Printing the variable "firstGrid" shows that it consist of five time points equally spaced between 0 and 2. The last line accesses and prints the time instant of the third grid point. This grid might be further manipulated, e.g.: 
+We start by integrating a very simple test ODE of the form     dx(t) / dt = -x(t)    with t ∈ [0,1]. The explicit solution at the time   t = 1   is given by   x(1) = 1/e. Now, the standard way to integrate this differential equation with ACADO Toolkit reads as follows: 
 
 \code
-  // Add additional grid point at time 7
-  // (time must be greater than time at last grid point)
-  firstGrid.addTime( 7.0 );
+  #include <acado_integrators.hpp>
 
-  printf( "\nNow, the grid consists of the following grid points:\n" );
-  firstGrid.print();
-  printf( "Its interval length is:  %f\n",firstGrid.getIntervalLength() );
+  int main( ){
+
+    USING_NAMESPACE_ACADO
+
+    DifferentialState     x;        // define the differential state x
+    DifferentialEquation  f;        // introduce a differential equation f
+
+    f << dot(x) == -x;              // define the right-hand side of the ODE
+
+    IntegratorRK45 integrator( f ); // use a Runge Kutta integrator
+                                    // (Dormand-Prince 4/5)
+
+    double x_start[1] = { 1.0 };    // define the start value
+    double t_start    =   0.0  ;    // define the time horizon
+    double t_end      =   1.0  ;    // t in [0,1]
+
+    integrator.set( "IntegratorPrintLevel",PL_MEDIUM ); // set a print-level
+    integrator.integrate( x_start,t_start,t_end );      // start integration
+
+    return 0;
+  }
 \endcode
 
-These lines add a sixth grid point at time instant 7. Moreover, the interval length of "firstGrid" is printed, which is defined as the time difference between the last and first grid point.
-Also specifying non-equidistant grids is simple as demonstrated in the following listing: 
+Compiling and running the above piece of code leads to the following output: 
 
 \code
-  // Setup an arbitrary grid with 3 grid points
-  Grid secondGrid( 3 );
-
-  secondGrid.setTime( 0,-1.0 );
-  secondGrid.setTime( 1,1.0 );
-  secondGrid.setTime( 2,5.0 );
-
-  printf( "\nThe second grid consists of the following grid points:\n" );
-  secondGrid.print();
-
+	x[0] = 3.6787698129972368e-01
+    RK: number of steps:  6      
 \endcode
 
-These lines set up a "secondGrid" consisting of 3 grid points and assign certain time instants -1, 1, and 5 to them.
-The Grid data structure offers many more useful features. In order to keep the presentation short, we conclude with illustrating how to merge two time grids: 
+i.e. the Runge Kutta integrator needs 6 steps to obtain the result. The accuracy of the result depends of course on the tolerance options. How these options can be specified is explained below. 
+
+
+
+\section example_018_part2 Obtaining the results of the integration
+
+In order to obtain the result of the integration for example the following routine can be used: 
 
 \code
-  // Add grid points of first grid to that of the second one
-  secondGrid & firstGrid;
-
-  printf( "\nNow, the second grid consists of the following grid points:\n" );
-  secondGrid.print();
-  printf( "Its interval length is:  %f\n",secondGrid.getIntervalLength() );
-  printf( "Its third grid point has time:  %f\n",secondGrid.getTime( 2 ) );
+  	  #include <acado_integrators.hpp>
+  	
+  	  int main( ){
+  	
+  	    USING_NAMESPACE_ACADO
+  	
+  	    DifferentialState     x;     // define the differential state x
+  	    DifferentialEquation  f;     // introduce a differential equation f
+  	
+  	    // ... (same as above)
+  	
+  	    integrator.integrate( x_start,t_start,t_end );  // start integration
+  	
+  	    Vector xEnd(f.getDim());     // construct a vector with dimension n_x
+  	    integrator.getX( &xEnd );    // obtain the result from the integrator
+  	    xEnd.print();                // e.g. print the result on the terminal
+  	
+  	    return 0;
+  	  }
 \endcode
 
-
-
-\section example_018_part2 Working with VariablesGrids
-
-The data structure VariablesGrid extends the definition of a discrete time grid. Besides the time grid itself, it allows to also store a vector at each grid point. This is particularly useful for presenting discretized trajectories, which consist of a vector sequence of given dimension along a given time grid.
-Again, we first explain how to setup an equidistant VariablesGrid: 
+Please note that the above tutorial code makes use of the ACADO matrix vector class, i.e. the result is stored in ACADO vector format. It is of course also possible to write the result into a simple  " double* ". For this aim, the double pointer must be allocated with the correct dimension (here the dimension of the right-hand-side function f): 
 
 \code
-  // Setup an equidistant VariablesGrid with 5 grid points
-  // and vectors of dimension 2 at each grid point and assign values
-  double tStart =  0.0;
-  double tEnd   =  2.0;
+  #include <acado_integrators.hpp>
 
-  VariablesGrid equidistantGrid( 2,tStart,tEnd,5 );
-  equidistantGrid.setZero();
+  int main( ){
 
-  Vector v( 2 );
-  v(0) = 1.0;
-  v(1) = 2.0;
-  equidistantGrid.setVector( 1,v );
-  equidistantGrid.setVector( 2,v );
+    USING_NAMESPACE_ACADO
 
-  v.setAll( 5.0 );
-  equidistantGrid.setVector( 3,v );
-  equidistantGrid.setVector( 4,v );
+    // ... (same as above)
 
-  printf( "The grid consists of the following grid points:\n" );
-  equidistantGrid.print();
-  printf( "Its number of grid points is:  %d\n",equidistantGrid.getNumPoints() );
-  printf( "Each vector has dimension:     %d\n",equidistantGrid.getNumValues() );
+    double  xEnd[f.getDim()];   // construct a double* with dimension n_x
+    integrator.getX( &xEnd );   // obtain the result from the integrator
+
+    return 0;
+  }
 \endcode
 
-Often it is more convenient to read the data of a VariablesGrid from a txt-file. This can be done as follows: 
 
-\code
-  // Construct another VariablesGrid from file
-  VariablesGrid gridFromFile( "./data.txt" );
+\section example_018_part3 User options
 
-  printf( "\nThe second grid consists of the following grid points:\n" );
-  gridFromFile.print();
-
-
-  // Append (in time) grid points of second VariablesGrid to first one
-  equidistantGrid.appendTimes( gridFromFile );
-
-  printf( "\nNow, the grid consists of the following grid points:\n" );
-  equidistantGrid.print();
-  printf( "Its number of grid points is:  %d\n",equidistantGrid.getNumPoints() );
-  printf( "Each vector has dimension:     %d\n",equidistantGrid.getNumValues() );
-\endcode
-
-The file "data.txt" needs to contain exactly one grid point per line, starting with the time instant and followed by the components of the associated vector: 
-
-\code
-  3.0    30.0   31.0
-  4.0    40.0   41.0
-  5.0    50.0   51.0
-\endcode
-
-The above listing not only reads a VariablesGrid "gridFromFile" from the file "data.txt" but also shows how "gridFromFile" can be appended to the "equidistantGrid" as defined in the previous listing. 
-
+work in progress
 
 
 Next example: \ref example_019

@@ -1,146 +1,124 @@
 /*!
 
-\page example_014 Advanced Features for Simulating a Process
+\page example_014 Setting-Up More Classical Feedback Controllers
 
-This tutorial introduces more advanced features of the ACADO Process for MPC simulations. In particular, actuator and sensor behaviour can be simulated to yield more realistic results.
+This tutorial explains how to setup a basic MPC controller. Again, we consider a simple actively damped quarter car model.
 
 \li Part 1: \ref example_014_part1
 \li Part 2: \ref example_014_part2
-\li Part 3: \ref example_014_part3
-\li Part 4: \ref example_014_part4
 
 
-\section example_014_part1 Adding a Actuator to the Process
+\section example_014_part1 Implementation of a PID controller for a Quarter Car
 
-Actuator effects can be simulated by adding an Actuator block to the Process as demonstrated in the following code fragment: 
+The following piece of code sets-up a PID controller that could be used to control a quarter car: 
 
 \code
-	// to be added to code fragment from previous Online Tutorial ...
-
-    // SETUP NOISE:
-    // ------------
-    Vector mean( 1 ), amplitude( 1 );
-    mean.setZero( );
-    amplitude.setAll( 50.0 );
-
-    GaussianNoise myNoise( mean,amplitude );
-
-
-    // SETUP ACTUATOR:
-    // ---------------
-    Actuator myActuator( 1,1 );
-
-    myActuator.setControlNoise( myNoise,0.1 );
-    myActuator.setControlDeadTimes( 0.1 );
-
-    myActuator.setParameterDeadTimes( 0.2 );
-
-    // ...
-
-    myProcess.setActuator( myActuator );
+	  #include <acado_toolkit.hpp>
+	  #include <include/acado_gnuplot/gnuplot_window.hpp>
+	
+	  int main( )
+	  {
+	    USING_NAMESPACE_ACADO
+	
+	
+	    // SETTING UP THE FEEDBACK CONTROLLER:
+	    // -----------------------------------
+	    PIDcontroller pid( 4,1,0.01 );
+	
+	    Vector pWeights( 4 );
+	    pWeights(0) = 1000.0;
+	    pWeights(1) = -1000.0;
+	    pWeights(2) = 1000.0;
+	    pWeights(3) = -1000.0;
+	
+	    Vector dWeights( 4 );
+	    dWeights(0) = 0.0;
+	    dWeights(1) = 0.0;
+	    dWeights(2) = 20.0;
+	    dWeights(3) = -20.0;
+	
+	    pid.setProportionalWeights( pWeights );
+	    pid.setDerivativeWeights( dWeights );
+	
+	    pid.setControlLowerLimit( 0,-200.0 );
+	    pid.setControlUpperLimit( 0, 200.0 );
+	
+	    StaticReferenceTrajectory zeroReference;
+	
+	    Controller controller( pid,zeroReference );
+	
+	
+	    // INITIALIZE CONTROLLER AND PERFORM A STEP:
+	    // -----------------------------------------    
+	    Vector y( 4 );
+	    y.setZero( );
+	    y(0) = 0.01;
+	
+	    controller.init( 0.0,y );
+	    controller.step( 0.0,y );
+	
+	    Vector u;
+	    controller.getU( u );
+	    u.print( "Feedback control" );
+	
+	    return 0;
+	  }
 \endcode
 
-The code fragment shows how to setup a class generating one-dimensional, Gaussian noise with given amplitude (standard deviation) and mean. Afterwards, an Actuator accepting one control and one parameter input is defined. The previously defined noise will generated with a sampling time of 0.1 second and added to the control input. Moreover, both control and parameter inputs are delayed by the actuator by 0.1 and 0.2 seconds, respectively. 
+First, a PID controller comprising four inputs and one output with a sampling time of 10ms is defined. In case the number of outputs equls the number of inputs, all outputs are calculated component-wise; otherwise, as in our example, the PID terms of all inputs are summed to yield the single output. Second, proportional and derivative weights are set. Third, lower and upper limits are specified for the control output, i.e. if the control signal exceed these limits, it is clipped. Finally, the controller is initialized, one step is performed and the control signal is printed. 
 
 
-\section example_014_part2 Adding a Sensor to the Process
+\section example_014_part2 Implementation of an LQR controller for a Quarter Car
 
-Sensor effects can be simulated analogously by adding a Sensor block to the Process as demonstrated in the following code fragment: 
+The following piece of code sets-up an LQR controller based on the quarter car model: 
 
 \code
-    	// to be added to code fragment from previous Online Tutorial ...
-    
-        // SETUP NOISE:
-        // ---------------
-        Vector mean( 1 ), amplitude( 1 );
-    
-        mean.setZero( );
-        amplitude.setAll( 0.005 );
-        UniformNoise myOutputNoise1( mean,amplitude );
-    
-        mean.setAll( 10.0 );
-        amplitude.setAll( 50.0 );
-        GaussianNoise myOutputNoise2( mean,amplitude );
-    
-    
-        // SETUP SENSOR:
-        // -------------
-        Sensor mySensor( 2 );
-    
-        mySensor.setOutputNoise( 0,myOutputNoise1,0.1 );
-        mySensor.setOutputNoise( 1,myOutputNoise2,0.1 );
-    
-        mySensor.setOutputDeadTimes( 0.2 );
-    
-        // ...
-    
-        myProcess.setSensor( mySensor );
+    	  #include <acado_toolkit.hpp>
+    	  #include <include/acado_gnuplot/gnuplot_window.hpp>
+    	
+    	  int main( )
+    	  {
+    	    USING_NAMESPACE_ACADO
+    	
+    	
+    	    // SETTING UP THE FEEDBACK CONTROLLER:
+    	    // -----------------------------------
+    	    Matrix K( 1,4 );
+    	    K(0,0) = -3.349222044080232e+04;
+    	    K(0,1) = -3.806600292165519e+03;
+    	    K(0,2) =  9.999999999999985e+02;
+    	    K(0,3) = -1.040810121403324e+03;
+    	
+    	    LinearStateFeedback lqr( K,0.025 );
+    	
+    	    lqr.setControlLowerLimit( 0,-200.0 );
+    	    lqr.setControlUpperLimit( 0, 200.0 );
+    	
+    	    StaticReferenceTrajectory zeroReference;
+    	
+    	    Controller controller( pid,zeroReference );
+    	
+    	
+    	    // INITIALIZE CONTROLLER AND PERFORM A STEP:
+    	    // -----------------------------------------    
+    	    Vector y( 4 );
+    	    y.setZero( );
+    	    y(0) = 0.01;
+    	
+    	    controller.init( 0.0,y );
+    	    controller.step( 0.0,y );
+    	
+    	    Vector u;
+    	    controller.getU( u );
+    	    u.print( "Feedback control" );
+    	
+    	    return 0;
+    	  }
+    	
 \endcode
 
-In this code fragment, noise is setup that is to added to the process ouput. Two different instances of the noise class with different means and amplitudes are instantiated and assigned to the two components of the process output. Note that to the first component uniformly-distributed noise is added, while Gaussian noise is used for the second component in order to illustrate the flexibility of the concept. Finally, all output components are delayed by a dead time of 0.2 seconds. 
+First, the gain matrix of the LQR controller is defined (that has been calculated before-hand). Afterwards, the linear state feedback controller is defined by specifying the LQR gain matrix as well as a sampling time of 25ms. Third, lower and upper limits are specified for the control output, i.e. if the control signal exceed these limits, it is clipped. Finally, the controller is initialized, one step is performed and the control signal is printed. 
 
-
-
-\section example_014_part3 Simulation Results
-
-For completeness, we show the Gnuplot window of the quarter car process simulation from the previous Online Tutorial with the additions discussed before (and the parameter initialized at 300 to make the dead time visible): 
-
-\image html example_014_1.png
-
-Note that this is only a simulation with user-specified control inputs; no feedback control is applied. 
-
-
-\section example_014_part4 List of Process Options
-
-We end this tutorial with proving a list of the most common options that can be set when performing Process simulations:
-
-<table border="1" cellpadding="5" width="100%">
-<tr>
-         <td> <b>Option Name:</b> </td>
-         <td> <b>Option Value:</b> </td>
-         <td> <b>Short Description:</b> </td>
-</tr>
-<tr>
-         <td> INTEGRATOR_TOLERANCE   </td>
-         <td> double                 </td>
-         <td> relative tolerance of the integrator </td>
-</tr>
-<tr>
-         <td> ABSOLUTE_TOLERANCE    </td>
-         <td> double                </td>
-         <td> absolute tolerance of the integrator (&quot;ATOL&quot;) </td>
-</tr>
-<tr>
-         <td> MAX_NUM_INTEGRATOR_STEPS  </td>
-         <td> int            </td>
-         <td> maximum number of integrator steps  </td>
-</tr>
-<tr>
-         <td> CONTROL_PLOTTING  </td>
-         <td> PLOT_NOMINAL<br>
-              PLOT_REAL</td>
-         <td> specifying whether nominal or actual controls shall be plotted </td>
-</tr>
-<tr>
-         <td> PARAMETER_PLOTTING  </td>
-         <td> PLOT_NOMINAL<br>
-              PLOT_REAL</td>
-         <td> specifying whether nominal or actual parameters shall be plotted </td>
-</tr>
-<tr>
-         <td> OUTPUT_PLOTTING  </td>
-         <td> PLOT_NOMINAL<br>
-              PLOT_REAL</td>
-         <td> specifying whether nominal or actual outputs shall be plotted </td>
-</tr>
-<tr>
-         <td> PLOT_RESOLUTION  </td>
-         <td> LOW<br>
-              MEDIUM<br>
-              HIGH</td>
-         <td> specifying screen resolution when plotting </td>
-</tr>
-</table>
 
 Next example: \ref example_015
 

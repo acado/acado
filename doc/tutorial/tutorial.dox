@@ -20,38 +20,38 @@ The best way for getting started with the ACADO Toolkit is to work through the o
 
 <ul>
 	<li>\subpage example_008</li>
-	<li>\subpage example_007</li>
-	<li>\subpage example_010</li>
 	<li>\subpage example_009</li>
+	<li>\subpage example_009a</li>
+	<li>\subpage example_009b</li>
 </ul>
 
 \section tutorial_003 Parameter Estimation Problems
 
 <ul>
-	<li>\subpage example_012</li>
+	<li>\subpage example_010</li>
 </ul>
 
 \section tutorial_004 Model Predictive Control
 
 <ul>
 	<li>\subpage example_011</li>
-	<li>\subpage example_014</li>
+	<li>\subpage example_012</li>
 	<li>\subpage example_013</li>
-	<li>\subpage example_016</li>
+	<li>\subpage example_014</li>
 	<li>\subpage example_015</li>
 </ul>
 
 \section tutorial_005 Low-Level Data Structures and Global Functionality
 
 <ul>
-	<li>\subpage example_018</li>
+	<li>\subpage example_016</li>
 	<li>\subpage example_017</li>
 </ul>
 
 \section tutorial_006 Using the ACADO Integrators Stand-Alone
 
 <ul>
-	<li>\subpage example_020</li>
+	<li>\subpage example_018</li>
 	<li>\subpage example_019</li>
 </ul>
 

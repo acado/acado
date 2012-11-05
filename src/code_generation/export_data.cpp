@@ -33,7 +33,6 @@
 
 #include <acado/code_generation/export_data.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
 
 
