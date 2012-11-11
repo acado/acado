@@ -146,6 +146,13 @@ ADD_CUSTOM_COMMAND(
         code_generation_getting_started
 )
 
+# If we are building withing main ACADO build, correct paths must be set
+IF( ACADO_BUILD )
+	SET( ACADO_QPOASES_EMBEDDED_SOURCES
+		${ACADO_ENV_QPOASES_EMBEDDED_SOURCES}
+	)
+ENDIF()
+
 # Build a test application
 ADD_EXECUTABLE(
 	# Name of the executable
