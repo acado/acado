@@ -112,7 +112,7 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	u = Control(NU);
 	p = Parameter(NP);
 	
-	uint i;
+//	uint i;
 	
 	if( NDX > 0 && NDX != NX ) {
 		return ACADOERROR( RET_INVALID_OPTION );

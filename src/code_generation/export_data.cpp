@@ -42,6 +42,11 @@ BEGIN_NAMESPACE_ACADO
 
 ExportData::ExportData( )
 {
+	name = "default_name";
+	type = REAL;
+	prefix = "";
+	dataStruct = ACADO_LOCAL;
+	fullName = name;
 }
 
 

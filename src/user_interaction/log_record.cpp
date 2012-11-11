@@ -575,7 +575,7 @@ uint LogRecord::getMaxNumMatrices( ) const
 
 	while ( current != 0 )
 	{
-		if ( current->getNumPoints( ) > maxNumMatrices );
+//		if ( current->getNumPoints( ) > maxNumMatrices );
 		maxNumMatrices = current->getNumPoints( );
 
 		current = current->getNext( );

@@ -22,67 +22,43 @@
  *
  */
 
-
-
 /**
- *    \file src/code_generation/export_statement.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \file include/code_generation/memory_allocator.hpp
+ *    \author Milan Vukov
+ *    \date 2012
  */
 
-#include <acado/code_generation/export_statement.hpp>
+#ifndef ACADO_TOLLKIT_MEMORY_ALLOCATOR
+#define ACADO_TOLLKIT_MEMORY_ALLOCATOR
 
+#include <acado/utils/acado_utils.hpp>
+#include <acado/code_generation/object_pool.hpp>
+#include <acado/code_generation/export_index.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
-//
-// PUBLIC MEMBER FUNCTIONS:
-//
-
-ExportStatement::ExportStatement( )
+class MemoryAllocator
 {
-}
+public:
+	MemoryAllocator()
+	{}
 
+	~MemoryAllocator()
+	{}
 
-ExportStatement::ExportStatement(	const ExportStatement& arg
-									)
-{
-}
+	returnValue acquire(ExportIndex& _obj);
 
+	returnValue release(const ExportIndex& _obj);
 
-ExportStatement::~ExportStatement( )
-{
-}
+	returnValue add(const ExportIndex& _obj);
 
+	std::vector< ExportIndex > getPool( void );
 
-ExportStatement& ExportStatement::operator=(	const ExportStatement& arg
-												)
-{
-	if( this != &arg )
-	{
-		// empty
-	}
-
-	return *this;
-}
-
-
-
-returnValue ExportStatement::exportDataDeclaration(	FILE* file,
-													const String& _realString,
-													const String& _intString,
-													int _precision
-													) const
-{
-	return SUCCESSFUL_RETURN;
-}
-
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
+private:
+	ObjectPool<ExportIndex, ExportIndexComparator> indices;
+};
 
 CLOSE_NAMESPACE_ACADO
 
-// end of file.
+#endif // ACADO_TOLLKIT_MEMORY_ALLOCATOR
+

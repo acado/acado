@@ -41,6 +41,7 @@
 #include <acado/code_generation/export_index.hpp>
 #include <acado/code_generation/export_data_declaration.hpp>
 
+#include <vector>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -287,9 +288,10 @@ class ExportStatementBlock : public ExportStatement
 	// DATA MEMBERS:
 	//
 	protected:
+		typedef std::vector< statementPtr > statementPtrArray;
 
-		uint nStatements;							/**< Number of statement within statement block. */
-		ExportStatement** statements;				/**< Array containing all statements of the statement block. */
+		/** Array containing all statements of the statement block. */
+		statementPtrArray statements;
 };
 
 

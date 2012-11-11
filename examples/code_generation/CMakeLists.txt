@@ -79,7 +79,7 @@ FOREACH( SRC ${SOURCES} )
 
 	TARGET_LINK_LIBRARIES(
 		code_generation_${EXEC_NAME}
-		acado_toolkit qpOASESextras csparse
+		${ACADO_STATIC_LIBRARIES}
 	)
 		
 	SET_TARGET_PROPERTIES(

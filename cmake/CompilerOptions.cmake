@@ -73,6 +73,8 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC )
 	IF( ACADO_DEVELOPER )
 		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline" )
 		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Winline" )
+	ELSE()
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual -Wno-unused-comparison" )
 	ENDIF()
 
 	#

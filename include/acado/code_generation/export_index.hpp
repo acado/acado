@@ -75,7 +75,7 @@ class ExportIndex : public ExportData
 		 *	@param[in] _factor			Factor to create expression of the form "factor * index".
 		 *	@param[in] _offset			Offset to create expression of the form "index + offset".
 		 */
-		ExportIndex(	const String& _name = "i",
+		ExportIndex(	const String& _name = "default_index_name",
 						ExportType _type = INT,
 						const int* const _value  = 0,
 						const int* const _factor = 0,
@@ -234,8 +234,6 @@ class ExportIndex : public ExportData
 		 */
 		ExportArgument makeArgument( ) const;
 
-
-
 	//
     // PROTECTED MEMBER FUNCTIONS:
     //
@@ -255,6 +253,13 @@ class ExportIndex : public ExportData
 		int* offset;							/**< Offset to create expression of the form "index + offset". */
 };
 
+struct ExportIndexComparator
+{
+    bool operator() (const ExportIndex& val1, const ExportIndex& val2) const
+    {
+        return std::string( val1.getName().getName() ).compare( std::string( val2.getName().getName() ) );
+    }
+};
 
 static const int emptyConstExportIndexValue = 0;
 static const ExportIndex emptyConstExportIndex((String)"default_index", INT, &emptyConstExportIndexValue );

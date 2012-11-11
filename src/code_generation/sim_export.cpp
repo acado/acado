@@ -328,10 +328,6 @@ returnValue SIMexport::setup( )
 	if ( returnvalue != SUCCESSFUL_RETURN )
 		return ACADOERROR( returnvalue );
 
-    int allowC99codegen;
-	get( CG_USE_C99, allowC99codegen );
-	ExportArithmeticStatement::allowC99( static_cast<BooleanType>( allowC99codegen ) );
-
 	int numSteps;
     get( NUM_INTEGRATOR_STEPS, numSteps );
 

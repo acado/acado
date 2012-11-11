@@ -48,26 +48,12 @@ BEGIN_NAMESPACE_ACADO
 
 ExportStatementBlock::ExportStatementBlock( ) : ExportStatement( )
 {
-	nStatements = 0;
-	statements  = 0;
 }
 
 
 ExportStatementBlock::ExportStatementBlock( const ExportStatementBlock& arg ) : ExportStatement( arg )
 {
-	nStatements = arg.nStatements;
-
-	if ( arg.statements != 0 )
-	{
-		statements = (ExportStatement**) calloc( nStatements,sizeof(ExportStatement*) );
-		for( uint i=0; i<nStatements; ++i )
-			statements[i] = (arg.statements[i])->clone( );
-	}
-	else
-	{
-		nStatements = 0;
-		statements = 0;
-	}
+	statements = arg.statements;
 }
 
 
@@ -85,19 +71,7 @@ ExportStatementBlock& ExportStatementBlock::operator=( const ExportStatementBloc
 
 		ExportStatement::operator=( arg );
 
-		nStatements = arg.nStatements;
-	
-		if ( arg.statements != 0 )
-		{
-			statements = (ExportStatement**) calloc( nStatements,sizeof(ExportStatement*) );
-			for( uint i=0; i<nStatements; ++i )
-				statements[i] = (arg.statements[i])->clone( );
-		}
-		else
-		{
-			nStatements = 0;
-			statements = 0;
-		}
+		statements = arg.statements;
 	}
 
 	return *this;
@@ -114,10 +88,7 @@ ExportStatement* ExportStatementBlock::clone( ) const
 returnValue ExportStatementBlock::addStatement(	const ExportStatement& _statement
 												)
 {
-	++nStatements;
-
-	statements = (ExportStatement**) realloc( statements,nStatements*sizeof(ExportStatement*) );
-	statements[ nStatements-1 ] = _statement.clone( );
+	statements.push_back( statementPtr( _statement.clone() ) );
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -280,7 +251,7 @@ returnValue ExportStatementBlock::addComment(	uint _nBlanks,
 
 uint ExportStatementBlock::getNumStatements( ) const
 {
-	return nStatements;
+	return statements.size();
 }
 
 
@@ -291,11 +262,10 @@ returnValue ExportStatementBlock::exportDataDeclaration(	FILE *file,
 															int _precision
 															) const
 {
-	for( uint i=0; i<nStatements; ++i )
-	{
-		if ( statements[i]->exportDataDeclaration( file,_realString,_intString,_precision ) != SUCCESSFUL_RETURN )
+	statementPtrArray::const_iterator it = statements.begin();
+	for(; it != statements.end(); ++it)
+		if ((*it)->exportDataDeclaration(file, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
-	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -308,14 +278,10 @@ returnValue ExportStatementBlock::exportCode(	FILE* file,
 												int _precision
 												) const
 {
-	for( uint i=0; i<nStatements; ++i )
-	{
-		if ( statements[i]->exportCode( file,_realString,_intString,_precision ) != SUCCESSFUL_RETURN )
+	statementPtrArray::const_iterator it = statements.begin();
+	for(; it != statements.end(); ++it)
+		if ((*it)->exportCode(file, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
-		
-// 		if ( i<nStatements-1 )
-// 			acadoFPrintf( file,"\n" );
-	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -324,20 +290,6 @@ returnValue ExportStatementBlock::exportCode(	FILE* file,
 
 returnValue ExportStatementBlock::clear( )
 {
-	if ( statements != 0 )
-	{
-		for( uint i=0; i<nStatements; ++i )
-		{
-			delete statements[i];
-			statements[i] = 0;
-		}
-
-		free( statements );
-		statements = 0;
-
-		nStatements = 0;
-	}
-	
 	return SUCCESSFUL_RETURN;
 }
 

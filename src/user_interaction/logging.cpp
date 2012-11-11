@@ -101,7 +101,7 @@ returnValue Logging::getLogRecord(	uint idx,
 									LogRecord& _record
 									) const
 {
-	if ( ( idx < 0 ) || ( idx >= getNumLogRecords( ) ) )
+	if (idx >= getNumLogRecords( ))
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 
 	_record = logCollection( idx );

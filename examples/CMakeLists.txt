@@ -188,8 +188,8 @@ FOREACH( DIR ${EXAMPLE_DIRS} )
 		ADD_EXECUTABLE( ${DIR}_${EXEC_NAME} ${SRC} )
 
 		TARGET_LINK_LIBRARIES(
-				${DIR}_${EXEC_NAME}
-				acado_toolkit qpOASESextras csparse
+			${DIR}_${EXEC_NAME}
+			${ACADO_STATIC_LIBRARIES}
 		)
 		
 		SET_TARGET_PROPERTIES(

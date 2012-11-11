@@ -37,13 +37,11 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_statement.hpp>
 #include <acado/code_generation/export_variable.hpp>
+#include <acado/code_generation/export_function.hpp>
 
 
 
 BEGIN_NAMESPACE_ACADO
-
-
-
 
 /** 
  *	\brief Allows to export code of different arithmetic statements.
@@ -163,17 +161,7 @@ class ExportArithmeticStatement : public ExportStatement
 										int _precision = 16
 										) const;
 
-		
-		/** Return an copy of the arithmetic statement where outer loop is not unrolled.
-		 *
-		 *	\return Copy of the arithmetic statement where outer loop is not unrolled
-		 */
-		 ExportArithmeticStatement& keepOuterLoop( );
-
-		 static void allowC99( BooleanType allow )
-		 {
-			 allowedC99 = allow;
-		 }
+		 returnValue allocate( memoryAllocatorPtr allocator );
 
 	//
     // PROTECTED MEMBER FUNCTIONS:
@@ -216,16 +204,6 @@ class ExportArithmeticStatement : public ExportStatement
 										int _precision = 16
 										) const;
 
-		/** Exports source code for a multiplication to given file; uses C-language C99 support
-		 *  This function is a quick patch and should be called from exportCodeMultiply
-		 */
-		returnValue exportCodeMultiplyC99(	FILE* file,
-											BooleanType transposeRhs1 = BT_FALSE,
-											const String& _realString = "real_t",
-											const String& _intString = "int",
-											int _precision = 16
-											) const;
-
 		/** Exports source code for an assignment to given file. 
 		 *  Its appearance can be adjusted by various options.
 		 *
@@ -257,6 +235,7 @@ class ExportArithmeticStatement : public ExportStatement
 
     protected:
 
+		// Refactor this guys as shared pointers
 		ExportVariable* lhs;					/**< Left-hand side expression of arithmetic statement. */
 		ExportVariable* rhs1;					/**< First right-hand side expression of arithmetic statement. */
 		ExportVariable* rhs2;					/**< Second right-hand side expression of arithmetic statement. */
@@ -266,9 +245,7 @@ class ExportArithmeticStatement : public ExportStatement
 		ExportStatementOperator op1; 			/**< Operator between first and second right-hand side expression of arithmetic statement. */
 		ExportStatementOperator op2;			/**< Operator between second and third right-hand side expression of arithmetic statement. */
 
-		ExportIndex outerLoopVariable;			/**< Left-hand side expression of arithmetic statement. */
-
-		static BooleanType allowedC99;		/**< Temporary patch for allowing exporting C99-compatible code*/
+		memoryAllocatorPtr memAllocator;
 };
 
 

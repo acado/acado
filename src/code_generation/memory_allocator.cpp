@@ -22,67 +22,50 @@
  *
  */
 
-
-
 /**
- *    \file src/code_generation/export_statement.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \file include/code_generation/memory_allocator.hpp
+ *    \author Milan Vukov
+ *    \date 2012
  */
 
-#include <acado/code_generation/export_statement.hpp>
-
+#include <acado/code_generation/memory_allocator.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
-//
-// PUBLIC MEMBER FUNCTIONS:
-//
-
-ExportStatement::ExportStatement( )
+returnValue MemoryAllocator::acquire(ExportIndex& _obj)
 {
-}
-
-
-ExportStatement::ExportStatement(	const ExportStatement& arg
-									)
-{
-}
-
-
-ExportStatement::~ExportStatement( )
-{
-}
-
-
-ExportStatement& ExportStatement::operator=(	const ExportStatement& arg
-												)
-{
-	if( this != &arg )
+	if (indices.busy() == true)
 	{
-		// empty
+		ExportIndex ind( (String)"lRun" << indices.size() + 1 );
+
+		indices.add( ind );
+
+		_obj = ind;
 	}
 
-	return *this;
-}
+	indices.acquire( _obj );
 
-
-
-returnValue ExportStatement::exportDataDeclaration(	FILE* file,
-													const String& _realString,
-													const String& _intString,
-													int _precision
-													) const
-{
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue MemoryAllocator::release(const ExportIndex& _obj)
+{
+	indices.release( _obj );
 
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
+	return SUCCESSFUL_RETURN;
+}
 
+returnValue MemoryAllocator::add(const ExportIndex& _obj)
+{
+	if (indices.add( _obj ) == false)
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Index with the same name already exists in the object pool");
+
+	return SUCCESSFUL_RETURN;
+}
+
+std::vector< ExportIndex > MemoryAllocator::getPool( void )
+{
+	return indices.getPool();
+}
 
 CLOSE_NAMESPACE_ACADO
-
-// end of file.

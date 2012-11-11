@@ -33,7 +33,6 @@
 #include <acado/code_generation/export_function.hpp>
 #include <acado/code_generation/export_function_call.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
 
 
@@ -56,6 +55,8 @@ ExportFunction::ExportFunction(	const String& _name,
 	functionReturnValue = 0;
 	returnAsPointer = BT_FALSE;
 
+	memAllocator = memoryAllocatorPtr( new MemoryAllocator );
+
 	init( _name,_argument1,_argument2,_argument3,
 				_argument4,_argument5,_argument6,
 				_argument7,_argument8,_argument9 );
@@ -72,14 +73,8 @@ ExportFunction::ExportFunction( const ExportFunction& arg ) : ExportStatementBlo
 	if ( arg.functionReturnValue != 0 )
 		setReturnValue( *(arg.functionReturnValue),arg.returnAsPointer );
 
-	localVariables.resize(arg.localVariables.size(), 0);
-	for (unsigned i = 0; i < arg.localVariables.size(); ++i)
-	{
-		if ( arg.localVariables[ i ] )
-		{
-			localVariables[ i ] = arg.localVariables[ i ]->clone();
-		}
-	}
+	memAllocator = arg.memAllocator;
+	localVariables = arg.localVariables;
 }
 
 
@@ -101,14 +96,8 @@ ExportFunction& ExportFunction::operator=( const ExportFunction& arg )
 		if ( arg.functionReturnValue != 0 )
 			setReturnValue( *(arg.functionReturnValue),arg.returnAsPointer );
 
-		localVariables.resize(arg.localVariables.size(), 0);
-		for (unsigned i = 0; i < arg.localVariables.size(); ++i)
-		{
-			if ( arg.localVariables[ i ] )
-			{
-				localVariables[ i ] = arg.localVariables[ i ]->clone();
-			}
-		}
+		memAllocator = arg.memAllocator;
+		localVariables = arg.localVariables;
 	}
 
 	return *this;
@@ -272,10 +261,15 @@ returnValue ExportFunction::exportCode(	FILE *file,
 										int _precision
 										) const
 {
-	// do not export undefined (empty) functions
+	//
+	// Do not export undefined (empty) functions
+	//
 	if ( isDefined() == BT_FALSE )
 		return SUCCESSFUL_RETURN;
 
+	//
+	// Set return value type
+	//
 	if ( functionReturnValue != 0 )
 	{
 		acadoFPrintf( file,"%s", functionReturnValue->getTypeString( _realString,_intString ).getName() );
@@ -288,7 +282,7 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	}
 	
 	acadoFPrintf( file," %s( ", name.getName() );
-	functionArguments.exportCode( file,_realString,_intString,_precision );
+	functionArguments.exportCode(file, _realString, _intString, _precision);
 	acadoFPrintf( file," )\n{\n");
 
 	if ( functionReturnValue )
@@ -297,13 +291,51 @@ returnValue ExportFunction::exportCode(	FILE *file,
 		acadoFPrintf(file, "%s;\n", functionReturnValue->getName().getName());
 	}
 
-	for (unsigned i = 0; i < localVariables.size(); ++i)
-		localVariables[ i ]->exportDataDeclaration(file, _realString, _intString, _precision);
+	// ExportStatementBlock::exportDataDeclaration( file,_realString,_intString,_precision );
 
-	ExportStatementBlock::exportDataDeclaration( file,_realString,_intString,_precision );
+	//
+	// Set parent pointers, and run memory allocation
+	//
+	statementPtrArray::const_iterator it = statements.begin();
+	for(; it != statements.end(); ++it)
+		(*it)->allocate( memAllocator );
 
-	ExportStatementBlock::exportCode( file,_realString,_intString,_precision );
-	
+	//
+	// Open a temporary file and export statements to the temporary file
+	//
+	FILE* tmpFile;
+	tmpFile = tmpfile();
+	ExportStatementBlock::exportCode(tmpFile, _realString, _intString, _precision);
+
+	//
+	// Export local indices (allocated previously)
+	//
+	const std::vector< ExportIndex > indices = memAllocator->getPool();
+	for (unsigned i = 0; i < indices.size(); ++i)
+		indices[ i ].exportDataDeclaration(file, _realString, _intString, _precision);
+
+	//
+	// Export local variables -- still done in a very primitive way
+	//
+	for(unsigned i = 0; i < localVariables.size(); ++i)
+		localVariables[ i ].exportDataDeclaration(file, _realString, _intString, _precision);
+
+	//
+	// Copy temporary file to main file, and close te temporary file aftwarards
+	//
+
+	rewind( tmpFile );
+	char buffer[ 256 ];
+	while ( !feof( tmpFile ) )
+	{
+		if ( fgets(buffer, 256, tmpFile) )
+			fputs(buffer, file);
+	}
+	fclose( tmpFile );
+
+	//
+	// Finish the export of the function
+	//
 	if ( functionReturnValue != 0 )
 		acadoFPrintf( file,"return %s;\n", functionReturnValue->getFullName().getName() );
 	acadoFPrintf( file,"}\n\n");
@@ -351,10 +383,6 @@ returnValue ExportFunction::clear( )
 		functionReturnValue = 0;
 	}
 	
-	for (std::vector< ExportData* >::iterator it = localVariables.begin(); it != localVariables.end(); ++it)
-		delete *it;
-	localVariables.clear();
-
 	returnAsPointer = BT_FALSE;
 
 	return SUCCESSFUL_RETURN;
@@ -362,18 +390,25 @@ returnValue ExportFunction::clear( )
 
 returnValue ExportFunction::addIndex(const ExportIndex& _index)
 {
-	localVariables.push_back( new ExportIndex( _index ) );
-
-	return SUCCESSFUL_RETURN;
+	return memAllocator->add( _index );
 }
 
-returnValue ExportFunction::addVariables(const ExportVariable& _variable)
+returnValue ExportFunction::acquire(ExportIndex& obj)
 {
-	localVariables.push_back( new ExportVariable( _variable ) );
+	return memAllocator->acquire( obj );
+}
+
+returnValue ExportFunction::release(const ExportIndex& obj)
+{
+	return memAllocator->release( obj );
+}
+
+returnValue ExportFunction::addVariable(const ExportVariable& _var)
+{
+	localVariables.push_back( _var );
 
 	return SUCCESSFUL_RETURN;
 }
-
 
 CLOSE_NAMESPACE_ACADO
 

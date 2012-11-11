@@ -58,9 +58,13 @@ ExportForLoop::ExportForLoop(	const ExportIndex& _loopVariable,
 }
 
 
-ExportForLoop::ExportForLoop( const ExportForLoop& arg ) : ExportStatementBlock( arg )
+ExportForLoop::ExportForLoop( const ExportForLoop& arg ) :	ExportStatementBlock( arg ),
+															loopVariable( arg.loopVariable ),
+															startValue( arg.startValue ),
+															finalValue( arg.finalValue ),
+															increment( arg.increment ),
+															doLoopUnrolling( arg.doLoopUnrolling )
 {
-	init(arg.loopVariable, arg.startValue, arg.finalValue, arg.increment, arg.doLoopUnrolling );
 }
 
 
@@ -102,6 +106,8 @@ returnValue ExportForLoop::init(	const ExportIndex& _loopVariable,
 	finalValue = _finalValue;
 	increment  = _increment;
 	doLoopUnrolling = _doLoopUnrolling;
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -205,6 +211,18 @@ ExportForLoop& ExportForLoop::keepLoop( )
 	return *this;
 }
 
+returnValue ExportForLoop::allocate(memoryAllocatorPtr allocator)
+{
+	//
+	// For loop itself cannot allocate any memory. Thus it just forwards
+	// the pointer, so that later statements can allocate some memory.
+	//
+	statementPtrArray::const_iterator it = statements.begin();
+	for(; it != statements.end(); ++it)
+		(*it)->allocate( allocator );
+
+	return SUCCESSFUL_RETURN;
+}
 
 
 //

@@ -55,7 +55,6 @@ class ExportData // : public CasADi::SharedObject
     // PUBLIC MEMBER FUNCTIONS:
     //
     public:
-
 		/** Default constructor. 
 		 */
         ExportData( );
@@ -111,7 +110,6 @@ class ExportData // : public CasADi::SharedObject
 							ExportStruct _dataStruct = ACADO_LOCAL,
 							const String& _prefix = emptyConstString
 							);
-
 
 		/** Sets the name of the data object.
 		 *
@@ -226,8 +224,6 @@ class ExportData // : public CasADi::SharedObject
     //
     protected:
 
-
-
     protected:
 
 		/** Name of the data object. */
@@ -248,7 +244,6 @@ class ExportData // : public CasADi::SharedObject
     private:
 		returnValue setFullName( void );
 };
-
 
 CLOSE_NAMESPACE_ACADO
 

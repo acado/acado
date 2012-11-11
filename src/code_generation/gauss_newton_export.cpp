@@ -154,6 +154,7 @@ returnValue GaussNewtonExport::setup( )
 	////////////////////////////////////////////////////////////////////////////
 	initialValueEmbedding.setup( "initialValueEmbedding" );
 
+	// TODO Assign the variable here
 	initialValueEmbedding.addStatement( "real_t tmp;\n" );
 	
 	if ( condenser->performsFullCondensing() == BT_TRUE )

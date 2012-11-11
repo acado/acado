@@ -40,6 +40,8 @@
 #include <acado/code_generation/export_statement_block.hpp>
 #include <acado/code_generation/export_statement_string.hpp>
 
+#include <acado/code_generation/memory_allocator.hpp>
+
 
 BEGIN_NAMESPACE_ACADO
 
@@ -293,20 +295,30 @@ class ExportFunction : public ExportStatementBlock
 		 */
 		uint getNumArguments( ) const;
 
-		/** Add a new index (local) variable to the function
+		/** Add a new index (local) index to the function
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 *
 		 * */
 		returnValue addIndex(	const ExportIndex& _index );
 
+		/** Add a new index (local) variable to the function
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 *
+		 * */
+		returnValue addVariable(	const ExportVariable& _var );
+
 		/** Add a new local variable to the function
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 *
 		 * */
-		returnValue addVariables(	const ExportVariable& _variable );
+		// returnValue addVariables(	const ExportVariable& _variable );
 
+		virtual returnValue acquire( ExportIndex& obj );
+
+		virtual returnValue release( const ExportIndex& obj );
 
 	//
     // PROTECTED MEMBER FUNCTIONS:
@@ -330,7 +342,9 @@ class ExportFunction : public ExportStatementBlock
 		ExportVariable* functionReturnValue;				/**< Return value of the function (by default, if pointer is null, return value is void). */
 		BooleanType returnAsPointer;						/**< Flag indicating whether value shall be returned as pointer. */
 
-		std::vector< ExportData* > localVariables;
+		memoryAllocatorPtr memAllocator;
+
+		std::vector< ExportVariable > localVariables;
 };
 
 

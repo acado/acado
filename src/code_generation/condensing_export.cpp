@@ -618,7 +618,7 @@ returnValue CondensingExport::setupMultiplicationRoutines( )
 	multiplyH01.addStatement( H01 == (C^QE) );
 
 	multiplyH11.setup( "multiplyH11", E,QE,H11 );
-	multiplyH11.addStatement( (H11 == (E^QE)).keepOuterLoop() );
+	multiplyH11.addStatement( (H11 == (E^QE)) );
 
 	return SUCCESSFUL_RETURN;
 }

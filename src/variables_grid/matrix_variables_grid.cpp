@@ -671,8 +671,6 @@ MatrixVariablesGrid MatrixVariablesGrid::getCoarsenedGrid(	const Grid& arg
 	if ( this->isEmpty( ) == BT_TRUE )
 		return tmp;
 
-	uint idx;
-
 	// checks for equality and subset
 	if ( Grid::operator==( arg ) == BT_TRUE )
 		return *this;
@@ -682,7 +680,7 @@ MatrixVariablesGrid MatrixVariablesGrid::getCoarsenedGrid(	const Grid& arg
 
 	for( uint i=0; i<arg.getNumPoints( ); ++i )
 	{
-		idx = findLastTime( arg.getTime( i ) );
+		int idx = findLastTime( arg.getTime( i ) );
 
 		if ( idx >= 0 )
 			tmp.addMatrix( *(values[idx]),arg.getTime( i ) );

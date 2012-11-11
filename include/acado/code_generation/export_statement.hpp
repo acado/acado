@@ -36,11 +36,13 @@
 
 #include <acado/utils/acado_utils.hpp>
 
-
+#include <tr1/memory>
 
 BEGIN_NAMESPACE_ACADO
 
 
+class ExportIndex;
+class MemoryAllocator;
 
 
 /** 
@@ -59,6 +61,12 @@ class ExportStatement
     // PUBLIC MEMBER FUNCTIONS:
     //
     public:
+
+		/** Shared pointer to a statement. */
+		typedef std::tr1::shared_ptr< ExportStatement > statementPtr;
+
+		/** Shared pointer to a memory allocator */
+		typedef std::tr1::shared_ptr< MemoryAllocator > memoryAllocatorPtr;
 
 		/** Default constructor. 
 		 */
@@ -121,24 +129,20 @@ class ExportStatement
 										int _precision = 16
 										) const = 0;
 
+		virtual returnValue acquire( ExportIndex& obj )
+		{
+			return RET_NOT_IMPLEMENTED_IN_BASE_CLASS;
+		}
 
-	//
-    // PROTECTED MEMBER FUNCTIONS:
-    //
-    protected:
+		virtual returnValue release( const ExportIndex& obj )
+		{
+			return RET_NOT_IMPLEMENTED_IN_BASE_CLASS;
+		}
 
-		/** Returns a string containing the name of the next unused run variable.
-		 *
-		 *	\return String containing the name of the next run variable.
-		 */
-		String getNextRunVariable( );
-
-
-
-    protected:
-		
-		static uint runVariableCounter;				/**< Static counter for run variables. */
-
+		virtual returnValue allocate( memoryAllocatorPtr allocator )
+		{
+			return SUCCESSFUL_RETURN;
+		}
 };
 
 

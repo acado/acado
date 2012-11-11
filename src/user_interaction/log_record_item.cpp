@@ -361,10 +361,10 @@ returnValue LogRecordItem::assignDigits(	uint& toDigit,
 											uint defaultDigit
 											)
 {
-	if ( fromDigit >= 0 )
+//	if ( fromDigit >= 0 )
 		toDigit = fromDigit; 
-	else
-		toDigit = defaultDigit;
+//	else
+//		toDigit = defaultDigit;
 
 	return SUCCESSFUL_RETURN;
 }
