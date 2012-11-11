@@ -28,7 +28,6 @@
  *	\author Hans Joachim Ferreau, Boris Houska
  */
 
-#ifndef ACADO_CMAKE_BUILD
 
 #ifndef ACADO_TOOLKIT_EXPORTED_RTI_SCHEME_HPP
 #define ACADO_TOOLKIT_EXPORTED_RTI_SCHEME_HPP
@@ -40,24 +39,14 @@
 typedef double real_t;
 // typedef float real_t;
 
-#ifndef __MATLAB__
-extern "C"
-{
-	void preparationStep( );
-	void feedbackStep( real_t* );
-	void shiftControls( real_t* );
-	void shiftStates( real_t* );
-	
-	real_t* getAcadoVariablesX( );
-	real_t* getAcadoVariablesU( );
-	real_t* getAcadoVariablesXRef( );
-	real_t* getAcadoVariablesURef( );
-} // extern "C"
-#endif // __MATLAB__
-
-
 
 BEGIN_NAMESPACE_ACADO
+
+
+typedef void (*fcnVoidVoid)( void );
+typedef void (*fcnVoidDoublePtr)( double* );
+typedef double* (*fcnDoublePtrVoid)( void );
+typedef int (*fcnIntDoublePtrVoid)( double* );
 
 
 /** 
@@ -87,10 +76,6 @@ class ExportedRTIscheme : public ControlLaw
 	//
 	public:
 
-		/** Default constructor. 
-		 */
-		ExportedRTIscheme( );
-
 		/** Constructor which takes the optimal control problem to be solved online
 		 *	together with the sampling time.
 		 *
@@ -100,7 +85,17 @@ class ExportedRTIscheme : public ControlLaw
 		ExportedRTIscheme(	uint _nX,
 							uint _nU,
 							uint _nPH,
-							double _samplingTime = DEFAULT_SAMPLING_TIME
+							double _samplingTime,
+
+							fcnVoidVoid _preparationStep,
+							fcnIntDoublePtrVoid _feedbackStep,
+							fcnVoidDoublePtr _shiftControls,
+							fcnVoidDoublePtr _shiftStates,
+
+							fcnDoublePtrVoid _getAcadoVariablesX,
+							fcnDoublePtrVoid _getAcadoVariablesU,
+							fcnDoublePtrVoid _getAcadoVariablesXRef,
+							fcnDoublePtrVoid _getAcadoVariablesURef
 							);
 
 		/** Copy constructor (deep copy).
@@ -308,7 +303,6 @@ class ExportedRTIscheme : public ControlLaw
 	protected:
 
 
-
 	//
 	// DATA MEMBERS:
 	//
@@ -317,6 +311,22 @@ class ExportedRTIscheme : public ControlLaw
 		uint nX;
 		uint nU;
 		uint nPH;
+
+		fcnVoidVoid preparationStepPtr;
+		fcnIntDoublePtrVoid feedbackStepPtr;
+		fcnVoidDoublePtr shiftControlsPtr;
+		fcnVoidDoublePtr shiftStatesPtr;
+
+		fcnDoublePtrVoid getAcadoVariablesXPtr;
+		fcnDoublePtrVoid getAcadoVariablesUPtr;
+		fcnDoublePtrVoid getAcadoVariablesXRefPtr;
+		fcnDoublePtrVoid getAcadoVariablesURefPtr;
+
+	private:
+
+		/** Default constructor.
+		 */
+		ExportedRTIscheme( );
 };
 
 
@@ -328,7 +338,6 @@ CLOSE_NAMESPACE_ACADO
 
 #endif  // ACADO_TOOLKIT_EXPORTED_RTI_SCHEME_HPP
 
-#endif // ACADO_CMAKE_BUILD
 
 /*
  *	end of file

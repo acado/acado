@@ -89,7 +89,7 @@ returnValue ExportPrintf::exportDataDeclaration(	FILE *file,
 // 	if ( data.isVector() == BT_TRUE )
 // 		acadoFPrintf( file,"%s %s;\n", _intString,"run1" );
 // 	else
-		acadoFPrintf( file,"%s %s,%s;\n", _intString.getName(),"run01","run02" );
+//		acadoFPrintf( file,"%s %s,%s;\n", _intString.getName(),"run01","run02" );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -112,6 +112,8 @@ returnValue ExportPrintf::exportCode(	FILE *file,
 // 	innerLoop.addStatement( )
 // 	outerLoop.addStatement( innerLoop );
 	
+	acadoFPrintf( file,"%s %s,%s;\n", _intString.getName(),"run01","run02" );
+
 	acadoFPrintf( file,"for( run01=0; run01<%d; ++run01 ){\n",data.getNumRows() );
 	acadoFPrintf( file,"  for( run02=0; run02<%d; ++run02 )\n",data.getNumCols() );
 

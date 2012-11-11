@@ -22,237 +22,305 @@
  *
  */
 
-
 /**
  *    \file   external_packages/src/acado_csparse/acado_csparse.cpp
  *    \author Boris Houska, Hans Joachim Ferreau
  *    \date   2009
  */
 
-
 #include <include/acado_csparse/acado_csparse.hpp>
 
-#if defined(ACADO_CMAKE_BUILD) && defined(__cplusplus)
-	extern "C" {
-#endif // ACADO_CMAKE_BUILD
+#ifndef __MATLAB__
 
+#if defined( ACADO_CMAKE_BUILD ) && defined( __cplusplus )
+extern "C"
+{
+#endif // ACADO_CMAKE_BUILD
 #include "../../csparse/cs.h"
 
-#if defined(ACADO_CMAKE_BUILD) && defined(__cplusplus)
-	}
+#if defined( ACADO_CMAKE_BUILD ) && defined( __cplusplus )
+}
 #endif // ACADO_CMAKE_BUILD
 
-
 BEGIN_NAMESPACE_ACADO
-
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-
-
-ACADOcsparse::ACADOcsparse( ){
-
-    dim        = 0     ;
-    nDense     = 0     ;
-    index1     = 0     ;
-    index2     = 0     ;
-    x          = 0     ;
-    S          = 0     ;
-    N          = 0     ;
-    TOL        = 1e-14 ;
-    printLevel = LOW;
+ACADOcsparse::ACADOcsparse()
+{
+	dim = 0;
+	nDense = 0;
+	index1 = 0;
+	index2 = 0;
+	x = 0;
+	S = 0;
+	N = 0;
+	TOL = 1e-14;
+	printLevel = LOW;
 }
 
+ACADOcsparse::ACADOcsparse(const ACADOcsparse &arg)
+{
+	int run1;
 
-ACADOcsparse::ACADOcsparse( const ACADOcsparse &arg ){
+	dim = arg.dim;
+	nDense = arg.nDense;
+	index1 = 0;
+	index2 = 0;
 
-    int run1;
+	if (arg.x == 0)
+		x = 0;
+	else
+	{
+		x = new double[dim];
+		for (run1 = 0; run1 < dim; run1++)
+			x[run1] = arg.x[run1];
+	}
 
-    dim        = arg.dim;
-    nDense     = arg.nDense;
-    index1     = 0;
-    index2     = 0;
+	S = 0;
+	N = 0;
 
-    if( arg.x == 0 )  x = 0;
-    else{
-        x = new double[dim];
-        for( run1 = 0; run1 < dim; run1++ )
-            x[run1] = arg.x[run1];
-    }
-
-    S = 0;
-    N = 0;
-
-    TOL = arg.TOL;
-    printLevel = arg.printLevel;
+	TOL = arg.TOL;
+	printLevel = arg.printLevel;
 }
 
+ACADOcsparse::~ACADOcsparse()
+{
+	if (index1 != 0)
+		delete[] index1;
+	if (index2 != 0)
+		delete[] index2;
+	if (x != 0)
+		delete[] x;
 
-ACADOcsparse::~ACADOcsparse( ){
+	if (S != 0)
+		cs_free(S);
+	if (N != 0)
+	{
 
-    if( index1 != 0 ) delete[] index1;
-    if( index2 != 0 ) delete[] index2;
-    if( x != 0 ) delete[] x;
-
-    if( S != 0 ) cs_free(S);
-    if( N != 0 ){
-
-         if( N->L    != 0 ) cs_spfree(N->L);
-         if( N->U    != 0 ) cs_spfree(N->U);
-         if( N->pinv != 0 ) free(N->pinv);
-         if( N->B    != 0 ) free(N->B);
-         free(N);
-    }
+		if (N->L != 0)
+			cs_spfree(N->L);
+		if (N->U != 0)
+			cs_spfree(N->U);
+		if (N->pinv != 0)
+			free(N->pinv);
+		if (N->B != 0)
+			free(N->B);
+		free(N);
+	}
 }
 
+ACADOcsparse* ACADOcsparse::clone() const
+{
 
-ACADOcsparse* ACADOcsparse::clone() const{
-
-    return new ACADOcsparse(*this);
+	return new ACADOcsparse(*this);
 }
 
+returnValue ACADOcsparse::solve(double *b)
+{
+	// CONSISTENCY CHECKS:
+	// -------------------
+	if (dim <= 0)
+		return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
+	if (nDense <= 0)
+		return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
+	if (S == 0)
+		return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
 
+	// CASE: LU
 
-returnValue ACADOcsparse::solve( double *b ){
+	cs_ipvec(N->pinv, b, x, dim); /* x = b(p) */
+	cs_lsolve(N->L, x); /* x = L\x  */
+	cs_usolve(N->U, x); /* x = U\x  */
+	cs_ipvec(S->q, x, b, dim); /* b(q) = x */
 
-    // CONSISTENCY CHECKS:
-    // -------------------
-    if( dim    <= 0 )  return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
-    if( nDense <= 0 )  return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
-    if( S      == 0 )  return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
-
-
-    // CASE: LU
-
-    cs_ipvec  ( N->pinv, b, x, dim );   /* x = b(p) */
-    cs_lsolve ( N->L   , x         );   /* x = L\x  */
-    cs_usolve ( N->U   , x         );   /* x = U\x  */
-    cs_ipvec  ( S->q   , x, b, dim );   /* b(q) = x */
-
-    return SUCCESSFUL_RETURN;
+	return SUCCESSFUL_RETURN;
 }
 
+returnValue ACADOcsparse::solveTranspose(double *b)
+{
+	// CONSISTENCY CHECKS:
+	// -------------------
+	if (dim <= 0)
+		return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
+	if (nDense <= 0)
+		return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
+	if (S == 0)
+		return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
 
-returnValue ACADOcsparse::solveTranspose( double *b ){
+	// CASE: LU
 
-    // CONSISTENCY CHECKS:
-    // -------------------
-    if( dim    <= 0 )  return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
-    if( nDense <= 0 )  return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
-    if( S      == 0 )  return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
+	cs_ipvec(N->pinv, b, x, dim); /* x = b(p) */
+	cs_utsolve(N->U, x); /* x = U'\x */
+	cs_ltsolve(N->L, x); /* x = L'\x */
+	cs_ipvec(S->q, x, b, dim); /* b(q) = x */
 
-
-    // CASE: LU
-
-    cs_ipvec  ( N->pinv, b, x, dim );   /* x = b(p) */
-    cs_utsolve( N->U   , x         );   /* x = U'\x */
-    cs_ltsolve( N->L   , x         );   /* x = L'\x */
-    cs_ipvec  ( S->q   , x, b, dim );   /* b(q) = x */
-
-    return SUCCESSFUL_RETURN;
+	return SUCCESSFUL_RETURN;
 }
 
+returnValue ACADOcsparse::setDimension(const int &n)
+{
+	dim = n;
 
+	if (x != 0)
+	{
+		delete[] x;
+		x = 0;
+	}
+	x = new double[dim];
 
-returnValue ACADOcsparse::setDimension( const int &n ){
-
-    dim = n;
-
-    if( x != 0 ){
-        delete[] x;
-        x = 0;
-    }
-    x = new double[dim];
-
-
-    return SUCCESSFUL_RETURN;
+	return SUCCESSFUL_RETURN;
 }
 
-
-
-returnValue ACADOcsparse::setNumberOfEntries( const int &nDense_ ){
-
-    nDense = nDense_;
-    return SUCCESSFUL_RETURN;
+returnValue ACADOcsparse::setNumberOfEntries(const int &nDense_)
+{
+	nDense = nDense_;
+	return SUCCESSFUL_RETURN;
 }
 
+returnValue ACADOcsparse::setIndices(const int *rowIdx_, const int *colIdx_)
+{
+	if (index1 != 0)
+		delete[] index1;
+	if (index2 != 0)
+		delete[] index2;
 
-returnValue ACADOcsparse::setIndices( const int *rowIdx_,
-                                      const int *colIdx_ ){
+	int run1;
 
-    if( index1 != 0 ) delete[] index1;
-    if( index2 != 0 ) delete[] index2;
+	index1 = new int[nDense];
+	index2 = new int[nDense];
 
-    int run1;
-
-    index1 = new int[nDense];
-    index2 = new int[nDense];
-
-    for( run1 = 0; run1 < nDense; run1++ ){
-        index1[run1] = rowIdx_[run1];
-        index2[run1] = colIdx_[run1];
-    }
-    return SUCCESSFUL_RETURN;
+	for (run1 = 0; run1 < nDense; run1++)
+	{
+		index1[run1] = rowIdx_[run1];
+		index2[run1] = colIdx_[run1];
+	}
+	return SUCCESSFUL_RETURN;
 }
 
+returnValue ACADOcsparse::setMatrix(double *A_)
+{
+	int run1;
+	int order = 0;
 
+	if (dim <= 0)
+		return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
+	if (nDense <= 0)
+		return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
 
-returnValue ACADOcsparse::setMatrix( double *A_ ){
+	cs *C, *D;
+	C = cs_spalloc(0, 0, 1, 1, 1);
 
-    int run1;
-    int order = 0;
+	for (run1 = 0; run1 < nDense; run1++)
+		cs_entry(C, index1[run1], index2[run1], A_[run1]);
 
-    if( dim    <= 0 )  return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
-    if( nDense <= 0 )  return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
+	D = cs_compress(C);
+	S = cs_sqr(order, D, 0);
+	N = cs_lu(D, S, TOL);
 
-    cs *C, *D;
-    C = cs_spalloc (0, 0, 1, 1, 1) ;
+	cs_spfree(C);
+	cs_spfree(D);
 
-    for( run1 = 0; run1 < nDense; run1++ )
-        cs_entry( C, index1[run1], index2[run1], A_[run1] );
-
-    D = cs_compress(C);
-    S = cs_sqr (order, D, 0);
-    N = cs_lu  (D, S, TOL);
-
-    cs_spfree( C );
-    cs_spfree( D );
-
-    return SUCCESSFUL_RETURN;
+	return SUCCESSFUL_RETURN;
 }
 
+returnValue ACADOcsparse::getX(double *x_)
+{
+	int run1;
+	for (run1 = 0; run1 < dim; run1++)
+		x_[run1] = x[run1];
 
-
-
-returnValue ACADOcsparse::getX( double *x_ ){
-
-    int run1;
-    for( run1 = 0; run1 < dim; run1++ )
-        x_[run1] = x[run1];
-
-    return SUCCESSFUL_RETURN;
+	return SUCCESSFUL_RETURN;
 }
 
-
-returnValue ACADOcsparse::setTolerance( double TOL_ ){
-
-    TOL = TOL_;
-    return SUCCESSFUL_RETURN;
+returnValue ACADOcsparse::setTolerance(double TOL_)
+{
+	TOL = TOL_;
+	return SUCCESSFUL_RETURN;
 }
 
-
-returnValue ACADOcsparse::setPrintLevel( PrintLevel printLevel_ ){
-
-    printLevel = printLevel_;
-    return SUCCESSFUL_RETURN;
+returnValue ACADOcsparse::setPrintLevel(PrintLevel printLevel_)
+{
+	printLevel = printLevel_;
+	return SUCCESSFUL_RETURN;
 }
-
-
 
 CLOSE_NAMESPACE_ACADO
+
+#else // __MATLAB__
+
+BEGIN_NAMESPACE_ACADO
+
+//
+// PUBLIC MEMBER FUNCTIONS:
+//
+
+ACADOcsparse::ACADOcsparse( )
+{
+
+}
+
+ACADOcsparse::ACADOcsparse( const ACADOcsparse &arg )
+{}
+
+ACADOcsparse::~ACADOcsparse( )
+{}
+
+ACADOcsparse* ACADOcsparse::clone() const
+{
+	return new ACADOcsparse(*this);
+}
+
+returnValue ACADOcsparse::solve( double *b )
+{
+	return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+}
+
+returnValue ACADOcsparse::setDimension( const int &n )
+{
+	return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+}
+
+returnValue ACADOcsparse::setNumberOfEntries( const int &nDense_ )
+{
+	return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+}
+
+returnValue ACADOcsparse::setIndices( const int *rowIdx_, const int *colIdx_ )
+{
+	return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+}
+
+returnValue ACADOcsparse::setMatrix( double *A_ )
+{
+	return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+}
+
+returnValue ACADOcsparse::solveTranspose( double *b )
+{
+	return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+}
+
+returnValue ACADOcsparse::getX( double *x_ )
+{
+	return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+}
+
+returnValue ACADOcsparse::setTolerance( double TOL_ )
+{
+	return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+}
+
+returnValue ACADOcsparse::setPrintLevel( PrintLevel printLevel_ )
+{
+	return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+}
+
+CLOSE_NAMESPACE_ACADO
+
+#endif // __MATLAB__
 
 
 /*

@@ -46,6 +46,7 @@ ACADOworkspace acadoWorkspace;
 
 Vars         vars;
 Params       params;
+
 #ifdef USE_CVXGEN
 Workspace    work;
 Settings     settings;
@@ -89,7 +90,22 @@ int main( )
 
     // SETTING UP THE MPC CONTROLLER:
     // ------------------------------
-	ExportedRTIscheme rtiScheme( 4,1, 10, 0.3 );
+	ExportedRTIscheme rtiScheme(
+			4, // number of states
+			1, // number of controls
+			10, // number of horizon intervals
+			0.3, // sampling time
+
+			/* Function handlers: */
+			preparationStep,
+			feedbackStep,
+			shiftControls,
+			shiftStates,
+			getAcadoVariablesX,
+			getAcadoVariablesU,
+			getAcadoVariablesXRef,
+			getAcadoVariablesURef );
+
 	#ifdef USE_CVXGEN
 	set_defaults( );
 	#endif

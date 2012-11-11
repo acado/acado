@@ -98,10 +98,10 @@ BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
 
 
 % TODO remove this file and patch acado_csparse.cpp
-% [fl, ol] = getFilesAndObjectNames('../../external_packages/src/acado_csparse/');
-SRC = [SRC; '../../external_packages/src/acado_csparse/acado_csparse_matlab.cpp'];
-BIN = [BIN; 'acado_csparse_matlab'];
-BINFOLDER = [BINFOLDER; {'src/'}];
+[fl, ol] = getFilesAndObjectNames('../../external_packages/src/acado_csparse/');
+SRC = [SRC; fl];
+BIN = [BIN; ol'];
+BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
 
 [fl, ol] = getFilesAndObjectNames('../../src/matrix_vector');
 

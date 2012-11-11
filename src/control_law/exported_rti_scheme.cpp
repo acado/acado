@@ -22,7 +22,6 @@
  *
  */
 
-#ifndef ACADO_CMAKE_BUILD
 
 /**
  *    \file src/control_law/exported_rti_scheme.cpp
@@ -34,25 +33,7 @@
 #include <acado/control_law/exported_rti_scheme.hpp>
 
 
-#ifdef __MATLAB__
-extern "C"
-{
-	void preparationStep( ) {};
-	void feedbackStep( real_t* ) {};
-	void shiftControls( real_t* ) {};
-	void shiftStates( real_t* ) {};
-	
-	real_t* getAcadoVariablesX( ) { return 0; };
-	real_t* getAcadoVariablesU( ) { return 0; };
-	real_t* getAcadoVariablesXRef( ) { return 0; };
-	real_t* getAcadoVariablesURef( ) { return 0; };
-} // extern "C"
-#endif // __MATLAB__
-
-
-
 BEGIN_NAMESPACE_ACADO
-
 
 
 //
@@ -68,12 +49,32 @@ ExportedRTIscheme::ExportedRTIscheme( ) : ControlLaw( )
 ExportedRTIscheme::ExportedRTIscheme(	uint _nX,
 										uint _nU,
 										uint _nPH,
-										double _samplingTime
+										double _samplingTime,
+
+										fcnVoidVoid _preparationStep,
+										fcnIntDoublePtrVoid _feedbackStep,
+										fcnVoidDoublePtr _shiftControls,
+										fcnVoidDoublePtr _shiftStates,
+
+										fcnDoublePtrVoid _getAcadoVariablesX,
+										fcnDoublePtrVoid _getAcadoVariablesU,
+										fcnDoublePtrVoid _getAcadoVariablesXRef,
+										fcnDoublePtrVoid _getAcadoVariablesURef
 										) : ControlLaw( _samplingTime )
 {
 	nX  = _nX;
 	nU  = _nU;
 	nPH = _nPH;
+
+	preparationStepPtr = _preparationStep;
+	feedbackStepPtr = _feedbackStep;
+	shiftControlsPtr = _shiftControls;
+	shiftStatesPtr = _shiftStates;
+
+	getAcadoVariablesXPtr = _getAcadoVariablesX;
+	getAcadoVariablesUPtr = _getAcadoVariablesU;
+	getAcadoVariablesXRefPtr = _getAcadoVariablesXRef;
+	getAcadoVariablesURefPtr = _getAcadoVariablesURef;
 
 	setStatus( BS_NOT_INITIALIZED );
 }
@@ -84,6 +85,16 @@ ExportedRTIscheme::ExportedRTIscheme( const ExportedRTIscheme& rhs ) : ControlLa
 	nX  = rhs.nX;
 	nU  = rhs.nU;
 	nPH = rhs.nPH;
+
+	preparationStepPtr = rhs.preparationStepPtr;
+	feedbackStepPtr = rhs.feedbackStepPtr;
+	shiftControlsPtr = rhs.shiftControlsPtr;
+	shiftStatesPtr = rhs.shiftStatesPtr;
+
+	getAcadoVariablesXPtr = rhs.getAcadoVariablesXPtr;
+	getAcadoVariablesUPtr = rhs.getAcadoVariablesUPtr;
+	getAcadoVariablesXRefPtr = rhs.getAcadoVariablesXRefPtr;
+	getAcadoVariablesURefPtr = rhs.getAcadoVariablesURefPtr;
 }
 
 
@@ -101,6 +112,16 @@ ExportedRTIscheme& ExportedRTIscheme::operator=( const ExportedRTIscheme& rhs )
 		nX = rhs.nX;
 		nU = rhs.nU;
 		nPH = rhs.nPH;
+
+		preparationStepPtr = rhs.preparationStepPtr;
+		feedbackStepPtr = rhs.feedbackStepPtr;
+		shiftControlsPtr = rhs.shiftControlsPtr;
+		shiftStatesPtr = rhs.shiftStatesPtr;
+
+		getAcadoVariablesXPtr = rhs.getAcadoVariablesXPtr;
+		getAcadoVariablesUPtr = rhs.getAcadoVariablesUPtr;
+		getAcadoVariablesXRefPtr = rhs.getAcadoVariablesXRefPtr;
+		getAcadoVariablesURefPtr = rhs.getAcadoVariablesURefPtr;
 	}
 
     return *this;
@@ -141,14 +162,8 @@ returnValue ExportedRTIscheme::init(	double startTime,
 										const VariablesGrid& _yRef
 										)
 {
-// 	printf( "sizeof(acadoVariables) = %d\n",sizeof(acadoVariables) );
-// 	printf( "sizeof(acadoWorkspace) = %d\n",sizeof(acadoWorkspace) );
-// 	printf( "address acadoVariables = %p\n",&acadoVariables );
-// 	printf( "address acadoWorkspace = %p\n",&acadoWorkspace );
-
 	Grid refGrid( _yRef.getFirstTime(),_yRef.getLastTime(),nPH+1 );
 	VariablesGrid yRefTmp = _yRef.getRefinedGrid( refGrid );
-	//yRefTmp.print( );
 
    // INTRODUCE AUXILIARY VAIRABLES:
    // ------------------------------
@@ -157,10 +172,7 @@ returnValue ExportedRTIscheme::init(	double startTime,
    // INITIALIZE THE STATES AND CONTROLS:
    // ----------------------------------------
 	for( i = 0; i < getNX(); ++i ) 
-		getAcadoVariablesX()[i] = (real_t)_x(i);
-
-// 	_x.print("xInit");
-// 	yRefTmp.print("yRefInit");
+		getAcadoVariablesXPtr()[i] = (real_t)_x(i);
 	
 	if ( u.isEmpty( ) == BT_TRUE )
 	{
@@ -171,7 +183,7 @@ returnValue ExportedRTIscheme::init(	double startTime,
 	for( i = 0; i < nPH; i++ ) 
 	{
 		for( j = 0; j < getNU( ); ++j )
-			getAcadoVariablesU()[i*getNU()+j] = (real_t)u(j);
+			getAcadoVariablesUPtr()[i*getNU()+j] = (real_t)u(j);
 	}
 
    // INITIALIZE THE STATES AND CONTROL REFERENCE:
@@ -179,10 +191,10 @@ returnValue ExportedRTIscheme::init(	double startTime,
     for( i = 0; i < nPH; i++ )
 	{
 		for( j = 0; j < getNX( ); ++j )
-			getAcadoVariablesXRef()[i*getNX()+j] = (real_t)yRefTmp( i,j );
+			getAcadoVariablesXRefPtr()[i*getNX()+j] = (real_t)yRefTmp( i,j );
 
 		for( j = 0; j < getNU( ); ++j )
-			getAcadoVariablesURef()[i*getNU()+j] = (real_t)yRefTmp( i,getNX()+j );
+			getAcadoVariablesURefPtr()[i*getNU()+j] = (real_t)yRefTmp( i,getNX()+j );
 	}
 
 
@@ -219,9 +231,6 @@ returnValue ExportedRTIscheme::feedbackStep(	double currentTime,
 												)
 {
 	uint i;
-	
-// 	_x.print("x");
-
 
 	if ( getStatus( ) != BS_READY )
 		return ACADOERROR( RET_BLOCK_NOT_READY );
@@ -237,20 +246,12 @@ returnValue ExportedRTIscheme::feedbackStep(	double currentTime,
 	for( i=0; i<getNX(); ++i )
 		measurement[i] = (real_t)_x(i);
 
-	::feedbackStep( measurement );
+	feedbackStepPtr( measurement );
 
 	delete[] measurement;
 
 	for( i=0; i<getNU(); ++i )
-		u(i) = (real_t)getAcadoVariablesU()[i];
-
-// 	u.print("u");
-
-// 	printf("=================================================================\n\n" );
-// 	printf("    Current Real-Time Iteration:  KKT Tolerance = %.3e\n", getKKT() );
-// 	printf("\n=================================================================\n" );
-
-	//shift( );
+		u(i) = (real_t)getAcadoVariablesUPtr()[i];
 
 	return SUCCESSFUL_RETURN;
 }
@@ -268,13 +269,13 @@ returnValue ExportedRTIscheme::preparationStep(	double nextTime,
     for( i = 0; i < nPH; ++i )
 	{
 		for( j = 0; j < getNX( ); ++j )
-			getAcadoVariablesXRef()[i*getNX()+j] = (real_t)yRefTmp( i,j );
+			getAcadoVariablesXRefPtr()[i*getNX()+j] = (real_t)yRefTmp( i,j );
 
 		for( j = 0; j < getNU( ); ++j )
-			getAcadoVariablesURef()[i*getNU()+j] = (real_t)yRefTmp( i,getNX()+j );
+			getAcadoVariablesURefPtr()[i*getNU()+j] = (real_t)yRefTmp( i,getNX()+j );
 	}
 
-	::preparationStep( );
+	preparationStepPtr( );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -283,8 +284,8 @@ returnValue ExportedRTIscheme::preparationStep(	double nextTime,
 
 returnValue ExportedRTIscheme::shift( )
 {
-// 	shiftControls( getAcadoVariablesURef() );
-// 	shiftStates  ( getAcadoVariablesXRef() );
+// 	shiftControlsPtr( getAcadoVariablesURef() );
+// 	shiftStatesPtr( getAcadoVariablesXRef() );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -372,13 +373,10 @@ BooleanType ExportedRTIscheme::isInRealTimeMode( ) const
 }
 
 
-
 //
 // PROTECTED MEMBER FUNCTIONS:
 //
 
 CLOSE_NAMESPACE_ACADO
-
-#endif // ACADO_CMAKE_BUILD
 
 // end of file.

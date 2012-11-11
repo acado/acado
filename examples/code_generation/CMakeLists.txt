@@ -35,10 +35,10 @@
 #	- It is assumed that one executable has only one source (.cpp) file.
 #
 # Usage:
-#	- This file should be called from the main CMake script for examples
+#	- This file should be called from the main CMake script for examples.
 #
 # TODO:
-#	- Closed loop example(s) -- this can work with static libraries only
+#	- Simplify build rules for closed loop example(s).
 #
 ################################################################################
 
@@ -72,6 +72,9 @@ IF ( CLOSED_LOOP_SOURCES )
 	LIST( REMOVE_ITEM SOURCES ${CLOSED_LOOP_SOURCES} )
 ENDIF ( CLOSED_LOOP_SOURCES )
 
+#
+# Compile examples
+#
 FOREACH( SRC ${SOURCES} )
 	GET_FILENAME_COMPONENT( EXEC_NAME ${SRC} NAME_WE )
 
@@ -92,3 +95,80 @@ FOREACH( SRC ${SOURCES} )
 	)		
 
 ENDFOREACH( SRC ${SOURCES} )
+
+################################################################################
+#
+# Compilation of the closed loop example. The following code first calls an
+# executable that generates the code, and afterwards a test application is built
+# that performs a closed loop simulation with the auto-generated NMPC. 
+#
+################################################################################
+
+#
+# Compile the closed loop example
+#
+
+# Build library out of auto-generated code
+SET( GENERATED_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/acado.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/condensing.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/gauss_newton_method.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/integrator.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/qpoases/solver.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/qpoases/solver.hpp
+)
+
+# Add the additional folders to the build proces
+INCLUDE_DIRECTORIES(
+	${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/qpoases
+	${ACADO_QPOASES_EMBEDDED_INC_DIRS}
+)
+
+# Add a patch definition
+ADD_DEFINITIONS( -DACADO_CMAKE_BUILD )
+
+
+# Get the name of the executable getting started
+GET_TARGET_PROPERTY(
+    MY_GENERATOR_EXE
+        code_generation_getting_started LOCATION
+)
+
+# Create a command that will generate the code for us
+ADD_CUSTOM_COMMAND(
+    OUTPUT
+        ${GENERATED_FILES}       
+    COMMAND
+        ${MY_GENERATOR_EXE}
+	WORKING_DIRECTORY
+		${CMAKE_CURRENT_SOURCE_DIR}
+	DEPENDS
+        code_generation_getting_started
+)
+
+# Build a test application
+ADD_EXECUTABLE(
+	# Name of the executable
+    getting_started_closed_loop
+    
+    # A test application source
+    getting_started_closed_loop.cpp
+    
+    # Auto-generated sources
+    ${GENERATED_FILES}
+    
+    # qpOASES embedded sources
+	${ACADO_QPOASES_EMBEDDED_SOURCES}
+)
+TARGET_LINK_LIBRARIES(
+	# Name of the executable
+    getting_started_closed_loop
+    
+    # Link against ACADO libraries
+    ${ACADO_STATIC_LIBRARIES}
+)
+SET_TARGET_PROPERTIES(
+	getting_started_closed_loop
+	PROPERTIES
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
