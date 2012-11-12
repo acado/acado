@@ -128,10 +128,6 @@ SET( GENERATED_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/qpoases/solver.hpp
 )
 
-IF( ACADO_BUILD )
-
-ACADO_ENV_QPOASES_EMBEDDED_INC_DIRS
-
 # Add the additional folders to the build proces
 INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/qpoases
