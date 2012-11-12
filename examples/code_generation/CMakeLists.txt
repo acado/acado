@@ -96,6 +96,16 @@ FOREACH( SRC ${SOURCES} )
 
 ENDFOREACH( SRC ${SOURCES} )
 
+# If we are building withing main ACADO build, correct paths must be set
+IF( ACADO_BUILD )
+	SET( ACADO_QPOASES_EMBEDDED_SOURCES
+		${ACADO_ENV_QPOASES_EMBEDDED_SOURCES}
+	)
+	SET( ACADO_QPOASES_EMBEDDED_INC_DIRS
+		${ACADO_ENV_QPOASES_EMBEDDED_INC_DIRS}
+	)
+ENDIF()
+
 ################################################################################
 #
 # Compilation of the closed loop example. The following code first calls an
@@ -117,6 +127,10 @@ SET( GENERATED_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/qpoases/solver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/qpoases/solver.hpp
 )
+
+IF( ACADO_BUILD )
+
+ACADO_ENV_QPOASES_EMBEDDED_INC_DIRS
 
 # Add the additional folders to the build proces
 INCLUDE_DIRECTORIES(
@@ -145,13 +159,6 @@ ADD_CUSTOM_COMMAND(
 	DEPENDS
         code_generation_getting_started
 )
-
-# If we are building withing main ACADO build, correct paths must be set
-IF( ACADO_BUILD )
-	SET( ACADO_QPOASES_EMBEDDED_SOURCES
-		${ACADO_ENV_QPOASES_EMBEDDED_SOURCES}
-	)
-ENDIF()
 
 # Build a test application
 ADD_EXECUTABLE(
