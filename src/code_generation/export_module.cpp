@@ -268,7 +268,7 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 			acadoHeader.addStatement( "#ifndef __MATLAB__\n");
 			acadoHeader.addStatement( "#ifdef __cplusplus\n" );
 			acadoHeader.addLinebreak( );
-			acadoHeader.addStatement( "} // extern \"C\"\n" );
+			acadoHeader.addStatement( "} /* extern \"C\" */\n" );
 			acadoHeader.addStatement( "#endif\n" );
 			acadoHeader.addStatement( "#endif\n" );
 			break;
