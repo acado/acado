@@ -65,14 +65,11 @@ classdef Disturbance < acado.Variable
             end
             for j = 1:length(obj)
                 for i = 1:length(var)
+                    var(i) = getExpression(var(i));
                     if isa(var(i), 'acado.Variable')
-                        jac(j,i) = double(isa(var(i), 'acado.Disturbance') && strcmp(obj(j).name, var(i).name));
+                        jac(j,i) = acado.DoubleConstant(double(isa(var(i), 'acado.Disturbance') && strcmp(obj(j).name, var(i).name)));
                     else
-                        if isa(var(i).obj1, 'acado.Variable')
-                            jac(j,i) = double(isa(var(i).obj1, 'acado.Disturbance') && strcmp(obj(j).name, var(i).obj1.name));
-                        else
-                            error('A jacobian can only be computed with respect to a variable.');
-                        end
+                        error('A jacobian can only be computed with respect to a variable.');
                     end
                 end
             end

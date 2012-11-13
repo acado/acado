@@ -34,11 +34,37 @@ classdef Expression < handle
         
         zero = 0;
         one = 0;
+        
+        singleTerm = 0;
+        
+        expr;
     end
     
     methods
-        function obj = Expression( varargin )
-            
+        function obj = Expression( in )
+            if nargin > 0
+                for i = 1:size(in,1)
+                    for j = 1:size(in,2)
+                        if isa(in(i,j), 'numeric')
+                            obj(i,j).expr = acado.DoubleConstant(in(i,j)); 
+                            obj(i,j).zero = (in(i,j) == 0);
+                            obj(i,j).one = (in(i,j) == 1);
+                        else
+                            obj(i,j).expr = in(i,j).getExpression;
+                            obj(i,j).zero = in(i,j).zero;
+                            obj(i,j).one = in(i,j).one;
+                        end
+                    end
+                end
+            end
+        end
+        
+        function out = copy(obj)
+            if strcmp(class(obj), 'acado.Expression')
+                out = acado.Expression(copy(obj.expr));
+            else
+                error(['Undefined copy constructor for class ' class(obj) ' !']);
+            end
         end
         
         function r = dot(obj1, b, dim)
@@ -63,13 +89,13 @@ classdef Expression < handle
             if length(obj2) == 1
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj1,2)
-                        r(i,j) = acado.Addition(acado.Product(obj1(i,j),obj2));
+                        r(i,j) = acado.Expression(acado.Product(obj1(i,j),obj2));
                     end
                 end
             elseif length(obj1) == 1
                 for i = 1:size(obj2,1)
                     for j = 1:size(obj2,2)
-                        r(i,j) = acado.Addition(acado.Product(obj2(i,j),obj1));
+                        r(i,j) = acado.Expression(acado.Product(obj2(i,j),obj1));
                     end
                 end
             else
@@ -78,9 +104,9 @@ classdef Expression < handle
                 end
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj2,2)
-                        r(i,j) = acado.Addition(acado.Product(obj1(i,1),obj2(1,j)));
+                        r(i,j) = acado.Expression(acado.Product(obj1(i,1),obj2(1,j)));
                         for k = 2:size(obj1,2)
-                            r(i,j) = acado.Addition(r(i,j), acado.Product(obj1(i,k),obj2(k,j)));
+                            r(i,j) = acado.Expression(acado.Addition(r(i,j), acado.Product(obj1(i,k),obj2(k,j))));
                         end
                     end
                 end
@@ -91,13 +117,13 @@ classdef Expression < handle
             if length(obj2) == 1
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj1,2)
-                        r(i,j) = acado.Addition(acado.Product(obj1(i,j),obj2));
+                        r(i,j) = acado.Expression(acado.Product(obj1(i,j),obj2));
                     end
                 end
             elseif length(obj1) == 1
                 for i = 1:size(obj2,1)
                     for j = 1:size(obj2,2)
-                        r(i,j) = acado.Addition(acado.Product(obj2(i,j),obj1));
+                        r(i,j) = acado.Expression(acado.Product(obj2(i,j),obj1));
                     end
                 end
             else
@@ -106,7 +132,7 @@ classdef Expression < handle
                 end
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj1,2)
-                        r(i,j) = acado.Addition(acado.Product(obj1(i,j),obj2(i,j)));
+                        r(i,j) = acado.Expression(acado.Product(obj1(i,j),obj2(i,j)));
                     end
                 end
             end
@@ -118,7 +144,7 @@ classdef Expression < handle
             end
             for i = 1:size(obj1,1)
                 for j = 1:size(obj1,2)
-                    r(i,j) = acado.Addition(obj1(i,j),obj2(i,j));
+                    r(i,j) = acado.Expression(acado.Addition(obj1(i,j),obj2(i,j)));
                 end
             end
         end
@@ -129,7 +155,7 @@ classdef Expression < handle
             end
             for i = 1:size(obj1,1)
                 for j = 1:size(obj1,2)
-                    r(i,j) = acado.Subtraction(obj1(i,j),obj2(i,j));
+                    r(i,j) = acado.Expression(acado.Subtraction(obj1(i,j),obj2(i,j)));
                 end
             end
         end
@@ -138,7 +164,7 @@ classdef Expression < handle
             if length(obj2) == 1
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj1,2)
-                        r(i,j) = acado.Addition(acado.Quotient(obj1(i,j),obj2));
+                        r(i,j) = acado.Expression(acado.Quotient(obj1(i,j),obj2));
                     end
                 end
             else
@@ -153,7 +179,7 @@ classdef Expression < handle
             if length(obj2) == 1
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj1,2)
-                        r(i,j) = acado.Addition(acado.Quotient(obj1(i,j),obj2));
+                        r(i,j) = acado.Expression(acado.Quotient(obj1(i,j),obj2));
                     end
                 end
             else
@@ -162,7 +188,7 @@ classdef Expression < handle
                 end
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj1,2)
-                        r(i,j) = acado.Addition(acado.Quotient(obj1(i,j),obj2(i,j)));
+                        r(i,j) = acado.Expression(acado.Quotient(obj1(i,j),obj2(i,j)));
                     end
                 end
             end
@@ -171,7 +197,7 @@ classdef Expression < handle
         function r = uminus(obj1)         % -
             for i = 1:size(obj1,1)
                 for j = 1:size(obj1,2)
-                    r(i,j) = acado.Subtraction(obj1(i,j));
+                    r(i,j) = acado.Expression(acado.Subtraction(acado.DoubleConstant(0),obj1(i,j)));
                 end
             end
         end
@@ -179,7 +205,7 @@ classdef Expression < handle
         function r = uplus(obj1)          % +
             for i = 1:size(obj1,1)
                 for j = 1:size(obj1,2)
-                    r(i,j) = acado.Addition(obj1(i,j));
+                    r(i,j) = acado.Expression(obj1(i,j));
                 end
             end
         end
@@ -195,7 +221,7 @@ classdef Expression < handle
             if length(obj2) == 1
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj1,2)
-                        r(i,j) = acado.Addition(acado.Power(obj1(i,j),obj2));
+                        r(i,j) = acado.Expression(acado.Power(obj1(i,j),obj2));
                     end
                 end
             else
@@ -204,7 +230,7 @@ classdef Expression < handle
                 end
                 for i = 1:size(obj1,1)
                     for j = 1:size(obj1,2)
-                        r(i,j) = acado.Addition(acado.Power(obj1(i,j),obj2(i,j)));
+                        r(i,j) = acado.Expression(acado.Power(obj1(i,j),obj2(i,j)));
                     end
                 end
             end
@@ -273,6 +299,14 @@ classdef Expression < handle
             end
         end
         
+        function r = sqrt(obj1)            % sqrt
+            for i = 1:size(obj1,1)
+                for j = 1:size(obj1,2)
+                    r(i,j) = acado.SquareRoot(obj1(i,j));
+                end
+            end
+        end
+        
         function r = acos(obj1)           % acos
             for i = 1:size(obj1,1)
                 for j = 1:size(obj1,2)
@@ -330,7 +364,11 @@ classdef Expression < handle
         end
         
         function s = toString(obj)
-            s = obj.name;
+            if ~isempty(obj.expr)
+                s = obj.expr.toString; 
+            else
+                s = '';
+            end
         end
         
         function result = checkDoubleVectorMatrix(obj, r)
@@ -366,9 +404,9 @@ classdef Expression < handle
             for i = 1:size(temp,1)
                 for j = 1:size(temp,2)
                     if isa(temp(i,j), 'numeric')
-                        C(i,j) = acado.Addition(acado.DoubleConstant(temp(i,j)));
+                        C(i,j) = acado.Expression(acado.DoubleConstant(temp(i,j)));
                     else
-                        C(i,j) = acado.Addition(temp(i,j));
+                        C(i,j) = acado.Expression(temp(i,j));
                     end
                 end
             end
@@ -378,9 +416,9 @@ classdef Expression < handle
                 for i = 1:size(temp,1)
                     for j = 1:size(temp,2)
                         if isa(temp(i,j), 'numeric')
-                            C(base+i,j) = acado.Addition(acado.DoubleConstant(temp(i,j)));
+                            C(base+i,j) = acado.Expression(acado.DoubleConstant(temp(i,j)));
                         else
-                            C(base+i,j) = acado.Addition(temp(i,j));
+                            C(base+i,j) = acado.Expression(temp(i,j));
                         end
                     end
                 end
@@ -392,9 +430,9 @@ classdef Expression < handle
             for i = 1:size(temp,1)
                 for j = 1:size(temp,2)
                     if isa(temp(i,j), 'numeric')
-                        C(i,j) = acado.Addition(acado.DoubleConstant(temp(i,j)));
+                        C(i,j) = acado.Expression(acado.DoubleConstant(temp(i,j)));
                     else
-                        C(i,j) = acado.Addition(temp(i,j));
+                        C(i,j) = acado.Expression(temp(i,j));
                     end
                 end
             end
@@ -404,9 +442,9 @@ classdef Expression < handle
                 for i = 1:size(temp,1)
                     for j = 1:size(temp,2)
                         if isa(temp(i,j), 'numeric')
-                            C(i,base+j) = acado.Addition(acado.DoubleConstant(temp(i,j)));
+                            C(i,base+j) = acado.Expression(acado.DoubleConstant(temp(i,j)));
                         else
-                            C(i,base+j) = acado.Addition(temp(i,j));
+                            C(i,base+j) = acado.Expression(temp(i,j));
                         end
                     end
                 end
@@ -442,16 +480,16 @@ classdef Expression < handle
             elseif nargin == 2
                 if varargin{1} == 1
                     for i = 1:size(in,2)
-                        out(1,i) = acado.Addition(in(1,i));
+                        out(1,i) = acado.Expression(in(1,i));
                         for j = 2:size(in,1)
-                            out(1,i) = acado.Addition(out(1,i), in(j,i));
+                            out(1,i) = acado.Expression(acado.Addition(out(1,i), in(j,i)));
                         end
                     end
                 elseif varargin{1} == 2
                     for i = 1:size(in,1)
-                        out(i,1) = acado.Addition(in(i,1));
+                        out(i,1) = acado.Expression(in(i,1));
                         for j = 2:size(in,2)
-                            out(i,1) = acado.Addition(out(i,1), in(i,j));
+                            out(i,1) = acado.Expression(acado.Addition(out(i,1), in(i,j)));
                         end
                     end
                 else
@@ -461,6 +499,103 @@ classdef Expression < handle
                 error('Unsupported use of the sum function in acado.Expression.');
             end
         end
+        
+        function out = MatrixDiff(in,var)
+            [n,m] = size(var);
+            if length(in) > 1
+                error('Dimensions of the input expression not supported.');
+            end
+            for i = 1:n
+                for j = 1:m
+                    out(i,j) = jacobian(in,var(i,j));
+                end
+            end
+        end
+        
+        function D = diag(in)
+            if size(in,1) == 1 && size(in,2) == 1
+                D = in;
+            elseif size(in,1) == 1 || size(in,2) == 1
+                for i = 1:length(in)
+                    for j = 1:length(in)
+                        D(i,j) = acado.Expression(acado.DoubleConstant(0));
+                    end
+                    D(i,i) = in(i);
+                end
+            elseif size(in,1) == size(in,2)
+                for i = 1:size(in,1)
+                    D(i,1) = in(i,i);
+                end
+            else
+                error('Unsupported use of the diag function.')
+            end
+        end
+        
+        function out = trace(in)
+            out = sum(diag(in));
+        end
+        
+        function out = simplify(obj)
+            for i = 1:size(obj,1)
+                for j = 1:size(obj,2)
+                    out(i,j) = simplifyOne(obj(i,j));
+                end
+            end
+        end
+        
+        function out = simplifyOne(obj)
+           if length(obj) ~= 1
+              error('Unsupported use of the function simplifyOne !'); 
+           end
+           changed = 1;
+           while(changed && ~obj.singleTerm)
+               prevString = toString(obj);
+               
+               while isa(obj, 'acado.MultiOperator') && length(obj.objs) == 1 && ~obj.contra
+                   obj = obj.objs{1};
+               end
+               obj = simplifyLocally(obj);
+               if isa(obj, 'acado.UnaryOperator')
+                   obj.obj1 = simplifyOne(obj.obj1);
+                   
+               elseif isa(obj, 'acado.BinaryOperator')
+                   obj.obj1 = simplifyOne(obj.obj1);
+                   obj.obj2 = simplifyOne(obj.obj2);
+                   
+               elseif isa(obj, 'acado.MultiOperator')
+                   for k = 1:length(obj.objs)
+                       obj.objs{k} = simplifyOne(obj.objs{k});
+                   end
+               elseif strcmp(class(obj), 'acado.Expression')
+                   obj.expr = simplifyOne(obj.expr);
+               end
+               
+               changed = ~strcmp(toString(obj), prevString);
+           end
+           out = obj;
+        end
+        
+        function out = simplifyLocally(obj)
+            % NOTHING TO BE DONE AT THIS LEVEL
+            out = obj;
+        end
+        
+        function out = getExpression(obj)
+            for i = 1:size(obj,1)
+                for j = 1:size(obj,2)
+                    if strcmp(class(obj(i,j)), 'acado.Expression')
+                        out(i,j) = obj(i,j).expr;
+                    else
+                        out(i,j) = obj(i,j);
+                    end
+                end
+            end
+        end
+        
+        function jac = jacobian(obj, var)
+            jac = jacobian(obj.getExpression, var.getExpression);
+        end
+        
     end
     
 end

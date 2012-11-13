@@ -57,6 +57,7 @@ else
             end
         end
         assignin( 'caller', name, var );
+        var = VAR_ASSIGN;
     end
     
 end

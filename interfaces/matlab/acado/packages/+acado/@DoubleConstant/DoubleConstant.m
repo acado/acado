@@ -73,7 +73,12 @@ classdef DoubleConstant < acado.Operator
                 else
                     error('DoubleConstant expects a numeric value or a acado.MexInput');
                 end
+                obj.singleTerm = 1;
             end
+        end
+        
+        function out = copy(obj)
+            out = acado.DoubleConstant(obj.val);
         end
         
         
@@ -86,8 +91,8 @@ classdef DoubleConstant < acado.Operator
             global ACADO_;
             
             if obj.callByValue
-                if ~isempty(ACADO_) && ACADO_.generatingCode
-                    s = strcat('(double)', num2str(obj.val));
+                if obj.val < 0
+                    s = ['(' num2str(obj.val) ')'];
                 else
                     s = num2str(obj.val);
                 end
@@ -102,6 +107,13 @@ classdef DoubleConstant < acado.Operator
                 error('A jacobian can only be computed of a vector function.');
             end
             jac = zeros(length(obj), length(var));
+        end
+        
+        function setToAbsoluteValue(obj)
+            obj.val = abs(obj.val);
+            if obj.val == 1
+               obj.one = 1; 
+            end
         end
     end
 end

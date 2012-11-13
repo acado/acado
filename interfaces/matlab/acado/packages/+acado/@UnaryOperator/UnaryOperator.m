@@ -33,6 +33,10 @@ classdef UnaryOperator < acado.Operator
     end
     
     methods
+        function obj = UnaryOperator()
+            
+            obj.singleTerm = 1;
+        end 
     end
     
 end

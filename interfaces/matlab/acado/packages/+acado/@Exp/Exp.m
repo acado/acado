@@ -43,8 +43,33 @@ classdef Exp < acado.UnaryOperator
             end
         end
         
+        function out = copy(obj)
+            out = acado.Exp(copy(obj.obj1));
+        end
+        
         function s = toString(obj)
-            s = sprintf('exp(%s)', obj.obj1.toString); 
+            global ACADO_;
+            
+            if obj.obj1.zero
+                s = '1';
+            elseif obj.obj1.one && (isempty(ACADO_) || ~ACADO_.generatingCode)
+                s = 'e';
+            else
+                s = sprintf('exp(%s)', obj.obj1.toString); 
+            end
+        end
+        
+        function jac = jacobian(obj, var)
+            if ~isvector(obj)
+                error('A jacobian can only be computed of a vector function.');
+            end
+            for i = 1:length(obj)
+                if obj(i).obj1.zero || obj(i).obj1.one || isa(obj(i).obj1, 'acado.DoubleConstant')
+                    jac(i,:) = zeros(1,length(var));
+                else
+                    jac(i,:) = jacobian(obj(i).obj1,var)*obj;
+                end
+            end
         end
     end
     

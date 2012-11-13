@@ -32,50 +32,34 @@
 %    Author: David Ariens, Rien Quirynen
 %    Date: 2012
 %
-classdef Quotient < acado.BinaryOperator
+classdef Quotient < acado.Product
     properties(SetAccess='private')
         
     end
     
     methods
-        function obj = Quotient(obj1, obj2)
-            if ~isempty(obj1) && ~isempty(obj2)
-                if (isa(obj1, 'numeric'))
-                    obj1 = acado.DoubleConstant(obj1);
-                elseif (isa(obj2, 'numeric'))
-                    obj2 = acado.DoubleConstant(obj2);
-                end
-                
-                if obj2.zero
-                    error('DIVISION BY ZERO !');
-                end
-                if obj1.zero
+        function obj = Quotient(varargin)
+            i = 1;
+            while i <= nargin
+               if isa(varargin{i}, 'numeric')
+                   varargin{i} = acado.DoubleConstant(varargin{i});
+               end
+               old = length(obj.objs);
+               obj.concatenate(varargin{i});
+               if i > 1
+                    obj.contra(old+1:end) = obj.contra(old+1:end)+ones(size(obj.contra(old+1:end)));
+                    obj.contra = mod(obj.contra, 2);
+               end
+               
+               if i == 1 && varargin{i}.zero
                     obj.zero = 1;
-                end
-                
-                obj.obj1 = obj1;
-                obj.obj2 = obj2;
+               elseif varargin{i}.zero
+                    error('DIVISION BY ZERO !');
+               end
+               i = i+1;
             end
-        end
-        
-        function s = toString(obj)
-            if obj.zero
-                s = '0';
-            else
-                s = sprintf('(%s)/(%s)', obj.obj1.toString, obj.obj2.toString);
-            end
-        end
-        
-        function jac = jacobian(obj, var)
-            if ~isvector(obj)
-                error('A jacobian can only be computed of a vector function.');
-            end
-            for i = 1:length(obj)
-                if obj(i).zero
-                    jac(i,:) = zeros(1,length(var));
-                else
-                    jac(i,:) = (jacobian(obj(i).obj1,var)*obj(i).obj2 - obj(i).obj1*jacobian(obj(i).obj2,var))/(obj(i).obj2^2);
-                end
+            if nargin == 1
+                obj.singleTerm = varargin{1}.singleTerm;
             end
         end
     end
