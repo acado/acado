@@ -962,9 +962,10 @@ returnValue CondensingExport::setupEvaluation( )
 	getObjectiveValue.setup( "getObjectiveValue" );
 	getObjectiveValue.setReturnValue( tmp );
 
-	getObjectiveValue.addStatement( tmp == Matrix( 0 ) );
-	getObjectiveValue.addStatement( String( "real_t tmpDx[ " ) <<  getNX() << " ];\n" ) ;
-	getObjectiveValue.addStatement( String( "real_t tmpDu[ " ) <<  getNU() << " ];\n" ) ;
+	getObjectiveValue.addVariable( tmpDx );
+	getObjectiveValue.addVariable( tmpDu );
+
+	getObjectiveValue.addStatement( tmp == 0.0 );
 	getObjectiveValue.addLinebreak( );
 
 	for (unsigned i = 0; i < getN(); ++i)
@@ -981,7 +982,7 @@ returnValue CondensingExport::setupEvaluation( )
 	}
 	getObjectiveValue.addLinebreak( );
 
-	getObjectiveValue.addStatement( "tmp *= 0.5;\n" );
+	getObjectiveValue.addStatement( tmp == tmp * Matrix( 0.5 ) );
 
 	return SUCCESSFUL_RETURN;
 }

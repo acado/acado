@@ -116,6 +116,9 @@ class ExportVariable : public ExportArgument
 		ExportVariable(	const Matrix& _data
 						);
 
+//		ExportVariable(	const double _data
+//						);
+
 		/** Copy constructor (deep copy).
 		 *
 		 *	@param[in] arg		Right-hand side object.

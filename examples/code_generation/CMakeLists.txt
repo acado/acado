@@ -82,7 +82,7 @@ FOREACH( SRC ${SOURCES} )
 
 	TARGET_LINK_LIBRARIES(
 		code_generation_${EXEC_NAME}
-		${ACADO_STATIC_LIBRARIES}
+		${ACADO_LIBS}
 	)
 		
 	SET_TARGET_PROPERTIES(
@@ -95,16 +95,6 @@ FOREACH( SRC ${SOURCES} )
 	)		
 
 ENDFOREACH( SRC ${SOURCES} )
-
-# If we are building withing main ACADO build, correct paths must be set
-IF( ACADO_BUILD )
-	SET( ACADO_QPOASES_EMBEDDED_SOURCES
-		${ACADO_ENV_QPOASES_EMBEDDED_SOURCES}
-	)
-	SET( ACADO_QPOASES_EMBEDDED_INC_DIRS
-		${ACADO_ENV_QPOASES_EMBEDDED_INC_DIRS}
-	)
-ENDIF()
 
 ################################################################################
 #
@@ -128,7 +118,7 @@ SET( GENERATED_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/qpoases/solver.hpp
 )
 
-# Add the additional folders to the build proces
+# Add the additional folders to the build process
 INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_SOURCE_DIR}/getting_started_export/qpoases
 	${ACADO_QPOASES_EMBEDDED_INC_DIRS}
@@ -137,8 +127,7 @@ INCLUDE_DIRECTORIES(
 # Add a patch definition
 ADD_DEFINITIONS( -DACADO_CMAKE_BUILD )
 
-
-# Get the name of the executable getting started
+# Get the full name of the executable getting_started
 GET_TARGET_PROPERTY(
     MY_GENERATOR_EXE
         code_generation_getting_started LOCATION
@@ -175,7 +164,7 @@ TARGET_LINK_LIBRARIES(
     getting_started_closed_loop
     
     # Link against ACADO libraries
-    ${ACADO_STATIC_LIBRARIES}
+    ${ACADO_LIBS}
 )
 SET_TARGET_PROPERTIES(
 	getting_started_closed_loop

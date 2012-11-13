@@ -285,7 +285,7 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	functionArguments.exportCode(file, _realString, _intString, _precision);
 	acadoFPrintf( file," )\n{\n");
 
-	if ( functionReturnValue )
+	if (functionReturnValue && functionReturnValue->getDataStruct() == ACADO_LOCAL)
 	{
 		acadoFPrintf(file, "%s ", functionReturnValue->getTypeString( _realString,_intString ).getName());
 		acadoFPrintf(file, "%s;\n", functionReturnValue->getName().getName());

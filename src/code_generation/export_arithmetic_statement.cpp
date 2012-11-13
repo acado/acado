@@ -33,6 +33,7 @@
 #include <acado/code_generation/export_arithmetic_statement.hpp>
 
 #include <sstream>
+#include <iomanip>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -700,7 +701,18 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 		for(unsigned i = 0; i < getNumRows( ); ++i)
 			for(unsigned j = 0; j < getNumCols( ); ++j)
 				if ( ( _op == (String)"=" ) || ( rhs1->isZero(i,j) == BT_FALSE ) )
-					s << lhs->get(i, j) << " " << _op.getName() << " " << rhs1->get(i, j)  << ";" << endl;
+				{
+					s << lhs->get(i, j) << " " << _op.getName() << " ";
+					if (rhs1->isGiven() == BT_TRUE)
+					{
+						s << setprecision( 16 ) << rhs1->operator ()(i, j);
+					}
+					else
+					{
+						s << rhs1->get(i, j);
+					}
+					s << ";" << endl;
+				}
 	}
 	else
 	{

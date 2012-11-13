@@ -95,6 +95,13 @@ ExportVariable::ExportVariable(	const Matrix& _data
 	init( "M",_data );
 }
 
+//ExportVariable::ExportVariable(	const double _data
+//								)
+//{
+//	Matrix m( _data );
+//	init( "M", m );
+//}
+
 
 ExportVariable::~ExportVariable( )
 {

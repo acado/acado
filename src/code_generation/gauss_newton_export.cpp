@@ -131,8 +131,8 @@ returnValue GaussNewtonExport::setup( )
 	
 	xVars.setup( "x", getNumQPvars(),1, REAL,ACADO_VARS );
 	yVars.setup( "y", getNumQPvars()+getNumStateBounds(),1, REAL,ACADO_VARS );
-	
-	ExportVariable tmp( "tmp", 1,1, REAL,ACADO_LOCAL,BT_TRUE );
+
+	ExportVariable tmp("tmp",1, 1, REAL, ACADO_LOCAL, BT_TRUE);
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -154,9 +154,6 @@ returnValue GaussNewtonExport::setup( )
 	////////////////////////////////////////////////////////////////////////////
 	initialValueEmbedding.setup( "initialValueEmbedding" );
 
-	// TODO Assign the variable here
-	initialValueEmbedding.addStatement( "real_t tmp;\n" );
-	
 	if ( condenser->performsFullCondensing() == BT_TRUE )
 	{
 		initialValueEmbedding.addStatement( lb == lbValues - u );
@@ -196,6 +193,8 @@ returnValue GaussNewtonExport::setup( )
 
 	if( getNumStateBounds( ) > 0 )
 	{
+		initialValueEmbedding.addVariable( tmp );
+
 		for( run1 = 0; run1 < getNumStateBounds( ); run1++ )
 		{
 			if ( condenser->performsFullCondensing() == BT_TRUE )
