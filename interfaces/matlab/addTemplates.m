@@ -27,7 +27,7 @@
 templateFiles = {'integrator_mex.c.in', 'rhs_mex.c.in'};
 templates = {'INTEGRATOR_MEX_TEMPLATE', 'RHS_MEX_TEMPLATE'};
 
-fid = fopen('../../include/acado/code_generation/templates/templates.hpp', 'w+');
+fid = fopen('./bin/include/acado/code_generation/templates/templates.hpp', 'w+');
 
 fprintf(fid, '%s \n', ' #ifndef ACADO_TOOLKIT_TEMPLATES_HPP');
 fprintf(fid, '%s \n\n', ' #define ACADO_TOOLKIT_TEMPLATES_HPP');
