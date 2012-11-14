@@ -61,6 +61,7 @@ classdef DoubleConstant < acado.Operator
                     %                 obj.name = strcat('acadoconstant', num2str(ACADO_.count_double));
                     %
                     %                 ACADO_.helper.addInstruction(obj);
+                    obj.name = num2str(val);
                     
                 elseif (isa(val, 'acado.MexInput'))
                     
@@ -111,6 +112,7 @@ classdef DoubleConstant < acado.Operator
         
         function setToAbsoluteValue(obj)
             obj.val = abs(obj.val);
+            obj.name = num2str(obj.val);
             if obj.val == 1
                obj.one = 1; 
             end

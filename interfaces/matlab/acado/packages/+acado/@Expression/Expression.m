@@ -538,7 +538,7 @@ classdef Expression < handle
         function out = simplify(obj)
             for i = 1:size(obj,1)
                 for j = 1:size(obj,2)
-                    out(i,j) = simplifyOne(obj(i,j));
+                    out(i,j) = simplifyOne(copy(obj(i,j)));
                 end
             end
         end
@@ -566,7 +566,7 @@ classdef Expression < handle
                    for k = 1:length(obj.objs)
                        obj.objs{k} = simplifyOne(obj.objs{k});
                    end
-               elseif strcmp(class(obj), 'acado.Expression')
+               elseif strcmp(class(obj), 'acado.Expression') || isa(obj, 'acado.IntermediateState')
                    obj.expr = simplifyOne(obj.expr);
                end
                
@@ -578,6 +578,26 @@ classdef Expression < handle
         function out = simplifyLocally(obj)
             % NOTHING TO BE DONE AT THIS LEVEL
             out = obj;
+        end
+        
+        function defineIntermediateStates(obj, cppobj, get)
+            if isa(obj, 'acado.IntermediateState')
+                getInstructions(obj, cppobj, get);
+                
+            elseif isa(obj, 'acado.UnaryOperator')
+                defineIntermediateStates(obj.obj1, cppobj, get);
+                
+            elseif isa(obj, 'acado.BinaryOperator')
+                defineIntermediateStates(obj.obj1, cppobj, get);
+                defineIntermediateStates(obj.obj2, cppobj, get);
+                
+            elseif isa(obj, 'acado.MultiOperator')
+                for k = 1:length(obj.objs)
+                    defineIntermediateStates(obj.objs{k}, cppobj, get);
+                end
+            elseif strcmp(class(obj), 'acado.Expression')
+                defineIntermediateStates(obj.expr, cppobj, get);
+            end
         end
         
         function out = getExpression(obj)
@@ -594,6 +614,10 @@ classdef Expression < handle
         
         function jac = jacobian(obj, var)
             jac = jacobian(obj.getExpression, var.getExpression);
+        end
+        
+        function out = is(obj)
+            out = acado.Expression(acado.IntermediateState(obj));
         end
         
     end

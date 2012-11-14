@@ -47,6 +47,10 @@ classdef Dot < acado.Expression
             end
         end
         
+        function out = copy(obj)
+            out = obj;
+        end
+        
         function s = toString(obj)
             s = sprintf('dot(%s)', obj.obj1.toString);
         end

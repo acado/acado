@@ -181,6 +181,11 @@ classdef AcadoMatlab < handle
             obj.ints{length(obj.ints)+1} = set;
         end
         
+        % Get number of intermediate states
+        function num = getNumIntS(obj)
+            num = length(obj.ints);
+        end
+        
         generateCPP(obj);
         getCPPheader(obj);
         getCPPbody(obj);

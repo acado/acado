@@ -68,4 +68,3 @@ classdef Subtraction < acado.Addition
     end
     
 end
-
