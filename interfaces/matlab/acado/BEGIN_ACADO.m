@@ -77,6 +77,7 @@ ACADO_.count_sim = 0;
 ACADO_.count_other = 0;
 ACADO_.count_mexin = 0;
 ACADO_.count_double = 0;
+ACADO_.count_generation = 0;
 
 
 end

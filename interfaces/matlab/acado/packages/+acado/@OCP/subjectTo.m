@@ -83,21 +83,36 @@ function subjectTo(obj, varargin)
     elseif(nargin == 3 && isa(varargin{1}, 'char') && isa(varargin{2}, 'acado.Expression'))
         % ocp.subjectTo( 'AT_START', x == 1.0 );
         % ocp.subjectTo( 'AT_END', x == 1.0 );
-        obj.subjectoItems{end+1} = sprintf('%s, %s', varargin{1}, varargin{2}.toString());
+        var2 = varargin{2};
+        for i = 1:length(var2)
+            obj.subjectoItems{end+1} = sprintf('%s, %s', varargin{1}, var2(i).toString());
+        end
        
     elseif(nargin == 2 && isa(varargin{1}, 'acado.Expression'))
         % ocp.subjectTo(  0.1 <= p <= 2.0 );
         % ocp.subjectTo(  0.1 == p );
-        obj.subjectoItems{end+1} = varargin{1}.toString();
+        var1 = varargin{1};
+        for i = 1:length(var1)
+            obj.subjectoItems{end+1} = var1(i).toString();
+        end
     
     elseif(nargin == 5 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'acado.Expression') && isa(varargin{3}, 'acado.Expression') && isa(varargin{4}, 'numeric'))
         % ocp.subjectTo( 0.0, r , -r , 0.0 );
-        
-        double1 = acado.DoubleConstant(varargin{1});
-        double2 = acado.DoubleConstant(varargin{4});
-        
-        obj.subjectoItems{end+1} = sprintf('%s, %s, %s, %s',double1.toString(), varargin{2}.toString(), varargin{3}.toString(), double2.toString());
-     
+        var1 = varargin{1};
+        var2 = varargin{2};
+        var3 = varargin{3};
+        var4 = varargin{4};
+        if length(var1) ~= length(var2) && length(var1) ~= length(var3) && length(var1) ~= length(var4)
+            error('ERROR: Invalid subjectTo. <a href="matlab: help acado.OCP.subjectTo">help acado.OCP.subjectTo</a>'); 
+        else
+            for i = 1:length(var1)
+                double1 = acado.DoubleConstant(var1(i));
+                double2 = acado.DoubleConstant(var4(i));
+                
+                obj.subjectoItems{end+1} = sprintf('%s, %s, %s, %s',double1.toString(), var2(i).toString(), var3(i).toString(), double2.toString());
+            end
+        end
+                
     else
        error('ERROR: Invalid subjectTo. <a href="matlab: help acado.OCP.subjectTo">help acado.OCP.subjectTo</a>'); 
         

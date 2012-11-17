@@ -1,8 +1,8 @@
-%Shorthand for acado.Disturbance
+%Shorthand for acado.MexInput
 %
 %  Example:
-%    >> Disturbance w;
-%    >> Disturbance w1 w2 w3 w4;
+%    >> MexInput x;
+%    >> MexInput x1 x2 x3 x4;
 %
 %  Licence:
 %    This file is part of ACADO Toolkit  - (http://www.acadotoolkit.org/)
@@ -26,15 +26,16 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2010
+%    Author: Rien Quirynen
+%    Date: 2012
 %
-function  Disturbance( varargin )
+function MexInput( varargin )
 
 checkActiveModel;
 
 if ~iscellstr( varargin ),
-    error( 'Syntax is: Disturbance x' );
+    error( 'Syntax is: MexInput x' );
+    
 else
     
     for k = 1 : nargin,
@@ -42,26 +43,18 @@ else
         
         if N == 0 && M == 0
             global ACADO_;
-            ACADO_.helper.clearW;
+            ACADO_.helper.clearIn;
         else
-            for i = 1:N
-                for j = 1:M
-                    if N > 1
-                        VAR_NAME = strcat(name,num2str(i));
-                    else
-                        VAR_NAME = name;
-                    end
-                    if M > 1
-                        VAR_NAME = strcat(VAR_NAME,num2str(j));
-                    end
-                    VAR_ASSIGN = acado.Disturbance(VAR_NAME);
-                    var(i,j) = VAR_ASSIGN;
-                    
-                    assignin( 'caller', VAR_NAME, VAR_ASSIGN );
-                end
+            VAR_NAME = name;
+            if N == 1 && M == 1
+                VAR_ASSIGN = acado.MexInput(VAR_NAME);
+            elseif N == 1 || M == 1
+                VAR_ASSIGN = acado.MexInputVector(VAR_NAME);
+            else
+                VAR_ASSIGN = acado.MexInputMatrix(VAR_NAME);
             end
-            assignin( 'caller', name, var );
-            var = VAR_ASSIGN;
+            
+            assignin( 'caller', VAR_NAME, VAR_ASSIGN );
         end
     end
     

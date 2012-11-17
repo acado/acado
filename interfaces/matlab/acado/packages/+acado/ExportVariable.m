@@ -1,8 +1,4 @@
-%Shorthand for acado.IntermediateState
-%
-%  Example:
-%    >> IntermediateState x;
-%    >> IntermediateState x1 x2 x3 x4;
+%ExportVariable
 %
 %  Licence:
 %    This file is part of ACADO Toolkit  - (http://www.acadotoolkit.org/)
@@ -29,44 +25,47 @@
 %    Author: Rien Quirynen
 %    Date: 2012
 %
-function IntermediateState( varargin )
-
-checkActiveModel;
-
-if ~iscellstr( varargin ),
-    error( 'Syntax is: IntermediateState x' );
-    
-else
-    
-    for k = 1 : nargin,
-        [name N M] = readVariable(varargin{k});
-        
-        if N == 0 && M == 0
-            global ACADO_;
-            ACADO_.helper.clearIntS;
-        else
-            for i = 1:N
-                for j = 1:M
-                    if N > 1
-                        VAR_NAME = strcat(name,num2str(i));
-                    else
-                        VAR_NAME = name;
-                    end
-                    if M > 1
-                        VAR_NAME = strcat(VAR_NAME,num2str(j));
-                    end
-                    VAR_ASSIGN = acado.IntermediateState(VAR_NAME);
-                    var(i,j) = VAR_ASSIGN;
-                    
-                    assignin( 'caller', VAR_NAME, VAR_ASSIGN );
-                end
-            end
-            assignin( 'caller', name, var );
-            var = VAR_ASSIGN;
-        end
+classdef ExportVariable < handle
+    properties(SetAccess='private')
+        name;
+        numRows = 1;
+        numCols = 1;
     end
     
-end
-
+    methods
+        function obj = ExportVariable(varargin)
+            global ACADO_;
+            if nargin > 0
+                if ~ischar(varargin{1})
+                    error('Unsupported use of the ExportVariable constructor: please specify a name.');
+                end
+                obj.name = varargin{1};
+                if nargin == 2
+                    obj.numRows = varargin{2};
+                elseif nargin == 3
+                    obj.numRows = varargin{2};
+                    obj.numCols = varargin{3};
+                elseif nargin > 3
+                    error('Unsupported use of the ExportVariable constructor.');
+                end
+                
+                ACADO_.helper.addExpV(obj);
+                ACADO_.helper.addInstruction(obj);
+            end
+        end
+        
+        function s = toString(obj)
+            s = obj.name;
+        end
+        
+        function getInstructions(obj, cppobj, get)
+            if (get == 'FB')
+                fprintf(cppobj.fileMEX,sprintf('    ExportVariable %s( "%s", %s, %s );\n', obj.name, obj.name, num2str(obj.numRows), num2str(obj.numCols)));
+            end
+            
+        end
+        
+    end
+    
 end
 

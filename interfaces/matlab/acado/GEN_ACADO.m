@@ -1,8 +1,10 @@
-%Shorthand for acado.Disturbance
+%Generate the current ACADO problem. 
+% This function can only be called when a problem is active (and thus
+% BEGIN_ACADO is called before). Upon calling this function the current
+% problem will be transfered to a C++ file and will be compiled. 
 %
 %  Example:
-%    >> Disturbance w;
-%    >> Disturbance w1 w2 w3 w4;
+%    >> END_ACADO
 %
 %  Licence:
 %    This file is part of ACADO Toolkit  - (http://www.acadotoolkit.org/)
@@ -26,46 +28,14 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2010
-%
-function  Disturbance( varargin )
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2009-2012
+% 
 
+% Check if there is an active model to build
 checkActiveModel;
 
-if ~iscellstr( varargin ),
-    error( 'Syntax is: Disturbance x' );
-else
-    
-    for k = 1 : nargin,
-        [name N M] = readVariable(varargin{k});
-        
-        if N == 0 && M == 0
-            global ACADO_;
-            ACADO_.helper.clearW;
-        else
-            for i = 1:N
-                for j = 1:M
-                    if N > 1
-                        VAR_NAME = strcat(name,num2str(i));
-                    else
-                        VAR_NAME = name;
-                    end
-                    if M > 1
-                        VAR_NAME = strcat(VAR_NAME,num2str(j));
-                    end
-                    VAR_ASSIGN = acado.Disturbance(VAR_NAME);
-                    var(i,j) = VAR_ASSIGN;
-                    
-                    assignin( 'caller', VAR_NAME, VAR_ASSIGN );
-                end
-            end
-            assignin( 'caller', name, var );
-            var = VAR_ASSIGN;
-        end
-    end
-    
-end
-
-end
-
+% Build cpp files + compile them to a problemname_RUN.m/.cpp file
+global ACADO_;
+ACADO_.count_generation = ACADO_.count_generation+1;
+ACADO_.helper.generateCPP();

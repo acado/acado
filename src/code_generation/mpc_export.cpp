@@ -34,6 +34,10 @@
 
 #include <acado/code_generation/export_algorithm_factory.hpp>
 
+#ifdef __MATLAB__
+#include "mex.h"
+#endif
+
 BEGIN_NAMESPACE_ACADO
 
 
@@ -98,6 +102,7 @@ returnValue MPCexport::exportCode(	const String& dirName,
 									int _precision
 									)
 {
+	if (!MODEL_DIMENSIONS_SET) return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 	if ( setup( ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
@@ -118,6 +123,12 @@ returnValue MPCexport::exportCode(	const String& dirName,
 		
 		if ( integratorFile.exportCode( ) != SUCCESSFUL_RETURN )
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+
+		int generateMatlabInterface;
+		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
+		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
+			// TODO
+		}
 	}
 
 	if( condenser != 0 )
@@ -275,18 +286,7 @@ returnValue MPCexport::setup( )
 	Grid grid;
 	ocp.getGrid( grid );
 
-	DifferentialEquation f;
-	Expression rhs;
-
-	ocp.getDifferentialEquation( f );
-	f.getExpression( rhs );
-
 	N = grid.getNumIntervals();
-	NX = rhs.getDim() - f.getNXA();
-	NDX = f.getNDX();
-	NXA = f.getNXA();
-	NU = f.getNU();
-	NP = f.getNP();
 
 	int numSteps;
 	get( NUM_INTEGRATOR_STEPS, numSteps );
@@ -304,8 +304,16 @@ returnValue MPCexport::setup( )
 
 	integrator->setDimensions( NX,NDX,NXA,NU,NP,N );
 
-	if ( integrator->setDifferentialEquation( rhs ) != SUCCESSFUL_RETURN )
-		return RET_UNABLE_TO_EXPORT_CODE;
+	if( EXPORT_RHS ) {
+		Expression rhs;
+		f.getExpression( rhs );
+		if ( integrator->setDifferentialEquation( rhs ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+	}
+	else {
+		if ( integrator->setModel( rhs_ODE, diffs_ODE ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+	}
 
 	if ( integrator->setGrid(grid, numSteps) != SUCCESSFUL_RETURN ) {
 		return RET_UNABLE_TO_EXPORT_CODE;
@@ -461,9 +469,6 @@ returnValue MPCexport::checkConsistency( ) const
 		return ACADOERROR( RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT );
 	
 	// only time-continuous ODEs without parameter and disturbances supported!
-	DifferentialEquation f;
-	ocp.getDifferentialEquation( f );
-
 	if ( f.isODE( ) == BT_FALSE )
 		return ACADOERROR( RET_ONLY_ODE_FOR_CODE_EXPORT );
 
@@ -746,6 +751,9 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addStatement( "\t./cvxgen/ldl.o                 \\\n" );
 			Makefile.addStatement( "\t./cvxgen/util.o                \\\n" );
 			Makefile.addStatement( "\tintegrator.o                   \\\n" );
+			if( !EXPORT_RHS ) {
+				Makefile.addStatement( (String)"\t" << externModel << ".o \\\n" );
+			}
 			Makefile.addStatement( "\tcondensing.o                   \\\n" );
 			Makefile.addStatement( "\tgauss_newton_method.o          \n" );
 			Makefile.addLinebreak( );
@@ -756,6 +764,9 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addLinebreak( );
 			Makefile.addStatement( "./cvxgen/solver.o     : ./cvxgen/solver.h\n" );
 			Makefile.addStatement( "integrator.o          : acado.h\n" );
+			if( !EXPORT_RHS ) {
+				Makefile.addStatement( (String)externModel << ".o             : acado.h\n" );
+			}
 			Makefile.addStatement( "condensing.o          : acado.h\n" );
 			Makefile.addStatement( "gauss_newton_method.o : acado.h   ./cvxgen/solver.h\n" );
 			Makefile.addStatement( "test.o                : acado.h   ./cvxgen/solver.h\n" );
@@ -791,6 +802,9 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addStatement( "\t./qpoases/SRC/MessageHandling.o \\\n" );
 			Makefile.addStatement( "\t./qpoases/solver.o              \\\n" );
 			Makefile.addStatement( "\tintegrator.o                    \\\n" );
+			if( !EXPORT_RHS ) {
+				Makefile.addStatement( (String)"\t" << externModel << ".o \\\n" );
+			}
 			Makefile.addStatement( "\tcondensing.o                    \\\n" );
 			Makefile.addStatement( "\tgauss_newton_method.o \n" );
 			Makefile.addLinebreak( );
@@ -801,6 +815,9 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addLinebreak( );
 			Makefile.addStatement( "./qpoases/solver.o    : ./qpoases/solver.hpp\n" );
 			Makefile.addStatement( "integrator.o          : acado.h\n" );
+			if( !EXPORT_RHS ) {
+				Makefile.addStatement( (String)externModel << ".o             : acado.h\n" );
+			}
 			Makefile.addStatement( "condensing.o          : acado.h\n" );
 			Makefile.addStatement( "gauss_newton_method.o : acado.h   ./qpoases/solver.hpp\n" );
 			Makefile.addStatement( "test.o                : acado.h   ./qpoases/solver.hpp\n" );
@@ -837,6 +854,9 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addStatement( "\t./qpoases3/src/MessageHandling.o \\\n" );
 			Makefile.addStatement( "\t./qpoases3/solver.o              \\\n" );
 			Makefile.addStatement( "\tintegrator.o                     \\\n" );
+			if( !EXPORT_RHS ) {
+				Makefile.addStatement( (String)"\t" << externModel << ".o \\\n" );
+			}
 			Makefile.addStatement( "\tcondensing.o                     \\\n" );
 			Makefile.addStatement( "\tgauss_newton_method.o \n" );
 			Makefile.addLinebreak( );
@@ -847,6 +867,9 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addLinebreak( );
 			Makefile.addStatement( "./qpoases3/solver.o    : ./qpoases3/solver.h\n" );
 			Makefile.addStatement( "integrator.o          : acado.h\n" );
+			if( !EXPORT_RHS ) {
+				Makefile.addStatement( (String)externModel << ".o             : acado.h\n" );
+			}
 			Makefile.addStatement( "condensing.o          : acado.h\n" );
 			Makefile.addStatement( "gauss_newton_method.o : acado.h   ./qpoases3/solver.h\n" );
 			Makefile.addStatement( "test.o                : acado.h   ./qpoases3/solver.h\n" );

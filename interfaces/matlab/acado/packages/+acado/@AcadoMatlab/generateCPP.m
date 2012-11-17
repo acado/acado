@@ -40,6 +40,11 @@ function generateCPP(obj)
     
     obj.problemname = ACADO_.problemname;
     
+    % add the exportModule to the instruction list
+    if ~isempty(obj.exportModule)
+        obj.addInstruction(obj.exportModule);
+    end
+    
     ACADO_.generatingCode = 1;
     fprintf('Writing c++ files... \n');
     
@@ -95,6 +100,10 @@ function generateCPP(obj)
 
         %% MEX EVAL
         eval(sprintf(regexprep(ACADO_.mexcall, '\\', '\\\\'), fileIN, fileOUT));
+        
+        % remove the exportModule from the instruction list
+        obj.removeInstruction(obj.exportModule.model);
+        obj.removeInstruction(obj.exportModule);
 
     else
        

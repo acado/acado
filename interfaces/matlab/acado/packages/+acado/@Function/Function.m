@@ -62,6 +62,10 @@ classdef Function < handle
             ACADO_.helper.addInstruction(obj);  %also called by OutputFcn and DifferentialEquation!!
         end 
         
+        function s = toString(obj)
+            s = obj.name;
+        end
+        
         getInstructions(obj, cppobj, get)
        
     end
