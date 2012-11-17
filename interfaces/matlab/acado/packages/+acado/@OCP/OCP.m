@@ -83,15 +83,10 @@ classdef OCP < acado.MultiObjectiveFunctionality
         minLSQTermS = {};
         minLSQTermh = {};
         minLSQTermr = {};
-        
-        minLSQTermQ;
-        minLSQTermR;
 
         minLSQEndTermS = {};
         minLSQEndTermh = {};
         minLSQEndTermr = {};
-        
-        minLSQEndTermQ;
 
         % Subject to
         subjectoItems = {};
@@ -144,7 +139,7 @@ classdef OCP < acado.MultiObjectiveFunctionality
             elseif(isa(r, 'acado.MexInputMatrix'))
                 result = acado.Matrix(r);
                 
-            elseif isnumeric(r)
+            else
                 [m n] = size(r);
                 
                 if( (m == 1 && n >= 1) || (m >= 1 && n == 1) )
@@ -152,8 +147,6 @@ classdef OCP < acado.MultiObjectiveFunctionality
                 else
                     result = acado.Matrix(r);
                 end
-            else
-                result = r;
             end
     
         end

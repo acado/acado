@@ -82,10 +82,6 @@ if (get == 'B')
         end
     end
     
-    if ~isempty(obj.minLSQTermQ) && ~isempty(obj.minLSQTermR)
-        fprintf(cppobj.fileMEX,sprintf('    %s.minimizeLSQ(%s, %s);\n', obj.name, obj.minLSQTermQ.name, obj.minLSQTermR.name));
-    end
-    
     for i=1:length(obj.minLSQEndTermh)  % MIN LSQ END TERM
         if (~isempty(obj.minLSQEndTermS{i}) && ~isempty(obj.minLSQEndTermr{i})) % S,h,r
             fprintf(cppobj.fileMEX,sprintf('    %s.minimizeLSQEndTerm(%s, %s, %s);\n', obj.name, obj.minLSQEndTermS{i}.name_m, obj.minLSQEndTermh{i}.name, obj.minLSQEndTermr{i}.name));
@@ -94,10 +90,6 @@ if (get == 'B')
         else % h
             error('error minimizeLSQEndTerm write');
         end
-    end
-    
-    if ~isempty(obj.minLSQEndTermQ)
-        fprintf(cppobj.fileMEX,sprintf('    %s.minimizeLSQEndTerm(%s);\n', obj.name, obj.minLSQEndTermQ.name));
     end
     
     

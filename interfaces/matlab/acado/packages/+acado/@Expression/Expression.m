@@ -237,11 +237,6 @@ classdef Expression < handle
         end
         
         function r = eq(obj1, obj2)       % ==
-            if isnumeric(obj1) && length(obj1) == 1
-                obj1 = obj1*ones(size(obj2));
-            elseif isnumeric(obj2) && length(obj2) == 1
-                obj2 = obj2*ones(size(obj1));
-            end
             if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
                 error('ERROR: Invalid acado.Equals. Check your dimensions..');
             end
@@ -253,11 +248,6 @@ classdef Expression < handle
         end
         
         function r = lt(obj1, obj2)       % <
-            if isnumeric(obj1) && length(obj1) == 1
-                obj1 = obj1*ones(size(obj2));
-            elseif isnumeric(obj2) && length(obj2) == 1
-                obj2 = obj2*ones(size(obj1));
-            end
             if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
                 error('ERROR: Invalid acado.LessThan. Check your dimensions..');
             end
@@ -269,11 +259,6 @@ classdef Expression < handle
         end
         
         function r = le(obj1, obj2)       % <=
-            if isnumeric(obj1) && length(obj1) == 1
-                obj1 = obj1*ones(size(obj2));
-            elseif isnumeric(obj2) && length(obj2) == 1
-                obj2 = obj2*ones(size(obj1));
-            end
             if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
                 error('ERROR: Invalid acado.LessThanEqual. Check your dimensions..');
             end
@@ -285,11 +270,6 @@ classdef Expression < handle
         end
         
         function r = gt(obj1, obj2)       % >
-            if isnumeric(obj1) && length(obj1) == 1
-                obj1 = obj1*ones(size(obj2));
-            elseif isnumeric(obj2) && length(obj2) == 1
-                obj2 = obj2*ones(size(obj1));
-            end
             if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
                 error('ERROR: Invalid acado.GreaterThan. Check your dimensions..');
             end
@@ -301,11 +281,6 @@ classdef Expression < handle
         end
         
         function r = ge(obj1, obj2)       % >=
-            if isnumeric(obj1) && length(obj1) == 1
-                obj1 = obj1*ones(size(obj2));
-            elseif isnumeric(obj2) && length(obj2) == 1
-                obj2 = obj2*ones(size(obj1));
-            end
             if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
                 error('ERROR: Invalid acado.GreaterThanEqual. Check your dimensions..');
             end
@@ -392,7 +367,7 @@ classdef Expression < handle
             if ~isempty(obj.expr)
                 s = obj.expr.toString; 
             else
-                s = obj.name;
+                s = '';
             end
         end
         

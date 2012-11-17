@@ -36,15 +36,11 @@
 
 
 #include <acado/code_generation/export_module.hpp>
-#include <acado/code_generation/integrators/export_matlab_integrator.hpp>
-#include <acado/code_generation/integrators/export_matlab_rhs.hpp>
 #include <acado/code_generation/integrators/integrator_export.hpp>
 #include <acado/code_generation/condensing_export.hpp>
 #include <acado/code_generation/gauss_newton_export.hpp>
 #include <acado/code_generation/auxiliary_functions_export.hpp>
 #include <acado/code_generation/export_file.hpp>
-
-#include <acado/code_generation/templates/templates.hpp>
 
 BEGIN_NAMESPACE_ACADO
 

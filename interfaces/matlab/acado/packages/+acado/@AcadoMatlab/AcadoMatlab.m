@@ -37,10 +37,7 @@ classdef AcadoMatlab < handle
         z = {};     % alg states
         ints = {};  % intermediate states
         in = {};    % mexInput
-        expV = {};  % export variables
     
-        exportModule;
-        
         %instructions
         instructionList = {};
     
@@ -60,19 +57,8 @@ classdef AcadoMatlab < handle
         end
         
         % Remove last instruction
-        function removeInstruction(obj, set)
-            found = 0;
-            i = 1;
-            while i <= length(obj.instructionList) && ~found
-                if strcmp(class(obj.instructionList{i}), class(set)) && strcmp(obj.instructionList{i}.toString, set.toString)
-                    found = 1;
-                else 
-                    i = i+1;
-                end
-            end
-            if found
-                obj.instructionList = {obj.instructionList{1:i-1}, obj.instructionList{i+1:end}};
-            end
+        function removeLastInstruction(obj)
+            obj.instructionList = obj.instructionList(1:end-1);
         end
         
         % Add time
@@ -94,12 +80,6 @@ classdef AcadoMatlab < handle
             end
             
             obj.x{length(obj.x)+1} = set;
-        end
-        function clearX(obj)
-            for i = 1:length(obj.x)
-            	obj.removeInstruction(obj.x{i});
-            end
-            obj.x = {};
         end
         
         % Add differential state derivative
@@ -128,9 +108,6 @@ classdef AcadoMatlab < handle
                 obj.dx{length(obj.dx)+1} = set;
             end
         end
-        function clearDX(obj)
-            obj.dx = {};
-        end
         
         % Add algebraic state
         function addZ(obj, set)
@@ -142,12 +119,6 @@ classdef AcadoMatlab < handle
             end
             
             obj.z{length(obj.z)+1} = set;
-        end
-        function clearZ(obj)
-            for i = 1:length(obj.z)
-            	obj.removeInstruction(obj.z{i});
-            end
-            obj.z = {};
         end
         
         % Add control
@@ -161,12 +132,6 @@ classdef AcadoMatlab < handle
             
             obj.u{length(obj.u)+1} = set;
         end
-        function clearU(obj)
-            for i = 1:length(obj.u)
-            	obj.removeInstruction(obj.u{i});
-            end
-            obj.u = {};
-        end
         
         % Add parameter
         function addP(obj, set)
@@ -178,12 +143,6 @@ classdef AcadoMatlab < handle
             end
             
             obj.p{length(obj.p)+1} = set;
-        end
-        function clearP(obj)
-            for i = 1:length(obj.p)
-            	obj.removeInstruction(obj.p{i});
-            end
-            obj.p = {};
         end
         
         % Add disturbance
@@ -197,21 +156,6 @@ classdef AcadoMatlab < handle
             
             obj.w{length(obj.w)+1} = set;
         end
-        function clearW(obj)
-            for i = 1:length(obj.w)
-            	obj.removeInstruction(obj.w{i});
-            end
-            obj.w = {};
-        end
-        
-        % Add export module
-        function addModule(obj, set)
-            if isa(set, 'acado.ExportModule')
-                obj.exportModule = set;
-            else
-                error('This is not an instance of acado.ExportModule.');
-            end
-        end
         
         % Add mex input
         function addIn(obj, set)
@@ -223,14 +167,6 @@ classdef AcadoMatlab < handle
             end
             
             obj.in{length(obj.in)+1} = set;
-        end
-        function clearIn(obj)
-            for i = 1:length(obj.in)
-            	obj.removeInstruction(obj.in{i});
-            end
-            obj.in = {};
-            global ACADO_;
-            ACADO_.count_mexin = 0;
         end
         
         % Add intermediate state
@@ -244,34 +180,10 @@ classdef AcadoMatlab < handle
             
             obj.ints{length(obj.ints)+1} = set;
         end
-        function clearIntS(obj)
-            for i = 1:length(obj.ints)
-            	obj.removeInstruction(obj.ints{i});
-            end
-            obj.ints = {};
-        end
         
         % Get number of intermediate states
         function num = getNumIntS(obj)
             num = length(obj.ints);
-        end
-        
-        % Add export variables
-        function addExpV(obj, set)
-            
-            for i=1:length(obj.expV)
-                if (strcmp(obj.expV{i}.name, set.name))
-                   error('The export variable you are trying to add already exists.'); 
-                end
-            end
-            
-            obj.expV{length(obj.expV)+1} = set;
-        end
-        function clearExpV(obj)
-            for i = 1:length(obj.expV)
-            	obj.removeInstruction(obj.expV{i});
-            end
-            obj.expV = {};
         end
         
         generateCPP(obj);

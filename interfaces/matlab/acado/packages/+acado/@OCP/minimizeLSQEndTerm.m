@@ -47,12 +47,7 @@ function minimizeLSQEndTerm(obj, varargin)
 
 index = length(obj.minLSQEndTermh);
 
-if length(varargin) == 1        %ocp.minimizeLSQEndTerm(QT)
-    QT = varargin{1};
-    
-    obj.minLSQEndTermQ = obj.checkVectorMatrix(QT);
-    
-elseif (length(varargin) == 2)  %ocp.minimizeLSQEndTerm(h, r)
+if (length(varargin) == 2)  %ocp.minimizeLSQEndTerm(h, r)
     h = varargin{1};
     r = varargin{2};
     

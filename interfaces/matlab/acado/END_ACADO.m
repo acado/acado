@@ -32,7 +32,12 @@
 %    Date: 2009-2012
 % 
 
-GEN_ACADO;
+% Check if there is an active model to build
+checkActiveModel;
+
+% Build cpp files + compile them to a problemname_RUN.m/.cpp file
+global ACADO_;
+ACADO_.helper.generateCPP();
 
 warning off all
 

@@ -67,21 +67,13 @@ if (length(varargin) == 1) % ocp.minimizeLSQ(h)
     obj.minLSQTermr{index+1} = {};
     obj.minLSQTermS{index+1} = {};
     
-elseif (length(varargin) == 2)  
-    if isnumeric(varargin{1}) || isa(varargin{1}, 'acado.ExportVariable') %ocp.minimizeLSQ(Q, R)
-        Q = varargin{1};
-        R = varargin{2};
-        
-        obj.minLSQTermQ = obj.checkVectorMatrix(Q);
-        obj.minLSQTermR = obj.checkVectorMatrix(R);
-    else %ocp.minimizeLSQ(h, r)
-        h = varargin{1};
-        r = varargin{2};
-        
-        obj.minLSQTermh{index+1} = acado.Function(h);
-        obj.minLSQTermr{index+1} = obj.checkVectorMatrix(r);
-        obj.minLSQTermS{index+1} = {};
-    end
+elseif (length(varargin) == 2)  %ocp.minimizeLSQ(h, r)
+    h = varargin{1};
+    r = varargin{2};
+
+    obj.minLSQTermh{index+1} = acado.Function(h);
+    obj.minLSQTermr{index+1} = obj.checkVectorMatrix(r);
+    obj.minLSQTermS{index+1} = {};
     
 elseif (length(varargin) == 3)  %ocp.minimizeLSQ(S, h, r)
     h = varargin{2};

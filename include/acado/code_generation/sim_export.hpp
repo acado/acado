@@ -164,6 +164,60 @@ class SIMexport : public ExportModule
 		virtual returnValue printDetails( BooleanType details );
 
 
+		/** Returns the differential equations in the model.
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		returnValue getModel( DifferentialEquation& _f ) const;
+
+
+		/** Assigns Differential Equation to be used by the integrator.
+		 *
+		 *	@param[in] f		Differential equation.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		returnValue setModel( const DifferentialEquation& _f );
+
+
+		/** Assigns the model to be used by the integrator.
+		 *
+		 *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.
+		 *	@param[in] _diffs_rhs_ODE		Name of the function, evaluating the derivatives of the ODE right-hand side.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		virtual returnValue setModel( 	const String& fileName,
+				const String& _rhs_ODE,
+				const String& _diffs_rhs_ODE );
+
+
+		/** Assigns the model dimensions to be used by the integrator.
+		 *
+		 *	@param[in] _NX		Number of differential states.
+		 *	@param[in] _NDX		Number of differential states derivatives.
+		 *	@param[in] _NXA		Number of algebraic states.
+		 *	@param[in] _NU		Number of control inputs
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		virtual returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU );
+
+
+		/** Assigns the model dimensions to be used by the integrator.
+		 *
+		 *	@param[in] _NX		Number of differential states.
+		 *	@param[in] _NU		Number of control inputs
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		virtual returnValue setDimensions( uint _NX, uint _NU );
+
+
 		/** Adds an output function.
 		 *
 		 *  \param outputEquation_ 	  an output function to be added
@@ -340,8 +394,15 @@ class SIMexport : public ExportModule
 
     protected:
 
+        BooleanType EXPORT_RHS;					/**< True if the right-hand side and their derivatives should be exported too. */
+        BooleanType MODEL_DIMENSIONS_SET;		/**< True if the model dimensions have been set. */
         double T;								/**< The total simulation time. */
+
 		IntegratorExport*  integrator;			/**< Module for exporting a tailored integrator. */
+		DifferentialEquation 		f;			/**< The differential equations in the model. */
+		String externModel;						/**< The name of the file containing the needed functions, if provided. */
+		String rhs_ODE;							/**< The name of the function evaluating the ODE right-hand side, if provided. */
+		String diffs_ODE;						/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
 		std::vector<Grid> outputGrids;			/**< A separate grid for each output. */
 		std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
 		std::vector<String> outputNames;				/**< A separate function name for each output. */
