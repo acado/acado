@@ -40,6 +40,10 @@ classdef AcadoMatlab < handle
     
         %instructions
         instructionList = {};
+        
+        %mex files
+        mexList = {};
+        mainList = {};
     
         problemname = '';
         fileMEX = '';
@@ -186,11 +190,89 @@ classdef AcadoMatlab < handle
             num = length(obj.ints);
         end
         
+        % Add mex files to be compiled
+        function addMEX(obj, dir, varargin)
+            if nargin > 2 && ischar(dir)
+                tmp{1} = dir;
+                for i = 1:length(varargin)
+                    if ischar(varargin{i})
+                        tmp{1+i} = varargin{i};
+                    else
+                        error('Invalid MEX filename.');
+                    end
+                end
+                obj.mexList{end+1} = tmp;
+            end
+        end
+        
+        % Add main files to be compiled
+        function addMain(obj, dir, varargin)
+            if nargin > 2 && ischar(dir)
+                tmp{1} = dir;
+                for i = 1:length(varargin)
+                    if ischar(varargin{i})
+                        tmp{1+i} = varargin{i};
+                    else
+                        error('Invalid filename.');
+                    end
+                end
+                obj.mainList{end+1} = tmp;
+            end
+        end
+        
         generateCPP(obj);
         getCPPheader(obj);
         getCPPbody(obj);
         getCPPfooter(obj);
         getCPPlefthandout(obj, nameB, name, out);
+        
+        function setValues(obj, t, x, z, dx, u, p, w)
+            if ~isempty(t) 
+                obj.t{1}.setValue(t);
+            end
+            for i = 1:length(x)
+                obj.x{i}.setValue(x(i));
+            end
+            for i = 1:length(z)
+                obj.z{i}.setValue(z(i));
+            end
+            for i = 1:length(dx)
+                obj.dx{i}.setValue(dx(i));
+            end
+            for i = 1:length(u)
+                obj.u{i}.setValue(u(i));
+            end
+            for i = 1:length(p)
+                obj.p{i}.setValue(p(i));
+            end
+            for i = 1:length(w)
+                obj.w{i}.setValue(w(i));
+            end
+        end
+        
+        function clearValues(obj)
+            if ~isempty(obj.t)
+                obj.t{1}.setValue([]);
+            end
+            for i = 1:length(obj.x)
+                obj.x{i}.setValue([]);
+            end
+            for i = 1:length(obj.z)
+                obj.z{i}.setValue([]);
+            end
+            for i = 1:length(obj.dx)
+                obj.dx{i}.setValue([]);
+            end
+            for i = 1:length(obj.u)
+                obj.u{i}.setValue([]);
+            end
+            for i = 1:length(obj.p)
+                obj.p{i}.setValue([]);
+            end
+            for i = 1:length(obj.w)
+                obj.w{i}.setValue([]);
+            end
+        end
         
     end
     

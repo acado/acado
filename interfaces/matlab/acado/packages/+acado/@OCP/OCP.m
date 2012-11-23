@@ -87,6 +87,7 @@ classdef OCP < acado.MultiObjectiveFunctionality
         minLSQEndTermS = {};
         minLSQEndTermh = {};
         minLSQEndTermr = {};
+        minLSQEndTermR;
 
         % Subject to
         subjectoItems = {};
@@ -149,6 +150,10 @@ classdef OCP < acado.MultiObjectiveFunctionality
                 end
             end
     
+        end
+        
+        function s = toString(obj)
+            s = obj.name;
         end
     
         

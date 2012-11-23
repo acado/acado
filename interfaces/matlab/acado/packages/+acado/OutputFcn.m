@@ -76,7 +76,7 @@ classdef OutputFcn < acado.Function
         
         function getInstructions(obj, cppobj, get)
             if (get == 'B')
-                if (~isempty(obj.outputList))
+%                 if (~isempty(obj.outputList))
                     
                     fprintf(cppobj.fileMEX,sprintf('    OutputFcn %s;\n', obj.name));
                     
@@ -85,7 +85,7 @@ classdef OutputFcn < acado.Function
                     end
                     
                     fprintf(cppobj.fileMEX,'\n');
-                end
+%                 end
             end
         end
         

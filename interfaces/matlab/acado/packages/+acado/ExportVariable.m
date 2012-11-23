@@ -1,4 +1,4 @@
-%Variable
+%ExportVariable
 %
 %  Licence:
 %    This file is part of ACADO Toolkit  - (http://www.acadotoolkit.org/)
@@ -25,35 +25,48 @@
 %    Author: Rien Quirynen
 %    Date: 2012
 %
-classdef Variable < acado.Expression
+classdef ExportVariable < handle
     properties(SetAccess='private')
-        value;
+        name;
+        numRows = 1;
+        numCols = 1;
     end
     
     methods
-        function obj = Variable(name)
-            
-            obj.singleTerm = 1;
-        end
-        
-        function out = copy(obj)
-            out = obj;
+        function obj = ExportVariable(varargin)
+            global ACADO_;
+            if nargin > 0
+                if ~ischar(varargin{1})
+                    error('Unsupported use of the ExportVariable constructor: please specify a name.');
+                end
+                obj.name = varargin{1};
+                if nargin == 2
+                    obj.numRows = varargin{2};
+                elseif nargin == 3
+                    obj.numRows = varargin{2};
+                    obj.numCols = varargin{3};
+                elseif nargin > 3
+                    error('Unsupported use of the ExportVariable constructor.');
+                end
+                
+                ACADO_.helper.addExpV(obj);
+                ACADO_.helper.addInstruction(obj);
+            end
         end
         
         function s = toString(obj)
-            if isempty(obj.value)
-                s = obj.name;
-            else
-                s = num2str(obj.value);
-            end
+            s = obj.name;
         end
         
-        function setValue(obj, set)
-            if isempty(set) || isnumeric(set)
-                obj.value = set;
-            else
-                error('A value needs to be numeric.');
+        function getInstructions(obj, cppobj, get)
+            if (get == 'FB')
+%                 if obj.numRows == 1 && obj.numCols == 1
+%                     fprintf(cppobj.fileMEX,sprintf('    ExportVariable %s;\n', obj.name));
+%                 else
+                    fprintf(cppobj.fileMEX,sprintf('    ExportVariable %s( "%s", %s, %s );\n', obj.name, obj.name, num2str(obj.numRows), num2str(obj.numCols)));
+%                 end
             end
+            
         end
         
     end

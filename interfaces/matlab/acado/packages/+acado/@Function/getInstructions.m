@@ -34,7 +34,11 @@ if (get == 'FB')
     fprintf(cppobj.fileMEX,sprintf('    Function %s;\n', obj.name));
 
     for i=1:length(obj.items)
-        fprintf(cppobj.fileMEX,sprintf('    %s << %s;\n', obj.name, obj.items{i}{1}.toString));
+        if iscell(obj.items{i})
+            fprintf(cppobj.fileMEX,sprintf('    %s << %s;\n', obj.name, obj.items{i}{1}.toString));
+        else
+            fprintf(cppobj.fileMEX,sprintf('    %s << %s;\n', obj.name, obj.items{i}.toString));
+        end
     end
 
 end 

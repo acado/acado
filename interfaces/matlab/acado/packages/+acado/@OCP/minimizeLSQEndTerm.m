@@ -48,12 +48,20 @@ function minimizeLSQEndTerm(obj, varargin)
 index = length(obj.minLSQEndTermh);
 
 if (length(varargin) == 2)  %ocp.minimizeLSQEndTerm(h, r)
-    h = varargin{1};
-    r = varargin{2};
-    
-    obj.minLSQEndTermh{index+1} = acado.Function(h);
-    obj.minLSQEndTermr{index+1} = obj.checkVectorMatrix(r);
-    obj.minLSQEndTermS{index+1} = {};
+    if isnumeric(varargin{1}) || isa(varargin{1}, 'acado.ExportVariable')
+        Q = varargin{1};
+        r = varargin{2};
+        
+        obj.minLSQEndTermQ = obj.checkVectorMatrix(Q);
+        obj.minLSQEndTermR = acado.Function(r);
+    else
+        h = varargin{1};
+        r = varargin{2};
+        
+        obj.minLSQEndTermh{index+1} = acado.Function(h);
+        obj.minLSQEndTermr{index+1} = obj.checkVectorMatrix(r);
+        obj.minLSQEndTermS{index+1} = {};
+    end
     
 elseif (length(varargin) == 3)  %ocp.minimizeLSQEndTerm(S, h, r)
     h = varargin{2};

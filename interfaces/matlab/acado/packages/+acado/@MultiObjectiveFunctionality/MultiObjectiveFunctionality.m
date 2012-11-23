@@ -37,7 +37,6 @@ classdef MultiObjectiveFunctionality < handle
     
     methods
         
-        
     end
     
 end

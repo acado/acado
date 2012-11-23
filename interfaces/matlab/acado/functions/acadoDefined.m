@@ -1,4 +1,3 @@
-%Variable
 %
 %  Licence:
 %    This file is part of ACADO Toolkit  - (http://www.acadotoolkit.org/)
@@ -24,39 +23,22 @@
 %
 %    Author: Rien Quirynen
 %    Date: 2012
-%
-classdef Variable < acado.Expression
-    properties(SetAccess='private')
-        value;
+
+function out = acadoDefined(obj)
+
+global ACADO_;
+if ~isempty(obj) && ~isempty(ACADO_) && ~isempty(ACADO_.helper)
+    out = 0;
+    i = 1;
+    while i <= length(ACADO_.helper.instructionList) && ~out
+        if strcmp(class(ACADO_.helper.instructionList{i}), class(obj)) && strcmp(ACADO_.helper.instructionList{i}.toString, obj.toString)
+            out = 1;
+        else
+            i = i+1;
+        end
     end
-    
-    methods
-        function obj = Variable(name)
-            
-            obj.singleTerm = 1;
-        end
-        
-        function out = copy(obj)
-            out = obj;
-        end
-        
-        function s = toString(obj)
-            if isempty(obj.value)
-                s = obj.name;
-            else
-                s = num2str(obj.value);
-            end
-        end
-        
-        function setValue(obj, set)
-            if isempty(set) || isnumeric(set)
-                obj.value = set;
-            else
-                error('A value needs to be numeric.');
-            end
-        end
-        
-    end
-    
+else
+    out = 0;
 end
 
+end

@@ -35,7 +35,7 @@
 %    Author: David Ariens, Rien Quirynen
 %    Date: 2012
 % 
-classdef TIME < acado.Expression   
+classdef TIME < acado.Variable   
     properties(SetAccess='protected')
         
     end
@@ -71,6 +71,22 @@ classdef TIME < acado.Expression
         end
         
         getInstructions(obj, cppobj, get)
+        
+        function jac = jacobian(obj, var)
+            if ~isvector(obj)
+                error('A jacobian can only be computed of a vector function.');
+            end
+            for j = 1:length(obj)
+                for i = 1:length(var)
+                    var(i) = getExpression(var(i));
+                    if isa(var(i), 'acado.Variable')
+                        jac(j,i) = acado.DoubleConstant(double(isa(var(i), 'acado.TIME')));
+                    else
+                        error('A jacobian can only be computed with respect to a variable.');
+                    end
+                end
+            end
+        end
 
     end
     

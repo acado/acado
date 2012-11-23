@@ -264,7 +264,7 @@ classdef SIMexport < acado.ExportModule
                 
                 
                 % DIFFERENTIAL EQUATION
-                if (~obj.modelDefined)
+                if (~isempty(obj.model) && ~acadoDefined(obj.model))
                     obj.model.getInstructions(cppobj, get);
                 end
                 if (~isempty(obj.model))
@@ -323,6 +323,24 @@ classdef SIMexport < acado.ExportModule
                 
                 fprintf(cppobj.fileMEX,'\n');
             end
+        end
+        
+        
+        function setMEXFiles(obj, dir)
+            global ACADO_;
+            if ~ischar(dir)
+                error('Invalid directory name.');
+            end
+            ACADO_.helper.addMEX(dir, 'integrate.c', 'rhs.c')
+        end
+        
+        
+        function setMainFiles(obj, dir)
+            global ACADO_;
+            if ~ischar(dir)
+                error('Invalid directory name.');
+            end
+            ACADO_.helper.addMain(dir, 'test.c', 'compare.c')
         end
         
     end

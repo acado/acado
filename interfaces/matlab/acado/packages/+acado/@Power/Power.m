@@ -78,6 +78,12 @@ classdef Power < acado.BinaryOperator
                 s = '1';
             elseif strcmp(obj.obj2.toString, '1')
                 s = sprintf('%s', obj.obj1.toString); 
+            elseif isa(obj.obj2, 'acado.DoubleConstant') && obj.obj2.val == -1
+                s = sprintf('1/%s', obj.obj1.toString); 
+            elseif isa(obj.obj2, 'acado.DoubleConstant') && obj.obj2.val == 1/2
+                s = sprintf('sqrt(%s)', obj.obj1.toString);
+            elseif isa(obj.obj2, 'acado.DoubleConstant') && obj.obj2.val == -1/2
+                s = sprintf('1/sqrt(%s)', obj.obj1.toString);
             elseif ~isempty(ACADO_) && ACADO_.generatingCode
                 s = sprintf('pow(%s,%s)', obj.obj1.toString, obj.obj2.toString); 
             else

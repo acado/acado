@@ -38,7 +38,7 @@
 %
 classdef IntermediateState < acado.Expression
     properties(SetAccess='private')
-        defined = 0;
+        
     end
     
     methods
@@ -72,10 +72,8 @@ classdef IntermediateState < acado.Expression
         end
         
         function getInstructions(obj, cppobj, get)
-            if (strcmp(get,'FB') && ~obj.defined)
-                defineIntermediateStates(obj.expr, cppobj, get);
+            if strcmp(get,'FB')
                 fprintf(cppobj.fileMEX,sprintf('    IntermediateState %s = %s;\n', obj.name, obj.expr.toString));
-                obj.defined = 1;
             end
         end
         

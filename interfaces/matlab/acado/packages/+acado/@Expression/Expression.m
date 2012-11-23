@@ -580,44 +580,61 @@ classdef Expression < handle
             out = obj;
         end
         
-        function defineIntermediateStates(obj, cppobj, get)
-            if isa(obj, 'acado.IntermediateState')
-                getInstructions(obj, cppobj, get);
-                
-            elseif isa(obj, 'acado.UnaryOperator')
-                defineIntermediateStates(obj.obj1, cppobj, get);
-                
-            elseif isa(obj, 'acado.BinaryOperator')
-                defineIntermediateStates(obj.obj1, cppobj, get);
-                defineIntermediateStates(obj.obj2, cppobj, get);
-                
-            elseif isa(obj, 'acado.MultiOperator')
-                for k = 1:length(obj.objs)
-                    defineIntermediateStates(obj.objs{k}, cppobj, get);
-                end
-            elseif strcmp(class(obj), 'acado.Expression')
-                defineIntermediateStates(obj.expr, cppobj, get);
-            end
-        end
-        
         function out = getExpression(obj)
-            for i = 1:size(obj,1)
-                for j = 1:size(obj,2)
-                    if strcmp(class(obj(i,j)), 'acado.Expression')
-                        out(i,j) = obj(i,j).expr;
-                    else
-                        out(i,j) = obj(i,j);
-                    end
-                end
+            if strcmp(class(obj(1,1)), 'acado.Expression')
+                out = obj.expr;
+            else
+                out = obj;
             end
         end
         
         function jac = jacobian(obj, var)
-            jac = jacobian(obj.getExpression, var.getExpression);
+            for i = 1:length(obj)
+                for j = 1:length(var)
+                    jac(i,j) = acado.Expression(jacobian(obj(i).getExpression, var(j).getExpression));
+                end
+            end
         end
         
         function out = is(obj)
             out = acado.Expression(acado.IntermediateState(obj));
+        end
+        
+        function out = eval(obj, varargin) % x, u, z, dx, p, w, t
+            global ACADO_;
+            if ~isempty(ACADO_)
+                t = []; x = []; z = []; dx = []; u = []; p = []; w = [];
+                if nargin > 1
+                    x = varargin{1};
+                    if nargin > 2
+                        u = varargin{2};
+                        if nargin > 3
+                            z = varargin{3};
+                            if nargin > 4
+                                dx = varargin{4};
+                                if nargin > 5
+                                    p = varargin{5};
+                                    if nargin > 6
+                                        w = varargin{6};
+                                        if nargin > 7
+                                            t = varargin{7};
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                ACADO_.helper.setValues(t, x, z, dx, u, p, w);
+                for i = 1:size(obj,1)
+                    for j = 1:size(obj,2)
+                        out(i,j) = evalin('base', obj(i,j).toString);
+                    end
+                end
+                ACADO_.helper.clearValues;
+            else
+                error('Unsupported use of the eval function.');
+            end
         end
         
     end

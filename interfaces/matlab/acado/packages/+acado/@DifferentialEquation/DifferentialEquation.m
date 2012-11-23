@@ -149,6 +149,12 @@ classdef DifferentialEquation < acado.Function
                 error('ERROR: Invalid DifferentialEquation.add call. <a href="matlab: help acado.DifferentialEquation.add">help acado.DifferentialEquation.add</a>');
             end
         end
+        
+        function out = getExpression(obj)
+            for i = 1:length(obj.differentialList)
+                out(i) = acado.Expression(obj.differentialList{i}.obj2);
+            end
+        end
     end
     
 end
