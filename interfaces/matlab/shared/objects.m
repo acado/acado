@@ -61,7 +61,7 @@ function [HEADER_PATHS, SRC, BIN, BINFOLDER, SRCMEX, BINMEX, BINFOLDERMEX] = obj
 %% SETTINGS
 
 % HEADER_PATHS = '-I../../include -I../../external_packages -I../../external_packages/include  -I../../external_packages/qpOASES-2.0/INCLUDE';
-HEADER_PATHS = sprintf('-I''%s/../../../../../ACADOtesting/testing/mvukov/mhe_export'' -I''%s/bin/include'' -I''%s/../../include'' -I''%s/../../external_packages'' -I''%s/../../external_packages/include''  -I''%s/../../external_packages/qpOASES-3.0beta/include'' -I''%s''', pwd,pwd,pwd,pwd,pwd,pwd,pwd);
+HEADER_PATHS = sprintf('-I''%s/bin/include'' -I''%s/../../include'' -I''%s/../../external_packages'' -I''%s/../../external_packages/include''  -I''%s/../../external_packages/qpOASES-3.0beta/include'' -I''%s''',pwd,pwd,pwd,pwd,pwd,pwd);
 
 %% C++ SRC ACADO OBJECTS
 
@@ -286,15 +286,6 @@ if (returnlist == 0 || returnlist == 3)
 	BIN = [BIN; ol'];
 	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
 end;
-
-%% MHE_EXPORT MILAN (TEMPORARY FIX UNTIL MHE EXPORT IS PUBLIC)
-    [fl, ol] = getFilesAndObjectNames('../../../../../ACADOtesting/testing/mvukov/mhe_export');
-    fl = fl(1:3);
-    ol = ol(1:3);
-    
-	SRC = [SRC; fl];
-	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
     
 
 %% MEX
