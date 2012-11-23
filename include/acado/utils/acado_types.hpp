@@ -282,7 +282,7 @@ enum IntegratorType{
      INT_RK78,            	/**< Explicit Runge-Kutta integrator of order 7/8          */
      INT_BDF,             	/**< Implicit backward differentiation formula integrator. */
      INT_DISCRETE,        	/**< Discrete time integrator                              */
-     INT_LYAPUNOV45,             /**< Explicit Runge-Kutta integrator of order 4/5  with Lyapunov structure exploiting        */
+     INT_LYAPUNOV45,        /**< Explicit Runge-Kutta integrator of order 4/5  with Lyapunov structure exploiting        */
      INT_UNKNOWN           	/**< unkown.                                               */
 };
 
@@ -367,6 +367,8 @@ enum OptionsName
 	MAX_NUM_INTEGRATOR_STEPS,
 	NUM_INTEGRATOR_STEPS,
 	INTEGRATOR_TOLERANCE,
+	MEX_ITERATION_STEPS,						/**< The number of real-time iterations performed in the auto generated mex function. */
+	MEX_VERBOSE,
 	ABSOLUTE_TOLERANCE,
 	INITIAL_INTEGRATOR_STEPSIZE,
 	MIN_INTEGRATOR_STEPSIZE,

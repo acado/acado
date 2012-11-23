@@ -36,11 +36,16 @@
 
 
 #include <acado/code_generation/export_module.hpp>
+#include <acado/code_generation/integrators/export_matlab_integrator.hpp>
+#include <acado/code_generation/integrators/export_matlab_rhs.hpp>
 #include <acado/code_generation/integrators/integrator_export.hpp>
 #include <acado/code_generation/condensing_export.hpp>
 #include <acado/code_generation/gauss_newton_export.hpp>
 #include <acado/code_generation/auxiliary_functions_export.hpp>
 #include <acado/code_generation/export_file.hpp>
+
+#include <acado/code_generation/templates/templates.hpp>
+#include <acado/code_generation/export_matlab_MPC.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -216,9 +221,9 @@ class MPCexport : public ExportModule
 		 */
 		returnValue exportMakefile(	const String& _dirName,
 									const String& _fileName,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
-										int _precision = 16
+									const String& _realString = "real_t",
+									const String& _intString = "int",
+									int _precision = 16
 									) const;
 
 		/** Exports files containing the interface to an external online 

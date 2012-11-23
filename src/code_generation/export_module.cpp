@@ -104,6 +104,77 @@ returnValue ExportModule::setOCP(	const OCP& _ocp
 									)
 {
 	ocp = _ocp;
+	if( ocp.hasDifferentialEquation() ) {
+		DifferentialEquation f;
+		ocp.getDifferentialEquation(f);
+		setModel(f);
+	}
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ExportModule::getModel( DifferentialEquation& _f ) const{
+
+    _f = f;
+    return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ExportModule::setModel( const DifferentialEquation& _f )
+{
+	if( rhs_ODE.isEmpty() ) {
+		f = _f;
+		Expression rhs;
+		f.getExpression( rhs );
+
+		NX = rhs.getDim() - f.getNXA();
+		NDX = f.getNDX();
+		NXA = f.getNXA();
+		NU = f.getNU();
+		NP = f.getNP();
+
+		MODEL_DIMENSIONS_SET = BT_TRUE;
+
+		EXPORT_RHS = BT_TRUE;
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ExportModule::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU )
+{
+	NX = _NX;
+	NDX = _NDX;
+	NXA = _NXA;
+	NU = _NU;
+	MODEL_DIMENSIONS_SET = BT_TRUE;
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ExportModule::setDimensions( uint _NX, uint _NU )
+{
+	setDimensions( _NX, 0, 0, _NU );
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ExportModule::setModel( const String& fileName, const String& _rhs_ODE, const String& _diffs_ODE )
+{
+	if( f.getNumDynamicEquations() == 0 ) {
+		externModel = String(fileName);
+		rhs_ODE = String(_rhs_ODE);
+		diffs_ODE = String(_diffs_ODE);
+
+		EXPORT_RHS = BT_FALSE;
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -395,6 +466,8 @@ returnValue ExportModule::setupOptions( )
 	addOption( GENERATE_MAKE_FILE,          BT_TRUE         );
 	addOption( GENERATE_SIMULINK_INTERFACE, BT_FALSE        );
 	addOption( GENERATE_MATLAB_INTERFACE, 	BT_FALSE        );
+	addOption( MEX_ITERATION_STEPS, 		1        		);
+	addOption( MEX_VERBOSE, 				0       		);
 	addOption( OPERATING_SYSTEM,            OS_DEFAULT      );
 	addOption( USE_SINGLE_PRECISION,        BT_FALSE        );
 	addOption( PRINTLEVEL,                  MEDIUM          );

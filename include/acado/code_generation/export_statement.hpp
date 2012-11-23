@@ -36,12 +36,7 @@
 
 #include <acado/utils/acado_utils.hpp>
 
-#ifdef _WIN32
-    #include <memory>
-#else
-    #include <tr1/memory>
-#endif
-
+#include <tr1/memory>
 
 BEGIN_NAMESPACE_ACADO
 

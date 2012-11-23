@@ -158,14 +158,18 @@ uint getStringLength( const char* string )
 
 int acadoPrintf( const char* format, ... ){
 
-  va_list argPtr;
-  va_start( argPtr,format );
+	int returnvalue;
+	va_list argPtr;
+	va_start( argPtr,format );
+#ifdef __MATLAB__
+	mexPrintf( format );
+	returnvalue = 1;
+#else
+	returnvalue = acadoVFPrintf ( TEXT_OUTPUT_STREAM, format, argPtr );
+	va_end( argPtr );
+#endif
 
-  int returnvalue = acadoVFPrintf ( TEXT_OUTPUT_STREAM, format, argPtr );
-
-  va_end( argPtr );
-
-  return returnvalue;
+	return returnvalue;
 }
 
 FILE* acadoFOpen( const char * filename, const char * mode )
@@ -197,10 +201,10 @@ int acadoVFPrintf ( FILE * stream, const char * format, va_list arg )
     {
       const int buffersize = 256;
       char buffer[buffersize];
-      
+
       // check length of buffer
       int count = vsnprintf(NULL, 0, format, arg );
-      
+
       if(count < buffersize)
 	{
 	  // if string fits in buffer

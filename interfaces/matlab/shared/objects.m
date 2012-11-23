@@ -61,7 +61,7 @@ function [HEADER_PATHS, SRC, BIN, BINFOLDER, SRCMEX, BINMEX, BINFOLDERMEX] = obj
 %% SETTINGS
 
 % HEADER_PATHS = '-I../../include -I../../external_packages -I../../external_packages/include  -I../../external_packages/qpOASES-2.0/INCLUDE';
-HEADER_PATHS = sprintf('-I''%s/bin/include'' -I''%s/../../include'' -I''%s/../../external_packages'' -I''%s/../../external_packages/include''  -I''%s/../../external_packages/qpOASES-3.0beta/include'' -I''%s''', pwd,pwd,pwd,pwd,pwd,pwd);
+HEADER_PATHS = sprintf('-I''%s/../../../../../ACADOtesting/testing/mvukov/mhe_export'' -I''%s/bin/include'' -I''%s/../../include'' -I''%s/../../external_packages'' -I''%s/../../external_packages/include''  -I''%s/../../external_packages/qpOASES-3.0beta/include'' -I''%s''', pwd,pwd,pwd,pwd,pwd,pwd,pwd);
 
 %% C++ SRC ACADO OBJECTS
 
@@ -287,6 +287,16 @@ if (returnlist == 0 || returnlist == 3)
 	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
 end;
 
+%% MHE_EXPORT MILAN (TEMPORARY FIX UNTIL MHE EXPORT IS PUBLIC)
+    [fl, ol] = getFilesAndObjectNames('../../../../../ACADOtesting/testing/mvukov/mhe_export');
+    fl = fl(1:3);
+    ol = ol(1:3);
+    
+	SRC = [SRC; fl];
+	BIN = [BIN; ol'];
+	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+    
+
 %% MEX
 k = 1;
 %% OCP MEX
@@ -370,42 +380,3 @@ end
     % SRC{k} = '../../external_packages/csparse/SRC/cs_ereach.c';              BIN{k} ='cs_ereach';                           BINFOLDER{k} = 'csparse/'; k=k+1;
     % SRC{k} = '../../external_packages/csparse/SRC/cs_leaf.c';               BIN{k} ='cs_leaf';                            BINFOLDER{k} = 'csparse/'; k=k+1;
     % SRC{k} = '../../external_packages/csparse/SRC/cs_randperm.c';               BIN{k} ='cs_randperm';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-	
-function [fileList, objList] = getFilesAndObjectNames( dirName )
-
-	% Get the data for the current directory
-	dirData = dir(dirName);
-	% Find the index for directories
-	dirIndex = [dirData.isdir];
-	fileListTemp = dir(fullfile(dirName, '*.cpp'));
-	
-	% Get a list of the files
-	fileList = { fileListTemp( : ).name }';
-	objList = {};
-	for i = 1: length( fileList )
-		[~, name, ~] = fileparts( fileList{ i } );
-		objList{ i } = name; 
-	end;
-  
-	if ~isempty( fileList )
-		% Prepend path to files
-		[fileList] = cellfun(@( x ) fullfile(dirName, x), ...  
-						fileList, 'UniformOutput', false);
-	end;
-	
-	% Get a list of the subdirectories
-	subDirs = { dirData(dirIndex).name };
-	% Find index of subdirectories that are not '.' or '..'
-	validIndex = ~ismember(subDirs, {'.', '..', '.svn'});  
-                                               
- 	% Loop over valid subdirectories
- 	for iDir = find( validIndex )
- 		% Get the subdirectory path
-		nextDir = fullfile(dirName, subDirs{ iDir });
-		% Recursively call getFilesAndObjectNames
-		[fl, ol] = getFilesAndObjectNames( nextDir ); 
-		fileList = [fileList; fl];
-		objList  = [objList  ol];
-	end;
-	
-end
