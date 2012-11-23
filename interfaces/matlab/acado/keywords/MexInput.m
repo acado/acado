@@ -1,10 +1,8 @@
-%End the current ACADO problem. 
-% This function can only be called when a problem is active (and thus
-% BEGIN_ACADO is called before). Upon calling this function the current
-% problem will be transfered to a C++ file and will be compiled. 
+%Shorthand for acado.MexInput
 %
 %  Example:
-%    >> END_ACADO
+%    >> MexInput x;
+%    >> MexInput x1 x2 x3 x4;
 %
 %  Licence:
 %    This file is part of ACADO Toolkit  - (http://www.acadotoolkit.org/)
@@ -28,22 +26,39 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens, Rien Quirynen
-%    Date: 2009-2012
-% 
+%    Author: Rien Quirynen
+%    Date: 2012
+%
+function MexInput( varargin )
 
-GEN_ACADO;
+checkActiveModel;
 
-warning off all
+if ~iscellstr( varargin ),
+    error( 'Syntax is: MexInput x' );
+    
+else
+    
+    for k = 1 : nargin,
+        [name N M] = readVariable(varargin{k});
+        
+        if N == 0 && M == 0
+            global ACADO_;
+            ACADO_.helper.clearIn;
+        else
+            VAR_NAME = name;
+            if N == 1 && M == 1
+                VAR_ASSIGN = acado.MexInput(VAR_NAME);
+            elseif N == 1 || M == 1
+                VAR_ASSIGN = acado.MexInputVector(VAR_NAME);
+            else
+                VAR_ASSIGN = acado.MexInputMatrix(VAR_NAME);
+            end
+            
+            assignin( 'caller', VAR_NAME, VAR_ASSIGN );
+        end
+    end
+    
+end
 
-% % Remove the ACADO package from the path
-% rmpath(genpath([ACADO_.pwd filesep 'acado']));  
-% addpath([ACADO_.pwd filesep 'acado']);   
-% addpath([ACADO_.pwd filesep 'acado/functions']);
-% addpath( genpath([ACADO_.pwd filesep 'acado' filesep 'packages']) );
+end
 
-% Clear global
-ACADO_ = {};
-clear ACADO_;
-
-warning on all

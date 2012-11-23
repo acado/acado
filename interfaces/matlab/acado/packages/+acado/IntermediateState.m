@@ -56,12 +56,15 @@ classdef IntermediateState < acado.Expression
                 ACADO_.helper.addIntS(obj);
                 ACADO_.helper.addInstruction(obj);
             elseif nargin == 1 && isa(varargin{1}, 'acado.Expression') % NAME
+                tmp = varargin{1};
                 for i = 1:size(varargin{1},1)
                     for j = 1:size(varargin{1},2)
-                        tmp = varargin{1};
                         num = ACADO_.helper.getNumIntS;
                         obj(i,j) = acado.IntermediateState(['intS' num2str(num+1)]);
                         obj(i,j).expr = tmp(i,j).getExpression;
+                        obj(i,j).zero = tmp(i,j).zero;
+                        obj(i,j).one = tmp(i,j).one;
+                        obj(i,j).singleTerm = tmp(i,j).singleTerm;
                     end
                 end
             end

@@ -50,17 +50,6 @@ classdef SIMexport < acado.ExportModule
         totalTime;
         timingSteps;
         
-        % DifferentialEquation
-        model;
-        modelDefined = 1;
-        fileName;
-        modelName;
-        modelDiffsName;
-        NX;
-        NDX;
-        NXA;
-        NU;
-        
         % OutputEquation
         output = {};
         outputName = {};
@@ -68,11 +57,6 @@ classdef SIMexport < acado.ExportModule
         outputDim = {};
         meas;
         outputDefined = [];
-        
-        
-        % dirName
-        dir;
-        run;
     end
     
     methods
@@ -94,29 +78,6 @@ classdef SIMexport < acado.ExportModule
                 
             end
             
-            ACADO_.helper.addInstruction(obj);
-            
-        end
-        
-        
-        function exportCode(obj, varargin)
-            
-            if (nargin == 2 && isa(varargin{1}, 'char'))
-                % SIMexport.exportCode( dirName );
-                obj.dir = varargin{1};
-                obj.run = 0;
-                
-            elseif (nargin == 1)
-                % SIMexport.exportCode( );
-                obj.dir = './';
-                obj.run = 0;
-                
-            else
-                error('ERROR: Invalid exportCode. <a href="matlab: help acado.SIMexport.exportCode">help acado.SIMexport.exportCode</a>');
-                
-            end
-            
-            END_ACADO; 
         end
         
         
@@ -132,33 +93,7 @@ classdef SIMexport < acado.ExportModule
                 
             end
             
-            END_ACADO; 
-        end
-        
-        
-        function setModel(obj, varargin)
-            
-            global ACADO_;
-            if (nargin == 2 && isa(varargin{1}, 'acado.DifferentialEquation'))
-                % SIMexport.setModel( f );
-                obj.model = varargin{1};
-                
-            elseif (nargin == 2 && (isa(varargin{1}, 'cell') || isa(varargin{1}, 'acado.Expression')))
-                obj.modelDefined = 0;
-                obj.model = acado.DifferentialEquation();
-                ACADO_.helper.removeLastInstruction();
-                obj.model(:) = varargin{1};
-                
-            elseif (nargin == 4 && isa(varargin{1}, 'char') && isa(varargin{2}, 'char') && isa(varargin{3}, 'char'))
-                % SIMexport.setModel( fileName, modelName, modelDiffsName );
-                obj.fileName = varargin{1};
-                obj.modelName = varargin{2};
-                obj.modelDiffsName = varargin{3};
-                
-            else
-                error('ERROR: Invalid setModel. <a href="matlab: help acado.SIMexport.setModel">help acado.SIMexport.setModel</a>');
-                
-            end
+            GEN_ACADO; 
         end
         
         
@@ -173,7 +108,7 @@ classdef SIMexport < acado.ExportModule
             elseif (nargin == 2 && (isa(varargin{1}, 'cell') || isa(varargin{1}, 'acado.Expression')))
                 obj.outputDefined(end+1) = 0;
                 tmp = acado.OutputFcn();
-                ACADO_.helper.removeLastInstruction();
+                ACADO_.helper.removeInstruction(tmp);
                 tmp(:) = varargin{1};
                 obj.output{end+1} = tmp;
                 
@@ -214,30 +149,6 @@ classdef SIMexport < acado.ExportModule
                 
             else
                 error('ERROR: Invalid setTimingSteps. <a href="matlab: help acado.SIMexport.setTimingSteps">help acado.SIMexport.setTimingSteps</a>');
-                
-            end
-            
-        end
-        
-        
-        function setDimensions(obj, varargin)
-            
-            if (nargin == 3 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric'))
-                % SIMexport.setDimensions( NX, NU );
-                obj.NX = varargin{1};
-                obj.NDX = 0;
-                obj.NXA = 0;
-                obj.NU = varargin{2};
-                
-            elseif (nargin == 5 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric') && isa(varargin{3}, 'numeric') && isa(varargin{4}, 'numeric'))
-                % SIMexport.setDimensions( NX, NDX, NXA, NU );
-                obj.NX = varargin{1};
-                obj.NDX = varargin{2};
-                obj.NXA = varargin{3};
-                obj.NU = varargin{4};
-                
-            else
-                error('ERROR: Invalid call to setDimensions.');
                 
             end
             
@@ -346,4 +257,3 @@ classdef SIMexport < acado.ExportModule
     end
     
 end
-

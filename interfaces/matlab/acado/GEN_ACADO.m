@@ -1,4 +1,4 @@
-%End the current ACADO problem. 
+%Generate the current ACADO problem. 
 % This function can only be called when a problem is active (and thus
 % BEGIN_ACADO is called before). Upon calling this function the current
 % problem will be transfered to a C++ file and will be compiled. 
@@ -32,18 +32,10 @@
 %    Date: 2009-2012
 % 
 
-GEN_ACADO;
+% Check if there is an active model to build
+checkActiveModel;
 
-warning off all
-
-% % Remove the ACADO package from the path
-% rmpath(genpath([ACADO_.pwd filesep 'acado']));  
-% addpath([ACADO_.pwd filesep 'acado']);   
-% addpath([ACADO_.pwd filesep 'acado/functions']);
-% addpath( genpath([ACADO_.pwd filesep 'acado' filesep 'packages']) );
-
-% Clear global
-ACADO_ = {};
-clear ACADO_;
-
-warning on all
+% Build cpp files + compile them to a problemname_RUN.m/.cpp file
+global ACADO_;
+ACADO_.count_generation = ACADO_.count_generation+1;
+ACADO_.helper.generateCPP();

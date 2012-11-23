@@ -83,6 +83,9 @@ classdef Options < handle
                 elseif(ischar(obj.set_n{i}) && isnumeric(obj.set_v{i}))
                     fprintf(cppobj.fileMEX,sprintf('    %s.set( %s, %s );\n', obj.name, obj.set_n{i}, stringIntDouble(obj.set_v{i})));
                     
+                elseif(ischar(obj.set_n{i}) && isa(obj.set_v{i}, 'acado.MexInput'))
+                    fprintf(cppobj.fileMEX,sprintf('    %s.set( %s, (int)%s );\n', obj.name, obj.set_n{i}, obj.set_v{i}.name));
+                    
                 else
                     error('ERROR: Invalid option given.');
                 end
@@ -93,4 +96,3 @@ classdef Options < handle
     end
     
 end
-
