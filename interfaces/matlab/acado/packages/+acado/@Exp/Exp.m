@@ -39,7 +39,15 @@ classdef Exp < acado.UnaryOperator
     methods
         function obj = Exp(obj1)
             if nargin > 0
+                if (isa(obj1, 'numeric'))
+                    obj1 = acado.DoubleConstant(obj1);
+                end
+                obj1 = obj1.getExpression;
                 obj.obj1 = obj1;
+                
+                if obj1.zero
+                   obj.one = 1; 
+                end
             end
         end
         
@@ -50,7 +58,7 @@ classdef Exp < acado.UnaryOperator
         function s = toString(obj)
             global ACADO_;
             
-            if obj.obj1.zero
+            if obj.one
                 s = '1';
             elseif obj.obj1.one && (isempty(ACADO_) || ~ACADO_.generatingCode)
                 s = 'e';

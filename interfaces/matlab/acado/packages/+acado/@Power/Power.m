@@ -45,6 +45,8 @@ classdef Power < acado.BinaryOperator
             elseif (isa(obj2, 'numeric'))
                 obj2 = acado.DoubleConstant(obj2);
             end
+            obj1 = obj1.getExpression;
+            obj2 = obj2.getExpression;
             
             if obj1.zero
                obj.zero = 1;

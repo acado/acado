@@ -39,6 +39,10 @@ classdef Sin < acado.UnaryOperator
     methods
         function obj = Sin(obj1)
             if nargin > 0
+                if (isa(obj1, 'numeric'))
+                    obj1 = acado.DoubleConstant(obj1);
+                end
+                obj1 = obj1.getExpression;
                 obj.obj1 = obj1;
                 
                 if obj1.zero

@@ -40,10 +40,7 @@ classdef MultiOperator < acado.Operator
         
         function concatenate(obj, varargin)
             for i = 2:nargin
-                varargin{i-1} = getExpression(varargin{i-1});
-                if strcmp(class(varargin{i-1}), 'acado.Expression')
-                    varargin{i-1}
-                end
+%                 varargin{i-1} = getExpression(varargin{i-1});
                 if (isa(varargin{i-1}, 'acado.Addition') && isa(obj, 'acado.Addition')) || (isa(varargin{i-1}, 'acado.Product') && isa(obj, 'acado.Product'))
                     for j = 1:length(varargin{i-1}.objs)
                         obj.objs{length(obj.objs)+1} = varargin{i-1}.objs{j};
@@ -64,13 +61,16 @@ classdef MultiOperator < acado.Operator
             end
         end
         
-        function sortObjects(obj)
+        function out = sortObjects(obj)
+            strings = cellfun(@toString, obj.objs, 'UniformOutput', false);
             if obj.unsorted
-                strings = cellfun(@toString, obj.objs, 'UniformOutput', false);
-                [S, I] = sort(strings);
+                [~, I] = sort(strings);
                 obj.objs = obj.objs(I);
                 obj.contra = obj.contra(I);
                 obj.unsorted = 0;
+                out = strings(I);
+            else
+                out = strings;
             end
         end
     

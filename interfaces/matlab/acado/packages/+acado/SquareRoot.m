@@ -39,6 +39,10 @@ classdef SquareRoot < acado.UnaryOperator
     methods
         function obj = SquareRoot(obj1)
             if nargin > 0
+                if (isa(obj1, 'numeric'))
+                    obj1 = acado.DoubleConstant(obj1);
+                end
+                obj1 = getExpression(obj1);
                 obj.obj1 = obj1;
                 obj.zero = obj1.zero;
                 obj.one = obj1.one;

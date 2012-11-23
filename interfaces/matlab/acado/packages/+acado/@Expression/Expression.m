@@ -47,12 +47,8 @@ classdef Expression < handle
                     for j = 1:size(in,2)
                         if isa(in(i,j), 'numeric')
                             obj(i,j).expr = acado.DoubleConstant(in(i,j)); 
-                            obj(i,j).zero = (in(i,j) == 0);
-                            obj(i,j).one = (in(i,j) == 1);
                         else
                             obj(i,j).expr = in(i,j).getExpression;
-                            obj(i,j).zero = in(i,j).zero;
-                            obj(i,j).one = in(i,j).one;
                         end
                     end
                 end
@@ -606,7 +602,7 @@ classdef Expression < handle
         end
         
         function out = getExpression(obj)
-            if strcmp(class(obj(1,1)), 'acado.Expression')
+            if strcmp(class(obj), 'acado.Expression')
                 out = obj.expr;
             else
                 out = obj;

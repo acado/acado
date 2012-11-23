@@ -39,6 +39,7 @@ classdef Subtraction < acado.Addition
                if isa(varargin{i}, 'numeric')
                    varargin{i} = acado.DoubleConstant(varargin{i});
                end
+               varargin{i} = getExpression(varargin{i});
                if ~varargin{i}.zero
                    old = length(obj.objs);
                    obj.concatenate(varargin{i});

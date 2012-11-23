@@ -62,9 +62,9 @@ classdef IntermediateState < acado.Expression
                         num = ACADO_.helper.getNumIntS;
                         obj(i,j) = acado.IntermediateState(['intS' num2str(num+1)]);
                         obj(i,j).expr = tmp(i,j).getExpression;
-                        obj(i,j).zero = tmp(i,j).zero;
-                        obj(i,j).one = tmp(i,j).one;
-                        obj(i,j).singleTerm = tmp(i,j).singleTerm;
+                        obj(i,j).zero = obj(i,j).expr.zero;
+                        obj(i,j).one = obj(i,j).expr.one;
+                        obj(i,j).singleTerm = obj(i,j).expr.singleTerm;
                     end
                 end
             end

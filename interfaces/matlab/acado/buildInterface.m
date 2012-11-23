@@ -32,8 +32,10 @@ if ~isempty(ACADO_)
     if num ~= length(h.mainList)
         error('Internal error: contact developer ACADO Matlab interface for info.')
     end
-    disp(' ');
-    disp('COMPILATION OF MEX FILES...');
+    if num > 0
+        disp(' ');
+        disp('COMPILATION OF MEX FILES...');
+    end
     for i = 1:num
         m = h.mexList{i};
         dirName = m{1};

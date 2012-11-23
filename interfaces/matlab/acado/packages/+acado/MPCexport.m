@@ -185,8 +185,8 @@ classdef MPCexport < acado.ExportOCP
             end
             jacX = jacobian(obj.model.getExpression, diffStates);
             jacU = jacobian(obj.model.getExpression, controls);
-            A = eval(jacX, obj.Xref(end,:), obj.Uref(end,:));
-            B = eval(jacU, obj.Xref(end,:), obj.Uref(end,:));
+            A = jacX.eval(obj.Xref(end,:), obj.Uref(end,:));
+            B = jacU.eval(obj.Xref(end,:), obj.Uref(end,:));
             
             [obj.K,obj.S,~] = lqr(A,B,obj.Q,obj.R);
         end

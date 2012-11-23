@@ -54,6 +54,10 @@ classdef Dot < acado.Expression
         function s = toString(obj)
             s = sprintf('dot(%s)', obj.obj1.toString);
         end
+        
+        function jac = jacobian(obj, var)
+            error('Jacobian feature not supported for expressions with state derivatives.')
+        end
     end
     
 end

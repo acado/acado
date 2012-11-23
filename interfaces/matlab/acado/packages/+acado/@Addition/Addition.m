@@ -46,6 +46,7 @@ classdef Addition < acado.MultiOperator
                if isa(varargin{i}, 'numeric')
                    varargin{i} = acado.DoubleConstant(varargin{i});
                end
+               varargin{i} = getExpression(varargin{i});
                if ~varargin{i}.zero
                    obj.concatenate(varargin{i});
                    
@@ -88,7 +89,7 @@ classdef Addition < acado.MultiOperator
         end
         
         function s = toString(obj)
-            obj.sortObjects;
+            strings = obj.sortObjects;
             if obj.zero
                 s = '0';
             elseif obj.one
@@ -100,15 +101,15 @@ classdef Addition < acado.MultiOperator
                     if ~isa(obj.objs{i}, 'acado.EmptyWrapper') && ~obj.objs{i}.zero
                         if num == 1
                             if obj.contra(i)
-                                s = sprintf('(-%s', obj.objs{i}.toString);
+                                s = sprintf('(-%s', strings{i});
                             else
-                                s = sprintf('(%s', obj.objs{i}.toString);
+                                s = sprintf('(%s', strings{i});
                             end
                         else
                             if obj.contra(i)
-                                s = [s sprintf('-%s', obj.objs{i}.toString)];
+                                s = [s sprintf('-%s', strings{i})];
                             else
-                                s = [s sprintf('+%s', obj.objs{i}.toString)];
+                                s = [s sprintf('+%s', strings{i})];
                             end
                         end
                         num = num+1;

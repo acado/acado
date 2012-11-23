@@ -45,6 +45,7 @@ classdef Quotient < acado.Product
                    varargin{i} = acado.DoubleConstant(varargin{i});
                end
                old = length(obj.objs);
+               varargin{i} = getExpression(varargin{i});
                obj.concatenate(varargin{i});
                if i > 1
                     obj.contra(old+1:end) = obj.contra(old+1:end)+ones(size(obj.contra(old+1:end)));
