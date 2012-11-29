@@ -623,7 +623,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( "      end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;\n" );
 		main.addStatement( "      time = (end-start);\n" );
 		main.addLinebreak( );
-		main.addStatement( "      printf( \"\\n\\n AVERAGE DURATION OF ONE INTEGRATION STEP:   %.3g μs\\n\\n\", 1e6*time/STEPS_TIMING );\n" );
+		main.addStatement( "      printf( \"\\n\\n AVERAGE DURATION OF ONE INTEGRATION STEP:   %.3g Î¼s\\n\\n\", 1e6*time/STEPS_TIMING );\n" );
 	}
     main.addLinebreak( );
 	main.addStatement( "      return 0;\n" );
