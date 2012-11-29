@@ -705,9 +705,9 @@ Matrix Expression::getDependencyPattern( const Expression& arg ) const{
     Function f;
     f << backwardDerivative( *this, arg );
 
-    //FILE *test=fopen("test-getdep.txt","w");
-    //test << f;
-    //fclose(test);
+//    FILE *test=fopen("test-getdep.txt","w");
+//    test << f;
+//    fclose(test);
     
     double *x      = new double[ f.getNumberOfVariables()+1 ];
     double *result = new double[ f.getDim()                 ];

@@ -73,7 +73,7 @@ returnValue ExportGaussElim::getDataDeclarations(	ExportStatementBlock& declarat
 														) const
 {
 	declarations.addDeclaration( rk_swap,dataStruct );			// needed for the row swaps
-	if( REUSE == BT_TRUE ) {
+	if( REUSE ) {
 		declarations.addDeclaration( rk_perm,dataStruct );		// permutation vector
 		declarations.addDeclaration( rk_bPerm,dataStruct );		// reordered right-hand side
 	}
@@ -86,7 +86,7 @@ returnValue ExportGaussElim::getFunctionDeclarations(	ExportStatementBlock& decl
 															) const
 {
 	declarations.addDeclaration( solve );
-	if( REUSE == BT_TRUE ) {
+	if( REUSE ) {
 		declarations.addDeclaration( solveReuse );
 	}
 
@@ -98,16 +98,26 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 											)
 {
 	uint run1, run2, run3;
+	ExportIndex i( "i" );
+	solve.addIndex( i );
+	ExportIndex j( "j" );
+	ExportIndex k( "k" );
+	ExportVariable indexMax( "indexMax", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
+	ExportVariable valueMax( "valueMax", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
+	ExportVariable temp( "temp", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
 	if( !UNROLLING ) {
-		solve.addStatement( String( "int indexMax, i, j, k;\n" ) );
-		solve.addStatement( String( "real_t valueMax, temp;\n" ) );
+		solve.addIndex( j );
+		solve.addIndex( k );
+		solve.addDeclaration( indexMax );
+		solve.addDeclaration( valueMax );
+		solve.addDeclaration( temp );
 	}
 	
 	// initialise rk_perm (the permutation vector)
-	if( REUSE == BT_TRUE ) {
-		for( run1 = 0; run1 < dim; run1++ ) {
-			solve.addStatement( String( "acadoWorkspace.rk_" ) << identifier << "perm[" << String( run1 ) << String( "] = " ) << String( run1 ) << String( ";\n" ) );
-		}
+	if( REUSE ) {
+		ExportForLoop loop1( i,0,dim );
+		loop1.addStatement( String( rk_perm.get( i,0 ) ) << " = " << i.getName() << ";\n" );
+		solve.addStatement( loop1 );
 	}
 	
 	if( UNROLLING || dim <= 5 ) {
@@ -143,7 +153,7 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 				solve.addStatement( b.getRow( run1 ) == b.getRow( run2 ) );
 				solve.addStatement( b.getRow( run2 ) == rk_swap );
 			
-				if( REUSE == BT_TRUE ) { // rk_perm also needs to be updated if it needs to be possible to reuse the factorization
+				if( REUSE ) { // rk_perm also needs to be updated if it needs to be possible to reuse the factorization
 					solve.addStatement( rk_swap == rk_perm.getRow( run1 ) );
 					solve.addStatement( rk_perm.getRow( run1 ) == rk_perm.getRow( run2 ) );
 					solve.addStatement( rk_perm.getRow( run2 ) == rk_swap );
@@ -176,15 +186,15 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 		solve.addStatement( String( "		}\n" ) );
 		solve.addStatement( String( "	}\n" ) );
 		solve.addStatement( String( "	if( indexMax > i ) {\n" ) );
-		for( run1 = 0; run1 < dim; run1++ ) {
-			solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "swap = A[i*" << String( dim ) << "+" << String( run1 ) << "];\n" );
-			solve.addStatement( String( "	A[i*" ) << String( dim ) << "+" << String( run1 ) << "] = A[indexMax*" << String( dim ) << "+" << String( run1 ) << "];\n" );
-			solve.addStatement( String( "	A[indexMax*" ) << String( dim ) << "+" << String( run1 ) << "] = acadoWorkspace.rk_" << identifier << "swap;\n" );
-		}
+		ExportForLoop loop2( k,0,dim );
+		loop2.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "swap = A[i*" << String( dim ) << "+" << k.getName() << "];\n" );
+		loop2.addStatement( String( "	A[i*" ) << String( dim ) << "+" << k.getName() << "] = A[indexMax*" << String( dim ) << "+" << k.getName() << "];\n" );
+		loop2.addStatement( String( "	A[indexMax*" ) << String( dim ) << "+" << k.getName() << "] = acadoWorkspace.rk_" << identifier << "swap;\n" );
+		solve.addStatement( loop2 );
 		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "swap = b[i];\n" );
 		solve.addStatement( String( "	b[i] = b[indexMax];\n" ) );
 		solve.addStatement( String( "	b[indexMax] = acadoWorkspace.rk_" ) << identifier << "swap;\n" );
-		if( REUSE == BT_TRUE ) {
+		if( REUSE ) {
 			solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "swap = acadoWorkspace.rk_" << identifier << "perm[i];\n" );
 			solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "perm[i] = acadoWorkspace.rk_" << identifier << "perm[indexMax];\n" );
 			solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "perm[indexMax] = acadoWorkspace.rk_" << identifier << "swap;\n" );
@@ -201,23 +211,22 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 	}
 	
 	// Solve the upper triangular system of equations which is left, using back substitution:
-	for( run1 = dim; run1 > 0; run1--) {
-		solve.addStatement( x.getRow( (run1-1) ) == b.getRow( (run1-1) ) );
-		for( run2 = dim-1; run2 > (run1-1); run2--) {
-			solve.addStatement( x.getRow( (run1-1) ) -= A.getSubMatrix( (run1-1),(run1-1)+1,run2,run2+1 ) * x.getRow( run2 ) );
-		}
-		solve.addStatement( String( "x[" ) << String( (run1-1) ) << "] = x[" << String( (run1-1) ) << "]/A[" << String( (run1-1)*dim+(run1-1) ) << "];\n" );
-	}
+	solve.addStatement( String( "for( i=" ) << String(dim) << "; i>0; i-- ) {\n" );
+	solve.addStatement( String( "	x[i-1] = b[i-1];\n" ) );
+	solve.addStatement( String( "	for( j=" ) << String(dim-1) << "; j>(i-1); j-- ) {\n" );
+	solve.addStatement( String( "		x[i-1] -= A[" ) << String( dim ) << "*(i-1)+j]*x[j];\n" );
+	solve.addStatement( String( "	}\n" ) );
+	solve.addStatement( String( "	x[i-1] = x[i-1]/A[" ) << String( dim ) << "*(i-1)+i-1];\n" );
+	solve.addStatement( String( "}\n" ) );
 	
 	code.addFunction( solve );
 	
     code.addLinebreak( 2 );
-	if( REUSE == BT_TRUE ) { // Also export the extra function which reuses the factorization of the matrix A
-		
+	if( REUSE ) { // Also export the extra function which reuses the factorization of the matrix A
 		for( run1 = 0; run1 < dim; run1++ ) {
 			solveReuse.addStatement( ((String)rk_bPerm.get( run1,0 ) << " = b[acadoWorkspace.rk_" << identifier << "perm[" << String( run1 ) << "]];\n" ) );
 		}
-		
+
 		for( run1 = 0; run1 < (dim-1); run1++ ) { 		// column run1
 			for( run2 = run1+1; run2 < dim; run2++ ) { 	// update row run2
 				solveReuse.addStatement( ((String)rk_bPerm.get( run2,0 ) << " += A[" << String( run2*dim+run1 ) << "]*acadoWorkspace.rk_" << identifier << "bPerm[" << String( run1 ) << "];\n" ) );
@@ -225,7 +234,7 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 			solveReuse.addLinebreak();
 		}
 		solveReuse.addLinebreak();
-		
+
 		// Solve the upper triangular system of equations:
 		for( run1 = dim; run1 > 0; run1--) {
 			solveReuse.addStatement( String( "x[" ) << String( (run1-1) ) << "] = " << rk_bPerm.get( run1-1,0 ) << ";\n" );
@@ -234,7 +243,7 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 			}
 			solveReuse.addStatement( String( "x[" ) << String( (run1-1) ) << "] = x[" << String( (run1-1) ) << "]/A[" << String( (run1-1)*dim+(run1-1) ) << "];\n" );
 		}
-		
+
 		code.addFunction( solveReuse );
 	}
 	
@@ -253,7 +262,7 @@ returnValue ExportGaussElim::setup( )
 	solve = ExportFunction( getNameSolveFunction(), A, b, x);
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	
-	if( REUSE == BT_TRUE ) {
+	if( REUSE ) {
 		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b, x);
 		solveReuse.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	}

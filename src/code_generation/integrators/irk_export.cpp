@@ -51,7 +51,6 @@ ImplicitRungeKuttaExport::ImplicitRungeKuttaExport(	UserInteraction* _userIntera
 	numItsInit = 0; 	// DEFAULT value
 	REUSE = BT_TRUE;
 	CONTINUOUS_OUTPUT = BT_FALSE;
-	UNROLL_OUTPUT = BT_TRUE;
 
 	solver = 0;
 }
@@ -68,7 +67,6 @@ ImplicitRungeKuttaExport::ImplicitRungeKuttaExport( const ImplicitRungeKuttaExpo
     solver = arg.solver;
 	REUSE = arg.REUSE;;
 	CONTINUOUS_OUTPUT = arg.CONTINUOUS_OUTPUT;
-	UNROLL_OUTPUT = arg.UNROLL_OUTPUT;
 }
 
 
@@ -193,22 +191,16 @@ returnValue ImplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 	declarations.addDeclaration( rk_b,dataStruct );
 	declarations.addDeclaration( rk_rhsTemp,dataStruct );
 	declarations.addDeclaration( rk_diffsTemp,dataStruct );
-	
 	declarations.addDeclaration( rk_num,dataStruct );
-	
-	if( grid.getNumIntervals() > 1 || !hasEquidistantGrid() ) {
-		declarations.addDeclaration( rk_diffsPrev,dataStruct );
-		declarations.addDeclaration( rk_diffsNew,dataStruct );
-	}
+	declarations.addDeclaration( rk_diffsPrev,dataStruct );
+	declarations.addDeclaration( rk_diffsNew,dataStruct );
 	
 	if( CONTINUOUS_OUTPUT ) {
 		declarations.addDeclaration( rk_xPrev,dataStruct );
 		declarations.addDeclaration( rk_rhsOutputTemp,dataStruct );
 		declarations.addDeclaration( rk_diffsOutputTemp,dataStruct );
-		if( !UNROLL_OUTPUT ) {
-			declarations.addDeclaration( rk_outH,dataStruct );
-			declarations.addDeclaration( rk_out2,dataStruct );
-		}
+		declarations.addDeclaration( rk_outH,dataStruct );
+		declarations.addDeclaration( rk_out2,dataStruct );
 	}
 
     return SUCCESSFUL_RETURN;
@@ -274,11 +266,9 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	}
 
 	// export RK scheme
-	uint run1, run2, run3, run4, run5;
+	uint run2, run3, run4, run5;
 	String tempString;
 	
-	Matrix id = eye( (NX+NXA)*numStages );
-	id *= -1;
 	Matrix nul = zeros( 1,NX+NXA );
 	initializeButcherTableau();
 	initializeDDMatrix();
@@ -286,61 +276,58 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	   
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
 
-	ExportVariable Ah ( "AA*h",  AA*=h );
+	ExportVariable Ah ( "Ah_mat",  AA*=h );
 	ExportVariable Bh( "bb*h", Matrix( bb, BT_TRUE )*=h );
 	ExportVariable DM( "DD", DD );
-	ExportVariable eyeM( "id", id );
 	ExportVariable zeroM( "nul", nul );
 	
 	ExportIndex i( "i" );
 	ExportIndex j( "j" );
 	ExportIndex k( "k" );
 	ExportIndex run( "run" );
+	ExportIndex run1( "run1" );
 	
+	code.addDeclaration( Ah );
+	code.addLinebreak( 2 );
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !hasEquidistantGrid() ) {
-		integrate.addStatement( String( "int " ) << run.getName() << ";\n" );
-		integrate.addStatement( String( "static const int numSteps[" ) << String( numSteps.getDim() ) << "] = {" << String( (int)numSteps(0) ) );
-		uint index;
-		for( index = 1; index < numSteps.getDim(); index++ ) {
-			integrate.addStatement( String( ", " ) << String( (int)numSteps(index) ) );
-		}
-		integrate.addStatement( String( "};\n" ) );
-		integrate.addStatement( String( "int " ) << numInt.getName() << " = numSteps[" << rk_index.getName() << "];\n" );
+		ExportVariable numStepsV( "numSteps", numSteps );
+		code.addDeclaration( numStepsV );
+		code.addLinebreak( 2 );
+		integrate.addStatement( String( "int " ) << numInt.getName() << " = " << numStepsV.getName() << "[" << rk_index.getName() << "];\n" );
 	}
 	
 	std::vector<ExportVariable> gridVariables;
-	if( !UNROLL_OUTPUT ) {
-		for( run1 = 0; run1 < outputGrids.size(); run1++ ) {
-			ExportVariable gridVariable( (String)"gridOutput" << run1, 1, outputGrids[run1].getNumIntervals(), REAL );
-			integrate.addStatement( (String)"static const real_t " << gridVariable.getName() << "[" << outputGrids[run1].getNumIntervals() << "] = {" << outputGrids[run1].getTime(1) );
-			uint index;
-			for( index = 1; index < outputGrids[run1].getNumIntervals(); index++ ) {
-				integrate.addStatement( (String)", " << outputGrids[run1].getTime( index+1 ) );
-			}
-			integrate.addStatement( String( "};\n" ) );
-			gridVariables.push_back( gridVariable );
+	for( run5 = 0; run5 < outputGrids.size(); run5++ ) {
+		Vector gridV(outputGrids[run5].getNumIntervals());
+		for( uint index = 1; index <= outputGrids[run5].getNumIntervals(); index++ ) {
+			gridV( index-1 ) = outputGrids[run5].getTime( index );
 		}
+		ExportVariable gridVariable( (String)"gridOutput" << run5, gridV );
+		code.addDeclaration( gridVariable );
+		gridVariables.push_back( gridVariable );
 	}
 
 	integrate.addIndex( i );
-	if( grid.getNumIntervals() > 1 || !hasEquidistantGrid() ) {
-		integrate.addIndex( j );
-		if( rk_outputs.size() > 0 ) {
-			integrate.addIndex( k );
-		}
+	integrate.addIndex( j );
+	integrate.addIndex( k );
+	if( rk_outputs.size() > 0 ) {
+		integrate.addDeclaration( polynEvalVar );
 	}
 	integrate.addIndex( run );
+	integrate.addIndex( run1 );
 	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
 
 	// initialize sensitivities:
-	if( !hasEquidistantGrid() ) {
-		Matrix idX    = eye( NX );
+	Matrix idX    = eye( NX );
+	integrate.addStatement( rk_eta.getCols( NX+NXA,NX+NXA+NX*NX ) == idX.makeVector().transpose() );
+	if( NXA > 0 ) {
 		Matrix zeroXA = zeros( NXA,NX );
-		Matrix zeroXU = zeros( NX+NXA,NU );
-		integrate.addStatement( rk_eta.getCols( NX+NXA,NX+NXA+NX*NX ) == idX.makeVector().transpose() );
 		integrate.addStatement( rk_eta.getCols( NX+NXA+NX*NX,NX+NXA+NX*NX+NXA*NX ) == zeroXA.makeVector().transpose() );
+	}
+	if( NU > 0 ) {
+		Matrix zeroXU = zeros( NX+NXA,NU );
 		integrate.addStatement( rk_eta.getCols( (NX+NXA)*(1+NX),(NX+NXA)*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
 	}
 
@@ -350,855 +337,588 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	integrate.addLinebreak( );
 
     // integrator loop:
-    ExportForLoop loop;
+	ExportForLoop tmpLoop( run, 0, grid.getNumIntervals() );
+	ExportStatementBlock *loop;
 	if( hasEquidistantGrid() ) {
-		loop = ExportForLoop( run, 0, grid.getNumIntervals() );
+		loop = &tmpLoop;
 	}
 	else {
-		loop = ExportForLoop( run, 0, 1 );
-		loop.addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+	    loop = &integrate;
+		loop->addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
 	}
 
-	if( grid.getNumIntervals() > 1 || !hasEquidistantGrid() ) {
-		if( hasEquidistantGrid() ) loop.addStatement( String( "if( run > 1 ) {\n" ) ); // greater than one, so only when the multiplication of the sensitivity matrices is done (see end of loop)
-		for( run1 = 0; run1 < (NX+NXA); run1++ ) {
-			loop.addStatement( rk_diffsPrev.getSubMatrix( run1,run1+1,0,NX ) == rk_eta.getCols( NX+NXA+run1*NX,NX+NXA+run1*NX+NX ) );
-		}
-		for( run1 = 0; run1 < (NX+NXA); run1++ ) {
-			loop.addStatement( rk_diffsPrev.getSubMatrix( run1,run1+1,NX,NX+NU ) == rk_eta.getCols( (NX+NXA)*(NX+1)+run1*NU,(NX+NXA)*(NX+1)+run1*NU+NU ) );
-		}
-		if( hasEquidistantGrid() ) loop.addStatement( String( "}\n" ) );
-	}
+	// Set rk_diffsPrev:
+	ExportForLoop loopTemp( i,0,NX+NXA );
+	loopTemp.addStatement( rk_diffsPrev.getSubMatrix( i,i+1,0,NX ) == rk_eta.getCols( i*NX+NX+NXA,i*NX+NX+NXA+NX ) );
+	if( NU > 0 ) loopTemp.addStatement( rk_diffsPrev.getSubMatrix( i,i+1,NX,NX+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1),i*NU+(NX+NXA)*(NX+1)+NU ) );
+	loop->addStatement( loopTemp );
 
-	if( REUSE ) loop.addStatement( String( "if( " ) << rk_num.get(0,0) << " == 0 ) {\n" );
+
+	if( REUSE ) loop->addStatement( String( "if( " ) << rk_num.get(0,0) << " == 0 ) {\n" );
 	// Initialization iterations:
 	ExportForLoop loop1( i,0,numItsInit+1 ); // NOTE: +1 because 0 will lead to NaNs, so the minimum number of iterations is 1 at the initialization
-	for( run1 = 0; run1 < numStages; run1++ ) {
-		loop1.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
-		if( NXA > 0 ) loop1.addStatement( rk_xxx.getCols( NX,NX+NXA ) == rk_kkk.getSubMatrix( run1,run1+1,NX,NX+NXA ) );
-		if( NDX > 0 ) {
-			loop1.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == rk_kkk.getSubMatrix( run1,run1+1,0,NX ) );
-		}
-		loop1.addFunctionCall( getNameODE(), rk_xxx, rk_rhsTemp.getAddress(0,0) );
-		loop1.addFunctionCall( getNameDiffsODE(), rk_xxx, rk_diffsTemp.getAddress(0,0) );
-		// matrix rk_A:
-		for( run2 = 0; run2 < NX+NXA; run2++ ) {
-			for( run3 = 0; run3 < numStages; run3++ ) { // differential states
-				if( NDX == 0 ) {
-					loop1.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == eyeM.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*(NX+NXA),run3*(NX+NXA)+NX ) + Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( 0,1,run2*NX,run2*NX+NX ) );
-				}
-				else {
-					if( run3 == run1 ) {
-						loop1.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == rk_diffsTemp.getSubMatrix( 0,1,(NX+NXA)*(NX+NXA+NU)+run2*NDX,(NX+NXA)*(NX+NXA+NU)+run2*NDX+NDX ) + Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( 0,1,run2*NX,run2*NX+NX ) );
-					}
-					else {
-						loop1.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( 0,1,run2*NX,run2*NX+NX ) );
-					}
-				}
+	ExportForLoop loop11( run1,0,numStages );
+	loop11.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
+	if( NXA > 0 ) loop11.addStatement( rk_xxx.getCols( NX,NX+NXA ) == rk_kkk.getSubMatrix( run1,run1+1,NX,NX+NXA ) );
+	if( NDX > 0 ) loop11.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == rk_kkk.getSubMatrix( run1,run1+1,0,NX ) );
+
+	loop11.addFunctionCall( getNameODE(), rk_xxx, rk_rhsTemp.getAddress(0,0) );
+	loop11.addFunctionCall( getNameDiffsODE(), rk_xxx, rk_diffsTemp.getAddress(0,0) );
+	// matrix rk_A: TODO: EXPORTINDEX STUFF FROM MILAN
+	for( run2 = 0; run2 < NX+NXA; run2++ ) {
+		for( run3 = 0; run3 < numStages; run3++ ) { // differential states
+			if( NDX == 0 ) {
+				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( 0,1,run2*NX,run2*NX+NX ) );
+				loop11.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) " );
+				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX+run2,run3*NX+run2+1 ) -= 1 );
 			}
-			for( run3 = 0; run3 < numStages; run3++ ) { // algebraic states
-				if( run3 == run1 ) {
-					loop1.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == rk_diffsTemp.getSubMatrix( 0,1,(NX+NXA)*NX+run2*NXA,(NX+NXA)*NX+run2*NXA+NXA ) );
-				}
-				else {
-					loop1.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == zeroM.getCols( 0,NXA ) );
-				}
+			else {
+				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( 0,1,run2*NX,run2*NX+NX ) );
+				loop11.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) {\n" );
+				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) += rk_diffsTemp.getSubMatrix( 0,1,(NX+NXA)*(NX+NXA+NU)+run2*NDX,(NX+NXA)*(NX+NXA+NU)+run2*NDX+NDX ) );
+				loop11.addStatement( String( "}\n" ) );
 			}
-		}
-		// matrix rk_b:
-		if( NDX == 0 ) {
-			loop1.addStatement( rk_b.getCols( run1*(NX+NXA),run1*(NX+NXA)+NX ) == rk_kkk.getSubMatrix( run1,run1+1,0,NX ) - rk_rhsTemp.getCols( 0,NX ) );
-		}
-		else {
-			loop1.addStatement( rk_b.getCols( run1*(NX+NXA),run1*(NX+NXA)+NX ) == zeroM.getCols( 0,NX ) - rk_rhsTemp.getCols( 0,NX ) );
 		}
 		if( NXA > 0 ) {
-			loop1.addStatement( rk_b.getCols( run1*(NX+NXA)+NX,(run1+1)*(NX+NXA) ) == zeroM.getCols( 0,NXA ) - rk_rhsTemp.getCols( NX,NX+NXA ) );
+			for( run3 = 0; run3 < numStages; run3++ ) { // algebraic states
+				loop11.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) {\n" );
+				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == rk_diffsTemp.getSubMatrix( 0,1,(NX+NXA)*NX+run2*NXA,(NX+NXA)*NX+run2*NXA+NXA ) );
+				loop11.addStatement( String( "}\n else {\n" ) );
+				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == zeroM.getCols( 0,NXA ) );
+				loop11.addStatement( String( "}\n" ) );
+			}
 		}
 	}
+	// matrix rk_b:
+	if( NDX == 0 ) {
+		loop11.addStatement( rk_b.getCols( run1*(NX+NXA),run1*(NX+NXA)+NX ) == rk_kkk.getSubMatrix( run1,run1+1,0,NX ) - rk_rhsTemp.getCols( 0,NX ) );
+	}
+	else {
+		loop11.addStatement( rk_b.getCols( run1*(NX+NXA),run1*(NX+NXA)+NX ) == zeroM.getCols( 0,NX ) - rk_rhsTemp.getCols( 0,NX ) );
+	}
+	if( NXA > 0 ) loop11.addStatement( rk_b.getCols( run1*(NX+NXA)+NX,(run1+1)*(NX+NXA) ) == zeroM.getCols( 0,NXA ) - rk_rhsTemp.getCols( NX,NX+NXA ) );
+	loop1.addStatement( loop11 );
+
 	loop1.addFunctionCall( solver->getNameSolveFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_sol.getAddress(0,0) );
-	for( run1 = 0; run1 < numStages; run1++ ) { // differential states
-		loop1.addStatement( rk_kkk.getSubMatrix( run1,run1+1,0,NX ) += rk_sol.getCols( run1*NX,run1*NX+NX ) );
-	}
-	for( run1 = 0; run1 < numStages; run1++ ) { // algebraic states
-		loop1.addStatement( rk_kkk.getSubMatrix( run1,run1+1,NX,NX+NXA ) += rk_sol.getCols( numStages*NX+run1*NXA,numStages*NX+run1*NXA+NXA ) );
-	}
-	loop.addStatement( loop1 );
-	if( REUSE ) loop.addStatement( String( "}\n" ) );
+	loopTemp = ExportForLoop( j,0,numStages );
+	loopTemp.addStatement( rk_kkk.getSubMatrix( j,j+1,0,NX ) += rk_sol.getCols( j*NX,j*NX+NX ) );													// differential states
+	if(NXA > 0) loopTemp.addStatement( rk_kkk.getSubMatrix( j,j+1,NX,NX+NXA ) += rk_sol.getCols( j*NXA+numStages*NX,j*NXA+numStages*NX+NXA ) );		// algebraic states
+	loop1.addStatement( loopTemp );
+	loop->addStatement( loop1 );
+	if( REUSE ) loop->addStatement( String( "}\n" ) );
 
 
 	// the rest (numIts) of the Newton iterations with reuse of the Jacobian (no evaluation or factorization needed)
 	ExportForLoop loop2( i,0,numIts );
-	for( run1 = 0; run1 < numStages; run1++ ) {
-		loop2.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
-		if( NXA > 0 ) loop2.addStatement( rk_xxx.getCols( NX,NX+NXA ) == rk_kkk.getSubMatrix( run1,run1+1,NX,NX+NXA ) );
-		if( NDX > 0 ) {
-			loop2.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == rk_kkk.getSubMatrix( run1,run1+1,0,NX ) );
-		}
-		loop2.addFunctionCall( getNameODE(), rk_xxx, rk_rhsTemp.getAddress(0,0) );
+	ExportForLoop loop21( run1,0,numStages );
+	loop21.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
+	if( NXA > 0 ) loop21.addStatement( rk_xxx.getCols( NX,NX+NXA ) == rk_kkk.getSubMatrix( run1,run1+1,NX,NX+NXA ) );
+	if( NDX > 0 ) loop21.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == rk_kkk.getSubMatrix( run1,run1+1,0,NX ) );
 
-		// matrix rk_b:
-		if( NDX == 0 ) {
-			loop2.addStatement( rk_b.getCols( run1*(NX+NXA),run1*(NX+NXA)+NX ) == rk_kkk.getSubMatrix( run1,run1+1,0,NX ) - rk_rhsTemp.getCols( 0,NX ) );
-		}
-		else {
-			loop2.addStatement( rk_b.getCols( run1*(NX+NXA),run1*(NX+NXA)+NX ) == zeroM.getCols( 0,NX ) - rk_rhsTemp.getCols( 0,NX ) );
-		}
-		if( NXA > 0 ) {
-			loop2.addStatement( rk_b.getCols( run1*(NX+NXA)+NX,(run1+1)*(NX+NXA) ) == zeroM.getCols( 0,NXA ) - rk_rhsTemp.getCols( NX,NX+NXA ) );
-		}
+	loop21.addFunctionCall( getNameODE(), rk_xxx, rk_rhsTemp.getAddress(0,0) );
+
+	// matrix rk_b:
+	if( NDX == 0 ) {
+		loop21.addStatement( rk_b.getCols( run1*(NX+NXA),run1*(NX+NXA)+NX ) == rk_kkk.getSubMatrix( run1,run1+1,0,NX ) - rk_rhsTemp.getCols( 0,NX ) );
 	}
+	else {
+		loop21.addStatement( rk_b.getCols( run1*(NX+NXA),run1*(NX+NXA)+NX ) == zeroM.getCols( 0,NX ) - rk_rhsTemp.getCols( 0,NX ) );
+	}
+	if( NXA > 0 ) {
+		loop21.addStatement( rk_b.getCols( run1*(NX+NXA)+NX,(run1+1)*(NX+NXA) ) == zeroM.getCols( 0,NXA ) - rk_rhsTemp.getCols( NX,NX+NXA ) );
+	}
+	loop2.addStatement( loop21 );
 	loop2.addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_sol.getAddress(0,0) );
-	for( run1 = 0; run1 < numStages; run1++ ) { // differential states
-		loop2.addStatement( rk_kkk.getSubMatrix( run1,run1+1,0,NX ) += rk_sol.getCols( run1*NX,run1*NX+NX ) );
-	}
-	for( run1 = 0; run1 < numStages; run1++ ) { // algebraic states
-		loop2.addStatement( rk_kkk.getSubMatrix( run1,run1+1,NX,NX+NXA ) += rk_sol.getCols( numStages*NX+run1*NXA,numStages*NX+run1*NXA+NXA ) );
-	}
-	loop.addStatement( loop2 );
+	loopTemp = ExportForLoop( j,0,numStages );
+	loopTemp.addStatement( rk_kkk.getSubMatrix( j,j+1,0,NX ) += rk_sol.getCols( j*NX,j*NX+NX ) );													// differential states
+	if(NXA > 0) loopTemp.addStatement( rk_kkk.getSubMatrix( j,j+1,NX,NX+NXA ) += rk_sol.getCols( j*NXA+numStages*NX,j*NXA+numStages*NX+NXA ) );		// algebraic states
+	loop2.addStatement( loopTemp );
+	loop->addStatement( loop2 );
 
 	// generate continuous output (except for the last grid point):
-	for( run1 = 0; run1 < rk_outputs.size(); run1++ ) {
-		if( UNROLL_OUTPUT ) {
-			for( run2 = 0; run2 < outputGrids[run1].getNumIntervals()-1; run2++ ) {
-				Vector out = evaluatePolynomial( outputGrids[run1].getTime( run2+1 ) );
-				Vector out2 = evaluateDerivedPolynomial( outputGrids[run1].getTime( run2+1 ) );
-				rk_outH = ExportVariable( "out*h", Matrix( out, BT_TRUE )*=h );
-				rk_out2 = ExportVariable( "out2", Matrix( out2, BT_TRUE ) );
-				Vector dependencyX, dependencyDX;
-				if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run1].getDependencyPattern( x ) );
-				for( run3 = 0; run3 < NX; run3++ ) {
-					if( !EXPORT_RHS || (int)dependencyX(run3) != 0 ) {
-						loop.addStatement( rk_xxx.getCols( run3,run3+1 ) == rk_eta.getCols( run3,run3+1 ) + rk_outH*rk_kkk.getCol( run3 ) );
-					}
-				}
-				for( run3 = 0; run3 < NXA; run3++ ) { // getDependencyPattern doesn't work for algebraic states:
-					loop.addStatement( rk_xxx.getCols( NX+run3,NX+run3+1 ) == rk_out2*rk_kkk.getCol( NX+run3 ) );
-				}
-				if( EXPORT_RHS ) dependencyDX = sumRow( outputExpressions[run1].getDependencyPattern( dx ) );
-				for( run3 = 0; run3 < NDX; run3++ ) {
-					// TODO: SOLUTIONS ??
-//					if( !EXPORT_RHS || (int)dependencyDX(run3) != 0 ) {
-						loop.addStatement( rk_xxx.getCols( inputDim-diffsDim+run3,inputDim-diffsDim+run3+1 ) == rk_out2*rk_kkk.getCol( run3 ) );
-//					}
-				}
-				loop.addFunctionCall( getNameOUTPUT( run1 ), rk_xxx, rk_rhsOutputTemp.getAddress(0,0) );
-				uint numOutputs = getDimOUTPUT( run1 );
-				uint outputDim = outputGrids[run1].getNumIntervals( )*numOutputs*(NX+NU+1);
-				for( run3 = 0; run3 < numOutputs; run3++ ) {
-					loop.addStatement( String( rk_outputs[run1].getName() ) << "[run*" << String( outputDim ) << "+" << String( run2*numOutputs*(NX+NU+1)+run3 ) << "] = " << rk_rhsOutputTemp.get( 0,run3 ) << ";\n" );
-				}
+	for( run5 = 0; run5 < rk_outputs.size(); run5++ ) {
+		ExportForLoop loop22( i,0,outputGrids[run5].getNumIntervals()-1 );
+		evaluatePolynomial( loop22, rk_outH, gridVariables[run5], i, h );
+		if( NXA > 0 || NDX > 0 ) evaluateDerivedPolynomial( loop22, rk_out2, gridVariables[run5], i );
+		Vector dependencyX, dependencyZ, dependencyDX;
+		if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run5].getDependencyPattern( x ) );
+		if( EXPORT_RHS && NXA > 0 ) dependencyZ = sumRow( outputExpressions[run5].getDependencyPattern( z ) );
+		if( EXPORT_RHS && NDX > 0 ) dependencyDX = sumRow( outputExpressions[run5].getDependencyPattern( dx ) );
+		for( run3 = 0; run3 < NX; run3++ ) {
+			if( !EXPORT_RHS || (int)dependencyX(run3) != 0 ) {
+				loop22.addStatement( rk_xxx.getCols( run3,run3+1 ) == rk_eta.getCols( run3,run3+1 ) + rk_outH*rk_kkk.getCol( run3 ) );
 			}
 		}
-		else {
-			loop2 = ExportForLoop( i,0,outputGrids[run1].getNumIntervals()-1 );
-			evaluatePolynomial( loop2, rk_outH, gridVariables[run1], i, h );
-			if( NXA > 0 || NDX > 0 ) evaluateDerivedPolynomial( loop2, rk_out2, gridVariables[run1], i );
-			Vector dependencyX, dependencyDX;
-			if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run1].getDependencyPattern( x ) );
-			for( run3 = 0; run3 < NX; run3++ ) {
-				if( !EXPORT_RHS || (int)dependencyX(run3) != 0 ) {
-					loop2.addStatement( rk_xxx.getCols( run3,run3+1 ) == rk_eta.getCols( run3,run3+1 ) + rk_outH*rk_kkk.getCol( run3 ) );
-				}
+		for( run3 = 0; run3 < NXA; run3++ ) {
+			if( !EXPORT_RHS || (int)dependencyZ(run3) != 0 ) {
+				loop22.addStatement( rk_xxx.getCols( NX+run3,NX+run3+1 ) == rk_out2*rk_kkk.getCol( NX+run3 ) );
 			}
-			for( run3 = 0; run3 < NXA; run3++ ) { // getDependencyPattern doesn't work for algebraic states:
-				loop2.addStatement( rk_xxx.getCols( NX+run3,NX+run3+1 ) == rk_out2*rk_kkk.getCol( NX+run3 ) );
-			}
-			if( EXPORT_RHS ) dependencyDX = sumRow( outputExpressions[run1].getDependencyPattern( dx ) );
-			for( run3 = 0; run3 < NDX; run3++ ) {
-				// TODO: SOLUTIONS ??
-//				if( !EXPORT_RHS || (int)dependencyDX(run3) != 0 ) {
-					loop2.addStatement( rk_xxx.getCols( inputDim-diffsDim+run3,inputDim-diffsDim+run3+1 ) == rk_out2*rk_kkk.getCol( run3 ) );
-//				}
-			}
-			loop2.addFunctionCall( getNameOUTPUT( run1 ), rk_xxx, rk_rhsOutputTemp.getAddress(0,0) );
-			uint numOutputs = getDimOUTPUT( run1 );
-			uint outputDim = outputGrids[run1].getNumIntervals( )*numOutputs*(NX+NU+1);
-			for( run3 = 0; run3 < numOutputs; run3++ ) {
-				loop2.addStatement( String( rk_outputs[run1].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run3 << "] = " << rk_rhsOutputTemp.get( 0,run3 ) << ";\n" );
-			}
-			loop.addStatement( loop2 );
 		}
+		for( run3 = 0; run3 < NDX; run3++ ) {
+			if( !EXPORT_RHS || (int)dependencyDX(run3) != 0 ) {
+				loop22.addStatement( rk_xxx.getCols( inputDim-diffsDim+run3,inputDim-diffsDim+run3+1 ) == rk_out2*rk_kkk.getCol( run3 ) );
+			}
+		}
+		loop22.addFunctionCall( getNameOUTPUT( run5 ), rk_xxx, rk_rhsOutputTemp.getAddress(0,0) );
+		uint numOutputs = getDimOUTPUT( run5 );
+		uint outputDim = outputGrids[run5].getNumIntervals( )*numOutputs*(NX+NU+1);
+		for( run3 = 0; run3 < numOutputs; run3++ ) { // TODO: EXPORTINDEX STUFF FROM MILAN
+			loop22.addStatement( String( rk_outputs[run5].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run3 << "] = " << rk_rhsOutputTemp.get( 0,run3 ) << ";\n" );
+		}
+		loop->addStatement( loop22 );
 	}
 
 	// solution calculated --> evaluate and save the necessary derivatives in rk_diffsTemp and update the matrix rk_A:
-	for( run1 = 0; run1 < numStages; run1++ ) {
-		loop.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
-		if( NXA > 0 ) loop.addStatement( rk_xxx.getCols( NX,NX+NXA ) == rk_kkk.getSubMatrix( run1,run1+1,NX,NX+NXA ) );
-		if( NDX > 0 ) {
-			loop.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == rk_kkk.getSubMatrix( run1,run1+1,0,NX ) );
-		}
-		loop.addFunctionCall( getNameDiffsODE(), rk_xxx, rk_diffsTemp.getAddress(run1,0) );
+	ExportForLoop loop3( run1,0,numStages );
+	loop3.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
+	if( NXA > 0 ) loop3.addStatement( rk_xxx.getCols( NX,NX+NXA ) == rk_kkk.getSubMatrix( run1,run1+1,NX,NX+NXA ) );
+	if( NDX > 0 ) loop3.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == rk_kkk.getSubMatrix( run1,run1+1,0,NX ) );
 
-		// matrix rk_A:
-		for( run2 = 0; run2 < NX+NXA; run2++ ) {
-			for( run3 = 0; run3 < numStages; run3++ ) { // differential states
-				if( NDX == 0 ) {
-					loop.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == eyeM.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*(NX+NXA),run3*(NX+NXA)+NX ) + Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( run1,run1+1,run2*NX,run2*NX+NX ) );
-				}
-				else {
-					if( run3 == run1 ) {
-						loop.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == rk_diffsTemp.getSubMatrix( run1,run1+1,(NX+NXA)*(NX+NXA+NU)+run2*NDX,(NX+NXA)*(NX+NXA+NU)+run2*NDX+NDX ) + Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( run1,run1+1,run2*NX,run2*NX+NX ) );
-					}
-					else {
-						loop.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( run1,run1+1,run2*NX,run2*NX+NX ) );
-					}
-				}
+	loop3.addFunctionCall( getNameDiffsODE(), rk_xxx, rk_diffsTemp.getAddress(run1,0) );
+
+	// matrix rk_A: TODO: EXPORTINDEX STUFF FROM MILAN
+	for( run2 = 0; run2 < NX+NXA; run2++ ) {
+		for( run3 = 0; run3 < numStages; run3++ ) { // differential states
+			if( NDX == 0 ) {
+				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( run1,run1+1,run2*NX,run2*NX+NX ) );
+				loop3.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) " );
+				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX+run2,run3*NX+run2+1 ) -= 1 );
 			}
+			else {
+				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( run1,run1+1,run2*NX,run2*NX+NX ) );
+				loop3.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) {" );
+				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) += rk_diffsTemp.getSubMatrix( run1,run1+1,(NX+NXA)*(NX+NXA+NU)+run2*NDX,(NX+NXA)*(NX+NXA+NU)+run2*NDX+NDX ) );
+				loop3.addStatement( String( "}\n" ) );
+			}
+		}
+		if( NXA > 0 ) {
 			for( run3 = 0; run3 < numStages; run3++ ) { // algebraic states
-				if( run3 == run1 ) {
-					loop.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == rk_diffsTemp.getSubMatrix( run1,run1+1,(NX+NXA)*NX+run2*NXA,(NX+NXA)*NX+run2*NXA+NXA ) );
-				}
-				else {
-					loop.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == zeroM.getCols( 0,NXA ) );
-				}
+				loop3.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) {\n" );
+				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == rk_diffsTemp.getSubMatrix( run1,run1+1,(NX+NXA)*NX+run2*NXA,(NX+NXA)*NX+run2*NXA+NXA ) );
+				loop3.addStatement( String( "}\n else {\n" ) );
+				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == zeroM.getCols( 0,NXA ) );
+				loop3.addStatement( String( "}\n" ) );
 			}
 		}
 	}
+	loop->addStatement( loop3 );
 
 	// update rk_eta:
-	if( CONTINUOUS_OUTPUT ) loop.addStatement( rk_xPrev.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
-	loop.addStatement( rk_eta.getCols( 0,NX ) += Bh*rk_kkk.getCols( 0,NX ) );
+	if( CONTINUOUS_OUTPUT ) loop->addStatement( rk_xPrev.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
+	loop->addStatement( rk_eta.getCols( 0,NX ) += Bh*rk_kkk.getCols( 0,NX ) );
 	Vector outTemp = evaluateDerivedPolynomial( 1.0 );
 	ExportVariable tempCoefs( "tempCoefs", Matrix( outTemp, BT_TRUE ) );
-	loop.addStatement( rk_eta.getCols( NX,NX+NXA ) == tempCoefs*rk_kkk.getCols( NX,NX+NXA ) );
+	if( NXA > 0) loop->addStatement( rk_eta.getCols( NX,NX+NXA ) == tempCoefs*rk_kkk.getCols( NX,NX+NXA ) );
 
 	// generate continuous output (only the last grid point):
 	if( CONTINUOUS_OUTPUT ) {
-		loop.addStatement( rk_xxx.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
-		if( NDX > 0 ) {
-			loop.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == tempCoefs*rk_kkk.getCols( 0,NX ) );
-		}
+		loop->addStatement( rk_xxx.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
+		if( NDX > 0 ) loop->addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == tempCoefs*rk_kkk.getCols( 0,NX ) );
+
 	}
-	for( run1 = 0; run1 < rk_outputs.size(); run1++ ) {
-		run2 = outputGrids[run1].getNumIntervals()-1;
-		loop.addFunctionCall( getNameOUTPUT( run1 ), rk_xxx, rk_rhsOutputTemp.getAddress(0,0) );
-		uint numOutputs = getDimOUTPUT( run1 );
-		uint outputDim = outputGrids[run1].getNumIntervals( )*numOutputs*(NX+NU+1);
-		for( run3 = 0; run3 < numOutputs; run3++ ) {
-			loop.addStatement( String( rk_outputs[run1].getName() ) << "[run*" << String( outputDim ) << "+" << String( run2*numOutputs*(NX+NU+1)+run3 ) << "] = " << rk_rhsOutputTemp.get( 0,run3 ) << ";\n" );
+	for( run5 = 0; run5 < rk_outputs.size(); run5++ ) {
+		run2 = outputGrids[run5].getNumIntervals()-1;
+		loop->addFunctionCall( getNameOUTPUT( run5 ), rk_xxx, rk_rhsOutputTemp.getAddress(0,0) );
+		uint numOutputs = getDimOUTPUT( run5 );
+		uint outputDim = outputGrids[run5].getNumIntervals( )*numOutputs*(NX+NU+1);
+		for( run3 = 0; run3 < numOutputs; run3++ ) { // TODO: EXPORTINDEX STUFF FROM MILAN
+			loop->addStatement( String( rk_outputs[run5].getName() ) << "[run*" << String( outputDim ) << "+" << String( run2*numOutputs*(NX+NU+1)+run3 ) << "] = " << rk_rhsOutputTemp.get( 0,run3 ) << ";\n" );
 		}
 	}
 
 	// derivatives wrt the states (IFT):
-	for( run1 = 0; run1 < NX; run1++ ) {
-		for( run2 = 0; run2 < numStages; run2++ ) {
-			for( run3 = 0; run3 < NX+NXA; run3++ ) {
-				loop.addStatement( rk_b.getCol( run2*(NX+NXA)+run3 ) == zeroM.getCols( 0,1 ) - rk_diffsTemp.getSubMatrix( run2,run2+1,run3*NX+run1,run3*NX+run1+1 ) );
+	ExportForLoop loop4( run1,0,NX );
+	for( run2 = 0; run2 < numStages; run2++ ) { // TODO: EXPORTINDEX STUFF FROM MILAN
+		for( run3 = 0; run3 < NX+NXA; run3++ ) {
+			loop4.addStatement( rk_b.getCol( run2*(NX+NXA)+run3 ) == zeroM.getCols( 0,1 ) - rk_diffsTemp.getSubMatrix( run2,run2+1,run1+run3*NX,run1+run3*NX+1 ) );
+		}
+	}
+	loop4.addStatement( String( "if( 0 == " ) << run1.getName() << " ) {\n" );	// factorization of the new matrix rk_A not yet calculated!
+	loop4.addFunctionCall( solver->getNameSolveFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_sol.getAddress(0,0) );
+	loop4.addStatement( String( "}\n else {\n" ) );
+	loop4.addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_sol.getAddress(0,0) );
+	loop4.addStatement( String( "}\n" ) );
+
+	// generate sensitivities wrt states for continuous output (except for the last grid point):
+	for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
+		ExportForLoop loop41( i,0,outputGrids[run2].getNumIntervals()-1 );
+		evaluatePolynomial( loop41, rk_outH, gridVariables[run2], i, h );
+		if( NXA > 0 || NDX > 0 ) evaluateDerivedPolynomial( loop41, rk_out2, gridVariables[run2], i );
+		Vector dependencyX, dependencyZ, dependencyDX;
+		if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run2].getDependencyPattern( x ) );
+		if( EXPORT_RHS && NXA > 0 ) dependencyZ = sumRow( outputExpressions[run2].getDependencyPattern( z ) );
+		if( EXPORT_RHS && NDX > 0 ) dependencyDX = sumRow( outputExpressions[run2].getDependencyPattern( dx ) );
+		for( run4 = 0; run4 < NX; run4++ ) {
+			if( !EXPORT_RHS || (int)dependencyX(run4) != 0 ) {
+				loop41.addStatement( String(rk_rhsTemp.get( 0,run4 )) << " = (" << run4 << " == " << run1.getName() << ");\n" );
+				for( run5 = 0; run5 < numStages; run5++ ) {
+					loop41.addStatement( rk_rhsTemp.getCol( run4 ) += rk_outH.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
+				}
+				loop41.addStatement( rk_xxx.getCol( run4 ) == rk_xPrev.getCol( run4 ) + rk_outH*rk_kkk.getCol( run4 ) );
 			}
 		}
-		if( run1 == 0 ) { // factorization of the new matrix rk_A not yet calculated!
-			loop.addFunctionCall( solver->getNameSolveFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_sol.getAddress(0,0) );
-		} else {
-			loop.addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_sol.getAddress(0,0) );
-		}
-
-		// generate sensitivities wrt states for continuous output (except for the last grid point):
-		for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
-			if(UNROLL_OUTPUT) {
-				for( run3 = 0; run3 < outputGrids[run2].getNumIntervals()-1; run3++ ) {
-					Vector out = evaluatePolynomial( outputGrids[run2].getTime( run3+1 ) );
-					Vector out2 = evaluateDerivedPolynomial( outputGrids[run2].getTime( run3+1 ) );
-					rk_outH = ExportVariable( "out*h", Matrix( out, BT_TRUE )*=h );
-					rk_out2 = ExportVariable( "out2", Matrix( out2, BT_TRUE ) );
-					Vector dependencyX, dependencyDX;
-					if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run2].getDependencyPattern( x ) );
-					for( run4 = 0; run4 < NX; run4++ ) {
-						if( !EXPORT_RHS || (int)dependencyX(run4) != 0 ) {
-							if( run1 == run4 ) {
-								loop.addStatement( rk_rhsTemp.getCol( run4 ) == 1 );
-							}
-							else {
-								loop.addStatement( rk_rhsTemp.getCol( run4 ) == 0 );
-							}
-							for( run5 = 0; run5 < numStages; run5++ ) {
-								loop.addStatement( rk_rhsTemp.getCol( run4 ) += rk_outH.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
-							}
-							loop.addStatement( rk_xxx.getCol( run4 ) == rk_xPrev.getCol( run4 ) + rk_outH*rk_kkk.getCol( run4 ) );
-						}
-					}
-					for( run4 = 0; run4 < NXA; run4++ ) { // getDependencyPattern doesn't work for algebraic states:
-						loop.addStatement( rk_rhsTemp.getCol( NX+run4 ) == 0 );
-						for( run5 = 0; run5 < numStages; run5++ ) {
-							loop.addStatement( rk_rhsTemp.getCol( NX+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( numStages*NX+run5*NXA+run4 ) );
-						}
-						loop.addStatement( rk_xxx.getCol( NX+run4 ) == rk_out2*rk_kkk.getCol( NX+run4 ) );
-					}
-					if( EXPORT_RHS ) dependencyDX = sumRow( outputExpressions[run2].getDependencyPattern( dx ) );
-					for( run4 = 0; run4 < NDX; run4++ ) {
-						// TODO: SOLUTIONS ??
-//						if( !EXPORT_RHS || (int)dependencyDX(run4) != 0 ) {
-							loop.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) == 0 );
-							for( run5 = 0; run5 < numStages; run5++ ) {
-								loop.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
-							}
-							loop.addStatement( rk_xxx.getCol( inputDim-diffsDim+run4 ) == rk_out2*rk_kkk.getCol( run4 ) );
-//						}
-					}
-
-					loop.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
-					uint numOutputs = getDimOUTPUT( run2 );
-					uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
-					for( run4 = 0; run4 < numOutputs; run4++ ) {
-						if( EXPORT_RHS ) {
-							dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-							dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
-						}
-						loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] = 0.0;\n" );
-						for( run5 = 0; run5 < NX; run5++ ) {
-							if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-								tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 );
-								loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
-							}
-						}
-						for( run5 = 0; run5 < NXA; run5++ ) {
-							tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] += " << rk_rhsTemp.get( 0,NX+run5 ) << "*" << tempString << ";\n" );
-						}
-						for( run5 = 0; run5 < NDX; run5++ ) {
-							// TODO: SOLUTIONS ??
-//							if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-								tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 );
-								loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] += " << rk_rhsTemp.get( 0,NX+NXA+run5 ) << "*" << tempString << ";\n" );
-//							}
-						}
-					}
+		for( run4 = 0; run4 < NXA; run4++ ) {
+			if( !EXPORT_RHS || (int)dependencyZ(run4) != 0 ) {
+				loop41.addStatement( rk_rhsTemp.getCol( NX+run4 ) == rk_out2.getCol( 0 )*rk_sol.getCol( numStages*NX+run4 ) );
+				for( run5 = 1; run5 < numStages; run5++ ) {
+					loop41.addStatement( rk_rhsTemp.getCol( NX+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( numStages*NX+run5*NXA+run4 ) );
 				}
+				loop41.addStatement( rk_xxx.getCol( NX+run4 ) == rk_out2*rk_kkk.getCol( NX+run4 ) );
 			}
-			else {
-				loop2 = ExportForLoop( i,0,outputGrids[run2].getNumIntervals()-1 );
-				evaluatePolynomial( loop2, rk_outH, gridVariables[run2], i, h );
-				if( NXA > 0 || NDX > 0 ) evaluateDerivedPolynomial( loop2, rk_out2, gridVariables[run2], i );
-				Vector dependencyX, dependencyDX;
-				if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run2].getDependencyPattern( x ) );
-				for( run4 = 0; run4 < NX; run4++ ) {
-					if( !EXPORT_RHS || (int)dependencyX(run4) != 0 ) {
-						if( run1 == run4 ) {
-							loop2.addStatement( rk_rhsTemp.getCol( run4 ) == 1 );
-						}
-						else {
-							loop2.addStatement( rk_rhsTemp.getCol( run4 ) == 0 );
-						}
-						for( run5 = 0; run5 < numStages; run5++ ) {
-							loop2.addStatement( rk_rhsTemp.getCol( run4 ) += rk_outH.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
-						}
-						loop2.addStatement( rk_xxx.getCol( run4 ) == rk_xPrev.getCol( run4 ) + rk_outH*rk_kkk.getCol( run4 ) );
-					}
+		}
+		for( run4 = 0; run4 < NDX; run4++ ) {
+			if( !EXPORT_RHS || (int)dependencyDX(run4) != 0 ) {
+				loop41.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) == rk_out2.getCol( 0 )*rk_sol.getCol( run4 ) );
+				for( run5 = 1; run5 < numStages; run5++ ) {
+					loop41.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
 				}
-				for( run4 = 0; run4 < NXA; run4++ ) { // getDependencyPattern doesn't work for algebraic states:
-					loop2.addStatement( rk_rhsTemp.getCol( NX+run4 ) == 0 );
-					for( run5 = 0; run5 < numStages; run5++ ) {
-						loop2.addStatement( rk_rhsTemp.getCol( NX+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( numStages*NX+run5*NXA+run4 ) );
-					}
-					loop2.addStatement( rk_xxx.getCol( NX+run4 ) == rk_out2*rk_kkk.getCol( NX+run4 ) );
-				}
-				if( EXPORT_RHS ) dependencyDX = sumRow( outputExpressions[run2].getDependencyPattern( dx ) );
-				for( run4 = 0; run4 < NDX; run4++ ) {
-					// TODO: SOLUTIONS ??
-//					if( !EXPORT_RHS || (int)dependencyDX(run4) != 0 ) {
-						loop2.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) == 0 );
-						for( run5 = 0; run5 < numStages; run5++ ) {
-							loop2.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
-						}
-						loop2.addStatement( rk_xxx.getCol( inputDim-diffsDim+run4 ) == rk_out2*rk_kkk.getCol( run4 ) );
-//					}
-				}
-
-				loop2.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
-				uint numOutputs = getDimOUTPUT( run2 );
-				uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
-				for( run4 = 0; run4 < numOutputs; run4++ ) {
-					if( EXPORT_RHS ) {
-						dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-						dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
-					}
-					loop2.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << numOutputs+run4*NX+run1<< "] = 0.0;\n" );
-					for( run5 = 0; run5 < NX; run5++ ) {
-						if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 );
-							loop2.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << numOutputs+run4*NX+run1 << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
-						}
-					}
-					for( run5 = 0; run5 < NXA; run5++ ) {
-						tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 );
-						loop2.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << numOutputs+run4*NX+run1 << "] += " << rk_rhsTemp.get( 0,NX+run5 ) << "*" << tempString << ";\n" );
-					}
-					for( run5 = 0; run5 < NDX; run5++ ) {
-						// TODO: SOLUTIONS ??
-//						if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 );
-							loop2.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << numOutputs+run4*NX+run1 << "] += " << rk_rhsTemp.get( 0,NX+NXA+run5 ) << "*" << tempString << ";\n" );
-//						}
-					}
-				}
-				loop.addStatement( loop2 );
+				loop41.addStatement( rk_xxx.getCol( inputDim-diffsDim+run4 ) == rk_out2*rk_kkk.getCol( run4 ) );
 			}
 		}
 
-
-		for( run2 = 0; run2 < NDX; run2++ ) {
-			loop.addStatement( rk_rhsTemp.getCol( run2 ) == 0 );
-			for (run3 = 0; run3 < numStages; run3++ ) {
-				loop.addStatement( rk_rhsTemp.getCol( run2 ) += tempCoefs.getCol( run3 )*rk_sol.getCol( run3*NX+run2 ) );
+		loop41.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
+		uint numOutputs = getDimOUTPUT( run2 );
+		uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
+		for( run4 = 0; run4 < numOutputs; run4++ ) {
+			if( EXPORT_RHS ) {
+				dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
+				if( NXA > 0 ) dependencyZ = outputExpressions[run2].getRow(run4).getDependencyPattern( z );
+				if( NDX > 0 ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
 			}
-		}
-		// update rk_eta with the new sensitivities:
-		if( grid.getNumIntervals() == 1 && hasEquidistantGrid() ) {
-			for( run2 = 0; run2 < NX; run2++ ) {
-				if( run1 == run2 ) {
-					loop.addStatement( rk_eta.getCol( NX+NXA+run2*NX+run1 ) == 1 );
-				}
-				else {
-					loop.addStatement( rk_eta.getCol( NX+NXA+run2*NX+run1 ) == 0 );
-				}
-				for (run3 = 0; run3 < numStages; run3++ ) {
-					loop.addStatement( rk_eta.getCol( NX+NXA+run2*NX+run1 ) += Bh.getCol( run3 )*rk_sol.getCol( run3*NX+run2 ) );
+			// TODO: EXPORTINDEX STUFF FROM MILAN
+			loop41.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs+run4*NX << "] = 0.0;\n" );
+			for( run5 = 0; run5 < NX; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop41.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs+run4*NX << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
 				}
 			}
-			for( run2 = 0; run2 < NXA; run2++ ) {
-				loop.addStatement( rk_eta.getCol( NX+NXA+NX*NX+run2*NX+run1 ) == 0 );
-				for (run3 = 0; run3 < numStages; run3++ ) {
-					loop.addStatement( rk_eta.getCol( NX+NXA+NX*NX+run2*NX+run1 ) += tempCoefs.getCol( run3 )*rk_sol.getCol( numStages*NX+run3*NXA+run2 ) );
+			for( run5 = 0; run5 < NXA; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyZ(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop41.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs+run4*NX << "] += " << rk_rhsTemp.get( 0,NX+run5 ) << "*" << tempString << ";\n" );
 				}
 			}
-
-			// generate sensitivities wrt states for continuous output (only the last grid point):
-			if( CONTINUOUS_OUTPUT ) {
-				loop.addStatement( rk_xxx.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
-				if( NDX > 0 ) {
-					loop.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == tempCoefs*rk_kkk.getCols( 0,NX ) );
-				}
-			}
-			for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
-				run3 = outputGrids[run2].getNumIntervals()-1;
-				loop.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
-				uint numOutputs = getDimOUTPUT( run2 );
-				uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
-				for( run4 = 0; run4 < numOutputs; run4++ ) {
-					Vector dependencyX, dependencyDX;
-					if( EXPORT_RHS ) dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-					loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] = 0.0;\n" );
-					for( run5 = 0; run5 < NX; run5++ ) {
-						if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] += " << rk_eta.get( 0,NX+NXA+run5*NX+run1 ) << "*" << tempString << ";\n" );
-						}
-					}
-					for( run5 = 0; run5 < NXA; run5++ ) {
-						tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 );
-						loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] += " << rk_eta.get( 0,NX+NXA+NX*NX+run5*NX+run1 ) << "*" << tempString << ";\n" );
-					}
-					if( EXPORT_RHS ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
-					for( run5 = 0; run5 < NDX; run5++ ) {
-						// TODO: SOLUTION??
-//						if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
-//						}
-					}
+			for( run5 = 0; run5 < NDX; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop41.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs+run4*NX << "] += " << rk_rhsTemp.get( 0,NX+NXA+run5 ) << "*" << tempString << ";\n" );
 				}
 			}
 		}
-		else { // update immediately rk_diffsNew:
-			for( run2 = 0; run2 < NX; run2++ ) {
-				if( run1 == run2 ) {
-					loop.addStatement( rk_diffsNew.getSubMatrix( run2,run2+1,run1,run1+1 ) == 1 );
-				}
-				else {
-					loop.addStatement( rk_diffsNew.getSubMatrix( run2,run2+1,run1,run1+1 ) == 0 );
-				}
-				for (run3 = 0; run3 < numStages; run3++ ) {
-					loop.addStatement( rk_diffsNew.getSubMatrix( run2,run2+1,run1,run1+1 ) += Bh.getCol( run3 )*rk_sol.getCol( run3*NX+run2 ) );
-				}
-			}
-			for( run2 = 0; run2 < NXA; run2++ ) {
-				loop.addStatement( rk_diffsNew.getSubMatrix( NX+run2,NX+run2+1,run1,run1+1 ) == 0 );
-				for (run3 = 0; run3 < numStages; run3++ ) {
-					loop.addStatement( rk_diffsNew.getSubMatrix( NX+run2,NX+run2+1,run1,run1+1 ) += tempCoefs.getCol( run3 )*rk_sol.getCol( numStages*NX+run3*NXA+run2 ) );
-				}
-			}
+		loop4.addStatement( loop41 );
+	}
 
-			// generate sensitivities wrt states for continuous output (only the last grid point):
-			if( CONTINUOUS_OUTPUT ) {
-				loop.addStatement( rk_xxx.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
-				if( NDX > 0 ) {
-					loop.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == tempCoefs*rk_kkk.getCols( 0,NX ) );
+	if( NDX > 0 ) {
+		ExportForLoop loop42( i,0,NDX );
+		loop42.addStatement( rk_rhsTemp.getCol( i ) == tempCoefs.getCol( 0 )*rk_sol.getCol( i ) );
+		for (run3 = 1; run3 < numStages; run3++ ) {
+			loop42.addStatement( rk_rhsTemp.getCol( i ) += tempCoefs.getCol( run3 )*rk_sol.getCol( i+run3*NX ) );
+		}
+		loop4.addStatement( loop42 );
+	}
+
+	// TODO:  THE CODE THAT IS COMMENTED OUT SHOULD ACTUALLY BE USED AFTER MILANS UPDATE !!
+//	// update rk_diffsNew with the new sensitivities:
+//	ExportForLoop loop43( i,0,NX );
+//	loop43.addStatement( String(rk_diffsNew.get( i,run1 )) << " = (" << i.getName() << " == " << run1.getName() << ");\n" );
+//	for (run3 = 0; run3 < numStages; run3++ ) {
+//		loop43.addStatement( rk_diffsNew.getSubMatrix( i,i+1,run1,run1+1 ) += Bh.getCol( run3 )*rk_sol.getCol( i+run3*NX ) );
+//	}
+//	loop4.addStatement( loop43 );
+//	if( NXA > 0 ) {
+//		ExportForLoop loop44( i,0,NXA );
+//		loop44.addStatement( rk_diffsNew.getSubMatrix( i+NX,i+NX+1,run1,run1+1 ) == tempCoefs.getCol( 0 )*rk_sol.getCol( i+numStages*NX ) );
+//		for (run3 = 1; run3 < numStages; run3++ ) {
+//			loop44.addStatement( rk_diffsNew.getSubMatrix( i+NX,i+NX+1,run1,run1+1 ) += tempCoefs.getCol( run3 )*rk_sol.getCol( i+numStages*NX+run3*NXA ) );
+//		}
+//		loop4.addStatement( loop44 );
+//	}
+	// update rk_diffsNew with the new sensitivities:
+	for( run2 = 0; run2 < NX; run2++ ) {
+		loop4.addStatement( String(rk_diffsNew.get( run2,run1 )) << " = (" << run2 << " == " << run1.getName() << ");\n" );
+		for (run3 = 0; run3 < numStages; run3++ ) {
+			loop4.addStatement( rk_diffsNew.getSubMatrix( run2,run2+1,run1,run1+1 ) += Bh.getCol( run3 )*rk_sol.getCol( run3*NX+run2 ) );
+		}
+	}
+	for( run2 = 0; run2 < NXA; run2++ ) {
+		loop4.addStatement( rk_diffsNew.getSubMatrix( NX+run2,NX+run2+1,run1,run1+1 ) == tempCoefs.getCol( 0 )*rk_sol.getCol( numStages*NX+run2 ) );
+		for (run3 = 1; run3 < numStages; run3++ ) {
+			loop4.addStatement( rk_diffsNew.getSubMatrix( NX+run2,NX+run2+1,run1,run1+1 ) += tempCoefs.getCol( run3 )*rk_sol.getCol( numStages*NX+run3*NXA+run2 ) );
+		}
+	}
+
+	// generate sensitivities wrt states for continuous output (only the last grid point):
+	if( CONTINUOUS_OUTPUT ) {
+		loop4.addStatement( rk_xxx.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
+		if( NDX > 0 ) loop4.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == tempCoefs*rk_kkk.getCols( 0,NX ) );
+
+	}
+	for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
+		run3 = outputGrids[run2].getNumIntervals()-1;
+		loop4.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
+		uint numOutputs = getDimOUTPUT( run2 );
+		uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
+		for( run4 = 0; run4 < numOutputs; run4++ ) {
+			Vector dependencyX, dependencyZ, dependencyDX;
+			if( EXPORT_RHS ) dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
+			if( EXPORT_RHS && NXA > 0 ) dependencyZ = outputExpressions[run2].getRow(run4).getDependencyPattern( z );
+			if( EXPORT_RHS && NDX > 0 ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
+			// TODO: EXPORTINDEX STUFF FROM MILAN
+			loop4.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX ) << "] = 0.0;\n" );
+			for( run5 = 0; run5 < NX; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop4.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX ) << "] += " << rk_diffsNew.get( run5,run1 ) << "*" << tempString << ";\n" );
 				}
 			}
-			for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
-				run3 = outputGrids[run2].getNumIntervals()-1;
-				loop.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
-				uint numOutputs = getDimOUTPUT( run2 );
-				uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
-				for( run4 = 0; run4 < numOutputs; run4++ ) {
-					Vector dependencyX, dependencyDX;
-					if( EXPORT_RHS ) dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-					loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] = 0.0;\n" );
-					for( run5 = 0; run5 < NX; run5++ ) {
-						if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] += " << rk_diffsNew.get( run5,run1 ) << "*" << tempString << ";\n" );
-						}
-					}
-					for( run5 = 0; run5 < NXA; run5++ ) {
-						tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 );
-						loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] += " << rk_diffsNew.get( NX+run5,run1 ) << "*" << tempString << ";\n" );
-					}
-					if( EXPORT_RHS ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
-					for( run5 = 0; run5 < NDX; run5++ ) {
-						// TODO: SOLUTION??
-//						if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX+run1 ) << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
-//						}
-					}
+			for( run5 = 0; run5 < NXA; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyZ(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop4.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX ) << "] += " << rk_diffsNew.get( NX+run5,run1 ) << "*" << tempString << ";\n" );
+				}
+			}
+			for( run5 = 0; run5 < NDX; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop4.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX ) << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
 				}
 			}
 		}
 	}
+	loop->addStatement( loop4 );
+
 
 	// derivatives wrt the control inputs (IFT):
-	for( run1 = 0; run1 < NU; run1++ ) {
-		for( run2 = 0; run2 < numStages; run2++ ) {
-			for( run3 = 0; run3 < NX+NXA; run3++ ) {
-				loop.addStatement( rk_b.getCol( run2*(NX+NXA)+run3 ) == zeroM.getCols( 0,1 ) - rk_diffsTemp.getSubMatrix( run2,run2+1,(NX+NXA)*(NX+NXA)+run3*NU+run1,(NX+NXA)*(NX+NXA)+run3*NU+run1+1 ) );
+	if( NU > 0 ) {
+	ExportForLoop loop5( run1,0,NU );
+	for( run2 = 0; run2 < numStages; run2++ ) { // TODO: EXPORTINDEX STUFF FROM MILAN
+		for( run3 = 0; run3 < NX+NXA; run3++ ) {
+			loop5.addStatement( rk_b.getCol( run2*(NX+NXA)+run3 ) == zeroM.getCols( 0,1 ) - rk_diffsTemp.getSubMatrix( run2,run2+1,run1+(NX+NXA)*(NX+NXA)+run3*NU,run1+(NX+NXA)*(NX+NXA)+run3*NU+1 ) );
+		}
+	}
+	loop5.addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_sol.getAddress(0,0) );
+
+	// generate sensitivities wrt controls for continuous output (except for the last grid point):
+	for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
+		ExportForLoop loop51( i,0,outputGrids[run2].getNumIntervals()-1 );
+		evaluatePolynomial( loop51, rk_outH, gridVariables[run2], i, h );
+		if( NXA > 0 || NDX > 0 ) evaluateDerivedPolynomial( loop51, rk_out2, gridVariables[run2], i );
+		Vector dependencyX, dependencyZ, dependencyDX;
+		if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run2].getDependencyPattern( x ) );
+		if( EXPORT_RHS && NXA > 0 ) dependencyZ = sumRow( outputExpressions[run2].getDependencyPattern( z ) );
+		if( EXPORT_RHS && NDX > 0 ) dependencyDX = sumRow( outputExpressions[run2].getDependencyPattern( dx ) );
+		for( run4 = 0; run4 < NX; run4++ ) {
+			if( !EXPORT_RHS || (int)dependencyX(run4) != 0 ) {
+				loop51.addStatement( rk_rhsTemp.getCol( run4 ) == rk_outH.getCol( 0 )*rk_sol.getCol( run4 ) );
+				for( run5 = 1; run5 < numStages; run5++ ) {
+					loop51.addStatement( rk_rhsTemp.getCol( run4 ) += rk_outH.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
+				}
+				loop51.addStatement( rk_xxx.getCol( run4 ) == rk_xPrev.getCol( run4 ) + rk_outH*rk_kkk.getCol( run4 ) );
 			}
 		}
-		loop.addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_sol.getAddress(0,0) );
-
-		// generate sensitivities wrt controls for continuous output (except for the last grid point):
-		for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
-			if( UNROLL_OUTPUT ) {
-				for( run3 = 0; run3 < outputGrids[run2].getNumIntervals()-1; run3++ ) {
-					Vector out = evaluatePolynomial( outputGrids[run2].getTime( run3+1 ) );
-					Vector out2 = evaluateDerivedPolynomial( outputGrids[run2].getTime( run3+1 ) );
-					rk_outH = ExportVariable( "out*h", Matrix( out, BT_TRUE )*=h );
-					rk_out2 = ExportVariable( "out2", Matrix( out2, BT_TRUE ) );
-					Vector dependencyX, dependencyDX;
-					if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run2].getDependencyPattern( x ) );
-					for( run4 = 0; run4 < NX; run4++ ) {
-						if( !EXPORT_RHS || (int)dependencyX(run4) != 0 ) {
-							loop.addStatement( rk_rhsTemp.getCol( run4 ) == 0 );
-							for( run5 = 0; run5 < numStages; run5++ ) {
-								loop.addStatement( rk_rhsTemp.getCol( run4 ) += rk_outH.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
-							}
-							loop.addStatement( rk_xxx.getCol( run4 ) == rk_xPrev.getCol( run4 ) + rk_outH*rk_kkk.getCol( run4 ) );
-						}
-					}
-					for( run4 = 0; run4 < NXA; run4++ ) { // getDependencyPattern doesn't work for algebraic states:
-						loop.addStatement( rk_rhsTemp.getCol( NX+run4 ) == 0 );
-						for( run5 = 0; run5 < numStages; run5++ ) {
-							loop.addStatement( rk_rhsTemp.getCol( NX+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( numStages*NX+run5*NXA+run4 ) );
-						}
-						loop.addStatement( rk_xxx.getCol( NX+run4 ) == rk_out2*rk_kkk.getCol( NX+run4 ) );
-					}
-					if( EXPORT_RHS ) dependencyDX = sumRow( outputExpressions[run2].getDependencyPattern( dx ) );
-					for( run4 = 0; run4 < NDX; run4++ ) {
-						// TODO: SOLUTION ??
-//						if( !EXPORT_RHS || (int)dependencyDX(run4) != 0 ) {
-							loop.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) == 0 );
-							for( run5 = 0; run5 < numStages; run5++ ) {
-								loop.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
-							}
-							loop.addStatement( rk_xxx.getCol( inputDim-diffsDim+run4 ) == rk_out2*rk_kkk.getCol( run4 ) );
-//						}
-					}
-
-					loop.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
-					uint numOutputs = getDimOUTPUT( run2 );
-					uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
-					for( run4 = 0; run4 < numOutputs; run4++ ) {
-						if( EXPORT_RHS ) {
-							dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-							dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
-						}
-						loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] = " <<  rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA)+run4*NU+run1 ) << ";\n" );
-						for( run5 = 0; run5 < NX; run5++ ) {
-							if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-								tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 );
-								loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
-							}
-						}
-						for( run5 = 0; run5 < NXA; run5++ ) {
-							tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] += " << rk_rhsTemp.get( 0,NX+run5 ) << "*" << tempString << ";\n" );
-						}
-						for( run5 = 0; run5 < NDX; run5++ ) {
-							// TODO: SOLUTION ??
-//							if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-								tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 );
-								loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] += " << rk_rhsTemp.get( 0,NX+NXA+run5 ) << "*" << tempString << ";\n" );
-//							}
-						}
-					}
+		for( run4 = 0; run4 < NXA; run4++ ) {
+			if( !EXPORT_RHS || (int)dependencyZ(run4) != 0 ) {
+				loop51.addStatement( rk_rhsTemp.getCol( NX+run4 ) == rk_out2.getCol( 0 )*rk_sol.getCol( numStages*NX+run4 ) );
+				for( run5 = 1; run5 < numStages; run5++ ) {
+					loop51.addStatement( rk_rhsTemp.getCol( NX+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( numStages*NX+run5*NXA+run4 ) );
 				}
+				loop51.addStatement( rk_xxx.getCol( NX+run4 ) == rk_out2*rk_kkk.getCol( NX+run4 ) );
 			}
-			else {
-				loop2 = ExportForLoop( i,0,outputGrids[run2].getNumIntervals()-1 );
-				evaluatePolynomial( loop2, rk_outH, gridVariables[run2], i, h );
-				if( NXA > 0 || NDX > 0 ) evaluateDerivedPolynomial( loop2, rk_out2, gridVariables[run2], i );
-				Vector dependencyX, dependencyDX;
-				if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run2].getDependencyPattern( x ) );
-				for( run4 = 0; run4 < NX; run4++ ) {
-					if( !EXPORT_RHS || (int)dependencyX(run4) != 0 ) {
-						loop2.addStatement( rk_rhsTemp.getCol( run4 ) == 0 );
-						for( run5 = 0; run5 < numStages; run5++ ) {
-							loop2.addStatement( rk_rhsTemp.getCol( run4 ) += rk_outH.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
-						}
-						loop2.addStatement( rk_xxx.getCol( run4 ) == rk_xPrev.getCol( run4 ) + rk_outH*rk_kkk.getCol( run4 ) );
-					}
+		}
+		for( run4 = 0; run4 < NDX; run4++ ) {
+			if( !EXPORT_RHS || (int)dependencyDX(run4) != 0 ) {
+				loop51.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) == rk_out2.getCol( 0 )*rk_sol.getCol( run4 ) );
+				for( run5 = 1; run5 < numStages; run5++ ) {
+					loop51.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
 				}
-				for( run4 = 0; run4 < NXA; run4++ ) { // getDependencyPattern doesn't work for algebraic states:
-					loop2.addStatement( rk_rhsTemp.getCol( NX+run4 ) == 0 );
-					for( run5 = 0; run5 < numStages; run5++ ) {
-						loop2.addStatement( rk_rhsTemp.getCol( NX+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( numStages*NX+run5*NXA+run4 ) );
-					}
-					loop2.addStatement( rk_xxx.getCol( NX+run4 ) == rk_out2*rk_kkk.getCol( NX+run4 ) );
-				}
-				if( EXPORT_RHS ) dependencyDX = sumRow( outputExpressions[run2].getDependencyPattern( dx ) );
-				for( run4 = 0; run4 < NDX; run4++ ) {
-					// TODO: SOLUTION ??
-//					if( !EXPORT_RHS || (int)dependencyDX(run4) != 0 ) {
-						loop2.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) == 0 );
-						for( run5 = 0; run5 < numStages; run5++ ) {
-							loop2.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
-						}
-						loop2.addStatement( rk_xxx.getCol( inputDim-diffsDim+run4 ) == rk_out2*rk_kkk.getCol( run4 ) );
-//					}
-				}
-
-				loop2.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
-				uint numOutputs = getDimOUTPUT( run2 );
-				uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
-				for( run4 = 0; run4 < numOutputs; run4++ ) {
-					if( EXPORT_RHS ) {
-						dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-						dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
-					}
-					loop2.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << numOutputs*(1+NX)+run4*NU+run1 << "] = " <<  rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA)+run4*NU+run1 ) << ";\n" );
-					for( run5 = 0; run5 < NX; run5++ ) {
-						if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 );
-							loop2.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << numOutputs*(1+NX)+run4*NU+run1 << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
-						}
-					}
-					for( run5 = 0; run5 < NXA; run5++ ) {
-						tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 );
-						loop2.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << numOutputs*(1+NX)+run4*NU+run1 << "] += " << rk_rhsTemp.get( 0,NX+run5 ) << "*" << tempString << ";\n" );
-					}
-					for( run5 = 0; run5 < NDX; run5++ ) {
-						// TODO: SOLUTION ??
-//						if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << numOutputs*(1+NX)+run4*NU+run1 << "] += " << rk_rhsTemp.get( 0,NX+NXA+run5 ) << "*" << tempString << ";\n" );
-//						}
-					}
-				}
-				loop.addStatement( loop2 );
+				loop51.addStatement( rk_xxx.getCol( inputDim-diffsDim+run4 ) == rk_out2*rk_kkk.getCol( run4 ) );
 			}
 		}
 
-		for( run2 = 0; run2 < NDX; run2++ ) {
-			loop.addStatement( rk_rhsTemp.getCol( run2 ) == 0 );
-			for (run3 = 0; run3 < numStages; run3++ ) {
-				loop.addStatement( rk_rhsTemp.getCol( run2 ) += tempCoefs.getCol( run3 )*rk_sol.getCol( run3*NX+run2 ) );
+		loop51.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
+		uint numOutputs = getDimOUTPUT( run2 );
+		uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
+		for( run4 = 0; run4 < numOutputs; run4++ ) {
+			if( EXPORT_RHS ) {
+				dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
+				if( NXA > 0 ) dependencyZ = outputExpressions[run2].getRow(run4).getDependencyPattern( z );
+				if( NDX > 0 ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
 			}
-		}
-		// update rk_eta with the new sensitivities:
-		if( grid.getNumIntervals() == 1 && hasEquidistantGrid() ) {
-			for( run2 = 0; run2 < NX; run2++ ) {
-				loop.addStatement( rk_eta.getCol( (NX+NXA)*(NX+1)+run2*NU+run1 ) == 0 );
-				for (run3 = 0; run3 < numStages; run3++ ) {
-					loop.addStatement( rk_eta.getCol( (NX+NXA)*(NX+1)+run2*NU+run1 ) += Bh.getCol( run3 )*rk_sol.getCol( run3*NX+run2 ) );
+			// TODO: EXPORTINDEX STUFF FROM MILAN
+			loop51.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs*(1+NX)+run4*NU << "] = " <<  rk_diffsOutputTemp.get( 0,run1+numOutputs*(NX+NXA)+run4*NU ) << ";\n" );
+			for( run5 = 0; run5 < NX; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop51.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs*(1+NX)+run4*NU << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
 				}
 			}
-			for( run2 = 0; run2 < NXA; run2++ ) {
-				loop.addStatement( rk_eta.getCol( (NX+NXA)*(NX+1)+NX*NU+run2*NU+run1 ) == 0 );
-				for (run3 = 0; run3 < numStages; run3++ ) {
-					loop.addStatement( rk_eta.getCol( (NX+NXA)*(NX+1)+NX*NU+run2*NU+run1 ) += tempCoefs.getCol( run3 )*rk_sol.getCol( numStages*NX+run3*NXA+run2 ) );
+			for( run5 = 0; run5 < NXA; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyZ(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop51.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs*(1+NX)+run4*NU << "] += " << rk_rhsTemp.get( 0,NX+run5 ) << "*" << tempString << ";\n" );
 				}
 			}
-
-			// generate sensitivities wrt controls for continuous output (only the last grid point):
-			if( CONTINUOUS_OUTPUT ) {
-				loop.addStatement( rk_xxx.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
-				if( NDX > 0 ) {
-					loop.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == tempCoefs*rk_kkk.getCols( 0,NX ) );
-				}
-			}
-			for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
-				run3 = outputGrids[run2].getNumIntervals()-1;
-				loop.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
-				uint numOutputs = getDimOUTPUT( run2 );
-				uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
-				for( run4 = 0; run4 < numOutputs; run4++ ) {
-					Vector dependencyX, dependencyDX;
-					if( EXPORT_RHS ) dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-					loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] = " <<  rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA)+run4*NU+run1 ) << ";\n" );
-					for( run5 = 0; run5 < NX; run5++ ) {
-						if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] += " << rk_eta.get( 0,(NX+NXA)*(NX+1)+run5*NU+run1 ) << "*" << tempString << ";\n" );
-						}
-					}
-					for( run5 = 0; run5 < NXA; run5++ ) {
-						tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 );
-						loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] += " << rk_eta.get( 0,(NX+NXA)*(NX+1)+NX*NU+run5*NU+run1 ) << "*" << tempString << ";\n" );
-					}
-					if( EXPORT_RHS ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
-					for( run5 = 0; run5 < NDX; run5++ ) {
-						// TODO: SOLUTION ??
-//						if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
-//						}
-					}
+			for( run5 = 0; run5 < NDX; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop51.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs*(1+NX)+run4*NU << "] += " << rk_rhsTemp.get( 0,NX+NXA+run5 ) << "*" << tempString << ";\n" );
 				}
 			}
 		}
-		else { // update immediately rk_diffsNew:
-			for( run2 = 0; run2 < NX; run2++ ) {
-				loop.addStatement( rk_diffsNew.getSubMatrix( run2,run2+1,NX+run1,NX+run1+1 ) == 0 );
-				for (run3 = 0; run3 < numStages; run3++ ) {
-					loop.addStatement( rk_diffsNew.getSubMatrix( run2,run2+1,NX+run1,NX+run1+1 ) += Bh.getCol( run3 )*rk_sol.getCol( run3*NX+run2 ) );
-				}
-			}
-			for( run2 = 0; run2 < NXA; run2++ ) {
-				loop.addStatement( rk_diffsNew.getSubMatrix( NX+run2,NX+run2+1,NX+run1,NX+run1+1 ) == 0 );
-				for (run3 = 0; run3 < numStages; run3++ ) {
-					loop.addStatement( rk_diffsNew.getSubMatrix( NX+run2,NX+run2+1,NX+run1,NX+run1+1 ) += tempCoefs.getCol( run3 )*rk_sol.getCol( numStages*NX+run3*NXA+run2 ) );
-				}
-			}
+		loop5.addStatement( loop51 );
+	}
 
-			// generate sensitivities wrt controls for continuous output (only the last grid point):
-			if( CONTINUOUS_OUTPUT ) {
-				loop.addStatement( rk_xxx.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
-				if( NDX > 0 ) {
-					loop.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == tempCoefs*rk_kkk.getCols( 0,NX ) );
+	if( NDX > 0 ) {
+		ExportForLoop loop52( i,0,NDX );
+		loop52.addStatement( rk_rhsTemp.getCol( i ) == tempCoefs.getCol( 0 )*rk_sol.getCol( i ) );
+		for (run3 = 1; run3 < numStages; run3++ ) {
+			loop52.addStatement( rk_rhsTemp.getCol( i ) += tempCoefs.getCol( run3 )*rk_sol.getCol( i+run3*NX ) );
+		}
+		loop5.addStatement( loop52 );
+	}
+
+//	// TODO:  THE CODE THAT IS COMMENTED OUT SHOULD ACTUALLY BE USED AFTER MILANS UPDATE !!
+//	// update rk_diffsNew with the new sensitivities:
+//	ExportForLoop loop53( i,0,NX );
+//	loop53.addStatement( rk_diffsNew.getSubMatrix( i,i+1,run1+NX,run1+NX+1 ) == Bh.getCol( 0 )*rk_sol.getCol( i ) );
+//	for (run3 = 1; run3 < numStages; run3++ ) {
+//		loop53.addStatement( rk_diffsNew.getSubMatrix( i,i+1,run1+NX,run1+NX+1 ) += Bh.getCol( run3 )*rk_sol.getCol( i+run3*NX ) );
+//	}
+//	loop5.addStatement( loop53 );
+//	if( NXA > 0 ) {
+//		ExportForLoop loop54( i,0,NXA );
+//		loop54.addStatement( rk_diffsNew.getSubMatrix( i+NX,i+NX+1,run1+NX,run1+NX+1 ) == tempCoefs.getCol( 0 )*rk_sol.getCol( i+numStages*NX ) );
+//		for (run3 = 1; run3 < numStages; run3++ ) {
+//			loop54.addStatement( rk_diffsNew.getSubMatrix( i+NX,i+NX+1,run1+NX,run1+NX+1 ) += tempCoefs.getCol( run3 )*rk_sol.getCol( i+numStages*NX+run3*NXA ) );
+//		}
+//		loop5.addStatement( loop54 );
+//	}
+	// update rk_diffsNew with the new sensitivities:
+	for( run2 = 0; run2 < NX; run2++ ) {
+		loop5.addStatement( rk_diffsNew.getSubMatrix( run2,run2+1,run1+NX,run1+NX+1 ) == Bh.getCol( 0 )*rk_sol.getCol( run2 ) );
+		for (run3 = 1; run3 < numStages; run3++ ) {
+			loop5.addStatement( rk_diffsNew.getSubMatrix( run2,run2+1,run1+NX,run1+NX+1 ) += Bh.getCol( run3 )*rk_sol.getCol( run3*NX+run2 ) );
+		}
+	}
+	for( run2 = 0; run2 < NXA; run2++ ) {
+		loop5.addStatement( rk_diffsNew.getSubMatrix( NX+run2,NX+run2+1,run1+NX,run1+NX+1 ) == tempCoefs.getCol( 0 )*rk_sol.getCol( numStages*NX+run2 ) );
+		for (run3 = 1; run3 < numStages; run3++ ) {
+			loop5.addStatement( rk_diffsNew.getSubMatrix( NX+run2,NX+run2+1,run1+NX,run1+NX+1 ) += tempCoefs.getCol( run3 )*rk_sol.getCol( numStages*NX+run3*NXA+run2 ) );
+		}
+	}
+
+	// generate sensitivities wrt controls for continuous output (only the last grid point):
+	if( CONTINUOUS_OUTPUT ) {
+		loop5.addStatement( rk_xxx.getCols( 0,NX+NXA ) == rk_eta.getCols( 0,NX+NXA ) );
+		if( NDX > 0 ) loop5.addStatement( rk_xxx.getCols( inputDim-diffsDim,inputDim-diffsDim+NDX ) == tempCoefs*rk_kkk.getCols( 0,NX ) );
+
+	}
+	for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
+		run3 = outputGrids[run2].getNumIntervals()-1;
+		loop5.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
+		uint numOutputs = getDimOUTPUT( run2 );
+		uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
+		for( run4 = 0; run4 < numOutputs; run4++ ) {
+			Vector dependencyX, dependencyZ, dependencyDX;
+			if( EXPORT_RHS ) dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
+			if( EXPORT_RHS && NXA > 0 ) dependencyZ = outputExpressions[run2].getRow(run4).getDependencyPattern( z );
+			if( EXPORT_RHS && NDX > 0 ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
+			// TODO: EXPORTINDEX STUFF FROM MILAN
+			loop5.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU ) << "] = " <<  rk_diffsOutputTemp.get( 0,run1+numOutputs*(NX+NXA)+run4*NU ) << ";\n" );
+			for( run5 = 0; run5 < NX; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop5.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU ) << "] += " << rk_diffsNew.get( run5,run1+NX ) << "*" << tempString << ";\n" );
 				}
 			}
-			for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
-				run3 = outputGrids[run2].getNumIntervals()-1;
-				loop.addFunctionCall( getNameDiffsOUTPUT( run2 ), rk_xxx, rk_diffsOutputTemp.getAddress(0,0) );
-				uint numOutputs = getDimOUTPUT( run2 );
-				uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
-				for( run4 = 0; run4 < numOutputs; run4++ ) {
-					Vector dependencyX, dependencyDX;
-					if( EXPORT_RHS ) dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-					loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] = " <<  rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA)+run4*NU+run1 ) << ";\n" );
-					for( run5 = 0; run5 < NX; run5++ ) {
-						if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] += " << rk_diffsNew.get( run5,NX+run1 ) << "*" << tempString << ";\n" );
-						}
-					}
-					for( run5 = 0; run5 < NXA; run5++ ) {
-						tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 );
-						loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] += " << rk_diffsNew.get( NX+run5,NX+run1 ) << "*" << tempString << ";\n" );
-					}
-					if( EXPORT_RHS ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
-					for( run5 = 0; run5 < NDX; run5++ ) {
-						// TODO: SOLUTION ??
-//						if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-							tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 );
-							loop.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU+run1 ) << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
-//						}
-					}
+			for( run5 = 0; run5 < NXA; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyZ(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop5.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU ) << "] += " << rk_diffsNew.get( NX+run5,run1+NX ) << "*" << tempString << ";\n" );
+				}
+			}
+			for( run5 = 0; run5 < NDX; run5++ ) {
+				if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+					loop5.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU ) << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
 				}
 			}
 		}
 	}
+	loop->addStatement( loop5 );
+	}
 
+	// Computation of the sensitivities using the chain rule:
+	ExportForLoop loop01( i,0,NX+NXA );
+	ExportForLoop loop02( j,0,NX ); // TODO: EXPORTINDEX STUFF FROM MILAN
+	loop02.addStatement( String( "rk_eta[" ) << String( NX+NXA ) << "+i*" << String( NX ) << "+j] = acadoWorkspace.rk_diffsNew[i*" << String( NX+NU ) << "]*acadoWorkspace.rk_diffsPrev[j];\n" );
+	ExportForLoop loop021( k,1,NX );
+	loop021.addStatement( String( "rk_eta[" ) << String( NX+NXA ) << "+i*" << String( NX ) << "+j] += acadoWorkspace.rk_diffsNew[i*" << String( NX+NU ) << "+" << k.getName() << "]*acadoWorkspace.rk_diffsPrev[" << k.getName() << "*" << String( NX+NU ) << "+j];\n" );
+	loop02.addStatement( loop021 );
+	loop01.addStatement( loop02 );
+	loop->addStatement( loop01 );
 
-	if( grid.getNumIntervals() > 1 || !hasEquidistantGrid() ) {
-		if( hasEquidistantGrid() ) loop.addStatement( String( "if( run > 0 ) {\n" ) );
-		// calculation of the sensitivities using the chain rule:
-
-		ExportForLoop loop01( i,0,NX+NXA );
-		ExportForLoop loop02( j,0,NX );
-		loop02.addStatement( String( "rk_eta[" ) << String( NX+NXA ) << "+i*" << String( NX ) << "+j] = acadoWorkspace.rk_diffsNew[i*" << String( NX+NU ) << "]*acadoWorkspace.rk_diffsPrev[j];\n" );
-		for( run1 = 1; run1 < NX; run1++ ) {
-			loop02.addStatement( String( "rk_eta[" ) << String( NX+NXA ) << "+i*" << String( NX ) << "+j] += acadoWorkspace.rk_diffsNew[i*" << String( NX+NU ) << "+" << String( run1 ) << "]*acadoWorkspace.rk_diffsPrev[" << String( run1*(NX+NU) ) << "+j];\n" );
-		}
-		loop01.addStatement( loop02 );
-		loop.addStatement( loop01 );
-
+	if( NU > 0 ) {
 		ExportForLoop loop03( i,0,NX+NXA );
-		ExportForLoop loop04( j,0,NU );
+		ExportForLoop loop04( j,0,NU ); // TODO: EXPORTINDEX STUFF FROM MILAN
 		loop04.addStatement( String( "rk_eta[" ) << String( (NX+NXA)*(1+NX) ) << "+i*" << String( NU ) << "+j] = acadoWorkspace.rk_diffsNew[i*" << String( NX+NU ) << "+" << String( NX ) << "+j] + acadoWorkspace.rk_diffsNew[i*" << String( NX+NU ) << "]*acadoWorkspace.rk_diffsPrev[" << String( NX ) << "+j];\n" );
-		for( run1 = 1; run1 < NX; run1++ ) {
-			loop04.addStatement( String( "rk_eta[" ) << String( (NX+NXA)*(1+NX) ) << "+i*" << String( NU ) << "+j] += acadoWorkspace.rk_diffsNew[i*" << String( NX+NU ) << "+" << String( run1 ) << "]*acadoWorkspace.rk_diffsPrev[" << String( run1*(NX+NU) ) << "+" << String( NX ) << "+j];\n" );
-		}
+		ExportForLoop loop041( k,1,NX );
+		loop041.addStatement( String( "rk_eta[" ) << String( (NX+NXA)*(1+NX) ) << "+i*" << String( NU ) << "+j] += acadoWorkspace.rk_diffsNew[i*" << String( NX+NU ) << "+" << k.getName() << "]*acadoWorkspace.rk_diffsPrev[" << k.getName() << "*" << String( NX+NU ) << "+" << String( NX ) << "+j];\n" );
+		loop04.addStatement( loop041 );
 		loop03.addStatement( loop04 );
-		loop.addStatement( loop03 );
+		loop->addStatement( loop03 );
+	}
+
+	if( rk_outputs.size() > 0 && (grid.getNumIntervals() > 1 || !hasEquidistantGrid()) ) {
+		loop->addStatement( String( "if( run > 0 ) {\n" ) );
 
 		// chain rule for the sensitivities of the continuous output:
-		for( run1 = 0; run1 < rk_outputs.size(); run1++ ) {
-			ExportForLoop loop05( k,0,outputGrids[run1].getNumIntervals() );
-			uint numOutputs = getDimOUTPUT( run1 );
-			uint outputDim = outputGrids[run1].getNumIntervals( )*numOutputs*(NX+NU+1);
-			for( run2 = 0; run2 < numOutputs*(NX+NU); run2++ ) {
-				loop05.addStatement( String( rk_diffsOutputTemp.get( 0,run2 ) ) << " = " << rk_outputs[run1].getName() << "[run*" << String( outputDim ) << "+(k*" << String( numOutputs*(NX+NU+1) ) << ")+" << String( numOutputs+run2 ) << "];\n" );
-			}
+		for( run5 = 0; run5 < rk_outputs.size(); run5++ ) {
+			ExportForLoop loop05( run1,0,outputGrids[run5].getNumIntervals() );
+			uint numOutputs = getDimOUTPUT( run5 );
+			uint outputDim = outputGrids[run5].getNumIntervals( )*numOutputs*(NX+NU+1);
+			ExportForLoop loop051( k,0,numOutputs*(NX+NU) ); // TODO: EXPORTINDEX STUFF FROM MILAN
+			loop051.addStatement( String( rk_diffsOutputTemp.get( 0,k ) ) << " = " << rk_outputs[run5].getName() << "[run*" << String( outputDim ) << "+(" << run1.getName() << "*" << String( numOutputs*(NX+NU+1) ) << ")+" << String( numOutputs ) << "+" << k.getName() << "];\n" );
+			loop05.addStatement( loop051 );
 
 			ExportForLoop loop06( i,0,numOutputs );
-			ExportForLoop loop07( j,0,NX );
-			loop07.addStatement( String( rk_outputs[run1].getName() ) << "[run*" << String( outputDim ) << "+(k*" << String( numOutputs*(NX+NU+1) ) << ")+" << String( numOutputs ) << "+i*" << String( NX ) << "+j] = acadoWorkspace.rk_diffsOutputTemp[i*" << String( NX ) << "]*acadoWorkspace.rk_diffsPrev[j];\n" );
-			for( run2 = 1; run2 < NX; run2++ ) {
-				loop07.addStatement( String( rk_outputs[run1].getName() ) << "[run*" << String( outputDim ) << "+(k*" << String( numOutputs*(NX+NU+1) ) << ")+" << String( numOutputs ) << "+i*" << String( NX ) << "+j] += acadoWorkspace.rk_diffsOutputTemp[i*" << String( NX ) << "+" << String( run2 ) << "]*acadoWorkspace.rk_diffsPrev[" << String( run2*(NX+NU) ) << "+j];\n" );
-			}
+			ExportForLoop loop07( j,0,NX ); // TODO: EXPORTINDEX STUFF FROM MILAN
+			loop07.addStatement( String( rk_outputs[run5].getName() ) << "[run*" << String( outputDim ) << "+(" << run1.getName() << "*" << String( numOutputs*(NX+NU+1) ) << ")+" << String( numOutputs ) << "+i*" << String( NX ) << "+j] = acadoWorkspace.rk_diffsOutputTemp[i*" << String( NX ) << "]*acadoWorkspace.rk_diffsPrev[j];\n" );
+			ExportForLoop loop071( k,1,NX );
+			loop071.addStatement( String( rk_outputs[run5].getName() ) << "[run*" << String( outputDim ) << "+(" << run1.getName() << "*" << String( numOutputs*(NX+NU+1) ) << ")+" << String( numOutputs ) << "+i*" << String( NX ) << "+j] += acadoWorkspace.rk_diffsOutputTemp[i*" << String( NX ) << "+" << k.getName() << "]*acadoWorkspace.rk_diffsPrev[" << k.getName() << "*" << String( NX+NU ) << "+j];\n" );
+			loop07.addStatement( loop071 );
 			loop06.addStatement( loop07 );
 			loop05.addStatement( loop06 );
 
-			ExportForLoop loop08( i,0,numOutputs );
-			ExportForLoop loop09( j,0,NU );
-			loop09.addStatement( String( rk_outputs[run1].getName() ) << "[run*" << String( outputDim ) << "+(k*" << String( numOutputs*(NX+NU+1) ) << ")+" << String( numOutputs*(1+NX) ) << "+i*" << String( NU ) << "+j] = acadoWorkspace.rk_diffsOutputTemp[" << String( numOutputs*NX ) << "+i*" << String( NU ) << "+j] + acadoWorkspace.rk_diffsOutputTemp[i*" << String( NX ) << "]*acadoWorkspace.rk_diffsPrev[" << String( NX ) << "+j];\n" );
-			for( run2 = 1; run2 < NX; run2++ ) {
-				loop09.addStatement( String( rk_outputs[run1].getName() ) << "[run*" << String( outputDim ) << "+(k*" << String( numOutputs*(NX+NU+1) ) << ")+" << String( numOutputs*(1+NX) ) << "+i*" << String( NU ) << "+j] += acadoWorkspace.rk_diffsOutputTemp[i*" << String( NX ) << "+" << String( run2 ) << "]*acadoWorkspace.rk_diffsPrev[" << String( run2*(NX+NU)+NX ) << "+j];\n" );
+			if( NU > 0 ) {
+				ExportForLoop loop08( i,0,numOutputs );
+				ExportForLoop loop09( j,0,NU ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				loop09.addStatement( String( rk_outputs[run5].getName() ) << "[run*" << String( outputDim ) << "+(" << run1.getName() << "*" << String( numOutputs*(NX+NU+1) ) << ")+" << String( numOutputs*(1+NX) ) << "+i*" << String( NU ) << "+j] = acadoWorkspace.rk_diffsOutputTemp[" << String( numOutputs*NX ) << "+i*" << String( NU ) << "+j] + acadoWorkspace.rk_diffsOutputTemp[i*" << String( NX ) << "]*acadoWorkspace.rk_diffsPrev[" << String( NX ) << "+j];\n" );
+				ExportForLoop loop091( k,1,NX );
+				loop091.addStatement( String( rk_outputs[run5].getName() ) << "[run*" << String( outputDim ) << "+(" << run1.getName() << "*" << String( numOutputs*(NX+NU+1) ) << ")+" << String( numOutputs*(1+NX) ) << "+i*" << String( NU ) << "+j] += acadoWorkspace.rk_diffsOutputTemp[i*" << String( NX ) << "+" << k.getName() << "]*acadoWorkspace.rk_diffsPrev[" << k.getName() << "*" << String( NX+NU ) << "+" << String( NX ) << "+j];\n" );
+				loop09.addStatement( loop091 );
+				loop08.addStatement( loop09 );
+				loop05.addStatement( loop08 );
 			}
-			loop08.addStatement( loop09 );
-			loop05.addStatement( loop08 );
-			loop.addStatement( loop05 );
+			loop->addStatement( loop05 );
 		}
-
-		if( hasEquidistantGrid() ) {
-			loop.addStatement( String( "}\n" ) );
-			loop.addStatement( String( "else {\n" ) );
-			loop.addStatement( rk_diffsPrev == rk_diffsNew );
-			loop.addStatement( String( "}\n" ) );
-		}
+		loop->addStatement( String( "}\n" ) );
 	}
 
-	loop.addStatement( rk_ttt += Matrix(h) );
-
-	// TODO: CHECK IF THIS ACTUALLY HELPS
-//	// Initialization for the NEXT step:
-//	for( run1 = 0; run1 < numStages; run1++ ) {
-//		for( run2 = 0; run2 < NX+NXA; run2++ ) {
-//			loop.addStatement( rk_sol.getCol( run1*(NX+NXA)+run2 ) == rk_kkk.getSubMatrix( run1,run1+1,run2,run2+1 ) );
-//		}
-//	}
-//	for( run1 = 0; run1 < numStages; run1++ ) {
-//		for( run2 = 0; run2 < NX+NXA; run2++ ) {
-//			loop.addStatement( rk_kkk.getSubMatrix( run1,run1+1,run2,run2+1 ) == 0 );
-//			for( run3 = 0; run3 < numStages; run3++ ) {
-//				loop.addStatement( rk_kkk.getSubMatrix( run1,run1+1,run2,run2+1 ) += DM.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_sol.getCol( run3*(NX+NXA)+run2 ) );
-//			}
-//		}
-//	}
-
-	loop.addStatement( String( rk_num.get(0,0) ) << " += 1;\n" );
+	loop->addStatement( rk_ttt += Matrix(h) );
+	loop->addStatement( String( rk_num.get(0,0) ) << " += 1;\n" );
 
     // end of the integrator loop.
     if( !hasEquidistantGrid() ) {
-		loop.addStatement( "}\n" );
-		loop.unrollLoop();
+		loop->addStatement( "}\n" );
 	}
-	integrate.addStatement( loop );
+    else {
+    	integrate.addStatement( *loop );
+    }
 	code.addFunction( integrate );
-	
     code.addLinebreak( 2 );
-	
+
 	solver->getCode( code );
 
     return SUCCESSFUL_RETURN;
@@ -1306,11 +1026,19 @@ returnValue ImplicitRungeKuttaExport::evaluatePolynomial( ExportStatementBlock& 
 {
 	uint i, j;
 
-	for( j = 0; j < numStages; j++ ) {
-		block.addStatement( (String)variable.getFullName() << "[" << j << "] = pow( " << gridVariable.getName() << "[" << indexTime.getName() << "], " << numStages << " )*" << coeffs( 0,j ) << ";\n" );
-		for( i = 1; i < numStages; i++ ) {
-			block.addStatement( (String)variable.getFullName() << "[" << j << "] += pow( " << gridVariable.getName() << "[" << indexTime.getName() << "], " << numStages-i << " )*" << coeffs( i,j ) << ";\n" );
+	block.addStatement( (String)polynEvalVar.getName() << " = " << gridVariable.getName() << "[" << indexTime.getName() << "];\n" );
+	for( i = 0; i < numStages; i++ ) {
+		for( j = 0; j < numStages; j++ ) {
+			if( i == 0 ) {
+				block.addStatement( (String)variable.getFullName() << "[" << j << "] = " << polynEvalVar.getName() << "*" << coeffs( numStages-1-i,j ) << ";\n" );
+			}
+			else {
+				block.addStatement( (String)variable.getFullName() << "[" << j << "] += " << polynEvalVar.getName() << "*" << coeffs( numStages-1-i,j ) << ";\n" );
+			}
 		}
+		if( i < (numStages-1) ) block.addStatement( (String)polynEvalVar.getName() << " *= " << gridVariable.getName() << "[" << indexTime.getName() << "];\n" );
+	}
+	for( j = 0; j < numStages; j++ ) {
 		block.addStatement( (String)variable.getFullName() << "[" << j << "] *= " << h << ";\n" );
 	}
 
@@ -1343,9 +1071,11 @@ returnValue ImplicitRungeKuttaExport::evaluateDerivedPolynomial( ExportStatement
 	
 	// construct the Lagrange interpolating polynomials:
 	for( i = 0; i < numStages; i++ ) {
-		block.addStatement( (String)variable.getFullName() << "[" << i << "] = 1.0;\n" );
 		for( j = 0; j < numStages; j++ ) {
-			if( i != j ) {
+			if( (i == 0 && j == 1) || (i != j && j == 0) ) {
+				block.addStatement( (String)variable.getFullName() << "[" << i << "] = (" << gridVariable.getName() << "[" << indexTime.getName() << "] - " << cc(j) << ")*" << 1/(cc(i)-cc(j)) << ";\n" );
+			}
+			else if( i != j ) {
 				block.addStatement( (String)variable.getFullName() << "[" << i << "] *= (" << gridVariable.getName() << "[" << indexTime.getName() << "] - " << cc(j) << ")*" << 1/(cc(i)-cc(j)) << ";\n" );
 			}
 		}
@@ -1443,21 +1173,6 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 	if( outputGrids_.size() != outputExpressions_.size() ) return ACADOERROR( RET_INVALID_ARGUMENTS ); 
 	outputGrids = outputGrids_;
 	outputExpressions = outputExpressions_;
-	
-	// unroll output evaluation:
-	int unrollOutput;
-	userInteraction->get( INTEGRATOR_UNROLL_OUTPUT,unrollOutput );
-	switch( (UnrollOption) unrollOutput ) {
-	case UNROLL:
-		UNROLL_OUTPUT = BT_TRUE;
-		break;
-	case NO_UNROLL:
-		UNROLL_OUTPUT = BT_FALSE;
-		break;
-	default:
-		UNROLL_OUTPUT = BT_TRUE;
-		break;
-	}
 
 	uint i;
 	uint maxOutputs = 0;
@@ -1467,9 +1182,6 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 	for( i = 0; i < outputGrids.size(); i++ ) {
 		uint numOutputs = outputExpressions_[i].getDim();
 		uint outputDim = outputGrids[i].getNumIntervals( )*grid.getNumIntervals()*numOutputs*(NX+NU+1);
-		if( (UnrollOption) unrollOutput == HEURISTIC_UNROLL && outputGrids[i].getNumIntervals( ) > 10 ) {
-			UNROLL_OUTPUT = BT_FALSE;
-		}
 		
 		if( numOutputs > maxOutputs ) maxOutputs = numOutputs;
 		
@@ -1495,10 +1207,9 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 	setup();
 	rk_rhsOutputTemp = ExportVariable( "rk_rhsOutputTemp", 1, maxOutputs, REAL, ACADO_WORKSPACE );
 	rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(NX+NXA+NU+NDX), REAL, ACADO_WORKSPACE );
-	if( !UNROLL_OUTPUT ) {
-		rk_outH = ExportVariable( "rk_outH", 1, numStages, REAL, ACADO_WORKSPACE );
-		rk_out2 = ExportVariable( "rk_out2", 1, numStages, REAL, ACADO_WORKSPACE );
-	}
+	rk_outH = ExportVariable( "rk_outH", 1, numStages, REAL, ACADO_WORKSPACE );
+	rk_out2 = ExportVariable( "rk_out2", 1, numStages, REAL, ACADO_WORKSPACE );
+	polynEvalVar = ExportVariable( "tmp_polyn", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
 	
 	return ( val );
 }
@@ -1518,21 +1229,6 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 		name_diffs_OUTPUTS = _diffs_outputNames;
 		num_OUTPUTS = _dims_output;
 
-		// unroll output evaluation:
-		int unrollOutput;
-		userInteraction->get( INTEGRATOR_UNROLL_OUTPUT,unrollOutput );
-		switch( (UnrollOption) unrollOutput ) {
-		case UNROLL:
-			UNROLL_OUTPUT = BT_TRUE;
-			break;
-		case NO_UNROLL:
-			UNROLL_OUTPUT = BT_FALSE;
-			break;
-		default:
-			UNROLL_OUTPUT = BT_TRUE;
-			break;
-		}
-
 		uint i;
 		uint maxOutputs = 0;
 		rk_outputs.clear();
@@ -1541,9 +1237,6 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 		for( i = 0; i < outputGrids.size(); i++ ) {
 			uint numOutputs = num_OUTPUTS[i];
 			uint outputDim = outputGrids[i].getNumIntervals( )*grid.getNumIntervals()*numOutputs*(NX+NU+1);
-			if( (UnrollOption) unrollOutput == HEURISTIC_UNROLL && outputGrids[i].getNumIntervals( ) > 10 ) {
-				UNROLL_OUTPUT = BT_FALSE;
-			}
 
 			if( numOutputs > maxOutputs ) maxOutputs = numOutputs;
 
@@ -1554,10 +1247,9 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 		setup();
 		rk_rhsOutputTemp = ExportVariable( "rk_rhsOutputTemp", 1, maxOutputs, REAL, ACADO_WORKSPACE );
 		rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(NX+NXA+NU+NDX), REAL, ACADO_WORKSPACE );
-		if( !UNROLL_OUTPUT ) {
-			rk_outH = ExportVariable( "rk_outH", 1, numStages, REAL, ACADO_WORKSPACE );
-			rk_out2 = ExportVariable( "rk_out2", 1, numStages, REAL, ACADO_WORKSPACE );
-		}
+		rk_outH = ExportVariable( "rk_outH", 1, numStages, REAL, ACADO_WORKSPACE );
+		rk_out2 = ExportVariable( "rk_out2", 1, numStages, REAL, ACADO_WORKSPACE );
+		polynEvalVar = ExportVariable( "tmp_polyn", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
 
 		EXPORT_RHS = BT_FALSE;
 	}
@@ -1614,6 +1306,7 @@ returnValue ImplicitRungeKuttaExport::copy(	const ImplicitRungeKuttaExport& arg
 	rk_diffsOutputTemp = arg.rk_diffsOutputTemp;
 	rk_outH = arg.rk_outH;
 	rk_out2 = arg.rk_out2;
+	polynEvalVar = arg.polynEvalVar;
 	rk_outputs = arg.rk_outputs;
 	
 	// ExportFunctions
@@ -1621,7 +1314,6 @@ returnValue ImplicitRungeKuttaExport::copy(	const ImplicitRungeKuttaExport& arg
 	
 	REUSE = arg.REUSE;
 	CONTINUOUS_OUTPUT = arg.CONTINUOUS_OUTPUT;
-	UNROLL_OUTPUT = arg.UNROLL_OUTPUT;
 	
 	DD = arg.DD;
 	coeffs = arg.coeffs;

@@ -289,7 +289,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
     
 		BooleanType REUSE;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
 		BooleanType CONTINUOUS_OUTPUT;			/**< This boolean is true when continuous output needs to be provided. */
-		BooleanType UNROLL_OUTPUT;				/**< This boolean is true when the evaluations for the continuous output should be unrolled. */
+//		BooleanType UNROLL_OUTPUT;				/**< This boolean is true when the evaluations for the continuous output should be unrolled. */
 
 		uint diffsDim;							/**< This is the total number of sensitivities needed. */
 		uint inputDim;							/**< This is the dimension of the input to the integrator. */
@@ -313,6 +313,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		std::vector<ExportVariable> rk_outputs;	/**< Variables containing the evaluations of the continuous output from the integrator. */
 		ExportVariable 	rk_outH;				/**< Variable that is used for the evaluations of the continuous output. */
 		ExportVariable 	rk_out2;				/**< Variable that is used for the evaluations of the continuous output. */
+		ExportVariable 	polynEvalVar;			/**< Local variable that is used for the evaluations of the continuous output. */
 		
 		Matrix DD;								/**< This matrix is used for the initialization of the variables for the next integration step. */
 		Matrix coeffs;							/**< This matrix contains coefficients of polynomials that are used to evaluate the continuous output (see evaluatePolynomial). */

@@ -360,7 +360,7 @@ enum OptionsName
 	IMPLICIT_INTEGRATOR_MODE,					/**< This determines the mode of the implicit integrator (see enum ImplicitIntegratorMode). */
 	IMPLICIT_INTEGRATOR_NUM_ITS,				/**< This is the performed number of Newton iterations in the implicit integrator. */
 	IMPLICIT_INTEGRATOR_NUM_ITS_INIT,			/**< This is the performed number of Newton iterations in the implicit integrator for the initialization of the first step. */
-	INTEGRATOR_UNROLL_OUTPUT,					/**< This option determines the unrolling of the evaluation of the continuous output. */
+//	INTEGRATOR_UNROLL_OUTPUT,					/**< This option determines the unrolling of the evaluation of the continuous output. */
 	UNROLL_LINEAR_SOLVER,						/**< This option of the boolean type determines the unrolling of the linear solver (no unrolling recommended for larger systems). */
 //	CONSISTENCY_ITERATIONS,						/**< This option specifies the number of Newton iterations, performed to make the initial values of the algebraic states consistent with those of the differential states. */
 	OPT_UNKNOWN,

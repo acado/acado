@@ -346,17 +346,17 @@ returnValue ExportArgument::exportDataDeclaration(	FILE* file,
 	}
 	else
 	{
-		if ( getDim( ) == 1 )
-		{
-			if (getType() == REAL)
-				acadoFPrintf( file," = %e;\n\n", data(0,0) );
-			else if (getType() == INT)
-				acadoFPrintf( file," = %d;\n\n", static_cast< int >(data(0,0)) );
-			else
-				return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
-		}
-		else
-		{
+//		if ( getDim( ) == 1 )
+//		{
+//			if (getType() == REAL)
+//				acadoFPrintf( file," = %e;\n\n", data(0,0) );
+//			else if (getType() == INT)
+//				acadoFPrintf( file," = %d;\n\n", static_cast< int >(data(0,0)) );
+//			else
+//				return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+//		}
+//		else
+//		{
 			acadoFPrintf( file," = " );
 
 			if (getType() == REAL)
@@ -369,7 +369,7 @@ returnValue ExportArgument::exportDataDeclaration(	FILE* file,
 			}
 			else
 				return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
-		}
+//		}
 	}
 
 	return SUCCESSFUL_RETURN;

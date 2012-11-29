@@ -82,7 +82,7 @@ returnValue ExportHouseholderQR::getFunctionDeclarations(	ExportStatementBlock& 
 															) const
 {
 	declarations.addDeclaration( solve );
-	if( REUSE == BT_TRUE ) {
+	if( REUSE ) {
 		declarations.addDeclaration( solveReuse );
 	}
 
@@ -94,8 +94,13 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 											)
 {
 	uint run1, run2, run3;
+	ExportIndex i( "i" );
+	ExportIndex j( "j" );
+	ExportIndex k( "k" );
 	if( !UNROLLING ) {
-		solve.addStatement( String( "int i, j, k;\n" ) );
+		solve.addIndex( i );
+		solve.addIndex( j );
+		solve.addIndex( k );
 	}
 	
 	if( UNROLLING || dim <= 5 ) {
@@ -130,7 +135,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 			solve.addStatement( rk_temp.getCol( dim ) == rk_temp.getCols( run1,dim )*A.getSubMatrix( run1,dim,run1,run1+1 ) );
 			solve.addStatement( String( "acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] *= 2;\n" );
 			solve.addStatement( A.getSubMatrix( run1,run1+1,run1,run1+1 ) -= rk_temp.getCol( run1 )*rk_temp.getCol( dim ) );
-			if( REUSE == BT_TRUE ) {
+			if( REUSE ) {
 				// replace zeros by results that can be reused:
 				for( run2 = run1; run2 < dim-1; run2++ ) {
 					solve.addStatement( A.getSubMatrix( run2+1,run2+2,run1,run1+1 ) == rk_temp.getCol( run2 ) );
@@ -152,7 +157,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 				solve.addStatement( b.getRow( run3 ) -= rk_temp.getCol( run3 )*rk_temp.getCol( dim ) );
 			}
 			
-			if( REUSE == BT_TRUE ) {
+			if( REUSE ) {
 				// store last element to be reused:
 				solve.addStatement( rk_temp.getCol( run1 ) == rk_temp.getCol( dim-1 ) );
 			}
@@ -184,7 +189,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 		solve.addStatement( String( "	}\n" ) );
 		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] *= 2;\n" );
 		solve.addStatement( String( "	A[i*" ) << String( dim ) << "+i] -= acadoWorkspace.rk_" << identifier << "temp[i]*acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "];\n" );
-		if( REUSE == BT_TRUE ) {
+		if( REUSE ) {
 			solve.addStatement( String( "	for( j=i; j < (" ) << String( dim ) << "-1); j++ ) {\n" );
 			solve.addStatement( String( "		A[(j+1)*" ) << String( dim ) << "+i] = acadoWorkspace.rk_" << identifier << "temp[j];\n" );
 			solve.addStatement( String( "	}\n" ) );
@@ -207,7 +212,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 		solve.addStatement( String( "	for( k=i; k < " ) << String( dim ) << "; k++ ) {\n" );
 		solve.addStatement( String( "		b[k] -= acadoWorkspace.rk_" ) << identifier << "temp[k]*acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "];\n" );
 		solve.addStatement( String( "	}\n" ) );
-		if( REUSE == BT_TRUE ) {
+		if( REUSE ) {
 			solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[i] = acadoWorkspace.rk_" << identifier << "temp[" << String( dim-1 ) << "];\n" );
 		}
 		solve.addStatement( String( "}\n" ) );
@@ -219,19 +224,18 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 	solve.addLinebreak();
 	
 	// Solve the upper triangular system of equations which is left, using back substitution:
-	for( run1 = dim; run1 > 0; run1--) {
-		solve.addStatement( x.getRow( (run1-1) ) == b.getRow( (run1-1) ) );
-		for( run2 = dim-1; run2 > (run1-1); run2--) {
-			solve.addStatement( x.getRow( (run1-1) ) -= A.getSubMatrix( (run1-1),(run1-1)+1,run2,run2+1 ) * x.getRow( run2 ) );
-		}
-		solve.addStatement( String( "x[" ) << String( (run1-1) ) << "] = x[" << String( (run1-1) ) << "]/A[" << String( (run1-1)*dim+(run1-1) ) << "];\n" );
-	}
+	solve.addStatement( String( "for( i=" ) << String(dim) << "; i>0; i-- ) {\n" );
+	solve.addStatement( String( "	x[i-1] = b[i-1];\n" ) );
+	solve.addStatement( String( "	for( j=" ) << String(dim-1) << "; j>(i-1); j-- ) {\n" );
+	solve.addStatement( String( "		x[i-1] -= A[" ) << String( dim ) << "*(i-1)+j]*x[j];\n" );
+	solve.addStatement( String( "	}\n" ) );
+	solve.addStatement( String( "	x[i-1] = x[i-1]/A[" ) << String( dim ) << "*(i-1)+i-1];\n" );
+	solve.addStatement( String( "}\n" ) );
 	
 	code.addFunction( solve );
 	
     code.addLinebreak( 2 );
-	if( REUSE == BT_TRUE ) { // Also export the extra function which reuses the factorization of the matrix A
-		
+	if( REUSE ) { // Also export the extra function which reuses the factorization of the matrix A
 		// update right-hand side:
 		for( run1 = 0; run1 < (dim-1); run1++ ) {
 			solveReuse.addStatement( rk_temp.getCol( dim ) == A.getSubMatrix( run1+1,run1+2,run1,run1+1 )*b.getRow( run1 ) );
@@ -247,7 +251,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 		}
 		solveReuse.addStatement( String( "b[" ) << String( dim-1 ) << "] *= -1;\n" );
 		solveReuse.addLinebreak();
-		
+
 		// Solve the upper triangular system of equations which is left, using back substitution:
 		for( run1 = dim; run1 > 0; run1--) {
 			solveReuse.addStatement( x.getRow( (run1-1) ) == b.getRow( (run1-1) ) );
@@ -256,7 +260,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 			}
 			solveReuse.addStatement( String( "x[" ) << String( (run1-1) ) << "] = x[" << String( (run1-1) ) << "]/A[" << String( (run1-1)*dim+(run1-1) ) << "];\n" );
 		}
-		
+
 		code.addFunction( solveReuse );
 	}
 	
@@ -273,7 +277,7 @@ returnValue ExportHouseholderQR::setup( )
 	solve = ExportFunction( getNameSolveFunction(), A, b, x);
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	
-	if( REUSE == BT_TRUE ) {
+	if( REUSE ) {
 		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b, x);
 		solveReuse.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	}
