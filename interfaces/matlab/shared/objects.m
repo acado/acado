@@ -231,6 +231,12 @@ if (returnlist == 0 || returnlist == 2 || returnlist == 3)
 	BIN = [BIN; ol'];
 	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
 	
+	[fl, ol] = getFilesAndObjectNames('../../external_packages/casadi/symbolic');
+
+	SRC = [SRC; fl];
+	BIN = [BIN; ol'];
+	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	
 end;
 
 
