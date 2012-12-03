@@ -82,13 +82,13 @@ class ExportArithmeticStatement : public ExportStatement
 		 *	@param[in] _op2			Operator between second and third right-hand side expression.
 		 *	@param[in] _rhs3		Third right-hand side expression.
 		 */
-		ExportArithmeticStatement(	const ExportVariable* const _lhs,
+		ExportArithmeticStatement(	const ExportVariable& _lhs,
 									ExportStatementOperator _op0,
-									const ExportVariable* const _rhs1,
+									const ExportVariable& _rhs1,
 									ExportStatementOperator _op1,
-									const ExportVariable* const _rhs2,
+									const ExportVariable& _rhs2,
 									ExportStatementOperator _op2 = ESO_UNDEFINED,
-									const ExportVariable* const _rhs3 = 0
+									const ExportVariable& _rhs3 = 0
 									);
 
 		/** Copy constructor (deep copy).
@@ -236,10 +236,10 @@ class ExportArithmeticStatement : public ExportStatement
     protected:
 
 		// Refactor this guys as shared pointers
-		ExportVariable* lhs;					/**< Left-hand side expression of arithmetic statement. */
-		ExportVariable* rhs1;					/**< First right-hand side expression of arithmetic statement. */
-		ExportVariable* rhs2;					/**< Second right-hand side expression of arithmetic statement. */
-		ExportVariable* rhs3;					/**< Third right-hand side expression of arithmetic statement. */
+		ExportVariable lhs;						/**< Left-hand side expression of arithmetic statement. */
+		ExportVariable rhs1;					/**< First right-hand side expression of arithmetic statement. */
+		ExportVariable rhs2;					/**< Second right-hand side expression of arithmetic statement. */
+		ExportVariable rhs3;					/**< Third right-hand side expression of arithmetic statement. */
 
 		ExportStatementOperator op0;			/**< Operator between left- and right-hand side expression of arithmetic statement. */
 		ExportStatementOperator op1; 			/**< Operator between first and second right-hand side expression of arithmetic statement. */

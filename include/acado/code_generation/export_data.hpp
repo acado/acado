@@ -26,7 +26,7 @@
 
 /**
  *    \file include/acado/code_generation/export_data.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
@@ -34,10 +34,12 @@
 #define ACADO_TOOLKIT_EXPORT_DATA_HPP
 
 #include <acado/utils/acado_utils.hpp>
-
-// #include <casadi/symbolic/shared_object.hpp>
+#include <casadi/symbolic/shared_object.hpp>
 
 BEGIN_NAMESPACE_ACADO
+
+// Forward declaration
+class ExportDataInternal;
 
 /** 
  *	\brief Abstract base class to define variables to be used for exporting code
@@ -49,7 +51,7 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-class ExportData // : public CasADi::SharedObject
+class ExportData : public CasADi::SharedObject
 {
     //
     // PUBLIC MEMBER FUNCTIONS:
@@ -59,57 +61,17 @@ class ExportData // : public CasADi::SharedObject
 		 */
         ExportData( );
 
-		/** Default constructor which optionally takes name and type string
-		 *	of the data object.
-		 *
-		 *	@param[in] _name			Name of the data object.
-		 *	@param[in] _type			Data type of the data object.
-		 *	@param[in] _dataStruct		Global data struct to which the data object belongs to (if any).
-		 */
-		ExportData(	const String& _name,
-					ExportType _type = REAL,
-					ExportStruct _dataStruct = ACADO_LOCAL,
-					const String& _prefix = emptyConstString
-					);
-
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportData(	const ExportData& arg
-					);
-
         /** Destructor.
 		 */
         virtual ~ExportData( );
 
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportData& operator=(	const ExportData& arg
-								);
+        /** An operator for access to functions and  members of the node
+         */
+        ExportDataInternal* operator->();
 
-		/** Clone constructor (deep copy).
-		 *
-		 *	\return Pointer to cloned object.
-		 */
-		virtual ExportData* clone( ) const = 0;
-
-
-		/** Initializes data object with given name and type.
-		 *
-		 *	@param[in] _name			Name of the data object.
-		 *	@param[in] _type			Data type of the data object.
-		 *	@param[in] _dataStruct		Global data struct to which the data object belongs to (if any).
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue init(	const String& _name,
-							ExportType _type = REAL,
-							ExportStruct _dataStruct = ACADO_LOCAL,
-							const String& _prefix = emptyConstString
-							);
+        /** An operator for const access to functions and  members of the node
+         */
+        const ExportDataInternal* operator->() const;
 
 		/** Sets the name of the data object.
 		 *
@@ -208,7 +170,7 @@ class ExportData // : public CasADi::SharedObject
 													const String& _realString = "real_t",
 													const String& _intString = "int",
 													int _precision = 16
-													) const = 0;
+													) const;
 
 
 		/** Returns whether the index is set to a given value.
@@ -216,33 +178,7 @@ class ExportData // : public CasADi::SharedObject
 		 *	\return BT_TRUE  iff index is set to a given value, \n
 		 *	        BT_FALSE otherwise
 		 */
-		virtual BooleanType isGiven( ) const = 0;
-
-
-	//
-    // PROTECTED MEMBER FUNCTIONS:
-    //
-    protected:
-
-    protected:
-
-		/** Name of the data object. */
-		String name;
-
-		/**< Data type of the data object. */
-		ExportType type;
-
-		/** Prefix, which is added before the structure name*/
-		String prefix;
-
-		/**< Global data struct to which the data object belongs to (if any). */
-		ExportStruct dataStruct;
-
-		/**< Full name of the data object including the possible prefix of the global data struct. */
-		String fullName;
-
-    private:
-		returnValue setFullName( void );
+		virtual BooleanType isGiven( );
 };
 
 CLOSE_NAMESPACE_ACADO

@@ -41,43 +41,32 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExportDataDeclaration::ExportDataDeclaration( ) : ExportStatement( )
-{
-	data = 0;
-}
+{}
 
 
 ExportDataDeclaration::ExportDataDeclaration(	const ExportVariable& _data
 												) : ExportStatement( )
 {
-	data = new ExportVariable( _data );
+	data = _data;
 }
 
 
 ExportDataDeclaration::ExportDataDeclaration(	const ExportIndex& _data
 												) : ExportStatement( )
 {
-	data = new ExportIndex( _data );
+	data = _data;
 }
 
 
 ExportDataDeclaration::ExportDataDeclaration(	const ExportDataDeclaration& arg
 												) : ExportStatement( arg )
 {
-	if ( arg.data != 0 )
-		data = arg.data->clone( );
-	else
-		data = 0;
+	data = arg.data;
 }
 
 
 ExportDataDeclaration::~ExportDataDeclaration( )
-{
-	if ( data != 0 )
-	{
-		delete data;
-		data = 0;
-	}
-}
+{}
 
 
 ExportDataDeclaration& ExportDataDeclaration::operator=(	const ExportDataDeclaration& arg
@@ -85,18 +74,7 @@ ExportDataDeclaration& ExportDataDeclaration::operator=(	const ExportDataDeclara
 {
 	if( this != &arg )
 	{
-		if ( data != 0 )
-		{
-			delete data;
-			data = 0;
-		}
-
-		ExportStatement::operator= ( arg );
-
-		if ( arg.data != 0 )
-			data = arg.data->clone( );
-		else
-			data = 0;
+		data = arg.data;
 	}
 
 	return *this;
@@ -118,10 +96,7 @@ returnValue ExportDataDeclaration::exportCode(	FILE* file,
 												int _precision
 												) const
 {
-	if ( data == 0 )
-		return SUCCESSFUL_RETURN;
-	
-	return data->exportDataDeclaration( file,_realString,_intString,_precision );
+	return data.exportDataDeclaration(file, _realString, _intString, _precision);
 }
 
 

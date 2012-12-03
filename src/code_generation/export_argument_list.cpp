@@ -42,9 +42,6 @@ BEGIN_NAMESPACE_ACADO
 
 ExportArgumentList::ExportArgumentList( )
 {
-	nArguments = 0;
-	arguments  = 0;
-	
 	doIncludeType( );
 }
 
@@ -60,9 +57,6 @@ ExportArgumentList::ExportArgumentList(	const ExportArgument& _argument1,
 										const ExportArgument& _argument9
 										)
 {
-	nArguments = 0;
-	arguments  = 0;
-	
 	addArgument( _argument1,_argument2,_argument3,
 				 _argument4,_argument5,_argument6,
 				 _argument7,_argument8,_argument9 );
@@ -71,19 +65,7 @@ ExportArgumentList::ExportArgumentList(	const ExportArgument& _argument1,
 
 ExportArgumentList::ExportArgumentList( const ExportArgumentList& arg )
 {
-	nArguments = arg.nArguments;
-
-	if ( arg.arguments != 0 )
-	{
-		arguments = (ExportArgument**) calloc( nArguments,sizeof(ExportArgument*) );
-		for( uint i=0; i<nArguments; ++i )
-			arguments[i] = new ExportArgument( *(arg.arguments[i]) );
-	}
-	else
-	{
-		nArguments = 0;
-		arguments = 0;
-	}
+	arguments = arg.arguments;
 	
 	includeType = arg.includeType;
 }
@@ -101,19 +83,7 @@ ExportArgumentList& ExportArgumentList::operator=( const ExportArgumentList& arg
 	{
 		clear( );
 
-		nArguments = arg.nArguments;
-	
-		if ( arg.arguments != 0 )
-		{
-			arguments = (ExportArgument**) calloc( nArguments,sizeof(ExportArgument*) );
-			for( uint i=0; i<nArguments; ++i )
-				arguments[i] = new ExportArgument( *(arg.arguments[i]) );
-		}
-		else
-		{
-			nArguments = 0;
-			arguments = 0;
-		}
+		arguments = arg.arguments;
 		
 		includeType = arg.includeType;
 	}
@@ -150,7 +120,7 @@ returnValue ExportArgumentList::addArgument(	const ExportArgument& _argument1,
 
 uint ExportArgumentList::getNumArguments( ) const
 {
-	return nArguments;
+	return arguments.size();
 }
 
 
@@ -161,27 +131,26 @@ returnValue ExportArgumentList::exportCode(	FILE* file,
 											int _precision
 											) const
 {
-	for( uint i=0; i<nArguments; ++i )
+	for (unsigned i = 0; i < arguments.size(); ++i)
 	{
-		// only export arguments that are not explicitly given
-		if ( arguments[i]->isGiven( ) == BT_FALSE )
-		{
-			if ( includeType == BT_TRUE )
-			{
-				if ( arguments[i]->isCalledByValue( ) == BT_TRUE )
-					acadoFPrintf( file,"%s ", arguments[i]->getTypeString( _realString,_intString ).getName() );
-				else
-					acadoFPrintf( file,"%s* ", arguments[i]->getTypeString( _realString,_intString ).getName() );
-			}
+		if ( arguments[ i ].isGiven( ) == BT_TRUE )
+			continue;
 
-			if ( includeType == BT_FALSE )
-				acadoFPrintf( file,"%s", arguments[i]->getAddressString( ) );
+		if ( includeType == BT_TRUE )
+		{
+			if ( arguments[ i ].isCalledByValue( ) == BT_TRUE )
+				acadoFPrintf(file, "%s ", arguments[ i ].getTypeString(_realString, _intString).getName());
 			else
-				acadoFPrintf( file,"%s", arguments[i]->getAddressString( BT_FALSE ) );
-			
-			if ( i < nArguments-1 )
-				acadoFPrintf( file,", " );
+				acadoFPrintf(file, "%s* ", arguments[ i ].getTypeString(_realString, _intString).getName());
 		}
+
+		if ( includeType == BT_FALSE )
+			acadoFPrintf(file, "%s", arguments[ i ].getAddressString( ).getName());
+		else
+			acadoFPrintf(file, "%s", arguments[ i ].getAddressString( BT_FALSE ).getName());
+
+		if (i < arguments.size() - 1)
+			acadoFPrintf(file, ", ");
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -191,19 +160,6 @@ returnValue ExportArgumentList::exportCode(	FILE* file,
 
 returnValue ExportArgumentList::clear( )
 {
-	if ( arguments != 0 )
-	{
-		for( uint i=0; i<nArguments; ++i )
-		{
-			delete arguments[i];
-			arguments[i] = 0;
-		}
-		free( arguments );
-		arguments = 0;
-		
-		nArguments = 0;
-	}
-
 	doIncludeType( );
 
 	return SUCCESSFUL_RETURN;
@@ -233,14 +189,12 @@ returnValue ExportArgumentList::doNotIncludeType( )
 returnValue ExportArgumentList::addSingleArgument(	const ExportArgument& _argument
 													)
 {
-	// nothing to do?
-	if ( _argument.getDim( ) == 0 )
+	if ( _argument.isNull() )
+		return SUCCESSFUL_RETURN;
+	if (_argument.getDim() == 0)
 		return SUCCESSFUL_RETURN;
 
-	++nArguments;
-
-	arguments = (ExportArgument**) realloc( arguments,nArguments*sizeof(ExportArgument*) );
-	arguments[ nArguments-1 ] = new ExportArgument( _argument );
+	arguments.push_back( _argument );
 
 	return SUCCESSFUL_RETURN;
 }

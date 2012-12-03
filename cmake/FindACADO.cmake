@@ -43,7 +43,7 @@
 #		toolkit. If you install ACADO toolkit you do not need this script.
 #
 #	- PREREQUISITE: sourced acado_env.sh in your ~/.bashrc file. This script
-#		fill try to find ACADO folders, libraries etc., but looking for them
+#		will try to find ACADO folders, libraries etc., but looking for them
 #		in enviromental variables.
 #
 # Usage:
@@ -88,52 +88,34 @@ ENDIF( ACADO_LIBRARY_DIRS )
 # Static libs
 #
 MESSAGE( STATUS "Looking for ACADO toolkit static libraries" )
-SET( ACADO_STATIC_LIBS_FOUND TRUE )
 
-FIND_LIBRARY( ACADO_TOOLKIT_LIB
-	NAMES acado_toolkit
-	PATHS ${ACADO_LIBRARY_DIRS}
-	NO_DEFAULT_PATH
-)
-IF( ACADO_TOOLKIT_LIB )
-	MESSAGE( STATUS "Found ACADO static library: acado_toolkit" )
-ELSE( ACADO_TOOLKIT_LIB )
-	MESSAGE( STATUS "Could not find ACADO static library: acado_toolkit" )
-	SET( ACADO_STATIC_LIBS_FOUND FALSE )
-ENDIF( ACADO_TOOLKIT_LIB )
-		
-FIND_LIBRARY( ACADO_QPOASES_LIB
-	NAMES acado_qpOASESextras
-	PATHS ${ACADO_LIBRARY_DIRS}
-	NO_DEFAULT_PATH
-)
-IF( ACADO_QPOASES_LIB )
-	MESSAGE( STATUS "Found ACADO static library: acado_qpOASESextras" )
-ELSE( ACADO_QPOASES_LIB )
-	MESSAGE( STATUS "Could not find ACADO static library: acado_qpOASESextras" )
-	SET( ACADO_STATIC_LIBS_FOUND FALSE )
-ENDIF( ACADO_QPOASES_LIB )
-		
-FIND_LIBRARY( ACADO_CSPARSE_LIB
-	NAMES acado_csparse
-	PATHS ${ACADO_LIBRARY_DIRS}
-	NO_DEFAULT_PATH
-)
-IF( ACADO_CSPARSE_LIB )
-	MESSAGE( STATUS "Found ACADO static library: acado_csparse" )
-ELSE( ACADO_CSPARSE_LIB )
-	MESSAGE( STATUS "Could not find ACADO static library: acado_csparse" )
-	SET( ACADO_STATIC_LIBS_FOUND FALSE )
-ENDIF( ACADO_CSPARSE_LIB )
-		
-SET( ACADO_STATIC_LIBRARIES
-	${ACADO_TOOLKIT_LIB} ${ACADO_QPOASES_LIB} ${ACADO_CSPARSE_LIB}
-)
+SET( ACADO_STATIC_LIBS_FOUND TRUE )
+UNSET( ACADO_STATIC_LIBRARIES )
+FOREACH( LIB $ENV{ACADO_ENV_STATIC_LIBRARIES} )
+	UNSET( ACADO_TOOLKIT_STATIC_${LIB} )
+	
+	FIND_LIBRARY( ACADO_TOOLKIT_STATIC_${LIB}
+		NAMES ${LIB}
+		PATHS ${ACADO_LIBRARY_DIRS}
+		NO_DEFAULT_PATH
+	)
+	
+	IF( ACADO_TOOLKIT_STATIC_${LIB} )
+		MESSAGE( STATUS "Found ACADO static library: ${LIB}" )
+		SET( ACADO_STATIC_LIBRARIES
+			${ACADO_STATIC_LIBRARIES} ${ACADO_TOOLKIT_STATIC_${LIB}}
+		)
+	ELSE( )
+		MESSAGE( STATUS "Could not find ACADO static library: ${LIB}" )
+ 		SET( ACADO_STATIC_LIBS_FOUND FALSE )
+	ENDIF( )
+ENDFOREACH()
+
 
 IF( ACADO_STATIC_LIBS_FOUND )
-	MESSAGE( STATUS "Found ACADO toolkit static libraries\n" )
+	MESSAGE( STATUS "Found all ACADO toolkit static libraries\n" )
 ELSE()
-	MESSAGE( STATUS "Could not find ACADO toolkit static libraries\n" )
+	MESSAGE( STATUS "Could not find all ACADO toolkit static libraries\n" )
 ENDIF()
 
 IF( VERBOSE )
@@ -144,52 +126,33 @@ ENDIF()
 # Shared libs
 #
 MESSAGE( STATUS "Looking for ACADO toolkit shared libraries" )
-SET( ACADO_SHARED_LIBS_FOUND TRUE )
 
-FIND_LIBRARY( ACADO_TOOLKIT_LIB_S
-	NAMES acado_toolkit_s
-	PATHS ${ACADO_LIBRARY_DIRS}
-	NO_DEFAULT_PATH
-)
-IF( ACADO_TOOLKIT_LIB_S )
-	MESSAGE( STATUS "Found ACADO shared library: acado_toolkit_s" )
-ELSE( ACADO_TOOLKIT_LIB_S )
-	MESSAGE( STATUS "Could not find ACADO shared library: acado_toolkit_s" )
-	SET( ACADO_SHARED_LIBS_FOUND FALSE )
-ENDIF( ACADO_TOOLKIT_LIB_S )
-		
-FIND_LIBRARY( ACADO_QPOASES_LIB_S
-	NAMES acado_qpOASESextras_s
-	PATHS ${ACADO_LIBRARY_DIRS}
-	NO_DEFAULT_PATH
-)
-IF( ACADO_QPOASES_LIB_S )
-	MESSAGE( STATUS "Found ACADO shared library: acado_qpOASESextras_s" )
-ELSE( ACADO_QPOASES_LIB_S )
-	MESSAGE( STATUS "Could not find ACADO shared library: acado_qpOASESextras_s" )
-	SET( ACADO_SHARED_LIBS_FOUND FALSE )
-ENDIF( ACADO_QPOASES_LIB_S )
-		
-FIND_LIBRARY( ACADO_CSPARSE_LIB_S
-	NAMES acado_csparse_s
-	PATHS ${ACADO_LIBRARY_DIRS}
-	NO_DEFAULT_PATH
-)
-IF( ACADO_CSPARSE_LIB_S )
-	MESSAGE( STATUS "Found ACADO shared library: acado_csparse_s" )
-ELSE( ACADO_CSPARSE_LIB_S )
-	MESSAGE( STATUS "Could not find ACADO shared library: acado_csparse_s" )
-	SET( ACADO_SHARED_LIBS_FOUND FALSE )
-ENDIF( ACADO_CSPARSE_LIB_S )
-		
-SET( ACADO_SHARED_LIBRARIES
-	${ACADO_TOOLKIT_LIB_S} ${ACADO_QPOASES_LIB_S} ${ACADO_CSPARSE_LIB_S}
-)
+SET( ACADO_SHARED_LIBS_FOUND TRUE )
+UNSET( ACADO_SHARED_LIBRARIES )
+FOREACH( LIB $ENV{ACADO_ENV_SHARED_LIBRARIES} )
+	UNSET( ACADO_TOOLKIT_SHARED_${LIB} )
+	
+	FIND_LIBRARY( ACADO_TOOLKIT_SHARED_${LIB}
+		NAMES ${LIB}
+		PATHS ${ACADO_LIBRARY_DIRS}
+		NO_DEFAULT_PATH
+	)
+	
+	IF( ACADO_TOOLKIT_SHARED_${LIB} )
+		MESSAGE( STATUS "Found ACADO shared library: ${LIB}" )
+		SET( ACADO_SHARED_LIBRARIES
+			${ACADO_SHARED_LIBRARIES} ${ACADO_TOOLKIT_SHARED_${LIB}}
+		)
+	ELSE( )
+		MESSAGE( STATUS "Could not find ACADO shared library: ${LIB}" )
+ 		SET( ACADO_SHARED_LIBS_FOUND FALSE )
+	ENDIF( )
+ENDFOREACH()
 
 IF( ACADO_SHARED_LIBS_FOUND )
-	MESSAGE( STATUS "Found ACADO toolkit shared libraries\n" )
+	MESSAGE( STATUS "Found all ACADO toolkit shared libraries\n" )
 ELSE()
-	MESSAGE( STATUS "Could not find ACADO toolkit shared libraries\n" )
+	MESSAGE( STATUS "Could not find all ACADO toolkit shared libraries\n" )
 ENDIF()
 
 IF( VERBOSE )

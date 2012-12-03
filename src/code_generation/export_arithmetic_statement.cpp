@@ -31,6 +31,7 @@
  */
 
 #include <acado/code_generation/export_arithmetic_statement.hpp>
+#include <acado/code_generation/export_variable_internal.hpp>
 
 #include <sstream>
 #include <iomanip>
@@ -46,48 +47,28 @@ using namespace std;
 
 ExportArithmeticStatement::ExportArithmeticStatement( )
 {
-	lhs  = 0;
-	rhs1 = 0;
-	rhs2 = 0;
-	rhs3 = 0;
-
 	op0 = ESO_UNDEFINED;
 	op1 = ESO_UNDEFINED;
 	op2 = ESO_UNDEFINED;
 }
 
 
-ExportArithmeticStatement::ExportArithmeticStatement(	const ExportVariable* const _lhs,
+ExportArithmeticStatement::ExportArithmeticStatement(	const ExportVariable& _lhs,
 														ExportStatementOperator _op0,
-														const ExportVariable* const _rhs1,
+														const ExportVariable& _rhs1,
 														ExportStatementOperator _op1,
-														const ExportVariable* const _rhs2,
+														const ExportVariable& _rhs2,
 														ExportStatementOperator _op2,
-														const ExportVariable* const _rhs3
+														const ExportVariable& _rhs3
 														) : ExportStatement( )
 {
 	ASSERT( ( _op0 == ESO_UNDEFINED ) || ( _op0 == ESO_ASSIGN ) || ( _op0 == ESO_ADD_ASSIGN ) || ( _op0 == ESO_SUBTRACT_ASSIGN ) );
 	ASSERT( ( _op2 == ESO_UNDEFINED ) || ( _op2 == ESO_ADD ) || ( _op2 == ESO_SUBTRACT ) );
 
-	if ( _lhs != 0 )
-		lhs  = new ExportVariable( *_lhs );
-	else
-		lhs = 0;
-	
-	if ( _rhs1 != 0 )
-		rhs1  = new ExportVariable( *_rhs1 );
-	else
-		rhs1 = 0;
-	
-	if ( _rhs2 != 0 )
-		rhs2  = new ExportVariable( *_rhs2 );
-	else
-		rhs2 = 0;
-
-	if ( _rhs3 != 0 )
-		rhs3  = new ExportVariable( *_rhs3 );
-	else
-		rhs3 = 0;
+	lhs = _lhs;
+	rhs1 = _rhs1;
+	rhs2 = _rhs2;
+	rhs3 = _rhs3;
 
 	op0  = _op0;
 	op1  = _op1;
@@ -97,25 +78,10 @@ ExportArithmeticStatement::ExportArithmeticStatement(	const ExportVariable* cons
 
 ExportArithmeticStatement::ExportArithmeticStatement( const ExportArithmeticStatement& arg ) : ExportStatement( arg )
 {
-	if ( arg.lhs != 0 )
-		lhs  = new ExportVariable( *(arg.lhs) );
-	else
-		lhs = 0;
-	
-	if ( arg.rhs1 != 0 )
-		rhs1  = new ExportVariable( *(arg.rhs1) );
-	else
-		rhs1 = 0;
-	
-	if ( arg.rhs2 != 0 )
-		rhs2  = new ExportVariable( *(arg.rhs2) );
-	else
-		rhs2 = 0;
-	
-	if ( arg.rhs3 != 0 )
-		rhs3  = new ExportVariable( *(arg.rhs3) );
-	else
-		rhs3 = 0;
+	lhs = arg.lhs;
+	rhs1 = arg.rhs1;
+	rhs2 = arg.rhs2;
+	rhs3 = arg.rhs3;
 
 	op0  = arg.op0;
 	op1  = arg.op1;
@@ -126,58 +92,19 @@ ExportArithmeticStatement::ExportArithmeticStatement( const ExportArithmeticStat
 
 
 ExportArithmeticStatement::~ExportArithmeticStatement( )
-{
-	if ( lhs != 0 )
-		delete lhs;
-
-	if ( rhs1 != 0 )
-		delete rhs1;
-
-	if ( rhs2 != 0 )
-		delete rhs2;
-	
-	if ( rhs3 != 0 )
-		delete rhs3;
-}
+{}
 
 
 ExportArithmeticStatement& ExportArithmeticStatement::operator=( const ExportArithmeticStatement& arg )
 {
 	if( this != &arg )
 	{
-		if ( lhs != 0 )
-			delete lhs;
-
-		if ( rhs1 != 0 )
-			delete rhs1;
-
-		if ( rhs2 != 0 )
-			delete rhs2;
-
-		if ( rhs3 != 0 )
-			delete rhs3;
-
 		ExportStatement::operator=( arg );
 		
-		if ( arg.lhs != 0 )
-			lhs  = new ExportVariable( *(arg.lhs) );
-		else
-			lhs = 0;
-		
-		if ( arg.rhs1 != 0 )
-			rhs1  = new ExportVariable( *(arg.rhs1) );
-		else
-			rhs1 = 0;
-		
-		if ( arg.rhs2 != 0 )
-			rhs2  = new ExportVariable( *(arg.rhs2) );
-		else
-			rhs2 = 0;
-
-		if ( arg.rhs3 != 0 )
-			rhs3  = new ExportVariable( *(arg.rhs3) );
-		else
-			rhs3 = 0;
+		lhs = arg.lhs;
+		rhs1 = arg.rhs1;
+		rhs2 = arg.rhs2;
+		rhs3 = arg.rhs3;
 
 		op0  = arg.op0;
 		op1  = arg.op1;
@@ -198,7 +125,7 @@ ExportStatement* ExportArithmeticStatement::clone( ) const
 
 uint ExportArithmeticStatement::getNumRows( ) const
 {
-	if ( rhs1 == 0 )
+	if ( rhs1.isNull() )
 		return 0;
 	else
 	{
@@ -212,11 +139,11 @@ uint ExportArithmeticStatement::getNumRows( ) const
 
 uint ExportArithmeticStatement::getNumCols( ) const
 {
-	if ( rhs1 == 0 )
+	if ( rhs1.isNull() )
 		return 0;
 	else
 	{
-		if ( rhs2 == 0 )
+		if ( rhs2.isNull() )
 			return rhs1->getNumCols( );
 		else
 			return rhs2->getNumCols( );
@@ -287,14 +214,17 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 																int _precision
 																) const
 {
-	if ( ( rhs1 == 0 ) || ( rhs2 == 0 ) || ( rhs3 != 0 ) )
-		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
+//	if ( ( rhs1.isNull() ) || ( rhs2.isNull() ) || ( !rhs3.isNull() ) )
+//		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
+
+	if (rhs1.getDim() == 0)
+		return SUCCESSFUL_RETURN;
 
 	if ( ( rhs1->getNumRows() != rhs2->getNumRows() ) || 
 		 ( rhs1->getNumCols() != rhs2->getNumCols() ) )
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
 	
-	if ( lhs != 0 )
+	if ( !lhs.isNull() )
 	{
 		if ( ( rhs1->getNumRows() != lhs->getNumRows() ) || 
 		     ( rhs1->getNumCols() != lhs->getNumCols() ) )
@@ -326,28 +256,28 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 						( rhs1->isGiven(i,j) == BT_TRUE ) && ( rhs2->isGiven(i,j) == BT_TRUE ) )
 				{
 					// check for zero value in case of "+=" or "-="
-					if ( ( op1 == ESO_ADD ) && ( acadoIsZero( rhs1->operator()(i,j)+rhs2->operator()(i,j) ) == BT_TRUE ) )
+					if ( ( op1 == ESO_ADD ) && ( acadoIsZero(rhs1(i, j) + rhs2(i, j)) == BT_TRUE ) )
 						continue;
 
-					if ( ( op1 == ESO_SUBTRACT ) && ( acadoIsZero( rhs1->operator()(i,j)-rhs2->operator()(i,j) ) == BT_TRUE ) )
+					if ( ( op1 == ESO_SUBTRACT ) && ( acadoIsZero( rhs1(i, j) - rhs2(i, j)) == BT_TRUE ) )
 						continue;
 				}
 
-				if ( lhs != 0 )
-					acadoFPrintf( file,"%s %s ", lhs->get(i,j),assignString.getName() );
+				if ( !lhs.isNull() )
+					acadoFPrintf( file,"%s %s ", lhs.get(i,j).getName(),assignString.getName() );
 
-				if ( rhs1->isZero(i,j) == BT_FALSE )
+				if ( rhs1->isZero(i, j) == BT_FALSE )
 				{
-					acadoFPrintf( file,"%s", rhs1->get(i,j) );
+					acadoFPrintf( file,"%s", rhs1->get(i,j).getName() );
 					if ( rhs2->isZero(i,j) == BT_FALSE )
-						acadoFPrintf( file," %s %s;\n", _sign.getName(),rhs2->get(i,j) );
+						acadoFPrintf( file," %s %s;\n", _sign.getName(),rhs2->get(i,j).getName() );
 					else
 						acadoFPrintf( file,";\n" );
 				}
 				else
 				{
 					if ( rhs2->isZero(i,j) == BT_FALSE )
-						acadoFPrintf( file,"%s %s;\n", _sign.getName(),rhs2->get(i,j) );
+						acadoFPrintf( file,"%s %s;\n", _sign.getName(),rhs2->get(i,j).getName() );
 					else
 						acadoFPrintf( file,"0.0;\n" );
 				}
@@ -364,8 +294,8 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 
 		for(unsigned j = 0; j < getNumCols( ); ++j)
 		{
-			acadoFPrintf( file,"%s %s ", lhs->get(ii, j), assignString.getName() );
-			acadoFPrintf( file,"%s %s;\n", _sign.getName(), rhs2->get(ii,j) );
+			acadoFPrintf( file,"%s %s ", lhs->get(ii, j).getName(), assignString.getName() );
+			acadoFPrintf( file,"%s %s;\n", _sign.getName(), rhs2->get(ii,j).getName() );
 		}
 
 		acadoFPrintf(file, "\n{\n");
@@ -386,8 +316,8 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 		acadoFPrintf(file, "%s < %d; ", jj.getName().getName(), getNumRows());
 		acadoFPrintf(file, "++%s)\n{\n", jj.getName().getName());
 
-		acadoFPrintf( file,"%s %s ", lhs->get(ii, jj), assignString.getName() );
-		acadoFPrintf( file,"%s %s;\n", _sign.getName(), rhs2->get(ii,jj) );
+		acadoFPrintf( file,"%s %s ", lhs->get(ii, jj).getName(), assignString.getName() );
+		acadoFPrintf( file,"%s %s;\n", _sign.getName(), rhs2->get(ii,jj).getName() );
 
 		acadoFPrintf(file, "\n{\n");
 		acadoFPrintf(file, "\n{\n");
@@ -406,8 +336,11 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 															int _precision
 															) const
 {
-	if ( ( lhs == 0 ) || ( rhs1 == 0 ) || ( rhs2 == 0 ) )
-		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
+//	if ( ( lhs.isNull() ) || ( rhs1.isNull() ) || ( rhs2.isNull() ) )
+//		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
+
+	if (lhs.getDim() == 0 || rhs1.getDim() == 0 || rhs2.getDim() == 0)
+		return SUCCESSFUL_RETURN;
 
 	String assignString;
 	if ( getAssignString( assignString ) != SUCCESSFUL_RETURN )
@@ -479,7 +412,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 			{
 				allZero = BT_TRUE;
 
-				acadoFPrintf( file,"%s %s", lhs->get(ii,j), assignString.getName() );
+				acadoFPrintf( file,"%s %s", lhs->get(ii,j).getName(), assignString.getName() );
 
 				for(uint k = 0; k < nColsRhs1; ++k)
 				{
@@ -502,14 +435,14 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 
 						if ( rhs1->isOne(iiRhs1,kkRhs1) == BT_FALSE )
 						{
-							acadoFPrintf( file," %s %s", sign,rhs1->get(iiRhs1,kkRhs1) );
+							acadoFPrintf( file," %s %s", sign,rhs1->get(iiRhs1,kkRhs1).getName() );
 							if ( rhs2->isOne(kk,j) == BT_FALSE )
-							acadoFPrintf( file,"*%s", rhs2->get(kk,j) );
+							acadoFPrintf( file,"*%s", rhs2->get(kk,j).getName() );
 						}
 						else
 						{
 							if ( rhs2->isOne(kk,j) == BT_FALSE )
-							acadoFPrintf( file," %s %s", sign,rhs2->get(kk,j) );
+							acadoFPrintf( file," %s %s", sign,rhs2->get(kk,j).getName() );
 							else
 							acadoFPrintf( file," %s 1.0", sign );
 						}
@@ -517,7 +450,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 				}
 
 				if ( ( op2 == ESO_ADD ) || ( op2 == ESO_SUBTRACT ) )
-					acadoFPrintf( file," + %s;\n", rhs3->get(ii,j) );
+					acadoFPrintf( file," + %s;\n", rhs3->get(ii,j).getName() );
 
 				if ( op2 == ESO_UNDEFINED )
 				{
@@ -545,7 +478,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 		{
 			allZero = BT_TRUE;
 
-			acadoFPrintf( file,"%s %s", lhs->get(ii,j), assignString.getName() );
+			acadoFPrintf( file,"%s %s", lhs->get(ii,j).getName(), assignString.getName() );
 
 			for(uint k = 0; k < nColsRhs1; ++k)
 			{
@@ -568,14 +501,14 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 
 					if ( rhs1->isOne(iiRhs1,kkRhs1) == BT_FALSE )
 					{
-						acadoFPrintf( file," %s %s", sign,rhs1->get(iiRhs1,kkRhs1) );
+						acadoFPrintf( file," %s %s", sign,rhs1->get(iiRhs1,kkRhs1).getName() );
 						if ( rhs2->isOne(kk,j) == BT_FALSE )
-							acadoFPrintf( file,"*%s", rhs2->get(kk,j) );
+							acadoFPrintf( file,"*%s", rhs2->get(kk,j).getName() );
 					}
 					else
 					{
 						if ( rhs2->isOne(kk,j) == BT_FALSE )
-							acadoFPrintf( file," %s %s", sign,rhs2->get(kk,j) );
+							acadoFPrintf( file," %s %s", sign,rhs2->get(kk,j).getName() );
 						else
 							acadoFPrintf( file," %s 1.0", sign );
 					}
@@ -583,7 +516,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 			}
 
 			if ( ( op2 == ESO_ADD ) || ( op2 == ESO_SUBTRACT ) )
-				acadoFPrintf( file," + %s;\n", rhs3->get(ii,j) );
+				acadoFPrintf( file," + %s;\n", rhs3->get(ii,j).getName() );
 
 			if ( op2 == ESO_UNDEFINED )
 			{
@@ -619,7 +552,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 
 		allZero = BT_TRUE;
 
-		acadoFPrintf( file,"%s %s", lhs->get(ii,jj), assignString.getName() );
+		acadoFPrintf( file,"%s %s", lhs->get(ii,jj).getName(), assignString.getName() );
 
 		for(uint k = 0; k < nColsRhs1; ++k)
 		{
@@ -642,14 +575,14 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 
 				if ( rhs1->isOne(iiRhs1,kkRhs1) == BT_FALSE )
 				{
-					acadoFPrintf( file," %s %s", sign,rhs1->get(iiRhs1,kkRhs1) );
+					acadoFPrintf( file," %s %s", sign,rhs1->get(iiRhs1,kkRhs1).getName() );
 					if ( rhs2->isOne(kk,jj) == BT_FALSE )
-						acadoFPrintf( file,"*%s", rhs2->get(kk,jj) );
+						acadoFPrintf( file,"*%s", rhs2->get(kk,jj).getName() );
 				}
 				else
 				{
 					if ( rhs2->isOne(kk,jj) == BT_FALSE )
-						acadoFPrintf( file," %s %s", sign,rhs2->get(kk,jj) );
+						acadoFPrintf( file," %s %s", sign,rhs2->get(kk,jj).getName() );
 					else
 						acadoFPrintf( file," %s 1.0", sign );
 				}
@@ -657,7 +590,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 		}
 
 		if ( ( op2 == ESO_ADD ) || ( op2 == ESO_SUBTRACT ) )
-			acadoFPrintf( file," + %s;\n", rhs3->get(ii,jj) );
+			acadoFPrintf( file," + %s;\n", rhs3->get(ii,jj).getName() );
 
 		if ( op2 == ESO_UNDEFINED )
 		{
@@ -685,31 +618,39 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 															int _precision
 															) const
 {
-	if ( ( lhs == 0 ) || ( rhs1 == 0 ) || ( rhs2 != 0 ) )
-		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
+	if (lhs.getDim() == 0 || rhs1.getDim() == 0 || rhs2.getDim() == 0)
+		return SUCCESSFUL_RETURN;
 
-	if ( ( rhs1->getNumRows( ) != lhs->getNumRows( ) ) || 
-		 ( rhs1->getNumCols( ) != lhs->getNumCols( ) ) )
+	if ( ( rhs1.getNumRows( ) != lhs.getNumRows( ) ) ||
+		 ( rhs1.getNumCols( ) != lhs.getNumCols( ) ) )
+	{
+		cout << "lhs name is " << lhs.getName().getName() <<
+				", size: " << lhs.getNumRows() << " x " << lhs.getNumCols() << endl;
+		cout << "rhs1 name is " << rhs1.getName().getName() <<
+				", size: " << rhs1.getNumRows() << " x " << rhs1.getNumCols() << endl;
+
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
+	}
 
 	stringstream s;
+	s.precision( 16 );
 
-	unsigned numOps = lhs->getNumRows() * lhs->getNumCols();
+	unsigned numOps = lhs.getNumRows() * lhs.getNumCols();
 
-	if (numOps < 1024 || rhs1->isGiven() == BT_TRUE)
+	if ((numOps < 1024) || (rhs1.isGiven() == BT_TRUE))
 	{
-		for(unsigned i = 0; i < getNumRows( ); ++i)
-			for(unsigned j = 0; j < getNumCols( ); ++j)
-				if ( ( _op == (String)"=" ) || ( rhs1->isZero(i,j) == BT_FALSE ) )
+		for(unsigned i = 0; i < lhs.getNumRows( ); ++i)
+			for(unsigned j = 0; j < lhs.getNumCols( ); ++j)
+				if ( ( _op == (String)"=" ) || ( rhs1.isZero(i,j) == BT_FALSE ) )
 				{
-					s << lhs->get(i, j) << " " << _op.getName() << " ";
+					s << lhs->get(i, j).getName() << " " << _op.getName() << " ";
 					if (rhs1->isGiven() == BT_TRUE)
 					{
-						s << setprecision( 16 ) << rhs1->operator ()(i, j);
+						s << scientific << rhs1(i, j);
 					}
 					else
 					{
-						s << rhs1->get(i, j);
+						s << rhs1->get(i, j).getName();
 					}
 					s << ";" << endl;
 				}
@@ -727,12 +668,12 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 			if (lhs->getNumCols() == 1)
 			{
 				s << lhs->getNumRows() << "; ++" << ind1.getName().getName() << ")" << endl
-						<< lhs->get(ind1, 0) << " " << _op.getName() << " " << rhs1->get(ind1, 0);
+						<< lhs->get(ind1, 0).getName() << " " << _op.getName() << " " << rhs1->get(ind1, 0).getName();
 			}
 			else
 			{
 				s << lhs->getNumCols() << "; ++" << ind1.getName().getName() << ")" << endl
-						<< lhs->get(0, ind1) << " " << _op.getName() << " " << rhs1->get(0, ind1);
+						<< lhs->get(0, ind1).getName() << " " << _op.getName() << " " << rhs1->get(0, ind1).getName();
 			}
 
 			memAllocator->release( ind1 );
@@ -748,7 +689,7 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 			s << "for (" << ind2.getName().getName() << " = 0;" << ind2.getName().getName() << " < "
 					<< lhs->getNumCols() << "; ++" << ind2.getName().getName() << ")" << endl;
 
-			s << lhs->get(ind1, ind2) << " " << _op.getName( ) << " " << rhs1->get(ind1, ind2) << ";" << endl;
+			s << lhs->get(ind1, ind2).getName() << " " << _op.getName( ) << " " << rhs1->get(ind1, ind2).getName() << ";" << endl;
 
 			memAllocator->release( ind1 );
 			memAllocator->release( ind2 );

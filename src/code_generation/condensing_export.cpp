@@ -676,7 +676,7 @@ returnValue CondensingExport::setupCondensing( )
 
 	deltaU.setup( "vars.x", getNumQPvars(),1 );
 
-	ExportIndex index( "index" );
+	ExportIndex index( String("index") );
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -899,7 +899,7 @@ returnValue CondensingExport::setupEvaluation( )
 
 	setupQP.addStatement( "acadoWorkspace.rk_num = 0;\n" );
 
-	ExportIndex run( "run1" );
+	ExportIndex run( String("run1") );
 	ExportForLoop loop( run, 0,getN() );
 	
 	setupQP.addIndex( run );
@@ -996,7 +996,7 @@ returnValue CondensingExport::setupQQF( )
 	}
 	else
 	{
-		QQF.init( "QQF",Q.getNumRows(),Q.getNumCols() );
+		QQF.setup( "QQF",Q.getNumRows(),Q.getNumCols() );
 		QQF.setDataStruct( ACADO_WORKSPACE );
 	}
 

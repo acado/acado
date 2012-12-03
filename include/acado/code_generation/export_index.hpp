@@ -26,7 +26,7 @@
 
 /**
  *    \file include/acado/code_generation/export_index.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
@@ -36,10 +36,9 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_data.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
 
-
+class ExportIndexNode;
 class ExportArgument;
 
 
@@ -53,204 +52,78 @@ class ExportArgument;
  *	but offer additional functionality, e.g. they allow to export arithmetic 
  *	expressions involving indices of the form:
  *
- *	<factor> * index + <offset>,
- *
- *	where <factor> and <offset> are fixed integers.
- *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
+
 class ExportIndex : public ExportData
 {
-    //
-    // PUBLIC MEMBER FUNCTIONS:
-    //
-    public:
+public:
 
-		/** Default constructor which optionally takes name and type
-		 *	of the index.
-		 *
-		 *	@param[in] _name			Name of the index.
-		 *	@param[in] _typeString		String containing the type of the index.
-		 *	@param[in] _value			Value of the index.
-		 *	@param[in] _factor			Factor to create expression of the form "factor * index".
-		 *	@param[in] _offset			Offset to create expression of the form "index + offset".
-		 */
-		ExportIndex(	const String& _name = "default_index_name",
-						ExportType _type = INT,
-						const int* const _value  = 0,
-						const int* const _factor = 0,
-						const int* const _offset = 0,
-						const String& _prefix = emptyConstString
-						);
+	ExportIndex();
 
-		/** Default constructor which optionally takes name and type
-		 *	of the index.
-		 *
-		 *	@param[in] _value			Value of the index.
-		 */
-		ExportIndex(	int _value
-						);
+	ExportIndex(	const int _value );
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportIndex(	const ExportIndex& arg
-						);
-
-        /** Destructor.
-		 */
-        virtual ~ExportIndex( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportIndex& operator=(	const ExportIndex& arg
-								);
-
-		/** Assignment operator for assigning a given integer to an ExportIndex.
-		 *	Note that a possibly given offset or factor remain unchanged!
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportIndex& operator=(	int _value
-								);
-
-		/** Clone constructor (deep copy).
-		 *
-		 *	\return Pointer to cloned object.
-		 */
-		virtual ExportData* clone( ) const;
-
-
-		/** Initializes index with given name and type.
-		 *
-		 *	@param[in] _name			Name of the index.
-		 *	@param[in] _typeString		String containing the type of the index.
-		 *	@param[in] _value			Value of the index.
-		 *	@param[in] _factor			Factor to create expression of the form "factor * index".
-		 *	@param[in] _offset			Offset to create expression of the form "index + offset".
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue init(	const String& _name = "i",
-							ExportType _type = INT,
-							const int* const _value  = 0,
-							const int* const _factor = 0,
-							const int* const _offset = 0,
+	explicit ExportIndex(	const String& _name,
 							const String& _prefix = emptyConstString
 							);
 
-							
-		/** Exports declaration of the index variable. Its appearance can 
-		 *  can be adjusted by various options.
-		 *
-		 *	@param[in] file				Name of file to be used to export function.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
-		 *	@param[in] _precision		Number of digits to be used for exporting real values.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue exportDataDeclaration(	FILE* file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
-													int _precision = 16
-													) const;
+	ExportIndexNode* operator->();
+
+	const ExportIndexNode* operator->() const;
+
+	friend ExportIndex operator+(	const ExportIndex& _arg1,
+									const ExportIndex& _arg2
+									);
 
 
-		/** Returns a string containing the value of the index.
-		 *
-		 *	\return String containing the value of the index.
-		 */
-		const char* get( ) const;
-
-		/** Returns the given value of the index (if defined).
-		 *
-		 *	\return Given value of the index or "undefinedValue".
-		 */
-		const int getGivenValue( ) const;
+	friend ExportIndex operator-(	const ExportIndex& _arg1,
+									const ExportIndex& _arg2
+									);
 
 
-		/** Operator for adding two ExportIndices.
-		 *
-		 *	@param[in] arg		Index to be added.
-		 *
-		 *	\return Index containing the value after addition
-		 */
-		ExportIndex operator+(	const ExportIndex& arg
-								) const;
-
-		/** Operator for subtracting an ExportIndex from another one.
-		 *
-		 *	@param[in] arg		Index to be subtracted.
-		 *
-		 *	\return Index containing the value after subtraction
-		 */
-		ExportIndex operator-(	const ExportIndex& arg
-								) const;
+	friend ExportIndex operator*(	const ExportIndex& _arg1,
+									const ExportIndex& _arg2
+									);
 
 
-		/** Operator for adding a given integer to an ExportIndex.
-		 *
-		 *	@param[in] _offset		Integer to be added.
-		 *
-		 *	\return Index containing the value after addition
-		 */
-		ExportIndex operator+(	int _offset
-								) const;
+	friend ExportIndex operator/(	const ExportIndex& _arg1,
+									const ExportIndex& _arg2
+									);
 
-		/** Operator for subtracting a given integer from an ExportIndex.
-		 *
-		 *	@param[in] _offset		Integer to be subtracted.
-		 *
-		 *	\return Index containing the value after subtraction
-		 */
-		ExportIndex operator-(	int _offset
-								) const;
+	friend String operator==(	const ExportIndex& _arg1,
+								const ExportIndex& _arg2
+								);
 
-		/** Operator for multiplying a given integer with an ExportIndex.
-		 *
-		 *	@param[in] _factor		Integer to be multiplied with.
-		 *
-		 *	\return Index containing the value after multiplication
-		 */
-		ExportIndex operator*(	int _factor
-								) const;
+	virtual returnValue exportDataDeclaration(	FILE* file,
+												const String& _realString = "real_t",
+												const String& _intString = "int",
+												int _precision = 16
+												) const;
 
+	/** Returns a string containing the value of the index.
+	 *
+	 *	\return String containing the value of the index.
+	 */
+	const String get( ) const;
 
-		/** Returns whether the index is set to a given value.
-		 *
-		 *	\return BT_TRUE  iff index is set to a given value, \n
-		 *	        BT_FALSE otherwise
-		 */
-		virtual BooleanType isGiven( ) const;
+	/** Returns the given value of the index (if defined).
+	 *
+	 *	\return Given value of the index or "undefinedValue".
+	 */
+	const int getGivenValue( ) const;
 
+	/** Returns whether the index is set to a given value.
+	 *
+	 *	\return BT_TRUE  iff index is set to a given value, \n
+	 *	        BT_FALSE otherwise
+	 */
+	BooleanType isGiven( ) const;
 
-		/** Converts index into a calling argument.
-		 *
-		 *	\return Index converted into a calling argument.
-		 */
-		ExportArgument makeArgument( ) const;
-
-	//
-    // PROTECTED MEMBER FUNCTIONS:
-    //
-    protected:
-
-		/** Frees internal dynamic memory to yield an empty index.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue clear( );
-
-
-    protected:
-
-		int* value;								/**< Value of the index. */
-		int* factor;							/**< Factor to create expression of the form "factor * index". */
-		int* offset;							/**< Offset to create expression of the form "index + offset". */
+	/** Converts index into a calling argument.
+	 *
+	 *	\return Index converted into a calling argument.
+	 */
+	ExportArgument makeArgument( ) const;
 };
 
 struct ExportIndexComparator
@@ -261,11 +134,8 @@ struct ExportIndexComparator
     }
 };
 
-static const int emptyConstExportIndexValue = 0;
-static const ExportIndex emptyConstExportIndex((String)"default_index", INT, &emptyConstExportIndexValue );
-
-static const int constIndexValueOne = 1;
-static const ExportIndex constExportIndexValueOne((String)"one", INT, &constIndexValueOne);
+static const ExportIndex emptyConstExportIndex( int( 0 ) );
+static const ExportIndex constExportIndexValueOne( int( 1 ) );
 
 CLOSE_NAMESPACE_ACADO
 

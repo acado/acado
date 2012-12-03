@@ -32,6 +32,7 @@
 
 
 #include <acado/code_generation/export_data.hpp>
+#include <acado/code_generation/export_data_internal.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -41,248 +42,98 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExportData::ExportData( )
-{
-	name = "default_name";
-	type = REAL;
-	prefix = "";
-	dataStruct = ACADO_LOCAL;
-	fullName = name;
-}
-
-
-ExportData::ExportData(	const String& _name,
-						ExportType _type,
-						ExportStruct _dataStruct,
-						const String& _prefix
-						)
-{
-	init(_name, _type, _dataStruct, _prefix);
-}
-
-
-ExportData::ExportData(	const ExportData& arg
-						)
-{
-	init(arg.name, arg.type, arg.dataStruct, arg.prefix);
-}
-
+{}
 
 ExportData::~ExportData( )
+{}
+
+ExportDataInternal* ExportData::operator->()
 {
+	return (ExportDataInternal*)(SharedObject::operator->());
 }
 
-
-ExportData& ExportData::operator=(	const ExportData& arg
-									)
+const ExportDataInternal* ExportData::operator->() const
 {
-	if( this != &arg )
-	{
-		init(arg.name, arg.type, arg.dataStruct, arg.prefix);
-	}
-
-	return *this;
+	return (const ExportDataInternal*)(SharedObject::operator->());
 }
-
-
-returnValue ExportData::init(	const String& _name,
-								ExportType _type,
-								ExportStruct _dataStruct,
-								const String& _prefix
-								)
-{
-	if ( _name.isEmpty() == BT_FALSE )
-	{
-		dataStruct = ACADO_LOCAL;
-		setName( _name );
-	}
-
-	setType( _type );
-	setPrefix( _prefix );
-	setDataStruct( _dataStruct );
-
-	return SUCCESSFUL_RETURN;
-}
-
-
 
 returnValue	ExportData::setName(	const String& _name
 									)
 {
-	if ( _name.isEmpty() == BT_TRUE )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
-
-	name = _name;
-
-	setFullName();
-
-	return SUCCESSFUL_RETURN;
+	return (*this)->setName( _name );
 }
 
 
 returnValue	ExportData::setType(	ExportType _type
 									)
 {
-	type = _type;
-
-	setFullName();
-
-	return SUCCESSFUL_RETURN;
+	return (*this)->setType( _type );
 }
 
 returnValue ExportData::setPrefix(	const String& _prefix
 									)
 {
-	prefix = _prefix;
-
-	setFullName();
-
-	return SUCCESSFUL_RETURN;
+	return (*this)->setPrefix( _prefix );
 }
 
 returnValue	ExportData::setDataStruct(	ExportStruct _dataStruct
 										)
 {
-	dataStruct = _dataStruct;
-
-	setFullName();
-
-	return SUCCESSFUL_RETURN;
+	return (*this)->setDataStruct( _dataStruct );
 }
-
-
 
 String ExportData::getName( ) const
 {
-	return name;
+	return (*this)->getName();
 }
 
 ExportType ExportData::getType( ) const
 {
-	return type;
+	return (*this)->getType();
 }
 
 String ExportData::getPrefix() const
 {
-	return prefix;
+	return (*this)->getPrefix();
 }
 
 String ExportData::getTypeString(	const String& _realString,
 									const String& _intString
 									) const
 {
-	switch ( type )
-	{
-		case INT:
-			return _intString;
-			
-		case REAL:
-			return _realString;
-	}
-	
-	return (String)"<unknown_type>";
+	return (*this)->getTypeString();
 }
 
 
 ExportStruct ExportData::getDataStruct( ) const
 {
-	return dataStruct;
+	return (*this)->getDataStruct();
 }
 
 
 String ExportData::getDataStructString( ) const
 {
-	String tmp = prefix;
-
-	if (tmp.isEmpty() == BT_FALSE)
-		tmp << "_";
-
-	switch ( dataStruct )
-	{
-		case ACADO_VARIABLES:
-			tmp << "acadoVariables";
-			break;
-			
-		case ACADO_WORKSPACE:
-			tmp << "acadoWorkspace";
-			break;
-
-		case ACADO_PARAMS:
-			tmp << "params";
-			break;
-			
-		case ACADO_VARS:
-			tmp << "vars";
-			break;
-
-		case FORCES_PARAMS:
-			tmp << "params";
-			break;
-
-		case FORCES_OUTPUT:
-			tmp << "output";
-			break;
-
-		case FORCES_INFO:
-			tmp << "info";
-			break;
-
-		default:
-			tmp << "";
-			break;
-	}
-
-	return tmp;
+	return (*this)->getDataStructString();
 }
 
 
 String ExportData::getFullName( ) const
 {
-	if ( fullName.isEmpty() == BT_TRUE )
-		return name;
-	else
-		return fullName;
+	return (*this)->getFullName();
 }
 
-
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-//
-// PRIVATE MEMBER FUNCTIONS:
-//
-returnValue ExportData::setFullName()
+returnValue ExportData::exportDataDeclaration(	FILE* file,
+												const String& _realString,
+												const String& _intString,
+												int _precision
+												) const
 {
-	if ( dataStruct == ACADO_LOCAL )
-	{
-		if ( prefix.isEmpty() == BT_FALSE )
-		{
-			fullName = prefix;
-			fullName << "_" << name;
-		}
-		else
-		{
-			fullName = "";
-		}
-	}
-	else
-	{
-//		if ( prefix.isEmpty() == BT_FALSE )
-//		{
-//			fullName = prefix;
-//			fullName << "_" << getDataStructString();
-//		}
-//		else
-//		{
-			fullName = getDataStructString();
-//		}
+	return (*this)->exportDataDeclaration(file, _realString, _intString, _precision);
+}
 
-		fullName << "." << name;
-	}
-
-	return SUCCESSFUL_RETURN;
+BooleanType ExportData::isGiven( )
+{
+	return (*this)->isGiven();
 }
 
 CLOSE_NAMESPACE_ACADO

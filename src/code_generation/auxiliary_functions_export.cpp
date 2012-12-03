@@ -108,10 +108,10 @@ returnValue AuxiliaryFunctionsExport::setup( )
 
 
 	printStates.setup( "printStates" );
-	printStates.addStatement( ExportPrintf(x.accessTransposed()) );
+	printStates.addStatement( ExportPrintf(x.getTranspose()) );
 
 	printControls.setup( "printControls" );
-	printControls.addStatement( ExportPrintf(u.accessTransposed()) );
+	printControls.addStatement( ExportPrintf(u.getTranspose()) );
 
 
 	int operatingSystem;
