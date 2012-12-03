@@ -537,7 +537,7 @@ returnValue CondensingExport::clear( )
 
 returnValue CondensingExport::setupMultiplicationRoutines( )
 {
-	ExportVariable QQ = Q;
+	ExportVariable QQ = deepcopy( Q );
 	QQ.setDataStruct( ACADO_LOCAL );
 
 	ExportVariable QC1( "QC1",  getNX(),getNX() );
