@@ -30,25 +30,24 @@
  *    \date 2010-2011
  */
 
-
+#include <acado/code_generation/export_index.hpp>
 #include <acado/code_generation/export_argument.hpp>
-// #include <acado/code_generation/export_index.hpp>
+#include <acado/code_generation/export_argument_internal.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
 
-
 static const double undefinedEntry = 1073741824.03125; // = 2^30 + 2^-5
-static char exportDataString[1024];
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportArgument::ExportArgument( ) : ExportData( )
+ExportArgument::ExportArgument( )
 {
-	init( "",0,0 );
+	Matrix m(0, 0);
+	assignNode(new ExportArgumentInternal(
+				"defaultArgumentName", m, REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConstString));
 }
 
 
@@ -60,9 +59,13 @@ ExportArgument::ExportArgument(	const String& _name,
 								BooleanType _callItByValue,
 								const ExportIndex& _addressIdx,
 								const String& _prefix
-								) : ExportData( )
+								)
 {
-	init( _name,_nRows,_nCols,_type,_dataStruct,_callItByValue,_addressIdx, _prefix );
+	Matrix m(_nRows, _nCols);
+	m.setAll( undefinedEntry );
+
+	assignNode(new ExportArgumentInternal(
+			_name, m, _type, _dataStruct, _callItByValue, _addressIdx, _prefix));
 }
 
 
@@ -73,237 +76,78 @@ ExportArgument::ExportArgument(	const String& _name,
 								BooleanType _callItByValue,
 								const ExportIndex& _addressIdx,
 								const String& _prefix
-								) : ExportData( )
+								)
 {
-	init( _name,_data,_type,
-			_dataStruct,_callItByValue,_addressIdx, _prefix );
+	assignNode(new ExportArgumentInternal(
+			_name, _data, _type, _dataStruct, _callItByValue, _addressIdx, _prefix));
 }
 
-
-// ExportArgument::ExportArgument(	const ExportIndex& _arg
-// 										)
-// {
-// 	init( _arg.name,_arg.type,1,1,0,BT_TRUE );
-// }
-
-
-ExportArgument::ExportArgument(	const ExportArgument& arg
-								) : ExportData( )
+ExportArgument::ExportArgument( const Matrix& _data
+								)
 {
-	init( arg.name, arg.data, arg.type,
-			arg.dataStruct, arg.callItByValue, arg.addressIdx, arg.prefix );
+	assignNode(new ExportArgumentInternal(
+			"defaultArgumentName", _data, REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConstString));
 }
 
-
-ExportArgument::~ExportArgument( )
+ExportArgumentInternal* ExportArgument::operator->()
 {
-	clear( );
+	return (ExportArgumentInternal*)(ExportData::operator->());
 }
 
-
-ExportArgument& ExportArgument::operator=(	const ExportArgument& arg
-											)
+const ExportArgumentInternal* ExportArgument::operator->() const
 {
-	if( this != &arg )
-	{
-		init( arg.name, arg.data, arg.type,
-				arg.dataStruct, arg.callItByValue, arg.addressIdx, arg.prefix );
-	}
-
-	return *this;
+	return (const ExportArgumentInternal*)(ExportData::operator->());
 }
 
-
-ExportArgument& ExportArgument::operator=(	const Matrix& arg	
-											)
-{
-	String tmp;
-	if ( name.isEmpty() == BT_FALSE )
-		tmp = name;
-	else
-		tmp = "M";
-
-	init(tmp, arg);
-	return *this;
-}
-
-
-ExportData* ExportArgument::clone( ) const
-{
-	return new ExportArgument(*this);
-}
-
-
-
-
-returnValue ExportArgument::init(	const String& _name,
-									uint _nRows,
-									uint _nCols,
-									ExportType _type,
-									ExportStruct _dataStruct,
-									BooleanType _callItByValue,
-									const ExportIndex& _addressIdx,
-									const String& _prefix
-									)
-{
-	clear( );
-
-	data.init( _nRows,_nCols );
-	data.setAll( undefinedEntry );
-
-	ExportData::init( _name,_type,_dataStruct, _prefix );
-
-	callItByValue = _callItByValue;
-	addressIdx  = _addressIdx;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue ExportArgument::init(	const String& _name,
-									const Matrix& _data,
-									ExportType _type,
-									ExportStruct _dataStruct,
-									BooleanType _callItByValue,
-									const ExportIndex& _addressIdx,
-									const String& _prefix
-									)
-{
-	clear( );
-
-	data = _data;
-
-	ExportData::init( _name,_type,_dataStruct, _prefix );
-
-	callItByValue = _callItByValue;
-	addressIdx  = _addressIdx;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-ExportArgument ExportArgument::getAddress(	uint rowIdx,
-											uint colIdx
+ExportArgument ExportArgument::getAddress(	const ExportIndex& _rowIdx,
+											const ExportIndex& _colIdx
 											) const
 {
-	ASSERT( rowIdx < getNumRows() );
-	ASSERT( colIdx < getNumCols() );
-
-	ExportIndex tmpAddressIdx( "i" );
-	tmpAddressIdx = getTotalIdx( rowIdx,colIdx );
-
-	ExportArgument tmp(	name,getNumRows(),getNumCols(),
-						type,dataStruct,BT_FALSE,
-						tmpAddressIdx, prefix );
-
-	return tmp;
+	return (*this)->getAddress(_rowIdx, _colIdx);
 }
 
-
-ExportArgument ExportArgument::getAddress(	const ExportIndex& rowIdx,
-											uint colIdx
-											) const
-{
-	if ( rowIdx.isGiven( ) )
-	{
-		ASSERT( rowIdx.getGivenValue() < (int)getNumRows() );
-	}
-	
-	ASSERT( colIdx < getNumCols() );
-	
-	ExportIndex tmpAddressIdx( "i" );
-	tmpAddressIdx = getTotalIdx( rowIdx,colIdx );
-
-	ExportArgument tmp(	name,getNumRows(),getNumCols(),
-						type,dataStruct,BT_FALSE,
-						tmpAddressIdx, prefix );
-
-	return tmp;
-}
-
-
-
-const char* ExportArgument::getAddressString(	BooleanType withDataStruct
+const String ExportArgument::getAddressString(	BooleanType withDataStruct
 												) const
 {
-	if ( withDataStruct == BT_TRUE )
-	{
-		if ( addressIdx.isGiven() == BT_TRUE )
-		{
-			if ( addressIdx.getGivenValue() == 0 )
-				sprintf( exportDataString,"%s", getFullName().getName() );
-			else
-				sprintf( exportDataString,"&(%s[%d])", getFullName().getName(),addressIdx.getGivenValue() );
-		}
-		else
-		{
-			sprintf( exportDataString,"&(%s[%s])", getFullName().getName(),addressIdx.get() );
-		}
-	}
-	else
-	{
-		if ( addressIdx.isGiven() == BT_TRUE )
-		{
-			if ( addressIdx.getGivenValue() == 0 )
-				sprintf( exportDataString,"%s", getName().getName() );
-			else
-				sprintf( exportDataString,"&(%s[%d])", getName().getName(),addressIdx.getGivenValue() );
-		}
-		else
-		{
-			sprintf( exportDataString,"&(%s[%s])", getName().getName(),addressIdx.get() );
-		}
-	}
-
-	return exportDataString;
+	return (*this)->getAddressString( withDataStruct );
 }
-
 
 
 uint ExportArgument::getNumRows( ) const
 {
-	return data.getNumRows( );
+	return (*this)->getNumRows();
 }
 
 
 uint ExportArgument::getNumCols( ) const
 {
-	return data.getNumCols( );
+	return (*this)->getNumCols();
 }
 
 
 uint ExportArgument::getDim( ) const
 {
-	return data.getDim( );
+	return (*this)->getDim();
 }
 
 
 
 BooleanType ExportArgument::isGiven( ) const
 {
-	if ( getDim() == 0 )
-		return BT_TRUE;
-
-	for ( uint i=0; i<getNumRows(); ++i )
-		for ( uint j=0; j<getNumCols(); ++j )
-			if ( acadoIsEqual( data(i,j),undefinedEntry ) == BT_TRUE )
-				return BT_FALSE;
-			
-	return BT_TRUE;
+	return (*this)->isGiven();
 }
 
 
 
 BooleanType ExportArgument::isCalledByValue( ) const
 {
-	return callItByValue;
+	return (*this)->isCalledByValue();
 }
 
 
 returnValue ExportArgument::callByValue( )
 {
-	callItByValue = BT_TRUE;
-	return SUCCESSFUL_RETURN;
+	return (*this)->callByValue();
 }
 
 
@@ -314,102 +158,8 @@ returnValue ExportArgument::exportDataDeclaration(	FILE* file,
 													int _precision
 													) const
 {
-	// Variable not in use, thus no declaration necessary
-	if ( getDim( ) == 0 )
-		return SUCCESSFUL_RETURN;
-
-	// Variable will be hard-coded
-	if (isGiven() == BT_TRUE && getDataStruct() != ACADO_LOCAL)
-		return SUCCESSFUL_RETURN;
-
-	if ( ( isCalledByValue() == BT_TRUE ) && ( getDim() == 1 ) )
-	{
-		acadoFPrintf( file,"%s %s", getTypeString( _realString,_intString ).getName(),name.getName() );
-	}
-	else
-	{
-		if (data.getNumCols() > 1 && data.getNumRows() > 1)
-		{
-			acadoFPrintf(file,"/* %s %d %s %d %s */\n", "Matrix of size:", data.getNumRows(), "x", data.getNumCols(), "(row major format)");
-		}
-		else
-		{
-			acadoFPrintf(file,"/* %s %d */\n", "Vector of size:", data.getNumCols() > 1 ? data.getNumCols() : data.getNumRows());
-		}
-
-		acadoFPrintf( file,"%s %s[ %d ]", getTypeString( _realString,_intString ).getName(),name.getName(),getDim() );
-	}
-
-	if ( isGiven() == BT_FALSE )
-	{
-		acadoFPrintf( file,";\n\n" );
-	}
-	else
-	{
-//		if ( getDim( ) == 1 )
-//		{
-//			if (getType() == REAL)
-//				acadoFPrintf( file," = %e;\n\n", data(0,0) );
-//			else if (getType() == INT)
-//				acadoFPrintf( file," = %d;\n\n", static_cast< int >(data(0,0)) );
-//			else
-//				return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
-//		}
-//		else
-//		{
-			acadoFPrintf( file," = " );
-
-			if (getType() == REAL)
-			{
-				data.printToFile( file, "", "{ "," };\n", 1, 16, ", ",", \n" );
-			}
-			else if (getType() == INT)
-			{
-				data.printToFile( file, "", "{ "," };\n", 5, 0, ", ",", \n" );
-			}
-			else
-				return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
-//		}
-	}
-
-	return SUCCESSFUL_RETURN;
+	return (*this)->exportDataDeclaration(file, _realString, _intString, _precision);
 }
-
-
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-returnValue ExportArgument::clear( )
-{
-	return SUCCESSFUL_RETURN;
-}
-
-
-
-uint ExportArgument::getColDim( ) const
-{
-	return data.getNumCols( );
-}
-
-
-
-uint ExportArgument::getTotalIdx(	uint rowIdx,
-									uint colIdx
-									) const
-{
-	return rowIdx*getNumCols()+colIdx;
-}
-
-
-ExportIndex	ExportArgument::getTotalIdx(	const ExportIndex& rowIdx,
-											const ExportIndex& colIdx
-											) const
-{
-	return rowIdx*getNumCols()+colIdx;
-}
-
 
 CLOSE_NAMESPACE_ACADO
 

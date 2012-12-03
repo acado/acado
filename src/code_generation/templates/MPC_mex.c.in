@@ -197,6 +197,7 @@ void mexFunction( int            nlhs,
 
         /* PERFORM THE FEEDBACK STEP: */
         /* ----------------------------- */
+           t1 = getTime();
            status = feedbackStep( measurement );
            t2 = getTime();
            timeFeed = timeFeed + (t2-t1);
@@ -211,8 +212,9 @@ void mexFunction( int            nlhs,
 			if( iter < (NUM_STEPS-1) ) {
 				/* PREPARE NEXT STEP: */
 				/* ------------------ */
+                t2 = getTime();
 				preparationStep();
-				real_t t1 = getTime();
+				t1 = getTime();
 				timePrep = timePrep + (t1-t2);
 			}
       }
@@ -223,7 +225,7 @@ void mexFunction( int            nlhs,
    /* PRINT DURATION AND RESULTS: */
    /* -------------------------------------------------------------------------------------------------- */
       if( !VERBOSE )
-      mexPrintf("\n\n AVERAGE DURATION OF ONE REAL-TIME ITERATION:   %.3g μs\n\n", 1e6*(timePrep+timeFeed)/NUM_STEPS );
+      mexPrintf("\n AVERAGE DURATION OF ONE REAL-TIME ITERATION FOR MPC:   %.3g μs\n", 1e6*(timePrep+timeFeed)/NUM_STEPS );
       
    /* ASSIGN THE STATES AND CONTROLS TO THE OUTPUTS: */
    /* ---------------------------------------- */

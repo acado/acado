@@ -117,10 +117,10 @@ returnValue ExportPrintf::exportCode(	FILE *file,
 	acadoFPrintf( file,"for( run01=0; run01<%d; ++run01 ){\n",data.getNumRows() );
 	acadoFPrintf( file,"  for( run02=0; run02<%d; ++run02 )\n",data.getNumCols() );
 
-	if ( data.isAccessedTransposed() == BT_FALSE )
+//	if ( data.isAccessedTransposed() == BT_FALSE )
 		acadoFPrintf( file,"    printf( \"%%e \\t\", %s[run01*%d+run02] );\n", data.getFullName().getName(),data.getNumCols() );
-	else
-		acadoFPrintf( file,"    printf( \"%%e \\t\", %s[run02*%d+run01] );\n", data.getFullName().getName(),data.getNumRows() );
+//	else
+//		acadoFPrintf( file,"    printf( \"%%e \\t\", %s[run02*%d+run01] );\n", data.getFullName().getName(),data.getNumRows() );
 
 	acadoFPrintf( file,"  printf( \"\\n\" );\n" );
 	acadoFPrintf( file,"}\n" );

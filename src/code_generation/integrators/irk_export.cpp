@@ -123,10 +123,12 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	f << rhs;
 	
 	DifferentialEquation g;
-	g << forwardDerivative( rhs, x );
-	g << forwardDerivative( rhs, z );
-	g << forwardDerivative( rhs, u );
-	g << forwardDerivative( rhs, dx );
+	for( uint i = 0; i < rhs.getDim(); i++ ) {
+		g << forwardDerivative( rhs(i), x );
+		g << forwardDerivative( rhs(i), z );
+		g << forwardDerivative( rhs(i), u );
+		g << forwardDerivative( rhs(i), dx );
+	}
 
 	setup();
 	return (ODE.init( f,"acado_rhs",NX,NXA,NU ) & diffs_ODE.init( g,"acado_diffs",NX,NXA,NU ) );
@@ -299,14 +301,33 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	}
 	
 	std::vector<ExportVariable> gridVariables;
+	std::vector<ExportVariable> polynVariables;
+	std::vector<ExportVariable> polynDerVariables;
 	for( run5 = 0; run5 < outputGrids.size(); run5++ ) {
+		// Export output grids
 		Vector gridV(outputGrids[run5].getNumIntervals());
+		Matrix polynV(outputGrids[run5].getNumIntervals(),numStages);
+		Matrix polynDerV(outputGrids[run5].getNumIntervals(),numStages);
 		for( uint index = 1; index <= outputGrids[run5].getNumIntervals(); index++ ) {
 			gridV( index-1 ) = outputGrids[run5].getTime( index );
+			polynV.setRow( index-1, evaluatePolynomial(outputGrids[run5].getTime(index)) );
+			polynDerV.setRow( index-1, evaluateDerivedPolynomial(outputGrids[run5].getTime(index)) );
 		}
 		ExportVariable gridVariable( (String)"gridOutput" << run5, gridV );
 		code.addDeclaration( gridVariable );
 		gridVariables.push_back( gridVariable );
+
+		ExportVariable polynVariable( (String)"polynOutput" << run5, polynV*=h );
+		code.addDeclaration( polynVariable );
+		polynVariable = ExportVariable( (String)"polynOutput" << run5, outputGrids[run5].getNumIntervals(), numStages );
+		polynVariables.push_back( polynVariable );
+
+		if( NXA > 0 || NDX > 0 ) {
+			ExportVariable polynDerVariable( (String)"polynDerOutput" << run5, polynDerV );
+			code.addDeclaration( polynDerVariable );
+			polynDerVariable = ExportVariable( (String)"polynDerOutput" << run5, outputGrids[run5].getNumIntervals(), numStages );
+			polynDerVariables.push_back( polynDerVariable );
+		}
 	}
 
 	integrate.addIndex( i );
@@ -368,21 +389,21 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	for( run2 = 0; run2 < NX+NXA; run2++ ) {
 		for( run3 = 0; run3 < numStages; run3++ ) { // differential states
 			if( NDX == 0 ) {
-				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( 0,1,run2*NX,run2*NX+NX ) );
+				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( 0,1,run2*(NVARS),run2*(NVARS)+NX ) );
 				loop11.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) " );
 				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX+run2,run3*NX+run2+1 ) -= 1 );
 			}
 			else {
-				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( 0,1,run2*NX,run2*NX+NX ) );
+				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( 0,1,run2*(NVARS),run2*(NVARS)+NX ) );
 				loop11.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) {\n" );
-				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) += rk_diffsTemp.getSubMatrix( 0,1,(NX+NXA)*(NX+NXA+NU)+run2*NDX,(NX+NXA)*(NX+NXA+NU)+run2*NDX+NDX ) );
+				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) += rk_diffsTemp.getSubMatrix( 0,1,run2*(NVARS)+NX+NXA+NU,run2*(NVARS)+NVARS ) );
 				loop11.addStatement( String( "}\n" ) );
 			}
 		}
 		if( NXA > 0 ) {
 			for( run3 = 0; run3 < numStages; run3++ ) { // algebraic states
 				loop11.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) {\n" );
-				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == rk_diffsTemp.getSubMatrix( 0,1,(NX+NXA)*NX+run2*NXA,(NX+NXA)*NX+run2*NXA+NXA ) );
+				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == rk_diffsTemp.getSubMatrix( 0,1,run2*(NVARS)+NX,run2*(NVARS)+NX+NXA ) );
 				loop11.addStatement( String( "}\n else {\n" ) );
 				loop11.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == zeroM.getCols( 0,NXA ) );
 				loop11.addStatement( String( "}\n" ) );
@@ -438,24 +459,26 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	// generate continuous output (except for the last grid point):
 	for( run5 = 0; run5 < rk_outputs.size(); run5++ ) {
 		ExportForLoop loop22( i,0,outputGrids[run5].getNumIntervals()-1 );
-		evaluatePolynomial( loop22, rk_outH, gridVariables[run5], i, h );
-		if( NXA > 0 || NDX > 0 ) evaluateDerivedPolynomial( loop22, rk_out2, gridVariables[run5], i );
+		loop22.addStatement( rk_outH == polynVariables[run5].getRow( i ) );
+		if( NXA > 0 || NDX > 0 ) loop22.addStatement( rk_out2 == polynDerVariables[run5].getRow( i ) );
 		Vector dependencyX, dependencyZ, dependencyDX;
-		if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run5].getDependencyPattern( x ) );
-		if( EXPORT_RHS && NXA > 0 ) dependencyZ = sumRow( outputExpressions[run5].getDependencyPattern( z ) );
-		if( EXPORT_RHS && NDX > 0 ) dependencyDX = sumRow( outputExpressions[run5].getDependencyPattern( dx ) );
+		if( EXPORT_RHS || CRS_FORMAT ) {
+			dependencyX = sumRow( outputDependencies[run5].getCols( 0,NX-1 ) );
+			if( NXA > 0 ) dependencyZ = sumRow( outputDependencies[run5].getCols( NX,NX+NXA-1 ) );
+			if( NDX > 0 ) dependencyDX = sumRow( outputDependencies[run5].getCols( NX+NXA+NU,NVARS-1 ) );
+		}
 		for( run3 = 0; run3 < NX; run3++ ) {
-			if( !EXPORT_RHS || (int)dependencyX(run3) != 0 ) {
+			if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyX(run3) != 0 ) {
 				loop22.addStatement( rk_xxx.getCols( run3,run3+1 ) == rk_eta.getCols( run3,run3+1 ) + rk_outH*rk_kkk.getCol( run3 ) );
 			}
 		}
 		for( run3 = 0; run3 < NXA; run3++ ) {
-			if( !EXPORT_RHS || (int)dependencyZ(run3) != 0 ) {
+			if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyZ(run3) != 0 ) {
 				loop22.addStatement( rk_xxx.getCols( NX+run3,NX+run3+1 ) == rk_out2*rk_kkk.getCol( NX+run3 ) );
 			}
 		}
 		for( run3 = 0; run3 < NDX; run3++ ) {
-			if( !EXPORT_RHS || (int)dependencyDX(run3) != 0 ) {
+			if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyDX(run3) != 0 ) {
 				loop22.addStatement( rk_xxx.getCols( inputDim-diffsDim+run3,inputDim-diffsDim+run3+1 ) == rk_out2*rk_kkk.getCol( run3 ) );
 			}
 		}
@@ -480,21 +503,21 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	for( run2 = 0; run2 < NX+NXA; run2++ ) {
 		for( run3 = 0; run3 < numStages; run3++ ) { // differential states
 			if( NDX == 0 ) {
-				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( run1,run1+1,run2*NX,run2*NX+NX ) );
+				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( run1,run1+1,run2*(NVARS),run2*(NVARS)+NX ) );
 				loop3.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) " );
 				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX+run2,run3*NX+run2+1 ) -= 1 );
 			}
 			else {
-				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( run1,run1+1,run2*NX,run2*NX+NX ) );
+				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) == Ah.getSubMatrix( run1,run1+1,run3,run3+1 )*rk_diffsTemp.getSubMatrix( run1,run1+1,run2*(NVARS),run2*(NVARS)+NX ) );
 				loop3.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) {" );
-				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) += rk_diffsTemp.getSubMatrix( run1,run1+1,(NX+NXA)*(NX+NXA+NU)+run2*NDX,(NX+NXA)*(NX+NXA+NU)+run2*NDX+NDX ) );
+				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,run3*NX,run3*NX+NX ) += rk_diffsTemp.getSubMatrix( run1,run1+1,run2*(NVARS)+NX+NXA+NU,run2*(NVARS)+NVARS ) );
 				loop3.addStatement( String( "}\n" ) );
 			}
 		}
 		if( NXA > 0 ) {
 			for( run3 = 0; run3 < numStages; run3++ ) { // algebraic states
 				loop3.addStatement( String( "if( " ) << run3 << " == " << run1.getName() << " ) {\n" );
-				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == rk_diffsTemp.getSubMatrix( run1,run1+1,(NX+NXA)*NX+run2*NXA,(NX+NXA)*NX+run2*NXA+NXA ) );
+				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == rk_diffsTemp.getSubMatrix( run1,run1+1,run2*(NVARS)+NX,run2*(NVARS)+NX+NXA ) );
 				loop3.addStatement( String( "}\n else {\n" ) );
 				loop3.addStatement( rk_A.getSubMatrix( run1*(NX+NXA)+run2,run1*(NX+NXA)+run2+1,numStages*NX+run3*NXA,numStages*NX+run3*NXA+NXA ) == zeroM.getCols( 0,NXA ) );
 				loop3.addStatement( String( "}\n" ) );
@@ -530,7 +553,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	ExportForLoop loop4( run1,0,NX );
 	for( run2 = 0; run2 < numStages; run2++ ) { // TODO: EXPORTINDEX STUFF FROM MILAN
 		for( run3 = 0; run3 < NX+NXA; run3++ ) {
-			loop4.addStatement( rk_b.getCol( run2*(NX+NXA)+run3 ) == zeroM.getCols( 0,1 ) - rk_diffsTemp.getSubMatrix( run2,run2+1,run1+run3*NX,run1+run3*NX+1 ) );
+			loop4.addStatement( rk_b.getCol( run2*(NX+NXA)+run3 ) == zeroM.getCols( 0,1 ) - rk_diffsTemp.getSubMatrix( run2,run2+1,run1+run3*(NVARS),run1+run3*(NVARS)+1 ) );
 		}
 	}
 	loop4.addStatement( String( "if( 0 == " ) << run1.getName() << " ) {\n" );	// factorization of the new matrix rk_A not yet calculated!
@@ -542,14 +565,16 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	// generate sensitivities wrt states for continuous output (except for the last grid point):
 	for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
 		ExportForLoop loop41( i,0,outputGrids[run2].getNumIntervals()-1 );
-		evaluatePolynomial( loop41, rk_outH, gridVariables[run2], i, h );
-		if( NXA > 0 || NDX > 0 ) evaluateDerivedPolynomial( loop41, rk_out2, gridVariables[run2], i );
+		loop41.addStatement( rk_outH == polynVariables[run2].getRow( i ) );
+		if( NXA > 0 || NDX > 0 ) loop41.addStatement( rk_out2 == polynDerVariables[run2].getRow( i ) );
 		Vector dependencyX, dependencyZ, dependencyDX;
-		if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run2].getDependencyPattern( x ) );
-		if( EXPORT_RHS && NXA > 0 ) dependencyZ = sumRow( outputExpressions[run2].getDependencyPattern( z ) );
-		if( EXPORT_RHS && NDX > 0 ) dependencyDX = sumRow( outputExpressions[run2].getDependencyPattern( dx ) );
+		if( EXPORT_RHS || CRS_FORMAT ) {
+			dependencyX = sumRow( outputDependencies[run2].getCols( 0,NX-1 ) );
+			if( NXA > 0 ) dependencyZ = sumRow( outputDependencies[run2].getCols( NX,NX+NXA-1 ) );
+			if( NDX > 0 ) dependencyDX = sumRow( outputDependencies[run2].getCols( NX+NXA+NU,NVARS-1 ) );
+		}
 		for( run4 = 0; run4 < NX; run4++ ) {
-			if( !EXPORT_RHS || (int)dependencyX(run4) != 0 ) {
+			if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyX(run4) != 0 ) {
 				loop41.addStatement( String(rk_rhsTemp.get( 0,run4 )) << " = (" << run4 << " == " << run1.getName() << ");\n" );
 				for( run5 = 0; run5 < numStages; run5++ ) {
 					loop41.addStatement( rk_rhsTemp.getCol( run4 ) += rk_outH.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
@@ -558,7 +583,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 			}
 		}
 		for( run4 = 0; run4 < NXA; run4++ ) {
-			if( !EXPORT_RHS || (int)dependencyZ(run4) != 0 ) {
+			if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyZ(run4) != 0 ) {
 				loop41.addStatement( rk_rhsTemp.getCol( NX+run4 ) == rk_out2.getCol( 0 )*rk_sol.getCol( numStages*NX+run4 ) );
 				for( run5 = 1; run5 < numStages; run5++ ) {
 					loop41.addStatement( rk_rhsTemp.getCol( NX+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( numStages*NX+run5*NXA+run4 ) );
@@ -567,7 +592,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 			}
 		}
 		for( run4 = 0; run4 < NDX; run4++ ) {
-			if( !EXPORT_RHS || (int)dependencyDX(run4) != 0 ) {
+			if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyDX(run4) != 0 ) {
 				loop41.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) == rk_out2.getCol( 0 )*rk_sol.getCol( run4 ) );
 				for( run5 = 1; run5 < numStages; run5++ ) {
 					loop41.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
@@ -580,28 +605,28 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		uint numOutputs = getDimOUTPUT( run2 );
 		uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
 		for( run4 = 0; run4 < numOutputs; run4++ ) {
-			if( EXPORT_RHS ) {
-				dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-				if( NXA > 0 ) dependencyZ = outputExpressions[run2].getRow(run4).getDependencyPattern( z );
-				if( NDX > 0 ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
+			if( EXPORT_RHS || CRS_FORMAT ) {
+				dependencyX = (outputDependencies[run2].getCols( 0,NX-1 )).getRow( run4 );
+				if( NXA > 0 ) dependencyZ = (outputDependencies[run2].getCols( NX,NX+NXA-1 )).getRow( run4 );
+				if( NDX > 0 ) dependencyDX = (outputDependencies[run2].getCols( NX+NXA+NU,NVARS-1 )).getRow( run4 );
 			}
 			// TODO: EXPORTINDEX STUFF FROM MILAN
 			loop41.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs+run4*NX << "] = 0.0;\n" );
 			for( run5 = 0; run5 < NX; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop41.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs+run4*NX << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
 				}
 			}
 			for( run5 = 0; run5 < NXA; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyZ(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyZ(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop41.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs+run4*NX << "] += " << rk_rhsTemp.get( 0,NX+run5 ) << "*" << tempString << ";\n" );
 				}
 			}
 			for( run5 = 0; run5 < NDX; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyDX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+NX+NXA+NU+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop41.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs+run4*NX << "] += " << rk_rhsTemp.get( 0,NX+NXA+run5 ) << "*" << tempString << ";\n" );
 				}
 			}
@@ -661,26 +686,28 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
 		for( run4 = 0; run4 < numOutputs; run4++ ) {
 			Vector dependencyX, dependencyZ, dependencyDX;
-			if( EXPORT_RHS ) dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-			if( EXPORT_RHS && NXA > 0 ) dependencyZ = outputExpressions[run2].getRow(run4).getDependencyPattern( z );
-			if( EXPORT_RHS && NDX > 0 ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
+			if( EXPORT_RHS || CRS_FORMAT ) {
+				dependencyX = (outputDependencies[run2].getCols( 0,NX-1 )).getRow( run4 );
+				if( NXA > 0 ) dependencyZ = (outputDependencies[run2].getCols( NX,NX+NXA-1 )).getRow( run4 );
+				if( NDX > 0 ) dependencyDX = (outputDependencies[run2].getCols( NX+NXA+NU,NVARS-1 )).getRow( run4 );
+			}
 			// TODO: EXPORTINDEX STUFF FROM MILAN
 			loop4.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX ) << "] = 0.0;\n" );
 			for( run5 = 0; run5 < NX; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop4.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX ) << "] += " << rk_diffsNew.get( run5,run1 ) << "*" << tempString << ";\n" );
 				}
 			}
 			for( run5 = 0; run5 < NXA; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyZ(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyZ(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop4.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX ) << "] += " << rk_diffsNew.get( NX+run5,run1 ) << "*" << tempString << ";\n" );
 				}
 			}
 			for( run5 = 0; run5 < NDX; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyDX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+NX+NXA+NU+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop4.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs+run4*NX ) << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
 				}
 			}
@@ -694,7 +721,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	ExportForLoop loop5( run1,0,NU );
 	for( run2 = 0; run2 < numStages; run2++ ) { // TODO: EXPORTINDEX STUFF FROM MILAN
 		for( run3 = 0; run3 < NX+NXA; run3++ ) {
-			loop5.addStatement( rk_b.getCol( run2*(NX+NXA)+run3 ) == zeroM.getCols( 0,1 ) - rk_diffsTemp.getSubMatrix( run2,run2+1,run1+(NX+NXA)*(NX+NXA)+run3*NU,run1+(NX+NXA)*(NX+NXA)+run3*NU+1 ) );
+			loop5.addStatement( rk_b.getCol( run2*(NX+NXA)+run3 ) == zeroM.getCols( 0,1 ) - rk_diffsTemp.getSubMatrix( run2,run2+1,run1+run3*(NVARS)+NX+NXA,run1+run3*(NVARS)+NX+NXA+1 ) );
 		}
 	}
 	loop5.addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_sol.getAddress(0,0) );
@@ -702,14 +729,16 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	// generate sensitivities wrt controls for continuous output (except for the last grid point):
 	for( run2 = 0; run2 < rk_outputs.size(); run2++ ) {
 		ExportForLoop loop51( i,0,outputGrids[run2].getNumIntervals()-1 );
-		evaluatePolynomial( loop51, rk_outH, gridVariables[run2], i, h );
-		if( NXA > 0 || NDX > 0 ) evaluateDerivedPolynomial( loop51, rk_out2, gridVariables[run2], i );
+		loop51.addStatement( rk_outH == polynVariables[run2].getRow( i ) );
+		if( NXA > 0 || NDX > 0 ) loop51.addStatement( rk_out2 == polynDerVariables[run2].getRow( i ) );
 		Vector dependencyX, dependencyZ, dependencyDX;
-		if( EXPORT_RHS ) dependencyX = sumRow( outputExpressions[run2].getDependencyPattern( x ) );
-		if( EXPORT_RHS && NXA > 0 ) dependencyZ = sumRow( outputExpressions[run2].getDependencyPattern( z ) );
-		if( EXPORT_RHS && NDX > 0 ) dependencyDX = sumRow( outputExpressions[run2].getDependencyPattern( dx ) );
+		if( EXPORT_RHS || CRS_FORMAT ) {
+			dependencyX = sumRow( outputDependencies[run2].getCols( 0,NX-1 ) );
+			if( NXA > 0 ) dependencyZ = sumRow( outputDependencies[run2].getCols( NX,NX+NXA-1 ) );
+			if( NDX > 0 ) dependencyDX = sumRow( outputDependencies[run2].getCols( NX+NXA+NU,NVARS-1 ) );
+		}
 		for( run4 = 0; run4 < NX; run4++ ) {
-			if( !EXPORT_RHS || (int)dependencyX(run4) != 0 ) {
+			if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyX(run4) != 0 ) {
 				loop51.addStatement( rk_rhsTemp.getCol( run4 ) == rk_outH.getCol( 0 )*rk_sol.getCol( run4 ) );
 				for( run5 = 1; run5 < numStages; run5++ ) {
 					loop51.addStatement( rk_rhsTemp.getCol( run4 ) += rk_outH.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
@@ -718,7 +747,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 			}
 		}
 		for( run4 = 0; run4 < NXA; run4++ ) {
-			if( !EXPORT_RHS || (int)dependencyZ(run4) != 0 ) {
+			if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyZ(run4) != 0 ) {
 				loop51.addStatement( rk_rhsTemp.getCol( NX+run4 ) == rk_out2.getCol( 0 )*rk_sol.getCol( numStages*NX+run4 ) );
 				for( run5 = 1; run5 < numStages; run5++ ) {
 					loop51.addStatement( rk_rhsTemp.getCol( NX+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( numStages*NX+run5*NXA+run4 ) );
@@ -727,7 +756,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 			}
 		}
 		for( run4 = 0; run4 < NDX; run4++ ) {
-			if( !EXPORT_RHS || (int)dependencyDX(run4) != 0 ) {
+			if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyDX(run4) != 0 ) {
 				loop51.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) == rk_out2.getCol( 0 )*rk_sol.getCol( run4 ) );
 				for( run5 = 1; run5 < numStages; run5++ ) {
 					loop51.addStatement( rk_rhsTemp.getCol( NX+NXA+run4 ) += rk_out2.getCol( run5 )*rk_sol.getCol( run5*NX+run4 ) );
@@ -740,28 +769,28 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		uint numOutputs = getDimOUTPUT( run2 );
 		uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
 		for( run4 = 0; run4 < numOutputs; run4++ ) {
-			if( EXPORT_RHS ) {
-				dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-				if( NXA > 0 ) dependencyZ = outputExpressions[run2].getRow(run4).getDependencyPattern( z );
-				if( NDX > 0 ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
+			if( EXPORT_RHS || CRS_FORMAT ) {
+				dependencyX = (outputDependencies[run2].getCols( 0,NX-1 )).getRow( run4 );
+				if( NXA > 0 ) dependencyZ = (outputDependencies[run2].getCols( NX,NX+NXA-1 )).getRow( run4 );
+				if( NDX > 0 ) dependencyDX = (outputDependencies[run2].getCols( NX+NXA+NU,NVARS-1 )).getRow( run4 );
 			}
 			// TODO: EXPORTINDEX STUFF FROM MILAN
-			loop51.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs*(1+NX)+run4*NU << "] = " <<  rk_diffsOutputTemp.get( 0,run1+numOutputs*(NX+NXA)+run4*NU ) << ";\n" );
+			loop51.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs*(1+NX)+run4*NU << "] = " <<  rk_diffsOutputTemp.get( 0,run1+run4*NVARS+NX+NXA ) << ";\n" );
 			for( run5 = 0; run5 < NX; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop51.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs*(1+NX)+run4*NU << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
 				}
 			}
 			for( run5 = 0; run5 < NXA; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyZ(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyZ(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop51.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs*(1+NX)+run4*NU << "] += " << rk_rhsTemp.get( 0,NX+run5 ) << "*" << tempString << ";\n" );
 				}
 			}
 			for( run5 = 0; run5 < NDX; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyDX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+NX+NXA+NU+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop51.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+i*" << String( numOutputs*(NX+NU+1) ) << "+" << run1.getName() << "+" << numOutputs*(1+NX)+run4*NU << "] += " << rk_rhsTemp.get( 0,NX+NXA+run5 ) << "*" << tempString << ";\n" );
 				}
 			}
@@ -821,26 +850,28 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		uint outputDim = outputGrids[run2].getNumIntervals( )*numOutputs*(NX+NU+1);
 		for( run4 = 0; run4 < numOutputs; run4++ ) {
 			Vector dependencyX, dependencyZ, dependencyDX;
-			if( EXPORT_RHS ) dependencyX = outputExpressions[run2].getRow(run4).getDependencyPattern( x );
-			if( EXPORT_RHS && NXA > 0 ) dependencyZ = outputExpressions[run2].getRow(run4).getDependencyPattern( z );
-			if( EXPORT_RHS && NDX > 0 ) dependencyDX = outputExpressions[run2].getRow(run4).getDependencyPattern( dx );
+			if( EXPORT_RHS || CRS_FORMAT ) {
+				dependencyX = (outputDependencies[run2].getCols( 0,NX-1 )).getRow( run4 );
+				if( NXA > 0 ) dependencyZ = (outputDependencies[run2].getCols( NX,NX+NXA-1 )).getRow( run4 );
+				if( NDX > 0 ) dependencyDX = (outputDependencies[run2].getCols( NX+NXA+NU,NVARS-1 )).getRow( run4 );
+			}
 			// TODO: EXPORTINDEX STUFF FROM MILAN
-			loop5.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU ) << "] = " <<  rk_diffsOutputTemp.get( 0,run1+numOutputs*(NX+NXA)+run4*NU ) << ";\n" );
+			loop5.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU ) << "] = " <<  rk_diffsOutputTemp.get( 0,run1+run4*NVARS+NX+NXA ) << ";\n" );
 			for( run5 = 0; run5 < NX; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyX(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,run4*NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop5.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU ) << "] += " << rk_diffsNew.get( run5,run1+NX ) << "*" << tempString << ";\n" );
 				}
 			}
 			for( run5 = 0; run5 < NXA; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyZ(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,numOutputs*NX+run4*NXA+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyZ(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+NX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop5.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU ) << "] += " << rk_diffsNew.get( NX+run5,run1+NX ) << "*" << tempString << ";\n" );
 				}
 			}
 			for( run5 = 0; run5 < NDX; run5++ ) {
-				if( !EXPORT_RHS || (int)dependencyDX(run5) != 0 ) {
-					tempString = rk_diffsOutputTemp.get( 0,numOutputs*(NX+NXA+NU)+run4*NDX+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
+				if( (!EXPORT_RHS && !CRS_FORMAT) || (int)dependencyDX(run5) != 0 ) {
+					tempString = rk_diffsOutputTemp.get( 0,run4*NVARS+NX+NXA+NU+run5 ); // TODO: EXPORTINDEX STUFF FROM MILAN
 					loop5.addStatement( String( rk_outputs[run2].getName() ) << "[run*" << String( outputDim ) << "+" << run1.getName() << "+" << String( run3*numOutputs*(NX+NU+1)+numOutputs*(1+NX)+run4*NU ) << "] += " << rk_rhsTemp.get( 0,run5 ) << "*" << tempString << ";\n" );
 				}
 			}
@@ -1112,6 +1143,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 		numItsInit = newNumItsInit;
 	}
 	
+	NVARS = NX+NXA+NU+NDX;
 	diffsDim = (NX+NXA)*(NX+NU);
 	inputDim = (NX+NXA)*(NX+NU+1) + NU + NP;
 	
@@ -1124,7 +1156,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	rk_A = ExportVariable( "rk_A", numStages*(NX+NXA), numStages*(NX+NXA), REAL, ACADO_WORKSPACE );
 	rk_b = ExportVariable( "rk_b", 1, numStages*(NX+NXA), REAL, ACADO_WORKSPACE );
 	rk_rhsTemp = ExportVariable( "rk_rhsTemp", 1, NX+NXA+NDX, REAL, ACADO_WORKSPACE );
-	rk_diffsTemp = ExportVariable( "rk_diffsTemp", numStages, (NX+NXA)*(NX+NXA+NU+NDX), REAL, ACADO_WORKSPACE );
+	rk_diffsTemp = ExportVariable( "rk_diffsTemp", numStages, (NX+NXA)*(NVARS), REAL, ACADO_WORKSPACE );
 	rk_diffsPrev = ExportVariable( "rk_diffsPrev", NX+NXA, NX+NU, REAL, ACADO_WORKSPACE );
 	rk_diffsNew = ExportVariable( "rk_diffsNew", NX+NXA, NX+NU, REAL, ACADO_WORKSPACE );
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
@@ -1189,10 +1221,12 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		f_Output << outputExpressions_[i];
 	
 		DifferentialEquation g_Output;
-		g_Output << forwardDerivative( outputExpressions_[i], x );
-		g_Output << forwardDerivative( outputExpressions_[i], z );
-		g_Output << forwardDerivative( outputExpressions_[i], u );
-		g_Output << forwardDerivative( outputExpressions_[i], dx );
+		for( uint j = 0; j < outputExpressions_[i].getDim(); j++ ) {
+			g_Output << forwardDerivative( outputExpressions_[i](j), x );
+			g_Output << forwardDerivative( outputExpressions_[i](j), z );
+			g_Output << forwardDerivative( outputExpressions_[i](j), u );
+			g_Output << forwardDerivative( outputExpressions_[i](j), dx );
+		}
 	
 		ExportODEfunction OUTPUT, diffs_OUTPUT;
 		val = val & OUTPUT.init( f_Output,String("acado_output")<<String(i)<<"_rhs",NX,NXA,NU ) & diffs_OUTPUT.init( g_Output,String("acado_output")<<String(i)<<"_diffs",NX,NXA,NU );
@@ -1202,11 +1236,18 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		
 		OUTPUTS.push_back( OUTPUT );
 		diffs_OUTPUTS.push_back( diffs_OUTPUT );
+
+		Matrix dependencyMat = outputExpressions[i].getDependencyPattern( x );
+		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( z ) );
+		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( u ) );
+		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( dx ) );
+
+		outputDependencies.push_back( dependencyMat );
 	}
 	
 	setup();
 	rk_rhsOutputTemp = ExportVariable( "rk_rhsOutputTemp", 1, maxOutputs, REAL, ACADO_WORKSPACE );
-	rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(NX+NXA+NU+NDX), REAL, ACADO_WORKSPACE );
+	rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(NVARS), REAL, ACADO_WORKSPACE );
 	rk_outH = ExportVariable( "rk_outH", 1, numStages, REAL, ACADO_WORKSPACE );
 	rk_out2 = ExportVariable( "rk_out2", 1, numStages, REAL, ACADO_WORKSPACE );
 	polynEvalVar = ExportVariable( "tmp_polyn", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
@@ -1246,7 +1287,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 
 		setup();
 		rk_rhsOutputTemp = ExportVariable( "rk_rhsOutputTemp", 1, maxOutputs, REAL, ACADO_WORKSPACE );
-		rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(NX+NXA+NU+NDX), REAL, ACADO_WORKSPACE );
+		rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(NVARS), REAL, ACADO_WORKSPACE );
 		rk_outH = ExportVariable( "rk_outH", 1, numStages, REAL, ACADO_WORKSPACE );
 		rk_out2 = ExportVariable( "rk_out2", 1, numStages, REAL, ACADO_WORKSPACE );
 		polynEvalVar = ExportVariable( "tmp_polyn", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
@@ -1259,6 +1300,19 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 
 
 	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outputGrids_,
+									  	  const std::vector<String> _outputNames,
+									  	  const std::vector<String> _diffs_outputNames,
+										  const std::vector<uint> _dims_output,
+										  const std::vector<Matrix> _outputDependencies ) {
+
+	outputDependencies = _outputDependencies;
+	CRS_FORMAT = BT_TRUE;
+
+	return setupOutput( outputGrids_, _outputNames, _diffs_outputNames, _dims_output );
 }
 
 

@@ -30,68 +30,48 @@
  */
 
 
-#ifndef ACADO_TOOLKIT_EXPORT_ARGUMENT_HPP
-#define ACADO_TOOLKIT_EXPORT_ARGUMENT_HPP
+#ifndef ACADO_TOOLKIT_EXPORT_ARGUMENT_INTERNAL_HPP
+#define ACADO_TOOLKIT_EXPORT_ARGUMENT_INTERNAL_HPP
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
-#include <acado/code_generation/export_data.hpp>
+#include <acado/code_generation/export_data_internal.hpp>
 #include <acado/code_generation/export_index.hpp>
+
 
 BEGIN_NAMESPACE_ACADO
 
 
-class ExportArgumentInternal;
+class ExportArithmeticStatement;
+class ExportIndex;
 
 
-/** 
+/**
  *	\brief Defines a matrix-valued variable that can be passed as argument to exported functions.
  *
  *	\ingroup AuxiliaryFunctionality
  *
- *	The class ExportArgument defines a matrix-valued variable that 
+ *	The class ExportArgumentInternal defines a matrix-valued variable that
  *	can be passed as argument to exported functions. By default, all entries
- *	of an arguments are undefined, but each of its component can be set to 
+ *	of an arguments are undefined, but each of its component can be set to
  *	a fixed value if known beforehand.
  *
  *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
-class ExportArgument : public ExportData
+class ExportArgumentInternal : public ExportDataInternal
 {
     //
     // PUBLIC MEMBER FUNCTIONS:
     //
     public:
 
-		/** Default constructor. 
+		/** Default constructor.
 		 */
-        ExportArgument( );
-
-		/** Constructor which takes the name, type
-		 *	and dimensions of the argument.
-		 *
-		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _nRows			Number of rows of the argument.
-		 *	@param[in] _nCols			Number of columns of the argument.
-		 *	@param[in] _type			Data type of the argument.
-		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
-		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
-		 *	@param[in] _addressIdx		If an address index is specified, not the argument itself but 
-		 *								a pointer to this address within the memory of the argument is passed.
-		 */
-		ExportArgument(	const String& _name,
-						uint _nRows = 1,
-						uint _nCols = 1,
-						ExportType _type = REAL,
-						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callByValue = BT_FALSE,
-						const ExportIndex& _addressIdx = emptyConstExportIndex,
-						const String& _prefix = emptyConstString
-						);
+        ExportArgumentInternal( );
 
 		/** Constructor which takes the name and type of the argument.
-		 *	Moreover, it initializes the argument with the dimensions and the 
+		 *	Moreover, it initializes the argument with the dimensions and the
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
@@ -99,24 +79,23 @@ class ExportArgument : public ExportData
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
-		 *	@param[in] _addressIdx		If an address index is specified, not the argument itself but 
+		 *	@param[in] _addressIdx		If an address index is specified, not the argument itself but
 		 *								a pointer to this address within the memory of the argument is passed.
 		 */
-		ExportArgument(	const String& _name,
-						const Matrix& _data,
-						ExportType _type = REAL,
-						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callByValue = BT_FALSE,
-						const ExportIndex& _addressIdx = emptyConstExportIndex,
-						const String& _prefix = emptyConstString
-						);
+		ExportArgumentInternal(	const String& _name,
+								const Matrix& _data,
+								ExportType _type,
+								ExportStruct _dataStruct,
+								BooleanType _callByValue,
+								const ExportIndex& _addressIdx,
+								const String& _prefix
+								);
 
-		ExportArgument(	const Matrix& _data
-						);
+		/** Destructor.
+		 */
+		virtual ~ExportArgumentInternal( );
 
-		ExportArgumentInternal* operator->();
-
-		const ExportArgumentInternal* operator->() const;
+		virtual ExportArgumentInternal* clone() const;
 
 		/** Returns a copy of the argument with address index set to given location.
 		 *
@@ -125,13 +104,13 @@ class ExportArgument : public ExportData
 		 *
 		 *	\return Copy of the argument with address index set to given location
 		 */
-		ExportArgument getAddress(	const ExportIndex& _rowIdx,
-									const ExportIndex& _colIdx = emptyConstExportIndex
+		ExportArgument getAddress(	const ExportIndex& rowIdx,
+									const ExportIndex& colIdx = emptyConstExportIndex
 									) const;
 
-		/** Returns a string containing the address of the argument to be called. 
-		 *	If an address index has been set, the string contains a pointer to the 
-		 *	desired location. The string also depends on whether the argument is 
+		/** Returns a string containing the address of the argument to be called.
+		 *	If an address index has been set, the string contains a pointer to the
+		 *	desired location. The string also depends on whether the argument is
 		 *	to be called by value or not.
 		 *
 		 *	\return String containing the address of the argument
@@ -179,9 +158,7 @@ class ExportArgument : public ExportData
 		 */
 		returnValue callByValue( );
 
-
-
-		/** Exports declaration of the argument into given file. Its appearance can 
+		/** Exports declaration of the argument into given file. Its appearance can
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export declaration.
@@ -196,15 +173,44 @@ class ExportArgument : public ExportData
 													const String& _intString = "int",
 													int _precision = 16
 													) const;
+
+
+	//
+	// PROTECTED MEMBER FUNCTIONS:
+	//
+	protected:
+
+		/** Returns column dimension of the argument.
+		 *
+		 *	\return Column dimension of the argument
+		 */
+		virtual uint getColDim( ) const;
+
+		/** Returns total index of given component within memory.
+		 *
+		 *	@param[in] rowIdx		Row index of the component.
+		 *	@param[in] colIdx		Column index of the component.
+		 *
+		 *	\return Total index of given component
+		 */
+		virtual ExportIndex	getTotalIdx(	const ExportIndex& rowIdx,
+											const ExportIndex& colIdx
+											) const;
+
+
+	protected:
+
+		Matrix data;								/**< Matrix containing the values of each component of the argument
+													 *   (by default, all entries are undefined). */
+		ExportIndex addressIdx;						/**< Address index in case not the argument itself but a pointer to
+													 *   this address within the memory of the argument is to be passed. */
+		BooleanType callItByValue;					/**< Flag indicating whether argument it to be called by value. */
 };
-
-
-static const ExportArgument emptyConstExportArgument;
 
 
 CLOSE_NAMESPACE_ACADO
 
 
-#endif  // ACADO_TOOLKIT_EXPORT_ARGUMENT_HPP
+#endif  // ACADO_TOOLKIT_EXPORT_ARGUMENT_INTERNAL_HPP
 
 // end of file.

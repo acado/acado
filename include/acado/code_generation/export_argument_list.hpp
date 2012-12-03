@@ -37,6 +37,7 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_argument.hpp>
 
+#include <vector>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -195,10 +196,11 @@ class ExportArgumentList
 	//
 	protected:
 
-		uint nArguments;						/**< Number of arguments in list. */
-		ExportArgument** arguments;				/**< Array containing all calling arguments. */
+		/** Array containing all calling arguments. */
+		std::vector< ExportArgument > arguments;
 		
-		BooleanType includeType;				/**< Flag indicating whether variable types are to be included in calling arguments. */
+		/** Flag indicating whether variable types are to be included in calling arguments. */
+		BooleanType includeType;
 };
 
 

@@ -83,12 +83,16 @@ function subjectTo(obj, varargin)
     elseif(nargin == 3 && isa(varargin{1}, 'char') && isa(varargin{2}, 'acado.Expression'))
         % ocp.subjectTo( 'AT_START', x == 1.0 );
         % ocp.subjectTo( 'AT_END', x == 1.0 );
-        obj.subjectoItems{end+1} = sprintf('%s, %s', varargin{1}, varargin{2}.toString());
+        for i = 1:length(varargin{2})
+            obj.subjectoItems{end+1} = sprintf('%s, %s', varargin{1}, varargin{2}(i).toString());
+        end
        
     elseif(nargin == 2 && isa(varargin{1}, 'acado.Expression'))
         % ocp.subjectTo(  0.1 <= p <= 2.0 );
         % ocp.subjectTo(  0.1 == p );
-        obj.subjectoItems{end+1} = varargin{1}.toString();
+        for i = 1:length(varargin{1})
+            obj.subjectoItems{end+1} = varargin{1}(i).toString();
+        end
     
     elseif(nargin == 5 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'acado.Expression') && isa(varargin{3}, 'acado.Expression') && isa(varargin{4}, 'numeric'))
         % ocp.subjectTo( 0.0, r , -r , 0.0 );

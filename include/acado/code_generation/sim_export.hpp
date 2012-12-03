@@ -184,6 +184,20 @@ class SIMexport : public ExportModule
 		returnValue addOutput( const String& output, const String& diffs_output, const uint dim );
 
 
+		/** Adds an output function.
+		 *
+		 *  \param output 	  			The output function to be added.
+		 *  \param diffs_output 	  	The derivatives of the output function to be added.
+		 *  \param dim					The dimension of the output function.
+		 *  \param colInd				Vector stores the column indices of the elements for Compressed Row Storage (CRS).
+		 *  \param rowPtr				Vector stores the locations that start a row for Compressed Row Storage (CRS).
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		returnValue addOutput( 	const String& output, const String& diffs_output, const uint dim,
+								const String& colInd, const String& rowPtr	);
+
+
 		/** Sets up the output functions.
 		 *
 		 *  \param numberMeasurements	  the number of measurements per interval for each output function
@@ -241,6 +255,14 @@ class SIMexport : public ExportModule
 		 *	        RET_UNABLE_TO_EXPORT_CODE
 		 */
 		returnValue setup( );
+
+
+		/** Returns the dependency matrix for each output function, which is defined externally.
+		 *
+		 * \return The dependency matrix for each output function, defined externally.
+		 */
+		std::vector<Matrix> getOutputDependencies( );
+
 
 		/** Checks whether OCP formulation is compatible with code export capabilities.
 		 *
@@ -343,9 +365,11 @@ class SIMexport : public ExportModule
         double T;								/**< The total simulation time. */
 		IntegratorExport*  integrator;			/**< Module for exporting a tailored integrator. */
 		std::vector<Grid> outputGrids;			/**< A separate grid for each output. */
-		std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
-		std::vector<String> outputNames;				/**< A separate function name for each output. */
-		std::vector<String> diffs_outputNames;			/**< A separate function name for evaluating the derivatives of each output. */
+		std::vector<Expression> outputExpressions;	/**< A separate expression for each output. */
+		std::vector<String> outputNames;			/**< A separate function name for each output. */
+		std::vector<String> diffs_outputNames;		/**< A separate function name for evaluating the derivatives of each output. */
+		std::vector<Vector> colInd_outputs;			/**< A separate Vector of column indices for each output if in CRS format. */
+		std::vector<Vector> rowPtr_outputs;			/**< A separate Vector of row pointers for each output if in CRS format. */
 		
 		BooleanType referenceProvided;			/**< True if the user provided a file with the reference solution. */
 		BooleanType PRINT_DETAILS;				/**< True if the user wants all the details about the results being printed. */

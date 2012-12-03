@@ -200,6 +200,24 @@ returnValue SIMexport::addOutput( const String& output, const String& diffs_outp
 }
 
 
+returnValue SIMexport::addOutput( 	const String& output, const String& diffs_output, const uint dim,
+									const String& colInd, const String& rowPtr	){
+
+
+	Vector colIndV = readFromFile( colInd.getName() );
+	Vector rowPtrV = readFromFile( rowPtr.getName() );
+	if( rowPtrV.getDim() != (dim+1) ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	colInd_outputs.push_back( colIndV );
+	rowPtr_outputs.push_back( rowPtrV );
+
+	addOutput( output, diffs_output, dim );
+
+    return SUCCESSFUL_RETURN;
+}
+
+
 returnValue SIMexport::setMeasurements( const Vector& numberMeasurements ){
 
 	int i;
@@ -321,7 +339,12 @@ returnValue SIMexport::setup( )
 			integrator->setupOutput( newGrids_, outputExpressions );
 		}
 		else {
-			integrator->setupOutput( newGrids_, outputNames, diffs_outputNames, dim_outputs );
+			if( colInd_outputs.size() == 0 ) {
+				integrator->setupOutput( newGrids_, outputNames, diffs_outputNames, dim_outputs );
+			}
+			else {
+				integrator->setupOutput( newGrids_, outputNames, diffs_outputNames, dim_outputs, getOutputDependencies() );
+			}
 		}
 	}
 	
@@ -330,6 +353,27 @@ returnValue SIMexport::setup( )
 	setStatus( BS_READY );
 
 	return SUCCESSFUL_RETURN;
+}
+
+
+std::vector<Matrix> SIMexport::getOutputDependencies( ) {
+	std::vector<Matrix> outputDependencies;
+	for( int i = 0; i < outputNames.size(); i++ ) {
+		Vector colIndV = colInd_outputs[i];
+		Vector rowPtrV = rowPtr_outputs[i];
+
+		Matrix dependencyMat = zeros( dim_outputs[i],NX+NXA+NU+NDX );
+		int index = 1;
+		for( int j = 0; j < dim_outputs[i]; j++ ) {
+			int upper = rowPtrV(j+1);
+			for( int k = rowPtrV(j); k < upper; k++ ) {
+				dependencyMat(j,colIndV(k-1)-1) = index++;
+			}
+		}
+
+		outputDependencies.push_back( dependencyMat );
+	}
+	return outputDependencies;
 }
 
 
@@ -558,7 +602,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( "      end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;\n" );
 		main.addStatement( "      time = (end-start);\n" );
 		main.addLinebreak( );
-		main.addStatement( "      printf( \"\\n\\n AVERAGE DURATION OF ONE INTEGRATION STEP:   %.3g μs\\n\\n\", 1e6*time/STEPS_TIMING );\n" );
+		main.addStatement( "      printf( \"\\n\\n AVERAGE DURATION OF ONE INTEGRATION STEP:   %.3g Î¼s\\n\\n\", 1e6*time/STEPS_TIMING );\n" );
 	}
     main.addLinebreak( );
 	main.addStatement( "      return 0;\n" );

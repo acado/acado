@@ -132,7 +132,7 @@ class ExportDataDeclaration : public ExportStatement
 
     protected:
 		
-		ExportData* data;					/**< Variable to be declared. */
+		ExportData data;					/**< Variable to be declared. */
 
 };
 

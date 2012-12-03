@@ -248,7 +248,7 @@ returnValue GaussNewtonExport::setup( )
 	{
 		initialValueEmbedding.addStatement( H.getSubMatrix( 0,getNX(), 0,getNX() ) == H00 );
 		initialValueEmbedding.addStatement( H.getSubMatrix( 0,getNX(), getNX(),getNumQPvars() ) == H01 );
-		initialValueEmbedding.addStatement( H.getSubMatrix( getNX(),getNumQPvars(), 0,getNX() ) == H01.accessTransposed() );
+		initialValueEmbedding.addStatement( H.getSubMatrix( getNX(),getNumQPvars(), 0,getNX() ) == H01.getTranspose() );
 		initialValueEmbedding.addStatement( H.getSubMatrix( getNX(),getNumQPvars(), getNX(),getNumQPvars() ) == H11 );
 	}
 

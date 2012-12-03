@@ -46,6 +46,7 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 									) : ExportAlgorithm( _userInteraction,_commonHeaderName )
 {
 	EXPORT_RHS = BT_TRUE;
+	CRS_FORMAT = BT_FALSE;
 }
 
 
@@ -53,6 +54,7 @@ IntegratorExport::IntegratorExport(	const IntegratorExport& arg
 									) : ExportAlgorithm( arg )
 {
 	EXPORT_RHS = BT_TRUE;
+	CRS_FORMAT = BT_FALSE;
 }
 
 
@@ -130,6 +132,7 @@ returnValue IntegratorExport::copy(	const IntegratorExport& arg
 									)
 {
 	EXPORT_RHS = arg.EXPORT_RHS;
+	CRS_FORMAT = arg.CRS_FORMAT;
 	grid = arg.grid;
 	numSteps = arg.numSteps;
 
