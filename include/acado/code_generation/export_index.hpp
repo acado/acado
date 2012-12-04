@@ -130,7 +130,9 @@ struct ExportIndexComparator
 {
     bool operator() (const ExportIndex& val1, const ExportIndex& val2) const
     {
-        return std::string( val1.getName().getName() ).compare( std::string( val2.getName().getName() ) );
+    	int tmp = std::string( val1.getName().getName() ).compare( std::string( val2.getName().getName() ) );
+
+    	return (tmp < 0) ? true : false;
     }
 };
 

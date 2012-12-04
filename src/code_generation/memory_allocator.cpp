@@ -41,6 +41,8 @@ returnValue MemoryAllocator::acquire(ExportIndex& _obj)
 		indices.add( ind );
 
 		_obj = ind;
+
+		return SUCCESSFUL_RETURN;
 	}
 
 	indices.acquire( _obj );
@@ -50,7 +52,8 @@ returnValue MemoryAllocator::acquire(ExportIndex& _obj)
 
 returnValue MemoryAllocator::release(const ExportIndex& _obj)
 {
-	indices.release( _obj );
+	if (indices.release( _obj ) == false)
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Object is not found in the pool");
 
 	return SUCCESSFUL_RETURN;
 }
