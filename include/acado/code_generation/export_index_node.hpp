@@ -48,8 +48,6 @@ enum ExportVariableType
 
 class ExportIndexNode : public ExportDataInternal
 {
-	friend class ExportIndex;
-
 public:
 	ExportIndexNode(	const String& _name,
 						const String& _prefix,
@@ -120,6 +118,16 @@ public:
 	 *	        BT_FALSE otherwise
 	 */
 	virtual BooleanType isGiven( ) const;
+
+	const int getFactor( ) const
+	{
+		return factor;
+	}
+
+	const int getOffset( ) const
+	{
+		return offset;
+	}
 
 private:
 	ExportVariableType varType;
