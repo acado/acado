@@ -55,6 +55,8 @@ classdef SIMexport < acado.ExportModule
         outputName = {};
         outputDiffsName = {};
         outputDim = {};
+        outputColIndName = {};
+        outputRowPtrName = {};
         meas;
         outputDefined = [];
     end
@@ -118,6 +120,15 @@ classdef SIMexport < acado.ExportModule
                 obj.outputName{end+1} = varargin{1};
                 obj.outputDiffsName{end+1} = varargin{2};
                 obj.outputDim{end+1} = varargin{3};
+                
+            elseif (nargin == 6 && isa(varargin{1}, 'char') && isa(varargin{2}, 'char') && isa(varargin{3}, 'numeric')) && isa(varargin{4}, 'char')  && isa(varargin{5}, 'char') 
+                obj.outputDefined(end+1) = 1;
+                % SIMexport.addOutput( output, diffs_output, dim, colInd, rowPtr );
+                obj.outputName{end+1} = varargin{1};
+                obj.outputDiffsName{end+1} = varargin{2};
+                obj.outputDim{end+1} = varargin{3};
+                obj.outputColIndName{end+1} = varargin{4};
+                obj.outputRowPtrName{end+1} = varargin{5};
                 
             else
                 error('ERROR: Invalid output added.');
@@ -211,8 +222,16 @@ classdef SIMexport < acado.ExportModule
                         error('ERROR: Invalid SIMexport object in getInstructions !\n');
                     end
                     numOutputs = length(obj.outputName);
-                    for i = 1:numOutputs
-                        fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( "%s", "%s", %s );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i})));
+                    if (~isempty(obj.outputColIndName)) && (length(obj.outputColIndName) == length(obj.outputRowPtrName)) && (length(obj.outputColIndName) == numOutputs)
+                        for i = 1:numOutputs
+                            fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( "%s", "%s", %s, "%s", "%s" );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i}), obj.outputColIndName{i}, obj.outputRowPtrName{i}));
+                        end
+                    elseif (~isempty(obj.outputColIndName))
+                        error('ERROR: Invalid SIMexport object in getInstructions !\n');
+                    else
+                        for i = 1:numOutputs
+                            fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( "%s", "%s", %s );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i})));
+                        end
                     end
                 end
                 if (numOutputs > 0 && numOutputs ~= obj.meas.dim)
