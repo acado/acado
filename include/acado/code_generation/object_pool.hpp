@@ -65,7 +65,7 @@ public:
 	{
 		if ( pool.size() )
 		{
-			typename poolMap::const_iterator it = pool.begin();
+			typename poolMap::iterator it = pool.begin();
 			for (; it != pool.end(); ++it)
 			{
 				if (it->second == false)
@@ -75,6 +75,7 @@ public:
 			if (it != pool.end())
 			{
 				obj = it->first;
+				it->second = true;
 
 				return true;
 			}
@@ -84,11 +85,17 @@ public:
 	}
 	
 	/** This function releases an object in the pool */
-	void release(const T& obj)
+	bool release(const T& obj)
 	{
 		typename poolMap::iterator it = pool.find( obj );
 		if (it != pool.end())
+		{
 			it->second = false;
+
+			return true;
+		}
+
+		return false;
 	}
 	
 	/** This function return a vector containing all objects in the pool */

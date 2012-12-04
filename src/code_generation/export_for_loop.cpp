@@ -139,49 +139,29 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 	{
 		stringstream s;
 
-		s << "for (" << loopVariable.getName().getName() << " = ";
-
-		if (startValue.isGiven() == BT_TRUE)
-		{
-			s << startValue.getGivenValue();
-		}
-		else
-		{
-			s << startValue.getName().getName();
-		}
-		s << "; ";
-
-		s << loopVariable.getName().getName() << " < ";
-		if (finalValue.isGiven() == BT_TRUE)
-		{
-			s << finalValue.getGivenValue();
-		}
-		else
-		{
-			s << finalValue.getName().getName();
-		}
-		s << "; ";
+		s << "for (" << loopVariable.get().getName() << " = " << startValue.get().getName() << "; "
+				<< loopVariable.get().getName() << " < " << finalValue.get().getName() << "; ";
 		
 		if (increment.isGiven() == BT_TRUE)
 		{
 			switch ( increment.getGivenValue() )
 			{
 				case 1:
-					s << "++" << loopVariable.getName().getName();
+					s << "++" << loopVariable.get().getName();
 					break;
 
 				case -1:
-					s << "--" << loopVariable.getName().getName();
+					s << "--" << loopVariable.get().getName();
 					break;
 
 				default:
-					s << loopVariable.getName().getName() << " += " << increment.getGivenValue();
+					s << loopVariable.get().getName() << " += " << increment.getGivenValue();
 					break;
 			}
 		}
 		else
 		{
-			s << loopVariable.getName().getName() << " += " << increment.getName().getName();
+			s << loopVariable.get().getName() << " += " << increment.get().getName();
 		}
 
 		s << ")" << endl << "{" << endl;
@@ -190,7 +170,7 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 
 		ExportStatementBlock::exportCode(file, _realString, _intString, _precision);
 
-		acadoFPrintf( file,"\n}\n");
+		acadoFPrintf( file,"}\n");
 	}
 	
 	return SUCCESSFUL_RETURN;
