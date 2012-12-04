@@ -165,6 +165,23 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 										  const std::vector<uint> _dims_output );
 
 
+		/** Sets up the output with the grids for the different output functions.										\n
+		 *                                                                      										\n
+		 *  \param outputGrids_	  			The vector containing a grid for each output function.			  			\n
+		 *  \param _outputNames 	  		The names of the output functions.									  		\n
+		 *  \param _diffs_outputNames 		The names of the functions, evaluating the derivatives of the outputs.		\n
+		 *  \param _dims_output 			The dimensions of the output functions.										\n
+		 *  \param _outputDependencies		A separate dependency matrix for each output.								\n
+		 *                                                                      										\n
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
+									  	  const std::vector<String> _outputNames,
+									  	  const std::vector<String> _diffs_outputNames,
+										  const std::vector<uint> _dims_output,
+										  const std::vector<Matrix> _outputDependencies );
+
+
 	protected:
 
 		

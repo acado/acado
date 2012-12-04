@@ -339,6 +339,16 @@ returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 }
 
 
+returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outputGrids_,
+									  	  	  	  	const std::vector<String> _outputNames,
+									  	  	  	  	const std::vector<String> _diffs_outputNames,
+									  	  	  	  	const std::vector<uint> _dims_output,
+									  	  	  	  	const std::vector<Matrix> _outputDependencies ) {
+
+	return ACADOERROR( RET_INVALID_OPTION );
+}
+
+
 
 // PROTECTED:
 

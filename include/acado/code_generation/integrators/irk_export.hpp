@@ -140,6 +140,23 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 									  	  const std::vector<String> _outputNames,
 									  	  const std::vector<String> _diffs_outputNames,
 										  const std::vector<uint> _dims_output );
+
+
+		/** Sets up the output with the grids for the different output functions.										\n
+		 *                                                                      										\n
+		 *  \param outputGrids_	  			The vector containing a grid for each output function.			  			\n
+		 *  \param _outputNames 	  		The names of the output functions.									  		\n
+		 *  \param _diffs_outputNames 		The names of the functions, evaluating the derivatives of the outputs.		\n
+		 *  \param _dims_output 			The dimensions of the output functions.										\n
+		 *  \param _outputDependencies		A separate dependency matrix for each output.								\n
+		 *                                                                      										\n
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
+									  	  const std::vector<String> _outputNames,
+									  	  const std::vector<String> _diffs_outputNames,
+										  const std::vector<uint> _dims_output,
+										  const std::vector<Matrix> _outputDependencies );
         
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -177,6 +194,17 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 	protected:
 		
 		
+		/** Returns the index corresponding Compressed Row Storage (CRS) for the dependency matrix of a specific output function.
+		 *
+		 * @param[in] output	The number of the output function.
+		 * @param[in] row		The number of the row, corresponding the element of interest.
+		 * @param[in] col		The number of the column, corresponding the element of interest.
+		 *
+		 *	\return The CRS index.
+		 */
+		returnValue getCRSIndex( uint output, ExportIndex row, ExportIndex col );
+
+
 		/** Initializes the matrix DD, which is used to extrapolate the variables of the IRK method to the next step.
 		 *
 		 *	\return SUCCESSFUL_RETURN
@@ -289,8 +317,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
     
 		BooleanType REUSE;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
 		BooleanType CONTINUOUS_OUTPUT;			/**< This boolean is true when continuous output needs to be provided. */
-		BooleanType UNROLL_OUTPUT;				/**< This boolean is true when the evaluations for the continuous output should be unrolled. */
+//		BooleanType UNROLL_OUTPUT;				/**< This boolean is true when the evaluations for the continuous output should be unrolled. */
 
+		uint NVARS;								/**< This is the total number of variables (=NX+NXA+NU+NDX). */
 		uint diffsDim;							/**< This is the total number of sensitivities needed. */
 		uint inputDim;							/**< This is the dimension of the input to the integrator. */
 		uint numIts;							/**< This is the performed number of Newton iterations. */
@@ -313,6 +342,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		std::vector<ExportVariable> rk_outputs;	/**< Variables containing the evaluations of the continuous output from the integrator. */
 		ExportVariable 	rk_outH;				/**< Variable that is used for the evaluations of the continuous output. */
 		ExportVariable 	rk_out2;				/**< Variable that is used for the evaluations of the continuous output. */
+		ExportVariable 	polynEvalVar;			/**< Local variable that is used for the evaluations of the continuous output. */
 		
 		Matrix DD;								/**< This matrix is used for the initialization of the variables for the next integration step. */
 		Matrix coeffs;							/**< This matrix contains coefficients of polynomials that are used to evaluate the continuous output (see evaluatePolynomial). */

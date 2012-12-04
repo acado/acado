@@ -187,6 +187,23 @@ class IntegratorExport : public ExportAlgorithm
 										  const std::vector<uint> _dims_output ) = 0;
 
 
+		/** Sets up the output with the grids for the different output functions.										\n
+		 *                                                                      										\n
+		 *  \param outputGrids_	  			The vector containing a grid for each output function.			  			\n
+		 *  \param _outputNames 	  		The names of the output functions.									  		\n
+		 *  \param _diffs_outputNames 		The names of the functions, evaluating the derivatives of the outputs.		\n
+		 *  \param _dims_output 			The dimensions of the output functions.										\n
+		 *  \param _outputDependencies		A separate dependency matrix for each output.								\n
+		 *                                                                      										\n
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
+									  	  const std::vector<String> _outputNames,
+									  	  const std::vector<String> _diffs_outputNames,
+										  const std::vector<uint> _dims_output,
+										  const std::vector<Matrix> _outputDependencies ) = 0;
+
+
 		/** Returns the grid of the integrator. 	\n
 		* 
 		*  \return SUCCESSFUL_RETURN          		\n
@@ -252,6 +269,7 @@ class IntegratorExport : public ExportAlgorithm
     protected:
 
         BooleanType EXPORT_RHS;				/**< True if the right-hand side and their derivatives should be exported too. */
+        BooleanType CRS_FORMAT;				/**< True if the CRS format is used for the jacobian of output functions. */
         String name_ODE;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
         String name_diffs_ODE;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
 
@@ -276,8 +294,9 @@ class IntegratorExport : public ExportAlgorithm
 
         std::vector<Grid> outputGrids;					/**< A separate grid for each output. */
         std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
+        std::vector<Matrix> outputDependencies;			/**< A separate dependency matrix for each output. */
         std::vector<ExportODEfunction> OUTPUTS;			/**< Module to export output functions. */
-        std::vector<ExportODEfunction> diffs_OUTPUTS;			/**< Module to export the evaluation of the derivatives of the output functions. */
+        std::vector<ExportODEfunction> diffs_OUTPUTS;	/**< Module to export the evaluation of the derivatives of the output functions. */
 		
         std::vector<String> name_OUTPUTS;				/**< A separate function name for each output. */
         std::vector<String> name_diffs_OUTPUTS;			/**< A separate function name for evaluating the derivatives of each output. */
