@@ -65,6 +65,9 @@ const String ExportIndexNode::get( ) const
 		case ESO_DIVIDE:
 			s << " / ";
 			break;
+		case ESO_MODULO:
+			s << " % ";
+			break;
 		}
 		s << "(" << right.get().getName() << ")";
 		break;
@@ -97,6 +100,8 @@ const int ExportIndexNode::getGivenValue( ) const
 
 	case ESO_DIVIDE:
 		return left.getGivenValue() / right.getGivenValue();
+	case ESO_MODULO:
+		return left.getGivenValue() % right.getGivenValue();
 
 	default:
 		return 0;

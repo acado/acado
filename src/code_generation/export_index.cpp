@@ -212,6 +212,24 @@ ExportIndex operator/(	const ExportIndex& _arg1,
 	return tmp;
 }
 
+ExportIndex operator%(	const ExportIndex& _arg1,
+						const ExportIndex& _arg2
+						)
+{
+	ExportIndex tmp;
+
+	if (_arg1.isGiven() == BT_TRUE && _arg2.isGiven() == BT_TRUE)
+	{
+		tmp.assignNode(new ExportIndexNode(_arg1.getGivenValue() % _arg2.getGivenValue()));
+
+		return tmp;
+	}
+
+	tmp.assignNode(new ExportIndexNode(ESO_MODULO, _arg1, _arg2));
+
+	return tmp;
+}
+
 String operator==(	const ExportIndex& _arg1,
 					const ExportIndex& _arg2
 					)

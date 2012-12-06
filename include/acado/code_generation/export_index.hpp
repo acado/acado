@@ -90,6 +90,10 @@ public:
 									const ExportIndex& _arg2
 									);
 
+	friend ExportIndex operator%(	const ExportIndex& _arg1,
+									const ExportIndex& _arg2
+									);
+
 	friend String operator==(	const ExportIndex& _arg1,
 								const ExportIndex& _arg2
 								);
