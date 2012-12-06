@@ -417,6 +417,19 @@ CurvatureType Product::getCurvature( ){
 }
 
 
+double Product::getValue() const
+{ 
+	if ( ( argument1 == 0 ) || ( argument2 == 0 ) )
+		return INFTY;
+		
+	if ( ( acadoIsEqual( argument1->getValue(),INFTY ) == BT_TRUE ) ||
+		 ( acadoIsEqual( argument2->getValue(),INFTY ) == BT_TRUE ) )
+		return INFTY;
+		
+	return (argument1->getValue() * argument2->getValue());
+}
+
+
 returnValue Product::AD_forward( int number, double *x, double *seed,
                                  double *f, double *df ){
 
@@ -509,7 +522,15 @@ returnValue Product::AD_backward2( int number, double seed1, double seed2,
 
 Stream Product::print( Stream &stream ) const{
 
-    return  (((((stream << "(") << *argument1) << "*") << *argument2) << ")");
+	if ( ( acadoIsFinite( argument1->getValue() ) == BT_FALSE ) ||
+		 ( acadoIsFinite( argument2->getValue() ) == BT_FALSE ) )
+	{
+		return  (((((stream << "(") << *argument1) << "*") << *argument2) << ")");
+	}
+	else
+	{
+		return stream << "((real_t)(" << ((argument1->getValue()) * (argument2->getValue())) << "))";
+	}
 }
 
 

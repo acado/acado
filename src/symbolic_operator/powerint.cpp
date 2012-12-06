@@ -518,8 +518,36 @@ returnValue Power_Int::AD_backward2( int number, double seed1, double seed2,
 
 Stream Power_Int::print( Stream &stream ) const{
 
-    return stream << "(pow(" << *argument << "," << exponent << "))";
+	if ( argument->getName() == ON_POWER ) 
+	{
+		Power* dummy = (Power*)argument;
+
+		if ( acadoIsEqual( dummy->argument2->getValue(),1.0/((double)exponent) ) == BT_TRUE )
+		{
+			return stream << "(" << *(dummy->argument1) << ")";
+		}
+	}
+
+	if ( exponent == 1 )
+	{
+	    return stream << "(" << *argument << ")";
+	}
+	else
+	{
+		VariableType dummy1;
+		int dummy2;
+
+		if ( ( exponent == 2 ) && ( argument->isVariable( dummy1,dummy2 ) == BT_TRUE ) )
+		{
+			return stream << "((" << *argument << ")*(" << *argument << "))";
+		}
+		else
+		{
+			return stream << "(pow(" << *argument << "," << exponent << "))";
+		}
+	}
 }
+
 
 
 Operator* Power_Int::clone() const{

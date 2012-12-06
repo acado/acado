@@ -476,7 +476,7 @@ returnValue runOQPbenchmark(	const char* path, BooleanType isSparse, const Optio
 {
 	int nQP=0, nV=0, nC=0, nEC=0;
 
-	real_t *H, *g, *A, *lb, *ub, *lbA, *ubA;
+	real_t *H=0, *g=0, *A=0, *lb=0, *ub=0, *lbA=0, *ubA=0;
 
 
 	returnValue returnvalue;

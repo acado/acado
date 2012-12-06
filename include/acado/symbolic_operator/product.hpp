@@ -199,6 +199,9 @@ public:
      virtual CurvatureType getCurvature( );
 
 
+     /** Return the value of the constant */
+     virtual double getValue() const;
+
 
     /** Automatic Differentiation in forward mode.                \n
      *  This function uses the intermediate                       \n

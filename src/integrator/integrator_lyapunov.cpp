@@ -1236,7 +1236,7 @@ returnValue IntegratorLYAPUNOV::evaluateSensitivities(){
     else{
 
     double a_my=0.0, b_my=0.0, c_my=0.0;//, aa;
-    int counter_my;
+    int counter_my=0;
   
     for( run2 = 0; run2 < (int)(lyap.x1).getDim(); run2++ ){
       a_my += etaG[run2];

@@ -735,7 +735,21 @@ returnValue Power::AD_backward2( int number, double seed1, double seed2,
 
 Stream Power::print( Stream &stream ) const{
 
-    return stream << "(pow(" << *argument1 << "," << *argument2 << "))";
+	if ( acadoIsEqual( argument2->getValue(),0.5 ) == BT_TRUE )
+	{
+		return stream << "(sqrt(" << *argument1 << "))";
+	}
+	else
+	{
+		if ( acadoIsEqual( argument2->getValue(),-0.5 ) == BT_TRUE )
+		{
+			return stream << "(1.0/sqrt(" << *argument1 << "))";
+		}
+		else
+		{
+			return stream << "(pow(" << *argument1 << "," << *argument2 << "))";
+		}
+	}
 }
 
 

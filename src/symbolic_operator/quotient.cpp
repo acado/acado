@@ -497,6 +497,20 @@ CurvatureType Quotient::getCurvature( ){
 }
 
 
+double Quotient::getValue() const
+{ 
+	if ( ( argument1 == 0 ) || ( argument2 == 0 ) )
+		return INFTY;
+		
+	if ( ( acadoIsEqual( argument1->getValue(),INFTY ) == BT_TRUE ) ||
+		 ( acadoIsEqual( argument2->getValue(),INFTY ) == BT_TRUE ) )
+		return INFTY;
+
+	ASSERT( argument2->getValue() != 0 );
+
+	return (argument1->getValue() / argument2->getValue());
+}
+
 returnValue Quotient::AD_forward( int number, double *x, double *seed,
                                  double *f, double *df ){
 

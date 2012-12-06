@@ -56,6 +56,7 @@ class BinaryOperator : public SmoothOperator{
 
 public:
 
+  friend class Power_Int;
   /** Default constructor. */
   BinaryOperator();
 
