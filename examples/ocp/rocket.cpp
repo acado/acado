@@ -45,7 +45,7 @@ int main( ){
     DifferentialEquation  f    ;
 
     const double t_start =  0.0;
-    const double t_end   = 8.0;
+    const double t_end   = 10.0;
 
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
@@ -58,15 +58,7 @@ int main( ){
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
     OCP ocp( t_start, t_end, 20 );
-
-
-//    ocp.minimizeLagrangeTerm( u*u );
-
-    Function h;
-    h << u;
-
-    ocp.minimizeLSQ( h );
-
+    ocp.minimizeLagrangeTerm( u*u );
     ocp.subjectTo( f );
 
 	ocp.subjectTo( AT_START, s ==  0.0 );
@@ -75,8 +67,9 @@ int main( ){
     ocp.subjectTo( AT_END  , s == 10.0 );
     ocp.subjectTo( AT_END  , v ==  0.0 );
 
-    ocp.subjectTo( v <= 1.7 );
-    ocp.subjectTo( -1.1 <= u <= 1.1 );
+    ocp.subjectTo( -0.01 <= v <= 1.3 );
+	
+	ocp.subjectTo( u*u >= -1.0 );
 
 
     // DEFINE A PLOT WINDOW:
@@ -86,7 +79,7 @@ int main( ){
         window.addSubplot( v,"DifferentialState v" );
         window.addSubplot( m,"DifferentialState m" );
         window.addSubplot( u,"Control u" );
-//        window.addSubplot( PLOT_KKT_TOLERANCE,"KKT Tolerance" );
+        window.addSubplot( PLOT_KKT_TOLERANCE,"KKT Tolerance" );
 //         window.addSubplot( 0.5 * m * v*v,"Kinetic Energy" );
 
 
