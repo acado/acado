@@ -334,8 +334,8 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	\return BT_TRUE  iff given component is set to given value, \n
 		 *	        BT_FALSE otherwise
 		 */
-		BooleanType hasValue(	const ExportIndex& rowIdx,
-								const ExportIndex& colIdx,
+		BooleanType hasValue(	const ExportIndex& _rowIdx,
+								const ExportIndex& _colIdx,
 								double _value
 								) const;
 

@@ -657,42 +657,44 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 	}
 	else
 	{
-		ExportIndex ind1, ind2;
+		ExportIndex ii, jj;
 
-		if (lhs->getNumCols() == 1 || lhs->getNumRows() == 1)
+		if (lhs.getNumCols() == 1 || lhs.getNumRows() == 1)
 		{
-			memAllocator->acquire( ind1 );
+			memAllocator->acquire( ii );
 
-			s << "for (" << ind1.getName().getName() << " = 0;" << ind1.getName().getName() << " < ";
+			s << "for (" << ii.get().getName() << " = 0; " << ii.get().getName() << " < ";
 
 			if (lhs->getNumCols() == 1)
 			{
-				s << lhs->getNumRows() << "; ++" << ind1.getName().getName() << ")" << endl
-						<< lhs->get(ind1, 0).getName() << " " << _op.getName() << " " << rhs1->get(ind1, 0).getName();
+				s << lhs->getNumRows() << "; ++" << ii.getName().getName() << ")" << endl
+						<< lhs.get(ii, 0).getName() << " " << _op.getName() << " " << rhs1.get(ii, 0).getName()
+						<< ";" << endl << endl;
 			}
 			else
 			{
-				s << lhs->getNumCols() << "; ++" << ind1.getName().getName() << ")" << endl
-						<< lhs->get(0, ind1).getName() << " " << _op.getName() << " " << rhs1->get(0, ind1).getName();
+				s << lhs.getNumCols() << "; ++" << ii.getName().getName() << ")" << endl;
+				s << lhs.get(0, ii).getName() << " " << _op.getName() << " " << rhs1.get(0, ii).getName()
+						<< ";" << endl << endl;
 			}
 
-			memAllocator->release( ind1 );
+			memAllocator->release( ii );
 		}
 		else
 		{
-			memAllocator->acquire( ind1 );
-			memAllocator->acquire( ind2 );
+			memAllocator->acquire( ii );
+			memAllocator->acquire( jj );
 
-			s << "for (" << ind1.getName().getName() << " = 0;" << ind1.getName().getName() << " < "
-					<< lhs->getNumRows() << "; ++" << ind1.getName().getName() << ")" << endl;
+			s << "for (" << ii.getName().getName() << " = 0;" << ii.getName().getName() << " < "
+					<< lhs->getNumRows() << "; ++" << ii.getName().getName() << ")" << endl;
 
-			s << "for (" << ind2.getName().getName() << " = 0;" << ind2.getName().getName() << " < "
-					<< lhs->getNumCols() << "; ++" << ind2.getName().getName() << ")" << endl;
+			s << "for (" << jj.getName().getName() << " = 0;" << jj.getName().getName() << " < "
+					<< lhs->getNumCols() << "; ++" << jj.getName().getName() << ")" << endl;
 
-			s << lhs->get(ind1, ind2).getName() << " " << _op.getName( ) << " " << rhs1->get(ind1, ind2).getName() << ";" << endl;
+			s << lhs->get(ii, jj).getName() << " " << _op.getName( ) << " " << rhs1->get(ii, jj).getName() << ";" << endl;
 
-			memAllocator->release( ind1 );
-			memAllocator->release( ind2 );
+			memAllocator->release( ii );
+			memAllocator->release( jj );
 		}
 	}
 	

@@ -16,7 +16,9 @@ returnValue ExportIndexNode::exportDataDeclaration(	FILE* file,
 	stringstream s;
 
 	if (isGiven() == BT_TRUE)
-		return ACADOERRORTEXT(RET_UNABLE_TO_EXPORT_CODE, "Export of given indices is not supported.");
+		return ACADOERRORTEXT(RET_UNABLE_TO_EXPORT_CODE, "Declaration of given indices is not supported.");
+	else if (isBinary() == BT_TRUE)
+		return ACADOERRORTEXT(RET_UNABLE_TO_EXPORT_CODE, "Declaration of binary node indices is not supported.");
 
 	s << _intString.getName() << " " << getFullName().getName() << ";" << endl;
 
@@ -40,8 +42,10 @@ const String ExportIndexNode::get( ) const
 		else
 			s << getFullName().getName() << " * " << factor;
 
-		if ( offset )
+		if (offset > 0)
 			s << " + " << offset;
+		else if (offset < 0)
+			s << offset;
 
 		break;
 
@@ -100,6 +104,7 @@ const int ExportIndexNode::getGivenValue( ) const
 
 	case ESO_DIVIDE:
 		return left.getGivenValue() / right.getGivenValue();
+
 	case ESO_MODULO:
 		return left.getGivenValue() % right.getGivenValue();
 

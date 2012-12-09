@@ -444,14 +444,18 @@ uint ExportVariableInternal::getColDim( ) const
 }
 
 
-ExportIndex	ExportVariableInternal::getTotalIdx(	const ExportIndex& rowIdx,
-													const ExportIndex& colIdx
+ExportIndex	ExportVariableInternal::getTotalIdx(	const ExportIndex& _rowIdx,
+													const ExportIndex& _colIdx
 													) const
 {
+	ExportIndex tmp;
+
 	if ( doAccessTransposed == BT_FALSE )
-		return rowIdx * getColDim() + colIdx;
+		tmp = _rowIdx * getColDim() + _colIdx;
 	else
-		return colIdx * getColDim() + rowIdx;
+		tmp = _colIdx * getColDim() + _rowIdx;
+
+	return tmp;
 }
 
 

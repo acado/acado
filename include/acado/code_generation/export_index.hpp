@@ -123,6 +123,10 @@ public:
 	 */
 	BooleanType isGiven( ) const;
 
+	BooleanType isBinary() const;
+
+	BooleanType isVariable() const;
+
 	/** Converts index into a calling argument.
 	 *
 	 *	\return Index converted into a calling argument.
