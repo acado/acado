@@ -841,7 +841,8 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	executeTest( dirName );
 	
 	// THE EVALUATION:
-	system( (String(dirName) << "/./compare").getName() );
+	int nil;
+	nil = system( (String(dirName) << "/./compare").getName() );
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -924,9 +925,10 @@ returnValue SIMexport::printDetails( BooleanType details ) {
 
 returnValue SIMexport::executeTest( const String& _dirName ) {
 	//sleep(2); does not compile on windows!!
-	system( ((String) String("make clean -s -C ") << _dirName).getName() );
-	system( ((String) String("make -s -C ") << _dirName).getName() );
-	system( (String(_dirName) << "/./test").getName() );
+	int nil;
+	nil = system( ((String) String("make clean -s -C ") << _dirName).getName() );
+	nil = system( ((String) String("make -s -C ") << _dirName).getName() );
+	nil = system( (String(_dirName) << "/./test").getName() );
 	
 	return SUCCESSFUL_RETURN;
 }
