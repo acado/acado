@@ -126,13 +126,15 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		if ( integratorFile.exportCode( ) != SUCCESSFUL_RETURN )
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
+		int measGrid;
+		get( MEASUREMENT_GRID, measGrid );
 		int generateMatlabInterface;
 		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
 		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
 			String integrateInterface( dirName );
 			integrateInterface << "/integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure(dim_outputs.size());
+			exportMexFun.configure((MeasurementGrid)measGrid == ONLINE_GRID);
 			exportMexFun.exportCode();
 
 			String rhsInterface( dirName );
@@ -326,13 +328,13 @@ returnValue SIMexport::setup( )
 		_outputFiles.clear();
 		num_meas.clear();
 		for( i = 0; i < outputGrids.size(); i++ ) {
-			uint numOuts = (int) ceil((double)outputGrids[i].getNumIntervals()/((double) numSteps) - 10.0*EPS);
+			uint numOuts = (int) ceil((double)outputGrids[i].getNumIntervals()/((double) N) - 10.0*EPS);
 			Grid nextGrid( 0.0, 1.0, numOuts + 1 );
 			newGrids_.push_back( nextGrid );
 
 			if( !referenceProvided ) _refOutputFiles.push_back( (String)"refOutput" << i << ".txt" );
 			_outputFiles.push_back( (String)"output" << i << ".txt" );
-			num_meas.push_back(ceil((double)(numOuts*numSteps)/((double) N) - 10.0*EPS));
+			num_meas.push_back( numOuts );
 		}
 		
 		if( outputExpressions.size() > 0 ) {
@@ -434,27 +436,16 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 	if( outputFiles.size() != outputGrids.size() || (outputFiles.size() != outputExpressions.size() && outputFiles.size() != outputNames.size()) ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
-	
+
     String fileName( _dirName );
     fileName << "/" << _fileName;
 
 	ExportFile main( fileName,"acado.h" );
-
 	main.addLinebreak( 2 );
+
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
 	main.addComment( "---------------------------------------------------------------" );
-	main.addStatement( (String)"   #define NX          " << NX << "      /* number of differential states  */\n" );
-	main.addStatement( (String)"   #define NXA          " << NXA << "      /* number of algebraic states  */\n" );
-	main.addStatement( (String)"   #define NU          " << NU << "      /* number of control inputs       */\n" );
-	for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"   #define NOUT" << i << "          " << getDimOutput( (uint) i ) << "      /* number of outputs       */\n" );
-		main.addStatement( (String)"   #define NMEAS" << i << "          " << num_meas[i] << "      /* number of measurements       */\n" );
-	}
-	if ( NP > 0 )
-		main.addStatement( (String)"   #define NP          " << NP << "      /* number of fixed parameters     */\n" );
-
 	main.addStatement( (String)"   #define JUMP           " << jumpReference  << "      /* jump for the output reference    */\n" );
-	main.addStatement( (String)"   #define N           " << N  << "      /* number of simulation intervals    */\n" );
 	main.addStatement( (String)"   #define h           " << T/N  << "      /* length of one simulation interval    */\n" );
 	if( TIMING == BT_TRUE ) main.addStatement( (String)"   #define STEPS_TIMING   " << timingSteps << "      /* number of steps for the timing */\n" );
 	if( TIMING == BT_TRUE ) main.addStatement( (String)"   #define CALLS_TIMING   " << timingCalls << "      /* number of calls for the timing */\n" );
@@ -469,6 +460,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 	main.addComment( "GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM:" );
 	main.addComment( "---------------------------------------------------" );
 	main.addStatement( "   ACADOworkspace acadoWorkspace;\n" );
+	main.addStatement( "   ACADOvariables acadoVariables;\n" );
 	main.addLinebreak( );
 
     main.addLinebreak( 2 );
@@ -484,50 +476,52 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 	}
     main.addStatement( "      int i,j,k,nil;\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      const int dimOut" << i << " = NOUT" << i << "*(1+NX+NU);\n" );
+		main.addStatement( (String)"      const int dimOut" << i << " = NOUT[" << i << "]*(1+ACADO_NX+ACADO_NU);\n" );
 	}
-    main.addStatement( "      real_t x[(NX+NXA)*(1+NX+NU)+NU];\n" );
+    main.addStatement( "      real_t x[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU];\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      real_t out" << i << "[NMEAS" << i << "*dimOut" << i << "];\n" );
+		main.addStatement( (String)"      real_t out" << i << "[NMEAS[" << i << "]*dimOut" << i << "];\n" );
 	}
-    main.addStatement( "      real_t u[NU];\n" );
+    main.addStatement( "      real_t u[ACADO_NU];\n" );
     if( NXA > 0 ) main.addStatement( "      real_t norm;\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      real_t step" << i << " = h/NMEAS" << i << ";\n" );
+		main.addStatement( (String)"      real_t step" << i << " = h/NMEAS[" << i << "];\n" );
 	}
     if( TIMING == BT_TRUE ) {
 		main.addStatement( "      struct timeval theclock;\n" );
 		main.addStatement( "      real_t start, end, time;\n" );
-		main.addStatement( "      real_t xT[(NX+NXA)*(1+NX+NU)+NU];\n" );
+		main.addStatement( "      real_t xT[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU];\n" );
 	}
     main.addStatement( "      const ACADOworkspace_ nullWork2 = {0};\n" );
+    main.addStatement( "      const ACADOvariables_ nullVars2 = {0};\n" );
     main.addStatement( " 	  acadoWorkspace = nullWork2;\n" );
+    main.addStatement( " 	  acadoVariables = nullVars2;\n" );
     main.addLinebreak( 2 );
 
     main.addComment( 3,"INITIALIZATION:" );
     main.addComment( 3,"----------------------------------------" );
     main.addStatement( "      initStates = fopen( INIT_NAME,\"r\" );\n" );
-    main.addStatement( "      for( j = 0; j < NX+NXA; j++) {\n" );
+    main.addStatement( "      for( j = 0; j < ACADO_NX+ACADO_NXA; j++) {\n" );
     main.addStatement( "      		nil = fscanf( initStates, \"%lf\", &x[j] );\n" );
     main.addStatement( "      }\n" );
     main.addStatement( "      fclose( initStates );\n" );
     main.addLinebreak( 1 );
-    main.addStatement( "      for( i = 0; i < (NX+NXA); i++ ) {\n" );
-    main.addStatement( "      		for( j = 0; j < NX; j++ ) {\n" );
+    main.addStatement( "      for( i = 0; i < (ACADO_NX+ACADO_NXA); i++ ) {\n" );
+    main.addStatement( "      		for( j = 0; j < ACADO_NX; j++ ) {\n" );
     main.addStatement( "      			if( i == j ) {\n" );
-    main.addStatement( "      				x[NX+NXA+i*NX+j] = 1;\n" );
+    main.addStatement( "      				x[ACADO_NX+ACADO_NXA+i*ACADO_NX+j] = 1;\n" );
     main.addStatement( "      			} else {\n" );
-    main.addStatement( "      				x[NX+NXA+i*NX+j] = 0;\n" );
+    main.addStatement( "      				x[ACADO_NX+ACADO_NXA+i*ACADO_NX+j] = 0;\n" );
     main.addStatement( "      			}\n" );
     main.addStatement( "      		}\n" );
     main.addStatement( "      }\n" );
-    main.addStatement( "      for( i = 0; i < (NX+NXA); i++ ) {\n" );
-    main.addStatement( "      		for( j = 0; j < NU; j++ ) {\n" );
-    main.addStatement( "      			x[NX+NXA+(NX+NXA)*NX+i*NU+j] = 0;\n" );
+    main.addStatement( "      for( i = 0; i < (ACADO_NX+ACADO_NXA); i++ ) {\n" );
+    main.addStatement( "      		for( j = 0; j < ACADO_NU; j++ ) {\n" );
+    main.addStatement( "      			x[ACADO_NX+ACADO_NXA+(ACADO_NX+ACADO_NXA)*ACADO_NX+i*ACADO_NU+j] = 0;\n" );
     main.addStatement( "      		}\n" );
     main.addStatement( "      }\n" );
-    main.addStatement( "      for( i = 0; i < NU; i++ ) {\n" );
-    main.addStatement( "      		x[(NX+NXA)*(1+NX+NU)+i] = 0;\n" );
+    main.addStatement( "      for( i = 0; i < ACADO_NU; i++ ) {\n" );
+    main.addStatement( "      		x[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = 0;\n" );
     main.addStatement( "      }\n" );
     main.addLinebreak( 1 );
 
@@ -538,21 +532,21 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( (String)"      output" << i << " = fopen(OUTPUT" << i << "_NAME,\"w\");\n" );
 	}
     main.addStatement( "      controls = fopen(CONTROLS_NAME,\"r\");\n" );
-    main.addStatement( "      for( i = 0; i < N; i++ ) {\n" );
+    main.addStatement( "      for( i = 0; i < ACADO_N; i++ ) {\n" );
     main.addStatement( "      		fprintf(file, \"%.16f \", i*h);\n" );
-    main.addStatement( "      		for( j = 0; j < (NX+NXA)*(1+NX+NU); j++) {\n" );
+    main.addStatement( "      		for( j = 0; j < (ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU); j++) {\n" );
     main.addStatement( "      			fprintf(file, \"%.16f \", x[j]);\n" );
     main.addStatement( "      		}\n" );
     main.addStatement( "      		fprintf(file, \"\\n\");\n" );
     main.addLinebreak( );
-    main.addStatement( "      		nil = fscanf( controls, \"%lf\", &x[(NX+NXA)*(1+NX+NU)] );\n" );
-    main.addStatement( "      		for( j = 0; j < NU; j++) {\n" );
-    main.addStatement( "      			nil = fscanf( controls, \"%lf\", &x[(NX+NXA)*(1+NX+NU)+j] );\n" );
+    main.addStatement( "      		nil = fscanf( controls, \"%lf\", &x[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)] );\n" );
+    main.addStatement( "      		for( j = 0; j < ACADO_NU; j++) {\n" );
+    main.addStatement( "      			nil = fscanf( controls, \"%lf\", &x[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+j] );\n" );
     main.addStatement( "      		}\n" );
     main.addLinebreak( );
     if( TIMING == BT_TRUE ) {
 		main.addStatement( "      		if( i == 0 ) {\n" );
-		main.addStatement( "      			for( j=0; j < (NX+NXA)*(1+NX+NU)+NU; j++ ) {\n" );
+		main.addStatement( "      			for( j=0; j < (ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU; j++ ) {\n" );
 		main.addStatement( "      				xT[j] = x[j];\n" );
 		main.addStatement( "     			}\n" );
 		main.addStatement( "      		}\n" );
@@ -565,7 +559,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     main.addStatement( integrate << " );\n" );
     main.addLinebreak( );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      		for( j = JUMP-1; j < NMEAS" << i << "; j=j+JUMP ) {\n" );
+		main.addStatement( (String)"      		for( j = JUMP-1; j < NMEAS[" << i << "]; j=j+JUMP ) {\n" );
 		main.addStatement( (String)"      			fprintf(output" << i << ", \"%.16f \", i*h+(j+1)*step" << i << ");\n" );
 		main.addStatement( (String)"      			for( k = 0; k < dimOut" << i << "; k++ ) {\n" );
 		main.addStatement( (String)"      				fprintf(output" << i << ", \"%.16f \", out" << i << "[j*dimOut" << i << "+k]);\n" );
@@ -574,8 +568,8 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( "      		}\n" );
 	}
     main.addStatement( "      }\n" );
-    main.addStatement( "      fprintf(file, \"%.16f \", N*h);\n" );
-    main.addStatement( "      for( j = 0; j < (NX+NXA)*(1+NX+NU); j++) {\n" );
+    main.addStatement( "      fprintf(file, \"%.16f \", ACADO_N*h);\n" );
+    main.addStatement( "      for( j = 0; j < (ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU); j++) {\n" );
     main.addStatement( "      		fprintf(file, \"%.16f \", x[j]);\n" );
     main.addStatement( "      }\n" );
     main.addStatement( "      fprintf(file, \"\\n\");\n" );
@@ -589,7 +583,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( "      gettimeofday( &theclock,0 );\n" );
 		main.addStatement( "      start = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;\n" );
 		main.addStatement( "      for( i=0; i < CALLS_TIMING; i++ ) {\n" );
-		main.addStatement( "      		for( j=0; j < (NX+NXA); j++ ) {\n" );
+		main.addStatement( "      		for( j=0; j < (ACADO_NX+ACADO_NXA); j++ ) {\n" );
 		main.addStatement( "      			x[j] = xT[j];\n" );
 		main.addStatement( "      		}\n" );
 		integrate = String( "      		integrate( x" );
@@ -619,6 +613,13 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 {
 	int i;
 	
+	Vector nMeasV( outputGrids.size() );
+	Vector nOutV( outputGrids.size() );
+	for( i = 0; i < (int)outputGrids.size(); i++ ) {
+		nMeasV(i) = num_meas[i];
+		nOutV(i) = getDimOutput( (uint) i );
+	}
+
     String fileName( _dirName );
     fileName << "/" << _fileName;
 
@@ -627,18 +628,6 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addLinebreak( 2 );
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
 	main.addComment( "---------------------------------------------------------------" );
-	main.addStatement( (String)"   #define NX          " << NX << "      /* number of differential states  */\n" );
-	main.addStatement( (String)"   #define NXA          " << NXA << "      /* number of algebraic states  */\n" );
-	main.addStatement( (String)"   #define NU          " << NU << "      /* number of control inputs       */\n" );
-	for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"   #define NOUT" << i << "          " << getDimOutput(i) << "      /* number of outputs       */\n" );
-		main.addStatement( (String)"   #define NMEAS" << i << "          " << num_meas[i] << "      /* number of measurements       */\n" );
-	}
-
-	if ( NP > 0 )
-		main.addStatement( (String)"   #define NP          " << NP << "      /* number of fixed parameters     */\n" );
-
-	main.addStatement( (String)"   #define N           " << N  << "      /* number of simulation intervals    */\n" );
 	main.addStatement( (String)"   #define h           " << T/N  << "      /* length of one simulation interval   */\n" );
 	main.addStatement( "   #define RESULTS_NAME	  \"" << _results << "\"\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
@@ -651,6 +640,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 	main.addComment( "GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM:" );
 	main.addComment( "---------------------------------------------------" );
 	main.addStatement( "   ACADOworkspace acadoWorkspace;\n" );
+	main.addStatement( "   ACADOvariables acadoVariables;\n" );
 	main.addLinebreak( );
 
     main.addLinebreak( 2 );
@@ -666,16 +656,18 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 		main.addStatement( (String)"      FILE *refOutput" << i << ";\n" );
 	}
     main.addStatement( "      int i, j, nil;\n" );
-    main.addStatement( "      real_t x[NX+NXA];\n" );
-    main.addStatement( "      real_t xRef[NX+NXA];\n" );
+    main.addStatement( "      real_t x[ACADO_NX+ACADO_NXA];\n" );
+    main.addStatement( "      real_t xRef[ACADO_NX+ACADO_NXA];\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      real_t step" << i << " = h/NMEAS" << i << ";\n" );
-		main.addStatement( (String)"      real_t out" << i << "[NMEAS" << i << "*NOUT" << i << "];\n" );
-		main.addStatement( (String)"      real_t refOut" << i << "[NMEAS" << i << "*NOUT" << i << "];\n" );
+		main.addStatement( (String)"      real_t step" << i << " = h/NMEAS[" << i << "];\n" );
+		main.addStatement( (String)"      real_t out" << i << "[NMEAS[" << i << "]*NOUT[" << i << "]];\n" );
+		main.addStatement( (String)"      real_t refOut" << i << "[NMEAS[" << i << "]*NOUT[" << i << "]];\n" );
 	}
     main.addStatement( "      real_t maxErr, meanErr, maxErrX, meanErrX, maxErrXA, meanErrXA, temp;\n" );
     main.addStatement( "      const ACADOworkspace_ nullWork2 = {0};\n" );
+    main.addStatement( "      const ACADOvariables_ nullVars2 = {0};\n" );
     main.addStatement( " 	  acadoWorkspace = nullWork2;\n" );
+    main.addStatement( " 	  acadoVariables = nullVars2;\n" );
     main.addLinebreak( 2 );
 
     main.addComment( 3,"START EVALUATION RESULTS:" );
@@ -684,18 +676,18 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 	main.addStatement( "      meanErrXA = 0;\n" );
     main.addStatement( "      file = fopen(RESULTS_NAME,\"r\");\n" );
     main.addStatement( "      ref = fopen(REF_NAME,\"r\");\n" );
-    main.addStatement( "      for( i = 0; i < (NX+NXA)*(1+NX+NU)+1; i++ ) {\n" );
+    main.addStatement( "      for( i = 0; i < (ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+1; i++ ) {\n" );
     main.addStatement( "      		nil = fscanf( file, \"%lf\", &temp );\n" );
     main.addStatement( "      		nil = fscanf( ref, \"%lf\", &temp );\n" );
     main.addStatement( "      }\n" );
 	main.addStatement( "      printf( \" STATES:\\n\" );\n" );
     main.addLinebreak( );
-    main.addStatement( "      for( i = 1; i <= N; i++ ) {\n" );
+    main.addStatement( "      for( i = 1; i <= ACADO_N; i++ ) {\n" );
     main.addStatement( "      		nil = fscanf( file, \"%lf\", &temp );\n" );
     main.addStatement( "      		nil = fscanf( ref, \"%lf\", &temp );\n" );
     main.addLinebreak( );
     main.addStatement( "      		maxErrX = 0;\n" );
-    main.addStatement( "      		for( j = 0; j < NX; j++ ) {\n" );
+    main.addStatement( "      		for( j = 0; j < ACADO_NX; j++ ) {\n" );
     main.addStatement( "      			nil = fscanf( file, \"%lf\", &x[j] );\n" );
     main.addStatement( "      			nil = fscanf( ref, \"%lf\", &xRef[j] );\n" );
     main.addStatement( "      			temp = fabs(x[j] - xRef[j])/fabs(xRef[j]);\n" );
@@ -704,12 +696,12 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addStatement( "      		}\n" );
     main.addLinebreak( );
     main.addStatement( "      		maxErrXA = 0;\n" );
-    main.addStatement( "      		for( j = 0; j < NXA; j++ ) {\n" );
-    main.addStatement( "      			nil = fscanf( file, \"%lf\", &x[NX+j] );\n" );
-    main.addStatement( "      			nil = fscanf( ref, \"%lf\", &xRef[NX+j] );\n" );
-    main.addStatement( "      			temp = fabs(x[NX+j] - xRef[NX+j])/fabs(xRef[NX+j]);\n" );
+    main.addStatement( "      		for( j = 0; j < ACADO_NXA; j++ ) {\n" );
+    main.addStatement( "      			nil = fscanf( file, \"%lf\", &x[ACADO_NX+j] );\n" );
+    main.addStatement( "      			nil = fscanf( ref, \"%lf\", &xRef[ACADO_NX+j] );\n" );
+    main.addStatement( "      			temp = fabs(x[ACADO_NX+j] - xRef[ACADO_NX+j])/fabs(xRef[ACADO_NX+j]);\n" );
     main.addStatement( "      			if( temp > maxErrXA ) maxErrXA = temp;\n" );
-    main.addStatement( "      			if( isnan(x[NX+j]) ) maxErrXA = sqrt(-1);\n" );
+    main.addStatement( "      			if( isnan(x[ACADO_NX+j]) ) maxErrXA = sqrt(-1);\n" );
     main.addStatement( "      		}\n" );
     main.addLinebreak( );
     if( PRINT_DETAILS && NXA > 0 ) {
@@ -721,13 +713,13 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addStatement( "			meanErrX += maxErrX;\n" );
     main.addStatement( "			meanErrXA += maxErrXA;\n" );
     main.addLinebreak( );
-    main.addStatement( "      		for( j = 0; j < (NX+NXA)*(NX+NU); j++ ) {\n" );
+    main.addStatement( "      		for( j = 0; j < (ACADO_NX+ACADO_NXA)*(ACADO_NX+ACADO_NU); j++ ) {\n" );
     main.addStatement( "      			nil = fscanf( file, \"%lf\", &temp );\n" );
     main.addStatement( "      			nil = fscanf( ref, \"%lf\", &temp );\n" );
     main.addStatement( "      		}\n" );
     main.addStatement( "      }\n" );
-    main.addStatement( "	  meanErrX = meanErrX/N;\n" );
-    main.addStatement( "	  meanErrXA = meanErrXA/N;\n" );
+    main.addStatement( "	  meanErrX = meanErrX/ACADO_N;\n" );
+    main.addStatement( "	  meanErrXA = meanErrXA/ACADO_N;\n" );
     if( PRINT_DETAILS ) main.addStatement( "      printf( \"\\n\" );\n" );
     if( NXA > 0 ) {
     	main.addStatement( "      printf( \"TOTAL MEAN ERROR:   %.4e   %.4e \\n\", meanErrX, meanErrXA );\n" );
@@ -743,12 +735,12 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 		main.addStatement( (String)"      output" << i << " = fopen(OUTPUT" << i << "_NAME,\"r\");\n" );
 		main.addStatement( (String)"      refOutput" << i << " = fopen(REF_OUTPUT" << i << "_NAME,\"r\");\n" );
 		main.addLinebreak( );
-		main.addStatement( (String)"      for( i = 1; i <= N*NMEAS" << i << "; i++ ) {\n" );
+		main.addStatement( (String)"      for( i = 1; i <= ACADO_N*NMEAS[" << i << "]; i++ ) {\n" );
 		main.addStatement( (String)"      		nil = fscanf( output" << i << ", \"%lf\", &temp );\n" );
 		main.addStatement( (String)"      		nil = fscanf( refOutput" << i << ", \"%lf\", &temp );\n" );
 		main.addLinebreak( );
 		main.addStatement( "      		maxErr = 0;\n" );
-		main.addStatement( (String)"      		for( j = 0; j < NOUT" << i << "; j++ ) {\n" );
+		main.addStatement( (String)"      		for( j = 0; j < NOUT[" << i << "]; j++ ) {\n" );
 		main.addStatement( (String)"      			nil = fscanf( output" << i << ", \"%lf\", &out" << i << "[j] );\n" );
 		main.addStatement( (String)"      			nil = fscanf( refOutput" << i << ", \"%lf\", &refOut" << i << "[j] );\n" );
 		main.addStatement( (String)"      			temp = fabs(out" << i << "[j] - refOut" << i << "[j])/fabs(refOut" << i << "[j]);\n" );
@@ -759,12 +751,12 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 		if( PRINT_DETAILS ) main.addStatement( (String)"      		printf( \"MAX ERROR AT %.3f s:   %.4e \\n\", i*step" << i << ", maxErr );\n" );
 		main.addStatement( "      		meanErr += maxErr;\n" );
 		main.addLinebreak( );
-		main.addStatement( (String)"      		for( j = 0; j < NOUT" << i << "*(NX+NU); j++ ) {\n" );
+		main.addStatement( (String)"      		for( j = 0; j < NOUT[" << i << "]*(ACADO_NX+ACADO_NU); j++ ) {\n" );
 		main.addStatement( (String)"      			nil = fscanf( output" << i << ", \"%lf\", &temp );\n" );
 		main.addStatement( (String)"      			nil = fscanf( refOutput" << i << ", \"%lf\", &temp );\n" );
 		main.addStatement( "      		}\n" );
 		main.addStatement( "      }\n" );
-		main.addStatement( (String)"	  meanErr = meanErr/(N*NMEAS" << i << ");\n" );
+		main.addStatement( (String)"	  meanErr = meanErr/(ACADO_N*NMEAS[" << i << "]);\n" );
 		if( PRINT_DETAILS ) main.addStatement( "      printf( \"\\n\" );\n" );
 		main.addStatement( "      printf( \"TOTAL MEAN ERROR:   %.4e \\n\", meanErr );\n" );
 		main.addStatement( "      printf( \"\\n\\n\" );\n" );

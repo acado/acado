@@ -266,6 +266,15 @@ class IntegratorExport : public ExportAlgorithm
 		virtual returnValue clear( );
 
 
+		/**	Get the index of the integration interval, corresponding a certain time.
+		 *
+		 * 	@param[in] time		The time.
+		 *
+		 *	\return The index of the integration interval.
+		 */
+		uint getIntegrationInterval( double time );
+
+
     protected:
 
         BooleanType EXPORT_RHS;				/**< True if the right-hand side and their derivatives should be exported too. */

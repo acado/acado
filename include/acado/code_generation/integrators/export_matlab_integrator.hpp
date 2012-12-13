@@ -98,7 +98,7 @@ class ExportMatlabIntegrator : public ExportTemplatedFile
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue configure(	const uint numOutputs );
+		returnValue configure(	const uint online );
 
 	protected:
 

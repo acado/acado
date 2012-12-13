@@ -149,6 +149,15 @@ returnValue IntegratorExport::clear( )
 }
 
 
+uint IntegratorExport::getIntegrationInterval( double time ) {
+	uint index = 0;
+	while( time > ((double)index+1)/(double)grid.getNumIntervals() ) {
+		index++;
+	}
+	return index;
+}
+
+
 returnValue IntegratorExport::getGrid( Grid& grid_ ) const{
 
     grid_ = grid;

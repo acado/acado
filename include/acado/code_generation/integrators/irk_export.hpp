@@ -256,8 +256,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
 		 *	@param[in] variable			The variable containing the coefficients of the polynomial.
-		 *	@param[in] grid				The variable containing the grid points for the specific output.
-		 *	@param[in] indexTime		The index of the specific grid point.
+		 *	@param[in] grid				The variable containing the grid point for the specific output.
 		 *	@param[in] h				The integration step size.
 		 *
 		 *	\return SUCCESSFUL_RETURN
@@ -265,7 +264,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		returnValue evaluatePolynomial( ExportStatementBlock& block, 
 										const ExportVariable& variable, 
 										const ExportVariable& grid, 
-										const ExportIndex& indexTime, 
 										double h );
 
 
@@ -273,17 +271,42 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
 		 *	@param[in] variable			The variable containing the coefficients of the polynomial.
-		 *	@param[in] grid				The variable containing the grid points for the specific output.
-		 *	@param[in] indexTime		The index of the specific grid point.
+		 *	@param[in] grid				The variable containing the grid point for the specific output.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue evaluateDerivedPolynomial( ExportStatementBlock& block,
 										const ExportVariable& variable,
-										const ExportVariable& grid,
-										const ExportIndex& indexTime );
+										const ExportVariable& grid );
 		
 		
+		/** Returns the coefficients of the polynomial for the complete grid of the output, corresponding a certain index.
+		 *
+		 *	@param[in] index	The index of the continuous output for which the coefficients are returned.
+		 *
+		 *	\return Coefficients of the polynomial, corresponding the given continuous output
+		 */
+		Matrix evaluatePolynomial( uint index );
+
+
+		/** Returns the coefficients of the derived polynomial for the complete grid of the output, corresponding a certain index.
+		 *
+		 *	@param[in] index	The index of the continuous output for which the coefficients are returned.
+		 *
+		 *	\return Coefficients of the derived polynomial, corresponding the given continuous output
+		 */
+		Matrix evaluateDerivedPolynomial( uint index );
+
+
+		/** Divide the total number of measurements over the different integration steps.
+		 *
+		 *	@param[in] index	The index of the continuous output for which the division of measurements is returned.
+		 *
+		 *	\return The division of measurements over the integration steps, corresponding the given continuous output.
+		 */
+		Vector divideMeasurements( uint index );
+
+
 		/** Copies all class members from given object.
 		 *
 		 *	@param[in] arg		Right-hand side object.
@@ -346,6 +369,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		
 		Matrix DD;								/**< This matrix is used for the initialization of the variables for the next integration step. */
 		Matrix coeffs;							/**< This matrix contains coefficients of polynomials that are used to evaluate the continuous output (see evaluatePolynomial). */
+
+		std::vector<ExportVariable> gridVariables;	/**< This vector contains an ExportVariable for the grid of each continuous output. */
+		std::vector<uint> totalMeas;				/**< This vector contains the total number of measurements per output (per shooting or integration interval, depending on grid type). */
 };
 
 

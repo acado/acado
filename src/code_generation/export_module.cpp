@@ -265,11 +265,26 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 			return ACADOERROR( RET_INVALID_OPTION );
 	}
 
+	if( dim_outputs.size() != num_meas.size() ) return ACADOERROR( RET_INVALID_OPTION );
+	Vector nMeasV( dim_outputs.size() );
+	Vector nOutV( dim_outputs.size() );
+	for( uint i = 0; i < (int)dim_outputs.size(); i++ ) {
+		nMeasV(i) = num_meas[i];
+		nOutV(i) = dim_outputs[i];
+	}
+
 	//
 	// Some common defines
 	//
 	acadoHeader.addComment( "COMMON DEFINITIONS:             " );
 	acadoHeader.addComment( "--------------------------------" );
+	acadoHeader.addLinebreak( 2 );
+	if( (uint)dim_outputs.size() > 0 ) {
+		acadoHeader.addComment( "Dimension of the output functions" );
+		acadoHeader.addDeclaration( ExportVariable( "NOUT",nOutV,STATIC_CONSTANT ) );
+		acadoHeader.addComment( "Measurements of the output functions per shooting interval" );
+		acadoHeader.addDeclaration( ExportVariable( "NMEAS",nMeasV,STATIC_CONSTANT ) );
+	}
 	acadoHeader.addLinebreak( 2 );
 
 	acadoHeader.addComment( "Number of control intervals" );
@@ -284,13 +299,8 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 	acadoHeader.addStatement( (String)"#define ACADO_NU  " << NU << "\n" );
 	acadoHeader.addComment( "Number of parameters" );
 	acadoHeader.addStatement( (String)"#define ACADO_NP  " << NP << "\n" );
-	if( dim_outputs.size() != num_meas.size() ) return ACADOERROR( RET_INVALID_OPTION );
-	for( uint i = 0; i < dim_outputs.size(); i++ ) {
-		acadoHeader.addComment( String("Dimension of output ") << i+1 );
-		acadoHeader.addStatement( (String)"#define ACADO_NOUT" << i+1 << "  " << dim_outputs[i] << "\n" );
-		acadoHeader.addComment( String("Measurements of output ") << i+1 << " per shooting interval" );
-		acadoHeader.addStatement( (String)"#define ACADO_NMEAS" << i+1 << "  " << num_meas[i] << "\n" );
-	}
+	acadoHeader.addComment( "Number of output functions" );
+	acadoHeader.addStatement( (String)"#define NUM_OUTPUTS  " << (uint)dim_outputs.size() << "\n" );
 	acadoHeader.addLinebreak( 2 );
 
 	acadoHeader.addComment( "GLOBAL VARIABLES:               " );
@@ -452,6 +462,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( LINEAR_ALGEBRA_SOLVER,       GAUSS_LU        );
 	addOption( UNROLL_LINEAR_SOLVER,       	BT_FALSE	    );
 	addOption( NUM_INTEGRATOR_STEPS,        30              );
+	addOption( MEASUREMENT_GRID, 			EQUIDISTANT_GRID);
 	addOption( IMPLICIT_INTEGRATOR_MODE,	IFTR 			);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	3				);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS_INIT, 0			);

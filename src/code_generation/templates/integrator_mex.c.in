@@ -1,5 +1,5 @@
 #include "mex.h"
-#define NUM_OUTPUTS @NUM_OUTPUTS@
+#define ONLINE_GRID @ONLINE_GRID@
 
 /* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
 /* --------------------------------------------------- */
@@ -8,32 +8,22 @@
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
-    int i, j, k, Nx, Nu;
-    real_t *x, *u, *xnext, *sensX, *sensU;
+    int i, j, k, Nx, Nu, gridI, Ngrid;
+    real_t *x, *u, *xnext, *sensX, *sensU, *grid;
     real_t next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU];
     const char *fieldnames[3];  
     
     #if NUM_OUTPUTS > 0
-        int NMeas[NUM_OUTPUTS];
-        int dimOutputs[NUM_OUTPUTS];
-        NMeas[0] = ACADO_NMEAS1;
-        dimOutputs[0] = ACADO_NOUT1;
-        real_t out1[NMeas[0]*dimOutputs[0]*(1+ACADO_NX+ACADO_NU)];
+        real_t out1[NMEAS[0]*NOUT[0]*(1+ACADO_NX+ACADO_NU)];
         
         #if NUM_OUTPUTS > 1
-            NMeas[1] = ACADO_NMEAS2;
-            dimOutputs[1] = ACADO_NOUT2;
-            real_t out2[NMeas[1]*dimOutputs[1]*(1+ACADO_NX+ACADO_NU)];
+            real_t out2[NMEAS[1]*NOUT[1]*(1+ACADO_NX+ACADO_NU)];
             
             #if NUM_OUTPUTS > 2
-                NMeas[2] = ACADO_NMEAS3;
-                dimOutputs[2] = ACADO_NOUT3;
-                real_t out3[NMeas[2]*dimOutputs[2]*(1+ACADO_NX+ACADO_NU)];
+                real_t out3[NMEAS[2]*NOUT[2]*(1+ACADO_NX+ACADO_NU)];
                 
                 #if NUM_OUTPUTS > 3
-                    NMeas[3] = ACADO_NMEAS4;
-                    dimOutputs[3] = ACADO_NOUT4;
-                    real_t out4[NMeas[3]*dimOutputs[3]*(1+ACADO_NX+ACADO_NU)];
+                    real_t out4[NMEAS[3]*NOUT[3]*(1+ACADO_NX+ACADO_NU)];
                 #endif
             #endif
         #endif
@@ -43,8 +33,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     fieldnames[1] = "sensX";  
     fieldnames[2] = "sensU"; 
     
-    if (nrhs != 2 && !(nrhs == 1 && ACADO_NU == 0)) {
-        mexErrMsgTxt( "Check the number of input arguments !" );
+    if (nrhs != (2+ONLINE_GRID*NUM_OUTPUTS) && !(nrhs == (1+ONLINE_GRID*NUM_OUTPUTS) && ACADO_NU == 0)) {
+        if( ONLINE_GRID ) {
+			mexErrMsgTxt( "Check the number of input arguments: since the ONLINE_GRID option is used, a grid needs to be provided for every output function !" );
+        }
+        else {
+			mexErrMsgTxt( "Check the number of input arguments !" );
+        }
     }
     if (nlhs > (1+NUM_OUTPUTS)) {
         mexErrMsgTxt( "Check the number of output arguments !" );
@@ -53,9 +48,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     Nx = mxGetM(prhs[0])*mxGetN(prhs[0]);
     if (ACADO_NU > 0) {
         Nu = mxGetM(prhs[1])*mxGetN(prhs[1]);
+        gridI = 2;
     }
     else {
         Nu = 0;
+        gridI = 1;
     }
     
     if (Nx != ACADO_NX+ACADO_NXA) {
@@ -64,6 +61,71 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     if (Nu != ACADO_NU) {
         mexErrMsgTxt( "Check the dimension of the second input argument !" );
     }
+    #if ONLINE_GRID
+		#if NUM_OUTPUTS > 0
+			Ngrid = mxGetM(prhs[gridI])*mxGetN(prhs[gridI]);
+			grid = mxGetPr(prhs[gridI]);
+			if( Ngrid > NMEAS[0] ) {
+				mexErrMsgTxt( "The first provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+			}
+			else {
+				for( j = 0; j < Ngrid; ++j ) {
+					acadoVariables.gridOutput0[j] = grid[j];
+				}
+				for( j = Ngrid; j < NMEAS[0]; ++j ) {
+					acadoVariables.gridOutput0[j] = 1.1;
+				}
+			}
+        
+			#if NUM_OUTPUTS > 1
+				Ngrid = mxGetM(prhs[gridI+1])*mxGetN(prhs[gridI+1]);
+				grid = mxGetPr(prhs[gridI+1]);
+				if( Ngrid > NMEAS[1] ) {
+					mexErrMsgTxt( "The second provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+				}
+				else {
+					for( j = 0; j < Ngrid; ++j ) {
+						acadoVariables.gridOutput1[j] = grid[j];
+					}
+					for( j = Ngrid; j < NMEAS[1]; ++j ) {
+						acadoVariables.gridOutput1[j] = 1.1;
+					}
+				}
+            
+				#if NUM_OUTPUTS > 2
+					Ngrid = mxGetM(prhs[gridI+2])*mxGetN(prhs[gridI+2]);
+					grid = mxGetPr(prhs[gridI+2]);
+					if( Ngrid > NMEAS[2] ) {
+						mexErrMsgTxt( "The third provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+					}
+					else {
+						for( j = 0; j < Ngrid; ++j ) {
+							acadoVariables.gridOutput2[j] = grid[j];
+						}
+						for( j = Ngrid; j < NMEAS[2]; ++j ) {
+							acadoVariables.gridOutput2[j] = 1.1;
+						}
+					}
+                
+					#if NUM_OUTPUTS > 3
+						Ngrid = mxGetM(prhs[gridI+3])*mxGetN(prhs[gridI+3]);
+						grid = mxGetPr(prhs[gridI+3]);
+						if( Ngrid > NMEAS[3] ) {
+							mexErrMsgTxt( "The fourth provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+						}
+						else {
+							for( j = 0; j < Ngrid; ++j ) {
+								acadoVariables.gridOutput3[j] = grid[j];
+							}
+							for( j = Ngrid; j < NMEAS[3]; ++j ) {
+								acadoVariables.gridOutput3[j] = 1.1;
+							}
+						}
+					#endif
+				#endif
+			#endif
+		#endif  
+    #endif       
     
     x = mxGetPr(prhs[0]);
     if (ACADO_NU > 0) {
@@ -77,7 +139,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
     }
 
-    acadoWorkspace.rk_num = 0;
+    acadoVariables.rk_num = 0;
     
     #if NUM_OUTPUTS > 3
         integrate( next, out1, out2, out3, out4 );
@@ -119,128 +181,128 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     #if NUM_OUTPUTS > 0
     if (nlhs > 1) {
         plhs[1] = mxCreateStructMatrix(1, 1, 3, fieldnames);
-        mxSetField(plhs[1],0,fieldnames[0],mxCreateDoubleMatrix(dimOutputs[0],NMeas[0],mxREAL));
-        mxSetField(plhs[1],0,fieldnames[1],mxCreateDoubleMatrix(dimOutputs[0]*NMeas[0],ACADO_NX,mxREAL));
-        mxSetField(plhs[1],0,fieldnames[2],mxCreateDoubleMatrix(dimOutputs[0]*NMeas[0],ACADO_NU,mxREAL));
+        mxSetField(plhs[1],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[0],NMEAS[0],mxREAL));
+        mxSetField(plhs[1],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[0]*NMEAS[0],ACADO_NX,mxREAL));
+        mxSetField(plhs[1],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[0]*NMEAS[0],ACADO_NU,mxREAL));
         
         xnext = mxGetPr(mxGetField(plhs[1],0,fieldnames[0]));
         sensX = mxGetPr(mxGetField(plhs[1],0,fieldnames[1]));
         sensU = mxGetPr(mxGetField(plhs[1],0,fieldnames[2]));
         
-        for( k = 0; k < NMeas[0]; ++k ) {
-            for( i = 0; i < dimOutputs[0]; ++i ) {
-                xnext[k*dimOutputs[0]+i] = out1[k*dimOutputs[0]*(1+ACADO_NX+ACADO_NU)+i];
+        for( k = 0; k < NMEAS[0]; ++k ) {
+            for( i = 0; i < NOUT[0]; ++i ) {
+                xnext[k*NOUT[0]+i] = out1[k*NOUT[0]*(1+ACADO_NX+ACADO_NU)+i];
             }
         }
         
         /* NOTE: Matlab is column-major, while C is row-major order !! */
-        for( k = 0; k < NMeas[0]; ++k ) {
-            for( i = 0; i < dimOutputs[0]; ++i ) {
+        for( k = 0; k < NMEAS[0]; ++k ) {
+            for( i = 0; i < NOUT[0]; ++i ) {
                 for( j = 0; j < ACADO_NX; ++j ) {
-                    sensX[j*dimOutputs[0]*NMeas[0]+k*dimOutputs[0]+i] = out1[k*dimOutputs[0]*(1+ACADO_NX+ACADO_NU)+dimOutputs[0]+i*ACADO_NX+j];
+                    sensX[j*NOUT[0]*NMEAS[0]+k*NOUT[0]+i] = out1[k*NOUT[0]*(1+ACADO_NX+ACADO_NU)+NOUT[0]+i*ACADO_NX+j];
                 }
             }
         }
-        for( k = 0; k < NMeas[0]; ++k ) {
-            for( i = 0; i < dimOutputs[0]; ++i ) {
+        for( k = 0; k < NMEAS[0]; ++k ) {
+            for( i = 0; i < NOUT[0]; ++i ) {
                 for( j = 0; j < ACADO_NU; ++j ) {
-                    sensU[j*dimOutputs[0]*NMeas[0]+k*dimOutputs[0]+i] = out1[k*dimOutputs[0]*(1+ACADO_NX+ACADO_NU)+dimOutputs[0]*(1+ACADO_NX)+i*ACADO_NU+j];
+                    sensU[j*NOUT[0]*NMEAS[0]+k*NOUT[0]+i] = out1[k*NOUT[0]*(1+ACADO_NX+ACADO_NU)+NOUT[0]*(1+ACADO_NX)+i*ACADO_NU+j];
                 }
             }
         }
         #if NUM_OUTPUTS > 1
         if (nlhs > 2) {
             plhs[2] = mxCreateStructMatrix(1, 1, 3, fieldnames);
-            mxSetField(plhs[2],0,fieldnames[0],mxCreateDoubleMatrix(dimOutputs[1],NMeas[1],mxREAL));
-            mxSetField(plhs[2],0,fieldnames[1],mxCreateDoubleMatrix(dimOutputs[1]*NMeas[1],ACADO_NX,mxREAL));
-            mxSetField(plhs[2],0,fieldnames[2],mxCreateDoubleMatrix(dimOutputs[1]*NMeas[1],ACADO_NU,mxREAL));
+            mxSetField(plhs[2],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[1],NMEAS[1],mxREAL));
+            mxSetField(plhs[2],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[1]*NMEAS[1],ACADO_NX,mxREAL));
+            mxSetField(plhs[2],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[1]*NMEAS[1],ACADO_NU,mxREAL));
 
             xnext = mxGetPr(mxGetField(plhs[2],0,fieldnames[0]));
             sensX = mxGetPr(mxGetField(plhs[2],0,fieldnames[1]));
             sensU = mxGetPr(mxGetField(plhs[2],0,fieldnames[2]));
 
-            for( k = 0; k < NMeas[1]; ++k ) {
-                for( i = 0; i < dimOutputs[1]; ++i ) {
-                    xnext[k*dimOutputs[1]+i] = out2[k*dimOutputs[1]*(1+ACADO_NX+ACADO_NU)+i];
+            for( k = 0; k < NMEAS[1]; ++k ) {
+                for( i = 0; i < NOUT[1]; ++i ) {
+                    xnext[k*NOUT[1]+i] = out2[k*NOUT[1]*(1+ACADO_NX+ACADO_NU)+i];
                 }
             }
 
             /* NOTE: Matlab is column-major, while C is row-major order !! */
-            for( k = 0; k < NMeas[1]; ++k ) {
-                for( i = 0; i < dimOutputs[1]; ++i ) {
+            for( k = 0; k < NMEAS[1]; ++k ) {
+                for( i = 0; i < NOUT[1]; ++i ) {
                     for( j = 0; j < ACADO_NX; ++j ) {
-                        sensX[j*dimOutputs[1]*NMeas[1]+k*dimOutputs[1]+i] = out2[k*dimOutputs[1]*(1+ACADO_NX+ACADO_NU)+dimOutputs[1]+i*ACADO_NX+j];
+                        sensX[j*NOUT[1]*NMEAS[1]+k*NOUT[1]+i] = out2[k*NOUT[1]*(1+ACADO_NX+ACADO_NU)+NOUT[1]+i*ACADO_NX+j];
                     }
                 }
             }
-            for( k = 0; k < NMeas[1]; ++k ) {
-                for( i = 0; i < dimOutputs[1]; ++i ) {
+            for( k = 0; k < NMEAS[1]; ++k ) {
+                for( i = 0; i < NOUT[1]; ++i ) {
                     for( j = 0; j < ACADO_NU; ++j ) {
-                        sensU[j*dimOutputs[1]*NMeas[1]+k*dimOutputs[1]+i] = out2[k*dimOutputs[1]*(1+ACADO_NX+ACADO_NU)+dimOutputs[1]*(1+ACADO_NX)+i*ACADO_NU+j];
+                        sensU[j*NOUT[1]*NMEAS[1]+k*NOUT[1]+i] = out2[k*NOUT[1]*(1+ACADO_NX+ACADO_NU)+NOUT[1]*(1+ACADO_NX)+i*ACADO_NU+j];
                     }
                 }
             }
             #if NUM_OUTPUTS > 2
             if (nlhs > 3) {
                 plhs[3] = mxCreateStructMatrix(1, 1, 3, fieldnames);
-                mxSetField(plhs[3],0,fieldnames[0],mxCreateDoubleMatrix(dimOutputs[2],NMeas[2],mxREAL));
-                mxSetField(plhs[3],0,fieldnames[1],mxCreateDoubleMatrix(dimOutputs[2]*NMeas[2],ACADO_NX,mxREAL));
-                mxSetField(plhs[3],0,fieldnames[2],mxCreateDoubleMatrix(dimOutputs[2]*NMeas[2],ACADO_NU,mxREAL));
+                mxSetField(plhs[3],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[2],NMEAS[2],mxREAL));
+                mxSetField(plhs[3],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[2]*NMEAS[2],ACADO_NX,mxREAL));
+                mxSetField(plhs[3],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[2]*NMEAS[2],ACADO_NU,mxREAL));
 
                 xnext = mxGetPr(mxGetField(plhs[3],0,fieldnames[0]));
                 sensX = mxGetPr(mxGetField(plhs[3],0,fieldnames[1]));
                 sensU = mxGetPr(mxGetField(plhs[3],0,fieldnames[2]));
 
-                for( k = 0; k < NMeas[2]; ++k ) {
-                    for( i = 0; i < dimOutputs[2]; ++i ) {
-                        xnext[k*dimOutputs[2]+i] = out3[k*dimOutputs[2]*(1+ACADO_NX+ACADO_NU)+i];
+                for( k = 0; k < NMEAS[2]; ++k ) {
+                    for( i = 0; i < NOUT[2]; ++i ) {
+                        xnext[k*NOUT[2]+i] = out3[k*NOUT[2]*(1+ACADO_NX+ACADO_NU)+i];
                     }
                 }
 
                 /* NOTE: Matlab is column-major, while C is row-major order !! */
-                for( k = 0; k < NMeas[2]; ++k ) {
-                    for( i = 0; i < dimOutputs[2]; ++i ) {
+                for( k = 0; k < NMEAS[2]; ++k ) {
+                    for( i = 0; i < NOUT[2]; ++i ) {
                         for( j = 0; j < ACADO_NX; ++j ) {
-                            sensX[j*dimOutputs[2]*NMeas[2]+k*dimOutputs[2]+i] = out3[k*dimOutputs[2]*(1+ACADO_NX+ACADO_NU)+dimOutputs[2]+i*ACADO_NX+j];
+                            sensX[j*NOUT[2]*NMEAS[2]+k*NOUT[2]+i] = out3[k*NOUT[2]*(1+ACADO_NX+ACADO_NU)+NOUT[2]+i*ACADO_NX+j];
                         }
                     }
                 }
-                for( k = 0; k < NMeas[2]; ++k ) {
-                    for( i = 0; i < dimOutputs[2]; ++i ) {
+                for( k = 0; k < NMEAS[2]; ++k ) {
+                    for( i = 0; i < NOUT[2]; ++i ) {
                         for( j = 0; j < ACADO_NU; ++j ) {
-                            sensU[j*dimOutputs[2]*NMeas[2]+k*dimOutputs[2]+i] = out3[k*dimOutputs[2]*(1+ACADO_NX+ACADO_NU)+dimOutputs[2]*(1+ACADO_NX)+i*ACADO_NU+j];
+                            sensU[j*NOUT[2]*NMEAS[2]+k*NOUT[2]+i] = out3[k*NOUT[2]*(1+ACADO_NX+ACADO_NU)+NOUT[2]*(1+ACADO_NX)+i*ACADO_NU+j];
                         }
                     }
                 }
                 #if NUM_OUTPUTS > 3
                 if (nlhs > 4) {
                     plhs[4] = mxCreateStructMatrix(1, 1, 3, fieldnames);
-                    mxSetField(plhs[4],0,fieldnames[0],mxCreateDoubleMatrix(dimOutputs[3],NMeas[3],mxREAL));
-                    mxSetField(plhs[4],0,fieldnames[1],mxCreateDoubleMatrix(dimOutputs[3]*NMeas[3],ACADO_NX,mxREAL));
-                    mxSetField(plhs[4],0,fieldnames[2],mxCreateDoubleMatrix(dimOutputs[3]*NMeas[3],ACADO_NU,mxREAL));
+                    mxSetField(plhs[4],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[3],NMEAS[3],mxREAL));
+                    mxSetField(plhs[4],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[3]*NMEAS[3],ACADO_NX,mxREAL));
+                    mxSetField(plhs[4],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[3]*NMEAS[3],ACADO_NU,mxREAL));
 
                     xnext = mxGetPr(mxGetField(plhs[4],0,fieldnames[0]));
                     sensX = mxGetPr(mxGetField(plhs[4],0,fieldnames[1]));
                     sensU = mxGetPr(mxGetField(plhs[4],0,fieldnames[2]));
 
-                    for( k = 0; k < NMeas[3]; ++k ) {
-                        for( i = 0; i < dimOutputs[3]; ++i ) {
-                            xnext[k*dimOutputs[3]+i] = out4[k*dimOutputs[3]*(1+ACADO_NX+ACADO_NU)+i];
+                    for( k = 0; k < NMEAS[3]; ++k ) {
+                        for( i = 0; i < NOUT[3]; ++i ) {
+                            xnext[k*NOUT[3]+i] = out4[k*NOUT[3]*(1+ACADO_NX+ACADO_NU)+i];
                         }
                     }
 
                     /* NOTE: Matlab is column-major, while C is row-major order !! */
-                    for( k = 0; k < NMeas[3]; ++k ) {
-                        for( i = 0; i < dimOutputs[3]; ++i ) {
+                    for( k = 0; k < NMEAS[3]; ++k ) {
+                        for( i = 0; i < NOUT[3]; ++i ) {
                             for( j = 0; j < ACADO_NX; ++j ) {
-                                sensX[j*dimOutputs[3]*NMeas[3]+k*dimOutputs[3]+i] = out4[k*dimOutputs[3]*(1+ACADO_NX+ACADO_NU)+dimOutputs[3]+i*ACADO_NX+j];
+                                sensX[j*NOUT[3]*NMEAS[3]+k*NOUT[3]+i] = out4[k*NOUT[3]*(1+ACADO_NX+ACADO_NU)+NOUT[3]+i*ACADO_NX+j];
                             }
                         }
                     }
-                    for( k = 0; k < NMeas[3]; ++k ) {
-                        for( i = 0; i < dimOutputs[3]; ++i ) {
+                    for( k = 0; k < NMEAS[3]; ++k ) {
+                        for( i = 0; i < NOUT[3]; ++i ) {
                             for( j = 0; j < ACADO_NU; ++j ) {
-                                sensU[j*dimOutputs[3]*NMeas[3]+k*dimOutputs[3]+i] = out4[k*dimOutputs[3]*(1+ACADO_NX+ACADO_NU)+dimOutputs[3]*(1+ACADO_NX)+i*ACADO_NU+j];
+                                sensU[j*NOUT[3]*NMEAS[3]+k*NOUT[3]+i] = out4[k*NOUT[3]*(1+ACADO_NX+ACADO_NU)+NOUT[3]*(1+ACADO_NX)+i*ACADO_NU+j];
                             }
                         }
                     }

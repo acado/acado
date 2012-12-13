@@ -287,6 +287,16 @@ enum IntegratorType{
 };
 
 
+/** The available options for providing the grid of measurements.
+ */
+enum MeasurementGrid{
+
+	EQUIDISTANT_SUBGRID,    /**< An equidistant subgrid, within one interval of the integration grid.       */
+	EQUIDISTANT_GRID,       /**< An equidistant grid, independent of the integration grid.           		*/
+	ONLINE_GRID         	/**< A random grid, provided online by the user.           						*/
+};
+
+
 /** Unrolling option.
  */
 enum UnrollOption{
@@ -408,6 +418,7 @@ enum OptionsName
 	USE_REFERENCE_PREDICTION,
 	FREEZE_INTEGRATOR,
 	INTEGRATOR_TYPE,
+	MEASUREMENT_GRID,
 	SAMPLING_TIME,
 	SIMULATE_COMPUTATIONAL_DELAY,
 	COMPUTATIONAL_DELAY_FACTOR,
@@ -638,6 +649,7 @@ enum QPSolverName
 	QP_QPOASES,
 	QP_QPOASES3,
 	QP_CVXGEN,
+	QP_FORCES,
 	QP_NONE
 };
 
@@ -794,6 +806,7 @@ enum ExportStatementOperator
 	ESO_MULTIPLY,
 	ESO_MULTIPLY_TRANSPOSE,
 	ESO_DIVIDE,
+	ESO_MODULO,
 	ESO_ASSIGN,
 	ESO_UNDEFINED
 };
@@ -809,6 +822,7 @@ enum OperatingSystem
 
 enum ExportType
 {
+	STATIC_CONSTANT,
 	INT,
 	REAL
 };
