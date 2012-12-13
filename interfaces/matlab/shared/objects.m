@@ -230,7 +230,7 @@ if (returnlist == 0 || returnlist == 2 || returnlist == 3)
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
 	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
-	
+    
 	[fl, ol] = getFilesAndObjectNames('../../external_packages/casadi/symbolic');
 
 	SRC = [SRC; fl];
@@ -292,6 +292,7 @@ if (returnlist == 0 || returnlist == 3)
 	BIN = [BIN; ol'];
 	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
 end;
+    
 
 %% MEX
 k = 1;
@@ -376,42 +377,3 @@ end
     % SRC{k} = '../../external_packages/csparse/SRC/cs_ereach.c';              BIN{k} ='cs_ereach';                           BINFOLDER{k} = 'csparse/'; k=k+1;
     % SRC{k} = '../../external_packages/csparse/SRC/cs_leaf.c';               BIN{k} ='cs_leaf';                            BINFOLDER{k} = 'csparse/'; k=k+1;
     % SRC{k} = '../../external_packages/csparse/SRC/cs_randperm.c';               BIN{k} ='cs_randperm';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-	
-function [fileList, objList] = getFilesAndObjectNames( dirName )
-
-	% Get the data for the current directory
-	dirData = dir(dirName);
-	% Find the index for directories
-	dirIndex = [dirData.isdir];
-	fileListTemp = dir(fullfile(dirName, '*.cpp'));
-	
-	% Get a list of the files
-	fileList = { fileListTemp( : ).name }';
-	objList = {};
-	for i = 1: length( fileList )
-		[~, name, ~] = fileparts( fileList{ i } );
-		objList{ i } = name; 
-	end;
-  
-	if ~isempty( fileList )
-		% Prepend path to files
-		[fileList] = cellfun(@( x ) fullfile(dirName, x), ...  
-						fileList, 'UniformOutput', false);
-	end;
-	
-	% Get a list of the subdirectories
-	subDirs = { dirData(dirIndex).name };
-	% Find index of subdirectories that are not '.' or '..'
-	validIndex = ~ismember(subDirs, {'.', '..', '.svn'});  
-                                               
- 	% Loop over valid subdirectories
- 	for iDir = find( validIndex )
- 		% Get the subdirectory path
-		nextDir = fullfile(dirName, subDirs{ iDir });
-		% Recursively call getFilesAndObjectNames
-		[fl, ol] = getFilesAndObjectNames( nextDir ); 
-		fileList = [fileList; fl];
-		objList  = [objList  ol];
-	end;
-	
-end
