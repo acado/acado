@@ -70,6 +70,9 @@ function subjectTo(obj, varargin)
 %    Author: David Ariens
 %    Date: 2009-2010
 % 
+    % Fix because of all the calls to the "toString" function
+    global ACADO_;
+    ACADO_.generatingCode = 1;
 
     if (nargin == 2 && isa(varargin{1}, 'acado.DifferentialEquation'))
         % ocp.subjectTo( f ); 
@@ -106,5 +109,6 @@ function subjectTo(obj, varargin)
        error('ERROR: Invalid subjectTo. <a href="matlab: help acado.OCP.subjectTo">help acado.OCP.subjectTo</a>'); 
         
     end
-
+    % Important to set the value to zero again
+    ACADO_.generatingCode = 0;
 end
