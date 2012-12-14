@@ -24,8 +24,8 @@
 %    Date: 2012
 % 
 
-templateFiles = {'integrator_mex.c.in', 'rhs_mex.c.in'};
-templates = {'INTEGRATOR_MEX_TEMPLATE', 'RHS_MEX_TEMPLATE'};
+templateFiles = {'integrator_mex.c.in', 'rhs_mex.c.in', 'MPC_mex.c.in', 'MHE_mex.c.in'};
+templates = {'INTEGRATOR_MEX_TEMPLATE', 'RHS_MEX_TEMPLATE', 'MPC_MEX_TEMPLATE', 'MHE_MEX_TEMPLATE'};
 
 fid = fopen('./bin/include/acado/code_generation/templates/templates.hpp', 'w+');
 
