@@ -224,7 +224,7 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
 		{
 			data.printToFile( file, "", "{ "," };\n", 1, 16, ", ",", \n" );
 		}
-		else if (getType() == INT)
+		else if (getType() == INT || getType() == STATIC_CONSTANT)
 		{
 			data.printToFile( file, "", "{ "," };\n", 5, 0, ", ",", \n" );
 		}

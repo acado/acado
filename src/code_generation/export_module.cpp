@@ -384,7 +384,6 @@ returnValue ExportModule::setupOptions( )
 	addOption( IMPLICIT_INTEGRATOR_MODE,	IFTR 			);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	3				);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS_INIT, 0			);
-	addOption( INTEGRATOR_UNROLL_OUTPUT, HEURISTIC_UNROLL	);
 	addOption( SPARSE_QP_SOLUTION,          FULL_CONDENSING );
 	addOption( FIX_INITIAL_STATE,           BT_TRUE         );
 	addOption( QP_SOLVER,                   QP_QPOASES      );

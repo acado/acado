@@ -287,6 +287,16 @@ enum IntegratorType{
 };
 
 
+/** The available options for providing the grid of measurements.
+ */
+enum MeasurementGrid{
+
+	EQUIDISTANT_SUBGRID,    /**< An equidistant subgrid, within one interval of the integration grid.       */
+	EQUIDISTANT_GRID,       /**< An equidistant grid specified independent of the integration grid.           		*/
+	ONLINE_GRID         	/**< A random grid, provided online by the user.           						*/
+};
+
+
 /** Unrolling option.
  */
 enum UnrollOption{
@@ -360,7 +370,7 @@ enum OptionsName
 	IMPLICIT_INTEGRATOR_MODE,					/**< This determines the mode of the implicit integrator (see enum ImplicitIntegratorMode). */
 	IMPLICIT_INTEGRATOR_NUM_ITS,				/**< This is the performed number of Newton iterations in the implicit integrator. */
 	IMPLICIT_INTEGRATOR_NUM_ITS_INIT,			/**< This is the performed number of Newton iterations in the implicit integrator for the initialization of the first step. */
-	INTEGRATOR_UNROLL_OUTPUT,					/**< This option determines the unrolling of the evaluation of the continuous output. */
+//	INTEGRATOR_UNROLL_OUTPUT,					/**< This option determines the unrolling of the evaluation of the continuous output. */
 	UNROLL_LINEAR_SOLVER,						/**< This option of the boolean type determines the unrolling of the linear solver (no unrolling recommended for larger systems). */
 //	CONSISTENCY_ITERATIONS,						/**< This option specifies the number of Newton iterations, performed to make the initial values of the algebraic states consistent with those of the differential states. */
 	OPT_UNKNOWN,
@@ -406,6 +416,7 @@ enum OptionsName
 	USE_REFERENCE_PREDICTION,
 	FREEZE_INTEGRATOR,
 	INTEGRATOR_TYPE,
+	MEASUREMENT_GRID,
 	SAMPLING_TIME,
 	SIMULATE_COMPUTATIONAL_DELAY,
 	COMPUTATIONAL_DELAY_FACTOR,
@@ -809,6 +820,7 @@ enum OperatingSystem
 
 enum ExportType
 {
+	STATIC_CONSTANT,
 	INT,
 	REAL
 };

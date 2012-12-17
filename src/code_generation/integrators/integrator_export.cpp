@@ -176,7 +176,7 @@ returnValue IntegratorExport::getOutputGrids( std::vector<Grid>& outputGrids_ ) 
     return SUCCESSFUL_RETURN;
 }
 
-BooleanType IntegratorExport::hasEquidistantGrid( ) const{
+BooleanType IntegratorExport::equidistantControlGrid( ) const{
 	
 	return numSteps.isEmpty();
 }

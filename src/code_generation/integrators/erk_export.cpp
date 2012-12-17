@@ -113,7 +113,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	ExportIndex run( "run1" );
 
 	// setup INTEGRATE function
-	if( hasEquidistantGrid() ) {
+	if( equidistantControlGrid() ) {
 		integrate = ExportFunction( "integrate", rk_eta );
 	}
 	else {
@@ -123,7 +123,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	integrate.addIndex( run );
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
-	if( !hasEquidistantGrid() ) {
+	if( !equidistantControlGrid() ) {
 		integrate.addStatement( String( "int " ) << run.getName() << ";\n" );
 		integrate.addStatement( String( "int numSteps[" ) << String( numSteps.getDim() ) << "] = {" << String( numSteps(0) ) );
 		uint i;
@@ -147,7 +147,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
     // integrator loop
 	ExportForLoop loop;
-	if( hasEquidistantGrid() ) {
+	if( equidistantControlGrid() ) {
 		loop = ExportForLoop( run, 0, grid.getNumIntervals() );
 	}
 	else {
@@ -164,7 +164,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 //	loop.addStatement( rk_ttt += Matrix(h) );
     // end of integrator loop
 
-	if( !hasEquidistantGrid() ) {
+	if( !equidistantControlGrid() ) {
 		loop.addStatement( "}\n" );
 		loop.unrollLoop();
 	}

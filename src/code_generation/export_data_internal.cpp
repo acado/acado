@@ -91,6 +91,9 @@ String ExportDataInternal::getTypeString(	const String& _realString,
 {
 	switch ( type )
 	{
+		case STATIC_CONSTANT:
+				return String("const static ") << _intString;
+
 		case INT:
 			return _intString;
 

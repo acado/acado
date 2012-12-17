@@ -390,7 +390,7 @@ returnValue SIMexport::setup( )
 		}
 	}
 	
-	if( !integrator->hasEquidistantGrid() ) return ACADOERROR( RET_INVALID_OPTION );
+	if( !integrator->equidistantControlGrid() ) return ACADOERROR( RET_INVALID_OPTION );
 	
 	setStatus( BS_READY );
 

@@ -236,7 +236,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *  
 		 * \return BT_TRUE  iff the grid is equidistant, BT_FALSE otherwise. \n
 		 */
-		virtual BooleanType hasEquidistantGrid( ) const;
+		virtual BooleanType equidistantControlGrid( ) const;
 
 
 		const String getNameODE() const;

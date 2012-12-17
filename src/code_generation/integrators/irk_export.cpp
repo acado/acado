@@ -296,7 +296,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	code.addLinebreak( 2 );
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
-	if( !hasEquidistantGrid() ) {
+	if( !equidistantControlGrid() ) {
 		ExportVariable numStepsV( "numSteps", numSteps );
 		code.addDeclaration( numStepsV );
 		code.addLinebreak( 2 );
@@ -364,7 +364,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
     // integrator loop:
 	ExportForLoop tmpLoop( run, 0, grid.getNumIntervals() );
 	ExportStatementBlock *loop;
-	if( hasEquidistantGrid() ) {
+	if( equidistantControlGrid() ) {
 		loop = &tmpLoop;
 	}
 	else {
@@ -871,7 +871,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		loop->addStatement( loop03 );
 	}
 
-	if( rk_outputs.size() > 0 && (grid.getNumIntervals() > 1 || !hasEquidistantGrid()) ) {
+	if( rk_outputs.size() > 0 && (grid.getNumIntervals() > 1 || !equidistantControlGrid()) ) {
 		loop->addStatement( String( "if( run > 0 ) {\n" ) );
 
 		// chain rule for the sensitivities of the continuous output:
@@ -921,7 +921,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	loop->addStatement( String( rk_num.get(0,0) ) << " += 1;\n" );
 
     // end of the integrator loop.
-    if( !hasEquidistantGrid() ) {
+    if( !equidistantControlGrid() ) {
 		loop->addStatement( "}\n" );
 	}
     else {
@@ -1141,7 +1141,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	rk_diffsNew = ExportVariable( "rk_diffsNew", NX+NXA, NX+NU, REAL, ACADO_WORKSPACE );
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
-	if( hasEquidistantGrid() ) {
+	if( equidistantControlGrid() ) {
 		integrate = ExportFunction( "integrate", rk_eta );
 	}
 	else {
