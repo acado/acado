@@ -162,6 +162,13 @@ returnValue ExportModule::setDimensions( uint _NX, uint _NU )
 }
 
 
+returnValue ExportModule::setIntegrationGrid( const Vector& gridPoints )
+{
+	integrationGrid = Grid(gridPoints);
+	return SUCCESSFUL_RETURN;
+}
+
+
 returnValue ExportModule::setModel( const String& fileName, const String& _rhs_ODE, const String& _diffs_ODE )
 {
 	if( f.getNumDynamicEquations() == 0 ) {

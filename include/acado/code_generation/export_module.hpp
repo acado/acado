@@ -158,6 +158,15 @@ class ExportModule : public UserInteraction
 		virtual returnValue setDimensions( uint _NX, uint _NU );
 
 
+		/** Sets the grid to be used by the integrator.
+		 *
+		 *	@param[in] gridPoints		The points that form the integration grid.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue setIntegrationGrid( const Vector& gridPoints );
+
+
 		/** Exports all files of the auto-generated code into the given directory.
 		 *
 		 *	@param[in] dirName			Name of directory to be used to export files.
@@ -301,6 +310,7 @@ class ExportModule : public UserInteraction
         String diffs_ODE;						/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
 
         OCP ocp;							/**< OCP formulation used to export code. */
+        Grid integrationGrid;				/**< Integration grid. */
 
 		uint NX;							/**< Number of differential states. */
 		uint NDX;							/**< Number of differential states derivatives. */

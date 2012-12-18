@@ -46,6 +46,7 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 									) : ExportAlgorithm( _userInteraction,_commonHeaderName )
 {
 	EXPORT_RHS = BT_TRUE;
+	EQUIDISTANT = BT_TRUE;
 	CRS_FORMAT = BT_FALSE;
 }
 
@@ -54,6 +55,7 @@ IntegratorExport::IntegratorExport(	const IntegratorExport& arg
 									) : ExportAlgorithm( arg )
 {
 	EXPORT_RHS = BT_TRUE;
+	EQUIDISTANT = BT_TRUE;
 	CRS_FORMAT = BT_FALSE;
 }
 
@@ -73,6 +75,15 @@ IntegratorExport& IntegratorExport::operator=(	const IntegratorExport& arg
 		ExportAlgorithm::operator=( arg );
 	}
     return *this;
+}
+
+
+returnValue IntegratorExport::setGrid(	const Grid& _grid )
+{
+	grid = _grid;
+	EQUIDISTANT = BT_FALSE;
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -132,6 +143,7 @@ returnValue IntegratorExport::copy(	const IntegratorExport& arg
 									)
 {
 	EXPORT_RHS = arg.EXPORT_RHS;
+	EQUIDISTANT = arg.EQUIDISTANT;
 	CRS_FORMAT = arg.CRS_FORMAT;
 	grid = arg.grid;
 	numSteps = arg.numSteps;
@@ -151,7 +163,8 @@ returnValue IntegratorExport::clear( )
 
 uint IntegratorExport::getIntegrationInterval( double time ) {
 	uint index = 0;
-	while( time > ((double)index+1)/(double)grid.getNumIntervals() ) {
+	double scale = 1.0/(grid.getLastTime() - grid.getFirstTime());
+	while( index < (grid.getNumIntervals()-1) && time > scale*grid.getTime( index+1 ) ) {
 		index++;
 	}
 	return index;
@@ -185,7 +198,7 @@ returnValue IntegratorExport::getOutputGrids( std::vector<Grid>& outputGrids_ ) 
     return SUCCESSFUL_RETURN;
 }
 
-BooleanType IntegratorExport::hasEquidistantGrid( ) const{
+BooleanType IntegratorExport::equidistantControlGrid( ) const{
 	
 	return numSteps.isEmpty();
 }

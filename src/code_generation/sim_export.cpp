@@ -313,9 +313,16 @@ returnValue SIMexport::setup( )
 			return RET_UNABLE_TO_EXPORT_CODE;
 	}
 
-	Grid ocpGrid( 0.0, T, N+1 );
-	if ( integrator->setGrid(ocpGrid, numSteps) != SUCCESSFUL_RETURN ) {
-		return RET_UNABLE_TO_EXPORT_CODE;
+	if( !integrationGrid.isEmpty() ) {
+		if ( integrator->setGrid(integrationGrid) != SUCCESSFUL_RETURN ) {
+			return RET_UNABLE_TO_EXPORT_CODE;
+		}
+	}
+	else {
+		Grid ocpGrid( 0.0, T, N+1 );
+		if ( integrator->setGrid(ocpGrid, numSteps) != SUCCESSFUL_RETURN ) {
+			return RET_UNABLE_TO_EXPORT_CODE;
+		}
 	}
 
 	integrator->setup( );
@@ -350,7 +357,7 @@ returnValue SIMexport::setup( )
 		}
 	}
 	
-	if( !integrator->hasEquidistantGrid() ) return ACADOERROR( RET_INVALID_OPTION );
+	if( !integrator->equidistantControlGrid() ) return ACADOERROR( RET_INVALID_OPTION );
 	
 	setStatus( BS_READY );
 
@@ -777,11 +784,15 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 							const String& ref
 										)
 {
+	int measGrid;
+	get( MEASUREMENT_GRID, measGrid );
+	if( (MeasurementGrid)measGrid == ONLINE_GRID || ((MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID && !integrationGrid.isEmpty()) ) return ACADOERROR( RET_INVALID_OPTION );
+
 	_initStates = initStates;
 	_controls = controls;
 	_results = results;
 	_ref = ref;
-	uint i;
+	uint i, j;
 	Vector meas( (uint)outputGrids.size() );
 	Vector measRef( (uint)outputGrids.size() );
 	for( i = 0; i < outputGrids.size(); i++ ) {
@@ -789,6 +800,20 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 		measRef(i) = (double)outputGrids[i].getNumIntervals()*factorRef;
 	}
 	
+	Vector intGrid( integrationGrid.getNumIntervals()+1 );
+	Vector refIntGrid( factorRef*integrationGrid.getNumIntervals()+1 );
+	if( !integrationGrid.isEmpty() ) {
+		intGrid(0) = integrationGrid.getTime( 0 );
+		refIntGrid(0) = integrationGrid.getTime( 0 );
+		for( i = 0; i < integrationGrid.getNumIntervals(); i++ ) {
+			intGrid(i+1) = integrationGrid.getTime( i+1 );
+			double step = (integrationGrid.getTime( i+1 ) - integrationGrid.getTime( i ))/factorRef;
+			for( j = 0; j < factorRef; j++ ) {
+				refIntGrid(i*factorRef+1+j) = refIntGrid(i*factorRef+j) + step;
+			}
+		}
+	}
+
 	int numSteps;
     get( NUM_INTEGRATOR_STEPS, numSteps );
 	timingCalls = (uint) ceil((double)(timingSteps*N)/((double) numSteps) - 10.0*EPS);
@@ -796,21 +821,38 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
     
     if( !referenceProvided ) {
 	    // REFERENCE:
-	    setMeasurements( measRef );
-		set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
-		exportCode(	dirName );
-		exportTest(	dirName, String( "test.c" ), _ref, _refOutputFiles, BT_FALSE, factorRef );
+    	if( !integrationGrid.isEmpty() ) {
+    		setMeasurements( meas );			// EQUIDISTANT_GRID option is used
+    		setIntegrationGrid( refIntGrid );
+    		exportCode(	dirName );
+    		exportTest(	dirName, String( "test.c" ), _ref, _refOutputFiles, BT_FALSE, 1 );
+    	}
+    	else if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
+    		setMeasurements( meas );
+    		set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
+    		exportCode(	dirName );
+    		exportTest(	dirName, String( "test.c" ), _ref, _refOutputFiles, BT_FALSE, 1 );
+    	}
+    	else {
+    		setMeasurements( measRef );
+    		set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
+    		exportCode(	dirName );
+    		exportTest(	dirName, String( "test.c" ), _ref, _refOutputFiles, BT_FALSE, factorRef );
+    	}
 		executeTest( dirName );
 	}
     
     // THE INTEGRATOR:
     setMeasurements( meas );
 	set( NUM_INTEGRATOR_STEPS,  numSteps );
+	if( !integrationGrid.isEmpty() ) {
+		setIntegrationGrid( intGrid );
+	}
 	exportCode(	dirName );
 	if(timingSteps > 0 && timingCalls > 0) 	exportTest(	dirName, String( "test.c" ), _results, _outputFiles, BT_TRUE, 1 );
 	else 									exportTest(	dirName, String( "test.c" ), _results, _outputFiles, BT_FALSE, 1 );
 	executeTest( dirName );
-	
+
 	// THE EVALUATION:
 	int nil;
 	nil = system( (String(dirName) << "/./compare").getName() );

@@ -182,6 +182,11 @@ classdef SIMexport < acado.ExportModule
                     
                 end
                 
+                % INTEGRATION GRID
+                if (~isempty(obj.integrationGrid))
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setIntegrationGrid( %s );\n', obj.name, obj.integrationGrid.name));
+                end
+                
                 getOptions(obj, cppobj);
                 
                 

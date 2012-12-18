@@ -47,6 +47,9 @@ classdef ExportModule < acado.UserInteraction
     properties (SetAccess='protected')
         name = 'ExportModule';
         
+        % Integration
+        integrationGrid;
+        
         % DifferentialEquation
         model;
         fileName;
@@ -123,6 +126,16 @@ classdef ExportModule < acado.UserInteraction
                 
             end
             
+        end
+        
+        
+        function setIntegrationGrid(obj, varargin)
+           
+            if (nargin == 2 && isa(varargin{1}, 'numeric'))
+                obj.integrationGrid = acado.Vector( varargin{1} );
+            else
+                error('ERROR: Invalid call to setIntegrationGrid.');
+            end
         end
         
         

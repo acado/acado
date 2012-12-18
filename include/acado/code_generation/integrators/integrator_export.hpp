@@ -117,14 +117,23 @@ class IntegratorExport : public ExportAlgorithm
 										const String& _name_diffs_ODE );
 
 
+		/** Sets integration grid (this grid is expected to be non equidistant, otherwise use the other setGrid function).
+		 *
+		 *	@param[in] _grid		integration grid
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setGrid(	const Grid& _grid   );
+
+
 		/** Sets integration grid.
 		 *
-		 *	@param[in] _grid		Evaluation grid for optimal control.
+		 *	@param[in] _ocpGrid		Evaluation grid for optimal control.
 		 *	@param[in] numSteps		The number of integration steps along the prediction horizon.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setGrid(	const Grid& _grid,
+		virtual returnValue setGrid(	const Grid& _ocpGrid,
 										const uint _numSteps
 								);
 
@@ -236,7 +245,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *  
 		 * \return BT_TRUE  iff the grid is equidistant, BT_FALSE otherwise. \n
 		 */
-		virtual BooleanType hasEquidistantGrid( ) const;
+		virtual BooleanType equidistantControlGrid( ) const;
 
 
 		const String getNameODE() const;
@@ -278,6 +287,7 @@ class IntegratorExport : public ExportAlgorithm
     protected:
 
         BooleanType EXPORT_RHS;				/**< True if the right-hand side and their derivatives should be exported too. */
+        BooleanType EQUIDISTANT;			/**< True if the integration grid is equidistant. */
         BooleanType CRS_FORMAT;				/**< True if the CRS format is used for the jacobian of output functions. */
         String name_ODE;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
         String name_diffs_ODE;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */

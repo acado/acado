@@ -264,7 +264,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		returnValue evaluatePolynomial( ExportStatementBlock& block, 
 										const ExportVariable& variable, 
 										const ExportVariable& grid, 
-										double h );
+										const String& h );
 
 
 		/** Exports the evaluation of the coefficients of the derived polynomial, representing the derivative of the continuous output with respect to time.

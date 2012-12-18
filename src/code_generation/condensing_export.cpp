@@ -918,7 +918,7 @@ returnValue CondensingExport::setupEvaluation( )
 	loop.addStatement( state.getCols( pIdx,pIdx+getNP() ) == p );
 	loop.addLinebreak( );
 	
-	if ( integrator->hasEquidistantGrid() )
+	if ( integrator->equidistantControlGrid() )
 	{
 		loop.addFunctionCall( "integrate", state );
 	}

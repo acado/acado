@@ -330,8 +330,15 @@ returnValue MPCexport::setup( )
 			return RET_UNABLE_TO_EXPORT_CODE;
 	}
 
-	if ( integrator->setGrid(grid, numSteps) != SUCCESSFUL_RETURN ) {
-		return RET_UNABLE_TO_EXPORT_CODE;
+	if( !integrationGrid.isEmpty() ) {
+		if ( integrator->setGrid(integrationGrid) != SUCCESSFUL_RETURN ) {
+			return RET_UNABLE_TO_EXPORT_CODE;
+		}
+	}
+	else {
+		if ( integrator->setGrid(grid, numSteps) != SUCCESSFUL_RETURN ) {
+			return RET_UNABLE_TO_EXPORT_CODE;
+		}
 	}
 
 	integrator->setup( );
