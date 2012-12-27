@@ -366,7 +366,7 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getSubMatrix: cannot determine column size");
 
 	tmp.assignNode( this->clone() );
-	tmp->setSubmatrixOffsets(_rowIdx1, _colIdx1, getNumRows(), getNumCols( ), sizeRow.getGivenValue(), sizeCol.getGivenValue() );
+	tmp->setSubmatrixOffsets(_rowIdx1, _colIdx1, getNumRows(), getNumCols( ), sizeRow.getGivenValue(), sizeCol.getGivenValue());
 
 	return tmp;
 }

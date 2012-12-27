@@ -220,16 +220,21 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
 	{
 		acadoFPrintf( file," = " );
 
-		if (getType() == REAL)
+		switch ( getType() )
 		{
-			data.printToFile( file, "", "{ "," };\n", 1, 16, ", ",", \n" );
-		}
-		else if (getType() == INT || getType() == STATIC_CONSTANT)
-		{
+		case INT:
+		case STATIC_CONST_INT:
 			data.printToFile( file, "", "{ "," };\n", 5, 0, ", ",", \n" );
-		}
-		else
+			break;
+
+		case REAL:
+		case STATIC_CONST_REAL:
+			data.printToFile( file, "", "{ "," };\n", 1, 16, ", ",", \n" );
+			break;
+
+		default:
 			return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+		}
 	}
 
 	return SUCCESSFUL_RETURN;

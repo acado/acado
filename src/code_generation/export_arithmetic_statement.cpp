@@ -228,7 +228,14 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 	{
 		if ( ( rhs1->getNumRows() != lhs->getNumRows() ) || 
 		     ( rhs1->getNumCols() != lhs->getNumCols() ) )
+		{
+			cout << "lhs name is " << lhs.getName().getName() <<
+					", size: " << lhs.getNumRows() << " x " << lhs.getNumCols() << endl;
+			cout << "rhs1 name is " << rhs1.getName().getName() <<
+					", size: " << rhs1.getNumRows() << " x " << rhs1.getNumCols() << endl;
+
 			return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
+		}
 	}
 	
 	String assignString;

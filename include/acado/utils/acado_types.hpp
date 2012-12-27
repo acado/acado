@@ -820,9 +820,10 @@ enum OperatingSystem
 
 enum ExportType
 {
-	STATIC_CONSTANT,
 	INT,
-	REAL
+	REAL,
+	STATIC_CONST_INT,
+	STATIC_CONST_REAL
 };
 
 
