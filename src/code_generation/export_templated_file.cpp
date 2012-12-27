@@ -134,7 +134,10 @@ returnValue ExportTemplatedFile::fillTemplate( )
 				{
 					if ((str.size() - pos) < 256)
 					{
-						addStatement( static_cast< String >( str.substr( pos ).c_str() ) );
+						string tmp = str.substr( pos );
+
+						if ( tmp.size() )
+							addStatement( static_cast< String >( tmp.c_str() ) );
 
 						break;
 					}
