@@ -358,7 +358,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportVariable  rk_diffsTemp;			/**< Variable containing intermediate results of evaluations of the derivatives of the differential equations (ordinary and algebraic). */
 		ExportVariable  rk_diffsPrev;			/**< Variable containing the sensitivities from the previous integration step. */
 		ExportVariable  rk_diffsNew;			/**< Variable containing the derivatives wrt the previous values. */
-		ExportVariable 	rk_xPrev;				/**< Variable containing the previous integrator state. */
 		
 		ExportVariable 	rk_rhsOutputTemp;		/**< Variable containing intermediate results of evaluations of the right-hand side expression of an output function. */
 		ExportVariable  rk_diffsOutputTemp;		/**< Variable containing intermediate results of evaluations of the derivatives of an output function. */
