@@ -48,6 +48,8 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 	EXPORT_RHS = BT_TRUE;
 	EQUIDISTANT = BT_TRUE;
 	CRS_FORMAT = BT_FALSE;
+
+	reset_int = ExportVariable( "resetIntegrator", 1, 1, INT, ACADO_VARIABLES, BT_TRUE );
 }
 
 

@@ -86,6 +86,7 @@ returnValue ExportGaussElim::getFunctionDeclarations(	ExportStatementBlock& decl
 															) const
 {
 	declarations.addDeclaration( solve );
+	declarations.addDeclaration( solveTriangular );
 	if( REUSE ) {
 		declarations.addDeclaration( solveReuse );
 	}
@@ -210,15 +211,7 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 		solve.addStatement( String( "}\n" ) );
 	}
 	
-	// Solve the upper triangular system of equations which is left, using back substitution:
-	solve.addStatement( String( "for( i=" ) << String(dim) << "; i>0; i-- ) {\n" );
-	solve.addStatement( String( "	x[i-1] = b[i-1];\n" ) );
-	solve.addStatement( String( "	for( j=" ) << String(dim-1) << "; j>(i-1); j-- ) {\n" );
-	solve.addStatement( String( "		x[i-1] -= A[" ) << String( dim ) << "*(i-1)+j]*x[j];\n" );
-	solve.addStatement( String( "	}\n" ) );
-	solve.addStatement( String( "	x[i-1] = x[i-1]/A[" ) << String( dim ) << "*(i-1)+i-1];\n" );
-	solve.addStatement( String( "}\n" ) );
-	
+	solve.addFunctionCall( solveTriangular, A, b, x );
 	code.addFunction( solve );
 	
     code.addLinebreak( 2 );
@@ -227,25 +220,27 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 			solveReuse.addStatement( ((String)rk_bPerm.get( run1,0 ) << " = b[acadoWorkspace.rk_" << identifier << "perm[" << String( run1 ) << "]];\n" ) );
 		}
 
-		for( run1 = 0; run1 < (dim-1); run1++ ) { 		// column run1
-			for( run2 = run1+1; run2 < dim; run2++ ) { 	// update row run2
+		for( run2 = 1; run2 < dim; run2++ ) { 		// row run2
+			for( run1 = 0; run1 < run2; run1++ ) { 	// column run1
 				solveReuse.addStatement( ((String)rk_bPerm.get( run2,0 ) << " += A[" << String( run2*dim+run1 ) << "]*acadoWorkspace.rk_" << identifier << "bPerm[" << String( run1 ) << "];\n" ) );
 			}
 			solveReuse.addLinebreak();
 		}
 		solveReuse.addLinebreak();
 
-		// Solve the upper triangular system of equations:
-		for( run1 = dim; run1 > 0; run1--) {
-			solveReuse.addStatement( String( "x[" ) << String( (run1-1) ) << "] = " << rk_bPerm.get( run1-1,0 ) << ";\n" );
-			for( run2 = dim-1; run2 > (run1-1); run2--) {
-				solveReuse.addStatement( x.getRow( (run1-1) ) -= A.getSubMatrix( (run1-1),(run1-1)+1,run2,run2+1 ) * x.getRow( run2 ) );
-			}
-			solveReuse.addStatement( String( "x[" ) << String( (run1-1) ) << "] = x[" << String( (run1-1) ) << "]/A[" << String( (run1-1)*dim+(run1-1) ) << "];\n" );
-		}
-
+		solveReuse.addFunctionCall( solveTriangular, A, rk_bPerm, x );
 		code.addFunction( solveReuse );
 	}
+
+	// Solve the upper triangular system of equations:
+	for( run1 = dim; run1 > 0; run1--) {
+		solveTriangular.addStatement( String( "x[" ) << String( (run1-1) ) << "] = " << b.get( run1-1,0 ) << ";\n" );
+		for( run2 = dim-1; run2 > (run1-1); run2--) {
+			solveTriangular.addStatement( x.getRow( (run1-1) ) -= A.getSubMatrix( (run1-1),(run1-1)+1,run2,run2+1 ) * x.getRow( run2 ) );
+		}
+		solveTriangular.addStatement( String( "x[" ) << String( (run1-1) ) << "] = x[" << String( (run1-1) ) << "]/A[" << String( (run1-1)*dim+(run1-1) ) << "];\n" );
+	}
+	code.addFunction( solveTriangular );
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -261,6 +256,8 @@ returnValue ExportGaussElim::setup( )
 	x = ExportVariable( "x", dim, 1, REAL );
 	solve = ExportFunction( getNameSolveFunction(), A, b, x);
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
+	solveTriangular = ExportFunction( String( "solve_" ) << identifier << "triangular", A, b, x);
+	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	
 	if( REUSE ) {
 		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b, x);

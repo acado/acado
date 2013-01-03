@@ -531,7 +531,8 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     main.addStatement( "      		x[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = 0;\n" );
     main.addStatement( "      }\n" );
     main.addLinebreak( 1 );
-
+    main.addStatement( "      acadoVariables.resetIntegrator = 1;\n" );
+    main.addLinebreak( 1 );
     main.addComment( 3,"RUN INTEGRATOR:" );
     main.addComment( 3,"----------------------------------------" );
     main.addStatement( "      file = fopen(RESULTS_NAME,\"w\");\n" );
@@ -603,7 +604,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( "      end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;\n" );
 		main.addStatement( "      time = (end-start);\n" );
 		main.addLinebreak( );
-		main.addStatement( "      printf( \"\\n\\n AVERAGE DURATION OF ONE INTEGRATION STEP:   %.3g Î¼s\\n\\n\", 1e6*time/STEPS_TIMING );\n" );
+		main.addStatement( "      printf( \"\\n\\n AVERAGE DURATION OF ONE INTEGRATION STEP:   %.3g μs\\n\\n\", 1e6*time/STEPS_TIMING );\n" );
 	}
     main.addLinebreak( );
 	main.addStatement( "      return 0;\n" );

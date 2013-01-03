@@ -35,10 +35,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     if (nrhs != (2+ONLINE_GRID*NUM_OUTPUTS) && !(nrhs == (1+ONLINE_GRID*NUM_OUTPUTS) && ACADO_NU == 0)) {
         if( ONLINE_GRID ) {
-			mexErrMsgTxt( "Check the number of input arguments: since the ONLINE_GRID option is used, a grid needs to be provided for every output function !" );
+mexErrMsgTxt( "Check the number of input arguments: since the ONLINE_GRID option is used, a grid needs to be provided for every output function !" );
         }
         else {
-			mexErrMsgTxt( "Check the number of input arguments !" );
+mexErrMsgTxt( "Check the number of input arguments !" );
         }
     }
     if (nlhs > (1+NUM_OUTPUTS)) {
@@ -62,69 +62,69 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         mexErrMsgTxt( "Check the dimension of the second input argument !" );
     }
     #if ONLINE_GRID
-		#if NUM_OUTPUTS > 0
-			Ngrid = mxGetM(prhs[gridI])*mxGetN(prhs[gridI]);
-			grid = mxGetPr(prhs[gridI]);
-			if( Ngrid > NMEAS[0] ) {
-				mexErrMsgTxt( "The first provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
-			}
-			else {
-				for( j = 0; j < Ngrid; ++j ) {
-					acadoVariables.gridOutput0[j] = grid[j];
-				}
-				for( j = Ngrid; j < NMEAS[0]; ++j ) {
-					acadoVariables.gridOutput0[j] = 1.1;
-				}
-			}
+#if NUM_OUTPUTS > 0
+Ngrid = mxGetM(prhs[gridI])*mxGetN(prhs[gridI]);
+grid = mxGetPr(prhs[gridI]);
+if( Ngrid > NMEAS[0] ) {
+mexErrMsgTxt( "The first provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+}
+else {
+for( j = 0; j < Ngrid; ++j ) {
+acadoVariables.gridOutput0[j] = grid[j];
+}
+for( j = Ngrid; j < NMEAS[0]; ++j ) {
+acadoVariables.gridOutput0[j] = 1.1;
+}
+}
         
-			#if NUM_OUTPUTS > 1
-				Ngrid = mxGetM(prhs[gridI+1])*mxGetN(prhs[gridI+1]);
-				grid = mxGetPr(prhs[gridI+1]);
-				if( Ngrid > NMEAS[1] ) {
-					mexErrMsgTxt( "The second provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
-				}
-				else {
-					for( j = 0; j < Ngrid; ++j ) {
-						acadoVariables.gridOutput1[j] = grid[j];
-					}
-					for( j = Ngrid; j < NMEAS[1]; ++j ) {
-						acadoVariables.gridOutput1[j] = 1.1;
-					}
-				}
+#if NUM_OUTPUTS > 1
+Ngrid = mxGetM(prhs[gridI+1])*mxGetN(prhs[gridI+1]);
+grid = mxGetPr(prhs[gridI+1]);
+if( Ngrid > NMEAS[1] ) {
+mexErrMsgTxt( "The second provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+}
+else {
+for( j = 0; j < Ngrid; ++j ) {
+acadoVariables.gridOutput1[j] = grid[j];
+}
+for( j = Ngrid; j < NMEAS[1]; ++j ) {
+acadoVariables.gridOutput1[j] = 1.1;
+}
+}
             
-				#if NUM_OUTPUTS > 2
-					Ngrid = mxGetM(prhs[gridI+2])*mxGetN(prhs[gridI+2]);
-					grid = mxGetPr(prhs[gridI+2]);
-					if( Ngrid > NMEAS[2] ) {
-						mexErrMsgTxt( "The third provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
-					}
-					else {
-						for( j = 0; j < Ngrid; ++j ) {
-							acadoVariables.gridOutput2[j] = grid[j];
-						}
-						for( j = Ngrid; j < NMEAS[2]; ++j ) {
-							acadoVariables.gridOutput2[j] = 1.1;
-						}
-					}
+#if NUM_OUTPUTS > 2
+Ngrid = mxGetM(prhs[gridI+2])*mxGetN(prhs[gridI+2]);
+grid = mxGetPr(prhs[gridI+2]);
+if( Ngrid > NMEAS[2] ) {
+mexErrMsgTxt( "The third provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+}
+else {
+for( j = 0; j < Ngrid; ++j ) {
+acadoVariables.gridOutput2[j] = grid[j];
+}
+for( j = Ngrid; j < NMEAS[2]; ++j ) {
+acadoVariables.gridOutput2[j] = 1.1;
+}
+}
                 
-					#if NUM_OUTPUTS > 3
-						Ngrid = mxGetM(prhs[gridI+3])*mxGetN(prhs[gridI+3]);
-						grid = mxGetPr(prhs[gridI+3]);
-						if( Ngrid > NMEAS[3] ) {
-							mexErrMsgTxt( "The fourth provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
-						}
-						else {
-							for( j = 0; j < Ngrid; ++j ) {
-								acadoVariables.gridOutput3[j] = grid[j];
-							}
-							for( j = Ngrid; j < NMEAS[3]; ++j ) {
-								acadoVariables.gridOutput3[j] = 1.1;
-							}
-						}
-					#endif
-				#endif
-			#endif
-		#endif  
+#if NUM_OUTPUTS > 3
+Ngrid = mxGetM(prhs[gridI+3])*mxGetN(prhs[gridI+3]);
+grid = mxGetPr(prhs[gridI+3]);
+if( Ngrid > NMEAS[3] ) {
+mexErrMsgTxt( "The fourth provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+}
+else {
+for( j = 0; j < Ngrid; ++j ) {
+acadoVariables.gridOutput3[j] = grid[j];
+}
+for( j = Ngrid; j < NMEAS[3]; ++j ) {
+acadoVariables.gridOutput3[j] = 1.1;
+}
+}
+#endif
+#endif
+#endif
+#endif  
     #endif       
     
     x = mxGetPr(prhs[0]);
@@ -139,7 +139,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
     }
 
-    acadoVariables.rk_num = 0;
+    acadoVariables.resetIntegrator = 1;
     
     #if NUM_OUTPUTS > 3
         integrate( next, out1, out2, out3, out4 );

@@ -193,7 +193,7 @@ returnValue ImplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 	declarations.addDeclaration( rk_b,dataStruct );
 	declarations.addDeclaration( rk_rhsTemp,dataStruct );
 	declarations.addDeclaration( rk_diffsTemp,dataStruct );
-	declarations.addDeclaration( rk_num,dataStruct );
+	declarations.addDeclaration( reset_int,dataStruct );
 	declarations.addDeclaration( rk_diffsPrev,dataStruct );
 	declarations.addDeclaration( rk_diffsNew,dataStruct );
 	
@@ -469,7 +469,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	loop->addStatement( loopTemp );
 
 
-	if( REUSE ) loop->addStatement( String( "if( " ) << rk_num.get(0,0) << " == 0 ) {\n" );
+	if( REUSE ) loop->addStatement( String( "if( " ) << reset_int.getFullName() << " ) {\n" );
 	// Initialization iterations:
 	ExportForLoop loop1( i,0,numItsInit+1 ); // NOTE: +1 because 0 will lead to NaNs, so the minimum number of iterations is 1 at the initialization
 	ExportForLoop loop11( run1,0,numStages );
@@ -1181,7 +1181,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		loop->addStatement( String( "}\n" ) );
 	}
 
-	loop->addStatement( String( rk_num.get(0,0) ) << " += 1;\n" );
+	loop->addStatement( String( reset_int.get(0,0) ) << " = 0;\n" );
 
 	for( run5 = 0; run5 < rk_outputs.size(); run5++ ) {
 		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) loop->addStatement( numMeas[run5] == numMeas[run5]+totalMeas[run5] );
@@ -1462,7 +1462,6 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	diffsDim = (NX+NXA)*(NX+NU);
 	inputDim = (NX+NXA)*(NX+NU+1) + NU + NP;
 	
-	rk_num = ExportVariable( "rk_num", 1, 1, INT, ACADO_VARIABLES, BT_TRUE );
 	rk_ttt = ExportVariable( "rk_ttt", 1, 1, REAL, ACADO_WORKSPACE, BT_TRUE );
 	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim-diffsDim+NDX, REAL, ACADO_WORKSPACE );
 	if( CONTINUOUS_OUTPUT ) rk_xPrev = ExportVariable( "rk_xPrev", 1, inputDim-diffsDim, REAL, ACADO_WORKSPACE );

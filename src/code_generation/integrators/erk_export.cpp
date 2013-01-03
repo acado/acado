@@ -91,7 +91,6 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
-	rk_num = ExportVariable( "rk_num", 1, 1, INT, ACADO_VARIABLES, BT_TRUE );
 
 
 //	rk_ttt.setup( "rk_ttt", 1,1,            REAL,ACADO_WORKSPACE,BT_TRUE );
@@ -262,7 +261,7 @@ returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 	declarations.addDeclaration( rk_xxx,dataStruct );
 	declarations.addDeclaration( rk_kkk,dataStruct );
 	
-	declarations.addDeclaration( rk_num,dataStruct );
+	declarations.addDeclaration( reset_int,dataStruct );
 
 	return SUCCESSFUL_RETURN;
 }

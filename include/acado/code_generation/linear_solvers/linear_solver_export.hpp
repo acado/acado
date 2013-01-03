@@ -246,6 +246,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		ExportVariable x;							/**< Variable containing the solution of the linear system. */
 		
 		ExportFunction solve;						/**< Function that solves the linear system. */
+		ExportFunction solveTriangular;				/**< Function that solves the upper-triangular system. */
 		ExportFunction solveReuse;					/**< Function that solves a linear system with the same matrix, reusing previous results. */
 
 };
