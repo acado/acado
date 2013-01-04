@@ -307,6 +307,44 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		Vector divideMeasurements( uint index );
 
 
+		/** Exports the evaluation of the matrix, optionally also the right-hand side, of the linear system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] index1			The loop index of the outer loop.
+		 *	@param[in] index2			The loop index of the inner loop.
+		 *	@param[in] tmp_index		A temporary index to be used.
+		 *	@param[in] Ah				The matrix A of the IRK method, multiplied by the step size h.
+		 *	@param[in] evaluateB		True if the right-hand side of the linear system should also be evaluated, false otherwise.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue evaluateMatrix( 	ExportStatementBlock* block,
+										const ExportIndex& index1,
+										const ExportIndex& index2,
+										const ExportIndex& tmp_index,
+										const ExportVariable& Ah,
+										BooleanType evaluateB );
+
+
+		/** Exports the computation of the sensitivities for the continuous output.
+				 *
+				 *	@param[in] TODO: RIEN
+				 *
+				 *	\return SUCCESSFUL_RETURN
+				 */
+		returnValue generateSensitivitiesOutput( 	ExportStatementBlock* block,
+													const ExportIndex& index0,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& tmp_index1,
+													const ExportIndex& tmp_index2,
+													const ExportIndex& tmp_index3,
+													const ExportVariable& tmp_meas,
+													const ExportVariable& rk_tPrev,
+													const ExportVariable& time_tmp,
+													BooleanType STATES );
+
+
 		/** Copies all class members from given object.
 		 *
 		 *	@param[in] arg		Right-hand side object.
@@ -358,19 +396,25 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportVariable  rk_diffsTemp;			/**< Variable containing intermediate results of evaluations of the derivatives of the differential equations (ordinary and algebraic). */
 		ExportVariable  rk_diffsPrev;			/**< Variable containing the sensitivities from the previous integration step. */
 		ExportVariable  rk_diffsNew;			/**< Variable containing the derivatives wrt the previous values. */
-		
 		ExportVariable 	rk_rhsOutputTemp;		/**< Variable containing intermediate results of evaluations of the right-hand side expression of an output function. */
 		ExportVariable  rk_diffsOutputTemp;		/**< Variable containing intermediate results of evaluations of the derivatives of an output function. */
-		std::vector<ExportVariable> rk_outputs;	/**< Variables containing the evaluations of the continuous output from the integrator. */
 		ExportVariable 	rk_outH;				/**< Variable that is used for the evaluations of the continuous output. */
 		ExportVariable 	rk_out2;				/**< Variable that is used for the evaluations of the continuous output. */
 		ExportVariable 	polynEvalVar;			/**< Local variable that is used for the evaluations of the continuous output. */
 		
+		ExportVariable stepsH;					/**< Variable defining the different integration step sizes in case of a non equidistant grid. */
+
 		Matrix DD;								/**< This matrix is used for the initialization of the variables for the next integration step. */
 		Matrix coeffs;							/**< This matrix contains coefficients of polynomials that are used to evaluate the continuous output (see evaluatePolynomial). */
 
 		std::vector<ExportVariable> gridVariables;	/**< This vector contains an ExportVariable for the grid of each continuous output. */
 		std::vector<uint> totalMeas;				/**< This vector contains the total number of measurements per output (per shooting or integration interval, depending on grid type). */
+
+		std::vector<ExportVariable> rk_outputs;			/**< Variables containing the evaluations of the continuous output from the integrator. */
+		std::vector<ExportVariable> polynVariables;		/**< Variables containing the coefficients for the polynomial. */
+		std::vector<ExportVariable> polynDerVariables;	/**< Variables containing the coefficients for the derived polynomial. */
+		std::vector<ExportVariable> numMeasVariables;	/**< Variables containing the number of measurements per integration interval. */
+		std::vector<ExportIndex> numMeas;				/**< Indices containing the number of measurements that are already computed. */
 };
 
 
