@@ -173,7 +173,7 @@ returnValue MultiObjectiveAlgorithm::solveSingleObjective( const int &number_ ){
     returnvalue = OptimizationAlgorithm::solve();
     totalCPUtime += acadoGetTime();
 
-    int index;
+    int index=0;
     Matrix Weights = getWeights();
 
     for( run1 = 0; run1 < (int) Weights.getNumCols(); run1++ ){

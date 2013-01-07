@@ -301,6 +301,19 @@ CurvatureType Subtraction::getCurvature( ){
 }
 
 
+double Subtraction::getValue() const
+{ 
+	if ( ( argument1 == 0 ) || ( argument2 == 0 ) )
+		return INFTY;
+		
+	if ( ( acadoIsEqual( argument1->getValue(),INFTY ) == BT_TRUE ) ||
+		 ( acadoIsEqual( argument2->getValue(),INFTY ) == BT_TRUE ) )
+		return INFTY;
+		
+	return (argument1->getValue() - argument2->getValue());
+}
+
+
 returnValue Subtraction::AD_forward( int number, double *x, double *seed,
                                      double *f, double *df ){
 

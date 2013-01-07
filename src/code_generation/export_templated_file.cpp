@@ -91,7 +91,7 @@ returnValue ExportTemplatedFile::exportCode( ) const
 	if ( file == 0 )
 		return ACADOERROR( RET_DOES_DIRECTORY_EXISTS );
 
-	returnValue returnvalue = ExportStatementBlock::exportCode(file, realString, intString, precision);
+	returnValue returnvalue =  ExportStatementBlock::exportCode(file, realString, intString, precision);
 
 	if ( file != 0 )
 		fclose( file );
@@ -107,17 +107,20 @@ returnValue ExportTemplatedFile::exportCode( ) const
 returnValue ExportTemplatedFile::fillTemplate( )
 {
 	ifstream inputFile( templateName.getName() );
-	
+
+	unsigned maxDim = 0;
+	for (map<string, string>::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
+		maxDim = maxDim < it->second.length() ? it->second.length() : maxDim;
+
 	if ( inputFile.is_open() )
 	{
 		string str;
  		while ( getline(inputFile, str) )
 		{
-			map<string, string>::iterator it;
-			for (it = dictionary.begin(); it != dictionary.end(); ++it)
+			for (map<string, string>::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
 			{
 				size_t pos = 0;
-				while((pos = str.find(it->first, pos)) != string::npos)
+				while ((pos = str.find(it->first, pos)) != string::npos)
 				{
 					str.replace(pos, it->first.length(), it->second);
 					pos += it->second.length();
@@ -126,11 +129,29 @@ returnValue ExportTemplatedFile::fillTemplate( )
 
 			if ( str.size() )
 			{
-				addStatement( static_cast< String >( str.c_str() ) );
+				size_t pos = 0;
+				while ( 1 )
+				{
+					if ((str.size() - pos) < 256)
+					{
+						string tmp = str.substr( pos );
+
+						if ( tmp.size() )
+							addStatement( static_cast< String >( tmp.c_str() ) );
+
+						break;
+					}
+					else
+					{
+						addStatement( static_cast< String >( str.substr(pos, 256).c_str() ) );
+
+						pos += 256;
+					}
+				}
 			}
 			addStatement( (String)"\n" );
 		}
-		
+
 		inputFile.close();
 	}
 	else

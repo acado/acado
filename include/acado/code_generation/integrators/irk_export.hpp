@@ -389,7 +389,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportLinearSolver* solver;				/**< This is the exported linear solver that is used by the implicit Runge-Kutta method. */
         
         // DEFINITION OF THE EXPORTVARIABLES
-		ExportVariable  rk_sol;					/**< Variable containing the solution of the linear system. */
 		ExportVariable	rk_A;					/**< Variable containing the matrix of the linear system. */
 		ExportVariable	rk_b;					/**< Variable containing the right-hand side of the linear system. */
 		ExportVariable 	rk_rhsTemp;				/**< Variable containing intermediate results of evaluations of the right-hand side expression. */

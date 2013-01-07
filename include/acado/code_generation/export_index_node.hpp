@@ -119,6 +119,22 @@ public:
 	 */
 	virtual BooleanType isGiven( ) const;
 
+	BooleanType isBinary() const
+	{
+		if (varType == EVT_BINARY_OPERATOR)
+			return BT_TRUE;
+
+		return BT_FALSE;
+	}
+
+	BooleanType isVariable() const
+	{
+		if (varType == EVT_VARIABLE)
+			return BT_TRUE;
+
+		return BT_FALSE;
+	}
+
 	const int getFactor( ) const
 	{
 		return factor;

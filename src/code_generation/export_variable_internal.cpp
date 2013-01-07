@@ -366,7 +366,7 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getSubMatrix: cannot determine column size");
 
 	tmp.assignNode( this->clone() );
-	tmp->setSubmatrixOffsets(_rowIdx1, _colIdx1, getNumRows(), getNumCols( ), sizeRow.getGivenValue(), sizeCol.getGivenValue() );
+	tmp->setSubmatrixOffsets(_rowIdx1, _colIdx1, getNumRows(), getNumCols( ), sizeRow.getGivenValue(), sizeCol.getGivenValue());
 
 	return tmp;
 }
@@ -444,14 +444,18 @@ uint ExportVariableInternal::getColDim( ) const
 }
 
 
-ExportIndex	ExportVariableInternal::getTotalIdx(	const ExportIndex& rowIdx,
-													const ExportIndex& colIdx
+ExportIndex	ExportVariableInternal::getTotalIdx(	const ExportIndex& _rowIdx,
+													const ExportIndex& _colIdx
 													) const
 {
+	ExportIndex tmp;
+
 	if ( doAccessTransposed == BT_FALSE )
-		return rowIdx * getColDim() + colIdx;
+		tmp = _rowIdx * getColDim() + _colIdx;
 	else
-		return colIdx * getColDim() + rowIdx;
+		tmp = _colIdx * getColDim() + _rowIdx;
+
+	return tmp;
 }
 
 

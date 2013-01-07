@@ -90,6 +90,10 @@ public:
 									const ExportIndex& _arg2
 									);
 
+	friend ExportIndex operator%(	const ExportIndex& _arg1,
+									const ExportIndex& _arg2
+									);
+
 	friend String operator==(	const ExportIndex& _arg1,
 								const ExportIndex& _arg2
 								);
@@ -118,6 +122,10 @@ public:
 	 *	        BT_FALSE otherwise
 	 */
 	BooleanType isGiven( ) const;
+
+	BooleanType isBinary() const;
+
+	BooleanType isVariable() const;
 
 	/** Converts index into a calling argument.
 	 *

@@ -195,7 +195,7 @@ Grid OCPiterate::getUnionGrid() const{
 
 BooleanType OCPiterate::areGridsConsistent( )
 {
-	double startTime, endTime;
+	double startTime = 0.0, endTime = 0.0;
 	BooleanType timeDefined = BT_FALSE;
 
 	if ( ( x != 0 ) && ( x->isEmpty( ) == BT_FALSE ) )

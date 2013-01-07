@@ -91,14 +91,17 @@ String ExportDataInternal::getTypeString(	const String& _realString,
 {
 	switch ( type )
 	{
-		case STATIC_CONSTANT:
-				return String("const static ") << _intString;
+	case INT:
+		return _intString;
 
-		case INT:
-			return _intString;
+	case REAL:
+		return _realString;
 
-		case REAL:
-			return _realString;
+	case STATIC_CONST_INT:
+		return String("static const ") << _intString;
+
+	case STATIC_CONST_REAL:
+		return String("static const ") << _realString;
 	}
 
 	return (String)"unknownType";

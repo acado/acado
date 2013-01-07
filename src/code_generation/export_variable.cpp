@@ -130,22 +130,26 @@ ExportVariable& ExportVariable::setup(	const String& _name,
 										const String& _prefix
 										)
 {
-	if ( isNull() )
-		assignNode(new ExportVariableInternal);
-
-	setName( _name );
-
 	Matrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
-	(*this)->data = m;
 
-	setDataStruct( _dataStruct );
+	assignNode(new ExportVariableInternal(_name, m, _type, _dataStruct, _callItByValue, _prefix));
 
-	(*this)->callItByValue = _callItByValue;
-
-	setPrefix( _prefix );
-
-	(*this)->setSubmatrixOffsets(0, 0, _nRows, _nCols, 0, 0);
+//	if ( isNull() )
+//		assignNode(new ExportVariableInternal);
+//
+//	setName( _name );
+//
+//
+//	(*this)->data = m;
+//
+//	setDataStruct( _dataStruct );
+//
+//	(*this)->callItByValue = _callItByValue;
+//
+//	setPrefix( _prefix );
+//
+//	(*this)->setSubmatrixOffsets(0, 0, _nRows, _nCols, 0, 0);
 
 	return *this;
 }
@@ -159,34 +163,33 @@ ExportVariable& ExportVariable::setup(	const String& _name,
 										const String& _prefix
 										)
 {
-	if ( isNull() )
-		assignNode(new ExportVariableInternal);
+	assignNode(new ExportVariableInternal(_name, _data, _type, _dataStruct, _callItByValue, _prefix));
 
-	setName( _name );
-
-	(*this)->data = _data;
-
-	setDataStruct( _dataStruct );
-
-	(*this)->callItByValue = _callItByValue;
-
-	(*this)->doAccessTransposed = BT_FALSE;
-
-	setPrefix( _prefix );
-
-	(*this)->setSubmatrixOffsets(0, 0, _data.getNumRows(), _data.getNumCols(), 0, 0);
+//	setName( _name );
+//
+//	(*this)->data = _data;
+//
+//	setDataStruct( _dataStruct );
+//
+//	(*this)->callItByValue = _callItByValue;
+//
+//	(*this)->doAccessTransposed = BT_FALSE;
+//
+//	setPrefix( _prefix );
+//
+//	(*this)->setSubmatrixOffsets(0, 0, _data.getNumRows(), _data.getNumCols(), 0, 0);
 
 	return *this;
 }
 
 
 
-double& ExportVariable::operator()(	uint rowIdx,
-									uint colIdx
-									)
-{
-	return (*this)->data(rowIdx, colIdx);
-}
+//double& ExportVariable::operator()(	uint rowIdx,
+//									uint colIdx
+//									)
+//{
+//	return (*this)->data(rowIdx, colIdx);
+//}
 
 
 double ExportVariable::operator()(	uint rowIdx,
@@ -196,11 +199,11 @@ double ExportVariable::operator()(	uint rowIdx,
 	return (*this)->data(rowIdx, colIdx);}
 
 
-double& ExportVariable::operator()(	uint totalIdx
-									)
-{
-	return (*this)->data(totalIdx / (*this)->data.getNumCols(), totalIdx % (*this)->data.getNumCols());
-}
+//double& ExportVariable::operator()(	uint totalIdx
+//									)
+//{
+//	return (*this)->data(totalIdx / (*this)->data.getNumCols(), totalIdx % (*this)->data.getNumCols());
+//}
 
 
 double ExportVariable::operator()(	uint totalIdx

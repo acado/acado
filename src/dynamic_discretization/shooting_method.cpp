@@ -705,7 +705,9 @@ returnValue ShootingMethod::logTrajectory( const OCPiterate &iter ){
     if( integrator == 0 ) return SUCCESSFUL_RETURN;
 
     int i, j;
-    double T,t1,t2,h;
+    double T = 0.0;
+	double t1 = 0.0, t2 = 0.0;
+	double h = 0.0;
 	BooleanType needToRescale = BT_FALSE;
 
     VariablesGrid logX, logXA, logP, logU, logW, logI, tmp,tmp2;

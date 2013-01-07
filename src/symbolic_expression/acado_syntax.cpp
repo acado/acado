@@ -167,6 +167,43 @@ Matrix eye( int n ){
 }
 
 
+
+Matrix diag( const Vector& v )
+{
+	int n = v.getDim();
+
+    Matrix t = zeros( n,n );
+    for( int i=0; i<n; ++i )
+		t(i,i) = v(i);
+
+    return t;
+}
+
+
+Vector diag( const Matrix& M )
+{
+	ASSERT( M.isSquare() == BT_TRUE );
+
+	int n = M.getNumRows();
+
+    Vector t( n );
+    for( int i=0; i<n; ++i )
+		t(i) = M(i,i);
+
+    return t;
+}
+
+
+ExportVariable diag(	const String& _name,
+						unsigned int _n )
+{
+	ExportVariable t( _name, _n,_n );
+	t = eye( _n );
+	t.resetDiagonal( );
+	return t;
+}
+
+
 Expression getRiccatiODE( const Expression        &rhs,
                           const DifferentialState &x  ,
                           const Control           &u  ,

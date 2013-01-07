@@ -662,7 +662,7 @@ returnValue MPCexport::exportTemplateMain(	const String& _dirName,
     main.addStatement( "      for( i = 0; i < NU*N; ++i )  acadoVariables.u[i] = 0.0;\n" );
 
 	if ( NP > 0 )
-		main.addStatement( "      for( i = 0; i < NP; ++i )  acadoVariables.p[i] = 0.0;\n" );
+		main.addStatement( "      for( i = 0; i < NP; ++i )    acadoVariables.p[i] = 0.0;\n" );
 
     main.addLinebreak( );
     main.addComment( 3,"// INITIALIZE THE STATES AND CONTROL REFERENCE:" );
@@ -978,8 +978,8 @@ returnValue MPCexport::exportQPsolverInterface(	const String& _dirName,
 	qpSolverHeader.addStatement( "#include <math.h>\n" );
 	qpSolverHeader.addLinebreak( 2 );
 	qpSolverHeader.addStatement( (String)"#define QPOASES_NVMAX      " << gaussNewton->getNumQPvars() << "\n" );
-	qpSolverHeader.addStatement( (String)"#define QPOASES_NCMAX      " << gaussNewton->getNumStateBounds() << "\n" );
-	qpSolverHeader.addStatement( (String)"#define QPOASES_NWSRMAX    " << maxNumQPiterations << "\n" );
+	qpSolverHeader.addStatement( (String)"#define QPOASES_NCMAX      " << acadoMax( gaussNewton->getNumStateBounds(),1 ) << "\n" );
+	qpSolverHeader.addStatement( (String)"#define QPOASES_NWSRMAX    " << acadoMax( maxNumQPiterations,1 ) << "\n" );
 	qpSolverHeader.addStatement( (String)"#define QPOASES_PRINTLEVEL " << "PL_NONE" << "\n" );
 
 	if ( (BooleanType)useSinglePrecision == BT_TRUE )
@@ -1174,10 +1174,15 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addLinebreak( );
 	sfunction.addStatement( (String)"#define NX           " << getNX() << "\n" );
 	sfunction.addStatement( (String)"#define NU           " << getNU() << "\n" );
+	sfunction.addStatement( (String)"#define NP           " << getNP() << "\n" );
 	sfunction.addStatement( (String)"#define N            " << getN()  << "\n" );
 	sfunction.addStatement( "#define SAMPLINGTIME 0.1\n" );
 	sfunction.addLinebreak( 2 );
 	
+	int numInputs = 3;
+	if ( getNP() > 0 )
+		++numInputs;
+
 	sfunction.addStatement( "static void mdlInitializeSizes (SimStruct *S)\n" );
 	sfunction.addStatement( "{\n" );
 	sfunction.addStatement( "    /* Specify the number of continuous and discrete states */\n" );
@@ -1185,7 +1190,7 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    ssSetNumDiscStates(S, 0);\n" );
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    /* Specify the number of intput ports */\n" );
-	sfunction.addStatement( "    if ( !ssSetNumInputPorts(S, 3) )\n" );
+	sfunction.addStatement( (String)"    if ( !ssSetNumInputPorts(S, " << numInputs << ") )\n" );
 	sfunction.addStatement( "        return;\n" );
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    /* Specify the number of output ports */\n" );
@@ -1201,6 +1206,10 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    ssSetInputPortVectorDimension(S, 0, NX);\n" );
 	sfunction.addStatement( "    ssSetInputPortVectorDimension(S, 1, NX*N);\n" );
 	sfunction.addStatement( "    ssSetInputPortVectorDimension(S, 2, NU*N);\n" );
+
+	if ( getNP() > 0 )
+		sfunction.addStatement( "    ssSetInputPortVectorDimension(S, 3, NP);\n" );
+
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    /* Specify dimension information for the output ports */\n" );
 	sfunction.addStatement( "    ssSetOutputPortVectorDimension(S, 0, NU );\n" );
@@ -1210,6 +1219,10 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    ssSetInputPortDirectFeedThrough(S, 0, 1);\n" );
 	sfunction.addStatement( "    ssSetInputPortDirectFeedThrough(S, 1, 1);\n" );
 	sfunction.addStatement( "    ssSetInputPortDirectFeedThrough(S, 2, 1);\n" );
+
+	if ( getNP() > 0 )
+		sfunction.addStatement( "    ssSetInputPortDirectFeedThrough(S, 3, 1);\n" );
+
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    /* One sample time */\n" );
 	sfunction.addStatement( "    ssSetNumSampleTimes(S, 1);\n" );
@@ -1246,21 +1259,34 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "{\n" );
 	sfunction.addStatement( "    int i;\n" );
 	sfunction.addLinebreak( );
-	sfunction.addStatement( "    InputRealPtrsType in_xRef, in_uRef;\n" );
+
+	if ( getNP() > 0 )
+		sfunction.addStatement( "    InputRealPtrsType in_xRef, in_uRef, in_p;\n" );
+	else
+		sfunction.addStatement( "    InputRealPtrsType in_xRef, in_uRef;\n" );
+
 	sfunction.addStatement( "    double *xInit, *uInit;\n" );
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    /* get inputs and perform feedback step */\n" );
 	sfunction.addStatement( "    in_xRef = ssGetInputPortRealSignalPtrs(S, 1);\n" );
 	sfunction.addStatement( "    in_uRef = ssGetInputPortRealSignalPtrs(S, 2);\n" );
+	
+	if ( getNP() > 0 )
+		sfunction.addStatement( "    in_p    = ssGetInputPortRealSignalPtrs(S, 3);\n" );
+
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    xInit = mxGetPr( ssGetSFcnParam(S, 0) );\n" );
 	sfunction.addStatement( "    uInit = mxGetPr( ssGetSFcnParam(S, 1) );\n" );
 	sfunction.addLinebreak( );
-	sfunction.addStatement( "    for( i = 0; i < NX  ; ++i )  acadoVariables.x[i] = xInit[i];\n" );
-	sfunction.addStatement( "    for( i = 0; i < NU*N; ++i )  acadoVariables.u[i] = uInit[i];\n" );
+	sfunction.addStatement( "    for( i=0; i < NX*N; ++i ) acadoVariables.x[i] = xInit[i];\n" );
+	sfunction.addStatement( "    for( i=0; i < NU*N; ++i ) acadoVariables.u[i] = uInit[i];\n" );
 	sfunction.addLinebreak( );
-	sfunction.addStatement( "    for( i = 0; i < NX*N; ++i ) acadoVariables.xRef[i] = (*in_xRef)[i];\n" );
-	sfunction.addStatement( "    for( i = 0; i < NU*N; ++i ) acadoVariables.uRef[i] = (*in_uRef)[i];\n" );
+	sfunction.addStatement( "    for( i=0; i < NX*N; ++i ) acadoVariables.xRef[i] = (double)(*in_xRef)[i];\n" );
+	sfunction.addStatement( "    for( i=0; i < NU*N; ++i ) acadoVariables.uRef[i] = (double)(*in_uRef)[i];\n" );
+
+	if ( getNP() > 0 )
+		sfunction.addStatement( "    for( i = 0; i < NP;   ++i ) acadoVariables.p[i]    = (double)(*in_p)[i];\n" );
+
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    preparationStep( );\n" );
 	sfunction.addStatement( "}\n" );
@@ -1271,17 +1297,30 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    int i;\n" );
 	sfunction.addStatement( "    double measurement[NX];\n" );
 	sfunction.addLinebreak( );
-	sfunction.addStatement( "    InputRealPtrsType in_x, in_xRef, in_uRef;\n" );
+
+	if ( getNP() > 0 )
+		sfunction.addStatement( "    InputRealPtrsType in_x, in_xRef, in_uRef, in_p;\n" );
+	else
+		sfunction.addStatement( "    InputRealPtrsType in_x, in_xRef, in_uRef;\n" );
+
 	sfunction.addStatement( "    real_t *out_u0, *out_kktTol;\n" );
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    /* get inputs and perform feedback step */\n" );
 	sfunction.addStatement( "    in_x    = ssGetInputPortRealSignalPtrs(S, 0);\n" );
 	sfunction.addStatement( "    in_xRef = ssGetInputPortRealSignalPtrs(S, 1);\n" );
 	sfunction.addStatement( "    in_uRef = ssGetInputPortRealSignalPtrs(S, 2);\n" );
+
+	if ( getNP() > 0 )
+		sfunction.addStatement( "    in_p    = ssGetInputPortRealSignalPtrs(S, 3);\n" );
+
 	sfunction.addLinebreak( );
-	sfunction.addStatement( "    for( i = 0; i < NX; ++i )   measurement[i] = (*in_x)[i];\n" );
-	sfunction.addStatement( "    for( i = 0; i < NX*N; ++i ) acadoVariables.xRef[i] = (*in_xRef)[i];\n" );
-	sfunction.addStatement( "    for( i = 0; i < NU*N; ++i ) acadoVariables.uRef[i] = (*in_uRef)[i];\n" );
+	sfunction.addStatement( "    for( i=0; i < NX;   ++i ) measurement[i]         = (double)(*in_x)[i];\n" );
+	sfunction.addStatement( "    for( i=0; i < NX*N; ++i ) acadoVariables.xRef[i] = (double)(*in_xRef)[i];\n" );
+	sfunction.addStatement( "    for( i=0; i < NU*N; ++i ) acadoVariables.uRef[i] = (double)(*in_uRef)[i];\n" );
+
+	if ( getNP() > 0 )
+		sfunction.addStatement( "    for( i = 0; i < NP;   ++i ) acadoVariables.p[i]    = (double)(*in_p)[i];\n" );
+
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    feedbackStep( measurement );\n" );
 	sfunction.addLinebreak( );
@@ -1289,7 +1328,7 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    out_u0     = ssGetOutputPortRealSignal(S, 0);\n" );
 	sfunction.addStatement( "    out_kktTol = ssGetOutputPortRealSignal(S, 1);\n" );
 	sfunction.addLinebreak( );
-	sfunction.addStatement( "    for( i = 0; i < NU; ++i )  out_u0[i] = acadoVariables.u[i];\n" );
+	sfunction.addStatement( "    for( i=0; i < NU; ++i ) out_u0[i] = acadoVariables.u[i];\n" );
 	sfunction.addStatement( "    out_kktTol[0] = getKKT( );\n" );
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    preparationStep( );\n" );
@@ -1320,6 +1359,10 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	fileName << "/" << _makeFileName;
 
 	ExportFile make_sfunction( fileName,"", _realString,_intString,_precision,"%%" );
+
+
+	make_sfunction.addStatement( "FCN_NAME = 'sfunction';\n" );
+	make_sfunction.addLinebreak( );
 
 	switch ( (QPSolverName) qpSolver )
 	{
@@ -1390,8 +1433,8 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	make_sfunction.addStatement( "            'condensing.c ',...\n" );
 	make_sfunction.addStatement( "            'gauss_newton_method.c ' ];\n" );
 	make_sfunction.addLinebreak( 2 );
-	make_sfunction.addStatement( "eval( [ 'mex -output sfunction ', CPPFLAGS, 'sfunction.cpp ', OBJECTS] );\n" );
-	make_sfunction.addStatement( "disp( [ 'sfunction.', eval('mexext'), ' successfully created!'] );\n" );
+	make_sfunction.addStatement( "eval( [ 'mex -output ', FCN_NAME, ' ', CPPFLAGS, ' ', FCN_NAME, '.cpp ', OBJECTS] );\n" );
+	make_sfunction.addStatement( "disp( [ FCN_NAME, '.', eval('mexext'), ' successfully created!'] );\n" );
 	make_sfunction.addLinebreak( );
 	make_sfunction.addStatement( "clear IFLAGS CPPFLAGS OBJECTS\n" );
 	make_sfunction.addLinebreak( );

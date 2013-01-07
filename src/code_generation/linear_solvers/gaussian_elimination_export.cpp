@@ -211,7 +211,7 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 		solve.addStatement( String( "}\n" ) );
 	}
 	
-	solve.addFunctionCall( solveTriangular, A, b, x );
+	solve.addFunctionCall( solveTriangular, A, b );
 	code.addFunction( solve );
 	
     code.addLinebreak( 2 );
@@ -228,17 +228,18 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 		}
 		solveReuse.addLinebreak();
 
-		solveReuse.addFunctionCall( solveTriangular, A, rk_bPerm, x );
+		solveReuse.addFunctionCall( solveTriangular, A, rk_bPerm );
+		solveReuse.addStatement( b == rk_bPerm );
+
 		code.addFunction( solveReuse );
 	}
 
 	// Solve the upper triangular system of equations:
 	for( run1 = dim; run1 > 0; run1--) {
-		solveTriangular.addStatement( String( "x[" ) << String( (run1-1) ) << "] = " << b.get( run1-1,0 ) << ";\n" );
 		for( run2 = dim-1; run2 > (run1-1); run2--) {
-			solveTriangular.addStatement( x.getRow( (run1-1) ) -= A.getSubMatrix( (run1-1),(run1-1)+1,run2,run2+1 ) * x.getRow( run2 ) );
+			solveTriangular.addStatement( b.getRow( (run1-1) ) -= A.getSubMatrix( (run1-1),(run1-1)+1,run2,run2+1 ) * b.getRow( run2 ) );
 		}
-		solveTriangular.addStatement( String( "x[" ) << String( (run1-1) ) << "] = x[" << String( (run1-1) ) << "]/A[" << String( (run1-1)*dim+(run1-1) ) << "];\n" );
+		solveTriangular.addStatement( String( "b[" ) << String( (run1-1) ) << "] = b[" << String( (run1-1) ) << "]/A[" << String( (run1-1)*dim+(run1-1) ) << "];\n" );
 	}
 	code.addFunction( solveTriangular );
 	
@@ -253,14 +254,13 @@ returnValue ExportGaussElim::setup( )
 	rk_bPerm = ExportVariable( String( "rk_" ) << identifier << "bPerm", dim, 1, REAL, ACADO_WORKSPACE );
 	A = ExportVariable( "A", dim, dim, REAL );
 	b = ExportVariable( "b", dim, 1, REAL );
-	x = ExportVariable( "x", dim, 1, REAL );
-	solve = ExportFunction( getNameSolveFunction(), A, b, x);
+	solve = ExportFunction( getNameSolveFunction(), A, b);
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
-	solveTriangular = ExportFunction( String( "solve_" ) << identifier << "triangular", A, b, x);
+	solveTriangular = ExportFunction( String( "solve_" ) << identifier << "triangular", A, b);
 	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	
 	if( REUSE ) {
-		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b, x);
+		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b);
 		solveReuse.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	}
 	

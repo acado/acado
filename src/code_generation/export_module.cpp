@@ -288,9 +288,9 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 	acadoHeader.addLinebreak( 2 );
 	if( (uint)dim_outputs.size() > 0 ) {
 		acadoHeader.addComment( "Dimension of the output functions" );
-		acadoHeader.addDeclaration( ExportVariable( "NOUT",nOutV,STATIC_CONSTANT ) );
+		acadoHeader.addDeclaration( ExportVariable( "NOUT",nOutV,STATIC_CONST_INT ) );
 		acadoHeader.addComment( "Measurements of the output functions per shooting interval" );
-		acadoHeader.addDeclaration( ExportVariable( "NMEAS",nMeasV,STATIC_CONSTANT ) );
+		acadoHeader.addDeclaration( ExportVariable( "NMEAS",nMeasV,STATIC_CONST_INT ) );
 	}
 	acadoHeader.addLinebreak( 2 );
 

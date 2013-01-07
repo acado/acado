@@ -113,10 +113,10 @@ class ExportVariable : public ExportArgument
 						);
 
 		ExportVariable(	const Vector& _data
-								);
+						);
 
 		ExportVariable(	const double _data
-								);
+						);
 
         /** Destructor.
 		 */
@@ -177,9 +177,9 @@ class ExportVariable : public ExportArgument
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		double& operator()(	uint rowIdx,
-							uint colIdx
-							);
+//		double& operator()(	uint rowIdx,
+//							uint colIdx
+//							);
 
 		/** Returns value of given component.
 		 *
@@ -198,8 +198,8 @@ class ExportVariable : public ExportArgument
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		double& operator()(	uint totalIdx
-							);
+//		double& operator()(	uint totalIdx
+//							);
 
 		/** Returns value of given component.
 		 *

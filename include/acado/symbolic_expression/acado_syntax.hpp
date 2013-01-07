@@ -37,6 +37,7 @@
 #include <acado/symbolic_expression/differential_state.hpp>
 #include <acado/symbolic_expression/intermediate_state.hpp>
 #include <acado/symbolic_expression/control.hpp>
+#include <acado/code_generation/export_variable.hpp>
 
 
 /**
@@ -128,6 +129,10 @@ REFER_NAMESPACE_ACADO Expression laplace           ( const REFER_NAMESPACE_ACADO
 REFER_NAMESPACE_ACADO Matrix ones  ( int nRows, int nCols = 1 );
 REFER_NAMESPACE_ACADO Matrix zeros ( int nRows, int nCols = 1 );
 REFER_NAMESPACE_ACADO Matrix eye   ( int n                    );
+
+REFER_NAMESPACE_ACADO Matrix diag        ( const REFER_NAMESPACE_ACADO Vector& v );
+REFER_NAMESPACE_ACADO Vector diag        ( const REFER_NAMESPACE_ACADO Matrix& M );
+REFER_NAMESPACE_ACADO ExportVariable diag( const REFER_NAMESPACE_ACADO String& _name, unsigned int _n );
 
 
 
