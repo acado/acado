@@ -152,6 +152,7 @@ classdef OCP < acado.MultiObjectiveFunctionality
                     result = acado.Vector(r);
                 else
                     result = acado.Matrix(r);
+                    result.name = result.name_m;
                 end
             else
                 result = r;
