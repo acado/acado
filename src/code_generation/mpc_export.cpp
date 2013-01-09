@@ -124,10 +124,22 @@ returnValue MPCexport::exportCode(	const String& dirName,
 		if ( integratorFile.exportCode( ) != SUCCESSFUL_RETURN )
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
+		int measGrid;
+		get( MEASUREMENT_GRID, measGrid );
 		int generateMatlabInterface;
 		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
 		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
-			// TODO
+			String integrateInterface( dirName );
+			integrateInterface << "/integrate.c";
+			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
+			exportMexFun.configure((MeasurementGrid)measGrid == ONLINE_GRID);
+			exportMexFun.exportCode();
+
+			String rhsInterface( dirName );
+			rhsInterface << "/rhs.c";
+			ExportMatlabRhs exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
+			exportMexFun2.configure(integrator->getNameODE());
+			exportMexFun2.exportCode();
 		}
 	}
 
