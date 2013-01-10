@@ -94,6 +94,11 @@ classdef MPCexport < acado.ExportOCP
                     error('Unable to export a MPC algorithm without an OCP formulation.');
                 end
                 
+                % INTEGRATION GRID
+                if (~isempty(obj.integrationGrid))
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setIntegrationGrid( %s );\n', obj.name, obj.integrationGrid.name));
+                end
+                
                 getOptions(obj, cppobj);
                 
                 

@@ -497,7 +497,7 @@ classdef Expression < handle
         
         function out = sum(in, varargin)
             if nargin == 1
-                out = sum(in,1);
+                out = sum(in(:),1);
             elseif nargin == 2
                 if varargin{1} == 1
                     for i = 1:size(in,2)
@@ -519,6 +519,14 @@ classdef Expression < handle
             else
                 error('Unsupported use of the sum function in acado.Expression.');
             end
+        end
+        
+        % vector 2-norm only
+        function out = norm(in)
+            if(size(in,1) > 1 && size(in,2) > 1)
+                error('Unsupported use of the 2-norm function in acado.Expression.');
+            end
+            out = sqrt(sum(in.^2));
         end
         
         function out = MatrixDiff(in,var)

@@ -93,9 +93,9 @@ classdef DoubleConstant < acado.Operator
             
             if obj.callByValue
                 if obj.val < 0
-                    s = ['(' num2str(obj.val) ')'];
+                    s = ['(' sprintf('%E', obj.val) ')'];
                 else
-                    s = num2str(obj.val);
+                    s = sprintf('%E', obj.val);
                 end
             else
                 s = obj.name;
