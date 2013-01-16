@@ -199,6 +199,11 @@ returnValue ExportArgumentList::addSingleArgument(	const ExportArgument& _argume
 	return SUCCESSFUL_RETURN;
 }
 
+const std::vector< ExportArgument >& ExportArgumentList::get() const
+{
+	return arguments;
+}
+
 
 CLOSE_NAMESPACE_ACADO
 

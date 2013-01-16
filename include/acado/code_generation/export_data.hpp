@@ -179,6 +179,10 @@ class ExportData : public CasADi::SharedObject
 		 *	        BT_FALSE otherwise
 		 */
 		virtual BooleanType isGiven( );
+
+		virtual returnValue setDoc(const String& _doc);
+
+		virtual String getDoc() const;
 };
 
 CLOSE_NAMESPACE_ACADO

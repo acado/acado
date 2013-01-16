@@ -199,15 +199,23 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
 	{
 		if (data.getNumCols() > 1 && data.getNumRows() > 1)
 		{
-			acadoFPrintf(file,"/* %s %d %s %d %s */\n", "Matrix of size:", data.getNumRows(), "x", data.getNumCols(), "(row major format)");
+			acadoFPrintf(file,
+					"/** %s %d %s %d %s", "Matrix of size:", data.getNumRows(), "x", data.getNumCols(), "(row major format)");
 		}
 		else
 		{
 			if (data.getNumCols() == 1)
-				acadoFPrintf(file,"/* %s %d */\n",      "Row vector of size:", data.getNumRows());
+				acadoFPrintf(file,"/** %s %d",      "Column vector of size:", data.getNumRows());
 			else
-				acadoFPrintf(file,"/* %s %d */\n",      "Column vector of size:", data.getNumCols());
+				acadoFPrintf(file,"/** %s %d",      "Row vector of size:", data.getNumCols());
 		}
+
+		if (description.isEmpty() == BT_FALSE)
+		{
+			acadoFPrintf(file, "\n * \n *  %s\n", description.getName());
+		}
+
+		acadoFPrintf(file," */\n");
 
 		acadoFPrintf( file,"%s %s[ %d ]", getTypeString( _realString,_intString ).getName(),name.getName(),getDim() );
 	}

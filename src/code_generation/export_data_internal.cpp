@@ -15,7 +15,8 @@ ExportDataInternal::ExportDataInternal(	const String& _name,
 										ExportStruct _dataStruct,
 										const String& _prefix
 										)
-	: SharedObjectNode(), name( _name ), type( _type ), prefix( _prefix ), dataStruct( _dataStruct )
+	: SharedObjectNode(), name( _name ), type( _type ), prefix( _prefix ), dataStruct( _dataStruct ),
+	  description()
 {
 	setFullName();
 }
@@ -212,6 +213,18 @@ returnValue ExportDataInternal::setFullName()
 	}
 
 	return SUCCESSFUL_RETURN;
+}
+
+returnValue ExportDataInternal::setDoc( const String& _doc )
+{
+	description = _doc;
+
+	return SUCCESSFUL_RETURN;
+}
+
+String ExportDataInternal::getDoc() const
+{
+	return description;
 }
 
 CLOSE_NAMESPACE_ACADO

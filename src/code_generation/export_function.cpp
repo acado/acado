@@ -33,6 +33,10 @@
 #include <acado/code_generation/export_function.hpp>
 #include <acado/code_generation/export_function_call.hpp>
 
+#include <vector>
+
+using namespace std;
+
 BEGIN_NAMESPACE_ACADO
 
 
@@ -50,7 +54,7 @@ ExportFunction::ExportFunction(	const String& _name,
 								const ExportArgument& _argument7,
 								const ExportArgument& _argument8,
 								const ExportArgument& _argument9
-								) : ExportStatementBlock( )
+								) : ExportStatementBlock( ), description()
 {
 	functionReturnValue = 0;
 	returnAsPointer = BT_FALSE;
@@ -75,6 +79,8 @@ ExportFunction::ExportFunction( const ExportFunction& arg ) : ExportStatementBlo
 
 	memAllocator = arg.memAllocator;
 	localVariables = arg.localVariables;
+
+	description = arg.description;
 }
 
 
@@ -98,6 +104,8 @@ ExportFunction& ExportFunction::operator=( const ExportFunction& arg )
 
 		memAllocator = arg.memAllocator;
 		localVariables = arg.localVariables;
+
+		description = arg.description;
 	}
 
 	return *this;
@@ -235,6 +243,37 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 	// do not export undefined (empty) functions
 	if ( isDefined() == BT_FALSE )
 		return SUCCESSFUL_RETURN;
+
+	if (description.isEmpty() == BT_FALSE)
+	{
+		acadoFPrintf(file, "\n/** %s", description.getName());
+
+		unsigned numArgs = functionArguments.getNumArguments() > 0;
+
+		if (functionArguments.getNumArguments() > 0)
+		{
+			vector< ExportArgument > args = functionArguments.get();
+
+			acadoFPrintf(file, "\n *\n");
+
+			for (unsigned i = 0; i < args.size(); ++i)
+			{
+				if (args[ i ].isGiven() == BT_TRUE || args[ i ].getDoc().isEmpty() == BT_TRUE)
+					continue;
+
+				acadoFPrintf(file, " *  \\param %s\n", args[ i ].getDoc().getName());
+			}
+		}
+
+		if ( functionReturnValue != 0 )
+		{
+			String doc = functionReturnValue->getDoc();
+			if (doc.isEmpty() == BT_FALSE)
+				acadoFPrintf(file, "\n *\n *  \\return %s\n", doc.getName());
+		}
+		acadoFPrintf(file, " */\n");
+	}
+
 
 	if ( functionReturnValue != 0 )
 	{
@@ -406,6 +445,13 @@ returnValue ExportFunction::release(const ExportIndex& obj)
 returnValue ExportFunction::addVariable(const ExportVariable& _var)
 {
 	localVariables.push_back( _var );
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue ExportFunction::doc(const String& _doc)
+{
+	description = _doc;
 
 	return SUCCESSFUL_RETURN;
 }
