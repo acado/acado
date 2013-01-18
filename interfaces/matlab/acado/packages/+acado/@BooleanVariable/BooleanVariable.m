@@ -39,7 +39,11 @@ classdef BooleanVariable < acado.Expression
         
         function s = toDisplayString(obj)
             s = toString(obj); 
-        end        
+        end  
+        
+        function jac = jacobian(obj, var)
+            error('The jacobian function is not supported for boolean expressions.');
+        end      
 
     end
     
