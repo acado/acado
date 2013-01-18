@@ -92,10 +92,18 @@ classdef DoubleConstant < acado.Operator
             global ACADO_;
             
             if obj.callByValue
-                if obj.val < 0
-                    s = ['(' sprintf('%E', obj.val) ')'];
+                if ~isempty(ACADO_) && ACADO_.generatingCode
+                    if obj.val < 0
+                        s = ['(' sprintf('%E', obj.val) ')'];
+                    else
+                        s = sprintf('%E', obj.val);
+                    end
                 else
-                    s = sprintf('%E', obj.val);
+                    if obj.val < 0
+                        s = ['(' num2str(obj.val) ')'];
+                    else
+                        s = num2str(obj.val);
+                    end
                 end
             else
                 s = obj.name;
