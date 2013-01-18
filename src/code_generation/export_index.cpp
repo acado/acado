@@ -274,6 +274,7 @@ BooleanType ExportIndex::isVariable() const
 ExportArgument ExportIndex::makeArgument( ) const
 {
 	ExportArgument tmp((*this)->getName(), 1 , 1, (*this)->getType(), ACADO_LOCAL, BT_TRUE, emptyConstExportIndex);
+	tmp.setDoc( getDoc() );
 
 	return tmp;
 }

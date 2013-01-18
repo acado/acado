@@ -502,12 +502,12 @@ returnValue OCP::minimizeLSQEndTerm(const ExportVariable& S, const Function& h)
 
 returnValue OCP::minimizeLSQLinearTerms(const Vector& Slx, const Vector& Slu)
 {
-	return SUCCESSFUL_RETURN;
+	return objective.addLSQLinearTerms(Slx, Slu);
 }
 
 returnValue OCP::minimizeLSQLinearTerms(const ExportVariable& Slx, const ExportVariable& Slu)
 {
-	return SUCCESSFUL_RETURN;
+	return objective.addLSQLinearTerms(Slx, Slu);
 }
 
 

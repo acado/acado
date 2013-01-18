@@ -138,6 +138,9 @@ public:
 	 */
 	virtual BooleanType isGiven( ) const = 0;
 
+	virtual returnValue setDoc( const String& _doc );
+	virtual String getDoc( ) const;
+
 	//
 	// PROTECTED MEMBER FUNCTIONS:
 	//
@@ -150,17 +153,20 @@ protected:
 	/** Name of the data object. */
 	String name;
 
-	/**< Data type of the data object. */
+	/** Data type of the data object. */
 	ExportType type;
 
 	/** Prefix, which is added before the structure name*/
 	String prefix;
 
-	/**< Global data struct to which the data object belongs to (if any). */
+	/** Global data struct to which the data object belongs to (if any). */
 	ExportStruct dataStruct;
 
-	/**< Full name of the data object including the possible prefix of the global data struct. */
+	/** Full name of the data object including the possible prefix of the global data struct. */
 	String fullName;
+
+	/** Description of the variable */
+	String description;
 };
 
 CLOSE_NAMESPACE_ACADO

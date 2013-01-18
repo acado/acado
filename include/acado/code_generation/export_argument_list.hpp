@@ -175,6 +175,11 @@ class ExportArgumentList
 		 */
 		returnValue doNotIncludeType( );
 
+		/** Get the list of arguments.
+		 *
+		 *	\return Argument list
+		 */
+		const std::vector< ExportArgument >& get( ) const;
 
 	//
 	// PROTECTED MEMBER FUNCTIONS:

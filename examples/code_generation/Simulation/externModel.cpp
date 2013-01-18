@@ -90,7 +90,7 @@ int main() {
     sim.setMeasurements( Meas );
 	sim.setTimingSteps( 10000 );
     
-    acadoPrintf( "-----------------------------------------\n  Using a Pendulum DAE model in ACADO syntax':\n-----------------------------------------\n" );
+    acadoPrintf( "-----------------------------------------\n  Using a Pendulum DAE model in ACADO syntax:\n-----------------------------------------\n" );
     sim.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
     
     
@@ -107,7 +107,7 @@ int main() {
     sim2.setMeasurements( Meas );
 	sim2.setTimingSteps( 10000 );
     
-    acadoPrintf( "-----------------------------------------\n  Using an externally defined Pendulum DAE model':\n-----------------------------------------\n" );
+    acadoPrintf( "-----------------------------------------\n  Using an externally defined Pendulum DAE model:\n-----------------------------------------\n" );
     sim2.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
     
 	return 0;

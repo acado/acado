@@ -320,6 +320,8 @@ class ExportFunction : public ExportStatementBlock
 
 		virtual returnValue release( const ExportIndex& obj );
 
+		virtual returnValue doc( const String& _doc );
+
 	//
     // PROTECTED MEMBER FUNCTIONS:
     //
@@ -345,6 +347,8 @@ class ExportFunction : public ExportStatementBlock
 		memoryAllocatorPtr memAllocator;
 
 		std::vector< ExportVariable > localVariables;
+
+		String description;
 };
 
 

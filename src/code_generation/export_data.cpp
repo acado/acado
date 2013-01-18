@@ -136,6 +136,17 @@ BooleanType ExportData::isGiven( )
 	return (*this)->isGiven();
 }
 
+returnValue ExportData::setDoc(	const String& _doc
+								)
+{
+	return (*this)->setDoc( _doc );
+}
+
+String ExportData::getDoc( ) const
+{
+	return (*this)->getDoc();
+}
+
 CLOSE_NAMESPACE_ACADO
 
 // end of file.
