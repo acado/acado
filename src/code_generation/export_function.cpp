@@ -261,7 +261,7 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 				if (args[ i ].isGiven() == BT_TRUE || args[ i ].getDoc().isEmpty() == BT_TRUE)
 					continue;
 
-				acadoFPrintf(file, " *  \\param %s\n", args[ i ].getDoc().getName());
+				acadoFPrintf(file, " *  \\param %s %s\n", args[ i ].getName().getName(), args[ i ].getDoc().getName());
 			}
 		}
 

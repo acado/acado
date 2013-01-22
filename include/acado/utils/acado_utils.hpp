@@ -25,7 +25,7 @@
 
 /**
  *    \file   include/utils/acado_utils.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  *    \date   2008-2010
  *
  *    This file declares several global utility functions.
@@ -37,8 +37,6 @@
 
 
 #include <stdio.h>
-//#include <stdlib.h>
-//#include <string.h>
 #include <math.h>
 
 
@@ -192,7 +190,11 @@ returnValue acadoAssignString(	char** toString,
 								const char* const defaultString
 								);
 
-
+/** A function for file copying.
+ */
+returnValue acadoCopyFile(	const char* source,
+							const char* destination
+							);
 
 CLOSE_NAMESPACE_ACADO
 
