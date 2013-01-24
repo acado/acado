@@ -22,17 +22,16 @@ intrinsically bounded between 0 and 1, whereas upper and lower constraints are i
 the jacket and reactor temperatures for safety and constructive reasons.
 
 \f{eqnarray*}{
-\begin{array}{crcl}
-\min_{x(\cdot),u(\cdot)}  & \multicolumn{3}{l}{\left\{C_{F}(1-x_1(L)),\frac{T_{F}^2}{K_1}x_2^2(L)\right\} 
-	\quad \quad}\\[0.3cm]
-\textrm{subject to:}    &  \qquad \quad \quad\\[0.3cm]
-\forall z \in [0,L]:  &  \frac{dx_{1}}{dz} & = & \frac{\alpha}{v} (1 - x_{1})e^{\frac{\gamma x_{2}}{1+x_{2}}} \\[0.26cm]
-										  &  \frac{dx_{2}}{dz} & = & \frac{\alpha \delta}{v}(1-x_{1})e^{\frac{\gamma x_{2}}{1+x_{2}}} + \frac{\beta}{v} (u - x_{2}) \\[0.26cm] \\[0.26cm]
-\forall z \in [0,L]:  &  0.0 	  							& \leq x_1 \leq & 1.0 							 \\[0.26cm]										  
-										  &  x_{2,\mathrm{min}} 	& \leq x_2 \leq & x_{2,\mathrm{max}} \\[0.26cm]										  										  
-										  &  u_{\mathrm{min}} 	  & \leq u   \leq & u_{\mathrm{max}}	 \\[0.26cm] \\[0.26cm]						  										  
-\mathrm{at~} z = 0:  	&  x_{1}(0)				  	  & = & 0.0														 \\[0.26cm]										  										  
-										  &  x_{2}(0)				  	  & = & 0.0														 \\[0.26cm]										  										  										  
+\begin{array}{lcl}
+\min_{x(\cdot),u(\cdot)}& & \left\{C_{F}(1-x_1(L)),\frac{T_{F}^2}{K_1}x_2^2(L)\right\} \\
+\textrm{subject to:}    & & \qquad \quad \quad \\
+\forall z \in [0,L]:	& & \frac{dx_{1}}{dz}	= \frac{\alpha}{v} (1 - x_{1})e^{\frac{\gamma x_{2}}{1+x_{2}}} \\
+						& & \frac{dx_{2}}{dz}	= \frac{\alpha \delta}{v}(1-x_{1})e^{\frac{\gamma x_{2}}{1+x_{2}}} + \frac{\beta}{v} (u - x_{2}) \\
+\forall z \in [0,L]:	& & 0.0					\leq x_1 \leq 1.0 \\										  
+						& & x_{2,\mathrm{min}} 	\leq x_2 \leq x_{2,\mathrm{max}} \\										  										  
+						& & u_{\mathrm{min}}		\leq u   \leq u_{\mathrm{max}} \\						  										  
+\mathrm{at~} z = 0:		& & x_{1}(0)				= 0.0 \\										  										  
+						& & x_{2}(0)				= 0.0 \\										  										  										  
 \end{array}
 \f}
 
@@ -179,9 +178,9 @@ To indicate the order of the different solutions, each time "MOx" is added to th
 In the current case, a fraction of the conversion cost is added to the energy cost as the pure energy optimal case is not uniquely defined. (There are infinitely many profiles with an outlet temperature equal to the inlet temperature.) However, adding this small focus on conversion leads to chemically consistent and gradual results. Moreover, when comparing the current results to results reported in literature, no significant differences are observed.
 
 \code
-  // Define energy cost (perturbed by small conversion cost; 
-  // otherwise the problem is ill-defined.)
-  ocp.minimizeMayerTerm( 1,(pow((Tin*x2),2.0)/K1) + 0.005*Cin*(1.0-x1) ); 
+	// Define energy cost (perturbed by small conversion cost; 
+	// otherwise the problem is ill-defined.)
+	ocp.minimizeMayerTerm( 1,(pow((Tin*x2),2.0)/K1) + 0.005*Cin*(1.0-x1) ); 
 \endcode
 
 \section example_009b_res ACADO results
