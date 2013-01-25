@@ -2,9 +2,7 @@
 
 \page example_017 Plotting Results
  
-\li Part 1: \ref example_017_symb
-\li Part 2: \ref example_017_grid
-\li Part 3: \ref example_017_alg
+\tableofcontents
  
 The ACADO Toolkit allows to conveniently setup PlotWindows for plotting results with external packages (GNUplot by default). This tutorial explains how to use them.
 
@@ -65,7 +63,7 @@ int main( )
 Having defined a simple OCP comprising the differential states "x" and "y" as well as a control "u", an OptimizationAlgorithm is set up. Afterwards, two plot windows are defined and flushed to the OptimizationAlgorithm before running it. 
 In our example, two GnuplotWindows are instantiated that allow to use Gnuplot for plotting (make sure that the corresponding header file "gnuplot_window.hpp" is included as). By default, each plot window only plot the desired information at the end of the solution procedure. However, also one of the following option might be specified: 
 
-<table border="1">
+<table>
 <tr>
          <td> &nbsp; <b>PlotFrequency:</b>  &nbsp; </td>
          <td> &nbsp; <b>Description:</b>  &nbsp; </td>

@@ -1,10 +1,8 @@
 /*!
 
 \page example_009b Optimal control of a plug flow reactor with conflicting energy and conversion objectives
- 
-\li Part 1: \ref example_009b_math
-\li Part 2: \ref example_009b_impl
-\li Part 3: \ref example_009b_res
+
+\tableofcontents
  
 This tutorial explains how to set up multi-objective optimal control problems in ACADO. As an example the optimal and safe operation of a jacketed tubular reactor is considered. Inside the tubular reactor an exothermic irreversible first order reaction takes place. The heat produced by this reaction is removed through the surrounding jacket. In addition, it is assumed that the reactor operates in steady-state conditions and that the fluid flow as a plug through the tube. The aim is to find an optimal profile along the reactor for the temperature of the fluid in the jacket such that conversion and energy costs are minimized.
 

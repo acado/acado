@@ -1,11 +1,10 @@
 /*!
 
 \page example_003 Algorithmic Options and Numerical Accuracy
- 
-In the previous tutorials we have only used the optimization algorithms with its default settings. For optimal control problems these default settings are usually a multiple-shooting SQP type method combined with a standard Runge-Kutta integrator for the state integration. This tutorial describes how to overwrite the default settings and how to specialize the algorithm for our problems regarding both the method and its numerical accuracy settings:
 
-\li Part 1: \ref example_003_options
-\li Part 2: \ref example_003_common
+\tableofcontents
+ 
+In the previous tutorials we have only used the optimization algorithms with its default settings. For optimal control problems these default settings are usually a multiple-shooting SQP type method combined with a standard Runge-Kutta integrator for the state integration. This tutorial describes how to overwrite the default settings and how to specialize the algorithm for our problems regarding both the method and its numerical accuracy settings.
 
 \section example_003_options A tutorial code with algorithmic options
 
@@ -63,13 +62,15 @@ The options which have been set in this example are first the integrator type: n
 
 Note that all options can be set on the optimization algorithm by using the syntax 
 
+<tt>
 set( <Option Name>, <Option Value> ). 
+</tt>
 
 An important exception are the number of control intervals which are specified in the constructor of the OCP following the definition of the time interval.
 
 \section example_003_common A brief overview of the most common options for optimal control with ACADO Toolkit
 
-<table border="1" cellpadding="5">
+<table>
 <tr>
          <td> <b>Option Name:</b> </td>
          <td> <b>Option Value:</b> </td>

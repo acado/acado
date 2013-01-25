@@ -2,9 +2,7 @@
 
 \page example_005 Optimal Control of Hybrid- and Multi-Stage Processes
 
-\li Part 1: \ref example_005_math
-\li Part 2: \ref example_005_guide
-\li Part 3: \ref example_005_multi
+\tableofcontents
 
 This tutorial explains how to optimize over dynamic systems which have at discrete
 points jumps in the states or changes of the dynamic equations. As an guiding

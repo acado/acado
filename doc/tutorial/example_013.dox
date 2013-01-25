@@ -2,9 +2,7 @@
 
 \page example_013 Setting-Up an MPC Controller
  
-\li Part 1: \ref example_013_math
-\li Part 2: \ref example_013_impl
-\li Part 3: \ref example_013_options
+\tableofcontents
 
 This tutorial explains how to setup a basic MPC controller. Again, we consider a simple actively damped quarter car model.
 
@@ -148,19 +146,19 @@ int main( )
 The file "ref.txt" contains the data of the (trivial) reference trajectory:
 
 \code
-    DATA FILE: ref.txt
-    
-    --------------------------------------------
-    
-    TIME    xB      xW      vB      vW      F
-    
-    0.0     0.00    0.00    0.00    0.00    0.00
-    1.0     0.00    0.00    0.00    0.00    0.00
-    1.5     0.00    0.00    0.00    0.00    0.00
-    2.0     0.00    0.00    0.00    0.00    0.00
-    3.0     0.00    0.00    0.00    0.00    0.00
-    
-    --------------------------------------------
+DATA FILE: ref.txt
+
+--------------------------------------------
+
+TIME    xB      xW      vB      vW      F
+
+0.0     0.00    0.00    0.00    0.00    0.00
+1.0     0.00    0.00    0.00    0.00    0.00
+1.5     0.00    0.00    0.00    0.00    0.00
+2.0     0.00    0.00    0.00    0.00    0.00
+3.0     0.00    0.00    0.00    0.00    0.00
+
+--------------------------------------------
 \endcode
 
 If we run the above piece of code in ACADO, the corresponding Gnuplot output should be as follows: 
@@ -171,7 +169,7 @@ If we run the above piece of code in ACADO, the corresponding Gnuplot output sho
 
 We end this tutorial with providing lists comprising the most common options that can be set when defining a RealTimeAlgorithm:
 
-<table border="1" cellpadding="5">
+<table>
 <tr>
          <td> <b>Option Name:</b> </td>
          <td> <b>Option Value:</b> </td>

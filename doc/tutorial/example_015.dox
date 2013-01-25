@@ -2,7 +2,7 @@
 
 \page example_015 Performing a Basic Closed-Loop MPC Simulation
  
-\li Part 1: \ref example_015_impl
+\tableofcontents
  
 This tutorial explains how to setup a basic closed-loop simulation using a model
  predictive controller. Again, we consider the simple quarter car model as a guiding example.

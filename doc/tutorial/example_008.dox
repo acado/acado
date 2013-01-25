@@ -1,13 +1,10 @@
 /*!
 
 \page example_008 Multi-Objective Optimal Control Problems (MOOCPs)
+
+\tableofcontents
  
 ACADO offers advanced and systematic features for efficiently solving optimal control problems with multiple and conflicting objectives. Typically, these Multi-Objective Optimal Control Problems (MOOCPs) give rise to a set of Pareto optimal solutions instead of one single optimum. This tutorial explains how to generate this Pareto set (or trade-off curve) efficiently.
-
-\li Part 1: \ref example_008_part1
-\li Part 2: \ref example_008_part2
-\li Part 3: \ref example_008_part3
-
 
 \section example_008_part1 Mathematical formulation of general Multi-Objective Optimal Control Problems
 

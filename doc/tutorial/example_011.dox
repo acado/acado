@@ -2,9 +2,7 @@
 
 \page example_011 Setting-Up a Process for MPC Simulations
  
-\li Part 1: \ref example_011_math
-\li Part 2: \ref example_011_impl
-\li Part 3: \ref example_011_res
+\tableofcontents
  
 This tutorial explains how to setup a simple Process for MPC simulations. As a guiding example, we consider a simple actively damped quarter car model.
 
@@ -173,19 +171,19 @@ int main( )
 The file "road.txt" containing the disturbance data:
 
 \code
-	DATA FILE: road.txt
-  	
-    ------------------------------
-    
-    TIME      W
-    
-    0.0       0.00
-    0.1       0.01
-    0.15      0.01
-    0.2       0.00
-    5.0       0.00
-    
-    ------------------------------
+DATA FILE: road.txt
+
+------------------------------
+
+TIME      W
+
+0.0       0.00
+0.1       0.01
+0.15      0.01
+0.2       0.00
+5.0       0.00
+
+------------------------------
 \endcode
 
 If we run the above piece of code in ACADO, the corresponding Gnuplot output should be as follows: 

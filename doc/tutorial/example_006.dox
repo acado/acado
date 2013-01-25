@@ -1,13 +1,10 @@
 /*!
 
 \page example_006 Optimization of Differential Algebraic Systems (DAEs)
+
+\tableofcontents
  
 This tutorial explains how to solve optimal control problems for which the model equation contains not only differential, but also algebraic states.
-
-\li Part 1: \ref example_006_part1
-\li Part 2: \ref example_006_part2
-\li Part 3: \ref example_006_part3
-
 
 \section example_006_part1 Mathematical formulation of general DAE optimization problems
 
@@ -48,59 +45,59 @@ for a matrix valued function M. However, in ACADO linear dependencies are automa
 The following piece of code illustrates how to setup a simple DAE optimization problem for the case that the DAE is semi-implicit: 
 
 \code
-  	#include <acado_optimal_control.hpp>
-    #include <include/acado_gnuplot/gnuplot_window.hpp>
-  
-    int main( ){
-  
-      USING_NAMESPACE_ACADO
-  
-      // INTRODUCE THE VARIABLES:
-      // -------------------------
-      DifferentialState     x;
-      DifferentialState     l;
-      AlgebraicState        z;
-      Control               u;
-      DifferentialEquation  f;
-  
-      const double t_start =  0.0;
-      const double t_end   = 10.0;
-  
-      // DEFINE A DIFFERENTIAL EQUATION:
-      // -------------------------------
-      f << dot(x) == -x + 0.5*x*x + u + 0.5*z;
-      f << dot(l) ==  x*x + 3.0*u*u            ;
-      f <<      0 ==  z + exp(z) - 1.0 + x     ;
-  
-  
-      // DEFINE AN OPTIMAL CONTROL PROBLEM:
-      // ----------------------------------
-      OCP ocp( t_start, t_end, 10 );
-      ocp.minimizeMayerTerm( l );
-  
-      ocp.subjectTo( f );
-      ocp.subjectTo( AT_START, x == 1.0 );
-      ocp.subjectTo( AT_START, l == 0.0 );
-  
-      GnuplotWindow window;
-        window.addSubplot(x,"DIFFERENTIAL STATE  x");
-        window.addSubplot(z,"ALGEBRAIC STATE  z"   );
-        window.addSubplot(u,"CONTROL  u"   );
-  
-  
-      // DEFINE AN OPTIMIZATION ALGORITHM AND SOLVE THE OCP:
-      // ----------------------------------------------------
-      OptimizationAlgorithm algorithm(ocp);
-  
-      algorithm.set( ABSOLUTE_TOLERANCE    , 1e-7          );
-      algorithm.set( INTEGRATOR_TOLERANCE  , 1e-7          );
-      algorithm.set( HESSIAN_APPROXIMATION , EXACT_HESSIAN );
-  
-      algorithm << window;
-      algorithm.solve();
-  
-      return 0;
-    }
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
+
+int main( )
+{
+	USING_NAMESPACE_ACADO
+	
+	// INTRODUCE THE VARIABLES:
+	// -------------------------
+	DifferentialState     x;
+	DifferentialState     l;
+	AlgebraicState        z;
+	Control               u;
+	DifferentialEquation  f;
+	
+	const double t_start =  0.0;
+	const double t_end   = 10.0;
+	
+	// DEFINE A DIFFERENTIAL EQUATION:
+	// -------------------------------
+	f << dot(x) == -x + 0.5*x*x + u + 0.5*z;
+	f << dot(l) ==  x*x + 3.0*u*u            ;
+	f <<      0 ==  z + exp(z) - 1.0 + x     ;
+	
+	
+	// DEFINE AN OPTIMAL CONTROL PROBLEM:
+	// ----------------------------------
+	OCP ocp( t_start, t_end, 10 );
+	ocp.minimizeMayerTerm( l );
+	
+	ocp.subjectTo( f );
+	ocp.subjectTo( AT_START, x == 1.0 );
+	ocp.subjectTo( AT_START, l == 0.0 );
+	
+	GnuplotWindow window;
+	window.addSubplot(x,"DIFFERENTIAL STATE  x");
+	window.addSubplot(z,"ALGEBRAIC STATE  z"   );
+	window.addSubplot(u,"CONTROL  u"   );
+	
+	
+	// DEFINE AN OPTIMIZATION ALGORITHM AND SOLVE THE OCP:
+	// ----------------------------------------------------
+	OptimizationAlgorithm algorithm(ocp);
+	
+	algorithm.set( ABSOLUTE_TOLERANCE    , 1e-7          );
+	algorithm.set( INTEGRATOR_TOLERANCE  , 1e-7          );
+	algorithm.set( HESSIAN_APPROXIMATION , EXACT_HESSIAN );
+	
+	algorithm << window;
+	algorithm.solve();
+	
+	return 0;
+}
 \endcode
 
 Running this example, the corresponding Gnuplot output should look as follows:

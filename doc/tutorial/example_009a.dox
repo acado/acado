@@ -2,12 +2,9 @@
 
 \page example_009a Static Optimization Problem with Three Objectives
 
+\tableofcontents
+
 This tutorial explains how to solve static optimization problems with three objectives.
-
-\li Part 1: \ref example_009a_part1
-\li Part 2: \ref example_009a_part2
-\li Part 3: \ref example_009a_part3
-
 
 \section example_009a_part1 Mathematical formulation
 
@@ -28,69 +25,69 @@ For the static tri-objective problem only three scalar variables are involved:  
 The following piece of code illustrates how to set up the tri-objective optimization problem mentioned above. The Pareto set is generated based on WS. The number of Pareto points  np  between two indidivual objectives is set to 11. Hence, this results in 1/2* np *( np +1) = 66 single objective optimization problems to be solved and also in 66 points on the global Pareto front. This code is available in the examples/multi_objective directory as scalar3_ws.cpp. The NBI and NNC version are called scalar3_nbi.cpp and scalar3_nnc.cpp, respectively.
 
 \code
-  #include <acado_optimal_control.hpp>
-  #include <include/acado_gnuplot/gnuplot_window.hpp>
- 
-  int main( ){
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
 
-    USING_NAMESPACE_ACADO
-
-
-    // INTRODUCE THE VARIABLES:
-    // -------------------------
-    Parameter y1,y2,y3;
-
-
-    // DEFINE AN OPTIMIZATION PROBLEM:
-    // -------------------------------
-    NLP nlp;
-    nlp.minimize( 0, y1 );
-    nlp.minimize( 1, y2 );
-    nlp.minimize( 2, y3 );
-
-    nlp.subjectTo( -5.0 <= y1 <= 5.0 );
-    nlp.subjectTo( -5.0 <= y2 <= 5.0 );
-    nlp.subjectTo( -5.0 <= y3 <= 5.0 );
-
-    nlp.subjectTo( y1*y1+y2*y2+y3*y3 <= 4.0 );
-
-
-    // DEFINE A MULTI-OBJECTIVE ALGORITHM AND SOLVE THE NLP:
-    // -----------------------------------------------------
-    MultiObjectiveAlgorithm algorithm(nlp);
-
-    algorithm.set( PARETO_FRONT_GENERATION, PFG_WEIGHTED_SUM );
-    algorithm.set( PARETO_FRONT_DISCRETIZATION, 11 );
-
-    // Generate Pareto set 
-    algorithm.solve();
-
-    algorithm.getWeights("scalar3_ws_weights.txt");
-
-
-    // GET THE RESULT FOR THE PARETO FRONT AND PLOT IT:
-    // ------------------------------------------------
-    VariablesGrid paretoFront;
-    algorithm.getParetoFront( paretoFront );
-    paretoFront.print();
-
-    GnuplotWindow window;
-      window.addSubplot3D( paretoFront, "Pareto Front y1 vs y2 vs y3",
-                                        "y1","y2", PM_POINTS );
-    window.plot( );
-
-    FILE *file = fopen("scalar3_ws_pareto.txt","w");
-    paretoFront.print();
-    file << paretoFront;
-    fclose(file);
-
-
-    // PRINT INFORMATION ABOUT THE ALGORITHM:
-    // --------------------------------------
-    algorithm.printInfo();
-
-    return 0;
-  }
+int main( )
+{
+	USING_NAMESPACE_ACADO
+	
+	
+	// INTRODUCE THE VARIABLES:
+	// -------------------------
+	Parameter y1,y2,y3;
+	
+	
+	// DEFINE AN OPTIMIZATION PROBLEM:
+	// -------------------------------
+	NLP nlp;
+	nlp.minimize( 0, y1 );
+	nlp.minimize( 1, y2 );
+	nlp.minimize( 2, y3 );
+	
+	nlp.subjectTo( -5.0 <= y1 <= 5.0 );
+	nlp.subjectTo( -5.0 <= y2 <= 5.0 );
+	nlp.subjectTo( -5.0 <= y3 <= 5.0 );
+	
+	nlp.subjectTo( y1*y1+y2*y2+y3*y3 <= 4.0 );
+	
+	
+	// DEFINE A MULTI-OBJECTIVE ALGORITHM AND SOLVE THE NLP:
+	// -----------------------------------------------------
+	MultiObjectiveAlgorithm algorithm(nlp);
+	
+	algorithm.set( PARETO_FRONT_GENERATION, PFG_WEIGHTED_SUM );
+	algorithm.set( PARETO_FRONT_DISCRETIZATION, 11 );
+	
+	// Generate Pareto set 
+	algorithm.solve();
+	
+	algorithm.getWeights("scalar3_ws_weights.txt");
+	
+	
+	// GET THE RESULT FOR THE PARETO FRONT AND PLOT IT:
+	// ------------------------------------------------
+	VariablesGrid paretoFront;
+	algorithm.getParetoFront( paretoFront );
+	paretoFront.print();
+	
+	GnuplotWindow window;
+	window.addSubplot3D( paretoFront, "Pareto Front y1 vs y2 vs y3",
+									"y1","y2", PM_POINTS );
+	window.plot( );
+	
+	FILE *file = fopen("scalar3_ws_pareto.txt","w");
+	paretoFront.print();
+	file << paretoFront;
+	fclose(file);
+	
+	
+	// PRINT INFORMATION ABOUT THE ALGORITHM:
+	// --------------------------------------
+	algorithm.printInfo();
+	
+	return 0;
+}
 \endcode
 
 

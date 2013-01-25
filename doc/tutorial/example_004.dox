@@ -1,37 +1,34 @@
 /*!
 
 \page example_004 Storing the Results of Optimization Algorithms
+
+\tableofcontents
  
-This tutorial explains how to obtain and store the results of an optimization algorithm. In the previous tutorials (e.g. \ref example_001 ), it has already been explained how to plot the results with Gnuplot. However, once an optimization problem has been solved with ACADO, one of the first question that arises is how to obtain the numerical results. Here, several possibilities are available:
-
-\li Part 1: \ref example_004_text
-\li Part 2: \ref example_004_data
-\li Part 3: \ref example_004_log
-
+This tutorial explains how to obtain and store the results of an optimization algorithm. In the previous tutorials (e.g. \ref example_001 ), it has already been explained how to plot the results with Gnuplot. However, once an optimization problem has been solved with ACADO, one of the first question that arises is how to obtain the numerical results.
 
 \section example_004_text Storing the results in a text file
 
 The easiest way to store results with ACADO is via text files. Analogous to the \ref example_002 initialization of optimal control algorithms, the results can e.g. be obtained by the following lines of code: 
 
 \code
-  #include <acado_optimal_control.hpp>
-  #include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
 
-  int main( ){
-
-    USING_NAMESPACE_ACADO
-
-    // ... (IMPLEMENTATION OF THE OPTIMIZATION PROBLEM) ...
-
-    OptimizationAlgorithm algorithm(ocp);
-    algorithm.solve()                   ;
-
-    algorithm.getDifferentialStates("states.txt"    );
-    algorithm.getParameters        ("parameters.txt");
-    algorithm.getControls          ("controls.txt"  );
-
-    return 0;
-  }
+int main( )
+{
+	USING_NAMESPACE_ACADO
+	
+	// ... (IMPLEMENTATION OF THE OPTIMIZATION PROBLEM) ...
+	
+	OptimizationAlgorithm algorithm(ocp);
+	algorithm.solve()                   ;
+	
+	algorithm.getDifferentialStates("states.txt"    );
+	algorithm.getParameters        ("parameters.txt");
+	algorithm.getControls          ("controls.txt"  );
+	
+	return 0;
+}
 \endcode
 
 The above example will store the results for differential states, parameters, and controls in the text files "states.txt", "parameters.txt", and "controls.txt", respectively. As an easy exercise, it is recommended to test the following:
@@ -50,30 +47,30 @@ The result of this exercise should be that the optimization algorithm detects di
 Similar to the storage of results in form of text files, the result can also be obtained in form of a "VariablesGrid". The class "VariablesGrid" has already been introduced in the tutorial \ref example_002 "Initialization of Nonlinear Optimization Algorithms". The syntax is analogous: 
 
 \code
-  #include <acado_optimal_control.hpp>
-  #include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
 
-  int main( ){
-
-    USING_NAMESPACE_ACADO
-
-    // ... (IMPLEMENTATION OF THE OPTIMIZATION PROBLEM) ...
-
-    OptimizationAlgorithm algorithm(ocp);
-    algorithm.solve()                   ;
-
-    Variables Grid states, parameters, controls;
-
-    algorithm.getDifferentialStates(states    );
-    algorithm.getParameters        (parameters);
-    algorithm.getControls          (controls  );
-
-    states.print();
-    parameters.print();
-    controls.print();
-
-    return 0;
-  }
+int main( )
+{
+	USING_NAMESPACE_ACADO
+	
+	// ... (IMPLEMENTATION OF THE OPTIMIZATION PROBLEM) ...
+	
+	OptimizationAlgorithm algorithm(ocp);
+	algorithm.solve()                   ;
+	
+	Variables Grid states, parameters, controls;
+	
+	algorithm.getDifferentialStates(states    );
+	algorithm.getParameters        (parameters);
+	algorithm.getControls          (controls  );
+	
+	states.print();
+	parameters.print();
+	controls.print();
+	
+	return 0;
+}
 \endcode
 
 The advantage of getting the results in form of a "VariablesGrid" is that they can for example processed by a user-written C++ routine or modified and then written to a text file. In addition, in a real-time context, communication via files is not recommended and thus a "VariablesGrid" is right medium for communication in this case.
@@ -84,37 +81,37 @@ The advantage of getting the results in form of a "VariablesGrid" is that they c
 Another way to retrieve results is provided by the logging functionality of ACADO Toolkit. It allows you to setup so-called LogRecords to be passed to the optimization algorithm. Therein, you can specify which information you would like to log and the algorithm will take care of that. After running the optimization algorithm, the desired information is logged within your LogRecord and can be printed onto the screen or to a file. We give a simple example: 
 
 \code
-  #include <acado_optimal_control.hpp>
-  #include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
 
-  int main( ){
-
-    USING_NAMESPACE_ACADO
-
-    // ... (IMPLEMENTATION OF THE OPTIMIZATION PROBLEM) ...
-
-    OptimizationAlgorithm algorithm(ocp);
-
-    // setup a logging object and flush it into the algorithm
-    LogRecord logRecord( LOG_AT_EACH_ITERATION,"kkt.txt" );
-    logRecord << LOG_KKT_TOLERANCE;
-
-    algorithm << logRecord;
-
-    // solve the optimization problem
-    algorithm.solve( );
-
-    // get the logging object back and print it
-    algorithm.getLogRecord( logRecord );
-    logRecord.print( );
-
-    return 0;
-  }
+int main( )
+{
+	USING_NAMESPACE_ACADO
+	
+	// ... (IMPLEMENTATION OF THE OPTIMIZATION PROBLEM) ...
+	
+	OptimizationAlgorithm algorithm(ocp);
+	
+	// setup a logging object and flush it into the algorithm
+	LogRecord logRecord( LOG_AT_EACH_ITERATION,"kkt.txt" );
+	logRecord << LOG_KKT_TOLERANCE;
+	
+	algorithm << logRecord;
+	
+	// solve the optimization problem
+	algorithm.solve( );
+	
+	// get the logging object back and print it
+	algorithm.getLogRecord( logRecord );
+	logRecord.print( );
+	
+	return 0;
+}
 \endcode
 
 In this example a LogRecord is defined that logs the KKT tolerance at each iteration that shall be written into the file "kkt.txt". Note that you can add more than one entry to each LogRecord and that you can flush several LogRecords containing different entries with different log schemes into the same algorithm. Also the format of the output on printing can be adjusted in detail. You might either log at each iteration as above, or only at start/end of the optimization using LOG_AT_START/LOG_AT_END, respectively. For example, the following information can be logged: 
 <br><br>
-<table border="1">
+<table>
 <tr>
          <td> &nbsp; <b>Logging name</b>  &nbsp; </td>
          <td> &nbsp; <b>Description</b>  &nbsp; </td>
@@ -180,36 +177,36 @@ In this example a LogRecord is defined that logs the KKT tolerance at each itera
 This example shows you how to export multiple variables from ACADO directly to into a Matlab(TM) .m file: 
 
 \code
-  #include <acado_optimal_control.hpp>
-  #include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
 
-  int main( ){
-
-    USING_NAMESPACE_ACADO
-
-    // ... (IMPLEMENTATION OF THE OPTIMIZATION PROBLEM) ...
-
-    OptimizationAlgorithm algorithm(ocp);
-
-    // setup a logging object for all states, controls,  
-    // disturbances and parameters with a Matlab style result
-    LogRecord logRecord( LOG_AT_END,"output.m" );
-    logRecord.addItem(LOG_DIFFERENTIAL_STATES,PS_MATLAB,"STATES");
-    logRecord.addItem(LOG_CONTROLS,PS_MATLAB,"CONTROLS");
-    logRecord.addItem(LOG_DISTURBANCES,PS_MATLAB,"DISTURBANCES");
-    logRecord.addItem(LOG_PARAMETERS,PS_MATLAB,"PARAMETERS");
-
-    algorithm << logRecord;
-
-    // solve the optimization problem
-    algorithm.solve( );
-
-    // get the logging object back and print it
-    algorithm.getLogRecord( logRecord );
-    logRecord.print( );
-
-    return 0;
-  }
+int main( )
+{
+	USING_NAMESPACE_ACADO
+	
+	// ... (IMPLEMENTATION OF THE OPTIMIZATION PROBLEM) ...
+	
+	OptimizationAlgorithm algorithm(ocp);
+	
+	// setup a logging object for all states, controls,  
+	// disturbances and parameters with a Matlab style result
+	LogRecord logRecord( LOG_AT_END,"output.m" );
+	logRecord.addItem(LOG_DIFFERENTIAL_STATES,PS_MATLAB,"STATES");
+	logRecord.addItem(LOG_CONTROLS,PS_MATLAB,"CONTROLS");
+	logRecord.addItem(LOG_DISTURBANCES,PS_MATLAB,"DISTURBANCES");
+	logRecord.addItem(LOG_PARAMETERS,PS_MATLAB,"PARAMETERS");
+	
+	algorithm << logRecord;
+	
+	// solve the optimization problem
+	algorithm.solve( );
+	
+	// get the logging object back and print it
+	algorithm.getLogRecord( logRecord );
+	logRecord.print( );
+	
+	return 0;
+}
 \endcode
 
 The resulting <em>output.m</em> file will contain 4 matrices. The first column will be the time, the next column(s) the appropriate data. These matrices can easily be added to your workspace. Just go to the directory where you have saved <em>output.m</em> and run "<em>output.m;</em>" in your command window.

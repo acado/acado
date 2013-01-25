@@ -1,19 +1,17 @@
 /*!
 
 \page example_001 A Guiding Example: Time Optimal Control of a Rocket Flight
- 
-This tutorial explains how to setup a simple optimal control problem with ACADO. As an example a simple model of a rocket is considered, which should fly as fast as possible from one to another point in space while satisfying state and control constraints during the flight. The tutorial is devided into three parts:
 
-\li Part 1: \ref example_001_math
-\li Part 2: \ref example_001_impl
-\li Part 3: \ref example_001_disc
+\tableofcontents
+ 
+This tutorial explains how to setup a simple optimal control problem with ACADO. As an example a simple model of a rocket is considered, which should fly as fast as possible from one to another point in space while satisfying state and control constraints during the flight.
 
 \section example_001_math Mathematical Formulation of the Optimization Problem:
 
 We consider a simple rocket model with three differential states s, v, and m representing the traveling distance, the velocity, and the mass of the rocket, respectively. Moreover, we assume that the rocket can be accelerated by a control input u . The fuel optimal control problem of our interest has the following form:
 
 \f{eqnarray*}{
-        \min_{x(\cdot),u(\cdot)} & & \int\limits_{0}^{T} \left(|| x(t)||_Q^2 + || u(t)||_R^2\right) \, \mathrm{d}t \, + \, || x(T) ||_P^2\\[0.5em]
+        \min_{x(\cdot),u(\cdot)} & & \int\limits_{0}^{T} \left(|| x(t)||_Q^2 + || u(t)||_R^2\right) \, \mathrm{d}t \, + \, || x(T) ||_P^2\\
 	\textrm{s.t.} & & \dot x(t) \; = \; f(\,x(t),\,u(t)\,),\\
                   & & x(0) \; = \; x_0,\\
 				  & & \underline u(t) \; \leq \; u(t) \; \leq \; \overline u(t),\\
