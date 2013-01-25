@@ -47,19 +47,6 @@ classdef ExportModule < acado.UserInteraction
     properties (SetAccess='protected')
         name = 'ExportModule';
         
-        % Integration
-        integrationGrid;
-        
-        % DifferentialEquation
-        model;
-        fileName;
-        modelName;
-        modelDiffsName;
-        NX;
-        NDX;
-        NXA;
-        NU;
-        
         % dirName
         dir;
         run;
@@ -77,65 +64,6 @@ classdef ExportModule < acado.UserInteraction
         
         function s = toString(obj)
             s = obj.name;
-        end
-        
-        
-        function setModel(obj, varargin)
-            
-            global ACADO_;
-            if (nargin == 2 && isa(varargin{1}, 'acado.DifferentialEquation'))
-                % SIMexport.setModel( f );
-                obj.model = varargin{1};
-                
-            elseif (nargin == 2 && (isa(varargin{1}, 'cell') || isa(varargin{1}, 'acado.Expression')))
-                obj.model = acado.DifferentialEquation();
-                ACADO_.helper.removeInstruction(obj.model);
-                obj.model(:) = varargin{1};
-                
-            elseif (nargin == 4 && isa(varargin{1}, 'char') && isa(varargin{2}, 'char') && isa(varargin{3}, 'char'))
-                % SIMexport.setModel( fileName, modelName, modelDiffsName );
-                obj.fileName = varargin{1};
-                obj.modelName = varargin{2};
-                obj.modelDiffsName = varargin{3};
-                
-            else
-                error('ERROR: Invalid setModel.');
-                
-            end
-        end
-        
-        
-        function setDimensions(obj, varargin)
-            
-            if (nargin == 3 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric'))
-                % SIMexport.setDimensions( NX, NU );
-                obj.NX = varargin{1};
-                obj.NDX = 0;
-                obj.NXA = 0;
-                obj.NU = varargin{2};
-                
-            elseif (nargin == 5 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric') && isa(varargin{3}, 'numeric') && isa(varargin{4}, 'numeric'))
-                % SIMexport.setDimensions( NX, NDX, NXA, NU );
-                obj.NX = varargin{1};
-                obj.NDX = varargin{2};
-                obj.NXA = varargin{3};
-                obj.NU = varargin{4};
-                
-            else
-                error('ERROR: Invalid call to setDimensions.');
-                
-            end
-            
-        end
-        
-        
-        function setIntegrationGrid(obj, varargin)
-           
-            if (nargin == 2 && isa(varargin{1}, 'numeric'))
-                obj.integrationGrid = acado.Vector( varargin{1} );
-            else
-                error('ERROR: Invalid call to setIntegrationGrid.');
-            end
         end
         
         

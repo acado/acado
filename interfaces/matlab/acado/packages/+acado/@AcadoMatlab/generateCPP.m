@@ -104,7 +104,7 @@ function generateCPP(obj)
         % remove the exportModule from the instruction list
         try
             obj.removeInstruction(obj.exportModule);
-            obj.removeInstruction(obj.exportModule.model);
+            obj.removeInstruction(obj.exportModule.ocp.model);
             obj.removeInstruction(obj.exportModule.ocp);
         catch
         end

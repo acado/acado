@@ -63,7 +63,7 @@
 %    Author: David Ariens, Rien Quirynen
 %    Date: 2009-2012
 % 
-classdef OCP < acado.MultiObjectiveFunctionality    
+classdef OCP < acado.MultiObjectiveFunctionality & acado.ModelContainer    
     properties (SetAccess='private')
         name = 'ocp';
        
