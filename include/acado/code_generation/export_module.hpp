@@ -68,13 +68,6 @@ class ExportModule : public UserInteraction
 		 */
 		ExportModule( );
 
-		/** Constructor which takes OCP formulation.
-		 *
-		 *	@param[in] _ocp		OCP formulation for code export.
-		 */
-		ExportModule(	const OCP& _ocp
-						);
-
 		/** Copy constructor (deep copy).
 		 *
 		 *	@param[in] arg		Right-hand side object.
@@ -91,16 +84,6 @@ class ExportModule : public UserInteraction
 		 *	@param[in] arg		Right-hand side object.
 		 */
         ExportModule& operator=(	const ExportModule& arg
-									);
-
-
-		/** Assigns OCP formulation to be used to export MPC algorithm.
-		 *
-		 *	@param[in] _ocp		OCP formulation for code export.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-        virtual returnValue setOCP(	const OCP& _ocp
 									);
 
 
@@ -130,12 +113,12 @@ class ExportModule : public UserInteraction
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportAcadoHeader(	const String& _dirName,
+		virtual returnValue exportAcadoHeader(	const String& _dirName,
 										const String& _fileName,
 										const String& _realString = "real_t",
 										const String& _intString = "int",
 										int _precision = 16
-										) const;
+										) const = 0;
 
 
 		/** Collects all data declarations of the auto-generated sub-modules to given
@@ -199,8 +182,6 @@ class ExportModule : public UserInteraction
 
 
     protected:
-
-        OCP ocp;							/**< OCP formulation used to export code. */
 
 		String commonHeaderName;			/**< Name of common header file. */
 };

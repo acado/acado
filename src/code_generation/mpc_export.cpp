@@ -34,10 +34,6 @@
 
 #include <acado/code_generation/export_algorithm_factory.hpp>
 
-#ifdef __MATLAB__
-#include "mex.h"
-#endif
-
 BEGIN_NAMESPACE_ACADO
 
 
@@ -57,12 +53,13 @@ MPCexport::MPCexport( ) : ExportModule( )
 
 
 MPCexport::MPCexport(	const OCP& _ocp
-						) : ExportModule( _ocp )
+						) : ExportModule( )
 {
 	integrator  = 0;
 	condenser   = 0;
 	gaussNewton = 0;
 	auxFcns     = 0;
+	ocp = _ocp;
 
 	setStatus( BS_NOT_INITIALIZED );
 }
@@ -309,9 +306,7 @@ returnValue MPCexport::setup( )
 	if ( integrator == NULL )
 		return ACADOERROR( RET_INVALID_OPTION );
 
-	if( ocp.hasEquidistantIntegrationGrid()) {
-		ocp.setIntegrationGrid( grid, numSteps );
-	}
+	ocp.setNumberIntegrationSteps( numSteps );
 	integrator->setModelData( ocp.getModelData() );
 
 
@@ -679,6 +674,196 @@ returnValue MPCexport::exportTemplateMain(	const String& _dirName,
 	main.addLinebreak( );
 
 	return main.exportCode( );
+}
+
+
+returnValue MPCexport::exportAcadoHeader(	const String& _dirName,
+											const String& _fileName,
+											const String& _realString,
+											const String& _intString,
+											int _precision
+											) const
+{
+	int qpSolver;
+	get( QP_SOLVER,qpSolver );
+
+	int operatingSystem;
+	get( OPERATING_SYSTEM,operatingSystem );
+
+	int useSinglePrecision;
+	get( USE_SINGLE_PRECISION,useSinglePrecision );
+
+	int fixInitialState;
+	get( FIX_INITIAL_STATE,fixInitialState );
+
+
+	String fileName( _dirName );
+	fileName << "/" << _fileName;
+	ExportFile acadoHeader( fileName,"", _realString,_intString,_precision );
+
+	acadoHeader.addStatement( "#include <stdio.h>\n" );
+	acadoHeader.addStatement( "#include <math.h>\n" );
+
+	if ( (OperatingSystem)operatingSystem == OS_WINDOWS )
+	{
+		acadoHeader.addStatement( "#include <windows.h>\n" );
+	}
+	else
+	{
+		// OS_UNIX
+		acadoHeader.addStatement( "#include <time.h>\n" );
+		acadoHeader.addStatement( "#include <sys/stat.h>\n" );
+		acadoHeader.addStatement( "#include <sys/time.h>\n" );
+	}
+	acadoHeader.addLinebreak( );
+
+	acadoHeader.addStatement( "#ifndef ACADO_H\n" );
+	acadoHeader.addStatement( "#define ACADO_H\n" );
+	acadoHeader.addLinebreak( );
+
+	switch ( (QPSolverName)qpSolver )
+	{
+		case QP_CVXGEN:
+			acadoHeader.addStatement( "#define USE_CVXGEN\n" );
+			acadoHeader.addStatement( "#include \"cvxgen/solver.h\"\n" );
+			acadoHeader.addLinebreak( 2 );
+
+			if ( (BooleanType)useSinglePrecision == BT_TRUE )
+				acadoHeader.addStatement( "typedef float real_t;\n" );
+			else
+				acadoHeader.addStatement( "typedef double real_t;\n" );
+			acadoHeader.addLinebreak( 2 );
+			break;
+
+		case QP_QPOASES:
+			acadoHeader.addStatement( "#ifndef __MATLAB__\n" );
+			acadoHeader.addStatement( "#ifdef __cplusplus\n" );
+			acadoHeader.addStatement( "extern \"C\"\n" );
+			acadoHeader.addStatement( "{\n" );
+			acadoHeader.addStatement( "#endif\n" );
+			acadoHeader.addStatement( "#endif\n" );
+			acadoHeader.addStatement( "#include \"qpoases/solver.hpp\"\n" );
+			acadoHeader.addLinebreak( 2 );
+			break;
+
+		case QP_QPOASES3:
+			acadoHeader.addStatement( "#include \"qpoases3/solver.h\"\n" );
+			acadoHeader.addLinebreak( 2 );
+			break;
+
+		case QP_NONE:
+			if ( (BooleanType)useSinglePrecision == BT_TRUE )
+				acadoHeader.addStatement( "typedef float real_t;\n" );
+			else
+				acadoHeader.addStatement( "typedef double real_t;\n" );
+			acadoHeader.addLinebreak( 2 );
+			break;
+
+		default:
+			return ACADOERROR( RET_INVALID_OPTION );
+	}
+
+	Vector nMeasV = ocp.getNumMeas();
+	Vector nOutV = ocp.getDimOutputs();
+	if( nMeasV.getDim() != nOutV.getDim() ) return ACADOERROR( RET_INVALID_OPTION );
+
+	//
+	// Some common defines
+	//
+	acadoHeader.addComment( "COMMON DEFINITIONS:             " );
+	acadoHeader.addComment( "--------------------------------" );
+	acadoHeader.addLinebreak( 2 );
+	if( (uint)nOutV.getDim() > 0 ) {
+		acadoHeader.addComment( "Dimension of the output functions" );
+		acadoHeader.addDeclaration( ExportVariable( "NOUT",nOutV,STATIC_CONST_INT ) );
+		acadoHeader.addComment( "Measurements of the output functions per shooting interval" );
+		acadoHeader.addDeclaration( ExportVariable( "NMEAS",nMeasV,STATIC_CONST_INT ) );
+	}
+	acadoHeader.addLinebreak( 2 );
+
+	acadoHeader.addComment( "Number of control intervals" );
+	acadoHeader.addStatement( (String)"#define ACADO_N   " << ocp.getN() << "\n");
+	acadoHeader.addComment( "Number of differential states" );
+	acadoHeader.addStatement( (String)"#define ACADO_NX  " << ocp.getNX() << "\n" );
+	acadoHeader.addComment( "Number of differential state derivatives" );
+	acadoHeader.addStatement( (String)"#define ACADO_NDX  " << ocp.getNDX() << "\n" );
+	acadoHeader.addComment( "Number of algebraic states" );
+	acadoHeader.addStatement( (String)"#define ACADO_NXA  " << ocp.getNXA() << "\n" );
+	acadoHeader.addComment( "Number of controls" );
+	acadoHeader.addStatement( (String)"#define ACADO_NU  " << ocp.getNU() << "\n" );
+	acadoHeader.addComment( "Number of parameters" );
+	acadoHeader.addStatement( (String)"#define ACADO_NP  " << ocp.getNP() << "\n" );
+	acadoHeader.addComment( "Number of output functions" );
+	acadoHeader.addStatement( (String)"#define NUM_OUTPUTS  " << (uint)nOutV.getDim() << "\n" );
+	acadoHeader.addLinebreak( 2 );
+
+	acadoHeader.addComment( "GLOBAL VARIABLES:               " );
+	acadoHeader.addComment( "--------------------------------" );
+	acadoHeader.addStatement( "typedef struct ACADOvariables_ {\n" );
+
+	if ( collectDataDeclarations( acadoHeader,ACADO_VARIABLES ) != SUCCESSFUL_RETURN )
+		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+
+	acadoHeader.addLinebreak( );
+	acadoHeader.addStatement( "} ACADOvariables;\n" );
+	acadoHeader.addLinebreak( 2 );
+
+	acadoHeader.addComment( "GLOBAL WORKSPACE:               " );
+	acadoHeader.addComment( "--------------------------------" );
+	acadoHeader.addStatement( "typedef struct ACADOworkspace_ {\n" );
+
+	if ( collectDataDeclarations( acadoHeader,ACADO_WORKSPACE ) != SUCCESSFUL_RETURN )
+		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+
+	acadoHeader.addLinebreak( );
+	acadoHeader.addStatement( "} ACADOworkspace;\n" );
+	acadoHeader.addLinebreak( 2 );
+
+	acadoHeader.addComment( "GLOBAL FORWARD DECLARATIONS:         " );
+	acadoHeader.addComment( "-------------------------------------" );
+
+	if ( collectFunctionDeclarations( acadoHeader ) != SUCCESSFUL_RETURN )
+		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+
+	acadoHeader.addComment( "-------------------------------------" );
+	acadoHeader.addLinebreak( 2 );
+
+	acadoHeader.addComment( "EXTERN DECLARATIONS:                 " );
+	acadoHeader.addComment( "-------------------------------------" );
+	acadoHeader.addStatement( "extern ACADOworkspace acadoWorkspace;\n" );
+	acadoHeader.addStatement( "extern ACADOvariables acadoVariables;\n" );
+	acadoHeader.addComment( "-------------------------------------" );
+
+	switch ( (QPSolverName) qpSolver )
+	{
+		case QP_CVXGEN:
+			break;
+
+		case QP_QPOASES:
+			acadoHeader.addStatement( "#ifndef __MATLAB__\n");
+			acadoHeader.addStatement( "#ifdef __cplusplus\n" );
+			acadoHeader.addLinebreak( );
+			acadoHeader.addStatement( "} /* extern \"C\" */\n" );
+			acadoHeader.addStatement( "#endif\n" );
+			acadoHeader.addStatement( "#endif\n" );
+			break;
+
+		case QP_QPOASES3:
+			break;
+
+		case QP_NONE:
+			break;
+
+		default:
+			return ACADOERROR( RET_INVALID_OPTION );
+	}
+
+	acadoHeader.addStatement( "#endif\n" );
+	acadoHeader.addLinebreak( );
+    acadoHeader.addComment( "END OF FILE." );
+	acadoHeader.addLinebreak( );
+
+	return acadoHeader.exportCode( );
 }
 
 

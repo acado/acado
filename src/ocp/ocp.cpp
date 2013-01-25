@@ -367,6 +367,15 @@ returnValue OCP::setObjective ( const Objective & objective_  ){ objective   = o
 returnValue OCP::setConstraint( const Constraint& constraint_ ){ constraint = constraint_; return SUCCESSFUL_RETURN; }
 
 
+returnValue OCP::setNumberIntegrationSteps( const uint numSteps )
+{
+	if( hasEquidistantIntegrationGrid()) {
+		setIntegrationGrid( grid, numSteps );
+	}
+	return SUCCESSFUL_RETURN;
+}
+
+
 returnValue OCP::getObjective( const int &multiObjectiveIdx, Expression **arg ) const{
 
     return MultiObjectiveFunctionality::getObjective( multiObjectiveIdx, arg );

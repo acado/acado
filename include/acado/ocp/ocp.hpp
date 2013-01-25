@@ -373,6 +373,7 @@ public:
 
      returnValue setObjective ( const Objective & objective_  );
      returnValue setConstraint( const Constraint& constraint_ );
+     returnValue setNumberIntegrationSteps( const uint numSteps );
 
 
      double getStartTime ( ) const;
