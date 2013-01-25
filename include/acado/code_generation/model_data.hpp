@@ -1,0 +1,382 @@
+/*
+ *    This file is part of ACADO Toolkit.
+ *
+ *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
+ *    Copyright (C) 2008-2009 by Boris Houska and Hans Joachim Ferreau, K.U.Leuven.
+ *    Developed within the Optimization in Engineering Center (OPTEC) under
+ *    supervision of Moritz Diehl. All rights reserved.
+ *
+ *    ACADO Toolkit is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation; either
+ *    version 3 of the License, or (at your option) any later version.
+ *
+ *    ACADO Toolkit is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ *
+ *    You should have received a copy of the GNU Lesser General Public
+ *    License along with ACADO Toolkit; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
+
+/**
+ *    \file include/acado/code_generation/modelData.hpp
+ *    \author Rien Quirynen
+ */
+
+
+#ifndef ACADO_TOOLKIT_MODELDATA_HPP
+#define ACADO_TOOLKIT_MODELDATA_HPP
+
+
+#include <acado/utils/acado_utils.hpp>
+#include <acado/matrix_vector/matrix_vector.hpp>
+#include <acado/function/function.hpp>
+
+
+BEGIN_NAMESPACE_ACADO
+
+
+/**
+ *	\brief Data class for defining models and everything that is related, to be passed to the integrator.
+ *
+ *	\ingroup BasicDataStructures
+ *
+ *	TODO: Rien
+ *
+ *  \author Rien Quirynen
+ */
+
+class ModelData {
+
+
+//
+// PUBLIC MEMBER FUNCTIONS:
+//
+public:
+
+
+    /**
+     * Default constructor.
+     */
+	ModelData( );
+
+
+	/** Assigns the model dimensions to be used by the integrator.
+	 *
+	 *	@param[in] _NX		Number of differential states.
+	 *	@param[in] _NDX		Number of differential states derivatives.
+	 *	@param[in] _NXA		Number of algebraic states.
+	 *	@param[in] _NU		Number of control inputs
+	 *
+	 *	\return SUCCESSFUL_RETURN
+	 */
+
+	returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU );
+
+
+	/** Assigns the model dimensions to be used by the integrator.
+	 *
+	 *	@param[in] _NX		Number of differential states.
+	 *	@param[in] _NU		Number of control inputs
+	 *
+	 *	\return SUCCESSFUL_RETURN
+	 */
+
+	returnValue setDimensions( uint _NX, uint _NU );
+
+
+	/** Adds an output function.
+	 *
+	 *  \param outputEquation_ 	  an output function to be added
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue addOutput( const OutputFcn& outputEquation_ );
+
+
+	/** Adds an output function.
+	 *
+	 *  \param output 	  			The output function to be added.
+	 *  \param diffs_output 	  	The derivatives of the output function to be added.
+	 *  \param dim					The dimension of the output function.
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue addOutput( const String& output, const String& diffs_output, const uint dim );
+
+
+	/** Adds an output function.
+	 *
+	 *  \param output 	  			The output function to be added.
+	 *  \param diffs_output 	  	The derivatives of the output function to be added.
+	 *  \param dim					The dimension of the output function.
+	 *  \param colInd				Vector stores the column indices of the elements for Compressed Row Storage (CRS).
+	 *  \param rowPtr				Vector stores the locations that start a row for Compressed Row Storage (CRS).
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue addOutput( 	const String& output, const String& diffs_output, const uint dim,
+							const String& colInd, const String& rowPtr	);
+
+
+	/** Returns true if there are extra outputs, specified for the integrator.
+	 *
+	 *  \return True if there are extra outputs, specified for the integrator.
+	 */
+	BooleanType hasOutputs		() const;
+
+
+	/** Returns the dimension of a specific output function.
+	 *
+	 *  \param index	The index of the output function.
+	 *
+	 *  \return The dimension of a specific output function.
+	 */
+	uint getDimOutput( uint index ) const;
+
+
+    /** Sets up the output functions. 																			\n
+     *                                                                      									\n
+     *  \param numberMeasurements	  the number of measurements per horizon for each output function  			\n
+     *                                                                      									\n
+     *  \return SUCCESSFUL_RETURN
+     */
+    returnValue setMeasurements( const Vector& numberMeasurements );
+
+
+	 /** Returns the number of integration steps along the horizon.
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	 returnValue getNumSteps( Vector& _numSteps ) const;
+
+
+	 /** Sets the number of integration steps along the horizon.
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	 returnValue setNumSteps( const Vector& _numSteps );
+
+
+     /** Returns the output functions.
+      *
+      *  \return SUCCESSFUL_RETURN
+      */
+     returnValue getOutputExpressions( std::vector<Expression>& outputExpressions_ ) const;
+
+
+     /** Returns the output grids.
+      *
+      *  \return SUCCESSFUL_RETURN
+      */
+     returnValue getOutputGrids( std::vector<Grid>& outputGrids_ ) const;
+
+
+     /** Returns the dependency matrix for each output function, which is defined externally.
+      *
+      * \return The dependency matrix for each output function, defined externally.
+      */
+     std::vector<Matrix> getOutputDependencies( ) const;
+
+
+     /** Assigns Differential Equation to be used by the integrator.
+      *
+      *	@param[in] f		Differential equation.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+
+     returnValue setModel( const DifferentialEquation& _f );
+
+
+     /** Assigns the model to be used by the integrator.
+      *
+      *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.
+      *	@param[in] _diffs_rhs_ODE		Name of the function, evaluating the derivatives of the ODE right-hand side.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+
+     returnValue setModel( 	const String& fileName,
+    		 	 	 	 	const String& _rhs_ODE,
+    		 	 	 	 	const String& _diffs_rhs_ODE );
+
+
+     /** Returns the grid to be used by the integrator.
+      *
+      *	\return The grid to be used by the integrator.
+      */
+     returnValue getIntegrationGrid( Grid& integrationGrid_ ) const;
+
+
+     /** Sets the grid to be used by the integrator.
+      *
+      *	@param[in] gridPoints		The points that form the integration grid.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+     returnValue setIntegrationGrid( const Vector& gridPoints );
+
+
+     /** Sets integration grid.
+      *
+      *	@param[in] _ocpGrid		Evaluation grid for optimal control.
+      *	@param[in] numSteps		The number of integration steps along the horizon.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+     returnValue setIntegrationGrid(	const Grid& _ocpGrid,
+    		 	 	 	 				const uint _numSteps	);
+
+
+     /** Returns the differential equations in the model.
+      *
+      *  \return SUCCESSFUL_RETURN
+      */
+     returnValue getModel( DifferentialEquation& _f ) const;
+
+
+     BooleanType hasEquidistantIntegrationGrid		() const;
+     BooleanType hasOutputFunctions		() const;
+     BooleanType hasDifferentialEquation() const;
+     BooleanType modelDimensionsSet() const;
+     BooleanType exportRhs() const;
+     BooleanType hasCompressedStorage() const;
+
+
+     /** Returns number of differential states.
+      *
+      *  \return Number of differential states
+      */
+     uint getNX( ) const;
+
+
+     /** Returns number of differential state derivatives.
+      *
+      *  \return Number of differential state derivatives
+      */
+     uint getNDX( ) const;
+
+
+     /** Returns number of algebraic states.
+      *
+      *  \return Number of algebraic states
+      */
+     uint getNXA( ) const;
+
+     /** Returns number of control inputs.
+      *
+      *  \return Number of control inputs
+      */
+     uint getNU( ) const;
+
+     /** Returns number of parameters.
+      *
+      *  \return Number of parameters
+      */
+     uint getNP( ) const;
+
+     /** Returns number of shooting intervals.
+      *
+      *  \return Number of shooting intervals
+      */
+     uint getN( ) const;
+
+     /** Sets the number of shooting intervals.
+      *
+      *  @param[in] N_		The number of shooting intervals.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+     returnValue setN( const uint N_ );
+
+
+     /** Returns the dimensions of the different output functions.
+      *
+      *  \return dimensions of the different output functions.
+      */
+     Vector getDimOutputs( ) const;
+
+
+     /** Returns the number of different output functions.
+      *
+      *  \return the number of different output functions.
+      */
+     uint getNumOutputs( ) const;
+
+
+     /** Returns the dimensions of the different output functions.
+      *
+      *  \return dimensions of the different output functions.
+      */
+     returnValue getDimOutputs( std::vector<uint>& dims ) const;
+
+
+     /** Returns the number of measurements for the different output functions.
+      *
+      *  \return number of measurements for the different output functions.
+      */
+     Vector getNumMeas( ) const;
+
+
+     const String getFileNameModel() const;
+     const String getNameRhs() const;
+     const String getNameDiffsRhs() const;
+     returnValue getNameOutputs( std::vector<String>& names ) const;
+     returnValue getNameDiffsOutputs( std::vector<String>& names ) const;
+
+
+     //
+    // PROTECTED FUNCTIONS:
+    //
+    protected:
+
+
+    //
+    // DATA MEMBERS:
+    //
+    protected:
+
+     uint NX;										/**< Number of differential states. */
+     uint NDX;										/**< Number of differential states derivatives. */
+     uint NXA;										/**< Number of algebraic states. */
+     uint NU;										/**< Number of control inputs. */
+     uint NP;										/**< Number of parameters. */
+     uint N;										/**< Number of shooting intervals. */
+
+     BooleanType export_rhs;						/**< True if the right-hand side and their derivatives should be exported too. */
+     BooleanType model_dimensions_set;				/**< True if the model dimensions have been set. */
+     String externModel;							/**< The name of the file containing the needed functions, if provided. */
+     String rhs_name;								/**< The name of the function evaluating the ODE right-hand side, if provided. */
+     String diffs_name;								/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+     DifferentialEquation differentialEquation;  	/**< The differential equations in the model. */
+
+     Grid integrationGrid;							/**< Integration grid. */
+     BooleanType equidistant;						/**< True if the integration grid is equidistant. */
+     Vector numSteps;								/**< The number of integration steps per shooting interval. */
+
+     std::vector<Expression> outputExpressions;		/**< A vector with the output functions.     				*/
+     std::vector<Grid> outputGrids;					/**< A separate grid for each output function.  			*/
+     std::vector<uint> dim_outputs;					/**< Dimensions of the different output functions. */
+     std::vector<uint> num_meas;					/**< Number of measurements for the different output functions. */
+     std::vector<String> outputNames;				/**< A separate function name for each output. */
+     std::vector<String> diffs_outputNames;			/**< A separate function name for evaluating the derivatives of each output. */
+     std::vector<Vector> colInd_outputs;			/**< A separate Vector of column indices for each output if in CRS format. */
+     std::vector<Vector> rowPtr_outputs;			/**< A separate Vector of row pointers for each output if in CRS format. */
+};
+
+
+CLOSE_NAMESPACE_ACADO
+
+
+
+#endif  // ACADO_TOOLKIT_MODELDATA_HPP
+
+/*
+ *   end of file
+ */

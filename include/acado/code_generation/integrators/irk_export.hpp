@@ -392,11 +392,10 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
     protected:
     
-		BooleanType REUSE;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
-		BooleanType CONTINUOUS_OUTPUT;			/**< This boolean is true when continuous output needs to be provided. */
-//		BooleanType UNROLL_OUTPUT;				/**< This boolean is true when the evaluations for the continuous output should be unrolled. */
+		BooleanType reuse;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
+		BooleanType continuousOutput;			/**< This boolean is true when continuous output needs to be provided. */
 
-		uint NVARS;								/**< This is the total number of variables (=NX+NXA+NU+NDX). */
+		uint nVars;								/**< This is the total number of variables (=NX+NXA+NU+NDX). */
 		uint diffsDim;							/**< This is the total number of sensitivities needed. */
 		uint inputDim;							/**< This is the dimension of the input to the integrator. */
 		uint numIts;							/**< This is the performed number of Newton iterations. */

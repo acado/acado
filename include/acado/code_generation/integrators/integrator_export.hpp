@@ -120,6 +120,10 @@ class IntegratorExport : public ExportAlgorithm
 
 		/** Passes all the necessary model data to the integrator.
 		 *
+			acadoHeader.addComment( "Number of estimation intervals" );
+			acadoHeader.addStatement( (String)"#define ACADO_N   " << ocp.getN() << "\n");
+			acadoHeader.addComment( "Number of states" );
+			acadoHeader.addStatement( (String)"#define A
 		 *	@param[in] data			The model data.
 		 *
 		 *	\return SUCCESSFUL_RETURN
@@ -284,18 +288,18 @@ class IntegratorExport : public ExportAlgorithm
 
     protected:
 
-        BooleanType EXPORT_RHS;				/**< True if the right-hand side and their derivatives should be exported too. */
-        BooleanType EQUIDISTANT;			/**< True if the integration grid is equidistant. */
-        BooleanType CRS_FORMAT;				/**< True if the CRS format is used for the jacobian of output functions. */
-        String name_RHS;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
-        String name_diffs_RHS;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+        BooleanType exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
+        BooleanType equidistant;			/**< True if the integration grid is equidistant. */
+        BooleanType crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
+        String name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
+        String name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
 		Vector numSteps;					/**< The number of integration steps per shooting interval. */
 		
 		ExportFunction integrate;			/**< Function that integrates the exported ODE. */
-		ExportODEfunction RHS;				/**< Module to export ODE. */
-		ExportODEfunction diffs_RHS;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
+		ExportODEfunction rhs;				/**< Module to export ODE. */
+		ExportODEfunction diffs_rhs;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
 		
 		ExportVariable  reset_int;			/**< Variable containing the number of the current integration step. */
 		ExportVariable  rk_index;			/**< Variable containing the number of the current shooting interval. */
@@ -312,12 +316,12 @@ class IntegratorExport : public ExportAlgorithm
         std::vector<Grid> outputGrids;					/**< A separate grid for each output. */
         std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
         std::vector<Matrix> outputDependencies;			/**< A separate dependency matrix for each output. */
-        std::vector<ExportODEfunction> OUTPUTS;			/**< Module to export output functions. */
-        std::vector<ExportODEfunction> diffs_OUTPUTS;	/**< Module to export the evaluation of the derivatives of the output functions. */
+        std::vector<ExportODEfunction> outputs;			/**< Module to export output functions. */
+        std::vector<ExportODEfunction> diffs_outputs;	/**< Module to export the evaluation of the derivatives of the output functions. */
 		
-        std::vector<String> name_OUTPUTS;				/**< A separate function name for each output. */
-        std::vector<String> name_diffs_OUTPUTS;			/**< A separate function name for evaluating the derivatives of each output. */
-        std::vector<uint> num_OUTPUTS;					/**< A separate dimension for each output. */
+        std::vector<String> name_outputs;				/**< A separate function name for each output. */
+        std::vector<String> name_diffs_outputs;			/**< A separate function name for evaluating the derivatives of each output. */
+        std::vector<uint> num_outputs;					/**< A separate dimension for each output. */
 };
 
 
