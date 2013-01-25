@@ -50,7 +50,7 @@ BEGIN_NAMESPACE_ACADO
 
 SIMexport::SIMexport( const uint simIntervals, const double totalTime ) : ExportModule( )
 {
-	N = simIntervals;
+	setN(simIntervals);
 	T = totalTime;
 	integrator  = 0;
 	timingSteps = 100;
@@ -62,7 +62,6 @@ SIMexport::SIMexport( const uint simIntervals, const double totalTime ) : Export
 	_ref = String( "ref.txt" );
 	referenceProvided = BT_FALSE;
 	PRINT_DETAILS = BT_TRUE;
-	MODEL_DIMENSIONS_SET = BT_FALSE;
 
 	setStatus( BS_NOT_INITIALIZED );
 }
@@ -102,7 +101,7 @@ returnValue SIMexport::exportCode(	const String& dirName,
 									int _precision
 									)
 {
-	if (!MODEL_DIMENSIONS_SET) return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+	if (!modelDimensionsSet()) return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 	set( QP_SOLVER, QP_NONE );
 
 	if ( setup( ) != SUCCESSFUL_RETURN )
@@ -130,17 +129,19 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		get( MEASUREMENT_GRID, measGrid );
 		int generateMatlabInterface;
 		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
+		int debugMode;
+		get( INTEGRATOR_DEBUG_MODE, debugMode );
 		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
 			String integrateInterface( dirName );
 			integrateInterface << "/integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure((MeasurementGrid)measGrid == ONLINE_GRID);
+			exportMexFun.configure((MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, ((RungeKuttaExport*)integrator)->getNumStages());
 			exportMexFun.exportCode();
 
 			String rhsInterface( dirName );
 			rhsInterface << "/rhs.c";
 			ExportMatlabRhs exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun2.configure(integrator->getNameODE());
+			exportMexFun2.configure(integrator->getNameRHS());
 			exportMexFun2.exportCode();
 		}
 	}
@@ -168,78 +169,6 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		ACADOINFO( RET_CODE_EXPORT_SUCCESSFUL );
 
     return SUCCESSFUL_RETURN;
-}
-
-
-returnValue SIMexport::addOutput( const OutputFcn& outputEquation_ ){
-
-	if( rhs_ODE.isEmpty() && outputNames.size() == 0 ) {
-		Expression next;
-		outputEquation_.getExpression( next );
-		outputExpressions.push_back( next );
-		dim_outputs.push_back( next.getDim() );
-	}
-	else {
-		return ACADOERROR( RET_INVALID_OPTION );
-	}
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue SIMexport::addOutput( const String& output, const String& diffs_output, const uint dim ){
-
-	if( outputExpressions.size() == 0 && f.getNumDynamicEquations() == 0 ) {
-		outputNames.push_back( output );
-		diffs_outputNames.push_back( diffs_output );
-		dim_outputs.push_back( dim );
-	}
-	else {
-		return ACADOERROR( RET_INVALID_OPTION );
-	}
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue SIMexport::addOutput( 	const String& output, const String& diffs_output, const uint dim,
-									const String& colInd, const String& rowPtr	){
-
-
-	Vector colIndV = readFromFile( colInd.getName() );
-	Vector rowPtrV = readFromFile( rowPtr.getName() );
-	if( rowPtrV.getDim() != (dim+1) ) {
-		return ACADOERROR( RET_INVALID_OPTION );
-	}
-	colInd_outputs.push_back( colIndV );
-	rowPtr_outputs.push_back( rowPtrV );
-
-	addOutput( output, diffs_output, dim );
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue SIMexport::setMeasurements( const Vector& numberMeasurements ){
-
-	int i;
-	if( outputExpressions.size() != numberMeasurements.getDim() && outputNames.size() != numberMeasurements.getDim() ) {
-		return ACADOERROR( RET_INVALID_OPTION );
-	}
-	outputGrids.clear();
-	for( i = 0; i < (int)numberMeasurements.getDim(); i++ ) {
-		Grid nextGrid( 0.0, 1.0, (int)numberMeasurements(i) + 1 );
-		outputGrids.push_back( nextGrid );
-	}
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-BooleanType SIMexport::hasOutputs() const{
-
-	if( outputExpressions.size() == 0 && outputNames.size() == 0 ) return BT_FALSE;
-	return BT_TRUE;
 }
 
 
@@ -279,6 +208,8 @@ returnValue SIMexport::clear( )
 
 returnValue SIMexport::setup( )
 {
+	ocp.setModelData( modelData );
+
 	returnValue returnvalue = checkConsistency( );
 	if ( returnvalue != SUCCESSFUL_RETURN )
 		return ACADOERROR( returnvalue );
@@ -300,63 +231,24 @@ returnValue SIMexport::setup( )
 	if ( integrator == NULL )
 		return ACADOERROR( RET_INVALID_OPTION );
 
-	integrator->setDimensions( NX,NDX,NXA,NU,NP,N );
-
-	if( EXPORT_RHS ) {
-		Expression rhs;
-		f.getExpression( rhs );
-		if ( integrator->setDifferentialEquation( rhs ) != SUCCESSFUL_RETURN )
-			return RET_UNABLE_TO_EXPORT_CODE;
+	if( modelData.hasEquidistantIntegrationGrid()) {
+		Grid ocpGrid( 0.0, T, modelData.getN()+1 );
+		modelData.setIntegrationGrid( ocpGrid, numSteps );
 	}
-	else {
-		if ( integrator->setModel( rhs_ODE, diffs_ODE ) != SUCCESSFUL_RETURN )
-			return RET_UNABLE_TO_EXPORT_CODE;
-	}
-
-	if( !integrationGrid.isEmpty() ) {
-		if ( integrator->setGrid(integrationGrid) != SUCCESSFUL_RETURN ) {
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
-	}
-	else {
-		Grid ocpGrid( 0.0, T, N+1 );
-		if ( integrator->setGrid(ocpGrid, numSteps) != SUCCESSFUL_RETURN ) {
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
-	}
-
-	integrator->setup( );
+	integrator->setModelData( modelData );
 	
-	if( hasOutputs() ) {
+	if( modelData.hasOutputs() ) {
 		uint i;
 
 		std::vector<Grid> newGrids_;
 		if( !referenceProvided ) _refOutputFiles.clear();
 		_outputFiles.clear();
-		num_meas.clear();
-		for( i = 0; i < outputGrids.size(); i++ ) {
-			uint numOuts = (int) ceil((double)outputGrids[i].getNumIntervals()/((double) N) - 10.0*EPS);
-			Grid nextGrid( 0.0, 1.0, numOuts + 1 );
-			newGrids_.push_back( nextGrid );
-
+		for( i = 0; i < modelData.getNumOutputs(); i++ ) {
 			if( !referenceProvided ) _refOutputFiles.push_back( (String)"refOutput" << i << ".txt" );
 			_outputFiles.push_back( (String)"output" << i << ".txt" );
-			num_meas.push_back( numOuts );
-		}
-		
-		if( outputExpressions.size() > 0 ) {
-			integrator->setupOutput( newGrids_, outputExpressions );
-		}
-		else {
-			if( colInd_outputs.size() == 0 ) {
-				integrator->setupOutput( newGrids_, outputNames, diffs_outputNames, dim_outputs );
-			}
-			else {
-				integrator->setupOutput( newGrids_, outputNames, diffs_outputNames, dim_outputs, getOutputDependencies() );
-			}
 		}
 	}
-	
+
 	if( !integrator->equidistantControlGrid() ) return ACADOERROR( RET_INVALID_OPTION );
 	
 	setStatus( BS_READY );
@@ -365,36 +257,17 @@ returnValue SIMexport::setup( )
 }
 
 
-std::vector<Matrix> SIMexport::getOutputDependencies( ) {
-	std::vector<Matrix> outputDependencies;
-	for( int i = 0; i < outputNames.size(); i++ ) {
-		Vector colIndV = colInd_outputs[i];
-		Vector rowPtrV = rowPtr_outputs[i];
-
-		Matrix dependencyMat = zeros( dim_outputs[i],NX+NXA+NU+NDX );
-		int index = 1;
-		for( int j = 0; j < dim_outputs[i]; j++ ) {
-			int upper = rowPtrV(j+1);
-			for( int k = rowPtrV(j); k < upper; k++ ) {
-				dependencyMat(j,colIndV(k-1)-1) = index++;
-			}
-		}
-
-		outputDependencies.push_back( dependencyMat );
-	}
-	return outputDependencies;
-}
-
-
 returnValue SIMexport::checkConsistency( ) const
 {
 	// Number of differential state derivatives must be either zero or equal to the number of differential states:
-	if( NDX > 0 && NDX != NX ) {
+	if( modelData.getNDX() > 0 && modelData.getNDX() != modelData.getNX() ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
 	// consistency checks:
 	// only time-continuous DAEs without parameter and disturbances supported!
+	DifferentialEquation f;
+	modelData.getModel(f);
 	if ( f.isDiscretized( ) == BT_TRUE )
 		return ACADOERROR( RET_NO_DISCRETE_ODE_FOR_CODE_EXPORT );
 	
@@ -440,6 +313,12 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 {
 	int i;
 	
+	std::vector<Grid> outputGrids;
+	std::vector<Expression> outputExpressions;
+	std::vector<String> outputNames;
+	modelData.getOutputGrids(outputGrids);
+	modelData.getOutputExpressions(outputExpressions);
+	modelData.getNameOutputs(outputNames);
 	if( outputFiles.size() != outputGrids.size() || (outputFiles.size() != outputExpressions.size() && outputFiles.size() != outputNames.size()) ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
@@ -453,7 +332,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
 	main.addComment( "---------------------------------------------------------------" );
 	main.addStatement( (String)"   #define JUMP           " << jumpReference  << "      /* jump for the output reference    */\n" );
-	main.addStatement( (String)"   #define h           " << T/N  << "      /* length of one simulation interval    */\n" );
+	main.addStatement( (String)"   #define h           " << T/modelData.getN()  << "      /* length of one simulation interval    */\n" );
 	if( TIMING == BT_TRUE ) main.addStatement( (String)"   #define STEPS_TIMING   " << timingSteps << "      /* number of steps for the timing */\n" );
 	if( TIMING == BT_TRUE ) main.addStatement( (String)"   #define CALLS_TIMING   " << timingCalls << "      /* number of calls for the timing */\n" );
 	main.addStatement( "   #define RESULTS_NAME	  \"" << _resultsFile << "\"\n" );
@@ -490,7 +369,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( (String)"      real_t out" << i << "[NMEAS[" << i << "]*dimOut" << i << "];\n" );
 	}
     main.addStatement( "      real_t u[ACADO_NU];\n" );
-    if( NXA > 0 ) main.addStatement( "      real_t norm;\n" );
+    if( modelData.getNXA() > 0 ) main.addStatement( "      real_t norm;\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"      real_t step" << i << " = h/NMEAS[" << i << "];\n" );
 	}
@@ -567,7 +446,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     main.addStatement( integrate << " );\n" );
     main.addLinebreak( );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      		for( j = JUMP-1; j < NMEAS[" << i << "]; j=j+JUMP ) {\n" );
+		main.addStatement( (String)"      		for( j = 0; j < NMEAS[" << i << "]; j=j+JUMP ) {\n" );
 		main.addStatement( (String)"      			fprintf(output" << i << ", \"%.16f \", i*h+(j+1)*step" << i << ");\n" );
 		main.addStatement( (String)"      			for( k = 0; k < dimOut" << i << "; k++ ) {\n" );
 		main.addStatement( (String)"      				fprintf(output" << i << ", \"%.16f \", out" << i << "[j*dimOut" << i << "+k]);\n" );
@@ -621,12 +500,11 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 {
 	int i;
 	
-	Vector nMeasV( outputGrids.size() );
-	Vector nOutV( outputGrids.size() );
-	for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		nMeasV(i) = num_meas[i];
-		nOutV(i) = getDimOutput( (uint) i );
-	}
+	Vector nMeasV = modelData.getNumMeas();
+	Vector nOutV = modelData.getDimOutputs();
+
+	std::vector<Grid> outputGrids;
+	modelData.getOutputGrids(outputGrids);
 
     String fileName( _dirName );
     fileName << "/" << _fileName;
@@ -636,7 +514,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addLinebreak( 2 );
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
 	main.addComment( "---------------------------------------------------------------" );
-	main.addStatement( (String)"   #define h           " << T/N  << "      /* length of one simulation interval   */\n" );
+	main.addStatement( (String)"   #define h           " << T/modelData.getN()  << "      /* length of one simulation interval   */\n" );
 	main.addStatement( "   #define RESULTS_NAME	  \"" << _results << "\"\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"   #define OUTPUT" << i << "_NAME	  \"" << _outputFiles[i] << "\"\n" );
@@ -712,7 +590,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addStatement( "      			if( isnan(x[ACADO_NX+j]) ) maxErrXA = sqrt(-1);\n" );
     main.addStatement( "      		}\n" );
     main.addLinebreak( );
-    if( PRINT_DETAILS && NXA > 0 ) {
+    if( PRINT_DETAILS && modelData.getNXA() > 0 ) {
     	main.addStatement( "      		printf( \"MAX ERROR AT %.3f s:   %.4e   %.4e \\n\", i*h, maxErrX, maxErrXA );\n" );
     }
     else if( PRINT_DETAILS ) {
@@ -729,7 +607,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addStatement( "	  meanErrX = meanErrX/ACADO_N;\n" );
     main.addStatement( "	  meanErrXA = meanErrXA/ACADO_N;\n" );
     if( PRINT_DETAILS ) main.addStatement( "      printf( \"\\n\" );\n" );
-    if( NXA > 0 ) {
+    if( modelData.getNXA() > 0 ) {
     	main.addStatement( "      printf( \"TOTAL MEAN ERROR:   %.4e   %.4e \\n\", meanErrX, meanErrXA );\n" );
     }
     else {
@@ -756,7 +634,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 		main.addStatement( (String)"      			if( isnan(out" << i << "[j]) ) maxErr = sqrt(-1);\n" );
 		main.addStatement( "      		}\n" );
 		main.addLinebreak( );
-		if( PRINT_DETAILS ) main.addStatement( (String)"      		printf( \"MAX ERROR AT %.3f s:   %.4e \\n\", i*step" << i << ", maxErr );\n" );
+		if( PRINT_DETAILS ) main.addStatement( (String)"      		printf( \"MAX ERROR AT %.3f s:   %.4e \\n\", (i-1)*step" << i << ", maxErr );\n" );
 		main.addStatement( "      		meanErr += maxErr;\n" );
 		main.addLinebreak( );
 		main.addStatement( (String)"      		for( j = 0; j < NOUT[" << i << "]*(ACADO_NX+ACADO_NU); j++ ) {\n" );
@@ -785,9 +663,14 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 							const String& ref
 										)
 {
+	Grid integrationGrid;
+	modelData.getIntegrationGrid(integrationGrid);
+	std::vector<Grid> outputGrids;
+	modelData.getOutputGrids(outputGrids);
+
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
-	if( (MeasurementGrid)measGrid == ONLINE_GRID || ((MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID && !integrationGrid.isEmpty()) ) return ACADOERROR( RET_INVALID_OPTION );
+	if( (MeasurementGrid)measGrid == ONLINE_GRID || ((MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID && !modelData.hasEquidistantIntegrationGrid()) ) return ACADOERROR( RET_INVALID_OPTION );
 
 	_initStates = initStates;
 	_controls = controls;
@@ -803,7 +686,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	
 	Vector intGrid( integrationGrid.getNumIntervals()+1 );
 	Vector refIntGrid( factorRef*integrationGrid.getNumIntervals()+1 );
-	if( !integrationGrid.isEmpty() ) {
+	if( !modelData.hasEquidistantIntegrationGrid() ) {
 		intGrid(0) = integrationGrid.getTime( 0 );
 		refIntGrid(0) = integrationGrid.getTime( 0 );
 		for( i = 0; i < integrationGrid.getNumIntervals(); i++ ) {
@@ -817,25 +700,25 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 
 	int numSteps;
     get( NUM_INTEGRATOR_STEPS, numSteps );
-	timingCalls = (uint) ceil((double)(timingSteps*N)/((double) numSteps) - 10.0*EPS);
-	timingSteps = (uint) ceil((double)timingCalls*((double) numSteps/((double) N)) - 10.0*EPS);
+	timingCalls = (uint) ceil((double)(timingSteps*modelData.getN())/((double) numSteps) - 10.0*EPS);
+	timingSteps = (uint) ceil((double)timingCalls*((double) numSteps/((double) modelData.getN())) - 10.0*EPS);
     
     if( !referenceProvided ) {
 	    // REFERENCE:
-    	if( !integrationGrid.isEmpty() ) {
-    		setMeasurements( meas );			// EQUIDISTANT_GRID option is used
-    		setIntegrationGrid( refIntGrid );
+    	if( !modelData.hasEquidistantIntegrationGrid() ) {
+    		modelData.setMeasurements( meas );			// EQUIDISTANT_GRID option is used
+    		modelData.setIntegrationGrid( refIntGrid );
     		exportCode(	dirName );
     		exportTest(	dirName, String( "test.c" ), _ref, _refOutputFiles, BT_FALSE, 1 );
     	}
     	else if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
-    		setMeasurements( meas );
+    		modelData.setMeasurements( meas );
     		set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
     		exportCode(	dirName );
     		exportTest(	dirName, String( "test.c" ), _ref, _refOutputFiles, BT_FALSE, 1 );
     	}
     	else {
-    		setMeasurements( measRef );
+    		modelData.setMeasurements( measRef );
     		set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
     		exportCode(	dirName );
     		exportTest(	dirName, String( "test.c" ), _ref, _refOutputFiles, BT_FALSE, factorRef );
@@ -844,10 +727,10 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	}
     
     // THE INTEGRATOR:
-    setMeasurements( meas );
+    modelData.setMeasurements( meas );
 	set( NUM_INTEGRATOR_STEPS,  numSteps );
-	if( !integrationGrid.isEmpty() ) {
-		setIntegrationGrid( intGrid );
+	if( !modelData.hasEquidistantIntegrationGrid() ) {
+		modelData.setIntegrationGrid( intGrid );
 	}
 	exportCode(	dirName );
 	if(timingSteps > 0 && timingCalls > 0) 	exportTest(	dirName, String( "test.c" ), _results, _outputFiles, BT_TRUE, 1 );
@@ -881,8 +764,8 @@ returnValue SIMexport::exportMakefile(	const String& _dirName,
 	Makefile.addLinebreak( );
 	Makefile.addStatement( "OBJECTS = \\\n" );
 	Makefile.addStatement( "\tintegrator.o \\\n" );
-	if( !EXPORT_RHS ) {
-		Makefile.addStatement( (String)"\t" << externModel << ".o \n" );
+	if( !modelData.exportRhs() ) {
+		Makefile.addStatement( (String)"\t" << modelData.getFileNameModel() << ".o \n" );
 	}
 	Makefile.addLinebreak( 2 );
 	Makefile.addStatement( ".PHONY: all\n" );
@@ -895,8 +778,8 @@ returnValue SIMexport::exportMakefile(	const String& _dirName,
 	Makefile.addStatement( "integrator.o          : acado.h\n" );
 	Makefile.addStatement( "test.o                : acado.h\n" );
 	Makefile.addStatement( "compare.o             : acado.h\n" );
-	if( !EXPORT_RHS ) {
-		Makefile.addStatement( (String)externModel << ".o             : acado.h\n" );
+	if( !modelData.exportRhs() ) {
+		Makefile.addStatement( (String)modelData.getFileNameModel() << ".o             : acado.h\n" );
 	}
 	Makefile.addLinebreak( );
 	Makefile.addStatement( "${OBJECTS} : \n" );
@@ -945,16 +828,6 @@ returnValue SIMexport::executeTest( const String& _dirName ) {
 	nil = system( (String(_dirName) << "/./test").getName() );
 	
 	return SUCCESSFUL_RETURN;
-}
-
-
-uint SIMexport::getDimOutput( uint index ) const {
-	if( outputExpressions.size() > 0 ) {
-		return outputExpressions[index].getDim();
-	}
-	else {
-		return dim_outputs[index];
-	}
 }
 
 

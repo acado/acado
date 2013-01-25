@@ -106,10 +106,10 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	{
 		ExportVariable auxVar;
 
-		auxVar = diffs_ODE.getGlobalExportVariable();
+		auxVar = diffs_RHS.getGlobalExportVariable();
 		auxVar.setName( "odeAuxVar" );
 		auxVar.setDataStruct( ACADO_LOCAL );
-		diffs_ODE.setGlobalExportVariable( auxVar );
+		diffs_RHS.setGlobalExportVariable( auxVar );
 	}
 
 	ExportIndex run( "run1" );
@@ -160,7 +160,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
 		loop.addStatement( rk_xxx.getCols( 0,rhsDim ) == rk_eta.getCols( 0,rhsDim ) + Ah.getRow(run1)*rk_kkk );
-		loop.addFunctionCall( diffs_ODE.getName(), rk_xxx,rk_kkk.getAddress(run1,0) );
+		loop.addFunctionCall( diffs_RHS.getName(), rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
 //	loop.addStatement( rk_ttt += Matrix(h) );
@@ -234,10 +234,10 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	int matlabInterface;
 	userInteraction->get(GENERATE_MATLAB_INTERFACE, matlabInterface);
 	if (matlabInterface) {
-		return ODE.init(f_ODE, "acado_rhs", NX, 0, NU)
-				& diffs_ODE.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU);
+		return RHS.init(f_ODE, "acado_rhs", NX, 0, NU)
+				& diffs_RHS.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU);
 	} else {
-		return diffs_ODE.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU);
+		return diffs_RHS.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU);
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -256,7 +256,7 @@ returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 													ExportStruct dataStruct
 													) const
 {
-	declarations.addDeclaration( diffs_ODE.getGlobalExportVariable(),dataStruct );
+	declarations.addDeclaration( diffs_RHS.getGlobalExportVariable(),dataStruct );
 //	declarations.addDeclaration( rk_ttt,dataStruct );
 	declarations.addDeclaration( rk_xxx,dataStruct );
 	declarations.addDeclaration( rk_kkk,dataStruct );
@@ -271,12 +271,12 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 														) const
 {
 	declarations.addDeclaration( integrate );
-	declarations.addDeclaration( diffs_ODE );
+	declarations.addDeclaration( diffs_RHS );
 
 	int matlabInterface;
 	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
 	if (matlabInterface) {
-		declarations.addDeclaration( ODE );
+		declarations.addDeclaration( RHS );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -296,13 +296,13 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	get(CG_USE_OPENMP, useOMP);
 	if ( useOMP )
 	{
-		code.addDeclaration( diffs_ODE.getGlobalExportVariable() );
+		code.addDeclaration( diffs_RHS.getGlobalExportVariable() );
 		code.addDeclaration( rk_xxx );
 		code.addDeclaration( rk_kkk );
 
 		stringstream s;
 		s << "#pragma omp threadprivate( "
-				<< diffs_ODE.getGlobalExportVariable().getFullName().getName()  << ", "
+				<< diffs_RHS.getGlobalExportVariable().getFullName().getName()  << ", "
 				<< rk_xxx.getFullName().getName() << ", "
 				<< rk_kkk.getFullName().getName()
 				<< " )" << endl << endl;
@@ -310,13 +310,13 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		code.addStatement( s.str().c_str() );
 	}
 
-	code.addFunction( diffs_ODE );
+	code.addFunction( diffs_RHS );
 	code.addFunction( integrate );
 
 	int matlabInterface;
 	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
 	if (matlabInterface) {
-		code.addFunction( ODE );
+		code.addFunction( RHS );
 	}
 
 // 	if ( (PrintLevel)printLevel >= HIGH ) 

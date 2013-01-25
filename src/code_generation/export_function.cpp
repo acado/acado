@@ -248,8 +248,6 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 	{
 		acadoFPrintf(file, "\n/** %s", description.getName());
 
-		unsigned numArgs = functionArguments.getNumArguments() > 0;
-
 		if (functionArguments.getNumArguments() > 0)
 		{
 			vector< ExportArgument > args = functionArguments.get();
@@ -261,15 +259,15 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 				if (args[ i ].isGiven() == BT_TRUE || args[ i ].getDoc().isEmpty() == BT_TRUE)
 					continue;
 
-				acadoFPrintf(file, " *  \\param %s\n", args[ i ].getDoc().getName());
+				acadoFPrintf(file, " *  \\param %s %s\n", args[ i ].getName().getName(), args[ i ].getDoc().getName());
 			}
 		}
 
 		if ( functionReturnValue != 0 )
 		{
-			String doc = functionReturnValue->getDoc();
-			if (doc.isEmpty() == BT_FALSE)
-				acadoFPrintf(file, "\n *\n *  \\return %s\n", doc.getName());
+			String tmp = functionReturnValue->getDoc();
+			if (tmp.isEmpty() == BT_FALSE)
+				acadoFPrintf(file, "\n *\n *  \\return %s\n", tmp.getName());
 		}
 		acadoFPrintf(file, " */\n");
 	}

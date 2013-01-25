@@ -88,10 +88,10 @@ returnValue RungeKuttaExport::copy(	const RungeKuttaExport& arg
 									)
 {
 	numStages = arg.numStages;
-	ODE = arg.ODE;
-	diffs_ODE = arg.diffs_ODE;
-	name_ODE = arg.name_ODE;
-	name_diffs_ODE = arg.name_diffs_ODE;
+	RHS = arg.RHS;
+	diffs_RHS = arg.diffs_RHS;
+	name_RHS = arg.name_RHS;
+	name_diffs_RHS = arg.name_diffs_RHS;
 	grid = arg.grid;
 
 	// ExportVariables

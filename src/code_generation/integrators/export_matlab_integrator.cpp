@@ -73,10 +73,12 @@ ExportMatlabIntegrator& ExportMatlabIntegrator::operator=(	const ExportMatlabInt
 	return *this;
 }
 
-returnValue ExportMatlabIntegrator::configure(	const uint online )
+returnValue ExportMatlabIntegrator::configure(	const uint online, const uint debugMode, const uint numStages )
 {	
 	// Configure the dictionary
 	dictionary[ "@ONLINE_GRID@" ] =  std::string(String(online).getName());
+	dictionary[ "@DEBUG_MODE@" ] =  std::string(String(debugMode).getName());
+	dictionary[ "@NUM_STAGES@" ] =  std::string(String(numStages).getName());
 	
 	// And then fill a template file
 	fillTemplate();

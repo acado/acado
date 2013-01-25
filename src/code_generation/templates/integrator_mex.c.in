@@ -1,5 +1,7 @@
 #include "mex.h"
 #define ONLINE_GRID @ONLINE_GRID@
+#define DEBUG_MODE @DEBUG_MODE@
+#define NUM_STAGES @NUM_STAGES@
 
 /* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
 /* --------------------------------------------------- */
@@ -9,7 +11,7 @@
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     int i, j, k, Nx, Nu, gridI, Ngrid;
-    real_t *x, *u, *xnext, *sensX, *sensU, *grid;
+    real_t *x, *u, *xnext, *sensX, *sensU, *grid, *mat;
     real_t next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU];
     const char *fieldnames[3];  
     
@@ -41,7 +43,7 @@ mexErrMsgTxt( "Check the number of input arguments: since the ONLINE_GRID option
 mexErrMsgTxt( "Check the number of input arguments !" );
         }
     }
-    if (nlhs > (1+NUM_OUTPUTS)) {
+    if (nlhs > (1+NUM_OUTPUTS+DEBUG_MODE)) {
         mexErrMsgTxt( "Check the number of output arguments !" );
     }
     
@@ -177,6 +179,18 @@ acadoVariables.gridOutput3[j] = 1.1;
             sensU[j*(ACADO_NX+ACADO_NXA)+i] = next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX)+i*ACADO_NU+j];
         }
     }
+    
+    #if DEBUG_MODE > 0
+    if (nlhs > 1+NUM_OUTPUTS) {
+		plhs[1+NUM_OUTPUTS] = mxCreateDoubleMatrix(NUM_STAGES*(ACADO_NX+ACADO_NXA),NUM_STAGES*(ACADO_NX+ACADO_NXA),mxREAL);
+		mat = mxGetPr(plhs[1+NUM_OUTPUTS]);
+		for( i = 0; i < NUM_STAGES*(ACADO_NX+ACADO_NXA); ++i ) {
+            for( j = 0; j < NUM_STAGES*(ACADO_NX+ACADO_NXA); ++j ) {
+                mat[j*NUM_STAGES*(ACADO_NX+ACADO_NXA)+i] = acadoVariables.debug_mat[i*NUM_STAGES*(ACADO_NX+ACADO_NXA)+j];
+            }
+        }
+    }
+    #endif
     
     #if NUM_OUTPUTS > 0
     if (nlhs > 1) {

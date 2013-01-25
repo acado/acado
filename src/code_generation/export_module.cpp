@@ -44,13 +44,6 @@ ExportModule::ExportModule( ) : UserInteraction( )
 { 
 	setupOptions( );
 
-	NX = 0; 
-	NDX = 0;
-	NXA = 0; 
-	NU = 0; 
-	NP = 0; 
-	N  = 0;
-
 	setCommonHeaderName( "acado.h" );
 }
 
@@ -59,13 +52,6 @@ ExportModule::ExportModule(	const OCP& _ocp
 							) : UserInteraction( )
 { 
 	setupOptions( );
-
-	NX = 0;
-	NDX = 0;
-	NXA = 0; 
-	NU = 0; 
-	NP = 0; 
-	N  = 0;
 
 	setCommonHeaderName( "acado.h" );
 
@@ -104,84 +90,6 @@ returnValue ExportModule::setOCP(	const OCP& _ocp
 									)
 {
 	ocp = _ocp;
-	if( ocp.hasDifferentialEquation() ) {
-		DifferentialEquation f;
-		ocp.getDifferentialEquation(f);
-		setModel(f);
-	}
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue ExportModule::getModel( DifferentialEquation& _f ) const{
-
-    _f = f;
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue ExportModule::setModel( const DifferentialEquation& _f )
-{
-	if( rhs_ODE.isEmpty() ) {
-		f = _f;
-		Expression rhs;
-		f.getExpression( rhs );
-
-		NX = rhs.getDim() - f.getNXA();
-		NDX = f.getNDX();
-		NXA = f.getNXA();
-		NU = f.getNU();
-		NP = f.getNP();
-
-		MODEL_DIMENSIONS_SET = BT_TRUE;
-
-		EXPORT_RHS = BT_TRUE;
-	}
-	else {
-		return ACADOERROR( RET_INVALID_OPTION );
-	}
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue ExportModule::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU )
-{
-	NX = _NX;
-	NDX = _NDX;
-	NXA = _NXA;
-	NU = _NU;
-	MODEL_DIMENSIONS_SET = BT_TRUE;
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue ExportModule::setDimensions( uint _NX, uint _NU )
-{
-	setDimensions( _NX, 0, 0, _NU );
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue ExportModule::setIntegrationGrid( const Vector& gridPoints )
-{
-	integrationGrid = Grid(gridPoints);
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue ExportModule::setModel( const String& fileName, const String& _rhs_ODE, const String& _diffs_ODE )
-{
-	if( f.getNumDynamicEquations() == 0 ) {
-		externModel = String(fileName);
-		rhs_ODE = String(_rhs_ODE);
-		diffs_ODE = String(_diffs_ODE);
-
-		EXPORT_RHS = BT_FALSE;
-	}
-	else {
-		return ACADOERROR( RET_INVALID_OPTION );
-	}
-
 	return SUCCESSFUL_RETURN;
 }
 
@@ -272,13 +180,9 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 			return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	if( dim_outputs.size() != num_meas.size() ) return ACADOERROR( RET_INVALID_OPTION );
-	Vector nMeasV( dim_outputs.size() );
-	Vector nOutV( dim_outputs.size() );
-	for( uint i = 0; i < (int)dim_outputs.size(); i++ ) {
-		nMeasV(i) = num_meas[i];
-		nOutV(i) = dim_outputs[i];
-	}
+	Vector nMeasV = ocp.getNumMeas();
+	Vector nOutV = ocp.getDimOutputs();
+	if( nMeasV.getDim() != nOutV.getDim() ) return ACADOERROR( RET_INVALID_OPTION );
 
 	//
 	// Some common defines
@@ -286,7 +190,7 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 	acadoHeader.addComment( "COMMON DEFINITIONS:             " );
 	acadoHeader.addComment( "--------------------------------" );
 	acadoHeader.addLinebreak( 2 );
-	if( (uint)dim_outputs.size() > 0 ) {
+	if( (uint)nOutV.getDim() > 0 ) {
 		acadoHeader.addComment( "Dimension of the output functions" );
 		acadoHeader.addDeclaration( ExportVariable( "NOUT",nOutV,STATIC_CONST_INT ) );
 		acadoHeader.addComment( "Measurements of the output functions per shooting interval" );
@@ -295,19 +199,19 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 	acadoHeader.addLinebreak( 2 );
 
 	acadoHeader.addComment( "Number of control intervals" );
-	acadoHeader.addStatement( (String)"#define ACADO_N   " << N << "\n");
+	acadoHeader.addStatement( (String)"#define ACADO_N   " << ocp.getN() << "\n");
 	acadoHeader.addComment( "Number of differential states" );
-	acadoHeader.addStatement( (String)"#define ACADO_NX  " << NX << "\n" );
+	acadoHeader.addStatement( (String)"#define ACADO_NX  " << ocp.getNX() << "\n" );
 	acadoHeader.addComment( "Number of differential state derivatives" );
-	acadoHeader.addStatement( (String)"#define ACADO_NDX  " << NDX << "\n" );
+	acadoHeader.addStatement( (String)"#define ACADO_NDX  " << ocp.getNDX() << "\n" );
 	acadoHeader.addComment( "Number of algebraic states" );
-	acadoHeader.addStatement( (String)"#define ACADO_NXA  " << NXA << "\n" );
+	acadoHeader.addStatement( (String)"#define ACADO_NXA  " << ocp.getNXA() << "\n" );
 	acadoHeader.addComment( "Number of controls" );
-	acadoHeader.addStatement( (String)"#define ACADO_NU  " << NU << "\n" );
+	acadoHeader.addStatement( (String)"#define ACADO_NU  " << ocp.getNU() << "\n" );
 	acadoHeader.addComment( "Number of parameters" );
-	acadoHeader.addStatement( (String)"#define ACADO_NP  " << NP << "\n" );
+	acadoHeader.addStatement( (String)"#define ACADO_NP  " << ocp.getNP() << "\n" );
 	acadoHeader.addComment( "Number of output functions" );
-	acadoHeader.addStatement( (String)"#define NUM_OUTPUTS  " << (uint)dim_outputs.size() << "\n" );
+	acadoHeader.addStatement( (String)"#define NUM_OUTPUTS  " << (uint)nOutV.getDim() << "\n" );
 	acadoHeader.addLinebreak( 2 );
 
 	acadoHeader.addComment( "GLOBAL VARIABLES:               " );
@@ -380,43 +284,6 @@ returnValue ExportModule::exportAcadoHeader(	const String& _dirName,
 }
 
 
-uint ExportModule::getNX( ) const
-{
-	return NX;
-}
-
-
-uint ExportModule::getNDX( ) const
-{
-	return NDX;
-}
-
-
-uint ExportModule::getNXA( ) const
-{
-	return NXA;
-}
-
-
-uint ExportModule::getNU( ) const
-{
-	return NU;
-}
-
-
-uint ExportModule::getNP( ) const
-{
-	return NP;
-}
-
-
-uint ExportModule::getN( ) const
-{
-	return N;
-}
-
-
-
 returnValue	ExportModule::setCommonHeaderName(	const String& _name
 												)
 {
@@ -445,16 +312,6 @@ returnValue ExportModule::copy(	const ExportModule& arg
 {
 	ocp = arg.ocp;
 
-	NX = arg.NX;
-	NDX = arg.NDX;
-	NXA = arg.NXA; 
-	NU = arg.NU;
-	NP = arg.NP;
-	N  = arg.N;
-	
-	dim_outputs = arg.dim_outputs;
-	num_meas = arg.num_meas;
-
 	commonHeaderName = arg.commonHeaderName;
 
 	return SUCCESSFUL_RETURN;
@@ -470,6 +327,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( UNROLL_LINEAR_SOLVER,       	BT_FALSE	    );
 	addOption( NUM_INTEGRATOR_STEPS,        30              );
 	addOption( MEASUREMENT_GRID, 			EQUIDISTANT_GRID);
+	addOption( INTEGRATOR_DEBUG_MODE, 		0				);
 	addOption( IMPLICIT_INTEGRATOR_MODE,	IFTR 			);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	3				);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS_INIT, 0			);

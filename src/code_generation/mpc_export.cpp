@@ -102,7 +102,7 @@ returnValue MPCexport::exportCode(	const String& dirName,
 									int _precision
 									)
 {
-	if (!MODEL_DIMENSIONS_SET) return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+	if (!ocp.modelDimensionsSet()) return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 	if ( setup( ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
@@ -295,8 +295,6 @@ returnValue MPCexport::setup( )
 	Grid grid;
 	ocp.getGrid( grid );
 
-	N = grid.getNumIntervals();
-
 	int numSteps;
 	get( NUM_INTEGRATOR_STEPS, numSteps );
 
@@ -311,74 +309,16 @@ returnValue MPCexport::setup( )
 	if ( integrator == NULL )
 		return ACADOERROR( RET_INVALID_OPTION );
 
-	integrator->setDimensions( NX,NDX,NXA,NU,NP,N );
-
-	if( EXPORT_RHS ) {
-		Expression rhs;
-		f.getExpression( rhs );
-		if ( integrator->setDifferentialEquation( rhs ) != SUCCESSFUL_RETURN )
-			return RET_UNABLE_TO_EXPORT_CODE;
+	if( ocp.hasEquidistantIntegrationGrid()) {
+		ocp.setIntegrationGrid( grid, numSteps );
 	}
-	else {
-		if ( integrator->setModel( rhs_ODE, diffs_ODE ) != SUCCESSFUL_RETURN )
-			return RET_UNABLE_TO_EXPORT_CODE;
-	}
-
-	if( !integrationGrid.isEmpty() ) {
-		if ( integrator->setGrid(integrationGrid) != SUCCESSFUL_RETURN ) {
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
-	}
-	else {
-		if ( integrator->setGrid(grid, numSteps) != SUCCESSFUL_RETURN ) {
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
-	}
-
-	integrator->setup( );
-
-	if( ocp.hasOutputFunctions() ) {
-		std::vector<OutputFcn> outputFcns;
-		ocp.getOutputFunctions( outputFcns );
-
-		std::vector<Expression> rhsOutput;
-		uint i;
-		for( i = 0; i < outputFcns.size(); i++ ) {
-			Expression next;
-			outputFcns[i].getExpression( next );
-			rhsOutput.push_back( next );
-		}
-
-		std::vector<Grid> outputGrids_;
-		ocp.getOutputGrids( outputGrids_ );
-
-		int steps;
-		if( ocp.hasEquidistantGrid() ) {
-			steps = numSteps;
-		}
-		else {
-			Vector _numSteps;
-			ocp.getNumSteps( _numSteps );
-			steps = 0;
-			for( i = 0; i < _numSteps.getDim(); i++ ) {
-				steps += (int)_numSteps(i);
-			}
-		}
-
-		std::vector<Grid> newGrids_;
-		for( i = 0; i < outputGrids_.size(); i++ ) {
-			Grid nextGrid( 0.0, 1.0, (int) ceil((double)outputGrids_[i].getNumIntervals()/((double) steps) - 10.0*EPS) + 1 );
-			newGrids_.push_back( nextGrid );
-		}
-
-		integrator->setupOutput( newGrids_, rhsOutput );
-	}
+	integrator->setModelData( ocp.getModelData() );
 
 
 	// extract control/state bounds (no free parameters yet!)
 	// TODO: extension to DAE systems
-	VariablesGrid ugrid( NU, grid );
-	VariablesGrid xgrid( NX, grid );
+	VariablesGrid ugrid( ocp.getNU(), grid );
+	VariablesGrid xgrid( ocp.getNX(), grid );
 
 	OCPiterate tmp;
 	tmp.init( &xgrid,0,0,&ugrid,0 );
@@ -396,7 +336,7 @@ returnValue MPCexport::setup( )
 		delete condenser;
 
 	condenser = new CondensingExport( this,commonHeaderName );
-	condenser->setDimensions( NX,NU,NP,N );
+	condenser->setDimensions( ocp.getNX(),ocp.getNU(),ocp.getNP(),ocp.getN() );
 
 	condenser->setIntegratorExport( integrator );
 
@@ -427,19 +367,19 @@ returnValue MPCexport::setup( )
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
 
 	if( Q.getDim() == 0 )
-		Q = zeros( NX,NX );
+		Q = zeros( ocp.getNX(),ocp.getNX() );
 
 	if( R.getDim() == 0 )
-		R = zeros( NU,NU );
+		R = zeros( ocp.getNU(),ocp.getNU() );
 
 	if( QF.getDim() == 0 )
-		QF = zeros( NX,NX );
+		QF = zeros( ocp.getNX(),ocp.getNX() );
 
 	if( QS.getDim() == 0 )
-		QS = zeros( NX,NX );
+		QS = zeros( ocp.getNX(),ocp.getNX() );
 
 	if( QS2.getDim() == 0 )
-		QS2 = zeros( NX,NX );
+		QS2 = zeros( ocp.getNX(),ocp.getNX() );
 
 	if ( ( Q.getNumRows( ) != QF.getNumRows( ) ) || ( Q.getNumCols( ) != QF.getNumCols( ) ) )
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
@@ -455,7 +395,7 @@ returnValue MPCexport::setup( )
 		delete gaussNewton;
 
 	gaussNewton = new GaussNewtonExport( this,commonHeaderName );
-	gaussNewton->setDimensions( NX,NDX,NXA,NU,NP,N );
+	gaussNewton->setDimensions( ocp.getNX(),ocp.getNDX(),ocp.getNXA(),ocp.getNU(),ocp.getNP(),ocp.getN() );
 
 	gaussNewton->setCondensingExport( condenser );
 	gaussNewton->setControlBounds( *(tmp.u) );
@@ -467,7 +407,7 @@ returnValue MPCexport::setup( )
 		delete auxFcns;
 
 	auxFcns = new AuxiliaryFunctionsExport( this );
-	auxFcns->setDimensions( NX,NDX,NXA,NU,NP,N );
+	auxFcns->setDimensions( ocp.getNX(),ocp.getNDX(),ocp.getNXA(),ocp.getNU(),ocp.getNP(),ocp.getN() );
 
 	auxFcns->setup( );
 
@@ -484,6 +424,8 @@ returnValue MPCexport::checkConsistency( ) const
 	if ( ocp.hasObjective( ) == BT_TRUE )
 		return ACADOERROR( RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT );
 	
+	DifferentialEquation f;
+	ocp.getModel( f );
 	// only time-continuous ODEs without parameter and disturbances supported!
 	if ( f.isODE( ) == BT_FALSE )
 		return ACADOERROR( RET_ONLY_ODE_FOR_CODE_EXPORT );
@@ -593,13 +535,13 @@ returnValue MPCexport::exportTemplateMain(	const String& _dirName,
 	main.addLinebreak( 2 );
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
 	main.addComment( "---------------------------------------------------------------" );
-	main.addStatement( (String)"   #define NX          " << NX << "      /* number of differential states  */\n" );
-	main.addStatement( (String)"   #define NU          " << NU << "      /* number of control inputs       */\n" );
+	main.addStatement( (String)"   #define NX          " << ocp.getNX() << "      /* number of differential states  */\n" );
+	main.addStatement( (String)"   #define NU          " << ocp.getNU() << "      /* number of control inputs       */\n" );
 
-	if ( NP > 0 )
-		main.addStatement( (String)"   #define NP          " << NP << "      /* number of fixed parameters     */\n" );
+	if ( ocp.getNP() > 0 )
+		main.addStatement( (String)"   #define NP          " << ocp.getNP() << "      /* number of fixed parameters     */\n" );
 
-	main.addStatement( (String)"   #define N           " << N  << "      /* number of control intervals    */\n" );
+	main.addStatement( (String)"   #define N           " << ocp.getN()  << "      /* number of control intervals    */\n" );
 	main.addStatement( "   #define NUM_STEPS   5      /* number of real time iterations */\n" );
 	main.addStatement( "   #define VERBOSE     1      /* show iterations: 1, silent: 0  */\n" );
 	main.addComment( "---------------------------------------------------------------" );
@@ -655,7 +597,7 @@ returnValue MPCexport::exportTemplateMain(	const String& _dirName,
     main.addStatement( "      for( i = 0; i < NX*N; ++i )  acadoVariables.x[i] = 0.0;\n" );
     main.addStatement( "      for( i = 0; i < NU*N; ++i )  acadoVariables.u[i] = 0.0;\n" );
 
-	if ( NP > 0 )
+	if ( ocp.getNP() > 0 )
 		main.addStatement( "      for( i = 0; i < NP; ++i )    acadoVariables.p[i] = 0.0;\n" );
 
     main.addLinebreak( );
@@ -767,8 +709,8 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addStatement( "\t./cvxgen/ldl.o                 \\\n" );
 			Makefile.addStatement( "\t./cvxgen/util.o                \\\n" );
 			Makefile.addStatement( "\tintegrator.o                   \\\n" );
-			if( !EXPORT_RHS ) {
-				Makefile.addStatement( (String)"\t" << externModel << ".o \\\n" );
+			if( !ocp.exportRhs() ) {
+				Makefile.addStatement( (String)"\t" << ocp.getFileNameModel() << ".o \\\n" );
 			}
 			Makefile.addStatement( "\tcondensing.o                   \\\n" );
 			Makefile.addStatement( "\tgauss_newton_method.o          \n" );
@@ -780,8 +722,8 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addLinebreak( );
 			Makefile.addStatement( "./cvxgen/solver.o     : ./cvxgen/solver.h\n" );
 			Makefile.addStatement( "integrator.o          : acado.h\n" );
-			if( !EXPORT_RHS ) {
-				Makefile.addStatement( (String)externModel << ".o             : acado.h\n" );
+			if( !ocp.exportRhs() ) {
+				Makefile.addStatement( (String)ocp.getFileNameModel() << ".o             : acado.h\n" );
 			}
 			Makefile.addStatement( "condensing.o          : acado.h\n" );
 			Makefile.addStatement( "gauss_newton_method.o : acado.h   ./cvxgen/solver.h\n" );
@@ -818,8 +760,8 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addStatement( "\t./qpoases/SRC/MessageHandling.o \\\n" );
 			Makefile.addStatement( "\t./qpoases/solver.o              \\\n" );
 			Makefile.addStatement( "\tintegrator.o                    \\\n" );
-			if( !EXPORT_RHS ) {
-				Makefile.addStatement( (String)"\t" << externModel << ".o \\\n" );
+			if( !ocp.exportRhs() ) {
+				Makefile.addStatement( (String)"\t" << ocp.getFileNameModel() << ".o \\\n" );
 			}
 			Makefile.addStatement( "\tcondensing.o                    \\\n" );
 			Makefile.addStatement( "\tgauss_newton_method.o \n" );
@@ -831,8 +773,8 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addLinebreak( );
 			Makefile.addStatement( "./qpoases/solver.o    : ./qpoases/solver.hpp\n" );
 			Makefile.addStatement( "integrator.o          : acado.h\n" );
-			if( !EXPORT_RHS ) {
-				Makefile.addStatement( (String)externModel << ".o             : acado.h\n" );
+			if( !ocp.exportRhs() ) {
+				Makefile.addStatement( (String)ocp.getFileNameModel() << ".o             : acado.h\n" );
 			}
 			Makefile.addStatement( "condensing.o          : acado.h\n" );
 			Makefile.addStatement( "gauss_newton_method.o : acado.h   ./qpoases/solver.hpp\n" );
@@ -870,8 +812,8 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addStatement( "\t./qpoases3/src/MessageHandling.o \\\n" );
 			Makefile.addStatement( "\t./qpoases3/solver.o              \\\n" );
 			Makefile.addStatement( "\tintegrator.o                     \\\n" );
-			if( !EXPORT_RHS ) {
-				Makefile.addStatement( (String)"\t" << externModel << ".o \\\n" );
+			if( !ocp.exportRhs() ) {
+				Makefile.addStatement( (String)"\t" << ocp.getFileNameModel() << ".o \\\n" );
 			}
 			Makefile.addStatement( "\tcondensing.o                     \\\n" );
 			Makefile.addStatement( "\tgauss_newton_method.o \n" );
@@ -883,8 +825,8 @@ returnValue MPCexport::exportMakefile(	const String& _dirName,
 			Makefile.addLinebreak( );
 			Makefile.addStatement( "./qpoases3/solver.o    : ./qpoases3/solver.h\n" );
 			Makefile.addStatement( "integrator.o          : acado.h\n" );
-			if( !EXPORT_RHS ) {
-				Makefile.addStatement( (String)externModel << ".o             : acado.h\n" );
+			if( !ocp.exportRhs() ) {
+				Makefile.addStatement( (String)ocp.getFileNameModel() << ".o             : acado.h\n" );
 			}
 			Makefile.addStatement( "condensing.o          : acado.h\n" );
 			Makefile.addStatement( "gauss_newton_method.o : acado.h   ./qpoases3/solver.h\n" );
@@ -1166,15 +1108,15 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	}
 
 	sfunction.addLinebreak( );
-	sfunction.addStatement( (String)"#define NX           " << getNX() << "\n" );
-	sfunction.addStatement( (String)"#define NU           " << getNU() << "\n" );
-	sfunction.addStatement( (String)"#define NP           " << getNP() << "\n" );
-	sfunction.addStatement( (String)"#define N            " << getN()  << "\n" );
+	sfunction.addStatement( (String)"#define NX           " << ocp.getNX() << "\n" );
+	sfunction.addStatement( (String)"#define NU           " << ocp.getNU() << "\n" );
+	sfunction.addStatement( (String)"#define NP           " << ocp.getNP() << "\n" );
+	sfunction.addStatement( (String)"#define N            " << ocp.getN()  << "\n" );
 	sfunction.addStatement( "#define SAMPLINGTIME 0.1\n" );
 	sfunction.addLinebreak( 2 );
 	
 	int numInputs = 3;
-	if ( getNP() > 0 )
+	if ( ocp.getNP() > 0 )
 		++numInputs;
 
 	sfunction.addStatement( "static void mdlInitializeSizes (SimStruct *S)\n" );
@@ -1201,7 +1143,7 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    ssSetInputPortVectorDimension(S, 1, NX*N);\n" );
 	sfunction.addStatement( "    ssSetInputPortVectorDimension(S, 2, NU*N);\n" );
 
-	if ( getNP() > 0 )
+	if ( ocp.getNP() > 0 )
 		sfunction.addStatement( "    ssSetInputPortVectorDimension(S, 3, NP);\n" );
 
 	sfunction.addLinebreak( );
@@ -1214,7 +1156,7 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    ssSetInputPortDirectFeedThrough(S, 1, 1);\n" );
 	sfunction.addStatement( "    ssSetInputPortDirectFeedThrough(S, 2, 1);\n" );
 
-	if ( getNP() > 0 )
+	if ( ocp.getNP() > 0 )
 		sfunction.addStatement( "    ssSetInputPortDirectFeedThrough(S, 3, 1);\n" );
 
 	sfunction.addLinebreak( );
@@ -1254,7 +1196,7 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    int i;\n" );
 	sfunction.addLinebreak( );
 
-	if ( getNP() > 0 )
+	if ( ocp.getNP() > 0 )
 		sfunction.addStatement( "    InputRealPtrsType in_xRef, in_uRef, in_p;\n" );
 	else
 		sfunction.addStatement( "    InputRealPtrsType in_xRef, in_uRef;\n" );
@@ -1265,7 +1207,7 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    in_xRef = ssGetInputPortRealSignalPtrs(S, 1);\n" );
 	sfunction.addStatement( "    in_uRef = ssGetInputPortRealSignalPtrs(S, 2);\n" );
 	
-	if ( getNP() > 0 )
+	if ( ocp.getNP() > 0 )
 		sfunction.addStatement( "    in_p    = ssGetInputPortRealSignalPtrs(S, 3);\n" );
 
 	sfunction.addLinebreak( );
@@ -1278,7 +1220,7 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    for( i=0; i < NX*N; ++i ) acadoVariables.xRef[i] = (double)(*in_xRef)[i];\n" );
 	sfunction.addStatement( "    for( i=0; i < NU*N; ++i ) acadoVariables.uRef[i] = (double)(*in_uRef)[i];\n" );
 
-	if ( getNP() > 0 )
+	if ( ocp.getNP() > 0 )
 		sfunction.addStatement( "    for( i = 0; i < NP;   ++i ) acadoVariables.p[i]    = (double)(*in_p)[i];\n" );
 
 	sfunction.addLinebreak( );
@@ -1292,7 +1234,7 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    double measurement[NX];\n" );
 	sfunction.addLinebreak( );
 
-	if ( getNP() > 0 )
+	if ( ocp.getNP() > 0 )
 		sfunction.addStatement( "    InputRealPtrsType in_x, in_xRef, in_uRef, in_p;\n" );
 	else
 		sfunction.addStatement( "    InputRealPtrsType in_x, in_xRef, in_uRef;\n" );
@@ -1304,7 +1246,7 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    in_xRef = ssGetInputPortRealSignalPtrs(S, 1);\n" );
 	sfunction.addStatement( "    in_uRef = ssGetInputPortRealSignalPtrs(S, 2);\n" );
 
-	if ( getNP() > 0 )
+	if ( ocp.getNP() > 0 )
 		sfunction.addStatement( "    in_p    = ssGetInputPortRealSignalPtrs(S, 3);\n" );
 
 	sfunction.addLinebreak( );
@@ -1312,7 +1254,7 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    for( i=0; i < NX*N; ++i ) acadoVariables.xRef[i] = (double)(*in_xRef)[i];\n" );
 	sfunction.addStatement( "    for( i=0; i < NU*N; ++i ) acadoVariables.uRef[i] = (double)(*in_uRef)[i];\n" );
 
-	if ( getNP() > 0 )
+	if ( ocp.getNP() > 0 )
 		sfunction.addStatement( "    for( i = 0; i < NP;   ++i ) acadoVariables.p[i]    = (double)(*in_p)[i];\n" );
 
 	sfunction.addLinebreak( );

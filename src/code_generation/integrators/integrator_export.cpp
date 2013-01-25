@@ -83,54 +83,83 @@ IntegratorExport& IntegratorExport::operator=(	const IntegratorExport& arg
 returnValue IntegratorExport::setGrid(	const Grid& _grid )
 {
 	grid = _grid;
-	EQUIDISTANT = BT_FALSE;
 
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue IntegratorExport::setGrid(	const Grid& _ocpGrid, const uint _numSteps
-										)
-{
-	uint i;
-	N = _ocpGrid.getNumIntervals();
-	BooleanType equidistant = _ocpGrid.isEquidistant();
-	double T = _ocpGrid.getLastTime() - _ocpGrid.getFirstTime();
-	double h = T/((double)_numSteps);
-	Vector stepsVector( N );
-
-	for( i = 0; i < stepsVector.getDim(); i++ )
-	{
-		stepsVector(i) = (int) ceil((_ocpGrid.getTime(i+1)-_ocpGrid.getTime(i))/h - 10.0*EPS);
-	}
-
-	if( equidistant )
-	{
-		// Setup fixed integrator grid for equidistant control grid
-		grid = Grid( 0.0, ((double) T)/((double) N), (int) ceil((double)_numSteps/((double) N) - 10.0*EPS) + 1 );
-	}
-	else
-	{
-		// Setup for non equidistant control grid
-		// NOTE: This grid defines only one integration step because the control
-		// grid is non equidistant.
-		grid = Grid( 0.0, h, 2 );
-		numSteps = stepsVector;
-	}
 	return SUCCESSFUL_RETURN;
 }
 
 
 returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _name_diffs_ODE ) {
 
-	if( ODE.getFunctionDim() == 0 ) {
-		name_ODE = String(_name_ODE);
-		name_diffs_ODE = String(_name_diffs_ODE);
+	if( RHS.getFunctionDim() == 0 ) {
+		name_RHS = String(_name_ODE);
+		name_diffs_RHS = String(_name_diffs_ODE);
 
 		EXPORT_RHS = BT_FALSE;
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue IntegratorExport::setModelData( const ModelData& data ) {
+
+	setDimensions( data.getNX(),data.getNDX(),data.getNXA(),data.getNU(),data.getNP(),data.getN() );
+	EXPORT_RHS = data.exportRhs();
+
+	if( EXPORT_RHS ) {
+		DifferentialEquation f;
+		data.getModel(f);
+		Expression rhs;
+		f.getExpression( rhs );
+		if ( setDifferentialEquation( rhs ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+	}
+	else {
+		if ( setModel( data.getNameRhs(), data.getNameDiffsRhs() ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+	}
+	Grid integrationGrid;
+	data.getIntegrationGrid(integrationGrid);
+	grid = integrationGrid;
+	EQUIDISTANT = data.hasEquidistantIntegrationGrid();
+
+	setup( );
+
+	if( data.hasOutputs() ) {
+		uint i;
+
+		std::vector<Grid> newGrids_;
+		std::vector<Grid> outputGrids_;
+		data.getOutputGrids(outputGrids_);
+		std::vector<Expression> outputExpressions_;
+		data.getOutputExpressions(outputExpressions_);
+		for( i = 0; i < outputGrids_.size(); i++ ) {
+			uint numOuts = (int) ceil((double)outputGrids_[i].getNumIntervals()/((double) data.getN()) - 10.0*EPS);
+			Grid nextGrid( 0.0, 1.0, numOuts + 1 );
+			newGrids_.push_back( nextGrid );
+		}
+
+		if( outputExpressions_.size() > 0 ) {
+			setupOutput( newGrids_, outputExpressions_ );
+		}
+		else {
+			std::vector<String> outputNames;
+			std::vector<String> diffs_outputNames;
+			std::vector<uint> dim_outputs;
+			std::vector<Matrix> outputDependencies_ = data.getOutputDependencies();
+			data.getNameOutputs(outputNames);
+			data.getNameDiffsOutputs(diffs_outputNames);
+			data.getDimOutputs(dim_outputs);
+			if( !data.hasCompressedStorage() ) {
+				setupOutput( newGrids_, outputNames, diffs_outputNames, dim_outputs );
+			}
+			else {
+				setupOutput( newGrids_, outputNames, diffs_outputNames, dim_outputs, outputDependencies_ );
+			}
+		}
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -205,12 +234,12 @@ BooleanType IntegratorExport::equidistantControlGrid( ) const{
 	return numSteps.isEmpty();
 }
 
-const String IntegratorExport::getNameODE() const{
+const String IntegratorExport::getNameRHS() const{
 	if( EXPORT_RHS ) {
-		return ODE.getName();
+		return RHS.getName();
 	}
 	else {
-		return name_ODE;
+		return name_RHS;
 	}
 }
 
@@ -233,12 +262,12 @@ uint IntegratorExport::getDimOUTPUT( uint index ) const{
 }
 
 
-const String IntegratorExport::getNameDiffsODE() const{
+const String IntegratorExport::getNameDiffsRHS() const{
 	if( EXPORT_RHS ) {
-		return diffs_ODE.getName();
+		return diffs_RHS.getName();
 	}
 	else {
-		return name_diffs_ODE;
+		return name_diffs_RHS;
 	}
 }
 
