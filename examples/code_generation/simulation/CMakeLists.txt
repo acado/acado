@@ -106,11 +106,11 @@ TARGET_LINK_LIBRARIES(
 # Build externModel example
 #
 ADD_EXECUTABLE(
-    externModel
-    externModel.cpp
+    extern_model
+    extern_model.cpp
 )
 TARGET_LINK_LIBRARIES(
-	externModel
+	extern_model
 	${ACADO_SHARED_LIBRARIES}
 	${MHE_EXPORT_SHARED_LIBRARIES}
 )
