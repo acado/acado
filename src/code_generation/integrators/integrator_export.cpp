@@ -45,9 +45,9 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 									const String& _commonHeaderName
 									) : ExportAlgorithm( _userInteraction,_commonHeaderName )
 {
-	EXPORT_RHS = BT_TRUE;
-	EQUIDISTANT = BT_TRUE;
-	CRS_FORMAT = BT_FALSE;
+	exportRhs = BT_TRUE;
+	equidistant = BT_TRUE;
+	crsFormat = BT_FALSE;
 
 	reset_int = ExportVariable( "resetIntegrator", 1, 1, INT, ACADO_VARIABLES, BT_TRUE );
 }
@@ -56,9 +56,9 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 IntegratorExport::IntegratorExport(	const IntegratorExport& arg
 									) : ExportAlgorithm( arg )
 {
-	EXPORT_RHS = BT_TRUE;
-	EQUIDISTANT = BT_TRUE;
-	CRS_FORMAT = BT_FALSE;
+	exportRhs = BT_TRUE;
+	equidistant = BT_TRUE;
+	crsFormat = BT_FALSE;
 }
 
 
@@ -90,11 +90,11 @@ returnValue IntegratorExport::setGrid(	const Grid& _grid )
 
 returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _name_diffs_ODE ) {
 
-	if( RHS.getFunctionDim() == 0 ) {
-		name_RHS = String(_name_ODE);
-		name_diffs_RHS = String(_name_diffs_ODE);
+	if( rhs.getFunctionDim() == 0 ) {
+		name_rhs = String(_name_ODE);
+		name_diffs_rhs = String(_name_diffs_ODE);
 
-		EXPORT_RHS = BT_FALSE;
+		exportRhs = BT_FALSE;
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -107,9 +107,9 @@ returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _
 returnValue IntegratorExport::setModelData( const ModelData& data ) {
 
 	setDimensions( data.getNX(),data.getNDX(),data.getNXA(),data.getNU(),data.getNP(),data.getN() );
-	EXPORT_RHS = data.exportRhs();
+	exportRhs = data.exportRhs();
 
-	if( EXPORT_RHS ) {
+	if( exportRhs ) {
 		DifferentialEquation f;
 		data.getModel(f);
 		Expression rhs;
@@ -124,7 +124,7 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	Grid integrationGrid;
 	data.getIntegrationGrid(integrationGrid);
 	grid = integrationGrid;
-	EQUIDISTANT = data.hasEquidistantIntegrationGrid();
+	equidistant = data.hasEquidistantIntegrationGrid();
 
 	setup( );
 
@@ -173,9 +173,9 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 returnValue IntegratorExport::copy(	const IntegratorExport& arg
 									)
 {
-	EXPORT_RHS = arg.EXPORT_RHS;
-	EQUIDISTANT = arg.EQUIDISTANT;
-	CRS_FORMAT = arg.CRS_FORMAT;
+	exportRhs = arg.exportRhs;
+	equidistant = arg.equidistant;
+	crsFormat = arg.crsFormat;
 	grid = arg.grid;
 	numSteps = arg.numSteps;
 
@@ -235,48 +235,48 @@ BooleanType IntegratorExport::equidistantControlGrid( ) const{
 }
 
 const String IntegratorExport::getNameRHS() const{
-	if( EXPORT_RHS ) {
-		return RHS.getName();
+	if( exportRhs ) {
+		return rhs.getName();
 	}
 	else {
-		return name_RHS;
+		return name_rhs;
 	}
 }
 
 const String IntegratorExport::getNameOUTPUT( uint index ) const{
-	if( EXPORT_RHS ) {
-		return OUTPUTS[index].getName();
+	if( exportRhs ) {
+		return outputs[index].getName();
 	}
 	else {
-		return name_OUTPUTS[index];
+		return name_outputs[index];
 	}
 }
 
 uint IntegratorExport::getDimOUTPUT( uint index ) const{
-	if( EXPORT_RHS ) {
+	if( exportRhs ) {
 		return outputExpressions[index].getDim();
 	}
 	else {
-		return num_OUTPUTS[index];
+		return num_outputs[index];
 	}
 }
 
 
 const String IntegratorExport::getNameDiffsRHS() const{
-	if( EXPORT_RHS ) {
-		return diffs_RHS.getName();
+	if( exportRhs ) {
+		return diffs_rhs.getName();
 	}
 	else {
-		return name_diffs_RHS;
+		return name_diffs_rhs;
 	}
 }
 
 const String IntegratorExport::getNameDiffsOUTPUT( uint index ) const{
-	if( EXPORT_RHS ) {
-		return diffs_OUTPUTS[index].getName();
+	if( exportRhs ) {
+		return diffs_outputs[index].getName();
 	}
 	else {
-		return name_diffs_OUTPUTS[index];
+		return name_diffs_outputs[index];
 	}
 }
 
