@@ -148,7 +148,7 @@ ADD_CUSTOM_COMMAND(
 # Build a test application
 ADD_EXECUTABLE(
 	# Name of the executable
-    getting_started_closed_loop
+    code_generation_getting_started_closed_loop
     
     # A test application source
     getting_started_closed_loop.cpp
@@ -161,13 +161,14 @@ ADD_EXECUTABLE(
 )
 TARGET_LINK_LIBRARIES(
 	# Name of the executable
-    getting_started_closed_loop
+    code_generation_getting_started_closed_loop
     
     # Link against ACADO libraries
     ${ACADO_LIBS}
 )
 SET_TARGET_PROPERTIES(
-	getting_started_closed_loop
+	code_generation_getting_started_closed_loop
 	PROPERTIES
+		OUTPUT_NAME getting_started_closed_loop
 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )

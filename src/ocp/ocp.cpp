@@ -64,7 +64,7 @@ OCP::OCP( const double &tStart_, const double &tEnd_, const Vector& _numSteps )
 		times(i+1) = times(i) + h*_numSteps(i);
 	}
 	
-	numSteps = _numSteps;
+	modelData.setNumSteps(_numSteps);
     setupGrid( times );
 }
 
@@ -75,6 +75,7 @@ OCP::OCP( const Grid &grid_ )
     grid = grid_;
     objective.init ( grid );
     constraint.init( grid );
+    setN( grid.getNumIntervals() );
 }
 
 
@@ -102,12 +103,9 @@ void OCP::copy( const OCP &rhs ){
 	mCs = rhs.mCs;
 
     grid                 = rhs.grid                ;
-    numSteps			 = rhs.numSteps			   ;
+    modelData			 = rhs.modelData		   ;
     objective            = rhs.objective           ;
-    differentialEquation = rhs.differentialEquation;
-    outputFunctions 	 = rhs.outputFunctions	   ;
     constraint           = rhs.constraint          ;
-    outputGrids			 = rhs.outputGrids		   ;
 }
 
 OCP::OCP( const OCP& rhs )
@@ -178,35 +176,9 @@ returnValue OCP::minimizeLSQ( const Function      &h,
 
 
 
-returnValue OCP::addOutput( const OutputFcn& outputEquation_ ){
-
-	outputFunctions.push_back( outputEquation_ );
-    
-    return SUCCESSFUL_RETURN;
-}
-
-
-
-returnValue OCP::setupOutput( const Vector& numberMeasurements ){
-
-	int i;
-	if( outputFunctions.size() != numberMeasurements.getDim() ) {
-		return ACADOERROR( RET_INVALID_OPTION );
-	}
-	outputGrids.clear();
-	for( i = 0; i < (int)numberMeasurements.getDim(); i++ ) {
-		Grid nextGrid( grid.getFirstTime(), grid.getLastTime(), (uint)numberMeasurements(i) + 1 );
-		outputGrids.push_back( nextGrid );
-	}
-    
-    return SUCCESSFUL_RETURN;
-}
-
-
-
 returnValue OCP::subjectTo( const DifferentialEquation& differentialEquation_ ){
 
-    differentialEquation = differentialEquation_;
+    modelData.setModel(differentialEquation_);
     return SUCCESSFUL_RETURN;
 }
 
@@ -379,18 +351,6 @@ BooleanType OCP::hasObjective() const{
     return BT_TRUE;
 }
 
-BooleanType OCP::hasOutputFunctions() const{
-
-    if( outputFunctions.size() == 0 ) return BT_FALSE;
-    return BT_TRUE;
-}
-
-BooleanType OCP::hasDifferentialEquation() const{
-
-    if( differentialEquation.getDim() == 0 ) return BT_FALSE;
-    return BT_TRUE;
-}
-
 BooleanType OCP::hasConstraint() const{
 
     if( constraint.isEmpty() == BT_TRUE ) return BT_FALSE;
@@ -403,35 +363,16 @@ returnValue OCP::getObjective( Objective  & objective_ ) const{ objective_  = ob
 returnValue OCP::getConstraint( Constraint& constraint_) const{ constraint_ = constraint; return SUCCESSFUL_RETURN; }
 
 
-returnValue OCP::getNumSteps( Vector& _numSteps ) const{
-
-    _numSteps = numSteps;
-    return SUCCESSFUL_RETURN;
-}
-
-
 returnValue OCP::setObjective ( const Objective & objective_  ){ objective   = objective_; return SUCCESSFUL_RETURN; }
 returnValue OCP::setConstraint( const Constraint& constraint_ ){ constraint = constraint_; return SUCCESSFUL_RETURN; }
 
 
-returnValue OCP::getOutputFunctions( std::vector<OutputFcn>& outputFunctions_ ) const{
-
-    outputFunctions_ = outputFunctions;
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue OCP::getOutputGrids( std::vector<Grid>& outputGrids_ ) const{
-
-    outputGrids_ = outputGrids;
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue OCP::getDifferentialEquation( DifferentialEquation &differentialEquation_ ) const{
-
-    differentialEquation_ = differentialEquation;
-    return SUCCESSFUL_RETURN;
+returnValue OCP::setNumberIntegrationSteps( const uint numSteps )
+{
+	if( hasEquidistantIntegrationGrid()) {
+		setIntegrationGrid( grid, numSteps );
+	}
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -487,6 +428,8 @@ returnValue OCP::getMHEWeightingMatrices( Matrix& Q_, Matrix& R_, Matrix& PL_ )
 
 BooleanType OCP::hasEquidistantGrid( ) const{
 	
+	Vector numSteps;
+	modelData.getNumSteps(numSteps);
 	return numSteps.isEmpty();
 }
 
@@ -519,6 +462,7 @@ void OCP::setupGrid( double tStart, double tEnd, int N ){
     grid.init( tStart, tEnd, N );
     objective.init ( grid );
     constraint.init( grid );
+    setN( grid.getNumIntervals() );
 }
 
 
@@ -527,6 +471,7 @@ void OCP::setupGrid( const Vector& times ){
     grid.init( times );
     objective.init ( grid );
     constraint.init( grid );
+    setN( grid.getNumIntervals() );
 }
 
 

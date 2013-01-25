@@ -68,13 +68,6 @@ class ExportModule : public UserInteraction
 		 */
 		ExportModule( );
 
-		/** Constructor which takes OCP formulation.
-		 *
-		 *	@param[in] _ocp		OCP formulation for code export.
-		 */
-		ExportModule(	const OCP& _ocp
-						);
-
 		/** Copy constructor (deep copy).
 		 *
 		 *	@param[in] arg		Right-hand side object.
@@ -93,15 +86,6 @@ class ExportModule : public UserInteraction
         ExportModule& operator=(	const ExportModule& arg
 									);
 
-
-		/** Assigns OCP formulation to be used to export MPC algorithm.
-		 *
-		 *	@param[in] _ocp		OCP formulation for code export.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-        virtual returnValue setOCP(	const OCP& _ocp
-									);
 
 		/** Exports all files of the auto-generated code into the given directory.
 		 *
@@ -129,12 +113,12 @@ class ExportModule : public UserInteraction
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportAcadoHeader(	const String& _dirName,
+		virtual returnValue exportAcadoHeader(	const String& _dirName,
 										const String& _fileName,
 										const String& _realString = "real_t",
 										const String& _intString = "int",
 										int _precision = 16
-										) const;
+										) const = 0;
 
 
 		/** Collects all data declarations of the auto-generated sub-modules to given
@@ -160,45 +144,6 @@ class ExportModule : public UserInteraction
 		 */
 		virtual returnValue collectFunctionDeclarations(	ExportStatementBlock& declarations
 													) const = 0;
-
-
-		/** Returns number of differential states.
-		 *
-		 *  \return Number of differential states
-		 */
-		uint getNX( ) const;
-
-
-		/** Returns number of differential state derivatives.
-		 *
-		 *  \return Number of differential state derivatives
-		 */
-		uint getNDX( ) const;
-
-
-		/** Returns number of algebraic states.
-		 *
-		 *  \return Number of algebraic states
-		 */
-		uint getNXA( ) const;
-
-		/** Returns number of control inputs.
-		 *
-		 *  \return Number of control inputs
-		 */
-		uint getNU( ) const;
-
-		/** Returns number of parameters.
-		 *
-		 *  \return Number of parameters
-		 */
-		uint getNP( ) const;
-
-		/** Returns number of control intervals.
-		 *
-		 *  \return Number of control intervals
-		 */
-		uint getN( ) const;
 
 
 		/** Sets the name of common header file.
@@ -237,18 +182,6 @@ class ExportModule : public UserInteraction
 
 
     protected:
-		
-		OCP ocp;							/**< OCP formulation used to export code. */
-
-		uint NX;							/**< Number of differential states. */
-		uint NDX;							/**< Number of differential states derivatives. */
-		uint NXA;							/**< Number of algebraic states. */
-		uint NU;							/**< Number of control inputs. */
-		uint NP;							/**< Number of parameters. */
-		uint N;								/**< Number of control intervals. */
-		
-		std::vector<uint> dim_outputs;		/**< Dimensions of the different output functions. */
-		std::vector<uint> num_meas;			/**< Number of measurements for the different output functions. */
 
 		String commonHeaderName;			/**< Name of common header file. */
 };

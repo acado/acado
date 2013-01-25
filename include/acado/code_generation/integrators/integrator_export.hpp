@@ -37,6 +37,7 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/code_generation/export_algorithm.hpp>
+#include <acado/code_generation/model_data.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -117,16 +118,26 @@ class IntegratorExport : public ExportAlgorithm
 										const String& _name_diffs_ODE );
 
 
-		/** Sets integration grid.
+		/** Passes all the necessary model data to the integrator.
 		 *
-		 *	@param[in] _grid		Evaluation grid for optimal control.
-		 *	@param[in] numSteps		The number of integration steps along the prediction horizon.
+			acadoHeader.addComment( "Number of estimation intervals" );
+			acadoHeader.addStatement( (String)"#define ACADO_N   " << ocp.getN() << "\n");
+			acadoHeader.addComment( "Number of states" );
+			acadoHeader.addStatement( (String)"#define A
+		 *	@param[in] data			The model data.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setGrid(	const Grid& _grid,
-										const uint _numSteps
-								);
+		returnValue setModelData( 	const ModelData& data  );
+
+
+		/** Sets integration grid (this grid is expected to be non equidistant, otherwise use the other setGrid function).
+		 *
+		 *	@param[in] _grid		integration grid
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setGrid(	const Grid& _grid   );
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -239,10 +250,10 @@ class IntegratorExport : public ExportAlgorithm
 		virtual BooleanType equidistantControlGrid( ) const;
 
 
-		const String getNameODE() const;
+		const String getNameRHS() const;
 		const String getNameOUTPUT( uint index ) const;
 			  uint   getDimOUTPUT( uint index ) const;
-		const String getNameDiffsODE() const;
+		const String getNameDiffsRHS() const;
 		const String getNameDiffsOUTPUT( uint index ) const;
 
 
@@ -266,21 +277,31 @@ class IntegratorExport : public ExportAlgorithm
 		virtual returnValue clear( );
 
 
+		/**	Get the index of the integration interval, corresponding a certain time.
+		 *
+		 * 	@param[in] time		The time.
+		 *
+		 *	\return The index of the integration interval.
+		 */
+		uint getIntegrationInterval( double time );
+
+
     protected:
 
-        BooleanType EXPORT_RHS;				/**< True if the right-hand side and their derivatives should be exported too. */
-        BooleanType CRS_FORMAT;				/**< True if the CRS format is used for the jacobian of output functions. */
-        String name_ODE;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
-        String name_diffs_ODE;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+        BooleanType exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
+        BooleanType equidistant;			/**< True if the integration grid is equidistant. */
+        BooleanType crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
+        String name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
+        String name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
 		Vector numSteps;					/**< The number of integration steps per shooting interval. */
 		
 		ExportFunction integrate;			/**< Function that integrates the exported ODE. */
-		ExportODEfunction ODE;				/**< Module to export ODE. */
-		ExportODEfunction diffs_ODE;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
+		ExportODEfunction rhs;				/**< Module to export ODE. */
+		ExportODEfunction diffs_rhs;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
 		
-		ExportVariable  rk_num;				/**< Variable containing the number of the current integration step. */
+		ExportVariable  reset_int;			/**< Variable containing the number of the current integration step. */
 		ExportVariable  rk_index;			/**< Variable containing the number of the current shooting interval. */
 		ExportVariable 	rk_ttt;				/**< Variable containing the integration time. */
 		ExportVariable 	rk_xxx;				/**< Variable containing the current integrator state. */
@@ -295,12 +316,12 @@ class IntegratorExport : public ExportAlgorithm
         std::vector<Grid> outputGrids;					/**< A separate grid for each output. */
         std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
         std::vector<Matrix> outputDependencies;			/**< A separate dependency matrix for each output. */
-        std::vector<ExportODEfunction> OUTPUTS;			/**< Module to export output functions. */
-        std::vector<ExportODEfunction> diffs_OUTPUTS;	/**< Module to export the evaluation of the derivatives of the output functions. */
+        std::vector<ExportODEfunction> outputs;			/**< Module to export output functions. */
+        std::vector<ExportODEfunction> diffs_outputs;	/**< Module to export the evaluation of the derivatives of the output functions. */
 		
-        std::vector<String> name_OUTPUTS;				/**< A separate function name for each output. */
-        std::vector<String> name_diffs_OUTPUTS;			/**< A separate function name for evaluating the derivatives of each output. */
-        std::vector<uint> num_OUTPUTS;					/**< A separate dimension for each output. */
+        std::vector<String> name_outputs;				/**< A separate function name for each output. */
+        std::vector<String> name_diffs_outputs;			/**< A separate function name for evaluating the derivatives of each output. */
+        std::vector<uint> num_outputs;					/**< A separate dimension for each output. */
 };
 
 

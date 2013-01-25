@@ -36,11 +36,16 @@
 
 
 #include <acado/code_generation/export_module.hpp>
+#include <acado/code_generation/integrators/export_matlab_integrator.hpp>
+#include <acado/code_generation/integrators/export_matlab_rhs.hpp>
 #include <acado/code_generation/integrators/integrator_export.hpp>
 #include <acado/code_generation/condensing_export.hpp>
 #include <acado/code_generation/gauss_newton_export.hpp>
 #include <acado/code_generation/auxiliary_functions_export.hpp>
 #include <acado/code_generation/export_file.hpp>
+
+#include <acado/code_generation/templates/templates.hpp>
+#include <acado/code_generation/export_matlab_mpc.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -107,6 +112,24 @@ class MPCexport : public ExportModule
 										const String& _intString = "int",
 										int _precision = 16
 										);
+
+
+		/** Exports main header file for using the exported algorithm.
+		 *
+		 *	@param[in] _dirName			Name of directory to be used to export file.
+		 *	@param[in] _fileName		Name of file to be exported.
+		 *	@param[in] _realString		String to be used to declare real variables.
+		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _precision		Number of digits to be used for exporting real values.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue exportAcadoHeader(	const String& _dirName,
+										const String& _fileName,
+										const String& _realString = "real_t",
+										const String& _intString = "int",
+										int _precision = 16
+										) const;
 
 
 		/** Prints dimensions (i.e. number of variables and constraints) 
@@ -216,9 +239,9 @@ class MPCexport : public ExportModule
 		 */
 		returnValue exportMakefile(	const String& _dirName,
 									const String& _fileName,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
-										int _precision = 16
+									const String& _realString = "real_t",
+									const String& _intString = "int",
+									int _precision = 16
 									) const;
 
 		/** Exports files containing the interface to an external online 
@@ -259,6 +282,8 @@ class MPCexport : public ExportModule
 
 
     protected:
+
+        OCP ocp;							/**< OCP formulation used to export code. */
 
 		IntegratorExport*  integrator;			/**< Module for exporting a tailored integrator. */
 		CondensingExport*  condenser;			/**< Module for exporting a tailored condensing algorithm. */

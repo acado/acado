@@ -666,7 +666,7 @@ returnValue OptimizationAlgorithmBase::extractOCPdata(	Objective** objective,
     if( ocp->hasDifferentialEquation() == BT_TRUE ){
 
         differentialEquation[0][0] = new DifferentialEquation();
-        ocp->getDifferentialEquation( *differentialEquation[0][0] );
+        ocp->getModel( *differentialEquation[0][0] );
     }
 
 

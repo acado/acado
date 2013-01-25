@@ -94,31 +94,7 @@ classdef MPCexport < acado.ExportOCP
                     error('Unable to export a MPC algorithm without an OCP formulation.');
                 end
                 
-                % INTEGRATION GRID
-                if (~isempty(obj.integrationGrid))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setIntegrationGrid( %s );\n', obj.name, obj.integrationGrid.name));
-                end
-                
                 getOptions(obj, cppobj);
-                
-                
-                % DIFFERENTIAL EQUATION
-                if (~isempty(obj.model) && ~acadoDefined(obj.model))
-                    obj.model.getInstructions(cppobj, get);
-                end
-                if (~isempty(obj.model))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setModel( %s );\n', obj.name, obj.model.name));
-                elseif (~isempty(obj.fileName) && ~isempty(obj.modelName) && ~isempty(obj.modelDiffsName))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setModel( "%s", "%s", "%s" );\n', obj.name, obj.fileName, obj.modelName, obj.modelDiffsName));
-                    if (isempty(obj.NX) || isempty(obj.NDX) || isempty(obj.NXA) || isempty(obj.NU))
-                        error('ERROR: You need to provide the dimensions of the external model !\n');
-                    else
-                        fprintf(cppobj.fileMEX,sprintf('    %s.setDimensions( %s, %s, %s, %s );\n', obj.name, num2str(obj.NX), num2str(obj.NDX), num2str(obj.NXA), num2str(obj.NU)));
-                    end
-                else
-                    error('ERROR: Invalid MPCexport object in getInstructions !\n');
-                end
-                
                 
                 % EXPORT
                 if ~isempty(obj.dir)
@@ -181,15 +157,15 @@ classdef MPCexport < acado.ExportOCP
             if isempty(obj.Xref) || isempty(obj.Uref)
                error('Unable to compute the terminal cost without the terminal values for the states and control inputs.'); 
             end
-            if isempty(obj.model)
+            if isempty(obj.ocp.model)
                error('Unable to compute the terminal cost without a system to linearize.');
             end
             global ACADO_;
             if ~isempty(ACADO_.helper.dx) || ~isempty(ACADO_.helper.z)
                error('This feature is currently only available for explicit ODE systems.'); 
             end
-            jacX = jacobian(obj.model.getExpression, diffStates);
-            jacU = jacobian(obj.model.getExpression, controls);
+            jacX = jacobian(obj.ocp.model.getExpression, diffStates);
+            jacU = jacobian(obj.ocp.model.getExpression, controls);
             A = jacX.eval(obj.Xref(end,:), obj.Uref(end,:));
             B = jacU.eval(obj.Xref(end,:), obj.Uref(end,:));
             

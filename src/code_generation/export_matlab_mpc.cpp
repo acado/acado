@@ -25,87 +25,69 @@
 
 
 /**
- *    \file src/code_generation/rk_export.cpp
+ *    \file ...
  *    \author Rien Quirynen
  *    \date 2012
  */
 
-#include <acado/code_generation/integrators/rk_export.hpp>
-
+#include <acado/code_generation/export_matlab_mpc.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
+
+using namespace std;
 
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-RungeKuttaExport::RungeKuttaExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
-									) : IntegratorExport( _userInteraction,_commonHeaderName )
-{
-}
+ExportMatlabMPC::ExportMatlabMPC(	const String& _templateName,
+												const String& _fileName,
+												const String& _commonHeaderName,
+												const String& _realString,
+												const String& _intString,
+												int _precision,
+												const String& _commentString
+						) : ExportTemplatedFile(_templateName, _fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
+{}
 
 
-RungeKuttaExport::RungeKuttaExport(	const RungeKuttaExport& arg
-									) : IntegratorExport( arg )
-{
-	copy( arg );
-}
+ExportMatlabMPC::ExportMatlabMPC(	const ExportMatlabMPC& arg
+						) : ExportTemplatedFile( arg )
+{}
 
 
-RungeKuttaExport::~RungeKuttaExport( )
-{
-	clear( );
-}
+ExportMatlabMPC::~ExportMatlabMPC( )
+{}
 
 
-RungeKuttaExport& RungeKuttaExport::operator=( const RungeKuttaExport& arg
-												)
+ExportMatlabMPC& ExportMatlabMPC::operator=(	const ExportMatlabMPC& arg
+														)
 {
 	if( this != &arg )
 	{
-		clear( );
-		IntegratorExport::operator=( arg );
-		copy( arg );
+		ExportTemplatedFile::operator=( arg );
 	}
-    return *this;
+	
+	return *this;
 }
 
-
-const uint RungeKuttaExport::getNumStages() {
+returnValue ExportMatlabMPC::configure(	const uint numSteps, const uint verbose )
+{	
+	// Configure the dictionary
+	dictionary[ "@NUM_STEPS@" ] =  std::string(String(numSteps).getName());
+	dictionary[ "@VERBOSE@" ] =  std::string(String(verbose).getName());
 	
-	return numStages;
-}
+	// And then fill a template file
+	fillTemplate();
 
-
-
-// PROTECTED:
-
-
-returnValue RungeKuttaExport::copy(	const RungeKuttaExport& arg
-									)
-{
-	numStages = arg.numStages;
-	rhs = arg.rhs;
-	diffs_rhs = arg.diffs_rhs;
-	name_rhs = arg.name_rhs;
-	name_diffs_rhs = arg.name_diffs_rhs;
-	grid = arg.grid;
-
-	// ExportVariables
-	rk_ttt = arg.rk_ttt;
-	rk_xxx = arg.rk_xxx;
-	rk_kkk = arg.rk_kkk;
-	
-	// ExportFunctions
-	integrate = arg.integrate;
-	
 	return SUCCESSFUL_RETURN;
 }
 
-
+//
+// PROTECTED MEMBER FUNCTIONS:
+//
 
 CLOSE_NAMESPACE_ACADO
 

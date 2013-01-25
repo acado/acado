@@ -42,7 +42,6 @@
     #include <tr1/memory>
 #endif
 
-
 BEGIN_NAMESPACE_ACADO
 
 

@@ -242,10 +242,10 @@ class ExportLinearSolver : public ExportAlgorithm
 		
 		// DEFINITION OF THE EXPORTVARIABLES
 		ExportVariable A;							/**< Variable containing the matrix of the linear system. */
-		ExportVariable b;							/**< Variable containing the right-hand side of the linear system. */
-		ExportVariable x;							/**< Variable containing the solution of the linear system. */
+		ExportVariable b;							/**< Variable containing the right-hand side of the linear system and it will also contain the solution. */
 		
 		ExportFunction solve;						/**< Function that solves the linear system. */
+		ExportFunction solveTriangular;				/**< Function that solves the upper-triangular system. */
 		ExportFunction solveReuse;					/**< Function that solves a linear system with the same matrix, reusing previous results. */
 
 };

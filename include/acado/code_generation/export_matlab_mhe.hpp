@@ -30,8 +30,8 @@
  */
 
 
-#ifndef ACADO_TOOLKIT_EXPORT_MATLAB_INTEGRATOR_HPP
-#define ACADO_TOOLKIT_EXPORT_MATLAB_INTEGRATOR_HPP
+#ifndef ACADO_TOOLKIT_EXPORT_MATLAB_MHE_HPP
+#define ACADO_TOOLKIT_EXPORT_MATLAB_MHE_HPP
 
 
 #include <acado/code_generation/export_templated_file.hpp>
@@ -47,7 +47,7 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\author Rien Quirynen
  */
-class ExportMatlabIntegrator : public ExportTemplatedFile
+class ExportMatlabMHE : public ExportTemplatedFile
 {
     //
     // PUBLIC MEMBER FUNCTIONS:
@@ -67,7 +67,7 @@ class ExportMatlabIntegrator : public ExportTemplatedFile
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		ExportMatlabIntegrator(	const String& _templateName,
+		ExportMatlabMHE(	const String& _templateName,
 								const String& _fileName,
 								const String& _commonHeaderName = "",
 								const String& _realString = "real_t",
@@ -80,25 +80,25 @@ class ExportMatlabIntegrator : public ExportTemplatedFile
 		 *
 		 *	@param[in] arg		Right-hand side object.
 		 */
-        ExportMatlabIntegrator(	const ExportMatlabIntegrator& arg
+        ExportMatlabMHE(	const ExportMatlabMHE& arg
 								);
 
         /** Destructor. 
 		 */
-        virtual ~ExportMatlabIntegrator( );
+        virtual ~ExportMatlabMHE( );
 
 		/** Assignment operator (deep copy).
 		 *
 		 *	@param[in] arg		Right-hand side object.
 		 */
-		ExportMatlabIntegrator& operator=(	const ExportMatlabIntegrator& arg
+		ExportMatlabMHE& operator=(	const ExportMatlabMHE& arg
 										);
 		
 		/** Configure the template
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue configure(	const uint online, const uint debugMode, const uint numStages );
+		returnValue configure(	const uint numSteps, const uint verbose );
 
 	protected:
 
@@ -108,4 +108,4 @@ class ExportMatlabIntegrator : public ExportTemplatedFile
 CLOSE_NAMESPACE_ACADO
 
 
-#endif  // ACADO_TOOLKIT_EXPORT_MATLAB_INTEGRATOR_HPP
+#endif  // ACADO_TOOLKIT_EXPORT_MATLAB_MHE_HPP

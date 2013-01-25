@@ -43,7 +43,7 @@
 % Author: Rien Quirynen
 % Date: 2012
 
-classdef SIMexport < acado.ExportModule
+classdef SIMexport < acado.ExportModule & acado.ModelContainer
     properties (SetAccess='protected')
         
         simIntervals;

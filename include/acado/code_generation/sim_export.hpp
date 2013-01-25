@@ -41,6 +41,7 @@
 #include <acado/code_generation/integrators/integrator_generation.hpp>
 #include <acado/code_generation/auxiliary_functions_export.hpp>
 #include <acado/code_generation/export_file.hpp>
+#include <acado/code_generation/model_container.hpp>
 
 
 
@@ -62,7 +63,7 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\author Rien Quirynen
  */
-class SIMexport : public ExportModule
+class SIMexport : public ExportModule, public ModelContainer
 {
     //
     // PUBLIC MEMBER FUNCTIONS:
@@ -110,6 +111,24 @@ class SIMexport : public ExportModule
 										const String& _intString = "int",
 										int _precision = 16
 										);
+
+
+		/** Exports main header file for using the exported algorithm.
+		 *
+		 *	@param[in] _dirName			Name of directory to be used to export file.
+		 *	@param[in] _fileName		Name of file to be exported.
+		 *	@param[in] _realString		String to be used to declare real variables.
+		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _precision		Number of digits to be used for exporting real values.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue exportAcadoHeader(	const String& _dirName,
+										const String& _fileName,
+										const String& _realString = "real_t",
+										const String& _intString = "int",
+										int _precision = 16
+										) const;
 
 
 		/** Exports all files of the auto-generated code into the given directory and runs the test
@@ -164,105 +183,6 @@ class SIMexport : public ExportModule
 		virtual returnValue printDetails( BooleanType details );
 
 
-		/** Returns the differential equations in the model.
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		returnValue getModel( DifferentialEquation& _f ) const;
-
-
-		/** Assigns Differential Equation to be used by the integrator.
-		 *
-		 *	@param[in] f		Differential equation.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-
-		returnValue setModel( const DifferentialEquation& _f );
-
-
-		/** Assigns the model to be used by the integrator.
-		 *
-		 *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.
-		 *	@param[in] _diffs_rhs_ODE		Name of the function, evaluating the derivatives of the ODE right-hand side.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-
-		virtual returnValue setModel( 	const String& fileName,
-				const String& _rhs_ODE,
-				const String& _diffs_rhs_ODE );
-
-
-		/** Assigns the model dimensions to be used by the integrator.
-		 *
-		 *	@param[in] _NX		Number of differential states.
-		 *	@param[in] _NDX		Number of differential states derivatives.
-		 *	@param[in] _NXA		Number of algebraic states.
-		 *	@param[in] _NU		Number of control inputs
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-
-		virtual returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU );
-
-
-		/** Assigns the model dimensions to be used by the integrator.
-		 *
-		 *	@param[in] _NX		Number of differential states.
-		 *	@param[in] _NU		Number of control inputs
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-
-		virtual returnValue setDimensions( uint _NX, uint _NU );
-
-
-		/** Adds an output function.
-		 *
-		 *  \param outputEquation_ 	  an output function to be added
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		returnValue addOutput( const OutputFcn& outputEquation_ );
-
-
-		/** Adds an output function.
-		 *
-		 *  \param output 	  			The output function to be added.
-		 *  \param diffs_output 	  	The derivatives of the output function to be added.
-		 *  \param dim					The dimension of the output function.
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		returnValue addOutput( const String& output, const String& diffs_output, const uint dim );
-
-
-		/** Sets up the output functions.
-		 *
-		 *  \param numberMeasurements	  the number of measurements per interval for each output function
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		returnValue setMeasurements( const Vector& numberMeasurements );
-
-
-		/** Returns true if there are extra outputs, specified for the integrator.
-		 *
-		 *  \return True if there are extra outputs, specified for the integrator.
-		 */
-		BooleanType hasOutputs		() const;
-
-
-		/** Returns the dimension of a specific output function.
-		 *
-		 *  \param index	The index of the output function.
-		 *
-		 *  \return The dimension of a specific output function.
-		 */
-		uint getDimOutput( uint index ) const;
-
-
 
     protected:
 
@@ -295,6 +215,7 @@ class SIMexport : public ExportModule
 		 *	        RET_UNABLE_TO_EXPORT_CODE
 		 */
 		returnValue setup( );
+
 
 		/** Checks whether OCP formulation is compatible with code export capabilities.
 		 *
@@ -394,19 +315,8 @@ class SIMexport : public ExportModule
 
     protected:
 
-        BooleanType EXPORT_RHS;					/**< True if the right-hand side and their derivatives should be exported too. */
-        BooleanType MODEL_DIMENSIONS_SET;		/**< True if the model dimensions have been set. */
         double T;								/**< The total simulation time. */
-
 		IntegratorExport*  integrator;			/**< Module for exporting a tailored integrator. */
-		DifferentialEquation 		f;			/**< The differential equations in the model. */
-		String externModel;						/**< The name of the file containing the needed functions, if provided. */
-		String rhs_ODE;							/**< The name of the function evaluating the ODE right-hand side, if provided. */
-		String diffs_ODE;						/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
-		std::vector<Grid> outputGrids;			/**< A separate grid for each output. */
-		std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
-		std::vector<String> outputNames;				/**< A separate function name for each output. */
-		std::vector<String> diffs_outputNames;			/**< A separate function name for evaluating the derivatives of each output. */
 		
 		BooleanType referenceProvided;			/**< True if the user provided a file with the reference solution. */
 		BooleanType PRINT_DETAILS;				/**< True if the user wants all the details about the results being printed. */
