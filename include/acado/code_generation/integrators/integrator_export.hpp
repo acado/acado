@@ -37,6 +37,7 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/code_generation/export_algorithm.hpp>
+#include <acado/code_generation/model_data.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -117,6 +118,15 @@ class IntegratorExport : public ExportAlgorithm
 										const String& _name_diffs_ODE );
 
 
+		/** Passes all the necessary model data to the integrator.
+		 *
+		 *	@param[in] data			The model data.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue setModelData( 	const ModelData& data  );
+
+
 		/** Sets integration grid (this grid is expected to be non equidistant, otherwise use the other setGrid function).
 		 *
 		 *	@param[in] _grid		integration grid
@@ -124,18 +134,6 @@ class IntegratorExport : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setGrid(	const Grid& _grid   );
-
-
-		/** Sets integration grid.
-		 *
-		 *	@param[in] _ocpGrid		Evaluation grid for optimal control.
-		 *	@param[in] numSteps		The number of integration steps along the prediction horizon.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setGrid(	const Grid& _ocpGrid,
-										const uint _numSteps
-								);
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -248,10 +246,10 @@ class IntegratorExport : public ExportAlgorithm
 		virtual BooleanType equidistantControlGrid( ) const;
 
 
-		const String getNameODE() const;
+		const String getNameRHS() const;
 		const String getNameOUTPUT( uint index ) const;
 			  uint   getDimOUTPUT( uint index ) const;
-		const String getNameDiffsODE() const;
+		const String getNameDiffsRHS() const;
 		const String getNameDiffsOUTPUT( uint index ) const;
 
 
@@ -289,15 +287,15 @@ class IntegratorExport : public ExportAlgorithm
         BooleanType EXPORT_RHS;				/**< True if the right-hand side and their derivatives should be exported too. */
         BooleanType EQUIDISTANT;			/**< True if the integration grid is equidistant. */
         BooleanType CRS_FORMAT;				/**< True if the CRS format is used for the jacobian of output functions. */
-        String name_ODE;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
-        String name_diffs_ODE;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+        String name_RHS;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
+        String name_diffs_RHS;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
 		Vector numSteps;					/**< The number of integration steps per shooting interval. */
 		
 		ExportFunction integrate;			/**< Function that integrates the exported ODE. */
-		ExportODEfunction ODE;				/**< Module to export ODE. */
-		ExportODEfunction diffs_ODE;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
+		ExportODEfunction RHS;				/**< Module to export ODE. */
+		ExportODEfunction diffs_RHS;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
 		
 		ExportVariable  reset_int;			/**< Variable containing the number of the current integration step. */
 		ExportVariable  rk_index;			/**< Variable containing the number of the current shooting interval. */

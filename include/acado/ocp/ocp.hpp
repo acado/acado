@@ -41,6 +41,7 @@
 #include <acado/objective/objective.hpp>
 #include <acado/ocp/multi_objective_functionality.hpp>
 #include <acado/code_generation/export_variable.hpp>
+#include <acado/code_generation/model_container.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -93,7 +94,7 @@ BEGIN_NAMESPACE_ACADO
  *  \author Boris Houska, Hans Joachim Ferreau
  */
 
-class OCP: public MultiObjectiveFunctionality{
+class OCP: public MultiObjectiveFunctionality, public ModelContainer {
 
 
 friend class OptimizationAlgorithmBase;
@@ -280,24 +281,6 @@ public:
     		 	 	 	 	 	 	 	 	);
 
 
-     /** Adds an output function. 																				\n
-      *                                                                      									\n
-      *  \param outputEquation_ 	  an output function to be added 											\n
-      *                                                                      									\n
-      *  \return SUCCESSFUL_RETURN
-      */
-     returnValue addOutput( const OutputFcn& outputEquation_ );
-
-
-     /** Sets up the output functions. 																			\n
-      *                                                                      									\n
-      *  \param numberMeasurements	  the number of measurements per horizon for each output function  			\n
-      *                                                                      									\n
-      *  \return SUCCESSFUL_RETURN
-      */
-     returnValue setupOutput( const Vector& numberMeasurements );
-
-
      /** Adds an differential equation (as a continous equality constraint). \n
       *                                                                      \n
       *  \param differentialEquation_ the differential equation to be added  \n
@@ -376,41 +359,11 @@ public:
 
 
      BooleanType hasObjective           () const;
-     BooleanType hasOutputFunctions		() const;
-     BooleanType hasDifferentialEquation() const;
      BooleanType hasConstraint          () const;
 
      returnValue getGrid                ( Grid&      grid_                               ) const;
      returnValue getObjective           ( Objective& objective_                          ) const;
      returnValue getObjective           ( const int &multiObjectiveIdx, Expression **arg ) const;
-
-
-	 /** Returns the number of integration steps along the prediction horizon. 	\n
-	 * 
-	 *  \return SUCCESSFUL_RETURN          		\n
-	 */
-	 returnValue getNumSteps( Vector& _numSteps ) const;
-
-
-     /** Returns the output functions. \n
-      * 
-      *  \return SUCCESSFUL_RETURN          \n
-      */
-     returnValue getOutputFunctions( std::vector<OutputFcn>& outputFunctions_ ) const;
-
-
-     /** Returns the output grids. 			\n
-      * 
-      *  \return SUCCESSFUL_RETURN          \n
-      */
-     returnValue getOutputGrids( std::vector<Grid>& outputGrids_ ) const;
-
-
-     /** Returns the differential equation. \n
-      * 
-      *  \return SUCCESSFUL_RETURN          \n
-      */
-     returnValue getDifferentialEquation( DifferentialEquation &differentialEquation_ ) const;
 
 
 
@@ -460,13 +413,7 @@ public:
 
         Grid                   grid                 ;   /**< Common discretization grid            					*/
         Objective              objective            ;   /**< The Objective.                        					*/
-        DifferentialEquation   differentialEquation ;   /**< Dynamic Equations.                    					*/
         Constraint             constraint           ;   /**< The Constraints.                      					*/
-        
-		Vector numSteps								;	/**< The number of integration steps per shooting interval. */
-		
-        std::vector<OutputFcn> outputFunctions		;	/**< A vector with the output functions.     				*/
-        std::vector<Grid>	   outputGrids			;	/**< A separate grid for each output function.  			*/
 
         ExportVariable QQ,RR,QF;
 		ExportVariable QS,QS2;

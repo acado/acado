@@ -104,69 +104,6 @@ class ExportModule : public UserInteraction
 									);
 
 
-		/** Returns the differential equations in the model.
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		returnValue getModel( DifferentialEquation& _f ) const;
-
-
-		/** Assigns Differential Equation to be used by the integrator.
-		 *
-		 *	@param[in] f		Differential equation.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-
-		returnValue setModel( const DifferentialEquation& _f );
-
-
-		/** Assigns the model to be used by the integrator.
-		 *
-		 *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.
-		 *	@param[in] _diffs_rhs_ODE		Name of the function, evaluating the derivatives of the ODE right-hand side.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-
-		virtual returnValue setModel( 	const String& fileName,
-				const String& _rhs_ODE,
-				const String& _diffs_rhs_ODE );
-
-
-		/** Assigns the model dimensions to be used by the integrator.
-		 *
-		 *	@param[in] _NX		Number of differential states.
-		 *	@param[in] _NDX		Number of differential states derivatives.
-		 *	@param[in] _NXA		Number of algebraic states.
-		 *	@param[in] _NU		Number of control inputs
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-
-		virtual returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU );
-
-
-		/** Assigns the model dimensions to be used by the integrator.
-		 *
-		 *	@param[in] _NX		Number of differential states.
-		 *	@param[in] _NU		Number of control inputs
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-
-		virtual returnValue setDimensions( uint _NX, uint _NU );
-
-
-		/** Sets the grid to be used by the integrator.
-		 *
-		 *	@param[in] gridPoints		The points that form the integration grid.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue setIntegrationGrid( const Vector& gridPoints );
-
-
 		/** Exports all files of the auto-generated code into the given directory.
 		 *
 		 *	@param[in] dirName			Name of directory to be used to export files.
@@ -226,45 +163,6 @@ class ExportModule : public UserInteraction
 													) const = 0;
 
 
-		/** Returns number of differential states.
-		 *
-		 *  \return Number of differential states
-		 */
-		uint getNX( ) const;
-
-
-		/** Returns number of differential state derivatives.
-		 *
-		 *  \return Number of differential state derivatives
-		 */
-		uint getNDX( ) const;
-
-
-		/** Returns number of algebraic states.
-		 *
-		 *  \return Number of algebraic states
-		 */
-		uint getNXA( ) const;
-
-		/** Returns number of control inputs.
-		 *
-		 *  \return Number of control inputs
-		 */
-		uint getNU( ) const;
-
-		/** Returns number of parameters.
-		 *
-		 *  \return Number of parameters
-		 */
-		uint getNP( ) const;
-
-		/** Returns number of control intervals.
-		 *
-		 *  \return Number of control intervals
-		 */
-		uint getN( ) const;
-
-
 		/** Sets the name of common header file.
 		 *
 		 *	@param[in] _name			New name of common header file.
@@ -302,25 +200,7 @@ class ExportModule : public UserInteraction
 
     protected:
 
-        BooleanType EXPORT_RHS;					/**< True if the right-hand side and their derivatives should be exported too. */
-        BooleanType MODEL_DIMENSIONS_SET;		/**< True if the model dimensions have been set. */
-        DifferentialEquation 		f;			/**< The differential equations in the model. */
-        String externModel;						/**< The name of the file containing the needed functions, if provided. */
-        String rhs_ODE;							/**< The name of the function evaluating the ODE right-hand side, if provided. */
-        String diffs_ODE;						/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
-
         OCP ocp;							/**< OCP formulation used to export code. */
-        Grid integrationGrid;				/**< Integration grid. */
-
-		uint NX;							/**< Number of differential states. */
-		uint NDX;							/**< Number of differential states derivatives. */
-		uint NXA;							/**< Number of algebraic states. */
-		uint NU;							/**< Number of control inputs. */
-		uint NP;							/**< Number of parameters. */
-		uint N;								/**< Number of control intervals. */
-		
-		std::vector<uint> dim_outputs;		/**< Dimensions of the different output functions. */
-		std::vector<uint> num_meas;			/**< Number of measurements for the different output functions. */
 
 		String commonHeaderName;			/**< Name of common header file. */
 };

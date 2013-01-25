@@ -275,6 +275,7 @@ enum IntegratorType{
      INT_IRK_RIIA1,			/**< Radau IIA integrator of order 1 (Continuous output Implicit Runge-Kutta). */
      INT_IRK_RIIA3,			/**< Radau IIA integrator of order 3 (Continuous output Implicit Runge-Kutta). */
      INT_IRK_RIIA5,			/**< Radau IIA integrator of order 5 (Continuous output Implicit Runge-Kutta). */
+     INT_TMP_RIIA5,			/**< TEMP Radau IIA integrator of order 5 (Continuous output Implicit Runge-Kutta). */
 
      INT_RK12,             	/**< Explicit Runge-Kutta integrator of order 1/2          */
      INT_RK23,             	/**< Explicit Runge-Kutta integrator of order 2/3          */
@@ -370,9 +371,8 @@ enum OptionsName
 	IMPLICIT_INTEGRATOR_MODE,					/**< This determines the mode of the implicit integrator (see enum ImplicitIntegratorMode). */
 	IMPLICIT_INTEGRATOR_NUM_ITS,				/**< This is the performed number of Newton iterations in the implicit integrator. */
 	IMPLICIT_INTEGRATOR_NUM_ITS_INIT,			/**< This is the performed number of Newton iterations in the implicit integrator for the initialization of the first step. */
-//	INTEGRATOR_UNROLL_OUTPUT,					/**< This option determines the unrolling of the evaluation of the continuous output. */
 	UNROLL_LINEAR_SOLVER,						/**< This option of the boolean type determines the unrolling of the linear solver (no unrolling recommended for larger systems). */
-//	CONSISTENCY_ITERATIONS,						/**< This option specifies the number of Newton iterations, performed to make the initial values of the algebraic states consistent with those of the differential states. */
+	INTEGRATOR_DEBUG_MODE,
 	OPT_UNKNOWN,
 	MAX_NUM_INTEGRATOR_STEPS,
 	NUM_INTEGRATOR_STEPS,

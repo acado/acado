@@ -326,6 +326,22 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										BooleanType evaluateB );
 
 
+		/** Exports the computation of the continuous output.
+				 *
+				 *	@param[in] TODO: RIEN
+				 *
+				 *	\return SUCCESSFUL_RETURN
+				 */
+		returnValue generateOutput( 	ExportStatementBlock* block,
+										const ExportIndex& index0,
+										const ExportIndex& index1,
+										const ExportIndex& tmp_index1,
+										const ExportIndex& tmp_index2,
+										const ExportVariable& tmp_meas,
+										const ExportVariable& rk_tPrev,
+										const ExportVariable& time_tmp );
+
+
 		/** Exports the computation of the sensitivities for the continuous output.
 				 *
 				 *	@param[in] TODO: RIEN
