@@ -145,6 +145,7 @@ SET( EXAMPLE_DIRS
 	basic_data_structures/symbolics
 	basic_data_structures/variables_grid
 #	code_generation
+	code_generation/Simulation
 	controller
 	getting_started
 	integration_algorithm
@@ -222,4 +223,4 @@ ENDFOREACH( DIR ${EXAMPLE_DIRS} )
 #
 # Build code generation examples
 #
-# ADD_SUBDIRECTORY( ./code_generation )
+ADD_SUBDIRECTORY( ./code_generation/MPC )

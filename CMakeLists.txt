@@ -23,7 +23,7 @@
 ################################################################################
 #
 # Description:
-#	CMake script for building ACADO static and shared libraries
+#	CMake script for building ACADO static and shared libraries, etc.
 #
 # Authors:
 #	Joel Andersson
@@ -31,42 +31,10 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2011 - 2012
-#
-# NOTE:
-#	- In order to build the API documentation, you will need Doxygen installed.
+#	2011 - 2013.
 #
 # Usage:
-#	- Linux
-#
-#		* If you want to build examples along with libraries, enable the option
-#		WITH_ACADO_EXAMPLES before running CMake.
-#
-#		* For building type:
-#
-#		mkdir build
-#		cd build
-#		cmake ..
-#		make clean all
-#
-#		* For installation type:
-#
-#		sudo make install 
-#
-#		Last command will install libraries, headers, etc., and you will need
-#		admin privileges to execute it.
-#
-#		* If you want to build API documentation, type:
-#
-#		make doc
-#
-#		* For uninstallation type:
-#
-#		sudo make uninstall
-#
-#	- Apple: TODO
-#
-#	- Windows: TODO
+#	- Linux, OS X, Windows: more info can be found on www.acadotoolkit.org
 #
 ################################################################################
 
@@ -175,11 +143,11 @@ IF ( ${CMAKE_SYSTEM_NAME} MATCHES Windows )
 	SET( LIB_DIR "lib/acado" )
 #	SET( SHARE_DIR "" )
 ELSE( )
-	SET( LIB_DIR "/usr/lib" )
+	SET( LIB_DIR "lib" )
 #	SET( SHARE_DIR "share" )
 ENDIF( )
 
-SET( INSTALL_LIB_DIR ${LIB_DIR} CACHE PATH
+SET( INSTALL_LIB_DIR lib CACHE PATH
 	"Installation directory for libraries"
 )
 SET( INSTALL_BIN_DIR bin CACHE PATH
@@ -239,7 +207,7 @@ INCLUDE( CompilerOptions )
 ################################################################################
 
 SET( ACADO_SOURCE_DIRS
-    # Integrators source folders
+	# Integrators source folders
 	./src/utils
 	./src/clock
 	./src/matrix_vector
@@ -537,8 +505,11 @@ SET( ACADO_ENV_EXTERNAL_PACKAGES_DIR
 	${PROJECT_SOURCE_DIR}/external_packages
 )
 
-SET( ACADO_ENV_BUILD_DIR
-	${PROJECT_BINARY_DIR}
+SET( PROJECT_CMAKE_DIR
+	${PROJECT_SOURCE_DIR}/cmake
+)
+SET( ACADO_ENV_CMAKE_DIR
+	${PROJECT_CMAKE_DIR}
 )
 
 SET( ACADO_ENV_STATIC_LIBRARIES 

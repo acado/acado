@@ -29,7 +29,7 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2011.
+#	2011 - 2013.
 #
 # NOTE:
 #	- Linux/Unix only.
@@ -53,8 +53,7 @@
 export ACADO_ENV_INCLUDE_DIRS="@ACADO_ENV_INCLUDE_DIRS@"
 export ACADO_ENV_LIBRARY_DIRS="@ACADO_ENV_LIBRARY_DIRS@"
 export ACADO_ENV_EXTERNAL_PACKAGES_DIR="@ACADO_ENV_EXTERNAL_PACKAGES_DIR@"
-
-export ACADO_ENV_BUILD_DIR="@ACADO_ENV_BUILD_DIR@"
+export ACADO_ENV_CMAKE_DIR="@ACADO_ENV_CMAKE_DIR@"
  
 #
 # List of ACADO static libraries
