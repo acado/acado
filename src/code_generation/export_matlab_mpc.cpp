@@ -30,7 +30,7 @@
  *    \date 2012
  */
 
-#include <acado/code_generation/export_matlab_MHE.hpp>
+#include <acado/code_generation/export_matlab_mpc.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -42,7 +42,7 @@ using namespace std;
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportMatlabMHE::ExportMatlabMHE(	const String& _templateName,
+ExportMatlabMPC::ExportMatlabMPC(	const String& _templateName,
 												const String& _fileName,
 												const String& _commonHeaderName,
 												const String& _realString,
@@ -53,16 +53,16 @@ ExportMatlabMHE::ExportMatlabMHE(	const String& _templateName,
 {}
 
 
-ExportMatlabMHE::ExportMatlabMHE(	const ExportMatlabMHE& arg
+ExportMatlabMPC::ExportMatlabMPC(	const ExportMatlabMPC& arg
 						) : ExportTemplatedFile( arg )
 {}
 
 
-ExportMatlabMHE::~ExportMatlabMHE( )
+ExportMatlabMPC::~ExportMatlabMPC( )
 {}
 
 
-ExportMatlabMHE& ExportMatlabMHE::operator=(	const ExportMatlabMHE& arg
+ExportMatlabMPC& ExportMatlabMPC::operator=(	const ExportMatlabMPC& arg
 														)
 {
 	if( this != &arg )
@@ -73,7 +73,7 @@ ExportMatlabMHE& ExportMatlabMHE::operator=(	const ExportMatlabMHE& arg
 	return *this;
 }
 
-returnValue ExportMatlabMHE::configure(	const uint numSteps, const uint verbose )
+returnValue ExportMatlabMPC::configure(	const uint numSteps, const uint verbose )
 {	
 	// Configure the dictionary
 	dictionary[ "@NUM_STEPS@" ] =  std::string(String(numSteps).getName());

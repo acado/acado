@@ -45,7 +45,7 @@
 #include <acado/code_generation/export_file.hpp>
 
 #include <acado/code_generation/templates/templates.hpp>
-#include <acado/code_generation/export_matlab_MPC.hpp>
+#include <acado/code_generation/export_matlab_mpc.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
