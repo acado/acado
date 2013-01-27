@@ -307,6 +307,7 @@ returnValue MPCexport::setup( )
 		return ACADOERROR( RET_INVALID_OPTION );
 
 	ocp.setNumberIntegrationSteps( numSteps );
+	// NOTE: This function internally calls setup() function
 	integrator->setModelData( ocp.getModelData() );
 
 

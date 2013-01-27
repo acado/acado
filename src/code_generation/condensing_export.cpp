@@ -897,7 +897,7 @@ returnValue CondensingExport::setupEvaluation( )
 	if ( QQF.isGiven( ) == BT_FALSE )
 		setupQP.addStatement( QQF == Q + QF );
 
-	setupQP.addStatement( "acadoVariables.resetIntegrator = 1;\n" );
+	setupQP.addStatement( "acadoWorkspace.resetIntegrator = 1;\n" );
 
 	ExportIndex run( String("run1") );
 	ExportForLoop loop( run, 0,getN() );
@@ -905,7 +905,7 @@ returnValue CondensingExport::setupEvaluation( )
 	setupQP.addIndex( run );
 
 	if ( performsSingleShooting() == BT_FALSE ) {
-		loop.addStatement( "acadoVariables.resetIntegrator = 1;\n" );
+		loop.addStatement( "acadoWorkspace.resetIntegrator = 1;\n" );
 		loop.addStatement( state.getCols( 0,getNX() ) == x.getRow( run ) );
 	}
 	
