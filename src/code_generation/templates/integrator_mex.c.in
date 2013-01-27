@@ -141,7 +141,7 @@ acadoVariables.gridOutput3[j] = 1.1;
         next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
     }
 
-    acadoVariables.resetIntegrator = 1;
+    acadoWorkspace.resetIntegrator = 1;
     
     #if NUM_OUTPUTS > 3
         integrate( next, out1, out2, out3, out4 );
