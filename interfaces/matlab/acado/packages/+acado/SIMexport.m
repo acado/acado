@@ -187,6 +187,8 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
                     fprintf(cppobj.fileMEX,sprintf('    %s.setIntegrationGrid( %s );\n', obj.name, obj.integrationGrid.name));
                 end
                 
+                % OPTIONS
+                fprintf(cppobj.fileMEX,sprintf('    %s.set( GENERATE_MATLAB_INTERFACE, 1 );\n', obj.name));
                 getOptions(obj, cppobj);
                 
                 

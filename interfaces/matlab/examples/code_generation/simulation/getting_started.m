@@ -24,8 +24,6 @@ sim.set( 'NUM_INTEGRATOR_STEPS',        1               );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1               );
 
 sim.exportCode('getting_started_export');
-getting_started_RUN
-buildInterface
 
 %% simulation (test results):
 x = [-0.683; -0.864]; xs = x;

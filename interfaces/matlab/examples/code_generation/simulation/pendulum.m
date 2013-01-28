@@ -40,8 +40,6 @@ sim.set( 'NUM_INTEGRATOR_STEPS',        10                       );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1                       );
 
 sim.exportCode('pendulum_export');
-pendulum_RUN
-buildInterface
 
 %% accuracy states wrt ode15s:
 x = [zeros(6,1); ones(3,1)];       

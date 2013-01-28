@@ -45,8 +45,6 @@ sim.set( 'GENERATE_MATLAB_INTERFACE',   1               );
 sim.set( 'MEASUREMENT_GRID',       'ONLINE_GRID'        );
 
 sim.exportCode('crane_export')
-crane_RUN
-buildInterface
 
 %% accuracy states wrt ode45:
 grid = [1/3 2/3 3/3];

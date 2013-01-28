@@ -87,6 +87,9 @@ classdef ExportModule < acado.UserInteraction
             obj.setMainFiles(obj.dir);
             
             GEN_ACADO; 
+            global ACADO_;
+            run(sprintf('%s_RUN', ACADO_.helper.problemname));
+            buildInterface
         end
         
         
