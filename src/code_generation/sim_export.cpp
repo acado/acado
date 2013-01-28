@@ -377,9 +377,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( "      real_t xT[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU];\n" );
 	}
     main.addStatement( "      const ACADOworkspace_ nullWork2 = {0};\n" );
-    main.addStatement( "      const ACADOvariables_ nullVars2 = {0};\n" );
     main.addStatement( " 	  acadoWorkspace = nullWork2;\n" );
-    main.addStatement( " 	  acadoVariables = nullVars2;\n" );
     main.addLinebreak( 2 );
 
     main.addComment( 3,"INITIALIZATION:" );
@@ -408,7 +406,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     main.addStatement( "      		x[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = 0;\n" );
     main.addStatement( "      }\n" );
     main.addLinebreak( 1 );
-    main.addStatement( "      acadoVariables.resetIntegrator = 1;\n" );
+    main.addStatement( "      acadoWorkspace.resetIntegrator = 1;\n" );
     main.addLinebreak( 1 );
     main.addComment( 3,"RUN INTEGRATOR:" );
     main.addComment( 3,"----------------------------------------" );
@@ -549,9 +547,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 	}
     main.addStatement( "      real_t maxErr, meanErr, maxErrX, meanErrX, maxErrXA, meanErrXA, temp;\n" );
     main.addStatement( "      const ACADOworkspace_ nullWork2 = {0};\n" );
-    main.addStatement( "      const ACADOvariables_ nullVars2 = {0};\n" );
     main.addStatement( " 	  acadoWorkspace = nullWork2;\n" );
-    main.addStatement( " 	  acadoVariables = nullVars2;\n" );
     main.addLinebreak( 2 );
 
     main.addComment( 3,"START EVALUATION RESULTS:" );
