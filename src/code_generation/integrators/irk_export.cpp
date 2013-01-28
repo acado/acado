@@ -843,17 +843,17 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 			if( NDX > 0 ) dependencyDX = sumRow( outputDependencies[i].getCols( NX+NXA+NU,nVars-1 ) );
 		}
 		for( j = 0; j < NX; j++ ) {
-			if( (!exportRhs && !crsFormat) || (int)dependencyX(j) != 0 ) {
+			if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyX(j)) != 0 ) {
 				loop22->addStatement( rk_xxx.getCols( j,j+1 ) == rk_eta.getCols( j,j+1 ) + rk_outH*rk_kkk.getCol( j ) );
 			}
 		}
 		for( j = 0; j < NXA; j++ ) {
-			if( (!exportRhs && !crsFormat) || (int)dependencyZ(j) != 0 ) {
+			if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyZ(j)) != 0 ) {
 				loop22->addStatement( rk_xxx.getCols( NX+j,NX+j+1 ) == rk_out2*rk_kkk.getCol( NX+j ) );
 			}
 		}
 		for( j = 0; j < NDX; j++ ) {
-			if( (!exportRhs && !crsFormat) || (int)dependencyDX(j) != 0 ) {
+			if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyDX(j)) != 0 ) {
 				loop22->addStatement( rk_xxx.getCols( inputDim-diffsDim+j,inputDim-diffsDim+j+1 ) == rk_out2*rk_kkk.getCol( j ) );
 			}
 		}
@@ -938,7 +938,7 @@ returnValue ImplicitRungeKuttaExport::generateSensitivitiesOutput( ExportStateme
 			if( NDX > 0 ) dependencyDX = sumRow( outputDependencies[i].getCols( NX+NXA+NU,nVars-1 ) );
 		}
 		for( j = 0; j < NX; j++ ) {
-			if( (!exportRhs && !crsFormat) || (int)dependencyX(j) != 0 ) {
+			if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyX(j)) != 0 ) {
 				if( STATES ) {
 					loop->addStatement( String(rk_rhsTemp.get( 0,j )) << " = (" << j << " == " << index1.getName() << ");\n" );
 				}
@@ -952,7 +952,7 @@ returnValue ImplicitRungeKuttaExport::generateSensitivitiesOutput( ExportStateme
 			}
 		}
 		for( j = 0; j < NXA; j++ ) {
-			if( (!exportRhs && !crsFormat) || (int)dependencyZ(j) != 0 ) {
+			if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyZ(j)) != 0 ) {
 				loop->addStatement( rk_rhsTemp.getCol( NX+j ) == rk_out2.getCol( 0 )*rk_b.getCol( numStages*NX+j ) );
 				for( k = 1; k < numStages; k++ ) {
 					loop->addStatement( rk_rhsTemp.getCol( NX+j ) += rk_out2.getCol( k )*rk_b.getCol( numStages*NX+k*NXA+j ) );
@@ -961,7 +961,7 @@ returnValue ImplicitRungeKuttaExport::generateSensitivitiesOutput( ExportStateme
 			}
 		}
 		for( j = 0; j < NDX; j++ ) {
-			if( (!exportRhs && !crsFormat) || (int)dependencyDX(j) != 0 ) {
+			if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyDX(j)) != 0 ) {
 				loop->addStatement( rk_rhsTemp.getCol( NX+NXA+j ) == rk_out2.getCol( 0 )*rk_b.getCol( j ) );
 				for( k = 1; k < numStages; k++ ) {
 					loop->addStatement( rk_rhsTemp.getCol( NX+NXA+j ) += rk_out2.getCol( k )*rk_b.getCol( k*NX+j ) );
@@ -992,17 +992,17 @@ returnValue ImplicitRungeKuttaExport::generateSensitivitiesOutput( ExportStateme
 			}
 
 			for( k = 0; k < NX; k++ ) {
-				if( (!exportRhs && !crsFormat) || (int)dependencyX(k) != 0 ) {
+				if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyX(k)) != 0 ) {
 					loop->addStatement( rk_outputs[i].getCol( tmp_index2+offset ) += rk_diffsOutputTemp.getCol( j*nVars+k )*rk_rhsTemp.getCol( k ) );
 				}
 			}
 			for( k = 0; k < NXA; k++ ) {
-				if( (!exportRhs && !crsFormat) || (int)dependencyZ(k) != 0 ) {
+				if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyZ(k)) != 0 ) {
 					loop->addStatement( rk_outputs[i].getCol( tmp_index2+offset ) += rk_diffsOutputTemp.getCol( j*nVars+NX+k )*rk_rhsTemp.getCol( NX+k ) );
 				}
 			}
 			for( k = 0; k < NDX; k++ ) {
-				if( (!exportRhs && !crsFormat) || (int)dependencyDX(k) != 0 ) {
+				if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyDX(k)) != 0 ) {
 					loop->addStatement( rk_outputs[i].getCol( tmp_index2+offset ) += rk_diffsOutputTemp.getCol( j*nVars+NX+NXA+NU+k )*rk_rhsTemp.getCol( NX+NXA+k ) );
 				}
 			}

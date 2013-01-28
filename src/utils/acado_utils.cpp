@@ -345,6 +345,13 @@ int acadoRound (double x){
 }
 
 
+
+int acadoRoundAway (double x) {
+
+	return x < 0 ? floor(x) : ceil(x);
+}
+
+
 returnValue acadoAssignString(	char** toString,
 								const char* const fromString,
 								const char* const defaultString

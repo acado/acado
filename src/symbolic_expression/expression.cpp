@@ -712,9 +712,11 @@ Matrix Expression::getDependencyPattern( const Expression& arg ) const{
     double *x      = new double[ f.getNumberOfVariables()+1 ];
     double *result = new double[ f.getDim()                 ];
 
+    // TODO: DANGEROUS CODE --> TALK TO MILAN ABOUT THIS
     int run1;
+    srand(1.0);
     for( run1 = 0; run1 < f.getNumberOfVariables()+1; run1++ )
-        x[run1] = 0.0;
+    	x[run1] = 1.0 + (double)rand() / RAND_MAX;
 
     // EVALUATE f AT THE POINT  (tt,xx):
     // ---------------------------------

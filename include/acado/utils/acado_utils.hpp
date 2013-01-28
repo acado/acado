@@ -176,6 +176,11 @@ BooleanType acadoIsNaN(	double x
 int acadoRound (double x);
 
 
+/** Specific rounding implementation for rounding away from zero.
+ */
+int acadoRoundAway (double x);
+
+
 /** Assigns one string to the other.
  *
  *	@param[out] toString		Pointer to string to be assigned.
