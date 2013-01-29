@@ -38,6 +38,7 @@ if ~isempty(ACADO_)
     end
     for i = 1:num
         m = h.mexList{i};
+        out = h.mexOutList{i};
         dirName = m{1};
         [files, objs] = getFilesAndObjectNames( dirName, {'*.c', '*.cpp'}, {'EXAMPLES'} );
         k = 1;
@@ -95,7 +96,11 @@ if ~isempty(ACADO_)
         
         for j = 1:length(m)-1
             p = strfind(m{1+j},'.');
-            output = [m{1+j}(1:p-1) '.' mexext];
+            if isempty(out)
+                output = [m{1+j}(1:p-1) '.' mexext];
+            else
+                output = [out{j} '.' mexext];
+            end
             mexF = fullfile(dirName, m{1+j});
             cmd = sprintf('mex COPTIMFLAGS=''-DNDEBUG -O3'' -output %s %s', output, mexF);
             for k = 1:length(subDirs)
@@ -109,6 +114,8 @@ if ~isempty(ACADO_)
         end
     end
     disp(' ');
+    h.clearMEX;
+    h.clearMain;
 end
 
 end

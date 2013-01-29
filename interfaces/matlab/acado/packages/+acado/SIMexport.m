@@ -263,6 +263,15 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
         end
         
         
+        function setInterface(obj, integrate, rhs)
+           if ~ischar(integrate) ||  ~ischar(rhs)
+              error('Invalid call to setInterface.') 
+           end
+           global ACADO_;
+           ACADO_.helper.addMEXoutput(integrate, rhs);
+        end
+        
+        
         function setMEXFiles(obj, dir)
             global ACADO_;
             if ~ischar(dir)
