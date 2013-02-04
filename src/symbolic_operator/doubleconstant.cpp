@@ -101,6 +101,12 @@ returnValue DoubleConstant::evaluate( int number, double *x, double *result ){
 }
 
 
+returnValue DoubleConstant::evaluate( EvaluationBase *x ){
+
+    x->set(value);
+    return SUCCESSFUL_RETURN;
+}
+
 
 Operator* DoubleConstant::differentiate( int index ){
 

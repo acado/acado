@@ -95,6 +95,12 @@ returnValue Addition::evaluate( int number, double *x, double *result ){
 }
 
 
+returnValue Addition::evaluate( EvaluationBase *x ){
+
+    x->addition(*argument1,*argument2);
+    return SUCCESSFUL_RETURN;
+}
+
 
 Operator* Addition::differentiate( int index ){
 

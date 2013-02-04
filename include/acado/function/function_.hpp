@@ -42,6 +42,7 @@ BEGIN_NAMESPACE_ACADO
 
 class EvaluationPoint;
 class ExportVariable;
+template <typename T> class TevaluationPoint;
 
 
 /** 
@@ -207,6 +208,17 @@ public:
 
 
 
+	/** Evaluates the function at a templated  \n
+	 *  evaluation point.                      \n
+     *                                         \n
+     *  \param x       the evaluation point    \n
+     *                                         \n
+     *  \return The result of the evaluation.  \n
+     */
+    template <typename T> Tmatrix<T> evaluate( const TevaluationPoint<T> &x );
+	
+	
+	
     /** Evaluates the function and stores the intermediate        \n
      *  results in a buffer (needed for automatic differentiation \n
      *  in backward mode)                                         \n
@@ -511,6 +523,14 @@ protected:
 	
 	double* result;
 };
+
+
+template <typename T> Tmatrix<T> Function::evaluate( const TevaluationPoint<T> &x ){
+
+	Tmatrix<T> Tresult(getDim());
+	evaluationTree.evaluate( x.getEvaluationPointer(), &Tresult );
+	return Tresult;
+}
 
 
 CLOSE_NAMESPACE_ACADO

@@ -398,6 +398,32 @@ BooleanType DifferentialEquation::isODE( ) const
 }
 
 
+Expression DifferentialEquation::getODEexpansion( const int &order ) const{
+
+	if ( order <= 0 ){ ACADOERROR( RET_INDEX_OUT_OF_BOUNDS ); return 0; }
+	
+	Expression rhs;
+	getExpression(rhs);
+	TIME t;
+	int dim = rhs.getDim();
+	
+	IntermediateState coeff(dim,order+2);
+	int i,j;
+	for( i=0; i<dim; i++ ){
+		Expression e(1,1,VT_DIFFERENTIAL_STATE,component[i]);
+		coeff(i,0) = e;
+		coeff(i,1) = rhs(i);
+	}
+	for( j=0; j<order; j++ ){
+	   IntermediateState der =   (coeff.getCol(j+1)).ADforward( VT_DIFFERENTIAL_STATE, component, rhs )
+	                           + forwardDerivative( coeff.getCol(j+1), t, 1.0 );
+	   for( i=0; i<dim; i++ ) coeff(i,j+2) = der(i);
+	}
+	return coeff;
+}
+
+
+
 BooleanType DifferentialEquation::makeImplicit(){
 
     if ( is_implicit == BT_FALSE ){

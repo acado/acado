@@ -226,6 +226,13 @@ returnValue COperator::evaluate( int number, double *x, double *result_ ){
 }
 
 
+returnValue COperator::evaluate( EvaluationBase *x ){
+ 
+    ASSERT( 1 == 0 );
+    return ACADOERROR(RET_ASSERTION);
+}
+
+
 
 Operator* COperator::differentiate( int index ){
 

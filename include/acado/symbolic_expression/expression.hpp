@@ -257,6 +257,7 @@ class Expression{
         Expression ADbackward( const Expression &arg ) const;
 
         Expression ADforward ( const Expression &arg, const Expression &seed ) const;
+        Expression ADforward ( const VariableType &varType_, const int *arg, const Expression &seed ) const;
         Expression ADbackward( const Expression &arg, const Expression &seed ) const;
 
 
@@ -307,8 +308,8 @@ class Expression{
          inline uint getNumCols( ) const;
 
 
-        /** Returns the number of columns.
-         *  \return The number of columns. */
+        /** Returns the global type idea of the idx-component.
+         *  \return The global type ID. */
          inline uint getComponent( const unsigned int idx ) const;
 
 

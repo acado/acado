@@ -95,6 +95,14 @@ Tan& Tan::operator=( const Tan &arg ){
   return *this;
 }
 
+
+returnValue Tan::evaluate( EvaluationBase *x ){
+
+    x->Tan(*argument);
+    return SUCCESSFUL_RETURN;
+}
+
+
 Operator* Tan::differentiate( int index ){
 
   dargument = argument->differentiate( index );

@@ -92,6 +92,14 @@ Asin& Asin::operator=( const Asin &arg ){
   return *this;
 }
 
+
+returnValue Asin::evaluate( EvaluationBase *x ){
+ 
+    x->Asin(*argument);
+    return SUCCESSFUL_RETURN;
+}
+
+
 Operator* Asin::differentiate( int index ){
 
   dargument = argument->differentiate( index );

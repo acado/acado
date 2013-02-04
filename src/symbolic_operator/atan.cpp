@@ -93,6 +93,14 @@ Atan& Atan::operator=( const Atan &arg ){
   return *this;
 }
 
+
+returnValue Atan::evaluate( EvaluationBase *x ){
+ 
+    x->Atan(*argument);
+    return SUCCESSFUL_RETURN;
+}
+
+
 Operator* Atan::differentiate( int index ){
 
   dargument = argument->differentiate( index );

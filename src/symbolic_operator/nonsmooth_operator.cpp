@@ -177,6 +177,12 @@ returnValue NonsmoothOperator::evaluate( int number, double *x, double *result )
 }
 
 
+returnValue NonsmoothOperator::evaluate( EvaluationBase *x ){
+
+    return SUCCESSFUL_RETURN;
+}
+
+
 
 Operator* NonsmoothOperator::differentiate( int index ){
 

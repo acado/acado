@@ -82,6 +82,12 @@ returnValue Subtraction::evaluate( int number, double *x, double *result ){
 }
 
 
+returnValue Subtraction::evaluate( EvaluationBase *x ){
+
+    x->subtraction(*argument1,*argument2);
+    return SUCCESSFUL_RETURN;
+}
+
 
 Operator* Subtraction::differentiate( int index ){
 

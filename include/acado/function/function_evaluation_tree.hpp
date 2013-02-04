@@ -170,7 +170,11 @@ public:
 
 
 
-
+    /** Evaluates the expression */
+    template <typename T> returnValue evaluate( Tmatrix<T> *x, Tmatrix<T> *result );
+	
+	
+	
     /** Evaluates the expression and also prints   \n
      *  the intermediate results with a specified  \n
      *  print level.                               \n
@@ -490,6 +494,28 @@ public:
     String				auxVariableName;
     String				auxVariableStructName;
 };
+
+
+template <typename T> returnValue FunctionEvaluationTree::evaluate( Tmatrix<T> *x,
+																	Tmatrix<T> *result ){
+
+    int run1;
+
+	EvaluationTemplate<T> y(x);
+	
+	for( run1 = 0; run1 < n; run1++ ){
+		sub[run1]->evaluate(&y);
+		x->operator()(indexList->index(VT_INTERMEDIATE_STATE,lhs_comp[run1])) = y.res;
+	}
+	
+	for( run1 = 0; run1 < dim; run1++ ){
+		f[run1]->evaluate(&y);
+		result->operator()(run1) = y.res;
+	}
+
+    return SUCCESSFUL_RETURN;
+}
+
 
 
 CLOSE_NAMESPACE_ACADO

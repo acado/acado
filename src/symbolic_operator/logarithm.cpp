@@ -92,6 +92,14 @@ Logarithm& Logarithm::operator=( const Logarithm &arg ){
   return *this;
 }
 
+
+returnValue Logarithm::evaluate( EvaluationBase *x ){
+ 
+    x->Log(*argument);
+    return SUCCESSFUL_RETURN;
+}
+
+
 Operator* Logarithm::differentiate( int index ){
 
   dargument = argument->differentiate( index );

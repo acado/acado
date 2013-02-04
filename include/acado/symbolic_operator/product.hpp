@@ -83,7 +83,10 @@ public:
                                   double *result    /**< the result           */  );
 
 
-
+	/** Evaluates the expression (templated version) */
+	virtual returnValue evaluate( EvaluationBase *x );
+	
+	
     /** Returns the derivative of the expression with respect     \n
      *  to the variable var(index).                               \n
      *  \return The expression for the derivative.                \n

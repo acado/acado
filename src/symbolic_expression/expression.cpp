@@ -1094,11 +1094,29 @@ Expression Expression::ADbackward ( const Expression &arg ) const{
 
 Expression Expression::ADforward ( const Expression &arg, const Expression &seed ) const{
 
-    unsigned int run1, run2;
+    unsigned int run1;
     const unsigned int n = arg.getDim();
 
     ASSERT( arg .isVariable() == BT_TRUE );
     ASSERT( seed.getDim    () == n       );
+
+    int *Component = new int[n];
+
+    for( run1 = 0; run1 < n; run1++ ) Component[run1] = arg.getComponent(run1);
+
+	Expression result = ADforward( arg.getVariableType(), Component, seed );
+    delete[] Component;
+
+    return result;
+}
+
+
+Expression Expression::ADforward ( const VariableType &varType_,
+								   const int          *arg     ,
+								   const Expression   &seed      ) const{
+
+    unsigned int run1, run2;
+    const unsigned int n = seed.getDim();
 
     Expression result( getNumRows(), getNumCols() );
 
@@ -1107,10 +1125,9 @@ Expression Expression::ADforward ( const Expression &arg, const Expression &seed
     Operator     **seed1     = new Operator*   [n];
 
     for( run1 = 0; run1 < n; run1++ ){
-
-        varType  [run1] = arg .getVariableType     (    );
-        Component[run1] = arg .getComponent        (run1);
-        seed1    [run1] = seed.element[run1]->clone(    );
+        varType  [run1] = varType_;
+        Component[run1] = arg[run1];
+        seed1    [run1] = seed.element[run1]->clone();
     }
 
     for( run1 = 0; run1 < getDim(); run1++ ){

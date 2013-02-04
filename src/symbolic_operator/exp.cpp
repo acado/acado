@@ -84,6 +84,14 @@ Exp& Exp::operator=( const Exp &arg ){
   return *this;
 }
 
+
+returnValue Exp::evaluate( EvaluationBase *x ){
+ 
+    x->Exp(*argument);
+    return SUCCESSFUL_RETURN;
+}
+
+
 Operator* Exp::differentiate( int index ){
 
   dargument = argument->differentiate( index );

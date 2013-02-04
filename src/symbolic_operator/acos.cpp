@@ -93,6 +93,14 @@ Acos& Acos::operator=( const Acos &arg ){
 }
 
 
+returnValue Acos::evaluate( EvaluationBase *x ){
+ 
+    x->Acos(*argument);
+    return SUCCESSFUL_RETURN;
+}
+
+
+
 Operator* Acos::differentiate( int index ){
 
     dargument = argument->differentiate( index );

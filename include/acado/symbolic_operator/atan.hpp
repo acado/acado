@@ -70,6 +70,12 @@ public:
     /** Assignment Operator (deep copy). */
     Atan& operator=( const Atan &arg );
 
+	
+	/** Evaluates the expression (templated version) */
+	virtual returnValue evaluate( EvaluationBase *x );
+	
+	
+	
 
     /** Returns the derivative of the expression with respect     \n
      *  to the variable var(index).                               \n
@@ -78,8 +84,7 @@ public:
      */
      virtual Operator* differentiate( int index  /**< diff. index    */ );
 
-
-
+	 
     /** Substitutes var(index) with the expression sub.           \n
      *  \return The substituted expression.                       \n
      *

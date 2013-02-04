@@ -69,6 +69,7 @@ Product& Product::operator=( const Product &arg ){
 }
 
 
+
 returnValue Product::evaluate( int number, double *x, double *result ){
 
     if( number >= bufferSize ){
@@ -87,6 +88,12 @@ returnValue Product::evaluate( int number, double *x, double *result ){
     return SUCCESSFUL_RETURN;
 }
 
+
+returnValue Product::evaluate( EvaluationBase *x ){
+ 
+    x->product(*argument1,*argument2);
+    return SUCCESSFUL_RETURN;
+}
 
 
 Operator* Product::differentiate( int index ){

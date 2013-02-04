@@ -40,6 +40,7 @@
 
 #include <acado/matrix_vector/vector.hpp>
 #include <acado/matrix_vector/matrix.hpp>
+#include <acado/matrix_vector/t_matrix.hpp>
 #include <acado/matrix_vector/block_matrix.hpp>
 
 #include <acado/matrix_vector/vector.ipp>

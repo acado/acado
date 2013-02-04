@@ -150,6 +150,12 @@ returnValue Power_Int::evaluate( int number, double *x, double *result ){
 }
 
 
+returnValue Power_Int::evaluate( EvaluationBase *x ){
+ 
+    x->powerInt(*argument,exponent);
+    return SUCCESSFUL_RETURN;
+}
+
 
 Operator* Power_Int::differentiate( int index ){
 

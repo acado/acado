@@ -164,6 +164,12 @@ returnValue Projection::evaluate( int number, double *x, double *result ){
 }
 
 
+returnValue Projection::evaluate( EvaluationBase *x ){
+
+    x->project(variableIndex);
+    return SUCCESSFUL_RETURN;
+}
+
 
 Operator* Projection::differentiate( int index ){
 

@@ -88,6 +88,12 @@ returnValue Quotient::evaluate( int number, double *x, double *result ){
 }
 
 
+returnValue Quotient::evaluate( EvaluationBase *x ){
+
+    x->quotient(*argument1,*argument2);
+    return SUCCESSFUL_RETURN;
+}
+
 
 Operator* Quotient::differentiate( int index ){
 

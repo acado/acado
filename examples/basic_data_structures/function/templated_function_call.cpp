@@ -24,37 +24,52 @@
 
 
 
-/**
- *    \file include/acado/function/function.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 31.05.2008
+ /**
+ *    \file examples/basic_data_structures/templated_function_call.cpp
+ *    \author Boris Houska
+ *    \date 2013
  */
 
-
-#ifndef ACADO_TOOLKIT_FUNCTION_HPP
-#define ACADO_TOOLKIT_FUNCTION_HPP
+#include <time.h>
 
 #include <acado/utils/acado_utils.hpp>
-#include <acado/matrix_vector/matrix_vector.hpp>
-#include <acado/symbolic_expression/acado_syntax.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
-
-#include <acado/function/evaluation_point.hpp>
-#include <acado/function/t_evaluation_point.hpp>
-#include <acado/function/function_.hpp>
-#include <acado/function/c_function.hpp>
-#include <acado/function/differential_equation.hpp>
-#include <acado/function/transition.hpp>
-#include <acado/function/output_fcn.hpp>
+#include <acado/function/function.hpp>
 
 
-// BEGIN_NAMESPACE_ACADO
-// 
-// const OutputFcn undefinedOutputFcn;
-// 
-// CLOSE_NAMESPACE_ACADO
+/* >>> start tutorial code >>> */
+int main( ){
+
+    USING_NAMESPACE_ACADO
+
+    // DEFINE VARIABLES:
+    // ----------------------
+    DifferentialState      x;
+    TIME                   t;
+    Function               f;
+
+    f << -x*t;
+    f <<  x*x;
 
 
-#endif  // ACADO_TOOLKIT_FUNCTION_HPP
+    // TEST THE FUNCTION f:
+    // ---------------------------------------
+    TevaluationPoint<double> z(f);
 
-// end of file.
+    Tmatrix<double> xx(1);
+    xx(0) = 2.0;
+    Tmatrix<double> tt(1);
+	tt(0) = 1.0;
+
+    z.setT( tt );
+    z.setX( xx );
+
+    Tmatrix<double> result = f.evaluate( z );
+
+    std::cout << "result:\n" << result << "\n";
+
+    return 0;
+}
+/* <<< end tutorial code <<< */
+
+

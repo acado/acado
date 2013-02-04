@@ -92,6 +92,14 @@ Cos& Cos::operator=( const Cos &arg ){
   return *this;
 }
 
+
+returnValue Cos::evaluate( EvaluationBase *x ){
+ 
+    x->Cos(*argument);
+    return SUCCESSFUL_RETURN;
+}
+
+
 Operator* Cos::differentiate( int index ){
 
   dargument = argument->differentiate( index );

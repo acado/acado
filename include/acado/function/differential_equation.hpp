@@ -220,6 +220,19 @@ class DifferentialEquation : public Function{
                 BooleanType hasLyapunovEquation( ) const;
 
 
+		/** Returning an Expression that contains a Taylor expansion              \n
+		  * of the ODE-solution trajectory.                                       \n
+		  *                                                                       \n
+		  * \param order the order of Taylor expansion. 
+		  *
+		  * \return A matrix valued expression C of dimension                     \n
+		  *         n_x times (order+2) ,                                         \n
+		  *         whose rows contain the Taylor coefficients.                   \n
+		  *         C = [ x,f(x),f'(x)f(x),f''(x)f(x)f(x)+f'(x)f'(x)f(x), ... ].  \n
+		  **/
+		Expression getODEexpansion( const int &order ) const;
+		
+		
 	// PROTECTED MEMBER FUNCTIONS:
 	// ---------------------------
 	protected:

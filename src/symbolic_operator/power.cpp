@@ -83,6 +83,12 @@ returnValue Power::evaluate( int number, double *x, double *result ){
 }
 
 
+returnValue Power::evaluate( EvaluationBase *x ){
+
+    x->power(*argument1,*argument2);
+    return SUCCESSFUL_RETURN;
+}
+
 
 Operator* Power::differentiate( int index ){
 

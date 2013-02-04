@@ -102,6 +102,13 @@ Operator* Sin::differentiate( int index ){
 }
 
 
+returnValue Sin::evaluate( EvaluationBase *x ){
+
+    x->Sin(*argument);
+    return SUCCESSFUL_RETURN;
+}
+
+
 Operator* Sin::ADforwardProtected( int dim,
                                      VariableType *varType,
                                      int *component,
