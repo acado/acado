@@ -44,6 +44,7 @@ BEGIN_NAMESPACE_ACADO
 OCP::OCP( const double &tStart_, const double &tEnd_, const int &N_ )
     :MultiObjectiveFunctionality(){
 
+    if( N_ <= 0 ) ACADOERROR( RET_INVALID_ARGUMENTS );
     setupGrid( tStart_, tEnd_, N_+1 );
 }
 
@@ -51,6 +52,8 @@ OCP::OCP( const double &tStart_, const double &tEnd_, const int &N_ )
 OCP::OCP( const double &tStart_, const double &tEnd_, const Vector& _numSteps )
     :MultiObjectiveFunctionality(){
 
+        if( _numSteps.getDim() <= 0 ) ACADOERROR( RET_INVALID_ARGUMENTS );
+      
 	Vector times( _numSteps.getDim()+1 );
 	times(0) = tStart_;
 	
@@ -72,6 +75,7 @@ OCP::OCP( const double &tStart_, const double &tEnd_, const Vector& _numSteps )
 OCP::OCP( const Grid &grid_ )
     :MultiObjectiveFunctionality(){
 
+    if( grid_.getNumPoints() <= 1 ) ACADOERROR( RET_INVALID_ARGUMENTS );
     grid = grid_;
     objective.init ( grid );
     constraint.init( grid );
@@ -84,6 +88,7 @@ OCP::OCP( const double    &tStart_,
           const int       &N_       )
     :MultiObjectiveFunctionality(){
 
+    if( N_ <= 0 ) ACADOERROR( RET_INVALID_ARGUMENTS );
     setupGrid( tStart_, tStart_ + 1.0, N_+1);
 }
 
