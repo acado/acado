@@ -25,7 +25,7 @@
 
 
  /**
- *    \file examples/basic_data_structures/templated_function_call.cpp
+ *    \file examples/basic_data_structures/interval_function_tutorial.cpp
  *    \author Boris Houska
  *    \date 2013
  */
@@ -35,6 +35,7 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/function/function.hpp>
+#include <acado/set_arithmetics/interval.hpp>
 
 
 /* >>> start tutorial code >>> */
@@ -44,27 +45,27 @@ int main( ){
 
     // DEFINE VARIABLES:
     // ----------------------
-    DifferentialState      x;
-    TIME                   t;
-    Function               f;
+    Parameter  x,y,z;
+    Function       f;
 
-    f << -x*t;
-    f <<  x*x;
+	f << x+y*z;
+	f << x*x+y;
 
 
     // TEST THE FUNCTION f:
     // ---------------------------------------
-    TevaluationPoint<double> z(f);
+    TevaluationPoint<Interval> e(f);
 
-    Tmatrix<double> xx(1);
-    xx(0) = 2.0;
-    Tmatrix<double> tt(1);
-	tt(0) = 1.0;
+    Tmatrix<Interval> p(3);
+    p(0) = Interval(-1.0, 1.0 );
+	p(1) = Interval( 0.0, 2.0 );
+	p(2) = Interval( 0.0, 0.1 );
 
-    z.setT( tt );
-    z.setX( xx );
+    e.setP( p );
 
-    Tmatrix<double> result = f.evaluate( z );
+    Tmatrix<Interval> result = f.evaluate( e );
+
+    std::cout << "result:\n" << result << "\n";
 
     return 0;
 }

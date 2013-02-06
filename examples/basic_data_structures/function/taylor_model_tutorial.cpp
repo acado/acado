@@ -25,48 +25,40 @@
 
 
  /**
- *    \file examples/basic_data_structures/templated_function_call.cpp
+ *    \file examples/basic_data_structures/function/taylor_model_tutorial.cpp
  *    \author Boris Houska
  *    \date 2013
  */
 
-#include <time.h>
+#include <acado/set_arithmetics/interval.hpp>
+#include <acado/set_arithmetics/taylor_model.hpp>
 
-#include <acado/utils/acado_utils.hpp>
-#include <acado/symbolic_expression/symbolic_expression.hpp>
-#include <acado/function/function.hpp>
+USING_NAMESPACE_ACADO
 
+typedef Interval I;
+typedef TaylorModel<I> TM;
+typedef TaylorVariable<I> TV;
 
 /* >>> start tutorial code >>> */
 int main( ){
+	
+  // TEST Taylor model arithmetics:
+  // ---------------------------------------------
+    TM Mod( 2, 1 );
 
-    USING_NAMESPACE_ACADO
+    I XI = I(  0.01, 0.02 );
+    I YI = I( -0.2, 0.2 );
 
-    // DEFINE VARIABLES:
-    // ----------------------
-    DifferentialState      x;
-    TIME                   t;
-    Function               f;
+    TV X( &Mod, 0, XI );
+	TV Y( &Mod, 1, YI );
 
-    f << -x*t;
-    f <<  x*x;
+    TV Z1 = 1.0/X;
+	TV Z2 = X*Y + sin(X);
 
+	std::cout << Z1;
+	std::cout << Z2;
 
-    // TEST THE FUNCTION f:
-    // ---------------------------------------
-    TevaluationPoint<double> z(f);
-
-    Tmatrix<double> xx(1);
-    xx(0) = 2.0;
-    Tmatrix<double> tt(1);
-	tt(0) = 1.0;
-
-    z.setT( tt );
-    z.setX( xx );
-
-    Tmatrix<double> result = f.evaluate( z );
-
-    return 0;
+	return 0;
 }
 /* <<< end tutorial code <<< */
 

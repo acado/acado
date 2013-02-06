@@ -23,51 +23,71 @@
  */
 
 
-
- /**
- *    \file examples/basic_data_structures/templated_function_call.cpp
- *    \author Boris Houska
- *    \date 2013
+/**
+ *    \file   src/set_arithmetics/interval.cpp
+ *    \author Boris Houska, Mario Villanueva, Benoit Chachuat
+ *    \date   2013
  */
 
-#include <time.h>
 
-#include <acado/utils/acado_utils.hpp>
-#include <acado/symbolic_expression/symbolic_expression.hpp>
-#include <acado/function/function.hpp>
+#include <acado/set_arithmetics/interval.hpp>
 
 
-/* >>> start tutorial code >>> */
-int main( ){
-
-    USING_NAMESPACE_ACADO
-
-    // DEFINE VARIABLES:
-    // ----------------------
-    DifferentialState      x;
-    TIME                   t;
-    Function               f;
-
-    f << -x*t;
-    f <<  x*x;
+BEGIN_NAMESPACE_ACADO
 
 
-    // TEST THE FUNCTION f:
-    // ---------------------------------------
-    TevaluationPoint<double> z(f);
 
-    Tmatrix<double> xx(1);
-    xx(0) = 2.0;
-    Tmatrix<double> tt(1);
-	tt(0) = 1.0;
-
-    z.setT( tt );
-    z.setX( xx );
-
-    Tmatrix<double> result = f.evaluate( z );
-
-    return 0;
+BooleanType Interval::isCompact() const{
+ 
+	BooleanType result = BT_TRUE;
+	
+	if( acadoIsNaN   ( _l ) == BT_TRUE  ) result = BT_FALSE;
+	if( acadoIsFinite( _l ) == BT_FALSE ) result = BT_FALSE;
+	if( acadoIsNaN   ( _u ) == BT_TRUE  ) result = BT_FALSE;
+	if( acadoIsFinite( _u ) == BT_FALSE ) result = BT_FALSE;
+	
+	return result;
 }
-/* <<< end tutorial code <<< */
 
 
+
+double Interval::mid( const double convRel, const double concRel, const double valCut, int &indexMid ) const{
+
+  int ICONV = 0;
+  int ICUT  = 1;
+  int ICONC = 2;
+
+  if( indexMid < 0 ){
+    if ( valCut < convRel ){
+      indexMid = ICONV;
+      return convRel;
+    }
+    else
+    if ( valCut < concRel ){
+      indexMid = ICUT;
+      return valCut;
+    }
+    else{
+      indexMid = ICONC;
+      return concRel;
+    }
+  }
+
+  if ( indexMid == ICONV )
+    return convRel;
+
+  else
+  if ( indexMid == ICUT )
+    return valCut;
+
+  else
+    return concRel;
+}
+
+
+CLOSE_NAMESPACE_ACADO
+
+
+/*
+ *	end of file
+ */

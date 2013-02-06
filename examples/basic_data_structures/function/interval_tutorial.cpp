@@ -25,48 +25,35 @@
 
 
  /**
- *    \file examples/basic_data_structures/templated_function_call.cpp
+ *    \file examples/basic_data_structures/interval_tutorial.cpp
  *    \author Boris Houska
  *    \date 2013
  */
 
-#include <time.h>
-
-#include <acado/utils/acado_utils.hpp>
-#include <acado/symbolic_expression/symbolic_expression.hpp>
-#include <acado/function/function.hpp>
+#include <acado/set_arithmetics/interval.hpp>
 
 
 /* >>> start tutorial code >>> */
 int main( ){
 
-    USING_NAMESPACE_ACADO
-
-    // DEFINE VARIABLES:
-    // ----------------------
-    DifferentialState      x;
-    TIME                   t;
-    Function               f;
-
-    f << -x*t;
-    f <<  x*x;
-
-
-    // TEST THE FUNCTION f:
-    // ---------------------------------------
-    TevaluationPoint<double> z(f);
-
-    Tmatrix<double> xx(1);
-    xx(0) = 2.0;
-    Tmatrix<double> tt(1);
-	tt(0) = 1.0;
-
-    z.setT( tt );
-    z.setX( xx );
-
-    Tmatrix<double> result = f.evaluate( z );
-
-    return 0;
+	USING_NAMESPACE_ACADO
+	
+	Interval x(-0.1,0.1);
+	Interval y( 1,2);
+	
+	Interval z = asin(x) + y;
+	
+	z.print();
+	
+// 	(x/y).print();
+// 	(sin(x)*cos(y)).print();
+// 	(sqrt(x)).print();
+// 	(sqrt(y)).print();
+// 	(x*y+y/x).print();
+// 	(log(x)).print();
+// 	(-log(y)).print();
+	
+	return 0;
 }
 /* <<< end tutorial code <<< */
 
