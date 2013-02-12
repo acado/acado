@@ -315,13 +315,13 @@ public:
 	
 	
 
-
+	//! @brief Private constructor for a real scalar in a specific TaylorModel
+	TaylorVariable
+	( TaylorModel<T>*TM, const double d=0. );
 
 private:
 
-  //! @brief Private constructor for a real scalar in a specific TaylorModel
-  TaylorVariable
-    ( TaylorModel<T>*TM, const double d=0. );
+
   //! @brief Private constructor for a range in a specific TaylorModel
   TaylorVariable
     ( TaylorModel<T>*TM, const T&B );

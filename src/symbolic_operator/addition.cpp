@@ -182,15 +182,15 @@ Operator* Addition::substitute( int index, const Operator *sub ){
 
 NeutralElement Addition::isOneOrZero() const{
 
-    if ( argument1->isOneOrZero() == NE_ONE && argument2->isOneOrZero() == NE_ZERO ){
-        return NE_ONE;
-    }
-    if ( argument1->isOneOrZero() == NE_ZERO && argument2->isOneOrZero() == NE_ONE ){
-        return NE_ONE;
-    }
-    if ( argument1->isOneOrZero() == NE_ZERO && argument2->isOneOrZero() == NE_ZERO ){
-      return NE_ZERO;
-    }
+//    if ( argument1->isOneOrZero() == NE_ONE && argument2->isOneOrZero() == NE_ZERO ){
+//        return NE_ONE;
+//    }
+//    if ( argument1->isOneOrZero() == NE_ZERO && argument2->isOneOrZero() == NE_ONE ){
+//        return NE_ONE;
+//    }
+//    if ( argument1->isOneOrZero() == NE_ZERO && argument2->isOneOrZero() == NE_ZERO ){
+//      return NE_ZERO;
+//    }
     return NE_NEITHER_ONE_NOR_ZERO;
 
 }
