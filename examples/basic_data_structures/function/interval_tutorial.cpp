@@ -30,7 +30,7 @@
  *    \date 2013
  */
 
-#include <acado/set_arithmetics/interval.hpp>
+#include <acado/set_arithmetics/set_arithmetics.hpp>
 
 
 /* >>> start tutorial code >>> */
@@ -41,7 +41,7 @@ int main( ){
 	Interval x(-0.1,0.1);
 	Interval y( 1,2);
 	
-	Interval z = asin(x) + y;
+	Interval z = asin(x) + y/x;
 	
 	z.print();
 	

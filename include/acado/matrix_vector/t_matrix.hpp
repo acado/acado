@@ -181,6 +181,8 @@ public:
     ( const T*pM );
 
 	unsigned int getDim() const{ return _nc*_nr; }
+	unsigned int getNumRows() const{ return _nr; }
+	unsigned int getNumCols() const{ return _nc; }
 	
 	
   //! @brief Other operators
@@ -534,11 +536,11 @@ operator*
 ( const Tmatrix<T>&M, const Tmatrix<U>&N )
 {
   ASSERT( M._nc==N._nr );
-  Tmatrix<T> P( M._nr, N._nc );   
-  for( unsigned int ir=1; ir<=M._nr; ir++ ){
-    for( unsigned int ic=1; ic<=N._nc; ic++ ){
-      P(ir,ic) = M(ir,1)*N(1,ic);
-      for( unsigned int k=2; k<=M._nc; k++ ){
+  Tmatrix<T> P( M._nr, N._nc );
+  for( unsigned int ir=0; ir<M._nr; ir++ ){
+    for( unsigned int ic=0; ic<N._nc; ic++ ){
+      P(ir,ic) = M(ir,0)*N(0,ic);
+      for( unsigned int k=1; k<M._nc; k++ ){
         P(ir,ic) += M(ir,k)*N(k,ic);
       }
     }

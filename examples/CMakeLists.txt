@@ -149,6 +149,7 @@ SET( EXAMPLE_DIRS
 	getting_started
 	integration_algorithm
 	integrator
+	validated_integrator
 	multi_objective
 	my_examples
 	nlp

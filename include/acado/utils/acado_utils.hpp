@@ -110,6 +110,14 @@ int acadoMin( const int x, const int y );
 double acadoMin( const double x, const double y );
 
 
+/** Returns the factorial 1*2*3*...*n of an integer n. \n
+ *  \param n the input integer n.
+ *  \return 1*2*3*...*n   if n>=1                      \n
+ *          1 if n = 0. (and aborts if n < 0 ).        \n
+ */
+int acadoFactorial( int n );
+
+
 /** Returns whether str1 and str2 are identical
  */
 BooleanType acadoIsEqual( const char* str1, const char* str2 );

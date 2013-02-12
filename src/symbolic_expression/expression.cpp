@@ -1061,6 +1061,36 @@ Expression Expression::ADforward ( const Expression &arg ) const{
 }
 
 
+Expression Expression::ADforward ( const VariableType &varType_, const int *arg, int nV ) const{
+ 
+    ASSERT( getNumCols() == 1 );
+
+    Expression result( (int) getNumRows(), nV );
+
+    int run1, run2;
+
+    IntermediateState seed( nV );
+
+    for( run1 = 0; run1 < nV; run1++ ) seed(run1) = 0;
+
+    for( run1 = 0; run1 < nV; run1++ ){
+
+        seed(run1) = 1.0;
+
+        Expression tmp = ADforward( varType_, arg, seed );
+
+        seed(run1) = 0.0;
+
+        for( run2 = 0; run2 < (int) getNumRows(); run2++ ){
+            delete result.element[run2*nV+run1];
+            result.element[run2*nV+run1] = tmp.element[run2]->clone();
+        }
+    }
+    return result;
+}
+
+
+
 Expression Expression::ADbackward ( const Expression &arg ) const{
 
     ASSERT(     getNumCols() == 1 );

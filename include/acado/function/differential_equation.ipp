@@ -114,6 +114,9 @@ inline int DifferentialEquation::getEndTimeIdx() const{
 }
 
 
+inline int* DifferentialEquation::getComponents() const{ return component; }
+
+
 
 CLOSE_NAMESPACE_ACADO
 

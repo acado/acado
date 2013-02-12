@@ -254,6 +254,7 @@ class Expression{
 
 
         Expression ADforward ( const Expression &arg ) const;
+        Expression ADforward ( const VariableType &varType_, const int *arg, int nV ) const;
         Expression ADbackward( const Expression &arg ) const;
 
         Expression ADforward ( const Expression &arg, const Expression &seed ) const;

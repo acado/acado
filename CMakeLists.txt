@@ -219,6 +219,7 @@ SET( ACADO_SOURCE_DIRS
 	./src/symbolic_expression
 	./src/function
 	./src/integrator
+	./src/validated_integrator
 	./src/sparse_solver
 	./external_packages/src/acado_csparse
 	./external_packages/src/acado_gnuplot

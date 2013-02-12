@@ -30,30 +30,29 @@
  *    \date 2013
  */
 
-#include <acado/set_arithmetics/interval.hpp>
-#include <acado/set_arithmetics/taylor_model.hpp>
+#include <acado/set_arithmetics/set_arithmetics.hpp>
 
 USING_NAMESPACE_ACADO
 
-typedef Interval I;
-typedef TaylorModel<I> TM;
-typedef TaylorVariable<I> TV;
+typedef TaylorModel<Interval> MyTM;
+typedef TaylorVariable<Interval> MyTV;
+
 
 /* >>> start tutorial code >>> */
 int main( ){
 	
   // TEST Taylor model arithmetics:
   // ---------------------------------------------
-    TM Mod( 2, 1 );
+    MyTM Mod( 2, 3 );
 
-    I XI = I(  0.01, 0.02 );
-    I YI = I( -0.2, 0.2 );
+    Interval XI = Interval(  0.01, 1.0 );
+    Interval YI = Interval( -0.2, 0.2 );
 
-    TV X( &Mod, 0, XI );
-	TV Y( &Mod, 1, YI );
+    MyTV X( &Mod, 0, XI );
+	MyTV Y( &Mod, 1, YI );
 
-    TV Z1 = 1.0/X;
-	TV Z2 = X*Y + sin(X);
+    MyTV Z1 = 1.0/X;
+	MyTV Z2 = X*Y + sin(X);
 
 	std::cout << Z1;
 	std::cout << Z2;

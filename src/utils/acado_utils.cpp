@@ -345,6 +345,15 @@ int acadoRound (double x){
 }
 
 
+int acadoFactorial( int n ){
+  
+	ASSERT( n>= 0 );
+	int r = 1;
+	for (int i = n; i > 1; --i)
+		r *= i;
+	return r;
+}
+
 
 int acadoRoundAway (double x) {
 

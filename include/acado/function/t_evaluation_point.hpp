@@ -211,7 +211,6 @@ template <typename T> returnValue TevaluationPoint<T>::init( const Function &f ,
     nd = acadoMax( nd_, f.getNDX()                 );
     N  = acadoMax( N_ , f.getNumberOfVariables()+1 );
 
-	if( z != 0 ) delete z;
     z = new Tmatrix<T>(N);
 
     idx = new int*[7];
@@ -263,8 +262,6 @@ template <typename T> void TevaluationPoint<T>::copyIdx( const uint &dim, const 
 
 
 template <typename T> void TevaluationPoint<T>::copy( const TevaluationPoint<T> &rhs ){
-
-//    uint i;
 
     nx = rhs.nx;
     na = rhs.na;

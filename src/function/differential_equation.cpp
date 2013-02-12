@@ -402,8 +402,9 @@ Expression DifferentialEquation::getODEexpansion( const int &order ) const{
 
 	if ( order <= 0 ){ ACADOERROR( RET_INDEX_OUT_OF_BOUNDS ); return 0; }
 	
-	Expression rhs;
-	getExpression(rhs);
+	Expression tmp;
+	getExpression(tmp);
+	IntermediateState rhs = tmp;
 	TIME t;
 	int dim = rhs.getDim();
 	

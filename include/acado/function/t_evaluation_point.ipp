@@ -42,9 +42,9 @@ BEGIN_NAMESPACE_ACADO
 
 template <typename T> inline returnValue TevaluationPoint<T>::copy( const int *order, const Tmatrix<T> &rhs ){
 
-    uint i;
-    for( i = 0; i < rhs.getDim(); i++ )
+    for( uint i = 0; i < rhs.getDim(); i++ )
         z->operator()(order[i]) = rhs(i);
+
     return SUCCESSFUL_RETURN;
 }
 

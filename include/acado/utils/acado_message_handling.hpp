@@ -241,7 +241,8 @@ RET_WRONG_DEFINITION_OF_SEEDS,					/**< the seeds are not set correctly or in th
 RET_NOT_FROZEN,									/**< the mesh is not frozen and/or forward results not stored. */
 RET_TO_MANY_DIFFERENTIAL_STATES,				/**< there are to many differential states. */
 RET_TO_MANY_DIFFERENTIAL_STATE_DERIVATIVES,		/**< there are to many diff. state derivatives. */
-RET_RK45_CAN_NOT_TREAT_DAE,						/**< An explicit Runge-Kutta solver can not treat DAEs. */
+RET_RK45_CAN_NOT_TREAT_DAE,						/**< An explicit Runge-Kutta solver cannot treat DAEs. */
+RET_CANNOT_TREAT_DAE,							/**< The algorithm cannot treat DAEs. */
 RET_INPUT_HAS_WRONG_DIMENSION,					/**< At least one of the inputs has a wrong dimension. */
 RET_INPUT_OUT_OF_RANGE,							/**< One of the inputs is out of range. */
 RET_THE_DAE_INDEX_IS_TOO_LARGE,					/**< The index of the DAE is larger than 1. */

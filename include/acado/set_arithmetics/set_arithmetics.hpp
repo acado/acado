@@ -24,63 +24,21 @@
 
 
 
- /**
- *    \file examples/basic_data_structures/ode_taylor_expansion.cpp
- *    \author Boris Houska
+/**
+ *    \file include/acado/set_arithmetics/set_arithmetics.hpp
+ *    \author Mario Villanueva, Boris Houska
  *    \date 2013
  */
 
-#include <time.h>
+
+#ifndef ACADO_TOOLKIT_SET_ARITHMETICS_HPP
+#define ACADO_TOOLKIT_SET_ARITHMETICS_HPP
 
 #include <acado/utils/acado_utils.hpp>
-#include <acado/symbolic_expression/symbolic_expression.hpp>
-#include <acado/function/function.hpp>
+#include <acado/set_arithmetics/interval.hpp>
+#include <acado/set_arithmetics/taylor_model.hpp>
 
 
-/* >>> start tutorial code >>> */
-int main( ){
+#endif  // ACADO_TOOLKIT_SET_ARITHMETICS_HPP
 
-    USING_NAMESPACE_ACADO
-
-    DifferentialState     x(2);
-	TIME                  t;
-    
-	IntermediateState rhs(2);
-	rhs(0) = -t*x(0);
-	rhs(1) = -x(1);
-	
-	DifferentialEquation ode;
-	
-	ode << dot(x) == rhs;
-	
-	Function f;
-    f << ode.getODEexpansion( 4 );
-
-	TevaluationPoint<double> z(f);
-	
-    Tmatrix<double> xx(2);
-    xx(0) = 1.1;
-    xx(1) = 1.0;
-    Tmatrix<double> tt(1);
-	tt(0) = 0.0;
-    z.setT( tt );
-    z.setX( xx );
-
-	Tmatrix<double> result = f.evaluate( z );
-	
-	std::cout << "result = \n" << result << "\n";
-	
-	
-	FILE *file = fopen("my_function.c", "w");
-	
-	file << f;
-	
-	fclose(file);
-	
-	
-
-    return 0;
-}
-/* <<< end tutorial code <<< */
-
-
+// end of file.

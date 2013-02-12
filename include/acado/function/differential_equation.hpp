@@ -233,6 +233,10 @@ class DifferentialEquation : public Function{
 		Expression getODEexpansion( const int &order ) const;
 		
 		
+		inline int* getComponents() const;
+		
+		
+		
 	// PROTECTED MEMBER FUNCTIONS:
 	// ---------------------------
 	protected:

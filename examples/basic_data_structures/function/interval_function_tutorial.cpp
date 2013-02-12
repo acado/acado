@@ -35,7 +35,7 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/function/function.hpp>
-#include <acado/set_arithmetics/interval.hpp>
+#include <acado/set_arithmetics/set_arithmetics.hpp>
 
 
 /* >>> start tutorial code >>> */
