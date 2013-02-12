@@ -264,7 +264,7 @@ template <typename T> void TevaluationPoint<T>::copyIdx( const uint &dim, const 
 
 template <typename T> void TevaluationPoint<T>::copy( const TevaluationPoint<T> &rhs ){
 
-    uint i;
+//    uint i;
 
     nx = rhs.nx;
     na = rhs.na;
