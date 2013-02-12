@@ -64,14 +64,18 @@ template <typename T> returnValue EllipsoidalIntegrator::integrate( double t0, d
 			acadoPrintf("\n\nSTEP %d:\n---------------------------------------------------\n",count);
 			acadoPrintf("\ntime = %.6e \t h = %.6e \n", t, h );
 			acadoPrintf("\nSTATE ENCLOSURE: \n\n" );
-			std::cout << getStateBound(*x) << "\n";
+			Tmatrix<Interval> result = getStateBound(*x);
+			for( int i=0; i<nx; i++ )
+				std::cout << "x[" << i <<"]:  " << result(i) << "\n";
 		}
 	}
 	
 	if( PrintLevel == MEDIUM ){
 		acadoPrintf("\ntime = %.6e \n", t );
 		acadoPrintf("\nSTATE ENCLOSURE: \n\n" );
-		std::cout << getStateBound(*x) << "\n";
+		Tmatrix<Interval> result = getStateBound(*x);
+		for( int i=0; i<nx; i++ )
+			std::cout << "x[" << i <<"]:  " << result(i) << "\n";
 	}
 	
 	return SUCCESSFUL_RETURN;
@@ -82,27 +86,29 @@ template <typename T> double EllipsoidalIntegrator::step( const double &t, const
 														  Tmatrix<T> *x, Tmatrix<T> *p, Tmatrix<T> *w ){
   
 
-   if( nx != 0 ) ASSERT(x!=0);
- 
+	if( nx        != 0 ) if( x == 0 ){ ACADOERROR(RET_DIFFERENTIAL_STATE_DIMENSION_MISMATCH); setInfinity(); return -1.0; }
+	if( g.getNP() != 0 ) if( p == 0 ){ ACADOERROR(RET_PARAMETER_DIMENSION_MISMATCH); setInfinity(); return -1.0; }
+	if( g.getNW() != 0 ) if( w == 0 ){ ACADOERROR(RET_DISTURBANCE_DIMENSION_MISMATCH); setInfinity(); return -1.0; }
+
    Tmatrix<T>      coeff;
    Tmatrix<double> C    ;
 
-//     printf("e-i: setup step \n");
+//      printf("e-i: setup step \n");
    
    phase0( t, x, p, w, coeff, C );
 
-//     printf("e-i: phase 0 succeeded. \n");
+//      printf("e-i: phase 0 succeeded. \n");
    
    double h;
   
    h = phase1( t, tf, x, p, w, coeff, C );
   
    if( h <= -0.5 ){ setInfinity(); return h; }
-//     printf("e-i: phase 1 succeeded: h = %.6e \n", h );
+//      printf("e-i: phase 1 succeeded: h = %.6e \n", h );
    
    phase2( t, h, x, p, w, coeff, C );
   
-//    printf("e-i: phase 2 succeeded.\n" );
+//     printf("e-i: phase 2 succeeded.\n" );
    
    return h;
 }
@@ -134,10 +140,13 @@ template <typename T> void EllipsoidalIntegrator::phase0( double t,
 	
 	// Evaluate g:
 	// --------------------------------------------------------------
-	 
+	
+// 	std::cout << "x:  " << *x << "\n";
+// 	std::cout << "p:  " << *p << "\n";
+	
 	coeff = evaluate( g, t, x, p, w );
 	
-	//std::cout << "coeff:  " << coeff << "\n";
+//  	std::cout << "coeff:  " << coeff << "\n";
 	
 	
 	// Evaluate the Jacobian of g:
@@ -160,7 +169,7 @@ template <typename T> void EllipsoidalIntegrator::phase0( double t,
 			for( int k=0; k<nx; k++ )
 				coeff(i*nx+j) += J((i*nx+j)*nx+k)*R(k);
 	
-// 	std::cout << "\n\n coeff:  " << coeff << "\n";
+//  	std::cout << "\n\n coeff:  " << coeff << "\n";
 	
 	
 	// Evaluate a bound on the second order term of g:
@@ -172,7 +181,7 @@ template <typename T> void EllipsoidalIntegrator::phase0( double t,
 		stack(nx+i) =  R(i);
 	}
 	
-// 	std::cout << "\n\n stack:  " << stack << "\n";
+//  	std::cout << "\n\n stack:  " << stack << "\n";
 	
 	coeff += evaluate( ddg, t, &stack, p, w );
 	
@@ -318,7 +327,7 @@ template <typename T> Tmatrix<T> EllipsoidalIntegrator::evaluate(	Function &f, I
 	if( p!= 0 ) np = p->getDim();
 	if( w!= 0 ) nw = w->getDim();
 	
-	TevaluationPoint<T> z(f,2*nx,na,nu,np,nw);
+	TevaluationPoint<T> z(f,2*nx,na,np,nu,nw);
 	
 	Tmatrix<T> time(1);
 	time(0) = t;

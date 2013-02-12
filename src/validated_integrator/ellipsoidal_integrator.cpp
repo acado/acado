@@ -83,6 +83,13 @@ returnValue EllipsoidalIntegrator::init( const DifferentialEquation &rhs_, const
   gr << derivatives.getCol(N+1)/acadoFactorial(N+1);
   dg << gg.ADforward( VT_DIFFERENTIAL_STATE, rhs_.getComponents(), nx );
 
+  FILE *file = fopen("dg_out.c", "w");
+  
+  file << dg;
+  
+  fclose(file);
+  
+  
   DifferentialState r(nx);
   
   IntermediateState dgg = gg.ADforward( VT_DIFFERENTIAL_STATE, rhs_.getComponents(), r );
