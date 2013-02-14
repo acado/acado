@@ -147,7 +147,7 @@ class String
 
 struct StringComparer {
     bool operator() (const String &s1, const String &s2) const {
-        return std::string( s1.getName() ).compare( std::string( s2.getName() ) );
+        return std::string( s1.getName() ).compare( std::string( s2.getName() ) ) ? true : false;
     }
 };
 

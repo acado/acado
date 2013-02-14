@@ -650,6 +650,7 @@ enum QPSolverName
 	QP_QPOASES3,
 	QP_CVXGEN,
 	QP_FORCES,
+	QP_QPDUNES,
 	QP_NONE
 };
 
