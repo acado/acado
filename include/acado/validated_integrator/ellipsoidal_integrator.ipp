@@ -50,6 +50,8 @@ template <typename T> returnValue EllipsoidalIntegrator::integrate( double t0, d
 	int PrintLevel;
 	get( INTEGRATOR_PRINTLEVEL, PrintLevel );
 	
+	totalTime.start();
+	
 	int count = 1;
 	while( count <= Nmax ){
 
@@ -78,6 +80,26 @@ template <typename T> returnValue EllipsoidalIntegrator::integrate( double t0, d
 			std::cout << "x[" << i <<"]:  " << result(i) << "\n";
 	}
 	
+	totalTime.stop();
+	
+	int profile;
+	get( PRINT_INTEGRATOR_PROFILE, profile );
+	
+	if ( (BooleanType)profile == BT_TRUE ){
+	  
+		acadoPrintf("\nCOMPUTATION TIME: \n\n");
+		
+		std::cout << "Total  :  " << std::setprecision(3) << std::fixed << totalTime.getTime() << " sec        \n";
+		std::cout << "Phase 0:  " << std::setprecision(3) << std::fixed << Phase0Time.getTime() << " sec"
+		          << "   ( "     << std::setprecision(1) << std::fixed << 100.0*(Phase0Time.getTime()/totalTime.getTime())
+				  << " % )\n" ;
+		std::cout << "Phase 1:  " << std::setprecision(3) << std::fixed << Phase1Time.getTime() << " sec"
+		          << "   ( "     << std::setprecision(1) << std::fixed << 100.0*(Phase1Time.getTime()/totalTime.getTime())
+				  << " % )\n\n" ;
+				  
+		if( PrintLevel == MEDIUM ) acadoPrintf("Number of Steps:  %d \n\n", count );
+	}
+	
 	return SUCCESSFUL_RETURN;
 }
 
@@ -93,37 +115,23 @@ template <typename T> double EllipsoidalIntegrator::step( const double &t, const
    Tmatrix<double> C    ;
 
 //      printf("e-i: setup step \n");
-   
-//    double tCPU = -myGetTime();
-   
-   phase0( t, x, p, w, coeff, C );
 
-//    tCPU += myGetTime();
-//    
-//    printf("PHASE 0: %.16e \n", tCPU );
+   Phase0Time.start();
+   phase0( t, x, p, w, coeff, C );
+   Phase0Time.stop();
+
 //      printf("e-i: phase 0 succeeded. \n");
    
    double h;
-  
-//    tCPU = -myGetTime();
    
+   Phase1Time.start();
    h = phase1( t, tf, x, p, w, coeff, C );
-  
-//    tCPU += myGetTime();
-//    
-//    printf("PHASE 1: %.16e \n", tCPU );
-   
-   
+   Phase1Time.stop();
+
    if( h <= -0.5 ){ setInfinity(); return h; }
 //      printf("e-i: phase 1 succeeded: h = %.6e \n", h );
    
-//    tCPU = -myGetTime();
-   
    phase2( t, h, x, p, w, coeff, C );
-  
-//    tCPU += myGetTime();
-//    
-//    printf("PHASE 2: %.16e \n", tCPU );
 
 //     printf("e-i: phase 2 succeeded.\n" );
    
@@ -161,13 +169,7 @@ template <typename T> void EllipsoidalIntegrator::phase0( double t,
 // 	std::cout << "x:  " << *x << "\n";
 // 	std::cout << "p:  " << *p << "\n";
 	
-// 	double tCPU = -myGetTime();
-	
 	coeff = evaluate( g, t, x, p, w );
-	
-//    tCPU += myGetTime();
-//    
-// 	printf("evaluation g: %.16e \n", tCPU );
 	
 //  	std::cout << "coeff:  " << coeff << "\n";
 	
@@ -183,12 +185,8 @@ template <typename T> void EllipsoidalIntegrator::phase0( double t,
 	if( p != 0 ) pI = new Tmatrix<Interval>(bound(*p));
 	if( w != 0 ) wI = new Tmatrix<Interval>(bound(*w));
 	
-// 	tCPU = -myGetTime();
 	
 	Tmatrix<T> J = evaluate( dg, t, xI, pI, wI );
-	
-// 	tCPU += myGetTime();
-// 	printf("evaluation dg: %.16e \n", tCPU );
 	
 // 	std::cout << "\n\n J:  " << J << "\n";
 	
@@ -219,12 +217,7 @@ template <typename T> void EllipsoidalIntegrator::phase0( double t,
 
 //  	std::cout << "\n\n stack:  " << stack << "\n";
 	
-// 	tCPU = -myGetTime();
-	
 	coeff += evaluate( ddg, t, &stack, pI, wI );
-	
-// 	tCPU += myGetTime();
-// 	printf("evaluation ddg: %.16e \n", tCPU );
 	
 //  	std::cout << "\n\n coeff:  " << coeff << "\n";
 	

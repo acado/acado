@@ -61,18 +61,14 @@ int main( ){
 	
 	EllipsoidalIntegrator integrator( f, 5 );
 
-	integrator.set(INTEGRATOR_PRINTLEVEL, MEDIUM );
-	integrator.set(INTEGRATOR_TOLERANCE, 1e-6 );
-	integrator.set(ABSOLUTE_TOLERANCE, 1e-6 );
-	
-	double t = -acadoGetTime();
+	integrator.set(INTEGRATOR_PRINTLEVEL   , MEDIUM );
+	integrator.set(PRINT_INTEGRATOR_PROFILE, YES    );
+	integrator.set(INTEGRATOR_TOLERANCE    , 1e-6   );
+	integrator.set(ABSOLUTE_TOLERANCE      , 1e-6   );
 	
 	integrator.integrate( 0.0, 8.0, &x_init, &p_init );
 //	integrator.step( 0.0, 1.0, &x_init, &p_init );
-	
- 	t += acadoGetTime();
-// 	
-	printf("CPU time = %.16e \n", t );
+
 	
 	
     return 0;

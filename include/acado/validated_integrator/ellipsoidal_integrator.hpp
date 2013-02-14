@@ -33,9 +33,9 @@
 #ifndef ACADO_TOOLKIT_ELLIPSOIDAL_INTEGRATOR_HPP
 #define ACADO_TOOLKIT_ELLIPSOIDAL_INTEGRATOR_HPP
 
-#include <sys/stat.h>
-#include <sys/time.h>
-
+#include <iostream>
+#include <iomanip>
+#include <acado/clock/clock.hpp>
 #include <acado/utils/acado_utils.hpp>
 #include <acado/user_interaction/algorithmic_base.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
@@ -182,6 +182,10 @@ private:
 	Function ddg;   // Directional derivative of dg: (d^2 g(t,x,...)/d^2x)*r*r
 
     Tmatrix<double>  Q;  // Ellipsoidal remainder matrix
+    
+    RealClock totalTime ;
+    RealClock Phase0Time;
+    RealClock Phase1Time;
 };
 
 CLOSE_NAMESPACE_ACADO
