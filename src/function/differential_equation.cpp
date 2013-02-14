@@ -404,9 +404,9 @@ Expression DifferentialEquation::getODEexpansion( const int &order ) const{
 	
 	Expression tmp;
 	getExpression(tmp);
-	IntermediateState rhs = tmp;
 	TIME t;
-	int dim = rhs.getDim();
+	IntermediateState rhs = tmp;
+	int dim = tmp.getDim();
 	
 	IntermediateState coeff(dim,order+2);
 	int i,j;
@@ -416,7 +416,7 @@ Expression DifferentialEquation::getODEexpansion( const int &order ) const{
 		coeff(i,1) = rhs(i);
 	}
 	for( j=0; j<order; j++ ){
-	   IntermediateState der =   (coeff.getCol(j+1)).ADforward( VT_DIFFERENTIAL_STATE, component, rhs )
+	   IntermediateState der =   (coeff.getCol(j+1)).ADforward( VT_DIFFERENTIAL_STATE, component, coeff.getCol(1) )
 	                           + forwardDerivative( coeff.getCol(j+1), t, 1.0 );
 	   for( i=0; i<dim; i++ ) coeff(i,j+2) = der(i);
 	}

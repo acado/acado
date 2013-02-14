@@ -33,6 +33,8 @@
 #ifndef ACADO_TOOLKIT_ELLIPSOIDAL_INTEGRATOR_HPP
 #define ACADO_TOOLKIT_ELLIPSOIDAL_INTEGRATOR_HPP
 
+#include <sys/stat.h>
+#include <sys/time.h>
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/user_interaction/algorithmic_base.hpp>
@@ -163,6 +165,7 @@ private:
 	void updateQ( Tmatrix<double> C, Tmatrix<Interval> R );
 	
 	void setInfinity();
+	
 	
 	
 // PRIVATE MEMBERS:

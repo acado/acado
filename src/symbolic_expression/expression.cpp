@@ -1347,16 +1347,20 @@ Expression& Expression::assignmentSetup( const Expression &arg ){
 
     element = (Operator**)calloc(dim,sizeof(Operator*));
 
-    uint i;
-    for( i = 0; i < dim; i++ ){
+    VariableType tt = VT_UNKNOWN; int comp = 0;
 
-        Stream tmpName;
-        if( name.isEmpty() == BT_FALSE ){
-            if( dim > 1 ) tmpName = tmpName << name << "[" << i << "]";
-            else          tmpName = tmpName << name;
-        }
+    for( uint i = 0; i < dim; i++ ){
 
-        element[i] = (arg.getTreeProjection(i,tmpName)).clone();
+        arg.element[i]->isVariable(tt,comp);
+        if( tt == VT_INTERMEDIATE_STATE ) element[i] = arg.element[i]->clone();
+		else{
+			Stream tmpName;
+			if( name.isEmpty() == BT_FALSE ){
+				if( dim > 1 ) tmpName = tmpName << name << "[" << i << "]";
+				else          tmpName = tmpName << name;
+			 }
+			 element[i] = (arg.getTreeProjection(i,tmpName)).clone();
+		}
     }
     return *this;
 }

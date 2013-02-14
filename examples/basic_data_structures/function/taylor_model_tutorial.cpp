@@ -45,14 +45,14 @@ int main( ){
   // ---------------------------------------------
     MyTM Mod( 2, 3 );
 
-    Interval XI = Interval(  0.01, 1.0 );
+    Interval XI = Interval(  0.5, 1.0 );
     Interval YI = Interval( -0.2, 0.2 );
 
     MyTV X( &Mod, 0, XI );
 	MyTV Y( &Mod, 1, YI );
 
-    MyTV Z1 = 1.0/X;
-	MyTV Z2 = X*Y + sin(X);
+    MyTV Z1 = pow( pow(X,2) , 2 );
+	MyTV Z2 = log(X) + Y;// + X*Y + sin(X);
 
 	std::cout << Z1;
 	std::cout << Z2;

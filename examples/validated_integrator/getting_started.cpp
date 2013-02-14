@@ -23,44 +23,42 @@
  */
 
 
-
  /**
- *    \file examples/basic_data_structures/ode_taylor_expansion.cpp
- *    \author Boris Houska
+ *    \file examples/validated_integrator/getting_started.cpp
+ *    \author Boris Houska, Mario Villanueva, Benoit Chachuat
  *    \date 2013
  */
 
-#include <time.h>
 
-#include <acado/utils/acado_utils.hpp>
-#include <acado/symbolic_expression/symbolic_expression.hpp>
-#include <acado/function/function.hpp>
-#include <acado/set_arithmetics/set_arithmetics.hpp>
+#include <acado/validated_integrator/ellipsoidal_integrator.hpp>
 
 
-    USING_NAMESPACE_ACADO
-
+USING_NAMESPACE_ACADO
+    
 typedef TaylorVariable<Interval> T;
-
 
 /* >>> start tutorial code >>> */
 int main( ){
 
     // DEFINE VARIABLES:
     // ----------------------
-	DifferentialState      x;
-	DifferentialEquation   f;
+    DifferentialState      x;
+    DifferentialEquation   f;
+
+    f << dot(x) == -x*x;
+
+	TaylorModel<Interval> Mod( 1, 1 );
 	
-	f << dot(x) == -x*x;
+	Tmatrix<T> x0(1);
+	x0(0) = T( &Mod, 0, Interval(0.99,1.0));
 	
-	Function g;
-    g << f.getODEexpansion( 2 );
+	EllipsoidalIntegrator integrator( f, 4 );
 	
-	FILE *file = fopen("my_function.c", "w");
+	integrator.set(INTEGRATOR_PRINTLEVEL, HIGH );
+	integrator.set(INTEGRATOR_TOLERANCE, 1e-4 );
+	integrator.set(ABSOLUTE_TOLERANCE, 1e-4 );
 	
-	file << g;
-	
-	fclose(file);
+	integrator.integrate( 0.0, 5.0, &x0 );
 
     return 0;
 }

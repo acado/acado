@@ -25,24 +25,13 @@
 
 
  /**
- *    \file examples/validated_integrator/harmonoic_oscillator.cpp
+ *    \file examples/validated_integrator/lotka_volterra.cpp
  *    \author Boris Houska, Mario Villanueva, Benoit Chachuat
  *    \date 2013
  */
 
-#include <sys/stat.h>
-#include <sys/time.h>
+
 #include <acado/validated_integrator/ellipsoidal_integrator.hpp>
-
-double myGetTime( )
-{
-	double current_time = 0.0;
-	struct timeval theclock;
-	gettimeofday( &theclock,0 );
-	current_time = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
-
-	return current_time;
-}
 
 
 USING_NAMESPACE_ACADO
@@ -57,7 +46,7 @@ int main( ){
 	DifferentialState      x,y;
 	Parameter                p; 
 	DifferentialEquation     f;
-
+	
 	f << dot(x) == p*x*(1.0-y);
 	f << dot(y) == p*y*(x-1.0);
 
@@ -72,17 +61,17 @@ int main( ){
 	
 	EllipsoidalIntegrator integrator( f, 5 );
 
-	integrator.set(INTEGRATOR_PRINTLEVEL, HIGH );
+	integrator.set(INTEGRATOR_PRINTLEVEL, MEDIUM );
 	integrator.set(INTEGRATOR_TOLERANCE, 1e-6 );
 	integrator.set(ABSOLUTE_TOLERANCE, 1e-6 );
 	
-	double t = -myGetTime();
+	double t = -acadoGetTime();
 	
 	integrator.integrate( 0.0, 8.0, &x_init, &p_init );
 //	integrator.step( 0.0, 1.0, &x_init, &p_init );
 	
-	t += myGetTime();
-	
+ 	t += acadoGetTime();
+// 	
 	printf("CPU time = %.16e \n", t );
 	
 	

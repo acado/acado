@@ -80,14 +80,21 @@ returnValue EllipsoidalIntegrator::init( const DifferentialEquation &rhs_, const
   for( int i=0; i<N; i++ ) gg << derivatives.getCol(i+1)/acadoFactorial(i+1);
   
   g  << gg;  
+  
+  FILE *file1 = fopen("g_out.c", "w");
+  
+  file1 << g;
+  
+  fclose(file1);
+  
   gr << derivatives.getCol(N+1)/acadoFactorial(N+1);
   dg << gg.ADforward( VT_DIFFERENTIAL_STATE, rhs_.getComponents(), nx );
 
-  FILE *file = fopen("dg_out.c", "w");
-  
-  file << dg;
-  
-  fclose(file);
+//   FILE *file = fopen("dg_out.c", "w");
+//   
+//   file << dg;
+//   
+//   fclose(file);
   
   
   DifferentialState r(nx);

@@ -159,10 +159,26 @@ returnValue Power_Int::evaluate( EvaluationBase *x ){
 
 Operator* Power_Int::differentiate( int index ){
 
+  if( exponent == 0 ){
+    return new DoubleConstant( 0.0 , NE_ZERO );
+  }
+  
   dargument = argument->differentiate( index );
   if ( dargument->isOneOrZero() == NE_ZERO ){
     return new DoubleConstant( 0.0 , NE_ZERO );
   }
+
+  if( exponent == 1 ){
+    return dargument->clone();
+  }
+  
+  if( exponent == 2 ){
+    return new Product( argument->clone(),
+						new Product( new DoubleConstant( 2.0, NE_NEITHER_ONE_NOR_ZERO ),
+									 dargument->clone() )
+						);
+  }
+  
   if ( dargument->isOneOrZero() == NE_ONE ){
   return new Product(
            new DoubleConstant(
@@ -199,27 +215,43 @@ Operator* Power_Int::AD_forward( int dim,
                                    int &nNewIS,
                                    TreeProjection ***newIS ){
 
-    if( dargument != 0 )
-        delete dargument;
+	if( dargument != 0 )
+		delete dargument;
 
-    dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
+	dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
 
-    if( dargument->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if( dargument->isOneOrZero() == NE_ONE ){
-        return new Product(
-                 new DoubleConstant(
-                     (double) exponent,
-                     NE_NEITHER_ONE_NOR_ZERO
-                 ),
-                 new Power_Int(
-                     argument->clone(),
-                     exponent-1
-                 )
-             );
-    }
-    return new Product(
+	if( exponent == 0 ){
+		return new DoubleConstant( 0.0 , NE_ZERO );
+	}
+	
+	if ( dargument->isOneOrZero() == NE_ZERO ){
+		return new DoubleConstant( 0.0 , NE_ZERO );
+	}
+
+	if( exponent == 1 ){
+		return dargument->clone();
+	}
+  
+	if( exponent == 2 ){
+		return new Product( argument->clone(),
+							new Product( new DoubleConstant( 2.0, NE_NEITHER_ONE_NOR_ZERO ),
+										 dargument->clone() )
+							);
+	}
+  
+  if ( dargument->isOneOrZero() == NE_ONE ){
+  return new Product(
+           new DoubleConstant(
+             (double) exponent,
+             NE_NEITHER_ONE_NOR_ZERO
+           ),
+           new Power_Int(
+             argument->clone(),
+             exponent-1
+           )
+         );
+  }
+  return new Product(
            new Product(
              new DoubleConstant(
                (double) exponent,

@@ -84,7 +84,6 @@ template <typename T> returnValue EllipsoidalIntegrator::integrate( double t0, d
 
 template <typename T> double EllipsoidalIntegrator::step( const double &t, const double &tf,
 														  Tmatrix<T> *x, Tmatrix<T> *p, Tmatrix<T> *w ){
-  
 
 	if( nx        != 0 ) if( x == 0 ){ ACADOERROR(RET_DIFFERENTIAL_STATE_DIMENSION_MISMATCH); setInfinity(); return -1.0; }
 	if( g.getNP() != 0 ) if( p == 0 ){ ACADOERROR(RET_PARAMETER_DIMENSION_MISMATCH); setInfinity(); return -1.0; }
@@ -95,19 +94,37 @@ template <typename T> double EllipsoidalIntegrator::step( const double &t, const
 
 //      printf("e-i: setup step \n");
    
+//    double tCPU = -myGetTime();
+   
    phase0( t, x, p, w, coeff, C );
 
+//    tCPU += myGetTime();
+//    
+//    printf("PHASE 0: %.16e \n", tCPU );
 //      printf("e-i: phase 0 succeeded. \n");
    
    double h;
   
+//    tCPU = -myGetTime();
+   
    h = phase1( t, tf, x, p, w, coeff, C );
   
+//    tCPU += myGetTime();
+//    
+//    printf("PHASE 1: %.16e \n", tCPU );
+   
+   
    if( h <= -0.5 ){ setInfinity(); return h; }
 //      printf("e-i: phase 1 succeeded: h = %.6e \n", h );
    
+//    tCPU = -myGetTime();
+   
    phase2( t, h, x, p, w, coeff, C );
   
+//    tCPU += myGetTime();
+//    
+//    printf("PHASE 2: %.16e \n", tCPU );
+
 //     printf("e-i: phase 2 succeeded.\n" );
    
    return h;
@@ -144,7 +161,13 @@ template <typename T> void EllipsoidalIntegrator::phase0( double t,
 // 	std::cout << "x:  " << *x << "\n";
 // 	std::cout << "p:  " << *p << "\n";
 	
+// 	double tCPU = -myGetTime();
+	
 	coeff = evaluate( g, t, x, p, w );
+	
+//    tCPU += myGetTime();
+//    
+// 	printf("evaluation g: %.16e \n", tCPU );
 	
 //  	std::cout << "coeff:  " << coeff << "\n";
 	
@@ -152,7 +175,20 @@ template <typename T> void EllipsoidalIntegrator::phase0( double t,
 	// Evaluate the Jacobian of g:
 	// --------------------------------------------------------------
 	
-	Tmatrix<T> J = evaluate( dg, t, x, p, w );
+	Tmatrix<Interval> *xI = 0;
+	Tmatrix<Interval> *pI = 0;
+	Tmatrix<Interval> *wI = 0;
+	
+	if( x != 0 ) xI = new Tmatrix<Interval>(bound(*x));
+	if( p != 0 ) pI = new Tmatrix<Interval>(bound(*p));
+	if( w != 0 ) wI = new Tmatrix<Interval>(bound(*w));
+	
+// 	tCPU = -myGetTime();
+	
+	Tmatrix<T> J = evaluate( dg, t, xI, pI, wI );
+	
+// 	tCPU += myGetTime();
+// 	printf("evaluation dg: %.16e \n", tCPU );
 	
 // 	std::cout << "\n\n J:  " << J << "\n";
 	
@@ -175,17 +211,26 @@ template <typename T> void EllipsoidalIntegrator::phase0( double t,
 	// Evaluate a bound on the second order term of g:
 	// --------------------------------------------------------------
 	
-	Tmatrix<T> stack(2*nx);
+	Tmatrix<Interval> stack(2*nx);
 	for( int i=0; i<nx; i++ ){
-		stack(   i) =  x->operator()(i) + R(i);
+		stack(   i) =  xI->operator()(i) + R(i);
 		stack(nx+i) =  R(i);
 	}
-	
+
 //  	std::cout << "\n\n stack:  " << stack << "\n";
 	
-	coeff += evaluate( ddg, t, &stack, p, w );
+// 	tCPU = -myGetTime();
+	
+	coeff += evaluate( ddg, t, &stack, pI, wI );
+	
+// 	tCPU += myGetTime();
+// 	printf("evaluation ddg: %.16e \n", tCPU );
 	
 //  	std::cout << "\n\n coeff:  " << coeff << "\n";
+	
+	if( xI != 0 ) delete xI;
+	if( pI != 0 ) delete pI;
+	if( wI != 0 ) delete wI;
 	
 }
 

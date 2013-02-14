@@ -163,11 +163,9 @@ template <typename T> returnValue EvaluationTemplate<T>::power( Operator &arg1, 
 template <typename T> returnValue EvaluationTemplate<T>::powerInt( Operator &arg1, int &arg2 ){
  
 	EvaluationTemplate<T> r1(val);
-	
 	arg1.evaluate( &r1 );
-	
 	res = pow( r1.res, arg2 );
-
+	
 	return SUCCESSFUL_RETURN;
 }
 

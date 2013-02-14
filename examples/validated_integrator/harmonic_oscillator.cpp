@@ -25,22 +25,15 @@
 
 
  /**
- *    \file examples/basic_data_structures/ode_taylor_expansion.cpp
- *    \author Boris Houska
+ *    \file examples/validated_integrator/harmonoic_oscillator.cpp
+ *    \author Boris Houska, Mario Villanueva, Benoit Chachuat
  *    \date 2013
  */
 
-#include <time.h>
-
-#include <acado/utils/acado_utils.hpp>
-#include <acado/symbolic_expression/symbolic_expression.hpp>
-#include <acado/function/function.hpp>
-#include <acado/set_arithmetics/set_arithmetics.hpp>
+#include <acado/validated_integrator/ellipsoidal_integrator.hpp>
 
 
-    USING_NAMESPACE_ACADO
-
-typedef TaylorVariable<Interval> T;
+USING_NAMESPACE_ACADO
 
 
 /* >>> start tutorial code >>> */
@@ -48,20 +41,24 @@ int main( ){
 
     // DEFINE VARIABLES:
     // ----------------------
-	DifferentialState      x;
-	DifferentialEquation   f;
-	
-	f << dot(x) == -x*x;
-	
-	Function g;
-    g << f.getODEexpansion( 2 );
-	
-	FILE *file = fopen("my_function.c", "w");
-	
-	file << g;
-	
-	fclose(file);
+    DifferentialState      x,y;
+    DifferentialEquation   f;
 
+    f << dot(x) ==  y;
+	f << dot(y) == -x;
+	
+	Tmatrix<Interval> x_init(2);
+	x_init(0) = Interval(-1.0,1.0);
+	x_init(1) = Interval(-1.0,1.0);
+	
+	EllipsoidalIntegrator integrator( f, 8 );
+
+	integrator.set(INTEGRATOR_PRINTLEVEL, HIGH );
+	integrator.set(INTEGRATOR_TOLERANCE, 1e-8 );
+	integrator.set(ABSOLUTE_TOLERANCE, 1e-10 );
+	
+	integrator.integrate( 0.0, 2*M_PI, 1, x_init );
+	
     return 0;
 }
 /* <<< end tutorial code <<< */
