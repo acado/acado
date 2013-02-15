@@ -367,7 +367,8 @@ enum OptionsName
 	CG_USE_OPENMP,								/**< Use OpenMP for parallelization in multiple shooting. */
 	CG_USE_VARIABLE_WEIGHTING_MATRIX,			/**< Use variable weighting matrix S on first N shooting nodes. */
 	CG_USE_C99,									/**< Code generation is allowed (or not) to export C-code that conforms C99 standard. */
-	CG_COMPUTE_COVARIANCE_MATRIX,				/**< Enable computation of the variance-covariance matrix for the last estimate */
+	CG_COMPUTE_COVARIANCE_MATRIX,				/**< Enable computation of the variance-covariance matrix for the last estimate. */
+	CG_HARDCODE_CONSTRAINT_VALUES,				/**< Enable/disable hard-coding of the constraint values. */
 	IMPLICIT_INTEGRATOR_MODE,					/**< This determines the mode of the implicit integrator (see enum ImplicitIntegratorMode). */
 	IMPLICIT_INTEGRATOR_NUM_ITS,				/**< This is the performed number of Newton iterations in the implicit integrator. */
 	IMPLICIT_INTEGRATOR_NUM_ITS_INIT,			/**< This is the performed number of Newton iterations in the implicit integrator for the initialization of the first step. */
