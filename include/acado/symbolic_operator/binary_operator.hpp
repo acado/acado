@@ -138,7 +138,7 @@ public:
      *          NE_NEITHER_ONE_NOR_ZERO                           \n
      *
      */
-     virtual NeutralElement isOneOrZero() const = 0;
+     virtual NeutralElement isOneOrZero() const;
 
 
 
@@ -344,7 +344,7 @@ public:
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual Stream print( Stream &stream ) const = 0;
+     virtual Stream& print( Stream &stream ) const = 0;
 
 
 

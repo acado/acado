@@ -68,7 +68,8 @@ template <typename T> returnValue EllipsoidalIntegrator::integrate( double t0, d
 			acadoPrintf("\nSTATE ENCLOSURE: \n\n" );
 			Tmatrix<Interval> result = getStateBound(*x);
 			for( int i=0; i<nx; i++ )
-				std::cout << "x[" << i <<"]:  " << result(i) << "\n";
+				std::cout << "x[" << i <<"]:  " << result(i)
+						  << "     R[" << i <<"]:  " << (boundQ())(i) << "\n";
 		}
 	}
 	
@@ -308,18 +309,9 @@ template <typename T> void EllipsoidalIntegrator::phase2(	double t, double h,
 															Tmatrix<T> &coeff,
 															Tmatrix<double> &C ){
 
-
- 
-//	std::cout << "x " << *x << "\n";
-	
-	
 	center(*x);
 	
-//	std::cout << "x " << *x << "\n";
-	
 	Tmatrix<Interval> R = getRemainder(*x);
-	
-// 	std::cout << "R " << R << "\n";
 	
 	double TOL;
 	get( INTEGRATOR_TOLERANCE, TOL  );
@@ -328,19 +320,9 @@ template <typename T> void EllipsoidalIntegrator::phase2(	double t, double h,
 	
 	for( int i=0; i<nx; i++ ) R(i) += discretizationError;
 	
-// 	std::cout << "discretizationError " << discretizationError << "\n";
-// 	
-// 	printf("R.l = %.16e \n", R(0).l() );
-// 	printf("R.u = %.16e \n", R(0).u() );
-	
 	updateQ( evalC2(C,h), R );
 	
-// 	std::cout << "Q " << Q*1e6 << "\n";
-// 	printf("Q(0,0) = %.16e \n",Q(0,0));
-	
 	*x = getPolynomial(*x);
-	
-// 	std::cout << "x " << *x << "\n";
 }
 
 

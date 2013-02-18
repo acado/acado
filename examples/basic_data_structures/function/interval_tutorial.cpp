@@ -41,7 +41,7 @@ int main( ){
 	Interval x(-0.1,0.1);
 	Interval y( 1,2);
 	
-	Interval z = asin(x) + y/x;
+	Interval z = asin(x) + x/y;
 	
 	z.print();
 	

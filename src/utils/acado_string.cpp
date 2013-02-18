@@ -36,39 +36,28 @@
 BEGIN_NAMESPACE_ACADO
 
 
-String::String()
-{
-    length = 0;
-    name   = 0;
-}
+String::String(){}
 
 
-String::String( const String& arg )
-{
-	length = 0;
-	name   = 0;
-
-    copy( arg );
-}
+String::String( const String& arg ){ copy( arg ); }
 
 
 String::String( const char* name_ ){
 
-    length = 0;
-    while( length < MAX_LENGTH_STRING ){
+//     printf("string constructor \n");
+ 
+    int length = 0;
+    while( length < (int) MAX_LENGTH_STRING ){
         if( name_[length] == '\0' ) break;
         length++;
     }
     if( length > 0 ) length++;
 
     if( length > 0 ){
-        name = new char[length];
-        uint run1;
-        for( run1 = 0; run1 < length-1; run1++ )
-            name[run1] = name_[run1];
-        name[length-1] = '\0';
+        for( int run1 = 0; run1 < length-1; run1++ )
+            name.push_back( name_[run1] );
+        name.push_back('\0');
     }
-    else name = 0;
 }
 
 
@@ -89,7 +78,7 @@ String::String( const double& val_ ){
 
     dummy = gcvt( val_ , precision , char_value );
 
-    length = 0;
+    int length = 0;
     run1 = 0;
 
     while( char_value[run1] == '1' || char_value[run1] == '0' ||
@@ -123,9 +112,8 @@ String::String( const double& val_ ){
     tmp[length] = '\0';
     length++;
 
-    name = new char[length];
-    for( run1 = 0; run1 < (int) length; run1++ )
-        name[run1] = tmp[run1];
+    for( run1 = 0; run1 < length; run1++ )
+        name.push_back(tmp[run1]);
 
     free(tmp);
 }
@@ -139,7 +127,7 @@ String::String( const int& val_ ){
     const char digits[] = "0123456789";
     int sign;
 
-    length = 0;
+    int length = 0;
 
     if( (sign = n) < 0 ) n = -n;
 
@@ -156,10 +144,9 @@ String::String( const int& val_ ){
 
     length++;
 
-    name = new char[length];
     for( sign = 0; sign < (int) length-1; sign++ )
-        name[sign] = s[length-2-sign];
-    name[length-1] = '\0';
+        name.push_back(s[length-2-sign]);
+    name.push_back('\0');
 
     delete[] s;
 }
@@ -173,7 +160,7 @@ String::String( const uint& val_ )
     const char digits[] = "0123456789";
     int sign;
 
-    length = 0;
+    int length = 0;
 
     if( (sign = n) < 0 ) n = -n;
 
@@ -190,38 +177,21 @@ String::String( const uint& val_ )
 
     length++;
 
-    name = new char[length];
     for( sign = 0; sign < (int) length-1; sign++ )
-        name[sign] = s[length-2-sign];
-    name[length-1] = '\0';
+        name.push_back(s[length-2-sign]);
+    name.push_back('\0');
 
     delete[] s;
 }
 	
 	
 
-String::~String(){
-
-    if( name != 0 )
-    {
-        delete[] name;
-
-        name = 0;
-    }
-}
+String::~String(){}
 
 
 String& String::operator=( const String& arg ){
 
     if( this != &arg ){
-
-        if( name != 0 )
-        {
-            delete[] name;
-
-            name = 0;
-        }
-
         copy( arg );
     }
     return *this;
@@ -237,7 +207,7 @@ String& String::operator=( const char* name_ ){
 char String::operator()( uint idx ) const{
 
     ASSERT( idx < getLength() );
-    return name[idx];
+    return (name.data())[idx];
 }
 
 
@@ -248,24 +218,11 @@ String& String::operator+=( const char* arg ){
 
 
 String& String::operator+=( const String& arg ){
-
-    if( arg.getLength() <= 1 )  return *this;
-    if(     getLength() <= 1 )  return operator=(arg);
-
-    String tmp;
-
-    tmp.length = getLength() + arg.getLength()-1;
-    tmp.name = new char[tmp.length];
-
-    uint run1;
-
-    for( run1 = 0; run1 < getLength(); run1++ )
-        tmp.name[run1] = name[run1];
-
-    for( run1 = 0; run1 < arg.getLength(); run1++ )
-        tmp.name[getLength()-1+run1] = arg.name[run1];
-
-    return operator=(tmp);
+ 
+    if( getLength() > 0 ) name.pop_back();
+    for( uint run1 = 0; run1 < arg.getLength(); run1++ )
+		name.push_back(((arg.name).data())[run1]);
+    return *this;
 }
 
 
@@ -309,13 +266,13 @@ BooleanType String::operator==( const char* const arg ) const
 
 uint String::getLength() const{
 
-    return length;
+    return name.size();
 }
 
 
 returnValue String::print() const{
 
-    acadoPrintf( name );
+    acadoPrintf( (char*) name.data() );
     acadoPrintf( "\n" );
     return SUCCESSFUL_RETURN;
 }
@@ -323,7 +280,7 @@ returnValue String::print() const{
 
 returnValue String::print( FILE *file ) const{
 
-    acadoFPrintf( file, name );
+    acadoFPrintf( file, (char*) name.data() );
     return SUCCESSFUL_RETURN;
 }
 
@@ -331,51 +288,31 @@ returnValue String::print( FILE *file ) const{
 
 returnValue String::copy( const String& arg )
 {
-
-    if ( name )
-    {
-    	delete [] name;
-
-    	name  = 0;
-    }
-
-    length = arg.length;
-
-    if( length > 0 )
-    {
-    	name = new char[ length ];
-
-    	for( uint run1 = 0; run1 < length; run1++ )
-    		name[run1] = arg.name[run1];
-    }
-    else{
-    	name = 0;
-    }
-
+    name = arg.name;
     return SUCCESSFUL_RETURN;
 }
 
 
 BooleanType String::isEmpty() const{
 
-    if( length <= 1 ) return BT_TRUE;
+    if( getLength() <= 1 ) return BT_TRUE;
     return BT_FALSE;
 }
 
 const char* String::getName() const{
 
-    return name;
+    return name.data();
 }
 
 
 
 String operator<<(	const char* _lhs,
 					const String& rhs
-					)
-{
+					){
+	 
 	String newString = _lhs;
 	newString << rhs;
-	return newString;
+	return rhs;
 }
 
 

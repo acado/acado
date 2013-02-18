@@ -396,7 +396,7 @@ public:
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual Stream print( Stream &stream ) const = 0;
+     virtual Stream& print( Stream &stream ) const = 0;
 
 
     /** Prints the expression into a stream ("flush" version). \n

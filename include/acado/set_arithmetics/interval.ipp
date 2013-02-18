@@ -112,15 +112,6 @@ inline Interval xlog( const Interval&I ){
   return I2;
 }
 
-inline Interval erf( const Interval &I ){
-  Interval I2( ::erf(I._l), ::erf(I._u) );
-  return I2;
-}
-
-inline Interval erfc( const Interval &I ){
-  Interval I2( ::erfc(I._l), ::erfc(I._u) );
-  return I2;
-}
 
 inline Interval sqrt( const Interval&I ){
   if ( I._l <= EQUALITY_EPS ){

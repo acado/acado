@@ -57,7 +57,7 @@ int main( ){
 
        z = myProduct( x, y );
 
-       f << x + z;
+       f << x*z + z;
 
 
     // TEST THE FUNCTION f:

@@ -84,8 +84,9 @@ TreeProjection::TreeProjection( const TreeProjection &arg )
 
 
 TreeProjection::~TreeProjection(){
-
+ 
     if( argument != 0 ){
+
         if( argument->nCount == 0 ){
             delete argument;
             argument = 0;
@@ -195,7 +196,15 @@ Operator* TreeProjection::ADforwardProtected( int dim,
 
     ASSERT( argument != 0 );
 
-    int run1;
+    int run1 = 0;
+
+    while( run1 < dim ){
+
+        if( varType[run1] == variableType && component[run1] == vIndex ){
+            return seed[run1]->clone();
+        }
+        run1++;
+    }
 
     if( vIndex >= nNewIS ){
 

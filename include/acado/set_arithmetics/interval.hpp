@@ -107,8 +107,6 @@ class Interval{
   friend Interval fabs( const Interval& );
   friend Interval sqrt( const Interval& );
   friend Interval xlog( const Interval& );
-  friend Interval erf ( const Interval& );
-  friend Interval erfc( const Interval& );
   friend Interval pow ( const Interval&, const int );
   friend Interval arh ( const Interval&, const double );
   friend Interval pow ( const Interval&, const double );

@@ -42,28 +42,18 @@ BEGIN_NAMESPACE_ACADO
 
 
 Addition::Addition( )
-         :BinaryOperator( ){
-
-}
+         :BinaryOperator( ){}
 
 
 Addition::Addition( Operator *_argument1, Operator *_argument2 )
-         :BinaryOperator( _argument1, _argument2 ){
-
-
-}
+         :BinaryOperator( _argument1, _argument2 ){}
 
 
 Addition::Addition( const Addition &arg )
-         :BinaryOperator( arg ){
+         :BinaryOperator( arg ){}
 
 
-}
-
-
-Addition::~Addition(){
-
-}
+Addition::~Addition(){}
 
 
 Addition& Addition::operator=( const Addition &arg ){
@@ -175,23 +165,6 @@ Operator* Addition::substitute( int index, const Operator *sub ){
 
     return new Addition( argument1->substitute( index , sub ),
                          argument2->substitute( index , sub ) );
-
-}
-
-
-
-NeutralElement Addition::isOneOrZero() const{
-
-//    if ( argument1->isOneOrZero() == NE_ONE && argument2->isOneOrZero() == NE_ZERO ){
-//        return NE_ONE;
-//    }
-//    if ( argument1->isOneOrZero() == NE_ZERO && argument2->isOneOrZero() == NE_ONE ){
-//        return NE_ONE;
-//    }
-//    if ( argument1->isOneOrZero() == NE_ZERO && argument2->isOneOrZero() == NE_ZERO ){
-//      return NE_ZERO;
-//    }
-    return NE_NEITHER_ONE_NOR_ZERO;
 
 }
 
@@ -404,7 +377,7 @@ returnValue Addition::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream Addition::print( Stream &stream ) const{
+Stream& Addition::print( Stream &stream ) const{
 
 	if ( ( acadoIsFinite( argument1->getValue() ) == BT_FALSE ) ||
 		 ( acadoIsFinite( argument2->getValue() ) == BT_FALSE ) )

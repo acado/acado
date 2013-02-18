@@ -44,7 +44,11 @@ int main( ){
     DifferentialState   x, y;
     DifferentialEquation f;
 
-    f << dot(x) ==  y;
+	IntermediateState a;
+	
+	a = (1.0-x*x-y*y);
+	
+    f << dot(x) ==  y + a + x*a + a*a;
     f << dot(y) == -x;
 
     // Define an integrator:

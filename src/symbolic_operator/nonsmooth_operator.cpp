@@ -339,7 +339,7 @@ returnValue NonsmoothOperator::AD_backward2( int number, double seed1, double se
 }
 
 
-Stream NonsmoothOperator::print( Stream &stream ) const{
+Stream& NonsmoothOperator::print( Stream &stream ) const{
 
     return stream;// << value;
 }

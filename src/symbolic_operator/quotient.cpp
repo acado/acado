@@ -389,21 +389,6 @@ Operator* Quotient::substitute( int index, const Operator *sub ){
 }
 
 
-
-NeutralElement Quotient::isOneOrZero() const{
-
-    if ( argument1->isOneOrZero() == NE_ZERO ){
-      return NE_ZERO;
-    }
-    if ( argument1->isOneOrZero() == NE_ONE && argument2->isOneOrZero() == NE_ONE ){
-      return NE_ONE;
-    }
-    return NE_NEITHER_ONE_NOR_ZERO;
-
-}
-
-
-
 BooleanType Quotient::isLinearIn( int dim,
                                     VariableType *varType,
                                     int *component,
@@ -617,7 +602,7 @@ returnValue Quotient::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream Quotient::print( Stream &stream ) const{
+Stream& Quotient::print( Stream &stream ) const{
 
     return stream << "(" << *argument1 << "/" << *argument2 << ")";
 }

@@ -130,17 +130,6 @@ public:
 
 
 
-    /** Checks whether the expression is zero or one              \n
-     *  \return NE_ZERO                                           \n
-     *          NE_ONE                                            \n
-     *          NE_NEITHER_ONE_NOR_ZERO                           \n
-     *
-     */
-     virtual NeutralElement isOneOrZero() const;
-
-
-
-
     /** Checks whether the expression is linear in                \n
      *  (or not depending on) a variable                          \n
      *  \return BT_FALSE if no linearity is                       \n
@@ -292,7 +281,7 @@ public:
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual Stream print( Stream &stream ) const;
+     virtual Stream& print( Stream &stream ) const;
 
 
 

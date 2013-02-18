@@ -30,8 +30,6 @@
  *    \date 2013
  */
 
-#include <time.h>
-
 #include <acado/utils/acado_utils.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/function/function.hpp>
@@ -48,19 +46,35 @@ int main( ){
 
     // DEFINE VARIABLES:
     // ----------------------
-	DifferentialState      x;
+	DifferentialState      x,y;
 	DifferentialEquation   f;
 	
-	f << dot(x) == -x*x;
+	IntermediateState test;
+	
+	test = sin(x);
+	
+	f << dot(x) == sin(x);
+//	f << dot(y) == y*y;
+	
+	double time = acadoGetTime();
 	
 	Function g;
-    g << f.getODEexpansion( 2 );
+    g << f.getODEexpansion( 6 );
+	
+	time -= acadoGetTime();
+	printf("time = %.16e \n", time );
+	
+	time = acadoGetTime();
 	
 	FILE *file = fopen("my_function.c", "w");
 	
 	file << g;
 	
 	fclose(file);
+	
+	time -= acadoGetTime();
+	printf("time = %.16e \n", time );
+	
 
     return 0;
 }

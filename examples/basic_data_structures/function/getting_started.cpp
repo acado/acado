@@ -48,8 +48,8 @@ int main( ){
     TIME                   t;
     Function               f;
 
-    f << pow(x,2.0)      + t       ;
-    f << pow(x,2.0)           ;
+    f << pow(x,2) + t       ;
+    f << pow(x,2)           ;
 
 
     // TEST THE FUNCTION f:

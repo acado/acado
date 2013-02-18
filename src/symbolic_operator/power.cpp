@@ -450,24 +450,6 @@ Operator* Power::substitute( int index, const Operator *sub ){
 }
 
 
-
-NeutralElement Power::isOneOrZero() const{
-
-    if ( argument1->isOneOrZero() == NE_ONE ){
-        return NE_ONE;
-    }
-    if ( argument1->isOneOrZero() == NE_ZERO && argument2->isOneOrZero() != NE_ZERO ){
-        return NE_ZERO;
-    }
-    if ( argument2->isOneOrZero() == NE_ZERO ){
-        return NE_ONE;
-    }
-    return NE_NEITHER_ONE_NOR_ZERO;
-
-}
-
-
-
 BooleanType Power::isLinearIn( int dim,
                                  VariableType *varType,
                                  int *component,
@@ -739,7 +721,7 @@ returnValue Power::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream Power::print( Stream &stream ) const{
+Stream& Power::print( Stream &stream ) const{
 
 	if ( acadoIsEqual( argument2->getValue(),0.5 ) == BT_TRUE )
 	{

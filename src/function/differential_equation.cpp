@@ -400,27 +400,12 @@ BooleanType DifferentialEquation::isODE( ) const
 
 Expression DifferentialEquation::getODEexpansion( const int &order ) const{
 
-	if ( order <= 0 ){ ACADOERROR( RET_INDEX_OUT_OF_BOUNDS ); return 0; }
+	if ( order < 0 ){ ACADOERROR( RET_INDEX_OUT_OF_BOUNDS ); return 0; }
 	
-	Expression tmp;
-	getExpression(tmp);
-	TIME t;
-	IntermediateState rhs = tmp;
-	int dim = tmp.getDim();
+	Expression rhs;
+	getExpression(rhs);
 	
-	IntermediateState coeff(dim,order+2);
-	int i,j;
-	for( i=0; i<dim; i++ ){
-		Expression e(1,1,VT_DIFFERENTIAL_STATE,component[i]);
-		coeff(i,0) = e;
-		coeff(i,1) = rhs(i);
-	}
-	for( j=0; j<order; j++ ){
-	   IntermediateState der =   (coeff.getCol(j+1)).ADforward( VT_DIFFERENTIAL_STATE, component, coeff.getCol(1) )
-	                           + forwardDerivative( coeff.getCol(j+1), t, 1.0 );
-	   for( i=0; i<dim; i++ ) coeff(i,j+2) = der(i);
-	}
-	return coeff;
+	return rhs.getODEexpansion( order, component );
 }
 
 

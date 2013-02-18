@@ -116,7 +116,6 @@ class String
 									const String& rhs
 									);
 
-		
 		BooleanType operator==( const String& arg ) const;
 
 		BooleanType operator==( const char* const arg ) const;
@@ -140,9 +139,7 @@ class String
 
     protected:
 
-        uint  length; /**< the length of the char-pointer */
-        char *name  ; /**< the char pointer               */
-
+        std::vector<char> name; /**< the char-vector */
 };
 
 struct StringComparer {

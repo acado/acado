@@ -79,23 +79,14 @@ returnValue EllipsoidalIntegrator::init( const DifferentialEquation &rhs_, const
   IntermediateState gg = derivatives.getCol(0);
   for( int i=0; i<N; i++ ) gg << derivatives.getCol(i+1)/acadoFactorial(i+1);
   
-  g  << gg;  
+  g  << gg;
   
-  FILE *file1 = fopen("g_out.c", "w");
-  
-  file1 << g;
-  
-  fclose(file1);
+//   FILE *file = fopen("g.c","w");
+//   file << g;
+//   fclose(file);
   
   gr << derivatives.getCol(N+1)/acadoFactorial(N+1);
   dg << gg.ADforward( VT_DIFFERENTIAL_STATE, rhs_.getComponents(), nx );
-
-//   FILE *file = fopen("dg_out.c", "w");
-//   
-//   file << dg;
-//   
-//   fclose(file);
-  
   
   DifferentialState r(nx);
   
@@ -191,7 +182,7 @@ Tmatrix<Interval> EllipsoidalIntegrator::evalC( const Tmatrix<double> &C, double
 	  
 		double r_i;
 		r_i = C(i);
-		for( int j=0; j<N; j++ ) r_i += ::pow(h,j+1)*C(i+(j+1)*nx);
+		for( int j=0; j<N; j++ ) r_i += ::pow(h,j+1)*C(i+(j+1)*nx*nx);
 		r(i) = r_i;
 	}
 	return r;
@@ -206,7 +197,7 @@ Tmatrix<double> EllipsoidalIntegrator::evalC2( const Tmatrix<double> &C, double 
 	  
 		double r_i;
 		r_i = C(i);
-		for( int j=0; j<N; j++ ) r_i += ::pow(h,j+1)*C(i+(j+1)*nx);
+		for( int j=0; j<N; j++ ) r_i += ::pow(h,j+1)*C(i+(j+1)*nx*nx);
 		r(i) = r_i;
 	}
 	return r;
@@ -258,7 +249,8 @@ void EllipsoidalIntegrator::updateQ( Tmatrix<double> C, Tmatrix<Interval> R ){
 	Q *= kappa/(trQ+EPS);
 	for( int i=0; i<nx; i++ ){
 		double tmp = acadoMax(::fabs(R(i).l()),::fabs(R(i).u()));
-		Q(i,i) += (tmp*tmp+EPS)*kappa/(sqrR(i)+EPS);
+		tmp *= ::sqrt(kappa/(sqrR(i)+EPS));
+		Q(i,i) += tmp*tmp+EPS;
 	}
 }
 

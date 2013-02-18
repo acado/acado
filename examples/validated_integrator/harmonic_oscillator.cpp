@@ -53,7 +53,7 @@ int main( ){
 	
 	EllipsoidalIntegrator integrator( f, 8 );
 
-	integrator.set(INTEGRATOR_PRINTLEVEL, HIGH );
+	integrator.set(INTEGRATOR_PRINTLEVEL, MEDIUM );
 	integrator.set(INTEGRATOR_TOLERANCE, 1e-8 );
 	integrator.set(ABSOLUTE_TOLERANCE, 1e-10 );
 	

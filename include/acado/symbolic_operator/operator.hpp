@@ -427,13 +427,13 @@ public:
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual Stream print( Stream &stream ) const = 0;
+     virtual Stream& print( Stream &stream ) const = 0;
 
 
     /** Prints the expression into a stream ("flush" version). \n
      *  \return SUCCESFUL_RETURN                               \n
      */
-     friend Stream operator<<( Stream &stream, const Operator &arg );
+     friend Stream& operator<<( Stream &stream, const Operator &arg );
 
 
     /** Prints the expression into a stream ("flush" version). \n
@@ -446,7 +446,7 @@ public:
     /** Prints the expression into a stream ("flush" version). \n
      *  \return SUCCESFUL_RETURN                               \n
      */
-     Stream operator<<( Stream &stream );
+     Stream& operator<<( Stream &stream ) const;
 
 
 

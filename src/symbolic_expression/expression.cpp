@@ -1145,6 +1145,18 @@ Expression Expression::ADforward ( const VariableType &varType_,
 								   const int          *arg     ,
 								   const Expression   &seed      ) const{
 
+	VariableType *varType = new VariableType[seed.getDim()];
+	for( uint run1 = 0; run1 < seed.getDim(); run1++ ) varType[run1] = varType_;
+	Expression tmp = ADforward( varType, arg, seed );
+	delete[] varType;
+	return tmp;
+}
+
+
+Expression Expression::ADforward ( const VariableType *varType_,
+								   const int          *arg     ,
+								   const Expression   &seed      ) const{
+
     unsigned int run1, run2;
     const unsigned int n = seed.getDim();
 
@@ -1155,7 +1167,7 @@ Expression Expression::ADforward ( const VariableType &varType_,
     Operator     **seed1     = new Operator*   [n];
 
     for( run1 = 0; run1 < n; run1++ ){
-        varType  [run1] = varType_;
+        varType  [run1] = varType_[run1];
         Component[run1] = arg[run1];
         seed1    [run1] = seed.element[run1]->clone();
     }
@@ -1188,6 +1200,61 @@ Expression Expression::ADforward ( const VariableType &varType_,
     delete[] seed1;
 
     return result;
+}
+
+
+Expression Expression::getODEexpansion( const int &order, const int *arg ) const{
+ 
+	IntermediateState coeff( (int) dim, order+2 );
+	
+    VariableType  *vType = new VariableType[dim*(order+1)+1];
+    int           *Comp  = new int         [dim*(order+1)+1];
+    Operator     **seed  = new Operator*   [dim*(order+1)+1];
+	
+	Operator **der = new Operator*[dim*(order+1)];
+	
+	vType[0] = VT_TIME;
+	Comp [0] = 0      ;
+	seed [0] = new DoubleConstant( 1.0 , NE_ONE );
+	
+	for( uint i=0; i<dim; i++ ){
+		coeff(i,0)   = Expression(1,1,VT_DIFFERENTIAL_STATE,arg[i]);
+		coeff(i,1)   = operator()(i);
+		vType[i+1]   = VT_DIFFERENTIAL_STATE;
+		Comp [i+1]   = arg[i];
+		seed [i+1]   = coeff.element[(order+2)*i+1];
+		der[i]       = element[i]->clone();
+	}
+	
+	int nIS = 0;
+	TreeProjection **IS = 0;
+	
+	for( int j=0; j<order; j++ ){
+		for( uint i=0; i<dim; i++ ){
+			der[dim*(j+1)+i] = der[dim*j+i]->AD_forward( (j+1)*dim+1, vType, Comp, seed, nIS, &IS );
+		}
+		for( uint i=0; i<dim; i++ ){
+			coeff(i,j+2) = *der[dim*(j+1)+i];
+			vType[dim*(j+1)+i+1] = VT_INTERMEDIATE_STATE;
+			Comp [dim*(j+1)+i+1] = coeff.element[(order+2)*i+j+1]->getGlobalIndex();
+			seed [dim*(j+1)+i+1] = coeff.element[(order+2)*i+j+2];
+		}
+	}
+	
+	for( int run = 0; run < nIS; run++ ){
+		
+		if( IS[run] != 0 ) delete IS[run];
+	}
+	if( IS != 0 ) free(IS);
+	
+	delete[] vType;
+	delete[] Comp;
+	for( uint i=0; i<dim*(order+1); i++ ) delete der[i];
+	delete[] der;
+	delete seed[0];
+	delete[] seed;
+	
+	return coeff;
 }
 
 
@@ -1236,9 +1303,6 @@ Expression Expression::ADbackward( const Expression &arg, const Expression &seed
 
     return result;
 }
-
-
-
 
 
 returnValue Expression::substitute( int idx, const Expression &arg ) const{

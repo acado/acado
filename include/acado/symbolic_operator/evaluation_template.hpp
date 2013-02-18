@@ -57,23 +57,23 @@ public:
 	
 	virtual ~EvaluationTemplate();
 
-	virtual returnValue addition   ( Operator &arg1, Operator &arg2 );
-	virtual returnValue subtraction( Operator &arg1, Operator &arg2 );
-	virtual returnValue product    ( Operator &arg1, Operator &arg2 );
-	virtual returnValue quotient   ( Operator &arg1, Operator &arg2 );
-	virtual returnValue power      ( Operator &arg1, Operator &arg2 );
-	virtual returnValue powerInt   ( Operator &arg1, int      &arg2 );
+	virtual void addition   ( Operator &arg1, Operator &arg2 );
+	virtual void subtraction( Operator &arg1, Operator &arg2 );
+	virtual void product    ( Operator &arg1, Operator &arg2 );
+	virtual void quotient   ( Operator &arg1, Operator &arg2 );
+	virtual void power      ( Operator &arg1, Operator &arg2 );
+	virtual void powerInt   ( Operator &arg1, int      &arg2 );
 
-	virtual returnValue project    ( int      &idx );
-	virtual returnValue set        ( double   &arg );
-	virtual returnValue Acos       ( Operator &arg );
-	virtual returnValue Asin       ( Operator &arg );
-	virtual returnValue Atan       ( Operator &arg );
-	virtual returnValue Cos        ( Operator &arg );
-	virtual returnValue Exp        ( Operator &arg );
-	virtual returnValue Log        ( Operator &arg );
-	virtual returnValue Sin        ( Operator &arg );
-	virtual returnValue Tan        ( Operator &arg );
+	virtual void project    ( int      &idx );
+	virtual void set        ( double   &arg );
+	virtual void Acos       ( Operator &arg );
+	virtual void Asin       ( Operator &arg );
+	virtual void Atan       ( Operator &arg );
+	virtual void Cos        ( Operator &arg );
+	virtual void Exp        ( Operator &arg );
+	virtual void Log        ( Operator &arg );
+	virtual void Sin        ( Operator &arg );
+	virtual void Tan        ( Operator &arg );
 	
 	Tmatrix<T> *val;
 	T           res;
@@ -95,167 +95,111 @@ template <typename T> EvaluationTemplate<T>::EvaluationTemplate( Tmatrix<T> *_va
 { val = _val; }
 template <typename T> EvaluationTemplate<T>::~EvaluationTemplate(){}
 
-template <typename T> returnValue EvaluationTemplate<T>::addition( Operator &arg1, Operator &arg2 ){
+template <typename T> void EvaluationTemplate<T>::addition( Operator &arg1, Operator &arg2 ){
 	
-	EvaluationTemplate<T> r1(val);
-	EvaluationTemplate<T> r2(val);
-	
-	arg1.evaluate( &r1 );
-	arg2.evaluate( &r2 );
-	
-	res = r1.res + r2.res;
-
-	return SUCCESSFUL_RETURN;
+	EvaluationTemplate<T> r(val);
+	arg1.evaluate( this );
+	arg2.evaluate( &r );
+	res += r.res;
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::subtraction( Operator &arg1, Operator &arg2 ){
+template <typename T> void EvaluationTemplate<T>::subtraction( Operator &arg1, Operator &arg2 ){
  
-	EvaluationTemplate<T> r1(val);
-	EvaluationTemplate<T> r2(val);
-	
-	arg1.evaluate( &r1 );
-	arg2.evaluate( &r2 );
-	
-	res = r1.res - r2.res;
-	
-	return SUCCESSFUL_RETURN;
+	EvaluationTemplate<T> r(val);
+	arg1.evaluate( this );
+	arg2.evaluate( &r );
+	res -= r.res;
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::product( Operator &arg1, Operator &arg2 ){
+template <typename T> void EvaluationTemplate<T>::product( Operator &arg1, Operator &arg2 ){
  
-	EvaluationTemplate<T> r1(val);
-	EvaluationTemplate<T> r2(val);
-	
-	arg1.evaluate( &r1 );
-	arg2.evaluate( &r2 );
-	
-	res = r1.res*r2.res;
-	
-	return SUCCESSFUL_RETURN;
+	EvaluationTemplate<T> r(val);
+	arg1.evaluate( this );
+	arg2.evaluate( &r );
+	res *= r.res;
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::quotient( Operator &arg1, Operator &arg2 ){
+template <typename T> void EvaluationTemplate<T>::quotient( Operator &arg1, Operator &arg2 ){
+
+	EvaluationTemplate<T> r(val);
+	arg1.evaluate( this );
+	arg2.evaluate( &r );
+	res /= r.res;
+}
+
+template <typename T> void EvaluationTemplate<T>::power( Operator &arg1, Operator &arg2 ){
  
-	EvaluationTemplate<T> r1(val);
-	EvaluationTemplate<T> r2(val);
-	
-	arg1.evaluate( &r1 );
-	arg2.evaluate( &r2 );
-	
-	res = r1.res/r2.res;
-	
-	return SUCCESSFUL_RETURN;
+	EvaluationTemplate<T> r(val);
+	arg1.evaluate( this );
+	arg2.evaluate( &r );
+	res = pow(res,r.res);
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::power( Operator &arg1, Operator &arg2 ){
+template <typename T> void EvaluationTemplate<T>::powerInt( Operator &arg1, int &arg2 ){
  
-	EvaluationTemplate<T> r1(val);
-	EvaluationTemplate<T> r2(val);
-	
-	arg1.evaluate( &r1 );
-	arg2.evaluate( &r2 );
-	
-	res = pow(r1.res,r2.res);
-
-	return SUCCESSFUL_RETURN;
-}
-
-template <typename T> returnValue EvaluationTemplate<T>::powerInt( Operator &arg1, int &arg2 ){
- 
-	EvaluationTemplate<T> r1(val);
-	arg1.evaluate( &r1 );
-	res = pow( r1.res, arg2 );
-	
-	return SUCCESSFUL_RETURN;
+	arg1.evaluate( this );
+	res = pow( res, arg2 );
 }
 
 
-template <typename T> returnValue EvaluationTemplate<T>::project( int &idx ){
+template <typename T> void EvaluationTemplate<T>::project( int &idx ){
 
 	res = val->operator()(idx);
-
-	return SUCCESSFUL_RETURN;
 }
 
 
-template <typename T> returnValue EvaluationTemplate<T>::set( double &arg ){
+template <typename T> void EvaluationTemplate<T>::set( double &arg ){
 
 	res = arg;
-
-	return SUCCESSFUL_RETURN;
 }
 
 
-template <typename T> returnValue EvaluationTemplate<T>::Acos( Operator &arg ){
+template <typename T> void EvaluationTemplate<T>::Acos( Operator &arg ){
 
-	EvaluationTemplate<T> r1(val);
-	arg.evaluate( &r1 );
-	res = acos( r1.res );
-
-	return SUCCESSFUL_RETURN;
+	arg.evaluate( this );
+	res = acos( res );
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::Asin( Operator &arg ){
+template <typename T> void EvaluationTemplate<T>::Asin( Operator &arg ){
 
-	EvaluationTemplate<T> r1(val);
-	arg.evaluate( &r1 );
-	res = asin( r1.res );
-
-	return SUCCESSFUL_RETURN;
+	arg.evaluate( this );
+	res = asin( res );
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::Atan( Operator &arg ){
+template <typename T> void EvaluationTemplate<T>::Atan( Operator &arg ){
 
-	EvaluationTemplate<T> r1(val);
-	arg.evaluate( &r1 );
-	res = atan( r1.res );
-
-	return SUCCESSFUL_RETURN;
+	arg.evaluate( this );
+	res = atan( res );
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::Cos( Operator &arg ){
+template <typename T> void EvaluationTemplate<T>::Cos( Operator &arg ){
 
-	EvaluationTemplate<T> r1(val);
-	arg.evaluate( &r1 );
-	res = cos( r1.res );
-
-	return SUCCESSFUL_RETURN;
+	arg.evaluate( this );
+	res = cos( res );
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::Exp( Operator &arg ){
+template <typename T> void EvaluationTemplate<T>::Exp( Operator &arg ){
 
-	EvaluationTemplate<T> r1(val);
-	arg.evaluate( &r1 );
-	res = exp( r1.res );
-
-	return SUCCESSFUL_RETURN;
+	arg.evaluate( this );
+	res = exp( res );
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::Log( Operator &arg ){
+template <typename T> void EvaluationTemplate<T>::Log( Operator &arg ){
 
-	EvaluationTemplate<T> r1(val);
-	arg.evaluate( &r1 );
-	res = log( r1.res );
-
-	return SUCCESSFUL_RETURN;
+	arg.evaluate( this );
+	res = log( res );
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::Sin( Operator &arg ){
+template <typename T> void EvaluationTemplate<T>::Sin( Operator &arg ){
 
-	EvaluationTemplate<T> r1(val);
-	arg.evaluate( &r1 );
-	res = sin( r1.res );
-
-	return SUCCESSFUL_RETURN;
+	arg.evaluate( this );
+	res = sin( res );
 }
 
-template <typename T> returnValue EvaluationTemplate<T>::Tan( Operator &arg ){
+template <typename T> void EvaluationTemplate<T>::Tan( Operator &arg ){
 
-	EvaluationTemplate<T> r1(val);
-	arg.evaluate( &r1 );
-	res = tan( r1.res );
-
-	return SUCCESSFUL_RETURN;
+	arg.evaluate( this );
+	res = tan( res );
 }
 
 CLOSE_NAMESPACE_ACADO

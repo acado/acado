@@ -209,13 +209,13 @@ ConstraintComponent operator>=( VariablesGrid ub, const Operator &arg ){ return 
 double Operator::getValue() const{ return INFTY; }
 
 
-Stream Operator::operator<<( Stream &stream ){
+Stream& Operator::operator<<( Stream &stream ) const{
 
     return print( stream );
 }
 
 
-Stream operator<<( Stream &stream, const Operator &arg ){
+Stream& operator<<( Stream &stream, const Operator &arg ){
 
     return arg.print( stream );
 }
@@ -225,8 +225,8 @@ returnValue operator<<( FILE* file, const Operator &arg ){
 
     Stream tmp;
     tmp = arg.print(tmp);
-
-    return file << tmp;
+	file << tmp;
+    return SUCCESSFUL_RETURN;
 }
 
 

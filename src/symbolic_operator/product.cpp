@@ -274,23 +274,6 @@ Operator* Product::substitute( int index, const Operator *sub ){
 }
 
 
-
-NeutralElement Product::isOneOrZero() const{
-
-    if ( argument1->isOneOrZero() == NE_ZERO ){
-      return NE_ZERO;
-    }
-    if ( argument2->isOneOrZero() == NE_ZERO ){
-      return NE_ZERO;
-    }
-    if ( argument1->isOneOrZero() == NE_ONE && argument2->isOneOrZero() == NE_ONE ){
-      return NE_ONE;
-    }
-    return NE_NEITHER_ONE_NOR_ZERO;
-
-}
-
-
 BooleanType Product::isLinearIn( int dim,
                                    VariableType *varType,
                                    int *component,
@@ -527,7 +510,7 @@ returnValue Product::AD_backward2( int number, double seed1, double seed2,
 
 
 
-Stream Product::print( Stream &stream ) const{
+Stream& Product::print( Stream &stream ) const{
 
 	if ( ( acadoIsFinite( argument1->getValue() ) == BT_FALSE ) ||
 		 ( acadoIsFinite( argument2->getValue() ) == BT_FALSE ) )

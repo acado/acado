@@ -63,6 +63,8 @@ BinaryOperator::BinaryOperator( Operator *_argument1, Operator *_argument2 ) : S
 
 BinaryOperator::BinaryOperator( const BinaryOperator &arg ){
 
+	argument1  = arg.argument1->clone();
+    argument2  = arg.argument2->clone();
     copy( arg );
 }
 
@@ -82,6 +84,8 @@ BinaryOperator& BinaryOperator::operator=( const BinaryOperator &arg ){
     return *this;
 }
 
+
+NeutralElement BinaryOperator::isOneOrZero() const{ return NE_NEITHER_ONE_NOR_ZERO; }
 
 BooleanType BinaryOperator::isDependingOn( VariableType var ) const{
 
@@ -187,9 +191,7 @@ void BinaryOperator::copy( const BinaryOperator &arg ){
 
     int run1;
 
-    bufferSize       = arg.bufferSize;
-    argument1        = arg.argument1->clone();
-    argument2        = arg.argument2->clone();
+    bufferSize = arg.bufferSize;
 
     if( arg.dargument1 == NULL ){
         dargument1 = NULL;
@@ -204,18 +206,6 @@ void BinaryOperator::copy( const BinaryOperator &arg ){
     else{
         dargument2 = arg.dargument2->clone();
     }
-
-//    if ( argument1_result )
-//    	delete [] argument1_result;
-//
-//    if ( argument2_result )
-//        delete [] argument2_result;
-//
-//    if ( dargument1_result )
-//    	delete [] dargument1_result;
-//
-//    if ( dargument2_result )
-//    	delete [] dargument2_result;
 
     argument1_result  = (double*)calloc(bufferSize,sizeof(double));
     argument2_result  = (double*)calloc(bufferSize,sizeof(double));
@@ -239,8 +229,8 @@ void BinaryOperator::copy( const BinaryOperator &arg ){
 
 void BinaryOperator::deleteAll(){
 
-    delete argument1;
-    delete argument2;
+    if( argument1 != 0 ) delete argument1;
+    if( argument2 != 0 ) delete argument2;
 
     if( dargument1 != NULL ){
         delete dargument1;

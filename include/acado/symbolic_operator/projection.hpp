@@ -338,7 +338,7 @@ public:
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual Stream print( Stream &stream ) const;
+     virtual Stream& print( Stream &stream ) const;
 
 
 
@@ -411,7 +411,7 @@ public:
       *                                              \n
       *  \return the requested global type ID.       \n
       */
-     virtual int getGlobalTypeID() const;
+     virtual int getGlobalIndex() const;
 
 
      /** Asks the variable for its type. \n

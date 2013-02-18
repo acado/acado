@@ -72,8 +72,12 @@ UnaryOperator::UnaryOperator( const UnaryOperator &arg ){
     dfcn  = 0;
     ddfcn = 0;
 
-    bufferSize       = arg.bufferSize;
-    argument         = arg.argument->clone();
+    bufferSize = arg.bufferSize;
+
+	argument   = arg.argument->clone();
+	
+// 	argument   = arg.argument;
+//     argument->nCount++;
 
     if( arg.dargument == 0 ) dargument = 0;
     else                     dargument = arg.dargument->clone();
@@ -96,8 +100,19 @@ UnaryOperator::UnaryOperator( const UnaryOperator &arg ){
 
 
 UnaryOperator::~UnaryOperator(){
-
-    if(  argument != 0 ) delete  argument;
+ 
+ 
+ delete argument;
+//     if( argument != 0 ){
+// 
+//         if( argument->nCount == 0 ){
+//             delete argument;
+//             argument = 0;
+//         }
+//         else{
+//             argument->nCount--;
+//         }
+//     }
     if( dargument != 0 ) delete dargument;
 
     free(  argument_result );
@@ -109,13 +124,30 @@ UnaryOperator& UnaryOperator::operator=( const UnaryOperator &arg ){
 
     if( this != &arg ){
 
-        if(  argument != 0 ) delete  argument;
+	 
+	 
+	 delete argument;
+	 
+//         if( argument != 0 ){
+// 
+//             if( argument->nCount == 0 ){
+//                 delete argument;
+//                 argument = 0;
+//             }
+//             else{
+//                 argument->nCount--;
+//             }
+//         }
         if( dargument != 0 ) delete dargument;
 
         free(  argument_result );
         free( dargument_result );
 
-        argument          = arg.argument->clone()              ;
+		argument = arg.argument->clone();
+		
+//         argument = arg.argument;
+// 		argument->nCount++;
+
         dargument         = NULL                               ;
         bufferSize        = arg.bufferSize                     ;
         argument_result   = (double*)calloc(bufferSize,sizeof(double))  ;
@@ -166,14 +198,7 @@ returnValue UnaryOperator::AD_backward( int           dim      ,
 }
 
 
-NeutralElement UnaryOperator::isOneOrZero() const{
-
-    if ( argument->isOneOrZero() == NE_ZERO ){
-        return NE_ZERO;
-    }
-    return NE_NEITHER_ONE_NOR_ZERO;
-
-}
+NeutralElement UnaryOperator::isOneOrZero() const{ return NE_NEITHER_ONE_NOR_ZERO; }
 
 
 BooleanType UnaryOperator::isDependingOn( VariableType var ) const{
@@ -333,7 +358,7 @@ returnValue UnaryOperator::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream UnaryOperator::print( Stream &stream ) const{
+Stream& UnaryOperator::print( Stream &stream ) const{
 
     return stream << "(" << cName << "(" << *argument << "))";
 }

@@ -66,8 +66,12 @@ Power_Int::Power_Int( const Power_Int &arg ){
     int run1;
 
     bufferSize       = arg.bufferSize;
-    argument         = arg.argument->clone();
     exponent         = arg.exponent;
+
+	argument         = arg.argument->clone();
+	
+// 	argument         = arg.argument;
+// 	argument->nCount++;
 
     if( arg.dargument == NULL ){
         dargument = NULL;
@@ -94,7 +98,17 @@ Power_Int::Power_Int( const Power_Int &arg ){
 
 Power_Int::~Power_Int(){
 
-    delete argument;
+ delete argument;
+//     if( argument != 0 ){
+// 
+//         if( argument->nCount == 0 ){
+//             delete argument;
+//             argument = 0;
+//         }
+//         else{
+//             argument->nCount--;
+//         }
+//     }
 
     if( dargument != NULL ){
         delete dargument;
@@ -109,7 +123,18 @@ Power_Int& Power_Int::operator=( const Power_Int &arg ){
 
     if( this != &arg ){
 
-        delete argument;
+	 
+	 delete argument;
+//         if( argument != 0 ){
+// 
+//             if( argument->nCount == 0 ){
+//                 delete argument;
+//                 argument = 0;
+//             }
+//             else{
+//                 argument->nCount--;
+//             }
+//         }
 
         if( dargument != NULL ){
             delete dargument;
@@ -118,7 +143,11 @@ Power_Int& Power_Int::operator=( const Power_Int &arg ){
         free(  argument_result );
         free( dargument_result );
 
-        argument          = arg.argument->clone()              ;
+        argument = arg.argument->clone();
+		
+//         argument = arg.argument;
+// 		argument->nCount++;
+
         exponent          = arg.exponent                       ;
         dargument         = NULL                               ;
         bufferSize        = arg.bufferSize                     ;
@@ -337,21 +366,7 @@ Operator* Power_Int::substitute( int index, const Operator *sub ){
 }
 
 
-
-NeutralElement Power_Int::isOneOrZero() const{
-
-    if ( argument->isOneOrZero() == NE_ONE ){
-       return NE_ONE;
-    }
-    if ( argument->isOneOrZero() == NE_ZERO && exponent != 0 ){
-        return NE_ZERO;
-    }
-    if ( exponent == 0 ){
-        return NE_ONE;
-    }
-    return NE_NEITHER_ONE_NOR_ZERO;
-
-}
+NeutralElement Power_Int::isOneOrZero() const{ return NE_NEITHER_ONE_NOR_ZERO; }
 
 
 BooleanType Power_Int::isDependingOn( VariableType var ) const{
@@ -554,7 +569,7 @@ returnValue Power_Int::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream Power_Int::print( Stream &stream ) const{
+Stream& Power_Int::print( Stream &stream ) const{
 
 	if ( argument->getName() == ON_POWER ) 
 	{

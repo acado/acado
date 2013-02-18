@@ -242,7 +242,7 @@ returnValue SCPevaluation::evaluateSensitivities(	const OCPiterate& iter,
 
     objective->getBackwardSensitivities( cp.objectiveGradient, 1 );
 
-// 	
+	
 // 	printf("cp.hessian = \n");
 //     cp.hessian.print();
 
@@ -275,6 +275,9 @@ returnValue SCPevaluation::evaluateSensitivities(	const OCPiterate& iter,
             }
         }
     }
+
+// 	printf("cp.dynGradient = \n");
+// (cp.dynGradient).print();
 
     if( constraint != 0 ){
 

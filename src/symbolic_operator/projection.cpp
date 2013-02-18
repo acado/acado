@@ -347,7 +347,7 @@ returnValue Projection::AD_backward2( int number, double seed1, double seed2,
 
 
 
-Stream Projection::print( Stream &stream ) const{
+Stream& Projection::print( Stream &stream ) const{
 
     return stream << name << "[" << vIndex << "]";
 }
@@ -416,7 +416,7 @@ int Projection::getVariableIndex( ) const{
 }
 
 
-int Projection::getGlobalTypeID() const{
+int Projection::getGlobalIndex() const{
 
     return vIndex;
 }

@@ -166,20 +166,6 @@ Operator* Subtraction::substitute( int index, const Operator *sub ){
 }
 
 
-
-NeutralElement Subtraction::isOneOrZero() const{
-
-    if ( argument1->isOneOrZero() == NE_ONE && argument2->isOneOrZero() == NE_ZERO ){
-        return NE_ONE;
-    }
-    if ( argument1->isOneOrZero() == NE_ZERO && argument2->isOneOrZero() == NE_ZERO ){
-      return NE_ZERO;
-    }
-    return NE_NEITHER_ONE_NOR_ZERO;
-
-}
-
-
 BooleanType Subtraction::isLinearIn( int dim,
                                        VariableType *varType,
                                        int *component,
@@ -393,7 +379,7 @@ returnValue Subtraction::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream Subtraction::print( Stream &stream ) const{
+Stream& Subtraction::print( Stream &stream ) const{
 
     return stream << "(" << *argument1 << "-" << *argument2 << ")";
 }
