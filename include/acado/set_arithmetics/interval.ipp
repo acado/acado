@@ -69,7 +69,7 @@ inline Interval operator/( const Interval&I1, const Interval&I2){ return I1*inv(
 
 inline double   diam( const Interval &I ){ return I._u-I._l;       }
 inline double   mid ( const Interval &I ){ return 0.5*(I._u+I._l); }
-inline double   abs ( const Interval &I ){ return std::max(fabs(I._l),fabs(I._u)); }
+inline double   abs ( const Interval &I ){ return std::max(::fabs(I._l),::fabs(I._u)); }
 inline Interval inv ( const Interval &I ){
  
   if ( I._l <= EQUALITY_EPS && I._u >= -EQUALITY_EPS ){
@@ -185,7 +185,7 @@ inline Interval max( const unsigned int n, const Interval*I ){
 }
 
 inline Interval cos( const Interval&I ){
-  const int k = ::ceil(-(1.+I._l/M_PI)/2.);
+  const double k = ::ceil(-(1.+I._l/M_PI)/2.);
   const double l = I._l+2.*M_PI*k, u = I._u+2.*M_PI*k;
   if( l <= 0 ){
     if( u <= 0 ){
@@ -216,7 +216,7 @@ inline Interval sin( const Interval &I ){
 }
 
 inline Interval tan( const Interval&I ){
-  const int k = ::ceil(-0.5-I._l/M_PI);
+  const double k = ::ceil(-0.5-I._l/M_PI);
   const double l = I._l+M_PI*k, u = I._u+M_PI*k;
   if( u >= 0.5*M_PI - EQUALITY_EPS ){
      Interval I2( -INFINITY , INFINITY );

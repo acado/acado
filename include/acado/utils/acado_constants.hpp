@@ -67,6 +67,12 @@ const double ZERO = 1.0e-50;
 /** Numerical value of infinity (e.g. for non-existing bounds). */
 const double INFTY = 1.0e12;
 
+/** Algebraic value of infinity. \n
+ ** (for situations in which the use of "ACADO::INFTY" is critical). */
+#ifndef INFINITY
+const double INFINITY = 1.0/0.0;
+#endif
+
 /** Numerical value of NAN (not a nummber). */
 const double ACADO_NAN = INFTY;
 
