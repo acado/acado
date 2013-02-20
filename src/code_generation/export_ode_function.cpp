@@ -149,7 +149,10 @@ returnValue ExportODEfunction::exportDataDeclaration(	FILE* file,
 														int _precision
 														) const
 {
-	return f->exportHeader( file,name.getName(),_realString.getName() );
+	if (f->getDim() > 0)
+		return f->exportHeader(file, name.getName(), _realString.getName());
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -159,7 +162,10 @@ returnValue ExportODEfunction::exportForwardDeclaration(	FILE* file,
 															int _precision
 															) const
 {
-	return f->exportForwardDeclarations( file,name.getName(),_realString.getName() );
+	if (f->getDim() > 0)
+		return f->exportForwardDeclarations(file, name.getName(), _realString.getName());
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -169,7 +175,9 @@ returnValue ExportODEfunction::exportCode(	FILE* file,
 											int _precision
 											) const
 {
-	return f->exportCode( file,name.getName(),_realString.getName(),_precision,numX,numXA,numU );
+	if (f->getDim() > 0)
+		return f->exportCode(file, name.getName(), _realString.getName(), _precision, numX, numXA, numU);
+	return SUCCESSFUL_RETURN;
 }
 
 

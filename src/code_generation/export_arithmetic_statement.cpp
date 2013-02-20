@@ -644,7 +644,7 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 
 	unsigned numOps = lhs.getNumRows() * lhs.getNumCols();
 
-	if ((numOps < 1024) || (rhs1.isGiven() == BT_TRUE))
+	if ((numOps < 128) || (rhs1.isGiven() == BT_TRUE))
 	{
 		for(unsigned i = 0; i < lhs.getNumRows( ); ++i)
 			for(unsigned j = 0; j < lhs.getNumCols( ); ++j)

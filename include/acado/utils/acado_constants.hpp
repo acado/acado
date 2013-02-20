@@ -70,7 +70,7 @@ const double INFTY = 1.0e12;
 /** Algebraic value of infinity. \n
  ** (for situations in which the use of "ACADO::INFTY" is critical). */
 #ifndef INFINITY
-const double INFINITY = 1.0/0.0;
+const double INFINITY = 1.0/1e-53;
 #endif
 
 /** Numerical value of NAN (not a nummber). */
