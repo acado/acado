@@ -287,7 +287,7 @@ returnValue TreeProjection::loadIndices( SymbolicIndexList *indexList ){
     }
 
     if( name.isEmpty() == BT_TRUE ){
-        name = "acadoWorkspace.acado_aux";
+        name << "acadoWorkspace.acado_aux" << "[" << vIndex << "]";
     }
 
     return returnvalue;
@@ -362,7 +362,8 @@ Operator* TreeProjection::passArgument() const{
     return argument;
 }
 
-returnValue TreeProjection::setVariableExportName(VariableType _type, String& _name)
+
+returnValue TreeProjection::setVariableExportName( const VariableType &_type, const Stream *_name )
 {
 	argument->setVariableExportName(_type, _name);
 

@@ -58,7 +58,7 @@ Projection::Projection( const String &name_ )
     curvature      = CT_AFFINE       ;
     monotonicity   = MT_NONDECREASING;
     operatorName   = ON_VARIABLE     ;
-    name           = name_           ;
+    name           << name_          ;
 
     nCount = 0;
 }
@@ -78,43 +78,43 @@ Projection::Projection( VariableType variableType_, int vIndex_, const String &n
     switch(variableType){
 
          case VT_DIFFERENTIAL_STATE:
-              name = "acado_xd";
+              name << "acado_xd" << "[" << vIndex <<"]";
               break;
 
          case VT_ALGEBRAIC_STATE:
-              name = "acado_xa";
+              name << "acado_xa" << "[" << vIndex <<"]";
               break;
 
          case VT_CONTROL:
-              name = "acado_u";
+              name << "acado_u" << "[" << vIndex <<"]";
               break;
 
          case VT_INTEGER_CONTROL:
-              name = "acado_v";
+              name << "acado_v" << "[" << vIndex <<"]";
               break;
 
          case VT_PARAMETER:
-              name = "acado_p";
+              name << "acado_p" << "[" << vIndex <<"]";
               break;
 
          case VT_INTEGER_PARAMETER:
-              name = "acado_q";
+              name << "acado_q" << "[" << vIndex <<"]";
               break;
 
          case VT_DISTURBANCE:
-              name = "acado_w";
+              name << "acado_w" << "[" << vIndex <<"]";
               break;
 
          case VT_TIME:
-              name = "acado_t";
+              name << "acado_t" << "[" << vIndex <<"]";
               break;
 
          case VT_INTERMEDIATE_STATE:
-              name = "acadoWorkspace.acado_aux";
+              name << "acadoWorkspace.acado_aux" << "[" << vIndex <<"]";
               break;
 
          case VT_DDIFFERENTIAL_STATE:
-              name = "acado_dx";
+              name << "acado_dx" << "[" << vIndex <<"]";
               break;
 
          default: break;
@@ -147,7 +147,6 @@ void Projection::copy( const Projection &arg ){
         vIndex         = arg.vIndex       ;
         scale          = arg.scale        ;
         name           = arg.name         ;
-        unit           = arg.unit         ;
         operatorName   = arg.operatorName ;
         curvature      = arg.curvature    ;
         monotonicity   = arg.monotonicity ;
@@ -349,7 +348,7 @@ returnValue Projection::AD_backward2( int number, double seed1, double seed2,
 
 Stream& Projection::print( Stream &stream ) const{
 
-    return stream << name << "[" << vIndex << "]";
+    return stream << name;
 }
 
 
@@ -359,18 +358,9 @@ returnValue Projection::clearBuffer(){
 }
 
 
-
 OperatorName Projection::getName(){
 
     return operatorName;
-}
-
-
-
-returnValue Projection::setName(const char *name_){
-
-	name = name_;
-    return SUCCESSFUL_RETURN;
 }
 
 
@@ -383,13 +373,6 @@ double Projection::getScale() const{
 returnValue Projection::setScale( const double &scale_ ){
 
     scale = scale_;
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue Projection::setUnit( const char *unit_){
-
-	unit = unit_;
     return SUCCESSFUL_RETURN;
 }
 
@@ -499,15 +482,16 @@ returnValue Projection::ADbackwardProtected( int dim,
     return SUCCESSFUL_RETURN;
 }
 
-returnValue Projection::setVariableExportName(VariableType _type, String& _name)
-{
+
+returnValue Projection::setVariableExportName( const VariableType &_type, const Stream *_name ){
+
 	if (variableType == _type)
 	{
-		this->name = _name;
+		this->name = _name[vIndex];
 	}
-
 	return Operator::setVariableExportName(_type, _name);
 }
+
 
 CLOSE_NAMESPACE_ACADO
 

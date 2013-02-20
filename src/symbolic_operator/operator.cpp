@@ -235,8 +235,8 @@ Operator* Operator::passArgument() const{
     return 0;
 }
 
-returnValue Operator::setVariableExportName(VariableType type, String& name)
-{
+returnValue Operator::setVariableExportName( const VariableType &_type, const Stream *_name ){
+
 	return SUCCESSFUL_RETURN;
 }
 

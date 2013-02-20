@@ -546,7 +546,12 @@ public:
 
     int nCount;
 
-    virtual returnValue setVariableExportName(VariableType type, String& name);
+
+
+	/** Sets the name of the variable that is used for code export.   \n
+	 *  \return SUCCESSFUL_RETURN                                     \n
+	 */
+    virtual returnValue setVariableExportName( const VariableType &_type, const Stream *_name );
 
 
 //

@@ -654,7 +654,7 @@ BooleanType Power_Int::isSymbolic() const{
     return BT_TRUE;
 }
 
-returnValue Power_Int::setVariableExportName(VariableType type, String& name)
+returnValue Power_Int::setVariableExportName( const VariableType &type, const Stream *name )
 {
 	argument->setVariableExportName(type, name);
 

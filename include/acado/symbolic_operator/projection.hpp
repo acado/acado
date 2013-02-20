@@ -369,12 +369,6 @@ public:
      virtual OperatorName getName();
 
 
-     /** Sets the name of the variable.   \n
-      *  \returns void \n
-      */
-     virtual returnValue setName( const char *name_ );
-
-
      /** Asks the expression for its scale.   \n
       *  \return the scale of the expression. \n
       */
@@ -385,13 +379,6 @@ public:
       *  \returns void \n
       */
      virtual returnValue setScale( const double &scale_ );
-
-
-
-     /** Sets the unit of the variable.   \n
-      *  \returns void \n
-      */
-     virtual returnValue setUnit( const char *unit_ );
 
 
      /** Asks the expression whether it is a variable.   \n
@@ -449,7 +436,11 @@ public:
       */
     virtual BooleanType isSymbolic() const;
 
-    virtual returnValue setVariableExportName(VariableType _type, String& _name);
+
+	/** Sets the name of the variable that is used for code export.   \n
+	 *  \return SUCCESSFUL_RETURN                                     \n
+	 */
+    virtual returnValue setVariableExportName( const VariableType &_type, const Stream *_name );
 
 //
 //  PROTECTED FUNCTIONS:
@@ -502,15 +493,12 @@ protected:
     int               variableIndex;
     int               vIndex       ;
     double            scale        ;
-    String            name         ;
-    String            unit         ;
+    Stream            name         ;
 
     OperatorName      operatorName ;
 
     CurvatureType     curvature    ;
     MonotonicityType  monotonicity ;
-
-    int printIdx;
 };
 
 

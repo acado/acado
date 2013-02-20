@@ -74,7 +74,7 @@ UnaryOperator::UnaryOperator( const UnaryOperator &arg ){
 
     bufferSize = arg.bufferSize;
 
-	argument   = arg.argument->clone();
+ 	argument   = arg.argument->clone();
 	
 // 	argument   = arg.argument;
 //     argument->nCount++;
@@ -102,17 +102,17 @@ UnaryOperator::UnaryOperator( const UnaryOperator &arg ){
 UnaryOperator::~UnaryOperator(){
  
  
- delete argument;
-//     if( argument != 0 ){
-// 
-//         if( argument->nCount == 0 ){
-//             delete argument;
-//             argument = 0;
-//         }
-//         else{
-//             argument->nCount--;
-//         }
-//     }
+//  delete argument;
+    if( argument != 0 ){
+
+        if( argument->nCount == 0 ){
+            delete argument;
+            argument = 0;
+        }
+        else{
+            argument->nCount--;
+        }
+    }
     if( dargument != 0 ) delete dargument;
 
     free(  argument_result );
@@ -126,24 +126,24 @@ UnaryOperator& UnaryOperator::operator=( const UnaryOperator &arg ){
 
 	 
 	 
-	 delete argument;
+// 	 delete argument;
 	 
-//         if( argument != 0 ){
-// 
-//             if( argument->nCount == 0 ){
-//                 delete argument;
-//                 argument = 0;
-//             }
-//             else{
-//                 argument->nCount--;
-//             }
-//         }
+        if( argument != 0 ){
+
+            if( argument->nCount == 0 ){
+                delete argument;
+                argument = 0;
+            }
+            else{
+                argument->nCount--;
+            }
+        }
         if( dargument != 0 ) delete dargument;
 
         free(  argument_result );
         free( dargument_result );
 
-		argument = arg.argument->clone();
+ 		argument = arg.argument->clone();
 		
 //         argument = arg.argument;
 // 		argument->nCount++;
@@ -412,7 +412,7 @@ BooleanType UnaryOperator::isSymbolic() const{
 }
 
 
-returnValue UnaryOperator::setVariableExportName(VariableType type, String& name)
+returnValue UnaryOperator::setVariableExportName( const VariableType &type, const Stream *name )
 {
 	argument->setVariableExportName(type, name);
 

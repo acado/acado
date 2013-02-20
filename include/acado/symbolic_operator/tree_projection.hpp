@@ -235,7 +235,11 @@ protected:
     /** Copy function. */
     virtual void copy( const Projection &arg );
 
-    virtual returnValue setVariableExportName(VariableType _type, String& _name);
+
+	/** Sets the name of the variable that is used for code export.   \n
+	 *  \return SUCCESSFUL_RETURN                                     \n
+	 */
+    virtual returnValue setVariableExportName( const VariableType &_type, const Stream *_name );
 
     //
     //  PROTECTED MEMBERS:

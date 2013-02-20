@@ -245,7 +245,7 @@ void BinaryOperator::deleteAll(){
     free( dargument2_result );
 }
 
-returnValue BinaryOperator::setVariableExportName(VariableType type, String& name)
+returnValue BinaryOperator::setVariableExportName( const VariableType &type, const Stream *name )
 {
 	argument1->setVariableExportName(type, name);
 	argument2->setVariableExportName(type, name);

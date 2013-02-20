@@ -46,8 +46,12 @@ int main( ){
     DifferentialState x,y,z;
     Function              f;
 
-    f << x*y + z  ;
-    f << y*y + z*z;
+	IntermediateState a;
+	
+	a = z*z;
+	
+    f << x*y + z + a;
+    f << y*y + a;
 
     // EXPORT THE FUNCTION INTO PLAIN C CODE:
     // --------------------------------------
