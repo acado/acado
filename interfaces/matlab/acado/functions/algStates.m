@@ -27,7 +27,8 @@
 function out = algStates()
 
     global ACADO_;
+    out = [];
     for i = 1:numel(ACADO_.helper.z)
-       out(i,1) =  ACADO_.helper.z{i};
+       out = [out; ACADO_.helper.z{i}];
     end
 end

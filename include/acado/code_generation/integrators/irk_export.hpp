@@ -101,8 +101,25 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		
 		virtual returnValue setDifferentialEquation( const Expression& rhs );
+
+
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
+
+
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
 
 
 		/** Assigns the model to be used by the integrator.
@@ -189,6 +206,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 */
 		virtual returnValue getCode(	ExportStatementBlock& code
 										);
+
+
+		const String getNameFullRHS() const;
 
 
 	protected:
@@ -307,7 +327,240 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		Vector divideMeasurements( uint index );
 
 
-		/** Exports the evaluation of the matrix, optionally also the right-hand side, of the linear system.
+		/** .
+		 *
+		 *	@param[in] code			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue prepareInputSystem(	ExportStatementBlock& code );
+
+
+		/** .
+		 *
+		 *	@param[in] code			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue prepareOutputSystem(	ExportStatementBlock& code );
+
+
+		/** .
+		 *
+		 *	@param[in] jacobian			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue solveInputSystem( 	ExportStatementBlock* block,
+										const ExportIndex& index1,
+										const ExportIndex& index2,
+										const ExportIndex& index3,
+										const ExportIndex& tmp_index,
+										const ExportVariable& A1,
+										const ExportVariable& B1 );
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue solveImplicitSystem( 	ExportStatementBlock* block,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& index3,
+											const ExportIndex& tmp_index,
+											const ExportVariable& Ah  	);
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue solveOutputSystem( 	ExportStatementBlock* block,
+										const ExportIndex& index1,
+										const ExportIndex& index2,
+										const ExportIndex& index3,
+										const ExportIndex& tmp_index,
+										const ExportVariable& Ah,
+										const ExportVariable& A3 );
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue sensitivitiesInputSystem( 	ExportStatementBlock* block,
+												const ExportIndex& index1,
+												const ExportIndex& index2,
+												const ExportVariable& Bh,
+												BooleanType STATES  	);
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue updateInputSystem( 	ExportStatementBlock* block,
+										const ExportIndex& index1,
+										const ExportIndex& index2,
+										const ExportIndex& tmp_index  	);
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue propagateInputSystem( 	ExportStatementBlock* block,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& index3,
+											const ExportIndex& tmp_index  	);
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue sensitivitiesImplicitSystem( 	ExportStatementBlock* block,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& index3,
+													const ExportIndex& tmp_index1,
+													const ExportIndex& tmp_index2,
+													const ExportVariable& Ah,
+													const ExportVariable& Bh,
+													BooleanType STATES,
+													uint number 		);
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue updateImplicitSystem( 	ExportStatementBlock* block,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& tmp_index  	);
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue propagateImplicitSystem( 	ExportStatementBlock* block,
+												const ExportIndex& index1,
+												const ExportIndex& index2,
+												const ExportIndex& index3,
+												const ExportIndex& tmp_index  	);
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue sensitivitiesOutputSystem( 	ExportStatementBlock* block,
+												const ExportIndex& index1,
+												const ExportIndex& index2,
+												const ExportIndex& index3,
+												const ExportIndex& index4,
+												const ExportIndex& tmp_index1,
+												const ExportIndex& tmp_index2,
+												const ExportVariable& Ah,
+												const ExportVariable& Bh,
+												BooleanType STATES,
+												uint number 		);
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue updateOutputSystem( 	ExportStatementBlock* block,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& tmp_index  	);
+
+
+		/** .
+		 *
+		 *	@param[in] block			TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue propagateOutputSystem( 	ExportStatementBlock* block,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& index3,
+											const ExportIndex& tmp_index  	);
+
+
+		/** Exports the evaluation of the states at a specific stage.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The matrix A of the IRK method, multiplied by the step size h.
+		 *	@param[in] index			The loop index, defining the stage.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue evaluateStatesImplicitSystem( 	ExportStatementBlock* block,
+											const ExportVariable& Ah,
+											const ExportIndex& stage );
+
+
+		/** Exports the evaluation of the states at a specific stage.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The matrix A of the IRK method, multiplied by the step size h.
+		 *	@param[in] index			The loop index, defining the stage.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue evaluateStatesOutputSystem( 	ExportStatementBlock* block,
+													const ExportVariable& Ah,
+													const ExportIndex& stage );
+
+
+		/** Exports the evaluation of the right-hand side of the linear system at a specific stage.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] index			The loop index, defining the stage.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue evaluateRhsImplicitSystem( 	ExportStatementBlock* block,
+											const ExportIndex& stage );
+
+
+		/** Exports the evaluation of the matrix of the linear system.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
 		 *	@param[in] index1			The loop index of the outer loop.
@@ -324,6 +577,15 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
 										BooleanType evaluateB );
+
+
+		/** Prepares the structures to evaluate the continuous output.
+		 *
+		 *	@param[in] TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue prepareOutputEvaluation( 	ExportStatementBlock& code );
 
 
 		/** Exports the computation of the continuous output.
@@ -343,22 +605,42 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 
 		/** Exports the computation of the sensitivities for the continuous output.
-				 *
-				 *	@param[in] TODO: RIEN
-				 *
-				 *	\return SUCCESSFUL_RETURN
-				 */
-		returnValue generateSensitivitiesOutput( 	ExportStatementBlock* block,
-													const ExportIndex& index0,
-													const ExportIndex& index1,
-													const ExportIndex& index2,
-													const ExportIndex& tmp_index1,
-													const ExportIndex& tmp_index2,
-													const ExportIndex& tmp_index3,
-													const ExportVariable& tmp_meas,
-													const ExportVariable& rk_tPrev,
-													const ExportVariable& time_tmp,
-													BooleanType STATES );
+		 *
+		 *	@param[in] TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue sensitivitiesOutputs( 	ExportStatementBlock* block,
+											const ExportIndex& index0,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& tmp_index1,
+											const ExportIndex& tmp_index2,
+											const ExportIndex& tmp_index3,
+											const ExportVariable& tmp_meas,
+											const ExportVariable& rk_tPrev,
+											const ExportVariable& time_tmp,
+											BooleanType STATES,
+											uint base			);
+
+
+		/** Exports the propagation of the sensitivities for the continuous output.
+		 *
+		 *	@param[in] TODO: RIEN
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue propagateOutputs(	ExportStatementBlock* block,
+										const ExportIndex& index,
+										const ExportIndex& index0,
+										const ExportIndex& index1,
+										const ExportIndex& index2,
+										const ExportIndex& index3,
+										const ExportIndex& tmp_index1,
+										const ExportIndex& tmp_index2,
+										const ExportIndex& tmp_index3,
+										const ExportIndex& tmp_index4,
+										const ExportVariable& tmp_meas );
 
 
 		/** Copies all class members from given object.
@@ -390,36 +672,56 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
         uint getNumItsInit() const;
 
 
+		const String getNameOutputRHS() const;
+		const String getNameOutputDiffs() const;
+
+
+		/** TODO: RIEN.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue prepareFullRhs( );
+
+
     protected:
     
-		BooleanType reuse;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
-		BooleanType continuousOutput;			/**< This boolean is true when continuous output needs to be provided. */
+		BooleanType REUSE;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
+		BooleanType CONTINUOUS_OUTPUT;			/**< This boolean is true when continuous output needs to be provided. */
 
-		uint nVars;								/**< This is the total number of variables (=NX+NXA+NU+NDX). */
 		uint diffsDim;							/**< This is the total number of sensitivities needed. */
 		uint inputDim;							/**< This is the dimension of the input to the integrator. */
 		uint numIts;							/**< This is the performed number of Newton iterations. */
 		uint numItsInit;						/**< This is the performed number of Newton iterations for the initialization of the first step. */
 
+		uint NX1;
+
+		uint NX2;
+		uint NDX2;
+		uint NVARS2;
+
+		uint NX3;
+		uint NDX3;
+		uint NXA3;
+		uint NVARS3;
+
 		ExportLinearSolver* solver;				/**< This is the exported linear solver that is used by the implicit Runge-Kutta method. */
-        
-        // DEFINITION OF THE EXPORTVARIABLES
-		ExportVariable	rk_A;					/**< Variable containing the matrix of the linear system. */
-		ExportVariable	rk_b;					/**< Variable containing the right-hand side of the linear system. */
-		ExportVariable 	rk_rhsTemp;				/**< Variable containing intermediate results of evaluations of the right-hand side expression. */
-		ExportVariable  rk_diffsTemp;			/**< Variable containing intermediate results of evaluations of the derivatives of the differential equations (ordinary and algebraic). */
-		ExportVariable  rk_diffsPrev;			/**< Variable containing the sensitivities from the previous integration step. */
-		ExportVariable  rk_diffsNew;			/**< Variable containing the derivatives wrt the previous values. */
-		ExportVariable 	rk_rhsOutputTemp;		/**< Variable containing intermediate results of evaluations of the right-hand side expression of an output function. */
-		ExportVariable  rk_diffsOutputTemp;		/**< Variable containing intermediate results of evaluations of the derivatives of an output function. */
-		ExportVariable 	rk_outH;				/**< Variable that is used for the evaluations of the continuous output. */
-		ExportVariable 	rk_out2;				/**< Variable that is used for the evaluations of the continuous output. */
-		ExportVariable 	polynEvalVar;			/**< Local variable that is used for the evaluations of the continuous output. */
-		
-		ExportVariable stepsH;					/**< Variable defining the different integration step sizes in case of a non equidistant grid. */
 
 		Matrix DD;								/**< This matrix is used for the initialization of the variables for the next integration step. */
 		Matrix coeffs;							/**< This matrix contains coefficients of polynomials that are used to evaluate the continuous output (see evaluatePolynomial). */
+
+		Vector numDX_output;
+		Vector numXA_output;
+		Vector numVARS_output;
+
+        
+        // DEFINITION OF THE EXPORTVARIABLES
+		ExportVariable 	rk_rhsOutputTemp;		/**< Variable containing intermediate results of evaluations of the right-hand side expression of an output function. */
+		ExportVariable  rk_diffsOutputTemp;		/**< Variable containing intermediate results of evaluations of the derivatives of an output function. */
+		ExportVariable 	rk_outH;				/**< Variable that is used for the evaluations of the continuous output. */
+		ExportVariable 	rk_out;					/**< Variable that is used for the evaluations of the continuous output. */
+		ExportVariable 	polynEvalVar;			/**< Local variable that is used for the evaluations of the continuous output. */
+		
+		ExportVariable stepsH;					/**< Variable defining the different integration step sizes in case of a non equidistant grid. */
 
 		std::vector<ExportVariable> gridVariables;	/**< This vector contains an ExportVariable for the grid of each continuous output. */
 		std::vector<uint> totalMeas;				/**< This vector contains the total number of measurements per output (per shooting or integration interval, depending on grid type). */
@@ -429,6 +731,36 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		std::vector<ExportVariable> polynDerVariables;	/**< Variables containing the coefficients for the derived polynomial. */
 		std::vector<ExportVariable> numMeasVariables;	/**< Variables containing the number of measurements per integration interval. */
 		std::vector<ExportIndex> numMeas;				/**< Indices containing the number of measurements that are already computed. */
+
+		ExportFunction fullRhs;			/**< Function that evaluates the full right-hand side. */
+		ExportVariable	rhs_in;
+		ExportVariable	rhs_out;
+
+		ExportVariable	rk_mat1;
+		ExportVariable 	rk_dk1;
+		Matrix A11, B11, M11;
+		ExportVariable	rk_diffsNew1;
+		ExportVariable	rk_diffsPrev1;
+
+		ExportVariable	rk_A;					/**< Variable containing the matrix of the linear system. */
+		ExportVariable	rk_b;					/**< Variable containing the right-hand side of the linear system. */
+		ExportVariable 	rk_rhsTemp;				/**< Variable containing intermediate results of evaluations of the right-hand side expression. */
+		ExportVariable  rk_diffsTemp2;			/**< Variable containing intermediate results of evaluations of the derivatives of the differential equations (ordinary and algebraic). */
+		ExportVariable  rk_diffsPrev2;			/**< Variable containing the sensitivities from the previous integration step. */
+		ExportVariable  rk_diffsNew2;			/**< Variable containing the derivatives wrt the previous values. */
+
+		ExportVariable	rk_mat3;
+		ExportVariable 	rk_dk3;
+		Matrix A33, M33;
+		ExportODEfunction rhs3;
+		ExportODEfunction diffs_rhs3;
+		ExportVariable	rk_diffsNew3;
+		ExportVariable	rk_diffsPrev3;
+		ExportVariable  rk_diffsTemp3;
+
+		ExportVariable 	rk_diffK;
+		ExportVariable	debug_mat;
+
 };
 
 

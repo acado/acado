@@ -94,10 +94,15 @@ classdef MPCexport < acado.ExportOCP
                     error('Unable to export a MPC algorithm without an OCP formulation.');
                 end
                 
+                % OPTIONS
+                fprintf(cppobj.fileMEX,sprintf('    %s.set( GENERATE_MATLAB_INTERFACE, 1 );\n', obj.name));
                 getOptions(obj, cppobj);
                 
                 % EXPORT
                 if ~isempty(obj.dir)
+                    % SET TIMING CALLS
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setTimingCalls( %s );\n', obj.name, num2str(obj.timingCalls)));
+                    
                     fprintf(cppobj.fileMEX,sprintf('    %s.exportCode( "%s" );\n', obj.name, obj.dir));
                 end
                 

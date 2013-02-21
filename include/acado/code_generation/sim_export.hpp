@@ -323,7 +323,6 @@ class SIMexport : public ExportModule, public ModelContainer
 		
 		static const uint factorRef = 10;		/**< The used factor in the number of integration steps to get the reference. */
 		uint timingSteps;						/**< The number of integration steps performed for the timing results. */
-		uint timingCalls;						/**< The number of calls to the integrate function for the timing results. */
 		
 		String _initStates;						/**< Name of the file containing the initial values of all the states. */
 		String _controls;						/**< Name of the file containing the control values over the OCP grid. */

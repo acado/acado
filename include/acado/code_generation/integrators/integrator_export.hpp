@@ -106,6 +106,24 @@ class IntegratorExport : public ExportAlgorithm
 		virtual returnValue setDifferentialEquation( const Expression& rhs ) = 0;
 
 
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 ) = 0;
+
+
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs ) = 0;
+
+
 		/** Assigns the model to be used by the integrator.
 		 *
 		 *	@param[in] _name_ODE			Name of the function, evaluating the ODE right-hand side.
@@ -120,15 +138,11 @@ class IntegratorExport : public ExportAlgorithm
 
 		/** Passes all the necessary model data to the integrator.
 		 *
-			acadoHeader.addComment( "Number of estimation intervals" );
-			acadoHeader.addStatement( (String)"#define ACADO_N   " << ocp.getN() << "\n");
-			acadoHeader.addComment( "Number of states" );
-			acadoHeader.addStatement( (String)"#define A
 		 *	@param[in] data			The model data.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue setModelData( 	const ModelData& data  );
+		virtual returnValue setModelData( 	const ModelData& data  );
 
 
 		/** Sets integration grid (this grid is expected to be non equidistant, otherwise use the other setGrid function).
@@ -251,6 +265,7 @@ class IntegratorExport : public ExportAlgorithm
 
 
 		const String getNameRHS() const;
+		virtual const String getNameFullRHS() const;
 		const String getNameOUTPUT( uint index ) const;
 			  uint   getDimOUTPUT( uint index ) const;
 		const String getNameDiffsRHS() const;

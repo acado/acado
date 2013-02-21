@@ -433,7 +433,11 @@ classdef Expression < handle
             end
             for k = 2:nargin,
                 temp = varargin{k};
-                base = size(C,1);
+                if isempty(varargin{1})
+                    base = 0;
+                else
+                    base = size(C,1);
+                end
                 for i = 1:size(temp,1)
                     for j = 1:size(temp,2)
                         if isa(temp(i,j), 'numeric')

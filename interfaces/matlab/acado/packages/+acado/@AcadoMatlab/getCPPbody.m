@@ -23,8 +23,8 @@ function getCPPbody(obj)
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2010
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2010-2013
 % 
     
 fprintf(obj.fileMEX,'\n');
@@ -32,7 +32,7 @@ fprintf(obj.fileMEX,'void mexFunction( int nlhs, mxArray *plhs[], int nrhs, cons
 fprintf(obj.fileMEX,'{ \n \n');
 fprintf(obj.fileMEX,'    clearAllStaticCounters( ); \n \n');
 
-fprintf(obj.fileMEX,'    acadoPrintf("\\nACADO Toolkit for Matlab - Developed by David Ariens, 2009-2010 \\n"); \n');
+fprintf(obj.fileMEX,'    acadoPrintf("\\nACADO Toolkit for Matlab - Developed by David Ariens and Rien Quirynen, 2009-2013 \\n"); \n');
 fprintf(obj.fileMEX,'    acadoPrintf("Support available at http://www.acadotoolkit.org/matlab \\n \\n"); \n\n');
 
 fprintf(obj.fileMEX,sprintf('    if (nrhs != %d){ \n', length(obj.in)));

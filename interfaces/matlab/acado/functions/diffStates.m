@@ -27,7 +27,8 @@
 function out = diffStates()
 
     global ACADO_;
+    out = [];
     for i = 1:numel(ACADO_.helper.x)
-       out(i,1) =  ACADO_.helper.x{i};
+       out = [out; ACADO_.helper.x{i}];
     end
 end

@@ -44,6 +44,7 @@ ExportModule::ExportModule( ) : UserInteraction( )
 { 
 	setupOptions( );
 
+	timingCalls = 0;
 	setCommonHeaderName( "acado.h" );
 }
 
@@ -70,6 +71,13 @@ ExportModule& ExportModule::operator=(	const ExportModule& arg
 	}
 
 	return *this;
+}
+
+
+returnValue ExportModule::setTimingCalls( uint _timingCalls ) {
+	timingCalls = _timingCalls;
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -100,6 +108,7 @@ returnValue ExportModule::copy(	const ExportModule& arg
 								)
 {
 	commonHeaderName = arg.commonHeaderName;
+	timingCalls = arg.timingCalls;
 
 	return SUCCESSFUL_RETURN;
 }

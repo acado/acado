@@ -65,6 +65,32 @@ returnValue ModelContainer::setModel( 	const String& fileName, const String& _rh
 }
 
 
+returnValue ModelContainer::setLinearInput( const Matrix& M1_, const Matrix& A1_, const Matrix& B1_ )
+{
+	return modelData.setLinearInput( M1_, A1_, B1_ );
+}
+
+
+returnValue ModelContainer::setLinearInput( const Matrix& A1_, const Matrix& B1_ )
+{
+	Matrix M1_ = eye(A1_.getNumRows());
+	return modelData.setLinearInput( M1_, A1_, B1_ );
+}
+
+
+returnValue ModelContainer::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const OutputFcn& rhs3_ )
+{
+	return modelData.setLinearOutput( M3_, A3_, rhs3_ );
+}
+
+
+returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const OutputFcn& rhs3_ )
+{
+	Matrix M3_ = eye(A3_.getNumRows());
+	return modelData.setLinearOutput( M3_, A3_, rhs3_ );
+}
+
+
 returnValue ModelContainer::addOutput( const OutputFcn& outputEquation_ ) {
 	return modelData.addOutput( outputEquation_ );
 }

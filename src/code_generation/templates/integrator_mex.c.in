@@ -1,6 +1,7 @@
 #include "mex.h"
 #define ONLINE_GRID @ONLINE_GRID@
 #define DEBUG_MODE @DEBUG_MODE@
+#define CALLS_TIMING @CALLS_TIMING@
 #define NUM_STAGES @NUM_STAGES@
 
 /* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
@@ -10,10 +11,15 @@
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
-    int i, j, k, Nx, Nu, gridI, Ngrid;
-    real_t *x, *u, *xnext, *sensX, *sensU, *grid, *mat;
-    real_t next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU];
-    const char *fieldnames[3];  
+    int c, i, j, k, Nx, Nu, Np, gridI, Ngrid;
+    real_t *x, *u, *p, *xnext, *sensX, *sensU, *grid, *mat;
+    real_t next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU+ACADO_NP];
+    const char *fieldnames[3];
+    #if CALLS_TIMING > 1
+		struct timeval theclock;
+		real_t start, end, time;
+		real_t *result_timing;
+    #endif  
     
     #if NUM_OUTPUTS > 0
         real_t out1[NMEAS[0]*NOUT[0]*(1+ACADO_NX+ACADO_NU)];
@@ -35,7 +41,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     fieldnames[1] = "sensX";  
     fieldnames[2] = "sensU"; 
     
-    if (nrhs != (2+ONLINE_GRID*NUM_OUTPUTS) && !(nrhs == (1+ONLINE_GRID*NUM_OUTPUTS) && ACADO_NU == 0)) {
+    if (nrhs != (3+ONLINE_GRID*NUM_OUTPUTS) && !(nrhs == (2+ONLINE_GRID*NUM_OUTPUTS) && (ACADO_NU == 0 || ACADO_NP == 0)) && !(nrhs == (1+ONLINE_GRID*NUM_OUTPUTS) && ACADO_NU == 0 && ACADO_NP == 0)) {
         if( ONLINE_GRID ) {
 mexErrMsgTxt( "Check the number of input arguments: since the ONLINE_GRID option is used, a grid needs to be provided for every output function !" );
         }
@@ -43,25 +49,46 @@ mexErrMsgTxt( "Check the number of input arguments: since the ONLINE_GRID option
 mexErrMsgTxt( "Check the number of input arguments !" );
         }
     }
-    if (nlhs > (1+NUM_OUTPUTS+DEBUG_MODE)) {
-        mexErrMsgTxt( "Check the number of output arguments !" );
-    }
+    #if CALLS_TIMING > 1
+	    if (nlhs > (2+NUM_OUTPUTS)) {
+	        mexErrMsgTxt( "Check the number of output arguments !" );
+	    }
+    #else
+	    if (nlhs > (1+NUM_OUTPUTS+DEBUG_MODE)) {
+	        mexErrMsgTxt( "Check the number of output arguments !" );
+	    }
+    #endif
     
     Nx = mxGetM(prhs[0])*mxGetN(prhs[0]);
     if (ACADO_NU > 0) {
         Nu = mxGetM(prhs[1])*mxGetN(prhs[1]);
-        gridI = 2;
+        if (ACADO_NP > 0) {
+			Np = mxGetM(prhs[2])*mxGetN(prhs[2]);
+			gridI = 3;
+        }
+        else {
+			gridI = 2;
+		}
+    }
+    else if (ACADO_NP > 0) {
+		Nu = 0;
+		Np = mxGetM(prhs[1])*mxGetN(prhs[1]);
+		gridI = 2;
     }
     else {
         Nu = 0;
+        Np = 0;
         gridI = 1;
     }
     
     if (Nx != ACADO_NX+ACADO_NXA) {
-        mexErrMsgTxt( "Check the dimension of the first input argument !" );
+        mexErrMsgTxt( "Check the dimension of the state input argument !" );
     }
     if (Nu != ACADO_NU) {
-        mexErrMsgTxt( "Check the dimension of the second input argument !" );
+        mexErrMsgTxt( "Check the dimension of the control input argument !" );
+    }
+    if (Np != ACADO_NP) {
+        mexErrMsgTxt( "Check the dimension of the parameter input argument !" );
     }
     #if ONLINE_GRID
 #if NUM_OUTPUTS > 0
@@ -132,27 +159,47 @@ acadoVariables.gridOutput3[j] = 1.1;
     x = mxGetPr(prhs[0]);
     if (ACADO_NU > 0) {
         u = mxGetPr(prhs[1]);
+        if (ACADO_NP > 0) {
+			p = mxGetPr(prhs[2]);
+        }
+    }
+    else if (ACADO_NP > 0) {
+		p = mxGetPr(prhs[1]);
     }
     
-    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
-        next[i] = x[i];
-    }
+    acadoWorkspace.resetIntegrator = 1;
     for( i = 0; i < ACADO_NU; ++i ) {
         next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
     }
-
-    acadoWorkspace.resetIntegrator = 1;
+    for( i = 0; i < ACADO_NP; ++i ) {
+        next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU+i] = p[i];
+    }
     
-    #if NUM_OUTPUTS > 3
-        integrate( next, out1, out2, out3, out4 );
-    #elif NUM_OUTPUTS > 2
-        integrate( next, out1, out2, out3 );
-    #elif NUM_OUTPUTS > 1
-        integrate( next, out1, out2 );
-    #elif NUM_OUTPUTS > 0
-        integrate( next, out1 );
-    #else 
-        integrate( next );
+    #if CALLS_TIMING > 1
+		gettimeofday( &theclock,0 );
+		start = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+    #endif
+    for( c = 0; c < CALLS_TIMING; ++c ) {
+	    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
+	        next[i] = x[i];
+	    }
+	    
+	    #if NUM_OUTPUTS > 3
+	        integrate( next, out1, out2, out3, out4 );
+	    #elif NUM_OUTPUTS > 2
+	        integrate( next, out1, out2, out3 );
+	    #elif NUM_OUTPUTS > 1
+	        integrate( next, out1, out2 );
+	    #elif NUM_OUTPUTS > 0
+	        integrate( next, out1 );
+	    #else 
+	        integrate( next );
+	    #endif
+    }
+    #if CALLS_TIMING > 1
+		gettimeofday( &theclock,0 );
+	    end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+	    time = (end-start)/CALLS_TIMING;
     #endif
     
     plhs[0] = mxCreateStructMatrix(1, 1, 3, fieldnames);
@@ -190,6 +237,14 @@ acadoVariables.gridOutput3[j] = 1.1;
             }
         }
     }
+    #endif
+    
+    #if CALLS_TIMING > 1
+	    if (nlhs > 1+NUM_OUTPUTS) {
+			plhs[1+NUM_OUTPUTS] = mxCreateDoubleMatrix(1,1,mxREAL);
+			result_timing = mxGetPr(plhs[1+NUM_OUTPUTS]);
+			result_timing[0] = time;
+	    }
     #endif
     
     #if NUM_OUTPUTS > 0

@@ -27,7 +27,8 @@
 function out = parameters()
 
     global ACADO_;
+    out = [];
     for i = 1:numel(ACADO_.helper.p)
-       out(i,1) =  ACADO_.helper.p{i};
+       out = [out; ACADO_.helper.p{i}];
     end
 end

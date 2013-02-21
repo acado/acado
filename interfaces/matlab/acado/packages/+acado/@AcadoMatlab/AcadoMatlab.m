@@ -319,6 +319,7 @@ classdef AcadoMatlab < handle
         end
         function clearMEX(obj)
             obj.mexList = {};
+            obj.mexOutList = {};
         end
         
         % Add main files to be compiled

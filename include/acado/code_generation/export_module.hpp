@@ -146,6 +146,16 @@ class ExportModule : public UserInteraction
 													) const = 0;
 
 
+		/** This function sets the number of calls performed for the timing results.
+		 *
+		 *	@param[in] _timingCalls		The new number of calls performed for the timing results.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setTimingCalls( uint _timingCalls
+										);
+
+
 		/** Sets the name of common header file.
 		 *
 		 *	@param[in] _name			New name of common header file.
@@ -184,6 +194,7 @@ class ExportModule : public UserInteraction
     protected:
 
 		String commonHeaderName;			/**< Name of common header file. */
+		uint timingCalls;					/**< The number of calls to the exported function for the timing results. */
 };
 
 

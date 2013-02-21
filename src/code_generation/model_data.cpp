@@ -42,7 +42,9 @@ BEGIN_NAMESPACE_ACADO
 
 ModelData::ModelData() {
 
-	NX = 0;
+	NX1 = 0;
+	NX2 = 0;
+	NX3 = 0;
 	NDX = 0;
 	NXA = 0;
 	NU = 0;
@@ -55,7 +57,9 @@ ModelData::ModelData() {
 
 returnValue ModelData::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU )
 {
-	NX = _NX;
+	NX1 = 0;
+	NX2 = _NX;
+	NX3 = 0;
 	NDX = _NDX;
 	NXA = _NXA;
 	NU = _NU;
@@ -175,7 +179,7 @@ std::vector<Matrix> ModelData::getOutputDependencies( ) const {
 			Vector colIndV = colInd_outputs[i];
 			Vector rowPtrV = rowPtr_outputs[i];
 
-			Matrix dependencyMat = zeros( dim_outputs[i],NX+NXA+NU+NDX );
+			Matrix dependencyMat = zeros( dim_outputs[i],getNX()+NXA+NU+NDX );
 			int index = 1;
 			for( int j = 0; j < dim_outputs[i]; j++ ) {
 				int upper = rowPtrV(j+1);
@@ -205,6 +209,24 @@ returnValue ModelData::getModel( DifferentialEquation& _f ) const{
 }
 
 
+returnValue ModelData::getLinearInput( Matrix& M1_, Matrix& A1_, Matrix& B1_ ) const {
+	M1_ = M1;
+	A1_ = A1;
+	B1_ = B1;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ModelData::getLinearOutput( Matrix& M3_, Matrix& A3_, OutputFcn& rhs_ ) const {
+	M3_ = M3;
+	A3_ = A3;
+	rhs_ = rhs3;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 returnValue ModelData::setModel( const DifferentialEquation& _f )
 {
 	if( rhs_name.isEmpty() ) {
@@ -212,19 +234,52 @@ returnValue ModelData::setModel( const DifferentialEquation& _f )
 		Expression rhs;
 		differentialEquation.getExpression( rhs );
 
-		NX = rhs.getDim() - differentialEquation.getNXA();
-		NDX = differentialEquation.getNDX();
+		NX2 = rhs.getDim() - differentialEquation.getNXA();
+		if( NDX == 0 ) NDX = differentialEquation.getNDX();
 		NXA = differentialEquation.getNXA();
-		NU = differentialEquation.getNU();
+		if( NU == 0 ) NU = differentialEquation.getNU();
 		NP = differentialEquation.getNP();
 
 		model_dimensions_set = BT_TRUE;
-
 		export_rhs = BT_TRUE;
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ModelData::setLinearInput( const Matrix& M1_, const Matrix& A1_, const Matrix& B1_ )
+{
+	M1 = M1_;
+	A1 = A1_;
+	B1 = B1_;
+	NX1 = A1.getNumCols();
+	NDX = NX1;
+	if( !model_dimensions_set ) {
+		NU = B1.getNumCols();
+		model_dimensions_set = BT_TRUE;
+	}
+	export_rhs = BT_TRUE;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ModelData::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const OutputFcn& rhs3_ )
+{
+	M3 = M3_;
+	A3 = A3_;
+	rhs3 = rhs3_;
+	NX3 = A3.getNumCols();
+	NDX = NX3;
+	if( !model_dimensions_set ) {
+		if( NU == 0 ) NU = rhs3_.getNU();
+		model_dimensions_set = BT_TRUE;
+	}
+	export_rhs = BT_TRUE;
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -334,12 +389,15 @@ BooleanType ModelData::hasCompressedStorage() const {
 
 uint ModelData::getNX( ) const
 {
-	return NX;
+	return NX1+NX2+NX3;
 }
 
 
 uint ModelData::getNDX( ) const
 {
+	if( NDX > 0 ) {
+		return getNX();
+	}
 	return NDX;
 }
 
@@ -432,6 +490,16 @@ returnValue ModelData::getNameOutputs( std::vector<String>& names ) const {
 returnValue ModelData::getNameDiffsOutputs( std::vector<String>& names ) const {
 	names = diffs_outputNames;
 	return SUCCESSFUL_RETURN;
+}
+
+
+BooleanType ModelData::checkConsistency( ) const
+{
+	// Number of differential state derivatives must be either zero or equal to the number of differential states:
+	if( NDX == 0 || NX3 > 0 || NX1 > 0 || NDX == NX2 ) {
+		return BT_TRUE;
+	}
+	return BT_FALSE;
 }
 
 

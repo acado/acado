@@ -197,7 +197,7 @@ returnValue MPCexport::exportCode(	const String& dirName,
 		int mexSteps, verbose;
 		get( MEX_ITERATION_STEPS, mexSteps );
 		get( MEX_VERBOSE, verbose );
-		exportMexFun.configure(mexSteps, verbose);
+		exportMexFun.configure(mexSteps, verbose, timingCalls);
 		exportMexFun.exportCode();
 	}
 
@@ -307,9 +307,9 @@ returnValue MPCexport::setup( )
 		return ACADOERROR( RET_INVALID_OPTION );
 
 	ocp.setNumberIntegrationSteps( numSteps );
+
 	// NOTE: This function internally calls setup() function
 	integrator->setModelData( ocp.getModelData() );
-
 
 	// extract control/state bounds (no free parameters yet!)
 	// TODO: extension to DAE systems

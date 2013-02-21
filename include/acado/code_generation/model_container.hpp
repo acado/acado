@@ -99,6 +99,42 @@ public:
     returnValue setModel( const DifferentialEquation& _f );
 
 
+    /** .
+     *
+     *	@param[in] 		.
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setLinearInput( const Matrix& A1_, const Matrix& B1_ );
+
+
+    /** .
+     *
+     *	@param[in] 		.
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setLinearInput( const Matrix& M1_, const Matrix& A1_, const Matrix& B1_ );
+
+
+    /** .
+     *
+     *	@param[in] 		.
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setLinearOutput( const Matrix& A3_, const OutputFcn& rhs_ );
+
+
+    /** .
+     *
+     *	@param[in] 		.
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setLinearOutput( const Matrix& M3_, const Matrix& A3_, const OutputFcn& rhs_ );
+
+
     /** Assigns the model to be used by the integrator.
      *
      *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.

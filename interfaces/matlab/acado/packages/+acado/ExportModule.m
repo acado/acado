@@ -50,6 +50,8 @@ classdef ExportModule < acado.UserInteraction
         % dirName
         dir;
         run;
+        
+        timingCalls = 0;
     end
     
     methods
@@ -88,8 +90,12 @@ classdef ExportModule < acado.UserInteraction
             
             GEN_ACADO; 
             global ACADO_;
-            run(sprintf('%s_RUN', ACADO_.helper.problemname));
-            buildInterface
+            try
+                run(sprintf('%s_RUN', ACADO_.helper.problemname));
+                buildInterface
+            catch
+                disp(['You should now run the file "' sprintf('%s_RUN', ACADO_.helper.problemname) '" with the right inputs..']);
+            end
         end
         
         
@@ -103,6 +109,18 @@ classdef ExportModule < acado.UserInteraction
         function setMainFiles(obj, dir)
             if ~ischar(dir)
                 error('Invalid directory name.');
+            end
+        end
+        
+        
+        function setTimingCalls(obj, varargin)
+            
+            if (nargin == 2 && isa(varargin{1}, 'numeric'))
+                % SIMexport.setTimingCalls( timingCalls );
+                obj.timingCalls = varargin{1};
+                
+            else
+                error('ERROR: Invalid setTimingCalls. <a href="matlab: help acado.SIMexport.setTimingCalls">help acado.SIMexport.setTimingCalls</a>');
             end
         end
         

@@ -23,8 +23,8 @@ function getCPPheader(obj)
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens
-%    Date: 2010
+%    Author: David Ariens, Rien Quirynen
+%    Date: 2010-2013
 % 
     
     fprintf(obj.fileMEX,'/*\n');
@@ -53,8 +53,8 @@ function getCPPheader(obj)
     fprintf(obj.fileMEX,'\n');
     fprintf(obj.fileMEX,'\n');
     fprintf(obj.fileMEX,'/**\n');
-    fprintf(obj.fileMEX,'*    Author David Ariens\n');
-    fprintf(obj.fileMEX,'*    Date 2009-2010\n');
+    fprintf(obj.fileMEX,'*    Author David Ariens, Rien Quirynen\n');
+    fprintf(obj.fileMEX,'*    Date 2009-2013\n');
     fprintf(obj.fileMEX,'*    http://www.acadotoolkit.org/matlab \n');    
     fprintf(obj.fileMEX,'*/\n');
     fprintf(obj.fileMEX,'\n');

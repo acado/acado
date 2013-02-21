@@ -95,6 +95,8 @@ classdef MHEexport < acado.ExportOCP
                     error('Unable to export a MHE algorithm without an OCP formulation.');
                 end
                 
+                % OPTIONS
+                fprintf(cppobj.fileMEX,sprintf('    %s.set( GENERATE_MATLAB_INTERFACE, 1 );\n', obj.name));
                 getOptions(obj, cppobj);
                 
                 % EXPORT

@@ -119,19 +119,7 @@ if (get == 'B')
     
     
     % DIFFERENTIAL EQUATION
-    if (~isempty(obj.model) && ~acadoDefined(obj.model))
-        obj.model.getInstructions(cppobj, get);
-    end
-    if (~isempty(obj.model))
-        fprintf(cppobj.fileMEX,sprintf('    %s.setModel( %s );\n', obj.name, obj.model.name));
-    elseif (~isempty(obj.fileName) && ~isempty(obj.modelName) && ~isempty(obj.modelDiffsName))
-        fprintf(cppobj.fileMEX,sprintf('    %s.setModel( "%s", "%s", "%s" );\n', obj.name, obj.fileName, obj.modelName, obj.modelDiffsName));
-        if (isempty(obj.NX) || isempty(obj.NDX) || isempty(obj.NXA) || isempty(obj.NU))
-            error('ERROR: You need to provide the dimensions of the external model !\n');
-        else
-            fprintf(cppobj.fileMEX,sprintf('    %s.setDimensions( %s, %s, %s, %s );\n', obj.name, num2str(obj.NX), num2str(obj.NDX), num2str(obj.NXA), num2str(obj.NU)));
-        end
-    end
+    obj.getModelFormulation(cppobj, get);
     
 
     fprintf(cppobj.fileMEX,'\n');

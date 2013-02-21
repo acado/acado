@@ -27,7 +27,8 @@
 function out = disturbances()
 
     global ACADO_;
+    out = [];
     for i = 1:numel(ACADO_.helper.w)
-       out(i,1) =  ACADO_.helper.w{i};
+       out = [out; ACADO_.helper.w{i}];
     end
 end

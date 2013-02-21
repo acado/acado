@@ -27,7 +27,8 @@
 function out = controls()
 
     global ACADO_;
+    out = [];
     for i = 1:numel(ACADO_.helper.u)
-       out(i,1) =  ACADO_.helper.u{i};
+       out = [out; ACADO_.helper.u{i}];
     end
 end

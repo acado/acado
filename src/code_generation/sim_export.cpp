@@ -54,7 +54,6 @@ SIMexport::SIMexport( const uint simIntervals, const double totalTime ) : Export
 	T = totalTime;
 	integrator  = 0;
 	timingSteps = 100;
-	timingCalls = 0;
 	
 	_initStates = String( "initStates.txt" );
 	_controls = String( "controls.txt" );
@@ -135,13 +134,13 @@ returnValue SIMexport::exportCode(	const String& dirName,
 			String integrateInterface( dirName );
 			integrateInterface << "/integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure((MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, ((RungeKuttaExport*)integrator)->getNumStages());
+			exportMexFun.configure((MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
 			exportMexFun.exportCode();
 
 			String rhsInterface( dirName );
 			rhsInterface << "/rhs.c";
 			ExportMatlabRhs exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun2.configure(integrator->getNameRHS());
+			exportMexFun2.configure(integrator->getNameFullRHS());
 			exportMexFun2.exportCode();
 		}
 	}
@@ -190,7 +189,6 @@ returnValue SIMexport::copy(	const SIMexport& arg
 	referenceProvided = arg.referenceProvided;
 	PRINT_DETAILS = arg.PRINT_DETAILS;
 	timingSteps = arg.timingSteps;
-	timingCalls = arg.timingCalls;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -258,7 +256,7 @@ returnValue SIMexport::setup( )
 returnValue SIMexport::checkConsistency( ) const
 {
 	// Number of differential state derivatives must be either zero or equal to the number of differential states:
-	if( modelData.getNDX() > 0 && modelData.getNDX() != modelData.getNX() ) {
+	if( !modelData.checkConsistency() ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
@@ -333,12 +331,12 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 	main.addStatement( (String)"   #define h           " << T/modelData.getN()  << "      /* length of one simulation interval    */\n" );
 	if( TIMING == BT_TRUE ) main.addStatement( (String)"   #define STEPS_TIMING   " << timingSteps << "      /* number of steps for the timing */\n" );
 	if( TIMING == BT_TRUE ) main.addStatement( (String)"   #define CALLS_TIMING   " << timingCalls << "      /* number of calls for the timing */\n" );
-	main.addStatement( "   #define RESULTS_NAME	  \"" << _resultsFile << "\"\n" );
+	main.addStatement( (String)"   #define RESULTS_NAME	  \"" << _resultsFile << "\"\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"   #define OUTPUT" << i << "_NAME	  \"" << outputFiles[i] << "\"\n" );
 	}
-	main.addStatement( "   #define CONTROLS_NAME  \"" << _controls << "\"\n" );
-	main.addStatement( "   #define INIT_NAME	  \"" << _initStates << "\"\n" );
+	main.addStatement( (String)"   #define CONTROLS_NAME  \"" << _controls << "\"\n" );
+	main.addStatement( (String)"   #define INIT_NAME	  \"" << _initStates << "\"\n" );
 	main.addComment( "---------------------------------------------------------------" );
 	main.addLinebreak( 2 );
 	main.addComment( "GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM:" );
@@ -511,12 +509,12 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
 	main.addComment( "---------------------------------------------------------------" );
 	main.addStatement( (String)"   #define h           " << T/modelData.getN()  << "      /* length of one simulation interval   */\n" );
-	main.addStatement( "   #define RESULTS_NAME	  \"" << _results << "\"\n" );
+	main.addStatement( (String)"   #define RESULTS_NAME	  \"" << _results << "\"\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"   #define OUTPUT" << i << "_NAME	  \"" << _outputFiles[i] << "\"\n" );
 		main.addStatement( (String)"   #define REF_OUTPUT" << i << "_NAME	  \"" << _refOutputFiles[i] << "\"\n" );
 	}
-	main.addStatement( "   #define REF_NAME  \"" << _ref << "\"\n" );
+	main.addStatement( (String)"   #define REF_NAME  \"" << _ref << "\"\n" );
 	main.addComment( "---------------------------------------------------------------" );
 	main.addLinebreak( 2 );
 	main.addComment( "GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM:" );

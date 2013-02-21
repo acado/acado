@@ -244,6 +244,17 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 }
 
 
+returnValue ExplicitRungeKuttaExport::setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 ) {
+
+	return ACADOERROR( RET_INVALID_OPTION );
+}
+
+
+returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs ) {
+
+	return ACADOERROR( RET_INVALID_OPTION );
+}
+
 
 returnValue ExplicitRungeKuttaExport::setModel(	const String& _rhs, const String& _diffs_rhs ) {
 

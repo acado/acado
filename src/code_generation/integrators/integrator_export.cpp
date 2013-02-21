@@ -112,9 +112,21 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	if( exportRhs ) {
 		DifferentialEquation f;
 		data.getModel(f);
-		Expression rhs;
-		f.getExpression( rhs );
-		if ( setDifferentialEquation( rhs ) != SUCCESSFUL_RETURN )
+		Matrix M1, A1, B1;
+		data.getLinearInput( M1, A1, B1 );
+		Matrix M3, A3;
+		OutputFcn f3;
+		data.getLinearOutput( M3, A3, f3 );
+
+		Expression rhs_, rhs3_;
+		f.getExpression( rhs_ );
+		f3.getExpression( rhs3_ );
+
+		if ( M1.getNumRows() > 0 && setLinearInput( M1, A1, B1 ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+		if ( f.getDim() > 0 && setDifferentialEquation( rhs_ ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+		if ( M3.getNumRows() > 0 && setLinearOutput( M3, A3, rhs3_ ) != SUCCESSFUL_RETURN )
 			return RET_UNABLE_TO_EXPORT_CODE;
 	}
 	else {
@@ -161,6 +173,8 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 			}
 		}
 	}
+
+	setup( );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -241,6 +255,10 @@ const String IntegratorExport::getNameRHS() const{
 	else {
 		return name_rhs;
 	}
+}
+
+const String IntegratorExport::getNameFullRHS() const{
+	return getNameRHS();
 }
 
 const String IntegratorExport::getNameOUTPUT( uint index ) const{

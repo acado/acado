@@ -48,7 +48,7 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
         
         simIntervals;
         totalTime;
-        timingSteps;
+        timingSteps = 0;
         
         % OutputEquation
         output = {};
@@ -108,6 +108,9 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
                 obj.output{end+1} = varargin{1};
                 
             elseif (nargin == 2 && (isa(varargin{1}, 'cell') || isa(varargin{1}, 'acado.Expression')))
+                if ~isvector(varargin{1})
+                    error('ERROR: Please provide a vector of expressions instead of a matrix.');
+                end
                 obj.outputDefined(end+1) = 0;
                 tmp = acado.OutputFcn();
                 ACADO_.helper.removeInstruction(tmp);
@@ -160,9 +163,7 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
                 
             else
                 error('ERROR: Invalid setTimingSteps. <a href="matlab: help acado.SIMexport.setTimingSteps">help acado.SIMexport.setTimingSteps</a>');
-                
             end
-            
         end
         
         
@@ -193,21 +194,7 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
                 
                 
                 % DIFFERENTIAL EQUATION
-                if (~isempty(obj.model) && ~acadoDefined(obj.model))
-                    obj.model.getInstructions(cppobj, get);
-                end
-                if (~isempty(obj.model))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setModel( %s );\n', obj.name, obj.model.name));
-                elseif (~isempty(obj.fileName) && ~isempty(obj.modelName) && ~isempty(obj.modelDiffsName))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setModel( "%s", "%s", "%s" );\n', obj.name, obj.fileName, obj.modelName, obj.modelDiffsName));
-                    if (isempty(obj.NX) || isempty(obj.NDX) || isempty(obj.NXA) || isempty(obj.NU))
-                        error('ERROR: You need to provide the dimensions of the external model !\n');
-                    else
-                        fprintf(cppobj.fileMEX,sprintf('    %s.setDimensions( %s, %s, %s, %s );\n', obj.name, num2str(obj.NX), num2str(obj.NDX), num2str(obj.NXA), num2str(obj.NU)));
-                    end
-                else
-                    error('ERROR: Invalid SIMexport object in getInstructions !\n');
-                end
+                obj.getModelFormulation(cppobj, get);
                 
                 
                 % OUTPUT EQUATION
@@ -248,12 +235,14 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
                     fprintf(cppobj.fileMEX,sprintf('    %s.setMeasurements( %s );\n', obj.name, obj.meas.name));
                 end
                 
-                
                 % EXPORT (AND RUN)
                 if (obj.run == 1 & ~isempty(obj.dir))
                     fprintf(cppobj.fileMEX,sprintf('    %s.exportAndRun( "%s" );\n', obj.name, obj.dir));
                     
                 elseif (~isempty(obj.dir))
+                    % SET TIMING CALLS
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setTimingCalls( %s );\n', obj.name, num2str(obj.timingCalls)));
+                    
                     fprintf(cppobj.fileMEX,sprintf('    %s.exportCode( "%s" );\n', obj.name, obj.dir));
                     
                 end

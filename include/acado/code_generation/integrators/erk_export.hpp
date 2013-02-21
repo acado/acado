@@ -96,6 +96,24 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		virtual returnValue setDifferentialEquation( const Expression& rhs );
 
 
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
+
+
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
+
+
 		/** Assigns the model to be used by the integrator.
 		 *
 		 *	@param[in] _rhs				Name of the function, evaluating the right-hand side.

@@ -194,6 +194,24 @@ public:
      returnValue setModel( const DifferentialEquation& _f );
 
 
+     /** .
+      *
+      *	@param[in] 		.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+     returnValue setLinearInput( const Matrix& M1_, const Matrix& A1_, const Matrix& B1_ );
+
+
+     /** .
+      *
+      *	@param[in] 		.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+     returnValue setLinearOutput( const Matrix& M3_, const Matrix& A3_, const OutputFcn& rhs_ );
+
+
      /** Assigns the model to be used by the integrator.
       *
       *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.
@@ -239,6 +257,24 @@ public:
       *  \return SUCCESSFUL_RETURN
       */
      returnValue getModel( DifferentialEquation& _f ) const;
+
+
+     /** .
+      *
+      *	@param[in] 		.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+     returnValue getLinearInput( Matrix& M1_, Matrix& A1_, Matrix& B1_ ) const;
+
+
+     /** .
+      *
+      *	@param[in] 		.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+     returnValue getLinearOutput( Matrix& M3_, Matrix& A3_, OutputFcn& rhs_ ) const;
 
 
      BooleanType hasEquidistantIntegrationGrid		() const;
@@ -331,6 +367,13 @@ public:
      returnValue getNameDiffsOutputs( std::vector<String>& names ) const;
 
 
+ 	/**
+ 	 * Checks whether the model formulation is compatible with code export capabilities.
+ 	 *
+ 	 */
+ 	BooleanType checkConsistency() const;
+
+
      //
     // PROTECTED FUNCTIONS:
     //
@@ -342,7 +385,9 @@ public:
     //
     protected:
 
-     uint NX;										/**< Number of differential states. */
+     uint NX1;										/**< Number of differential states (defined by input system). */
+     uint NX2;										/**< Number of differential states (defined by implicit system). */
+     uint NX3;										/**< Number of differential states (defined by output system). */
      uint NDX;										/**< Number of differential states derivatives. */
      uint NXA;										/**< Number of algebraic states. */
      uint NU;										/**< Number of control inputs. */
@@ -368,6 +413,19 @@ public:
      std::vector<String> diffs_outputNames;			/**< A separate function name for evaluating the derivatives of each output. */
      std::vector<Vector> colInd_outputs;			/**< A separate Vector of column indices for each output if in CRS format. */
      std::vector<Vector> rowPtr_outputs;			/**< A separate Vector of row pointers for each output if in CRS format. */
+
+     // ------------------------------------
+     // ------------------------------------
+     // 		NEW VARIABLES IN VERSION 2.0:
+     // ------------------------------------
+     // ------------------------------------
+     Matrix M1;
+     Matrix A1;
+     Matrix B1;
+
+     Matrix M3;
+     Matrix A3;
+     OutputFcn rhs3;
 };
 
 
