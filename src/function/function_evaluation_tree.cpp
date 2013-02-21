@@ -1030,19 +1030,19 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
 
 ExportVariable FunctionEvaluationTree::getGlobalExportVariable( ) const
 {
-	int run1;
-	int nni = 0;
+//	int run1;
+//	int nni = 0;
 
-	for( run1 = 0; run1 < n; run1++ )
-		if( lhs_comp[run1]+1 > nni )
-			nni = lhs_comp[run1]+1;
+//	for( run1 = 0; run1 < n; run1++ )
+//		if( lhs_comp[run1]+1 > nni )
+//			nni = lhs_comp[run1]+1;
 
 	// TODO fix this in a correct way
 
 	if (auxVariableStructName.isEmpty())
-		return ExportVariable(auxVariableName, nni, 1, REAL, ACADO_LOCAL);
+		return ExportVariable(auxVariableName, n, 1, REAL, ACADO_LOCAL);
 	else
-		return ExportVariable(auxVariableName, nni, 1, REAL, ACADO_WORKSPACE);
+		return ExportVariable(auxVariableName, n, 1, REAL, ACADO_WORKSPACE);
 }
 
 
