@@ -135,6 +135,10 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 	if (status != SUCCESSFUL_RETURN)
 		return status;
 
+	if (startValue.isGiven() == BT_TRUE && finalValue.isGiven() == BT_TRUE)
+		if (startValue.getGivenValue() == finalValue.getGivenValue())
+			return SUCCESSFUL_RETURN;
+
 	if ( doLoopUnrolling == BT_FALSE )
 	{
 		stringstream s;
