@@ -683,6 +683,13 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		returnValue prepareFullRhs( );
 
 
+		/** TODO: RIEN.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		ExportVariable getAuxVariable() const;
+
+
     protected:
     
 		BooleanType REUSE;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */

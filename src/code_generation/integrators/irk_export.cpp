@@ -32,6 +32,9 @@
 
 #include <acado/code_generation/integrators/irk_export.hpp>
 
+#include <sstream>
+using namespace std;
+
 
 
 BEGIN_NAMESPACE_ACADO
@@ -289,6 +292,36 @@ returnValue ImplicitRungeKuttaExport::setModel(	const String& _rhs, const String
 }
 
 
+ExportVariable ImplicitRungeKuttaExport::getAuxVariable() const
+{
+	ExportVariable max;
+	if( NX2 > 0 || NXA > 0 ) {
+		max = rhs.getGlobalExportVariable();
+		if( diffs_rhs.getGlobalExportVariable().getDim() >= max.getDim() ) {
+			max = diffs_rhs.getGlobalExportVariable();
+		}
+	}
+	if( NX3 > 0 ) {
+		if( rhs3.getGlobalExportVariable().getDim() >= max.getDim() ) {
+			max = rhs3.getGlobalExportVariable();
+		}
+		if( diffs_rhs3.getGlobalExportVariable().getDim() >= max.getDim() ) {
+			max = diffs_rhs3.getGlobalExportVariable();
+		}
+	}
+	uint i;
+	for( i = 0; i < outputs.size(); i++ ) {
+		if( outputs[i].getGlobalExportVariable().getDim() >= max.getDim() ) {
+			max = outputs[i].getGlobalExportVariable();
+		}
+		if( diffs_outputs[i].getGlobalExportVariable().getDim() >= max.getDim() ) {
+			max = diffs_outputs[i].getGlobalExportVariable();
+		}
+	}
+	return max;
+}
+
+
 returnValue ImplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock& declarations,
 												ExportStruct dataStruct
 												) const
@@ -296,31 +329,10 @@ returnValue ImplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 	if( NX2 > 0 || NXA > 0 ) solver->getDataDeclarations( declarations,dataStruct );
 	
 	if( exportRhs ) {
-		ExportVariable max;
-		if( NX2 > 0 || NXA > 0 ) {
-			max = rhs.getGlobalExportVariable();
-			if( diffs_rhs.getGlobalExportVariable().getDim() >= max.getDim() ) {
-				max = diffs_rhs.getGlobalExportVariable();
-			}
-		}
-		if( NX3 > 0 ) {
-			if( rhs3.getGlobalExportVariable().getDim() >= max.getDim() ) {
-				max = rhs3.getGlobalExportVariable();
-			}
-			if( diffs_rhs3.getGlobalExportVariable().getDim() >= max.getDim() ) {
-				max = diffs_rhs3.getGlobalExportVariable();
-			}
-		}
-		uint i;
-		for( i = 0; i < outputs.size(); i++ ) {
-			if( outputs[i].getGlobalExportVariable().getDim() >= max.getDim() ) {
-				max = outputs[i].getGlobalExportVariable();
-			}
-			if( diffs_outputs[i].getGlobalExportVariable().getDim() >= max.getDim() ) {
-				max = diffs_outputs[i].getGlobalExportVariable();
-			}
-		}
-		declarations.addDeclaration( max,dataStruct );
+		ExportVariable max = getAuxVariable();
+		int useOMP;
+		get(CG_USE_OPENMP, useOMP);
+		if( !useOMP ) declarations.addDeclaration( max,dataStruct );
 	}
 
 	int debugMode;
@@ -416,6 +428,70 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 
 returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 {
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+	if ( useOMP ) {
+		ExportVariable max = getAuxVariable();
+		max.setName( "auxVar" );
+		max.setDataStruct( ACADO_LOCAL );
+		if( NX2 > 0 || NXA > 0 ) {
+			rhs.setGlobalExportVariable( max );
+			diffs_rhs.setGlobalExportVariable( max );
+		}
+		if( NX3 > 0 ) {
+			rhs3.setGlobalExportVariable( max );
+			diffs_rhs3.setGlobalExportVariable( max );
+		}
+		for( uint i = 0; i < outputs.size(); i++ ) {
+			outputs[i].setGlobalExportVariable( max );
+			diffs_outputs[i].setGlobalExportVariable( max );
+		}
+
+		code.addDeclaration( max );
+		code.addDeclaration( rk_ttt );
+		code.addDeclaration( rk_xxx );
+		code.addDeclaration( rk_kkk );
+		code.addDeclaration( rk_A );
+		code.addDeclaration( rk_b );
+		code.addDeclaration( rk_diffK );
+		code.addDeclaration( rk_rhsTemp );
+		code.addDeclaration( rk_diffsTemp2 );
+		code.addDeclaration( rk_diffsTemp3 );
+		code.addDeclaration( rk_diffsPrev1 );
+		code.addDeclaration( rk_diffsPrev2 );
+		code.addDeclaration( rk_diffsPrev3 );
+		code.addDeclaration( rk_diffsNew1 );
+		code.addDeclaration( rk_diffsNew2 );
+		code.addDeclaration( rk_diffsNew3 );
+
+		stringstream s;
+		s << "#pragma omp threadprivate( "
+				<< max.getFullName().getName() << ", "
+				<< rk_ttt.getFullName().getName() << ", "
+				<< rk_xxx.getFullName().getName() << ", "
+				<< rk_kkk.getFullName().getName() << ", "
+				<< rk_diffK.getFullName().getName() << ", "
+				<< rk_rhsTemp.getFullName().getName();
+		if( NX1 > 0 ) {
+			s << ", " << rk_diffsPrev1.getFullName().getName();
+			s << ", " << rk_diffsNew1.getFullName().getName();
+		}
+		if( NX2 > 0 || NXA > 0 ) {
+			s << ", " << rk_A.getFullName().getName();
+			s << ", " << rk_b.getFullName().getName();
+			s << ", " << rk_diffsPrev2.getFullName().getName();
+			s << ", " << rk_diffsNew2.getFullName().getName();
+			s << ", " << rk_diffsTemp2.getFullName().getName();
+		}
+		if( NX3 > 0 ) {
+			s << ", " << rk_diffsPrev3.getFullName().getName();
+			s << ", " << rk_diffsNew3.getFullName().getName();
+			s << ", " << rk_diffsTemp3.getFullName().getName();
+		}
+		s << " )" << endl << endl;
+		code.addStatement( s.str().c_str() );
+	}
+
 	if( exportRhs ) {
 		if( NX2 > 0 || NXA > 0 ) {
 			code.addFunction( rhs );
@@ -461,33 +537,33 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	ExportVariable A3var;
 	if( equidistant ) {
 		if( NX1 > 0 ) {
-			A1var = ExportVariable( "A11_mat", A11 );
+			A1var = ExportVariable( "A11_mat", A11, STATIC_CONST_REAL );
 			code.addDeclaration( A1var );
 			code.addLinebreak( 1 );
 			// TODO: Ask Milan why this does NOT work properly !!
-			A1var = ExportVariable( "A11_mat", NX1, NX1, REAL, ACADO_LOCAL );
+			A1var = ExportVariable( "A11_mat", NX1, NX1, STATIC_CONST_REAL, ACADO_LOCAL );
 
-			B1var = ExportVariable( "B11_mat", B11 );
+			B1var = ExportVariable( "B11_mat", B11, STATIC_CONST_REAL );
 			code.addDeclaration( B1var );
 			code.addLinebreak( 1 );
 			// TODO: Ask Milan why this does NOT work properly !!
-			B1var = ExportVariable( "B11_mat", NX1, NU, REAL, ACADO_LOCAL );
+			B1var = ExportVariable( "B11_mat", NX1, NU, STATIC_CONST_REAL, ACADO_LOCAL );
 		}
 		if( NX3 > 0 ) {
-			A3var = ExportVariable( "A33_mat", A33 );
+			A3var = ExportVariable( "A33_mat", A33, STATIC_CONST_REAL );
 			code.addDeclaration( A3var );
 			code.addLinebreak( 1 );
 			// TODO: Ask Milan why this does NOT work properly !!
-			A3var = ExportVariable( "A33_mat", NX3, NX3, REAL, ACADO_LOCAL );
+			A3var = ExportVariable( "A33_mat", NX3, NX3, STATIC_CONST_REAL, ACADO_LOCAL );
 		}
 
 		double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 		Matrix tmp = AA;
-		Ah = ExportVariable( "Ah_mat", tmp*=h );
+		Ah = ExportVariable( "Ah_mat", tmp*=h, STATIC_CONST_REAL );
 		code.addDeclaration( Ah );
 		code.addLinebreak( 2 );
 		// TODO: Ask Milan why this does NOT work properly !!
-		Ah = ExportVariable( "Ah_mat", numStages, numStages, REAL, ACADO_LOCAL );
+		Ah = ExportVariable( "Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 
 		Vector BB( bb );
 		Bh = ExportVariable( "Bh_mat", Matrix( BB*=h, BT_FALSE ) );
@@ -1114,10 +1190,10 @@ returnValue ImplicitRungeKuttaExport::prepareInputSystem(	ExportStatementBlock& 
 {
 	if( NX1 > 0 ) {
 		Matrix mat1 = formMatrix( M11, A11 );
-		rk_mat1 = ExportVariable( "rk_mat1", mat1 );
+		rk_mat1 = ExportVariable( "rk_mat1", mat1, STATIC_CONST_REAL );
 		code.addDeclaration( rk_mat1 );
 		// TODO: Ask Milan why this does NOT work properly !!
-		rk_mat1 = ExportVariable( "rk_mat1", numStages*NX1, numStages*NX1, REAL, ACADO_LOCAL );
+		rk_mat1 = ExportVariable( "rk_mat1", numStages*NX1, numStages*NX1, STATIC_CONST_REAL, ACADO_LOCAL );
 
 		Matrix sens = zeros(NX1*(NX1+NU), numStages);
 		uint i, j, k;
@@ -1149,10 +1225,10 @@ returnValue ImplicitRungeKuttaExport::prepareInputSystem(	ExportStatementBlock& 
 				}
 			}
 		}
-		rk_dk1 = ExportVariable( "rk_dk1", sens );
+		rk_dk1 = ExportVariable( "rk_dk1", sens, STATIC_CONST_REAL );
 		code.addDeclaration( rk_dk1 );
 		// TODO: Ask Milan why this does NOT work properly !!
-		rk_dk1 = ExportVariable( "rk_dk1", NX1*(NX1+NU), numStages, REAL, ACADO_LOCAL );
+		rk_dk1 = ExportVariable( "rk_dk1", NX1*(NX1+NU), numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -1163,10 +1239,10 @@ returnValue ImplicitRungeKuttaExport::prepareOutputSystem(	ExportStatementBlock&
 {
 	if( NX3 > 0 ) {
 		Matrix mat3 = formMatrix( M33, A33 );
-		rk_mat3 = ExportVariable( "rk_mat3", mat3 );
+		rk_mat3 = ExportVariable( "rk_mat3", mat3, STATIC_CONST_REAL );
 		code.addDeclaration( rk_mat3 );
 		// TODO: Ask Milan why this does NOT work properly !!
-		rk_mat3 = ExportVariable( "rk_mat3", numStages*NX3, numStages*NX3, REAL, ACADO_LOCAL );
+		rk_mat3 = ExportVariable( "rk_mat3", numStages*NX3, numStages*NX3, STATIC_CONST_REAL, ACADO_LOCAL );
 
 		Matrix sens = zeros(NX3*NX3, numStages);
 		uint i, j, k;
@@ -1184,10 +1260,10 @@ returnValue ImplicitRungeKuttaExport::prepareOutputSystem(	ExportStatementBlock&
 				}
 			}
 		}
-		rk_dk3 = ExportVariable( "rk_dk3", sens );
+		rk_dk3 = ExportVariable( "rk_dk3", sens, STATIC_CONST_REAL );
 		code.addDeclaration( rk_dk3 );
 		// TODO: Ask Milan why this does NOT work properly !!
-		rk_dk3 = ExportVariable( "rk_dk3", NX3*NX3, numStages, REAL, ACADO_LOCAL );
+		rk_dk3 = ExportVariable( "rk_dk3", NX3*NX3, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -2176,26 +2252,34 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	uint numXA = NXA;
 	if( NXA3 > numXA ) numXA = NXA3;
 
-	rk_ttt = ExportVariable( "rk_ttt", 1, 1, REAL, ACADO_WORKSPACE, BT_TRUE );
-	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim-diffsDim+numDX, REAL, ACADO_WORKSPACE );
-	rk_kkk = ExportVariable( "rk_kkk", NX+NXA, numStages, REAL, ACADO_WORKSPACE );
-	rk_A = ExportVariable( "rk_A", numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, ACADO_WORKSPACE );
-	if ( (BooleanType)debugMode == BT_TRUE ) {
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+	ExportStruct structWspace;
+	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
+
+	rk_ttt = ExportVariable( "rk_ttt", 1, 1, REAL, structWspace, BT_TRUE );
+	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim-diffsDim+numDX, REAL, structWspace );
+	rk_kkk = ExportVariable( "rk_kkk", NX+NXA, numStages, REAL, structWspace );
+	rk_A = ExportVariable( "rk_A", numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, structWspace );
+	if ( (BooleanType)debugMode == BT_TRUE && useOMP ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	else {
 		debug_mat = ExportVariable( "debug_mat", numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, ACADO_VARIABLES );
 	}
-	rk_b = ExportVariable( "rk_b", numStages*(Xmax+NXA), 1, REAL, ACADO_WORKSPACE );
-	rk_diffK = ExportVariable( "rk_diffK", NX+NXA, numStages, REAL, ACADO_WORKSPACE );
-	rk_rhsTemp = ExportVariable( "rk_rhsTemp", NX+NXA+numDX, 1, REAL, ACADO_WORKSPACE );
-	rk_diffsTemp2 = ExportVariable( "rk_diffsTemp2", numStages, (NX2+NXA)*(NVARS2), REAL, ACADO_WORKSPACE );
-	rk_diffsTemp3 = ExportVariable( "rk_diffsTemp3", numStages, NX3*NVARS3, REAL, ACADO_WORKSPACE );
+	rk_b = ExportVariable( "rk_b", numStages*(Xmax+NXA), 1, REAL, structWspace );
+	rk_diffK = ExportVariable( "rk_diffK", NX+NXA, numStages, REAL, structWspace );
+	rk_rhsTemp = ExportVariable( "rk_rhsTemp", NX+NXA+numDX, 1, REAL, structWspace );
+	rk_diffsTemp2 = ExportVariable( "rk_diffsTemp2", numStages, (NX2+NXA)*(NVARS2), REAL, structWspace );
+	rk_diffsTemp3 = ExportVariable( "rk_diffsTemp3", numStages, NX3*NVARS3, REAL, structWspace );
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		rk_diffsPrev1 = ExportVariable( "rk_diffsPrev1", NX1, NX1+NU, REAL, ACADO_WORKSPACE );
-		rk_diffsPrev2 = ExportVariable( "rk_diffsPrev2", NX2, NX1+NX2+NU, REAL, ACADO_WORKSPACE );
-		rk_diffsPrev3 = ExportVariable( "rk_diffsPrev3", NX3, NX+NU, REAL, ACADO_WORKSPACE );
+		rk_diffsPrev1 = ExportVariable( "rk_diffsPrev1", NX1, NX1+NU, REAL, structWspace );
+		rk_diffsPrev2 = ExportVariable( "rk_diffsPrev2", NX2, NX1+NX2+NU, REAL, structWspace );
+		rk_diffsPrev3 = ExportVariable( "rk_diffsPrev3", NX3, NX+NU, REAL, structWspace );
 	}
-	rk_diffsNew1 = ExportVariable( "rk_diffsNew1", NX1, NX1+NU, REAL, ACADO_WORKSPACE );
-	rk_diffsNew2 = ExportVariable( "rk_diffsNew2", NX2+NXA, NX1+NX2+NU, REAL, ACADO_WORKSPACE );
-	rk_diffsNew3 = ExportVariable( "rk_diffsNew3", NX3, NX+NU, REAL, ACADO_WORKSPACE );
+	rk_diffsNew1 = ExportVariable( "rk_diffsNew1", NX1, NX1+NU, REAL, structWspace );
+	rk_diffsNew2 = ExportVariable( "rk_diffsNew2", NX2+NXA, NX1+NX2+NU, REAL, structWspace );
+	rk_diffsNew3 = ExportVariable( "rk_diffsNew3", NX3, NX+NU, REAL, structWspace );
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
 	if( equidistantControlGrid() ) {
@@ -2315,11 +2399,16 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		gridVariables.push_back( gridVariable );
 	}
 	
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+	ExportStruct structWspace;
+	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
+
 	setup();
-	rk_rhsOutputTemp = ExportVariable( "rk_rhsOutputTemp", 1, maxOutputs, REAL, ACADO_WORKSPACE );
-	rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(maxVARS), REAL, ACADO_WORKSPACE );
-	rk_outH = ExportVariable( "rk_outH", numStages, 1, REAL, ACADO_WORKSPACE );
-	rk_out = ExportVariable( "rk_out2", numStages, 1, REAL, ACADO_WORKSPACE );
+	rk_rhsOutputTemp = ExportVariable( "rk_rhsOutputTemp", 1, maxOutputs, REAL, structWspace );
+	rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(maxVARS), REAL, structWspace );
+	rk_outH = ExportVariable( "rk_outH", numStages, 1, REAL, structWspace );
+	rk_out = ExportVariable( "rk_out2", numStages, 1, REAL, structWspace );
 	polynEvalVar = ExportVariable( "tmp_polyn", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
 
 	return ( val );
@@ -2374,11 +2463,16 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 		}
 		uint maxVARS = NX+NXA+NU+NDX;
 
+		int useOMP;
+		get(CG_USE_OPENMP, useOMP);
+		ExportStruct structWspace;
+		structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
+
 		setup();
-		rk_rhsOutputTemp = ExportVariable( "rk_rhsOutputTemp", 1, maxOutputs, REAL, ACADO_WORKSPACE );
-		rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(maxVARS), REAL, ACADO_WORKSPACE );
-		rk_outH = ExportVariable( "rk_outH", numStages, 1, REAL, ACADO_WORKSPACE );
-		rk_out = ExportVariable( "rk_out2", numStages, 1, REAL, ACADO_WORKSPACE );
+		rk_rhsOutputTemp = ExportVariable( "rk_rhsOutputTemp", 1, maxOutputs, REAL, structWspace );
+		rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(maxVARS), REAL, structWspace );
+		rk_outH = ExportVariable( "rk_outH", numStages, 1, REAL, structWspace );
+		rk_out = ExportVariable( "rk_out2", numStages, 1, REAL, structWspace );
 		polynEvalVar = ExportVariable( "tmp_polyn", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
 
 		exportRhs = BT_FALSE;
@@ -2424,19 +2518,19 @@ returnValue ImplicitRungeKuttaExport::prepareOutputEvaluation( ExportStatementBl
 			ExportVariable polynVariable;
 			if( equidistant ) {
 				double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-				polynVariable = ExportVariable( (String)"polynOutput" << i, polynV*=h );
+				polynVariable = ExportVariable( (String)"polynOutput" << i, polynV*=h, STATIC_CONST_REAL );
 			}
 			else {
-				polynVariable = ExportVariable( (String)"polynOutput" << i, polynV );
+				polynVariable = ExportVariable( (String)"polynOutput" << i, polynV, STATIC_CONST_REAL );
 			}
 			code.addDeclaration( polynVariable );
-			polynVariable = ExportVariable( (String)"polynOutput" << i, totalMeas[i], numStages );
+			polynVariable = ExportVariable( (String)"polynOutput" << i, totalMeas[i], numStages, STATIC_CONST_REAL );
 			polynVariables.push_back( polynVariable );
 
 			if( NXA > 0 || NDX > 0 ) {
-				ExportVariable polynDerVariable( (String)"polynDerOutput" << i, polynDerV );
+				ExportVariable polynDerVariable( (String)"polynDerOutput" << i, polynDerV, STATIC_CONST_REAL );
 				code.addDeclaration( polynDerVariable );
-				polynDerVariable = ExportVariable( (String)"polynDerOutput" << i, totalMeas[i], numStages );
+				polynDerVariable = ExportVariable( (String)"polynDerOutput" << i, totalMeas[i], numStages, STATIC_CONST_REAL );
 				polynDerVariables.push_back( polynDerVariable );
 			}
 
