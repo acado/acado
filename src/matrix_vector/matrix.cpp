@@ -530,6 +530,19 @@ BooleanType Matrix::isSymmetric( ) const
 	return BT_TRUE;
 }
 
+BooleanType Matrix::isDiagonal( ) const
+{
+	if (isSquare() == BT_FALSE)
+		return BT_FALSE;
+
+	for (unsigned i = 0; i < getNumRows( ); ++i)
+		for (unsigned j = 0; j < getNumCols( ); ++j)
+			if ((i != j) && (acadoIsZero( operator()(i, j) ) == BT_FALSE))
+				return BT_FALSE;
+
+	return BT_TRUE;
+}
+
 
 returnValue Matrix::symmetrize( )
 {

@@ -406,6 +406,10 @@ class Matrix : public VectorspaceElement{
 		 *  \return BT_TRUE iff matrix object is symmetric. */
 		BooleanType isSymmetric( ) const;
 		
+		/** Tests if object is a diagonal matrix.
+		 *  \return BT_TRUE iff matrix object is diagonal. */
+		BooleanType isDiagonal( ) const;
+
 		returnValue symmetrize( );
 
 
