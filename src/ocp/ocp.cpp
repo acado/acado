@@ -67,8 +67,8 @@ OCP::OCP( const double &tStart_, const double &tEnd_, const Vector& _numSteps )
 		times(i+1) = times(i) + h*_numSteps(i);
 	}
 	
-	modelData.setNumSteps(_numSteps);
     setupGrid( times );
+    modelData.setIntegrationGrid(grid, totalSteps);
 }
 
 

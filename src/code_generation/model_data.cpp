@@ -326,23 +326,26 @@ returnValue ModelData::setIntegrationGrid(	const Grid& _ocpGrid, const uint _num
 	double h = T/((double)_numSteps);
 	Vector stepsVector( N );
 
-	for( i = 0; i < stepsVector.getDim(); i++ )
+	if (integrationGrid.isEmpty() == BT_TRUE)
 	{
-		stepsVector(i) = (int) ceil((_ocpGrid.getTime(i+1)-_ocpGrid.getTime(i))/h - 10.0*EPS);
-	}
+		for( i = 0; i < stepsVector.getDim(); i++ )
+		{
+			stepsVector(i) = (int) ceil((_ocpGrid.getTime(i+1)-_ocpGrid.getTime(i))/h - 10.0*EPS);
+		}
 
-	if( equidistant )
-	{
-		// Setup fixed integrator grid for equidistant control grid
-		integrationGrid = Grid( 0.0, ((double) T)/((double) N), (int) ceil((double)_numSteps/((double) N) - 10.0*EPS) + 1 );
-	}
-	else
-	{
-		// Setup for non equidistant control grid
-		// NOTE: This grid defines only one integration step because the control
-		// grid is non equidistant.
-		integrationGrid = Grid( 0.0, h, 2 );
-		numSteps = stepsVector;
+		if( equidistant )
+		{
+			// Setup fixed integrator grid for equidistant control grid
+			integrationGrid = Grid( 0.0, ((double) T)/((double) N), (int) ceil((double)_numSteps/((double) N) - 10.0*EPS) + 1 );
+		}
+		else
+		{
+			// Setup for non equidistant control grid
+			// NOTE: This grid defines only one integration step because the control
+			// grid is non equidistant.
+			integrationGrid = Grid( 0.0, h, 2 );
+			numSteps = stepsVector;
+		}
 	}
 	return SUCCESSFUL_RETURN;
 }
