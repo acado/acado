@@ -229,7 +229,9 @@ classdef ModelContainer < handle
                         fprintf(cppobj.fileMEX,sprintf('    %s.setDimensions( %s, %s, %s, %s );\n', obj.name, num2str(obj.NX), num2str(obj.NDX), num2str(obj.NXA), num2str(obj.NU)));
                     end
                 else
-                    error('ERROR: Invalid SIMexport object in getInstructions !\n');
+                    % The model should then be defined elsewhere, e.g. with
+                    % subjectTo in OCP
+%                     error('ERROR: Invalid ModelContainer object in getInstructions !\n');
                 end
                 
                 fprintf(cppobj.fileMEX,'\n');
