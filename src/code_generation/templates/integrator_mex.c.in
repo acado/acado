@@ -11,7 +11,7 @@
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
-    int c, i, j, k, Nx, Nu, Np, gridI, Ngrid;
+    int reset, c, i, j, k, Nx, Nu, Np, gridI, Ngrid;
     real_t *x, *u, *p, *xnext, *sensX, *sensU, *grid, *mat;
     real_t next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU+ACADO_NP];
     const char *fieldnames[3];
@@ -167,7 +167,7 @@ acadoVariables.gridOutput3[j] = 1.1;
 		p = mxGetPr(prhs[1]);
     }
     
-    acadoWorkspace.resetIntegrator = 1;
+    reset = 1;
     for( i = 0; i < ACADO_NU; ++i ) {
         next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
     }
@@ -185,16 +185,17 @@ acadoVariables.gridOutput3[j] = 1.1;
 	    }
 	    
 	    #if NUM_OUTPUTS > 3
-	        integrate( next, out1, out2, out3, out4 );
+	        integrate( next, out1, out2, out3, out4, reset );
 	    #elif NUM_OUTPUTS > 2
-	        integrate( next, out1, out2, out3 );
+	        integrate( next, out1, out2, out3, reset );
 	    #elif NUM_OUTPUTS > 1
-	        integrate( next, out1, out2 );
+	        integrate( next, out1, out2, reset );
 	    #elif NUM_OUTPUTS > 0
-	        integrate( next, out1 );
+	        integrate( next, out1, reset );
 	    #else 
-	        integrate( next );
+	        integrate( next, reset );
 	    #endif
+	    reset = 0;
     }
     #if CALLS_TIMING > 1
 		gettimeofday( &theclock,0 );

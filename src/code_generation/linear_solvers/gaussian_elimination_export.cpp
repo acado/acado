@@ -121,6 +121,7 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 		solve.addStatement( loop1 );
 	}
 	
+	solve.addStatement( determinant == 1 );
 	if( UNROLLING || dim <= 5 ) {
 		// Start the factorization:
 		for( run1 = 0; run1 < (dim-1); run1++ ) {
@@ -171,8 +172,10 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 				solve.addStatement( b.getRow( run2 ) += A.getSubMatrix( run2,run2+1,run1,run1+1 ) * b.getRow( run1 ) );
 				solve.addLinebreak();
 			}
+			solve.addStatement( determinant == determinant*A.getSubMatrix(run1,run1+1,run1,run1+1) );
 			solve.addLinebreak();
 		}
+		solve.addStatement( determinant == determinant*A.getSubMatrix(dim-1,dim,dim-1,dim) );
 		solve.addLinebreak();
 	}
 	else { // without UNROLLING:
@@ -188,19 +191,20 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 		solve.addStatement( String( "	}\n" ) );
 		solve.addStatement( String( "	if( indexMax > i ) {\n" ) );
 		ExportForLoop loop2( k,0,dim );
-		loop2.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "swap = A[i*" << String( dim ) << "+" << k.getName() << "];\n" );
+		loop2.addStatement( String( "	" ) << rk_swap.getFullName() << " = A[i*" << String( dim ) << "+" << k.getName() << "];\n" );
 		loop2.addStatement( String( "	A[i*" ) << String( dim ) << "+" << k.getName() << "] = A[indexMax*" << String( dim ) << "+" << k.getName() << "];\n" );
-		loop2.addStatement( String( "	A[indexMax*" ) << String( dim ) << "+" << k.getName() << "] = acadoWorkspace.rk_" << identifier << "swap;\n" );
+		loop2.addStatement( String( "	A[indexMax*" ) << String( dim ) << "+" << k.getName() << "] = " << rk_swap.getFullName() << ";\n" );
 		solve.addStatement( loop2 );
-		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "swap = b[i];\n" );
+		solve.addStatement( String( "	" ) << rk_swap.getFullName() << " = b[i];\n" );
 		solve.addStatement( String( "	b[i] = b[indexMax];\n" ) );
-		solve.addStatement( String( "	b[indexMax] = acadoWorkspace.rk_" ) << identifier << "swap;\n" );
+		solve.addStatement( String( "	b[indexMax] = " ) << rk_swap.getFullName() << ";\n" );
 		if( REUSE ) {
-			solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "swap = acadoWorkspace.rk_" << identifier << "perm[i];\n" );
-			solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "perm[i] = acadoWorkspace.rk_" << identifier << "perm[indexMax];\n" );
-			solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "perm[indexMax] = acadoWorkspace.rk_" << identifier << "swap;\n" );
+			solve.addStatement( String( "	" ) << rk_swap.getFullName() << " = " << rk_perm.getFullName() << "[i];\n" );
+			solve.addStatement( String( "	" ) << rk_perm.getFullName() << "[i] = " << rk_perm.getFullName() << "[indexMax];\n" );
+			solve.addStatement( String( "	" ) << rk_perm.getFullName() << "[indexMax] = " << rk_swap.getFullName() << ";\n" );
 		}
 		solve.addStatement( String( "	}\n" ) );
+		solve.addStatement( String( "	" ) << determinant.getFullName() << " *= A[i*" << String( dim ) << "+i];\n" );
 		solve.addStatement( String( "	for( j=i+1; j < " ) << String( dim ) << "; j++ ) {\n" );
 		solve.addStatement( String( "		A[j*" ) << String( dim ) << "+i] = -A[j*" << String( dim ) << "+i]/A[i*" << String( dim ) << "+i];\n" );
 		solve.addStatement( String( "		for( k=i+1; k < " ) << String( dim ) << "; k++ ) {\n" );
@@ -209,7 +213,9 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 		solve.addStatement( String( "		b[j] += A[j*" ) << String( dim ) << "+i] * b[i];\n" );
 		solve.addStatement( String( "	}\n" ) );
 		solve.addStatement( String( "}\n" ) );
+		solve.addStatement( String( "" ) << determinant.getFullName() << " *= A[" << String( (dim-1)*dim+(dim-1) ) << "];\n" );
 	}
+	solve.addStatement( String( "" ) << determinant.getFullName() << " = fabs(" << determinant.getFullName() << ");\n" );
 	
 	solve.addFunctionCall( solveTriangular, A, b );
 	code.addFunction( solve );
@@ -217,12 +223,12 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
     code.addLinebreak( 2 );
 	if( REUSE ) { // Also export the extra function which reuses the factorization of the matrix A
 		for( run1 = 0; run1 < dim; run1++ ) {
-			solveReuse.addStatement( ((String)rk_bPerm.get( run1,0 ) << " = b[acadoWorkspace.rk_" << identifier << "perm[" << String( run1 ) << "]];\n" ) );
+			solveReuse.addStatement( ((String)rk_bPerm.get( run1,0 ) << " = b[" << rk_perm.getFullName() << "[" << String( run1 ) << "]];\n" ) );
 		}
 
 		for( run2 = 1; run2 < dim; run2++ ) { 		// row run2
 			for( run1 = 0; run1 < run2; run1++ ) { 	// column run1
-				solveReuse.addStatement( ((String)rk_bPerm.get( run2,0 ) << " += A[" << String( run2*dim+run1 ) << "]*acadoWorkspace.rk_" << identifier << "bPerm[" << String( run1 ) << "];\n" ) );
+				solveReuse.addStatement( ((String)rk_bPerm.get( run2,0 ) << " += A[" << String( run2*dim+run1 ) << "]*" << rk_bPerm.getFullName() << "[" << String( run1 ) << "];\n" ) );
 			}
 			solveReuse.addLinebreak();
 		}
@@ -247,14 +253,32 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 }
 
 
+returnValue ExportGaussElim::appendVariableNames( stringstream& string ) {
+
+	string << ", " << rk_swap.getFullName().getName();
+	if( REUSE ) {
+		string << ", " << rk_perm.getFullName().getName();
+		string << ", " << rk_bPerm.getFullName().getName();
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 returnValue ExportGaussElim::setup( )
 {
-	rk_swap = ExportVariable( String( "rk_" ) << identifier << "swap", 1, 1, REAL, ACADO_WORKSPACE, BT_TRUE );
-	rk_perm = ExportVariable( String( "rk_" ) << identifier << "perm", dim, 1, INT, ACADO_WORKSPACE );
-	rk_bPerm = ExportVariable( String( "rk_" ) << identifier << "bPerm", dim, 1, REAL, ACADO_WORKSPACE );
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+	ExportStruct structWspace;
+	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
+
+	rk_swap = ExportVariable( String( "rk_" ) << identifier << "swap", 1, 1, REAL, structWspace, BT_TRUE );
+	rk_perm = ExportVariable( String( "rk_" ) << identifier << "perm", dim, 1, INT, structWspace );
+	rk_bPerm = ExportVariable( String( "rk_" ) << identifier << "bPerm", dim, 1, REAL, structWspace );
 	A = ExportVariable( "A", dim, dim, REAL );
 	b = ExportVariable( "b", dim, 1, REAL );
 	solve = ExportFunction( getNameSolveFunction(), A, b);
+	solve.setReturnValue( determinant, BT_FALSE );
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	solveTriangular = ExportFunction( String( "solve_" ) << identifier << "triangular", A, b);
 	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED

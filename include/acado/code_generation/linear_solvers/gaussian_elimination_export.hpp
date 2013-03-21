@@ -123,6 +123,15 @@ class ExportGaussElim : public ExportLinearSolver
 										);
 
 
+		/** Appends the names of the used variables to a given stringstream.
+		 *
+		 *	@param[in] string				The string to which the names of the used variables are appended.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue appendVariableNames( stringstream& string );
+
+
 	//
     // PROTECTED MEMBER FUNCTIONS:
     //

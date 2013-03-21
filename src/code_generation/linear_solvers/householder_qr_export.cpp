@@ -115,26 +115,26 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 			for( run2 = run1+1; run2 < dim; run2++ ) {
 				solve.addStatement( rk_temp.getCol( dim ) += rk_temp.getCol( run2 )*rk_temp.getCol( run2 ) );
 			}
-			solve.addStatement( String( "acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] = sqrt(acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "]);\n" );
+			solve.addStatement( rk_temp.getFullName() << "[" << String( dim ) << "] = sqrt(" << rk_temp.getFullName() << "[" << String( dim ) << "]);\n" );
 			
 			// update first element:
-			solve.addStatement( String( "acadoWorkspace.rk_" ) << identifier << "temp[" << String( run1 ) << "] += (acadoWorkspace.rk_" << identifier << "temp[" << String( run1 ) << "] < 0 ? -1 : 1)*acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "];\n" );
+			solve.addStatement( rk_temp.getFullName() << "[" << String( run1 ) << "] += (" << rk_temp.getFullName() << "[" << String( run1 ) << "] < 0 ? -1 : 1)*" << rk_temp.getFullName() << "[" << String( dim ) << "];\n" );
 			
 			// calculate norm:
 			solve.addStatement( rk_temp.getCol( dim ) == rk_temp.getCol( run1 )*rk_temp.getCol( run1 ) );
 			for( run2 = run1+1; run2 < dim; run2++ ) {
 				solve.addStatement( rk_temp.getCol( dim ) += rk_temp.getCol( run2 )*rk_temp.getCol( run2 ) );
 			}
-			solve.addStatement( String( "acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] = sqrt(acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "]);\n" );
+			solve.addStatement( rk_temp.getFullName() << "[" << String( dim ) << "] = sqrt(" << rk_temp.getFullName() << "[" << String( dim ) << "]);\n" );
 			
 			// normalization:
 			for( run2 = run1; run2 < dim; run2++ ) {
-				solve.addStatement( String( "acadoWorkspace.rk_" ) << identifier << "temp[" << String( run2 ) << "] = acadoWorkspace.rk_" << identifier << "temp[" << String( run2 ) << "]/acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "];\n" );
+				solve.addStatement( rk_temp.getFullName() << "[" << String( run2 ) << "] = " << rk_temp.getFullName() << "[" << String( run2 ) << "]/" << rk_temp.getFullName() << "[" << String( dim ) << "];\n" );
 			}
 			
 			// update current column:
 			solve.addStatement( rk_temp.getCol( dim ) == rk_temp.getCols( run1,dim )*A.getSubMatrix( run1,dim,run1,run1+1 ) );
-			solve.addStatement( String( "acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] *= 2;\n" );
+			solve.addStatement( rk_temp.getFullName() << "[" << String( dim ) << "] *= 2;\n" );
 			solve.addStatement( A.getSubMatrix( run1,run1+1,run1,run1+1 ) -= rk_temp.getCol( run1 )*rk_temp.getCol( dim ) );
 			if( REUSE ) {
 				// replace zeros by results that can be reused:
@@ -146,14 +146,14 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 			// update following columns:
 			for( run2 = run1+1; run2 < dim; run2++ ) {
 				solve.addStatement( rk_temp.getCol( dim ) == rk_temp.getCols( run1,dim )*A.getSubMatrix( run1,dim,run2,run2+1 ) );
-				solve.addStatement( String( "acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] *= 2;\n" );
+				solve.addStatement( rk_temp.getFullName() << "[" << String( dim ) << "] *= 2;\n" );
 				for( run3 = run1; run3 < dim; run3++ ) {
 					solve.addStatement( A.getSubMatrix( run3,run3+1,run2,run2+1 ) -= rk_temp.getCol( run3 )*rk_temp.getCol( dim ) );
 				}
 			}
 			// update right-hand side:
 			solve.addStatement( rk_temp.getCol( dim ) == rk_temp.getCols( run1,dim )*b.getRows( run1,dim ) );
-			solve.addStatement( String( "acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] *= 2;\n" );
+			solve.addStatement( rk_temp.getFullName() << "[" << String( dim ) << "] *= 2;\n" );
 			for( run3 = run1; run3 < dim; run3++ ) {
 				solve.addStatement( b.getRow( run3 ) -= rk_temp.getCol( run3 )*rk_temp.getCol( dim ) );
 			}
@@ -167,54 +167,54 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 	else {
 		solve.addStatement( String( "for( i=0; i < " ) << String( dim-1 ) << "; i++ ) {\n" );
 		solve.addStatement( String( "	for( j=i; j < " ) << String( dim ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		acadoWorkspace.rk_" ) << identifier << "temp[j] = A[j*" << String( dim ) << "+i];\n" );
+		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[j] = A[j*" << String( dim ) << "+i];\n" );
 		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] = acadoWorkspace.rk_" << identifier << "temp[i]*acadoWorkspace.rk_" << identifier << "temp[i];\n" );
+		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( dim ) << "] = " << rk_temp.getFullName() << "[i]*" << rk_temp.getFullName() << "[i];\n" );
 		solve.addStatement( String( "	for( j=i+1; j < " ) << String( dim ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] += acadoWorkspace.rk_" << identifier << "temp[j]*acadoWorkspace.rk_" << identifier << "temp[j];\n" );
+		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( dim ) << "] += " << rk_temp.getFullName() << "[j]*" << rk_temp.getFullName() << "[j];\n" );
 		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] = sqrt(acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "]);\n" );
+		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( dim ) << "] = sqrt(" << rk_temp.getFullName() << "[" << String( dim ) << "]);\n" );
 		// update first element:
-		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[i] += (acadoWorkspace.rk_" << identifier << "temp[i] < 0 ? -1 : 1)*acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "];\n" );
-		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] = acadoWorkspace.rk_" << identifier << "temp[i]*acadoWorkspace.rk_" << identifier << "temp[i];\n" );
+		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[i] += (" << rk_temp.getFullName() << "[i] < 0 ? -1 : 1)*" << rk_temp.getFullName() << "[" << String( dim ) << "];\n" );
+		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( dim ) << "] = " << rk_temp.getFullName() << "[i]*" << rk_temp.getFullName() << "[i];\n" );
 		solve.addStatement( String( "	for( j=i+1; j < " ) << String( dim ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] += acadoWorkspace.rk_" << identifier << "temp[j]*acadoWorkspace.rk_" << identifier << "temp[j];\n" );
+		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( dim ) << "] += " << rk_temp.getFullName() << "[j]*" << rk_temp.getFullName() << "[j];\n" );
 		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] = sqrt(acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "]);\n" );
+		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( dim ) << "] = sqrt(" << rk_temp.getFullName() << "[" << String( dim ) << "]);\n" );
 		solve.addStatement( String( "	for( j=i; j < " ) << String( dim ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		acadoWorkspace.rk_" ) << identifier << "temp[j] = acadoWorkspace.rk_" << identifier << "temp[j]/acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "];\n" );
+		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[j] = " << rk_temp.getFullName() << "[j]/" << rk_temp.getFullName() << "[" << String( dim ) << "];\n" );
 		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] = acadoWorkspace.rk_" << identifier << "temp[i]*A[i*" << String( dim ) << "+i];\n" );
+		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( dim ) << "] = " << rk_temp.getFullName() << "[i]*A[i*" << String( dim ) << "+i];\n" );
 		solve.addStatement( String( "	for( j=i+1; j < " ) << String( dim ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] += acadoWorkspace.rk_" << identifier << "temp[j]*A[j*" << String( dim ) << "+i];\n" );
+		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( dim ) << "] += " << rk_temp.getFullName() << "[j]*A[j*" << String( dim ) << "+i];\n" );
 		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] *= 2;\n" );
-		solve.addStatement( String( "	A[i*" ) << String( dim ) << "+i] -= acadoWorkspace.rk_" << identifier << "temp[i]*acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "];\n" );
+		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( dim ) << "] *= 2;\n" );
+		solve.addStatement( String( "	A[i*" ) << String( dim ) << "+i] -= " << rk_temp.getFullName() << "[i]*" << rk_temp.getFullName() << "[" << String( dim ) << "];\n" );
 		if( REUSE ) {
 			solve.addStatement( String( "	for( j=i; j < (" ) << String( dim ) << "-1); j++ ) {\n" );
-			solve.addStatement( String( "		A[(j+1)*" ) << String( dim ) << "+i] = acadoWorkspace.rk_" << identifier << "temp[j];\n" );
+			solve.addStatement( String( "		A[(j+1)*" ) << String( dim ) << "+i] = " << rk_temp.getFullName() << "[j];\n" );
 			solve.addStatement( String( "	}\n" ) );
 		}
 		solve.addStatement( String( "	for( j=i+1; j < " ) << String( dim ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] = acadoWorkspace.rk_" << identifier << "temp[i]*A[i*" << String( dim ) << "+j];\n" );
+		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( dim ) << "] = " << rk_temp.getFullName() << "[i]*A[i*" << String( dim ) << "+j];\n" );
 		solve.addStatement( String( "		for( k=i+1; k < " ) << String( dim ) << "; k++ ) {\n" );
-		solve.addStatement( String( "			acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] += acadoWorkspace.rk_" << identifier << "temp[k]*A[k*" << String( dim ) << "+j];\n" );
+		solve.addStatement( String( "			" ) << rk_temp.getFullName() << "[" << String( dim ) << "] += " << rk_temp.getFullName() << "[k]*A[k*" << String( dim ) << "+j];\n" );
 		solve.addStatement( String( "		}\n" ) );
-		solve.addStatement( String( "		acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] *= 2;\n" );
+		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( dim ) << "] *= 2;\n" );
 		solve.addStatement( String( "		for( k=i; k < " ) << String( dim ) << "; k++ ) {\n" );
-		solve.addStatement( String( "			A[k*" ) << String( dim ) << "+j] -= acadoWorkspace.rk_" << identifier << "temp[k]*acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "];\n" );
+		solve.addStatement( String( "			A[k*" ) << String( dim ) << "+j] -= " << rk_temp.getFullName() << "[k]*" << rk_temp.getFullName() << "[" << String( dim ) << "];\n" );
 		solve.addStatement( String( "		}\n" ) );
 		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] = acadoWorkspace.rk_" << identifier << "temp[i]*b[i];\n" );
+		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( dim ) << "] = " << rk_temp.getFullName() << "[i]*b[i];\n" );
 		solve.addStatement( String( "	for( k=i+1; k < " ) << String( dim ) << "; k++ ) {\n" );
-		solve.addStatement( String( "		acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] += acadoWorkspace.rk_" << identifier << "temp[k]*b[k];\n" );
+		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( dim ) << "] += " << rk_temp.getFullName() << "[k]*b[k];\n" );
 		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] *= 2;\n" );
+		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( dim ) << "] *= 2;\n" );
 		solve.addStatement( String( "	for( k=i; k < " ) << String( dim ) << "; k++ ) {\n" );
-		solve.addStatement( String( "		b[k] -= acadoWorkspace.rk_" ) << identifier << "temp[k]*acadoWorkspace.rk_" << identifier << "temp[" << String( dim ) << "];\n" );
+		solve.addStatement( String( "		b[k] -= " ) << rk_temp.getFullName() << "[k]*" << rk_temp.getFullName() << "[" << String( dim ) << "];\n" );
 		solve.addStatement( String( "	}\n" ) );
 		if( REUSE ) {
-			solve.addStatement( String( "	acadoWorkspace.rk_" ) << identifier << "temp[i] = acadoWorkspace.rk_" << identifier << "temp[" << String( dim-1 ) << "];\n" );
+			solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[i] = " << rk_temp.getFullName() << "[" << String( dim-1 ) << "];\n" );
 		}
 		solve.addStatement( String( "}\n" ) );
 	}
@@ -236,7 +236,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 				solveReuse.addStatement( rk_temp.getCol( dim ) += A.getSubMatrix( run2+1,run2+2,run1,run1+1 )*b.getRow( run2 ) );
 			}
 			solveReuse.addStatement( rk_temp.getCol( dim ) += rk_temp.getCol( run1 )*b.getRow( dim-1 ) );
-			solveReuse.addStatement( String( "acadoWorkspace.rk_" ) << identifier << "temp[" << String( dim ) << "] *= 2;\n" );
+			solveReuse.addStatement( String( "" ) << rk_temp.getFullName() << "[" << String( dim ) << "] *= 2;\n" );
 			for( run3 = run1; run3 < (dim-1); run3++ ) {
 				solveReuse.addStatement( b.getRow( run3 ) -= A.getSubMatrix( run3+1,run3+2,run1,run1+1 )*rk_temp.getCol( dim ) );
 			}
@@ -262,12 +262,26 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 }
 
 
+returnValue ExportHouseholderQR::appendVariableNames( stringstream& string ) {
+
+	string << ", " << rk_temp.getFullName().getName();
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 returnValue ExportHouseholderQR::setup( )
 {
-	rk_temp = ExportVariable( String( "rk_" ) << identifier << "temp", 1, dim+1, REAL, ACADO_WORKSPACE );
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+	ExportStruct structWspace;
+	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
+
+	rk_temp = ExportVariable( String( "rk_" ) << identifier << "temp", 1, dim+1, REAL, structWspace );
 	A = ExportVariable( "A", dim, dim, REAL );
 	b = ExportVariable( "b", dim, 1, REAL );
 	solve = ExportFunction( getNameSolveFunction(), A, b);
+	solve.setReturnValue( determinant, BT_FALSE );
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	solveTriangular = ExportFunction( String( "solve_" ) << identifier << "triangular", A, b);
 	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED

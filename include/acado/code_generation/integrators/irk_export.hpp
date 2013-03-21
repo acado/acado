@@ -25,7 +25,7 @@
 
 
 /**
- *    \file include/acado/integrator/irk_export.hpp
+ *    \file include/acado/code_generation/integrators/irk_export.hpp
  *    \author Rien Quirynen
  *    \date 2012
  */
@@ -327,36 +327,39 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		Vector divideMeasurements( uint index );
 
 
-		/** .
+		/** Precompute as much as possible for the linear input system and export the resulting definitions.
 		 *
-		 *	@param[in] code			TODO: RIEN
+		 *	@param[in] code			The block to which the code will be exported.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue prepareInputSystem(	ExportStatementBlock& code );
 
 
-		/** .
+		/** Precompute as much as possible for the linear output system and export the resulting definitions.
 		 *
-		 *	@param[in] code			TODO: RIEN
+		 *	@param[in] code			The block to which the code will be exported.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue prepareOutputSystem(	ExportStatementBlock& code );
+		returnValue prepareOutputSystem( ExportStatementBlock& code );
 
 
-		/** .
+		/** Forms a constant linear system matrix for the collocation equations, given a constant jacobian and mass matrix.
 		 *
-		 *	@param[in] jacobian			TODO: RIEN
+		 *	@param[in] jacobian			given constant Jacobian matrix
+		 *	@param[in] mass				given constant mass matrix
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
 
 
-		/** .
+		/** Exports the code needed to solve the system of collocation equations for the linear input system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] A1				A constant matrix defining the equations of the linear input system.
+		 *	@param[in] B1				A constant matrix defining the equations of the linear input system.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -369,9 +372,11 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportVariable& B1 );
 
 
-		/** .
+		/** Exports the code needed to solve the system of collocation equations for the nonlinear, fully implicit system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
+		 *	@param[in] det				The variable that holds the determinant of the matrix in the linear system.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -380,12 +385,15 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportIndex& index2,
 											const ExportIndex& index3,
 											const ExportIndex& tmp_index,
-											const ExportVariable& Ah  	);
+											const ExportVariable& Ah,
+											const ExportVariable& det  	);
 
 
-		/** .
+		/** Exports the code needed to solve the system of collocation equations for the linear output system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
+		 *	@param[in] A3				A constant matrix defining the equations of the linear output system.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -398,9 +406,11 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportVariable& A3 );
 
 
-		/** .
+		/** Exports the code needed to compute the sensitivities of the states, defined by the linear input system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Bh				The variable containing the weights of the RK method, multiplied with the step size.
+		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -411,9 +421,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 												BooleanType STATES  	);
 
 
-		/** .
+		/** Exports the code needed to update the sensitivities of the states, defined by the linear input system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -423,9 +433,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& tmp_index  	);
 
 
-		/** .
+		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear input system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -436,9 +446,14 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportIndex& tmp_index  	);
 
 
-		/** .
+		/** Exports the code needed to compute the sensitivities of the states defined by the nonlinear, fully implicit system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
+		 *	@param[in] Bh				The variable containing the weights of the RK method, multiplied with the step size.
+		 *	@param[in] det				The variable that holds the determinant of the matrix in the linear system.
+		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
+		 *	@param[in] number			This number defines the stage of the state with respect to which the sensitivities are computed.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -450,13 +465,14 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 													const ExportIndex& tmp_index2,
 													const ExportVariable& Ah,
 													const ExportVariable& Bh,
+													const ExportVariable& det,
 													BooleanType STATES,
 													uint number 		);
 
 
-		/** .
+		/** Exports the code needed to update the sensitivities of the states defined by the nonlinear, fully implicit system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -466,9 +482,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportIndex& tmp_index  	);
 
 
-		/** .
+		/** Exports the code needed to propagate the sensitivities of the states defined by the nonlinear, fully implicit system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -479,9 +495,13 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 												const ExportIndex& tmp_index  	);
 
 
-		/** .
+		/** Exports the code needed to compute the sensitivities of the states, defined by the linear output system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
+		 *	@param[in] Bh				The variable containing the weights of the RK method, multiplied with the step size.
+		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
+		 *	@param[in] number			This number defines the stage of the state with respect to which the sensitivities are computed.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -498,9 +518,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 												uint number 		);
 
 
-		/** .
+		/** Exports the code needed to update the sensitivities of the states, defined by the linear output system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -510,9 +530,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportIndex& tmp_index  	);
 
 
-		/** .
+		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear output system.
 		 *
-		 *	@param[in] block			TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -579,21 +599,24 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										BooleanType evaluateB );
 
 
-		/** Prepares the structures to evaluate the continuous output.
+		/** Prepares the structures to evaluate the continuous output and exports the resulting definitions.
 		 *
-		 *	@param[in] TODO: RIEN
+		 *	@param[in] code				The block to which the code will be exported.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue prepareOutputEvaluation( 	ExportStatementBlock& code );
 
 
-		/** Exports the computation of the continuous output.
-				 *
-				 *	@param[in] TODO: RIEN
-				 *
-				 *	\return SUCCESSFUL_RETURN
-				 */
+		/** Exports the necessary code for the computation of the continuous output.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] tmp_meas			The number of measurements in the current integration step (in case of an online grid).
+		 *	@param[in] rk_tPrev			The time point, defining the beginning of the current integration step (in case of an online grid).
+		 *	@param[in] time_tmp			A variable used for time transformations (in case of an online grid).
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
 		returnValue generateOutput( 	ExportStatementBlock* block,
 										const ExportIndex& index0,
 										const ExportIndex& index1,
@@ -606,7 +629,12 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 		/** Exports the computation of the sensitivities for the continuous output.
 		 *
-		 *	@param[in] TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] tmp_meas			The number of measurements in the current integration step (in case of an online grid).
+		 *	@param[in] rk_tPrev			The time point, defining the beginning of the current integration step (in case of an online grid).
+		 *	@param[in] time_tmp			A variable used for time transformations (in case of an online grid).
+		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
+		 *	@param[in] base				The number of states in stages with respect to which the sensitivities have already been computed.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -626,7 +654,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 		/** Exports the propagation of the sensitivities for the continuous output.
 		 *
-		 *	@param[in] TODO: RIEN
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] tmp_meas			The number of measurements in the current integration step (in case of an online grid).
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
@@ -676,14 +705,14 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		const String getNameOutputDiffs() const;
 
 
-		/** TODO: RIEN.
+		/** Prepares a function that evaluates the complete right-hand side.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue prepareFullRhs( );
 
 
-		/** TODO: RIEN.
+		/** Returns the largest global export variable.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */

@@ -897,7 +897,9 @@ returnValue CondensingExport::setupEvaluation( )
 	if ( QQF.isGiven( ) == BT_FALSE )
 		setupQP.addStatement( QQF == Q + QF );
 
-	setupQP.addStatement( "acadoWorkspace.resetIntegrator = 1;\n" );
+	ExportIndex reset( String("reset") );
+	setupQP.addIndex( reset );
+	setupQP.addStatement( reset == 1 );
 
 	ExportIndex run( String("run1") );
 	ExportForLoop loop( run, 0,getN() );
@@ -905,7 +907,7 @@ returnValue CondensingExport::setupEvaluation( )
 	setupQP.addIndex( run );
 
 	if ( performsSingleShooting() == BT_FALSE ) {
-		loop.addStatement( "acadoWorkspace.resetIntegrator = 1;\n" );
+		loop.addStatement( reset == 1 );
 		loop.addStatement( state.getCols( 0,getNX() ) == x.getRow( run ) );
 	}
 	
@@ -920,12 +922,13 @@ returnValue CondensingExport::setupEvaluation( )
 	
 	if ( integrator->equidistantControlGrid() )
 	{
-		loop.addFunctionCall( "integrate", state );
+		loop.addFunctionCall( "integrate", state, reset.makeArgument() );
 	}
 	else
 	{
-		loop.addFunctionCall( "integrate", run.makeArgument(), state );
+		loop.addFunctionCall( "integrate", state, reset.makeArgument(), run.makeArgument() );
 	}
+	if( performsSingleShooting() ) loop.addStatement( reset == 0 );
 	
 	if ( performsSingleShooting() == BT_TRUE )
 	{

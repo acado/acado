@@ -275,7 +275,10 @@ enum IntegratorType{
      INT_IRK_RIIA1,			/**< Radau IIA integrator of order 1 (Continuous output Implicit Runge-Kutta). */
      INT_IRK_RIIA3,			/**< Radau IIA integrator of order 3 (Continuous output Implicit Runge-Kutta). */
      INT_IRK_RIIA5,			/**< Radau IIA integrator of order 5 (Continuous output Implicit Runge-Kutta). */
-     INT_TMP_RIIA5,			/**< TEMP Radau IIA integrator of order 5 (Continuous output Implicit Runge-Kutta). */
+
+     INT_DIRK3,				/**< Diagonally Implicit 2-stage Runge-Kutta integrator of order 3 (Continuous output). */
+     INT_DIRK4,				/**< Diagonally Implicit 3-stage Runge-Kutta integrator of order 4 (Continuous output). */
+     INT_DIRK5,				/**< Diagonally Implicit 5-stage Runge-Kutta integrator of order 5 (Continuous output). */
 
      INT_RK12,             	/**< Explicit Runge-Kutta integrator of order 1/2          */
      INT_RK23,             	/**< Explicit Runge-Kutta integrator of order 2/3          */

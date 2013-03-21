@@ -321,7 +321,7 @@ returnValue ModelData::setIntegrationGrid(	const Grid& _ocpGrid, const uint _num
 {
 	uint i;
 	N = _ocpGrid.getNumIntervals();
-	BooleanType equidistant = _ocpGrid.isEquidistant();
+	BooleanType equidistantControl = _ocpGrid.isEquidistant();
 	double T = _ocpGrid.getLastTime() - _ocpGrid.getFirstTime();
 	double h = T/((double)_numSteps);
 	Vector stepsVector( N );
@@ -333,7 +333,7 @@ returnValue ModelData::setIntegrationGrid(	const Grid& _ocpGrid, const uint _num
 			stepsVector(i) = (int) ceil((_ocpGrid.getTime(i+1)-_ocpGrid.getTime(i))/h - 10.0*EPS);
 		}
 
-		if( equidistant )
+		if( equidistantControl )
 		{
 			// Setup fixed integrator grid for equidistant control grid
 			integrationGrid = Grid( 0.0, ((double) T)/((double) N), (int) ceil((double)_numSteps/((double) N) - 10.0*EPS) + 1 );
@@ -347,6 +347,14 @@ returnValue ModelData::setIntegrationGrid(	const Grid& _ocpGrid, const uint _num
 			numSteps = stepsVector;
 		}
 	}
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ModelData::clearIntegrationGrid( )
+{
+	integrationGrid = Grid();
+
 	return SUCCESSFUL_RETURN;
 }
 

@@ -252,6 +252,13 @@ public:
     		 	 	 	 				const uint _numSteps	);
 
 
+     /** Clears any previously set integration grid.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+     returnValue clearIntegrationGrid( );
+
+
      /** Returns the differential equations in the model.
       *
       *  \return SUCCESSFUL_RETURN

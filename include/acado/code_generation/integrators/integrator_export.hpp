@@ -315,7 +315,8 @@ class IntegratorExport : public ExportAlgorithm
 		ExportFunction integrate;			/**< Function that integrates the exported ODE. */
 		ExportODEfunction rhs;				/**< Module to export ODE. */
 		ExportODEfunction diffs_rhs;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
-		
+
+		ExportVariable  error_code;			/**< Variable containing the error code, returned by the integrator. */
 		ExportVariable  reset_int;			/**< Variable containing the number of the current integration step. */
 		ExportVariable  rk_index;			/**< Variable containing the number of the current shooting interval. */
 		ExportVariable 	rk_ttt;				/**< Variable containing the integration time. */

@@ -33,7 +33,6 @@
 #include <acado/code_generation/integrators/erk_export.hpp>
 
 #include <sstream>
-
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
@@ -116,12 +115,12 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	// setup INTEGRATE function
 	if( equidistantControlGrid() ) {
-		integrate = ExportFunction( "integrate", rk_eta );
+		integrate = ExportFunction( "integrate", rk_eta, reset_int );
 	}
 	else {
-		integrate = ExportFunction( "integrate", rk_index, rk_eta );
+		integrate = ExportFunction( "integrate", rk_eta, reset_int, rk_index );
 	}
-
+	integrate.setReturnValue( error_code );
 	integrate.addIndex( run );
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
@@ -214,6 +213,10 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 
 	// add usual ODE
 	f_ODE << rhs_;
+	if( f_ODE.getNDX() > 0 ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+
 	f << rhs_;
 /*	if ( f.getDim() != f.getNX() )
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
@@ -271,8 +274,8 @@ returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 //	declarations.addDeclaration( rk_ttt,dataStruct );
 	declarations.addDeclaration( rk_xxx,dataStruct );
 	declarations.addDeclaration( rk_kkk,dataStruct );
-	
-	declarations.addDeclaration( reset_int,dataStruct );
+
+//	declarations.addDeclaration( reset_int,dataStruct );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -307,9 +310,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	get(CG_USE_OPENMP, useOMP);
 	if ( useOMP )
 	{
-		code.addDeclaration( diffs_rhs.getGlobalExportVariable() );
-		code.addDeclaration( rk_xxx );
-		code.addDeclaration( rk_kkk );
+		getDataDeclarations( code, ACADO_LOCAL );
 
 		stringstream s;
 		s << "#pragma omp threadprivate( "

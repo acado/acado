@@ -356,7 +356,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"      FILE *output" << i << ";\n" );
 	}
-    main.addStatement( "      int i,j,k,nil;\n" );
+    main.addStatement( "      int i,j,k,nil,reset;\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"      const int dimOut" << i << " = NOUT[" << i << "]*(1+ACADO_NX+ACADO_NU);\n" );
 	}
@@ -404,7 +404,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     main.addStatement( "      		x[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = 0;\n" );
     main.addStatement( "      }\n" );
     main.addLinebreak( 1 );
-    main.addStatement( "      acadoWorkspace.resetIntegrator = 1;\n" );
+    main.addStatement( " 	  reset = 1;\n" );
     main.addLinebreak( 1 );
     main.addComment( 3,"RUN INTEGRATOR:" );
     main.addComment( 3,"----------------------------------------" );
@@ -437,7 +437,9 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		integrate << ", out" << i;
 	}
+    integrate << ", reset";
     main.addStatement( integrate << " );\n" );
+    main.addStatement( "      		reset = 0;\n" );
     main.addLinebreak( );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (String)"      		for( j = 0; j < NMEAS[" << i << "]; j=j+JUMP ) {\n" );
@@ -463,6 +465,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     if( TIMING == BT_TRUE ) {
 		main.addStatement( "      gettimeofday( &theclock,0 );\n" );
 		main.addStatement( "      start = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;\n" );
+	    main.addStatement( "      reset = 1;\n" );
 		main.addStatement( "      for( i=0; i < CALLS_TIMING; i++ ) {\n" );
 		main.addStatement( "      		for( j=0; j < (ACADO_NX+ACADO_NXA); j++ ) {\n" );
 		main.addStatement( "      			x[j] = xT[j];\n" );
@@ -471,7 +474,9 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		for( i = 0; i < (int)outputGrids.size(); i++ ) {
 			integrate << ", out" << i;
 		}
+		integrate << ", reset";
 		main.addStatement( integrate << " );\n" );
+	    main.addStatement( "      		reset = 0;\n" );
 		main.addStatement( "      }\n" );
 		main.addStatement( "      gettimeofday( &theclock,0 );\n" );
 		main.addStatement( "      end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;\n" );
@@ -717,6 +722,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
     	}
 		executeTest( dirName );
 	}
+    modelData.clearIntegrationGrid();
     
     // THE INTEGRATOR:
     modelData.setMeasurements( meas );

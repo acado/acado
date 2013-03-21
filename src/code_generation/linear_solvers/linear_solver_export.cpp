@@ -47,6 +47,8 @@ ExportLinearSolver::ExportLinearSolver( UserInteraction* _userInteraction,
 	REUSE = BT_TRUE;		// DEFAULT value
 	UNROLLING = BT_FALSE;	// DEFAULT value
 	dim = 0;
+
+	determinant = ExportVariable( "det", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
 }
 
 

@@ -44,6 +44,9 @@
 
 #include <acado/user_interaction/options.hpp>
 
+#include <sstream>
+using namespace std;
+
 
 BEGIN_NAMESPACE_ACADO
 
@@ -168,6 +171,15 @@ class ExportLinearSolver : public ExportAlgorithm
 										) = 0;
 
 
+		/** Appends the names of the used variables to a given stringstream.
+		 *
+		 *	@param[in] string				The string to which the names of the used variables are appended.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue appendVariableNames( stringstream& string ) = 0;
+
+
 		/** Returns the dimensions of the linear system.
 		 *
 		 *  \return The dimensions of the linear system.
@@ -247,6 +259,8 @@ class ExportLinearSolver : public ExportAlgorithm
 		ExportFunction solve;						/**< Function that solves the linear system. */
 		ExportFunction solveTriangular;				/**< Function that solves the upper-triangular system. */
 		ExportFunction solveReuse;					/**< Function that solves a linear system with the same matrix, reusing previous results. */
+
+		ExportVariable determinant;					/**< Variable containing the matrix determinant. */
 
 };
 
