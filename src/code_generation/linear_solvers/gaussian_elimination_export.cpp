@@ -74,7 +74,6 @@ returnValue ExportGaussElim::getDataDeclarations(	ExportStatementBlock& declarat
 {
 	declarations.addDeclaration( rk_swap,dataStruct );			// needed for the row swaps
 	if( REUSE ) {
-		declarations.addDeclaration( rk_perm,dataStruct );		// permutation vector
 		declarations.addDeclaration( rk_bPerm,dataStruct );		// reordered right-hand side
 	}
 
@@ -117,7 +116,7 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 	// initialise rk_perm (the permutation vector)
 	if( REUSE ) {
 		ExportForLoop loop1( i,0,dim );
-		loop1.addStatement( String( rk_perm.get( i,0 ) ) << " = " << i.getName() << ";\n" );
+		loop1.addStatement( String( rk_perm.get( 0,i ) ) << " = " << i.getName() << ";\n" );
 		solve.addStatement( loop1 );
 	}
 	
@@ -156,9 +155,9 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 				solve.addStatement( b.getRow( run2 ) == rk_swap );
 			
 				if( REUSE ) { // rk_perm also needs to be updated if it needs to be possible to reuse the factorization
-					solve.addStatement( rk_swap == rk_perm.getRow( run1 ) );
-					solve.addStatement( rk_perm.getRow( run1 ) == rk_perm.getRow( run2 ) );
-					solve.addStatement( rk_perm.getRow( run2 ) == rk_swap );
+					solve.addStatement( rk_swap == rk_perm.getCol( run1 ) );
+					solve.addStatement( rk_perm.getCol( run1 ) == rk_perm.getCol( run2 ) );
+					solve.addStatement( rk_perm.getCol( run2 ) == rk_swap );
 				}
 			
 				solve.addStatement( String( "}\n" ) );
@@ -273,18 +272,18 @@ returnValue ExportGaussElim::setup( )
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
 	rk_swap = ExportVariable( String( "rk_" ) << identifier << "swap", 1, 1, REAL, structWspace, BT_TRUE );
-	rk_perm = ExportVariable( String( "rk_" ) << identifier << "perm", dim, 1, INT, structWspace );
 	rk_bPerm = ExportVariable( String( "rk_" ) << identifier << "bPerm", dim, 1, REAL, structWspace );
 	A = ExportVariable( "A", dim, dim, REAL );
 	b = ExportVariable( "b", dim, 1, REAL );
-	solve = ExportFunction( getNameSolveFunction(), A, b);
+	rk_perm = ExportVariable( "rk_perm", 1, dim, INT );
+	solve = ExportFunction( getNameSolveFunction(), A, b, rk_perm );
 	solve.setReturnValue( determinant, BT_FALSE );
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
-	solveTriangular = ExportFunction( String( "solve_" ) << identifier << "triangular", A, b);
+	solveTriangular = ExportFunction( String( "solve_" ) << identifier << "triangular", A, b );
 	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	
 	if( REUSE ) {
-		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b);
+		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b, rk_perm );
 		solveReuse.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	}
 	
@@ -293,6 +292,17 @@ returnValue ExportGaussElim::setup( )
 	UNROLLING = (BooleanType) unrollOpt;
 
     return SUCCESSFUL_RETURN;
+}
+
+
+ExportVariable ExportGaussElim::getGlobalExportVariable( const uint factor ) const {
+
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+	ExportStruct structWspace;
+	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
+
+	return ExportVariable( String( "rk_" ) << identifier << "perm", factor, dim, INT, structWspace );
 }
 
 

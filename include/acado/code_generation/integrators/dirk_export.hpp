@@ -87,6 +87,183 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 										);
 
 
+		/** Exports the code needed to solve the system of collocation equations for the linear input system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] A1				A constant matrix defining the equations of the linear input system.
+		 *	@param[in] B1				A constant matrix defining the equations of the linear input system.
+		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue solveInputSystem( 	ExportStatementBlock* block,
+										const ExportIndex& index1,
+										const ExportIndex& index2,
+										const ExportIndex& index3,
+										const ExportIndex& tmp_index,
+										const ExportVariable& Ah );
+
+
+		/** Precompute as much as possible for the linear input system and export the resulting definitions.
+		 *
+		 *	@param[in] code			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue prepareInputSystem(	ExportStatementBlock& code );
+
+
+		/** Exports the code needed to solve the system of collocation equations for the linear output system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
+		 *	@param[in] A3				A constant matrix defining the equations of the linear output system.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue solveOutputSystem( 	ExportStatementBlock* block,
+										const ExportIndex& index1,
+										const ExportIndex& index2,
+										const ExportIndex& index3,
+										const ExportIndex& tmp_index,
+										const ExportVariable& Ah );
+
+
+		/** Exports the code needed to compute the sensitivities of the states, defined by the linear output system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
+		 *	@param[in] Bh				The variable containing the weights of the RK method, multiplied with the step size.
+		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
+		 *	@param[in] number			This number defines the stage of the state with respect to which the sensitivities are computed.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue sensitivitiesOutputSystem( 	ExportStatementBlock* block,
+												const ExportIndex& index1,
+												const ExportIndex& index2,
+												const ExportIndex& index3,
+												const ExportIndex& index4,
+												const ExportIndex& tmp_index1,
+												const ExportIndex& tmp_index2,
+												const ExportVariable& Ah,
+												const ExportVariable& Bh,
+												BooleanType STATES,
+												uint number 		);
+
+
+		/** Precompute as much as possible for the linear output system and export the resulting definitions.
+		 *
+		 *	@param[in] code			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue prepareOutputSystem( ExportStatementBlock& code );
+
+
+		/** Forms a constant linear system matrix for the collocation equations, given a constant jacobian and mass matrix.
+		 *
+		 *	@param[in] jacobian			given constant Jacobian matrix
+		 *	@param[in] mass				given constant mass matrix
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
+
+
+		/** Exports the code needed to solve the system of collocation equations for the nonlinear, fully implicit system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
+		 *	@param[in] det				The variable that holds the determinant of the matrix in the linear system.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue solveImplicitSystem( 	ExportStatementBlock* block,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& index3,
+											const ExportIndex& tmp_index,
+											const ExportVariable& Ah,
+											const ExportVariable& det  	);
+
+
+		/** Exports the code needed to compute the sensitivities of the states defined by the nonlinear, fully implicit system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
+		 *	@param[in] Bh				The variable containing the weights of the RK method, multiplied with the step size.
+		 *	@param[in] det				The variable that holds the determinant of the matrix in the linear system.
+		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
+		 *	@param[in] number			This number defines the stage of the state with respect to which the sensitivities are computed.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue sensitivitiesImplicitSystem( 	ExportStatementBlock* block,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& index3,
+													const ExportIndex& tmp_index1,
+													const ExportIndex& tmp_index2,
+													const ExportVariable& Ah,
+													const ExportVariable& Bh,
+													const ExportVariable& det,
+													BooleanType STATES,
+													uint number 		);
+
+
+		/** Exports the evaluation of the matrix of the linear system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] index1			The loop index of the outer loop.
+		 *	@param[in] index2			The loop index of the inner loop.
+		 *	@param[in] tmp_index		A temporary index to be used.
+		 *	@param[in] Ah				The matrix A of the IRK method, multiplied by the step size h.
+		 *	@param[in] evaluateB		True if the right-hand side of the linear system should also be evaluated, false otherwise.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue evaluateMatrix( 	ExportStatementBlock* block,
+										const ExportIndex& index1,
+										const ExportIndex& index2,
+										const ExportIndex& tmp_index,
+										const ExportVariable& Ah,
+										BooleanType evaluateB );
+
+
+		/** Exports the evaluation of the states at a specific stage.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The matrix A of the IRK method, multiplied by the step size h.
+		 *	@param[in] index			The loop index, defining the stage.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue evaluateStatesImplicitSystem( 	ExportStatementBlock* block,
+											const ExportVariable& Ah,
+											const ExportIndex& stage,
+											const ExportIndex& i,
+											const ExportIndex& j );
+
+
+		/** Exports the evaluation of the right-hand side of the linear system at a specific stage.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] index			The loop index, defining the stage.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue evaluateRhsImplicitSystem( 	ExportStatementBlock* block,
+												const ExportIndex& stage );
+
+
+		/** Initializes export of a tailored integrator.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setup( );
+
+
 	protected:
 		
 

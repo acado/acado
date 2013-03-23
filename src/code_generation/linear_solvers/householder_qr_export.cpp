@@ -72,7 +72,6 @@ returnValue ExportHouseholderQR::getDataDeclarations(	ExportStatementBlock& decl
 														ExportStruct dataStruct
 														) const
 {
-	declarations.addDeclaration( rk_temp,dataStruct );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -277,17 +276,17 @@ returnValue ExportHouseholderQR::setup( )
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	rk_temp = ExportVariable( String( "rk_" ) << identifier << "temp", 1, dim+1, REAL, structWspace );
 	A = ExportVariable( "A", dim, dim, REAL );
 	b = ExportVariable( "b", dim, 1, REAL );
-	solve = ExportFunction( getNameSolveFunction(), A, b);
+	rk_temp = ExportVariable( "rk_temp", 1, dim+1, REAL );
+	solve = ExportFunction( getNameSolveFunction(), A, b, rk_temp);
 	solve.setReturnValue( determinant, BT_FALSE );
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	solveTriangular = ExportFunction( String( "solve_" ) << identifier << "triangular", A, b);
 	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	
 	if( REUSE ) {
-		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b);
+		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b, rk_temp );
 		solveReuse.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	}
 	
@@ -296,6 +295,17 @@ returnValue ExportHouseholderQR::setup( )
 	UNROLLING = (BooleanType) unrollOpt;
 
     return SUCCESSFUL_RETURN;
+}
+
+
+ExportVariable ExportHouseholderQR::getGlobalExportVariable( const uint factor ) const {
+
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+	ExportStruct structWspace;
+	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
+
+	return ExportVariable( String( "rk_" ) << identifier << "temp", factor, dim+1, REAL, structWspace );
 }
 
 

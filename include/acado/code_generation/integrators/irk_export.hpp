@@ -333,7 +333,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue prepareInputSystem(	ExportStatementBlock& code );
+		virtual returnValue prepareInputSystem(	ExportStatementBlock& code );
 
 
 		/** Precompute as much as possible for the linear output system and export the resulting definitions.
@@ -342,7 +342,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue prepareOutputSystem( ExportStatementBlock& code );
+		virtual returnValue prepareOutputSystem( ExportStatementBlock& code );
 
 
 		/** Forms a constant linear system matrix for the collocation equations, given a constant jacobian and mass matrix.
@@ -352,7 +352,16 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
+		virtual Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
+
+
+		/** .
+		 *
+		 *	@param[in] A3			.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		Matrix expandOutputMatrix( const Matrix& A3 );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the linear input system.
@@ -360,16 +369,16 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *	@param[in] block			The block to which the code will be exported.
 		 *	@param[in] A1				A constant matrix defining the equations of the linear input system.
 		 *	@param[in] B1				A constant matrix defining the equations of the linear input system.
+		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue solveInputSystem( 	ExportStatementBlock* block,
+		virtual returnValue solveInputSystem( 	ExportStatementBlock* block,
 										const ExportIndex& index1,
 										const ExportIndex& index2,
 										const ExportIndex& index3,
 										const ExportIndex& tmp_index,
-										const ExportVariable& A1,
-										const ExportVariable& B1 );
+										const ExportVariable& Ah );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the nonlinear, fully implicit system.
@@ -380,7 +389,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue solveImplicitSystem( 	ExportStatementBlock* block,
+		virtual returnValue solveImplicitSystem( 	ExportStatementBlock* block,
 											const ExportIndex& index1,
 											const ExportIndex& index2,
 											const ExportIndex& index3,
@@ -397,13 +406,12 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue solveOutputSystem( 	ExportStatementBlock* block,
+		virtual returnValue solveOutputSystem( 	ExportStatementBlock* block,
 										const ExportIndex& index1,
 										const ExportIndex& index2,
 										const ExportIndex& index3,
 										const ExportIndex& tmp_index,
-										const ExportVariable& Ah,
-										const ExportVariable& A3 );
+										const ExportVariable& Ah );
 
 
 		/** Exports the code needed to compute the sensitivities of the states, defined by the linear input system.
@@ -457,7 +465,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue sensitivitiesImplicitSystem( 	ExportStatementBlock* block,
+		virtual returnValue sensitivitiesImplicitSystem( 	ExportStatementBlock* block,
 													const ExportIndex& index1,
 													const ExportIndex& index2,
 													const ExportIndex& index3,
@@ -505,7 +513,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue sensitivitiesOutputSystem( 	ExportStatementBlock* block,
+		virtual returnValue sensitivitiesOutputSystem( 	ExportStatementBlock* block,
 												const ExportIndex& index1,
 												const ExportIndex& index2,
 												const ExportIndex& index3,
@@ -551,9 +559,11 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue evaluateStatesImplicitSystem( 	ExportStatementBlock* block,
+		virtual returnValue evaluateStatesImplicitSystem( 	ExportStatementBlock* block,
 											const ExportVariable& Ah,
-											const ExportIndex& stage );
+											const ExportIndex& stage,
+											const ExportIndex& i,
+											const ExportIndex& j );
 
 
 		/** Exports the evaluation of the states at a specific stage.
@@ -576,7 +586,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue evaluateRhsImplicitSystem( 	ExportStatementBlock* block,
+		virtual returnValue evaluateRhsImplicitSystem( 	ExportStatementBlock* block,
 											const ExportIndex& stage );
 
 
@@ -591,7 +601,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue evaluateMatrix( 	ExportStatementBlock* block,
+		virtual returnValue evaluateMatrix( 	ExportStatementBlock* block,
 										const ExportIndex& index1,
 										const ExportIndex& index2,
 										const ExportIndex& tmp_index,
@@ -772,6 +782,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportVariable	rhs_in;
 		ExportVariable	rhs_out;
 
+		ExportODEfunction lin_input;
 		ExportVariable	rk_mat1;
 		ExportVariable 	rk_dk1;
 		Matrix A11, B11, M11;
@@ -780,11 +791,13 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 		ExportVariable	rk_A;					/**< Variable containing the matrix of the linear system. */
 		ExportVariable	rk_b;					/**< Variable containing the right-hand side of the linear system. */
+		ExportVariable  rk_auxSolver;			/**< Variable containing auxiliary values for the exported linear solver. */
 		ExportVariable 	rk_rhsTemp;				/**< Variable containing intermediate results of evaluations of the right-hand side expression. */
 		ExportVariable  rk_diffsTemp2;			/**< Variable containing intermediate results of evaluations of the derivatives of the differential equations (ordinary and algebraic). */
 		ExportVariable  rk_diffsPrev2;			/**< Variable containing the sensitivities from the previous integration step. */
 		ExportVariable  rk_diffsNew2;			/**< Variable containing the derivatives wrt the previous values. */
 
+		ExportODEfunction lin_output;
 		ExportVariable	rk_mat3;
 		ExportVariable 	rk_dk3;
 		Matrix A33, M33;

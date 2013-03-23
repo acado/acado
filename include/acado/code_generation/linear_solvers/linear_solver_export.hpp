@@ -185,6 +185,13 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *  \return The dimensions of the linear system.
 		 */
 		uint getDim() const;
+
+
+		/** Returns the dimension of the auxiliary variables for the linear solver.
+		 *
+		 *  \return The dimension of the auxiliary variables for the linear solver.
+		 */
+		virtual ExportVariable getGlobalExportVariable( const uint factor ) const = 0;
 		
 		
 		/** Returns a boolean that is true when an extra algorithm will be exported for reuse.

@@ -132,6 +132,13 @@ class ExportHouseholderQR : public ExportLinearSolver
 		returnValue appendVariableNames( stringstream& string );
 
 
+		/** Returns the dimension of the auxiliary variables for the linear solver.
+		 *
+		 *  \return The dimension of the auxiliary variables for the linear solver.
+		 */
+		virtual ExportVariable getGlobalExportVariable( const uint factor ) const;
+
+
 	//
     // PROTECTED MEMBER FUNCTIONS:
     //
