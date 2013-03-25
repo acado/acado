@@ -1,0 +1,6 @@
+Name: ACADO Toolkit
+Description: Toolkit for Automatic Control and Dynamic Optimization
+URL: http://www.acadotoolkit.org
+Version: @PC_VERSION@
+Libs: @PC_LIBRARY_DIRS@ @PC_LIBS@
+Cflags: @PC_INCLUDE_DIRS@

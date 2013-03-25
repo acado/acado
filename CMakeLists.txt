@@ -582,6 +582,34 @@ CONFIGURE_FILE(
 
 ################################################################################
 #
+# Configure pkg-config script
+#
+################################################################################
+
+SET( PC_VERSION
+	${ACADO_VERSION_STRING}beta
+)
+
+SET( PC_INCLUDE_DIRS 
+	${INCLUDE_MK_INCLUDE_DIRS}
+)
+
+SET( PC_LIBRARY_DIRS
+	${INCLUDE_MK_LIBRARY_DIRS}
+)
+
+SET( PC_LIBS
+	${INCLUDE_MK_LIBS}
+)
+
+CONFIGURE_FILE(
+	"${PROJECT_SOURCE_DIR}/cmake/acado.pc.in"
+	"${PROJECT_BINARY_DIR}/acado.pc"
+	@ONLY
+)
+
+################################################################################
+#
 # Build examples
 #
 ################################################################################
