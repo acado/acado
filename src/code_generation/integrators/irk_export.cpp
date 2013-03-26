@@ -554,8 +554,10 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		Bh = ExportVariable( "Bh_mat", Matrix( BB*=h, BT_FALSE ) );
 	}
 	else {
-		// TODO: WHAT IF NONEQUIDISTANT INTEGRATION GRID??
-		return RET_UNABLE_TO_EXPORT_CODE;
+		if( NX1 > 0 || NX3 > 0 ) {
+			// TODO: WHAT IF NONEQUIDISTANT INTEGRATION GRID??
+			return RET_UNABLE_TO_EXPORT_CODE;
+		}
 
 		Ah = ExportVariable( "Ah_mat", numStages, numStages, REAL, ACADO_LOCAL );
 		Bh = ExportVariable( "Bh_mat", numStages, 1, REAL, ACADO_LOCAL );

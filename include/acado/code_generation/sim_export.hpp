@@ -144,8 +144,10 @@ class SIMexport : public ExportModule, public ModelContainer
 		 *	\return SUCCESSFUL_RETURN
 		 */
         virtual returnValue exportAndRun(	const String& dirName,
-											const String& initStates = String( "initStates.txt" ),
-											const String& controls = String( "controls.txt" ),
+//											const String& initStates = String( "initStates.txt" ),
+											const String& initStates,
+//											const String& controls = String( "controls.txt" ),
+											const String& controls,
 											const String& results = String( "results.txt" ),
 											const String& ref = String( "ref.txt" )
 										);

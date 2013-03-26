@@ -94,6 +94,10 @@ int main() {
 	//
 	// SET UP THE SIMULATION EXPORT MODULE:
 	//
+	
+	
+	acadoPrintf( "-----------------------------------------\n  Using option 'EQUIDISTANT_SUBGRID':\n-----------------------------------------\n" );
+	
 	SIMexport sim( 1, 0.1 );
 	sim.setModel( f );
 	sim.addOutput( h );
@@ -101,17 +105,21 @@ int main() {
 	sim.set( INTEGRATOR_TYPE, INT_IRK_RIIA5 );
 	sim.set( NUM_INTEGRATOR_STEPS, 5 );
 	sim.setTimingSteps( 10000 );
-	
-	acadoPrintf( "-----------------------------------------\n  Using option 'EQUIDISTANT_SUBGRID':\n-----------------------------------------\n" );
-	
 	sim.set( MEASUREMENT_GRID, EQUIDISTANT_SUBGRID );
 	sim.exportAndRun( "crane_export", "init_crane.txt", "controls_crane.txt" );
 	
 	
 	acadoPrintf( "-----------------------------------------\n  Using option 'EQUIDISTANT_GRID':\n-----------------------------------------\n" );
 	
-	sim.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
-	sim.exportAndRun( "crane_export", "init_crane.txt", "controls_crane.txt" );
+	SIMexport sim2( 1, 0.1 );
+	sim2.setModel( f );
+	sim2.addOutput( h );
+	sim2.setMeasurements( Meas );
+	sim2.set( INTEGRATOR_TYPE, INT_IRK_RIIA5 );
+	sim2.set( NUM_INTEGRATOR_STEPS, 5 );
+	sim2.setTimingSteps( 10000 );
+	sim2.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
+	sim2.exportAndRun( "crane_export", "init_crane.txt", "controls_crane.txt" );
 	
 	
 	acadoPrintf( "-----------------------------------------\n  Using user specified grid:\n-----------------------------------------\n" );
@@ -124,8 +132,15 @@ int main() {
 	grid(4) = 0.08;
 	grid(5) = 0.1;
 	
-	sim.setIntegrationGrid( grid );
-	sim.exportAndRun( "crane_export", "init_crane.txt", "controls_crane.txt" );
+	SIMexport sim3( 1, 0.1 );
+	sim3.setModel( f );
+	sim3.addOutput( h );
+	sim3.setMeasurements( Meas );
+	sim3.set( INTEGRATOR_TYPE, INT_IRK_RIIA5 );
+	sim3.set( NUM_INTEGRATOR_STEPS, 5 );
+	sim3.setTimingSteps( 10000 );
+	sim3.setIntegrationGrid( grid );
+	sim3.exportAndRun( "crane_export", "init_crane.txt", "controls_crane.txt" );
 
 	return 0;
 }
