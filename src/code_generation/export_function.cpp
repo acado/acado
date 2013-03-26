@@ -240,9 +240,9 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 														int _precision
 														) const
 {
-//	// do not export undefined (empty) functions
-//	if ( isDefined() == BT_FALSE )
-//		return SUCCESSFUL_RETURN;
+	// do not export undefined (empty) functions
+	if ( isDefined() == BT_FALSE )
+		return SUCCESSFUL_RETURN;
 
 	if (description.isEmpty() == BT_FALSE)
 	{
