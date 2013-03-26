@@ -22,16 +22,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     #endif  
     
     #if NUM_OUTPUTS > 0
-        real_t out1[NMEAS[0]*NOUT[0]*(1+ACADO_NX+ACADO_NU)];
+        real_t* out1;
+        out1 = (real_t*) malloc(NMEAS[0]*NOUT[0]*(1+ACADO_NX+ACADO_NU));
         
         #if NUM_OUTPUTS > 1
-            real_t out2[NMEAS[1]*NOUT[1]*(1+ACADO_NX+ACADO_NU)];
+            real_t* out2;
+            out2 = (real_t*) malloc(NMEAS[1]*NOUT[1]*(1+ACADO_NX+ACADO_NU));
             
             #if NUM_OUTPUTS > 2
-                real_t out3[NMEAS[2]*NOUT[2]*(1+ACADO_NX+ACADO_NU)];
+                real_t* out3;
+                out3 = (real_t*) malloc(NMEAS[2]*NOUT[2]*(1+ACADO_NX+ACADO_NU));
                 
                 #if NUM_OUTPUTS > 3
-                    real_t out4[NMEAS[3]*NOUT[3]*(1+ACADO_NX+ACADO_NU)];
+                    real_t* out4;
+                    out4 = (real_t*) malloc(NMEAS[3]*NOUT[3]*(1+ACADO_NX+ACADO_NU));
                 #endif
             #endif
         #endif
@@ -67,6 +71,7 @@ mexErrMsgTxt( "Check the number of input arguments !" );
 			gridI = 3;
         }
         else {
+            Np = 0;
 			gridI = 2;
 		}
     }
@@ -280,6 +285,7 @@ acadoVariables.gridOutput3[j] = 1.1;
                 }
             }
         }
+        free(out1);
         #if NUM_OUTPUTS > 1
         if (nlhs > 2) {
             plhs[2] = mxCreateStructMatrix(1, 1, 3, fieldnames);
@@ -312,6 +318,7 @@ acadoVariables.gridOutput3[j] = 1.1;
                     }
                 }
             }
+            free(out2);
             #if NUM_OUTPUTS > 2
             if (nlhs > 3) {
                 plhs[3] = mxCreateStructMatrix(1, 1, 3, fieldnames);
@@ -344,6 +351,7 @@ acadoVariables.gridOutput3[j] = 1.1;
                         }
                     }
                 }
+                free(out3);
                 #if NUM_OUTPUTS > 3
                 if (nlhs > 4) {
                     plhs[4] = mxCreateStructMatrix(1, 1, 3, fieldnames);
@@ -376,6 +384,7 @@ acadoVariables.gridOutput3[j] = 1.1;
                             }
                         }
                     }
+                    free(out4);
                 }
                 #endif
             }

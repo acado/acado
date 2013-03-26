@@ -21,6 +21,7 @@ sim.setModel(f);
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_GL4'   );
 sim.set( 'NUM_INTEGRATOR_STEPS',        100               );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1               );
+% sim.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'               );
 
 sim.exportCode('getting_started_export');
 

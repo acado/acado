@@ -36,8 +36,9 @@ sim.setModel(f);
 sim.addOutput([Fx; Fy]);
 sim.setMeasurements(numMeas);
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5'         );
-sim.set( 'NUM_INTEGRATOR_STEPS',        10                       );
+sim.set( 'NUM_INTEGRATOR_STEPS',        10                      );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1                       );
+% sim.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'                       );
 
 sim.exportCode('pendulum_export');
 

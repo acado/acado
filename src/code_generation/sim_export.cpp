@@ -865,13 +865,18 @@ returnValue SIMexport::exportAcadoHeader(	const String& _dirName,
 
 	acadoHeader.addComment( "GLOBAL VARIABLES:               " );
 	acadoHeader.addComment( "--------------------------------" );
-	acadoHeader.addStatement( "typedef struct ACADOvariables_ {\n" );
-
-	if ( collectDataDeclarations( acadoHeader,ACADO_VARIABLES ) != SUCCESSFUL_RETURN )
+	ExportStatementBlock tempHeader;
+	if ( collectDataDeclarations( tempHeader,ACADO_VARIABLES ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
-
-	acadoHeader.addLinebreak( );
-	acadoHeader.addStatement( "} ACADOvariables;\n" );
+		acadoHeader.addStatement( "typedef struct ACADOvariables_ {\n" );
+		acadoHeader.addStatement( tempHeader );
+#ifdef WIN32
+		if( tempHeader.getNumStatements() == 0 ) {
+			acadoHeader.addStatement( "int dummy; \n" );
+		}
+#endif
+		acadoHeader.addLinebreak( );
+		acadoHeader.addStatement( "} ACADOvariables;\n" );
 	acadoHeader.addLinebreak( 2 );
 
 	acadoHeader.addComment( "GLOBAL WORKSPACE:               " );

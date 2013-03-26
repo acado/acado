@@ -33,7 +33,11 @@ fprintf(fid, '%s \n', ' #ifndef ACADO_TOOLKIT_TEMPLATES_HPP');
 fprintf(fid, '%s \n\n', ' #define ACADO_TOOLKIT_TEMPLATES_HPP');
 
 for i = 1:length(templates)
-    fprintf(fid, '%s', sprintf(' #define %s "%s/../../src/code_generation/templates/%s" \n\n', char(templates(i)), pwd, char(templateFiles(i))));
+    tempString = sprintf(' #define %s "%s/../../src/code_generation/templates/%s" \n\n', char(templates(i)), pwd, char(templateFiles(i)));
+    if ispc
+        tempString = regexprep( tempString, '\', '/' );
+    end
+    fprintf(fid, '%s', tempString);
 end
 
 fprintf(fid, '%s \n', ' #endif // ACADO_TOOLKIT_TEMPLATES_HPP');

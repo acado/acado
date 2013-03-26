@@ -32,17 +32,19 @@ f = dot(diffStates) == [ vT; ...
     duL ];
 
 numSteps = 2;
-integrationGrid = [0:h/numSteps:h];
+% integrationGrid = [0:h/numSteps:h];
 
 %% SIMexport
 sim = acado.SIMexport( h );
 sim.setModel(f);
-sim.setIntegrationGrid( integrationGrid );
+% sim.setIntegrationGrid( integrationGrid );
 sim.addOutput([xT; vT; xL; vL]);
 sim.setMeasurements(3);
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5' );
+sim.set( 'NUM_INTEGRATOR_STEPS',        numSteps        );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1               );
 sim.set( 'MEASUREMENT_GRID',       'ONLINE_GRID'        );
+% sim.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'               );
 
 sim.exportCode('crane_export')
 
@@ -71,5 +73,5 @@ for i = 1:Nt
     [statesOr outOr] = integrate(x,u,grid);
 end
 time = toc/Nt;
-disp(['average time per integration: ' num2str(round(time*10^6)) ' μs'])
+disp(['average time per integration: ' num2str(round(time*10^6)) ' ?s'])
 

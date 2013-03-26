@@ -197,43 +197,47 @@ int acadoFPrintf ( FILE * stream, const char * format, ... )
 int acadoVFPrintf ( FILE * stream, const char * format, va_list arg )
 {
 #ifdef __MATLAB__
+#ifdef WIN32
+	if(stream==stdout)   // workaround
+#else
   if(stream==stdout || stream==stderr)   // workaround
-    {
-      const int buffersize = 256;
-      char buffer[buffersize];
+#endif
+	    {
+	      const int buffersize = 256;
+	      char buffer[buffersize];
 
-      // check length of buffer
-      int count = vsnprintf(NULL, 0, format, arg );
+	      // check length of buffer
+	      int count = vsnprintf(NULL, 0, format, arg );
 
-      if(count < buffersize)
-	{
-	  // if string fits in buffer
-	  vsprintf(buffer,format,arg);
-	  mexPrintf( "%s", buffer );
-	}
-      else
-	{
-	  // else dynamically allocate a larger buffer
-	  char *newbuffer = new char[count];
-	  vsprintf( newbuffer, format, arg );
-	  mexPrintf( "%s", newbuffer );
-	  delete [] newbuffer;
-	}
-      return count;
-    }
-  else // not stdout or stderr -> really print to file
-    {
-      return vfprintf( stream, format, arg );
-    }
+	      if(count < buffersize)
+		{
+		  // if string fits in buffer
+		  vsprintf(buffer,format,arg);
+		  mexPrintf( "%s", buffer );
+		}
+	      else
+		{
+		  // else dynamically allocate a larger buffer
+		  char *newbuffer = new char[count];
+		  vsprintf( newbuffer, format, arg );
+		  mexPrintf( "%s", newbuffer );
+		  delete [] newbuffer;
+		}
+	      return count;
+	    }
+	  else // not stdout or stderr -> really print to file
+	    {
+	      return vfprintf( stream, format, arg );
+	    }
 #elif defined __MODELICA__
   if(stream==stdout || stream==stderr)   // workaround
     {
       const int buffersize = 256;
       char buffer[buffersize];
-      
+
       // check length of buffer
       int count = vsnprintf(NULL, 0, format, arg );
-      
+
       // if string fits in buffer
       if(count < buffersize)
 	{
@@ -253,7 +257,7 @@ int acadoVFPrintf ( FILE * stream, const char * format, va_list arg )
     {
       return vfprintf( stream, format, arg );
     }
-  
+
 #else
   return vfprintf( stream, format, arg );
 #endif

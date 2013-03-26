@@ -112,13 +112,13 @@ function [ ] = makehelper( type, optmake, varargin )
     % GET FILES
     [HEADER_PATHS, SRC, BIN, BINFOLDER, SRCMEX, BINMEX, BINFOLDERMEX] = objects(type);
     BIN_FOLDER = 'bin/';
-    IFLAGS    = [ '-I. ', HEADER_PATHS           ];
+    IFLAGS    = [ '-I. ', HEADER_PATHS ];
     
     
     %COMPILER FLAGS
     if (ispc)
         % Microsoft Visual C++ (express) compiler
-        CPPFLAGS  = [ IFLAGS, ' -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -O ' ];    
+        CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -O ' ];    
     else
         % Other compilers
         CPPFLAGS  = [ IFLAGS, ' -D__cpluplus -D__MATLAB__ -O ' ];

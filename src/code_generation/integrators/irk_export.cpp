@@ -416,6 +416,7 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 	}
 	else {
 		Function tmpFun;
+		tmpFun << zeros(1,1);
 		ExportODEfunction tmpExport(tmpFun, getNameRHS());
 		declarations.addDeclaration( tmpExport );
 		tmpExport = ExportODEfunction(tmpFun, getNameDiffsRHS());
@@ -431,6 +432,7 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 	else {
 		for( i = 0; i < name_outputs.size(); i++ ) {
 			Function tmpFun;
+			tmpFun << zeros(1,1);
 			ExportODEfunction tmpExport(tmpFun, getNameOUTPUT(i));
 			declarations.addDeclaration( tmpExport );
 			tmpExport = ExportODEfunction(tmpFun, getNameDiffsOUTPUT(i));
@@ -474,19 +476,19 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 				<< rk_diffK.getFullName().getName() << ", "
 				<< rk_rhsTemp.getFullName().getName();
 		if( NX1 > 0 ) {
-			s << ", " << rk_diffsPrev1.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev1.getFullName().getName();
 			s << ", " << rk_diffsNew1.getFullName().getName();
 		}
 		if( NX2 > 0 || NXA > 0 ) {
 			s << ", " << rk_A.getFullName().getName();
 			s << ", " << rk_b.getFullName().getName();
-			s << ", " << rk_diffsPrev2.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev2.getFullName().getName();
 			s << ", " << rk_diffsNew2.getFullName().getName();
 			s << ", " << rk_diffsTemp2.getFullName().getName();
 			solver->appendVariableNames( s );
 		}
 		if( NX3 > 0 ) {
-			s << ", " << rk_diffsPrev3.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev3.getFullName().getName();
 			s << ", " << rk_diffsNew3.getFullName().getName();
 			s << ", " << rk_diffsTemp3.getFullName().getName();
 		}
@@ -575,7 +577,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	}
 	ExportVariable determinant( "det", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
 	integrate.addDeclaration( determinant );
-	
+
 	ExportIndex i( "i" );
 	ExportIndex j( "j" );
 	ExportIndex k( "k" );
