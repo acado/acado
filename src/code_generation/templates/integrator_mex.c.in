@@ -23,23 +23,23 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     #if NUM_OUTPUTS > 0
         real_t* out1;
-        out1 = (real_t*) malloc(NMEAS[0]*NOUT[0]*(1+ACADO_NX+ACADO_NU));
+        out1 = (real_t*) malloc(NMEAS[0]*NOUT[0]*(1+ACADO_NX+ACADO_NU)*sizeof(*out1));
         
         #if NUM_OUTPUTS > 1
             real_t* out2;
-            out2 = (real_t*) malloc(NMEAS[1]*NOUT[1]*(1+ACADO_NX+ACADO_NU));
+            out2 = (real_t*) malloc(NMEAS[1]*NOUT[1]*(1+ACADO_NX+ACADO_NU)*sizeof(*out2));
             
             #if NUM_OUTPUTS > 2
                 real_t* out3;
-                out3 = (real_t*) malloc(NMEAS[2]*NOUT[2]*(1+ACADO_NX+ACADO_NU));
+                out3 = (real_t*) malloc(NMEAS[2]*NOUT[2]*(1+ACADO_NX+ACADO_NU)*sizeof(*out3));
                 
                 #if NUM_OUTPUTS > 3
                     real_t* out4;
-                    out4 = (real_t*) malloc(NMEAS[3]*NOUT[3]*(1+ACADO_NX+ACADO_NU));
+                    out4 = (real_t*) malloc(NMEAS[3]*NOUT[3]*(1+ACADO_NX+ACADO_NU)*sizeof(*out4));
                 #endif
             #endif
         #endif
-    #endif       
+    #endif        
                         
     fieldnames[0] = "value";  
     fieldnames[1] = "sensX";  
