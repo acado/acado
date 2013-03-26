@@ -256,7 +256,7 @@ returnValue ExportGaussElim::appendVariableNames( stringstream& string ) {
 
 	string << ", " << rk_swap.getFullName().getName();
 	if( REUSE ) {
-		string << ", " << rk_perm.getFullName().getName();
+//		string << ", " << rk_perm.getFullName().getName();
 		string << ", " << rk_bPerm.getFullName().getName();
 	}
 

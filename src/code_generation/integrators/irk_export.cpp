@@ -474,7 +474,8 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 				<< rk_xxx.getFullName().getName() << ", "
 				<< rk_kkk.getFullName().getName() << ", "
 				<< rk_diffK.getFullName().getName() << ", "
-				<< rk_rhsTemp.getFullName().getName();
+				<< rk_rhsTemp.getFullName().getName() << ", "
+				<< rk_auxSolver.getFullName().getName();
 		if( NX1 > 0 ) {
 			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev1.getFullName().getName();
 			s << ", " << rk_diffsNew1.getFullName().getName();

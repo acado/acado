@@ -263,7 +263,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 
 returnValue ExportHouseholderQR::appendVariableNames( stringstream& string ) {
 
-	string << ", " << rk_temp.getFullName().getName();
+//	string << ", " << rk_temp.getFullName().getName();
 
 	return SUCCESSFUL_RETURN;
 }
