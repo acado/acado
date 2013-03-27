@@ -158,7 +158,9 @@ returnValue SIMexport::exportCode(	const String& dirName,
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 			
 	// export the evaluation file
-	if ( exportEvaluation( dirName, String( "compare.c" ) ) != SUCCESSFUL_RETURN )
+	int exportTest;
+	get( GENERATE_TEST_FILE, exportTest );
+	if ( exportTest && exportEvaluation( dirName, String( "compare.c" ) ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
@@ -660,6 +662,8 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 							const String& ref
 										)
 {
+	set( GENERATE_TEST_FILE, 1 );
+
 	Grid integrationGrid;
 	modelData.getIntegrationGrid(integrationGrid);
 	std::vector<Grid> outputGrids;

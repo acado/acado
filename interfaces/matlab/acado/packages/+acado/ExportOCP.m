@@ -87,9 +87,9 @@ classdef ExportOCP < acado.ExportModule
             if nargin > 3
                 error('Unsupported use of the setInit function.');
             end
-            if nargin > 1 && length(diffStates) == length(varargin{1})
+            if nargin > 1 && length(diffStates) == length(varargin{1}) && isvector(varargin{1})
                 obj.X0 = varargin{1};
-                if nargin > 2 && length(controls) == length(varargin{2})
+                if nargin > 2 && length(controls) == length(varargin{2}) && isvector(varargin{2})
                     obj.U0 = varargin{2};
                 elseif nargin > 2
                     error('Unsupported use of the setInit function.');
