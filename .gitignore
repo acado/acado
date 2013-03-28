@@ -1,0 +1,23 @@
+build*
+doc/html
+doc/XML
+doc/xml
+doc/latex
+
+*.o
+*.so
+*.dll
+*.lib
+*.a
+*.mex*
+
+*.log
+
+*.pdf
+*.xml
+*.out
+*.orig
+
+# Eclipse
+.project
+.cproject
