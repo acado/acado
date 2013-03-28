@@ -896,7 +896,7 @@ returnValue FunctionEvaluationTree::exportForwardDeclarations(	FILE *file,
 																const char *realString
 																) const{
 
-    acadoFPrintf(file,"void %s( %s*, %s* );\n", fcnName,realString,realString );
+    acadoFPrintf(file,"void %s( const %s* const, %s* const );\n", fcnName,realString,realString );
 
     return SUCCESSFUL_RETURN;
 }
@@ -942,30 +942,30 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
 		numU = getNU();
 	}
 
-    acadoFPrintf(file,"void %s( %s *acado_x, %s *acado_f ){\n", fcnName,realString,realString );
+    acadoFPrintf(file,"void %s( const %s* const acado_x, %s* const acado_f ){\n", fcnName,realString,realString );
     if( numX > 0 ){
-        acadoFPrintf(file,"%s *acado_xd = acado_x;\n", realString );
+        acadoFPrintf(file,"const %s* const acado_xd = acado_x;\n", realString );
     }
     if( numXA > 0 ){
-        acadoFPrintf(file,"%s *acado_xa = acado_x + %d;\n", realString,numX );
+        acadoFPrintf(file,"const %s* const acado_xa = acado_x + %d;\n", realString,numX );
     }
     if( getNU() > 0 ){
-        acadoFPrintf(file,"%s *acado_u  = acado_x + %d;\n", realString,numX+numXA );
+        acadoFPrintf(file,"const %s* const acado_u  = acado_x + %d;\n", realString,numX+numXA );
     }
     if( getNUI() > 0 ){
-        acadoFPrintf(file,"%s *acado_v  = acado_x + %d;\n", realString,numX+numXA+numU );
+        acadoFPrintf(file,"const %s* const acado_v  = acado_x + %d;\n", realString,numX+numXA+numU );
     }
     if( getNP() > 0 ){
-        acadoFPrintf(file,"%s *acado_p  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI() );
+        acadoFPrintf(file,"const %s* const acado_p  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI() );
     }
     if( getNPI() > 0 ){
-        acadoFPrintf(file,"%s *acado_q  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+getNP() );
+        acadoFPrintf(file,"const %s* const acado_q  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+getNP() );
     }
     if( getNW() > 0 ){
-        acadoFPrintf(file,"%s *acado_w  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+getNP()+getNPI() );
+        acadoFPrintf(file,"const %s* const acado_w  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+getNP()+getNPI() );
     }
     if( getNDX() > 0 ){
-        acadoFPrintf(file,"%s *acado_dx = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+getNP()+getNPI()+getNW() );
+        acadoFPrintf(file,"const %s* const acado_dx = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+getNP()+getNPI()+getNW() );
     }
     acadoFPrintf(file,"\n");
     acadoFPrintf(file,"/* COMPUTE INTERMEDIATE STATES: */\n");
