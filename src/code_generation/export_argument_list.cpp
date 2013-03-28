@@ -141,7 +141,7 @@ returnValue ExportArgumentList::exportCode(	FILE* file,
 			if ( arguments[ i ].isCalledByValue( ) == BT_TRUE )
 				acadoFPrintf(file, "%s ", arguments[ i ].getTypeString(_realString, _intString).getName());
 			else
-				acadoFPrintf(file, "%s* ", arguments[ i ].getTypeString(_realString, _intString).getName());
+				acadoFPrintf(file, "%s* const ", arguments[ i ].getTypeString(_realString, _intString).getName());
 		}
 
 		if ( includeType == BT_FALSE )
