@@ -238,12 +238,16 @@ classdef Expression < handle
             elseif isnumeric(obj2) && length(obj2) == 1
                 obj2 = obj2*ones(size(obj1));
             end
-            if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
-                error('ERROR: Invalid acado.Equals. Check your dimensions..');
-            end
-            for i = 1:size(obj1,1)
-                for j = 1:size(obj1,2)
-                    r(i,j) = acado.Equals(obj1(i,j),obj2(i,j));
+            if isa(obj1, 'acado.Disturbance') % special case
+                r = acado.Equals(obj1,obj2);
+            else
+                if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)
+                    error('ERROR: Invalid acado.Equals. Check your dimensions..');
+                end
+                for i = 1:size(obj1,1)
+                    for j = 1:size(obj1,2)
+                        r(i,j) = acado.Equals(obj1(i,j),obj2(i,j));
+                    end
                 end
             end
         end
