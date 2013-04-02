@@ -90,14 +90,6 @@ IF ( NOT ACADO_BUILD )
 	)
 	
 ELSE()
-	# If we are building withing main ACADO build, correct paths must be set
-	SET( ACADO_QPOASES_EMBEDDED_SOURCES
-		${ACADO_ENV_QPOASES_EMBEDDED_SOURCES}
-	)
-	SET( ACADO_QPOASES_EMBEDDED_INC_DIRS
-		${ACADO_ENV_QPOASES_EMBEDDED_INC_DIRS}
-	)
-	
 	SET( ACADO_LIBS
 		acado_toolkit csparse qpOASESextras acado_casadi
 	)
