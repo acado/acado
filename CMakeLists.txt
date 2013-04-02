@@ -296,7 +296,7 @@ ENDFOREACH( DIR ${ACADO_SOURCE_DIRS} )
 ADD_LIBRARY( acado_toolkit STATIC ${ACADO_SOURCES} )
 TARGET_LINK_LIBRARIES(
 	acado_toolkit
-	qpOASESextras csparse
+	acado_qpOASESextras acado_csparse acado_casadi
 )
 ADD_LIBRARY( acado_toolkit_s SHARED ${ACADO_SOURCES} )
 SET_TARGET_PROPERTIES( acado_toolkit_s
@@ -310,13 +310,13 @@ IF( NOT MSVC )
 	# Linux is assumed
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit_s
-		qpOASESextras_s csparse_s acado_casadi_s
+		acado_qpOASESextras_s acado_csparse_s acado_casadi_s
 	)
 ELSE( NOT MSVC )
 	# Windows, Visual Studio environment specifics...
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit_s
-		qpOASESextras csparse acado_casadi
+		acado_qpOASESextras acado_csparse acado_casadi
 	)
 ENDIF( NOT MSVC )
 
