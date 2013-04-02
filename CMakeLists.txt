@@ -127,6 +127,13 @@ SET( ACADO_DEVELOPER OFF CACHE STRING
 )
 
 #
+# ACADO internal stuff
+#
+SET( ACADO_INTERNAL OFF CACHE STRING
+	"Select building of ACADO internal stuff."
+)
+
+#
 # Build type
 #
 IF( NOT CMAKE_BUILD_TYPE )
@@ -617,3 +624,14 @@ CONFIGURE_FILE(
 IF( WITH_ACADO_EXAMPLES )
 	ADD_SUBDIRECTORY( ./examples )
 ENDIF( WITH_ACADO_EXAMPLES )
+
+################################################################################
+#
+# Internal stuff
+#
+################################################################################
+
+IF( ACADO_INTERNAL )
+	ADD_SUBDIRECTORY( ./experimental )
+ENDIF( ACADO_INTERNAL )
+
