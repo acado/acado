@@ -164,7 +164,7 @@ TARGET_LINK_LIBRARIES(
     code_generation_getting_started_closed_loop
     
     # Link against ACADO libraries
-    ${ACADO_SHARED_LIBRARIES}
+    ${ACADO_STATIC_LIBRARIES}
 )
 SET_TARGET_PROPERTIES(
 	code_generation_getting_started_closed_loop
