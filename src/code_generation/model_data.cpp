@@ -209,6 +209,15 @@ returnValue ModelData::getModel( DifferentialEquation& _f ) const{
 }
 
 
+returnValue ModelData::getNARXmodel( uint& _delay, Matrix& _parms ) const{
+
+    _delay = delay;
+    _parms = parms;
+
+    return SUCCESSFUL_RETURN;
+}
+
+
 returnValue ModelData::getLinearInput( Matrix& M1_, Matrix& A1_, Matrix& B1_ ) const {
 	M1_ = M1;
 	A1_ = A1;
@@ -229,7 +238,7 @@ returnValue ModelData::getLinearOutput( Matrix& M3_, Matrix& A3_, OutputFcn& rhs
 
 returnValue ModelData::setModel( const DifferentialEquation& _f )
 {
-	if( rhs_name.isEmpty() ) {
+	if( rhs_name.isEmpty() && NX2 == 0 ) {
 		differentialEquation = _f;
 		Expression rhs;
 		differentialEquation.getExpression( rhs );
@@ -239,6 +248,37 @@ returnValue ModelData::setModel( const DifferentialEquation& _f )
 		NXA = differentialEquation.getNXA();
 		if( NU == 0 ) NU = differentialEquation.getNU();
 		NP = differentialEquation.getNP();
+
+		model_dimensions_set = BT_TRUE;
+		export_rhs = BT_TRUE;
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ModelData::setNARXmodel( const uint _delay, const Matrix& _parms ) {
+
+	if( rhs_name.isEmpty() && NX2 == 0 && NX3 == 0 ) {
+		NX2 = _parms.getNumRows();
+		delay = _delay;
+		uint numParms = 1;
+		uint n = delay*getNX();
+		if( delay >= 1 ) {
+			numParms = numParms + n;
+		}
+		for( uint i = 1; i < delay; i++ ) {
+			numParms = numParms + (n+1)*pow(n,i)/2;
+		}
+		acadoPrintf("computed number of parameters: %d \n", numParms);
+		if( _parms.getNumCols() == numParms ) {
+			parms = _parms;
+		}
+		else {
+			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+		}
 
 		model_dimensions_set = BT_TRUE;
 		export_rhs = BT_TRUE;

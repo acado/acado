@@ -136,6 +136,17 @@ class IntegratorExport : public ExportAlgorithm
 										const String& _name_diffs_ODE );
 
 
+		/** Sets a polynomial NARX model to be used by the integrator.
+		 *
+		 *	@param[in] delay		The delay for the states in the NARX model.
+		 *	@param[in] parms		The parameters defining the polynomial NARX model.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		virtual returnValue setNARXmodel( const uint delay, const Matrix& parms ) = 0;
+
+
 		/** Passes all the necessary model data to the integrator.
 		 *
 		 *	@param[in] data			The model data.
@@ -143,6 +154,56 @@ class IntegratorExport : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setModelData( 	const ModelData& data  );
+
+
+		/** Exports the code needed to update the sensitivities of the states, defined by the linear input system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue updateInputSystem( 	ExportStatementBlock* block,
+										const ExportIndex& index1,
+										const ExportIndex& index2,
+										const ExportIndex& tmp_index  	);
+
+
+		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear input system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue propagateInputSystem( 	ExportStatementBlock* block,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& index3,
+											const ExportIndex& tmp_index  	);
+
+
+		/** Exports the code needed to update the sensitivities of the states defined by the nonlinear, fully implicit system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue updateImplicitSystem( 	ExportStatementBlock* block,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& tmp_index  	);
+
+
+		/** Exports the code needed to propagate the sensitivities of the states defined by the nonlinear, fully implicit system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue propagateImplicitSystem( 	ExportStatementBlock* block,
+												const ExportIndex& index1,
+												const ExportIndex& index2,
+												const ExportIndex& index3,
+												const ExportIndex& tmp_index  	);
 
 
 		/** Sets integration grid (this grid is expected to be non equidistant, otherwise use the other setGrid function).
@@ -301,7 +362,20 @@ class IntegratorExport : public ExportAlgorithm
 		uint getIntegrationInterval( double time );
 
 
+		/** Returns the largest global export variable.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual ExportVariable getAuxVariable() const = 0;
+
+
     protected:
+
+		uint NX1;
+		uint NX2;
+		uint NX3;
+
+		Matrix A11, B11;
 
         BooleanType exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
         BooleanType equidistant;			/**< True if the integration grid is equidistant. */
@@ -316,13 +390,21 @@ class IntegratorExport : public ExportAlgorithm
 		ExportODEfunction rhs;				/**< Module to export ODE. */
 		ExportODEfunction diffs_rhs;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
 
+		ExportODEfunction lin_input;
+
 		ExportVariable  error_code;			/**< Variable containing the error code, returned by the integrator. */
 		ExportVariable  reset_int;			/**< Variable containing the number of the current integration step. */
 		ExportVariable  rk_index;			/**< Variable containing the number of the current shooting interval. */
 		ExportVariable 	rk_ttt;				/**< Variable containing the integration time. */
 		ExportVariable 	rk_xxx;				/**< Variable containing the current integrator state. */
 		ExportVariable 	rk_eta;				/**< Variable containing the inputs or the results of the integrator. */
+
+		ExportVariable	rk_diffsPrev1;
+		ExportVariable	rk_diffsNew1;
 		
+		ExportVariable  rk_diffsPrev2;			/**< Variable containing the sensitivities from the previous integration step. */
+		ExportVariable  rk_diffsNew2;			/**< Variable containing the derivatives wrt the previous values. */
+
 		DifferentialState 			x;		/**< The differential states in the model. */
 		DifferentialStateDerivative dx;		/**< The differential state derivatives in the model. */
 		AlgebraicState	  			z;		/**< The algebraic states in the model. */

@@ -208,6 +208,13 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		virtual returnValue initializeButcherTableau() = 0;
 
 
+		/** Returns the largest global export variable.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		ExportVariable getAuxVariable() const;
+
+
     protected:
 
 };

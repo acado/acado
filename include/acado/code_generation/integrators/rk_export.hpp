@@ -103,6 +103,16 @@ class RungeKuttaExport : public IntegratorExport
 		virtual returnValue setDifferentialEquation( const Expression& rhs ) = 0;
 
 
+		/** Sets a polynomial NARX model to be used by the integrator.
+		 *
+		 *	@param[in] delay		The delay for the states in the NARX model.
+		 *	@param[in] parms		The parameters defining the polynomial NARX model.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue setNARXmodel( const uint delay, const Matrix& parms );
+
+
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
 		 *
 		 *	@param[in] declarations		List of declarations.

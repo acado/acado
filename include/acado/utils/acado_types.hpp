@@ -280,6 +280,8 @@ enum IntegratorType{
      INT_DIRK4,				/**< Diagonally Implicit 3-stage Runge-Kutta integrator of order 4 (Continuous output). */
      INT_DIRK5,				/**< Diagonally Implicit 5-stage Runge-Kutta integrator of order 5 (Continuous output). */
 
+     INT_NARX,				/**< An algorithm which handles the simulation and sensitivity generation for a NARX model. */
+
      INT_RK12,             	/**< Explicit Runge-Kutta integrator of order 1/2          */
      INT_RK23,             	/**< Explicit Runge-Kutta integrator of order 2/3          */
      INT_RK45,             	/**< Explicit Runge-Kutta integrator of order 4/5          */

@@ -80,6 +80,12 @@ const uint RungeKuttaExport::getNumStages() {
 }
 
 
+returnValue RungeKuttaExport::setNARXmodel( const uint delay, const Matrix& parms ) {
+
+	return RET_INVALID_OPTION;
+}
+
+
 
 // PROTECTED:
 

@@ -36,16 +36,18 @@
 
 #include <acado/code_generation/integrators/discrete_export.hpp>
 
+#include <acado/code_generation/export_algorithm_factory.hpp>
+
 
 BEGIN_NAMESPACE_ACADO
 
 
 /** 
- *	\brief Allows to export a tailored NARX integrator for fast model predictive control.
+ *	\brief Allows to export a tailored polynomial NARX integrator for fast model predictive control.
  *
  *	\ingroup NumericalAlgorithms
  *
- *	The class NARXExport allows to export a tailored NARX integrator
+ *	The class NARXExport allows to export a tailored polynomial NARX integrator
  *	for fast model predictive control.
  *
  *	\author Rien Quirynen
@@ -200,17 +202,45 @@ class NARXExport : public DiscreteTimeExport
 										  const std::vector<Matrix> _outputDependencies );
 
 
+		/** Sets a polynomial NARX model to be used by the integrator.
+		 *
+		 *	@param[in] delay		The delay for the states in the NARX model.
+		 *	@param[in] parms		The parameters defining the polynomial NARX model.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		returnValue setNARXmodel( const uint _delay, const Matrix& _parms );
+
+
 	protected:
 
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau() = 0;
+
+		/** Returns the largest global export variable.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		ExportVariable getAuxVariable() const;
+
+
+		/** ..
+		 *
+		 */
+		returnValue formNARXpolynomial( const uint num, const uint order, uint base, const uint index, IntermediateState& result );
 
 
     protected:
 
+		uint delay;
+		Matrix parms;
+		ExportVariable mem_narx;
+
 };
+
+static struct RegisterNARXExport
+{
+	RegisterNARXExport();
+} registerNARXExport;
 
 
 CLOSE_NAMESPACE_ACADO

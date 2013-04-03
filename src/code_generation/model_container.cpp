@@ -60,6 +60,11 @@ returnValue ModelContainer::setModel( const DifferentialEquation& _f ) {
 }
 
 
+returnValue ModelContainer::setNARXmodel( const uint _delay, const Matrix& _parms ) {
+	return modelData.setNARXmodel( _delay, _parms );
+}
+
+
 returnValue ModelContainer::setModel( 	const String& fileName, const String& _rhs_ODE, const String& _diffs_rhs_ODE ) {
 	return modelData.setModel( fileName, _rhs_ODE, _diffs_rhs_ODE );
 }
