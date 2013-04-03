@@ -29,7 +29,7 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2012
+#	2012 - 2013.
 #
 # NOTE:
 #	- It is assumed that one executable has only one source (.cpp) file.
@@ -38,7 +38,7 @@
 #	- This file should be called from the main CMake script for examples.
 #
 # TODO:
-#	- Simplify build rules for closed loop example(s).
+#	- Simplify build rules for closed loop example(s). (Log this on GitHub)
 #
 ################################################################################
 
@@ -82,7 +82,7 @@ FOREACH( SRC ${SOURCES} )
 
 	TARGET_LINK_LIBRARIES(
 		code_generation_${EXEC_NAME}
-		${ACADO_LIBS}
+		${ACADO_STATIC_LIBRARIES}
 	)
 		
 	SET_TARGET_PROPERTIES(
@@ -164,7 +164,7 @@ TARGET_LINK_LIBRARIES(
     code_generation_getting_started_closed_loop
     
     # Link against ACADO libraries
-    ${ACADO_LIBS}
+    ${ACADO_SHARED_LIBRARIES}
 )
 SET_TARGET_PROPERTIES(
 	code_generation_getting_started_closed_loop

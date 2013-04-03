@@ -83,16 +83,7 @@ IF ( NOT ACADO_BUILD )
 	# CMake module(s) path
 	SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/../cmake" )
 
-	FIND_PACKAGE( ACADO REQUIRED )
-	
-	SET( ACADO_LIBS
-		${ACADO_STATIC_LIBRARIES}
-	)
-	
-ELSE()
-	SET( ACADO_LIBS
-		acado_toolkit csparse qpOASESextras acado_casadi
-	)
+	FIND_PACKAGE( ACADO REQUIRED )		
 ENDIF()
 
 ################################################################################
@@ -197,7 +188,7 @@ FOREACH( DIR ${EXAMPLE_DIRS} )
 
 		TARGET_LINK_LIBRARIES(
 			${DIR}_${EXEC_NAME}
-			${ACADO_LIBS}
+			${ACADO_STATIC_LIBRARIES}
 		)
 		
 		SET_TARGET_PROPERTIES(
