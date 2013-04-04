@@ -62,14 +62,14 @@ FILE( GLOB CSPARSE_HEADERS *.h )
 #
 # Make static & shared libraries
 #
-ADD_LIBRARY( csparse STATIC ${CSPARSE_SOURCES} )
-SET_TARGET_PROPERTIES( csparse
+ADD_LIBRARY( acado_csparse STATIC ${CSPARSE_SOURCES} )
+SET_TARGET_PROPERTIES( acado_csparse
 	PROPERTIES
 		OUTPUT_NAME acado_csparse		
 )
 
-ADD_LIBRARY( csparse_s SHARED ${CSPARSE_SOURCES} )
-SET_TARGET_PROPERTIES( csparse_s
+ADD_LIBRARY( acado_csparse_s SHARED ${CSPARSE_SOURCES} )
+SET_TARGET_PROPERTIES( acado_csparse_s
 	PROPERTIES
 		OUTPUT_NAME acado_csparse_s
 		VERSION ${CSPARSE_VERSION}
@@ -84,7 +84,7 @@ SET_TARGET_PROPERTIES( csparse_s
 
 INSTALL(
 	TARGETS
-		csparse csparse_s
+		acado_csparse acado_csparse_s
 	DESTINATION
 		${INSTALL_LIB_DIR}
 )

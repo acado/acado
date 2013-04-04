@@ -1,7 +1,11 @@
+
 build*
 
 Debug
 Release
+
+CMake*
+!CMakeLists.txt
 
 doc/html
 doc/XML

@@ -127,6 +127,13 @@ SET( ACADO_DEVELOPER OFF CACHE STRING
 )
 
 #
+# ACADO internal stuff
+#
+SET( ACADO_INTERNAL OFF CACHE STRING
+	"Select building of ACADO internal stuff."
+)
+
+#
 # Build type
 #
 IF( NOT CMAKE_BUILD_TYPE )
@@ -289,7 +296,7 @@ ENDFOREACH( DIR ${ACADO_SOURCE_DIRS} )
 ADD_LIBRARY( acado_toolkit STATIC ${ACADO_SOURCES} )
 TARGET_LINK_LIBRARIES(
 	acado_toolkit
-	qpOASESextras csparse
+	acado_qpOASESextras acado_csparse acado_casadi
 )
 ADD_LIBRARY( acado_toolkit_s SHARED ${ACADO_SOURCES} )
 SET_TARGET_PROPERTIES( acado_toolkit_s
@@ -303,13 +310,13 @@ IF( NOT MSVC )
 	# Linux is assumed
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit_s
-		qpOASESextras_s csparse_s acado_casadi_s
+		acado_qpOASESextras_s acado_csparse_s acado_casadi_s
 	)
 ELSE( NOT MSVC )
 	# Windows, Visual Studio environment specifics...
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit_s
-		qpOASESextras csparse acado_casadi
+		acado_qpOASESextras acado_csparse acado_casadi
 	)
 ENDIF( NOT MSVC )
 
@@ -390,37 +397,35 @@ INSTALL(
 	DESTINATION
 		${INSTALL_DATA_DIR}/external_packages
 	PATTERN ".svn" EXCLUDE
-	# Temporary patch
-	PATTERN "xml" EXCLUDE
 )
 
 #
 # Configure and install CMake package configuration file
 #
-SET( ACADO_INCLUDE_DIRS
+SET( ACADO_INSTALL_INCLUDE_DIRS
 	${INSTALL_INCLUDE_DIR}
 	${INSTALL_DATA_DIR}/external_packages
 	${INSTALL_DATA_DIR}/external_packages/csparse/
 	${INSTALL_DATA_DIR}/external_packages/qpOASES-3.0beta/include
 )
-SET( ACADO_LIBRARY_DIRS
+SET( ACADO_INSTALL_LIBRARY_DIRS
 	${INSTALL_LIB_DIR}
 )
-SET( ACADO_EXTERNAL_PACKAGES_DIR
+SET( ACADO_INSTALL_EXTERNAL_PACKAGES_DIR
 	${INSTALL_DATA_DIR}/external_packages
 )
-SET( ACADO_CMAKE_DIR
+SET( ACADO_INSTALL_CMAKE_DIR
 	${INSTALL_CMAKE_DIR}
 )
 
-SET( ACADO_STATIC_LIBRARIES
+SET( ACADO_INSTALL_STATIC_LIBRARIES
 	acado_toolkit acado_qpOASESextras acado_csparse acado_casadi
 )
-SET( ACADO_SHARED_LIBRARIES
+SET( ACADO_INSTALL_SHARED_LIBRARIES
 	acado_toolkit_s acado_qpOASESextras_s acado_csparse_s acado_casadi_s
 )
 
-SET( ACADO_QPOASES_EMBEDDED_SOURCES
+SET( ACADO_INSTALL_QPOASES_EMBEDDED_SOURCES
 	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Bounds.cpp
 	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/CyclingManager.cpp 
 	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/MessageHandling.cpp
@@ -432,7 +437,7 @@ SET( ACADO_QPOASES_EMBEDDED_SOURCES
 	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/SubjectTo.cpp
 	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/EXTRAS/SolutionAnalysis.cpp
 )
-SET( ACADO_QPOASES_EMBEDDED_INC_DIRS
+SET( ACADO_INSTALL_QPOASES_EMBEDDED_INC_DIRS
 	${INSTALL_DATA_DIR}/external_packages/qpoases/
 	${INSTALL_DATA_DIR}/external_packages/qpoases/INCLUDE
 	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC
@@ -488,7 +493,7 @@ ENDIF( DOXYGEN_FOUND )
 #
 ################################################################################
 
-SET( ACADO_ENV_INCLUDE_DIRS
+SET( ACADO_INCLUDE_DIRS
 	${PROJECT_SOURCE_DIR}/include
 	${PROJECT_SOURCE_DIR}/external_packages
 	${PROJECT_SOURCE_DIR}/external_packages/csparse/
@@ -496,33 +501,30 @@ SET( ACADO_ENV_INCLUDE_DIRS
 	${PROJECT_BINARY_DIR}/include
 )
 
-SET( ACADO_ENV_LIBRARY_DIRS
+SET( ACADO_LIBRARY_DIRS
 	${LIBRARY_OUTPUT_PATH}
 	${qpOASES_BINARY_DIR}/libs
 	${CSPARSE_BINARY_DIR}/libs
 	${ACADO_CASADI_BINARY_DIR}/libs
 )
 
-SET( ACADO_ENV_EXTERNAL_PACKAGES_DIR
+SET( ACADO_EXTERNAL_PACKAGES_DIR
 	${PROJECT_SOURCE_DIR}/external_packages
 )
 
-SET( PROJECT_CMAKE_DIR
+SET( ACADO_CMAKE_DIR
 	${PROJECT_SOURCE_DIR}/cmake
 )
-SET( ACADO_ENV_CMAKE_DIR
-	${PROJECT_CMAKE_DIR}
+
+SET( ACADO_STATIC_LIBRARIES 
+	${ACADO_INSTALL_STATIC_LIBRARIES}
 )
 
-SET( ACADO_ENV_STATIC_LIBRARIES 
-	${ACADO_STATIC_LIBRARIES}
+SET( ACADO_SHARED_LIBRARIES
+	${ACADO_INSTALL_SHARED_LIBRARIES}
 )
 
-SET( ACADO_ENV_SHARED_LIBRARIES
-	${ACADO_SHARED_LIBRARIES}
-)
-
-SET( ACADO_ENV_QPOASES_EMBEDDED_SOURCES
+SET( ACADO_QPOASES_EMBEDDED_SOURCES
 	${PROJECT_SOURCE_DIR}/external_packages/qpoases/SRC/Bounds.cpp
 	${PROJECT_SOURCE_DIR}/external_packages/qpoases/SRC/CyclingManager.cpp 
 	${PROJECT_SOURCE_DIR}/external_packages/qpoases/SRC/MessageHandling.cpp
@@ -535,7 +537,7 @@ SET( ACADO_ENV_QPOASES_EMBEDDED_SOURCES
 	${PROJECT_SOURCE_DIR}/external_packages/qpoases/SRC/EXTRAS/SolutionAnalysis.cpp
 )
 
-SET( ACADO_ENV_QPOASES_EMBEDDED_INC_DIRS
+SET( ACADO_QPOASES_EMBEDDED_INC_DIRS
 	${PROJECT_SOURCE_DIR}/external_packages/qpoases/
 	${PROJECT_SOURCE_DIR}/external_packages/qpoases/INCLUDE
 	${PROJECT_SOURCE_DIR}/external_packages/qpoases/SRC
@@ -559,17 +561,17 @@ SET( INCLUDE_MK_CPP_EXE
 
 STRING(REPLACE ";" " " INCLUDE_MK_CPP_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
 
-STRING(REPLACE ";" " -I" INCLUDE_MK_INCLUDE_DIRS "${ACADO_ENV_INCLUDE_DIRS}")
+STRING(REPLACE ";" " -I" INCLUDE_MK_INCLUDE_DIRS "${ACADO_INCLUDE_DIRS}")
 SET( INCLUDE_MK_INCLUDE_DIRS 
 	"-I${INCLUDE_MK_INCLUDE_DIRS}"
 )
 
-STRING(REPLACE ";" " -L" INCLUDE_MK_LIBRARY_DIRS "${ACADO_ENV_LIBRARY_DIRS}")
+STRING(REPLACE ";" " -L" INCLUDE_MK_LIBRARY_DIRS "${ACADO_LIBRARY_DIRS}")
 SET( INCLUDE_MK_LIBRARY_DIRS
 	"-L${INCLUDE_MK_LIBRARY_DIRS}"
 )
 
-STRING(REPLACE ";" " -l" INCLUDE_MK_LIBS "${ACADO_ENV_STATIC_LIBRARIES}")
+STRING(REPLACE ";" " -l" INCLUDE_MK_LIBS "${ACADO_STATIC_LIBRARIES}")
 SET( INCLUDE_MK_LIBS
 	"-l${INCLUDE_MK_LIBS}"
 )
@@ -602,6 +604,13 @@ SET( PC_LIBS
 	${INCLUDE_MK_LIBS}
 )
 
+STRING(REPLACE ";" " -I" PC_QPOASES_EMBEDDED_INC_DIRS "${ACADO_QPOASES_EMBEDDED_INC_DIRS}")
+SET( PC_QPOASES_EMBEDDED_INC_DIRS 
+	"-I${PC_QPOASES_EMBEDDED_INC_DIRS}"
+)
+
+STRING(REPLACE ";" " " PC_QPOASES_EMBEDDED_SOURCES "${ACADO_QPOASES_EMBEDDED_SOURCES}")
+
 CONFIGURE_FILE(
 	"${PROJECT_SOURCE_DIR}/cmake/acado.pc.in"
 	"${PROJECT_BINARY_DIR}/acado.pc"
@@ -617,3 +626,13 @@ CONFIGURE_FILE(
 IF( WITH_ACADO_EXAMPLES )
 	ADD_SUBDIRECTORY( ./examples )
 ENDIF( WITH_ACADO_EXAMPLES )
+
+################################################################################
+#
+# Internal stuff
+#
+################################################################################
+
+IF( ACADO_INTERNAL )
+	ADD_SUBDIRECTORY( ./experimental )
+ENDIF( ACADO_INTERNAL )
