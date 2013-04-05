@@ -429,31 +429,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 												BooleanType STATES  	);
 
 
-		/** Exports the code needed to update the sensitivities of the states, defined by the linear input system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue updateInputSystem( 	ExportStatementBlock* block,
-										const ExportIndex& index1,
-										const ExportIndex& index2,
-										const ExportIndex& tmp_index  	);
-
-
-		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear input system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue propagateInputSystem( 	ExportStatementBlock* block,
-											const ExportIndex& index1,
-											const ExportIndex& index2,
-											const ExportIndex& index3,
-											const ExportIndex& tmp_index  	);
-
-
 		/** Exports the code needed to compute the sensitivities of the states defined by the nonlinear, fully implicit system.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
@@ -476,31 +451,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 													const ExportVariable& det,
 													BooleanType STATES,
 													uint number 		);
-
-
-		/** Exports the code needed to update the sensitivities of the states defined by the nonlinear, fully implicit system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue updateImplicitSystem( 	ExportStatementBlock* block,
-											const ExportIndex& index1,
-											const ExportIndex& index2,
-											const ExportIndex& tmp_index  	);
-
-
-		/** Exports the code needed to propagate the sensitivities of the states defined by the nonlinear, fully implicit system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue propagateImplicitSystem( 	ExportStatementBlock* block,
-												const ExportIndex& index1,
-												const ExportIndex& index2,
-												const ExportIndex& index3,
-												const ExportIndex& tmp_index  	);
 
 
 		/** Exports the code needed to compute the sensitivities of the states, defined by the linear output system.
@@ -739,13 +689,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		uint numIts;							/**< This is the performed number of Newton iterations. */
 		uint numItsInit;						/**< This is the performed number of Newton iterations for the initialization of the first step. */
 
-		uint NX1;
-
-		uint NX2;
 		uint NDX2;
 		uint NVARS2;
 
-		uint NX3;
 		uint NDX3;
 		uint NXA3;
 		uint NVARS3;
@@ -782,20 +728,15 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportVariable	rhs_in;
 		ExportVariable	rhs_out;
 
-		ExportODEfunction lin_input;
 		ExportVariable	rk_mat1;
 		ExportVariable 	rk_dk1;
-		Matrix A11, B11, M11;
-		ExportVariable	rk_diffsNew1;
-		ExportVariable	rk_diffsPrev1;
+		Matrix M11;
 
 		ExportVariable	rk_A;					/**< Variable containing the matrix of the linear system. */
 		ExportVariable	rk_b;					/**< Variable containing the right-hand side of the linear system. */
 		ExportVariable  rk_auxSolver;			/**< Variable containing auxiliary values for the exported linear solver. */
 		ExportVariable 	rk_rhsTemp;				/**< Variable containing intermediate results of evaluations of the right-hand side expression. */
 		ExportVariable  rk_diffsTemp2;			/**< Variable containing intermediate results of evaluations of the derivatives of the differential equations (ordinary and algebraic). */
-		ExportVariable  rk_diffsPrev2;			/**< Variable containing the sensitivities from the previous integration step. */
-		ExportVariable  rk_diffsNew2;			/**< Variable containing the derivatives wrt the previous values. */
 
 		ExportODEfunction lin_output;
 		ExportVariable	rk_mat3;

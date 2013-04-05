@@ -25,14 +25,14 @@
 
 
 /**
- *    \file include/acado/integrator/rk_export.hpp
+ *    \file include/acado/code_generation/integrators/discrete_export.hpp
  *    \author Rien Quirynen
- *    \date 2012
+ *    \date 2013
  */
 
 
-#ifndef ACADO_TOOLKIT_RK_EXPORT_HPP
-#define ACADO_TOOLKIT_RK_EXPORT_HPP
+#ifndef ACADO_TOOLKIT_DT_EXPORT_HPP
+#define ACADO_TOOLKIT_DT_EXPORT_HPP
 
 #include <acado/code_generation/integrators/integrator_export.hpp>
 
@@ -41,21 +41,20 @@ BEGIN_NAMESPACE_ACADO
 
 
 /** 
- *	\brief Allows to export a tailored Runge-Kutta integrator for fast model predictive control.
+ *	\brief Allows to export a tailored discrete-time 'integrator' for fast model predictive control.
  *
  *	\ingroup NumericalAlgorithms
  *
- *	The class RungeKuttaExport allows to export a tailored Runge-Kutta integrator
+ *	The class DiscreteTimeExport allows to export a tailored discrete-time 'integrator'
  *	for fast model predictive control.
  *
  *	\author Rien Quirynen
  */
-class RungeKuttaExport : public IntegratorExport
+class DiscreteTimeExport : public IntegratorExport
 {
     //
     // PUBLIC MEMBER FUNCTIONS:
     //
-
     public:
 
 		/** Default constructor. 
@@ -63,7 +62,7 @@ class RungeKuttaExport : public IntegratorExport
 		 *	@param[in] _userInteraction		Pointer to corresponding user interface.
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
-        RungeKuttaExport(	UserInteraction* _userInteraction = 0,
+        DiscreteTimeExport(	UserInteraction* _userInteraction = 0,
 							const String& _commonHeaderName = ""
 							);
 
@@ -71,18 +70,18 @@ class RungeKuttaExport : public IntegratorExport
 		 *
 		 *	@param[in] arg		Right-hand side object.
 		 */
-        RungeKuttaExport(	const RungeKuttaExport& arg
+        DiscreteTimeExport(	const DiscreteTimeExport& arg
 							);
 
         /** Destructor. 
 		 */
-        virtual ~RungeKuttaExport( );
+        virtual ~DiscreteTimeExport( );
 
 		/** Assignment operator (deep copy).
 		 *
 		 *	@param[in] arg		Right-hand side object.
 		 */
-		RungeKuttaExport& operator=(	const RungeKuttaExport& arg
+		DiscreteTimeExport& operator=(	const DiscreteTimeExport& arg
 										);
 
 
@@ -101,16 +100,6 @@ class RungeKuttaExport : public IntegratorExport
 		 */
 		
 		virtual returnValue setDifferentialEquation( const Expression& rhs ) = 0;
-
-
-		/** Sets a polynomial NARX model to be used by the integrator.
-		 *
-		 *	@param[in] delay		The delay for the states in the NARX model.
-		 *	@param[in] parms		The parameters defining the polynomial NARX model.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue setNARXmodel( const uint delay, const Matrix& parms );
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -143,22 +132,6 @@ class RungeKuttaExport : public IntegratorExport
 		 */
 		virtual returnValue getCode(	ExportStatementBlock& code
 										) = 0;
-        
-        
-        /** This routine returns the number of stages of the Runge-Kutta integrator that will be exported.
-         */
-        const uint getNumStages();
-							
-        
-        /** Sets up the output with the grids for the different output functions.									\n
-		*                                                                      										\n
-		*  \param outputGrids_	  	The vector containing a grid for each output function.			  				\n
-		*  \param rhs 	  	  		The expressions corresponding the output functions.								\n
-		*                                                                      										\n
-		*  \return SUCCESSFUL_RETURN
-		*/
-		virtual returnValue setupOutput( const std::vector<Grid> outputGrids_,
-									  const std::vector<Expression> rhs ) = 0;
 
 
 
@@ -170,29 +143,19 @@ class RungeKuttaExport : public IntegratorExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue copy(	const RungeKuttaExport& arg
+		virtual returnValue copy(	const DiscreteTimeExport& arg
 							);
-		
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau() = 0;
 
 
     protected:
         
-		ExportVariable rk_kkk;				/**< Variable containing intermediate results of the RK integrator. */
 
-		Matrix AA;							/**< This matrix defines the Runge-Kutta method to be exported. */
-		Vector bb, cc;						/**< These vectors define the Runge-Kutta method to be exported. */
-		
-		uint numStages;						/**< This is the number of stages for the Runge-Kutta method. */
 };
 
 
 CLOSE_NAMESPACE_ACADO
 
 
-#endif  // ACADO_TOOLKIT_RK_EXPORT_HPP
+#endif  // ACADO_TOOLKIT_DT_EXPORT_HPP
 
 // end of file.

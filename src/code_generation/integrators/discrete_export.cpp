@@ -25,12 +25,12 @@
 
 
 /**
- *    \file src/code_generation/rk_export.cpp
+ *    \file src/code_generation/integrators/discrete_export.cpp
  *    \author Rien Quirynen
- *    \date 2012
+ *    \date 2013
  */
 
-#include <acado/code_generation/integrators/rk_export.hpp>
+#include <acado/code_generation/integrators/discrete_export.hpp>
 
 
 
@@ -41,27 +41,27 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-RungeKuttaExport::RungeKuttaExport(	UserInteraction* _userInteraction,
+DiscreteTimeExport::DiscreteTimeExport(	UserInteraction* _userInteraction,
 									const String& _commonHeaderName
 									) : IntegratorExport( _userInteraction,_commonHeaderName )
 {
 }
 
 
-RungeKuttaExport::RungeKuttaExport(	const RungeKuttaExport& arg
+DiscreteTimeExport::DiscreteTimeExport(	const DiscreteTimeExport& arg
 									) : IntegratorExport( arg )
 {
 	copy( arg );
 }
 
 
-RungeKuttaExport::~RungeKuttaExport( )
+DiscreteTimeExport::~DiscreteTimeExport( )
 {
 	clear( );
 }
 
 
-RungeKuttaExport& RungeKuttaExport::operator=( const RungeKuttaExport& arg
+DiscreteTimeExport& DiscreteTimeExport::operator=( const DiscreteTimeExport& arg
 												)
 {
 	if( this != &arg )
@@ -74,36 +74,19 @@ RungeKuttaExport& RungeKuttaExport::operator=( const RungeKuttaExport& arg
 }
 
 
-const uint RungeKuttaExport::getNumStages() {
-	
-	return numStages;
-}
-
-
-returnValue RungeKuttaExport::setNARXmodel( const uint delay, const Matrix& parms ) {
-
-	return RET_INVALID_OPTION;
-}
-
-
 
 // PROTECTED:
 
 
-returnValue RungeKuttaExport::copy(	const RungeKuttaExport& arg
+returnValue DiscreteTimeExport::copy(	const DiscreteTimeExport& arg
 									)
 {
-	numStages = arg.numStages;
 	rhs = arg.rhs;
 	diffs_rhs = arg.diffs_rhs;
-	name_rhs = arg.name_rhs;
-	name_diffs_rhs = arg.name_diffs_rhs;
-	grid = arg.grid;
 
 	// ExportVariables
 	rk_ttt = arg.rk_ttt;
 	rk_xxx = arg.rk_xxx;
-	rk_kkk = arg.rk_kkk;
 	
 	// ExportFunctions
 	integrate = arg.integrate;

@@ -107,6 +107,7 @@ returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _
 
 returnValue IntegratorExport::setModelData( const ModelData& data ) {
 
+	acadoPrintf("NX: %d \n", data.getNX());
 	setDimensions( data.getNX(),data.getNDX(),data.getNXA(),data.getNU(),data.getNP(),data.getN() );
 	exportRhs = data.exportRhs();
 
@@ -118,6 +119,10 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 		Matrix M3, A3;
 		OutputFcn f3;
 		data.getLinearOutput( M3, A3, f3 );
+		Matrix parms;
+		uint delay;
+		data.getNARXmodel( delay, parms );
+		acadoPrintf("delay: %d \n", delay);
 
 		Expression rhs_, rhs3_;
 		f.getExpression( rhs_ );
@@ -128,6 +133,8 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 		if ( f.getDim() > 0 && setDifferentialEquation( rhs_ ) != SUCCESSFUL_RETURN )
 			return RET_UNABLE_TO_EXPORT_CODE;
 		if ( M3.getNumRows() > 0 && setLinearOutput( M3, A3, rhs3_ ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+		if ( !parms.isEmpty() && setNARXmodel( delay, parms ) != SUCCESSFUL_RETURN )
 			return RET_UNABLE_TO_EXPORT_CODE;
 	}
 	else {
@@ -177,6 +184,138 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	}
 
 	setup( );
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue IntegratorExport::updateInputSystem(	ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index )
+{
+	if( NX1 > 0 ) {
+		ExportForLoop loop01( index1,0,NX1 );
+		ExportForLoop loop02( index2,0,NX1 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == rk_diffsNew1.getSubMatrix( index1,index1+1,index2,index2+1 ) );
+		loop01.addStatement( loop02 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop03( index2,0,NU );
+			loop03.addStatement( tmp_index == index2+index1*NU );
+			loop03.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) == rk_diffsNew1.getSubMatrix( index1,index1+1,NX1+index2,NX1+index2+1 ) );
+			loop01.addStatement( loop03 );
+		}
+		block->addStatement( loop01 );
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue IntegratorExport::propagateInputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2,
+															 const ExportIndex& index3, const ExportIndex& tmp_index )
+{
+	if( NX1 > 0 ) {
+		ExportForLoop loop01( index1,0,NX1 );
+		ExportForLoop loop02( index2,0,NX1 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == rk_diffsNew1.getSubMatrix( index1,index1+1,0,1 )*rk_diffsPrev1.getSubMatrix( 0,1,index2,index2+1 ) );
+		ExportForLoop loop03( index3,1,NX1 );
+		loop03.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew1.getSubMatrix( index1,index1+1,index3,index3+1 )*rk_diffsPrev1.getSubMatrix( index3,index3+1,index2,index2+1 ) );
+		loop02.addStatement( loop03 );
+		loop01.addStatement( loop02 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop04( index2,0,NU );
+			loop04.addStatement( tmp_index == index2+index1*NU );
+			loop04.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) == rk_diffsNew1.getSubMatrix( index1,index1+1,NX1+index2,NX1+index2+1 ) );
+			ExportForLoop loop05( index3,0,NX1 );
+			loop05.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) += rk_diffsNew1.getSubMatrix( index1,index1+1,index3,index3+1 )*rk_diffsPrev1.getSubMatrix( index3,index3+1,NX1+index2,NX1+index2+1 ) );
+			loop04.addStatement( loop05 );
+			loop01.addStatement( loop04 );
+		}
+		block->addStatement( loop01 );
+	}
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue IntegratorExport::updateImplicitSystem(	ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index )
+{
+	if( NX2 > 0 ) {
+		ExportForLoop loop01( index1,NX1,NX1+NX2 );
+		ExportForLoop loop02( index2,0,NX1+NX2 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,index2,index2+1 ) );
+		loop01.addStatement( loop02 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop03( index2,0,NU );
+			loop03.addStatement( tmp_index == index2+index1*NU );
+			loop03.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) == rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,NX1+NX2+index2,NX1+NX2+index2+1 ) );
+			loop01.addStatement( loop03 );
+		}
+		block->addStatement( loop01 );
+	}
+	// ALGEBRAIC STATES
+	if( NXA > 0 ) {
+		ExportForLoop loop01( index1,NX,NX+NXA );
+		ExportForLoop loop02( index2,0,NX1+NX2 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == rk_diffsNew2.getSubMatrix( index1-NX1-NX3,index1-NX1-NX3+1,index2,index2+1 ) );
+		loop01.addStatement( loop02 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop03( index2,0,NU );
+			loop03.addStatement( tmp_index == index2+index1*NU );
+			loop03.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) == rk_diffsNew2.getSubMatrix( index1-NX1-NX3,index1-NX1-NX3+1,NX1+NX2+index2,NX1+NX2+index2+1 ) );
+			loop01.addStatement( loop03 );
+		}
+		block->addStatement( loop01 );
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue IntegratorExport::propagateImplicitSystem(	ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2,
+																const ExportIndex& index3, const ExportIndex& tmp_index )
+{
+	if( NX2 > 0 ) {
+		ExportForLoop loop01( index1,NX1,NX1+NX2 );
+		ExportForLoop loop02( index2,0,NX1 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == 0.0 );
+		ExportForLoop loop03( index3,0,NX1 );
+		loop03.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,index3,index3+1 )*rk_diffsPrev1.getSubMatrix( index3,index3+1,index2,index2+1 ) );
+		loop02.addStatement( loop03 );
+		ExportForLoop loop04( index3,0,NX2 );
+		loop04.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,NX1+index3,NX1+index3+1 )*rk_diffsPrev2.getSubMatrix( index3,index3+1,index2,index2+1 ) );
+		loop02.addStatement( loop04 );
+		loop01.addStatement( loop02 );
+
+		ExportForLoop loop05( index2,NX1,NX1+NX2 );
+		loop05.addStatement( tmp_index == index2+index1*NX );
+		loop05.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == 0.0 );
+		ExportForLoop loop06( index3,0,NX2 );
+		loop06.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,NX1+index3,NX1+index3+1 )*rk_diffsPrev2.getSubMatrix( index3,index3+1,index2,index2+1 ) );
+		loop05.addStatement( loop06 );
+		loop01.addStatement( loop05 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop07( index2,0,NU );
+			loop07.addStatement( tmp_index == index2+index1*NU );
+			loop07.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) == rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,NX1+NX2+index2,NX1+NX2+index2+1 ) );
+			ExportForLoop loop08( index3,0,NX1 );
+			loop08.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) += rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,index3,index3+1 )*rk_diffsPrev1.getSubMatrix( index3,index3+1,NX1+index2,NX1+index2+1 ) );
+			loop07.addStatement( loop08 );
+			ExportForLoop loop09( index3,0,NX2 );
+			loop09.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) += rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,NX1+index3,NX1+index3+1 )*rk_diffsPrev2.getSubMatrix( index3,index3+1,NX1+NX2+index2,NX1+NX2+index2+1 ) );
+			loop07.addStatement( loop09 );
+			loop01.addStatement( loop07 );
+		}
+		block->addStatement( loop01 );
+	}
+	// ALGEBRAIC STATES: NO PROPAGATION OF SENSITIVITIES NEEDED
 
 	return SUCCESSFUL_RETURN;
 }

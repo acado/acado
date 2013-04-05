@@ -194,6 +194,16 @@ public:
      returnValue setModel( const DifferentialEquation& _f );
 
 
+     /** Assigns a polynomial NARX model to be used by the integrator.
+ 	 *
+ 	 *	@param[in] delay		The delay for the states in the NARX model.
+ 	 *	@param[in] parms		The parameters defining the polynomial NARX model.
+ 	 *
+ 	 *	\return SUCCESSFUL_RETURN
+ 	 */
+ 	returnValue setNARXmodel( const uint _delay, const Matrix& _parms );
+
+
      /** .
       *
       *	@param[in] 		.
@@ -264,6 +274,13 @@ public:
       *  \return SUCCESSFUL_RETURN
       */
      returnValue getModel( DifferentialEquation& _f ) const;
+
+
+     /** Returns the polynomial NARX model.
+      *
+      *  \return SUCCESSFUL_RETURN
+      */
+     returnValue getNARXmodel( uint& _delay, Matrix& _parms ) const;
 
 
      /** .
@@ -433,6 +450,11 @@ public:
      Matrix M3;
      Matrix A3;
      OutputFcn rhs3;
+
+     // NARX model:
+     uint delay;
+     Matrix parms;
+
 };
 
 

@@ -363,6 +363,13 @@ returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 }
 
 
+ExportVariable ExplicitRungeKuttaExport::getAuxVariable() const
+{
+
+	return diffs_rhs.getGlobalExportVariable();
+}
+
+
 
 // PROTECTED:
 
