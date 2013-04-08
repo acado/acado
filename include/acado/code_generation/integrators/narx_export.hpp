@@ -157,6 +157,31 @@ class NARXExport : public DiscreteTimeExport
 		 */
 		virtual returnValue getCode(	ExportStatementBlock& code
 										);
+
+
+		/** Exports the code needed to update the sensitivities of the states defined by the nonlinear part.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue updateImplicitSystem( 	ExportStatementBlock* block,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& tmp_index  	);
+
+
+		/** Exports the code needed to propagate the sensitivities of the states defined by the nonlinear part.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue propagateImplicitSystem( 	ExportStatementBlock* block,
+												const ExportIndex& index1,
+												const ExportIndex& index2,
+												const ExportIndex& index3,
+												const ExportIndex& tmp_index  	);
 							
         
         /** Sets up the output with the grids for the different output functions.									\n
@@ -226,7 +251,7 @@ class NARXExport : public DiscreteTimeExport
 		/** ..
 		 *
 		 */
-		returnValue formNARXpolynomial( const uint num, const uint order, uint base, const uint index, IntermediateState& result );
+		returnValue formNARXpolynomial( const uint num, const uint order, uint& base, const uint index, IntermediateState& result );
 
 
     protected:

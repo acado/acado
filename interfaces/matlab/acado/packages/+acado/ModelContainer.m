@@ -59,6 +59,10 @@ classdef ModelContainer < handle
         NXA;
         NU;
         
+        % NARX
+        delay;
+        params;
+        
         % Linear input system
         M1;
         A1;
@@ -103,6 +107,15 @@ classdef ModelContainer < handle
                 error('ERROR: Invalid setModel.');
                 
             end
+        end
+        
+        function setNARXmodel(obj, varargin)
+           if (nargin == 3 && isnumeric(varargin{1}) && varargin{1} > 0 && isnumeric(varargin{2}))
+               obj.delay = varargin{1};
+               obj.params = acado.Matrix(varargin{2}); obj.params.name = obj.params.name_m;
+           else
+               error('ERROR: Invalid setNARXmodel.');
+           end
         end
         
         
@@ -211,6 +224,8 @@ classdef ModelContainer < handle
                     end
                     if (~isempty(obj.model))
                         fprintf(cppobj.fileMEX,sprintf('    %s.setModel( %s );\n', obj.name, obj.model.name));
+                    elseif (~isempty(obj.params))
+                        fprintf(cppobj.fileMEX,sprintf('    %s.setNARXmodel( %d, %s );\n', obj.name, round(obj.delay), obj.params.name));
                     end
                     if obj.linearOutput
                         obj.fun3.getInstructions(cppobj, get);

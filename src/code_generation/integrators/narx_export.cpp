@@ -108,11 +108,11 @@ returnValue NARXExport::setup( )
 	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim-diffsDim, REAL, structWspace );
 	mem_narx = ExportVariable( "mem_narx", delay, NX, REAL, structWspace );
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		rk_diffsPrev1 = ExportVariable( "rk_diffsPrev1", NX1, NX1+NU, REAL, structWspace );
-		rk_diffsPrev2 = ExportVariable( "rk_diffsPrev2", NX2, NX1+NX2+NU, REAL, structWspace );
+		rk_diffsPrev1 = ExportVariable( "rk_diffsPrev1", delay*NX1, NX1+NU, REAL, structWspace );
+		rk_diffsPrev2 = ExportVariable( "rk_diffsPrev2", delay*NX2, NX1+NX2+NU, REAL, structWspace );
 	}
 	rk_diffsNew1 = ExportVariable( "rk_diffsNew1", NX1, NX1+NU, REAL, structWspace );
-	rk_diffsNew2 = ExportVariable( "rk_diffsNew2", NX2, NX1+NX2+NU, REAL, structWspace );
+	rk_diffsNew2 = ExportVariable( "rk_diffsNew2", NX2, delay*NX, REAL, structWspace );
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
@@ -122,6 +122,31 @@ returnValue NARXExport::setup( )
 
 	integrate.addStatement( rk_xxx.getCols( NX,inputDim-diffsDim ) == rk_eta.getCols( NX+diffsDim,inputDim ) );
 	integrate.addLinebreak( );
+	if( NX2 > 0 ) {
+		integrate.addStatement( String("if( ") << reset_int.getName() << " ) { \n" );
+		Matrix zeroM = zeros(delay, NX);
+		integrate.addStatement( mem_narx == zeroM );
+		integrate.addStatement( String("} \n") );
+
+		if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
+			// Linear input:
+			Matrix eyeM = eye(NX1);
+			eyeM.appendCols( zeros(NX1,NU) );
+			if( NX1 > 0 ) {
+				integrate.addStatement( rk_diffsPrev1.getRows(0,NX1) == eyeM );
+				zeroM = zeros((delay-1)*NX1,NX1+NU);
+				integrate.addStatement( rk_diffsPrev1.getRows(NX1,delay*NX1) == zeroM );
+			}
+
+			// Nonlinear part:
+			eyeM = zeros(NX2,NX1);
+			eyeM.appendCols( eye(NX2) );
+			eyeM.appendCols( zeros(NX2,NU) );
+			integrate.addStatement( rk_diffsPrev2.getRows(0,NX2) == eyeM );
+			zeroM = zeros((delay-1)*NX2,NX1+NX2+NU);
+			integrate.addStatement( rk_diffsPrev2.getRows(NX2,delay*NX2) == zeroM );
+		}
+	}
 
 	// integrator loop:
 	ExportForLoop tmpLoop( run, 0, grid.getNumIntervals() );
@@ -137,8 +162,21 @@ returnValue NARXExport::setup( )
 	loop->addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		// Set rk_diffsPrev:
 		loop->addStatement( String("if( run > 0 ) {\n") );
+		// SHIFT rk_diffsPrev:
+		// TODO: write using exportforloop
+		if( NX1 > 0 ) {
+			for( uint s = 1; s < delay; s++ ) {
+				loop->addStatement( rk_diffsPrev1.getRows(s*NX1,s*NX1+NX1) == rk_diffsPrev1.getRows((s-1)*NX1,s*NX1) );
+			}
+		}
+		if( NX2 > 0 ) {
+			for( uint s = 1; s < delay; s++ ) {
+				loop->addStatement( rk_diffsPrev2.getRows(s*NX2,s*NX2+NX2) == rk_diffsPrev2.getRows((s-1)*NX2,s*NX2) );
+			}
+		}
+
+		// Add to rk_diffsPrev:
 		if( NX1 > 0 ) {
 			ExportForLoop loopTemp1( i,0,NX1 );
 			loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,0,NX1 ) == rk_eta.getCols( i*NX+NX+NXA,i*NX+NX+NXA+NX1 ) );
@@ -178,6 +216,9 @@ returnValue NARXExport::setup( )
 				loop->addStatement( rk_diffsNew1.getSubMatrix(i1,i1+1,NX1+i2,NX1+i2+1) == B11(i1,i2) );
 			}
 		}
+	}
+	if( NX2 > 0 ) {
+		loop->addFunctionCall( diffs_rhs.getName(), mem_narx, rk_diffsNew2.getAddress(0,0) );
 	}
 
 	// computation of the sensitivities using chain rule:
@@ -220,6 +261,79 @@ returnValue NARXExport::setup( )
 	return SUCCESSFUL_RETURN;
 }
 
+
+returnValue NARXExport::updateImplicitSystem(	ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index )
+{
+	if( NX2 > 0 ) {
+		ExportForLoop loop01( index1,NX1,NX1+NX2 );
+		ExportForLoop loop02( index2,0,NX1+NX2 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,index2,index2+1 ) );
+		loop01.addStatement( loop02 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop03( index2,0,NU );
+			loop03.addStatement( tmp_index == index2+index1*NU );
+			loop03.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) == 0.0 ); // the control inputs do not appear directly in the NARX model !!
+			loop01.addStatement( loop03 );
+		}
+		block->addStatement( loop01 );
+	}
+	// ALGEBRAIC STATES: NONE
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue NARXExport::propagateImplicitSystem(	ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2,
+																const ExportIndex& index3, const ExportIndex& tmp_index )
+{
+	uint i;
+	if( NX2 > 0 ) {
+		ExportForLoop loop01( index1,NX1,NX1+NX2 );
+		ExportForLoop loop02( index2,0,NX1 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == 0.0 );
+		for( i = 0; i < delay; i++ ) {
+			ExportForLoop loop03( index3,0,NX1 );
+			loop03.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,i*NX+index3,i*NX+index3+1 )*rk_diffsPrev1.getSubMatrix( i*NX1+index3,i*NX1+index3+1,index2,index2+1 ) );
+			loop02.addStatement( loop03 );
+			ExportForLoop loop04( index3,0,NX2 );
+			loop04.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,i*NX+NX1+index3,i*NX+NX1+index3+1 )*rk_diffsPrev2.getSubMatrix( i*NX2+index3,i*NX2+index3+1,index2,index2+1 ) );
+			loop02.addStatement( loop04 );
+		}
+		loop01.addStatement( loop02 );
+
+		ExportForLoop loop05( index2,NX1,NX1+NX2 );
+		loop05.addStatement( tmp_index == index2+index1*NX );
+		loop05.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == 0.0 );
+		for( i = 0; i < delay; i++ ) {
+			ExportForLoop loop06( index3,0,NX2 );
+			loop06.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,i*NX+NX1+index3,i*NX+NX1+index3+1 )*rk_diffsPrev2.getSubMatrix( i*NX2+index3,i*NX2+index3+1,index2,index2+1 ) );
+			loop05.addStatement( loop06 );
+		}
+		loop01.addStatement( loop05 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop07( index2,0,NU );
+			loop07.addStatement( tmp_index == index2+index1*NU );
+			loop07.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) == 0.0 );
+			for( i = 0; i < delay; i++ ) {
+				ExportForLoop loop08( index3,0,NX1 );
+				loop08.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) += rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,i*NX+index3,i*NX+index3+1 )*rk_diffsPrev1.getSubMatrix( i*NX1+index3,i*NX1+index3+1,NX1+index2,NX1+index2+1 ) );
+				loop07.addStatement( loop08 );
+				ExportForLoop loop09( index3,0,NX2 );
+				loop09.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) += rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,i*NX+NX1+index3,i*NX+NX1+index3+1 )*rk_diffsPrev2.getSubMatrix( i*NX2+index3,i*NX2+index3+1,NX1+NX2+index2,NX1+NX2+index2+1 ) );
+				loop07.addStatement( loop09 );
+			}
+			loop01.addStatement( loop07 );
+		}
+		block->addStatement( loop01 );
+	}
+	// ALGEBRAIC STATES: NO PROPAGATION OF SENSITIVITIES NEEDED
+
+	return SUCCESSFUL_RETURN;
+}
 
 
 returnValue NARXExport::setDifferentialEquation(	const Expression& rhs_ )
@@ -265,7 +379,7 @@ returnValue NARXExport::setLinearInput( const Matrix& M1, const Matrix& A1, cons
 }
 
 
-returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs ) {
+returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }
@@ -340,7 +454,7 @@ returnValue NARXExport::getCode(	ExportStatementBlock& code
 }
 
 
-returnValue NARXExport::setupOutput( const std::vector<Grid> outputGrids_, const std::vector<Expression> rhs ) {
+returnValue NARXExport::setupOutput( const std::vector<Grid> outputGrids_, const std::vector<Expression> _rhs ) {
 	
 	return ACADOERROR( RET_INVALID_OPTION );
 }
@@ -374,7 +488,6 @@ returnValue NARXExport::setNARXmodel( const uint _delay, const Matrix& _parms ) 
 	DifferentialState dummy;
 	dummy.clearStaticCounters();
 	uint n = _delay*NX;
-	acadoPrintf("n: %d \n", n);
 	x = DifferentialState(n);
 
 	OutputFcn narxFun;
@@ -397,6 +510,7 @@ returnValue NARXExport::setNARXmodel( const uint _delay, const Matrix& _parms ) 
 		}
 
 		narxFun << expr;
+		narxDiff << forwardDerivative( expr, x );
 	}
 	rhs.init( narxFun,"acado_NARX_fun",NX,NXA,NU );
 	diffs_rhs.init( narxDiff,"acado_NARX_diff",NX,NXA,NU );
@@ -408,7 +522,7 @@ returnValue NARXExport::setNARXmodel( const uint _delay, const Matrix& _parms ) 
 }
 
 
-returnValue NARXExport::formNARXpolynomial( const uint num, const uint order, uint base, const uint index, IntermediateState& result ) {
+returnValue NARXExport::formNARXpolynomial( const uint num, const uint order, uint& base, const uint index, IntermediateState& result ) {
 
 	uint n = delay*NX;
 	for( uint i = index; i < n; i++ ) {
