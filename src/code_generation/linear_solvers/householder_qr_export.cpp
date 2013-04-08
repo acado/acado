@@ -273,8 +273,8 @@ returnValue ExportHouseholderQR::setup( )
 {
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
-	ExportStruct structWspace;
-	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
+//	ExportStruct structWspace;
+//	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
 	A = ExportVariable( "A", dim, dim, REAL );
 	b = ExportVariable( "b", dim, 1, REAL );

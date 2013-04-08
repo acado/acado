@@ -107,7 +107,6 @@ returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _
 
 returnValue IntegratorExport::setModelData( const ModelData& data ) {
 
-	acadoPrintf("NX: %d \n", data.getNX());
 	setDimensions( data.getNX(),data.getNDX(),data.getNXA(),data.getNU(),data.getNP(),data.getN() );
 	exportRhs = data.exportRhs();
 
@@ -122,7 +121,6 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 		Matrix parms;
 		uint delay;
 		data.getNARXmodel( delay, parms );
-		acadoPrintf("delay: %d \n", delay);
 
 		Expression rhs_, rhs3_;
 		f.getExpression( rhs_ );

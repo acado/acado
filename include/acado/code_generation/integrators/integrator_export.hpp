@@ -187,10 +187,10 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue updateImplicitSystem( 	ExportStatementBlock* block,
-											const ExportIndex& index1,
-											const ExportIndex& index2,
-											const ExportIndex& tmp_index  	);
+		virtual returnValue updateImplicitSystem( 	ExportStatementBlock* block,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& tmp_index  	);
 
 
 		/** Exports the code needed to propagate the sensitivities of the states defined by the nonlinear, fully implicit system.
@@ -199,11 +199,11 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue propagateImplicitSystem( 	ExportStatementBlock* block,
-												const ExportIndex& index1,
-												const ExportIndex& index2,
-												const ExportIndex& index3,
-												const ExportIndex& tmp_index  	);
+		virtual returnValue propagateImplicitSystem( 	ExportStatementBlock* block,
+														const ExportIndex& index1,
+														const ExportIndex& index2,
+														const ExportIndex& index3,
+														const ExportIndex& tmp_index  	);
 
 
 		/** Sets integration grid (this grid is expected to be non equidistant, otherwise use the other setGrid function).

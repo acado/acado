@@ -147,10 +147,10 @@ returnValue ImplicitRungeKuttaExport::setLinearInput( const Matrix& M1, const Ma
 }
 
 
-returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs )
+returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs )
 {
 	if( !A3.isEmpty() ) {
-		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() || A3.getNumRows() != rhs.getDim() ) {
+		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() || A3.getNumRows() != _rhs.getDim() ) {
 			return RET_UNABLE_TO_EXPORT_CODE;
 		}
 		NX3 = A3.getNumRows();
@@ -162,7 +162,7 @@ returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 		A33 = A3;
 
 		OutputFcn f;
-		f << rhs;
+		f << _rhs;
 		Parameter         dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
@@ -175,7 +175,7 @@ returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 		u = Control(NU);
 		p = Parameter(NP);
 
-		if( f.getNDX() > (NX1+NX2) ) {
+		if( (uint)f.getNDX() > (NX1+NX2) ) {
 			return ACADOERROR( RET_INVALID_OPTION );
 		}
 		if( f.getNDX() > 0 ) NDX3 = NX1+NX2;
@@ -193,18 +193,18 @@ returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 
 		uint i;
 		OutputFcn g;
-		for( i = 0; i < rhs.getDim(); i++ ) {
-			g << forwardDerivative( rhs(i), x );
-			g << forwardDerivative( rhs(i), z );
-			g << forwardDerivative( rhs(i), u );
-			g << forwardDerivative( rhs(i), dx );
+		for( i = 0; i < _rhs.getDim(); i++ ) {
+			g << forwardDerivative( _rhs(i), x );
+			g << forwardDerivative( _rhs(i), z );
+			g << forwardDerivative( _rhs(i), u );
+			g << forwardDerivative( _rhs(i), dx );
 		}
 
 		dummy2.clearStaticCounters();
 		x = DifferentialState(NX);
 		NDX = NX;
 
-		Matrix dependencyMat = rhs.getDependencyPattern( x );
+		Matrix dependencyMat = _rhs.getDependencyPattern( x );
 		Vector dependency = sumRow( dependencyMat );
 		for( i = NX1+NX2; i < NX; i++ ) {
 			if( acadoRoundAway(dependency(i)) != 0 ) { // This expression should not depend on these differential states
@@ -214,7 +214,7 @@ returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 
 		OutputFcn f_large;
 		Matrix A3_large = expandOutputMatrix(A3);
-		f_large << rhs + A3_large*x;
+		f_large << _rhs + A3_large*x;
 
 		return (rhs3.init( f_large,"acado_rhs3",NX,NXA,NU ) & diffs_rhs3.init( g,"acado_diffs3",NX,NXA,NU ) );
 	}
@@ -1668,7 +1668,7 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 				loop1->addStatement( rk_xxx.getCol( j ) == rk_eta.getCol( j ) + rk_kkk.getRow( j )*rk_outH );
 			}
 		}
-		for( j = 0; j < numXA_output(i) > 0; j++ ) {
+		for( j = 0; j < numXA_output(i); j++ ) {
 			if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyZ(j)) != 0 ) {
 				loop1->addStatement( rk_xxx.getCol( NX+j ) == rk_kkk.getRow( NX+j )*rk_out );
 			}

@@ -253,7 +253,7 @@ returnValue ExplicitRungeKuttaExport::setLinearInput( const Matrix& M1, const Ma
 }
 
 
-returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs ) {
+returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }
@@ -338,7 +338,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 }
 
 
-returnValue ExplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outputGrids_, const std::vector<Expression> rhs ) {
+returnValue ExplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outputGrids_, const std::vector<Expression> _rhs ) {
 	
 	return ACADOERROR( RET_INVALID_OPTION );
 }

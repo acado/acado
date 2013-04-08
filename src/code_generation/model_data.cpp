@@ -175,15 +175,15 @@ returnValue ModelData::getOutputExpressions( std::vector<Expression>& outputExpr
 std::vector<Matrix> ModelData::getOutputDependencies( ) const {
 	std::vector<Matrix> outputDependencies;
 	if( hasCompressedStorage() ) {
-		for( int i = 0; i < outputNames.size(); i++ ) {
+		for( uint i = 0; i < outputNames.size(); i++ ) {
 			Vector colIndV = colInd_outputs[i];
 			Vector rowPtrV = rowPtr_outputs[i];
 
 			Matrix dependencyMat = zeros( dim_outputs[i],getNX()+NXA+NU+NDX );
 			int index = 1;
-			for( int j = 0; j < dim_outputs[i]; j++ ) {
-				int upper = rowPtrV(j+1);
-				for( int k = rowPtrV(j); k < upper; k++ ) {
+			for( uint j = 0; j < dim_outputs[i]; j++ ) {
+				uint upper = rowPtrV(j+1);
+				for( uint k = rowPtrV(j); k < upper; k++ ) {
 					dependencyMat(j,colIndV(k-1)-1) = index++;
 				}
 			}
@@ -272,7 +272,6 @@ returnValue ModelData::setNARXmodel( const uint _delay, const Matrix& _parms ) {
 		for( uint i = 1; i < delay; i++ ) {
 			numParms = numParms + (n+1)*pow(n,i)/2;
 		}
-		acadoPrintf("computed number of parameters: %d \n", numParms);
 		if( _parms.getNumCols() == numParms ) {
 			parms = _parms;
 		}
@@ -487,7 +486,7 @@ returnValue ModelData::setN( const uint N_ )
 Vector ModelData::getDimOutputs( ) const
 {
 	Vector nOutV( dim_outputs.size() );
-	for( uint i = 0; i < (int)dim_outputs.size(); i++ ) {
+	for( uint i = 0; i < dim_outputs.size(); i++ ) {
 		nOutV(i) = dim_outputs[i];
 	}
 	return nOutV;
@@ -510,7 +509,7 @@ returnValue ModelData::getDimOutputs( std::vector<uint>& dims ) const
 Vector ModelData::getNumMeas( ) const
 {
 	Vector nMeasV( num_meas.size() );
-	for( uint i = 0; i < (int)num_meas.size(); i++ ) {
+	for( uint i = 0; i < num_meas.size(); i++ ) {
 		nMeasV(i) = num_meas[i];
 	}
 	return nMeasV;

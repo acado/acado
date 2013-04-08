@@ -158,9 +158,9 @@ returnValue SIMexport::exportCode(	const String& dirName,
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 			
 	// export the evaluation file
-	int exportTest;
-	get( GENERATE_TEST_FILE, exportTest );
-	if ( exportTest && exportEvaluation( dirName, String( "compare.c" ) ) != SUCCESSFUL_RETURN )
+	int exportTestFile;
+	get( GENERATE_TEST_FILE, exportTestFile );
+	if ( exportTestFile && exportEvaluation( dirName, String( "compare.c" ) ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
@@ -742,6 +742,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	// THE EVALUATION:
 	int nil;
 	nil = system( (String(dirName) << "/./compare").getName() );
+	nil = nil+1;
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -1023,6 +1024,7 @@ returnValue SIMexport::executeTest( const String& _dirName ) {
 	nil = system( ((String) String("make clean -s -C ") << _dirName).getName() );
 	nil = system( ((String) String("make -s -C ") << _dirName).getName() );
 	nil = system( (String(_dirName) << "/./test").getName() );
+	nil = nil+1;
 	
 	return SUCCESSFUL_RETURN;
 }
