@@ -273,7 +273,18 @@ BooleanType ExportIndex::isVariable() const
 
 ExportArgument ExportIndex::makeArgument( ) const
 {
-	ExportArgument tmp((*this)->getName(), 1 , 1, (*this)->getType(), ACADO_LOCAL, BT_TRUE, emptyConstExportIndex);
+	String tmpName;
+
+	// In principle, this is an ugly hack. In case when an index is given,
+	// We give it a name which is equal to its value. This is done in order
+	// To be able to simplify function calls.
+
+	if (isGiven() == BT_TRUE)
+		tmpName = getGivenValue();
+	else
+		tmpName = (*this)->getName();
+
+	ExportArgument tmp(tmpName, 1 , 1, (*this)->getType(), ACADO_LOCAL, BT_TRUE, emptyConstExportIndex);
 	tmp.setDoc( getDoc() );
 
 	return tmp;

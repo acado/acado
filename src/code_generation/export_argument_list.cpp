@@ -133,7 +133,10 @@ returnValue ExportArgumentList::exportCode(	FILE* file,
 {
 	for (unsigned i = 0; i < arguments.size(); ++i)
 	{
-		if ( arguments[ i ].isGiven( ) == BT_TRUE )
+		// Allow only undefined arguments and defined integer scalars
+		if (	arguments[ i ].isGiven( ) == BT_TRUE &&
+				arguments[ i ].getDim() > 1 &&
+				arguments[ i ].getType() != INT )
 			continue;
 
 		if ( includeType == BT_TRUE )
