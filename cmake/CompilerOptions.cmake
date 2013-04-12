@@ -137,8 +137,10 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER
 #		SET( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -funroll-loops -ftree-vectorize  -pthtread" )
 #		SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -ftree-vectorize -gstabs+ -pthtread" )
 
-		# Option for FAT
-		SET( CMAKE_OSX_ARCHITECTURES "i386;x86_64;" )
+		# Build only for 64-bit arch. This requires (at least) OS X version >= 10.7.
+		IF ( NOT CMAKE_OSX_ARCHITECTURES ) 
+			SET( CMAKE_OSX_ARCHITECTURES "x86_64;" )
+		ENDIF()
 
 	ENDIF( APPLE )
 
