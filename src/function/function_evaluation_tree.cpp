@@ -1024,6 +1024,8 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
 
     acadoFPrintf(file,"}\n\n");
 
+    delete [] auxVarIndividualNames;
+
     return SUCCESSFUL_RETURN;
 }
 
