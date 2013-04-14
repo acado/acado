@@ -144,7 +144,7 @@ ExportIndex operator-(	const ExportIndex& _arg1,
 
 	if (_arg1.isGiven() == BT_TRUE && _arg2.isVariable() == BT_TRUE)
 	{
-		tmp.assignNode(new ExportIndexNode(_arg2.getName(), _arg2.getPrefix(), _arg2->getFactor(), _arg2->getOffset() - _arg1.getGivenValue()));
+		tmp.assignNode(new ExportIndexNode(_arg2.getName(), _arg2.getPrefix(), -1 * _arg2->getFactor(), _arg1->getGivenValue() - _arg2->getOffset()));
 
 		return tmp;
 	}

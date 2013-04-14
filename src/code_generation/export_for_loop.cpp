@@ -143,8 +143,12 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 	{
 		stringstream s;
 
-		s << "for (" << loopVariable.get().getName() << " = " << startValue.get().getName() << "; "
-				<< loopVariable.get().getName() << " < " << finalValue.get().getName() << "; ";
+		s << "for (" << loopVariable.get().getName() << " = " << startValue.get().getName() << "; ";
+
+		if (increment.isGiven() ==  BT_TRUE && increment.getGivenValue() == -1)
+			s << finalValue.get().getName() << " < " << loopVariable.get().getName() << "; ";
+		else
+			s << loopVariable.get().getName() << " < " << finalValue.get().getName() << "; ";
 		
 		if (increment.isGiven() == BT_TRUE)
 		{
