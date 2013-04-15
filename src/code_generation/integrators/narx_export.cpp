@@ -92,6 +92,7 @@ returnValue NARXExport::setup( )
 	uint diffsDim = NX*(NX+NU);
 	uint inputDim = NX*(NX+NU+1) + NU + NP;
 	// setup INTEGRATE function
+	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
 	if( equidistantControlGrid() ) {
 		integrate = ExportFunction( "integrate", rk_eta, reset_int );
@@ -123,10 +124,11 @@ returnValue NARXExport::setup( )
 	integrate.addStatement( rk_xxx.getCols( NX,inputDim-diffsDim ) == rk_eta.getCols( NX+diffsDim,inputDim ) );
 	integrate.addLinebreak( );
 	if( NX2 > 0 ) {
-		integrate.addStatement( String("if( ") << reset_int.getName() << " ) { \n" );
+		// TODO: is there a correct way of resetting this?
+//		integrate.addStatement( String("if( ") << reset_int.getName() << " ) { \n" );
 		Matrix zeroM = zeros(delay, NX);
-		integrate.addStatement( mem_narx == zeroM );
-		integrate.addStatement( String("} \n") );
+//		integrate.addStatement( mem_narx == zeroM );
+//		integrate.addStatement( String("} \n") );
 
 		if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
 			// Linear input:
