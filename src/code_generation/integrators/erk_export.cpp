@@ -167,7 +167,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	if( !equidistantControlGrid() ) {
 		loop.addStatement( "}\n" );
-		loop.unrollLoop();
+//		loop.unrollLoop();
 	}
 	integrate.addStatement( loop );
 	
