@@ -369,6 +369,7 @@ enum LogPrintMode
 
 enum OptionsName
 {
+	CG_USE_ARRIVAL_COST,						/**< Enable interface for arival cost calculation. */
 	CG_USE_OPENMP,								/**< Use OpenMP for parallelization in multiple shooting. */
 	CG_USE_VARIABLE_WEIGHTING_MATRIX,			/**< Use variable weighting matrix S on first N shooting nodes. */
 	CG_USE_C99,									/**< Code generation is allowed (or not) to export C-code that conforms C99 standard. */

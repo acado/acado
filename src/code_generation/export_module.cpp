@@ -148,6 +148,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( CG_COMPUTE_COVARIANCE_MATRIX,     NO         );
 	addOption( CG_USE_OPENMP,					 NO         );
 	addOption( CG_HARDCODE_CONSTRAINT_VALUES,    YES        );
+	addOption( CG_USE_ARRIVAL_COST,              NO         );
 
 	return SUCCESSFUL_RETURN;
 }
