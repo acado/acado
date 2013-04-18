@@ -36,8 +36,6 @@
 
 #include <acado/code_generation/integrators/discrete_export.hpp>
 
-#include <acado/code_generation/export_algorithm_factory.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 
@@ -98,24 +96,6 @@ class NARXExport : public DiscreteTimeExport
 		virtual returnValue setDifferentialEquation( const Expression& rhs );
 
 
-		/** .
-		 *
-		 *	@param[in] 		.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
-
-
-		/** .
-		 *
-		 *	@param[in] 		.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
-
-
 		/** Assigns the model to be used by the integrator.
 		 *
 		 *	@param[in] _rhs				Name of the function, evaluating the right-hand side.
@@ -136,27 +116,6 @@ class NARXExport : public DiscreteTimeExport
 		virtual returnValue getDataDeclarations(	ExportStatementBlock& declarations,
 													ExportStruct dataStruct = ACADO_ANY
 													) const;
-
-
-		/** Adds all function (forward) declarations of the auto-generated integrator to given list of declarations.
-		 *
-		 *	@param[in] declarations		List of declarations.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue getFunctionDeclarations(	ExportStatementBlock& declarations
-														) const;
-
-
-
-		/** Exports source code of the auto-generated integrator into the given directory.
-		 *
-		 *	@param[in] code				Code block containing the auto-generated integrator.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue getCode(	ExportStatementBlock& code
-										);
 
 
 		/** Exports the code needed to update the sensitivities of the states defined by the nonlinear part.
@@ -182,49 +141,6 @@ class NARXExport : public DiscreteTimeExport
 												const ExportIndex& index2,
 												const ExportIndex& index3,
 												const ExportIndex& tmp_index  	);
-							
-        
-        /** Sets up the output with the grids for the different output functions.									\n
-		*                                                                      										\n
-		*  \param outputGrids_	  	The vector containing a grid for each output function.			  				\n
-		*  \param rhs 	  	  		The expressions corresponding the output functions.								\n
-		*                                                                      										\n
-		*  \return SUCCESSFUL_RETURN
-		*/
-		virtual returnValue setupOutput( const std::vector<Grid> outputGrids_,
-									  const std::vector<Expression> rhs );
-
-
-		/** Sets up the output with the grids for the different output functions.									\n
-		 *                                                                      										\n
-		 *  \param outputGrids_	  		The vector containing a grid for each output function.			  			\n
-		 *  \param _outputNames 	  		The names of the output functions.									  		\n
-		 *  \param _diffs_outputNames 	The names of the functions, evaluating the derivatives of the outputs.		\n
-		 *  \param _dims_output 			The dimensions of the output functions.										\n
-		 *                                                                      										\n
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
-										  const std::vector<uint> _dims_output );
-
-
-		/** Sets up the output with the grids for the different output functions.										\n
-		 *                                                                      										\n
-		 *  \param outputGrids_	  			The vector containing a grid for each output function.			  			\n
-		 *  \param _outputNames 	  		The names of the output functions.									  		\n
-		 *  \param _diffs_outputNames 		The names of the functions, evaluating the derivatives of the outputs.		\n
-		 *  \param _dims_output 			The dimensions of the output functions.										\n
-		 *  \param _outputDependencies		A separate dependency matrix for each output.								\n
-		 *                                                                      										\n
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
-										  const std::vector<uint> _dims_output,
-										  const std::vector<Matrix> _outputDependencies );
 
 
 		/** Sets a polynomial NARX model to be used by the integrator.
@@ -239,13 +155,6 @@ class NARXExport : public DiscreteTimeExport
 
 
 	protected:
-
-
-		/** Returns the largest global export variable.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		ExportVariable getAuxVariable() const;
 
 
 		/** ..
