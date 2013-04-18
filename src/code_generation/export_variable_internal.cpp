@@ -160,7 +160,11 @@ const String ExportVariableInternal::get(	const ExportIndex& rowIdx,
 				s << getFullName().getName() << "[" << totalIdx.getGivenValue() << "]";
 		}
 		else
-			s << "(real_t)" << data(rowIdx.getGivenValue(), colIdx.getGivenValue());
+		{
+			Matrix m = data;
+			m.makeVector();
+			s << "(real_t)" << m(totalIdx.getGivenValue(), 0);
+		}
 	}
 	else
 		s << getFullName().getName() << "[" << totalIdx.get( ).getName() << "]";
@@ -493,8 +497,12 @@ BooleanType ExportVariableInternal::hasValue(	const ExportIndex& rowIdx,
 												double _value
 												) const
 {
-	if ( ( rowIdx.isGiven() == BT_TRUE ) && ( colIdx.isGiven() == BT_TRUE ) )
-		return acadoIsEqual(data(rowIdx.getGivenValue(), colIdx.getGivenValue()), _value);
+	// TODO This is not memory efficient btw.
+	ExportIndex ind = getTotalIdx(rowIdx + rowOffset, colIdx + colOffset);
+	Matrix m = data;
+	m.makeVector();
+	if (ind.isGiven() == BT_TRUE)
+		return acadoIsEqual(m(ind.getGivenValue(), 0), _value);
 
 	return BT_FALSE;
 }
