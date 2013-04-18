@@ -186,12 +186,23 @@ returnValue DiscreteTimeExport::getFunctionDeclarations(	ExportStatementBlock& d
 														) const
 {
 	declarations.addDeclaration( integrate );
-	if( NX1 > 0 ) {
-		declarations.addDeclaration( lin_input );
+
+	if( exportRhs ) {
+		if( NX1 > 0 ) {
+			declarations.addDeclaration( lin_input );
+		}
+		if( NX2 > 0 ) {
+			declarations.addDeclaration( rhs );
+			declarations.addDeclaration( diffs_rhs );
+		}
 	}
-	if( NX2 > 0 ) {
-		declarations.addDeclaration( rhs );
-		declarations.addDeclaration( diffs_rhs );
+	else {
+		Function tmpFun;
+		tmpFun << zeros(1,1);
+		ExportODEfunction tmpExport(tmpFun, getNameRHS());
+		declarations.addDeclaration( tmpExport );
+		tmpExport = ExportODEfunction(tmpFun, getNameDiffsRHS());
+		declarations.addDeclaration( tmpExport );
 	}
 
 	return SUCCESSFUL_RETURN;
