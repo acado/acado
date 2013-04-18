@@ -45,6 +45,10 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 									const String& _commonHeaderName
 									) : ExportAlgorithm( _userInteraction,_commonHeaderName )
 {
+	NX1 = 0;
+	NX2 = 0;
+	NX3 = 0;
+
 	exportRhs = BT_TRUE;
 	equidistant = BT_TRUE;
 	crsFormat = BT_FALSE;
@@ -57,6 +61,10 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 IntegratorExport::IntegratorExport(	const IntegratorExport& arg
 									) : ExportAlgorithm( arg )
 {
+	NX1 = arg.NX1;
+	NX2 = arg.NX2;
+	NX3 = arg.NX3;
+
 	exportRhs = BT_TRUE;
 	equidistant = BT_TRUE;
 	crsFormat = BT_FALSE;

@@ -81,7 +81,7 @@ returnValue NARXExport::setup( )
 	int printLevel;
 	get( PRINTLEVEL,printLevel );
 
-	if ( (PrintLevel)printLevel >= HIGH ) 
+	if ( (PrintLevel)printLevel >= HIGH )
 		acadoPrintf( "--> Preparing to export %s... ",fileName.getName() );
 
 	ExportIndex run( "run" );
@@ -92,6 +92,7 @@ returnValue NARXExport::setup( )
 	uint diffsDim = NX*(NX+NU);
 	uint inputDim = NX*(NX+NU+1) + NU + NP;
 	// setup INTEGRATE function
+	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
 	if( equidistantControlGrid() ) {
 		integrate = ExportFunction( "integrate", rk_eta, reset_int );
@@ -123,10 +124,11 @@ returnValue NARXExport::setup( )
 	integrate.addStatement( rk_xxx.getCols( NX,inputDim-diffsDim ) == rk_eta.getCols( NX+diffsDim,inputDim ) );
 	integrate.addLinebreak( );
 	if( NX2 > 0 ) {
-		integrate.addStatement( String("if( ") << reset_int.getName() << " ) { \n" );
+		// TODO: is there a correct way of resetting this?
+//		integrate.addStatement( String("if( ") << reset_int.getName() << " ) { \n" );
 		Matrix zeroM = zeros(delay, NX);
-		integrate.addStatement( mem_narx == zeroM );
-		integrate.addStatement( String("} \n") );
+//		integrate.addStatement( mem_narx == zeroM );
+//		integrate.addStatement( String("} \n") );
 
 		if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
 			// Linear input:
@@ -255,8 +257,8 @@ returnValue NARXExport::setup( )
 		integrate.addStatement( loop1 );
 	}
 
-	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "done.\n" );	
+	if ( (PrintLevel)printLevel >= HIGH )
+		acadoPrintf( "done.\n" );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -338,48 +340,6 @@ returnValue NARXExport::propagateImplicitSystem(	ExportStatementBlock* block, co
 
 returnValue NARXExport::setDifferentialEquation(	const Expression& rhs_ )
 {
-	// TODO: ADD NARX STUFF
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue NARXExport::setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 ) {
-
-	if( !A1.isEmpty() ) {
-		// NOTE: The matrix M1 is not used here since it is a discrete-time formulation
-
-		if( A1.getNumRows() != M1.getNumRows() || A1.getNumRows() != B1.getNumRows() || A1.getNumRows() != A1.getNumCols() || M1.getNumRows() != M1.getNumCols() || B1.getNumCols() != NU) {
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
-		NX1 = A1.getNumRows();
-		NDX = NX;
-		if( !equidistant ) {
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
-		A11 = A1;
-		B11 = B1;
-
-		Parameter         dummy0;
-		Control           dummy1;
-		DifferentialState dummy2;
-		dummy0.clearStaticCounters();
-		dummy1.clearStaticCounters();
-		dummy2.clearStaticCounters();
-		x = DifferentialState(NX1);
-		u = Control(NU);
-		p = Parameter(NP);
-
-		DifferentialEquation fun_input;
-		fun_input << A11*x+B11*u;
-		lin_input.init( fun_input,"acado_linear_input",NX,NXA,NU );
-	}
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }
@@ -393,89 +353,12 @@ returnValue NARXExport::setModel(	const String& _rhs, const String& _diffs_rhs )
 
 
 returnValue NARXExport::getDataDeclarations(	ExportStatementBlock& declarations,
-													ExportStruct dataStruct
+												ExportStruct dataStruct
 													) const
 {
-	ExportVariable max = getAuxVariable();
-	declarations.addDeclaration( max,dataStruct );
-	declarations.addDeclaration( rk_xxx,dataStruct );
 	declarations.addDeclaration( mem_narx,dataStruct );
-	declarations.addDeclaration( reset_int,dataStruct );
 
-	declarations.addDeclaration( rk_diffsPrev1,dataStruct );
-	declarations.addDeclaration( rk_diffsPrev2,dataStruct );
-
-	declarations.addDeclaration( rk_diffsNew1,dataStruct );
-	declarations.addDeclaration( rk_diffsNew2,dataStruct );
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue NARXExport::getFunctionDeclarations(	ExportStatementBlock& declarations
-														) const
-{
-	declarations.addDeclaration( integrate );
-	if( NX1 > 0 ) {
-		declarations.addDeclaration( lin_input );
-	}
-	if( NX2 > 0 ) {
-		declarations.addDeclaration( rhs );
-		declarations.addDeclaration( diffs_rhs );
-	}
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue NARXExport::getCode(	ExportStatementBlock& code
-										)
-{
-	if( NX1 > 0 ) {
-		code.addFunction( lin_input );
-		code.addStatement( "\n\n" );
-	}
-
-	if( NX2 > 0 ) {
-		code.addFunction( rhs );
-		code.addStatement( "\n\n" );
-		code.addFunction( diffs_rhs );
-		code.addStatement( "\n\n" );
-	}
-
-	if( !equidistantControlGrid() ) {
-		ExportVariable numStepsV( "numSteps", numSteps, STATIC_CONST_INT );
-		code.addDeclaration( numStepsV );
-		code.addLinebreak( 2 );
-	}
-	code.addFunction( integrate );
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue NARXExport::setupOutput( const std::vector<Grid> outputGrids_, const std::vector<Expression> _rhs ) {
-	
-	return ACADOERROR( RET_INVALID_OPTION );
-}
-
-
-returnValue NARXExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  	  	  	const std::vector<String> _outputNames,
-									  	  	  	  	const std::vector<String> _diffs_outputNames,
-									  	  	  	  	const std::vector<uint> _dims_output ) {
-
-	return ACADOERROR( RET_INVALID_OPTION );
-}
-
-
-returnValue NARXExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  	  	  	const std::vector<String> _outputNames,
-									  	  	  	  	const std::vector<String> _diffs_outputNames,
-									  	  	  	  	const std::vector<uint> _dims_output,
-									  	  	  	  	const std::vector<Matrix> _outputDependencies ) {
-
-	return ACADOERROR( RET_INVALID_OPTION );
+	return DiscreteTimeExport::getDataDeclarations( declarations, dataStruct );
 }
 
 
@@ -538,25 +421,6 @@ returnValue NARXExport::formNARXpolynomial( const uint num, const uint order, ui
 	}
 
 	return SUCCESSFUL_RETURN;
-}
-
-
-ExportVariable NARXExport::getAuxVariable() const
-{
-	ExportVariable max;
-	if( NX1 > 0 ) {
-		max = lin_input.getGlobalExportVariable();
-	}
-	if( NX2 > 0 ) {
-		if( rhs.getGlobalExportVariable().getDim() >= max.getDim() ) {
-			max = rhs.getGlobalExportVariable();
-		}
-		if( diffs_rhs.getGlobalExportVariable().getDim() >= max.getDim() ) {
-			max = diffs_rhs.getGlobalExportVariable();
-		}
-	}
-
-	return max;
 }
 
 
