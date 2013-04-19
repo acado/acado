@@ -125,7 +125,6 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
-		integrate.addStatement( String( "int " ) << run.getName() << ";\n" );
 		integrate.addStatement( String( "int numSteps[" ) << String( numSteps.getDim() ) << "] = {" << String( numSteps(0) ) );
 		uint i;
 		for( i = 1; i < numSteps.getDim(); i++ ) {
@@ -167,7 +166,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	if( !equidistantControlGrid() ) {
 		loop.addStatement( "}\n" );
-		loop.unrollLoop();
+//		loop.unrollLoop();
 	}
 	integrate.addStatement( loop );
 	
