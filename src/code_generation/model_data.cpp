@@ -182,9 +182,9 @@ std::vector<Matrix> ModelData::getOutputDependencies( ) const {
 			Matrix dependencyMat = zeros( dim_outputs[i],getNX()+NXA+NU+NDX );
 			int index = 1;
 			for( uint j = 0; j < dim_outputs[i]; j++ ) {
-				uint upper = rowPtrV(j+1);
-				for( uint k = rowPtrV(j); k < upper; k++ ) {
-					dependencyMat(j,colIndV(k-1)-1) = index++;
+				uint upper = (uint)rowPtrV(j+1);
+				for( uint k = (uint)rowPtrV(j); k < upper; k++ ) {
+					dependencyMat(j,(uint)colIndV(k-1)-1) = index++;
 				}
 			}
 
@@ -270,7 +270,7 @@ returnValue ModelData::setNARXmodel( const uint _delay, const Matrix& _parms ) {
 			numParms = numParms + n;
 		}
 		for( uint i = 1; i < delay; i++ ) {
-			numParms = numParms + (n+1)*pow(n,i)/2;
+			numParms = numParms + (n+1)*(uint)pow((double)n,(int)i)/2;
 		}
 		if( _parms.getNumCols() == numParms ) {
 			parms = _parms;
@@ -485,7 +485,7 @@ returnValue ModelData::setN( const uint N_ )
 
 Vector ModelData::getDimOutputs( ) const
 {
-	Vector nOutV( dim_outputs.size() );
+	Vector nOutV( (uint)dim_outputs.size() );
 	for( uint i = 0; i < dim_outputs.size(); i++ ) {
 		nOutV(i) = dim_outputs[i];
 	}
@@ -495,7 +495,7 @@ Vector ModelData::getDimOutputs( ) const
 
 uint ModelData::getNumOutputs( ) const
 {
-	return outputGrids.size();
+	return (uint)outputGrids.size();
 }
 
 
@@ -508,7 +508,7 @@ returnValue ModelData::getDimOutputs( std::vector<uint>& dims ) const
 
 Vector ModelData::getNumMeas( ) const
 {
-	Vector nMeasV( num_meas.size() );
+	Vector nMeasV( (uint)num_meas.size() );
 	for( uint i = 0; i < num_meas.size(); i++ ) {
 		nMeasV(i) = num_meas[i];
 	}
