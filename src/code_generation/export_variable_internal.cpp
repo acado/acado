@@ -201,21 +201,11 @@ uint ExportVariableInternal::getDim( ) const
 
 ExportVariable ExportVariableInternal::getTranspose( ) const
 {
-	unsigned nc = getNumCols();
-	unsigned nr = getNumRows();
+	Matrix m = data.transpose();
 
-	Matrix m(nc, nr);
-
-	for(unsigned i = 0; i < nc; ++i)
-		for(unsigned j = 0; j < nr; ++j)
-			m(i, j) = data(j, i);
-
-	ExportVariableInternal tmp(name, m, type, dataStruct, callItByValue, prefix);
-	tmp.setSubmatrixOffsets(colOffset, rowOffset, colDim, rowDim, nCols, nRows);
-	tmp.doAccessTransposed = BT_TRUE;
-
-	ExportVariable transposed;
-	transposed.assignNode( tmp.clone() );
+	ExportVariable transposed(name, m, type, dataStruct, callItByValue, prefix);
+	transposed->setSubmatrixOffsets(colOffset, rowOffset, colDim, rowDim, nCols, nRows);
+	transposed->doAccessTransposed = BT_TRUE;
 
 	return transposed;
 }
@@ -497,12 +487,10 @@ BooleanType ExportVariableInternal::hasValue(	const ExportIndex& rowIdx,
 												double _value
 												) const
 {
-	// TODO This is not memory efficient btw.
 	ExportIndex ind = getTotalIdx(rowIdx + rowOffset, colIdx + colOffset);
-	Matrix m = data;
-	m.makeVector();
 	if (ind.isGiven() == BT_TRUE)
-		return acadoIsEqual(m(ind.getGivenValue(), 0), _value);
+		return acadoIsEqual(
+				static_cast<const VectorspaceElement>(data).operator ()(ind.getGivenValue()), _value );
 
 	return BT_FALSE;
 }
