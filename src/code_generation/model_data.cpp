@@ -75,7 +75,7 @@ returnValue ModelData::setDimensions( uint _NX, uint _NU )
 }
 
 
-returnValue ModelData::addOutput( const OutputFcn& outputEquation_ ){
+uint ModelData::addOutput( const OutputFcn& outputEquation_ ){
 
 	if( rhs_name.isEmpty() && outputNames.size() == 0 ) {
 		Expression next;
@@ -87,11 +87,11 @@ returnValue ModelData::addOutput( const OutputFcn& outputEquation_ ){
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-    return SUCCESSFUL_RETURN;
+	return dim_outputs.size();
 }
 
 
-returnValue ModelData::addOutput( const String& output, const String& diffs_output, const uint dim ){
+uint ModelData::addOutput( const String& output, const String& diffs_output, const uint dim ){
 
 	if( outputExpressions.size() == 0 && differentialEquation.getNumDynamicEquations() == 0 ) {
 		outputNames.push_back( output );
@@ -102,12 +102,12 @@ returnValue ModelData::addOutput( const String& output, const String& diffs_outp
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-    return SUCCESSFUL_RETURN;
+	return dim_outputs.size();
 }
 
 
-returnValue ModelData::addOutput( 	const String& output, const String& diffs_output, const uint dim,
-									const String& colInd, const String& rowPtr	){
+uint ModelData::addOutput( 	const String& output, const String& diffs_output, const uint dim,
+							const String& colInd, const String& rowPtr	){
 
 
 	Vector colIndV = readFromFile( colInd.getName() );
@@ -120,7 +120,7 @@ returnValue ModelData::addOutput( 	const String& output, const String& diffs_out
 
 	addOutput( output, diffs_output, dim );
 
-    return SUCCESSFUL_RETURN;
+    return addOutput( output, diffs_output, dim );
 }
 
 

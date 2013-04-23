@@ -164,7 +164,7 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	returnValue addOutput( const OutputFcn& outputEquation_ );
+	uint addOutput( const OutputFcn& outputEquation_ );
 
 
 	/** Adds an output function.
@@ -175,7 +175,7 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	returnValue addOutput( const String& output, const String& diffs_output, const uint dim );
+	uint addOutput( const String& output, const String& diffs_output, const uint dim );
 
 
 	/** Adds an output function.
@@ -188,8 +188,8 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	returnValue addOutput( 	const String& output, const String& diffs_output, const uint dim,
-							const String& colInd, const String& rowPtr	);
+	uint addOutput( 	const String& output, const String& diffs_output, const uint dim,
+						const String& colInd, const String& rowPtr	);
 
 
     /** Sets up the output functions. 																			\n

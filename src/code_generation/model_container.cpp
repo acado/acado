@@ -96,19 +96,19 @@ returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const OutputFcn&
 }
 
 
-returnValue ModelContainer::addOutput( const OutputFcn& outputEquation_ ) {
+uint ModelContainer::addOutput( const OutputFcn& outputEquation_ ) {
 	return modelData.addOutput( outputEquation_ );
 }
 
 
-returnValue ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim ) {
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim ) {
 	return modelData.addOutput( output, diffs_output, dim );
 }
 
 
 
-returnValue ModelContainer::addOutput( 	const String& output, const String& diffs_output, const uint dim,
-						const String& colInd, const String& rowPtr	) {
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
+								const String& colInd, const String& rowPtr	) {
 	return modelData.addOutput( output, diffs_output, dim, colInd, rowPtr );
 }
 
