@@ -28,6 +28,8 @@ doc/latex
 *.out
 *.orig
 
+*.obj
+
 # Eclipse
 .project
 .cproject
