@@ -119,7 +119,7 @@ private:
 //
 
 /** Factory for creation of exported integrators.*/
-typedef ExportAlgorithmFactory<IntegratorExport, IntegratorType> IntegratorExportFactory;
+typedef ExportAlgorithmFactory<IntegratorExport, ExportIntegratorType> IntegratorExportFactory;
 
 CLOSE_NAMESPACE_ACADO
 

@@ -41,6 +41,7 @@
 #include <acado/function/function.hpp>
 #include <acado/ocp/ocp.hpp>
 #include <acado/code_generation/export_file.hpp>
+#include <acado/code_generation/integrators/integrator_export.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
