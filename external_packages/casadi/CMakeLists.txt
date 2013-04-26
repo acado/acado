@@ -65,34 +65,9 @@ FILE( GLOB ACADO_CASADI_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/symbolic/*.cpp )
 FILE( GLOB ACADO_CASADI_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/symbolic/*.hpp )
 
 #
-# Make static & shared libraries
+# Make static libraries
 #
 ADD_LIBRARY( acado_casadi STATIC ${ACADO_CASADI_SOURCES} )
-SET_TARGET_PROPERTIES( acado_casadi
-	PROPERTIES
-		OUTPUT_NAME acado_casadi		
-)
-
-ADD_LIBRARY( acado_casadi_s SHARED ${ACADO_CASADI_SOURCES} )
-SET_TARGET_PROPERTIES( acado_casadi_s
-	PROPERTIES
-		OUTPUT_NAME acado_casadi_s
-		VERSION ${ACADO_CASADI_VERSION}
-		SOVERSION ${ACADO_CASADI_SOVERSION}
-)
-
-################################################################################
-#
-# Installation rules
-#
-################################################################################
-
-INSTALL(
-	TARGETS
-		acado_casadi acado_casadi_s
-	DESTINATION
-		${INSTALL_LIB_DIR}
-)
 
 INSTALL(
 	FILES

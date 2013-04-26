@@ -61,7 +61,7 @@ SET( ACADO_VERSION_MAJOR  1 )
 SET( ACADO_VERSION_MINOR  1 )
 SET( ACADO_VERSION_PATCH  0 )
 SET( ACADO_VERSION_STRING
-		${ACADO_VERSION_MAJOR}.${ACADO_VERSION_MINOR}.${ACADO_VERSION_PATCH}
+		${ACADO_VERSION_MAJOR}.${ACADO_VERSION_MINOR}.${ACADO_VERSION_PATCH}beta
 )
 
 #
@@ -84,11 +84,6 @@ SET( TESTING_OUTPUT_PATH ${PROJECT_BINARY_DIR}/testing/automatic_testing )
 #
 SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )
 
-#
-# ACADO build flag
-#
-SET( ACADO_BUILD ON )
-
 ################################################################################
 #
 # User configuration
@@ -104,20 +99,29 @@ IF( NOT CMAKE_VERBOSE_MAKEFILE )
 ENDIF( NOT CMAKE_VERBOSE_MAKEFILE )
 
 #
+# Enable building of shared and static libraries
+#
+IF( NOT MSVC )
+	OPTION( ACADO_BUILD_SHARED "Build shared libraries" ON )
+	OPTION( ACADO_BUILD_STATIC "Build static libraries" OFF )
+ELSE ()
+	SET( ACADO_BUILD_SHARED OFF )
+	SET( ACADO_BUILD_STATIC ON )
+ENDIF()
+
+IF((NOT ACADO_BUILD_SHARED) AND (NOT ACADO_BUILD_STATIC))
+	MESSAGE( ERROR "You must build some libraries..." )
+ENDIF()
+
+#
 # Enable building of ...
 #
-OPTION( WITH_ACADO_EXAMPLES
-	"Building ACADO examples"
-	ON
-)
+OPTION( ACADO_WITH_EXAMPLES "Building ACADO examples" ON )
 
 #
 # Compilation of testing suite
 #
-OPTION( WITH_TESTING
-	"Compiling with tests"
-	OFF
-)
+OPTION( ACADO_WITH_TESTING "Building the testing framework -- TODO" OFF )
 
 #
 # ACADO developer flag
@@ -289,36 +293,32 @@ ADD_SUBDIRECTORY( ./src/code_generation/templates )
 # Build ACADO Toolkit library
 #
 UNSET( ACADO_SOURCES )
+
 FOREACH( DIR ${ACADO_SOURCE_DIRS} )
 	FILE( GLOB SRC ${DIR}/*.cpp )
 	SET( ACADO_SOURCES ${ACADO_SOURCES} ${SRC} )
 ENDFOREACH( DIR ${ACADO_SOURCE_DIRS} )
-ADD_LIBRARY( acado_toolkit STATIC ${ACADO_SOURCES} )
-TARGET_LINK_LIBRARIES(
-	acado_toolkit
-	acado_qpOASESextras acado_csparse acado_casadi
-)
-ADD_LIBRARY( acado_toolkit_s SHARED ${ACADO_SOURCES} )
-SET_TARGET_PROPERTIES( acado_toolkit_s
-	PROPERTIES
-		VERSION ${ACADO_VERSION_STRING}
-		SOVERSION ${ACADO_VERSION_MAJOR}
-)
 
-# Dependencies, dependencies...
-IF( NOT MSVC )
-	# Linux is assumed
+IF ( ACADO_BUILD_STATIC )	
+	ADD_LIBRARY( acado_toolkit STATIC ${ACADO_SOURCES} )
 	TARGET_LINK_LIBRARIES(
-		acado_toolkit_s
-		acado_qpOASESextras_s acado_csparse_s acado_casadi_s
+		acado_toolkit
+		acado_qpOASESextras acado_csparse acado_casadi
 	)
-ELSE( NOT MSVC )
-	# Windows, Visual Studio environment specifics...
+ENDIF ( ACADO_BUILD_STATIC )
+
+IF( ACADO_BUILD_SHARED )
+	ADD_LIBRARY( acado_toolkit_s SHARED ${ACADO_SOURCES} )
+	SET_TARGET_PROPERTIES( acado_toolkit_s
+		PROPERTIES
+			VERSION ${ACADO_VERSION_STRING}
+			SOVERSION ${ACADO_VERSION_MAJOR}
+	)
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit_s
 		acado_qpOASESextras acado_csparse acado_casadi
 	)
-ENDIF( NOT MSVC )
+ENDIF( ACADO_BUILD_SHARED )
 
 ################################################################################
 #
@@ -350,12 +350,12 @@ ADD_SUBDIRECTORY( ./external_packages/casadi )
 #
 # Tests
 #
-#IF( WITH_TESTING )
+#IF( ACADO_WITH_TESTING )
 #	ENABLE_TESTING()
 #	INCLUDE( CTest )
 #	SET( DBUILD_DASHBOARD_REPORTS = ON )
 #	ADD_SUBDIRECTORY( ./testing/automatic_testing ${TESTING_OUTPUT_PATH} )
-#ENDIF( WITH_TESTING )
+#ENDIF( ACADO_WITH_TESTING )
 
 ################################################################################
 #
@@ -366,12 +366,23 @@ ADD_SUBDIRECTORY( ./external_packages/casadi )
 #
 # Install ACADO Toolkit libs
 #
-INSTALL(
-	TARGETS
-		acado_toolkit acado_toolkit_s
-	DESTINATION
-		${INSTALL_LIB_DIR}
-)
+IF ( ACADO_BUILD_STATIC )
+	INSTALL(
+		TARGETS
+			acado_toolkit
+		DESTINATION
+			${INSTALL_LIB_DIR}
+	)
+ENDIF()
+
+IF( ACADO_BUILD_SHARED )
+	INSTALL(
+		TARGETS
+			acado_toolkit_s
+		DESTINATION
+			${INSTALL_LIB_DIR}
+	)
+ENDIF()
 
 #
 # Install ACADO include folder
@@ -381,7 +392,6 @@ INSTALL(
 		include/
 	DESTINATION
 		${INSTALL_INCLUDE_DIR}
-	PATTERN ".svn" EXCLUDE
 )
 
 #
@@ -396,7 +406,6 @@ INSTALL(
 		${EXTERNAL_PACKAGES_DIRS}
 	DESTINATION
 		${INSTALL_DATA_DIR}/external_packages
-	PATTERN ".svn" EXCLUDE
 )
 
 #
@@ -418,12 +427,17 @@ SET( ACADO_INSTALL_CMAKE_DIR
 	${INSTALL_CMAKE_DIR}
 )
 
-SET( ACADO_INSTALL_STATIC_LIBRARIES
-	acado_toolkit acado_qpOASESextras acado_csparse acado_casadi
-)
-SET( ACADO_INSTALL_SHARED_LIBRARIES
-	acado_toolkit_s acado_qpOASESextras_s acado_csparse_s acado_casadi_s
-)
+IF ( ACADO_BUILD_STATIC )
+	SET( ACADO_INSTALL_STATIC_LIBRARIES
+		acado_toolkit
+	)
+ENDIF()
+
+IF ( ACADO_BUILD_SHARED )
+	SET( ACADO_INSTALL_SHARED_LIBRARIES
+		acado_toolkit_s
+	)
+ENDIF()
 
 SET( ACADO_INSTALL_QPOASES_EMBEDDED_SOURCES
 	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Bounds.cpp
@@ -503,9 +517,6 @@ SET( ACADO_INCLUDE_DIRS
 
 SET( ACADO_LIBRARY_DIRS
 	${LIBRARY_OUTPUT_PATH}
-	${qpOASES_BINARY_DIR}/libs
-	${CSPARSE_BINARY_DIR}/libs
-	${ACADO_CASADI_BINARY_DIR}/libs
 )
 
 SET( ACADO_EXTERNAL_PACKAGES_DIR
@@ -571,7 +582,12 @@ SET( INCLUDE_MK_LIBRARY_DIRS
 	"-L${INCLUDE_MK_LIBRARY_DIRS}"
 )
 
-STRING(REPLACE ";" " -l" INCLUDE_MK_LIBS "${ACADO_STATIC_LIBRARIES}")
+# The following code favors shared libraries.
+IF ( ACADO_BUILD_SHARED )
+	STRING(REPLACE ";" " -l" INCLUDE_MK_LIBS "${ACADO_SHARED_LIBRARIES}")
+ELSEIF ( ACADO_BUILD_STATIC )
+	STRING(REPLACE ";" " -l" INCLUDE_MK_LIBS "${ACADO_STATIC_LIBRARIES}")
+ENDIF()
 SET( INCLUDE_MK_LIBS
 	"-l${INCLUDE_MK_LIBS}"
 )
@@ -589,7 +605,7 @@ CONFIGURE_FILE(
 ################################################################################
 
 SET( PC_VERSION
-	${ACADO_VERSION_STRING}beta
+	${ACADO_VERSION_STRING}
 )
 
 SET( PC_INCLUDE_DIRS 
@@ -623,9 +639,9 @@ CONFIGURE_FILE(
 #
 ################################################################################
 
-IF( WITH_ACADO_EXAMPLES )
+IF( ACADO_WITH_EXAMPLES )
 	ADD_SUBDIRECTORY( ./examples )
-ENDIF( WITH_ACADO_EXAMPLES )
+ENDIF( ACADO_WITH_EXAMPLES )
 
 ################################################################################
 #

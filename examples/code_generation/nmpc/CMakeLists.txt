@@ -80,10 +80,17 @@ FOREACH( SRC ${SOURCES} )
 
 	ADD_EXECUTABLE( code_generation_${EXEC_NAME} ${SRC} )
 
-	TARGET_LINK_LIBRARIES(
-		code_generation_${EXEC_NAME}
-		${ACADO_STATIC_LIBRARIES}
-	)
+	IF (ACADO_BUILD_SHARED)
+		TARGET_LINK_LIBRARIES(
+			code_generation_${EXEC_NAME}
+			${ACADO_SHARED_LIBRARIES}
+		)
+	ELSE()
+		TARGET_LINK_LIBRARIES(
+			code_generation_${EXEC_NAME}
+			${ACADO_STATIC_LIBRARIES}
+		)
+	ENDIF()
 		
 	SET_TARGET_PROPERTIES(
 		code_generation_${EXEC_NAME}
@@ -159,13 +166,20 @@ ADD_EXECUTABLE(
     # qpOASES embedded sources
 	${ACADO_QPOASES_EMBEDDED_SOURCES}
 )
-TARGET_LINK_LIBRARIES(
-	# Name of the executable
-    code_generation_getting_started_closed_loop
-    
-    # Link against ACADO libraries
-    ${ACADO_STATIC_LIBRARIES}
-)
+
+# Link against ACADO libraries
+IF (ACADO_BUILD_SHARED)
+	TARGET_LINK_LIBRARIES(
+		code_generation_getting_started_closed_loop
+		${ACADO_SHARED_LIBRARIES}
+		)
+ELSE()
+	TARGET_LINK_LIBRARIES(
+		code_generation_getting_started_closed_loop
+		${ACADO_STATIC_LIBRARIES}
+	)
+ENDIF()
+
 SET_TARGET_PROPERTIES(
 	code_generation_getting_started_closed_loop
 	PROPERTIES

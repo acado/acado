@@ -48,7 +48,12 @@
 ################################################################################
 
 #
-# Temporary patch, needed for compilation
+# ACADO build flag
+#
+SET( ACADO_BUILD ON )
+
+#
+# Temporary patch, needed for compilation of the qpOASES embedded (at least)
 #
 ADD_DEFINITIONS( -DACADO_CMAKE_BUILD )
 
@@ -91,8 +96,8 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER
 	#
 	# Compiler options from original Makefiles
 	#
-	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
-	SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
+	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
+	SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
 	
 	IF( ACADO_DEVELOPER )
 		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline" )
@@ -112,16 +117,6 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER
 	SET(CMAKE_C_FLAGS_MINSIZEREL		"${CMAKE_C_FLAGS_MINSIZEREL} ")
 	SET(CMAKE_C_FLAGS_RELEASE			"${CMAKE_C_FLAGS_RELEASE} -O3")
 	SET(CMAKE_C_FLAGS_RELWITHDEBINFO	"${CMAKE_C_FLAGS_RELWITHDEBINFO} -DNDEBUG -O3")
-
-	#
-	# The following commands are needed to fix a problem with the libraries
-	# for Linux 64 bits
-	#
-	IF( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" )
-		MESSAGE( STATUS "x86_64 architecture detected - setting flag -fPIC" )
-		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
-		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC" )
-	ENDIF( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" )
 
 	#
 	# Apple specifics
