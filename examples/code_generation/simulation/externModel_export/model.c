@@ -2,11 +2,11 @@
 #include "acado.h"
 
 
-void rhs( real_t *acado_x, real_t *acado_f ){
-real_t *acado_xd = acado_x;
-real_t *acado_xa = acado_x + 6;
-real_t *acado_u  = acado_x + 11;
-real_t *acado_dx = acado_x + 12;
+void rhs( const real_t *acado_x, real_t *acado_f ){
+const real_t *acado_xd = acado_x;
+const real_t *acado_xa = acado_x + 6;
+const real_t *acado_u  = acado_x + 11;
+const real_t *acado_dx = acado_x + 12;
 
 /* COMPUTE INTERMEDIATE STATES: */
 /* ---------------------------- */
@@ -28,11 +28,11 @@ acado_f[10] = (((((real_t)(0.)-acado_xd[5])*acado_xd[3])-(acado_xa[2]*acado_xd[0
 
 
 
-void rhs_jac( real_t *acado_x, real_t *acado_f ){
-real_t *acado_xd = acado_x;
-real_t *acado_xa = acado_x + 6;
-real_t *acado_u  = acado_x + 11;
-real_t *acado_dx = acado_x + 12;
+void rhs_jac( const real_t *acado_x, real_t *acado_f ){
+const real_t *acado_xd = acado_x;
+const real_t *acado_xa = acado_x + 6;
+const real_t *acado_u  = acado_x + 11;
+const real_t *acado_dx = acado_x + 12;
 
 /* COMPUTE INTERMEDIATE STATES: */
 /* ---------------------------- */
@@ -241,10 +241,10 @@ acado_f[197] = (real_t)(0.);
 
 
 
-void out( real_t *acado_x, real_t *acado_f ){
-real_t *acado_xd = acado_x;
-real_t *acado_xa = acado_x + 6;
-real_t *acado_dx = acado_x + 12;
+void out( const real_t *acado_x, real_t *acado_f ){
+const real_t *acado_xd = acado_x;
+const real_t *acado_xa = acado_x + 6;
+const real_t *acado_dx = acado_x + 12;
 
 /* COMPUTE INTERMEDIATE STATES: */
 /* ---------------------------- */
@@ -257,10 +257,10 @@ acado_f[1] = acado_xa[4];
 
 
 
-void out_jac( real_t *acado_x, real_t *acado_f ){
-real_t *acado_xd = acado_x;
-real_t *acado_xa = acado_x + 6;
-real_t *acado_dx = acado_x + 12;
+void out_jac( const real_t *acado_x, real_t *acado_f ){
+const real_t *acado_xd = acado_x;
+const real_t *acado_xa = acado_x + 6;
+const real_t *acado_dx = acado_x + 12;
 
 /* COMPUTE INTERMEDIATE STATES: */
 /* ---------------------------- */
