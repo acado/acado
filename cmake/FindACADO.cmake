@@ -60,17 +60,17 @@
 ################################################################################
 
 MESSAGE( STATUS "********************************************************************************" )
-MESSAGE( STATUS "Looking for ACADO toolkit: \n" )
+MESSAGE( STATUS "---> Looking for ACADO toolkit:" )
 
 #
 # Include folders
 #
 SET( ACADO_INCLUDE_DIRS $ENV{ACADO_ENV_INCLUDE_DIRS} )
 IF( ACADO_INCLUDE_DIRS )
-	MESSAGE( STATUS "Found ACADO toolkit include directories: ${ACADO_INCLUDE_DIRS} \n" )
+	MESSAGE( STATUS "Found ACADO toolkit include directories: ${ACADO_INCLUDE_DIRS}" )
 	SET( ACADO_INCLUDE_DIRS_FOUND TRUE )
 ELSE( ACADO_INCLUDE_DIRS )
-	MESSAGE( STATUS "Could not find ACADO toolkit include directories \n" )
+	MESSAGE( STATUS "Could not find ACADO toolkit include directories" )
 ENDIF( ACADO_INCLUDE_DIRS )
 
 #
@@ -78,10 +78,10 @@ ENDIF( ACADO_INCLUDE_DIRS )
 #
 SET( ACADO_LIBRARY_DIRS $ENV{ACADO_ENV_LIBRARY_DIRS} )
 IF( ACADO_LIBRARY_DIRS )
-	MESSAGE( STATUS "Found ACADO toolkit library directories: ${ACADO_LIBRARY_DIRS} \n" )
+	MESSAGE( STATUS "Found ACADO toolkit library directories: ${ACADO_LIBRARY_DIRS}" )
 	SET( ACADO_LIBRARY_DIRS_FOUND TRUE )
 ELSE( ACADO_LIBRARY_DIRS )
-	MESSAGE( STATUS "Could not find ACADO toolkit library directories \n" )
+	MESSAGE( STATUS "Could not find ACADO toolkit library directories" )
 ENDIF( ACADO_LIBRARY_DIRS )
 
 #
@@ -90,10 +90,9 @@ ENDIF( ACADO_LIBRARY_DIRS )
 
 SET ( STATIC_TMP $ENV{ACADO_ENV_STATIC_LIBRARIES})
 IF ( NOT STATIC_TMP )
-	MESSAGE( STATUS "Could not find any ACADO static library." )
+	MESSAGE( STATUS "Could not find ACADO static library." )
 	SET( ACADO_STATIC_LIBS_FOUND FALSE )
 ELSE()
-	MESSAGE( STATUS "Looking for ACADO toolkit static libraries" )
 	SET( ACADO_STATIC_LIBS_FOUND TRUE )
 	UNSET( ACADO_STATIC_LIBRARIES )
 	FOREACH( LIB $ENV{ACADO_ENV_STATIC_LIBRARIES} )
@@ -128,11 +127,10 @@ ENDIF()
 #
 SET( SHARED_TMP $ENV{ACADO_ENV_SHARED_LIBRARIES} )
 IF ( NOT SHARED_TMP )
-	MESSAGE( STATUS "Could not find any ACADO shared library." )
+	MESSAGE( STATUS "Could not find ACADO shared library." )
 	SET( ACADO_SHARED_LIBS_FOUND FALSE )
 ELSE()
 SET( ACADO_SHARED_LIBS_FOUND TRUE )
-	MESSAGE( STATUS "Looking for ACADO toolkit shared libraries" )
 	UNSET( ACADO_SHARED_LIBRARIES )
 	FOREACH( LIB $ENV{ACADO_ENV_SHARED_LIBRARIES} )
 		UNSET( ACADO_TOOLKIT_SHARED_${LIB} )
