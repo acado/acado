@@ -60,7 +60,7 @@ ExportVariable::ExportVariable(	const String& _name,
 	Matrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal(_name, m, _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 
@@ -72,32 +72,38 @@ ExportVariable::ExportVariable(	const String& _name,
 								const String& _prefix
 								)
 {
+	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
+}
+
+ExportVariable::ExportVariable(	const String& _name,
+								const matrixPtr& _data,
+								ExportType _type,
+								ExportStruct _dataStruct,
+								BooleanType _callItByValue,
+								const String& _prefix
+								)
+{
 	assignNode(new ExportVariableInternal(_name, _data, _type, _dataStruct, _callItByValue, _prefix));
 }
 
 ExportVariable::ExportVariable( const Matrix& _data )
 {
-	assignNode(new ExportVariableInternal("var", _data));
+	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( _data ))));
 }
 
 ExportVariable::ExportVariable( const Vector& _data )
 {
-	Matrix m( _data );
-
-	assignNode(new ExportVariableInternal("var", m));
+	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( _data ))));
 }
 
 ExportVariable::ExportVariable( const double _data )
 {
-	Matrix m( _data );
-
-	assignNode(new ExportVariableInternal("var", m));
+	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( _data ))));
 }
 
 
 ExportVariable::~ExportVariable( )
-{
-}
+{}
 
 ExportVariable ExportVariable::clone() const
 {
@@ -133,23 +139,7 @@ ExportVariable& ExportVariable::setup(	const String& _name,
 	Matrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal(_name, m, _type, _dataStruct, _callItByValue, _prefix));
-
-//	if ( isNull() )
-//		assignNode(new ExportVariableInternal);
-//
-//	setName( _name );
-//
-//
-//	(*this)->data = m;
-//
-//	setDataStruct( _dataStruct );
-//
-//	(*this)->callItByValue = _callItByValue;
-//
-//	setPrefix( _prefix );
-//
-//	(*this)->setSubmatrixOffsets(0, 0, _nRows, _nCols, 0, 0);
+	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 
 	return *this;
 }
@@ -163,53 +153,24 @@ ExportVariable& ExportVariable::setup(	const String& _name,
 										const String& _prefix
 										)
 {
-	assignNode(new ExportVariableInternal(_name, _data, _type, _dataStruct, _callItByValue, _prefix));
-
-//	setName( _name );
-//
-//	(*this)->data = _data;
-//
-//	setDataStruct( _dataStruct );
-//
-//	(*this)->callItByValue = _callItByValue;
-//
-//	(*this)->doAccessTransposed = BT_FALSE;
-//
-//	setPrefix( _prefix );
-//
-//	(*this)->setSubmatrixOffsets(0, 0, _data.getNumRows(), _data.getNumCols(), 0, 0);
+	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
 
 	return *this;
 }
-
-
-
-//double& ExportVariable::operator()(	uint rowIdx,
-//									uint colIdx
-//									)
-//{
-//	return (*this)->data(rowIdx, colIdx);
-//}
 
 
 double ExportVariable::operator()(	uint rowIdx,
 									uint colIdx
 									) const
 {
-	return (*this)->data(rowIdx, colIdx);}
-
-
-//double& ExportVariable::operator()(	uint totalIdx
-//									)
-//{
-//	return (*this)->data(totalIdx / (*this)->data.getNumCols(), totalIdx % (*this)->data.getNumCols());
-//}
+	return (*this)->data->operator()(rowIdx, colIdx);
+}
 
 
 double ExportVariable::operator()(	uint totalIdx
 									) const
 {
-	return (*this)->data(totalIdx / (*this)->data.getNumCols(), totalIdx % (*this)->data.getNumCols());
+	return (*this)->data->operator()(totalIdx / (*this)->data->getNumCols(), totalIdx % (*this)->data->getNumCols());
 }
 
 

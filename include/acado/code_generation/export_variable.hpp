@@ -105,6 +105,24 @@ class ExportVariable : public ExportArgument
 						const String& _prefix = emptyConstString
 						);
 
+		/** Constructor which takes the name and type string of the variable.
+		 *	Moreover, it initializes the variable with the dimensions and the
+		 *	values of the given matrix.
+		 *
+		 *	@param[in] _name			Name of the argument.
+		 *	@param[in] _data			Shared pointer to Matrix used for initialization.
+		 *	@param[in] _type			Data type of the argument.
+		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
+		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
+		 */
+		ExportVariable(	const String& _name,
+						const matrixPtr& _data,
+						ExportType _type = REAL,
+						ExportStruct _dataStruct = ACADO_LOCAL,
+						BooleanType _callItByValue = BT_FALSE,
+						const String& _prefix = emptyConstString
+						);
+
 		/** Constructor which converts a given matrix into an ExportVariable.
 		 *
 		 *	@param[in] _data			Matrix used for initialization.

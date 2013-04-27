@@ -103,7 +103,7 @@ class ExportArgument : public ExportData
 		 *								a pointer to this address within the memory of the argument is passed.
 		 */
 		ExportArgument(	const String& _name,
-						const Matrix& _data,
+						const matrixPtr& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callByValue = BT_FALSE,

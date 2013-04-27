@@ -47,7 +47,7 @@ ExportArgument::ExportArgument( )
 {
 	Matrix m(0, 0);
 	assignNode(new ExportArgumentInternal(
-				"defaultArgumentName", m, REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConstString));
+				"defaultArgumentName", matrixPtr(new Matrix( m )), REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConstString));
 }
 
 
@@ -65,12 +65,12 @@ ExportArgument::ExportArgument(	const String& _name,
 	m.setAll( undefinedEntry );
 
 	assignNode(new ExportArgumentInternal(
-			_name, m, _type, _dataStruct, _callItByValue, _addressIdx, _prefix));
+			_name, matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _addressIdx, _prefix));
 }
 
 
 ExportArgument::ExportArgument(	const String& _name,
-								const Matrix& _data,
+								const matrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callItByValue,
@@ -86,7 +86,7 @@ ExportArgument::ExportArgument( const Matrix& _data
 								)
 {
 	assignNode(new ExportArgumentInternal(
-			"defaultArgumentName", _data, REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConstString));
+			"defaultArgumentName", matrixPtr(new Matrix( _data )), REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConstString));
 }
 
 ExportArgumentInternal* ExportArgument::operator->()

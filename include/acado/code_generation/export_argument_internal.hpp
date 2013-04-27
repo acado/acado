@@ -83,7 +83,7 @@ class ExportArgumentInternal : public ExportDataInternal
 		 *								a pointer to this address within the memory of the argument is passed.
 		 */
 		ExportArgumentInternal(	const String& _name,
-								const Matrix& _data,
+								const matrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callByValue,
@@ -200,7 +200,7 @@ class ExportArgumentInternal : public ExportDataInternal
 
 	protected:
 
-		Matrix data;								/**< Matrix containing the values of each component of the argument
+		matrixPtr data;								/**< Matrix containing the values of each component of the argument
 													 *   (by default, all entries are undefined). */
 		ExportIndex addressIdx;						/**< Address index in case not the argument itself but a pointer to
 													 *   this address within the memory of the argument is to be passed. */

@@ -32,6 +32,12 @@
 #ifndef ACADO_TOOLKIT_MATRIX_HPP
 #define ACADO_TOOLKIT_MATRIX_HPP
 
+#ifdef _WIN32
+    #include <memory>
+#else
+    #include <tr1/memory>
+#endif
+
 
 BEGIN_NAMESPACE_ACADO
 
@@ -807,6 +813,9 @@ class Matrix : public VectorspaceElement{
         SparseSolver *solver;   /**< Optional sparse solver */
 
 };
+
+/** Shared pointer of the Matrix class. */
+typedef std::tr1::shared_ptr< Matrix > matrixPtr;
 
 
 CLOSE_NAMESPACE_ACADO

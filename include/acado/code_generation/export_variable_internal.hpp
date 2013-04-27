@@ -84,7 +84,7 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
 		ExportVariableInternal(	const String& _name,
-								const Matrix& _data,
+								const matrixPtr& _data,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
 								BooleanType _callItByValue = BT_FALSE,

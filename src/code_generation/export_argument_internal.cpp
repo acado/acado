@@ -51,24 +51,24 @@ static const double undefinedEntry = 1073741824.03125; // = 2^30 + 2^-5
 
 ExportArgumentInternal::ExportArgumentInternal( ) : ExportDataInternal()
 {
-	data.init(0, 0);
+	data->init(0, 0);
 
 	callItByValue = BT_FALSE;
 }
 
 ExportArgumentInternal::ExportArgumentInternal(	const String& _name,
-												const Matrix& _data,
+												const matrixPtr& _data,
 												ExportType _type,
 												ExportStruct _dataStruct,
 												BooleanType _callItByValue,
 												const ExportIndex& _addressIdx,
 												const String& _prefix
-												) : ExportDataInternal(_name, _type, _dataStruct, _prefix)
+												)
+	: ExportDataInternal(_name, _type, _dataStruct, _prefix)
 {
-	data = _data;
-
+	data = _data ;
 	callItByValue = _callItByValue;
-	addressIdx  = _addressIdx;
+	addressIdx =  _addressIdx;
 }
 
 ExportArgumentInternal::~ExportArgumentInternal( )
@@ -95,7 +95,7 @@ ExportArgument ExportArgumentInternal::getAddress(	const ExportIndex& rowIdx,
 
 	ExportIndex ind = getTotalIdx(rowIdx, colIdx);
 
-	ExportArgument tmp(name, getNumRows(), getNumCols(), type, dataStruct, BT_FALSE, ind, prefix);
+	ExportArgument tmp(name, data, type, dataStruct, BT_FALSE, ind, prefix);
 
 	return tmp;
 }
@@ -133,19 +133,19 @@ const String ExportArgumentInternal::getAddressString(	BooleanType withDataStruc
 
 uint ExportArgumentInternal::getNumRows( ) const
 {
-	return data.getNumRows( );
+	return data->getNumRows( );
 }
 
 
 uint ExportArgumentInternal::getNumCols( ) const
 {
-	return data.getNumCols( );
+	return data->getNumCols( );
 }
 
 
 uint ExportArgumentInternal::getDim( ) const
 {
-	return data.getDim( );
+	return data->getDim( );
 }
 
 
@@ -154,9 +154,9 @@ BooleanType ExportArgumentInternal::isGiven( ) const
 	if ( getDim() == 0 )
 		return BT_TRUE;
 
-	for ( uint i=0; i<getNumRows(); ++i )
-		for ( uint j=0; j<getNumCols(); ++j )
-			if ( acadoIsEqual( data(i,j),undefinedEntry ) == BT_TRUE )
+	for (uint i = 0; i < getNumRows(); ++i)
+		for (uint j = 0; j < getNumCols(); ++j)
+			if (acadoIsEqual(data->operator()(i, j), undefinedEntry) == BT_TRUE)
 				return BT_FALSE;
 
 	return BT_TRUE;
@@ -197,17 +197,17 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
 	}
 	else
 	{
-		if (data.getNumCols() > 1 && data.getNumRows() > 1)
+		if (data->getNumCols() > 1 && data->getNumRows() > 1)
 		{
 			acadoFPrintf(file,
-					"/** %s %d %s %d %s", "Matrix of size:", data.getNumRows(), "x", data.getNumCols(), "(row major format)");
+					"/** %s %d %s %d %s", "Matrix of size:", data->getNumRows(), "x", data->getNumCols(), "(row major format)");
 		}
 		else
 		{
-			if (data.getNumCols() == 1)
-				acadoFPrintf(file,"/** %s %d",      "Column vector of size:", data.getNumRows());
+			if (data->getNumCols() == 1)
+				acadoFPrintf(file,"/** %s %d",      "Column vector of size:", data->getNumRows());
 			else
-				acadoFPrintf(file,"/** %s %d",      "Row vector of size:", data.getNumCols());
+				acadoFPrintf(file,"/** %s %d",      "Row vector of size:", data->getNumCols());
 		}
 
 		if (description.isEmpty() == BT_FALSE)
@@ -232,12 +232,12 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
 		{
 		case INT:
 		case STATIC_CONST_INT:
-			data.printToFile( file, "", "{ "," };\n", 5, 0, ", ",", \n" );
+			data->printToFile( file, "", "{ "," };\n", 5, 0, ", ",", \n" );
 			break;
 
 		case REAL:
 		case STATIC_CONST_REAL:
-			data.printToFile( file, "", "{ "," };\n", 1, 16, ", ",", \n" );
+			data->printToFile( file, "", "{ "," };\n", 1, 16, ", ",", \n" );
 			break;
 
 		default:
@@ -257,7 +257,7 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
 
 uint ExportArgumentInternal::getColDim( ) const
 {
-	return data.getNumCols( );
+	return data->getNumCols( );
 }
 
 ExportIndex	ExportArgumentInternal::getTotalIdx(	const ExportIndex& rowIdx,

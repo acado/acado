@@ -62,20 +62,21 @@ ExportVariableInternal::ExportVariableInternal( ) : ExportArgumentInternal( )
 }
 
 ExportVariableInternal::ExportVariableInternal(	const String& _name,
-												const Matrix& _data,
+												const matrixPtr& _data,
 												ExportType _type,
 												ExportStruct _dataStruct,
 												BooleanType _callItByValue,
 												const String& _prefix
-												) : ExportArgumentInternal(_name, _data, _type, _dataStruct, _callItByValue, emptyConstExportIndex, _prefix)
+												)
+	: ExportArgumentInternal(_name, _data, _type, _dataStruct, _callItByValue, emptyConstExportIndex, _prefix)
 {
 	doAccessTransposed = BT_FALSE;
 
 	rowOffset = 0;
 	colOffset = 0;
 
-	rowDim = _data.getNumRows();
-	colDim = _data.getNumCols();
+	rowDim = _data->getNumRows();
+	colDim = _data->getNumCols();
 	nRows = 0;
 	nCols = 0;
 }
@@ -93,17 +94,17 @@ ExportVariableInternal* ExportVariableInternal::clone() const
 
 returnValue ExportVariableInternal::resetAll( )
 {
-	return data.setAll( undefinedEntry );
+	return data->setAll( undefinedEntry );
 }
 
 
 returnValue ExportVariableInternal::resetDiagonal( )
 {
-	if ( getNumRows() != getNumCols() )
+	if (getNumRows() != getNumCols())
 		return ACADOERROR( RET_MATRIX_NOT_SQUARE );
 
-	for( uint i=0; i<getNumRows(); ++i )
-		data(i, i) = undefinedEntry;
+	for (unsigned i = 0; i < getNumRows(); ++i)
+		data->operator()(i, i) = undefinedEntry;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -161,9 +162,7 @@ const String ExportVariableInternal::get(	const ExportIndex& rowIdx,
 		}
 		else
 		{
-			Matrix m = data;
-			m.makeVector();
-			s << "(real_t)" << m(totalIdx.getGivenValue(), 0);
+			s << "(real_t)" << static_cast<const VectorspaceElement&>(*data).operator ()(totalIdx.getGivenValue());
 		}
 	}
 	else
@@ -180,7 +179,7 @@ uint ExportVariableInternal::getNumRows( ) const
 	if ( nRows > 0 )
 		return nRows;
 
-	return data.getNumRows( );
+	return data->getNumRows( );
 }
 
 
@@ -189,7 +188,7 @@ uint ExportVariableInternal::getNumCols( ) const
 	if ( nCols > 0 )
 		return nCols;
 
-	return data.getNumCols( );
+	return data->getNumCols( );
 }
 
 
@@ -201,7 +200,7 @@ uint ExportVariableInternal::getDim( ) const
 
 ExportVariable ExportVariableInternal::getTranspose( ) const
 {
-	Matrix m = data.transpose();
+	Matrix m = data->transpose();
 
 	ExportVariable transposed(name, m, type, dataStruct, callItByValue, prefix);
 	transposed->setSubmatrixOffsets(colOffset, rowOffset, colDim, rowDim, nCols, nRows);
@@ -216,12 +215,7 @@ ExportVariable ExportVariableInternal::getRow(	const ExportIndex& idx
 {
 	ASSERT( isAccessedTransposed() == BT_FALSE );
 
-	ExportVariable tmp;
-	tmp.assignNode( this->clone() );
-
-	// OR, proposed by Joel
-//	ExportVariable tmp = shared_from_this<ExportVariable>();
-//	tmp.makeUnique();
+	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
 	if (idx.isGiven() == BT_TRUE)
 	{
@@ -241,8 +235,7 @@ ExportVariable ExportVariableInternal::getCol(	const ExportIndex& idx
 {
 	ASSERT( isAccessedTransposed() == BT_FALSE );
 
-	ExportVariable tmp;
-	tmp.assignNode( this->clone() );
+	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
 	if (idx.isGiven() == BT_TRUE)
 	{
@@ -263,7 +256,7 @@ ExportVariable ExportVariableInternal::getRows(	const ExportIndex& idx1,
 {
 	ASSERT( isAccessedTransposed() == BT_FALSE );
 
-	ExportVariable tmp;
+	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
 	ExportIndex size = idx2 - idx1;
 
@@ -280,7 +273,6 @@ ExportVariable ExportVariableInternal::getRows(	const ExportIndex& idx1,
 	else if (size.isGiven() == BT_FALSE)
 		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getRows: Cannot determine size");
 
-	tmp.assignNode( this->clone() );
 	tmp->setSubmatrixOffsets(idx1, 0, getNumRows(), getNumCols( ), size.getGivenValue(), getNumCols( ));
 
 	return tmp;
@@ -293,11 +285,7 @@ ExportVariable ExportVariableInternal::getCols(	const ExportIndex& idx1,
 {
 	ASSERT( isAccessedTransposed() == BT_FALSE );
 
-	ExportVariable tmp;
-
-	// OR, proposed by Joel
-//	ExportVariable tmp = shared_from_this<ExportVariable>();
-//	tmp.makeUnique();
+	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
 	ExportIndex size = idx2 - idx1;
 
@@ -314,7 +302,6 @@ ExportVariable ExportVariableInternal::getCols(	const ExportIndex& idx1,
 	else if (size.isGiven() == BT_FALSE)
 		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getCols: Cannot determine size");
 
-	tmp.assignNode( this->clone() );
 	tmp->setSubmatrixOffsets(0, idx1, getNumRows(), getNumCols( ), getNumRows( ), size.getGivenValue() );
 	return tmp;
 }
@@ -328,6 +315,7 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 {
 	ASSERT( isAccessedTransposed() == BT_FALSE );
 
+//	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 	ExportVariable tmp;
 
 	ExportIndex sizeRow = _rowIdx2 - _rowIdx1;
@@ -359,7 +347,7 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 	else if (sizeCol.isGiven() == BT_FALSE)
 		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getSubMatrix: cannot determine column size");
 
-	tmp.assignNode( this->clone() );
+	tmp.assignNode(new ExportVariableInternal(name, data, type, dataStruct, callItByValue, prefix));
 	tmp->setSubmatrixOffsets(_rowIdx1, _colIdx1, getNumRows(), getNumCols( ), sizeRow.getGivenValue(), sizeCol.getGivenValue());
 
 	return tmp;
@@ -375,7 +363,7 @@ ExportVariable ExportVariableInternal::makeRowVector( ) const
 
 	for ( uint i=0; i<getNumRows(); ++i )
 		for ( uint j=0; j<getNumCols(); ++j )
-			m(0,i * nc + j) = data(i, j);
+			m(0,i * nc + j) = data->operator()(i, j);
 
 	ExportVariable tmp(name, m, type, dataStruct, callItByValue, prefix);
 
@@ -392,7 +380,7 @@ ExportVariable ExportVariableInternal::makeColVector( ) const
 
 	for ( uint i=0; i<getNumRows(); ++i )
 		for ( uint j=0; j<getNumCols(); ++j )
-			m(i * nc + j, 0) = data(i, j);
+			m(i * nc + j, 0) = data->operator()(i, j);
 
 	ExportVariable tmp(name, m, type, dataStruct, callItByValue, prefix);
 
@@ -412,7 +400,7 @@ BooleanType ExportVariableInternal::isVector( ) const
 Matrix ExportVariableInternal::getGivenMatrix( ) const
 {
 	if ( isGiven() == BT_TRUE )
-		return data;
+		return Matrix( *data.get() );
 	else
 		return Matrix();
 }
@@ -420,7 +408,7 @@ Matrix ExportVariableInternal::getGivenMatrix( ) const
 
 returnValue ExportVariableInternal::print( ) const
 {
-	return data.print( name.getName() );
+	return data->print( name.getName() );
 }
 
 
@@ -490,7 +478,7 @@ BooleanType ExportVariableInternal::hasValue(	const ExportIndex& rowIdx,
 	ExportIndex ind = getTotalIdx(rowIdx + rowOffset, colIdx + colOffset);
 	if (ind.isGiven() == BT_TRUE)
 		return acadoIsEqual(
-				static_cast<const VectorspaceElement>(data).operator ()(ind.getGivenValue()), _value );
+				static_cast<const VectorspaceElement&>(*data).operator ()(ind.getGivenValue()), _value );
 
 	return BT_FALSE;
 }
