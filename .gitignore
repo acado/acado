@@ -11,6 +11,7 @@ doc/html
 doc/XML
 doc/xml
 doc/latex
+doc/debug.txt
 
 *.o
 *.so
@@ -31,3 +32,4 @@ doc/latex
 # Eclipse
 .project
 .cproject
+.settings
