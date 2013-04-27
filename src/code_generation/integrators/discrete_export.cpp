@@ -61,41 +61,6 @@ DiscreteTimeExport::~DiscreteTimeExport( )
 }
 
 
-returnValue DiscreteTimeExport::setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 ) {
-
-	if( !A1.isEmpty() ) {
-		// NOTE: The matrix M1 is not used here since it is a discrete-time formulation
-
-		if( A1.getNumRows() != M1.getNumRows() || A1.getNumRows() != B1.getNumRows() || A1.getNumRows() != A1.getNumCols() || M1.getNumRows() != M1.getNumCols() || B1.getNumCols() != NU) {
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
-		NX1 = A1.getNumRows();
-		NDX = NX;
-		if( !equidistant ) {
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
-		A11 = A1;
-		B11 = B1;
-
-		Parameter         dummy0;
-		Control           dummy1;
-		DifferentialState dummy2;
-		dummy0.clearStaticCounters();
-		dummy1.clearStaticCounters();
-		dummy2.clearStaticCounters();
-		x = DifferentialState(NX1);
-		u = Control(NU);
-		p = Parameter(NP);
-
-		DifferentialEquation fun_input;
-		fun_input << A11*x+B11*u;
-		lin_input.init( fun_input,"acado_linear_input",NX,NXA,NU );
-	}
-
-	return SUCCESSFUL_RETURN;
-}
-
-
 returnValue DiscreteTimeExport::setDifferentialEquation(	const Expression& rhs_ )
 {
 	if( rhs_.getDim() > 0 ) {
@@ -129,36 +94,6 @@ returnValue DiscreteTimeExport::setDifferentialEquation(	const Expression& rhs_ 
 
 		return (rhs.init( f,"acado_rhs",NX,NXA,NU ) & diffs_rhs.init( g,"acado_diffs",NX,NXA,NU ) );
 	}
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue DiscreteTimeExport::setModel(	const String& _rhs, const String& _diffs_rhs ) {
-
-	IntegratorExport::setModel( _rhs, _diffs_rhs );
-
-	Parameter         dummy0;
-	Control           dummy1;
-	DifferentialState dummy2;
-	AlgebraicState 	  dummy3;
-	DifferentialStateDerivative dummy4;
-	dummy0.clearStaticCounters();
-	dummy1.clearStaticCounters();
-	dummy2.clearStaticCounters();
-	dummy3.clearStaticCounters();
-	dummy4.clearStaticCounters();
-
-	NX2 = NX;
-
-	x = DifferentialState(NX);
-	dx = DifferentialStateDerivative(NDX);
-	z = AlgebraicState(NXA);
-	u = Control(NU);
-	p = Parameter(NP);
-	// There are not supposed to be algebraic states or differential state derivatives !
-
-	setup();
-
 	return SUCCESSFUL_RETURN;
 }
 

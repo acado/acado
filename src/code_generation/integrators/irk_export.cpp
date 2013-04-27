@@ -112,41 +112,6 @@ ImplicitRungeKuttaExport& ImplicitRungeKuttaExport::operator=( const ImplicitRun
 }
 
 
-returnValue ImplicitRungeKuttaExport::setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 )
-{
-	if( !A1.isEmpty() ) {
-		if( A1.getNumRows() != M1.getNumRows() || A1.getNumRows() != B1.getNumRows() || A1.getNumRows() != A1.getNumCols() || M1.getNumRows() != M1.getNumCols() || B1.getNumCols() != NU) {
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
-		NX1 = A1.getNumRows();
-		NDX = NX;
-		if( !equidistant ) {
-			// TODO: WHAT IF NONEQUIDISTANT INTEGRATION GRID??
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
-		M11 = M1;
-		A11 = A1;
-		B11 = B1;
-
-		Parameter         dummy0;
-		Control           dummy1;
-		DifferentialState dummy2;
-		dummy0.clearStaticCounters();
-		dummy1.clearStaticCounters();
-		dummy2.clearStaticCounters();
-		x = DifferentialState(NX1);
-		u = Control(NU);
-		p = Parameter(NP);
-
-		DifferentialEquation fun_input;
-		fun_input << A11*x+B11*u;
-		lin_input.init( fun_input,"acado_linear_input",NX,NXA,NU );
-	}
-
-	return SUCCESSFUL_RETURN;
-}
-
-
 returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs )
 {
 	if( !A3.isEmpty() ) {
@@ -202,7 +167,6 @@ returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 
 		dummy2.clearStaticCounters();
 		x = DifferentialState(NX);
-		NDX = NX;
 
 		Matrix dependencyMat = _rhs.getDependencyPattern( x );
 		Vector dependency = sumRow( dependencyMat );
@@ -274,27 +238,51 @@ returnValue ImplicitRungeKuttaExport::setModel(	const String& _rhs, const String
 
 	IntegratorExport::setModel( _rhs, _diffs_rhs );
 
-	Parameter         dummy0;
-	Control           dummy1;
-	DifferentialState dummy2;
-	AlgebraicState 	  dummy3;
-	DifferentialStateDerivative dummy4;
-	dummy0.clearStaticCounters();
-	dummy1.clearStaticCounters();
-	dummy2.clearStaticCounters();
-	dummy3.clearStaticCounters();
-	dummy4.clearStaticCounters();
-
-	NX2 = NX;
 	NDX2 = NDX;
 
-	x = DifferentialState(NX);
-	dx = DifferentialStateDerivative(NDX2);
-	z = AlgebraicState(NXA);
-	u = Control(NU);
-	p = Parameter(NP);
-
 	setup();
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 )
+{
+	if( !A3.isEmpty() ) {
+		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() ) {
+			return RET_UNABLE_TO_EXPORT_CODE;
+		}
+		NX3 = A3.getNumRows();
+		if( !equidistant ) {
+			// TODO: WHAT IF NONEQUIDISTANT INTEGRATION GRID??
+			return RET_UNABLE_TO_EXPORT_CODE;
+		}
+		M33 = M3;
+		A33 = A3;
+
+		name_rhs3 = String(_rhs3);
+		name_diffs_rhs3 = String(_diffs_rhs3);
+		exportRhs = BT_FALSE;
+
+		Parameter         dummy0;
+		Control           dummy1;
+		DifferentialState dummy2;
+		AlgebraicState 	  dummy3;
+		DifferentialStateDerivative dummy4;
+		dummy0.clearStaticCounters();
+		dummy1.clearStaticCounters();
+		dummy2.clearStaticCounters();
+		dummy3.clearStaticCounters();
+		dummy4.clearStaticCounters();
+
+		x = DifferentialState(NX);
+		dx = DifferentialStateDerivative(NDX);
+		z = AlgebraicState(NXA);
+		u = Control(NU);
+		p = Parameter(NP);
+
+		setup();
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -341,7 +329,7 @@ returnValue ImplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 {
 	if( NX2 > 0 || NXA > 0 ) solver->getDataDeclarations( declarations,dataStruct );
 	
-	if( exportRhs ) {
+	if( NX1 > 0 || exportRhs ) {
 		ExportVariable max = getAuxVariable();
 		int useOMP;
 		get(CG_USE_OPENMP, useOMP);
@@ -401,10 +389,10 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 	if( NX2 > 0) solver->getFunctionDeclarations( declarations );
 	if( NX2 != NX ) declarations.addDeclaration( fullRhs );
 
+	if( NX1 > 0 ) {
+		declarations.addDeclaration( lin_input );
+	}
 	if( exportRhs ) {
-		if( NX1 > 0 ) {
-			declarations.addDeclaration( lin_input );
-		}
 		if( NX2 > 0 || NXA > 0 ) {
 			declarations.addDeclaration( rhs );
 			declarations.addDeclaration( diffs_rhs );
@@ -421,6 +409,13 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 		declarations.addDeclaration( tmpExport );
 		tmpExport = ExportODEfunction(tmpFun, getNameDiffsRHS());
 		declarations.addDeclaration( tmpExport );
+
+		if( NX3 > 0 ) {
+			tmpExport = ExportODEfunction(tmpFun, getNameOutputRHS());
+			declarations.addDeclaration( tmpExport );
+			tmpExport = ExportODEfunction(tmpFun, getNameOutputDiffs());
+			declarations.addDeclaration( tmpExport );
+		}
 	}
 	uint i;
 	if( exportRhs && CONTINUOUS_OUTPUT ) {
@@ -446,6 +441,10 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 
 returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 {
+	acadoPrintf("NDX:  %d\n", NDX);
+	acadoPrintf("NDX2: %d\n", NDX2);
+	acadoPrintf("NDX3: %d\n", NDX3);
+
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 	if ( useOMP ) {
@@ -497,12 +496,11 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		code.addStatement( s.str().c_str() );
 	}
 
+	if( NX1 > 0 ) {
+		code.addFunction( lin_input );
+		code.addStatement( "\n\n" );
+	}
 	if( exportRhs ) {
-		if( NX1 > 0 ) {
-			code.addFunction( lin_input );
-			code.addStatement( "\n\n" );
-		}
-
 		if( NX2 > 0 || NXA > 0 ) {
 			code.addFunction( rhs );
 			code.addStatement( "\n\n" );
@@ -2166,7 +2164,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	integrate.setReturnValue( error_code );
 	integrate.addLinebreak( );	// TO MAKE SURE IT GETS EXPORTED
 	
-	rhs_in = ExportVariable( "x", inputDim-diffsDim+numDX, 1, REAL, ACADO_LOCAL );
+	rhs_in = ExportVariable( "x", inputDim-diffsDim+NX, 1, REAL, ACADO_LOCAL );
 	rhs_out = ExportVariable( "f", NX+NXA, 1, REAL, ACADO_LOCAL );
 	fullRhs = ExportFunction( "full_rhs", rhs_in, rhs_out );
 
@@ -2549,12 +2547,22 @@ uint ImplicitRungeKuttaExport::getNumItsInit() const
 
 
 const String ImplicitRungeKuttaExport::getNameOutputRHS() const{
-	return rhs3.getName();
+	if( exportRhs ) {
+		return rhs3.getName();
+	}
+	else {
+		return name_rhs3;
+	}
 }
 
 
 const String ImplicitRungeKuttaExport::getNameOutputDiffs() const{
-	return diffs_rhs3.getName();
+	if( exportRhs ) {
+		return diffs_rhs3.getName();
+	}
+	else {
+		return name_diffs_rhs3;
+	}
 }
 
 

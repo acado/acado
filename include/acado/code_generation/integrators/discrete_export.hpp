@@ -104,26 +104,6 @@ class DiscreteTimeExport : public IntegratorExport
 		virtual returnValue setDifferentialEquation( const Expression& rhs );
 
 
-		/** Assigns the model to be used by the integrator.
-		 *
-		 *	@param[in] _rhs				Name of the function, evaluating the right-hand side.
-		 *	@param[in] _diffs_rhs		Name of the function, evaluating the derivatives of the right-hand side.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-
-		virtual returnValue setModel( const String& _rhs, const String& _diffs_rhs );
-
-
-		/** .
-		 *
-		 *	@param[in] 		.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
-
-
 		/** .
 		 *
 		 *	@param[in] 		.

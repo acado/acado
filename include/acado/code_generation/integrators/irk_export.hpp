@@ -110,15 +110,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
-
-
-		/** .
-		 *
-		 *	@param[in] 		.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
 		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
 
 
@@ -131,6 +122,15 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 */
 
 		returnValue setModel( const String& _rhs, const String& _diffs_rhs );
+
+
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
 							
         
         /** Sets up the output with the grids for the different output functions.									\n
@@ -692,8 +692,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		uint NDX2;
 		uint NVARS2;
 
-		uint NDX3;
-		uint NXA3;
 		uint NVARS3;
 
 		ExportLinearSolver* solver;				/**< This is the exported linear solver that is used by the implicit Runge-Kutta method. */
@@ -730,7 +728,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 		ExportVariable	rk_mat1;
 		ExportVariable 	rk_dk1;
-		Matrix M11;
 
 		ExportVariable	rk_A;					/**< Variable containing the matrix of the linear system. */
 		ExportVariable	rk_b;					/**< Variable containing the right-hand side of the linear system. */

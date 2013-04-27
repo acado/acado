@@ -112,7 +112,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 ) = 0;
+		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
 
 
 		/** .
@@ -122,6 +122,15 @@ class IntegratorExport : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs ) = 0;
+
+
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
 
 
 		/** Assigns the model to be used by the integrator.
@@ -328,7 +337,7 @@ class IntegratorExport : public ExportAlgorithm
 		const String getNameRHS() const;
 		virtual const String getNameFullRHS() const;
 		const String getNameOUTPUT( uint index ) const;
-			  uint   getDimOUTPUT( uint index ) const;
+		uint getDimOUTPUT( uint index ) const;
 		const String getNameDiffsRHS() const;
 		const String getNameDiffsOUTPUT( uint index ) const;
 
@@ -374,14 +383,18 @@ class IntegratorExport : public ExportAlgorithm
 		uint NX1;
 		uint NX2;
 		uint NX3;
+		uint NDX3;
+		uint NXA3;
 
-		Matrix A11, B11;
+		Matrix M11, A11, B11;
 
         BooleanType exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
         BooleanType equidistant;			/**< True if the integration grid is equidistant. */
         BooleanType crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
         String name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
         String name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+        String name_rhs3;					/**< The name of the nonlinear function in the linear output system, if provided. */
+        String name_diffs_rhs3;				/**< The name of the function evaluating the derivatives for the linear output system, if provided. */
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
 		Vector numSteps;					/**< The number of integration steps per shooting interval. */

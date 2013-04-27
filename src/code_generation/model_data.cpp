@@ -46,7 +46,9 @@ ModelData::ModelData() {
 	NX2 = 0;
 	NX3 = 0;
 	NDX = 0;
+	NDX3 = 0;
 	NXA = 0;
+	NXA3 = 0;
 	NU = 0;
 	NP = 0;
 	N  = 0;
@@ -55,22 +57,17 @@ ModelData::ModelData() {
 }
 
 
-returnValue ModelData::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU )
+returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU )
 {
-	NX1 = 0;
-	NX2 = _NX;
-	NX3 = 0;
+	NX1 = _NX1;
+	NX2 = _NX2;
+	NX3 = _NX3;
 	NDX = _NDX;
+	NDX3 = _NDX3;
 	NXA = _NXA;
+	NXA3 = _NXA3;
 	NU = _NU;
 	model_dimensions_set = BT_TRUE;
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue ModelData::setDimensions( uint _NX, uint _NU )
-{
-	setDimensions( _NX, 0, 0, _NU );
 	return SUCCESSFUL_RETURN;
 }
 
@@ -236,6 +233,14 @@ returnValue ModelData::getLinearOutput( Matrix& M3_, Matrix& A3_, OutputFcn& rhs
 }
 
 
+returnValue ModelData::getLinearOutput( Matrix& M3_, Matrix& A3_ ) const {
+	M3_ = M3;
+	A3_ = A3;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 returnValue ModelData::setModel( const DifferentialEquation& _f )
 {
 	if( rhs_name.isEmpty() && NX2 == 0 ) {
@@ -295,7 +300,6 @@ returnValue ModelData::setLinearInput( const Matrix& M1_, const Matrix& A1_, con
 	A1 = A1_;
 	B1 = B1_;
 	NX1 = A1.getNumCols();
-	NDX = NX1;
 	if( !model_dimensions_set ) {
 		NU = B1.getNumCols();
 		model_dimensions_set = BT_TRUE;
@@ -312,12 +316,29 @@ returnValue ModelData::setLinearOutput( const Matrix& M3_, const Matrix& A3_, co
 	A3 = A3_;
 	rhs3 = rhs3_;
 	NX3 = A3.getNumCols();
-	NDX = NX3;
 	if( !model_dimensions_set ) {
 		if( NU == 0 ) NU = rhs3_.getNU();
 		model_dimensions_set = BT_TRUE;
 	}
 	export_rhs = BT_TRUE;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ModelData::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const String& rhs3_, const String& diffs3_ )
+{
+	if( !export_rhs ) {
+		M3 = M3_;
+		A3 = A3_;
+		NX3 = A3.getNumCols();
+
+		rhs3_name = String(rhs3_);
+		diffs3_name = String(diffs3_);
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -443,6 +464,24 @@ uint ModelData::getNX( ) const
 }
 
 
+uint ModelData::getNX1( ) const
+{
+	return NX1;
+}
+
+
+uint ModelData::getNX2( ) const
+{
+	return NX2;
+}
+
+
+uint ModelData::getNX3( ) const
+{
+	return NX3;
+}
+
+
 uint ModelData::getNDX( ) const
 {
 	if( NDX > 0 ) {
@@ -452,9 +491,27 @@ uint ModelData::getNDX( ) const
 }
 
 
+uint ModelData::getNDX3( ) const
+{
+	if( NDX3 > 0 ) {
+		return NX1+NX2;
+	}
+	return NDX3;
+}
+
+
 uint ModelData::getNXA( ) const
 {
 	return NXA;
+}
+
+
+uint ModelData::getNXA3( ) const
+{
+	if( NXA3 > 0 ) {
+		return NXA;
+	}
+	return NXA3;
 }
 
 
@@ -528,6 +585,16 @@ const String ModelData::getNameRhs() const {
 
 const String ModelData::getNameDiffsRhs() const {
 	return diffs_name;
+}
+
+
+const String ModelData::getNameOutput() const {
+	return rhs3_name;
+}
+
+
+const String ModelData::getNameDiffsOutput() const {
+	return diffs3_name;
 }
 
 

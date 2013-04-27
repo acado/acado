@@ -65,6 +65,36 @@ public:
     ModelContainer( );
 
 
+    /** Assigns the model dimensions to be used by the integrator.
+     *
+     *	@param[in] _NX1		Number of differential states in linear input subsystem.
+     *	@param[in] _NX2		Number of differential states in nonlinear subsystem.
+     *	@param[in] _NX3		Number of differential states in linear output subsystem.
+     *	@param[in] _NDX		Number of differential states derivatives.
+     *	@param[in] _NDX3	Number of differential states derivatives in the linear output subsystem.
+     *	@param[in] _NXA		Number of algebraic states.
+     *	@param[in] _NXA3	Number of algebraic states in the linear output subsystem.
+     *	@param[in] _NU		Number of control inputs
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU );
+
+
+    /** Assigns the model dimensions to be used by the integrator.
+     *
+     *	@param[in] _NX1		Number of differential states in linear input subsystem.
+     *	@param[in] _NX2		Number of differential states in nonlinear subsystem.
+     *	@param[in] _NX3		Number of differential states in linear output subsystem.
+     *	@param[in] _NDX		Number of differential states derivatives.
+     *	@param[in] _NXA		Number of algebraic states.
+     *	@param[in] _NU		Number of control inputs
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU );
+
+
 	/** Assigns the model dimensions to be used by the integrator.
 	 *
 	 *	@param[in] _NX		Number of differential states.
@@ -145,6 +175,24 @@ public:
     returnValue setLinearOutput( const Matrix& M3_, const Matrix& A3_, const OutputFcn& rhs_ );
 
 
+    /** .
+     *
+     *	@param[in] 		.
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setLinearOutput( const Matrix& A3_, const String& _rhs3, const String& _diffs_rhs3 );
+
+
+    /** .
+     *
+     *	@param[in] 		.
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setLinearOutput( const Matrix& M3_, const Matrix& A3_, const String& _rhs3, const String& _diffs_rhs3 );
+
+
     /** Assigns the model to be used by the integrator.
      *
      *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.
@@ -154,8 +202,8 @@ public:
      */
 
     returnValue setModel( 	const String& fileName,
-   		 	 	 	 	const String& _rhs_ODE,
-   		 	 	 	 	const String& _diffs_rhs_ODE );
+   		 	 	 	 		const String& _rhs_ODE,
+   		 	 	 	 		const String& _diffs_rhs_ODE );
 
 
 	/** Adds an output function.
