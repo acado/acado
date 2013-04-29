@@ -79,6 +79,11 @@ ExportArgumentInternal* ExportArgumentInternal::clone() const
 	return new ExportArgumentInternal( *this );
 }
 
+void ExportArgumentInternal::deepCopyMembers(	std::map<CasADi::SharedObjectNode*, CasADi::SharedObject>& already_copied
+												)
+{
+	data.reset(new Matrix( *data ));
+}
 
 ExportArgument ExportArgumentInternal::getAddress(	const ExportIndex& rowIdx,
 													const ExportIndex& colIdx

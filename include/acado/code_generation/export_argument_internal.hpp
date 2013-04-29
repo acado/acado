@@ -97,6 +97,10 @@ class ExportArgumentInternal : public ExportDataInternal
 
 		virtual ExportArgumentInternal* clone() const;
 
+		/** Deep copy data members. */
+		virtual void deepCopyMembers(	std::map<CasADi::SharedObjectNode*, CasADi::SharedObject>& already_copied
+										);
+
 		/** Returns a copy of the argument with address index set to given location.
 		 *
 		 *	@param[in] rowIdx		Row index of the adress.
