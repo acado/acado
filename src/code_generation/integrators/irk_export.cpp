@@ -441,10 +441,6 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 
 returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 {
-	acadoPrintf("NDX:  %d\n", NDX);
-	acadoPrintf("NDX2: %d\n", NDX2);
-	acadoPrintf("NDX3: %d\n", NDX3);
-
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 	if ( useOMP ) {
