@@ -259,29 +259,8 @@ enum StateOfAggregation{
 };
 
 
-/** Summarizes all available intergrators.
- */
+/** Summarizes all available integrators in standard ACADO. */
 enum IntegratorType{
-
-     INT_EX_EULER,         	/**< Explicit Euler method.           */
-     INT_RK2,         	 	/**< Explicit Runge-Kutta integrator of order 2.           */
-     INT_RK3,         	 	/**< Explicit Runge-Kutta integrator of order 3.           */
-     INT_RK4,         	 	/**< Explicit Runge-Kutta integrator of order 4.           */
-     INT_IRK_GL2,			/**< Gauss-Legendre integrator of order 2 (Continuous output Implicit Runge-Kutta). */
-     INT_IRK_GL4,			/**< Gauss-Legendre integrator of order 4 (Continuous output Implicit Runge-Kutta). */
-     INT_IRK_GL6,			/**< Gauss-Legendre integrator of order 6 (Continuous output Implicit Runge-Kutta). */
-     INT_IRK_GL8,			/**< Gauss-Legendre integrator of order 8 (Continuous output Implicit Runge-Kutta). */
-     
-     INT_IRK_RIIA1,			/**< Radau IIA integrator of order 1 (Continuous output Implicit Runge-Kutta). */
-     INT_IRK_RIIA3,			/**< Radau IIA integrator of order 3 (Continuous output Implicit Runge-Kutta). */
-     INT_IRK_RIIA5,			/**< Radau IIA integrator of order 5 (Continuous output Implicit Runge-Kutta). */
-
-     INT_DIRK3,				/**< Diagonally Implicit 2-stage Runge-Kutta integrator of order 3 (Continuous output). */
-     INT_DIRK4,				/**< Diagonally Implicit 3-stage Runge-Kutta integrator of order 4 (Continuous output). */
-     INT_DIRK5,				/**< Diagonally Implicit 5-stage Runge-Kutta integrator of order 5 (Continuous output). */
-
-     INT_DT,				/**< An algorithm which handles the simulation and sensitivity generation for a discrete time state-space model. */
-     INT_NARX,				/**< An algorithm which handles the simulation and sensitivity generation for a NARX model. */
 
      INT_RK12,             	/**< Explicit Runge-Kutta integrator of order 1/2          */
      INT_RK23,             	/**< Explicit Runge-Kutta integrator of order 2/3          */

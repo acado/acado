@@ -224,7 +224,7 @@ returnValue SIMexport::setup( )
 	if ( integrator != NULL )
 		delete integrator;
 
-	integrator = IntegratorExportFactory::instance().createAlgorithm(this, commonHeaderName, static_cast<IntegratorType>(integratorType));
+	integrator = IntegratorExportFactory::instance().createAlgorithm(this, commonHeaderName, static_cast<ExportIntegratorType>(integratorType));
 
 	if ( integrator == NULL )
 		return ACADOERROR( RET_INVALID_OPTION );

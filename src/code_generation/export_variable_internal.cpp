@@ -220,8 +220,10 @@ ExportVariable ExportVariableInternal::getRow(	const ExportIndex& idx
 	if (idx.isGiven() == BT_TRUE)
 	{
 		if (	idx.getGivenValue() < 0 ||
-				idx.getGivenValue() > (int) getNumRows( ) )
+				idx.getGivenValue() > (int) getNumRows( ) ) {
 			ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getRow: invalid row arguments");
+			acadoPrintf("Index %d of variable named %s does not lie in the admissible range 0-%d\n", idx.getGivenValue(), getFullName().getName(), getNumRows( ));
+		}
 	}
 
 	tmp->setSubmatrixOffsets(idx, 0, getNumRows(), getNumCols( ), 1, getNumCols( ));

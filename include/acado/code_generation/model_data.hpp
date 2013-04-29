@@ -68,26 +68,18 @@ public:
 
 	/** Assigns the model dimensions to be used by the integrator.
 	 *
-	 *	@param[in] _NX		Number of differential states.
+	 *	@param[in] _NX1		Number of differential states in linear input subsystem.
+	 *	@param[in] _NX2		Number of differential states in nonlinear subsystem.
+	 *	@param[in] _NX3		Number of differential states in linear output subsystem.
 	 *	@param[in] _NDX		Number of differential states derivatives.
+	 *	@param[in] _NDX3	Number of differential states derivatives in the linear output subsystem.
 	 *	@param[in] _NXA		Number of algebraic states.
+	 *	@param[in] _NXA3	Number of algebraic states in the linear output subsystem.
 	 *	@param[in] _NU		Number of control inputs
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-
-	returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU );
-
-
-	/** Assigns the model dimensions to be used by the integrator.
-	 *
-	 *	@param[in] _NX		Number of differential states.
-	 *	@param[in] _NU		Number of control inputs
-	 *
-	 *	\return SUCCESSFUL_RETURN
-	 */
-
-	returnValue setDimensions( uint _NX, uint _NU );
+	returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU );
 
 
 	/** Adds an output function.
@@ -96,7 +88,7 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	returnValue addOutput( const OutputFcn& outputEquation_ );
+	uint addOutput( const OutputFcn& outputEquation_ );
 
 
 	/** Adds an output function.
@@ -107,7 +99,7 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	returnValue addOutput( const String& output, const String& diffs_output, const uint dim );
+	uint addOutput( const String& output, const String& diffs_output, const uint dim );
 
 
 	/** Adds an output function.
@@ -120,8 +112,8 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	returnValue addOutput( 	const String& output, const String& diffs_output, const uint dim,
-							const String& colInd, const String& rowPtr	);
+	uint addOutput( 	const String& output, const String& diffs_output, const uint dim,
+						const String& colInd, const String& rowPtr	);
 
 
 	/** Returns true if there are extra outputs, specified for the integrator.
@@ -222,6 +214,17 @@ public:
      returnValue setLinearOutput( const Matrix& M3_, const Matrix& A3_, const OutputFcn& rhs_ );
 
 
+     /** .
+      *
+      *	@param[in] 		.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+     returnValue setLinearOutput( 	const Matrix& M3_, const Matrix& A3_,
+    		 	 	 	 			const String& _rhs3,
+    		 	 	 	 			const String& _diffs3 );
+
+
      /** Assigns the model to be used by the integrator.
       *
       *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.
@@ -301,6 +304,15 @@ public:
      returnValue getLinearOutput( Matrix& M3_, Matrix& A3_, OutputFcn& rhs_ ) const;
 
 
+     /** .
+      *
+      *	@param[in] 		.
+      *
+      *	\return SUCCESSFUL_RETURN
+      */
+     returnValue getLinearOutput( Matrix& M3_, Matrix& A3_ ) const;
+
+
      BooleanType hasEquidistantIntegrationGrid		() const;
      BooleanType hasOutputFunctions		() const;
      BooleanType hasDifferentialEquation() const;
@@ -314,6 +326,9 @@ public:
       *  \return Number of differential states
       */
      uint getNX( ) const;
+     uint getNX1( ) const;
+     uint getNX2( ) const;
+     uint getNX3( ) const;
 
 
      /** Returns number of differential state derivatives.
@@ -321,6 +336,7 @@ public:
       *  \return Number of differential state derivatives
       */
      uint getNDX( ) const;
+     uint getNDX3( ) const;
 
 
      /** Returns number of algebraic states.
@@ -328,6 +344,7 @@ public:
       *  \return Number of algebraic states
       */
      uint getNXA( ) const;
+     uint getNXA3( ) const;
 
      /** Returns number of control inputs.
       *
@@ -387,6 +404,8 @@ public:
      const String getFileNameModel() const;
      const String getNameRhs() const;
      const String getNameDiffsRhs() const;
+     const String getNameOutput() const;
+     const String getNameDiffsOutput() const;
      returnValue getNameOutputs( std::vector<String>& names ) const;
      returnValue getNameDiffsOutputs( std::vector<String>& names ) const;
 
@@ -413,7 +432,9 @@ public:
      uint NX2;										/**< Number of differential states (defined by implicit system). */
      uint NX3;										/**< Number of differential states (defined by output system). */
      uint NDX;										/**< Number of differential states derivatives. */
+     uint NDX3;										/**< Number of differential states derivatives in output system. */
      uint NXA;										/**< Number of algebraic states. */
+     uint NXA3;										/**< Number of algebraic states in output system. */
      uint NU;										/**< Number of control inputs. */
      uint NP;										/**< Number of parameters. */
      uint N;										/**< Number of shooting intervals. */
@@ -423,6 +444,8 @@ public:
      String externModel;							/**< The name of the file containing the needed functions, if provided. */
      String rhs_name;								/**< The name of the function evaluating the ODE right-hand side, if provided. */
      String diffs_name;								/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+     String rhs3_name;								/**< The name of the nonlinear function in the linear output system, if provided. */
+     String diffs3_name;							/**< The name of the function evaluating the derivatives for the linear output system, if provided. */
      DifferentialEquation differentialEquation;  	/**< The differential equations in the model. */
 
      Grid integrationGrid;							/**< Integration grid. */

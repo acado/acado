@@ -45,13 +45,23 @@ ModelContainer::ModelContainer() {
 }
 
 
+returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU ) {
+	return modelData.setDimensions( _NX1, _NX2, _NX3, _NDX, _NDX3, _NXA, _NXA3, _NU );
+}
+
+
+returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU ) {
+	return setDimensions( _NX1, _NX2, _NX3, _NDX, 0, _NXA, 0, _NU );
+}
+
+
 returnValue ModelContainer::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU ) {
-	return modelData.setDimensions( _NX, _NDX, _NXA, _NU );
+	return setDimensions( 0, _NX, 0, _NDX, _NXA, _NU );
 }
 
 
 returnValue ModelContainer::setDimensions( uint _NX, uint _NU ) {
-	return modelData.setDimensions( _NX, _NU );
+	return setDimensions( _NX, 0, 0, _NU );
 }
 
 
@@ -96,19 +106,32 @@ returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const OutputFcn&
 }
 
 
-returnValue ModelContainer::addOutput( const OutputFcn& outputEquation_ ) {
+returnValue ModelContainer::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const String& rhs3_, const String& diffs_rhs3_ )
+{
+	return modelData.setLinearOutput( M3_, A3_, rhs3_, diffs_rhs3_ );
+}
+
+
+returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const String& rhs3_, const String& diffs_rhs3_ )
+{
+	Matrix M3_ = eye(A3_.getNumRows());
+	return modelData.setLinearOutput( M3_, A3_, rhs3_, diffs_rhs3_ );
+}
+
+
+uint ModelContainer::addOutput( const OutputFcn& outputEquation_ ) {
 	return modelData.addOutput( outputEquation_ );
 }
 
 
-returnValue ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim ) {
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim ) {
 	return modelData.addOutput( output, diffs_output, dim );
 }
 
 
 
-returnValue ModelContainer::addOutput( 	const String& output, const String& diffs_output, const uint dim,
-						const String& colInd, const String& rowPtr	) {
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
+								const String& colInd, const String& rowPtr	) {
 	return modelData.addOutput( output, diffs_output, dim, colInd, rowPtr );
 }
 

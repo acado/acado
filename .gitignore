@@ -29,6 +29,8 @@ doc/debug.txt
 *.out
 *.orig
 
+*.obj
+
 # Eclipse
 .project
 .cproject

@@ -112,7 +112,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 ) = 0;
+		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
 
 
 		/** .
@@ -122,6 +122,15 @@ class IntegratorExport : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs ) = 0;
+
+
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
 
 
 		/** Assigns the model to be used by the integrator.
@@ -328,7 +337,7 @@ class IntegratorExport : public ExportAlgorithm
 		const String getNameRHS() const;
 		virtual const String getNameFullRHS() const;
 		const String getNameOUTPUT( uint index ) const;
-			  uint   getDimOUTPUT( uint index ) const;
+		uint getDimOUTPUT( uint index ) const;
 		const String getNameDiffsRHS() const;
 		const String getNameDiffsOUTPUT( uint index ) const;
 
@@ -374,14 +383,18 @@ class IntegratorExport : public ExportAlgorithm
 		uint NX1;
 		uint NX2;
 		uint NX3;
+		uint NDX3;
+		uint NXA3;
 
-		Matrix A11, B11;
+		Matrix M11, A11, B11;
 
         BooleanType exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
         BooleanType equidistant;			/**< True if the integration grid is equidistant. */
         BooleanType crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
         String name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
         String name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+        String name_rhs3;					/**< The name of the nonlinear function in the linear output system, if provided. */
+        String name_diffs_rhs3;				/**< The name of the function evaluating the derivatives for the linear output system, if provided. */
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
 		Vector numSteps;					/**< The number of integration steps per shooting interval. */
@@ -420,6 +433,31 @@ class IntegratorExport : public ExportAlgorithm
         std::vector<String> name_outputs;				/**< A separate function name for each output. */
         std::vector<String> name_diffs_outputs;			/**< A separate function name for evaluating the derivatives of each output. */
         std::vector<uint> num_outputs;					/**< A separate dimension for each output. */
+};
+
+
+/** Summarizes all available integrators for code generation.  */
+enum ExportIntegratorType{
+
+     INT_EX_EULER,         	/**< Explicit Euler method.           */
+     INT_RK2,         	 	/**< Explicit Runge-Kutta integrator of order 2.           */
+     INT_RK3,         	 	/**< Explicit Runge-Kutta integrator of order 3.           */
+     INT_RK4,         	 	/**< Explicit Runge-Kutta integrator of order 4.           */
+     INT_IRK_GL2,			/**< Gauss-Legendre integrator of order 2 (Continuous output Implicit Runge-Kutta). */
+     INT_IRK_GL4,			/**< Gauss-Legendre integrator of order 4 (Continuous output Implicit Runge-Kutta). */
+     INT_IRK_GL6,			/**< Gauss-Legendre integrator of order 6 (Continuous output Implicit Runge-Kutta). */
+     INT_IRK_GL8,			/**< Gauss-Legendre integrator of order 8 (Continuous output Implicit Runge-Kutta). */
+
+     INT_IRK_RIIA1,			/**< Radau IIA integrator of order 1 (Continuous output Implicit Runge-Kutta). */
+     INT_IRK_RIIA3,			/**< Radau IIA integrator of order 3 (Continuous output Implicit Runge-Kutta). */
+     INT_IRK_RIIA5,			/**< Radau IIA integrator of order 5 (Continuous output Implicit Runge-Kutta). */
+
+     INT_DIRK3,				/**< Diagonally Implicit 2-stage Runge-Kutta integrator of order 3 (Continuous output). */
+     INT_DIRK4,				/**< Diagonally Implicit 3-stage Runge-Kutta integrator of order 4 (Continuous output). */
+     INT_DIRK5,				/**< Diagonally Implicit 5-stage Runge-Kutta integrator of order 5 (Continuous output). */
+
+     INT_DT,				/**< An algorithm which handles the simulation and sensitivity generation for a discrete time state-space model. */
+     INT_NARX				/**< An algorithm which handles the simulation and sensitivity generation for a NARX model. */
 };
 
 
