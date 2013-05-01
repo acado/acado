@@ -127,6 +127,10 @@ returnValue NARXExport::setup( )
 		// TODO: is there a correct way of resetting this?
 //		integrate.addStatement( String("if( ") << reset_int.getName() << " ) { \n" );
 		Matrix zeroM = zeros(delay, NX);
+//		for( uint s = 0; s < delay-1; s++ ) {
+//			integrate.addStatement( mem_narx.getRow(s) == rk_xxx.getCols( 0,NX ) );
+//		}
+
 //		integrate.addStatement( mem_narx == zeroM );
 //		integrate.addStatement( String("} \n") );
 

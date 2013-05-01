@@ -547,6 +547,8 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 
 		Vector BB( bb );
 		Bh = ExportVariable( "Bh_mat", Matrix( BB*=h, BT_FALSE ) );
+
+		code.addComment(String("Fixed step size:") << String(h));
 	}
 	else {
 		if( NX1 > 0 || NX3 > 0 ) {

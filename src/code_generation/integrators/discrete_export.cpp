@@ -316,6 +316,9 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 		code.addDeclaration( numStepsV );
 		code.addLinebreak( 2 );
 	}
+	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
+	code.addComment(String("Fixed step size:") << String(h));
+
 	code.addFunction( integrate );
 
 	return SUCCESSFUL_RETURN;
