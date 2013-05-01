@@ -374,7 +374,7 @@ returnValue OCP::setConstraint( const Constraint& constraint_ ){ constraint = co
 
 returnValue OCP::setNumberIntegrationSteps( const uint numSteps )
 {
-	if( hasEquidistantIntegrationGrid()) {
+	if( hasEquidistantIntegrationGrid() && hasEquidistantControlGrid() ) {
 		setIntegrationGrid( grid, numSteps );
 	}
 	return SUCCESSFUL_RETURN;

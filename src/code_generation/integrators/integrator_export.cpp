@@ -228,6 +228,7 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	data.getIntegrationGrid(integrationGrid);
 	grid = integrationGrid;
 	data.getNumSteps( numSteps );
+
 	equidistant = data.hasEquidistantIntegrationGrid();
 
 	setup( );

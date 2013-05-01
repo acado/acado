@@ -390,7 +390,7 @@ returnValue ModelData::setIntegrationGrid(	const Grid& _ocpGrid, const uint _num
 	{
 		for( i = 0; i < stepsVector.getDim(); i++ )
 		{
-			stepsVector(i) = (int) ceil((_ocpGrid.getTime(i+1)-_ocpGrid.getTime(i))/h - 10.0*EPS);
+			stepsVector(i) = (int) acadoRound((_ocpGrid.getTime(i+1)-_ocpGrid.getTime(i))/h);
 		}
 
 		if( equidistantControl )
@@ -422,6 +422,12 @@ returnValue ModelData::clearIntegrationGrid( )
 BooleanType ModelData::hasEquidistantIntegrationGrid(  ) const
 {
 	return equidistant;
+}
+
+
+BooleanType ModelData::hasEquidistantControlGrid(  ) const
+{
+	return numSteps.isEmpty();
 }
 
 
