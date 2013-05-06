@@ -79,8 +79,8 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
 		ExportVariable(	const String& _name,
-						uint _nRows = 1,
-						uint _nCols = 1,
+						uint _nRows,
+						uint _nCols,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callItByValue = BT_FALSE,

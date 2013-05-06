@@ -266,7 +266,13 @@ public:
 	 									const Function& h			/**< the LSQ-Function   */
  	 	 	 							);
 
-     // CG end
+     returnValue minimizeLSQ(	const ExportVariable& S,	/**< a weighting matrix */
+    		 	 	 	 	 	 const String& h			/**< the LSQ-Function   */
+     );
+
+     returnValue minimizeLSQEndTerm(	const ExportVariable& S,	/**< a weighting matrix */
+    		 	 	 	 	 	 	 	 const String& h			/**< the LSQ-Function   */
+     	 	 	 	 	 	 	 	 	 );
 
      //
      // Linear terms for LSQ
