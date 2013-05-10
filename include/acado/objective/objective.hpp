@@ -156,6 +156,10 @@ class Objective : public LagrangeTerm{
 
         returnValue addLSQEndTerm(const ExportVariable& S, const Function& h);
 
+        returnValue addLSQ(const ExportVariable& S, const String& h);
+
+        returnValue addLSQEndTerm(const ExportVariable& S, const String& h);
+
         returnValue addLSQLinearTerms(const Vector& Slx, const Vector& Slu);
 
         returnValue addLSQLinearTerms(const ExportVariable& Slx, const ExportVariable& Slu);
@@ -387,10 +391,13 @@ class Objective : public LagrangeTerm{
         BooleanType isEmpty() const;
 
         //
-        // Code generation retaled stuff
+        // Code generation related stuff
         //
         returnValue getLSQTerms( std::vector<ExportVariable>& _matrices, std::vector<Function>& _functions ) const;
         returnValue getLSQEndTerms( std::vector<ExportVariable>& _matrices, std::vector<Function>& _functions ) const;
+
+        returnValue getLSQTerms( std::vector<ExportVariable>& _matrices, std::vector<String>& _functions ) const;
+        returnValue getLSQEndTerms( std::vector<ExportVariable>& _matrices, std::vector<String>& _functions ) const;
 
         returnValue getLSQLinearTerms(std::vector<ExportVariable>& _vSlx, std::vector<ExportVariable>& _vSlu) const;
 
@@ -412,6 +419,12 @@ class Objective : public LagrangeTerm{
 
     std::vector<ExportVariable> cgLSQEndTermWeightingMatrices;
     std::vector<Function> cgLSQEndTermFunctions;
+
+    std::vector<ExportVariable> cgExternLSQWeightingMatrices;
+    std::vector<String> cgExternLSQFunctions;
+
+    std::vector<ExportVariable> cgExternLSQEndTermWeightingMatrices;
+    std::vector<String> cgExternLSQEndTermFunctions;
 
     std::vector<ExportVariable> cgLSQWeightingVectorsSlx;
     std::vector<ExportVariable> cgLSQWeightingVectorsSlu;

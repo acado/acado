@@ -448,6 +448,16 @@ returnValue OCP::minimizeLSQEndTerm(const ExportVariable& S, const Function& h)
 	return objective.addLSQEndTerm(S, h);
 }
 
+returnValue OCP::minimizeLSQ(const ExportVariable& S, const String& h)
+{
+	return objective.addLSQ(S, h);
+}
+
+returnValue OCP::minimizeLSQEndTerm(const ExportVariable& S, const String& h)
+{
+	return objective.addLSQEndTerm(S, h);
+}
+
 returnValue OCP::minimizeLSQLinearTerms(const Vector& Slx, const Vector& Slu)
 {
 	return objective.addLSQLinearTerms(Slx, Slu);

@@ -117,6 +117,12 @@ Objective::Objective( const Objective& rhs )
     cgLSQEndTermWeightingMatrices = rhs.cgLSQEndTermWeightingMatrices;
     cgLSQEndTermFunctions = rhs.cgLSQEndTermFunctions;
 
+    cgExternLSQWeightingMatrices = rhs.cgExternLSQWeightingMatrices;
+    cgExternLSQFunctions = rhs.cgExternLSQFunctions;
+
+    cgExternLSQEndTermWeightingMatrices = rhs.cgExternLSQEndTermWeightingMatrices;
+    cgExternLSQEndTermFunctions = rhs.cgExternLSQEndTermFunctions;
+
     cgLSQWeightingVectorsSlx = rhs.cgLSQWeightingVectorsSlx;
     cgLSQWeightingVectorsSlu = rhs.cgLSQWeightingVectorsSlu;
 
@@ -219,6 +225,12 @@ Objective& Objective::operator=( const Objective& rhs ){
 
         cgLSQEndTermWeightingMatrices = rhs.cgLSQEndTermWeightingMatrices;
         cgLSQEndTermFunctions = rhs.cgLSQEndTermFunctions;
+
+        cgExternLSQWeightingMatrices = rhs.cgExternLSQWeightingMatrices;
+        cgExternLSQFunctions = rhs.cgExternLSQFunctions;
+
+        cgExternLSQEndTermWeightingMatrices = rhs.cgExternLSQEndTermWeightingMatrices;
+        cgExternLSQEndTermFunctions = rhs.cgExternLSQEndTermFunctions;
 
         cgLSQWeightingVectorsSlx = rhs.cgLSQWeightingVectorsSlx;
         cgLSQWeightingVectorsSlu = rhs.cgLSQWeightingVectorsSlu;
@@ -576,6 +588,22 @@ returnValue Objective::getLSQEndTerms( std::vector<ExportVariable>& _matrices, s
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue Objective::getLSQTerms( std::vector<ExportVariable>& _matrices, std::vector<String>& _functions ) const
+{
+	_matrices = cgExternLSQWeightingMatrices;
+	_functions = cgExternLSQFunctions;
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue Objective::getLSQEndTerms( std::vector<ExportVariable>& _matrices, std::vector<String>& _functions ) const
+{
+	_matrices = cgExternLSQEndTermWeightingMatrices;
+	_functions = cgExternLSQEndTermFunctions;
+
+	return SUCCESSFUL_RETURN;
+}
+
 returnValue Objective::getLSQLinearTerms(std::vector<ExportVariable>& _vSlx, std::vector<ExportVariable>& _vSlu) const
 {
 	_vSlx = cgLSQWeightingVectorsSlx;
@@ -600,6 +628,22 @@ returnValue Objective::addLSQEndTerm(const ExportVariable& S, const Function& h)
 {
 	cgLSQEndTermWeightingMatrices.push_back( S );
 	cgLSQEndTermFunctions.push_back( h );
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue Objective::addLSQ(const ExportVariable& S, const String& h)
+{
+	cgExternLSQWeightingMatrices.push_back( S );
+	cgExternLSQFunctions.push_back( h );
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue Objective::addLSQEndTerm(const ExportVariable& S, const String& h)
+{
+	cgExternLSQEndTermWeightingMatrices.push_back( S );
+	cgExternLSQEndTermFunctions.push_back( h );
 
 	return SUCCESSFUL_RETURN;
 }
