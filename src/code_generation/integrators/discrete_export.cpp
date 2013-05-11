@@ -121,6 +121,7 @@ returnValue DiscreteTimeExport::getFunctionDeclarations(	ExportStatementBlock& d
 														) const
 {
 	declarations.addDeclaration( integrate );
+	if( NX2 != NX ) declarations.addDeclaration( fullRhs );
 
 	if( exportRhs ) {
 		if( NX1 > 0 ) {
@@ -184,6 +185,9 @@ returnValue DiscreteTimeExport::setup( )
 	integrate.addIndex( j );
 	integrate.addIndex( k );
 	integrate.addIndex( tmp_index );
+	rhs_in = ExportVariable( "x", inputDim-diffsDim, 1, REAL, ACADO_LOCAL );
+	rhs_out = ExportVariable( "f", NX, 1, REAL, ACADO_LOCAL );
+	fullRhs = ExportFunction( "full_rhs", rhs_in, rhs_out );
 	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim-diffsDim, REAL, structWspace );
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
 		rk_diffsPrev1 = ExportVariable( "rk_diffsPrev1", NX1, NX1+NU, REAL, structWspace );
@@ -320,6 +324,11 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 	code.addComment(String("Fixed step size:") << String(h));
 
 	code.addFunction( integrate );
+
+	if( NX2 != NX ) {
+		prepareFullRhs();
+		code.addFunction( fullRhs );
+	}
 
 	return SUCCESSFUL_RETURN;
 }

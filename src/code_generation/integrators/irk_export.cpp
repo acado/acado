@@ -2564,16 +2564,6 @@ const String ImplicitRungeKuttaExport::getNameOutputDiffs() const{
 }
 
 
-const String ImplicitRungeKuttaExport::getNameFullRHS() const {
-	if( NX2 == NX ) {
-		return getNameRHS();
-	}
-	else {
-		return fullRhs.getName();
-	}
-}
-
-
 CLOSE_NAMESPACE_ACADO
 
 // end of file.

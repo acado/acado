@@ -466,7 +466,12 @@ BooleanType ModelData::hasCompressedStorage() const {
 
 uint ModelData::getNX( ) const
 {
-	return NX1+NX2+NX3;
+	if( parms.isEmpty() ) {
+		return NX1+NX2+NX3;
+	}
+	else {
+		return delay*(NX1+NX2+NX3);		// IMPORTANT for NARX models where the state space is increased because of the delay
+	}
 }
 
 
