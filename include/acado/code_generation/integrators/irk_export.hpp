@@ -208,9 +208,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										);
 
 
-		const String getNameFullRHS() const;
-
-
 	protected:
 		
 		
@@ -568,6 +565,13 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		returnValue prepareOutputEvaluation( 	ExportStatementBlock& code );
 
 
+		/** Prepares a function that evaluates the complete right-hand side.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue prepareFullRhs( );
+
+
 		/** Exports the necessary code for the computation of the continuous output.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
@@ -665,13 +669,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		const String getNameOutputDiffs() const;
 
 
-		/** Prepares a function that evaluates the complete right-hand side.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue prepareFullRhs( );
-
-
 		/** Returns the largest global export variable.
 		 *
 		 *	\return SUCCESSFUL_RETURN
@@ -721,10 +718,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		std::vector<ExportVariable> polynDerVariables;	/**< Variables containing the coefficients for the derived polynomial. */
 		std::vector<ExportVariable> numMeasVariables;	/**< Variables containing the number of measurements per integration interval. */
 		std::vector<ExportIndex> numMeas;				/**< Indices containing the number of measurements that are already computed. */
-
-		ExportFunction fullRhs;			/**< Function that evaluates the full right-hand side. */
-		ExportVariable	rhs_in;
-		ExportVariable	rhs_out;
 
 		ExportVariable	rk_mat1;
 		ExportVariable 	rk_dk1;

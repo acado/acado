@@ -289,6 +289,7 @@ public:
     BooleanType hasDifferentialEquation() const;
     BooleanType modelDimensionsSet() const;
     BooleanType hasEquidistantIntegrationGrid		() const;
+    BooleanType hasEquidistantControlGrid		() const;
     BooleanType exportRhs() const;
 
 

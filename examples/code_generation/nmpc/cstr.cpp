@@ -156,7 +156,7 @@ int main( ){
        mpc.set( NUM_INTEGRATOR_STEPS , 20           );
        mpc.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON );
 // 	   mpc.set( QP_SOLVER,             QP_CVXGEN    );
-	   mpc.set( QP_SOLVER, QP_QPOASES3 );
+	   mpc.set( QP_SOLVER, QP_QPOASES );
        mpc.set( GENERATE_TEST_FILE,NO );
 // 	   mpc.set( SPARSE_QP_SOLUTION,CONDENSING );
 // 		mpc.set( USE_SINGLE_PRECISION,YES );

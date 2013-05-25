@@ -171,10 +171,10 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue updateInputSystem( 	ExportStatementBlock* block,
-										const ExportIndex& index1,
-										const ExportIndex& index2,
-										const ExportIndex& tmp_index  	);
+		virtual returnValue updateInputSystem( 	ExportStatementBlock* block,
+												const ExportIndex& index1,
+												const ExportIndex& index2,
+												const ExportIndex& tmp_index  	);
 
 
 		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear input system.
@@ -183,11 +183,11 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue propagateInputSystem( 	ExportStatementBlock* block,
-											const ExportIndex& index1,
-											const ExportIndex& index2,
-											const ExportIndex& index3,
-											const ExportIndex& tmp_index  	);
+		virtual returnValue propagateInputSystem( 	ExportStatementBlock* block,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& index3,
+													const ExportIndex& tmp_index  	);
 
 
 		/** Exports the code needed to update the sensitivities of the states defined by the nonlinear, fully implicit system.
@@ -362,6 +362,13 @@ class IntegratorExport : public ExportAlgorithm
 		virtual returnValue clear( );
 
 
+		/** Prepares a function that evaluates the complete right-hand side.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue prepareFullRhs( );
+
+
 		/**	Get the index of the integration interval, corresponding a certain time.
 		 *
 		 * 	@param[in] time		The time.
@@ -398,6 +405,10 @@ class IntegratorExport : public ExportAlgorithm
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
 		Vector numSteps;					/**< The number of integration steps per shooting interval. */
+
+		ExportFunction fullRhs;				/**< Function that evaluates the full right-hand side. */
+		ExportVariable	rhs_in;
+		ExportVariable	rhs_out;
 		
 		ExportFunction integrate;			/**< Function that integrates the exported ODE. */
 		ExportODEfunction rhs;				/**< Module to export ODE. */

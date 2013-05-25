@@ -314,6 +314,7 @@ public:
 
 
      BooleanType hasEquidistantIntegrationGrid		() const;
+     BooleanType hasEquidistantControlGrid		() const;
      BooleanType hasOutputFunctions		() const;
      BooleanType hasDifferentialEquation() const;
      BooleanType modelDimensionsSet() const;

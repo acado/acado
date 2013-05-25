@@ -118,6 +118,18 @@ class NARXExport : public DiscreteTimeExport
 													) const;
 
 
+		/** Exports the code needed to update the sensitivities of the states, defined by the linear input system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue updateInputSystem( 	ExportStatementBlock* block,
+										const ExportIndex& index1,
+										const ExportIndex& index2,
+										const ExportIndex& tmp_index  	);
+
+
 		/** Exports the code needed to update the sensitivities of the states defined by the nonlinear part.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
@@ -127,6 +139,19 @@ class NARXExport : public DiscreteTimeExport
 		returnValue updateImplicitSystem( 	ExportStatementBlock* block,
 											const ExportIndex& index1,
 											const ExportIndex& index2,
+											const ExportIndex& tmp_index  	);
+
+
+		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear input system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue propagateInputSystem( 	ExportStatementBlock* block,
+											const ExportIndex& index1,
+											const ExportIndex& index2,
+											const ExportIndex& index3,
 											const ExportIndex& tmp_index  	);
 
 
@@ -157,6 +182,13 @@ class NARXExport : public DiscreteTimeExport
 	protected:
 
 
+		/** Prepares a function that evaluates the complete right-hand side.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		returnValue prepareFullRhs( );
+
+
 		/** ..
 		 *
 		 */
@@ -167,7 +199,6 @@ class NARXExport : public DiscreteTimeExport
 
 		uint delay;
 		Matrix parms;
-		ExportVariable mem_narx;
 
 };
 

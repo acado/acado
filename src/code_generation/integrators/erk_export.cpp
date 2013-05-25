@@ -322,6 +322,9 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	}
 
 	code.addFunction( diffs_rhs );
+
+	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
+	code.addComment(String("Fixed step size:") << String(h));
 	code.addFunction( integrate );
 
 	int matlabInterface;

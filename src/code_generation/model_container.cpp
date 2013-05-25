@@ -188,6 +188,12 @@ BooleanType ModelContainer::hasEquidistantIntegrationGrid() const {
 }
 
 
+BooleanType ModelContainer::hasEquidistantControlGrid() const {
+
+    return modelData.hasEquidistantControlGrid();
+}
+
+
 BooleanType ModelContainer::exportRhs() const {
 
     return modelData.exportRhs();
