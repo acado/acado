@@ -363,7 +363,7 @@ enum returnValueLevel
 #define COL_FATAL		"\033[0;31m"
 #define COL_ERROR		"\033[1;31m"
 #define COL_WARNING		"\033[1;33m"
-#define COL_INFO		"\033[0;32m"
+#define COL_INFO		"\033[0m"
 
 #else
 
