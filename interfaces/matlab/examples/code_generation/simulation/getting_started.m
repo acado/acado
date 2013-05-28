@@ -19,7 +19,7 @@ f = [   x(2) + u*(mu+(1-mu)*x(1)); ...
 sim = acado.SIMexport( h );
 sim.setModel(f);
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_GL4'   );
-sim.set( 'NUM_INTEGRATOR_STEPS',        100               );
+sim.set( 'NUM_INTEGRATOR_STEPS',        10              );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1               );
 % sim.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'               );
 
@@ -36,7 +36,7 @@ end
 
 options = odeset('RelTol',1e-12,'AbsTol',1e-12);
 % use of an anonymous function in matlab: http://stackoverflow.com/questions/2256229/matlab-how-do-i-pass-a-parameter-to-a-function
-[tout exact] = ode45(@(t, y) rhs(t, y, u),[0:h:N*h],x,options);
+[tout exact] = ode45(@(t, y) rhs(t, y, u, mu),[0:h:N*h],x,options);
 exact = exact';
 
 format long e
