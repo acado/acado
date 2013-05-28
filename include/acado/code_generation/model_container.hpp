@@ -249,15 +249,6 @@ public:
     returnValue setMeasurements( const Vector& numberMeasurements );
 
 
-    /** Sets the grid to be used by the integrator.
-     *
-     *	@param[in] gridPoints		The points that form the integration grid.
-     *
-     *	\return SUCCESSFUL_RETURN
-     */
-    returnValue setIntegrationGrid( const Vector& gridPoints );
-
-
     /** Sets integration grid.
      *
      *	@param[in] _ocpGrid		Evaluation grid for optimal control.
@@ -288,7 +279,6 @@ public:
     BooleanType hasOutputs() const;
     BooleanType hasDifferentialEquation() const;
     BooleanType modelDimensionsSet() const;
-    BooleanType hasEquidistantIntegrationGrid		() const;
     BooleanType hasEquidistantControlGrid		() const;
     BooleanType exportRhs() const;
 

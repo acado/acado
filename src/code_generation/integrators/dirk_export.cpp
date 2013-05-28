@@ -186,7 +186,7 @@ Matrix DiagonallyImplicitRKExport::formMatrix( const Matrix& mass, const Matrix&
 }
 
 
-returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& det )
+returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, const ExportVariable& det )
 {
 	if( NX2 > 0 || NXA > 0 ) {
 
@@ -194,7 +194,7 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 		// Initialization iterations:
 		ExportForLoop loop11( index2,0,numStages );
 		ExportForLoop loop1( index1,0,numItsInit+1 ); // NOTE: +1 because 0 will lead to NaNs, so the minimum number of iterations is 1 at the initialization
-		evaluateMatrix( &loop1, index2, index3, tmp_index, Ah, BT_TRUE );
+		evaluateMatrix( &loop1, index2, index3, tmp_index, Ah, C, BT_TRUE );
 		loop1.addStatement( det.getFullName() << " = " << solver->getNameSolveFunction() << "( &" << rk_A.get(index2*(NX2+NXA),0) << ", " << rk_b.getFullName() << ", &" << rk_auxSolver.get(index2,0) << " );\n" );
 		loop1.addStatement( rk_kkk.getSubMatrix( NX1,NX1+NX2,index2,index2+1 ) += rk_b.getRows( 0,NX2 ) );													// differential states
 		if(NXA > 0) loop1.addStatement( rk_kkk.getSubMatrix( NX,NX+NXA,index2,index2+1 ) += rk_b.getRows( NX2,NX2+NXA ) );		// algebraic states
@@ -205,7 +205,7 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 		// the rest (numIts) of the Newton iterations with reuse of the Jacobian (no evaluation or factorization needed)
 		ExportForLoop loop21( index2,0,numStages );
 		ExportForLoop loop2( index1,0,numIts );
-		evaluateStatesImplicitSystem( &loop2, Ah, index2, index3, tmp_index );
+		evaluateStatesImplicitSystem( &loop2, Ah, C, index2, index3, tmp_index );
 		evaluateRhsImplicitSystem( &loop2, index2 );
 		loop2.addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(index2*(NX2+NXA),0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(index2,0) );
 		loop2.addStatement( rk_kkk.getSubMatrix( NX1,NX1+NX2,index2,index2+1 ) += rk_b.getRows( 0,NX2 ) );														// differential states
@@ -215,7 +215,7 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 
 		// solution calculated --> evaluate and save the necessary derivatives in rk_diffsTemp and update the matrix rk_A:
 		ExportForLoop loop3( index2,0,numStages );
-		evaluateMatrix( &loop3, index2, index3, tmp_index, Ah, BT_FALSE );
+		evaluateMatrix( &loop3, index2, index3, tmp_index, Ah, C, BT_FALSE );
 		block->addStatement( loop3 );
 
 		// IF DEBUG MODE:
@@ -313,9 +313,9 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportState
 }
 
 
-returnValue DiagonallyImplicitRKExport::evaluateMatrix( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index, const ExportVariable& Ah, BooleanType evaluateB )
+returnValue DiagonallyImplicitRKExport::evaluateMatrix( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, BooleanType evaluateB )
 {
-	evaluateStatesImplicitSystem( block, Ah, index1, index2, tmp_index );
+	evaluateStatesImplicitSystem( block, Ah, C, index1, index2, tmp_index );
 
 	block->addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsTemp2.getAddress(index1,0) );
 	ExportForLoop loop2( index2,0,NX2+NXA );
@@ -341,7 +341,7 @@ returnValue DiagonallyImplicitRKExport::evaluateMatrix( ExportStatementBlock* bl
 }
 
 
-returnValue DiagonallyImplicitRKExport::evaluateStatesImplicitSystem( ExportStatementBlock* block, const ExportVariable& Ah, const ExportIndex& stage, const ExportIndex& i, const ExportIndex& j )
+returnValue DiagonallyImplicitRKExport::evaluateStatesImplicitSystem( ExportStatementBlock* block, const ExportVariable& Ah, const ExportVariable& C, const ExportIndex& stage, const ExportIndex& i, const ExportIndex& j )
 {
 	ExportForLoop loop1( i, 0, NX1+NX2 );
 	loop1.addStatement( rk_xxx.getCol( i ) == rk_eta.getCol( i ) );
@@ -357,6 +357,10 @@ returnValue DiagonallyImplicitRKExport::evaluateStatesImplicitSystem( ExportStat
 	ExportForLoop loop4( i, 0, NDX2 );
 	loop4.addStatement( rk_xxx.getCol( inputDim-diffsDim+i ) == rk_kkk.getSubMatrix( i,i+1,stage,stage+1 ) );
 	block->addStatement( loop4 );
+
+	if( C.getDim() > 0 ) {	// There is a time dependence, so it must be set
+		block->addStatement( rk_xxx.getCol( inputDim-diffsDim+NDX2 ) == C.getCol(stage) );
+	}
 
 	return SUCCESSFUL_RETURN;
 }

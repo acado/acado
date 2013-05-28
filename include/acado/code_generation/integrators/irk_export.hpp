@@ -392,6 +392,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportIndex& index3,
 											const ExportIndex& tmp_index,
 											const ExportVariable& Ah,
+											const ExportVariable& C,
 											const ExportVariable& det  	);
 
 
@@ -508,6 +509,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 */
 		virtual returnValue evaluateStatesImplicitSystem( 	ExportStatementBlock* block,
 											const ExportVariable& Ah,
+											const ExportVariable& C,
 											const ExportIndex& stage,
 											const ExportIndex& i,
 											const ExportIndex& j );
@@ -553,6 +555,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& index2,
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
+										const ExportVariable& C,
 										BooleanType evaluateB );
 
 
@@ -587,7 +590,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& tmp_index1,
 										const ExportIndex& tmp_index2,
 										const ExportVariable& tmp_meas,
-										const ExportVariable& rk_tPrev,
 										const ExportVariable& time_tmp );
 
 
@@ -610,7 +612,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportIndex& tmp_index2,
 											const ExportIndex& tmp_index3,
 											const ExportVariable& tmp_meas,
-											const ExportVariable& rk_tPrev,
 											const ExportVariable& time_tmp,
 											BooleanType STATES,
 											uint base			);

@@ -116,12 +116,16 @@ class ExportODEfunction : public ExportFunction
 		 * 							(needed when the number of equations is not equal to the number of given states).
 		 * 	@param[in] _numXA		The number of algebraic states in the input for the evaluation of the system of equations.
 		 * 	@param[in] _numU		The number of control inputs given for the evaluation of the system of equations.
+		 * 	@param[in] _numP		The number of parameters given for the evaluation of the system of equations.
+		 * 	@param[in] _numDX		The number of differential state derivatives given for the evaluation of the system of equations.
 		 */
 		returnValue init(	const Function& _f,
 							const String& _name = "acadoFcn",
 							const uint _numX = 0,
 							const uint _numXA = 0,
-							const uint _numU = 0
+							const uint _numU = 0,
+							const uint _numP = 0,
+							const uint _numDX = 0
 							);
 
 
@@ -200,6 +204,8 @@ class ExportODEfunction : public ExportFunction
 		uint numX;									/**< The number of states that are needed to evaluate the system of differential equations. If this number isn't specified, then it will be set to the number of equations (minus the number of algebraic states).  */
 		uint numXA;									/**< The number of algebraic states in the input for the evaluation of the system of equations (similar to numX). */
 		uint numU;									/**< The number of control inputs given for the evaluation of the system of equations (similar to numX). */
+		uint numP;									/**< The number of parameters given for the evaluation of the system of equations. */
+		uint numDX;									/**< The number of differential state derivatives given for the evaluation of the system of equations. */
 		Function* f;								/**< ACADO function to be exported. */
 
 };

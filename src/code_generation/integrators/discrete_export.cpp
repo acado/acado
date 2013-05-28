@@ -152,9 +152,6 @@ returnValue DiscreteTimeExport::setup( )
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	// non equidistant integration grids not implemented for NARX integrators
-	if( !equidistant ) return ACADOERROR( RET_INVALID_OPTION );
-
 	String fileName( "integrator.c" );
 
 	int printLevel;

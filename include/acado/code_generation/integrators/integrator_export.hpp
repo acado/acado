@@ -393,10 +393,11 @@ class IntegratorExport : public ExportAlgorithm
 		uint NDX3;
 		uint NXA3;
 
+		BooleanType timeDependant;
+
 		Matrix M11, A11, B11;
 
         BooleanType exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
-        BooleanType equidistant;			/**< True if the integration grid is equidistant. */
         BooleanType crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
         String name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
         String name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */

@@ -157,6 +157,11 @@ public:
      */
     int getNW  () const;
 
+    /** Returns the number of time variables                        \n
+     *  \return The requested number of time variables.             \n
+     */
+    int getNT  () const;
+
 
     /** Returns the index of the variable with specified type and \n
      *  component.                                                \n
@@ -473,7 +478,9 @@ public:
 								int         precision = 16,
 								uint        _numX = 0,     
 								uint        _numXA = 0,
-								uint		_numU = 0     
+								uint		_numU = 0,
+								uint		_numP = 0,
+								uint		_numDX = 0
 								) const;
 
 	

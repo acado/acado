@@ -120,27 +120,6 @@ int main() {
 	sim2.setTimingSteps( 10000 );
 	sim2.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
 	sim2.exportAndRun( "crane_export", "init_crane.txt", "controls_crane.txt" );
-	
-	
-	acadoPrintf( "-----------------------------------------\n  Using user specified grid:\n-----------------------------------------\n" );
-	
-	Vector grid(6);
-	grid(0) = 0.0;
-	grid(1) = 0.02;
-	grid(2) = 0.04;
-	grid(3) = 0.06;
-	grid(4) = 0.08;
-	grid(5) = 0.1;
-	
-	SIMexport sim3( 1, 0.1 );
-	sim3.setModel( f );
-	sim3.addOutput( h );
-	sim3.setMeasurements( Meas );
-	sim3.set( INTEGRATOR_TYPE, INT_IRK_RIIA5 );
-	sim3.set( NUM_INTEGRATOR_STEPS, 5 );
-	sim3.setTimingSteps( 10000 );
-	sim3.setIntegrationGrid( grid );
-	sim3.exportAndRun( "crane_export", "init_crane.txt", "controls_crane.txt" );
 
 	return 0;
 }

@@ -245,15 +245,6 @@ public:
      returnValue getIntegrationGrid( Grid& integrationGrid_ ) const;
 
 
-     /** Sets the grid to be used by the integrator.
-      *
-      *	@param[in] gridPoints		The points that form the integration grid.
-      *
-      *	\return SUCCESSFUL_RETURN
-      */
-     returnValue setIntegrationGrid( const Vector& gridPoints );
-
-
      /** Sets integration grid.
       *
       *	@param[in] _ocpGrid		Evaluation grid for optimal control.
@@ -313,7 +304,6 @@ public:
      returnValue getLinearOutput( Matrix& M3_, Matrix& A3_ ) const;
 
 
-     BooleanType hasEquidistantIntegrationGrid		() const;
      BooleanType hasEquidistantControlGrid		() const;
      BooleanType hasOutputFunctions		() const;
      BooleanType hasDifferentialEquation() const;
@@ -450,7 +440,6 @@ public:
      DifferentialEquation differentialEquation;  	/**< The differential equations in the model. */
 
      Grid integrationGrid;							/**< Integration grid. */
-     BooleanType equidistant;						/**< True if the integration grid is equidistant. */
      Vector numSteps;								/**< The number of integration steps per shooting interval. */
 
      std::vector<Expression> outputExpressions;		/**< A vector with the output functions.     				*/

@@ -141,11 +141,6 @@ returnValue ModelContainer::setMeasurements( const Vector& numberMeasurements ) 
 }
 
 
-returnValue ModelContainer::setIntegrationGrid( const Vector& gridPoints ) {
-	return modelData.setIntegrationGrid( gridPoints );
-}
-
-
 returnValue ModelContainer::setIntegrationGrid( const Grid& _ocpGrid, const uint _numSteps ) {
 	return modelData.setIntegrationGrid( _ocpGrid, _numSteps );
 }
@@ -179,12 +174,6 @@ BooleanType ModelContainer::hasDifferentialEquation() const {
 BooleanType ModelContainer::modelDimensionsSet() const {
 
     return modelData.modelDimensionsSet();
-}
-
-
-BooleanType ModelContainer::hasEquidistantIntegrationGrid() const {
-
-    return modelData.hasEquidistantIntegrationGrid();
 }
 
 

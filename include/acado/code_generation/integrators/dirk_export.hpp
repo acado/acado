@@ -185,6 +185,7 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 											const ExportIndex& index3,
 											const ExportIndex& tmp_index,
 											const ExportVariable& Ah,
+											const ExportVariable& C,
 											const ExportVariable& det  	);
 
 
@@ -228,6 +229,7 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 										const ExportIndex& index2,
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
+										const ExportVariable& C,
 										BooleanType evaluateB );
 
 
@@ -241,6 +243,7 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 		 */
 		virtual returnValue evaluateStatesImplicitSystem( 	ExportStatementBlock* block,
 											const ExportVariable& Ah,
+											const ExportVariable& C,
 											const ExportIndex& stage,
 											const ExportIndex& i,
 											const ExportIndex& j );

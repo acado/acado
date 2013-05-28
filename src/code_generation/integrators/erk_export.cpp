@@ -64,9 +64,6 @@ ExplicitRungeKuttaExport::~ExplicitRungeKuttaExport( )
 
 returnValue ExplicitRungeKuttaExport::setup( )
 {
-	// non equidistant integration grids not yet implemented for explicit integrators
-	if( !equidistant ) return ACADOERROR( RET_INVALID_OPTION );
-
 	String fileName( "integrator.c" );
 
 	int printLevel;
@@ -93,12 +90,14 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 
 //	rk_ttt.setup( "rk_ttt", 1,1,            REAL,ACADO_WORKSPACE,BT_TRUE );
+	uint timeDep = 0;
+	if( timeDependant ) timeDep = 1;
 	
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
-	rk_xxx.setup("rk_xxx", 1, inputDim, REAL, structWspace);
+	rk_xxx.setup("rk_xxx", 1, inputDim+timeDep, REAL, structWspace);
 	rk_kkk.setup("rk_kkk", rkOrder, rhsDim, REAL, structWspace);
 
 	if ( useOMP )
@@ -158,6 +157,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
 		loop.addStatement( rk_xxx.getCols( 0,rhsDim ) == rk_eta.getCols( 0,rhsDim ) + Ah.getRow(run1)*rk_kkk );
+		if( timeDependant ) loop.addStatement( rk_xxx.getCol( inputDim ) == cc(run1) );
 		loop.addFunctionCall( diffs_rhs.getName(), rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
@@ -233,13 +233,15 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	// no free parameters yet!
 	// f << forwardDerivative( rhs_, x ) * Gp + forwardDerivative( rhs_, p );
 
+	if( f.getNT() > 0 ) timeDependant = BT_TRUE;
+
 	int matlabInterface;
 	userInteraction->get(GENERATE_MATLAB_INTERFACE, matlabInterface);
 	if (matlabInterface) {
-		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU)
-				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU);
+		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP)
+				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP);
 	} else {
-		return diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU);
+		return diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP);
 	}
 
 	return SUCCESSFUL_RETURN;

@@ -229,10 +229,8 @@ returnValue SIMexport::setup( )
 	if ( integrator == NULL )
 		return ACADOERROR( RET_INVALID_OPTION );
 
-	if( modelData.hasEquidistantIntegrationGrid()) {
-		Grid grid( 0.0, T, modelData.getN()+1 );
-		modelData.setIntegrationGrid( grid, numSteps );
-	}
+	Grid grid( 0.0, T, modelData.getN()+1 );
+	modelData.setIntegrationGrid( grid, numSteps );
 	integrator->setModelData( modelData );
 	
 	if( modelData.hasOutputs() ) {
@@ -671,7 +669,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
-	if( (MeasurementGrid)measGrid == ONLINE_GRID || ((MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID && !modelData.hasEquidistantIntegrationGrid()) ) return ACADOERROR( RET_INVALID_OPTION );
+	if( (MeasurementGrid)measGrid == ONLINE_GRID ) return ACADOERROR( RET_INVALID_OPTION );
 
 	_initStates = initStates;
 	_controls = controls;
@@ -684,20 +682,6 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 		meas(i) = (double)outputGrids[i].getNumIntervals();
 		measRef(i) = (double)outputGrids[i].getNumIntervals()*factorRef;
 	}
-	
-	Vector intGrid( integrationGrid.getNumIntervals()+1 );
-	Vector refIntGrid( factorRef*integrationGrid.getNumIntervals()+1 );
-	if( !modelData.hasEquidistantIntegrationGrid() ) {
-		intGrid(0) = integrationGrid.getTime( 0 );
-		refIntGrid(0) = integrationGrid.getTime( 0 );
-		for( i = 0; i < integrationGrid.getNumIntervals(); i++ ) {
-			intGrid(i+1) = integrationGrid.getTime( i+1 );
-			double step = (integrationGrid.getTime( i+1 ) - integrationGrid.getTime( i ))/factorRef;
-			for( j = 0; j < factorRef; j++ ) {
-				refIntGrid(i*factorRef+1+j) = refIntGrid(i*factorRef+j) + step;
-			}
-		}
-	}
 
 	int numSteps;
     get( NUM_INTEGRATOR_STEPS, numSteps );
@@ -706,13 +690,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
     
     if( !referenceProvided ) {
 	    // REFERENCE:
-    	if( !modelData.hasEquidistantIntegrationGrid() ) {
-    		modelData.setMeasurements( meas );			// EQUIDISTANT_GRID option is used
-    		modelData.setIntegrationGrid( refIntGrid );
-    		exportCode(	dirName );
-    		exportTest(	dirName, String( "test.c" ), _ref, _refOutputFiles, BT_FALSE, 1 );
-    	}
-    	else if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
+    	if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
     		modelData.setMeasurements( meas );
     		set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
     		exportCode(	dirName );
@@ -731,9 +709,6 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
     // THE INTEGRATOR:
     modelData.setMeasurements( meas );
 	set( NUM_INTEGRATOR_STEPS,  numSteps );
-	if( !modelData.hasEquidistantIntegrationGrid() ) {
-		modelData.setIntegrationGrid( intGrid );
-	}
 	exportCode(	dirName );
 	if(timingSteps > 0 && timingCalls > 0) 	exportTest(	dirName, String( "test.c" ), _results, _outputFiles, BT_TRUE, 1 );
 	else 									exportTest(	dirName, String( "test.c" ), _results, _outputFiles, BT_FALSE, 1 );

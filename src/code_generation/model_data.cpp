@@ -53,7 +53,6 @@ ModelData::ModelData() {
 	NP = 0;
 	N  = 0;
 	model_dimensions_set = BT_FALSE;
-	equidistant = BT_TRUE;
 }
 
 
@@ -368,14 +367,6 @@ returnValue ModelData::getIntegrationGrid( Grid& integrationGrid_ ) const
 }
 
 
-returnValue ModelData::setIntegrationGrid( const Vector& gridPoints )
-{
-	integrationGrid = Grid(gridPoints);
-	equidistant = BT_FALSE;
-	return SUCCESSFUL_RETURN;
-}
-
-
 returnValue ModelData::setIntegrationGrid(	const Grid& _ocpGrid, const uint _numSteps
 										)
 {
@@ -416,12 +407,6 @@ returnValue ModelData::clearIntegrationGrid( )
 	integrationGrid = Grid();
 
 	return SUCCESSFUL_RETURN;
-}
-
-
-BooleanType ModelData::hasEquidistantIntegrationGrid(  ) const
-{
-	return equidistant;
 }
 
 

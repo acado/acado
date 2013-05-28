@@ -57,6 +57,8 @@ ExportODEfunction::ExportODEfunction(	const Function& _f,
 	numX = 0;
 	numXA = 0;
 	numU = 0;
+	numP = 0;
+	numDX = 0;
 	f = new Function( _f );
 }
 
@@ -66,6 +68,8 @@ ExportODEfunction::ExportODEfunction( const ExportODEfunction& arg ) : ExportFun
 	numX = arg.numX;
 	numXA = arg.numXA;
 	numU = arg.numU;
+	numP = arg.numP;
+	numDX = arg.numDX;
 
 	if ( arg.f != 0 )
 	{
@@ -125,12 +129,16 @@ returnValue ExportODEfunction::init(	const Function& _f,
 										const String& _name,
 										const uint _numX,
 										const uint _numXA,
-										const uint _numU
+										const uint _numU,
+										const uint _numP,
+										const uint _numDX
 										)
 {
 	numX = _numX;
 	numXA = _numXA;
 	numU = _numU;
+	numP = _numP;
+	numDX = _numDX;
 
 	if ( f )
 		delete f;
@@ -176,7 +184,7 @@ returnValue ExportODEfunction::exportCode(	FILE* file,
 											) const
 {
 	if (f->getDim() > 0)
-		return f->exportCode(file, name.getName(), _realString.getName(), _precision, numX, numXA, numU);
+		return f->exportCode(file, name.getName(), _realString.getName(), _precision, numX, numXA, numU, numP, numDX);
 	return SUCCESSFUL_RETURN;
 }
 

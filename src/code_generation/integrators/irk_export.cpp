@@ -119,10 +119,6 @@ returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 			return RET_UNABLE_TO_EXPORT_CODE;
 		}
 		NX3 = A3.getNumRows();
-		if( !equidistant ) {
-			// TODO: WHAT IF NONEQUIDISTANT INTEGRATION GRID??
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
 		M33 = M3;
 		A33 = A3;
 
@@ -180,7 +176,7 @@ returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 		Matrix A3_large = expandOutputMatrix(A3);
 		f_large << _rhs + A3_large*x;
 
-		return (rhs3.init( f_large,"acado_rhs3",NX,NXA,NU ) & diffs_rhs3.init( g,"acado_diffs3",NX,NXA,NU ) );
+		return (rhs3.init( f_large,"acado_rhs3",NX,NXA,NU,NP ) & diffs_rhs3.init( g,"acado_diffs3",NX,NXA,NU,NP ) );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -228,7 +224,9 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 			g << forwardDerivative( rhs_(i), dx );
 		}
 
-		return (rhs.init( f,"acado_rhs",NX,NXA,NU ) & diffs_rhs.init( g,"acado_diffs",NX,NXA,NU ) );
+		if( f.getNT() > 0 ) timeDependant = BT_TRUE;
+
+		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX ) & diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX ) );
 	}
 	return SUCCESSFUL_RETURN;
 }
@@ -253,10 +251,6 @@ returnValue ImplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 			return RET_UNABLE_TO_EXPORT_CODE;
 		}
 		NX3 = A3.getNumRows();
-		if( !equidistant ) {
-			// TODO: WHAT IF NONEQUIDISTANT INTEGRATION GRID??
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
 		M33 = M3;
 		A33 = A3;
 
@@ -533,47 +527,28 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	initializeDDMatrix();
 	initializeCoefficients();
 
-	ExportVariable Ah;
-	ExportVariable Bh;
-	ExportVariable rk_tPrev;
-	if( equidistant ) {
-		double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-		Matrix tmp = AA;
-		Ah = ExportVariable( "Ah_mat", tmp*=h, STATIC_CONST_REAL );
-		code.addDeclaration( Ah );
+	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
+	Matrix tmp = AA;
+	ExportVariable Ah( "Ah_mat", tmp*=h, STATIC_CONST_REAL );
+	code.addDeclaration( Ah );
+	code.addLinebreak( 2 );
+	// TODO: Ask Milan why this does NOT work properly !!
+	Ah = ExportVariable( "Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
+
+	Vector BB( bb );
+	ExportVariable Bh( "Bh_mat", Matrix( BB*=h, BT_FALSE ) );
+
+	Vector CC( cc );
+	ExportVariable C;
+	if( timeDependant ) {
+		C = ExportVariable( "C_mat", Matrix( CC, BT_FALSE ), STATIC_CONST_REAL );
+		code.addDeclaration( C );
 		code.addLinebreak( 2 );
-		// TODO: Ask Milan why this does NOT work properly !!
-		Ah = ExportVariable( "Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
-
-		Vector BB( bb );
-		Bh = ExportVariable( "Bh_mat", Matrix( BB*=h, BT_FALSE ) );
-
-		code.addComment(String("Fixed step size:") << String(h));
+		C = ExportVariable( "C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 	}
-	else {
-		if( NX1 > 0 || NX3 > 0 ) {
-			// TODO: WHAT IF NONEQUIDISTANT INTEGRATION GRID??
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
 
-		Ah = ExportVariable( "Ah_mat", numStages, numStages, REAL, ACADO_LOCAL );
-		Bh = ExportVariable( "Bh_mat", numStages, 1, REAL, ACADO_LOCAL );
-		integrate.addDeclaration( Ah );
-		integrate.addDeclaration( Bh );
+	code.addComment(String("Fixed step size:") << String(h));
 
-		Vector steps(grid.getNumIntervals());
-		for( run5 = 0; run5 < grid.getNumIntervals(); run5++ ) {
-			steps(run5) = grid.getTime(run5+1) - grid.getTime(run5);
-		}
-		stepsH = ExportVariable( "steps_H", steps );
-		integrate.addDeclaration( stepsH );
-		stepsH = ExportVariable( "steps_H", 1, grid.getNumIntervals(), REAL, ACADO_LOCAL );
-
-		if( (MeasurementGrid)measGrid == ONLINE_GRID ) {
-			rk_tPrev = ExportVariable( "rk_ttt_prev", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
-			integrate.addDeclaration( rk_tPrev );
-		}
-	}
 	ExportVariable determinant( "det", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
 	integrate.addDeclaration( determinant );
 
@@ -642,23 +617,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
 	}
 
-	if( equidistant ) {
-		loop->addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
-	}
-	else {
-		if( (MeasurementGrid)measGrid == ONLINE_GRID ) loop->addStatement( rk_tPrev == rk_ttt );
-		loop->addStatement( rk_ttt += Matrix(1.0/(grid.getLastTime()-grid.getFirstTime()))*stepsH.getCol( run ) );
-	}
-
-	if( !equidistant ) {
-		// MULTIPLICATIONS WITH THE CORRECT INTEGRATION STEP SIZE
-		for( run5 = 0; run5 < numStages; run5++ ) {
-			loop->addStatement( Ah.getRow( run5 ) == stepsH.getCol( run )*Matrix(AA.getRow( run5 ),BT_TRUE) );
-		}
-		for( run5 = 0; run5 < numStages; run5++ ) {
-			loop->addStatement( Bh.getRow(run5) == stepsH.getCol( run )*Matrix(bb).getRow(run5) );
-		}
-	}
+	loop->addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
 
 	if( CONTINUOUS_OUTPUT && (MeasurementGrid)measGrid == ONLINE_GRID ) {
 		for( run5 = 0; run5 < outputGrids.size(); run5++ ) {
@@ -699,14 +658,14 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	solveInputSystem( loop, i, run1, j, tmp_index1, Ah );
 
 	// PART 2: The fully implicit system
-	solveImplicitSystem( loop, i, run1, j, tmp_index1, Ah, determinant );
+	solveImplicitSystem( loop, i, run1, j, tmp_index1, Ah, C, determinant );
 
 	// PART 3: The linear output system
 	prepareOutputSystem( code );
 	solveOutputSystem( loop, i, run1, j, tmp_index1, Ah );
 
 	// generate continuous OUTPUT:
-	generateOutput( loop, run, i, tmp_index2, tmp_index3, tmp_meas, rk_tPrev, time_tmp );
+	generateOutput( loop, run, i, tmp_index2, tmp_index3, tmp_meas, time_tmp );
 
 	// DERIVATIVES wrt the states (IFT):
 	if( NX1 > 0 ) {
@@ -718,7 +677,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		// PART 3: The linear output system
 		sensitivitiesOutputSystem( &loop4, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, BT_TRUE, 1 );
 		// generate sensitivities wrt states for continuous output:
-		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, rk_tPrev, time_tmp, BT_TRUE, 0 );
+		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, BT_TRUE, 0 );
 		loop->addStatement( loop4 );
 	}
 	if( NX2 > 0 ) {
@@ -728,7 +687,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		// PART 3: The linear output system
 		sensitivitiesOutputSystem( &loop4, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, BT_TRUE, 2 );
 		// generate sensitivities wrt states for continuous output:
-		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, rk_tPrev, time_tmp, BT_TRUE, NX1 );
+		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, BT_TRUE, NX1 );
 		loop->addStatement( loop4 );
 	}
 	if( NX3 > 0 ) {
@@ -736,7 +695,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		// PART 3: The linear output system
 		sensitivitiesOutputSystem( &loop4, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, BT_TRUE, 3 );
 		// generate sensitivities wrt states for continuous output:
-		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, rk_tPrev, time_tmp, BT_TRUE, NX1+NX2 );
+		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, BT_TRUE, NX1+NX2 );
 		loop->addStatement( loop4 );
 	}
 
@@ -751,7 +710,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		// PART 3: The linear output system
 		sensitivitiesOutputSystem( &loop5, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, BT_FALSE, 0 );
 		// generate sensitivities wrt controls for continuous output:
-		sensitivitiesOutputs( &loop5, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, rk_tPrev, time_tmp, BT_FALSE, 0 );
+		sensitivitiesOutputs( &loop5, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, BT_FALSE, 0 );
 		loop->addStatement( loop5 );
 	}
 
@@ -1199,7 +1158,7 @@ returnValue ImplicitRungeKuttaExport::solveInputSystem( ExportStatementBlock* bl
 }
 
 
-returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& det )
+returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, const ExportVariable& det )
 {
 	if( NX2 > 0 || NXA > 0 ) {
 
@@ -1207,7 +1166,7 @@ returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock*
 		// Initialization iterations:
 		ExportForLoop loop1( index1,0,numItsInit+1 ); // NOTE: +1 because 0 will lead to NaNs, so the minimum number of iterations is 1 at the initialization
 		ExportForLoop loop11( index2,0,numStages );
-		evaluateMatrix( &loop11, index2, index3, tmp_index, Ah, BT_TRUE );
+		evaluateMatrix( &loop11, index2, index3, tmp_index, Ah, C, BT_TRUE );
 		loop1.addStatement( loop11 );
 		loop1.addStatement( det.getFullName() << " = " << solver->getNameSolveFunction() << "( " << rk_A.getFullName() << ", " << rk_b.getFullName() << ", " << rk_auxSolver.getFullName() << " );\n" );
 		ExportForLoop loopTemp( index3,0,numStages );
@@ -1220,7 +1179,7 @@ returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock*
 		// the rest (numIts) of the Newton iterations with reuse of the Jacobian (no evaluation or factorization needed)
 		ExportForLoop loop2( index1,0,numIts );
 		ExportForLoop loop21( index2,0,numStages );
-		evaluateStatesImplicitSystem( &loop21, Ah, index2, index3, tmp_index );
+		evaluateStatesImplicitSystem( &loop21, Ah, C, index2, index3, tmp_index );
 		evaluateRhsImplicitSystem( &loop21, index2 );
 		loop2.addStatement( loop21 );
 		loop2.addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
@@ -1232,7 +1191,7 @@ returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock*
 
 		// solution calculated --> evaluate and save the necessary derivatives in rk_diffsTemp and update the matrix rk_A:
 		ExportForLoop loop3( index2,0,numStages );
-		evaluateMatrix( &loop3, index2, index3, tmp_index, Ah, BT_FALSE );
+		evaluateMatrix( &loop3, index2, index3, tmp_index, Ah, C, BT_FALSE );
 		block->addStatement( loop3 );
 
 		// IF DEBUG MODE:
@@ -1478,7 +1437,7 @@ returnValue ImplicitRungeKuttaExport::sensitivitiesOutputSystem( ExportStatement
 }
 
 
-returnValue ImplicitRungeKuttaExport::evaluateStatesImplicitSystem( ExportStatementBlock* block, const ExportVariable& Ah, const ExportIndex& stage, const ExportIndex& i, const ExportIndex& j )
+returnValue ImplicitRungeKuttaExport::evaluateStatesImplicitSystem( ExportStatementBlock* block, const ExportVariable& Ah, const ExportVariable& C, const ExportIndex& stage, const ExportIndex& i, const ExportIndex& j )
 {
 	ExportForLoop loop1( i, 0, NX1+NX2 );
 	loop1.addStatement( rk_xxx.getCol( i ) == rk_eta.getCol( i ) );
@@ -1494,6 +1453,10 @@ returnValue ImplicitRungeKuttaExport::evaluateStatesImplicitSystem( ExportStatem
 	ExportForLoop loop4( i, 0, NDX2 );
 	loop4.addStatement( rk_xxx.getCol( inputDim-diffsDim+i ) == rk_kkk.getSubMatrix( i,i+1,stage,stage+1 ) );
 	block->addStatement( loop4 );
+
+	if( C.getDim() > 0 ) {	// There is a time dependence, so it must be set
+		block->addStatement( rk_xxx.getCol( inputDim-diffsDim+NDX2 ) == C.getCol(stage) );
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -1541,11 +1504,11 @@ returnValue ImplicitRungeKuttaExport::evaluateRhsImplicitSystem( ExportStatement
 }
 
 
-returnValue ImplicitRungeKuttaExport::evaluateMatrix( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index, const ExportVariable& Ah, BooleanType evaluateB )
+returnValue ImplicitRungeKuttaExport::evaluateMatrix( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, BooleanType evaluateB )
 {
 	uint i;
 
-	evaluateStatesImplicitSystem( block, Ah, index1, index2, tmp_index );
+	evaluateStatesImplicitSystem( block, Ah, C, index1, index2, tmp_index );
 
 	block->addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsTemp2.getAddress(index1,0) );
 	ExportForLoop loop2( index2,0,NX2+NXA );
@@ -1584,7 +1547,7 @@ returnValue ImplicitRungeKuttaExport::evaluateMatrix( ExportStatementBlock* bloc
 
 returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* block, const ExportIndex& index0,
 		const ExportIndex& index1, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2,
-		const ExportVariable& tmp_meas, const ExportVariable& rk_tPrev, const ExportVariable& time_tmp )
+		const ExportVariable& tmp_meas, const ExportVariable& time_tmp )
 {
 	uint i, j;
 	int measGrid;
@@ -1595,15 +1558,8 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 		ExportForLoop tmpLoop2( index1,0,totalMeas[i] );
 		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) {
 			loop1 = &tmpLoop2;
-			if( equidistant ) {
-				for( j = 0; j < numStages; j++ ) {
-					loop1->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( index1,index1+1,j,j+1 ) );
-				}
-			}
-			else {
-				for( j = 0; j < numStages; j++ ) {
-					loop1->addStatement( rk_outH.getRow(j) == stepsH.getCol( index0 )*polynVariables[i].getSubMatrix( index1,index1+1,j,j+1 ) );
-				}
+			for( j = 0; j < numStages; j++ ) {
+				loop1->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( index1,index1+1,j,j+1 ) );
 			}
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) {
 				for( j = 0; j < numStages; j++ ) {
@@ -1615,15 +1571,8 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 			loop1 = block;
 			loop1->addStatement( String("for(") << index1.getName() << " = 0; " << index1.getName() << " < (int)" << numMeasVariables[i].get(0,index0) << "; " << index1.getName() << "++) {\n" );
 			loop1->addStatement( tmp_index1 == numMeas[i]+index1 );
-			if( equidistant ) {
-				for( j = 0; j < numStages; j++ ) {
-					loop1->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( tmp_index1,tmp_index1+1,j,j+1 ) );
-				}
-			}
-			else {
-				for( j = 0; j < numStages; j++ ) {
-					loop1->addStatement( rk_outH.getRow(j) == stepsH.getCol( index0 )*polynVariables[i].getSubMatrix( tmp_index1,tmp_index1+1,j,j+1 ) );
-				}
+			for( j = 0; j < numStages; j++ ) {
+				loop1->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( tmp_index1,tmp_index1+1,j,j+1 ) );
 			}
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) {
 				for( j = 0; j < numStages; j++ ) {
@@ -1637,18 +1586,11 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 			loop1->addStatement( String("for(") << index1.getName() << " = 0; " << index1.getName() << " < (int)" << tmp_index2.getName() << "; " << index1.getName() << "++) {\n" );
 			loop1->addStatement( tmp_index1 == numMeas[i]+index1 );
 
-			if( equidistant ) {
-				uint scale = grid.getNumIntervals();
-				double scale2 = 1.0/grid.getNumIntervals();
-				loop1->addStatement( time_tmp.getName() << " = " << String(scale) << "*(" << gridVariables[i].get(0,tmp_index1) << "-" << String(scale2) << "*" << index0.getName() << ");\n" );
-			}
-			else {
-				loop1->addStatement( time_tmp.getName() << " = " << (grid.getLastTime()-grid.getFirstTime()) << "*(" << gridVariables[i].get(0,tmp_index1) << "-" << rk_tPrev.getName() << ")/" << stepsH.get( 0,index0 ) << ";\n" );
-			}
+			uint scale = grid.getNumIntervals();
+			double scale2 = 1.0/grid.getNumIntervals();
+			loop1->addStatement( time_tmp.getName() << " = " << String(scale) << "*(" << gridVariables[i].get(0,tmp_index1) << "-" << String(scale2) << "*" << index0.getName() << ");\n" );
 
-			String h;
-			if( equidistant ) 	h = String((grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals());
-			else				h = stepsH.get( 0,index0 );
+			String h((grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals());
 			evaluatePolynomial( *loop1, rk_outH, time_tmp, h );
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) evaluateDerivedPolynomial( *loop1, rk_out, time_tmp );
 		}
@@ -1695,7 +1637,7 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 
 returnValue ImplicitRungeKuttaExport::sensitivitiesOutputs( ExportStatementBlock* block, const ExportIndex& index0,
 		const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2,
-		const ExportIndex& tmp_index3, const ExportVariable& tmp_meas, const ExportVariable& rk_tPrev, const ExportVariable& time_tmp, BooleanType STATES, uint base )
+		const ExportIndex& tmp_index3, const ExportVariable& tmp_meas, const ExportVariable& time_tmp, BooleanType STATES, uint base )
 {
 	uint i, j, k;
 	int measGrid;
@@ -1707,15 +1649,8 @@ returnValue ImplicitRungeKuttaExport::sensitivitiesOutputs( ExportStatementBlock
 		ExportForLoop tmpLoop( index2,0,totalMeas[i] );
 		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) {
 			loop = &tmpLoop;
-			if( equidistant ) {
-				for( j = 0; j < numStages; j++ ) {
-					loop->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( index2,index2+1,j,j+1 ) );
-				}
-			}
-			else {
-				for( j = 0; j < numStages; j++ ) {
-					loop->addStatement( rk_outH.getRow(j) == stepsH.getCol( index0 )*polynVariables[i].getSubMatrix( index2,index2+1,j,j+1 ) );
-				}
+			for( j = 0; j < numStages; j++ ) {
+				loop->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( index2,index2+1,j,j+1 ) );
 			}
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) {
 				for( j = 0; j < numStages; j++ ) {
@@ -1727,15 +1662,8 @@ returnValue ImplicitRungeKuttaExport::sensitivitiesOutputs( ExportStatementBlock
 			loop = block;
 			loop->addStatement( String("for(") << index2.getName() << " = 0; " << index2.getName() << " < (int)" << numMeasVariables[i].get(0,index0) << "; " << index2.getName() << "++) {\n" );
 			loop->addStatement( tmp_index2 == numMeas[i]+index2 );
-			if( equidistant ) {
-				for( j = 0; j < numStages; j++ ) {
-					loop->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( tmp_index2,tmp_index2+1,j,j+1 ) );
-				}
-			}
-			else {
-				for( j = 0; j < numStages; j++ ) {
-					loop->addStatement( rk_outH.getRow(j) == stepsH.getCol( index0 )*polynVariables[i].getSubMatrix( tmp_index2,tmp_index2+1,j,j+1 ) );
-				}
+			for( j = 0; j < numStages; j++ ) {
+				loop->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( tmp_index2,tmp_index2+1,j,j+1 ) );
 			}
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) {
 				for( j = 0; j < numStages; j++ ) {
@@ -1749,18 +1677,11 @@ returnValue ImplicitRungeKuttaExport::sensitivitiesOutputs( ExportStatementBlock
 			loop->addStatement( String("for(") << index2.getName() << " = 0; " << index2.getName() << " < (int)" << tmp_index3.getName() << "; " << index2.getName() << "++) {\n" );
 			loop->addStatement( tmp_index2 == numMeas[i]+index2 );
 
-			if( equidistant ) {
-				uint scale = grid.getNumIntervals();
-				double scale2 = 1.0/grid.getNumIntervals();
-				loop->addStatement( time_tmp.getName() << " = " << String(scale) << "*(" << gridVariables[i].get(0,tmp_index2) << "-" << String(scale2) << "*" << index0.getName() << ");\n" );
-			}
-			else {
-				loop->addStatement( time_tmp.getName() << " = " << (grid.getLastTime()-grid.getFirstTime()) << "*(" << gridVariables[i].get(0,tmp_index2) << "-" << rk_tPrev.getName() << ")/" << stepsH.get( 0,index0 ) << ";\n" );
-			}
+			uint scale = grid.getNumIntervals();
+			double scale2 = 1.0/grid.getNumIntervals();
+			loop->addStatement( time_tmp.getName() << " = " << String(scale) << "*(" << gridVariables[i].get(0,tmp_index2) << "-" << String(scale2) << "*" << index0.getName() << ");\n" );
 
-			String h;
-			if( equidistant ) 	h = String((grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals());
-			else				h = stepsH.get( 0,index0 );
+			String h((grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals());
 			evaluatePolynomial( *loop, rk_outH, time_tmp, h );
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) evaluateDerivedPolynomial( *loop, rk_out, time_tmp );
 		}
@@ -2065,11 +1986,9 @@ Vector ImplicitRungeKuttaExport::divideMeasurements( uint index )
 returnValue ImplicitRungeKuttaExport::setup( )
 {
 	if( CONTINUOUS_OUTPUT && !equidistantControlGrid() ) return ACADOERROR( RET_INVALID_OPTION );
-	if( !equidistant && !equidistantControlGrid() ) return ACADOERROR( RET_INVALID_OPTION );
 
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
-	if( !equidistant && (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) return ACADOERROR( RET_INVALID_OPTION );
 
 	int intMode;
 	userInteraction->get( IMPLICIT_INTEGRATOR_MODE,intMode ); 
@@ -2127,8 +2046,11 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
+	uint timeDep = 0;
+	if( timeDependant ) timeDep = 1;
+
 	rk_ttt = ExportVariable( "rk_ttt", 1, 1, REAL, structWspace, BT_TRUE );
-	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim-diffsDim+numDX, REAL, structWspace );
+	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim-diffsDim+numDX+timeDep, REAL, structWspace );
 	rk_kkk = ExportVariable( "rk_kkk", NX+NXA, numStages, REAL, structWspace );
 	rk_A = ExportVariable( "rk_A", numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, structWspace );
 	if ( (BooleanType)debugMode == BT_TRUE && useOMP ) {
@@ -2384,14 +2306,8 @@ returnValue ImplicitRungeKuttaExport::prepareOutputEvaluation( ExportStatementBl
 			Matrix polynDerV = evaluateDerivedPolynomial( i );
 			Vector measurements = divideMeasurements( i );
 
-			ExportVariable polynVariable;
-			if( equidistant ) {
-				double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-				polynVariable = ExportVariable( (String)"polynOutput" << i, polynV*=h, STATIC_CONST_REAL );
-			}
-			else {
-				polynVariable = ExportVariable( (String)"polynOutput" << i, polynV, STATIC_CONST_REAL );
-			}
+			double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
+			ExportVariable polynVariable = ExportVariable( (String)"polynOutput" << i, polynV*=h, STATIC_CONST_REAL );
 			code.addDeclaration( polynVariable );
 			polynVariable = ExportVariable( (String)"polynOutput" << i, totalMeas[i], numStages, STATIC_CONST_REAL );
 			polynVariables.push_back( polynVariable );

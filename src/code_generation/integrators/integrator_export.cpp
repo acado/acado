@@ -52,8 +52,9 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 	NDX3 = 0;
 	NXA3 = 0;
 
+	timeDependant = BT_FALSE;
+
 	exportRhs = BT_TRUE;
-	equidistant = BT_TRUE;
 	crsFormat = BT_FALSE;
 
 	reset_int = ExportVariable( "resetIntegrator", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
@@ -71,8 +72,9 @@ IntegratorExport::IntegratorExport(	const IntegratorExport& arg
 	NDX3 = arg.NDX3;
 	NXA3 = arg.NXA3;
 
+	timeDependant = BT_FALSE;
+
 	exportRhs = BT_TRUE;
-	equidistant = BT_TRUE;
 	crsFormat = BT_FALSE;
 }
 
@@ -110,10 +112,6 @@ returnValue IntegratorExport::setLinearInput( const Matrix& M1, const Matrix& A1
 			return RET_UNABLE_TO_EXPORT_CODE;
 		}
 		NX1 = A1.getNumRows();
-		if( !equidistant ) {
-			// TODO: WHAT IF NONEQUIDISTANT INTEGRATION GRID??
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
 		M11 = M1;
 		A11 = A1;
 		B11 = B1;
@@ -228,8 +226,6 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	data.getIntegrationGrid(integrationGrid);
 	grid = integrationGrid;
 	data.getNumSteps( numSteps );
-
-	equidistant = data.hasEquidistantIntegrationGrid();
 
 	setup( );
 
@@ -446,7 +442,6 @@ returnValue IntegratorExport::copy(	const IntegratorExport& arg
 									)
 {
 	exportRhs = arg.exportRhs;
-	equidistant = arg.equidistant;
 	crsFormat = arg.crsFormat;
 	grid = arg.grid;
 	numSteps = arg.numSteps;
