@@ -1455,7 +1455,7 @@ returnValue ImplicitRungeKuttaExport::evaluateStatesImplicitSystem( ExportStatem
 	block->addStatement( loop4 );
 
 	if( C.getDim() > 0 ) {	// There is a time dependence, so it must be set
-		block->addStatement( rk_xxx.getCol( inputDim-diffsDim+NDX2 ) == C.getCol(stage) );
+		block->addStatement( rk_xxx.getCol( inputDim-diffsDim+NDX ) == C.getCol(stage) );
 	}
 
 	return SUCCESSFUL_RETURN;
