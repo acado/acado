@@ -202,11 +202,6 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 
 	protected:
 
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau() = 0;
-
 
 		/** Returns the largest global export variable.
 		 *
@@ -218,6 +213,16 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
     protected:
 
 };
+
+
+//
+// Create the integrator
+//
+static ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction* _userInteraction,
+																	const String &_commonHeaderName	)
+{
+	return new ExplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+}
 
 
 CLOSE_NAMESPACE_ACADO

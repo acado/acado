@@ -80,6 +80,16 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
         virtual ~ImplicitRungeKuttaExport( );
 
 
+        //
+        // Create the correct integrator
+        //
+        static ImplicitRungeKuttaExport* createImplicitRungeKuttaExport(	UserInteraction* _userInteraction,
+        																	const String &_commonHeaderName	)
+        {
+        	return new ImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+        }
+
+
 		/** Assignment operator (deep copy).
 		 *
 		 *	@param[in] arg		Right-hand side object.
@@ -645,11 +655,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 */
 		virtual returnValue copy(	const ImplicitRungeKuttaExport& arg
 							);
-
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau() = 0;
 		
 		
 		/** Returns the performed number of Newton iterations.

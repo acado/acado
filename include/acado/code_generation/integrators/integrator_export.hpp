@@ -473,6 +473,16 @@ enum ExportIntegratorType{
 };
 
 
+/**  Summarizes all possible sensitivity generation types for exported integrators.  */
+enum ExportSensitivityType{
+
+	NO_SENSITIVITY, 				/**< No sensitivities are computed, if possible. 		  					 */
+    FORWARD,    					/**< Sensitivities are computed in forward mode.                             */
+    BACKWARD,    					/**< Sensitivities are computed in backward mode.                            */
+    FORWARD_OVER_BACKWARD         	/**< Sensitivities (first and second order) are computed.					 */
+};
+
+
 CLOSE_NAMESPACE_ACADO
 
 

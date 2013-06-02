@@ -119,6 +119,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( HESSIAN_APPROXIMATION,       GAUSS_NEWTON    );
 	addOption( DISCRETIZATION_TYPE,         SINGLE_SHOOTING );
 	addOption( INTEGRATOR_TYPE,             INT_RK4         );
+	addOption( DYNAMIC_SENSITIVITY,         FORWARD         );
 	addOption( LINEAR_ALGEBRA_SOLVER,       GAUSS_LU        );
 	addOption( UNROLL_LINEAR_SOLVER,       	BT_FALSE	    );
 	addOption( NUM_INTEGRATOR_STEPS,        30              );

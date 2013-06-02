@@ -64,6 +64,10 @@ ExplicitRungeKuttaExport::~ExplicitRungeKuttaExport( )
 
 returnValue ExplicitRungeKuttaExport::setup( )
 {
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
+	if ( (ExportSensitivityType)sensGen != FORWARD ) ACADOERROR( RET_INVALID_OPTION );
+
 	String fileName( "integrator.c" );
 
 	int printLevel;
@@ -76,9 +80,6 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	const uint rhsDim   = NX*(NX+NU+1);
 	const uint inputDim = NX*(NX+NU+1) + NU + NP;
 	const uint rkOrder  = getNumStages();
-	
-	initializeButcherTableau();
-	//grid.print();
 	   
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
 

@@ -93,6 +93,11 @@ class RungeKuttaExport : public IntegratorExport
 		virtual returnValue setup( ) = 0;
 
 
+		/** This routine initializes the matrices AA, bb and cc which
+		 * 	form the Butcher Tableau. */
+		returnValue initializeButcherTableau( const Matrix& _AA, const Vector& _bb, const Vector& _cc );
+
+
 		/** Assigns Differential Equation to be used by the integrator.
 		 *
 		 *	@param[in] rhs		Right-hand side expression.
@@ -157,8 +162,8 @@ class RungeKuttaExport : public IntegratorExport
 		*                                                                      										\n
 		*  \return SUCCESSFUL_RETURN
 		*/
-		virtual returnValue setupOutput( const std::vector<Grid> outputGrids_,
-									  const std::vector<Expression> rhs ) = 0;
+		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
+									  	  const std::vector<Expression> rhs ) = 0;
 
 
 
@@ -172,11 +177,6 @@ class RungeKuttaExport : public IntegratorExport
 		 */
 		virtual returnValue copy(	const RungeKuttaExport& arg
 							);
-		
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau() = 0;
 
 
     protected:

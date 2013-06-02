@@ -63,11 +63,19 @@ GaussLegendre8Export::~GaussLegendre8Export( )
 }
 
 
-returnValue GaussLegendre8Export::initializeButcherTableau() {
-	AA = Matrix(4,4);
-	bb = Vector(4);
-	cc = Vector(4);
-			
+// PROTECTED:
+
+//
+// Register the integrator
+//
+
+IntegratorExport* createGaussLegendre8Export(	UserInteraction* _userInteraction,
+												const String &_commonHeaderName)
+{
+	Matrix AA(4,4);
+	Vector bb(4);
+	Vector cc(4);
+
 	AA(0,0) = (1/(double)144)*(double)sqrt((double)(double)30)+(double)1/(double)8;
 	AA(0,1) = -(double)(1/(double)840)*(double)sqrt((double)(double)525-(double)70*(double)sqrt((double)(double)30))*(double)sqrt((double)(double)30)+(double)(1/(double)144)*(double)sqrt((double)(double)30)-(double)(1/(double)105)*(double)sqrt((double)(double)525-(double)70*(double)sqrt((double)(double)30))+(double)1/(double)8;		
 	AA(0,2) = (1/(double)2352)*(double)sqrt((double)(double)525+(double)70*(double)sqrt((double)(double)30))*(double)sqrt((double)(double)30)-(double)(1/(double)144)*(double)sqrt((double)(double)30)+(double)(1/(double)1680)*(double)sqrt((double)(double)525-(double)70*(double)sqrt((double)(double)30))*(double)sqrt((double)(double)30)+(double)1/(double)8+(double)(1/(double)1470)*(double)sqrt((double)(double)525+(double)70*(double)sqrt((double)(double)30))-(double)(1/(double)420)*(double)sqrt((double)(double)525-(double)70*(double)sqrt((double)(double)30));	
@@ -84,32 +92,21 @@ returnValue GaussLegendre8Export::initializeButcherTableau() {
 	AA(3,1) = (1/(double)2352)*(double)sqrt((double)525-(double)70*(double)sqrt((double)30))*(double)sqrt((double)30)+(double)(1/(double)144)*(double)sqrt((double)30)+(double)(1/(double)1680)*(double)sqrt((double)525+(double)70*(double)sqrt((double)30))*(double)sqrt((double)30)-(double)(1/(double)1470)*(double)sqrt((double)525-(double)70*(double)sqrt((double)30))+(double)1/(double)8+(double)(1/(double)420)*(double)sqrt((double)525+(double)70*(double)sqrt((double)30));
 	AA(3,2) = -(double)(1/(double)840)*(double)sqrt((double)525+(double)70*(double)sqrt((double)30))*(double)sqrt((double)30)-(double)(1/(double)144)*(double)sqrt((double)30)+(double)(1/(double)105)*(double)sqrt((double)525+(double)70*(double)sqrt((double)30))+(double)1/(double)8;
 	AA(3,3) = -(double)(1/(double)144)*(double)sqrt((double)30)+(double)1/(double)8;		
-			
+
 	bb(0) = (1/(double)72)*(double)sqrt((double)30)+(double)1/(double)4;		
 	bb(1) = (1/(double)72)*(double)sqrt((double)30)+(double)1/(double)4;					
 	bb(2) = -(double)(1/(double)72)*(double)sqrt((double)30)+(double)1/(double)4;
 	bb(3) = -(double)(1/(double)72)*(double)sqrt((double)30)+(double)1/(double)4;
-	
+
 	cc(0) = 1/(double)2-(double)(1/(double)70)*(double)sqrt((double)525-(double)70*(double)sqrt((double)30));		
 	cc(1) = 1/(double)2+(double)(1/(double)70)*(double)sqrt((double)525-(double)70*(double)sqrt((double)30));	
 	cc(2) = 1/(double)2-(double)(1/(double)70)*(double)sqrt((double)525+(double)70*(double)sqrt((double)30));
 	cc(3) = 1/(double)2+(double)(1/(double)70)*(double)sqrt((double)525+(double)70*(double)sqrt((double)30));
-			
-	
-	return SUCCESSFUL_RETURN;
-}
 
+	ImplicitRungeKuttaExport* integrator = ImplicitRungeKuttaExport::createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	integrator->initializeButcherTableau(AA, bb, cc);
 
-// PROTECTED:
-
-//
-// Register the integrator
-//
-
-IntegratorExport* createGaussLegendre8Export(	UserInteraction* _userInteraction,
-												const String &_commonHeaderName)
-{
-	return new GaussLegendre8Export(_userInteraction, _commonHeaderName);
+	return integrator;
 }
 
 RegisterGaussLegendre8Export::RegisterGaussLegendre8Export()

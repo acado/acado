@@ -63,21 +63,6 @@ ExplicitEulerExport::~ExplicitEulerExport( )
 }
 
 
-returnValue ExplicitEulerExport::initializeButcherTableau() {
-	AA = Matrix(1,1);
-	bb = Vector(1);
-	cc = Vector(1);
-	
-	AA(0,0) = 0.0;		
-	
-	bb(0) = 1.0;
-
-	cc(0) = 0.0;
-	
-	return SUCCESSFUL_RETURN;
-}
-
-
 // PROTECTED:
 
 //
@@ -87,7 +72,20 @@ returnValue ExplicitEulerExport::initializeButcherTableau() {
 IntegratorExport* createExplicitEulerExport(	UserInteraction* _userInteraction,
 												const String &_commonHeaderName)
 {
-	return new ExplicitEulerExport(_userInteraction, _commonHeaderName);
+	Matrix AA(1,1);
+	Vector bb(1);
+	Vector cc(1);
+
+	AA(0,0) = 0.0;
+
+	bb(0) = 1.0;
+
+	cc(0) = 0.0;
+
+	ExplicitRungeKuttaExport* integrator = createExplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	integrator->initializeButcherTableau(AA, bb, cc);
+
+	return integrator;
 }
 
 RegisterExplicitEulerExport::RegisterExplicitEulerExport()

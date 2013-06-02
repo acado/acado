@@ -63,29 +63,6 @@ DiagonallyIRK4Export::~DiagonallyIRK4Export( )
 }
 
 
-returnValue DiagonallyIRK4Export::initializeButcherTableau() {
-	const double alpha = 1.137158042603258;
-
-	AA = Matrix(numStages,numStages);
-	bb = Vector(numStages);
-	cc = Vector(numStages);
-	
-	AA(0,0) = (1.0+alpha)/2.0;	AA(0,1) = 0.0;					AA(0,2) = 0.0;
-	AA(1,0) = -alpha/2.0;		AA(1,1) = (1.0+alpha)/2.0;		AA(1,2) = 0.0;
-	AA(2,0) = 1.0+alpha;		AA(2,1) = -(1.0+2.0*alpha);		AA(2,2) = (1.0+alpha)/2.0;
-			
-	bb(0) = 1.0/(6.0*alpha*alpha);
-	bb(1) = 1.0-1.0/(3.0*alpha*alpha);
-	bb(2) = 1.0/(6.0*alpha*alpha);
-			
-	cc(0) = (1.0+alpha)/2.0;
-	cc(1) = 1.0/2.0;
-	cc(2) = (1.0-alpha)/2.0;
-	
-	return SUCCESSFUL_RETURN;
-}
-
-
 // PROTECTED:
 
 //
@@ -95,7 +72,28 @@ returnValue DiagonallyIRK4Export::initializeButcherTableau() {
 IntegratorExport* createDiagonallyIRK4Export(	UserInteraction* _userInteraction,
 												const String &_commonHeaderName)
 {
-	return new DiagonallyIRK4Export(_userInteraction, _commonHeaderName);
+	const double alpha = 1.137158042603258;
+
+	Matrix AA(3,3);
+	Vector bb(3);
+	Vector cc(3);
+
+	AA(0,0) = (1.0+alpha)/2.0;	AA(0,1) = 0.0;					AA(0,2) = 0.0;
+	AA(1,0) = -alpha/2.0;		AA(1,1) = (1.0+alpha)/2.0;		AA(1,2) = 0.0;
+	AA(2,0) = 1.0+alpha;		AA(2,1) = -(1.0+2.0*alpha);		AA(2,2) = (1.0+alpha)/2.0;
+
+	bb(0) = 1.0/(6.0*alpha*alpha);
+	bb(1) = 1.0-1.0/(3.0*alpha*alpha);
+	bb(2) = 1.0/(6.0*alpha*alpha);
+
+	cc(0) = (1.0+alpha)/2.0;
+	cc(1) = 1.0/2.0;
+	cc(2) = (1.0-alpha)/2.0;
+
+	DiagonallyImplicitRKExport* integrator = createDiagonallyImplicitRKExport(_userInteraction, _commonHeaderName);
+	integrator->initializeButcherTableau(AA, bb, cc);
+
+	return integrator;
 }
 
 RegisterDiagonallyIRK4Export::RegisterDiagonallyIRK4Export()

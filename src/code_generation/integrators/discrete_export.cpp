@@ -147,6 +147,10 @@ returnValue DiscreteTimeExport::getFunctionDeclarations(	ExportStatementBlock& d
 
 returnValue DiscreteTimeExport::setup( )
 {
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
+	if ( (ExportSensitivityType)sensGen != FORWARD ) ACADOERROR( RET_INVALID_OPTION );
+
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 	ExportStruct structWspace;

@@ -56,7 +56,7 @@ class RadauIIA5Export : public ImplicitRungeKuttaExport
     // PUBLIC MEMBER FUNCTIONS:
     //
 
-    public:
+    private:
 
 		/** Default constructor. 
 		 *
@@ -77,14 +77,6 @@ class RadauIIA5Export : public ImplicitRungeKuttaExport
         /** Destructor. 
 		 */
         virtual ~RadauIIA5Export( );
-
-
-	protected:
-
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau();
 
     protected:
 

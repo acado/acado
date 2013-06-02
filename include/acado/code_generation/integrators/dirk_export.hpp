@@ -277,6 +277,16 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 };
 
 
+//
+// Create the integrator
+//
+static DiagonallyImplicitRKExport* createDiagonallyImplicitRKExport(	UserInteraction* _userInteraction,
+																		const String &_commonHeaderName	)
+{
+	return new DiagonallyImplicitRKExport(_userInteraction, _commonHeaderName);
+}
+
+
 CLOSE_NAMESPACE_ACADO
 
 

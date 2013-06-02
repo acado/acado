@@ -523,7 +523,6 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	uint run5;
 	String tempString;
 	
-	initializeButcherTableau();
 	initializeDDMatrix();
 	initializeCoefficients();
 
