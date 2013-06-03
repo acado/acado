@@ -25,7 +25,7 @@
 
 /**
  *	\file include/acado/utils/acado_message_handling.hpp
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
@@ -37,21 +37,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #include <iostream>
 #include <vector>
 
 
-
-
 BEGIN_NAMESPACE_ACADO
-
-
-
-
-
-
-
 
 
 /**
@@ -357,12 +347,33 @@ enum VisibilityStatus
 
 
 /** Defines the importance level of the message */
-enum returnValueLevel {
+enum returnValueLevel
+{
+	LVL_DEBUG = 0,		///< Lowest level, the debug level.
 	LVL_FATAL,			///< Returned value is a fatal error, assert like use, aborts execution is unhandled
 	LVL_ERROR,			///< Returned value is a error
 	LVL_WARNING,		///< Returned value is a warning
 	LVL_INFO			///< Returned value is a information
 };
+
+/** Colored/formatted terminal output */
+#ifndef __MATLAB__
+
+#define COL_DEBUG		"\033[1;34m"
+#define COL_FATAL		"\033[0;31m"
+#define COL_ERROR		"\033[1;31m"
+#define COL_WARNING		"\033[1;33m"
+#define COL_INFO		"\033[0m"
+
+#else
+
+#define COL_DEBUG		""
+#define COL_FATAL		""
+#define COL_ERROR		""
+#define COL_WARNING		""
+#define COL_INFO		""
+
+#endif /* __MATLAB__ */
 
 /** Defines whether user has handled the returned value */
 enum returnValueStatus {
@@ -520,38 +531,37 @@ public:
 #define QUOTE(x) QUOTE_(x)
 
 
-
 /** Macro to return a error */
-#define ACADOERROR(retval) returnValue(" ("#retval") in file "__FILE__", line "QUOTE(__LINE__)"\n",LVL_ERROR,retval)
+#define ACADOERROR(retval) \
+		returnValue("Code: ("#retval") \n  File: "__FILE__"\n  Line: "QUOTE(__LINE__), LVL_ERROR, retval)
 
 /** Macro to return a error, with user message */
-#define ACADOERRORTEXT(retval,text) returnValue(" ("#retval") in file "__FILE__", line "QUOTE(__LINE__)", message: "#text"\n",LVL_ERROR,retval)
-
-
+#define ACADOERRORTEXT(retval, text) \
+		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    "__FILE__"\n  Line:    "QUOTE(__LINE__), LVL_ERROR, retval)
 
 /** Macro to return a fatal error */
-#define ACADOFATAL(retval) returnValue(" ("#retval") in file "__FILE__", line "QUOTE(__LINE__)"\n",LVL_FATAL,retval)
+#define ACADOFATAL(retval) \
+		returnValue("Code: ("#retval") \n  File: "__FILE__"\n  Line: "QUOTE(__LINE__), LVL_FATAL, retval)
 
 /** Macro to return a fatal error, with user message */
-#define ACADOFATALTEXT(retval,text) returnValue(" ("#retval") in file "__FILE__", line "QUOTE(__LINE__)", message: "#text"\n",LVL_FATAL,retval)
-
-
+#define ACADOFATALTEXT(retval, text) \
+		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    "__FILE__"\n  Line:    "QUOTE(__LINE__), LVL_FATAL, retval)
 
 /** Macro to return a warning */
-#define ACADOWARNING(retval) returnValue(" ("#retval") in file "__FILE__", line "QUOTE(__LINE__)"\n",LVL_WARNING,retval)
+#define ACADOWARNING(retval) \
+		returnValue("Code: ("#retval") \n  File: "__FILE__"\n  Line: "QUOTE(__LINE__), LVL_WARNING, retval)
 
 /** Macro to return a warning, with user message */
-#define ACADOWARNINGTEXT(retval,text) returnValue(" ("#retval") in file "__FILE__", line "QUOTE(__LINE__)", message: "#text"\n",LVL_WARNING,retval)
-
-
+#define ACADOWARNINGTEXT(retval,text) \
+		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    "__FILE__"\n  Line:    "QUOTE(__LINE__), LVL_WARNING, retval)
 
 /** Macro to return a information */
-//#define ACADOINFO(retval) returnValue("Information "#retval" in file "__FILE__", line "QUOTE(__LINE__)"\n",LVL_INFO,retval)
-#define ACADOINFO(retval) returnValue("\n",LVL_INFO,retval)
+#define ACADOINFO(retval) \
+		returnValue("", LVL_INFO, retval)
 
 /** Macro to return a information, with user message */
-#define ACADOINFOTEXT(retval,text) returnValue(" ("#retval") in file "__FILE__", line "QUOTE(__LINE__)", message: "#text"\n",LVL_INFO,retval)
-
+#define ACADOINFOTEXT(retval,text) \
+		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    "__FILE__"\n  Line:    "QUOTE(__LINE__), LVL_INFO, retval)
 
 
 /** Executes the statement X and handles returned message.
@@ -561,8 +571,57 @@ public:
  *  Example 2, extended use: ADACO_TRY( func() ).addMessage( "func() failed" );
  */
 #define ACADO_TRY(X) for(returnValue ACADO_R = X; !ACADO_R;) return ACADO_R
-//#define ACADO_TRY(X) for(returnValue ACADO_R = X; !ACADO_R;) return ACADO_R.addMessage("...called from file "__FILE__", line "QUOTE(__LINE__)": "#X"\n")
 
+/**
+ *  \brief A very simple logging class.
+ *  \ingroup BasicDataStructures
+ *  \author Milan Vukov
+ *  \date 2013.
+ */
+class Logger
+{
+public:
+	/** Get an instance of the logger. */
+	static Logger& instance()
+	{
+		static Logger instance;
+		return instance;
+	}
+
+	/** Set the log level. */
+	Logger& setLogLevel(returnValueLevel level)
+	{
+		logLevel = level;
+
+		return *this;
+	}
+
+	/** Get log level. */
+	returnValueLevel getLogLevel()
+	{
+		return logLevel;
+	}
+
+	/** Get a reference to the output stream. */
+	std::ostream& get(returnValueLevel level);
+
+private:
+	returnValueLevel logLevel;
+
+	Logger()
+		: logLevel( LVL_FATAL )
+	{}
+
+	Logger(const Logger&);
+	Logger& operator=(const Logger&);
+	~Logger()
+	{}
+};
+
+/// Just define a handy macro for getting the logger
+#define LOG( level ) \
+		if (level < Logger::instance().getLogLevel()); \
+		else Logger::instance().get( level )
 
 CLOSE_NAMESPACE_ACADO
 

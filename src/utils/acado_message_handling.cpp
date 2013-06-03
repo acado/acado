@@ -38,6 +38,7 @@
 #include <acado/utils/acado_message_handling.hpp>
 #include <acado/utils/acado_utils.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -357,13 +358,26 @@ ReturnValueList returnValueList[] =
 
 
 // Converts returnValueLevel enum type to a const char*
-const char* returnValueLevelToString(returnValueLevel level) {
-	switch(level) {
-		case LVL_FATAL:		return "Fatal error"; break;
-		case LVL_ERROR:		return "Error"; break;
-		case LVL_WARNING:	return "Warning"; break;
-		case LVL_INFO:		return "Information"; break;
+const char* returnValueLevelToString(returnValueLevel level)
+{
+	switch ( level )
+	{
+	case LVL_DEBUG:
+		return COL_DEBUG"Debug";
+
+	case LVL_FATAL:
+		return COL_FATAL"Fatal error";
+
+	case LVL_ERROR:
+		return COL_ERROR"Error";
+
+	case LVL_WARNING:
+		return COL_WARNING"Warning";
+
+	case LVL_INFO:
+		return COL_INFO"Information";
 	}
+
 	return 0;
 }
 
@@ -449,13 +463,6 @@ returnValue& returnValue::addMessage(const char* msg) {
  *
  */
 returnValue& returnValue::changeLevel(returnValueLevel _level) {
-// 	if (data) {
-// 		data->messages.push_back( "Level changed from \"" );
-// 		data->messages.push_back( returnValueLevelToString(level) );
-// 		data->messages.push_back( "\" to \"" );
-// 		data->messages.push_back( returnValueLevelToString(_level) );
-// 		data->messages.push_back( "\"\n" );			
-// 	}
 	level = _level;
 	return *this;
 }
@@ -464,13 +471,7 @@ returnValue& returnValue::changeLevel(returnValueLevel _level) {
  *
  */
 returnValue& returnValue::changeType(returnValueType _type) {
-// 	if (data) {
-// 		data->messages.push_back( "Type changed from \"" );
-// 		data->messages.push_back( returnValueTypeToString(type) );
-// 		data->messages.push_back( "\" to \"" );
-// 		data->messages.push_back( returnValueTypeToString(_type) );
-// 		data->messages.push_back( "\"\n" );
-// 	}
+
 	type = _type;
 	return *this;
 }
@@ -480,18 +481,13 @@ returnValue& returnValue::changeType(returnValueType _type) {
  */	
 void returnValue::print() {
 
-	std::cout << returnValueLevelToString(level) << ": " << returnValueTypeToString(type); 
+	cout 	<< COL_INFO"[ACADO] " << returnValueLevelToString( level )
+			<< ": " << returnValueTypeToString( type ) << COL_INFO << endl;
 
-	if (data)
-	{
-		for(std::vector<const char*>::iterator it=data->messages.begin(); it!=data->messages.end(); it++) {
-			std::cout << (*it);
-		}
-	}
-	else
-	{
-		std::cout << std::endl;
-	}
+	if ( data )
+		for (vector<const char*>::iterator it = data->messages.begin(); it != data->messages.end(); it++)
+			cout << "  " << (*it) << endl;
+	cout << endl;
 
 	status = STATUS_HANDLED;
 }
@@ -503,6 +499,15 @@ void returnValue::printBasic() {
 
 	std::cout << returnValueLevelToString(level) << ": " << returnValueTypeToString(type) << std::endl; 
 	status = STATUS_HANDLED;
+}
+
+// Logging class
+
+ostream& Logger::get(returnValueLevel level)
+{
+	cout << COL_INFO"[ACADO] " << returnValueLevelToString( level ) << ": " << COL_INFO;
+
+	return cout;
 }
 
 CLOSE_NAMESPACE_ACADO
