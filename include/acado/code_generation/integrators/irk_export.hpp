@@ -393,7 +393,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportIndex& tmp_index,
 											const ExportVariable& Ah,
 											const ExportVariable& C,
-											const ExportVariable& det  	);
+											const ExportVariable& det,
+											BooleanType DERIVATIVES = BT_FALSE );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the linear output system.
@@ -470,7 +471,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
 										const ExportVariable& C,
-										BooleanType evaluateB );
+										BooleanType evaluateB,
+										BooleanType DERIVATIVES );
 
 
 		/** Prepares the structures to evaluate the continuous output and exports the resulting definitions.

@@ -120,7 +120,6 @@ returnValue ForwardIRKExport::getDataDeclarations(	ExportStatementBlock& declara
 	
 	declarations.addDeclaration( rk_diffK,dataStruct );
 
-	declarations.addDeclaration( rk_diffsTemp2,dataStruct );
 	declarations.addDeclaration( rk_diffsTemp3,dataStruct );
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
@@ -147,9 +146,6 @@ returnValue ForwardIRKExport::getFunctionDeclarations(	ExportStatementBlock& dec
 	ImplicitRungeKuttaExport::getFunctionDeclarations( declarations );
 
 	if( exportRhs ) {
-		if( NX2 > 0 || NXA > 0 ) {
-			declarations.addDeclaration( diffs_rhs );
-		}
 		if( NX3 > 0 ) {
 			declarations.addDeclaration( diffs_rhs3 );
 		}
@@ -412,7 +408,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	solveInputSystem( loop, i, run1, j, tmp_index1, Ah );
 
 	// PART 2: The fully implicit system
-	solveImplicitSystem( loop, i, run1, j, tmp_index1, Ah, C, determinant );
+	solveImplicitSystem( loop, i, run1, j, tmp_index1, Ah, C, determinant, BT_TRUE );
 
 	// PART 3: The linear output system
 	prepareOutputSystem( code );
@@ -1189,7 +1185,6 @@ returnValue ForwardIRKExport::setup( )
 {
 	ImplicitRungeKuttaExport::setup();
 
-	NVARS2 = NX1+NX2+NXA+NU+NDX2;
 	NVARS3 = NX1+NX2+NXA3+NU+NDX3;
 	diffsDim = (NX+NXA)*(NX+NU);
 	inputDim = (NX+NXA)*(NX+NU+1) + NU + NP;
