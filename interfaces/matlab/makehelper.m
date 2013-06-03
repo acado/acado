@@ -121,7 +121,7 @@ function [ ] = makehelper( type, optmake, varargin )
         CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -O ' ];    
     else
         % Other compilers
-        CPPFLAGS  = [ IFLAGS, ' -D__cpluplus -D__MATLAB__ -O ' ];
+        CPPFLAGS  = [ IFLAGS, ' CXXFLAGS=''$CXXFLAGS -Wno-c++11-compat -Wno-unused-comparison'' -D__cpluplus -D__MATLAB__ -O ' ];
     end
     counter = 0 ;
     
