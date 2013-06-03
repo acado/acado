@@ -85,7 +85,7 @@ IntegratorExport* createGaussLegendre4Export(	UserInteraction* _userInteraction,
 	cc(0) = 1.0/2.0+sqrt(3.0)/6.0;
 	cc(1) = 1.0/2.0-sqrt(3.0)/6.0;
 
-	ImplicitRungeKuttaExport* integrator = ImplicitRungeKuttaExport::createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	ImplicitRungeKuttaExport* integrator = createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
 	integrator->initializeButcherTableau(AA, bb, cc);
 
 	return integrator;

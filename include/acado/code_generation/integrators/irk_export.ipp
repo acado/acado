@@ -25,74 +25,31 @@
 
 
 /**
- *    \file src/code_generation/radau_IIA1_export.cpp
+ *    \file include/acado/code_generation/integrators/irk_export.ipp
  *    \author Rien Quirynen
- *    \date 2012
+ *    \date 2013
  */
 
-#include <acado/code_generation/integrators/radau_IIA1_export.hpp>
-
-#include <acado/code_generation/export_algorithm_factory.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
 
 //
-// PUBLIC MEMBER FUNCTIONS:
+// Create the correct integrator
 //
-
-RadauIIA1Export::RadauIIA1Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
-									) : ImplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
+inline ImplicitRungeKuttaExport* createImplicitRungeKuttaExport(	UserInteraction* _userInteraction,
+																	const String &_commonHeaderName	)
 {
-	numStages = 1;
+	int sensGen;
+	_userInteraction->get( DYNAMIC_SENSITIVITY, sensGen );
+	if ( (ExportSensitivityType)sensGen == FORWARD ) {
+		return new ForwardIRKExport(_userInteraction, _commonHeaderName);
+	}
+	return new ImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
 }
 
-
-RadauIIA1Export::RadauIIA1Export(	const RadauIIA1Export& arg
-									) : ImplicitRungeKuttaExport( arg )
-{
-	numStages = 1;
-	copy( arg );
-}
-
-
-RadauIIA1Export::~RadauIIA1Export( )
-{
-	clear( );
-}
-
-
-// PROTECTED:
-
-//
-// Register the integrator
-//
-
-IntegratorExport* createRadauIIA1Export(	UserInteraction* _userInteraction,
-											const String &_commonHeaderName)
-{
-	Matrix AA(1,1);
-	Vector bb(1);
-	Vector cc(1);
-
-	AA(0,0) = 1;
-
-	bb(0) = 1;
-
-	cc(0) = 1;
-
-	ImplicitRungeKuttaExport* integrator = createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
-	integrator->initializeButcherTableau(AA, bb, cc);
-
-	return integrator;
-}
-
-RegisterRadauIIA1Export::RegisterRadauIIA1Export()
-{
-	IntegratorExportFactory::instance().registerAlgorithm(INT_IRK_RIIA1, createRadauIIA1Export);
-}
 
 CLOSE_NAMESPACE_ACADO
+
 
 // end of file.

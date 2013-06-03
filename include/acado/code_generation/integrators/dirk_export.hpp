@@ -280,7 +280,7 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 //
 // Create the integrator
 //
-static DiagonallyImplicitRKExport* createDiagonallyImplicitRKExport(	UserInteraction* _userInteraction,
+inline DiagonallyImplicitRKExport* createDiagonallyImplicitRKExport(	UserInteraction* _userInteraction,
 																		const String &_commonHeaderName	)
 {
 	return new DiagonallyImplicitRKExport(_userInteraction, _commonHeaderName);

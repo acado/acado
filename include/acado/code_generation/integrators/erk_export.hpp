@@ -218,7 +218,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 //
 // Create the integrator
 //
-static ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction* _userInteraction,
+inline ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction* _userInteraction,
 																	const String &_commonHeaderName	)
 {
 	return new ExplicitRungeKuttaExport(_userInteraction, _commonHeaderName);

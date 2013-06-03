@@ -87,7 +87,7 @@ IntegratorExport* createRadauIIA3Export(	UserInteraction* _userInteraction,
 	cc(0) = 1/(double)3;
 	cc(1) = 1;
 
-	ImplicitRungeKuttaExport* integrator = ImplicitRungeKuttaExport::createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	ImplicitRungeKuttaExport* integrator = createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
 	integrator->initializeButcherTableau(AA, bb, cc);
 
 	return integrator;
