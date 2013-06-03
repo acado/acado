@@ -415,7 +415,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	solveOutputSystem( loop, i, run1, j, tmp_index1, Ah, BT_TRUE );
 
 	// generate continuous OUTPUT:
-	generateOutput( loop, run, i, tmp_index2, tmp_index3, tmp_meas, time_tmp );
+	generateOutput( loop, run, i, tmp_index2, tmp_index3, tmp_meas, time_tmp, NX+NU );
 
 	// DERIVATIVES wrt the states (IFT):
 	if( NX1 > 0 ) {

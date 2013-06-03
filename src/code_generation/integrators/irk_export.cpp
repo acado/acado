@@ -599,7 +599,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	solveOutputSystem( loop, i, run1, j, tmp_index1, Ah );
 
 	// generate continuous OUTPUT:
-	generateOutput( loop, run, i, tmp_index2, tmp_index3, tmp_meas, time_tmp );
+	generateOutput( loop, run, i, tmp_index2, tmp_index3, tmp_meas, time_tmp, 0 );
 
 	// update rk_eta:
 	for( run5 = 0; run5 < NX; run5++ ) {
@@ -937,7 +937,7 @@ returnValue ImplicitRungeKuttaExport::evaluateMatrix( ExportStatementBlock* bloc
 
 returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* block, const ExportIndex& index0,
 		const ExportIndex& index1, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2,
-		const ExportVariable& tmp_meas, const ExportVariable& time_tmp )
+		const ExportVariable& tmp_meas, const ExportVariable& time_tmp, const uint directions )
 {
 	uint i, j;
 	int measGrid;
@@ -1008,8 +1008,8 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 		}
 		loop1->addFunctionCall( getNameOUTPUT( i ), rk_xxx, rk_rhsOutputTemp.getAddress(0,0) );
 		uint numOutputs = getDimOUTPUT( i );
-		uint outputDim = numOutputs*(NX+NU+1);
-		loop1->addStatement( tmp_index1 == numMeas[i]*outputDim+index1*(numOutputs*(NX+NU+1)) );
+		uint outputDim = numOutputs*(1+directions);
+		loop1->addStatement( tmp_index1 == numMeas[i]*outputDim+index1*(numOutputs*(1+directions)) );
 		for( j = 0; j < numOutputs; j++ ) {
 			loop1->addStatement( rk_outputs[i].getCol( tmp_index1+j ) == rk_rhsOutputTemp.getCol( j ) );
 		}

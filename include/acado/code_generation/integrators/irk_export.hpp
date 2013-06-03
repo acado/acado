@@ -506,7 +506,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& tmp_index1,
 										const ExportIndex& tmp_index2,
 										const ExportVariable& tmp_meas,
-										const ExportVariable& time_tmp );
+										const ExportVariable& time_tmp,
+										const uint directions );
 
 
 		/** Copies all class members from given object.
