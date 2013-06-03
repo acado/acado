@@ -1,6 +1,7 @@
 #include "mex.h"
 #define ONLINE_GRID @ONLINE_GRID@
 #define DEBUG_MODE @DEBUG_MODE@
+#define FIRST_ORDER_SENS @FIRST_ORDER_SENS@
 #define CALLS_TIMING @CALLS_TIMING@
 #define NUM_STAGES @NUM_STAGES@
 
@@ -13,7 +14,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     int error, reset, c, i, j, k, Nx, Nu, Np, gridI, Ngrid;
     real_t *x, *u, *p, *xnext, *sensX, *sensU, *grid, *mat;
-    real_t next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU+ACADO_NP];
+    #if FIRST_ORDER_SENS
+		real_t next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU+ACADO_NP];
+    #else
+		real_t next[ACADO_NX+ACADO_NXA+ACADO_NU+ACADO_NP];
+    #endif
     const char *fieldnames[3], *infonames[3];
 	struct timeval theclock;
 	real_t start, end, time;
@@ -21,19 +26,35 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     #if NUM_OUTPUTS > 0
         real_t* out1;
-        out1 = (real_t*) malloc(NMEAS[0]*NOUT[0]*(1+ACADO_NX+ACADO_NU)*sizeof(*out1));
+        #if FIRST_ORDER_SENS
+			out1 = (real_t*) malloc(NMEAS[0]*NOUT[0]*(1+ACADO_NX+ACADO_NU)*sizeof(*out1));
+        #else
+			out1 = (real_t*) malloc(NMEAS[0]*NOUT[0]*sizeof(*out1));
+        #endif
         
         #if NUM_OUTPUTS > 1
             real_t* out2;
-            out2 = (real_t*) malloc(NMEAS[1]*NOUT[1]*(1+ACADO_NX+ACADO_NU)*sizeof(*out2));
+            #if FIRST_ORDER_SENS
+				out2 = (real_t*) malloc(NMEAS[1]*NOUT[1]*(1+ACADO_NX+ACADO_NU)*sizeof(*out2));
+			#else
+				out2 = (real_t*) malloc(NMEAS[1]*NOUT[1]*sizeof(*out2));
+			#endif
             
             #if NUM_OUTPUTS > 2
                 real_t* out3;
-                out3 = (real_t*) malloc(NMEAS[2]*NOUT[2]*(1+ACADO_NX+ACADO_NU)*sizeof(*out3));
+                #if FIRST_ORDER_SENS
+					out3 = (real_t*) malloc(NMEAS[2]*NOUT[2]*(1+ACADO_NX+ACADO_NU)*sizeof(*out3));
+				#else
+					out3 = (real_t*) malloc(NMEAS[2]*NOUT[2]*sizeof(*out3));
+				#endif
                 
                 #if NUM_OUTPUTS > 3
                     real_t* out4;
-                    out4 = (real_t*) malloc(NMEAS[3]*NOUT[3]*(1+ACADO_NX+ACADO_NU)*sizeof(*out4));
+                    #if FIRST_ORDER_SENS
+						out4 = (real_t*) malloc(NMEAS[3]*NOUT[3]*(1+ACADO_NX+ACADO_NU)*sizeof(*out4));
+					#else
+						out4 = (real_t*) malloc(NMEAS[3]*NOUT[3]*sizeof(*out4));
+					#endif
                 #endif
             #endif
         #endif
@@ -171,10 +192,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     reset = 1;
     for( i = 0; i < ACADO_NU; ++i ) {
-        next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
+		#if FIRST_ORDER_SENS
+			next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
+		#else
+			next[ACADO_NX+ACADO_NXA+i] = u[i];
+		#endif
     }
     for( i = 0; i < ACADO_NP; ++i ) {
-        next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU+i] = p[i];
+		#if FIRST_ORDER_SENS
+			next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU+i] = p[i];
+		#else
+			next[ACADO_NX+ACADO_NXA+ACADO_NU+i] = p[i];
+		#endif
     }
     
 	gettimeofday( &theclock,0 );
@@ -201,30 +230,39 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
     time = (end-start)/CALLS_TIMING;
     
-    plhs[0] = mxCreateStructMatrix(1, 1, 3, fieldnames);
-    mxSetField(plhs[0],0,fieldnames[0],mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,1,mxREAL));
-    mxSetField(plhs[0],0,fieldnames[1],mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,ACADO_NX,mxREAL));
-    mxSetField(plhs[0],0,fieldnames[2],mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,ACADO_NU,mxREAL));
+    #if FIRST_ORDER_SENS
+		plhs[0] = mxCreateStructMatrix(1, 1, 3, fieldnames);
+		mxSetField(plhs[0],0,fieldnames[0],mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,1,mxREAL));
+		mxSetField(plhs[0],0,fieldnames[1],mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,ACADO_NX,mxREAL));
+		mxSetField(plhs[0],0,fieldnames[2],mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,ACADO_NU,mxREAL));
+	#else
+		plhs[0] = mxCreateStructMatrix(1, 1, 1, fieldnames);
+		mxSetField(plhs[0],0,fieldnames[0],mxCreateDoubleMatrix(ACADO_NX+ACADO_NXA,1,mxREAL));
+	#endif
     
     xnext = mxGetPr(mxGetField(plhs[0],0,fieldnames[0]));
-    sensX = mxGetPr(mxGetField(plhs[0],0,fieldnames[1]));
-    sensU = mxGetPr(mxGetField(plhs[0],0,fieldnames[2]));
+    #if FIRST_ORDER_SENS
+		sensX = mxGetPr(mxGetField(plhs[0],0,fieldnames[1]));
+		sensU = mxGetPr(mxGetField(plhs[0],0,fieldnames[2]));
+    #endif
     
     for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
         xnext[i] = next[i];
     }
     
-    /* NOTE: Matlab is column-major, while C is row-major order !! */
-    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
-        for( j = 0; j < ACADO_NX; ++j ) {
-            sensX[j*(ACADO_NX+ACADO_NXA)+i] = next[ACADO_NX+ACADO_NXA+i*ACADO_NX+j];
-        }
-    }
-    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
-        for( j = 0; j < ACADO_NU; ++j ) {
-            sensU[j*(ACADO_NX+ACADO_NXA)+i] = next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX)+i*ACADO_NU+j];
-        }
-    }
+    #if FIRST_ORDER_SENS
+	    /* NOTE: Matlab is column-major, while C is row-major order !! */
+	    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
+	        for( j = 0; j < ACADO_NX; ++j ) {
+	            sensX[j*(ACADO_NX+ACADO_NXA)+i] = next[ACADO_NX+ACADO_NXA+i*ACADO_NX+j];
+	        }
+	    }
+	    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
+	        for( j = 0; j < ACADO_NU; ++j ) {
+	            sensU[j*(ACADO_NX+ACADO_NXA)+i] = next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX)+i*ACADO_NU+j];
+	        }
+	    }
+    #endif
     
     if (nlhs > 1+NUM_OUTPUTS) {
     #if DEBUG_MODE > 0
@@ -248,135 +286,187 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     #if NUM_OUTPUTS > 0
     if (nlhs > 1) {
-        plhs[1] = mxCreateStructMatrix(1, 1, 3, fieldnames);
-        mxSetField(plhs[1],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[0],NMEAS[0],mxREAL));
-        mxSetField(plhs[1],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[0]*NMEAS[0],ACADO_NX,mxREAL));
-        mxSetField(plhs[1],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[0]*NMEAS[0],ACADO_NU,mxREAL));
+		#if FIRST_ORDER_SENS
+	        plhs[1] = mxCreateStructMatrix(1, 1, 3, fieldnames);
+	        mxSetField(plhs[1],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[0],NMEAS[0],mxREAL));
+	        mxSetField(plhs[1],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[0]*NMEAS[0],ACADO_NX,mxREAL));
+	        mxSetField(plhs[1],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[0]*NMEAS[0],ACADO_NU,mxREAL));
+        #else
+			plhs[1] = mxCreateStructMatrix(1, 1, 1, fieldnames);
+	        mxSetField(plhs[1],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[0],NMEAS[0],mxREAL));
+        #endif
         
         xnext = mxGetPr(mxGetField(plhs[1],0,fieldnames[0]));
-        sensX = mxGetPr(mxGetField(plhs[1],0,fieldnames[1]));
-        sensU = mxGetPr(mxGetField(plhs[1],0,fieldnames[2]));
+        #if FIRST_ORDER_SENS
+	        sensX = mxGetPr(mxGetField(plhs[1],0,fieldnames[1]));
+	        sensU = mxGetPr(mxGetField(plhs[1],0,fieldnames[2]));
+        #endif
         
         for( k = 0; k < NMEAS[0]; ++k ) {
             for( i = 0; i < NOUT[0]; ++i ) {
-                xnext[k*NOUT[0]+i] = out1[k*NOUT[0]*(1+ACADO_NX+ACADO_NU)+i];
+				#if FIRST_ORDER_SENS
+					xnext[k*NOUT[0]+i] = out1[k*NOUT[0]*(1+ACADO_NX+ACADO_NU)+i];
+                #else
+					xnext[k*NOUT[0]+i] = out1[k*NOUT[0]+i];
+                #endif
             }
         }
         
-        /* NOTE: Matlab is column-major, while C is row-major order !! */
-        for( k = 0; k < NMEAS[0]; ++k ) {
-            for( i = 0; i < NOUT[0]; ++i ) {
-                for( j = 0; j < ACADO_NX; ++j ) {
-                    sensX[j*NOUT[0]*NMEAS[0]+k*NOUT[0]+i] = out1[k*NOUT[0]*(1+ACADO_NX+ACADO_NU)+NOUT[0]+i*ACADO_NX+j];
-                }
-            }
-        }
-        for( k = 0; k < NMEAS[0]; ++k ) {
-            for( i = 0; i < NOUT[0]; ++i ) {
-                for( j = 0; j < ACADO_NU; ++j ) {
-                    sensU[j*NOUT[0]*NMEAS[0]+k*NOUT[0]+i] = out1[k*NOUT[0]*(1+ACADO_NX+ACADO_NU)+NOUT[0]*(1+ACADO_NX)+i*ACADO_NU+j];
-                }
-            }
-        }
+        #if FIRST_ORDER_SENS
+	        /* NOTE: Matlab is column-major, while C is row-major order !! */
+	        for( k = 0; k < NMEAS[0]; ++k ) {
+	            for( i = 0; i < NOUT[0]; ++i ) {
+	                for( j = 0; j < ACADO_NX; ++j ) {
+	                    sensX[j*NOUT[0]*NMEAS[0]+k*NOUT[0]+i] = out1[k*NOUT[0]*(1+ACADO_NX+ACADO_NU)+NOUT[0]+i*ACADO_NX+j];
+	                }
+	            }
+	        }
+	        for( k = 0; k < NMEAS[0]; ++k ) {
+	            for( i = 0; i < NOUT[0]; ++i ) {
+	                for( j = 0; j < ACADO_NU; ++j ) {
+	                    sensU[j*NOUT[0]*NMEAS[0]+k*NOUT[0]+i] = out1[k*NOUT[0]*(1+ACADO_NX+ACADO_NU)+NOUT[0]*(1+ACADO_NX)+i*ACADO_NU+j];
+	                }
+	            }
+	        }
+        #endif
         free(out1);
         #if NUM_OUTPUTS > 1
         if (nlhs > 2) {
-            plhs[2] = mxCreateStructMatrix(1, 1, 3, fieldnames);
-            mxSetField(plhs[2],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[1],NMEAS[1],mxREAL));
-            mxSetField(plhs[2],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[1]*NMEAS[1],ACADO_NX,mxREAL));
-            mxSetField(plhs[2],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[1]*NMEAS[1],ACADO_NU,mxREAL));
+			#if FIRST_ORDER_SENS
+	            plhs[2] = mxCreateStructMatrix(1, 1, 3, fieldnames);
+	            mxSetField(plhs[2],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[1],NMEAS[1],mxREAL));
+	            mxSetField(plhs[2],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[1]*NMEAS[1],ACADO_NX,mxREAL));
+	            mxSetField(plhs[2],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[1]*NMEAS[1],ACADO_NU,mxREAL));
+            #else
+				plhs[2] = mxCreateStructMatrix(1, 1, 1, fieldnames);
+	            mxSetField(plhs[2],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[1],NMEAS[1],mxREAL));
+            #endif
 
             xnext = mxGetPr(mxGetField(plhs[2],0,fieldnames[0]));
-            sensX = mxGetPr(mxGetField(plhs[2],0,fieldnames[1]));
-            sensU = mxGetPr(mxGetField(plhs[2],0,fieldnames[2]));
+            #if FIRST_ORDER_SENS
+	            sensX = mxGetPr(mxGetField(plhs[2],0,fieldnames[1]));
+	            sensU = mxGetPr(mxGetField(plhs[2],0,fieldnames[2]));
+            #endif
 
             for( k = 0; k < NMEAS[1]; ++k ) {
                 for( i = 0; i < NOUT[1]; ++i ) {
-                    xnext[k*NOUT[1]+i] = out2[k*NOUT[1]*(1+ACADO_NX+ACADO_NU)+i];
+					#if FIRST_ORDER_SENS
+						xnext[k*NOUT[1]+i] = out2[k*NOUT[1]*(1+ACADO_NX+ACADO_NU)+i];
+                    #else
+						xnext[k*NOUT[1]+i] = out2[k*NOUT[1]+i];
+                    #endif
                 }
             }
 
-            /* NOTE: Matlab is column-major, while C is row-major order !! */
-            for( k = 0; k < NMEAS[1]; ++k ) {
-                for( i = 0; i < NOUT[1]; ++i ) {
-                    for( j = 0; j < ACADO_NX; ++j ) {
-                        sensX[j*NOUT[1]*NMEAS[1]+k*NOUT[1]+i] = out2[k*NOUT[1]*(1+ACADO_NX+ACADO_NU)+NOUT[1]+i*ACADO_NX+j];
-                    }
-                }
-            }
-            for( k = 0; k < NMEAS[1]; ++k ) {
-                for( i = 0; i < NOUT[1]; ++i ) {
-                    for( j = 0; j < ACADO_NU; ++j ) {
-                        sensU[j*NOUT[1]*NMEAS[1]+k*NOUT[1]+i] = out2[k*NOUT[1]*(1+ACADO_NX+ACADO_NU)+NOUT[1]*(1+ACADO_NX)+i*ACADO_NU+j];
-                    }
-                }
-            }
+			#if FIRST_ORDER_SENS
+	            /* NOTE: Matlab is column-major, while C is row-major order !! */
+	            for( k = 0; k < NMEAS[1]; ++k ) {
+	                for( i = 0; i < NOUT[1]; ++i ) {
+	                    for( j = 0; j < ACADO_NX; ++j ) {
+	                        sensX[j*NOUT[1]*NMEAS[1]+k*NOUT[1]+i] = out2[k*NOUT[1]*(1+ACADO_NX+ACADO_NU)+NOUT[1]+i*ACADO_NX+j];
+	                    }
+	                }
+	            }
+	            for( k = 0; k < NMEAS[1]; ++k ) {
+	                for( i = 0; i < NOUT[1]; ++i ) {
+	                    for( j = 0; j < ACADO_NU; ++j ) {
+	                        sensU[j*NOUT[1]*NMEAS[1]+k*NOUT[1]+i] = out2[k*NOUT[1]*(1+ACADO_NX+ACADO_NU)+NOUT[1]*(1+ACADO_NX)+i*ACADO_NU+j];
+	                    }
+	                }
+	            }
+            #endif
             free(out2);
             #if NUM_OUTPUTS > 2
             if (nlhs > 3) {
-                plhs[3] = mxCreateStructMatrix(1, 1, 3, fieldnames);
-                mxSetField(plhs[3],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[2],NMEAS[2],mxREAL));
-                mxSetField(plhs[3],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[2]*NMEAS[2],ACADO_NX,mxREAL));
-                mxSetField(plhs[3],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[2]*NMEAS[2],ACADO_NU,mxREAL));
+				#if FIRST_ORDER_SENS
+	                plhs[3] = mxCreateStructMatrix(1, 1, 3, fieldnames);
+	                mxSetField(plhs[3],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[2],NMEAS[2],mxREAL));
+	                mxSetField(plhs[3],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[2]*NMEAS[2],ACADO_NX,mxREAL));
+	                mxSetField(plhs[3],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[2]*NMEAS[2],ACADO_NU,mxREAL));
+                #else
+					plhs[3] = mxCreateStructMatrix(1, 1, 1, fieldnames);
+	                mxSetField(plhs[3],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[2],NMEAS[2],mxREAL));
+                #endif
 
                 xnext = mxGetPr(mxGetField(plhs[3],0,fieldnames[0]));
-                sensX = mxGetPr(mxGetField(plhs[3],0,fieldnames[1]));
-                sensU = mxGetPr(mxGetField(plhs[3],0,fieldnames[2]));
+                #if FIRST_ORDER_SENS
+	                sensX = mxGetPr(mxGetField(plhs[3],0,fieldnames[1]));
+	                sensU = mxGetPr(mxGetField(plhs[3],0,fieldnames[2]));
+                #endif
 
                 for( k = 0; k < NMEAS[2]; ++k ) {
                     for( i = 0; i < NOUT[2]; ++i ) {
-                        xnext[k*NOUT[2]+i] = out3[k*NOUT[2]*(1+ACADO_NX+ACADO_NU)+i];
+						#if FIRST_ORDER_SENS
+							xnext[k*NOUT[2]+i] = out3[k*NOUT[2]*(1+ACADO_NX+ACADO_NU)+i];
+                        #else
+							xnext[k*NOUT[2]+i] = out3[k*NOUT[2]+i];
+                        #endif
                     }
                 }
 
-                /* NOTE: Matlab is column-major, while C is row-major order !! */
-                for( k = 0; k < NMEAS[2]; ++k ) {
-                    for( i = 0; i < NOUT[2]; ++i ) {
-                        for( j = 0; j < ACADO_NX; ++j ) {
-                            sensX[j*NOUT[2]*NMEAS[2]+k*NOUT[2]+i] = out3[k*NOUT[2]*(1+ACADO_NX+ACADO_NU)+NOUT[2]+i*ACADO_NX+j];
-                        }
-                    }
-                }
-                for( k = 0; k < NMEAS[2]; ++k ) {
-                    for( i = 0; i < NOUT[2]; ++i ) {
-                        for( j = 0; j < ACADO_NU; ++j ) {
-                            sensU[j*NOUT[2]*NMEAS[2]+k*NOUT[2]+i] = out3[k*NOUT[2]*(1+ACADO_NX+ACADO_NU)+NOUT[2]*(1+ACADO_NX)+i*ACADO_NU+j];
-                        }
-                    }
-                }
+				#if FIRST_ORDER_SENS
+	                /* NOTE: Matlab is column-major, while C is row-major order !! */
+	                for( k = 0; k < NMEAS[2]; ++k ) {
+	                    for( i = 0; i < NOUT[2]; ++i ) {
+	                        for( j = 0; j < ACADO_NX; ++j ) {
+	                            sensX[j*NOUT[2]*NMEAS[2]+k*NOUT[2]+i] = out3[k*NOUT[2]*(1+ACADO_NX+ACADO_NU)+NOUT[2]+i*ACADO_NX+j];
+	                        }
+	                    }
+	                }
+	                for( k = 0; k < NMEAS[2]; ++k ) {
+	                    for( i = 0; i < NOUT[2]; ++i ) {
+	                        for( j = 0; j < ACADO_NU; ++j ) {
+	                            sensU[j*NOUT[2]*NMEAS[2]+k*NOUT[2]+i] = out3[k*NOUT[2]*(1+ACADO_NX+ACADO_NU)+NOUT[2]*(1+ACADO_NX)+i*ACADO_NU+j];
+	                        }
+	                    }
+	                }
+                #endif
                 free(out3);
                 #if NUM_OUTPUTS > 3
                 if (nlhs > 4) {
-                    plhs[4] = mxCreateStructMatrix(1, 1, 3, fieldnames);
-                    mxSetField(plhs[4],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[3],NMEAS[3],mxREAL));
-                    mxSetField(plhs[4],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[3]*NMEAS[3],ACADO_NX,mxREAL));
-                    mxSetField(plhs[4],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[3]*NMEAS[3],ACADO_NU,mxREAL));
+					#if FIRST_ORDER_SENS
+	                    plhs[4] = mxCreateStructMatrix(1, 1, 3, fieldnames);
+	                    mxSetField(plhs[4],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[3],NMEAS[3],mxREAL));
+	                    mxSetField(plhs[4],0,fieldnames[1],mxCreateDoubleMatrix(NOUT[3]*NMEAS[3],ACADO_NX,mxREAL));
+	                    mxSetField(plhs[4],0,fieldnames[2],mxCreateDoubleMatrix(NOUT[3]*NMEAS[3],ACADO_NU,mxREAL));
+                    #else
+						plhs[4] = mxCreateStructMatrix(1, 1, 1, fieldnames);
+	                    mxSetField(plhs[4],0,fieldnames[0],mxCreateDoubleMatrix(NOUT[3],NMEAS[3],mxREAL));
+                    #endif
 
                     xnext = mxGetPr(mxGetField(plhs[4],0,fieldnames[0]));
-                    sensX = mxGetPr(mxGetField(plhs[4],0,fieldnames[1]));
-                    sensU = mxGetPr(mxGetField(plhs[4],0,fieldnames[2]));
+                    #if FIRST_ORDER_SENS
+	                    sensX = mxGetPr(mxGetField(plhs[4],0,fieldnames[1]));
+	                    sensU = mxGetPr(mxGetField(plhs[4],0,fieldnames[2]));
+                    #endif
 
                     for( k = 0; k < NMEAS[3]; ++k ) {
                         for( i = 0; i < NOUT[3]; ++i ) {
-                            xnext[k*NOUT[3]+i] = out4[k*NOUT[3]*(1+ACADO_NX+ACADO_NU)+i];
+							#if FIRST_ORDER_SENS
+								xnext[k*NOUT[3]+i] = out4[k*NOUT[3]*(1+ACADO_NX+ACADO_NU)+i];
+							#else
+								xnext[k*NOUT[3]+i] = out4[k*NOUT[3]+i];
+							#endif
                         }
                     }
 
-                    /* NOTE: Matlab is column-major, while C is row-major order !! */
-                    for( k = 0; k < NMEAS[3]; ++k ) {
-                        for( i = 0; i < NOUT[3]; ++i ) {
-                            for( j = 0; j < ACADO_NX; ++j ) {
-                                sensX[j*NOUT[3]*NMEAS[3]+k*NOUT[3]+i] = out4[k*NOUT[3]*(1+ACADO_NX+ACADO_NU)+NOUT[3]+i*ACADO_NX+j];
-                            }
-                        }
-                    }
-                    for( k = 0; k < NMEAS[3]; ++k ) {
-                        for( i = 0; i < NOUT[3]; ++i ) {
-                            for( j = 0; j < ACADO_NU; ++j ) {
-                                sensU[j*NOUT[3]*NMEAS[3]+k*NOUT[3]+i] = out4[k*NOUT[3]*(1+ACADO_NX+ACADO_NU)+NOUT[3]*(1+ACADO_NX)+i*ACADO_NU+j];
-                            }
-                        }
-                    }
+					#if FIRST_ORDER_SENS
+	                    /* NOTE: Matlab is column-major, while C is row-major order !! */
+	                    for( k = 0; k < NMEAS[3]; ++k ) {
+	                        for( i = 0; i < NOUT[3]; ++i ) {
+	                            for( j = 0; j < ACADO_NX; ++j ) {
+	                                sensX[j*NOUT[3]*NMEAS[3]+k*NOUT[3]+i] = out4[k*NOUT[3]*(1+ACADO_NX+ACADO_NU)+NOUT[3]+i*ACADO_NX+j];
+	                            }
+	                        }
+	                    }
+	                    for( k = 0; k < NMEAS[3]; ++k ) {
+	                        for( i = 0; i < NOUT[3]; ++i ) {
+	                            for( j = 0; j < ACADO_NU; ++j ) {
+	                                sensU[j*NOUT[3]*NMEAS[3]+k*NOUT[3]+i] = out4[k*NOUT[3]*(1+ACADO_NX+ACADO_NU)+NOUT[3]*(1+ACADO_NX)+i*ACADO_NU+j];
+	                            }
+	                        }
+	                    }
+                    #endif
                     free(out4);
                 }
                 #endif

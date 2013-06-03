@@ -124,6 +124,8 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		if ( integratorFile.exportCode( ) != SUCCESSFUL_RETURN )
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
+		int sensGen;
+		get( DYNAMIC_SENSITIVITY, sensGen );
 		int measGrid;
 		get( MEASUREMENT_GRID, measGrid );
 		int generateMatlabInterface;
@@ -134,7 +136,7 @@ returnValue SIMexport::exportCode(	const String& dirName,
 			String integrateInterface( dirName );
 			integrateInterface << "/integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure((MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
+			exportMexFun.configure((ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
 			exportMexFun.exportCode();
 
 			String rhsInterface( dirName );
