@@ -45,7 +45,12 @@ inline ImplicitRungeKuttaExport* createImplicitRungeKuttaExport(	UserInteraction
 	if ( (ExportSensitivityType)sensGen == FORWARD ) {
 		return new ForwardIRKExport(_userInteraction, _commonHeaderName);
 	}
-	return new ImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	else if( (ExportSensitivityType)sensGen == NO_SENSITIVITY ) {
+		return new ImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	}
+	else {
+		ACADOERROR( RET_INVALID_OPTION );
+	}
 }
 
 

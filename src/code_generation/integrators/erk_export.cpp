@@ -66,7 +66,9 @@ returnValue ExplicitRungeKuttaExport::setup( )
 {
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY,sensGen );
-	if ( (ExportSensitivityType)sensGen != FORWARD ) ACADOERROR( RET_INVALID_OPTION );
+	if ( (ExportSensitivityType)sensGen != FORWARD && (ExportSensitivityType)sensGen != NO_SENSITIVITY ) ACADOERROR( RET_INVALID_OPTION );
+
+	bool DERIVATIVES = ((ExportSensitivityType)sensGen != NO_SENSITIVITY);
 
 	String fileName( "integrator.c" );
 
@@ -77,8 +79,10 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		acadoPrintf( "--> Preparing to export %s... ",fileName.getName() );
 
 	// export RK scheme
-	const uint rhsDim   = NX*(NX+NU+1);
-	const uint inputDim = NX*(NX+NU+1) + NU + NP;
+	uint rhsDim   = NX*(NX+NU+1);
+	if( !DERIVATIVES ) rhsDim = NX;
+	uint inputDim = NX*(NX+NU+1) + NU + NP;
+	if( !DERIVATIVES ) inputDim = NX + NU + NP;
 	const uint rkOrder  = getNumStages();
 	   
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
@@ -136,11 +140,13 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	
 //	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
 
-	// initialize sensitivities:
-	Matrix idX    = eye( NX );
-	Matrix zeroXU = zeros( NX,NU );
-	integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
-	integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
+	if( DERIVATIVES ) {
+		// initialize sensitivities:
+		Matrix idX    = eye( NX );
+		Matrix zeroXU = zeros( NX,NU );
+		integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
+		integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
+	}
 
 	integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
 	integrate.addLinebreak( );
@@ -159,7 +165,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	{
 		loop.addStatement( rk_xxx.getCols( 0,rhsDim ) == rk_eta.getCols( 0,rhsDim ) + Ah.getRow(run1)*rk_kkk );
 		if( timeDependant ) loop.addStatement( rk_xxx.getCol( inputDim ) == cc(run1) );
-		loop.addFunctionCall( diffs_rhs.getName(), rk_xxx,rk_kkk.getAddress(run1,0) );
+		loop.addFunctionCall( diffs_rhs.getName(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
 //	loop.addStatement( rk_ttt += Matrix(h) );
@@ -181,6 +187,10 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression& rhs_ )
 {
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
+	bool DERIVATIVES = ((ExportSensitivityType)sensGen != NO_SENSITIVITY);
+
 	Parameter         dummy0;
 	Control           dummy1;
 	DifferentialState dummy2;
@@ -205,44 +215,47 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 	
-	DifferentialState Gx(NX,NX), Gu(NX,NU);
-	// no free parameters yet!
-	// DifferentialState Gp(NX,NP);
-
 	DifferentialEquation f, f_ODE;
-
 	// add usual ODE
 	f_ODE << rhs_;
 	if( f_ODE.getNDX() > 0 ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	f << rhs_;
-/*	if ( f.getDim() != f.getNX() )
-		return ACADOERROR( RET_ILLFORMED_ODE );*/
-	
-	// add VDE for differential states
-	f << forwardDerivative( rhs_, x ) * Gx;
-/*	if ( f.getDim() != f.getNX() )
-		return ACADOERROR( RET_ILLFORMED_ODE );*/
-	
-	// add VDE for control inputs
-	f << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
-// 	if ( f.getDim() != f.getNX() )
-// 		return ACADOERROR( RET_ILLFORMED_ODE );
+	if( DERIVATIVES ) {
+		DifferentialState Gx(NX,NX), Gu(NX,NU);
+		// no free parameters yet!
+		// DifferentialState Gp(NX,NP);
 
-	// no free parameters yet!
-	// f << forwardDerivative( rhs_, x ) * Gp + forwardDerivative( rhs_, p );
+		f << rhs_;
+		/*	if ( f.getDim() != f.getNX() )
+		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
-	if( f.getNT() > 0 ) timeDependant = BT_TRUE;
+		// add VDE for differential states
+		f << forwardDerivative( rhs_, x ) * Gx;
+		/*	if ( f.getDim() != f.getNX() )
+		return ACADOERROR( RET_ILLFORMED_ODE );*/
+
+		// add VDE for control inputs
+		f << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
+		// 	if ( f.getDim() != f.getNX() )
+		// 		return ACADOERROR( RET_ILLFORMED_ODE );
+
+		// no free parameters yet!
+		// f << forwardDerivative( rhs_, x ) * Gp + forwardDerivative( rhs_, p );
+
+		if( f.getNT() > 0 ) timeDependant = BT_TRUE;
+	}
 
 	int matlabInterface;
 	userInteraction->get(GENERATE_MATLAB_INTERFACE, matlabInterface);
-	if (matlabInterface) {
+	if( matlabInterface && DERIVATIVES ) {
 		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP)
 				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP);
-	} else {
+	} else if( DERIVATIVES ) {
 		return diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP);
+	} else {
+		return diffs_rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP);
 	}
 
 	return SUCCESSFUL_RETURN;

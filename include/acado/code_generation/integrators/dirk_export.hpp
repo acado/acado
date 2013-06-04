@@ -50,7 +50,7 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\author Rien Quirynen
  */
-class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
+class DiagonallyImplicitRKExport : public ForwardIRKExport
 {
     //
     // PUBLIC MEMBER FUNCTIONS:
@@ -126,7 +126,8 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 										const ExportIndex& index2,
 										const ExportIndex& index3,
 										const ExportIndex& tmp_index,
-										const ExportVariable& Ah );
+										const ExportVariable& Ah,
+										BooleanType DERIVATIVES = BT_FALSE );
 
 
 		/** Exports the code needed to compute the sensitivities of the states, defined by the linear output system.
@@ -186,7 +187,8 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 											const ExportIndex& tmp_index,
 											const ExportVariable& Ah,
 											const ExportVariable& C,
-											const ExportVariable& det  	);
+											const ExportVariable& det,
+											BooleanType DERIVATIVES = BT_FALSE  	);
 
 
 		/** Exports the code needed to compute the sensitivities of the states defined by the nonlinear, fully implicit system.
@@ -230,7 +232,8 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
 										const ExportVariable& C,
-										BooleanType evaluateB );
+										BooleanType evaluateB,
+										BooleanType DERIVATIVES );
 
 
 		/** Exports the evaluation of the states at a specific stage.
@@ -257,7 +260,7 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue evaluateRhsImplicitSystem( 	ExportStatementBlock* block,
-												const ExportIndex& stage );
+														const ExportIndex& stage );
 
 
 		/** Initializes export of a tailored integrator.
@@ -281,9 +284,16 @@ class DiagonallyImplicitRKExport : public ImplicitRungeKuttaExport
 // Create the integrator
 //
 inline DiagonallyImplicitRKExport* createDiagonallyImplicitRKExport(	UserInteraction* _userInteraction,
-																		const String &_commonHeaderName	)
+		const String &_commonHeaderName	)
 {
-	return new DiagonallyImplicitRKExport(_userInteraction, _commonHeaderName);
+	int sensGen;
+	_userInteraction->get( DYNAMIC_SENSITIVITY, sensGen );
+	if ( (ExportSensitivityType)sensGen == FORWARD ) {
+		return new DiagonallyImplicitRKExport(_userInteraction, _commonHeaderName);
+	}
+	else {
+		ACADOERROR( RET_INVALID_OPTION );
+	}
 }
 
 

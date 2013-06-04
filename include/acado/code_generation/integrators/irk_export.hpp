@@ -451,7 +451,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue evaluateRhsImplicitSystem( 	ExportStatementBlock* block,
-											const ExportIndex& stage );
+														const ExportIndex& stage );
 
 
 		/** Exports the evaluation of the matrix of the linear system.

@@ -46,12 +46,12 @@ BEGIN_NAMESPACE_ACADO
 
 DiagonallyImplicitRKExport::DiagonallyImplicitRKExport(	UserInteraction* _userInteraction,
 									const String& _commonHeaderName
-									) : ImplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
+									) : ForwardIRKExport( _userInteraction,_commonHeaderName )
 {
 
 }
 
-DiagonallyImplicitRKExport::DiagonallyImplicitRKExport( const DiagonallyImplicitRKExport& arg ) : ImplicitRungeKuttaExport( arg )
+DiagonallyImplicitRKExport::DiagonallyImplicitRKExport( const DiagonallyImplicitRKExport& arg ) : ForwardIRKExport( arg )
 {
 
 }
@@ -71,7 +71,7 @@ DiagonallyImplicitRKExport& DiagonallyImplicitRKExport::operator=( const Diagona
 
     if( this != &arg ){
 
-    	ImplicitRungeKuttaExport::operator=( arg );
+    	ForwardIRKExport::operator=( arg );
     }
     return *this;
 }
@@ -186,7 +186,7 @@ Matrix DiagonallyImplicitRKExport::formMatrix( const Matrix& mass, const Matrix&
 }
 
 
-returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, const ExportVariable& det )
+returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, const ExportVariable& det, BooleanType DERIVATIVES )
 {
 	if( NX2 > 0 || NXA > 0 ) {
 
@@ -194,7 +194,7 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 		// Initialization iterations:
 		ExportForLoop loop11( index2,0,numStages );
 		ExportForLoop loop1( index1,0,numItsInit+1 ); // NOTE: +1 because 0 will lead to NaNs, so the minimum number of iterations is 1 at the initialization
-		evaluateMatrix( &loop1, index2, index3, tmp_index, Ah, C, BT_TRUE );
+		evaluateMatrix( &loop1, index2, index3, tmp_index, Ah, C, BT_TRUE, DERIVATIVES );
 		loop1.addStatement( det.getFullName() << " = " << solver->getNameSolveFunction() << "( &" << rk_A.get(index2*(NX2+NXA),0) << ", " << rk_b.getFullName() << ", &" << rk_auxSolver.get(index2,0) << " );\n" );
 		loop1.addStatement( rk_kkk.getSubMatrix( NX1,NX1+NX2,index2,index2+1 ) += rk_b.getRows( 0,NX2 ) );													// differential states
 		if(NXA > 0) loop1.addStatement( rk_kkk.getSubMatrix( NX,NX+NXA,index2,index2+1 ) += rk_b.getRows( NX2,NX2+NXA ) );		// algebraic states
@@ -213,10 +213,12 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 		loop21.addStatement( loop2 );
 		block->addStatement( loop21 );
 
-		// solution calculated --> evaluate and save the necessary derivatives in rk_diffsTemp and update the matrix rk_A:
-		ExportForLoop loop3( index2,0,numStages );
-		evaluateMatrix( &loop3, index2, index3, tmp_index, Ah, C, BT_FALSE );
-		block->addStatement( loop3 );
+		if( DERIVATIVES ) {
+			// solution calculated --> evaluate and save the necessary derivatives in rk_diffsTemp and update the matrix rk_A:
+			ExportForLoop loop3( index2,0,numStages );
+			evaluateMatrix( &loop3, index2, index3, tmp_index, Ah, C, BT_FALSE, DERIVATIVES );
+			block->addStatement( loop3 );
+		}
 
 		// IF DEBUG MODE:
 		int debugMode;
@@ -313,24 +315,27 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportState
 }
 
 
-returnValue DiagonallyImplicitRKExport::evaluateMatrix( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, BooleanType evaluateB )
+returnValue DiagonallyImplicitRKExport::evaluateMatrix( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, BooleanType evaluateB, BooleanType DERIVATIVES )
 {
 	evaluateStatesImplicitSystem( block, Ah, C, index1, index2, tmp_index );
 
-	block->addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsTemp2.getAddress(index1,0) );
+	ExportIndex indexDiffs(index1);
+	if( !DERIVATIVES ) indexDiffs = ExportIndex(0);
+
+	block->addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsTemp2.getAddress(indexDiffs,0) );
 	ExportForLoop loop2( index2,0,NX2+NXA );
 	loop2.addStatement( tmp_index == index1*(NX2+NXA)+index2 );
 	if( NDX2 == 0 ) {
-		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) == Ah.getSubMatrix( 0,1,0,1 )*rk_diffsTemp2.getSubMatrix( index1,index1+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
+		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) == Ah.getSubMatrix( 0,1,0,1 )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
 		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,index2,index2+1 ) -= 1 );
 	}
 	else {
-		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) == Ah.getSubMatrix( 0,1,0,1 )*rk_diffsTemp2.getSubMatrix( index1,index1+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
-		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) += rk_diffsTemp2.getSubMatrix( index1,index1+1,index2*(NVARS2)+NVARS2-NX2,index2*(NVARS2)+NVARS2 ) );
+		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) == Ah.getSubMatrix( 0,1,0,1 )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
+		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) += rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NVARS2-NX2,index2*(NVARS2)+NVARS2 ) );
 	}
 	if( NXA > 0 ) {
 		Matrix zeroM = zeros( 1,NXA );
-		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,NX2,NX2+NXA ) == rk_diffsTemp2.getSubMatrix( index1,index1+1,index2*(NVARS2)+NX1+NX2,index2*(NVARS2)+NX1+NX2+NXA ) );
+		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,NX2,NX2+NXA ) == rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1+NX2,index2*(NVARS2)+NX1+NX2+NXA ) );
 	}
 	block->addStatement( loop2 );
 	if( evaluateB ) {
@@ -385,7 +390,7 @@ returnValue DiagonallyImplicitRKExport::evaluateRhsImplicitSystem( ExportStateme
 }
 
 
-returnValue DiagonallyImplicitRKExport::solveOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah )
+returnValue DiagonallyImplicitRKExport::solveOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, BooleanType DERIVATIVES )
 {
 	if( NX3 > 0 ) {
 		ExportForLoop loop( index1,0,numStages );
@@ -396,7 +401,7 @@ returnValue DiagonallyImplicitRKExport::solveOutputSystem( ExportStatementBlock*
 		loop01.addStatement( loop02 );
 		loop.addStatement( loop01 );
 		loop.addFunctionCall( getNameOutputRHS(), rk_xxx, rk_b.getAddress(0,0) );
-		loop.addFunctionCall( getNameOutputDiffs(), rk_xxx, rk_diffsTemp3.getAddress(index1,0) );
+		if( DERIVATIVES )	loop.addFunctionCall( getNameOutputDiffs(), rk_xxx, rk_diffsTemp3.getAddress(index1,0) );
 
 		ExportForLoop loop5( index2,0,NX3 );
 		loop5.addStatement( tmp_index == index1*NX3+index2 );
@@ -565,7 +570,7 @@ returnValue DiagonallyImplicitRKExport::prepareOutputSystem(	ExportStatementBloc
 
 returnValue DiagonallyImplicitRKExport::setup( )
 {
-	returnValue IRKsetup = ImplicitRungeKuttaExport::setup();
+	returnValue IRKsetup = ForwardIRKExport::setup();
 
 	int debugMode;
 	get( INTEGRATOR_DEBUG_MODE, debugMode );
