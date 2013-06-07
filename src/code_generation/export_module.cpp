@@ -126,7 +126,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( MEASUREMENT_GRID, 			EQUIDISTANT_GRID);
 	addOption( INTEGRATOR_DEBUG_MODE, 		0				);
 	addOption( IMPLICIT_INTEGRATOR_MODE,	IFTR 			);
-	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	3				);
+	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	5				);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS_INIT, 0			);
 	addOption( SPARSE_QP_SOLUTION,          FULL_CONDENSING );
 	addOption( FIX_INITIAL_STATE,           BT_TRUE         );

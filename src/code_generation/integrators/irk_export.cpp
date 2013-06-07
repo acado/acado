@@ -754,7 +754,7 @@ returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock*
 {
 	if( NX2 > 0 || NXA > 0 ) {
 
-		if( REUSE ) block->addStatement( String( "if( " ) << reset_int.getFullName() << " ) {\n" );
+		if( DERIVATIVES && REUSE ) block->addStatement( String( "if( " ) << reset_int.getFullName() << " ) {\n" );
 		// Initialization iterations:
 		ExportForLoop loop1( index1,0,numItsInit+1 ); // NOTE: +1 because 0 will lead to NaNs, so the minimum number of iterations is 1 at the initialization
 		ExportForLoop loop11( index2,0,numStages );
@@ -766,7 +766,7 @@ returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock*
 		if(NXA > 0) loopTemp.addStatement( rk_kkk.getSubMatrix( NX,NX+NXA,index3,index3+1 ) += rk_b.getRows( index3*NXA+numStages*NX2,index3*NXA+numStages*NX2+NXA ) );		// algebraic states
 		loop1.addStatement( loopTemp );
 		block->addStatement( loop1 );
-		if( REUSE ) block->addStatement( String( "}\n" ) );
+		if( DERIVATIVES && REUSE ) block->addStatement( String( "}\n" ) );
 
 		// the rest (numIts) of the Newton iterations with reuse of the Jacobian (no evaluation or factorization needed)
 		ExportForLoop loop2( index1,0,numIts );
