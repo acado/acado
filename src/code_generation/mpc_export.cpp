@@ -1403,11 +1403,11 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 	sfunction.addStatement( "    for( i=0; i < NX*N; ++i ) acadoVariables.x[i] = xInit[i];\n" );
 	sfunction.addStatement( "    for( i=0; i < NU*N; ++i ) acadoVariables.u[i] = uInit[i];\n" );
 	sfunction.addLinebreak( );
-	sfunction.addStatement( "    for( i=0; i < NX*N; ++i ) acadoVariables.xRef[i] = (double)(*in_xRef)[i];\n" );
-	sfunction.addStatement( "    for( i=0; i < NU*N; ++i ) acadoVariables.uRef[i] = (double)(*in_uRef)[i];\n" );
+	sfunction.addStatement( "    for( i=0; i < NX*N; ++i ) acadoVariables.xRef[i] = (double)(*in_xRef[i]);\n" );
+	sfunction.addStatement( "    for( i=0; i < NU*N; ++i ) acadoVariables.uRef[i] = (double)(*in_uRef[i]);\n" );
 
 	if ( ocp.getNP() > 0 )
-		sfunction.addStatement( "    for( i = 0; i < NP;   ++i ) acadoVariables.p[i]    = (double)(*in_p)[i];\n" );
+		sfunction.addStatement( "    for( i = 0; i < NP;   ++i ) acadoVariables.p[i]    = (double)(*in_p[i]);\n" );
 
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    preparationStep( );\n" );
@@ -1436,12 +1436,12 @@ returnValue MPCexport::exportSimulinkInterface(	const String& _dirName,
 		sfunction.addStatement( "    in_p    = ssGetInputPortRealSignalPtrs(S, 3);\n" );
 
 	sfunction.addLinebreak( );
-	sfunction.addStatement( "    for( i=0; i < NX;   ++i ) measurement[i]         = (double)(*in_x)[i];\n" );
-	sfunction.addStatement( "    for( i=0; i < NX*N; ++i ) acadoVariables.xRef[i] = (double)(*in_xRef)[i];\n" );
-	sfunction.addStatement( "    for( i=0; i < NU*N; ++i ) acadoVariables.uRef[i] = (double)(*in_uRef)[i];\n" );
+	sfunction.addStatement( "    for( i=0; i < NX;   ++i ) measurement[i]         = (double)(*in_x[i]);\n" );
+	sfunction.addStatement( "    for( i=0; i < NX*N; ++i ) acadoVariables.xRef[i] = (double)(*in_xRef[i]);\n" );
+	sfunction.addStatement( "    for( i=0; i < NU*N; ++i ) acadoVariables.uRef[i] = (double)(*in_uRef[i]);\n" );
 
 	if ( ocp.getNP() > 0 )
-		sfunction.addStatement( "    for( i = 0; i < NP;   ++i ) acadoVariables.p[i]    = (double)(*in_p)[i];\n" );
+		sfunction.addStatement( "    for( i = 0; i < NP;   ++i ) acadoVariables.p[i]    = (double)(*in_p[i]);\n" );
 
 	sfunction.addLinebreak( );
 	sfunction.addStatement( "    feedbackStep( measurement );\n" );
