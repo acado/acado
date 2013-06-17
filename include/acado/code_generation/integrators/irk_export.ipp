@@ -50,6 +50,7 @@ inline ImplicitRungeKuttaExport* createImplicitRungeKuttaExport(	UserInteraction
 	}
 	else {
 		ACADOERROR( RET_INVALID_OPTION );
+		return new ImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
 	}
 }
 
