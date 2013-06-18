@@ -499,7 +499,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	Vector CC( cc );
 	ExportVariable C;
 	if( timeDependant ) {
-		C = ExportVariable( "C_mat", Matrix( CC, BT_FALSE ), STATIC_CONST_REAL );
+		C = ExportVariable( "C_mat", Matrix( CC*=(1.0/grid.getNumIntervals()), BT_FALSE ), STATIC_CONST_REAL );
 		code.addDeclaration( C );
 		code.addLinebreak( 2 );
 		C = ExportVariable( "C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
@@ -575,12 +575,10 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
 	}
 
-	loop->addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
-
 	if( CONTINUOUS_OUTPUT && (MeasurementGrid)measGrid == ONLINE_GRID ) {
 		for( run5 = 0; run5 < outputGrids.size(); run5++ ) {
 			loop->addStatement( tmp_index1 == numMeas[run5] );
-			loop->addStatement( String("while( ") << tmp_index1.getName() << " < " << String(totalMeas[run5]) << " && " << gridVariables[run5].get(0,tmp_index1) << " <= " << rk_ttt.getFullName() << " ) {\n" );
+			loop->addStatement( String("while( ") << tmp_index1.getName() << " < " << String(totalMeas[run5]) << " && " << gridVariables[run5].get(0,tmp_index1) << " <= (" << rk_ttt.getFullName() << "+" << String(1.0/grid.getNumIntervals()) << ") ) {\n" );
 			loop->addStatement( tmp_index1 == tmp_index1+1 );
 			loop->addStatement( String("}\n") );
 			loop->addStatement( String(tmp_meas.get( 0,run5 )) << " = " << tmp_index1.getName() << " - " << numMeas[run5].getName() << ";\n" );
@@ -625,6 +623,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 			loop->addStatement( numMeas[run5].getName() << " += " << tmp_meas.get(0,run5) << ";\n" );
 		}
 	}
+	loop->addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
 
     // end of the integrator loop.
     if( !equidistantControlGrid() ) {
@@ -842,7 +841,7 @@ returnValue ImplicitRungeKuttaExport::evaluateStatesImplicitSystem( ExportStatem
 	block->addStatement( loop4 );
 
 	if( C.getDim() > 0 ) {	// There is a time dependence, so it must be set
-		block->addStatement( rk_xxx.getCol( inputDim-diffsDim+NDX ) == C.getCol(stage) );
+		block->addStatement( rk_xxx.getCol( inputDim-diffsDim+NDX ) == rk_ttt + C.getCol(stage) );
 	}
 
 	return SUCCESSFUL_RETURN;

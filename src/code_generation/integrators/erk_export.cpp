@@ -93,15 +93,15 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
 
-
-//	rk_ttt.setup( "rk_ttt", 1,1,            REAL,ACADO_WORKSPACE,BT_TRUE );
-	uint timeDep = 0;
-	if( timeDependant ) timeDep = 1;
-	
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
+
+	rk_ttt.setup( "rk_ttt", 1, 1, REAL, structWspace, BT_TRUE );
+	uint timeDep = 0;
+	if( timeDependant ) timeDep = 1;
+	
 	rk_xxx.setup("rk_xxx", 1, inputDim+timeDep, REAL, structWspace);
 	rk_kkk.setup("rk_kkk", rkOrder, rhsDim, REAL, structWspace);
 
@@ -138,7 +138,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		integrate.addStatement( String( "int " ) << numInt.getName() << " = numSteps[" << rk_index.getName() << "];\n" );
 	}
 	
-//	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
+	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
 
 	if( DERIVATIVES ) {
 		// initialize sensitivities:
@@ -164,11 +164,11 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
 		loop.addStatement( rk_xxx.getCols( 0,rhsDim ) == rk_eta.getCols( 0,rhsDim ) + Ah.getRow(run1)*rk_kkk );
-		if( timeDependant ) loop.addStatement( rk_xxx.getCol( inputDim ) == cc(run1) );
+		if( timeDependant ) loop.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt + ((double)cc(run1))/grid.getNumIntervals() );
 		loop.addFunctionCall( diffs_rhs.getName(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
-//	loop.addStatement( rk_ttt += Matrix(h) );
+	loop.addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop
 
 	if( !equidistantControlGrid() ) {
@@ -286,7 +286,7 @@ returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 													) const
 {
 	declarations.addDeclaration( diffs_rhs.getGlobalExportVariable(),dataStruct );
-//	declarations.addDeclaration( rk_ttt,dataStruct );
+	declarations.addDeclaration( rk_ttt,dataStruct );
 	declarations.addDeclaration( rk_xxx,dataStruct );
 	declarations.addDeclaration( rk_kkk,dataStruct );
 
@@ -331,6 +331,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		s << "#pragma omp threadprivate( "
 				<< diffs_rhs.getGlobalExportVariable().getFullName().getName()  << ", "
 				<< rk_xxx.getFullName().getName() << ", "
+				<< rk_ttt.getFullName().getName() << ", "
 				<< rk_kkk.getFullName().getName()
 				<< " )" << endl << endl;
 
