@@ -53,6 +53,8 @@ ModelData::ModelData() {
 	NP = 0;
 	N  = 0;
 	model_dimensions_set = BT_FALSE;
+	export_rhs = BT_TRUE;
+	delay = 1;
 }
 
 
@@ -455,7 +457,7 @@ uint ModelData::getNX( ) const
 		return NX1+NX2+NX3;
 	}
 	else {
-		return delay*(NX1+NX2+NX3);		// IMPORTANT for NARX models where the state space is increased because of the delay
+		return delay*(NX1+NX2)+NX3;		// IMPORTANT for NARX models where the state space is increased because of the delay
 	}
 }
 

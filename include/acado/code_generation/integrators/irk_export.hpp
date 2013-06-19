@@ -104,15 +104,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		virtual returnValue setDifferentialEquation( const Expression& rhs );
 
 
-		/** .
-		 *
-		 *	@param[in] 		.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
-
-
 		/** Assigns the model to be used by the integrator.
 		 *
 		 *	@param[in] _rhs				Name of the function, evaluating the right-hand side.
@@ -122,15 +113,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 */
 
 		returnValue setModel( const String& _rhs, const String& _diffs_rhs );
-
-
-		/** .
-		 *
-		 *	@param[in] 		.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
 							
         
         /** Sets up the output with the grids for the different output functions.									\n
@@ -352,15 +334,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		virtual Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
 
 
-		/** .
-		 *
-		 *	@param[in] A3			.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		Matrix expandOutputMatrix( const Matrix& A3 );
-
-
 		/** Exports the code needed to solve the system of collocation equations for the linear input system.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
@@ -534,10 +507,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
         uint getNumItsInit() const;
 
 
-		const String getNameOutputRHS() const;
-		const String getNameOutputDiffs() const;
-
-
 		/** Returns the largest global export variable.
 		 *
 		 *	\return SUCCESSFUL_RETURN
@@ -600,11 +569,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportODEfunction lin_output;
 		ExportVariable	rk_mat3;
 		ExportVariable 	rk_dk3;
-		Matrix A33, M33;
-		ExportODEfunction rhs3;
-		ExportODEfunction diffs_rhs3;
-		ExportVariable	rk_diffsNew3;
-		ExportVariable	rk_diffsPrev3;
 		ExportVariable  rk_diffsTemp3;
 
 		ExportVariable 	rk_diffK;

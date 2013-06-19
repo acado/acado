@@ -221,31 +221,6 @@ class ForwardIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 												uint number 		);
 
 
-		/** Exports the code needed to update the sensitivities of the states, defined by the linear output system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue updateOutputSystem( 	ExportStatementBlock* block,
-													const ExportIndex& index1,
-													const ExportIndex& index2,
-													const ExportIndex& tmp_index  	);
-
-
-		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear output system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue propagateOutputSystem( 	ExportStatementBlock* block,
-													const ExportIndex& index1,
-													const ExportIndex& index2,
-													const ExportIndex& index3,
-													const ExportIndex& tmp_index  	);
-
-
 		/** Exports the computation of the sensitivities for the continuous output.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.

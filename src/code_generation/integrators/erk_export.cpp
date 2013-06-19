@@ -274,6 +274,12 @@ returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 }
 
 
+returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 )
+{
+	return RET_INVALID_OPTION;
+}
+
+
 returnValue ExplicitRungeKuttaExport::setModel(	const String& _rhs, const String& _diffs_rhs ) {
 
 	// You can't use this feature yet with explicit integrators, because they need the Variational Differential Equations !
