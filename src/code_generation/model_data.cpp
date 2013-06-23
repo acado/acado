@@ -58,7 +58,7 @@ ModelData::ModelData() {
 }
 
 
-returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU )
+returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP )
 {
 	NX1 = _NX1;
 	NX2 = _NX2;
@@ -68,6 +68,7 @@ returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX
 	NXA = _NXA;
 	NXA3 = _NXA3;
 	NU = _NU;
+	NP = _NP;
 	model_dimensions_set = BT_TRUE;
 	return SUCCESSFUL_RETURN;
 }
@@ -253,7 +254,7 @@ returnValue ModelData::setModel( const DifferentialEquation& _f )
 		if( NDX == 0 ) NDX = differentialEquation.getNDX();
 		NXA = differentialEquation.getNXA();
 		if( NU == 0 ) NU = differentialEquation.getNU();
-		NP = differentialEquation.getNP();
+		if( NP == 0 ) NP = differentialEquation.getNP();
 
 		model_dimensions_set = BT_TRUE;
 		export_rhs = BT_TRUE;

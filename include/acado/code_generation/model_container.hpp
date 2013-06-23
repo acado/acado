@@ -75,9 +75,11 @@ public:
      *	@param[in] _NXA		Number of algebraic states.
      *	@param[in] _NXA3	Number of algebraic states in the linear output subsystem.
      *	@param[in] _NU		Number of control inputs
+     *	@param[in] _NP		Number of parameters
      *
      *	\return SUCCESSFUL_RETURN
      */
+    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP );
     returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU );
 
 
@@ -89,9 +91,11 @@ public:
      *	@param[in] _NDX		Number of differential states derivatives.
      *	@param[in] _NXA		Number of algebraic states.
      *	@param[in] _NU		Number of control inputs
+     *	@param[in] _NP		Number of parameters
      *
      *	\return SUCCESSFUL_RETURN
      */
+    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU, uint _NP );
     returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU );
 
 
@@ -101,10 +105,11 @@ public:
 	 *	@param[in] _NDX		Number of differential states derivatives.
 	 *	@param[in] _NXA		Number of algebraic states.
 	 *	@param[in] _NU		Number of control inputs
+     *	@param[in] _NP		Number of parameters
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-
+	returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU, uint _NP );
 	returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU );
 
 
@@ -112,10 +117,11 @@ public:
 	 *
 	 *	@param[in] _NX		Number of differential states.
 	 *	@param[in] _NU		Number of control inputs
+	 *	@param[in] _NP		Number of parameters
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-
+	returnValue setDimensions( uint _NX, uint _NU, uint _NP );
 	returnValue setDimensions( uint _NX, uint _NU );
 
 
