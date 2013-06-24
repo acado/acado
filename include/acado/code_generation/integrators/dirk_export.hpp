@@ -293,6 +293,7 @@ inline DiagonallyImplicitRKExport* createDiagonallyImplicitRKExport(	UserInterac
 	}
 	else {
 		ACADOERROR( RET_INVALID_OPTION );
+		return new DiagonallyImplicitRKExport(_userInteraction, _commonHeaderName);
 	}
 }
 
