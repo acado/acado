@@ -56,7 +56,7 @@ class ExplicitEulerExport : public ExplicitRungeKuttaExport
     // PUBLIC MEMBER FUNCTIONS:
     //
 
-    public:
+    private:
 
 		/** Default constructor. 
 		 *
@@ -77,14 +77,6 @@ class ExplicitEulerExport : public ExplicitRungeKuttaExport
         /** Destructor. 
 		 */
         virtual ~ExplicitEulerExport( );
-
-
-	protected:
-
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau();
 
     protected:
 

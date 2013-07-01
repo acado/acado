@@ -64,8 +64,11 @@ ExplicitRungeKuttaExport::~ExplicitRungeKuttaExport( )
 
 returnValue ExplicitRungeKuttaExport::setup( )
 {
-	// non equidistant integration grids not yet implemented for explicit integrators
-	if( !equidistant ) return ACADOERROR( RET_INVALID_OPTION );
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
+	if ( (ExportSensitivityType)sensGen != FORWARD && (ExportSensitivityType)sensGen != NO_SENSITIVITY ) ACADOERROR( RET_INVALID_OPTION );
+
+	bool DERIVATIVES = ((ExportSensitivityType)sensGen != NO_SENSITIVITY);
 
 	String fileName( "integrator.c" );
 
@@ -76,12 +79,11 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		acadoPrintf( "--> Preparing to export %s... ",fileName.getName() );
 
 	// export RK scheme
-	const uint rhsDim   = NX*(NX+NU+1);
-	const uint inputDim = NX*(NX+NU+1) + NU + NP;
+	uint rhsDim   = NX*(NX+NU+1);
+	if( !DERIVATIVES ) rhsDim = NX;
+	uint inputDim = NX*(NX+NU+1) + NU + NP;
+	if( !DERIVATIVES ) inputDim = NX + NU + NP;
 	const uint rkOrder  = getNumStages();
-	
-	initializeButcherTableau();
-	//grid.print();
 	   
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
 
@@ -91,14 +93,16 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
 
-
-//	rk_ttt.setup( "rk_ttt", 1,1,            REAL,ACADO_WORKSPACE,BT_TRUE );
-	
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
-	rk_xxx.setup("rk_xxx", 1, inputDim, REAL, structWspace);
+
+	rk_ttt.setup( "rk_ttt", 1, 1, REAL, structWspace, BT_TRUE );
+	uint timeDep = 0;
+	if( timeDependant ) timeDep = 1;
+	
+	rk_xxx.setup("rk_xxx", 1, inputDim+timeDep, REAL, structWspace);
 	rk_kkk.setup("rk_kkk", rkOrder, rhsDim, REAL, structWspace);
 
 	if ( useOMP )
@@ -134,13 +138,15 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		integrate.addStatement( String( "int " ) << numInt.getName() << " = numSteps[" << rk_index.getName() << "];\n" );
 	}
 	
-//	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
+	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
 
-	// initialize sensitivities:
-	Matrix idX    = eye( NX );
-	Matrix zeroXU = zeros( NX,NU );
-	integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
-	integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
+	if( DERIVATIVES ) {
+		// initialize sensitivities:
+		Matrix idX    = eye( NX );
+		Matrix zeroXU = zeros( NX,NU );
+		integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
+		integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
+	}
 
 	integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
 	integrate.addLinebreak( );
@@ -158,10 +164,11 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
 		loop.addStatement( rk_xxx.getCols( 0,rhsDim ) == rk_eta.getCols( 0,rhsDim ) + Ah.getRow(run1)*rk_kkk );
-		loop.addFunctionCall( diffs_rhs.getName(), rk_xxx,rk_kkk.getAddress(run1,0) );
+		if( timeDependant ) loop.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt + ((double)cc(run1))/grid.getNumIntervals() );
+		loop.addFunctionCall( diffs_rhs.getName(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
-//	loop.addStatement( rk_ttt += Matrix(h) );
+	loop.addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop
 
 	if( !equidistantControlGrid() ) {
@@ -180,6 +187,10 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression& rhs_ )
 {
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
+	bool DERIVATIVES = ((ExportSensitivityType)sensGen != NO_SENSITIVITY);
+
 	Parameter         dummy0;
 	Control           dummy1;
 	DifferentialState dummy2;
@@ -204,42 +215,47 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 	
-	DifferentialState Gx(NX,NX), Gu(NX,NU);
-	// no free parameters yet!
-	// DifferentialState Gp(NX,NP);
-
 	DifferentialEquation f, f_ODE;
-
 	// add usual ODE
 	f_ODE << rhs_;
 	if( f_ODE.getNDX() > 0 ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	f << rhs_;
-/*	if ( f.getDim() != f.getNX() )
-		return ACADOERROR( RET_ILLFORMED_ODE );*/
-	
-	// add VDE for differential states
-	f << forwardDerivative( rhs_, x ) * Gx;
-/*	if ( f.getDim() != f.getNX() )
-		return ACADOERROR( RET_ILLFORMED_ODE );*/
-	
-	// add VDE for control inputs
-	f << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
-// 	if ( f.getDim() != f.getNX() )
-// 		return ACADOERROR( RET_ILLFORMED_ODE );
+	if( DERIVATIVES ) {
+		DifferentialState Gx(NX,NX), Gu(NX,NU);
+		// no free parameters yet!
+		// DifferentialState Gp(NX,NP);
 
-	// no free parameters yet!
-	// f << forwardDerivative( rhs_, x ) * Gp + forwardDerivative( rhs_, p );
+		f << rhs_;
+		/*	if ( f.getDim() != f.getNX() )
+		return ACADOERROR( RET_ILLFORMED_ODE );*/
+
+		// add VDE for differential states
+		f << forwardDerivative( rhs_, x ) * Gx;
+		/*	if ( f.getDim() != f.getNX() )
+		return ACADOERROR( RET_ILLFORMED_ODE );*/
+
+		// add VDE for control inputs
+		f << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
+		// 	if ( f.getDim() != f.getNX() )
+		// 		return ACADOERROR( RET_ILLFORMED_ODE );
+
+		// no free parameters yet!
+		// f << forwardDerivative( rhs_, x ) * Gp + forwardDerivative( rhs_, p );
+
+		if( f.getNT() > 0 ) timeDependant = BT_TRUE;
+	}
 
 	int matlabInterface;
 	userInteraction->get(GENERATE_MATLAB_INTERFACE, matlabInterface);
-	if (matlabInterface) {
-		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU)
-				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU);
+	if( matlabInterface && DERIVATIVES ) {
+		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP)
+				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP);
+	} else if( DERIVATIVES ) {
+		return diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP);
 	} else {
-		return diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU);
+		return diffs_rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP);
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -258,6 +274,12 @@ returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 }
 
 
+returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 )
+{
+	return RET_INVALID_OPTION;
+}
+
+
 returnValue ExplicitRungeKuttaExport::setModel(	const String& _rhs, const String& _diffs_rhs ) {
 
 	// You can't use this feature yet with explicit integrators, because they need the Variational Differential Equations !
@@ -270,7 +292,7 @@ returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 													) const
 {
 	declarations.addDeclaration( diffs_rhs.getGlobalExportVariable(),dataStruct );
-//	declarations.addDeclaration( rk_ttt,dataStruct );
+	declarations.addDeclaration( rk_ttt,dataStruct );
 	declarations.addDeclaration( rk_xxx,dataStruct );
 	declarations.addDeclaration( rk_kkk,dataStruct );
 
@@ -315,6 +337,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		s << "#pragma omp threadprivate( "
 				<< diffs_rhs.getGlobalExportVariable().getFullName().getName()  << ", "
 				<< rk_xxx.getFullName().getName() << ", "
+				<< rk_ttt.getFullName().getName() << ", "
 				<< rk_kkk.getFullName().getName()
 				<< " )" << endl << endl;
 

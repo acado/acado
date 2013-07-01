@@ -114,6 +114,15 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
 
 
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
+
+
 		/** Assigns the model to be used by the integrator.
 		 *
 		 *	@param[in] _rhs				Name of the function, evaluating the right-hand side.
@@ -202,11 +211,6 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 
 	protected:
 
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau() = 0;
-
 
 		/** Returns the largest global export variable.
 		 *
@@ -218,6 +222,16 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
     protected:
 
 };
+
+
+//
+// Create the integrator
+//
+inline ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction* _userInteraction,
+																	const String &_commonHeaderName	)
+{
+	return new ExplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+}
 
 
 CLOSE_NAMESPACE_ACADO

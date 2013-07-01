@@ -76,10 +76,11 @@ public:
 	 *	@param[in] _NXA		Number of algebraic states.
 	 *	@param[in] _NXA3	Number of algebraic states in the linear output subsystem.
 	 *	@param[in] _NU		Number of control inputs
+	 *	@param[in] _NP		Number of parameters
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU );
+	returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP );
 
 
 	/** Adds an output function.
@@ -245,15 +246,6 @@ public:
      returnValue getIntegrationGrid( Grid& integrationGrid_ ) const;
 
 
-     /** Sets the grid to be used by the integrator.
-      *
-      *	@param[in] gridPoints		The points that form the integration grid.
-      *
-      *	\return SUCCESSFUL_RETURN
-      */
-     returnValue setIntegrationGrid( const Vector& gridPoints );
-
-
      /** Sets integration grid.
       *
       *	@param[in] _ocpGrid		Evaluation grid for optimal control.
@@ -313,7 +305,6 @@ public:
      returnValue getLinearOutput( Matrix& M3_, Matrix& A3_ ) const;
 
 
-     BooleanType hasEquidistantIntegrationGrid		() const;
      BooleanType hasEquidistantControlGrid		() const;
      BooleanType hasOutputFunctions		() const;
      BooleanType hasDifferentialEquation() const;
@@ -450,7 +441,6 @@ public:
      DifferentialEquation differentialEquation;  	/**< The differential equations in the model. */
 
      Grid integrationGrid;							/**< Integration grid. */
-     BooleanType equidistant;						/**< True if the integration grid is equidistant. */
      Vector numSteps;								/**< The number of integration steps per shooting interval. */
 
      std::vector<Expression> outputExpressions;		/**< A vector with the output functions.     				*/

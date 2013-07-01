@@ -104,15 +104,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		virtual returnValue setDifferentialEquation( const Expression& rhs );
 
 
-		/** .
-		 *
-		 *	@param[in] 		.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
-
-
 		/** Assigns the model to be used by the integrator.
 		 *
 		 *	@param[in] _rhs				Name of the function, evaluating the right-hand side.
@@ -122,15 +113,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 */
 
 		returnValue setModel( const String& _rhs, const String& _diffs_rhs );
-
-
-		/** .
-		 *
-		 *	@param[in] 		.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
 							
         
         /** Sets up the output with the grids for the different output functions.									\n
@@ -352,15 +334,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		virtual Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
 
 
-		/** .
-		 *
-		 *	@param[in] A3			.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		Matrix expandOutputMatrix( const Matrix& A3 );
-
-
 		/** Exports the code needed to solve the system of collocation equations for the linear input system.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
@@ -392,7 +365,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportIndex& index3,
 											const ExportIndex& tmp_index,
 											const ExportVariable& Ah,
-											const ExportVariable& det  	);
+											const ExportVariable& C,
+											const ExportVariable& det,
+											BooleanType DERIVATIVES = BT_FALSE );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the linear output system.
@@ -408,94 +383,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& index2,
 										const ExportIndex& index3,
 										const ExportIndex& tmp_index,
-										const ExportVariable& Ah );
-
-
-		/** Exports the code needed to compute the sensitivities of the states, defined by the linear input system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *	@param[in] Bh				The variable containing the weights of the RK method, multiplied with the step size.
-		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue sensitivitiesInputSystem( 	ExportStatementBlock* block,
-												const ExportIndex& index1,
-												const ExportIndex& index2,
-												const ExportVariable& Bh,
-												BooleanType STATES  	);
-
-
-		/** Exports the code needed to compute the sensitivities of the states defined by the nonlinear, fully implicit system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
-		 *	@param[in] Bh				The variable containing the weights of the RK method, multiplied with the step size.
-		 *	@param[in] det				The variable that holds the determinant of the matrix in the linear system.
-		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
-		 *	@param[in] number			This number defines the stage of the state with respect to which the sensitivities are computed.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue sensitivitiesImplicitSystem( 	ExportStatementBlock* block,
-													const ExportIndex& index1,
-													const ExportIndex& index2,
-													const ExportIndex& index3,
-													const ExportIndex& tmp_index1,
-													const ExportIndex& tmp_index2,
-													const ExportVariable& Ah,
-													const ExportVariable& Bh,
-													const ExportVariable& det,
-													BooleanType STATES,
-													uint number 		);
-
-
-		/** Exports the code needed to compute the sensitivities of the states, defined by the linear output system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
-		 *	@param[in] Bh				The variable containing the weights of the RK method, multiplied with the step size.
-		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
-		 *	@param[in] number			This number defines the stage of the state with respect to which the sensitivities are computed.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue sensitivitiesOutputSystem( 	ExportStatementBlock* block,
-												const ExportIndex& index1,
-												const ExportIndex& index2,
-												const ExportIndex& index3,
-												const ExportIndex& index4,
-												const ExportIndex& tmp_index1,
-												const ExportIndex& tmp_index2,
-												const ExportVariable& Ah,
-												const ExportVariable& Bh,
-												BooleanType STATES,
-												uint number 		);
-
-
-		/** Exports the code needed to update the sensitivities of the states, defined by the linear output system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue updateOutputSystem( 	ExportStatementBlock* block,
-											const ExportIndex& index1,
-											const ExportIndex& index2,
-											const ExportIndex& tmp_index  	);
-
-
-		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear output system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue propagateOutputSystem( 	ExportStatementBlock* block,
-											const ExportIndex& index1,
-											const ExportIndex& index2,
-											const ExportIndex& index3,
-											const ExportIndex& tmp_index  	);
+										const ExportVariable& Ah,
+										BooleanType DERIVATIVES = BT_FALSE );
 
 
 		/** Exports the evaluation of the states at a specific stage.
@@ -508,6 +397,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 */
 		virtual returnValue evaluateStatesImplicitSystem( 	ExportStatementBlock* block,
 											const ExportVariable& Ah,
+											const ExportVariable& C,
 											const ExportIndex& stage,
 											const ExportIndex& i,
 											const ExportIndex& j );
@@ -534,7 +424,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue evaluateRhsImplicitSystem( 	ExportStatementBlock* block,
-											const ExportIndex& stage );
+														const ExportIndex& stage );
 
 
 		/** Exports the evaluation of the matrix of the linear system.
@@ -553,7 +443,9 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& index2,
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
-										BooleanType evaluateB );
+										const ExportVariable& C,
+										BooleanType evaluateB,
+										BooleanType DERIVATIVES );
 
 
 		/** Prepares the structures to evaluate the continuous output and exports the resulting definitions.
@@ -587,53 +479,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& tmp_index1,
 										const ExportIndex& tmp_index2,
 										const ExportVariable& tmp_meas,
-										const ExportVariable& rk_tPrev,
-										const ExportVariable& time_tmp );
-
-
-		/** Exports the computation of the sensitivities for the continuous output.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *	@param[in] tmp_meas			The number of measurements in the current integration step (in case of an online grid).
-		 *	@param[in] rk_tPrev			The time point, defining the beginning of the current integration step (in case of an online grid).
-		 *	@param[in] time_tmp			A variable used for time transformations (in case of an online grid).
-		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
-		 *	@param[in] base				The number of states in stages with respect to which the sensitivities have already been computed.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue sensitivitiesOutputs( 	ExportStatementBlock* block,
-											const ExportIndex& index0,
-											const ExportIndex& index1,
-											const ExportIndex& index2,
-											const ExportIndex& tmp_index1,
-											const ExportIndex& tmp_index2,
-											const ExportIndex& tmp_index3,
-											const ExportVariable& tmp_meas,
-											const ExportVariable& rk_tPrev,
-											const ExportVariable& time_tmp,
-											BooleanType STATES,
-											uint base			);
-
-
-		/** Exports the propagation of the sensitivities for the continuous output.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *	@param[in] tmp_meas			The number of measurements in the current integration step (in case of an online grid).
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue propagateOutputs(	ExportStatementBlock* block,
-										const ExportIndex& index,
-										const ExportIndex& index0,
-										const ExportIndex& index1,
-										const ExportIndex& index2,
-										const ExportIndex& index3,
-										const ExportIndex& tmp_index1,
-										const ExportIndex& tmp_index2,
-										const ExportIndex& tmp_index3,
-										const ExportIndex& tmp_index4,
-										const ExportVariable& tmp_meas );
+										const ExportVariable& time_tmp,
+										const uint directions );
 
 
 		/** Copies all class members from given object.
@@ -644,11 +491,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 */
 		virtual returnValue copy(	const ImplicitRungeKuttaExport& arg
 							);
-
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau() = 0;
 		
 		
 		/** Returns the performed number of Newton iterations.
@@ -663,10 +505,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 * 	\return The performed number of Newton iterations for the initialization of the first step.
 		 */
         uint getNumItsInit() const;
-
-
-		const String getNameOutputRHS() const;
-		const String getNameOutputDiffs() const;
 
 
 		/** Returns the largest global export variable.
@@ -731,11 +569,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportODEfunction lin_output;
 		ExportVariable	rk_mat3;
 		ExportVariable 	rk_dk3;
-		Matrix A33, M33;
-		ExportODEfunction rhs3;
-		ExportODEfunction diffs_rhs3;
-		ExportVariable	rk_diffsNew3;
-		ExportVariable	rk_diffsPrev3;
 		ExportVariable  rk_diffsTemp3;
 
 		ExportVariable 	rk_diffK;
@@ -745,6 +578,10 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 
 CLOSE_NAMESPACE_ACADO
+
+
+#include <acado/code_generation/integrators/irk_forward_export.hpp>
+#include <acado/code_generation/integrators/irk_export.ipp>
 
 
 #endif  // ACADO_TOOLKIT_IRK_EXPORT_HPP

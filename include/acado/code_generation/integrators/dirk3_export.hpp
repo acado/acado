@@ -56,7 +56,7 @@ class DiagonallyIRK3Export : public DiagonallyImplicitRKExport
     // PUBLIC MEMBER FUNCTIONS:
     //
 
-    public:
+    private:
 
 		/** Default constructor. 
 		 *
@@ -77,14 +77,6 @@ class DiagonallyIRK3Export : public DiagonallyImplicitRKExport
         /** Destructor. 
 		 */
         virtual ~DiagonallyIRK3Export( );
-
-
-	protected:
-
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau();
 
     protected:
 

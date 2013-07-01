@@ -121,7 +121,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs ) = 0;
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
 
 
 		/** .
@@ -213,6 +213,31 @@ class IntegratorExport : public ExportAlgorithm
 														const ExportIndex& index2,
 														const ExportIndex& index3,
 														const ExportIndex& tmp_index  	);
+
+
+		/** Exports the code needed to update the sensitivities of the states, defined by the linear output system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue updateOutputSystem( 	ExportStatementBlock* block,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& tmp_index  	);
+
+
+		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear output system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue propagateOutputSystem( 	ExportStatementBlock* block,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& index3,
+													const ExportIndex& tmp_index  	);
 
 
 		/** Sets integration grid (this grid is expected to be non equidistant, otherwise use the other setGrid function).
@@ -335,15 +360,29 @@ class IntegratorExport : public ExportAlgorithm
 
 
 		const String getNameRHS() const;
-		virtual const String getNameFullRHS() const;
-		const String getNameOUTPUT( uint index ) const;
-		uint getDimOUTPUT( uint index ) const;
 		const String getNameDiffsRHS() const;
+		virtual const String getNameFullRHS() const;
+
+		const String getNameOutputRHS() const;
+		const String getNameOutputDiffs() const;
+
+		const String getNameOUTPUT( uint index ) const;
 		const String getNameDiffsOUTPUT( uint index ) const;
+		uint getDimOUTPUT( uint index ) const;
 
 
 
 	protected:
+
+
+		/** .
+		 *
+		 *	@param[in] A3			.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		Matrix expandOutputMatrix( const Matrix& A3 );
+
 
 		/** Copies all class members from given object.
 		 *
@@ -393,10 +432,12 @@ class IntegratorExport : public ExportAlgorithm
 		uint NDX3;
 		uint NXA3;
 
+		BooleanType timeDependant;
+
 		Matrix M11, A11, B11;
+		Matrix A33, M33;
 
         BooleanType exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
-        BooleanType equidistant;			/**< True if the integration grid is equidistant. */
         BooleanType crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
         String name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
         String name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
@@ -416,6 +457,9 @@ class IntegratorExport : public ExportAlgorithm
 
 		ExportODEfunction lin_input;
 
+		ExportODEfunction rhs3;
+		ExportODEfunction diffs_rhs3;
+
 		ExportVariable  error_code;			/**< Variable containing the error code, returned by the integrator. */
 		ExportVariable  reset_int;			/**< Variable containing the number of the current integration step. */
 		ExportVariable  rk_index;			/**< Variable containing the number of the current shooting interval. */
@@ -428,6 +472,9 @@ class IntegratorExport : public ExportAlgorithm
 		
 		ExportVariable  rk_diffsPrev2;			/**< Variable containing the sensitivities from the previous integration step. */
 		ExportVariable  rk_diffsNew2;			/**< Variable containing the derivatives wrt the previous values. */
+
+		ExportVariable	rk_diffsNew3;
+		ExportVariable	rk_diffsPrev3;
 
 		DifferentialState 			x;		/**< The differential states in the model. */
 		DifferentialStateDerivative dx;		/**< The differential state derivatives in the model. */
@@ -469,6 +516,16 @@ enum ExportIntegratorType{
 
      INT_DT,				/**< An algorithm which handles the simulation and sensitivity generation for a discrete time state-space model. */
      INT_NARX				/**< An algorithm which handles the simulation and sensitivity generation for a NARX model. */
+};
+
+
+/**  Summarizes all possible sensitivity generation types for exported integrators.  */
+enum ExportSensitivityType{
+
+	NO_SENSITIVITY, 				/**< No sensitivities are computed, if possible. 		  					 */
+    FORWARD,    					/**< Sensitivities are computed in forward mode.                             */
+    BACKWARD,    					/**< Sensitivities are computed in backward mode.                            */
+    FORWARD_OVER_BACKWARD         	/**< Sensitivities (first and second order) are computed.					 */
 };
 
 

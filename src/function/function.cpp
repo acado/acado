@@ -246,6 +246,12 @@ int Function::getNW   () const{
     return evaluationTree.getNW();
 }
 
+int Function::getNT   () const{
+
+
+    return evaluationTree.getNT();
+}
+
 
 int Function::getNumberOfVariables() const{
 
@@ -472,10 +478,12 @@ returnValue Function::exportCode(	FILE       *file,
 									int         precision,
 									uint        _numX,
 									uint		_numXA,
-									uint		_numU
+									uint		_numU,
+									uint		_numP,
+									uint		_numDX
 									) const{
 
-    return evaluationTree.exportCode( file,fcnName,realString,precision,_numX,_numXA,_numU );
+    return evaluationTree.exportCode( file,fcnName,realString,precision,_numX,_numXA,_numU,_numP,_numDX );
 }
 
 

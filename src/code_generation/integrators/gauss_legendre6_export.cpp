@@ -63,33 +63,6 @@ GaussLegendre6Export::~GaussLegendre6Export( )
 }
 
 
-returnValue GaussLegendre6Export::initializeButcherTableau() {
-	AA = Matrix(3,3);
-	bb = Vector(3);
-	cc = Vector(3);
-			
-	AA(0,0) = 5.0/36.0;
-	AA(0,1) = 2.0/9.0-1.0/15.0*sqrt(15.0);		
-	AA(0,2) = 5.0/36.0-1.0/30.0*sqrt(15.0);	
-	AA(1,0) = 5.0/36.0+1.0/24.0*sqrt(15.0);			
-	AA(1,1) = 2.0/9.0;		
-	AA(1,2) = 5.0/36.0-1.0/24.0*sqrt(15.0);
-	AA(2,0) = 5.0/36.0+1.0/30.0*sqrt(15.0);	
-	AA(2,1) = 2.0/9.0+1.0/15.0*sqrt(15.0);				
-	AA(2,2) = 5.0/36.0;	
-			
-	bb(0) = 5.0/18.0;		
-	bb(1) = 4.0/9.0;					
-	bb(2) = 5.0/18.0;
-	
-	cc(0) = 1.0/2.0-sqrt(15.0)/10.0;		
-	cc(1) = 1.0/2.0;	
-	cc(2) = 1.0/2.0+sqrt(15.0)/10.0;
-	
-	return SUCCESSFUL_RETURN;
-}
-
-
 // PROTECTED:
 
 //
@@ -99,7 +72,32 @@ returnValue GaussLegendre6Export::initializeButcherTableau() {
 IntegratorExport* createGaussLegendre6Export(	UserInteraction* _userInteraction,
 												const String &_commonHeaderName)
 {
-	return new GaussLegendre6Export(_userInteraction, _commonHeaderName);
+	Matrix AA(3,3);
+	Vector bb(3);
+	Vector cc(3);
+
+	AA(0,0) = 5.0/36.0;
+	AA(0,1) = 2.0/9.0-1.0/15.0*sqrt(15.0);
+	AA(0,2) = 5.0/36.0-1.0/30.0*sqrt(15.0);
+	AA(1,0) = 5.0/36.0+1.0/24.0*sqrt(15.0);
+	AA(1,1) = 2.0/9.0;
+	AA(1,2) = 5.0/36.0-1.0/24.0*sqrt(15.0);
+	AA(2,0) = 5.0/36.0+1.0/30.0*sqrt(15.0);
+	AA(2,1) = 2.0/9.0+1.0/15.0*sqrt(15.0);
+	AA(2,2) = 5.0/36.0;
+
+	bb(0) = 5.0/18.0;
+	bb(1) = 4.0/9.0;
+	bb(2) = 5.0/18.0;
+
+	cc(0) = 1.0/2.0-sqrt(15.0)/10.0;
+	cc(1) = 1.0/2.0;
+	cc(2) = 1.0/2.0+sqrt(15.0)/10.0;
+
+	ImplicitRungeKuttaExport* integrator = createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	integrator->initializeButcherTableau(AA, bb, cc);
+
+	return integrator;
 }
 
 RegisterGaussLegendre6Export::RegisterGaussLegendre6Export()

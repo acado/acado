@@ -363,6 +363,11 @@ inline int SymbolicIndexList::getNW   () const{
     return maxNumberOfEntries[6];
 }
 
+inline int SymbolicIndexList::getNT   () const{
+
+    return maxNumberOfEntries[7];
+}
+
 
 
 CLOSE_NAMESPACE_ACADO

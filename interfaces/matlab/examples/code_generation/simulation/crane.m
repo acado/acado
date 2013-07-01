@@ -32,12 +32,10 @@ f = dot(diffStates) == [ vT; ...
     duL ];
 
 numSteps = 2;
-% integrationGrid = [0:h/numSteps:h];
 
 %% SIMexport
 sim = acado.SIMexport( h );
 sim.setModel(f);
-% sim.setIntegrationGrid( integrationGrid );
 sim.addOutput([xT; vT; xL; vL]);
 sim.setMeasurements(3);
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5' );

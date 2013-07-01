@@ -32,6 +32,9 @@
 
 #include <acado/code_generation/integrators/discrete_export.hpp>
 
+#include <sstream>
+using namespace std;
+
 
 
 BEGIN_NAMESPACE_ACADO
@@ -109,9 +112,12 @@ returnValue DiscreteTimeExport::getDataDeclarations(	ExportStatementBlock& decla
 
 	declarations.addDeclaration( rk_diffsPrev1,dataStruct );
 	declarations.addDeclaration( rk_diffsPrev2,dataStruct );
+	declarations.addDeclaration( rk_diffsPrev3,dataStruct );
 
 	declarations.addDeclaration( rk_diffsNew1,dataStruct );
 	declarations.addDeclaration( rk_diffsNew2,dataStruct );
+	declarations.addDeclaration( rk_diffsNew3,dataStruct );
+	declarations.addDeclaration( rk_diffsTemp3,dataStruct );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -147,13 +153,14 @@ returnValue DiscreteTimeExport::getFunctionDeclarations(	ExportStatementBlock& d
 
 returnValue DiscreteTimeExport::setup( )
 {
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
+	if ( (ExportSensitivityType)sensGen != FORWARD ) ACADOERROR( RET_INVALID_OPTION );
+
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
-
-	// non equidistant integration grids not implemented for NARX integrators
-	if( !equidistant ) return ACADOERROR( RET_INVALID_OPTION );
 
 	String fileName( "integrator.c" );
 
@@ -192,9 +199,12 @@ returnValue DiscreteTimeExport::setup( )
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
 		rk_diffsPrev1 = ExportVariable( "rk_diffsPrev1", NX1, NX1+NU, REAL, structWspace );
 		rk_diffsPrev2 = ExportVariable( "rk_diffsPrev2", NX2, NX1+NX2+NU, REAL, structWspace );
+		rk_diffsPrev3 = ExportVariable( "rk_diffsPrev3", NX3, NX+NU, REAL, structWspace );
 	}
 	rk_diffsNew1 = ExportVariable( "rk_diffsNew1", NX1, NX1+NU, REAL, structWspace );
 	rk_diffsNew2 = ExportVariable( "rk_diffsNew2", NX2, NX1+NX2+NU, REAL, structWspace );
+	rk_diffsNew3 = ExportVariable( "rk_diffsNew3", NX3, NX+NU, REAL, structWspace );
+	rk_diffsTemp3 = ExportVariable( "rk_diffsTemp3", NX3, NX1+NX2+NU, REAL, structWspace );
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
@@ -203,6 +213,26 @@ returnValue DiscreteTimeExport::setup( )
 	}
 
 	integrate.addStatement( rk_xxx.getCols( NX,inputDim-diffsDim ) == rk_eta.getCols( NX+diffsDim,inputDim ) );
+	integrate.addLinebreak( );
+	// evaluate sensitivities linear input:
+	if( NX1 > 0 ) {
+		for( uint i1 = 0; i1 < NX1; i1++ ) {
+			for( uint i2 = 0; i2 < NX1; i2++ ) {
+				integrate.addStatement( rk_diffsNew1.getSubMatrix(i1,i1+1,i2,i2+1) == A11(i1,i2) );
+			}
+			for( uint i2 = 0; i2 < NU; i2++ ) {
+				integrate.addStatement( rk_diffsNew1.getSubMatrix(i1,i1+1,NX1+i2,NX1+i2+1) == B11(i1,i2) );
+			}
+		}
+	}
+	// evaluate sensitivities linear output:
+	if( NX1 > 0 ) {
+		for( uint i1 = 0; i1 < NX3; i1++ ) {
+			for( uint i2 = 0; i2 < NX3; i2++ ) {
+				integrate.addStatement( rk_diffsNew3.getSubMatrix(i1,i1+1,NX-NX3+i2,NX-NX3+i2+1) == A33(i1,i2) );
+			}
+		}
+	}
 	integrate.addLinebreak( );
 
 	// integrator loop:
@@ -233,6 +263,12 @@ returnValue DiscreteTimeExport::setup( )
 			if( NU > 0 ) loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,NX1+NX2,NX1+NX2+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+NX1*NU,i*NU+(NX+NXA)*(NX+1)+NX1*NU+NU ) );
 			loop->addStatement( loopTemp2 );
 		}
+		if( NX3 > 0 ) {
+			ExportForLoop loopTemp3( i,0,NX3 );
+			loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,0,NX ) == rk_eta.getCols( i*NX+NX+NXA+(NX1+NX2)*NX,i*NX+NX+NXA+(NX1+NX2)*NX+NX ) );
+			if( NU > 0 ) loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,NX,NX+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU,i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU+NU ) );
+			loop->addStatement( loopTemp3 );
+		}
 		loop->addStatement( String("}\n") );
 	}
 
@@ -243,20 +279,24 @@ returnValue DiscreteTimeExport::setup( )
 	if( NX2 > 0 ) {
 		loop->addFunctionCall( getNameRHS(), rk_xxx, rk_eta.getAddress(0,NX1) );
 	}
-
-	// evaluate sensitivities:
-	if( NX1 > 0 ) {
-		for( uint i1 = 0; i1 < NX1; i1++ ) {
-			for( uint i2 = 0; i2 < NX1; i2++ ) {
-				loop->addStatement( rk_diffsNew1.getSubMatrix(i1,i1+1,i2,i2+1) == A11(i1,i2) );
-			}
-			for( uint i2 = 0; i2 < NU; i2++ ) {
-				loop->addStatement( rk_diffsNew1.getSubMatrix(i1,i1+1,NX1+i2,NX1+i2+1) == B11(i1,i2) );
-			}
-		}
+	if( NX3 > 0 ) {
+		loop->addFunctionCall( getNameOutputRHS(), rk_xxx, rk_eta.getAddress(0,NX1+NX2) );
 	}
+
+	// evaluate sensitivities
 	if( NX2 > 0 ) {
 		loop->addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsNew2.getAddress(0,0) );
+	}
+	if( NX3 > 0 ) {
+		loop->addFunctionCall( getNameOutputDiffs(), rk_xxx, rk_diffsTemp3.getAddress(0,0) );
+		ExportForLoop loop1( i,0,NX3 );
+		ExportForLoop loop2( j,0,NX1+NX2 );
+		loop2.addStatement( rk_diffsNew3.getSubMatrix(i,i+1,j,j+1) == rk_diffsTemp3.getSubMatrix(i,i+1,j,j+1) );
+		loop1.addStatement( loop2 );
+		loop2 = ExportForLoop( j,0,NU );
+		loop2.addStatement( rk_diffsNew3.getSubMatrix(i,i+1,NX+j,NX+j+1) == rk_diffsTemp3.getSubMatrix(i,i+1,NX1+NX2+j,NX1+NX2+j+1) );
+		loop1.addStatement( loop2 );
+		loop->addStatement( loop1 );
 	}
 
 	// computation of the sensitivities using chain rule:
@@ -267,6 +307,8 @@ returnValue DiscreteTimeExport::setup( )
 	updateInputSystem(loop, i, j, tmp_index);
 	// PART 2
 	updateImplicitSystem(loop, i, j, tmp_index);
+	// PART 3
+	updateOutputSystem(loop, i, j, tmp_index);
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
 		loop->addStatement( String( "}\n" ) );
@@ -275,6 +317,8 @@ returnValue DiscreteTimeExport::setup( )
 		propagateInputSystem(loop, i, j, k, tmp_index);
 		// PART 2
 		propagateImplicitSystem(loop, i, j, k, tmp_index);
+		// PART 3
+		propagateOutputSystem(loop, i, j, k, tmp_index);
 		loop->addStatement( String( "}\n" ) );
 	}
 
@@ -287,11 +331,18 @@ returnValue DiscreteTimeExport::setup( )
 	}
 	// PART 1
 	if( NX1 > 0 ) {
-		Matrix zeroR = zeros(1, NX2);
+		Matrix zeroR = zeros(1, NX2+NX3);
 		ExportForLoop loop1( i,0,NX1 );
 		loop1.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1,i*NX+NX+NXA+NX ) == zeroR );
 		integrate.addStatement( loop1 );
 	}
+    // PART 2
+    Matrix zeroR = zeros(1, NX3);
+    if( NX2 > 0 ) {
+    	ExportForLoop loop2( i,NX1,NX1+NX2 );
+    	loop2.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1+NX2,i*NX+NX+NXA+NX ) == zeroR );
+    	integrate.addStatement( loop2 );
+    }
 
 	if ( (PrintLevel)printLevel >= HIGH )
 		acadoPrintf( "done.\n" );
@@ -303,6 +354,44 @@ returnValue DiscreteTimeExport::setup( )
 returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 										)
 {
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+	if ( useOMP ) {
+		ExportVariable max = getAuxVariable();
+		max.setName( "auxVar" );
+		max.setDataStruct( ACADO_LOCAL );
+		if( NX2 > 0 ) {
+			rhs.setGlobalExportVariable( max );
+			diffs_rhs.setGlobalExportVariable( max );
+		}
+		if( NX3 > 0 ) {
+			rhs3.setGlobalExportVariable( max );
+			diffs_rhs3.setGlobalExportVariable( max );
+		}
+
+		getDataDeclarations( code, ACADO_LOCAL );
+
+		stringstream s;
+		s << "#pragma omp threadprivate( "
+				<< max.getFullName().getName() << ", "
+				<< rk_xxx.getFullName().getName();
+		if( NX1 > 0 ) {
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev1.getFullName().getName();
+			s << ", " << rk_diffsNew1.getFullName().getName();
+		}
+		if( NX2 > 0 || NXA > 0 ) {
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev2.getFullName().getName();
+			s << ", " << rk_diffsNew2.getFullName().getName();
+		}
+		if( NX3 > 0 ) {
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev3.getFullName().getName();
+			s << ", " << rk_diffsNew3.getFullName().getName();
+			s << ", " << rk_diffsTemp3.getFullName().getName();
+		}
+		s << " )" << endl << endl;
+		code.addStatement( s.str().c_str() );
+	}
+
 	if( NX1 > 0 ) {
 		code.addFunction( lin_input );
 		code.addStatement( "\n\n" );
@@ -312,6 +401,13 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 		code.addFunction( rhs );
 		code.addStatement( "\n\n" );
 		code.addFunction( diffs_rhs );
+		code.addStatement( "\n\n" );
+	}
+
+	if( NX3 > 0 ) {
+		code.addFunction( rhs3 );
+		code.addStatement( "\n\n" );
+		code.addFunction( diffs_rhs3 );
 		code.addStatement( "\n\n" );
 	}
 
@@ -331,12 +427,6 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 	}
 
 	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue DiscreteTimeExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs ) {
-
-	return ACADOERROR( RET_INVALID_OPTION );
 }
 
 
@@ -415,6 +505,14 @@ ExportVariable DiscreteTimeExport::getAuxVariable() const
 		}
 		if( diffs_rhs.getGlobalExportVariable().getDim() >= max.getDim() ) {
 			max = diffs_rhs.getGlobalExportVariable();
+		}
+	}
+	if( NX3 > 0 ) {
+		if( rhs3.getGlobalExportVariable().getDim() >= max.getDim() ) {
+			max = rhs3.getGlobalExportVariable();
+		}
+		if( diffs_rhs3.getGlobalExportVariable().getDim() >= max.getDim() ) {
+			max = diffs_rhs3.getGlobalExportVariable();
 		}
 	}
 

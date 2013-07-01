@@ -188,6 +188,11 @@ public:
      */
     inline int getNW  () const;
 
+    /** Returns the number of time variables                        \n
+     *  \return The requested number of time variables.             \n
+     */
+    inline int getNT  () const;
+
 
     inline int makeImplicit( int dim );
 

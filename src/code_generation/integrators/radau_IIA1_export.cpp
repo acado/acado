@@ -63,21 +63,6 @@ RadauIIA1Export::~RadauIIA1Export( )
 }
 
 
-returnValue RadauIIA1Export::initializeButcherTableau() {
-	AA = Matrix(1,1);
-	bb = Vector(1);
-	cc = Vector(1);
-			
-	AA(0,0) = 1;				
-			
-	bb(0) = 1;					
-	
-	cc(0) = 1;	
-	
-	return SUCCESSFUL_RETURN;
-}
-
-
 // PROTECTED:
 
 //
@@ -87,7 +72,20 @@ returnValue RadauIIA1Export::initializeButcherTableau() {
 IntegratorExport* createRadauIIA1Export(	UserInteraction* _userInteraction,
 											const String &_commonHeaderName)
 {
-	return new RadauIIA1Export(_userInteraction, _commonHeaderName);
+	Matrix AA(1,1);
+	Vector bb(1);
+	Vector cc(1);
+
+	AA(0,0) = 1;
+
+	bb(0) = 1;
+
+	cc(0) = 1;
+
+	ImplicitRungeKuttaExport* integrator = createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	integrator->initializeButcherTableau(AA, bb, cc);
+
+	return integrator;
 }
 
 RegisterRadauIIA1Export::RegisterRadauIIA1Export()

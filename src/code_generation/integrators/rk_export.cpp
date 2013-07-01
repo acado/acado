@@ -74,6 +74,19 @@ RungeKuttaExport& RungeKuttaExport::operator=( const RungeKuttaExport& arg
 }
 
 
+returnValue RungeKuttaExport::initializeButcherTableau( const Matrix& _AA, const Vector& _bb, const Vector& _cc ) {
+
+	if( _cc.isEmpty() || !_AA.isSquare() || _AA.getNumRows() != _bb.getDim() || _bb.getDim() != _cc.getDim() ) return RET_INVALID_OPTION;
+
+	numStages = _cc.getDim();
+	AA = _AA;
+	bb = _bb;
+	cc = _cc;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 const uint RungeKuttaExport::getNumStages() {
 	
 	return numStages;
@@ -94,6 +107,10 @@ returnValue RungeKuttaExport::copy(	const RungeKuttaExport& arg
 									)
 {
 	numStages = arg.numStages;
+	AA = arg.AA;
+	bb = arg.bb;
+	cc = arg.cc;
+
 	rhs = arg.rhs;
 	diffs_rhs = arg.diffs_rhs;
 	name_rhs = arg.name_rhs;

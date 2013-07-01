@@ -63,24 +63,6 @@ GaussLegendre4Export::~GaussLegendre4Export( )
 }
 
 
-returnValue GaussLegendre4Export::initializeButcherTableau() {
-	AA = Matrix(2,2);
-	bb = Vector(2);
-	cc = Vector(2);
-	
-	AA(0,0) = 1.0/4.0;					AA(0,1) = (1.0/4.0+sqrt(3.0)/6.0);
-	AA(1,0) = (1.0/4.0-sqrt(3.0)/6.0);	AA(1,1) = 1.0/4.0;
-			
-	bb(0) = 1.0/2.0;
-	bb(1) = 1.0/2.0;
-			
-	cc(0) = 1.0/2.0+sqrt(3.0)/6.0;
-	cc(1) = 1.0/2.0-sqrt(3.0)/6.0;
-	
-	return SUCCESSFUL_RETURN;
-}
-
-
 // PROTECTED:
 
 //
@@ -90,7 +72,23 @@ returnValue GaussLegendre4Export::initializeButcherTableau() {
 IntegratorExport* createGaussLegendre4Export(	UserInteraction* _userInteraction,
 												const String &_commonHeaderName)
 {
-	return new GaussLegendre4Export(_userInteraction, _commonHeaderName);
+	Matrix AA(2,2);
+	Vector bb(2);
+	Vector cc(2);
+
+	AA(0,0) = 1.0/4.0;					AA(0,1) = (1.0/4.0+sqrt(3.0)/6.0);
+	AA(1,0) = (1.0/4.0-sqrt(3.0)/6.0);	AA(1,1) = 1.0/4.0;
+
+	bb(0) = 1.0/2.0;
+	bb(1) = 1.0/2.0;
+
+	cc(0) = 1.0/2.0+sqrt(3.0)/6.0;
+	cc(1) = 1.0/2.0-sqrt(3.0)/6.0;
+
+	ImplicitRungeKuttaExport* integrator = createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	integrator->initializeButcherTableau(AA, bb, cc);
+
+	return integrator;
 }
 
 RegisterGaussLegendre4Export::RegisterGaussLegendre4Export()
