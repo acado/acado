@@ -2,9 +2,10 @@
 
 /* SOME CONVENIENT DEFINTIONS: */
 /* --------------------------------------------------------------- */
-   #define NUM_STEPS   @NUM_STEPS@      /* number of real time iterations */
-   #define VERBOSE     @VERBOSE@      	/* show iterations: 1, silent: 0  */
+   #define NUM_STEPS    @NUM_STEPS@     /* number of real time iterations */
+   #define VERBOSE      @VERBOSE@      	/* show iterations: 1, silent: 0  */
    #define CALLS_TIMING @CALLS_TIMING@  /* number of timing calls */
+   #define OS_WINDOWS   @OS_WINDOWS@
 /* --------------------------------------------------------------- */
 
 /* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
@@ -17,11 +18,19 @@
    Vars         vars;
    Params       params;
 
-real_t getTime(  ){
+real_t getTime(  ) {
 	real_t current_time = 0.000000e+00;
-	struct timeval theclock;
-	gettimeofday( &theclock,0 );
-	current_time = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+	
+    #if OS_WINDOWS
+        LARGE_INTEGER counter, frequency;
+        QueryPerformanceFrequency(&frequency);
+        QueryPerformanceCounter(&counter);
+        current_time = ((real_t) counter.QuadPart)/((real_t) frequency.QuadPart);
+    #else
+        struct timeval theclock;
+        gettimeofday( &theclock,0 );
+        current_time = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+    #endif
 	return current_time;
 }
 
@@ -64,10 +73,7 @@ void mexFunction( int            nlhs,
     real_t timeFeed = 0;
     real_t time = 0;
 	real_t *result_timing;
-    #if CALLS_TIMING > 1
-		struct timeval theclock;
-		real_t start, end;
-    #endif 
+	real_t start, end;
     
     /* Initial State */
     nRx0      = mxGetM(prhs[0]);
@@ -266,14 +272,12 @@ void mexFunction( int            nlhs,
    /* SOME MORE ACCURATE TIMINGS IF DESIRED:   */
    /* ---------------------------------------- */
    #if CALLS_TIMING > 1
-		gettimeofday( &theclock,0 );
-		start = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+		start = getTime();
 		for( i = 0; i < CALLS_TIMING; ++i ) {
 			status = feedbackStep( measurement );
 			preparationStep();
 		}
-		gettimeofday( &theclock,0 );
-		end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+		end = getTime();
 		time = (end-start)/CALLS_TIMING;
 		
         mxSetField(plhs[2],0,infonames[1],mxCreateDoubleScalar(time));

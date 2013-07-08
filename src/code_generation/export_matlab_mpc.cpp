@@ -73,13 +73,14 @@ ExportMatlabMPC& ExportMatlabMPC::operator=(	const ExportMatlabMPC& arg
 	return *this;
 }
 
-returnValue ExportMatlabMPC::configure(	const uint numSteps, const uint verbose, const uint timingCalls )
+returnValue ExportMatlabMPC::configure(	const uint OSWindows, const uint numSteps, const uint verbose, const uint timingCalls )
 {	
 	// Configure the dictionary
 	dictionary[ "@NUM_STEPS@" ] =  std::string(String(numSteps).getName());
 	dictionary[ "@VERBOSE@" ] =  std::string(String(verbose).getName());
 	if( timingCalls > 1 ) 	dictionary[ "@CALLS_TIMING@" ] =  std::string(String(timingCalls).getName());
 	else 					dictionary[ "@CALLS_TIMING@" ] =  std::string(String(1).getName());
+	dictionary[ "@OS_WINDOWS@" ] = std::string(String(OSWindows).getName());
 	
 	// And then fill a template file
 	fillTemplate();

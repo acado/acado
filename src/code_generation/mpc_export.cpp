@@ -189,6 +189,8 @@ returnValue MPCexport::exportCode(	const String& dirName,
 	// export a Matlab mex function interface, if desired
 	int generateMatlabInterface;
 	get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
+	int operatingSystem;
+	get( OPERATING_SYSTEM,operatingSystem );
 	if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
 		String mpcInterface( dirName );
 		mpcInterface << "/MPCstep.c";
@@ -197,7 +199,7 @@ returnValue MPCexport::exportCode(	const String& dirName,
 		int mexSteps, verbose;
 		get( MEX_ITERATION_STEPS, mexSteps );
 		get( MEX_VERBOSE, verbose );
-		exportMexFun.configure(mexSteps, verbose, timingCalls);
+		exportMexFun.configure((OperatingSystem)operatingSystem == OS_WINDOWS, mexSteps, verbose, timingCalls);
 		exportMexFun.exportCode();
 	}
 
