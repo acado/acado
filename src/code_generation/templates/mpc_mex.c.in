@@ -20,7 +20,6 @@
 
 real_t getTime(  ) {
 	real_t current_time = 0.000000e+00;
-	
     #if OS_WINDOWS
         LARGE_INTEGER counter, frequency;
         QueryPerformanceFrequency(&frequency);
@@ -74,6 +73,12 @@ void mexFunction( int            nlhs,
     real_t time = 0;
 	real_t *result_timing;
 	real_t start, end;
+
+    int i, j, iter;
+    real_t measurement[ACADO_NX];
+
+	int status;
+    real_t t0, t1, t2;
     
     /* Initial State */
     nRx0      = mxGetM(prhs[0]);
@@ -141,9 +146,6 @@ void mexFunction( int            nlhs,
     
    /* INTRODUCE AUXILIARY VAIRABLES: */
    /* ------------------------------ */
-      int    i, j, iter        ;
-      real_t measurement[ACADO_NX];
-
     infonames[0] = "errorCode";  
     infonames[1] = "clockTime";  
     infonames[2] = "KKTvalue";
@@ -198,18 +200,16 @@ void mexFunction( int            nlhs,
         }
     }
       
-	  int status;
-      real_t t0 = getTime();
    /* PREPARE FIRST STEP: */
    /* ------------------- */
+      t0 = getTime();
       preparationStep();
+      t1 = getTime();
       
    /* GET THE TIME BEFORE START THE LOOP: */
    /* ---------------------------------------------- */
-      real_t t1 = getTime();
       timePrep = timePrep + (t1-t0);
       
-      real_t t2;
    /* THE REAL-TIME ITERATION LOOP: */
    /* ---------------------------------------------- */
       for( iter = 0; iter < NUM_STEPS; ++iter ){
@@ -237,14 +237,14 @@ void mexFunction( int            nlhs,
 				timePrep = timePrep + (t1-t2);
 			}
       }
-    if( VERBOSE ) mexPrintf("      Preparation step: %.3g μs\n", 1e6*timePrep/NUM_STEPS );
-    if( VERBOSE ) mexPrintf("      Feedback step:    %.3g μs\n", 1e6*timeFeed/NUM_STEPS );
+    if( VERBOSE ) mexPrintf("      Preparation step: %.3g µs\n", 1e6*timePrep/NUM_STEPS );
+    if( VERBOSE ) mexPrintf("      Feedback step:    %.3g µs\n", 1e6*timeFeed/NUM_STEPS );
     if( VERBOSE ) mexPrintf("\n=================================================================\n" );
 
    /* PRINT DURATION AND RESULTS: */
    /* -------------------------------------------------------------------------------------------------- */
       if( !VERBOSE )
-      mexPrintf("\n AVERAGE DURATION OF ONE REAL-TIME ITERATION FOR MPC:   %.3g μs\n", 1e6*(timePrep+timeFeed)/NUM_STEPS );
+      mexPrintf("\n AVERAGE DURATION OF ONE REAL-TIME ITERATION FOR MPC:   %.3g µs\n", 1e6*(timePrep+timeFeed)/NUM_STEPS );
       
    /* ASSIGN THE STATES AND CONTROLS TO THE OUTPUTS: */
    /* ---------------------------------------- */
@@ -279,7 +279,6 @@ void mexFunction( int            nlhs,
 		}
 		end = getTime();
 		time = (end-start)/CALLS_TIMING;
-		
         mxSetField(plhs[2],0,infonames[1],mxCreateDoubleScalar(time));
-    #endif
+   #endif
 }
