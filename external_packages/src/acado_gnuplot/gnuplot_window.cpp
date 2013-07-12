@@ -40,7 +40,13 @@
 
 BEGIN_NAMESPACE_ACADO
 
-
+static inline void systemIgnoreResult(const char *cmd)
+{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+  system(cmd);
+#pragma GCC diagnostic pop
+}
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -160,7 +166,6 @@ BooleanType GnuplotWindow::getMouseEvent( double &mouseX, double &mouseY ){
 
     FILE *readFile;
     readFile = fopen("mouse.dat", "r" );
-	int dummy;
 
     if( readFile == 0 ) return BT_FALSE;
 
@@ -169,7 +174,7 @@ BooleanType GnuplotWindow::getMouseEvent( double &mouseX, double &mouseY ){
     mouseX = tmp( tmp.getDim()-2 );
     mouseY = tmp( tmp.getDim()-1 );
 
-	dummy = system("rm mouse.dat");
+    systemIgnoreResult("rm mouse.dat");
     return BT_TRUE;
 }
 
@@ -181,11 +186,10 @@ returnValue GnuplotWindow::waitForMouseEvent( double &mouseX, double &mouseY ){
 
     FILE *check;
     check = fopen( "mouse.dat", "r" );
-	int dummy;
 	
     if( check != 0 ){
         fclose(check);
-        dummy = system("rm mouse.dat");
+        systemIgnoreResult("rm mouse.dat");
     }
 
     acadoFPrintf(gnuPipe,"pause mouse\n");
@@ -621,8 +625,6 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 	// if print to file: end here
 	if ( toFile == BT_TRUE )
 	{
-		int dummy;
-		
 		fclose( gnuPipe );
 		gnuPipe = 0;
 
@@ -631,11 +633,11 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 			std::string( GNUPLOT_EXECUTABLE ) + 
 			std::string(" -p acado2gnuplot_tmp.dat");
 
-		dummy = system( tmp.c_str() );
-		dummy = system("del acado2gnuplot_tmp.dat");
+		systemIgnoreResult( tmp.c_str() );
+		systemIgnoreResult("del acado2gnuplot_tmp.dat");
 #else
-		dummy = system("gnuplot -persist -background white acado2gnuplot_tmp.dat");
-		dummy = system("rm -rf acado2gnuplot_tmp.dat");
+		systemIgnoreResult("gnuplot -persist -background white acado2gnuplot_tmp.dat");
+		systemIgnoreResult("rm -rf acado2gnuplot_tmp.dat");
 #endif
 
 		return SUCCESSFUL_RETURN;
