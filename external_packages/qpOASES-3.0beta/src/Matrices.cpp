@@ -34,6 +34,7 @@
 
 #include <qpOASES.hpp>
 
+#include <qpOASES/PrivateUtils.hpp>
 
 BEGIN_NAMESPACE_QPOASES
 
@@ -43,29 +44,9 @@ const char * const TRANS = "TRANS";
 /** String for calling LAPACK/BLAS routines without transposing the matrix. */
 const char * const NOTRANS = "NOTRANS";
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-static inline bool isExactlyOne(real_t a)
-{
-  return a==1.0;
-}
-
-static inline bool isExactlyZero(real_t a)
-{
-  return a==0.0;
-}
-
-static inline bool isExactlyMinusOne(real_t a)
-{
-  return a==-1.0;
-}
-#pragma GCC diagnostic pop
-
 /*****************************************************************************
  *  P U B L I C                                                              *
  *****************************************************************************/
-
-
 
 DenseMatrix::~DenseMatrix()
 {
