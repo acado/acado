@@ -748,7 +748,7 @@ returnValue PlotWindow::setupLogFrequency( PlotFrequency _frequency )
 			break;
 	}
 
-	return plotDataRecord.setLogFrequency( LOG_AT_EACH_ITERATION );
+	return plotDataRecord.setLogFrequency( logFrequency );
 }
 
 
