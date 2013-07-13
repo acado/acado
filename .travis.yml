@@ -7,3 +7,8 @@ script:
  - cd build
  - cmake ..
  - make
+notifications:
+  recipients:
+    - mvukov@gmail.com
+  email:
+    on_failure: always
