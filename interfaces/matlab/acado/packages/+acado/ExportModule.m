@@ -93,8 +93,12 @@ classdef ExportModule < acado.UserInteraction
             try
                 run(sprintf('%s_RUN', ACADO_.helper.problemname));
                 buildInterface
-            catch
-                disp(['You should now run the file "' sprintf('%s_RUN', ACADO_.helper.problemname) '" with the right inputs..']);
+            catch err
+                if ~isempty(ACADO_.helper.in)
+                    disp(['You should now run the file "' sprintf('%s_RUN', ACADO_.helper.problemname) '" with the right inputs..']);
+                else
+                    rethrow(err);
+                end
             end
         end
         

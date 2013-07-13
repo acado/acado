@@ -177,6 +177,8 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	}
 	integrate.addStatement( loop );
 	
+	integrate.addStatement( error_code == 0 );
+
 	if ( (PrintLevel)printLevel >= HIGH ) 
 		acadoPrintf( "done.\n" );	
 
