@@ -33,14 +33,18 @@
 #include <include/acado_gnuplot/gnuplot_window.hpp>
 
 #ifdef WIN32
-#define round( value ) floor( value + 0.5 )
+#include <windows.h>
 
-#include <string>
+#define round( value ) floor( value + 0.5 )
 #endif
+
+#include <cstdlib>
+#include <string>
+#include <unistd.h>
 
 BEGIN_NAMESPACE_ACADO
 
-
+using namespace std;
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -160,7 +164,6 @@ BooleanType GnuplotWindow::getMouseEvent( double &mouseX, double &mouseY ){
 
     FILE *readFile;
     readFile = fopen("mouse.dat", "r" );
-	int dummy;
 
     if( readFile == 0 ) return BT_FALSE;
 
@@ -169,7 +172,9 @@ BooleanType GnuplotWindow::getMouseEvent( double &mouseX, double &mouseY ){
     mouseX = tmp( tmp.getDim()-2 );
     mouseY = tmp( tmp.getDim()-1 );
 
-	dummy = system("rm mouse.dat");
+	if ( system("rm mouse.dat") )
+		return BT_FALSE;
+
     return BT_TRUE;
 }
 
@@ -181,11 +186,13 @@ returnValue GnuplotWindow::waitForMouseEvent( double &mouseX, double &mouseY ){
 
     FILE *check;
     check = fopen( "mouse.dat", "r" );
-	int dummy;
 	
-    if( check != 0 ){
-        fclose(check);
-        dummy = system("rm mouse.dat");
+    if( check != 0 )
+    {
+        fclose( check );
+
+        if (system("rm mouse.dat") )
+        	return RET_PLOTTING_FAILED;
     }
 
     acadoFPrintf(gnuPipe,"pause mouse\n");
@@ -608,20 +615,12 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 
 	acadoFPrintf( gnuPipe,"unset multiplot\n" );
 
-#if defined(GNUPLOT_EXECUTABLE) && defined(WIN32)
-
-	// acadoFPrintf( gnuPipe,"exit\n" );
-
-#endif
-
-
 	fflush( gnuPipe );
 
 
 	// if print to file: end here
 	if ( toFile == BT_TRUE )
 	{
-		int dummy;
 		
 		fclose( gnuPipe );
 		gnuPipe = 0;
@@ -631,11 +630,17 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 			std::string( GNUPLOT_EXECUTABLE ) + 
 			std::string(" -p acado2gnuplot_tmp.dat");
 
-		dummy = system( tmp.c_str() );
-		dummy = system("del acado2gnuplot_tmp.dat");
+		if ( system( tmp.c_str() ) )
+			return RET_PLOTTING_FAILED;
+
+		if ( system("del acado2gnuplot_tmp.dat") )
+			return RET_PLOTTING_FAILED;
+
 #else
-		dummy = system("gnuplot -persist -background white acado2gnuplot_tmp.dat");
-		dummy = system("rm -rf acado2gnuplot_tmp.dat");
+		if ( system("gnuplot -persist -background white acado2gnuplot_tmp.dat") )
+			return RET_PLOTTING_FAILED;
+		if (system("rm -rf acado2gnuplot_tmp.dat") )
+			return RET_PLOTTING_FAILED;
 #endif
 
 		return SUCCESSFUL_RETURN;
