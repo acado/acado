@@ -31,7 +31,9 @@
  *	BLAS Level 3 replacement routines.
  */
 
+#include <qpOASES/PrivateUtils.hpp>
 
+USING_NAMESPACE_QPOASES
 
 extern "C" void dgemm_ ( const char *TRANSA, const char *TRANSB,
 		const unsigned long *M, const unsigned long *N, const unsigned long *K,
@@ -40,26 +42,26 @@ extern "C" void dgemm_ ( const char *TRANSA, const char *TRANSB,
 {
 	unsigned int i, j, k;
 
-	if (*BETA == 0.0)
+	if (isExactlyZero(*BETA))
 		for (k = 0; k < *N; k++)
 			for (j = 0; j < *M; j++)
 				C[j+(*LDC)*k] = 0.0;
-	else if (*BETA == -1.0)
+	else if (isExactlyMinusOne(*BETA))
 		for (k = 0; k < *N; k++)
 			for (j = 0; j < *M; j++)
 				C[j+(*LDC)*k] = -C[j+(*LDC)*k];
-	else if (*BETA != 1.0)
+	else if (!isExactlyOne(*BETA))
 		for (k = 0; k < *N; k++)
 			for (j = 0; j < *M; j++)
 				C[j+(*LDC)*k] *= *BETA;
 
 	if (TRANSA[0] == 'N')
-		if (*ALPHA == 1.0)
+		if (isExactlyOne(*ALPHA))
 			for (k = 0; k < *N; k++)
 				for (j = 0; j < *M; j++)
 					for (i = 0; i < *K; i++)
 						C[j+(*LDC)*k] += A[j+(*LDA)*i] * B[i+(*LDB)*k];
-		else if (*ALPHA == -1.0)
+		else if (isExactlyMinusOne(*ALPHA))
 			for (k = 0; k < *N; k++)
 				for (j = 0; j < *M; j++)
 					for (i = 0; i < *K; i++)
@@ -70,12 +72,12 @@ extern "C" void dgemm_ ( const char *TRANSA, const char *TRANSB,
 					for (i = 0; i < *K; i++)
 						C[j+(*LDC)*k] += *ALPHA * A[j+(*LDA)*i] * B[i+(*LDB)*k];
 	else
-		if (*ALPHA == 1.0)
+		if (isExactlyOne(*ALPHA))
 			for (k = 0; k < *N; k++)
 				for (j = 0; j < *M; j++)
 					for (i = 0; i < *K; i++)
 						C[j+(*LDC)*k] += A[i+(*LDA)*j] * B[i+(*LDB)*k];
-		else if (*ALPHA == -1.0)
+		else if (isExactlyMinusOne(*ALPHA))
 			for (k = 0; k < *N; k++)
 				for (j = 0; j < *M; j++)
 					for (i = 0; i < *K; i++)
@@ -94,26 +96,26 @@ extern "C" void sgemm_ ( const char *TRANSA, const char *TRANSB,
 {
 	unsigned int i, j, k;
 
-	if (*BETA == 0.0)
+	if (isExactlyZero(*BETA))
 		for (k = 0; k < *N; k++)
 			for (j = 0; j < *M; j++)
 				C[j+(*LDC)*k] = 0.0;
-	else if (*BETA == -1.0)
+	else if (isExactlyMinusOne(*BETA))
 		for (k = 0; k < *N; k++)
 			for (j = 0; j < *M; j++)
 				C[j+(*LDC)*k] = -C[j+(*LDC)*k];
-	else if (*BETA != 1.0)
+	else if (!isExactlyOne(*BETA))
 		for (k = 0; k < *N; k++)
 			for (j = 0; j < *M; j++)
 				C[j+(*LDC)*k] *= *BETA;
 
 	if (TRANSA[0] == 'N')
-		if (*ALPHA == 1.0)
+		if (isExactlyOne(*ALPHA))
 			for (k = 0; k < *N; k++)
 				for (j = 0; j < *M; j++)
 					for (i = 0; i < *K; i++)
 						C[j+(*LDC)*k] += A[j+(*LDA)*i] * B[i+(*LDB)*k];
-		else if (*ALPHA == -1.0)
+		else if (isExactlyMinusOne(*ALPHA))
 			for (k = 0; k < *N; k++)
 				for (j = 0; j < *M; j++)
 					for (i = 0; i < *K; i++)
@@ -124,12 +126,12 @@ extern "C" void sgemm_ ( const char *TRANSA, const char *TRANSB,
 					for (i = 0; i < *K; i++)
 						C[j+(*LDC)*k] += *ALPHA * A[j+(*LDA)*i] * B[i+(*LDB)*k];
 	else
-		if (*ALPHA == 1.0)
+		if (isExactlyOne(*ALPHA))
 			for (k = 0; k < *N; k++)
 				for (j = 0; j < *M; j++)
 					for (i = 0; i < *K; i++)
 						C[j+(*LDC)*k] += A[i+(*LDA)*j] * B[i+(*LDB)*k];
-		else if (*ALPHA == -1.0)
+		else if (isExactlyMinusOne(*ALPHA))
 			for (k = 0; k < *N; k++)
 				for (j = 0; j < *M; j++)
 					for (i = 0; i < *K; i++)
