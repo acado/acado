@@ -52,8 +52,9 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 	NDX3 = 0;
 	NXA3 = 0;
 
+	timeDependant = BT_FALSE;
+
 	exportRhs = BT_TRUE;
-	equidistant = BT_TRUE;
 	crsFormat = BT_FALSE;
 
 	reset_int = ExportVariable( "resetIntegrator", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
@@ -71,8 +72,9 @@ IntegratorExport::IntegratorExport(	const IntegratorExport& arg
 	NDX3 = arg.NDX3;
 	NXA3 = arg.NXA3;
 
+	timeDependant = BT_FALSE;
+
 	exportRhs = BT_TRUE;
-	equidistant = BT_TRUE;
 	crsFormat = BT_FALSE;
 }
 
@@ -110,10 +112,6 @@ returnValue IntegratorExport::setLinearInput( const Matrix& M1, const Matrix& A1
 			return RET_UNABLE_TO_EXPORT_CODE;
 		}
 		NX1 = A1.getNumRows();
-		if( !equidistant ) {
-			// TODO: WHAT IF NONEQUIDISTANT INTEGRATION GRID??
-			return RET_UNABLE_TO_EXPORT_CODE;
-		}
 		M11 = M1;
 		A11 = A1;
 		B11 = B1;
@@ -174,9 +172,112 @@ returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _
 }
 
 
+returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs )
+{
+	if( !A3.isEmpty() ) {
+		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() || A3.getNumRows() != _rhs.getDim() ) {
+			return RET_UNABLE_TO_EXPORT_CODE;
+		}
+		NX3 = A3.getNumRows();
+		M33 = M3;
+		A33 = A3;
+
+		OutputFcn f;
+		f << _rhs;
+		Parameter         dummy0;
+		Control           dummy1;
+		DifferentialState dummy2;
+		AlgebraicState 	  dummy3;
+		DifferentialStateDerivative dummy4;
+		dummy0.clearStaticCounters();
+		dummy1.clearStaticCounters();
+		dummy2.clearStaticCounters();
+		x = DifferentialState(NX1+NX2);
+		u = Control(NU);
+		p = Parameter(NP);
+
+		if( (uint)f.getNDX() > (NX1+NX2) ) {
+			return ACADOERROR( RET_INVALID_OPTION );
+		}
+		if( f.getNDX() > 0 ) NDX3 = NX1+NX2;
+		else NDX3 = 0;
+		dummy4.clearStaticCounters();
+		dx = DifferentialStateDerivative(NDX3);
+
+		if( f.getNXA() > 0 && NXA == 0 ) {
+			return ACADOERROR( RET_INVALID_OPTION );
+		}
+		if( f.getNXA() > 0 ) NXA3 = NXA;
+		else NXA3 = 0;
+		dummy3.clearStaticCounters();
+		z = AlgebraicState(NXA3);
+
+		uint i;
+		OutputFcn g;
+		for( i = 0; i < _rhs.getDim(); i++ ) {
+			g << forwardDerivative( _rhs(i), x );
+			g << forwardDerivative( _rhs(i), z );
+			g << forwardDerivative( _rhs(i), u );
+			g << forwardDerivative( _rhs(i), dx );
+		}
+
+		dummy2.clearStaticCounters();
+		x = DifferentialState(NX);
+
+		Matrix dependencyMat = _rhs.getDependencyPattern( x );
+		Vector dependency = sumRow( dependencyMat );
+		for( i = NX1+NX2; i < NX; i++ ) {
+			if( acadoRoundAway(dependency(i)) != 0 ) { // This expression should not depend on these differential states
+				return RET_UNABLE_TO_EXPORT_CODE;
+			}
+		}
+
+		OutputFcn f_large;
+		Matrix A3_large = expandOutputMatrix(A3);
+		f_large << _rhs + A3_large*x;
+
+		return (rhs3.init( f_large,"acado_rhs3",NX,NXA,NU,NP ) & diffs_rhs3.init( g,"acado_diffs3",NX,NXA,NU,NP ) );
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 )
 {
-	return RET_INVALID_OPTION;
+	if( !A3.isEmpty() ) {
+		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() ) {
+			return RET_UNABLE_TO_EXPORT_CODE;
+		}
+		NX3 = A3.getNumRows();
+		M33 = M3;
+		A33 = A3;
+
+		name_rhs3 = String(_rhs3);
+		name_diffs_rhs3 = String(_diffs_rhs3);
+		exportRhs = BT_FALSE;
+
+		Parameter         dummy0;
+		Control           dummy1;
+		DifferentialState dummy2;
+		AlgebraicState 	  dummy3;
+		DifferentialStateDerivative dummy4;
+		dummy0.clearStaticCounters();
+		dummy1.clearStaticCounters();
+		dummy2.clearStaticCounters();
+		dummy3.clearStaticCounters();
+		dummy4.clearStaticCounters();
+
+		x = DifferentialState(NX);
+		dx = DifferentialStateDerivative(NDX);
+		z = AlgebraicState(NXA);
+		u = Control(NU);
+		p = Parameter(NP);
+
+		setup();
+	}
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -213,9 +314,9 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 
 		if ( f.getDim() > 0 && setDifferentialEquation( rhs_ ) != SUCCESSFUL_RETURN )
 			return RET_UNABLE_TO_EXPORT_CODE;
-		if ( M3.getNumRows() > 0 && setLinearOutput( M3, A3, rhs3_ ) != SUCCESSFUL_RETURN )
-			return RET_UNABLE_TO_EXPORT_CODE;
 		if ( !parms.isEmpty() && setNARXmodel( delay, parms ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+		if ( M3.getNumRows() > 0 && setLinearOutput( M3, A3, rhs3_ ) != SUCCESSFUL_RETURN )
 			return RET_UNABLE_TO_EXPORT_CODE;
 	}
 	else {
@@ -228,8 +329,6 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	data.getIntegrationGrid(integrationGrid);
 	grid = integrationGrid;
 	data.getNumSteps( numSteps );
-
-	equidistant = data.hasEquidistantIntegrationGrid();
 
 	setup( );
 
@@ -405,6 +504,88 @@ returnValue IntegratorExport::propagateImplicitSystem(	ExportStatementBlock* blo
 }
 
 
+returnValue IntegratorExport::updateOutputSystem(	ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index )
+{
+	if( NX3 > 0 ) {
+		ExportForLoop loop01( index1,NX1+NX2,NX );
+		ExportForLoop loop02( index2,0,NX );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,index2,index2+1 ) );
+		loop01.addStatement( loop02 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop03( index2,0,NU );
+			loop03.addStatement( tmp_index == index2+index1*NU );
+			loop03.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) == rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,NX+index2,NX+index2+1 ) );
+			loop01.addStatement( loop03 );
+		}
+		block->addStatement( loop01 );
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue IntegratorExport::propagateOutputSystem(	ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2,
+																const ExportIndex& index3, const ExportIndex& tmp_index )
+{
+	if( NX3 > 0 ) {
+		ExportForLoop loop01( index1,NX1+NX2,NX );
+		ExportForLoop loop02( index2,0,NX1 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == 0.0 );
+		ExportForLoop loop03( index3,0,NX1 );
+		loop03.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,index3,index3+1 )*rk_diffsPrev1.getSubMatrix( index3,index3+1,index2,index2+1 ) );
+		loop02.addStatement( loop03 );
+		ExportForLoop loop04( index3,0,NX2 );
+		loop04.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,NX1+index3,NX1+index3+1 )*rk_diffsPrev2.getSubMatrix( index3,index3+1,index2,index2+1 ) );
+		loop02.addStatement( loop04 );
+		ExportForLoop loop042( index3,0,NX3 );
+		loop042.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,NX1+NX2+index3,NX1+NX2+index3+1 )*rk_diffsPrev3.getSubMatrix( index3,index3+1,index2,index2+1 ) );
+		loop02.addStatement( loop042 );
+		loop01.addStatement( loop02 );
+
+		ExportForLoop loop05( index2,NX1,NX1+NX2 );
+		loop05.addStatement( tmp_index == index2+index1*NX );
+		loop05.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == 0.0 );
+		ExportForLoop loop06( index3,0,NX2 );
+		loop06.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,NX1+index3,NX1+index3+1 )*rk_diffsPrev2.getSubMatrix( index3,index3+1,index2,index2+1 ) );
+		loop05.addStatement( loop06 );
+		ExportForLoop loop062( index3,0,NX3 );
+		loop062.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,NX1+NX2+index3,NX1+NX2+index3+1 )*rk_diffsPrev3.getSubMatrix( index3,index3+1,index2,index2+1 ) );
+		loop05.addStatement( loop062 );
+		loop01.addStatement( loop05 );
+
+		ExportForLoop loop07( index2,NX1+NX2,NX );
+		loop07.addStatement( tmp_index == index2+index1*NX );
+		loop07.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) == 0.0 );
+		ExportForLoop loop08( index3,0,NX3 );
+		loop08.addStatement( rk_eta.getCol( tmp_index+NX+NXA ) += rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,NX1+NX2+index3,NX1+NX2+index3+1 )*rk_diffsPrev3.getSubMatrix( index3,index3+1,index2,index2+1 ) );
+		loop07.addStatement( loop08 );
+		loop01.addStatement( loop07 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop09( index2,0,NU );
+			loop09.addStatement( tmp_index == index2+index1*NU );
+			loop09.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) == rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,NX+index2,NX+index2+1 ) );
+			ExportForLoop loop10( index3,0,NX1 );
+			loop10.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) += rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,index3,index3+1 )*rk_diffsPrev1.getSubMatrix( index3,index3+1,NX1+index2,NX1+index2+1 ) );
+			loop09.addStatement( loop10 );
+			ExportForLoop loop11( index3,0,NX2 );
+			loop11.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) += rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,NX1+index3,NX1+index3+1 )*rk_diffsPrev2.getSubMatrix( index3,index3+1,NX1+NX2+index2,NX1+NX2+index2+1 ) );
+			loop09.addStatement( loop11 );
+			ExportForLoop loop112( index3,0,NX3 );
+			loop112.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX) ) += rk_diffsNew3.getSubMatrix( index1-NX1-NX2,index1-NX1-NX2+1,NX1+NX2+index3,NX1+NX2+index3+1 )*rk_diffsPrev3.getSubMatrix( index3,index3+1,NX+index2,NX+index2+1 ) );
+			loop09.addStatement( loop112 );
+			loop01.addStatement( loop09 );
+		}
+		block->addStatement( loop01 );
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 returnValue IntegratorExport::prepareFullRhs( ) {
 
 	uint i, j;
@@ -428,10 +609,10 @@ returnValue IntegratorExport::prepareFullRhs( ) {
 		fullRhs.addFunctionCall( getNameRHS(), rhs_in, rhs_out.getAddress(NX1,0) );
 	}
 
-//	// PART 3:
-//	if( NX3 > 0 ) {
-//		fullRhs.addFunctionCall( getNameOutputRHS(), rhs_in, rhs_out.getAddress(NX1+NX2,0) );
-//	}
+	// PART 3:
+	if( NX3 > 0 ) {
+		fullRhs.addFunctionCall( getNameOutputRHS(), rhs_in, rhs_out.getAddress(NX1+NX2,0) );
+	}
 
 
 	return SUCCESSFUL_RETURN;
@@ -442,11 +623,23 @@ returnValue IntegratorExport::prepareFullRhs( ) {
 // PROTECTED:
 
 
+Matrix IntegratorExport::expandOutputMatrix( const Matrix& A3 ) {
+	Matrix result = zeros(NX3,NX);
+	uint i,j;
+	for( i = 0; i < NX3; i++ ) {
+		for( j = 0; j < NX3; j++ ) {
+			result(i,NX-NX3+j) = A3(i,j);
+		}
+	}
+
+	return result;
+}
+
+
 returnValue IntegratorExport::copy(	const IntegratorExport& arg
 									)
 {
 	exportRhs = arg.exportRhs;
-	equidistant = arg.equidistant;
 	crsFormat = arg.crsFormat;
 	grid = arg.grid;
 	numSteps = arg.numSteps;
@@ -521,6 +714,24 @@ const String IntegratorExport::getNameFullRHS() const{
 	}
 	else {
 		return fullRhs.getName();
+	}
+}
+
+const String IntegratorExport::getNameOutputRHS() const{
+	if( exportRhs ) {
+		return rhs3.getName();
+	}
+	else {
+		return name_rhs3;
+	}
+}
+
+const String IntegratorExport::getNameOutputDiffs() const{
+	if( exportRhs ) {
+		return diffs_rhs3.getName();
+	}
+	else {
+		return name_diffs_rhs3;
 	}
 }
 

@@ -104,15 +104,6 @@ class DiscreteTimeExport : public IntegratorExport
 		virtual returnValue setDifferentialEquation( const Expression& rhs );
 
 
-		/** .
-		 *
-		 *	@param[in] 		.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
-
-
 		/** Sets a polynomial NARX model to be used by the integrator.
 		 *
 		 *	@param[in] delay		The delay for the states in the NARX model.
@@ -220,7 +211,8 @@ class DiscreteTimeExport : public IntegratorExport
 
 
     protected:
-        
+
+		ExportVariable  rk_diffsTemp3;
 
 };
 

@@ -63,33 +63,6 @@ DiagonallyIRK5Export::~DiagonallyIRK5Export( )
 }
 
 
-returnValue DiagonallyIRK5Export::initializeButcherTableau() {
-	AA = Matrix(numStages,numStages);
-	bb = Vector(numStages);
-	cc = Vector(numStages);
-	
-	AA(0,0) = (6.0-sqrt(6.0))/10.0;					AA(0,1) = 0.0;									AA(0,2) = 0.0;								AA(0,3) = 0.0;								AA(0,4) = 0.0;
-	AA(1,0) = (5.0*sqrt(6.0)-6.0)/14.0;				AA(1,1) = (6.0-sqrt(6.0))/10.0;					AA(1,2) = 0.0;								AA(1,3) = 0.0;								AA(1,4) = 0.0;
-	AA(2,0) = (607.0*sqrt(6.0)+888.0)/2850.0;		AA(2,1) = (126.0-161.0*sqrt(6.0))/1425.0;		AA(2,2) = (6.0-sqrt(6.0))/10.0;				AA(2,3) = 0.0;								AA(2,4) = 0.0;
-	AA(3,0) = (3153.0-3082.0*sqrt(6.0))/14250.0;	AA(3,1) = (3213.0+1148.0*sqrt(6.0))/28500.0;	AA(3,2) = (88.0*sqrt(6.0)-267.0)/500.0;		AA(3,3) = (6.0-sqrt(6.0))/10.0;				AA(3,4) = 0.0;
-	AA(4,0) = (14638.0*sqrt(6.0)-32583.0)/71250.0;	AA(4,1) = (364.0*sqrt(6.0)-17199.0)/142500.0;	AA(4,2) = (1329.0-544.0*sqrt(6.0))/2500.0;	AA(4,3) = (131.0*sqrt(6.0)-96.0)/625.0;		AA(4,4) = (6.0-sqrt(6.0))/10.0;
-			
-	bb(0) = 0.0;
-	bb(1) = 0.0;
-	bb(2) = 1.0/9.0;
-	bb(3) = (16.0-sqrt(6.0))/36.0;
-	bb(4) = (16.0+sqrt(6.0))/36.0;
-			
-	cc(0) = (6.0-sqrt(6.0))/10.0;
-	cc(1) = (6.0+9.0*sqrt(6.0))/35.0;
-	cc(2) = 1.0;
-	cc(3) = (4.0-sqrt(6.0))/10.0;
-	cc(4) = (4.0+sqrt(6.0))/10.0;
-	
-	return SUCCESSFUL_RETURN;
-}
-
-
 // PROTECTED:
 
 //
@@ -99,7 +72,32 @@ returnValue DiagonallyIRK5Export::initializeButcherTableau() {
 IntegratorExport* createDiagonallyIRK5Export(	UserInteraction* _userInteraction,
 												const String &_commonHeaderName)
 {
-	return new DiagonallyIRK5Export(_userInteraction, _commonHeaderName);
+	Matrix AA(5,5);
+	Vector bb(5);
+	Vector cc(5);
+
+	AA(0,0) = (6.0-sqrt(6.0))/10.0;					AA(0,1) = 0.0;									AA(0,2) = 0.0;								AA(0,3) = 0.0;								AA(0,4) = 0.0;
+	AA(1,0) = (5.0*sqrt(6.0)-6.0)/14.0;				AA(1,1) = (6.0-sqrt(6.0))/10.0;					AA(1,2) = 0.0;								AA(1,3) = 0.0;								AA(1,4) = 0.0;
+	AA(2,0) = (607.0*sqrt(6.0)+888.0)/2850.0;		AA(2,1) = (126.0-161.0*sqrt(6.0))/1425.0;		AA(2,2) = (6.0-sqrt(6.0))/10.0;				AA(2,3) = 0.0;								AA(2,4) = 0.0;
+	AA(3,0) = (3153.0-3082.0*sqrt(6.0))/14250.0;	AA(3,1) = (3213.0+1148.0*sqrt(6.0))/28500.0;	AA(3,2) = (88.0*sqrt(6.0)-267.0)/500.0;		AA(3,3) = (6.0-sqrt(6.0))/10.0;				AA(3,4) = 0.0;
+	AA(4,0) = (14638.0*sqrt(6.0)-32583.0)/71250.0;	AA(4,1) = (364.0*sqrt(6.0)-17199.0)/142500.0;	AA(4,2) = (1329.0-544.0*sqrt(6.0))/2500.0;	AA(4,3) = (131.0*sqrt(6.0)-96.0)/625.0;		AA(4,4) = (6.0-sqrt(6.0))/10.0;
+
+	bb(0) = 0.0;
+	bb(1) = 0.0;
+	bb(2) = 1.0/9.0;
+	bb(3) = (16.0-sqrt(6.0))/36.0;
+	bb(4) = (16.0+sqrt(6.0))/36.0;
+
+	cc(0) = (6.0-sqrt(6.0))/10.0;
+	cc(1) = (6.0+9.0*sqrt(6.0))/35.0;
+	cc(2) = 1.0;
+	cc(3) = (4.0-sqrt(6.0))/10.0;
+	cc(4) = (4.0+sqrt(6.0))/10.0;
+
+	DiagonallyImplicitRKExport* integrator = createDiagonallyImplicitRKExport(_userInteraction, _commonHeaderName);
+	integrator->initializeButcherTableau(AA, bb, cc);
+
+	return integrator;
 }
 
 RegisterDiagonallyIRK5Export::RegisterDiagonallyIRK5Export()

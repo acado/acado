@@ -63,11 +63,20 @@ ExplicitRungeKutta4Export::~ExplicitRungeKutta4Export( )
 }
 
 
-returnValue ExplicitRungeKutta4Export::initializeButcherTableau() {
-	AA = Matrix(4,4);
-	bb = Vector(4);
-	cc = Vector(4);
-	
+// PROTECTED:
+
+//
+// Register the integrator
+//
+
+
+IntegratorExport* createExplicitRungeKutta4Export(	UserInteraction* _userInteraction,
+													const String &_commonHeaderName)
+{
+	Matrix AA(4,4);
+	Vector bb(4);
+	Vector cc(4);
+
 	AA(0,0) = 0.0;		AA(0,1) = 0.0;		AA(0,2) = 0.0;		AA(0,3) = 0.0;
 	AA(1,0) = 1.0/2.0;	AA(1,1) = 0.0;		AA(1,2) = 0.0;		AA(1,3) = 0.0;
 	AA(2,0) = 0.0;		AA(2,1) = 1.0/2.0;	AA(2,2) = 0.0;		AA(2,3) = 0.0;
@@ -82,22 +91,11 @@ returnValue ExplicitRungeKutta4Export::initializeButcherTableau() {
 	cc(1) = 1.0/2.0;
 	cc(2) = 1.0/2.0;
 	cc(3) = 1.0;
-	
-	return SUCCESSFUL_RETURN;
-}
 
+	ExplicitRungeKuttaExport* integrator = createExplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	integrator->initializeButcherTableau(AA, bb, cc);
 
-// PROTECTED:
-
-//
-// Register the integrator
-//
-
-
-IntegratorExport* createExplicitRungeKutta4Export(	UserInteraction* _userInteraction,
-													const String &_commonHeaderName)
-{
-	return new ExplicitRungeKutta4Export(_userInteraction, _commonHeaderName);
+	return integrator;
 }
 
 RegisterExplicitRungeKutta4Export::RegisterExplicitRungeKutta4Export()

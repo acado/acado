@@ -908,7 +908,9 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
 												int         precision,
 												uint        _numX,
 												uint		_numXA,
-												uint		_numU
+												uint		_numU,
+												uint		_numP,
+												uint		_numDX
 												) const{
 
     int run1;
@@ -942,6 +944,22 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
 		numU = getNU();
 	}
 
+	uint numP;
+	if( _numP > 0 ) {
+		numP = _numP;
+	}
+	else {
+		numP = getNP();
+	}
+
+	uint numDX;
+	if( _numDX > 0 ) {
+		numDX = _numDX;
+	}
+	else {
+		numDX = getNDX();
+	}
+
     acadoFPrintf(file,"void %s( const %s* acado_x, %s* acado_f ){\n", fcnName,realString,realString );
     if( numX > 0 ){
         acadoFPrintf(file,"const %s* acado_xd = acado_x;\n", realString );
@@ -955,17 +973,20 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
     if( getNUI() > 0 ){
         acadoFPrintf(file,"const %s* acado_v  = acado_x + %d;\n", realString,numX+numXA+numU );
     }
-    if( getNP() > 0 ){
+    if( numP > 0 ){
         acadoFPrintf(file,"const %s* acado_p  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI() );
     }
     if( getNPI() > 0 ){
-        acadoFPrintf(file,"const %s* acado_q  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+getNP() );
+        acadoFPrintf(file,"const %s* acado_q  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+numP );
     }
     if( getNW() > 0 ){
-        acadoFPrintf(file,"const %s* acado_w  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+getNP()+getNPI() );
+        acadoFPrintf(file,"const %s* acado_w  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+numP+getNPI() );
     }
-    if( getNDX() > 0 ){
-        acadoFPrintf(file,"const %s* acado_dx = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+getNP()+getNPI()+getNW() );
+    if( numDX > 0 ){
+        acadoFPrintf(file,"const %s* acado_dx = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+numP+getNPI()+getNW() );
+    }
+    if( getNT() > 0 ){
+        acadoFPrintf(file,"const %s* acado_t = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+numP+getNPI()+getNW()+numDX );
     }
     acadoFPrintf(file,"\n");
     acadoFPrintf(file,"/* COMPUTE INTERMEDIATE STATES: */\n");
@@ -1138,6 +1159,11 @@ int FunctionEvaluationTree::getNPI   () const{
 int FunctionEvaluationTree::getNW   () const{
 
     return indexList->getNW();
+}
+
+int FunctionEvaluationTree::getNT   () const{
+
+    return indexList->getNT();
 }
 
 int FunctionEvaluationTree::index( VariableType variableType_, int index_ ) const{

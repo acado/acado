@@ -63,21 +63,6 @@ GaussLegendre2Export::~GaussLegendre2Export( )
 }
 
 
-returnValue GaussLegendre2Export::initializeButcherTableau() {
-	AA = Matrix(1,1);
-	bb = Vector(1);
-	cc = Vector(1);
-	
-	AA(0,0) = 1.0/2.0;
-			
-	bb(0) = 1.0;
-			
-	cc(0) = 1.0/2.0;
-	
-	return SUCCESSFUL_RETURN;
-}
-
-
 // PROTECTED:
 
 //
@@ -87,7 +72,20 @@ returnValue GaussLegendre2Export::initializeButcherTableau() {
 IntegratorExport* createGaussLegendre2Export(	UserInteraction* _userInteraction,
 												const String &_commonHeaderName)
 {
-	return new GaussLegendre2Export(_userInteraction, _commonHeaderName);
+	Matrix AA(1,1);
+	Vector bb(1);
+	Vector cc(1);
+
+	AA(0,0) = 1.0/2.0;
+
+	bb(0) = 1.0;
+
+	cc(0) = 1.0/2.0;
+
+	ImplicitRungeKuttaExport* integrator = createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
+	integrator->initializeButcherTableau(AA, bb, cc);
+
+	return integrator;
 }
 
 RegisterGaussLegendre2Export::RegisterGaussLegendre2Export()

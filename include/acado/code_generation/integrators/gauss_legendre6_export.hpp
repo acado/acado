@@ -56,7 +56,7 @@ class GaussLegendre6Export : public ImplicitRungeKuttaExport
     // PUBLIC MEMBER FUNCTIONS:
     //
 
-    public:
+    private:
 
 		/** Default constructor. 
 		 *
@@ -77,14 +77,6 @@ class GaussLegendre6Export : public ImplicitRungeKuttaExport
         /** Destructor. 
 		 */
         virtual ~GaussLegendre6Export( );
-
-
-	protected:
-
-		
-		/** This routine initializes the matrices AA, bb and cc which
-		 * 	form the Butcher Tableau. */
-		virtual returnValue initializeButcherTableau();
 
     protected:
 

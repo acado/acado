@@ -63,24 +63,6 @@ DiagonallyIRK3Export::~DiagonallyIRK3Export( )
 }
 
 
-returnValue DiagonallyIRK3Export::initializeButcherTableau() {
-	AA = Matrix(numStages,numStages);
-	bb = Vector(numStages);
-	cc = Vector(numStages);
-	
-	AA(0,0) = 1.0/2.0+1.0/(2.0*sqrt(3.0));		AA(0,1) = 0.0;
-	AA(1,0) = -1.0/sqrt(3.0);					AA(1,1) = 1.0/2.0+1.0/(2.0*sqrt(3.0));
-			
-	bb(0) = 1.0/2.0;
-	bb(1) = 1.0/2.0;
-			
-	cc(0) = 1.0/2.0+1.0/(2.0*sqrt(3.0));
-	cc(1) = 1.0/2.0-1.0/(2.0*sqrt(3.0));
-	
-	return SUCCESSFUL_RETURN;
-}
-
-
 // PROTECTED:
 
 //
@@ -90,7 +72,23 @@ returnValue DiagonallyIRK3Export::initializeButcherTableau() {
 IntegratorExport* createDiagonallyIRK3Export(	UserInteraction* _userInteraction,
 												const String &_commonHeaderName)
 {
-	return new DiagonallyIRK3Export(_userInteraction, _commonHeaderName);
+	Matrix AA(2,2);
+	Vector bb(2);
+	Vector cc(2);
+
+	AA(0,0) = 1.0/2.0+1.0/(2.0*sqrt(3.0));		AA(0,1) = 0.0;
+	AA(1,0) = -1.0/sqrt(3.0);					AA(1,1) = 1.0/2.0+1.0/(2.0*sqrt(3.0));
+
+	bb(0) = 1.0/2.0;
+	bb(1) = 1.0/2.0;
+
+	cc(0) = 1.0/2.0+1.0/(2.0*sqrt(3.0));
+	cc(1) = 1.0/2.0-1.0/(2.0*sqrt(3.0));
+
+	DiagonallyImplicitRKExport* integrator = createDiagonallyImplicitRKExport(_userInteraction, _commonHeaderName);
+	integrator->initializeButcherTableau(AA, bb, cc);
+
+	return integrator;
 }
 
 RegisterDiagonallyIRK3Export::RegisterDiagonallyIRK3Export()

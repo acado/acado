@@ -142,6 +142,18 @@ class NARXExport : public DiscreteTimeExport
 											const ExportIndex& tmp_index  	);
 
 
+		/** Exports the code needed to update the sensitivities of the states, defined by the linear output system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue updateOutputSystem( 	ExportStatementBlock* block,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& tmp_index  	);
+
+
 		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear input system.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
@@ -168,6 +180,19 @@ class NARXExport : public DiscreteTimeExport
 												const ExportIndex& tmp_index  	);
 
 
+		/** Exports the code needed to propagate the sensitivities of the states, defined by the linear output system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue propagateOutputSystem( 	ExportStatementBlock* block,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& index3,
+													const ExportIndex& tmp_index  	);
+
+
 		/** Sets a polynomial NARX model to be used by the integrator.
 		 *
 		 *	@param[in] delay		The delay for the states in the NARX model.
@@ -177,6 +202,24 @@ class NARXExport : public DiscreteTimeExport
 		 */
 
 		returnValue setNARXmodel( const uint _delay, const Matrix& _parms );
+
+
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
+
+
+		/** .
+		 *
+		 *	@param[in] 		.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
 
 
 	protected:

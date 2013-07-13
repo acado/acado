@@ -53,11 +53,12 @@ ModelData::ModelData() {
 	NP = 0;
 	N  = 0;
 	model_dimensions_set = BT_FALSE;
-	equidistant = BT_TRUE;
+	export_rhs = BT_TRUE;
+	delay = 1;
 }
 
 
-returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU )
+returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP )
 {
 	NX1 = _NX1;
 	NX2 = _NX2;
@@ -67,6 +68,7 @@ returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX
 	NXA = _NXA;
 	NXA3 = _NXA3;
 	NU = _NU;
+	NP = _NP;
 	model_dimensions_set = BT_TRUE;
 	return SUCCESSFUL_RETURN;
 }
@@ -252,7 +254,7 @@ returnValue ModelData::setModel( const DifferentialEquation& _f )
 		if( NDX == 0 ) NDX = differentialEquation.getNDX();
 		NXA = differentialEquation.getNXA();
 		if( NU == 0 ) NU = differentialEquation.getNU();
-		NP = differentialEquation.getNP();
+		if( NP == 0 ) NP = differentialEquation.getNP();
 
 		model_dimensions_set = BT_TRUE;
 		export_rhs = BT_TRUE;
@@ -368,14 +370,6 @@ returnValue ModelData::getIntegrationGrid( Grid& integrationGrid_ ) const
 }
 
 
-returnValue ModelData::setIntegrationGrid( const Vector& gridPoints )
-{
-	integrationGrid = Grid(gridPoints);
-	equidistant = BT_FALSE;
-	return SUCCESSFUL_RETURN;
-}
-
-
 returnValue ModelData::setIntegrationGrid(	const Grid& _ocpGrid, const uint _numSteps
 										)
 {
@@ -416,12 +410,6 @@ returnValue ModelData::clearIntegrationGrid( )
 	integrationGrid = Grid();
 
 	return SUCCESSFUL_RETURN;
-}
-
-
-BooleanType ModelData::hasEquidistantIntegrationGrid(  ) const
-{
-	return equidistant;
 }
 
 
@@ -470,7 +458,7 @@ uint ModelData::getNX( ) const
 		return NX1+NX2+NX3;
 	}
 	else {
-		return delay*(NX1+NX2+NX3);		// IMPORTANT for NARX models where the state space is increased because of the delay
+		return delay*(NX1+NX2)+NX3;		// IMPORTANT for NARX models where the state space is increased because of the delay
 	}
 }
 
