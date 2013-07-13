@@ -261,7 +261,6 @@ returnValue solveOQPbenchmark(	int nQP, int nV, int nC, int nEC,
 	/* 3) Vectors for solution obtained by qpOASES. */
 	real_t* x = new real_t[nV];
 	real_t* y = new real_t[nV+nC];
-	real_t obj;
 
 	/* 4) Prepare matrix objects */
 	SymmetricMatrix *H; 
@@ -326,7 +325,6 @@ returnValue solveOQPbenchmark(	int nQP, int nV, int nC, int nEC,
 		/* 4) Obtain solution vectors and objective function value */
 		qp.getPrimalSolution( x );
 		qp.getDualSolution( y );
-		obj = qp.getObjVal( );
 
 		/* 5) Compute KKT residuals */
 		getKKTResidual( nV, nC, _H,gCur,_A,lbCur,ubCur,lbACur,ubACur, x, y, stat, feas, cmpl );
@@ -384,7 +382,6 @@ returnValue solveOQPbenchmark(	int nQP, int nV,
 	/* 3) Vectors for solution obtained by qpOASES. */
 	real_t* x = new real_t[nV];
 	real_t* y = new real_t[nV];
-	real_t  obj;
 
 	/* 4) Prepare matrix objects */
 	SymmetricMatrix *H; 
@@ -444,7 +441,6 @@ returnValue solveOQPbenchmark(	int nQP, int nV,
 		/* 4) Obtain solution vectors and objective function value ... */
 		qp.getPrimalSolution( x );
 		qp.getDualSolution( y );
-		obj = qp.getObjVal( );
 
 		/* 5) Compute KKT residuals */
 		getKKTResidual( nV,0, _H,gCur,0,lbCur,ubCur,0,0, x,y, stat,feas,cmpl );

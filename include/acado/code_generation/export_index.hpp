@@ -114,7 +114,7 @@ public:
 	 *
 	 *	\return Given value of the index or "undefinedValue".
 	 */
-	const int getGivenValue( ) const;
+	int getGivenValue( ) const;
 
 	/** Returns whether the index is set to a given value.
 	 *

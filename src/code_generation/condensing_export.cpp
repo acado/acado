@@ -546,22 +546,23 @@ returnValue CondensingExport::setupMultiplicationRoutines( )
 	ExportVariable QDx1("QDx1", getNX(),1 );
 	ExportVariable Du1( "Du1",  getNU(),1 );
 	ExportVariable RDu1("RDu1", getNU(),1 );
-	ExportVariable Gx ( "Gx",   getNX(),getNX() );
-	ExportVariable Gu ( "Gu",   getNX(),getNU() );
+  /* ex prefix on export variables with same name as class members */
+	ExportVariable exGx ( "Gx",   getNX(),getNX() );
+	ExportVariable exGu ( "Gu",   getNX(),getNU() );
 	ExportVariable C1 ( "C1",   getNX(),getNX() );
 	ExportVariable E1 ( "E1",   getNX(),getNU()*getN() );
 	ExportVariable d1 ( "d1",   getNX(),1 );
 	ExportVariable u1 ( "u1",   getNU(),1 );
-	ExportVariable C  ( "C",    getNX()*getN(),getNX() );
-	ExportVariable QC ( "QC",   getNX()*getN(),getNX() );
-	ExportVariable E  ( "E",    getNX()*getN(),getNU()*getN() );
-	ExportVariable QE ( "QE",   getNX()*getN(),getNU()*getN() );
-	ExportVariable QDx( "QDx",  getNX()*getN(),1 );
-	ExportVariable g0 ( "g0",   getNX(),1 );
-	ExportVariable g1 ( "g1",   getNU()*getN(),1 );
-	ExportVariable H00( "H00",  getNX(),getNX() );
-	ExportVariable H01( "H01",  getNX(),getNU()*getN() );
-	ExportVariable H11( "H11",  getNU()*getN(),getNU()*getN() );
+	ExportVariable exC  ( "C",    getNX()*getN(),getNX() );
+	ExportVariable exQC ( "QC",   getNX()*getN(),getNX() );
+	ExportVariable exE  ( "E",    getNX()*getN(),getNU()*getN() );
+	ExportVariable exQE ( "QE",   getNX()*getN(),getNU()*getN() );
+	ExportVariable exQDx( "QDx",  getNX()*getN(),1 );
+	ExportVariable exg0 ( "g0",   getNX(),1 );
+	ExportVariable exg1 ( "g1",   getNU()*getN(),1 );
+	ExportVariable exH00( "H00",  getNX(),getNX() );
+	ExportVariable exH01( "H01",  getNX(),getNU()*getN() );
+	ExportVariable exH11( "H11",  getNU()*getN(),getNU()*getN() );
 
 	multiplyQC1.setup( "multiplyQC1", QQ,C1,QC1 );
 	multiplyQC1.addStatement( QC1 == QQ*C1 );
@@ -584,41 +585,41 @@ returnValue CondensingExport::setupMultiplicationRoutines( )
 	multiplyQDX2.setup( "multiplyQDX2", QQF,Dx1,QDx1 );
 	multiplyQDX2.addStatement( QDx1 == QQF*Dx1 );
 
-	multiplyC.setup( "multiplyC", Gx,C1,C1("C1_new") );
-	multiplyC.addStatement( C1("C1_new") == Gx*C1 );
+	multiplyC.setup( "multiplyC", exGx,C1,C1("C1_new") );
+	multiplyC.addStatement( C1("C1_new") == exGx*C1 );
 
-	multiplyE.setup( "multiplyE", Gx,E1,E1("E1_new") );
-	multiplyE.addStatement( E1("E1_new") == Gx*E1 );
+	multiplyE.setup( "multiplyE", exGx,E1,E1("E1_new") );
+	multiplyE.addStatement( E1("E1_new") == exGx*E1 );
 	
 	if ( performsSingleShooting() == BT_FALSE )
 	{
-		multiplyCD1.setup( "multiplyCD1", Gx,d1,d1("d1_new") );
-		multiplyCD1.addStatement( d1("d1_new") == Gx*d1 );
+		multiplyCD1.setup( "multiplyCD1", exGx,d1,d1("d1_new") );
+		multiplyCD1.addStatement( d1("d1_new") == exGx*d1 );
 
-		multiplyEU1.setup( "multiplyEU1", Gu,u1,d1("d1_new") );
-		multiplyEU1.addStatement( d1("d1_new") += Gu*u1 );
+		multiplyEU1.setup( "multiplyEU1", exGu,u1,d1("d1_new") );
+		multiplyEU1.addStatement( d1("d1_new") += exGu*u1 );
 	}
 
 	if ( performsFullCondensing() == BT_FALSE )
 	{
-		multiplyG0.setup( "multiplyG0", C,QDx,g0 );
-		multiplyG0.addStatement( g0 == (C^QDx) );
+		multiplyG0.setup( "multiplyG0", exC,exQDx,exg0 );
+		multiplyG0.addStatement( exg0 == (exC^exQDx) );
 	}
 	
-	multiplyG1.setup( "multiplyG1", E,QDx,g1 );
-	multiplyG1.addStatement( g1 == (E^QDx) );
+	multiplyG1.setup( "multiplyG1", exE,exQDx,exg1 );
+	multiplyG1.addStatement( exg1 == (exE^exQDx) );
 
 	if ( performsFullCondensing() == BT_FALSE )
 	{
-		multiplyH00.setup( "multiplyH00", C,QC,H00 );
-		multiplyH00.addStatement( H00 == (C^QC) );
+		multiplyH00.setup( "multiplyH00", exC,exQC,exH00 );
+		multiplyH00.addStatement( exH00 == (exC^exQC) );
 	}
 
-	multiplyH01.setup( "multiplyH01", C,QE,H01 );
-	multiplyH01.addStatement( H01 == (C^QE) );
+	multiplyH01.setup( "multiplyH01", exC,exQE,exH01 );
+	multiplyH01.addStatement( exH01 == (exC^exQE) );
 
-	multiplyH11.setup( "multiplyH11", E,QE,H11 );
-	multiplyH11.addStatement( (H11 == (E^QE)) );
+	multiplyH11.setup( "multiplyH11", exE,exQE,exH11 );
+	multiplyH11.addStatement( (exH11 == (exE^exQE)) );
 
 	return SUCCESSFUL_RETURN;
 }

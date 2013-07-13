@@ -63,7 +63,7 @@ returnValue LSQTerm::setGrid( const Grid &grid_ ){
              Vector tmp = r_temp->getVector(0);
              r_temp->init( tmp,grid );
          }
-         else ASSERT( grid.getNumPoints() == r_temp->getNumPoints() );
+         else {ASSERT( grid.getNumPoints() == r_temp->getNumPoints() );}
     }
 
     if( S_temp != 0 ){
