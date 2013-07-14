@@ -452,7 +452,9 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		}
 	}
 	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
-	integrate.addStatement( rk_xxx.getCols( NX+NXA,inputDim ) == rk_eta.getCols( NX+NXA,inputDim ) );
+	if( inputDim > NX+NXA ) {
+		integrate.addStatement( rk_xxx.getCols( NX+NXA,inputDim ) == rk_eta.getCols( NX+NXA,inputDim ) );
+	}
 	integrate.addLinebreak( );
 
     // integrator loop:

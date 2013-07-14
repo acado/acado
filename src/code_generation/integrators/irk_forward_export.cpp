@@ -353,7 +353,9 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 		}
 	}
 	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
-	integrate.addStatement( rk_xxx.getCols( NX+NXA,inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
+	if( (inputDim-diffsDim) > NX+NXA ) {
+		integrate.addStatement( rk_xxx.getCols( NX+NXA,inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
+	}
 	integrate.addLinebreak( );
 
     // integrator loop:
