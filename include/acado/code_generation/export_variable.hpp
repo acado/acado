@@ -26,7 +26,7 @@
 
 /**
  *    \file include/acado/code_generation/export_variable.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
@@ -36,7 +36,6 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_argument.hpp>
 #include <acado/code_generation/export_index.hpp>
-
 
 
 BEGIN_NAMESPACE_ACADO
@@ -57,7 +56,7 @@ class ExportVariableInternal;
  *	default, all entries of a ExportVariable are undefined, but each of its 
  *	component can be set to a fixed value if known beforehand.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 class ExportVariable : public ExportArgument
@@ -123,18 +122,34 @@ class ExportVariable : public ExportArgument
 						const String& _prefix = emptyConstString
 						);
 
-		/** Constructor which converts a given matrix into an ExportVariable.
+		/** Constructor which takes the name and type string of the variable.
+		 *	Moreover, it initializes the variable with the dimensions of the matrix.
 		 *
-		 *	@param[in] _data			Matrix used for initialization.
+		 *	@param[in] _nRows			Name of the argument.
+		 *	@param[in] _nCols			Name of the argument.
+		 *	@param[in] _type			Data type of the argument.
+		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
+		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
-		ExportVariable(	const Matrix& _data = emptyConstMatrix
+		ExportVariable(	unsigned _nRows,
+						unsigned _nCols,
+						ExportType _type = REAL,
+						ExportStruct _dataStruct = ACADO_LOCAL,
+						BooleanType _callItByValue = BT_FALSE,
+						const String& _prefix = emptyConstString
 						);
 
-		ExportVariable(	const Vector& _data
+		/** \name Constructor which converts a given matrix/vector/scalar into an ExportVariable.
+		  * @{ */
+		ExportVariable(	const Matrix& _data = emptyConstMatrix	/**< Matrix used for initialization */
 						);
 
-		ExportVariable(	const double _data
+		ExportVariable(	const Vector& _data	/**< Vector used for initialization */
 						);
+
+		ExportVariable(	const double _data	/**< Scalar used for initialization */
+						);
+		/** @} */
 
         /** Destructor.
 		 */
@@ -187,18 +202,6 @@ class ExportVariable : public ExportArgument
 								const String& _prefix = emptyConstString
 								);
 
-
-		/** Returns value of given component.
-		 *
-		 *	@param[in] rowIdx		Row index of the component to be returned.
-		 *	@param[in] colIdx		Column index of the component to be returned.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-//		double& operator()(	uint rowIdx,
-//							uint colIdx
-//							);
-
 		/** Returns value of given component.
 		 *
 		 *	@param[in] rowIdx		Row index of the component to be returned.
@@ -209,15 +212,6 @@ class ExportVariable : public ExportArgument
 		double operator()(	uint rowIdx,
 							uint colIdx
 							) const;
-
-		/** Returns value of given component.
-		 *
-		 *	@param[in] totalIdx		Memory location of the component to be returned.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-//		double& operator()(	uint totalIdx
-//							);
 
 		/** Returns value of given component.
 		 *
@@ -396,7 +390,6 @@ class ExportVariable : public ExportArgument
 														const ExportVariable& arg2
 														);
 
-
 		/** Operator for assigning an arithmetic statement to an ExportVariable.
 		 *
 		 *	@param[in] arg		Arithmetic statement to be assigned.
@@ -503,6 +496,16 @@ class ExportVariable : public ExportArgument
 										const ExportIndex& colIdx2
 										) const;
 
+		/** Returns element at position (rowIdx, colIdx).
+		 *
+		 *	@param[in] rowIdx		Variable row index of the component.
+		 *	@param[in] colIdx		Variable column index of the component.
+		 *
+		 *	\return Element at position (rowIdx, colIdx)
+		 */
+		ExportVariable getElement(	const ExportIndex& rowIdx,
+									const ExportIndex& colIdx
+									) const;
 
 		/** Returns a copy of the variable that is transformed to a row vector.
 		 *
@@ -537,6 +540,12 @@ class ExportVariable : public ExportArgument
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue print( ) const;
+
+		/** Create a diagonal matrix variable.
+		 *
+		 *  \return A diagonal variable.
+		 * */
+		friend ExportVariable diag( const String& _name, unsigned int _n );
 };
 
 

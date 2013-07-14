@@ -27,7 +27,7 @@
 /**
  *    \file src/code_generation/export_variable.cpp
  *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
- *    \date 2010 - 2012
+ *    \date 2010 - 2013
  */
 
 #include <acado/code_generation/export_variable.hpp>
@@ -217,13 +217,13 @@ ExportVariable ExportVariableInternal::getRow(	const ExportIndex& idx
 
 	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
-	if (idx.isGiven() == BT_TRUE)
+	if (idx.isGiven() == BT_TRUE
+			&& (idx.getGivenValue() < 0 || idx.getGivenValue() > ((int) getNumRows( ) - 1)) )
 	{
-		if (	idx.getGivenValue() < 0 ||
-				idx.getGivenValue() > (int) getNumRows( ) ) {
-			ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getRow: invalid row arguments");
-			acadoPrintf("Index %d of variable named %s does not lie in the admissible range 0-%d\n", idx.getGivenValue(), getFullName().getName(), getNumRows( ));
-		}
+		LOG( LVL_ERROR )
+						<< "getRow: invalid row arguments, row index "
+						<< idx.getGivenValue() << " of variable " << getFullName().getName()
+						<< " does not lie in the admissible range " << "0 - " << getNumRows( ) - 1 << endl;
 	}
 
 	tmp->setSubmatrixOffsets(idx, 0, getNumRows(), getNumCols( ), 1, getNumCols( ));
@@ -239,11 +239,13 @@ ExportVariable ExportVariableInternal::getCol(	const ExportIndex& idx
 
 	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
-	if (idx.isGiven() == BT_TRUE)
+	if (idx.isGiven() == BT_TRUE
+			&& (idx.getGivenValue() < 0 || idx.getGivenValue() > (int) getNumCols( ) - 1) )
 	{
-		if (	idx.getGivenValue() < 0 ||
-				idx.getGivenValue() > (int) getNumCols( ) )
-			ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getCol: invalid row arguments");
+		LOG( LVL_ERROR )
+			<< "getCol: invalid column arguments, column index "
+			<< idx.getGivenValue() << " of variable " << getFullName().getName()
+			<< " does not lie in the admissible range " << "0 - " << getNumCols( ) - 1 << endl;
 	}
 
 	tmp->setSubmatrixOffsets(0, idx, getNumRows(), getNumCols( ), getNumRows(), 1);
@@ -265,17 +267,19 @@ ExportVariable ExportVariableInternal::getRows(	const ExportIndex& idx1,
 	if (size.isGiven() == BT_TRUE && size.getGivenValue() == 0)
 		return tmp;
 
-	if (idx1.isGiven() == BT_TRUE && idx2.isGiven() == BT_TRUE)
+	if (idx1.isGiven() == BT_TRUE && idx2.isGiven() == BT_TRUE
+			&& (	idx1.getGivenValue() < 0 ||
+					idx1.getGivenValue() > idx2.getGivenValue() ||
+					idx2.getGivenValue() > (int) getNumRows( ) ))
 	{
-		if (	idx1.getGivenValue() < 0 ||
-				idx1.getGivenValue() > idx2.getGivenValue() ||
-				idx1.getGivenValue() > (int) getNumRows( ) )
-			ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getRows: invalid row arguments");
+		LOG( LVL_ERROR ) << getFullName().getName() << ": getRows: invalid row arguments" << endl;
 	}
 	else if (size.isGiven() == BT_FALSE)
-		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getRows: Cannot determine size");
-
-	tmp->setSubmatrixOffsets(idx1, 0, getNumRows(), getNumCols( ), size.getGivenValue(), getNumCols( ));
+	{
+		LOG( LVL_ERROR ) << getFullName().getName() << ": getRows: Cannot determine size" << endl;
+	}
+	else
+		tmp->setSubmatrixOffsets(idx1, 0, getNumRows(), getNumCols( ), size.getGivenValue(), getNumCols( ));
 
 	return tmp;
 }
@@ -294,17 +298,20 @@ ExportVariable ExportVariableInternal::getCols(	const ExportIndex& idx1,
 	if (size.isGiven() == BT_TRUE && size.getGivenValue() == 0)
 		return tmp;
 
-	if (idx1.isGiven() == BT_TRUE && idx2.isGiven() == BT_TRUE)
+	if (idx1.isGiven() == BT_TRUE && idx2.isGiven() == BT_TRUE
+			&& (	idx1.getGivenValue() < 0 ||
+					idx1.getGivenValue() > idx2.getGivenValue() ||
+					idx2.getGivenValue() > (int) getNumCols( ) ))
 	{
-		if (	idx1.getGivenValue() < 0 ||
-				idx1.getGivenValue() > idx2.getGivenValue() ||
-				idx1.getGivenValue() > (int) getNumCols( ) )
-			ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getCols: invalid row arguments");
+		LOG( LVL_ERROR ) << getFullName().getName() << ": getCols: invalid column arguments" << endl;
 	}
 	else if (size.isGiven() == BT_FALSE)
-		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getCols: Cannot determine size");
+	{
+		LOG( LVL_ERROR ) << getFullName().getName() << ": getCols: Cannot determine size" << endl;
+	}
+	else
+		tmp->setSubmatrixOffsets(0, idx1, getNumRows(), getNumCols( ), getNumRows( ), size.getGivenValue() );
 
-	tmp->setSubmatrixOffsets(0, idx1, getNumRows(), getNumCols( ), getNumRows( ), size.getGivenValue() );
 	return tmp;
 }
 
@@ -317,7 +324,6 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 {
 	ASSERT( isAccessedTransposed() == BT_FALSE );
 
-//	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 	ExportVariable tmp;
 
 	ExportIndex sizeRow = _rowIdx2 - _rowIdx1;
@@ -329,25 +335,33 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 	if (sizeCol.isGiven() == BT_TRUE && sizeCol.getGivenValue() == 0)
 		return tmp;
 
-	if (_rowIdx1.isGiven() == BT_TRUE && _rowIdx2.isGiven() == BT_TRUE)
+	if (_rowIdx1.isGiven() == BT_TRUE && _rowIdx2.isGiven() == BT_TRUE
+			&& (	_rowIdx1.getGivenValue() < 0 ||
+					_rowIdx1.getGivenValue() > _rowIdx2.getGivenValue() ||
+					_rowIdx2.getGivenValue() > (int) getNumRows( ) ))
 	{
-		if (	_rowIdx1.getGivenValue() < 0 ||
-				_rowIdx1.getGivenValue() > _rowIdx2.getGivenValue() ||
-				_rowIdx1.getGivenValue() > (int) getNumRows( ) )
-			ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getSubMatrix: invalid row arguments");
+		LOG( LVL_ERROR ) << getFullName().getName() << ": getSubMatrix: invalid row arguments" << endl;
+		return tmp;
 	}
 	else if (sizeRow.isGiven() == BT_FALSE)
-		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getSubMatrix: cannot determine row size");
-
-	if (_colIdx1.isGiven() == BT_TRUE && _colIdx2.isGiven() == BT_TRUE)
 	{
-		if (	_colIdx1.getGivenValue() < 0 ||
-				_colIdx1.getGivenValue() > _colIdx2.getGivenValue() ||
-				_colIdx1.getGivenValue() > (int) getNumCols( ) )
-			ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getSubMatrix: invalid column arguments");
+		LOG( LVL_ERROR ) << getFullName().getName() << ": getSubMatrix: cannot determine row size" << endl;
+		return tmp;
+	}
+
+	if (_colIdx1.isGiven() == BT_TRUE && _colIdx2.isGiven() == BT_TRUE
+			&& (	_colIdx1.getGivenValue() < 0 ||
+					_colIdx1.getGivenValue() > _colIdx2.getGivenValue() ||
+					_colIdx2.getGivenValue() > (int) getNumCols( ) ))
+	{
+		LOG( LVL_ERROR ) << getFullName().getName() << ": getSubMatrix: invalid column arguments" << endl;
+		return tmp;
 	}
 	else if (sizeCol.isGiven() == BT_FALSE)
-		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "getSubMatrix: cannot determine column size");
+	{
+		LOG( LVL_ERROR ) << getFullName().getName() << ": getSubMatrix: cannot determine column size" << endl;
+		return tmp;
+	}
 
 	tmp.assignNode(new ExportVariableInternal(name, data, type, dataStruct, callItByValue, prefix));
 	tmp->setSubmatrixOffsets(_rowIdx1, _colIdx1, getNumRows(), getNumCols( ), sizeRow.getGivenValue(), sizeCol.getGivenValue());
