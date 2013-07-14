@@ -40,12 +40,10 @@
 #include <acado/objective/mayer_term.hpp>
 #include <acado/constraint/constraint.hpp>
 
-#include <acado/code_generation/export_variable.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 
-
+class ExportVariable;
 
 /** 
  *	\brief Stores and evaluates the objective function of optimal control problems.
@@ -129,9 +127,9 @@ class Objective : public LagrangeTerm{
          *                                                                         \n
          *  \return SUCCESSFUL_RETURN                                              \n
          */
-        inline returnValue addLSQ( const MatrixVariablesGrid *S_,   /**< the weighting matrix  */
-                                   const Function&            h ,   /**< the LSQ function      */
-                                   const VariablesGrid       *r_    /**< the reference vectors */ );
+        returnValue addLSQ( const MatrixVariablesGrid *S_,   /**< the weighting matrix  */
+                            const Function&            h ,   /**< the LSQ function      */
+                            const VariablesGrid       *r_    /**< the reference vectors */ );
 
 
 
@@ -144,9 +142,9 @@ class Objective : public LagrangeTerm{
          *                                                                        \n
          *  \return SUCCESSFUL_RETURN                                             \n
          */
-        inline returnValue addLSQEndTerm( const Matrix   & S,  /**< a weighting matrix */
-                                          const Function & m,  /**< the LSQ-Function   */
-                                          const Vector   & r   /**< the reference      */ );
+        returnValue addLSQEndTerm( const Matrix   & S,  /**< a weighting matrix */
+                                   const Function & m,  /**< the LSQ-Function   */
+                                   const Vector   & r   /**< the reference      */ );
 
         //
         // Code generation related functions

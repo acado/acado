@@ -58,43 +58,6 @@ inline returnValue Objective::addMayerTerm( const Function& arg ){
 }
 
 
-
-inline returnValue Objective::addLSQ( const MatrixVariablesGrid *S_,
-                                      const Function&            h ,
-                                      const VariablesGrid       *r_  )
-{
-
-    nLSQ++;
-    lsqTerm = (LSQTerm**)realloc(lsqTerm,nLSQ*sizeof(LSQTerm*));
-    lsqTerm[nLSQ-1] = new LSQTerm(S_, h, r_);
-    lsqTerm[nLSQ-1]->setGrid(grid);
-    
-    ExportVariable temp = S_->getMatrix( 0 );
-    cgLSQWeightingMatrices.push_back( temp );
-    cgLSQFunctions.push_back( h );
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-
-inline returnValue Objective::addLSQEndTerm( const Matrix   & S,
-                                             const Function & m,
-                                             const Vector   & r  )
-{
-
-    nEndLSQ++;
-    lsqEndTerm = (LSQEndTerm**)realloc(lsqEndTerm,nEndLSQ*sizeof(LSQEndTerm*));
-    lsqEndTerm[nEndLSQ-1] = new LSQEndTerm(grid, S, m, r);
-    lsqEndTerm[nEndLSQ-1]->setGrid(grid);
-    
-    cgLSQEndTermWeightingMatrices.push_back( S );
-    cgLSQEndTermFunctions.push_back( m );
-
-    return SUCCESSFUL_RETURN;
-}
-
-
 inline int Objective::getNX() const{
 
     uint run1;
