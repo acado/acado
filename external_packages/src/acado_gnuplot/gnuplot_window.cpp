@@ -25,8 +25,8 @@
 
 /**
  *    \file external_packages/acado_gnuplot/gnuplot_window.cpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date   2009
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date   2009-2013
  */
 
 
@@ -112,23 +112,21 @@ PlotWindow* GnuplotWindow::clone( ) const
 }
 
 
-returnValue GnuplotWindow::init(){
-
-	if( gnuPipe != 0 )
+returnValue GnuplotWindow::init()
+{
+	if (gnuPipe != 0)
 	{
 		fclose(gnuPipe);
 		gnuPipe = 0;
 	}
-#ifdef __NO_PIPES__
-	return SUCCESSFUL_RETURN;
-#else
-    gnuPipe = popen("gnuplot -persist -background white", "w");
-    if( gnuPipe != 0 )
-      return SUCCESSFUL_RETURN;  // gnuplot must not be null!
-    else
-      return ACADOERROR(RET_PLOT_WINDOW_CAN_NOT_BE_OPEN); // better: give warning, since it should work anyway
+
+#ifndef __NO_PIPES__
+	gnuPipe = popen("gnuplot -persist -background white", "w");
+	if (!gnuPipe)
+		return ACADOWARNING(RET_PLOT_WINDOW_CAN_NOT_BE_OPEN);
 #endif
 
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -286,14 +284,6 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 	char* plotStyleString = 0;
 
 	returnValue returnvalue;
-
-    //gnuPipe = fopen( "gnupipe.txt","w+" );
-
-#if defined(GNUPLOT_EXECUTABLE) && defined(WIN32)
-
-	//acadoFPrintf( gnuPipe,"set terminal windows;\n\n" );
-
-#endif
 
     acadoFPrintf( gnuPipe,"set multiplot;\n" );
 
@@ -626,16 +616,13 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 		gnuPipe = 0;
 
 #if defined(GNUPLOT_EXECUTABLE) && defined(WIN32)
-		std::string tmp = 
-			std::string( GNUPLOT_EXECUTABLE ) + 
-			std::string(" -p acado2gnuplot_tmp.dat");
+		string tmp = string( GNUPLOT_EXECUTABLE ) + string(" -p acado2gnuplot_tmp.dat");
 
 		if ( system( tmp.c_str() ) )
 			return RET_PLOTTING_FAILED;
 
 		if ( system("del acado2gnuplot_tmp.dat") )
 			return RET_PLOTTING_FAILED;
-
 #else
 		if ( system("gnuplot -persist -background white acado2gnuplot_tmp.dat") )
 			return RET_PLOTTING_FAILED;

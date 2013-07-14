@@ -26,7 +26,7 @@
 /**
  *    \file external_packages/acado_gnuplot/gnuplot_window.hpp
  *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
- *    \date   2013
+ *    \date   2009-2013
  */
 
 
@@ -50,7 +50,7 @@ BEGIN_NAMESPACE_ACADO
  *	that are implemented in this interface convert ACADO sturctures into
  *	a format that can be read by the program Gnuplot.
  *
- *	\author Boris Houska, Hans Joachim Ferreau
+ *	\author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
 
 
