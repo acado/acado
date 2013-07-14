@@ -357,9 +357,12 @@ Stream Expression::print( Stream &stream ) const{
 
     uint run1;
     stream << "[ ";
-    for( run1 = 0; run1 < dim-1; run1++ )
-        stream << *element[run1] << " , ";
-    stream << *element[dim-1];
+    if(dim)
+      {
+        for( run1 = 0; run1 < dim-1; run1++ )
+          stream << *element[run1] << " , ";
+        stream << *element[dim-1];
+      }
     stream << "]";
 
     return stream;
