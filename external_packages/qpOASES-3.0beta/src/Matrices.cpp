@@ -34,6 +34,7 @@
 
 #include <qpOASES.hpp>
 
+#include <qpOASES/PrivateUtils.hpp>
 
 BEGIN_NAMESPACE_QPOASES
 
@@ -43,13 +44,9 @@ const char * const TRANS = "TRANS";
 /** String for calling LAPACK/BLAS routines without transposing the matrix. */
 const char * const NOTRANS = "NOTRANS";
 
-
-
 /*****************************************************************************
  *  P U B L I C                                                              *
  *****************************************************************************/
-
-
 
 DenseMatrix::~DenseMatrix()
 {
@@ -109,10 +106,10 @@ returnValue DenseMatrix::getRow(int rNum, const Indexlist* const icols, real_t a
 	int i;
     if (icols != 0)
     {
-	    if (alpha == 1.0)
+	    if (isExactlyOne(alpha))
 		    for (i = 0; i < icols->length; i++)
 			    row[i] = val[rNum*leaDim+icols->number[i]];
-	    else if (alpha == -1.0)
+	    else if (isExactlyMinusOne(alpha))
 		    for (i = 0; i < icols->length; i++)
 			    row[i] = -val[rNum*leaDim+icols->number[i]];
 	    else
@@ -121,10 +118,10 @@ returnValue DenseMatrix::getRow(int rNum, const Indexlist* const icols, real_t a
     }
     else
     {
-	    if (alpha == 1.0)
+	    if (isExactlyOne(alpha))
 		    for (i = 0; i < nCols; i++)
 			    row[i] = val[rNum*leaDim+i];
-	    else if (alpha == -1.0)
+	    else if (isExactlyMinusOne(alpha))
 		    for (i = 0; i < nCols; i++)
 			    row[i] = -val[rNum*leaDim+i];
 	    else
@@ -138,10 +135,10 @@ returnValue DenseMatrix::getCol(int cNum, const Indexlist* const irows, real_t a
 {
 	int i;
 
-	if (alpha == 1.0)
+	if (isExactlyOne(alpha))
 		for (i = 0; i < irows->length; i++)
 			col[i] = val[irows->number[i]*leaDim+cNum];
-	else if (alpha == -1.0)
+	else if (isExactlyMinusOne(alpha))
 		for (i = 0; i < irows->length; i++)
 			col[i] = -val[irows->number[i]*leaDim+cNum];
 	else
@@ -175,21 +172,21 @@ returnValue DenseMatrix::times(const Indexlist* const irows, const Indexlist* co
 
 	if (yCompr == BT_TRUE)
 	{
-		if (beta == 0.0)
+		if (isExactlyZero(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[j+k*yLD] = 0.0;
-		else if (beta == -1.0)
+		else if (isExactlyMinusOne(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[j+k*yLD] = -y[j+k*yLD];
-		else if (beta != 1.0)
+		else if (!isExactlyOne(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[j+k*yLD] *= beta;
 
 		if (icols == 0)
-			if (alpha == 1.0)
+			if (isExactlyOne(alpha))
 				for (k = 0; k < xN; k++)
 					for (j = 0; j < irows->length; j++)
 					{
@@ -199,7 +196,7 @@ returnValue DenseMatrix::times(const Indexlist* const irows, const Indexlist* co
 						for (i = 0; i < nCols; i++)
 							y[iy] += val[irA+i] * x[k*xLD+i];
 					}
-			else if (alpha == -1.0)
+			else if (isExactlyMinusOne(alpha))
 				for (k = 0; k < xN; k++)
 					for (j = 0; j < irows->length; j++)
 					{
@@ -220,7 +217,7 @@ returnValue DenseMatrix::times(const Indexlist* const irows, const Indexlist* co
 							y[iy] += alpha * val[irA+i] * x[k*xLD+i];
 					}
 		else /* icols != 0 */
-			if (alpha == 1.0)
+			if (isExactlyOne(alpha))
 				for (k = 0; k < xN; k++)
 					for (j = 0; j < irows->length; j++)
 					{
@@ -233,7 +230,7 @@ returnValue DenseMatrix::times(const Indexlist* const irows, const Indexlist* co
 							y[iy] += val[irA+icols->number[col]] * x[k*xLD+col];
 						}
 					}
-			else if (alpha == -1.0)
+			else if (isExactlyMinusOne(alpha))
 				for (k = 0; k < xN; k++)
 					for (j = 0; j < irows->length; j++)
 					{
@@ -262,21 +259,21 @@ returnValue DenseMatrix::times(const Indexlist* const irows, const Indexlist* co
 	}
 	else /* y not compressed */
 	{
-		if (beta == 0.0)
+		if (isExactlyZero(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[irows->number[j]+k*yLD] = 0.0;
-		else if (beta == -1.0)
+		else if (isExactlyMinusOne(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[irows->number[j]+k*yLD] = -y[j+k*yLD];
-		else if (beta != 1.0)
+		else if (!isExactlyOne(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[irows->number[j]+k*yLD] *= beta;
 
 		if (icols == 0)
-			if (alpha == 1.0)
+			if (isExactlyOne(alpha))
 				for (k = 0; k < xN; k++)
 					for (j = 0; j < irows->length; j++)
 					{
@@ -286,7 +283,7 @@ returnValue DenseMatrix::times(const Indexlist* const irows, const Indexlist* co
 						for (i = 0; i < nCols; i++)
 							y[iy] += val[irA+i] * x[k*xLD+i];
 					}
-			else if (alpha == -1.0)
+			else if (isExactlyMinusOne(alpha))
 				for (k = 0; k < xN; k++)
 					for (j = 0; j < irows->length; j++)
 					{
@@ -307,7 +304,7 @@ returnValue DenseMatrix::times(const Indexlist* const irows, const Indexlist* co
 							y[iy] += alpha * val[irA+i] * x[k*xLD+i];
 					}
 		else /* icols != 0 */
-			if (alpha == 1.0)
+			if (isExactlyOne(alpha))
 				for (k = 0; k < xN; k++)
 					for (j = 0; j < irows->length; j++)
 					{
@@ -320,7 +317,7 @@ returnValue DenseMatrix::times(const Indexlist* const irows, const Indexlist* co
 							y[iy] += val[irA+icols->number[col]] * x[k*xLD+col];
 						}
 					}
-			else if (alpha == -1.0)
+			else if (isExactlyMinusOne(alpha))
 				for (k = 0; k < xN; k++)
 					for (j = 0; j < irows->length; j++)
 					{
@@ -356,20 +353,20 @@ returnValue DenseMatrix::transTimes(const Indexlist* const irows, const Indexlis
 {
 	int i, j, k, row, col;
 
-	if (beta == 0.0)
+	if (isExactlyZero(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < icols->length; j++)
 				y[j+k*yLD] = 0.0;
-	else if (beta == -1.0)
+	else if (isExactlyMinusOne(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < icols->length; j++)
 				y[j+k*yLD] = -y[j+k*yLD];
-	else if (beta != 1.0)
+	else if (!isExactlyOne(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < icols->length; j++)
 				y[j+k*yLD] *= beta;
 
-	if (alpha == 1.0)
+	if (isExactlyOne(alpha))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < irows->length; j++)
 			{
@@ -380,7 +377,7 @@ returnValue DenseMatrix::transTimes(const Indexlist* const irows, const Indexlis
 					y[col+k*yLD] += val[irows->number[row]*leaDim+icols->number[col]] * x[row+k*xLD];
 				}
 			}
-	else if (alpha == -1.0)
+	else if (isExactlyMinusOne(alpha))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < irows->length; j++)
 			{
@@ -503,7 +500,7 @@ SparseMatrix::SparseMatrix(int nr, int nc, int ld, const real_t * const v) : nRo
 	{
 		jc[j] = nnz;
 		for (i = 0; i < nRows; i++)
-			if (v[i*ld+j] != 0.0)
+			if (!isExactlyZero(v[i*ld+j]))
 			{
 				ir[nnz] = i;
 				val[nnz++] = v[i*ld+j];
@@ -572,14 +569,14 @@ returnValue SparseMatrix::getRow(int rNum, const Indexlist* const icols, real_t 
 
     if (icols != 0)
     {
-	    if (alpha == 1.0)
+	    if (isExactlyOne(alpha))
 		    for (k = 0; k < icols->length; k++)
 		    {
 			    j = icols->number[icols->iSort[k]];
 			    for (i = jc[j]; i < jc[j+1] && ir[i] < rNum; i++);
 			    row[icols->iSort[k]] = (i < jc[j+1] && ir[i] == rNum) ? val[i] : 0.0;
 		    }
-	    else if (alpha == -1.0)
+	    else if (isExactlyMinusOne(alpha))
 		    for (k = 0; k < icols->length; k++)
 		    {
 			    j = icols->number[icols->iSort[k]];
@@ -596,13 +593,13 @@ returnValue SparseMatrix::getRow(int rNum, const Indexlist* const icols, real_t 
     }
     else
     {
-	    if (alpha == 1.0)
+	    if (isExactlyOne(alpha))
 		    for (j = 0; j < nCols; j++)
 		    {
 			    for (i = jc[j]; i < jc[j+1] && ir[i] < rNum; i++);
 			    row[j] = (i < jc[j+1] && ir[i] == rNum) ? val[i] : 0.0;
 		    }
-	    else if (alpha == -1.0)
+	    else if (isExactlyMinusOne(alpha))
 		    for (j = 0; j < icols->length; j++)
 		    {
 			    for (i = jc[j]; i < jc[j+1] && ir[i] < rNum; i++);
@@ -624,7 +621,7 @@ returnValue SparseMatrix::getCol(int cNum, const Indexlist* const irows, real_t 
 
 	i = jc[cNum];
 	j = 0;
-	if (alpha == 1.0)
+	if (isExactlyOne(alpha))
 		while (i < jc[cNum+1] && j < irows->length)
 			if (ir[i] == irows->number[irows->iSort[j]])
 				col[irows->iSort[j++]] = val[i++];
@@ -632,7 +629,7 @@ returnValue SparseMatrix::getCol(int cNum, const Indexlist* const irows, real_t 
 				col[irows->iSort[j++]] = 0.0;
 			else
 				i++;
-	else if (alpha == -1.0)
+	else if (isExactlyMinusOne(alpha))
 		while (i < jc[cNum+1] && j < irows->length)
 			if (ir[i] == irows->number[irows->iSort[j]])
 				col[irows->iSort[j++]] = -val[i++];
@@ -661,25 +658,25 @@ returnValue SparseMatrix::times(int xN, real_t alpha, const real_t *x, int xLD,
 {
 	long i, j, k;
 
-	if (beta == 0.0)
+	if (isExactlyZero(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < nRows; j++)
 				y[j+k*yLD] = 0.0;
-	else if (beta == -1.0)
+	else if (isExactlyMinusOne(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < nRows; j++)
 				y[j+k*yLD] = -y[j+k*yLD];
-	else if (beta != 1.0)
+	else if (!isExactlyOne(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < nRows; j++)
 				y[j+k*yLD] *= beta;
 
-	if (alpha == 1.0)
+	if (isExactlyOne(alpha))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < nCols; j++)
 				for (i = jc[j]; i < jc[j+1]; i++)
 					y[ir[i]+k*yLD] += val[i] * x[j+k*xLD];
-	else if (alpha == -1.0)
+	else if (isExactlyMinusOne(alpha))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < nCols; j++)
 				for (i = jc[j]; i < jc[j+1]; i++)
@@ -698,25 +695,25 @@ returnValue SparseMatrix::transTimes(int xN, real_t alpha, const real_t *x, int 
 {
 	long i, j, k;
 
-	if (beta == 0.0)
+	if (isExactlyZero(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < nCols; j++)
 				y[j+k*yLD] = 0.0;
-	else if (beta == -1.0)
+	else if (isExactlyMinusOne(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < nCols; j++)
 				y[j+k*yLD] = -y[j+k*yLD];
-	else if (beta != 1.0)
+	else if (!isExactlyOne(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < nCols; j++)
 				y[j+k*yLD] *= beta;
 
-	if (alpha == 1.0)
+	if (isExactlyOne(alpha))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < nCols; j++)
 				for (i = jc[j]; i < jc[j+1]; i++)
 					y[j+k*yLD] += val[i] * x[ir[i]+k*xLD];
-	else if (alpha == -1.0)
+	else if (isExactlyMinusOne(alpha))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < nCols; j++)
 				for (i = jc[j]; i < jc[j+1]; i++)
@@ -738,21 +735,21 @@ returnValue SparseMatrix::times(const Indexlist* const irows, const Indexlist* c
 
 	if (yCompr == BT_TRUE)
 	{
-		if (beta == 0.0)
+		if (isExactlyZero(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[j+k*yLD] = 0.0;
-		else if (beta == -1.0)
+		else if (isExactlyMinusOne(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[j+k*yLD] = -y[j+k*yLD];
-		else if (beta != 1.0)
+		else if (!isExactlyOne(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[j+k*yLD] *= beta;
 
 		if (icols == 0)
-			if (alpha == 1.0)
+			if (isExactlyOne(alpha))
 				for (l = 0; l < nCols; l++)
 				{
 					i = jc[l];
@@ -767,7 +764,7 @@ returnValue SparseMatrix::times(const Indexlist* const irows, const Indexlist* c
 						else if (ir[i] > irows->number[irows->iSort[j]]) j++;
 						else i++;
 				}
-			else if (alpha == -1.0)
+			else if (isExactlyMinusOne(alpha))
 				for (l = 0; l < nCols; l++)
 				{
 					i = jc[l];
@@ -798,7 +795,7 @@ returnValue SparseMatrix::times(const Indexlist* const irows, const Indexlist* c
 						else i++;
 				}
 		else /* icols != 0 */
-			if (alpha == 1.0)
+			if (isExactlyOne(alpha))
 				for (l = 0; l < icols->length; l++)
 				{
 					col = icols->iSort[l];
@@ -814,7 +811,7 @@ returnValue SparseMatrix::times(const Indexlist* const irows, const Indexlist* c
 						else if (ir[i] > irows->number[irows->iSort[j]]) j++;
 						else i++;
 				}
-			else if (alpha == -1.0)
+			else if (isExactlyMinusOne(alpha))
 				for (l = 0; l < icols->length; l++)
 				{
 					col = icols->iSort[l];
@@ -849,21 +846,21 @@ returnValue SparseMatrix::times(const Indexlist* const irows, const Indexlist* c
 	}
 	else /* y not compressed */
 	{
-		if (beta == 0.0)
+		if (isExactlyZero(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[irows->number[j]+k*yLD] = 0.0;
-		else if (beta == -1.0)
+		else if (isExactlyMinusOne(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[irows->number[j]+k*yLD] = -y[j+k*yLD];
-		else if (beta != 1.0)
+		else if (!isExactlyOne(beta))
 			for (k = 0; k < xN; k++)
 				for (j = 0; j < irows->length; j++)
 					y[irows->number[j]+k*yLD] *= beta;
 
 		if (icols == 0)
-			if (alpha == 1.0)
+			if (isExactlyOne(alpha))
 				for (l = 0; l < nCols; l++)
 				{
 					i = jc[l];
@@ -878,7 +875,7 @@ returnValue SparseMatrix::times(const Indexlist* const irows, const Indexlist* c
 						else if (ir[i] > irows->number[irows->iSort[j]]) j++;
 						else i++;
 				}
-			else if (alpha == -1.0)
+			else if (isExactlyMinusOne(alpha))
 				for (l = 0; l < nCols; l++)
 				{
 					i = jc[l];
@@ -909,7 +906,7 @@ returnValue SparseMatrix::times(const Indexlist* const irows, const Indexlist* c
 						else i++;
 				}
 		else /* icols != 0 */
-			if (alpha == 1.0)
+			if (isExactlyOne(alpha))
 				for (l = 0; l < icols->length; l++)
 				{
 					col = icols->iSort[l];
@@ -925,7 +922,7 @@ returnValue SparseMatrix::times(const Indexlist* const irows, const Indexlist* c
 						else if (ir[i] > irows->number[irows->iSort[j]]) j++;
 						else i++;
 				}
-			else if (alpha == -1.0)
+			else if (isExactlyMinusOne(alpha))
 				for (l = 0; l < icols->length; l++)
 				{
 					col = icols->iSort[l];
@@ -966,20 +963,20 @@ returnValue SparseMatrix::transTimes(const Indexlist* const irows, const Indexli
 {
 	long i, j, k, l, col;
 
-	if (beta == 0.0)
+	if (isExactlyZero(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < icols->length; j++)
 				y[j+k*yLD] = 0.0;
-	else if (beta == -1.0)
+	else if (isExactlyMinusOne(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < icols->length; j++)
 				y[j+k*yLD] = -y[j+k*yLD];
-	else if (beta != 1.0)
+	else if (!isExactlyOne(beta))
 		for (k = 0; k < xN; k++)
 			for (j = 0; j < icols->length; j++)
 				y[j+k*yLD] *= beta;
 
-	if (alpha == 1.0)
+	if (isExactlyOne(alpha))
 		for (l = 0; l < icols->length; l++)
 		{
 			col = icols->iSort[l];
@@ -995,7 +992,7 @@ returnValue SparseMatrix::transTimes(const Indexlist* const irows, const Indexli
 				else if (ir[i] > irows->number[irows->iSort[j]]) j++;
 				else i++;
 		}
-	else if (alpha == -1.0)
+	else if (isExactlyMinusOne(alpha))
 		for (l = 0; l < icols->length; l++)
 		{
 			col = icols->iSort[l];
@@ -1035,7 +1032,7 @@ returnValue SparseMatrix::addToDiag(real_t alpha)
 {
 	long i;
 
-	if (alpha != 0.0)
+	if (!isExactlyZero(alpha))
 		for (i = 0; i < nRows && i < nCols; i++)
 			if (ir[jd[i]] == i) val[jd[i]] += alpha;
 			else return RET_NO_DIAGONAL_AVAILABLE;
