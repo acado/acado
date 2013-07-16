@@ -50,7 +50,13 @@ inline int PathConstraint::getNC() const{
 }
 
 
-inline int PathConstraint::getDim( const int& ){
+#ifdef __DEBUG__
+#  define ACADO_IDX_NAME idx_
+#else
+#  define ACADO_IDX_NAME
+#endif
+
+inline int PathConstraint::getDim( const int& ACADO_IDX_NAME){
 
     ASSERT( idx_ < (int) grid.getNumPoints() );
 
