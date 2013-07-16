@@ -86,6 +86,10 @@ ENDIF("${isSystemDir}" STREQUAL "-1")
 #
 INCLUDE( CompilerOptionsSSE )
 
+# define __DEBUG__ for debug builds
+SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D__DEBUG__")
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D__DEBUG__")
+
 ################################################################################
 #
 # Compiler settings - GCC/G++; Linux, Apple
