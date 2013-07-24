@@ -648,7 +648,7 @@ class PlotWindow
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue setupLogFrequency(	PlotFrequency _frequency
+		returnValue setupLogFrequency(	PlotFrequency _frequency = PLOT_AT_EACH_ITERATION
 										);
 
 

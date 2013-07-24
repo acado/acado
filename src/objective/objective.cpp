@@ -34,11 +34,11 @@
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/objective/objective.hpp>
 #include <acado/ocp/ocp.hpp>
+#include <acado/code_generation/export_variable.hpp>
 
 #include <algorithm>
 
 BEGIN_NAMESPACE_ACADO
-
 
 
 //
@@ -161,7 +161,40 @@ Objective::~Objective( ){
     cgLSQWeightingVectorsSlu.clear();
 }
 
+returnValue Objective::addLSQ( const MatrixVariablesGrid *S_,
+                                      const Function&            h ,
+                                      const VariablesGrid       *r_  )
+{
 
+    nLSQ++;
+    lsqTerm = (LSQTerm**)realloc(lsqTerm,nLSQ*sizeof(LSQTerm*));
+    lsqTerm[nLSQ-1] = new LSQTerm(S_, h, r_);
+    lsqTerm[nLSQ-1]->setGrid(grid);
+
+    ExportVariable temp = S_->getMatrix( 0 );
+    cgLSQWeightingMatrices.push_back( temp );
+    cgLSQFunctions.push_back( h );
+
+    return SUCCESSFUL_RETURN;
+}
+
+
+
+returnValue Objective::addLSQEndTerm( const Matrix   & S,
+                                             const Function & m,
+                                             const Vector   & r  )
+{
+
+    nEndLSQ++;
+    lsqEndTerm = (LSQEndTerm**)realloc(lsqEndTerm,nEndLSQ*sizeof(LSQEndTerm*));
+    lsqEndTerm[nEndLSQ-1] = new LSQEndTerm(grid, S, m, r);
+    lsqEndTerm[nEndLSQ-1]->setGrid(grid);
+
+    cgLSQEndTermWeightingMatrices.push_back( S );
+    cgLSQEndTermFunctions.push_back( m );
+
+    return SUCCESSFUL_RETURN;
+}
 
 Objective& Objective::operator=( const Objective& rhs ){
 

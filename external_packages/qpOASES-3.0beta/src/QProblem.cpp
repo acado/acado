@@ -1718,8 +1718,6 @@ returnValue QProblem::solveQP(	const real_t* const g_new,
 	/* I) PREPARATIONS */
 	/* 1) Allocate delta vectors of gradient and (constraints') bounds,
 	 *    index arrays and step direction arrays. */
-	int nFR, nFX, nAC, nIAC;
-
 	real_t* delta_xFR = new real_t[nV];
 	real_t* delta_xFX = new real_t[nV];
 	real_t* delta_yAC = new real_t[nC];
@@ -1771,13 +1769,6 @@ returnValue QProblem::solveQP(	const real_t* const g_new,
 		snprintf( messageString,80,"%d ...",iter );
 		getGlobalMessageHandler( )->throwInfo( RET_ITERATION_STARTED,messageString,__FUNCTION__,__FILE__,__LINE__,VS_VISIBLE );
 		#endif
-
-		/* some more definitions */
-		nFR  = getNFR( );
-		nFX  = getNFX( );
-		nAC  = getNAC( );
-		nIAC = getNIAC( );
-
 
 		/* 2) Detemination of shift direction of the gradient and the (constraints') bounds. */
 		returnvalue = determineDataShift(	g_new,lbA_new,ubA_new,lb_new,ub_new,

@@ -25,28 +25,19 @@
 
 /**
  *    \file external_packages/acado_gnuplot/gnuplot_window.hpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date   13.02.2009
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date   2009-2013
  */
 
 
 #ifndef ACADO_TOOLKIT_ACADO_2_GNUPLOT_HPP
 #define ACADO_TOOLKIT_ACADO_2_GNUPLOT_HPP
 
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
-
-#include <stdlib.h>
-
 
 #include <acado/user_interaction/plot_window.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
-
 
 
 /**
@@ -59,7 +50,7 @@ BEGIN_NAMESPACE_ACADO
  *	that are implemented in this interface convert ACADO sturctures into
  *	a format that can be read by the program Gnuplot.
  *
- *	\author Boris Houska, Hans Joachim Ferreau
+ *	\author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
 
 
@@ -224,9 +215,6 @@ class GnuplotWindow : public PlotWindow
 
 
 CLOSE_NAMESPACE_ACADO
-
-
-//#include <include/acado_gnuplot/gnuplot_window.ipp>
 
 
 #endif  // ACADO_TOOLKIT_ACADO_2_GNUPLOT_HPP

@@ -50,7 +50,7 @@ inline int PathConstraint::getNC() const{
 }
 
 
-inline int PathConstraint::getDim( const int& idx_ ){
+inline int PathConstraint::getDim( const int& ){
 
     ASSERT( idx_ < (int) grid.getNumPoints() );
 

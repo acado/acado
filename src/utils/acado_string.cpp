@@ -66,7 +66,6 @@ String::String( const double& val_ ){
     int          run1      ;
     char        *char_value;
     char        *tmp       ;
-	char        *dummy     ;
     BooleanType  dot       ;
 
     const int precision = 16;
@@ -76,7 +75,10 @@ String::String( const double& val_ ){
     char_value = (char*)malloc(MAX_LENGTH_STRING*sizeof(char));
     tmp        = (char*)malloc(MAX_LENGTH_STRING*sizeof(char));
 
-    dummy = gcvt( val_ , precision , char_value );
+    /* return value of gcvt is its third argument; however, in glibc 2.17
+       it has attribute warn_unused_result, so to placate
+       -Wunused-result, we have... */
+    char_value = gcvt( val_ , precision , char_value );
 
     int length = 0;
     run1 = 0;

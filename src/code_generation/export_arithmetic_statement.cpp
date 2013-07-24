@@ -168,7 +168,11 @@ returnValue ExportArithmeticStatement::exportCode(	FILE* file,
 													) const
 {
 	if (lhs->isGiven() == BT_TRUE && lhs->getDim() > 0)
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Left hand side of an expression is given.");
+	{
+		LOG( LVL_ERROR ) << "Left hand side ('" << lhs.getFullName().getName( ) << "') of an arithmetic "
+							"expression is given." << endl;
+		return ACADOERROR(RET_INVALID_ARGUMENTS);
+	}
 
 	if (memAllocator == 0)
 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Memory allocator is not defined.");

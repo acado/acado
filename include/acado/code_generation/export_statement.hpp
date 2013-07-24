@@ -133,17 +133,17 @@ class ExportStatement
 										int _precision = 16
 										) const = 0;
 
-		virtual returnValue acquire( ExportIndex& obj )
+		virtual returnValue acquire( ExportIndex&  )
 		{
 			return RET_NOT_IMPLEMENTED_IN_BASE_CLASS;
 		}
 
-		virtual returnValue release( const ExportIndex& obj )
+		virtual returnValue release( const ExportIndex&  )
 		{
 			return RET_NOT_IMPLEMENTED_IN_BASE_CLASS;
 		}
 
-		virtual returnValue allocate( memoryAllocatorPtr allocator )
+		virtual returnValue allocate( memoryAllocatorPtr  )
 		{
 			return SUCCESSFUL_RETURN;
 		}

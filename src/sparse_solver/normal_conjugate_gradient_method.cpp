@@ -138,7 +138,6 @@ returnValue NormalConjugateGradientMethod::setIndices( const int *indices ){
     int run1,  run2;
     int counter0   ;
     int bound      ;
-    int bound2     ;
     int counter = 0;
 
 
@@ -150,7 +149,6 @@ returnValue NormalConjugateGradientMethod::setIndices( const int *indices ){
 
         counter0 = counter;
         bound    = dim*(run1+1);
-        bound2   = run1*(dim+1);
 
         while( counter < nDense ){
 

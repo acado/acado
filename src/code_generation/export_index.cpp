@@ -249,7 +249,7 @@ const String ExportIndex::get( ) const
 }
 
 
-const int ExportIndex::getGivenValue( ) const
+int ExportIndex::getGivenValue( ) const
 {
 	return (*this)->getGivenValue();
 }

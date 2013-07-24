@@ -87,7 +87,7 @@ returnValue RungeKuttaExport::initializeButcherTableau( const Matrix& _AA, const
 }
 
 
-const uint RungeKuttaExport::getNumStages() {
+uint RungeKuttaExport::getNumStages() {
 	
 	return numStages;
 }
