@@ -37,7 +37,7 @@ classdef VariablesGrid < handle
             
             if( isa(matrix, 'acado.Matrix') )
                 obj.mat = matrix;
-                obj.name = strcat(matrix.name_m, '_grid');
+                obj.name = strcat(matrix.name, '_grid');
                 
                 ACADO_.helper.addInstruction(obj);
             else
@@ -46,9 +46,14 @@ classdef VariablesGrid < handle
         end
         
         
+        function s = toString(obj)
+            s = obj.name;
+        end
+        
+        
         function getInstructions(obj, cppobj, get)
             if (get == 'FB')
-                fprintf(cppobj.fileMEX,sprintf('    VariablesGrid %s(%s);\n', obj.name, obj.mat.name_m));
+                fprintf(cppobj.fileMEX,sprintf('    VariablesGrid %s(%s);\n', obj.name, obj.mat.name));
             end
         end
         

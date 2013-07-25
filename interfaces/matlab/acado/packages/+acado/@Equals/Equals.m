@@ -43,6 +43,10 @@ classdef Equals < acado.BooleanVariable
             if nargin > 0
                 obj.obj1 = obj.checkDoubleVectorMatrix(obj1);
                 obj.obj2 = obj.checkDoubleVectorMatrix(obj2);
+                
+                if( isa(obj.obj1, 'acado.Disturbance') && isa(obj.obj2, 'acado.Matrix') )   % EXCEPTION
+                   obj.obj2 = acado.VariablesGrid(obj.obj2); 
+                end
             end
         end
         

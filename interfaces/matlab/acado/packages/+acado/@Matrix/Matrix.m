@@ -40,7 +40,6 @@
 % 
 classdef Matrix < acado.VectorspaceElement    
     properties
-       name_m = '';   %nameMatrix
        matrixIsPrinted=0;
     end
     
@@ -52,8 +51,6 @@ classdef Matrix < acado.VectorspaceElement
             if (isa(val, 'numeric'))
                 ACADO_.count_matrix = ACADO_.count_matrix+1;
                 obj.name = strcat('acadodata_M', num2str(ACADO_.count_matrix));
-                
-                obj.name_m = strcat(obj.name, '_m');
 
                 obj.items = val;
                 
@@ -66,7 +63,6 @@ classdef Matrix < acado.VectorspaceElement
                 end
                 
                 obj.name = val.name;
-                obj.name_m = val.name_m;
                 
             else
                 error('Matrix expects a numeric value or a acado.MexInput'); 

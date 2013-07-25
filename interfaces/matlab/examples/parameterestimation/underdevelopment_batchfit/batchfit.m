@@ -3,8 +3,7 @@ clear;
 BEGIN_ACADO;                                % Always start with "BEGIN_ACADO". 
     
     %% WARNING ------------------------------------------------------------
-    % This example should only be used to understand the syntax. The
-    % content as such is still under devellopment and does not converge
+    error('This example should only be used to understand the syntax. The content as such is still under devellopment and does not converge.');
     %% --------------------------------------------------------------------
     
     acadoSet('problemname', 'batchfit');

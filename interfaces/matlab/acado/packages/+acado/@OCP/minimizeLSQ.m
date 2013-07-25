@@ -86,7 +86,11 @@ elseif (length(varargin) == 2)
         r = varargin{2};
         
         obj.minLSQTermh{index+1} = acado.Function(h);
-        obj.minLSQTermr{index+1} = acado.Vector(r);
+        if(isa(obj.checkVectorMatrix(r), 'acado.Matrix'))
+           obj.minLSQTermr{index+1} = acado.VariablesGrid(obj.checkVectorMatrix(r));
+        else
+           obj.minLSQTermr{index+1} = obj.checkVectorMatrix(r);
+        end
         obj.minLSQTermS{index+1} = {};
     end
     
@@ -97,7 +101,11 @@ elseif (length(varargin) == 3)  %ocp.minimizeLSQ(S, h, r)
 
     obj.minLSQTermh{index+1} = acado.Function(h);
     obj.minLSQTermS{index+1} = acado.Matrix(S);
-    obj.minLSQTermr{index+1} = acado.Vector(r);
+    if(isa(obj.checkVectorMatrix(r), 'acado.Matrix'))
+        obj.minLSQTermr{index+1} = acado.VariablesGrid(obj.checkVectorMatrix(r));
+    else
+        obj.minLSQTermr{index+1} = obj.checkVectorMatrix(r);
+    end
 
     
 else %error
