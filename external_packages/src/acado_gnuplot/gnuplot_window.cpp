@@ -25,22 +25,26 @@
 
 /**
  *    \file external_packages/acado_gnuplot/gnuplot_window.cpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date   2009
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date   2009-2013
  */
 
 
 #include <include/acado_gnuplot/gnuplot_window.hpp>
 
 #ifdef WIN32
-#define round( value ) floor( value + 0.5 )
+#include <windows.h>
 
-#include <string>
+#define round( value ) floor( value + 0.5 )
 #endif
+
+#include <cstdlib>
+#include <string>
+#include <unistd.h>
 
 BEGIN_NAMESPACE_ACADO
 
-
+using namespace std;
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -108,23 +112,21 @@ PlotWindow* GnuplotWindow::clone( ) const
 }
 
 
-returnValue GnuplotWindow::init(){
-
-	if( gnuPipe != 0 )
+returnValue GnuplotWindow::init()
+{
+	if (gnuPipe != 0)
 	{
 		fclose(gnuPipe);
 		gnuPipe = 0;
 	}
-#ifdef __NO_PIPES__
-	return SUCCESSFUL_RETURN;
-#else
-    gnuPipe = popen("gnuplot -persist -background white", "w");
-    if( gnuPipe != 0 )
-      return SUCCESSFUL_RETURN;  // gnuplot must not be null!
-    else
-      return ACADOERROR(RET_PLOT_WINDOW_CAN_NOT_BE_OPEN); // better: give warning, since it should work anyway
+
+#ifndef __NO_PIPES__
+	gnuPipe = popen("gnuplot -persist -background white", "w");
+	if (!gnuPipe)
+		return ACADOWARNING(RET_PLOT_WINDOW_CAN_NOT_BE_OPEN);
 #endif
 
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -160,7 +162,6 @@ BooleanType GnuplotWindow::getMouseEvent( double &mouseX, double &mouseY ){
 
     FILE *readFile;
     readFile = fopen("mouse.dat", "r" );
-	int dummy;
 
     if( readFile == 0 ) return BT_FALSE;
 
@@ -169,7 +170,9 @@ BooleanType GnuplotWindow::getMouseEvent( double &mouseX, double &mouseY ){
     mouseX = tmp( tmp.getDim()-2 );
     mouseY = tmp( tmp.getDim()-1 );
 
-	dummy = system("rm mouse.dat");
+	if ( system("rm mouse.dat") )
+		return BT_FALSE;
+
     return BT_TRUE;
 }
 
@@ -181,11 +184,13 @@ returnValue GnuplotWindow::waitForMouseEvent( double &mouseX, double &mouseY ){
 
     FILE *check;
     check = fopen( "mouse.dat", "r" );
-	int dummy;
 	
-    if( check != 0 ){
-        fclose(check);
-        dummy = system("rm mouse.dat");
+    if( check != 0 )
+    {
+        fclose( check );
+
+        if (system("rm mouse.dat") )
+        	return RET_PLOTTING_FAILED;
     }
 
     acadoFPrintf(gnuPipe,"pause mouse\n");
@@ -279,14 +284,6 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 	char* plotStyleString = 0;
 
 	returnValue returnvalue;
-
-    //gnuPipe = fopen( "gnupipe.txt","w+" );
-
-#if defined(GNUPLOT_EXECUTABLE) && defined(WIN32)
-
-	//acadoFPrintf( gnuPipe,"set terminal windows;\n\n" );
-
-#endif
 
     acadoFPrintf( gnuPipe,"set multiplot;\n" );
 
@@ -608,34 +605,29 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 
 	acadoFPrintf( gnuPipe,"unset multiplot\n" );
 
-#if defined(GNUPLOT_EXECUTABLE) && defined(WIN32)
-
-	// acadoFPrintf( gnuPipe,"exit\n" );
-
-#endif
-
-
 	fflush( gnuPipe );
 
 
 	// if print to file: end here
 	if ( toFile == BT_TRUE )
 	{
-		int dummy;
 		
 		fclose( gnuPipe );
 		gnuPipe = 0;
 
 #if defined(GNUPLOT_EXECUTABLE) && defined(WIN32)
-		std::string tmp = 
-			std::string( GNUPLOT_EXECUTABLE ) + 
-			std::string(" -p acado2gnuplot_tmp.dat");
+		string tmp = string( GNUPLOT_EXECUTABLE ) + string(" -p acado2gnuplot_tmp.dat");
 
-		dummy = system( tmp.c_str() );
-		dummy = system("del acado2gnuplot_tmp.dat");
+		if ( system( tmp.c_str() ) )
+			return RET_PLOTTING_FAILED;
+
+		if ( system("del acado2gnuplot_tmp.dat") )
+			return RET_PLOTTING_FAILED;
 #else
-		dummy = system("gnuplot -persist -background white acado2gnuplot_tmp.dat");
-		dummy = system("rm -rf acado2gnuplot_tmp.dat");
+		if ( system("gnuplot -persist -background white acado2gnuplot_tmp.dat") )
+			return RET_PLOTTING_FAILED;
+		if (system("rm -rf acado2gnuplot_tmp.dat") )
+			return RET_PLOTTING_FAILED;
 #endif
 
 		return SUCCESSFUL_RETURN;

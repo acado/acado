@@ -80,13 +80,12 @@ returnValue SolutionAnalysis::getHessianInverse( QProblem* qp, real_t* hessianIn
 	
 	register int run1, run2, run3;
 	
-	register int nFR, nFX, nAC;
+	register int nFR, nFX;
 	
 	/* Ask for the number of free and fixed variables, assumes that active set
 	 * is constant for the covariance evaluation */
 	nFR = qp->getNFR( );
 	nFX = qp->getNFX( );
-	nAC = qp->getNAC( );
 	
 	/* Ask for the corresponding index arrays: */
 	if ( qp->bounds.getFree( )->getNumberArray( FR_idx ) != SUCCESSFUL_RETURN )

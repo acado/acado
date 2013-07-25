@@ -87,7 +87,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	   
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
 
-	ExportVariable Ah ( "A*h",  AA*=h );
+	ExportVariable Ah ( "A*h",  Matrix( AA )*=h );
 	ExportVariable b4h( "b4*h", Matrix( bb )*=h );
 
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
@@ -177,6 +177,8 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	}
 	integrate.addStatement( loop );
 	
+	integrate.addStatement( error_code == 0 );
+
 	if ( (PrintLevel)printLevel >= HIGH ) 
 		acadoPrintf( "done.\n" );	
 

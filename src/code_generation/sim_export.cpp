@@ -132,11 +132,13 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
 		int debugMode;
 		get( INTEGRATOR_DEBUG_MODE, debugMode );
+		int operatingSystem;
+		get( OPERATING_SYSTEM,operatingSystem );
 		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
 			String integrateInterface( dirName );
 			integrateInterface << "/integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure((ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
+			exportMexFun.configure((OperatingSystem)operatingSystem == OS_WINDOWS, (ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
 			exportMexFun.exportCode();
 
 			String rhsInterface( dirName );
@@ -696,7 +698,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	_controls = controls;
 	_results = results;
 	_ref = ref;
-	uint i, j;
+	uint i;
 	Vector meas( (uint)outputGrids.size() );
 	Vector measRef( (uint)outputGrids.size() );
 	for( i = 0; i < outputGrids.size(); i++ ) {

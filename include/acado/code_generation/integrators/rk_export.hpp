@@ -152,7 +152,7 @@ class RungeKuttaExport : public IntegratorExport
         
         /** This routine returns the number of stages of the Runge-Kutta integrator that will be exported.
          */
-        const uint getNumStages();
+        uint getNumStages();
 							
         
         /** Sets up the output with the grids for the different output functions.									\n

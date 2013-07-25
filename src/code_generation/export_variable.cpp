@@ -26,14 +26,15 @@
 
 /**
  *    \file src/code_generation/export_variable.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010
+ *    \authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010-2013
  */
 
 
 #include <acado/code_generation/export_variable.hpp>
 #include <acado/code_generation/export_variable_internal.hpp>
 #include <acado/code_generation/export_arithmetic_statement.hpp>
+#include <acado/symbolic_expression/acado_syntax.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -73,6 +74,20 @@ ExportVariable::ExportVariable(	const String& _name,
 								)
 {
 	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
+}
+
+ExportVariable::ExportVariable(	unsigned _nRows,
+								unsigned _nCols,
+								ExportType _type,
+								ExportStruct _dataStruct,
+								BooleanType _callItByValue,
+								const String& _prefix
+								)
+{
+	Matrix m(_nRows, _nCols);
+	m.setAll( undefinedEntry );
+
+	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 ExportVariable::ExportVariable(	const String& _name,
@@ -234,12 +249,10 @@ const String ExportVariable::get(	const ExportIndex& rowIdx,
 	return (*this)->get(rowIdx, colIdx);
 }
 
-
 uint ExportVariable::getNumRows( ) const
 {
 	return (*this)->getNumRows();
 }
-
 
 uint ExportVariable::getNumCols( ) const
 {
@@ -436,6 +449,13 @@ ExportVariable ExportVariable::getSubMatrix(	const ExportIndex& rowIdx1,
 	return (*this)->getSubMatrix(rowIdx1, rowIdx2, colIdx1, colIdx2);
 }
 
+ExportVariable ExportVariable::getElement(	const ExportIndex& rowIdx,
+											const ExportIndex& colIdx
+											) const
+{
+	return (*this)->getSubMatrix(rowIdx, rowIdx + 1, colIdx, colIdx + 1);
+}
+
 
 ExportVariable ExportVariable::makeRowVector( ) const
 {
@@ -447,7 +467,6 @@ ExportVariable ExportVariable::makeColVector( ) const
 {
 	return (*this)->makeColVector();
 }
-
 
 
 BooleanType ExportVariable::isVector( ) const
@@ -465,6 +484,15 @@ Matrix ExportVariable::getGivenMatrix( ) const
 returnValue ExportVariable::print( ) const
 {
 	return (*this)->print();
+}
+
+ExportVariable diag(	const String& _name,
+						unsigned int _n )
+{
+	ExportVariable t(_name, _n, _n);
+	t = eye( _n );
+	t.resetDiagonal( );
+	return t;
 }
 
 

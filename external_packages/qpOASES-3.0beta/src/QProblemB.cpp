@@ -2374,8 +2374,6 @@ returnValue QProblemB::solveQP(	const real_t* const g_new,
 	/* I) PREPARATIONS */
 	/* 1) Allocate delta vectors of gradient and bounds,
 	 *    index arrays and step direction arrays. */
-	int nFR, nFX;
-
 	real_t* delta_xFR = new real_t[nV];
 	real_t* delta_xFX = new real_t[nV];
 	real_t* delta_yFX = new real_t[nV];
@@ -2423,10 +2421,6 @@ returnValue QProblemB::solveQP(	const real_t* const g_new,
 		snprintf( messageString,80,"%d ...",iter );
 		getGlobalMessageHandler( )->throwInfo( RET_ITERATION_STARTED,messageString,__FUNCTION__,__FILE__,__LINE__,VS_VISIBLE );
 		#endif
-
-		/* some more definitions */
-		nFR = getNFR( );
-		nFX = getNFX( );
 
 		/* 2) Initialise shift direction of the gradient and the bounds. */
 		returnvalue = determineDataShift(	g_new,lb_new,ub_new,

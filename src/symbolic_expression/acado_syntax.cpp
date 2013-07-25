@@ -194,16 +194,6 @@ Vector diag( const Matrix& M )
 }
 
 
-ExportVariable diag(	const String& _name,
-						unsigned int _n )
-{
-	ExportVariable t( _name, _n,_n );
-	t = eye( _n );
-	t.resetDiagonal( );
-	return t;
-}
-
-
 Expression getRiccatiODE( const Expression        &rhs,
                           const DifferentialState &x  ,
                           const Control           &u  ,

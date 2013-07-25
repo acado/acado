@@ -1,9 +1,11 @@
 #include "mex.h"
+
 #define ONLINE_GRID @ONLINE_GRID@
 #define DEBUG_MODE @DEBUG_MODE@
 #define FIRST_ORDER_SENS @FIRST_ORDER_SENS@
 #define CALLS_TIMING @CALLS_TIMING@
 #define NUM_STAGES @NUM_STAGES@
+#define OS_WINDOWS @OS_WINDOWS@
 
 /* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
 /* --------------------------------------------------- */
@@ -20,7 +22,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		real_t next[ACADO_NX+ACADO_NXA+ACADO_NU+ACADO_NP];
     #endif
     const char *fieldnames[3], *infonames[3];
-	struct timeval theclock;
+    #if OS_WINDOWS
+        LARGE_INTEGER counter, frequency;
+    #else
+        struct timeval theclock;
+    #endif
 	real_t start, end, time;
 	real_t *result_timing;
     
@@ -206,8 +212,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		#endif
     }
     
-	gettimeofday( &theclock,0 );
-	start = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+    #if OS_WINDOWS
+        QueryPerformanceFrequency(&frequency);
+        QueryPerformanceCounter(&counter);
+        start = ((real_t) counter.QuadPart) / ((real_t) frequency.QuadPart);
+    #else
+        gettimeofday( &theclock,0 );
+        start = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+    #endif
     for( c = 0; c < CALLS_TIMING; ++c ) {
 	    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
 	        next[i] = x[i];
@@ -226,8 +238,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	    #endif
 	    reset = 0;
     }
-	gettimeofday( &theclock,0 );
-    end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+    #if OS_WINDOWS
+        QueryPerformanceFrequency(&frequency);
+        QueryPerformanceCounter(&counter);
+        end = ((real_t) counter.QuadPart) / ((real_t) frequency.QuadPart);
+    #else
+        gettimeofday( &theclock,0 );
+        end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
+    #endif
     time = (end-start)/CALLS_TIMING;
     
     #if FIRST_ORDER_SENS

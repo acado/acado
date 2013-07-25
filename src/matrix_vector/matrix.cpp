@@ -669,7 +669,7 @@ Vector Matrix::getEigenvalues( Matrix &Q ) const{
     double threshold_norm;
     double threshold;
     double tan_phi, sin_phi, cos_phi, tan2_phi, sin2_phi, cos2_phi;
-    double sin_2phi, cos_2phi, cot_2phi;
+    double sin_2phi, cot_2phi;
     double dum1;
     double dum2;
     double dum3;
@@ -706,7 +706,6 @@ Vector Matrix::getEigenvalues( Matrix &Q ) const{
                 if (tan_phi < 0.0) sin_phi = - sin_phi;
                 cos_phi = sqrt(cos2_phi); 
                 sin_2phi = 2.0 * sin_phi * cos_phi;
-                cos_2phi = cos2_phi - sin2_phi;
 
                 p_r = d_element;
                 dum1 = *(pAk + k);

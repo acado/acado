@@ -25,8 +25,8 @@
 
 /**
  *    \file src/ocp/ocp.cpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 2008-2010
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov, Rien Quirynen
+ *    \date 2008-2013
  */
 
 #include <acado/ocp/ocp.hpp>

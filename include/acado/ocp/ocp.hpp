@@ -25,7 +25,7 @@
 
 /**
  *    \file include/acado/ocp/ocp.hpp
- *    \author Boris Houska, Hans Joachim Ferreau
+ *    \authors Boris Houska, Hans Joachim Ferreau, Milan Vukov, Rien Quirynen
  */
 
 
@@ -90,354 +90,351 @@ BEGIN_NAMESPACE_ACADO
  *  Please check the tutorial examples as well as the class reference below,
  *  to learn about the usage of this class in more detail.\n
  *  \n
- *
- *  \author Boris Houska, Hans Joachim Ferreau
  */
 
-class OCP: public MultiObjectiveFunctionality, public ModelContainer {
+class OCP: public MultiObjectiveFunctionality, public ModelContainer
+{
+	friend class OptimizationAlgorithmBase;
 
-
-friend class OptimizationAlgorithmBase;
-
-
-//
-// PUBLIC MEMBER FUNCTIONS:
-//
 public:
 
+	/** Default Constructor which can optionally set the time-horizon of the problem.
+	 */
+	OCP(	const double &tStart_ = 0.0,  /**< start of the time horizon of the OCP */
+			const double &tEnd_   = 1.0,  /**< end   of the time horizon of the OCP */
+			const int    &N_      = 20    /**< number of discretization intervals   */ );
 
-    /** Default Constructor which can optionally set the time-horizon of the problem.
-     */
-    OCP( const double &tStart_ = 0.0,  /**< start of the time horizon of the OCP */
-         const double &tEnd_   = 1.0,  /**< end   of the time horizon of the OCP */
-         const int    &N_      = 20    /**< number of discretization intervals   */ );
 
+	/** Constructor which can set a non equidistant time-horizon of the problem.
+	 */
+	OCP( 	const double &tStart_,  		/**< start of the time horizon of the OCP */
+			const double &tEnd_,  			/**< end   of the time horizon of the OCP */
+			const Vector& _numSteps   		/**< number of integration steps in each discretization interval   */ );
 
-    /** Constructor which can set a non equidistant time-horizon of the problem.
-     */
-    OCP( const double &tStart_,  		/**< start of the time horizon of the OCP */
-         const double &tEnd_,  			/**< end   of the time horizon of the OCP */
-         const Vector& _numSteps   			/**< number of integration steps in each discretization interval   */ );
 
+	/** Constructor that takes a parametric version of the time horizon. This contructor
+	 *  should be used if the end time should be optimized, too.
+	 */
+	OCP( 	const double    &tStart_,  /**< start of the time horizon of the OCP */
+			const Parameter &tEnd_,    /**< end   of the time horizon of the OCP */
+			const int       &N_ = 20   /**< number of discretization intervals   */ );
 
-    /** Constructor that takes a parametric version of the time horizon. This contructor
-     *  should be used if the end time should be optimized, too.
-     */
-    OCP( const double    &tStart_,  /**< start of the time horizon of the OCP */
-         const Parameter &tEnd_,    /**< end   of the time horizon of the OCP */
-         const int       &N_ = 20   /**< number of discretization intervals   */ );
 
+	/** Constructor that takes the time horizon in form of a Grid.
+	 */
+	OCP(	const Grid &grid_  /**< discretization grid  */ );
 
-    /** Constructor that takes the time horizon in form of a Grid.
-     */
-    OCP( const Grid &grid_  /**< discretization grid  */ );
 
+	/** Copy constructor (makes a deep copy of the class). */
+	OCP(	const OCP& rhs );
 
-    /** Copy constructor (makes a deep copy of the class). */
-    OCP( const OCP& rhs );
 
+	/** Destructor (deletes everything). */
+	virtual ~OCP( );
 
-    /** Destructor (deletes everything). */
-    virtual ~OCP( );
 
+	/** Assignment operator (deep copy). */
+	OCP& operator=( const OCP& rhs );
 
-    /** Assignment operator (deep copy). */
-    OCP& operator=( const OCP& rhs );
 
+	/** Adds an expression as a the Mayer term to be minimized.
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue minimizeMayerTerm( const Expression& arg );
 
 
-    /** Adds an expression as a the Mayer term to be minimized.
-     *  \return SUCCESSFUL_RETURN
-     */
-    returnValue minimizeMayerTerm( const Expression& arg );
+	/** Adds an expression as a the Mayer term to be minimized. In this version
+	 *  the number of the objective can be specified as well. This functionality
+	 *  is needed for multi-objective optimal control problems.
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue minimizeMayerTerm( const int &multiObjectiveIdx,  const Expression& arg );
 
 
-    /** Adds an expression as a the Mayer term to be minimized. In this version
-     *  the number of the objective can be specified as well. This functionality
-     *  is needed for multi-objective optimal control problems.
-     *  \return SUCCESSFUL_RETURN
-     */
-    returnValue minimizeMayerTerm( const int &multiObjectiveIdx,  const Expression& arg );
-
-
-    /** Adds an expression as a the Mayer term to be maximized.
-     *  Note that this function is introduced for convenience only.
-     *  A call of the form maximizeMayerTerm( arg ) is equivalent to
-     *  calling minimizeMayerTerm( -arg ).\n
-     *
-     *  \return SUCCESSFUL_RETURN
-     */
-    returnValue maximizeMayerTerm( const Expression& arg );
-
-
-     /** Adds an expression as a the Lagrange term to be minimized.
-      *  \return SUCCESSFUL_RETURN
-      */
-     returnValue minimizeLagrangeTerm( const Expression& arg );
-
-
-     /** Adds an expression as a the Lagrange term to be maximized.
-      *  \return SUCCESSFUL_RETURN
-      */
-     returnValue maximizeLagrangeTerm( const Expression& arg );
-
-
-
-
-     /** Adds an Least Square term of the form                                \n
-      *                                                                       \n
-      *   0.5* sum_i || ( h(t_i,x(t_i),u(t_i),p(t_i),...) - r ) ||^2_S_i      \n
-      *                                                                       \n
-      *  Here the sum is over all grid points of the objective grid. The      \n
-      *  Matrix S is assumed to be symmetric and positive (semi-) definite.   \n
-      *  The Function  r  is called reference and can be                      \n
-      *  specified by the user. The map  h  is a standard Function            \n
-      *  (cf. function_.hpp).                                                 \n
-      *
-      *  \return SUCCESSFUL_RETURN
-      */
-     returnValue minimizeLSQ( const Matrix   &S,   /**< a weighting matrix */
-                              const Function &h,   /**< the LSQ-Function   */
-                              const Vector   &r    /**< the reference      */ );
-
-     returnValue minimizeLSQ( const Function &h,   /**< the LSQ-Function   */
-                              const Vector   &r    /**< the reference      */ );
-
-     returnValue minimizeLSQ( const Function &h    /**< the LSQ-Function   */ );
-
-     returnValue minimizeLSQ( const MatrixVariablesGrid &S,   /**< a weighting matrix */
-                              const Function            &h,   /**< the LSQ-Function   */
-                              const VariablesGrid       &r    /**< the reference      */ );
-
-     returnValue minimizeLSQ( const Matrix        &S,   /**< a weighting matrix */
-                              const Function      &h,   /**< the LSQ-Function   */
-                              const VariablesGrid &r    /**< the reference      */ );
-
-     returnValue minimizeLSQ( const Function      &h,   /**< the LSQ-Function   */
-                              const VariablesGrid &r    /**< the reference      */ );
-
-     returnValue minimizeLSQ( const MatrixVariablesGrid &S,   /**< a weighting matrix */
-                              const Function            &h,   /**< the LSQ-Function   */
-                              const char*        rFilename    /**< filename where the reference is stored */ );
-
-
-     returnValue minimizeLSQ( const Matrix        &S,   /**< a weighting matrix */
-                              const Function      &h,   /**< the LSQ-Function   */
-                              const char*  rFilename    /**< filename where the reference is stored */ );
-
-
-     returnValue minimizeLSQ( const Function      &h,   /**< the LSQ-Function   */
-                              const char*  rFilename    /**< filename where the reference is stored */ );
-
-     returnValue minimizeLSQ         ( const ExportVariable &Q_, const ExportVariable &R_ );
-	 
-     returnValue minimizeLSQEndTerm  ( const ExportVariable &S_                   );
-	 
-	 returnValue minimizeLSQStartTerm( const ExportVariable& S_, const ExportVariable& S2_ = emptyConstExportVariable );
- 
-     returnValue getQRmatrices       ( ExportVariable &Q_, ExportVariable &R_, ExportVariable &QF_, ExportVariable& QS_, ExportVariable& QS2_ ) const;
-
-
-     /** Adds an Least Square term that is only evaluated at the end:          \n
-      *                                                                        \n
-      *        0.5* || ( m(T,x(T),u(T),p(T),...) - r ) ||^2_S                  \n
-      *                                                                        \n
-      *  where  S  is a weighting matrix, r a reference vector and T the time  \n
-      *  at the last objective grid point.                                     \n
-      *                                                                        \n
-      *  \return SUCCESSFUL_RETURN                                             \n
-      */
-     returnValue minimizeLSQEndTerm( const Matrix   & S,  /**< a weighting matrix */
-                                     const Function & m,  /**< the LSQ-Function   */
-                                     const Vector   & r   /**< the reference      */ );
-
-     returnValue minimizeLSQEndTerm( const Function & m,  /**< the LSQ-Function   */
-                                     const Vector   & r   /**< the reference      */ );
-
-     //
-     // Code generation based
-     //
-
-     returnValue minimizeLSQ(	const ExportVariable& S,	/**< a weighting matrix */
-    		 	 	 			const Function& h			/**< the LSQ-Function   */
-     	 	 	 	 	 	 	);
-
-     returnValue minimizeLSQEndTerm(	const ExportVariable& S,	/**< a weighting matrix */
-	 									const Function& h			/**< the LSQ-Function   */
- 	 	 	 							);
-
-     returnValue minimizeLSQ(	const ExportVariable& S,	/**< a weighting matrix */
-    		 	 	 	 	 	 const String& h			/**< the LSQ-Function   */
-     );
-
-     returnValue minimizeLSQEndTerm(	const ExportVariable& S,	/**< a weighting matrix */
-    		 	 	 	 	 	 	 	 const String& h			/**< the LSQ-Function   */
-     	 	 	 	 	 	 	 	 	 );
-
-     //
-     // Linear terms for LSQ
-     //
-
-     returnValue minimizeLSQLinearTerms(	const Vector& Slx,
-     	 	 	 	 	 	 	 	 	 	const Vector& Slu
-     	 	 	 	 	 	 	 	 	 	);
-
-     returnValue minimizeLSQLinearTerms(	const ExportVariable& Slx,
-    		 	 	 	 	 	 	 	 	const ExportVariable& Slu
-    		 	 	 	 	 	 	 	 	);
-
-
-     /** Adds an differential equation (as a continous equality constraint). \n
-      *                                                                      \n
-      *  \param differentialEquation_ the differential equation to be added  \n
-      *  \param n_                    the number of control intervals        \n
-      *                                                                      \n
-      *  \return SUCCESSFUL_RETURN
-      */
-     returnValue subjectTo( const DifferentialEquation& differentialEquation_ );
-
-
-     /**  Adds a (continuous) contraint.                \n
-       *  \return SUCCESSFUL_RETURN                     \n
-       *          RET_INFEASIBLE_CONSTRAINT             \n
-       */
-     returnValue subjectTo( const ConstraintComponent& component );
-
-
-     /**< Adds a (discrete) contraint.                  \n
-       *  \return SUCCESSFUL_RETURN                     \n
-       *          RET_INFEASIBLE_CONSTRAINT             \n
-       */
-     returnValue subjectTo( const int index_, const ConstraintComponent& component );
-
-
-     /**  Adds a (discrete) contraint.                  \n
-       *  \return SUCCESSFUL_RETURN                     \n
-       *          RET_INFEASIBLE_CONSTRAINT             \n
-       */
-     returnValue subjectTo( const TimeHorizonElement index_, const ConstraintComponent& component );
-
-
-     // ===========================================================================
-     //
-     //                       COUPLED BOUNDARY CONSTRAINTS
-     //                       ----------------------------
-     //
-     //
-     //   (general form  lb <=   h_1( t_0,x(t_0),u(t_0),p,... )
-     //                        + h_2( t_e,x(t_e),u(t_e),p,... ) <= ub(i)  )
-     //
-     //    where t_0 is the first and t_e the last time point in the grid.
-     //
-     // ===========================================================================
-
-     /**< Adds a constraint of the form  lb_ <= arg1(0) + arg_2(T) <= ub  with   \n
-      *   constant lower and upper bounds.                                       \n
-      *
-      *   \return  SUCCESSFUL_RETURN
-      *            RET_INFEASIBLE_CONSTRAINT
-      *
-      */
-     returnValue subjectTo( const double lb_, const Expression& arg1,
-                            const Expression& arg2, const double ub_ );
-
-
-
-     // ===========================================================================
-     //
-     //                         GENERAL COUPLED CONSTRAINTS
-     //                       -------------------------------
-     //
-     //
-     //   (general form  lb <= sum_i  h_i( t_i,x(t_i),u(t_i),p,... ) <= ub(i)  )
-     //
-     //
-     // ===========================================================================
-
-     /**< Adds a constraint of the form  lb_ <= sum_i arg_i(t_i) <= ub  with     \n
-      *   constant lower and upper bounds.                                       \n
-      *
-      *   \return  SUCCESSFUL_RETURN
-      *            RET_INFEASIBLE_CONSTRAINT
-      *
-      */
-     returnValue subjectTo( const double lb_, const Expression *arguments, const double ub_ );
-
-
-     BooleanType hasObjective           () const;
-     BooleanType hasConstraint          () const;
-
-     returnValue getGrid                ( Grid&      grid_                               ) const;
-     returnValue getObjective           ( Objective& objective_                          ) const;
-     returnValue getObjective           ( const int &multiObjectiveIdx, Expression **arg ) const;
-
-
-
-     returnValue getConstraint( Constraint& constraint_ ) const;
-
-
-
-     returnValue setObjective ( const Objective & objective_  );
-     returnValue setConstraint( const Constraint& constraint_ );
-     returnValue setNumberIntegrationSteps( const uint numSteps );
-
-
-     double getStartTime ( ) const;
-     double getEndTime( ) const;
-
-	//
-	// MHE related stuff
-	//
+	/** Adds an expression as a the Mayer term to be maximized.
+	 *  Note that this function is introduced for convenience only.
+	 *  A call of the form maximizeMayerTerm( arg ) is equivalent to
+	 *  calling minimizeMayerTerm( -arg ).\n
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue maximizeMayerTerm( const Expression& arg );
+
+
+	/** Adds an expression as a the Lagrange term to be minimized.
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue minimizeLagrangeTerm( const Expression& arg );
+
+
+	/** Adds an expression as a the Lagrange term to be maximized.
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue maximizeLagrangeTerm( const Expression& arg );
+
+
+	/** \name Least Squares terms.
+	 *
+	 *  Adds a Least Square term of the form
+	 *
+	 *  \f{equation*}{
+	 *    \frac{1}{2} \sum_i \Vert h(t_i,x(t_i),u(t_i),p(t_i),...) - r \Vert^2_{S_{i}}
+	 *  \f}
+	 *
+	 *  Here the sum is over all grid points of the objective grid. The
+	 *  Matrix \f$ S \f$ is assumed to be symmetric and positive (semi-) definite.
+	 *  The Function \f$ r \f$ is called reference and can be
+	 *  specified by the user. The function \f$ h \f$ is a standard Function.
+	 *
+	 *  \see function_.hpp
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 *
+	 *  @{ */
+	returnValue minimizeLSQ(	const Matrix   &S,   /**< a weighting matrix */
+								const Function &h,   /**< the LSQ-Function   */
+								const Vector   &r    /**< the reference      */ );
+
+	returnValue minimizeLSQ(	const Function &h,   /**< the LSQ-Function   */
+								const Vector   &r    /**< the reference      */ );
+
+	returnValue minimizeLSQ(	const Function &h    /**< the LSQ-Function   */ );
+
+	returnValue minimizeLSQ(	const MatrixVariablesGrid &S,   /**< a weighting matrix */
+								const Function            &h,   /**< the LSQ-Function   */
+								const VariablesGrid       &r    /**< the reference      */ );
+
+	returnValue minimizeLSQ(	const Matrix        &S,   /**< a weighting matrix */
+								const Function      &h,   /**< the LSQ-Function   */
+								const VariablesGrid &r    /**< the reference      */ );
+
+	returnValue minimizeLSQ(	const Function      &h,   /**< the LSQ-Function   */
+								const VariablesGrid &r    /**< the reference      */ );
+
+	returnValue minimizeLSQ(	const MatrixVariablesGrid &S,   /**< a weighting matrix */
+								const Function            &h,   /**< the LSQ-Function   */
+								const char*        rFilename    /**< filename where the reference is stored */ );
+
+
+	returnValue minimizeLSQ(	const Matrix        &S,   /**< a weighting matrix */
+								const Function      &h,   /**< the LSQ-Function   */
+								const char*  rFilename    /**< filename where the reference is stored */ );
+
+	returnValue minimizeLSQ(	const Function      &h,   /**< the LSQ-Function   */
+								const char*  rFilename    /**< filename where the reference is stored */ );
+
+	/** \note Applicable only for automatic code generation.
+	 *  \warning This function will be deprecated in the next release.
+	 * */
+	returnValue minimizeLSQ(	const ExportVariable &Q_,	/**< a weighting matrix for differential states. */
+								const ExportVariable &R_	/**< a weighting matrix for controls. */ );
+
+	/** \note Applicable only for automatic code generation.
+	 *  \warning Experimental. */
+	returnValue minimizeLSQ(	const ExportVariable& S,	/**< a weighting matrix */
+								const Function& h			/**< the LSQ-Function   */ );
+
+	returnValue minimizeLSQ(	const ExportVariable& S,	/**< a weighting matrix */
+								const String& h				/**< the externally defined LSQ-Function   */ );
+	/** @} */
+
+
+	/** \name Least Squares end terms.
+	 *
+	 *  Adds an Least Square term that is only evaluated at the end:
+	 *
+	 *  \f{equation*}{
+	 *        \frac{1}{2} \Vert( m(T,x(T),u(T),p(T),...) - r )\Vert^2_S
+	 *  \f}
+	 *
+	 *  where  \f$ S \f$ is a weighting matrix, \f$ r \f$ a reference vector
+	 *  and \f$ T \f$ the time at the last objective grid point. The function
+	 *  \f$ m \f$ is a standard Function.
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 *
+	 *  @{ */
+	returnValue minimizeLSQEndTerm( const Matrix   & S,  /**< a weighting matrix */
+									const Function & m,  /**< the LSQ-Function   */
+									const Vector   & r   /**< the reference      */ );
+
+	returnValue minimizeLSQEndTerm( const Function & m,  /**< the LSQ-Function   */
+									const Vector   & r   /**< the reference      */ );
+
+	/** \note Applicable only for automatic code generation.
+	 *  \warning This function will be deprecated in the next release.
+	 */
+	returnValue minimizeLSQEndTerm(	const ExportVariable &S		/**< a weighting matrix for differential states */ );
+
+	/** \note Applicable only for automatic code generation.
+	 *  \warning Experimental. */
+	returnValue minimizeLSQEndTerm(	const ExportVariable& S,	/**< a weighting matrix */
+									const Function& m			/**< the LSQ-Function   */ );
+
+	/** \note Applicable only for automatic code generation.
+	 *  \warning Experimental. */
+	returnValue minimizeLSQEndTerm(	const ExportVariable& S,	/**< a weighting matrix */
+									const String& m				/**< the externally defined LSQ-Function   */ );
+	/** @} */
+
+	/** Adds an differential equation (as a continuous equality constraint). \n
+	 *                                                                      \n
+	 *  \param differentialEquation_ the differential equation to be added  \n
+	 *  \param n_                    the number of control intervals        \n
+	 *                                                                      \n
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue subjectTo( const DifferentialEquation& differentialEquation_ );
+
+
+	/**  Adds a (continuous) constraint.
+	 *  \return SUCCESSFUL_RETURN                     \n
+	 *          RET_INFEASIBLE_CONSTRAINT             \n
+	 */
+	returnValue subjectTo( const ConstraintComponent& component );
+
+
+	/**< Adds a (discrete) constraint.
+	 *  \return SUCCESSFUL_RETURN                     \n
+	 *          RET_INFEASIBLE_CONSTRAINT             \n
+	 */
+	returnValue subjectTo( const int index_, const ConstraintComponent& component );
+
+
+	/**  Adds a (discrete) contraint.
+	 *  \return SUCCESSFUL_RETURN                     \n
+	 *          RET_INFEASIBLE_CONSTRAINT             \n
+	 */
+	returnValue subjectTo( const TimeHorizonElement index_, const ConstraintComponent& component );
+
+
+	/** Add a coupled boundary constraint.
+	 *
+	 *  Coupled boundary constraints of general form
+	 *
+	 *  \f{equation*}{
+	 *  	\text{lb} \leq  h_1( t_0,x(t_0),u(t_0),p,... ) + h_2( t_e,x(t_e),u(t_e),p,... ) \leq \text{ub}
+	 *  \f}
+	 *
+	 *  where \f$ t_0 \f$ is the first and \f$ t_e \f$ the last time point in the grid.
+	 *  Adds a constraint of the form  \verbatim lb <= arg1(0) + arg2(T) <= ub \endverbatim
+	 *  with constant lower and upper bounds.
+	 *
+	 *   \return  SUCCESSFUL_RETURN \n
+	 *            RET_INFEASIBLE_CONSTRAINT
+	 */
+	returnValue subjectTo(	const double lb_,
+							const Expression& arg1,
+							const Expression& arg2,
+							const double ub_ );
+
+
+	/** Add a custom constraint.
+	 *
+	 *  Adds a constraint of the form
+	 *
+	 *  \f{equation*}{
+	 *    \text{lb} <= \sum_i h_i(t_i, x(t_i), u(t_i), p, ...) <= \text{ub}
+	 *  \f}
+	 *
+	 *   with constant lower and upper bounds.
+	 *
+	 *   \return  SUCCESSFUL_RETURN \n
+	 *            RET_INFEASIBLE_CONSTRAINT
+	 *
+	 */
+	returnValue subjectTo( const double lb_, const Expression *arguments, const double ub_ );
+
+
+	/** \name Helper functions.
+	 *
+	 *  @{ */
+	BooleanType hasObjective           () const;
+	BooleanType hasConstraint          () const;
+
+	returnValue getGrid                ( Grid&      grid_                               ) const;
+	returnValue getObjective           ( Objective& objective_                          ) const;
+	returnValue getObjective           ( const int &multiObjectiveIdx, Expression **arg ) const;
+
+	returnValue getConstraint( Constraint& constraint_ ) const;
+
+	returnValue setObjective ( const Objective & objective_  );
+	returnValue setConstraint( const Constraint& constraint_ );
+	returnValue setNumberIntegrationSteps( const uint numSteps );
+
+	/** Returns whether the ocp grid is equidistant.
+	 *
+	 * \return BT_TRUE  iff the OCP grid is equidistant, BT_FALSE otherwise.
+	 */
+	virtual BooleanType hasEquidistantGrid( ) const;
+
+	double getStartTime ( ) const;
+	double getEndTime( ) const;
+	/** @} */
+
+	/** \name Set linear terms in the LSQ formulation.
+	 *
+	 *  @{ */
+
+	/** Applicable only for automatic code generation.
+	 *  \note Experimental. */
+	returnValue minimizeLSQLinearTerms(	const Vector& Slx,	/**< a weighting vector for differential states. */
+										const Vector& Slu	/**< a weighting vector for controls. */ );
+
+	/** Applicable only for automatic code generation.
+	 *  \note Experimental. */
+	returnValue minimizeLSQLinearTerms(	const ExportVariable& Slx,	/**< a weighting vector for differential states. */
+										const ExportVariable& Slu	/**< a weighting vector for controls. */ );
+	/** @} */
+
+	/** \name MHE Code generation related functions.
+	 *  \warning These functions will be deprecated in next release.
+	 *  \note Experimental.
+	 *
+	 *  @{ */
 	returnValue minimizeLSQMHE( const Matrix& Q_, const Matrix& R_ );
 	returnValue minimizeLSQMHEArrivalCost( const Matrix& PL_ );
 
-	returnValue getMHEWeightingMatrices( Matrix& Q_, Matrix& R_, Matrix& PL_ );
-
 	returnValue setMHEMeasurementMatrix( const Matrix& Cs_ );
+	returnValue getMHEWeightingMatrices( Matrix& Q_, Matrix& R_, Matrix& PL_ );
 	returnValue getMHEMeasurementMatrix( Matrix& Cs_ );
 
+	returnValue minimizeLSQStartTerm(	const ExportVariable& S_,
+										const ExportVariable& S2_ = emptyConstExportVariable );
 
-		/** Returns whether the ocp grid is equidistant.	\n
-		 *  
-		 * \return BT_TRUE  iff the ocp grid is equidistant, BT_FALSE otherwise. \n
-		 */
-		virtual BooleanType hasEquidistantGrid( ) const;
+	returnValue getQRmatrices(	ExportVariable &Q_,
+								ExportVariable &R_,
+								ExportVariable &QF_,
+								ExportVariable& QS_,
+								ExportVariable& QS2_ ) const;
+	/** @} */
 
-    //
-    // PROTECTED FUNCTIONS:
-    //
-    protected:
+protected:
 
-        void setupGrid( double tStart, double tEnd, int N );
-        void setupGrid( const Vector& times );
-        void copy( const OCP &rhs );
+	void setupGrid( double tStart, double tEnd, int N );
+	void setupGrid( const Vector& times );
+	void copy( const OCP &rhs );
 
+protected:
 
-    //
-    // DATA MEMBERS:
-    //
-    protected:
+	Grid		grid;		/**< Common discretization grid. */
+	Objective	objective;	/**< The Objective. */
+	Constraint	constraint;	/**< The Constraints. */
 
-        Grid                   grid                 ;   /**< Common discretization grid            					*/
-        Objective              objective            ;   /**< The Objective.                        					*/
-        Constraint             constraint           ;   /**< The Constraints.                      					*/
-
-        ExportVariable QQ,RR,QF;
-		ExportVariable QS,QS2;
-
-		Matrix mQ, mR, mQF, mPL, mCs;
+	/** \name Weighting matrices used in automatic code generation.
+	 *  \warning These variables will be removed in next release.
+	 *  @{ */
+	ExportVariable QQ,RR,QF;
+	ExportVariable QS,QS2;
+	Matrix mQ, mR, mQF, mPL, mCs;
+	/** @} */
 };
 
 
 CLOSE_NAMESPACE_ACADO
 
 
-
 #include <acado/ocp/ocp.ipp>
 #include <acado/ocp/nlp.hpp>
 
 #endif  // ACADO_TOOLKIT_OCP_HPP
-
-/*
- *   end of file
- */

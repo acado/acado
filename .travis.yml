@@ -1,6 +1,14 @@
 language: c++
+compiler:
+ - gcc
+ - clang
 script:
  - mkdir build
  - cd build
- - cmake ..
+ - cmake -DCMAKE_BUILD_TYPE=Debug ..
  - make
+notifications:
+  recipients:
+    - mvukov@gmail.com
+  email:
+    on_failure: always

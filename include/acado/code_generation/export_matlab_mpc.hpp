@@ -98,7 +98,7 @@ class ExportMatlabMPC : public ExportTemplatedFile
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue configure(	const uint numSteps, const uint verbose, const uint timingCalls );
+		returnValue configure(	const uint OSWindows, const uint numSteps, const uint verbose, const uint timingCalls );
 
 	protected:
 
