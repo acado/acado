@@ -213,7 +213,7 @@ ExportVariable ExportVariableInternal::getTranspose( ) const
 ExportVariable ExportVariableInternal::getRow(	const ExportIndex& idx
 												) const
 {
-	ASSERT( isAccessedTransposed() == BT_FALSE );
+	ASSERT( doAccessTransposed == BT_FALSE );
 
 	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
@@ -235,7 +235,7 @@ ExportVariable ExportVariableInternal::getRow(	const ExportIndex& idx
 ExportVariable ExportVariableInternal::getCol(	const ExportIndex& idx
 												) const
 {
-	ASSERT( isAccessedTransposed() == BT_FALSE );
+	ASSERT( doAccessTransposed == BT_FALSE );
 
 	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
@@ -258,7 +258,7 @@ ExportVariable ExportVariableInternal::getRows(	const ExportIndex& idx1,
 												const ExportIndex& idx2
 												) const
 {
-	ASSERT( isAccessedTransposed() == BT_FALSE );
+	ASSERT( doAccessTransposed == BT_FALSE );
 
 	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
@@ -289,7 +289,7 @@ ExportVariable ExportVariableInternal::getCols(	const ExportIndex& idx1,
 												const ExportIndex& idx2
 												) const
 {
-	ASSERT( isAccessedTransposed() == BT_FALSE );
+	ASSERT( doAccessTransposed == BT_FALSE );
 
 	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
@@ -322,7 +322,7 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 														const ExportIndex& _colIdx2
 														) const
 {
-	ASSERT( isAccessedTransposed() == BT_FALSE );
+	ASSERT( doAccessTransposed == BT_FALSE );
 
 	ExportVariable tmp;
 

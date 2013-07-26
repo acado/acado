@@ -61,7 +61,7 @@ inline const DifferentialEquation& DynamicSystem::getDifferentialEquation(	uint 
 																	) const
 {
 	ASSERT( diffEqn != 0 );
-	ASSERT( ( stageIdx >= 0 ) && ( stageIdx < nDiffEqn ) );
+	ASSERT( stageIdx < nDiffEqn );
 
 	return *(diffEqn[stageIdx]);
 }
@@ -71,7 +71,7 @@ inline const OutputFcn& DynamicSystem::getOutputFcn(	uint stageIdx
 												) const
 {
 	ASSERT( outputFcn != 0 );
-	ASSERT( ( stageIdx >= 0 ) && ( stageIdx < nDiffEqn ) );
+	ASSERT( stageIdx < nDiffEqn );
 
 	return *(outputFcn[stageIdx]);
 }
