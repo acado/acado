@@ -241,10 +241,11 @@ BooleanType acadoIsEqual( const char* str1, const char* str2 )
 
 BooleanType acadoIsEqual( double x, double y, double TOL ){
 
-	if( acadoMax(x,y) > 1)
+  double maxabs= acadoMax(fabs(x),fabs(y));
+	if(maxabs > 1)
 	{
 		// use relative error
-		if ( fabs( x-y )/acadoMax(x,y) >= 10.0*TOL ) return BT_FALSE;
+		if ( fabs( x-y )/maxabs >= 10.0*TOL ) return BT_FALSE;
 		else                      return BT_TRUE ;
 	}
 	else
