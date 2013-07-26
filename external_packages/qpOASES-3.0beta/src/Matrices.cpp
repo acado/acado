@@ -1033,9 +1033,11 @@ returnValue SparseMatrix::addToDiag(real_t alpha)
 	long i;
 
 	if (!isExactlyZero(alpha))
+	{
 		for (i = 0; i < nRows && i < nCols; i++)
 			if (ir[jd[i]] == i) val[jd[i]] += alpha;
 			else return RET_NO_DIAGONAL_AVAILABLE;
+	}
 
 	return SUCCESSFUL_RETURN;
 }

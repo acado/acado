@@ -477,7 +477,7 @@ inline returnValue VariableSettings::setName(	uint idx,
 	}
 
 	strncpy( names[idx],_name,MAX_LENGTH_NAME );
-	names[MAX_LENGTH_NAME] = '\0';
+	names[MAX_LENGTH_NAME] = NULL;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -524,7 +524,7 @@ inline returnValue VariableSettings::setUnit(	uint idx,
 	}
 
 	strncpy( units[idx],_unit,MAX_LENGTH_NAME );
-	units[MAX_LENGTH_NAME] = '\0';
+	units[MAX_LENGTH_NAME] = NULL;
 
 	return SUCCESSFUL_RETURN;
 }
