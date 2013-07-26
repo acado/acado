@@ -148,7 +148,9 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
 	}
 
-	integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
+	if( inputDim > rhsDim ) {
+		integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
+	}
 	integrate.addLinebreak( );
 
     // integrator loop
