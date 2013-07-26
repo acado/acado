@@ -50,17 +50,14 @@ inline int PathConstraint::getNC() const{
 }
 
 
-#ifdef __DEBUG__
-#  define ACADO_IDX_NAME idx_
-#else
-#  define ACADO_IDX_NAME
-#endif
+inline int PathConstraint::getDim( const int& idx_)
+{
+	if (idx_ >= (int) grid.getNumPoints())
+	{
+		LOG( LVL_WARNING ) << "Invalid index, will be ignored" << std::endl;
+	}
 
-inline int PathConstraint::getDim( const int& ACADO_IDX_NAME){
-
-    ASSERT( idx_ < (int) grid.getNumPoints() );
-
-    if( fcn == 0 )
+    if(fcn == 0)
         return 0;
 
     return fcn[0].getDim();
