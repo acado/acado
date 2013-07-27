@@ -206,7 +206,9 @@ returnValue acadoAssignString(	char** toString,
 /** A function for file copying.
  */
 returnValue acadoCopyFile(	const char* source,
-							const char* destination
+							const char* destination,
+							const char* commentString = 0,
+							BooleanType printCodegenNotice = BT_FALSE
 							);
 
 CLOSE_NAMESPACE_ACADO
