@@ -88,7 +88,7 @@ ExportStatement* ExportStatementBlock::clone( ) const
 returnValue ExportStatementBlock::addStatement(	const ExportStatement& _statement
 												)
 {
-	statements.push_back( statementPtr( _statement.clone() ) );
+	statements.push_back( StatementPtr( _statement.clone() ) );
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -262,7 +262,7 @@ returnValue ExportStatementBlock::exportDataDeclaration(	FILE *file,
 															int _precision
 															) const
 {
-	statementPtrArray::const_iterator it = statements.begin();
+	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
 		if ((*it)->exportDataDeclaration(file, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
@@ -278,7 +278,7 @@ returnValue ExportStatementBlock::exportCode(	FILE* file,
 												int _precision
 												) const
 {
-	statementPtrArray::const_iterator it = statements.begin();
+	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
 		if ((*it)->exportCode(file, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );

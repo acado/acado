@@ -26,8 +26,8 @@
 
 /**
  *    \file src/code_generation/export_function.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010 - 2013
  */
 
 #include <acado/code_generation/export_function.hpp>
@@ -59,7 +59,7 @@ ExportFunction::ExportFunction(	const String& _name,
 	functionReturnValue = 0;
 	returnAsPointer = BT_FALSE;
 
-	memAllocator = memoryAllocatorPtr( new MemoryAllocator );
+	memAllocator = MemoryAllocatorPtr( new MemoryAllocator );
 
 	init( _name,_argument1,_argument2,_argument3,
 				_argument4,_argument5,_argument6,
@@ -190,9 +190,9 @@ returnValue ExportFunction::addArgument(	const ExportArgument& _argument1,
 
 
 
-returnValue ExportFunction::setReturnValue(	const ExportVariable& _functionReturnValue,
-											BooleanType _returnAsPointer
-											)
+ExportFunction& ExportFunction::setReturnValue(	const ExportVariable& _functionReturnValue,
+												BooleanType _returnAsPointer
+												)
 {
 	if ( functionReturnValue != 0 )
 		*functionReturnValue = _functionReturnValue;
@@ -201,19 +201,19 @@ returnValue ExportFunction::setReturnValue(	const ExportVariable& _functionRetur
 	
 	returnAsPointer = _returnAsPointer;
 
-	return SUCCESSFUL_RETURN;
+	return *this;
 }
 
 
-returnValue	ExportFunction::setName(	const String& _name
-										)
+ExportFunction&	ExportFunction::setName(	const String& _name
+											)
 {
 	if ( _name.isEmpty() == BT_TRUE )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
+		ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	name = _name;
 	
-	return SUCCESSFUL_RETURN;
+	return *this;
 }
 
 
@@ -333,7 +333,7 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	//
 	// Set parent pointers, and run memory allocation
 	//
-	statementPtrArray::const_iterator it = statements.begin();
+	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
 		(*it)->allocate( memAllocator );
 
@@ -381,15 +381,6 @@ returnValue ExportFunction::exportCode(	FILE *file,
 }
 
 
-
-ExportVariable ExportFunction::getGlobalExportVariable( ) const
-{
-	ASSERT( 1==0 );
-	return ExportVariable();
-}
-
-
-
 BooleanType ExportFunction::isDefined( ) const
 {
 	if ( ( name.isEmpty() == BT_FALSE ) && 
@@ -400,12 +391,10 @@ BooleanType ExportFunction::isDefined( ) const
 }
 
 
-
-uint ExportFunction::getNumArguments( ) const
+unsigned ExportFunction::getNumArguments( ) const
 {
 	return functionArguments.getNumArguments( );
 }
-
 
 
 //
@@ -425,33 +414,39 @@ returnValue ExportFunction::clear( )
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportFunction::addIndex(const ExportIndex& _index)
+ExportFunction& ExportFunction::addIndex(const ExportIndex& _index)
 {
-	return memAllocator->add( _index );
+	memAllocator->add( _index );
+
+	return *this;
 }
 
-returnValue ExportFunction::acquire(ExportIndex& obj)
+ExportFunction& ExportFunction::acquire(ExportIndex& obj)
 {
-	return memAllocator->acquire( obj );
+	memAllocator->acquire( obj );
+
+	return *this;
 }
 
-returnValue ExportFunction::release(const ExportIndex& obj)
+ExportFunction& ExportFunction::release(const ExportIndex& obj)
 {
-	return memAllocator->release( obj );
+	memAllocator->release( obj );
+
+	return *this;
 }
 
-returnValue ExportFunction::addVariable(const ExportVariable& _var)
+ExportFunction& ExportFunction::addVariable(const ExportVariable& _var)
 {
 	localVariables.push_back( _var );
 
-	return SUCCESSFUL_RETURN;
+	return *this;
 }
 
-returnValue ExportFunction::doc(const String& _doc)
+ExportFunction& ExportFunction::doc(const String& _doc)
 {
 	description = _doc;
 
-	return SUCCESSFUL_RETURN;
+	return *this;
 }
 
 CLOSE_NAMESPACE_ACADO

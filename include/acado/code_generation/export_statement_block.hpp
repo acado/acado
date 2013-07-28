@@ -288,10 +288,9 @@ class ExportStatementBlock : public ExportStatement
 	// DATA MEMBERS:
 	//
 	protected:
-		typedef std::vector< statementPtr > statementPtrArray;
 
 		/** Array containing all statements of the statement block. */
-		statementPtrArray statements;
+		StatementPtrArray statements;
 };
 
 

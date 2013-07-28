@@ -30,6 +30,8 @@
 
 #include <acado/code_generation/memory_allocator.hpp>
 
+using namespace std;
+
 BEGIN_NAMESPACE_ACADO
 
 returnValue MemoryAllocator::acquire(ExportIndex& _obj)
@@ -53,7 +55,10 @@ returnValue MemoryAllocator::acquire(ExportIndex& _obj)
 returnValue MemoryAllocator::release(const ExportIndex& _obj)
 {
 	if (indices.release( _obj ) == false)
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Object is not found in the pool");
+	{
+		LOG( LVL_ERROR ) << "Object '" << _obj.getFullName().getName() << "' is not found in an object pool" << endl;
+		return ACADOERROR( RET_INVALID_ARGUMENTS );
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -61,7 +66,10 @@ returnValue MemoryAllocator::release(const ExportIndex& _obj)
 returnValue MemoryAllocator::add(const ExportIndex& _obj)
 {
 	if (indices.add( _obj ) == false)
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Index with the same name already exists in the object pool");
+	{
+		LOG( LVL_WARNING ) << "Object '" << _obj.getFullName().getName() << "' already exists in an object pool" << endl;
+		return ACADOERROR( RET_INVALID_ARGUMENTS );
+	}
 
 	return SUCCESSFUL_RETURN;
 }

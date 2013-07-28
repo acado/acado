@@ -26,8 +26,8 @@
 
 /**
  *    \file include/acado/code_generation/export_statement.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010 - 2013
  */
 
 
@@ -57,7 +57,7 @@ class MemoryAllocator;
  *	The class ExportStatement serves as a base class for all kind of statements to be exported 
  *	by the code generation tool.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class ExportStatement
 {
@@ -67,13 +67,15 @@ class ExportStatement
     public:
 
 		/** Shared pointer to a statement. */
-		typedef std::tr1::shared_ptr< ExportStatement > statementPtr;
+		typedef std::tr1::shared_ptr< ExportStatement > StatementPtr;
+
+		/** A vector of shared pointer statements. */
+		typedef std::vector< StatementPtr > StatementPtrArray;
 
 		/** Shared pointer to a memory allocator */
-		typedef std::tr1::shared_ptr< MemoryAllocator > memoryAllocatorPtr;
+		typedef std::tr1::shared_ptr< MemoryAllocator > MemoryAllocatorPtr;
 
-		/** Default constructor. 
-		 */
+		/** Default constructor. */
         ExportStatement( );
 
 		/** Copy constructor (deep copy).
@@ -83,8 +85,7 @@ class ExportStatement
 		ExportStatement(	const ExportStatement& arg
 							);
 
-        /** Destructor. 
-		 */
+        /** Destructor. */
         virtual ~ExportStatement( );
 
 		/** Assignment operator (deep copy).
@@ -133,19 +134,22 @@ class ExportStatement
 										int _precision = 16
 										) const = 0;
 
-		virtual returnValue acquire( ExportIndex&  )
+		/** Acquire an index. */
+		virtual ExportStatement& acquire( ExportIndex&  )
 		{
-			return RET_NOT_IMPLEMENTED_IN_BASE_CLASS;
+			return *this;
 		}
 
-		virtual returnValue release( const ExportIndex&  )
+		/** Release an index. */
+		virtual ExportStatement& release( const ExportIndex&  )
 		{
-			return RET_NOT_IMPLEMENTED_IN_BASE_CLASS;
+			return *this;
 		}
 
-		virtual returnValue allocate( memoryAllocatorPtr  )
+		/** Set a memory allocator. */
+		virtual ExportStatement& allocate( MemoryAllocatorPtr  )
 		{
-			return SUCCESSFUL_RETURN;
+			return *this;
 		}
 };
 
