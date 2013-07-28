@@ -25,8 +25,8 @@
 
 /**
  *    \file src/utils/acado_utils.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 31.05.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 
