@@ -33,7 +33,6 @@
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/function/function_evaluation_tree.hpp>
-#include <acado/code_generation/export_variable.hpp>
 
 
 
@@ -54,8 +53,7 @@ FunctionEvaluationTree::FunctionEvaluationTree( ){
     dim       =  0;
     n         =  0;
 
-    auxVariableName = "acado_aux";
-    auxVariableStructName = "acadoWorkspace";
+    globalExportVariableName = "acadoWorkspace.acado_aux";
 }
 
 FunctionEvaluationTree::FunctionEvaluationTree( const FunctionEvaluationTree& arg ){
@@ -65,8 +63,7 @@ FunctionEvaluationTree::FunctionEvaluationTree( const FunctionEvaluationTree& ar
     dim = arg.dim;
     n   = arg.n  ;
 
-    auxVariableName = arg.auxVariableName;
-    auxVariableStructName = arg.auxVariableStructName;
+    globalExportVariableName = arg.globalExportVariableName;
 
     if( arg.f == NULL ){
         f = NULL;
@@ -156,8 +153,7 @@ FunctionEvaluationTree& FunctionEvaluationTree::operator=( const FunctionEvaluat
         dim = arg.dim;
         n   = arg.n  ;
 
-        auxVariableName = arg.auxVariableName;
-        auxVariableStructName = arg.auxVariableStructName;
+        globalExportVariableName = arg.globalExportVariableName;
 
         if( arg.f == NULL ){
             f = NULL;
@@ -885,7 +881,7 @@ returnValue FunctionEvaluationTree::exportHeader(	FILE *file,
 													) const{
 
     if( n > 0 )
-    	acadoFPrintf(file,"%s %s[%d];\n", realString, auxVariableName.getName(), n );
+    	acadoFPrintf(file,"%s %s[%d];\n", realString, globalExportVariableName.getName(), n );
 
     return SUCCESSFUL_RETURN;
 }
@@ -1000,21 +996,9 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
     // TODO: setGlobalExportvariable should set the full name once....
     //
 
-    String auxVarName;
-    if ( auxVariableStructName.isEmpty() )
-    {
-    	auxVarName = auxVariableName;
-    }
-    else
-    {
-    	auxVarName = auxVariableStructName;
-    	auxVarName += ".";
-    	auxVarName += auxVariableName;
-    }
-
     Stream *auxVarIndividualNames = new Stream[nni];
 	for( run1 = 0; run1 < n; run1++ )
-		auxVarIndividualNames[lhs_comp[run1]] << auxVarName << "[" << run1 << "]";
+		auxVarIndividualNames[lhs_comp[run1]] << globalExportVariableName << "[" << run1 << "]";
 
 
     // Export intermediate quantities
@@ -1023,7 +1007,7 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
     	// Convert the name for intermediate variables for subexpressions
     	sub[ run1 ]->setVariableExportName(VT_INTERMEDIATE_STATE, auxVarIndividualNames );
 
-        acadoFPrintf(file,"%s[%d] = ", auxVarName.getName(), run1 );
+        acadoFPrintf(file,"%s[%d] = ", globalExportVariableName.getName(), run1 );
         file << *sub[run1];
         acadoFPrintf(file,";\n");
     }
@@ -1049,26 +1033,6 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
 
     return SUCCESSFUL_RETURN;
 }
-
-
-ExportVariable FunctionEvaluationTree::getGlobalExportVariable( ) const
-{
-//	int run1;
-//	int nni = 0;
-
-//	for( run1 = 0; run1 < n; run1++ )
-//		if( lhs_comp[run1]+1 > nni )
-//			nni = lhs_comp[run1]+1;
-
-	// TODO fix this in a correct way
-
-	if (auxVariableStructName.isEmpty())
-		return ExportVariable(auxVariableName, n, 1, REAL, ACADO_LOCAL);
-	else
-		return ExportVariable(auxVariableName, n, 1, REAL, ACADO_WORKSPACE);
-}
-
-
 
 
 returnValue FunctionEvaluationTree::clearBuffer(){
@@ -1206,33 +1170,29 @@ BooleanType FunctionEvaluationTree::isSymbolic() const{
 }
 
 
-returnValue FunctionEvaluationTree::setScale( double *scale_ ){
-
+returnValue FunctionEvaluationTree::setScale( double *scale_ )
+{
     return ACADOERROR(RET_INVALID_USE_OF_FUNCTION);
 }
 
-returnValue FunctionEvaluationTree::setAuxVariableName(const String& s)
+returnValue FunctionEvaluationTree::setGlobalExportVariableName(const String& _name)
 {
-	auxVariableName = s;
+	if (_name.getLength() == 0)
+		return ACADOERROR( RET_INVALID_ARGUMENTS );
+
+	globalExportVariableName = _name;
 
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue FunctionEvaluationTree::getAuxVariableName(String& s) const
+String FunctionEvaluationTree::getGlobalExportVariableName() const
 {
-	s = auxVariableName;
-
-	return SUCCESSFUL_RETURN;
+	return globalExportVariableName;
 }
 
-returnValue FunctionEvaluationTree::setAuxVariableStructName(const String& s)
+unsigned FunctionEvaluationTree::getGlobalExportVariableSize() const
 {
-	if (s.isEmpty() || s.getLength() == 1)
-		auxVariableStructName = String();
-	else
-		auxVariableStructName = s;
-
-	return SUCCESSFUL_RETURN;
+	return n;
 }
 
 CLOSE_NAMESPACE_ACADO
