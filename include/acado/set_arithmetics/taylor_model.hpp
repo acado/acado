@@ -111,22 +111,22 @@ public:
       {}
     //! @brief Copy constructor
     template <typename U> Options
-      ( U&options )
-      : BOUNDER_TYPE( options.BOUNDER_TYPE ),
-        PROPAGATE_BNDT( options.PROPAGATE_BNDT ),
-        INTER_WITH_BNDT( options.INTER_WITH_BNDT ),
-        SCALE_VARIABLES( options.SCALE_VARIABLES ),
-        CENTER_REMAINDER( options.CENTER_REMAINDER ),
-        REF_MIDPOINT( options.REF_MIDPOINT )
+      ( U&_options )
+      : BOUNDER_TYPE( _options.BOUNDER_TYPE ),
+        PROPAGATE_BNDT( _options.PROPAGATE_BNDT ),
+        INTER_WITH_BNDT( _options.INTER_WITH_BNDT ),
+        SCALE_VARIABLES( _options.SCALE_VARIABLES ),
+        CENTER_REMAINDER( _options.CENTER_REMAINDER ),
+        REF_MIDPOINT( _options.REF_MIDPOINT )
       {}
     template <typename U> Options& operator =
-      ( U&options ){
-        BOUNDER_TYPE = options.BOUNDER_TYPE;
-        PROPAGATE_BNDT = options.PROPAGATE_BNDT;
-        INTER_WITH_BNDT = options.INTER_WITH_BNDT;
-        SCALE_VARIABLES = options.SCALE_VARIABLES;
-        CENTER_REMAINDER = options.CENTER_REMAINDER;
-        REF_MIDPOINT = options.REF_MIDPOINT;
+      ( U&_options ){
+        BOUNDER_TYPE = _options.BOUNDER_TYPE;
+        PROPAGATE_BNDT = _options.PROPAGATE_BNDT;
+        INTER_WITH_BNDT = _options.INTER_WITH_BNDT;
+        SCALE_VARIABLES = _options.SCALE_VARIABLES;
+        CENTER_REMAINDER = _options.CENTER_REMAINDER;
+        REF_MIDPOINT = _options.REF_MIDPOINT;
         return *this;
       }
     //! @brief Taylor model range bounders

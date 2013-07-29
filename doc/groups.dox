@@ -1,0 +1,11 @@
+/*!
+
+@defgroup UserInterfaces 			User Interfaces         -- allow black-box users to conveniently define and solve numerical problems
+@defgroup UserDataStructures		User Data Structures    -- used mainly by the user to call interface functions
+@defgroup BasicDataStructures		Basic Data Structures   -- used mainly internally or by the user to call interface functions
+@defgroup NumericalAlgorithms		Numerical Algorithms    -- used internally or by developers to solve numerical problems
+@defgroup AlgorithmInterfaces 		Algorithm Interfaces    -- allow to link existing (numerical) algorithms to the package
+@defgroup AuxiliaryFunctionality	Auxiliary Functionality -- internally used by Numerical Algorithms or User Interfaces
+@defgroup ExternalFunctionality		External Functionality  -- to be optionally used by the ACADO Toolkit
+
+*/

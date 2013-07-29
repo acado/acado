@@ -50,11 +50,14 @@ inline int PathConstraint::getNC() const{
 }
 
 
-inline int PathConstraint::getDim( const int& ){
+inline int PathConstraint::getDim( const int& idx_)
+{
+	if (idx_ >= (int) grid.getNumPoints())
+	{
+		LOG( LVL_WARNING ) << "Invalid index, will be ignored" << std::endl;
+	}
 
-    ASSERT( idx_ < (int) grid.getNumPoints() );
-
-    if( fcn == 0 )
+    if(fcn == 0)
         return 0;
 
     return fcn[0].getDim();

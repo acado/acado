@@ -365,7 +365,8 @@ Operator* TreeProjection::passArgument() const{
 
 returnValue TreeProjection::setVariableExportName( const VariableType &_type, const Stream *_name )
 {
-	argument->setVariableExportName(_type, _name);
+	if (argument->getName() == ON_POWER_INT)
+		argument->setVariableExportName(_type, _name);
 
 	return Projection::setVariableExportName(_type, _name);
 }

@@ -160,7 +160,7 @@ class ExportForLoop : public ExportStatementBlock
 		 */
 		ExportForLoop& keepLoop( );
 
-		virtual returnValue allocate(memoryAllocatorPtr allocator);
+		ExportForLoop& allocate(MemoryAllocatorPtr allocator);
 
 
 	//

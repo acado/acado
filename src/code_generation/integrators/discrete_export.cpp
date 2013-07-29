@@ -162,13 +162,7 @@ returnValue DiscreteTimeExport::setup( )
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	String fileName( "integrator.c" );
-
-	int printLevel;
-	get( PRINTLEVEL,printLevel );
-
-	if ( (PrintLevel)printLevel >= HIGH )
-		acadoPrintf( "--> Preparing to export %s... ",fileName.getName() );
+	LOG( LVL_DEBUG ) << "Preparing to export DiscreteTimeExport... " << endl;
 
 	ExportIndex run( "run" );
 	ExportIndex i( "i" );
@@ -344,8 +338,7 @@ returnValue DiscreteTimeExport::setup( )
     	integrate.addStatement( loop2 );
     }
 
-	if ( (PrintLevel)printLevel >= HIGH )
-		acadoPrintf( "done.\n" );
+    LOG( LVL_DEBUG ) << "done" << endl;
 
 	return SUCCESSFUL_RETURN;
 }

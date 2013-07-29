@@ -31,6 +31,7 @@
  */
 
 #include <acado/code_generation/export_ode_function.hpp>
+#include <acado/function/function_.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -40,13 +41,18 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportODEfunction::ExportODEfunction( ) : ExportFunction( )
+ExportODEfunction::ExportODEfunction( ) : ExportFunction( ), globalVar()
 {
 	numX = 0;
 	numXA = 0;
 	numU = 0;
+	numDX = 0;
+	numP = 0;
 
 	f = new Function();
+
+	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
+	f->setGlobalExportVariableName( globalVar.getFullName() );
 }
 
 
@@ -60,6 +66,9 @@ ExportODEfunction::ExportODEfunction(	const Function& _f,
 	numP = 0;
 	numDX = 0;
 	f = new Function( _f );
+
+	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
+	f->setGlobalExportVariableName( globalVar.getFullName() );
 }
 
 
@@ -70,6 +79,7 @@ ExportODEfunction::ExportODEfunction( const ExportODEfunction& arg ) : ExportFun
 	numU = arg.numU;
 	numP = arg.numP;
 	numDX = arg.numDX;
+	globalVar = arg.globalVar;
 
 	if ( arg.f != 0 )
 	{
@@ -94,6 +104,7 @@ ExportODEfunction& ExportODEfunction::operator=( const ExportODEfunction& arg )
 		numX = arg.numX;
 		numXA = arg.numXA;
 		numU = arg.numU;
+		globalVar = arg.globalVar;
 
 		if ( f )
 		{
@@ -145,6 +156,8 @@ returnValue ExportODEfunction::init(	const Function& _f,
 	f = 0;
 
 	f = new Function( _f );
+	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
+	f->setGlobalExportVariableName( globalVar.getFullName() );
 
 	return ExportFunction::init( _name );
 }
@@ -185,36 +198,38 @@ returnValue ExportODEfunction::exportCode(	FILE* file,
 {
 	if (f->getDim() > 0)
 		return f->exportCode(file, name.getName(), _realString.getName(), _precision, numX, numXA, numU, numP, numDX);
+
 	return SUCCESSFUL_RETURN;
 }
-
-
-
-ExportVariable ExportODEfunction::getGlobalExportVariable( ) const
-{
-	return f->getGlobalExportVariable( );
-}
-
 
 
 BooleanType ExportODEfunction::isDefined( ) const
 {
-	if ( f->getDim() > 0 )
+	if (f->getDim() > 0)
 		return BT_TRUE;
-	else
-		return BT_FALSE;
+
+	return BT_FALSE;
 }
 
-returnValue ExportODEfunction::setGlobalExportVariable(const ExportVariable& var)
-{
-	f->setGlobalExportVariable( var );
-
-	return SUCCESSFUL_RETURN;
-}
 
 unsigned ExportODEfunction::getFunctionDim( void )
 {
 	return f->getDim();
+}
+
+ExportVariable ExportODEfunction::getGlobalExportVariable( ) const
+{
+	return deepcopy( globalVar );
+}
+
+returnValue ExportODEfunction::setGlobalExportVariable(const ExportVariable& var)
+{
+	ASSERT(var.getNumRows() < f->getGlobalExportVariableSize() || var.getNumCols() != 1);
+
+	globalVar = var;
+	f->setGlobalExportVariableName( globalVar.getFullName() );
+
+	return SUCCESSFUL_RETURN;
 }
 
 //

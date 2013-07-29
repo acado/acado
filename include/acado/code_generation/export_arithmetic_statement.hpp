@@ -161,7 +161,7 @@ class ExportArithmeticStatement : public ExportStatement
 										int _precision = 16
 										) const;
 
-		 returnValue allocate( memoryAllocatorPtr allocator );
+		ExportArithmeticStatement& allocate( MemoryAllocatorPtr allocator );
 
 	//
     // PROTECTED MEMBER FUNCTIONS:
@@ -245,7 +245,7 @@ class ExportArithmeticStatement : public ExportStatement
 		ExportStatementOperator op1; 			/**< Operator between first and second right-hand side expression of arithmetic statement. */
 		ExportStatementOperator op2;			/**< Operator between second and third right-hand side expression of arithmetic statement. */
 
-		memoryAllocatorPtr memAllocator;
+		MemoryAllocatorPtr memAllocator;
 };
 
 

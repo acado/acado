@@ -119,8 +119,6 @@ returnValue ExportForLoop::exportDataDeclaration(	FILE* file,
 													int _precision
 													) const
 {
-//	ExportStatementBlock::exportDataDeclaration(file, _realString, _intString, _precision);
-
 	return SUCCESSFUL_RETURN;
 }
 
@@ -199,17 +197,17 @@ ExportForLoop& ExportForLoop::keepLoop( )
 	return *this;
 }
 
-returnValue ExportForLoop::allocate(memoryAllocatorPtr allocator)
+ExportForLoop& ExportForLoop::allocate(MemoryAllocatorPtr allocator)
 {
 	//
 	// For loop itself cannot allocate any memory. Thus it just forwards
 	// the pointer, so that later statements can allocate some memory.
 	//
-	statementPtrArray::const_iterator it = statements.begin();
+	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
 		(*it)->allocate( allocator );
 
-	return SUCCESSFUL_RETURN;
+	return *this;
 }
 
 

@@ -70,13 +70,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	bool DERIVATIVES = ((ExportSensitivityType)sensGen != NO_SENSITIVITY);
 
-	String fileName( "integrator.c" );
-
-	int printLevel;
-	get( PRINTLEVEL,printLevel );
-
-	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Preparing to export %s... ",fileName.getName() );
+	LOG( LVL_DEBUG ) << "Preparing to export ExplicitRungeKuttaExport... " << endl;
 
 	// export RK scheme
 	uint rhsDim   = NX*(NX+NU+1);
@@ -148,7 +142,9 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
 	}
 
-	integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
+	if( inputDim > rhsDim ) {
+		integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
+	}
 	integrate.addLinebreak( );
 
     // integrator loop
@@ -179,8 +175,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	
 	integrate.addStatement( error_code == 0 );
 
-	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "done.\n" );	
+	LOG( LVL_DEBUG ) << "done" << endl;
 
 	return SUCCESSFUL_RETURN;
 }

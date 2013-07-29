@@ -26,8 +26,8 @@
 
 /**
  *    \file src/function/function.cpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 2008
+ *    \authors Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 
@@ -35,7 +35,6 @@
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/function/evaluation_point.hpp>
 #include <acado/function/function_.hpp>
-#include <acado/code_generation/export_variable.hpp>
 
 
 
@@ -487,12 +486,6 @@ returnValue Function::exportCode(	FILE       *file,
 }
 
 
-ExportVariable Function::getGlobalExportVariable( ) const
-{
-	return evaluationTree.getGlobalExportVariable( );
-}
-
-
 returnValue Function::clearBuffer(){
 
     return evaluationTree.clearBuffer();
@@ -576,13 +569,19 @@ returnValue Function::AD_backward( const    Vector &seed  ,
     return SUCCESSFUL_RETURN;
 }
 
-returnValue Function::setGlobalExportVariable(const ExportVariable& var)
+String Function::getGlobalExportVariableName( ) const
 {
-	// TODO: In the next iteration set the full name ;)
-	evaluationTree.setAuxVariableName( var.getName() );
-	evaluationTree.setAuxVariableStructName( var.getDataStructString() );
+	return evaluationTree.getGlobalExportVariableName( );
+}
 
-	return SUCCESSFUL_RETURN;
+returnValue Function::setGlobalExportVariableName(const String& var)
+{
+	return evaluationTree.setGlobalExportVariableName( var );
+}
+
+unsigned Function::getGlobalExportVariableSize( ) const
+{
+	return evaluationTree.getGlobalExportVariableSize( );
 }
 
 

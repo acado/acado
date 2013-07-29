@@ -497,7 +497,8 @@ double Quotient::getValue() const
 		 ( acadoIsEqual( argument2->getValue(),INFTY ) == BT_TRUE ) )
 		return INFTY;
 
-	ASSERT( argument2->getValue() != 0 );
+	if (acadoIsZero( argument2->getValue() ) == BT_TRUE)
+		ACADOFATAL(RET_DIV_BY_ZERO);
 
 	return (argument1->getValue() / argument2->getValue());
 }
