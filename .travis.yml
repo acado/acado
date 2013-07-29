@@ -5,7 +5,7 @@ compiler:
 script:
  - mkdir build
  - cd build
- - cmake -DCMAKE_BUILD_TYPE=Debug -DWITH_ACADO_TESTING=ON..
+ - cmake -DCMAKE_BUILD_TYPE=Debug -DWITH_ACADO_TESTING=ON ..
  - make
 after_success:
  - make test
