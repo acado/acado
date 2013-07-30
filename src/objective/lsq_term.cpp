@@ -242,7 +242,9 @@ returnValue LSQTerm::evaluate( const OCPiterate &x ){
 
         if( S != NULL ){
 
-            ASSERT_RETURN( S[run1].getNumCols() == nh && S[run1].getNumRows() == nh ).addMessage("\n >>>  The weighting matrix in the LSQ objective has a wrong dimension.  <<< \n\n");
+        	if ( !(S[run1].getNumCols() == nh && S[run1].getNumRows() == nh) )
+        		return ACADOERRORTEXT(RET_ASSERTION,
+        				The weighting matrix in the LSQ objective has a wrong dimension.);
 
             for( run2 = 0; run2 < nh; run2++ ){
                 S_h_res[run1][run2] = 0.0;
