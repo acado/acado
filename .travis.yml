@@ -5,8 +5,10 @@ compiler:
 script:
  - mkdir build
  - cd build
- - cmake -DCMAKE_BUILD_TYPE=Debug ..
+ - cmake -DCMAKE_BUILD_TYPE=Debug -DACADO_WITH_TESTING=ON ..
  - make
+after_success:
+ - make test
 notifications:
   recipients:
     - mvukov@gmail.com
