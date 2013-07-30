@@ -104,8 +104,8 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER
 	SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
 	
 	IF( ACADO_DEVELOPER )
-		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline" )
-		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Winline" )
+#		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline" )
+#		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Winline" )
 	ELSE()
 		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual" )
 	ENDIF()
@@ -148,6 +148,14 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER
 	#
 	SET( CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} ${SSE_FLAGS}" )
 	SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  ${SSE_FLAGS}" )
+	
+	#
+	# If we are running test suite, then turn off plotting
+	#
+	IF( ACADO_WITH_TESTING )
+		ADD_DEFINITIONS( -D__NO_PIPES__ )
+		ADD_DEFINITIONS( -D__NO_PLOTTING__ )
+	ENDIF()
 
 ################################################################################
 #
@@ -176,7 +184,7 @@ ELSEIF( MSVC )
 	MARK_AS_ADVANCED( FORCE GNUPLOT_EXECUTABLE )
 	
 	#
-	# Some cool definitions
+	# Some common definitions
 	#
 	ADD_DEFINITIONS( -DWIN32 )
 	ADD_DEFINITIONS( -D__NO_COPYRIGHT__ )

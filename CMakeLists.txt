@@ -55,7 +55,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 PROJECT( ACADO CXX C )
 
 #
-# Project versioning information
+# Project version information
 #
 SET( ACADO_VERSION_MAJOR  1 )
 SET( ACADO_VERSION_MINOR  1 )
@@ -104,7 +104,7 @@ ENDIF( NOT CMAKE_VERBOSE_MAKEFILE )
 IF( NOT MSVC )
 	OPTION( ACADO_BUILD_SHARED "Build shared libraries" ON )
 	OPTION( ACADO_BUILD_STATIC "Build static libraries" OFF )
-ELSE ()
+ELSE()
 	SET( ACADO_BUILD_SHARED OFF )
 	SET( ACADO_BUILD_STATIC ON )
 ENDIF()
@@ -121,11 +121,7 @@ OPTION( ACADO_WITH_EXAMPLES "Building ACADO examples" ON )
 #
 # Compilation of testing suite
 #
-OPTION( ACADO_WITH_TESTING "Building the testing framework -- TODO" OFF )
-
-IF( ACADO_WITH_TESTING )
-	ENABLE_TESTING()
-ENDIF( ACADO_WITH_TESTING )
+OPTION( ACADO_WITH_TESTING "Building the testing framework" OFF )
 
 #
 # ACADO developer flag
@@ -331,7 +327,7 @@ ENDIF( ACADO_BUILD_SHARED )
 ################################################################################
 
 #
-# Build qpOASES and qpOASESextras libraries
+# Build qpOASES library
 #
 ADD_SUBDIRECTORY( ./external_packages/qpOASES-3.0beta )
 
@@ -347,19 +343,16 @@ ADD_SUBDIRECTORY( ./external_packages/casadi )
 
 ################################################################################
 #
-# TODO Automatic testing
+# Automatic testing
 #
 ################################################################################
 
 #
 # Tests
 #
-#IF( ACADO_WITH_TESTING )
-#	ENABLE_TESTING()
-#	INCLUDE( CTest )
-#	SET( DBUILD_DASHBOARD_REPORTS = ON )
-#	ADD_SUBDIRECTORY( ./testing/automatic_testing ${TESTING_OUTPUT_PATH} )
-#ENDIF( ACADO_WITH_TESTING )
+IF( ACADO_WITH_TESTING )
+	ENABLE_TESTING()
+ENDIF( ACADO_WITH_TESTING )
 
 ################################################################################
 #
