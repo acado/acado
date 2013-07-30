@@ -56,12 +56,14 @@ int main( ){
     // EXPORT THE FUNCTION INTO PLAIN C CODE:
     // --------------------------------------
 
-    FILE *file = fopen("my_c_function.cpp", "w" );
+	// Print the function on standard output
+	stdout << f;
 
-    file << f;
+    // ... or print it out to a custom file
 
-    fclose(file);
-
+//    FILE *file = fopen("exported_c_function.c", "w" );
+//    file << f;
+//    fclose(file);
 
     return 0;
 }
