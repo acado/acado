@@ -123,6 +123,10 @@ OPTION( ACADO_WITH_EXAMPLES "Building ACADO examples" ON )
 #
 OPTION( ACADO_WITH_TESTING "Building the testing framework -- TODO" OFF )
 
+IF( ACADO_WITH_TESTING )
+	ENABLE_TESTING()
+ENDIF( ACADO_WITH_TESTING )
+
 #
 # ACADO developer flag
 #

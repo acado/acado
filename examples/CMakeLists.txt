@@ -150,6 +150,10 @@ SET( EXAMPLE_DIRS
 
 IF ( NOT ACADO_BUILD )
 	INCLUDE_DIRECTORIES( . ${ACADO_INCLUDE_DIRS} )
+	
+	IF( ACADO_WITH_TESTING )
+		ENABLE_TESTING()
+	ENDIF( ACADO_WITH_TESTING )
 ENDIF( )
 
 ################################################################################
@@ -158,13 +162,9 @@ ENDIF( )
 #
 ################################################################################
 
-IF (ACADO_WITH_TESTING)
-	ENABLE_TESTING()
-
-	SET( EXAMPLES_TESTING_BLACKLIST
-		hydroscal
-	)
-ENDIF(ACADO_WITH_TESTING)
+SET( EXAMPLES_TESTING_BLACKLIST
+	hydroscal
+)
 
 #
 # Compiling examples from list EXAMPLE_DIRS
