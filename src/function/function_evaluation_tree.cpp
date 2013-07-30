@@ -53,7 +53,7 @@ FunctionEvaluationTree::FunctionEvaluationTree( ){
     dim       =  0;
     n         =  0;
 
-    globalExportVariableName = "acadoWorkspace.acado_aux";
+    globalExportVariableName = "acado_aux";
 }
 
 FunctionEvaluationTree::FunctionEvaluationTree( const FunctionEvaluationTree& arg ){
