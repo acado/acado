@@ -153,7 +153,7 @@ int main( ){
 	   mpc.set( GENERATE_TEST_FILE,NO );
 // 	   mpc.set( USE_SINGLE_PRECISION,YES );
 
-       mpc.exportCode("kite_export");
+       mpc.exportCode("kite_carousel_export");
     // ----------------------------------------------------------
 
 
