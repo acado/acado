@@ -173,6 +173,19 @@ class ExportModule : public UserInteraction
 		 */
 		String getCommonHeaderName( ) const;
 
+		/** \name Set/get module name.
+		 *
+		 *  \todo Module name is used to prefix the exported files.
+		 *
+		 * @{ */
+
+		/** Set module name. */
+		returnValue setName(const String& _name);
+
+		/** Get module name. */
+		String getName() const;
+
+		/** @} */
 
 	protected:
 
@@ -193,9 +206,12 @@ class ExportModule : public UserInteraction
 
 
     protected:
-
 		String commonHeaderName;			/**< Name of common header file. */
 		uint timingCalls;					/**< The number of calls to the exported function for the timing results. */
+
+    private:
+		/** Module name. */
+		String name;
 };
 
 
