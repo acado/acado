@@ -45,8 +45,8 @@ ExportModule::ExportModule( ) : UserInteraction( )
 	setupOptions( );
 
 	timingCalls = 0;
-	setCommonHeaderName( "acado.h" );
 
+	commonHeaderName = "acado.h";
 	name = "acado";
 }
 
@@ -83,15 +83,15 @@ returnValue ExportModule::setTimingCalls( uint _timingCalls ) {
 }
 
 
-returnValue	ExportModule::setCommonHeaderName(	const String& _name
-												)
-{
-	if ( _name.isEmpty() == BT_TRUE )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
-	
-	commonHeaderName = _name;
-	return SUCCESSFUL_RETURN;
-}
+//returnValue	ExportModule::setCommonHeaderName(	const String& _name
+//												)
+//{
+//	if ( _name.isEmpty() == BT_TRUE )
+//		return ACADOERROR( RET_INVALID_ARGUMENTS );
+//
+//	commonHeaderName = _name;
+//	return SUCCESSFUL_RETURN;
+//}
 
 
 String ExportModule::getCommonHeaderName( ) const

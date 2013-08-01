@@ -164,8 +164,8 @@ class ExportModule : public UserInteraction
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_INVALID_ARGUMENTS
 		 */
-		returnValue	setCommonHeaderName(	const String& _name
-											);
+//		returnValue	setCommonHeaderName(	const String& _name
+//											);
 
 		/** Returns the name of common header file.
 		 *
