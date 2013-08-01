@@ -156,34 +156,34 @@ class ExportModule : public UserInteraction
 		virtual returnValue setTimingCalls( uint _timingCalls
 										);
 
-
-		/** Sets the name of common header file.
-		 *
-		 *	@param[in] _name			New name of common header file.
-		 *
-		 *	\return SUCCESSFUL_RETURN, \n
-		 *	        RET_INVALID_ARGUMENTS
-		 */
-//		returnValue	setCommonHeaderName(	const String& _name
-//											);
-
 		/** Returns the name of common header file.
 		 *
 		 *	\return Name of common header file
 		 */
 		String getCommonHeaderName( ) const;
 
-		/** \name Set/get module name.
+		/** \name Get/set module name.
 		 *
 		 *  \todo Module name is used to prefix the exported files.
 		 *
 		 * @{ */
 
+		/** Get module name. */
+		String getName() const;
+
 		/** Set module name. */
 		returnValue setName(const String& _name);
 
-		/** Get module name. */
-		String getName() const;
+		/** @} */
+
+		/** \name Get/set export folder name.
+		 * @{ */
+
+		/** Get export folder name */
+		const String& getExportFolderName() const;
+
+		/** Set export folder name */
+		void setExportFolderName(const String& _name);
 
 		/** @} */
 
@@ -212,6 +212,8 @@ class ExportModule : public UserInteraction
     private:
 		/** Module name. */
 		String name;
+		/** Name of a folder where the code is going to be exported. */
+		String exportFolderName;
 };
 
 
