@@ -136,6 +136,10 @@ class String
         /** copy routine (protected, for internal use only) */
         returnValue copy( const String& arg );
 
+        /** Addition operator */
+        friend String operator+(	const String& arg1,
+        							const String& arg2
+        							);
 
     protected:
 
