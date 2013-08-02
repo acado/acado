@@ -78,28 +78,45 @@ ENDIF ( CLOSED_LOOP_SOURCES )
 FOREACH( SRC ${SOURCES} )
 	GET_FILENAME_COMPONENT( EXEC_NAME ${SRC} NAME_WE )
 
-	ADD_EXECUTABLE( code_generation_${EXEC_NAME} ${SRC} )
+	SET( CURR_EXE code_generation_${EXEC_NAME} )
+
+	ADD_EXECUTABLE( ${CURR_EXE} ${SRC} )
 
 	IF (ACADO_BUILD_SHARED)
 		TARGET_LINK_LIBRARIES(
-			code_generation_${EXEC_NAME}
+			${CURR_EXE}
 			${ACADO_SHARED_LIBRARIES}
 		)
 	ELSE()
 		TARGET_LINK_LIBRARIES(
-			code_generation_${EXEC_NAME}
+			${CURR_EXE}
 			${ACADO_STATIC_LIBRARIES}
 		)
 	ENDIF()
 		
 	SET_TARGET_PROPERTIES(
-		code_generation_${EXEC_NAME}
+		${CURR_EXE}
 		PROPERTIES
 			OUTPUT_NAME "${EXEC_NAME}"
 			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 			# This one is Visual Studio specific
 			FOLDER "examples"
-	)		
+	)
+	
+	IF ( ACADO_WITH_TESTING )
+	
+		FILE( MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${EXEC_NAME}_export )
+		FILE( MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${EXEC_NAME}_export/qpoases )
+			
+		ADD_TEST(
+			NAME
+				${CURR_EXE}_test
+			WORKING_DIRECTORY
+				"${CMAKE_CURRENT_SOURCE_DIR}"
+			COMMAND
+				${CURR_EXE}
+			)
+	ENDIF()
 
 ENDFOREACH( SRC ${SOURCES} )
 
@@ -186,3 +203,14 @@ SET_TARGET_PROPERTIES(
 		OUTPUT_NAME getting_started_closed_loop
 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+IF ( ACADO_WITH_TESTING )
+	ADD_TEST(
+		NAME
+			code_generation_getting_started_closed_loop_test
+		WORKING_DIRECTORY
+			"${CMAKE_CURRENT_SOURCE_DIR}"
+		COMMAND
+			code_generation_getting_started_closed_loop
+	)
+ENDIF()

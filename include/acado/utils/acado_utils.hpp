@@ -26,7 +26,7 @@
 /**
  *    \file   include/utils/acado_utils.hpp
  *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
- *    \date   2008-2010
+ *    \date   2008 - 2013
  *
  *    This file declares several global utility functions.
  */
@@ -203,13 +203,16 @@ returnValue acadoAssignString(	char** toString,
 								const char* const defaultString
 								);
 
-/** A function for file copying.
- */
+/** A function for file copying. */
 returnValue acadoCopyFile(	const char* source,
 							const char* destination,
 							const char* commentString = 0,
 							BooleanType printCodegenNotice = BT_FALSE
 							);
+
+/** A function to create a folder. */
+returnValue acadoCreateFolder(const char* name);
+
 
 CLOSE_NAMESPACE_ACADO
 

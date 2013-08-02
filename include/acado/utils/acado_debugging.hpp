@@ -44,8 +44,8 @@
 #if __DEBUG__
 
     #include "acado_message_handling.hpp"
-    #define ASSERT(x)        if (!(x))        ACADOFATALTEXT(RET_ASSERTION, Assertion failure: #x)
-    #define ASSERT_RETURN(x) if (!(x)) return ACADOFATALTEXT(RET_ASSERTION, Assertion failure: #x)
+    #define ASSERT(x)        {if (!(x))        ACADOFATALTEXT(RET_ASSERTION, Assertion failure: #x);}
+    #define ASSERT_RETURN(x) {if (!(x)) return ACADOFATALTEXT(RET_ASSERTION, Assertion failure: #x);}
 
 #else
 

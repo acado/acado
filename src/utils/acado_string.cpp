@@ -317,6 +317,14 @@ String operator<<(	const char* _lhs,
 	return rhs;
 }
 
+String operator+(	const String& arg1,
+					const String& arg2
+					)
+{
+	String tmp( arg1 );
+	return tmp << arg2;
+}
+
 
 
 CLOSE_NAMESPACE_ACADO

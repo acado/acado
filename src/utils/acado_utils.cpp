@@ -30,12 +30,23 @@
  */
 
 
-#if defined(__WIN32__) || defined(WIN32)
-  #include <windows.h>
-#elif defined(LINUX)
-  #include <sys/stat.h>
-  #include <sys/time.h>
-#endif
+#if defined( __WIN32__ ) || defined( WIN32 )
+
+#include <windows.h>
+#include <direct.h>
+
+#elif defined( LINUX )
+
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#else
+
+#warning "File I/O is not supported on this platform"
+
+#endif /* defined(__WIN32__) || defined(WIN32) */
 
 
 #include <acado/utils/acado_utils.hpp>
@@ -426,6 +437,40 @@ returnValue acadoCopyFile(	const char* source,
 	}
 
 	dst << src.rdbuf();
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue acadoCreateFolder(const char* name)
+{
+#if defined( __WIN32__ ) || defined( WIN32 )
+
+	if ( _mkdir( name) )
+	{
+		// TODO give here an error code
+		LOG( LVL_ERROR ) << "Problem creating directory " << name << endl;
+		return ACADOERROR( RET_INVALID_ARGUMENTS );
+	}
+
+#elif defined( LINUX )
+
+	struct stat st = {0};
+
+	if (stat(name, &st) == -1)
+	{
+	    if (mkdir(name, 0700) == -1)
+	    {
+	    	// TODO give here an error code
+	    	LOG( LVL_ERROR ) << "Problem creating directory " << name << endl;
+	    	return ACADOERROR( RET_INVALID_ARGUMENTS );
+	    }
+	}
+
+#else
+
+	return ACADOERRORTEXT(RET_INVALID_OPTION, "Unsupported platform.");
+
+#endif /* defined(__WIN32__) || defined(WIN32) */
 
 	return SUCCESSFUL_RETURN;
 }

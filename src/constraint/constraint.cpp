@@ -338,7 +338,10 @@ returnValue Constraint::add( const int index_, const ConstraintComponent& compon
     Vector tmp_ub(grid.getNumPoints());
     Vector tmp_lb(grid.getNumPoints());
 
-    ASSERT_RETURN( index_ < (int) grid.getNumPoints() ).addMessage("\n >>>  The constraint component can not be set as the associated discretization point is not in the time horizon.  <<< \n\n");
+    if ( !(index_ < (int) grid.getNumPoints()) )
+    	return ACADOERRORTEXT(RET_ASSERTION,
+    			"The constraint component can not be set as the associated "
+    			"discretization point is not in the time horizon.");
 
     uint run1;
 

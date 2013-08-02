@@ -122,8 +122,11 @@ returnValue GnuplotWindow::init()
 
 #ifndef __NO_PIPES__
 	gnuPipe = popen("gnuplot -persist -background white", "w");
-	if (!gnuPipe)
-		return ACADOWARNING(RET_PLOT_WINDOW_CAN_NOT_BE_OPEN);
+
+	// In principle, we should just print out a warning, plot is not going
+	// to generated anyways.
+	if ( !gnuPipe )
+		ACADOWARNING( RET_PLOT_WINDOW_CAN_NOT_BE_OPEN );
 #endif
 
 	return SUCCESSFUL_RETURN;
@@ -135,19 +138,15 @@ returnValue GnuplotWindow::replot(	PlotFrequency _frequency
 {
 	if ( ( _frequency == PLOT_IN_ANY_CASE ) || ( _frequency == getPlotFrequency( ) ) )
 	{
-		returnValue returnvalue;
-
 		if( gnuPipe == 0 )
 		{
-			returnvalue = init();
-			if( returnvalue != SUCCESSFUL_RETURN )
-				return ACADOWARNING( returnvalue );
+			init();
 		}
 
 		return sendDataToGnuplot( );
 	}
-	else
-		return SUCCESSFUL_RETURN;
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -179,8 +178,11 @@ BooleanType GnuplotWindow::getMouseEvent( double &mouseX, double &mouseY ){
 
 returnValue GnuplotWindow::waitForMouseEvent( double &mouseX, double &mouseY ){
 
-	if ( gnuPipe == 0 )
-		return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+	if (gnuPipe == 0)
+	{
+		ACADOWARNING( RET_NOT_YET_IMPLEMENTED );
+		return SUCCESSFUL_RETURN;
+	}
 
     FILE *check;
     check = fopen( "mouse.dat", "r" );
@@ -220,6 +222,8 @@ returnValue GnuplotWindow::waitForMouseEvent( double &mouseX, double &mouseY ){
 
 returnValue GnuplotWindow::sendDataToGnuplot( )
 {
+#ifndef __NO_PLOTTING__
+
 	// if gnuPipe is 0: open a temporary file
 	BooleanType toFile = (BooleanType)( gnuPipe == 0 );
 	if( toFile == BT_TRUE )
@@ -647,6 +651,8 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 		acadoFPrintf(gnuPipe,"save var 'mouse.dat'\n");
 		fflush(gnuPipe);
 	}
+
+#endif // __NO_PLOTTING__
 
 	return SUCCESSFUL_RETURN;
 }
