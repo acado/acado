@@ -162,11 +162,12 @@ int main( ){
 // 		mpc.set( USE_SINGLE_PRECISION,YES );
 // 		mpc.set( GENERATE_SIMULINK_INTERFACE,YES );
 
-       mpc.exportCode( "cstr_export" );
+       if (mpc.exportCode( "cstr_export" ) != SUCCESSFUL_RETURN)
+    	   exit( EXIT_FAILURE );
     // ----------------------------------------------------------
 
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

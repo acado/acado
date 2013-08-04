@@ -125,11 +125,12 @@ int main( ){
 		mpc.set( PRINTLEVEL, HIGH );
 
 // 		mpc.printDimensionsQP( );
-		mpc.exportCode( "crane_export" );
+		if (mpc.exportCode( "crane_export" ) != SUCCESSFUL_RETURN)
+			exit( EXIT_FAILURE );
 	// ----------------------------------------------------------
 
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 

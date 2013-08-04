@@ -111,8 +111,8 @@ int main( )
 	Process process( dynamicSystem,INT_RK45 );
 
 	VariablesGrid disturbance = readFromFile( "road.txt" );
-	process.setProcessDisturbance( disturbance );
-
+	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
+		return EXIT_FAILURE;
 
     // SETTING UP THE MPC CONTROLLER:
     // ------------------------------
@@ -140,10 +140,12 @@ int main( )
 	Vector uCon;
 	VariablesGrid ySim;
 	
-	controller.init( startTime,x0 );
+	if (controller.init( startTime,x0 ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 	controller.getU( uCon );
 	
-	process.init( startTime,x0,uCon );
+	if (process.init( startTime,x0,uCon ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 	process.getY( ySim );
 
 
@@ -158,19 +160,20 @@ int main( )
 		acadoPrintf( "\n*** Simulation Loop No. %d (starting at time %.3f) ***\n",nSteps,currentTime );
 
 		double t = acadoGetTime();
-		controller.feedbackStep( currentTime,ySim.getLastVector() );
+		if (controller.feedbackStep( currentTime,ySim.getLastVector() ) != SUCCESSFUL_RETURN)
+			exit( EXIT_FAILURE );
 		printf( "t = %e\n", acadoGetTime()-t );
 		controller.getU( uCon );
-		controller.preparationStep( );
+		if (controller.preparationStep( ) != SUCCESSFUL_RETURN)
+			exit( EXIT_FAILURE );
 		
-		process.step( currentTime,currentTime+samplingTime,uCon );
+		if (process.step( currentTime,currentTime+samplingTime,uCon ) != SUCCESSFUL_RETURN)
+			exit( EXIT_FAILURE );
 		process.getY( ySim );
 		
 		currentTime += samplingTime;
 		++nSteps;
 	}
-
-
 
 //     // SETTING UP THE SIMULATION ENVIRONMENT,  RUN THE EXAMPLE...
 //     // ----------------------------------------------------------
@@ -200,7 +203,7 @@ int main( )
 // 	window.addSubplot( disturbance,     "Road Excitation [m]" );
 // 	window.plot( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

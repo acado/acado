@@ -129,11 +129,12 @@ int main( )
 	y.setZero( );
 	y(0) = 0.01;
 
-	controller.init( 0.0,y );
-	controller.step( 0.0,y );
+	if (controller.init( 0.0,y ) != SUCCESSFUL_RETURN)
+		exit( 1 );
+	if (controller.step( 0.0,y ) != SUCCESSFUL_RETURN)
+		exit( 1 );
 
-
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

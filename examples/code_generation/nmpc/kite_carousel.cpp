@@ -153,7 +153,8 @@ int main( ){
 	   mpc.set( GENERATE_TEST_FILE,NO );
 // 	   mpc.set( USE_SINGLE_PRECISION,YES );
 
-       mpc.exportCode("kite_carousel_export");
+       if (mpc.exportCode("kite_carousel_export") != SUCCESSFUL_RETURN)
+    	   exit( EXIT_FAILURE );
     // ----------------------------------------------------------
 
 
@@ -189,7 +190,7 @@ int main( ){
 // 	result.print( "x" );
 
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

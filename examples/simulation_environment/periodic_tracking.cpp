@@ -95,9 +95,8 @@ int main( ){
 // 		window2.addSubplot( disturbance, "my disturbance"   );
 // 	window2.plot();
 
-	process.setProcessDisturbance( disturbance );
-
-
+	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
     // SETUP OF THE ALGORITHM AND THE TUNING OPTIONS:
     // ----------------------------------------------
@@ -145,8 +144,6 @@ int main( ){
 	
     Controller controller( algorithm,reference );
 
-
-
     // SETTING UP THE SIMULATION ENVIRONMENT,  RUN THE EXAMPLE...
     // ----------------------------------------------------------
     double simulationStart =  0.0;
@@ -154,8 +151,10 @@ int main( ){
 
     SimulationEnvironment sim( simulationStart, simulationEnd, process, controller );
 
-    sim.init( x0 );
-    sim.run( );
+    if (sim.init( x0 ) != SUCCESSFUL_RETURN)
+    	exit( EXIT_FAILURE );
+    if (sim.run( ) != SUCCESSFUL_RETURN)
+    	exit( EXIT_FAILURE );
 
 
     // ...AND PLOT THE RESULTS
@@ -171,7 +170,6 @@ int main( ){
         window.addSubplot( feedbackControl(0),      "CONTROL: u" );
     window.plot();
 
-
-    return 0;
+    return EXIT_SUCCESS;
 }
 

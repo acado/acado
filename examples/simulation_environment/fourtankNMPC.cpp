@@ -33,15 +33,11 @@
 //#include <acado_optimal_control.hpp>
 #include <acado_toolkit.hpp>
 #include <include/acado_gnuplot/gnuplot_window.hpp>
-#include <math.h>
-// #include <iostream.h>
 
+USING_NAMESPACE_ACADO
 
-int main( ){
-
-    USING_NAMESPACE_ACADO
-
-
+int main( )
+{
     // INTRODUCE THE VARIABLES:
     // -------------------------
 
@@ -59,10 +55,6 @@ int main( ){
     // 
      const double t_end   = t_start+T*samplingTime;
    
-
-
-
-
     // DEFINE A DIFFERENTIAL EQUATION:
     // -------------------------------
 
@@ -115,12 +107,11 @@ int main( ){
     GaussianNoise noise( 4,0.0,0.1 );
 
     Sensor sensor( 4 );
-    sensor.setOutputNoise( noise,samplingTime );
+    if (sensor.setOutputNoise( noise,samplingTime ) != SUCCESSFUL_RETURN)
+    	exit( EXIT_FAILURE );
 
     Process process(dynamicSystem,INT_RK45);
     //process.setSensor( sensor );
-
-
 
     // SETTING UP THE MPC CONTROLLER
 
@@ -146,8 +137,10 @@ int main( ){
     x0(1)=0.1;
     x0(2)=0.1;
     x0(3)=0.1;
-    sim.init(x0);
-    sim.run( );
+    if (sim.init( x0 ) != SUCCESSFUL_RETURN)
+    	exit( EXIT_FAILURE );
+    if (sim.run( ) != SUCCESSFUL_RETURN)
+    	exit( EXIT_FAILURE );
    
     VariablesGrid diffStates;
     sim.getProcessDifferentialStates(diffStates);
@@ -173,8 +166,5 @@ int main( ){
     //algorithm.solve();
     //printf(" %.16e \n ", acadoGetTime() - t1  );
 
-    return 0;
+    return EXIT_SUCCESS;
 }
-
-
-

@@ -107,10 +107,6 @@ USING_NAMESPACE_ACADO
 
 	Process process( dynamicSystem,INT_RK45 );
 
-	VariablesGrid disturbance = readFromFile( "road.txt" );
-	process.setProcessDisturbance( disturbance );
-
-
     // SETTING UP THE MPC CONTROLLER:
     // ------------------------------
 	RealTimeAlgorithm alg( ocp,0.05 );
@@ -131,9 +127,10 @@ USING_NAMESPACE_ACADO
 	x0(2) = 0.0;
 	x0(3) = 0.0;
 
-	sim.init( x0 );
-	sim.run( );
-
+	if (sim.init( x0 ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
+	if (sim.run( ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
     // ...AND PLOT THE RESULTS
     // ----------------------------------------------------------
@@ -152,8 +149,7 @@ USING_NAMESPACE_ACADO
 	window.addSubplot( feedbackControl(0),      "Road Excitation [m]" );
 	window.plot( );
 
-
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

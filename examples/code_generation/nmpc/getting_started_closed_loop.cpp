@@ -133,9 +133,10 @@ int main( )
 	x0(2) = 0.0;
 	x0(3) = 0.0;
 
-	sim.init( x0 );
-	sim.run( );
-
+	if (sim.init( x0 ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
+	if (sim.run( ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
     // ... AND PLOT THE RESULTS
     // ------------------------
@@ -153,7 +154,7 @@ int main( )
 		window.addSubplot( feedbackControl(0), "a" );
 	window.plot( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

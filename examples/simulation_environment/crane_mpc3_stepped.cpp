@@ -108,8 +108,8 @@ int main( ){
 	Process process( dynamicSystem,INT_RK45 );
 
 	VariablesGrid disturbance = readFromFile( "dist.txt" );
-	process.setProcessDisturbance( disturbance );
-
+	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
     // SETTING UP THE MPC CONTROLLER:
     // ------------------------------
@@ -133,10 +133,12 @@ int main( ){
 	Vector uCon;
 	VariablesGrid ySim;
 	
-	controller.init( startTime,x0 );
+	if (controller.init( startTime,x0 ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 	controller.getU( uCon );
 	
-	process.init( startTime,x0,uCon );
+	if (process.init( startTime,x0,uCon ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 	process.getY( ySim );
 
 
@@ -150,18 +152,19 @@ int main( ){
 	{
 		acadoPrintf( "\n*** Simulation Loop No. %d (starting at time %.3f) ***\n",nSteps,currentTime );
 	
-		controller.step( currentTime,ySim.getLastVector() );
+		if (controller.step( currentTime,ySim.getLastVector() ) != SUCCESSFUL_RETURN)
+			exit( EXIT_FAILURE );
 		controller.getU( uCon );
 		
-		process.step( currentTime,currentTime+samplingTime,uCon );
+		if (process.step( currentTime,currentTime+samplingTime,uCon ) != SUCCESSFUL_RETURN)
+			exit( EXIT_FAILURE );
 		process.getY( ySim );
 		
 		++nSteps;
 		currentTime = (double)nSteps * samplingTime;
 	}
 
-
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 /* <<< end tutorial code <<< */
