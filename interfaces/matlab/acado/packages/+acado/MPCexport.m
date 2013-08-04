@@ -130,7 +130,7 @@ classdef MPCexport < acado.ExportOCP
             if ~ischar(dir)
                 error('Invalid directory name.');
             end
-            ACADO_.helper.addMain(dir, 'test.c', 'auxiliary_functions.c')
+            ACADO_.helper.addMain(dir, 'test.c', 'auxiliary_functions.c', 'sfunction.cpp')
         end
         
         function setWeights(obj, varargin) % obj.setWeights(Q, R) or obj.setWeights(Q, R, S)
