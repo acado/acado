@@ -44,7 +44,7 @@ BEGIN_NAMESPACE_ACADO
 OCP::OCP( const double &tStart_, const double &tEnd_, const int &N_ )
     :MultiObjectiveFunctionality(){
 
-    if( N_ <= 0 ) ACADOERROR( RET_INVALID_ARGUMENTS );
+    if( N_ < 0 ) ACADOERROR( RET_INVALID_ARGUMENTS );
     setupGrid( tStart_, tEnd_, N_+1 );
 }
 
