@@ -11,6 +11,6 @@ after_success:
  - make test
 notifications:
   recipients:
-    - mvukov@gmail.com
+    - builds@acadotoolkit.org
   email:
     on_failure: always
