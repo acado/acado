@@ -112,7 +112,7 @@ classdef ModelContainer < handle
         function setNARXmodel(obj, varargin)
            if (nargin == 3 && isnumeric(varargin{1}) && varargin{1} > 0 && isnumeric(varargin{2}))
                obj.delay = varargin{1};
-               obj.params = acado.Matrix(varargin{2}); obj.params.name = obj.params.name_m;
+               obj.params = acado.Matrix(varargin{2});
            else
                error('ERROR: Invalid setNARXmodel.');
            end
@@ -123,14 +123,14 @@ classdef ModelContainer < handle
             
             if (nargin == 3 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric'))
                 % setLinearInput( A1, B1 );
-                obj.A1 = acado.Matrix(varargin{1}); obj.A1.name = obj.A1.name_m;
-                obj.B1 = acado.Matrix(varargin{2}); obj.B1.name = obj.B1.name_m;
+                obj.A1 = acado.Matrix(varargin{1});
+                obj.B1 = acado.Matrix(varargin{2});
                 
             elseif (nargin == 4 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric') && isa(varargin{3}, 'numeric'))
                 % setLinearInput( M1, A1, B1 );
-                obj.M1 = acado.Matrix(varargin{1}); obj.M1.name = obj.M1.name_m;
-                obj.A1 = acado.Matrix(varargin{2}); obj.A1.name = obj.A1.name_m;
-                obj.B1 = acado.Matrix(varargin{3}); obj.B1.name = obj.B1.name_m;
+                obj.M1 = acado.Matrix(varargin{1});
+                obj.A1 = acado.Matrix(varargin{2});
+                obj.B1 = acado.Matrix(varargin{3});
                 
             else
                 error('ERROR: Invalid setLinearInput.');
@@ -148,7 +148,7 @@ classdef ModelContainer < handle
                     error('ERROR: Please provide a vector of expressions instead of a matrix.');
                 end
                 % setLinearOutput( A3, fun3 );
-                obj.A3 = acado.Matrix(varargin{1}); obj.A3.name = obj.A3.name_m;
+                obj.A3 = acado.Matrix(varargin{1});
                 obj.fun3 = acado.OutputFcn();
                 ACADO_.helper.removeInstruction(obj.fun3);
                 obj.fun3(:) = varargin{2};
@@ -158,8 +158,8 @@ classdef ModelContainer < handle
                     error('ERROR: Please provide a vector of expressions instead of a matrix.');
                 end
                 % setLinearOutput( M3, A3, fun3 );
-                obj.M3 = acado.Matrix(varargin{1}); obj.M3.name = obj.M3.name_m;
-                obj.A3 = acado.Matrix(varargin{2}); obj.A3.name = obj.A3.name_m;
+                obj.M3 = acado.Matrix(varargin{1});
+                obj.A3 = acado.Matrix(varargin{2});
                 obj.fun3 = acado.OutputFcn();
                 ACADO_.helper.removeInstruction(obj.fun3);
                 obj.fun3(:) = varargin{3};
