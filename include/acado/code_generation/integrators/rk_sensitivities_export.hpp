@@ -149,26 +149,6 @@ class RKSensitivitiesExport
 					uint base			) = 0;
 
 
-			/** Exports the propagation of the sensitivities for the continuous output.
-			 *
-			 *	@param[in] block			The block to which the code will be exported.
-			 *	@param[in] tmp_meas			The number of measurements in the current integration step (in case of an online grid).
-			 *
-			 *	\return SUCCESSFUL_RETURN
-			 */
-			virtual returnValue propagateOutputs(	ExportStatementBlock* block,
-					const ExportIndex& index,
-					const ExportIndex& index0,
-					const ExportIndex& index1,
-					const ExportIndex& index2,
-					const ExportIndex& index3,
-					const ExportIndex& tmp_index1,
-					const ExportIndex& tmp_index2,
-					const ExportIndex& tmp_index3,
-					const ExportIndex& tmp_index4,
-					const ExportVariable& tmp_meas ) = 0;
-
-
 	protected:
 
 };

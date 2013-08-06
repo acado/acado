@@ -210,8 +210,6 @@ returnValue ImplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 	
 	if( NX1 > 0 || exportRhs ) {
 		ExportVariable max = getAuxVariable();
-		int useOMP;
-		get(CG_USE_OPENMP, useOMP);
 		declarations.addDeclaration( max,dataStruct );
 	}
 

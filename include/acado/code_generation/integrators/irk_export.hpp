@@ -519,8 +519,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		BooleanType REUSE;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
 		BooleanType CONTINUOUS_OUTPUT;			/**< This boolean is true when continuous output needs to be provided. */
 
-		uint diffsDim;							/**< This is the total number of sensitivities needed. */
-		uint inputDim;							/**< This is the dimension of the input to the integrator. */
 		uint numIts;							/**< This is the performed number of Newton iterations. */
 		uint numItsInit;						/**< This is the performed number of Newton iterations for the initialization of the first step. */
 
@@ -564,7 +562,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportVariable	rk_b;					/**< Variable containing the right-hand side of the linear system. */
 		ExportVariable  rk_auxSolver;			/**< Variable containing auxiliary values for the exported linear solver. */
 		ExportVariable 	rk_rhsTemp;				/**< Variable containing intermediate results of evaluations of the right-hand side expression. */
-		ExportVariable  rk_diffsTemp2;			/**< Variable containing intermediate results of evaluations of the derivatives of the differential equations (ordinary and algebraic). */
 
 		ExportODEfunction lin_output;
 		ExportVariable	rk_mat3;
@@ -581,6 +578,7 @@ CLOSE_NAMESPACE_ACADO
 
 
 #include <acado/code_generation/integrators/irk_forward_export.hpp>
+#include <acado/code_generation/integrators/irk_adjoint_export.hpp>
 #include <acado/code_generation/integrators/irk_export.ipp>
 
 

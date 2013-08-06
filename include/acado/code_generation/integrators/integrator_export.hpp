@@ -432,6 +432,9 @@ class IntegratorExport : public ExportAlgorithm
 		uint NDX3;
 		uint NXA3;
 
+		uint diffsDim;							/**< This is the total number of sensitivities needed. */
+		uint inputDim;							/**< This is the dimension of the input to the integrator. */
+
 		BooleanType timeDependant;
 
 		Matrix M11, A11, B11;
@@ -472,6 +475,7 @@ class IntegratorExport : public ExportAlgorithm
 		
 		ExportVariable  rk_diffsPrev2;			/**< Variable containing the sensitivities from the previous integration step. */
 		ExportVariable  rk_diffsNew2;			/**< Variable containing the derivatives wrt the previous values. */
+		ExportVariable  rk_diffsTemp2;			/**< Variable containing intermediate results of evaluations of the derivatives of the differential equations (ordinary and algebraic). */
 
 		ExportVariable	rk_diffsNew3;
 		ExportVariable	rk_diffsPrev3;
