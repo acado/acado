@@ -23,9 +23,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     Nx = mxGetM(prhs[1])*mxGetN(prhs[1]);
     #if ACADO_NU > 0
         Nu = mxGetM(prhs[2])*mxGetN(prhs[2]);
+    #else
+        Nu = 0;
     #endif
     #if ACADO_NP > 0
         Np = mxGetM(prhs[3])*mxGetN(prhs[3]);
+    #else
+        Np = 0;
     #endif
     
     if (Nt != 1) {
