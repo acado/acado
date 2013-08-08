@@ -41,6 +41,11 @@
 #include <acado/code_generation/export_statement_string.hpp>
 #include <acado/code_generation/memory_allocator.hpp>
 
+#ifdef _WIN32
+    #include <memory>
+#else
+    #include <tr1/memory>
+#endif
 
 BEGIN_NAMESPACE_ACADO
 
@@ -281,6 +286,12 @@ public:
 	/** Set a documentation string. */
 	virtual ExportFunction& doc( const String& _doc );
 
+	/** Set the function as private. If this is true, then do not export it's declaration. */
+	virtual ExportFunction& setPrivate(	BooleanType _set = BT_TRUE );
+
+	/** Is function private? */
+	virtual BooleanType isPrivate() const;
+
 protected:
 	/** Frees internal dynamic memory to yield an empty function.
 	 *
@@ -296,13 +307,15 @@ protected:
 	/** List of calling arguments. */
 	ExportArgumentList functionArguments;
 	/** Return value of the function (by default, if pointer is null, return value is void). */
-	ExportVariable* functionReturnValue;
+	std::tr1::shared_ptr< ExportVariable > retVal;
 	/** Flag indicating whether value shall be returned as pointer. */
 	BooleanType returnAsPointer;
 	/** Memory allocator */
 	MemoryAllocatorPtr memAllocator;
 	/** Vector of local variables. */
 	std::vector< ExportVariable > localVariables;
+	/** Private flag. In principle if this guy is true, do not export function declaration. */
+	BooleanType flagPrivate;
 };
 
 

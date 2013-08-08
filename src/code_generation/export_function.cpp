@@ -56,8 +56,8 @@ ExportFunction::ExportFunction(	const String& _name,
 								const ExportArgument& _argument9
 								) : ExportStatementBlock( ), description()
 {
-	functionReturnValue = 0;
 	returnAsPointer = BT_FALSE;
+	flagPrivate = BT_FALSE;
 
 	memAllocator = MemoryAllocatorPtr( new MemoryAllocator );
 
@@ -69,13 +69,12 @@ ExportFunction::ExportFunction(	const String& _name,
 
 ExportFunction::ExportFunction( const ExportFunction& arg ) : ExportStatementBlock( arg )
 {
-	functionReturnValue = 0;
-
 	name = arg.name;
 	functionArguments = arg.functionArguments;
+	flagPrivate = arg.flagPrivate;
+	returnAsPointer = BT_FALSE;
 	
-	if ( arg.functionReturnValue != 0 )
-		setReturnValue( *(arg.functionReturnValue),arg.returnAsPointer );
+	retVal = arg.retVal;
 
 	memAllocator = arg.memAllocator;
 	localVariables = arg.localVariables;
@@ -98,9 +97,7 @@ ExportFunction& ExportFunction::operator=( const ExportFunction& arg )
 
 		ExportStatementBlock::operator=( arg );
 		functionArguments = arg.functionArguments;
-		
-		if ( arg.functionReturnValue != 0 )
-			setReturnValue( *(arg.functionReturnValue),arg.returnAsPointer );
+		retVal = arg.retVal;
 
 		memAllocator = arg.memAllocator;
 		localVariables = arg.localVariables;
@@ -194,11 +191,7 @@ ExportFunction& ExportFunction::setReturnValue(	const ExportVariable& _functionR
 												BooleanType _returnAsPointer
 												)
 {
-	if ( functionReturnValue != 0 )
-		*functionReturnValue = _functionReturnValue;
-	else
-		functionReturnValue = new ExportVariable( _functionReturnValue );
-	
+	retVal = std::tr1::shared_ptr< ExportVariable >(new ExportVariable( _functionReturnValue ));
 	returnAsPointer = _returnAsPointer;
 
 	return *this;
@@ -241,7 +234,10 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 														) const
 {
 	// do not export undefined (empty) functions
-	if ( isDefined() == BT_FALSE )
+	if (isDefined() == BT_FALSE)
+		return SUCCESSFUL_RETURN;
+
+	if (flagPrivate == BT_TRUE)
 		return SUCCESSFUL_RETURN;
 
 	if (description.isEmpty() == BT_FALSE)
@@ -263,9 +259,9 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 			}
 		}
 
-		if ( functionReturnValue != 0 )
+		if (retVal != 0)
 		{
-			String tmp = functionReturnValue->getDoc();
+			String tmp = retVal->getDoc();
 			if (tmp.isEmpty() == BT_FALSE)
 				acadoFPrintf(file, "\n *\n *  \\return %s\n", tmp.getName());
 		}
@@ -273,9 +269,9 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 	}
 
 
-	if ( functionReturnValue != 0 )
+	if (retVal != 0)
 	{
-		acadoFPrintf( file,"%s", functionReturnValue->getTypeString( _realString,_intString ).getName() );
+		acadoFPrintf( file,"%s", retVal->getTypeString( _realString,_intString ).getName() );
 		if ( returnAsPointer == BT_TRUE )
 			acadoFPrintf( file,"*" );
 	}
@@ -307,9 +303,9 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	//
 	// Set return value type
 	//
-	if ( functionReturnValue != 0 )
+	if ( retVal != 0 )
 	{
-		acadoFPrintf( file,"%s", functionReturnValue->getTypeString( _realString,_intString ).getName() );
+		acadoFPrintf( file,"%s", retVal->getTypeString( _realString,_intString ).getName() );
 		if ( returnAsPointer == BT_TRUE )
 			acadoFPrintf( file,"*" );
 	}
@@ -322,10 +318,10 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	functionArguments.exportCode(file, _realString, _intString, _precision);
 	acadoFPrintf( file," )\n{\n");
 
-	if (functionReturnValue && functionReturnValue->getDataStruct() == ACADO_LOCAL)
+	if (retVal && retVal->getDataStruct() == ACADO_LOCAL)
 	{
-		acadoFPrintf(file, "%s ", functionReturnValue->getTypeString( _realString,_intString ).getName());
-		acadoFPrintf(file, "%s;\n", functionReturnValue->getName().getName());
+		acadoFPrintf(file, "%s ", retVal->getTypeString( _realString,_intString ).getName());
+		acadoFPrintf(file, "%s;\n", retVal->getName().getName());
 	}
 
 	// ExportStatementBlock::exportDataDeclaration( file,_realString,_intString,_precision );
@@ -373,8 +369,8 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	//
 	// Finish the export of the function
 	//
-	if ( functionReturnValue != 0 )
-		acadoFPrintf( file,"return %s;\n", functionReturnValue->getFullName().getName() );
+	if ( retVal != 0 )
+		acadoFPrintf( file,"return %s;\n", retVal->getFullName().getName() );
 	acadoFPrintf( file,"}\n\n");
 
 	return SUCCESSFUL_RETURN;
@@ -384,7 +380,7 @@ returnValue ExportFunction::exportCode(	FILE *file,
 BooleanType ExportFunction::isDefined( ) const
 {
 	if ( ( name.isEmpty() == BT_FALSE ) && 
-		 ( ( getNumStatements( ) > 0 ) || ( functionReturnValue != 0 ) ) )
+		 ( ( getNumStatements( ) > 0 ) || ( retVal != 0 ) ) )
 		return BT_TRUE;
 	else
 		return BT_FALSE;
@@ -403,12 +399,6 @@ unsigned ExportFunction::getNumArguments( ) const
 
 returnValue ExportFunction::clear( )
 {
-	if ( functionReturnValue != 0 )
-	{
-		delete functionReturnValue;
-		functionReturnValue = 0;
-	}
-	
 	returnAsPointer = BT_FALSE;
 
 	return SUCCESSFUL_RETURN;
@@ -447,6 +437,18 @@ ExportFunction& ExportFunction::doc(const String& _doc)
 	description = _doc;
 
 	return *this;
+}
+
+ExportFunction& ExportFunction::setPrivate(BooleanType _set)
+{
+	flagPrivate = _set;
+
+	return *this;
+}
+
+BooleanType ExportFunction::isPrivate() const
+{
+	return flagPrivate;
 }
 
 CLOSE_NAMESPACE_ACADO

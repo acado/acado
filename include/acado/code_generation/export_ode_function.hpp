@@ -37,7 +37,6 @@
 
 #include <acado/code_generation/export_function.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
 
 class Function;
@@ -200,7 +199,7 @@ protected:
 	 *  system of equations. */
 	unsigned numDX;
 	/** ACADO function to be exported. */
-	Function* f;
+	std::tr1::shared_ptr< Function > f;
 	/** A variable that holds intermediate values. */
 	ExportVariable globalVar;
 };

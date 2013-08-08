@@ -26,8 +26,8 @@
 
 /**
  *    \file src/code_generation/export_ode_function.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010-2013
  */
 
 #include <acado/code_generation/export_ode_function.hpp>
@@ -41,18 +41,14 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportODEfunction::ExportODEfunction( ) : ExportFunction( ), globalVar()
+ExportODEfunction::ExportODEfunction( ) : ExportFunction( )
 {
 	numX = 0;
 	numXA = 0;
 	numU = 0;
 	numDX = 0;
 	numP = 0;
-
-	f = new Function();
-
-	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
-	f->setGlobalExportVariableName( globalVar.getFullName() );
+	f = std::tr1::shared_ptr< Function >(new Function());
 }
 
 
@@ -60,15 +56,7 @@ ExportODEfunction::ExportODEfunction(	const Function& _f,
 										const String& _name
 										) : ExportFunction( _name )
 {
-	numX = 0;
-	numXA = 0;
-	numU = 0;
-	numP = 0;
-	numDX = 0;
-	f = new Function( _f );
-
-	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
-	f->setGlobalExportVariableName( globalVar.getFullName() );
+	init(_f, _name);
 }
 
 
@@ -80,20 +68,12 @@ ExportODEfunction::ExportODEfunction( const ExportODEfunction& arg ) : ExportFun
 	numP = arg.numP;
 	numDX = arg.numDX;
 	globalVar = arg.globalVar;
-
-	if ( arg.f != 0 )
-	{
-		f = new Function( *(arg.f) );
-	}
+	f = arg.f;
 }
 
 
 ExportODEfunction::~ExportODEfunction( )
-{
-	if ( f )
-		delete f;
-	f = 0;
-}
+{}
 
 
 ExportODEfunction& ExportODEfunction::operator=( const ExportODEfunction& arg )
@@ -105,18 +85,7 @@ ExportODEfunction& ExportODEfunction::operator=( const ExportODEfunction& arg )
 		numXA = arg.numXA;
 		numU = arg.numU;
 		globalVar = arg.globalVar;
-
-		if ( f )
-		{
-			delete f;
-
-			f = 0;
-		}
-
-		if ( arg.f != 0 )
-		{
-			f = new Function( *(arg.f) );
-		}
+		f = arg.f;
 	}
 
 	return *this;
@@ -151,15 +120,13 @@ returnValue ExportODEfunction::init(	const Function& _f,
 	numP = _numP;
 	numDX = _numDX;
 
-	if ( f )
-		delete f;
-	f = 0;
+	f = std::tr1::shared_ptr< Function >(new Function( _f ));
 
-	f = new Function( _f );
 	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
 	f->setGlobalExportVariableName( globalVar.getFullName() );
 
-	return ExportFunction::init( _name );
+	// Just add two dummy arguments in order to keep addFunctionCall function happy.
+	return ExportFunction::init(_name, ExportArgument("input", 1, 1), ExportArgument("output", 1, 1));
 }
 
 
@@ -170,10 +137,7 @@ returnValue ExportODEfunction::exportDataDeclaration(	FILE* file,
 														int _precision
 														) const
 {
-	if (f->getDim() > 0)
-		return f->exportHeader(file, name.getName(), _realString.getName());
-
-	return SUCCESSFUL_RETURN;
+	return f->exportHeader(file, name.getName(), _realString.getName());
 }
 
 
@@ -183,10 +147,7 @@ returnValue ExportODEfunction::exportForwardDeclaration(	FILE* file,
 															int _precision
 															) const
 {
-	if (f->getDim() > 0)
-		return f->exportForwardDeclarations(file, name.getName(), _realString.getName());
-
-	return SUCCESSFUL_RETURN;
+	return f->exportForwardDeclarations(file, name.getName(), _realString.getName());
 }
 
 
@@ -196,10 +157,8 @@ returnValue ExportODEfunction::exportCode(	FILE* file,
 											int _precision
 											) const
 {
-	if (f->getDim() > 0)
-		return f->exportCode(file, name.getName(), _realString.getName(), _precision, numX, numXA, numU, numP, numDX);
-
-	return SUCCESSFUL_RETURN;
+	return f->exportCode(file, name.getName(), _realString.getName(),
+			_precision, numX, numXA, numU, numP, numDX);
 }
 
 

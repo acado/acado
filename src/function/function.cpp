@@ -447,27 +447,36 @@ returnValue Function::print(	FILE       *file     ,
 								const char *fcnName  ,
 								const char *realString,
 								int         precision
-								) const{
+								) const
+{
+	if (getDim() > 0)
+		return evaluationTree.C_print(file, fcnName, realString, precision);
 
-    return evaluationTree.C_print( file,fcnName,realString,precision );
+	return SUCCESSFUL_RETURN;
 }
 
 
 returnValue Function::exportHeader(	FILE       *file     ,
 									const char *fcnName  ,
 									const char *realString
-									) const{
+									) const
+{
+	if (getDim() > 0)
+		return evaluationTree.exportHeader(file, fcnName, realString);
 
-    return evaluationTree.exportHeader( file,fcnName,realString );
+	return SUCCESSFUL_RETURN;
 }
 
 
 returnValue Function::exportForwardDeclarations(	FILE       *file     ,
 													const char *fcnName  ,
 													const char *realString
-													) const{
+													) const
+{
+	if (getDim() > 0)
+		return evaluationTree.exportForwardDeclarations(file, fcnName, realString);
 
-    return evaluationTree.exportForwardDeclarations( file,fcnName,realString );
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -480,9 +489,13 @@ returnValue Function::exportCode(	FILE       *file,
 									uint		_numU,
 									uint		_numP,
 									uint		_numDX
-									) const{
+									) const
+{
+	if (getDim() > 0)
+		return evaluationTree.exportCode(file, fcnName, realString, precision,
+				_numX, _numXA, _numU, _numP, _numDX);
 
-    return evaluationTree.exportCode( file,fcnName,realString,precision,_numX,_numXA,_numU,_numP,_numDX );
+	return SUCCESSFUL_RETURN;
 }
 
 
