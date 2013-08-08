@@ -72,7 +72,7 @@ ExportFunction::ExportFunction( const ExportFunction& arg ) : ExportStatementBlo
 	name = arg.name;
 	functionArguments = arg.functionArguments;
 	flagPrivate = arg.flagPrivate;
-	returnAsPointer = BT_FALSE;
+	returnAsPointer = arg.returnAsPointer;
 	
 	retVal = arg.retVal;
 
@@ -98,6 +98,7 @@ ExportFunction& ExportFunction::operator=( const ExportFunction& arg )
 		ExportStatementBlock::operator=( arg );
 		functionArguments = arg.functionArguments;
 		retVal = arg.retVal;
+		returnAsPointer = arg.returnAsPointer;
 
 		memAllocator = arg.memAllocator;
 		localVariables = arg.localVariables;
