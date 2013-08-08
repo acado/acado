@@ -141,6 +141,9 @@ class String
         							const String& arg2
         							);
 
+        /** Print to STD stream. */
+        friend std::ostream& operator<<(std::ostream& os, const String& s);
+
     protected:
 
         std::vector<char> name; /**< the char-vector */

@@ -325,7 +325,11 @@ String operator+(	const String& arg1,
 	return tmp << arg2;
 }
 
-
+std::ostream& operator<<(std::ostream& os, const String& s)
+{
+  os << s.getName();
+  return os;
+}
 
 CLOSE_NAMESPACE_ACADO
 
