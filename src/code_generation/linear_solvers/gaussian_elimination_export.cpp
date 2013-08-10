@@ -266,6 +266,9 @@ returnValue ExportGaussElim::appendVariableNames( stringstream& string ) {
 
 returnValue ExportGaussElim::setup( )
 {
+	// Other cases are not implemented...
+	ASSERT_RETURN(nCols == nRows);
+
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 	ExportStruct structWspace;

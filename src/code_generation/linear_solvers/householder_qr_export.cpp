@@ -72,7 +72,6 @@ returnValue ExportHouseholderQR::getDataDeclarations(	ExportStatementBlock& decl
 														ExportStruct dataStruct
 														) const
 {
-
 	return SUCCESSFUL_RETURN;
 }
 
@@ -103,7 +102,8 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 		solve.addIndex( k );
 	}
 	
-	if( UNROLLING || dim <= 5 ) {
+	if( UNROLLING || nRows <= 5 )
+	{
 		// Start the factorization:
 		for( run1 = 0; run1 < (dim-1); run1++ ) {
 			for( run2 = run1; run2 < dim; run2++ ) {
@@ -261,37 +261,36 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 }
 
 
-returnValue ExportHouseholderQR::appendVariableNames( stringstream& string ) {
-
-//	string << ", " << rk_temp.getFullName().getName();
-
+returnValue ExportHouseholderQR::appendVariableNames( stringstream& string )
+{
 	return SUCCESSFUL_RETURN;
 }
 
 
 returnValue ExportHouseholderQR::setup( )
 {
+	ASSERT_RETURN(nRows != nCols && REUSE == BT_TRUE);
+
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
-//	ExportStruct structWspace;
-//	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	A = ExportVariable( "A", dim, dim, REAL );
-	b = ExportVariable( "b", dim, 1, REAL );
-	rk_temp = ExportVariable( "rk_temp", 1, dim+1, REAL );
-	solve = ExportFunction( getNameSolveFunction(), A, b, rk_temp);
-	solve.setReturnValue( determinant, BT_FALSE );
+	A = ExportVariable("A", nRows, nCols, REAL);
+	b = ExportVariable("b", nRows, 1, REAL);
+	rk_temp = ExportVariable("rk_temp", 1, nRows + 1, REAL);
+	solve = ExportFunction(getNameSolveFunction(), A, b, rk_temp);
+	solve.setReturnValue(determinant, BT_FALSE);
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	solveTriangular = ExportFunction( String( "solve_" ) << identifier << "triangular", A, b);
 	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	
-	if( REUSE ) {
-		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b, rk_temp );
-		solveReuse.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
+	if (REUSE)
+	{
+		solveReuse = ExportFunction(getNameSolveReuseFunction(), A, b, rk_temp);
+		solveReuse.addLinebreak();	// FIX: TO MAKE SURE IT GETS EXPORTED
 	}
 	
 	int unrollOpt;
-	userInteraction->get( UNROLL_LINEAR_SOLVER, unrollOpt );
+	userInteraction->get(UNROLL_LINEAR_SOLVER, unrollOpt);
 	UNROLLING = (BooleanType) unrollOpt;
 
     return SUCCESSFUL_RETURN;
@@ -305,7 +304,7 @@ ExportVariable ExportHouseholderQR::getGlobalExportVariable( const uint factor )
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	return ExportVariable( String( "rk_" ) << identifier << "temp", factor, dim+1, REAL, structWspace );
+	return ExportVariable( String( "rk_" ) << identifier << "temp", factor, nRows+1, REAL, structWspace );
 }
 
 
