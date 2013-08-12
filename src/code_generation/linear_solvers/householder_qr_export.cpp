@@ -95,8 +95,28 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 	if (REUSE == BT_TRUE)
 		return ACADOERRORTEXT(RET_NOT_IMPLEMENTED_YET, "There is a bug in the QR based lin. solver with reusing the factorization. Please use LU solver instead.");
 
-	uint run1, run2, run3;
+	unsigned run1, run2, run3;
+
+	//
+	// Solve the upper triangular system of equations:
+	//
+	for (run1 = nCols; run1 > (nCols - nBacksolves); run1--)
+	{
+		for (run2 = nCols - 1; run2 > (run1 - 1); run2--)
+		{
+			solveTriangular.addStatement(
+					b.getRow(run1 - 1) -= A.getSubMatrix((run1 - 1), run1, run2, run2 + 1) * b.getRow(run2));
+		}
+		solveTriangular.addStatement(
+				String("b[") << String((run1 - 1)) << "] = b["
+				<< String((run1 - 1)) << "]/A["
+				<< String((run1 - 1) * nCols + (run1 - 1)) << "];\n");
+	}
+	code.addFunction(solveTriangular);
 	
+	//
+	// Main solver function
+	//
 	solve.addStatement( determinant == 1.0 );
 
 	if( UNROLLING || nRows <= 5 )
@@ -303,21 +323,6 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 		solveReuse.addFunctionCall( solveTriangular, A, b );
 		code.addFunction( solveReuse );
 	}
-
-	// Solve the upper triangular system of equations:
-	for (run1 = nCols; run1 > (nCols - nBacksolves); run1--)
-	{
-		for (run2 = nCols - 1; run2 > (run1 - 1); run2--)
-		{
-			solveTriangular.addStatement(
-					b.getRow(run1 - 1) -= A.getSubMatrix((run1 - 1), run1, run2, run2 + 1) * b.getRow(run2));
-		}
-		solveTriangular.addStatement(
-				String("b[") << String((run1 - 1)) << "] = b["
-						<< String((run1 - 1)) << "]/A["
-						<< String((run1 - 1) * nCols + (run1 - 1)) << "];\n");
-	}
-	code.addFunction(solveTriangular);
 	
 	return SUCCESSFUL_RETURN;
 }
