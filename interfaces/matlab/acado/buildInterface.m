@@ -102,7 +102,7 @@ if ~isempty(ACADO_)
                 output = [out{j} '.' mexext];
             end
             mexF = fullfile(dirName, m{1+j});
-            cmd = sprintf('mex COPTIMFLAGS=''-DNDEBUG -O3'' -output %s %s', output, mexF);
+            cmd = sprintf('mex CFLAGS=''\\$CFLAGS -std=c99'' COPTIMFLAGS=''\\$COPTIMFLAGS -O3'' -output %s %s', output, mexF);
             for k = 1:length(subDirs)
                 cmd = [cmd sprintf(' -I./%s', subDirs{k})];
             end
