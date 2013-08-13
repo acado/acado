@@ -25,8 +25,8 @@
 
 /**
  *    \file src/code_generation/export_statement_block.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010-2013
  */
 
 
@@ -37,7 +37,9 @@
 #include <acado/code_generation/export_statement_string.hpp>
 #include <acado/code_generation/export_function_declaration.hpp>
 
-
+#include <acado/code_generation/export_variable.hpp>
+#include <acado/code_generation/export_index.hpp>
+#include <acado/code_generation/export_data_declaration.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -88,7 +90,7 @@ ExportStatement* ExportStatementBlock::clone( ) const
 returnValue ExportStatementBlock::addStatement(	const ExportStatement& _statement
 												)
 {
-	statements.push_back( statementPtr( _statement.clone() ) );
+	statements.push_back( StatementPtr( _statement.clone() ) );
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -262,7 +264,7 @@ returnValue ExportStatementBlock::exportDataDeclaration(	FILE *file,
 															int _precision
 															) const
 {
-	statementPtrArray::const_iterator it = statements.begin();
+	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
 		if ((*it)->exportDataDeclaration(file, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
@@ -278,7 +280,7 @@ returnValue ExportStatementBlock::exportCode(	FILE* file,
 												int _precision
 												) const
 {
-	statementPtrArray::const_iterator it = statements.begin();
+	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
 		if ((*it)->exportCode(file, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
@@ -293,7 +295,32 @@ returnValue ExportStatementBlock::clear( )
 	return SUCCESSFUL_RETURN;
 }
 
+ExportStatementBlock& operator<<(ExportStatementBlock& _block, const ExportStatement& _statement)
+{
+	returnValue status = _block.addStatement( _statement );
+	if (status != SUCCESSFUL_RETURN)
+		ACADOERROR( status );
 
+	return _block;
+}
+
+ExportStatementBlock& operator<<(ExportStatementBlock& _block, const String& _statement)
+{
+	returnValue status = _block.addStatement( _statement );
+	if (status != SUCCESSFUL_RETURN)
+		ACADOERROR( status );
+
+	return _block;
+}
+
+ExportStatementBlock& operator<<(ExportStatementBlock& _block, const std::string& _statement)
+{
+	returnValue status = _block.addStatement( String(_statement.c_str()) );
+	if (status != SUCCESSFUL_RETURN)
+		ACADOERROR( status );
+
+	return _block;
+}
 
 //
 // PROTECTED MEMBER FUNCTIONS:

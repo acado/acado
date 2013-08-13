@@ -103,8 +103,9 @@ int main( )
 // 	mpc.set( OPERATING_SYSTEM,            OS_WINDOWS      );
 // 	mpc.set( USE_SINGLE_PRECISION,        YES             );
 
-	mpc.exportCode( "getting_started_export" );
+	if (mpc.exportCode( "getting_started_export" ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 	// ----------------------------------------------------------
 
-	return 0;
+	return EXIT_SUCCESS;
 }

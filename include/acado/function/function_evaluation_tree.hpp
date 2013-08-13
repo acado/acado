@@ -26,8 +26,8 @@
 
 /**
  *    \file include/acado/function/function_evaluation_tree.hpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 2008
+ *    \authors Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 
@@ -53,9 +53,10 @@ class ExportVariable;
  *  The class FunctionEvaluationTree is designed to organize the evaluation of
  *  tree structured expressions.
  *
- *	\author Boris Houska, Hans Joachim Ferreau
+ *	\author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
-class FunctionEvaluationTree{
+class FunctionEvaluationTree
+{
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -473,33 +474,28 @@ public:
 
      virtual returnValue getExpression( Expression& expression ) const;
 
-     /** Set a name for auxiliary variable. Related to code export */
-     returnValue setAuxVariableName( const String& s );
+     returnValue setGlobalExportVariableName(const String& _name);
 
-     /** Get the name of a auxiliary variable. Related to code export */
-     returnValue getAuxVariableName( String& s ) const;
+     String getGlobalExportVariableName() const;
 
-     returnValue setAuxVariableStructName(const String& s);
+     unsigned getGlobalExportVariableSize() const;
 
+     //
+     // DATA MEMBERS:
+     //
+protected:
 
-    //
-    // DATA MEMBERS:
-    //
-    protected:
+     Operator           **f        ;   /**< The right-hand side expressions */
+     Operator           **sub      ;   /**< The intermediate expressions    */
+     int                 *lhs_comp ;   /**< The components of the intermediate states */
+     SymbolicIndexList   *indexList;   /**< an SymbolicIndexList            */
+     int                  dim      ;   /**< The dimension of the function.  */
+     int                  n        ;   /**< The number of Intermediate expressions */
 
-    Operator           **f        ;   /**< The right-hand side expressions */
-    Operator           **sub      ;   /**< The intermediate expressions    */
-    int                 *lhs_comp ;   /**< The components of the
-                                        *  intermediate states.            */
-    SymbolicIndexList   *indexList;   /**< an SymbolicIndexList            */
-    int                  dim      ;   /**< The dimension of the function.  */
-    int                  n        ;   /**< The number of Intermediate
-                                        *  Expressions                     */
+     Expression           safeCopy ;
 
-    Expression           safeCopy ;
-
-    String				auxVariableName;
-    String				auxVariableStructName;
+     /** Name of the variable that holds intermediate expressions. */
+     String				globalExportVariableName;
 };
 
 

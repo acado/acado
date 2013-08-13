@@ -26,8 +26,8 @@
 
 /**
  *    \file src/code_generation/export_function.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010 - 2013
  */
 
 #include <acado/code_generation/export_function.hpp>
@@ -56,10 +56,10 @@ ExportFunction::ExportFunction(	const String& _name,
 								const ExportArgument& _argument9
 								) : ExportStatementBlock( ), description()
 {
-	functionReturnValue = 0;
 	returnAsPointer = BT_FALSE;
+	flagPrivate = BT_FALSE;
 
-	memAllocator = memoryAllocatorPtr( new MemoryAllocator );
+	memAllocator = MemoryAllocatorPtr( new MemoryAllocator );
 
 	init( _name,_argument1,_argument2,_argument3,
 				_argument4,_argument5,_argument6,
@@ -69,13 +69,12 @@ ExportFunction::ExportFunction(	const String& _name,
 
 ExportFunction::ExportFunction( const ExportFunction& arg ) : ExportStatementBlock( arg )
 {
-	functionReturnValue = 0;
-
 	name = arg.name;
 	functionArguments = arg.functionArguments;
+	flagPrivate = arg.flagPrivate;
+	returnAsPointer = arg.returnAsPointer;
 	
-	if ( arg.functionReturnValue != 0 )
-		setReturnValue( *(arg.functionReturnValue),arg.returnAsPointer );
+	retVal = arg.retVal;
 
 	memAllocator = arg.memAllocator;
 	localVariables = arg.localVariables;
@@ -98,9 +97,8 @@ ExportFunction& ExportFunction::operator=( const ExportFunction& arg )
 
 		ExportStatementBlock::operator=( arg );
 		functionArguments = arg.functionArguments;
-		
-		if ( arg.functionReturnValue != 0 )
-			setReturnValue( *(arg.functionReturnValue),arg.returnAsPointer );
+		retVal = arg.retVal;
+		returnAsPointer = arg.returnAsPointer;
 
 		memAllocator = arg.memAllocator;
 		localVariables = arg.localVariables;
@@ -190,30 +188,26 @@ returnValue ExportFunction::addArgument(	const ExportArgument& _argument1,
 
 
 
-returnValue ExportFunction::setReturnValue(	const ExportVariable& _functionReturnValue,
-											BooleanType _returnAsPointer
-											)
+ExportFunction& ExportFunction::setReturnValue(	const ExportVariable& _functionReturnValue,
+												BooleanType _returnAsPointer
+												)
 {
-	if ( functionReturnValue != 0 )
-		*functionReturnValue = _functionReturnValue;
-	else
-		functionReturnValue = new ExportVariable( _functionReturnValue );
-	
+	retVal = std::tr1::shared_ptr< ExportVariable >(new ExportVariable( _functionReturnValue ));
 	returnAsPointer = _returnAsPointer;
 
-	return SUCCESSFUL_RETURN;
+	return *this;
 }
 
 
-returnValue	ExportFunction::setName(	const String& _name
-										)
+ExportFunction&	ExportFunction::setName(	const String& _name
+											)
 {
 	if ( _name.isEmpty() == BT_TRUE )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
+		ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	name = _name;
 	
-	return SUCCESSFUL_RETURN;
+	return *this;
 }
 
 
@@ -241,7 +235,10 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 														) const
 {
 	// do not export undefined (empty) functions
-	if ( isDefined() == BT_FALSE )
+	if (isDefined() == BT_FALSE)
+		return SUCCESSFUL_RETURN;
+
+	if (flagPrivate == BT_TRUE)
 		return SUCCESSFUL_RETURN;
 
 	if (description.isEmpty() == BT_FALSE)
@@ -263,9 +260,9 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 			}
 		}
 
-		if ( functionReturnValue != 0 )
+		if (retVal != 0)
 		{
-			String tmp = functionReturnValue->getDoc();
+			String tmp = retVal->getDoc();
 			if (tmp.isEmpty() == BT_FALSE)
 				acadoFPrintf(file, "\n *\n *  \\return %s\n", tmp.getName());
 		}
@@ -273,9 +270,9 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 	}
 
 
-	if ( functionReturnValue != 0 )
+	if (retVal != 0)
 	{
-		acadoFPrintf( file,"%s", functionReturnValue->getTypeString( _realString,_intString ).getName() );
+		acadoFPrintf( file,"%s", retVal->getTypeString( _realString,_intString ).getName() );
 		if ( returnAsPointer == BT_TRUE )
 			acadoFPrintf( file,"*" );
 	}
@@ -307,9 +304,9 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	//
 	// Set return value type
 	//
-	if ( functionReturnValue != 0 )
+	if ( retVal != 0 )
 	{
-		acadoFPrintf( file,"%s", functionReturnValue->getTypeString( _realString,_intString ).getName() );
+		acadoFPrintf( file,"%s", retVal->getTypeString( _realString,_intString ).getName() );
 		if ( returnAsPointer == BT_TRUE )
 			acadoFPrintf( file,"*" );
 	}
@@ -322,10 +319,10 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	functionArguments.exportCode(file, _realString, _intString, _precision);
 	acadoFPrintf( file," )\n{\n");
 
-	if (functionReturnValue && functionReturnValue->getDataStruct() == ACADO_LOCAL)
+	if (retVal && retVal->getDataStruct() == ACADO_LOCAL)
 	{
-		acadoFPrintf(file, "%s ", functionReturnValue->getTypeString( _realString,_intString ).getName());
-		acadoFPrintf(file, "%s;\n", functionReturnValue->getName().getName());
+		acadoFPrintf(file, "%s ", retVal->getTypeString( _realString,_intString ).getName());
+		acadoFPrintf(file, "%s;\n", retVal->getName().getName());
 	}
 
 	// ExportStatementBlock::exportDataDeclaration( file,_realString,_intString,_precision );
@@ -333,7 +330,7 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	//
 	// Set parent pointers, and run memory allocation
 	//
-	statementPtrArray::const_iterator it = statements.begin();
+	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
 		(*it)->allocate( memAllocator );
 
@@ -373,39 +370,28 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	//
 	// Finish the export of the function
 	//
-	if ( functionReturnValue != 0 )
-		acadoFPrintf( file,"return %s;\n", functionReturnValue->getFullName().getName() );
+	if ( retVal != 0 )
+		acadoFPrintf( file,"return %s;\n", retVal->getFullName().getName() );
 	acadoFPrintf( file,"}\n\n");
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-
-ExportVariable ExportFunction::getGlobalExportVariable( ) const
-{
-	ASSERT( 1==0 );
-	return ExportVariable();
-}
-
-
-
 BooleanType ExportFunction::isDefined( ) const
 {
 	if ( ( name.isEmpty() == BT_FALSE ) && 
-		 ( ( getNumStatements( ) > 0 ) || ( functionReturnValue != 0 ) ) )
+		 ( ( getNumStatements( ) > 0 ) || ( retVal != 0 ) ) )
 		return BT_TRUE;
 	else
 		return BT_FALSE;
 }
 
 
-
-uint ExportFunction::getNumArguments( ) const
+unsigned ExportFunction::getNumArguments( ) const
 {
 	return functionArguments.getNumArguments( );
 }
-
 
 
 //
@@ -414,44 +400,56 @@ uint ExportFunction::getNumArguments( ) const
 
 returnValue ExportFunction::clear( )
 {
-	if ( functionReturnValue != 0 )
-	{
-		delete functionReturnValue;
-		functionReturnValue = 0;
-	}
-	
 	returnAsPointer = BT_FALSE;
 
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportFunction::addIndex(const ExportIndex& _index)
+ExportFunction& ExportFunction::addIndex(const ExportIndex& _index)
 {
-	return memAllocator->add( _index );
+	memAllocator->add( _index );
+
+	return *this;
 }
 
-returnValue ExportFunction::acquire(ExportIndex& obj)
+ExportFunction& ExportFunction::acquire(ExportIndex& obj)
 {
-	return memAllocator->acquire( obj );
+	memAllocator->acquire( obj );
+
+	return *this;
 }
 
-returnValue ExportFunction::release(const ExportIndex& obj)
+ExportFunction& ExportFunction::release(const ExportIndex& obj)
 {
-	return memAllocator->release( obj );
+	memAllocator->release( obj );
+
+	return *this;
 }
 
-returnValue ExportFunction::addVariable(const ExportVariable& _var)
+ExportFunction& ExportFunction::addVariable(const ExportVariable& _var)
 {
 	localVariables.push_back( _var );
 
-	return SUCCESSFUL_RETURN;
+	return *this;
 }
 
-returnValue ExportFunction::doc(const String& _doc)
+ExportFunction& ExportFunction::doc(const String& _doc)
 {
 	description = _doc;
 
-	return SUCCESSFUL_RETURN;
+	return *this;
+}
+
+ExportFunction& ExportFunction::setPrivate(BooleanType _set)
+{
+	flagPrivate = _set;
+
+	return *this;
+}
+
+BooleanType ExportFunction::isPrivate() const
+{
+	return flagPrivate;
 }
 
 CLOSE_NAMESPACE_ACADO

@@ -737,11 +737,11 @@ returnValue ExportArithmeticStatement::getAssignString(	String& _assignString
 	}
 }
 
-returnValue ExportArithmeticStatement::allocate( memoryAllocatorPtr allocator )
+ExportArithmeticStatement& ExportArithmeticStatement::allocate( MemoryAllocatorPtr allocator )
 {
 	memAllocator = allocator;
 
-	return SUCCESSFUL_RETURN;
+	return *this;
 }
 
 CLOSE_NAMESPACE_ACADO

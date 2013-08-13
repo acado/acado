@@ -150,6 +150,10 @@ SET( EXAMPLE_DIRS
 
 IF ( NOT ACADO_BUILD )
 	INCLUDE_DIRECTORIES( . ${ACADO_INCLUDE_DIRS} )
+	
+	IF( ACADO_WITH_TESTING )
+		ENABLE_TESTING()
+	ENDIF( ACADO_WITH_TESTING )
 ENDIF( )
 
 ################################################################################
@@ -157,6 +161,10 @@ ENDIF( )
 # Compilation of examples
 #
 ################################################################################
+
+SET( EXAMPLES_TESTING_BLACKLIST
+	hydroscal
+)
 
 #
 # Compiling examples from list EXAMPLE_DIRS
@@ -184,28 +192,57 @@ FOREACH( DIR ${EXAMPLE_DIRS} )
 		GET_FILENAME_COMPONENT( EXEC_NAME ${SRC} NAME_WE )
 #		MESSAGE( STATUS "EXEC_NAME = ${EXEC_NAME}" )
 
-		ADD_EXECUTABLE( ${DIR}_${EXEC_NAME} ${SRC} )
+		SET( CURR_EXE ${DIR}_${EXEC_NAME} )
 
-		IF (ACADO_BUILD_SHARED)
+		ADD_EXECUTABLE( ${CURR_EXE} ${SRC} )
+
+		IF ( ACADO_BUILD_SHARED )
 			TARGET_LINK_LIBRARIES(
-				${DIR}_${EXEC_NAME}
+				${CURR_EXE}
 				${ACADO_SHARED_LIBRARIES}
 			)
 		ELSE()
 			TARGET_LINK_LIBRARIES(
-				${DIR}_${EXEC_NAME}
+				${CURR_EXE}
 				${ACADO_STATIC_LIBRARIES}
 			)
 		ENDIF()
 		
 		SET_TARGET_PROPERTIES(
-			${DIR}_${EXEC_NAME}
+			${CURR_EXE}
 			PROPERTIES
 				OUTPUT_NAME "${EXEC_NAME}"
 				RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_PATH}"
 				# This one is Visual Studio specific
 				FOLDER "examples"
-		)		
+		)
+		
+		IF ( ACADO_WITH_TESTING )
+			UNSET( BLACKLISTED )
+			
+			FOREACH(BL_ITEM ${EXAMPLES_TESTING_BLACKLIST})
+				IF (${EXEC_NAME} MATCHES ${BL_ITEM})
+					SET( BLACKLISTED YES )
+					BREAK()
+				ENDIF()
+			ENDFOREACH()
+			
+			# MO examples are not tested ATM
+			IF (${SOURCE_PATH} MATCHES "multi_objective")
+				SET( BLACKLISTED YES )
+			ENDIF()
+		
+			IF (NOT BLACKLISTED)
+				ADD_TEST(
+					NAME
+						${DIR}_${EXEC_NAME}_test
+					WORKING_DIRECTORY
+						"${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_PATH}"
+					COMMAND
+						${DIR}_${EXEC_NAME}
+				)
+			ENDIF (NOT BLACKLISTED)
+		ENDIF()
 
 	ENDFOREACH( SRC ${SOURCES} )
 ENDFOREACH( DIR ${EXAMPLE_DIRS} )

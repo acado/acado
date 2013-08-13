@@ -45,7 +45,10 @@ ExportModule::ExportModule( ) : UserInteraction( )
 	setupOptions( );
 
 	timingCalls = 0;
-	setCommonHeaderName( "acado.h" );
+
+	commonHeaderName = "acado.h";
+	name = "acado";
+	exportFolderName = "acado_exported_code";
 }
 
 
@@ -81,22 +84,10 @@ returnValue ExportModule::setTimingCalls( uint _timingCalls ) {
 }
 
 
-returnValue	ExportModule::setCommonHeaderName(	const String& _name
-												)
-{
-	if ( _name.isEmpty() == BT_TRUE )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
-	
-	commonHeaderName = _name;
-	return SUCCESSFUL_RETURN;
-}
-
-
 String ExportModule::getCommonHeaderName( ) const
 {
 	return commonHeaderName;
 }
-
 
 
 //
@@ -109,6 +100,8 @@ returnValue ExportModule::copy(	const ExportModule& arg
 {
 	commonHeaderName = arg.commonHeaderName;
 	timingCalls = arg.timingCalls;
+	name = arg.name;
+	exportFolderName = arg.exportFolderName;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -154,8 +147,27 @@ returnValue ExportModule::setupOptions( )
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue ExportModule::setName(const String& _name)
+{
+	if ( _name.isEmpty() == BT_TRUE )
+		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
+	return SUCCESSFUL_RETURN;
+}
+
+String ExportModule::getName() const
+{
+	return name;
+}
+
+const String& ExportModule::getExportFolderName() const
+{
+	return exportFolderName;
+}
+
+void ExportModule::setExportFolderName(const String& _name)
+{
+	exportFolderName = _name;
+}
 
 CLOSE_NAMESPACE_ACADO
-
-// end of file.

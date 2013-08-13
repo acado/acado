@@ -139,6 +139,14 @@ class ExportLinearSolver : public ExportAlgorithm
 							const String& newId
 							);
 
+		/** \todo DOC */
+		returnValue init(	unsigned _nRows,
+							unsigned _nCols,
+							unsigned _nBacksolves,
+							BooleanType _reuse,
+							BooleanType _unroll,
+							const String& _id
+							);
 
 		/** Adds all data declarations of the auto-generated algorithm to given list of declarations.
 		 *
@@ -259,6 +267,10 @@ class ExportLinearSolver : public ExportAlgorithm
 		BooleanType REUSE;							/**< The boolean that defines the reuse. */
 		uint dim;									/**< The dimensions of the linear system. */
 		
+		unsigned nRows;								/**< Number of rows of matrix A. */
+		unsigned nCols;								/**< Number of columns of matrix A. */
+		unsigned nBacksolves;						/**< Number of back-solves. */
+
 		// DEFINITION OF THE EXPORTVARIABLES
 		ExportVariable A;							/**< Variable containing the matrix of the linear system. */
 		ExportVariable b;							/**< Variable containing the right-hand side of the linear system and it will also contain the solution. */
@@ -268,7 +280,6 @@ class ExportLinearSolver : public ExportAlgorithm
 		ExportFunction solveReuse;					/**< Function that solves a linear system with the same matrix, reusing previous results. */
 
 		ExportVariable determinant;					/**< Variable containing the matrix determinant. */
-
 };
 
 

@@ -25,8 +25,8 @@
 
 /**
  *	\file include/acado/code_generation/export_statement_block.hpp
- *	\author Hans Joachim Ferreau, Boris Houska
- *	\date 2010-2011
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *	\date 2010-2013
  */
 
 
@@ -37,19 +37,18 @@
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_statement.hpp>
-#include <acado/code_generation/export_variable.hpp>
-#include <acado/code_generation/export_index.hpp>
-#include <acado/code_generation/export_data_declaration.hpp>
+#include <acado/code_generation/export_argument.hpp>
 
 #include <vector>
 
 BEGIN_NAMESPACE_ACADO
 
-
 class ExportFunction;
 class ExportODEfunction;
 class ExportFunctionDeclaration;
-
+class ExportVariable;
+class ExportIndex;
+class ExportDataDeclaration;
 
 /** 
  *	\brief Allows to export code for a block of statements.
@@ -58,7 +57,7 @@ class ExportFunctionDeclaration;
  *
  *	The class ExportStatementBlock allows to export code for a block of statements.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class ExportStatementBlock : public ExportStatement
 {
@@ -277,6 +276,15 @@ class ExportStatementBlock : public ExportStatement
 		 */
 		returnValue clear( );
 
+		/** Add a statement. */
+		friend ExportStatementBlock& operator<<(ExportStatementBlock& _block, const ExportStatement& _statement);
+
+		/** Add a string. */
+		friend ExportStatementBlock& operator<<(ExportStatementBlock& _block, const String& _statement);
+
+		/** Add an STL string. */
+		friend ExportStatementBlock& operator<<(ExportStatementBlock& _block, const std::string& _statement);
+
 
 	//
 	// PROTECTED MEMBER FUNCTIONS:
@@ -288,10 +296,9 @@ class ExportStatementBlock : public ExportStatement
 	// DATA MEMBERS:
 	//
 	protected:
-		typedef std::vector< statementPtr > statementPtrArray;
 
 		/** Array containing all statements of the statement block. */
-		statementPtrArray statements;
+		StatementPtrArray statements;
 };
 
 

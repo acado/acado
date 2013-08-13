@@ -73,8 +73,8 @@ int main( )
 	Process process( dynamicSystem,INT_RK45 );
 
 	VariablesGrid disturbance = readFromFile( "road.txt" );
-	process.setProcessDisturbance( disturbance );
-
+	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
     // ----------------------------------
@@ -130,8 +130,10 @@ int main( )
 	Vector x0(4);
 	x0.setZero();
 
-	sim.init( x0 );
-	sim.run( );
+	if (sim.init( x0 ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
+	if (sim.run( ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
 
     // ... AND PLOT THE RESULTS
@@ -151,7 +153,7 @@ int main( )
  	window.addSubplot( disturbance,     "Road Excitation [m]" );
  	window.plot( );
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

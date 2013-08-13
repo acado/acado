@@ -46,13 +46,10 @@
 #include <acado_toolkit.hpp>
 #include <include/acado_gnuplot/gnuplot_window.hpp>
 
+USING_NAMESPACE_ACADO
 
-
-int main( ){
-
-
-   USING_NAMESPACE_ACADO
-
+int main( )
+{
 
 // DIFFERENTIAL STATES :
 // -------------------------
@@ -439,16 +436,17 @@ int main( ){
 
 
 	VariablesGrid disturbance = readFromFile( "my_wind_disturbance_controlsfree.txt" );
-	process.setProcessDisturbance( disturbance );
-
-
+	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
     // SETUP OF THE ALGORITHM AND THE TUNING OPTIONS:
     // ----------------------------------------------
     double samplingTime = 1.0;
     RealTimeAlgorithm  algorithm( ocp, samplingTime );
-    algorithm.initializeDifferentialStates("p_s_ref.txt"    );
-    algorithm.initializeControls          ("p_c_ref.txt"  );
+    if (algorithm.initializeDifferentialStates("p_s_ref.txt"    ) != SUCCESSFUL_RETURN)
+    	exit( EXIT_FAILURE );
+    if (algorithm.initializeControls          ("p_c_ref.txt"  ) != SUCCESSFUL_RETURN)
+    	exit( EXIT_FAILURE );
 
     algorithm.set( MAX_NUM_ITERATIONS, 2  );
     algorithm.set( KKT_TOLERANCE    , 1e-4 );
@@ -477,8 +475,6 @@ int main( ){
 
 	Controller controller( algorithm, reference );
 
-
-
     // SETTING UP THE SIMULATION ENVIRONMENT,  RUN THE EXAMPLE...
     // ----------------------------------------------------------
     double simulationStart =  0.0;
@@ -486,10 +482,10 @@ int main( ){
 
     SimulationEnvironment sim( simulationStart, simulationEnd, process, controller );
 
-
-    sim.init( x0 );
-    sim.run( );
-
+    if (sim.init( x0 ) != SUCCESSFUL_RETURN)
+    	exit( EXIT_FAILURE );
+    if (sim.run( ) != SUCCESSFUL_RETURN)
+    	exit( EXIT_FAILURE );
 
     // ...AND PLOT THE RESULTS
     // ----------------------------------------------------------
@@ -514,7 +510,6 @@ int main( ){
 	feedbackControl.printToFile( "controls.txt" );
 	feedbackControl.printToFile( "controls.m","CONTROL",PS_MATLAB );
 
-
     GnuplotWindow window;
 		window.addSubplot( sampledProcessOutput(0), "DIFFERENTIAL STATE: r" );
 		window.addSubplot( sampledProcessOutput(1), "DIFFERENTIAL STATE: phi" );
@@ -530,8 +525,6 @@ int main( ){
 		window.addSubplot( feedbackControl(1), "CONTROL 1 DPSI" );
 		window.addSubplot( feedbackControl(2), "CONTROL 1 DCL" );
     window.plot( );
-
-
 	
 	GnuplotWindow window2;
 	window2.addSubplot( interStates(1) );

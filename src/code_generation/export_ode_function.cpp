@@ -26,11 +26,12 @@
 
 /**
  *    \file src/code_generation/export_ode_function.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010-2013
  */
 
 #include <acado/code_generation/export_ode_function.hpp>
+#include <acado/function/function_.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -45,8 +46,9 @@ ExportODEfunction::ExportODEfunction( ) : ExportFunction( )
 	numX = 0;
 	numXA = 0;
 	numU = 0;
-
-	f = new Function();
+	numDX = 0;
+	numP = 0;
+	f = std::tr1::shared_ptr< Function >(new Function());
 }
 
 
@@ -54,12 +56,7 @@ ExportODEfunction::ExportODEfunction(	const Function& _f,
 										const String& _name
 										) : ExportFunction( _name )
 {
-	numX = 0;
-	numXA = 0;
-	numU = 0;
-	numP = 0;
-	numDX = 0;
-	f = new Function( _f );
+	init(_f, _name);
 }
 
 
@@ -70,20 +67,13 @@ ExportODEfunction::ExportODEfunction( const ExportODEfunction& arg ) : ExportFun
 	numU = arg.numU;
 	numP = arg.numP;
 	numDX = arg.numDX;
-
-	if ( arg.f != 0 )
-	{
-		f = new Function( *(arg.f) );
-	}
+	globalVar = arg.globalVar;
+	f = arg.f;
 }
 
 
 ExportODEfunction::~ExportODEfunction( )
-{
-	if ( f )
-		delete f;
-	f = 0;
-}
+{}
 
 
 ExportODEfunction& ExportODEfunction::operator=( const ExportODEfunction& arg )
@@ -94,18 +84,8 @@ ExportODEfunction& ExportODEfunction::operator=( const ExportODEfunction& arg )
 		numX = arg.numX;
 		numXA = arg.numXA;
 		numU = arg.numU;
-
-		if ( f )
-		{
-			delete f;
-
-			f = 0;
-		}
-
-		if ( arg.f != 0 )
-		{
-			f = new Function( *(arg.f) );
-		}
+		globalVar = arg.globalVar;
+		f = arg.f;
 	}
 
 	return *this;
@@ -140,13 +120,13 @@ returnValue ExportODEfunction::init(	const Function& _f,
 	numP = _numP;
 	numDX = _numDX;
 
-	if ( f )
-		delete f;
-	f = 0;
+	f = std::tr1::shared_ptr< Function >(new Function( _f ));
 
-	f = new Function( _f );
+	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
+	f->setGlobalExportVariableName( globalVar.getFullName() );
 
-	return ExportFunction::init( _name );
+	// Just add two dummy arguments in order to keep addFunctionCall function happy.
+	return ExportFunction::init(_name, ExportArgument("input", 1, 1), ExportArgument("output", 1, 1));
 }
 
 
@@ -157,10 +137,7 @@ returnValue ExportODEfunction::exportDataDeclaration(	FILE* file,
 														int _precision
 														) const
 {
-	if (f->getDim() > 0)
-		return f->exportHeader(file, name.getName(), _realString.getName());
-
-	return SUCCESSFUL_RETURN;
+	return f->exportHeader(file, name.getName(), _realString.getName());
 }
 
 
@@ -170,10 +147,7 @@ returnValue ExportODEfunction::exportForwardDeclaration(	FILE* file,
 															int _precision
 															) const
 {
-	if (f->getDim() > 0)
-		return f->exportForwardDeclarations(file, name.getName(), _realString.getName());
-
-	return SUCCESSFUL_RETURN;
+	return f->exportForwardDeclarations(file, name.getName(), _realString.getName());
 }
 
 
@@ -183,38 +157,38 @@ returnValue ExportODEfunction::exportCode(	FILE* file,
 											int _precision
 											) const
 {
-	if (f->getDim() > 0)
-		return f->exportCode(file, name.getName(), _realString.getName(), _precision, numX, numXA, numU, numP, numDX);
-	return SUCCESSFUL_RETURN;
+	return f->exportCode(file, name.getName(), _realString.getName(),
+			_precision, numX, numXA, numU, numP, numDX);
 }
-
-
-
-ExportVariable ExportODEfunction::getGlobalExportVariable( ) const
-{
-	return f->getGlobalExportVariable( );
-}
-
 
 
 BooleanType ExportODEfunction::isDefined( ) const
 {
-	if ( f->getDim() > 0 )
+	if (f->getDim() > 0)
 		return BT_TRUE;
-	else
-		return BT_FALSE;
+
+	return BT_FALSE;
 }
 
-returnValue ExportODEfunction::setGlobalExportVariable(const ExportVariable& var)
-{
-	f->setGlobalExportVariable( var );
-
-	return SUCCESSFUL_RETURN;
-}
 
 unsigned ExportODEfunction::getFunctionDim( void )
 {
 	return f->getDim();
+}
+
+ExportVariable ExportODEfunction::getGlobalExportVariable( ) const
+{
+	return deepcopy( globalVar );
+}
+
+returnValue ExportODEfunction::setGlobalExportVariable(const ExportVariable& var)
+{
+	ASSERT(var.getNumRows() < f->getGlobalExportVariableSize() || var.getNumCols() != 1);
+
+	globalVar = var;
+	f->setGlobalExportVariableName( globalVar.getFullName() );
+
+	return SUCCESSFUL_RETURN;
 }
 
 //

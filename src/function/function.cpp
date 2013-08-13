@@ -26,8 +26,8 @@
 
 /**
  *    \file src/function/function.cpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 2008
+ *    \authors Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 
@@ -35,7 +35,6 @@
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/function/evaluation_point.hpp>
 #include <acado/function/function_.hpp>
-#include <acado/code_generation/export_variable.hpp>
 
 
 
@@ -448,27 +447,36 @@ returnValue Function::print(	FILE       *file     ,
 								const char *fcnName  ,
 								const char *realString,
 								int         precision
-								) const{
+								) const
+{
+	if (getDim() > 0)
+		return evaluationTree.C_print(file, fcnName, realString, precision);
 
-    return evaluationTree.C_print( file,fcnName,realString,precision );
+	return SUCCESSFUL_RETURN;
 }
 
 
 returnValue Function::exportHeader(	FILE       *file     ,
 									const char *fcnName  ,
 									const char *realString
-									) const{
+									) const
+{
+	if (getDim() > 0)
+		return evaluationTree.exportHeader(file, fcnName, realString);
 
-    return evaluationTree.exportHeader( file,fcnName,realString );
+	return SUCCESSFUL_RETURN;
 }
 
 
 returnValue Function::exportForwardDeclarations(	FILE       *file     ,
 													const char *fcnName  ,
 													const char *realString
-													) const{
+													) const
+{
+	if (getDim() > 0)
+		return evaluationTree.exportForwardDeclarations(file, fcnName, realString);
 
-    return evaluationTree.exportForwardDeclarations( file,fcnName,realString );
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -481,15 +489,13 @@ returnValue Function::exportCode(	FILE       *file,
 									uint		_numU,
 									uint		_numP,
 									uint		_numDX
-									) const{
-
-    return evaluationTree.exportCode( file,fcnName,realString,precision,_numX,_numXA,_numU,_numP,_numDX );
-}
-
-
-ExportVariable Function::getGlobalExportVariable( ) const
+									) const
 {
-	return evaluationTree.getGlobalExportVariable( );
+	if (getDim() > 0)
+		return evaluationTree.exportCode(file, fcnName, realString, precision,
+				_numX, _numXA, _numU, _numP, _numDX);
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -576,13 +582,19 @@ returnValue Function::AD_backward( const    Vector &seed  ,
     return SUCCESSFUL_RETURN;
 }
 
-returnValue Function::setGlobalExportVariable(const ExportVariable& var)
+String Function::getGlobalExportVariableName( ) const
 {
-	// TODO: In the next iteration set the full name ;)
-	evaluationTree.setAuxVariableName( var.getName() );
-	evaluationTree.setAuxVariableStructName( var.getDataStructString() );
+	return evaluationTree.getGlobalExportVariableName( );
+}
 
-	return SUCCESSFUL_RETURN;
+returnValue Function::setGlobalExportVariableName(const String& var)
+{
+	return evaluationTree.setGlobalExportVariableName( var );
+}
+
+unsigned Function::getGlobalExportVariableSize( ) const
+{
+	return evaluationTree.getGlobalExportVariableSize( );
 }
 
 

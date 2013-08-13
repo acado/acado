@@ -70,13 +70,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	bool DERIVATIVES = ((ExportSensitivityType)sensGen != NO_SENSITIVITY);
 
-	String fileName( "integrator.c" );
-
-	int printLevel;
-	get( PRINTLEVEL,printLevel );
-
-	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Preparing to export %s... ",fileName.getName() );
+	LOG( LVL_DEBUG ) << "Preparing to export ExplicitRungeKuttaExport... " << endl;
 
 	// export RK scheme
 	uint rhsDim   = NX*(NX+NU+1);
@@ -181,8 +175,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	
 	integrate.addStatement( error_code == 0 );
 
-	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "done.\n" );	
+	LOG( LVL_DEBUG ) << "done" << endl;
 
 	return SUCCESSFUL_RETURN;
 }

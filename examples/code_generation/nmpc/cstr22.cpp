@@ -155,11 +155,12 @@ int main( ){
        mpc.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON );
 	   mpc.set( GENERATE_TEST_FILE,NO );
 
-       mpc.exportCode("cstr22_export");
+       if (mpc.exportCode("cstr22_export") != SUCCESSFUL_RETURN)
+    	   exit( EXIT_FAILURE );
     // ----------------------------------------------------------
 
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 

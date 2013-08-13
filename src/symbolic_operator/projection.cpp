@@ -110,7 +110,7 @@ Projection::Projection( VariableType variableType_, int vIndex_, const String &n
               break;
 
          case VT_INTERMEDIATE_STATE:
-              name << "acadoWorkspace.acado_aux" << "[" << vIndex <<"]";
+              name << "acado_aux" << "[" << vIndex <<"]";
               break;
 
          case VT_DDIFFERENTIAL_STATE:

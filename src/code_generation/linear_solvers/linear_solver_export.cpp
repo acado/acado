@@ -40,27 +40,26 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportLinearSolver::ExportLinearSolver( UserInteraction* _userInteraction,
-									const String& _commonHeaderName
-									) : ExportAlgorithm( _userInteraction,_commonHeaderName )
+ExportLinearSolver::ExportLinearSolver(	UserInteraction* _userInteraction,
+										const String& _commonHeaderName
+										) : ExportAlgorithm(_userInteraction, _commonHeaderName)
 {
-	REUSE = BT_TRUE;		// DEFAULT value
-	UNROLLING = BT_FALSE;	// DEFAULT value
-	dim = 0;
+	REUSE = BT_TRUE;
+	UNROLLING = BT_FALSE;
+	dim = nRows = nCols = nBacksolves = 0;
 
-	determinant = ExportVariable( "det", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
+	determinant = ExportVariable("det", 1, 1, REAL, ACADO_LOCAL, BT_TRUE);
 }
 
 
 ExportLinearSolver::ExportLinearSolver( const ExportLinearSolver& arg ) : ExportAlgorithm( arg )
 {
-	init( arg.dim, arg.REUSE, arg.UNROLLING );
+	init(arg.nRows, arg.nCols, arg.nBacksolves, arg.REUSE, arg.UNROLLING, arg.identifier);
 }
 
 
 ExportLinearSolver::~ExportLinearSolver( )
-{
-}
+{}
 
 
 ExportLinearSolver& ExportLinearSolver::operator=( const ExportLinearSolver& arg )
@@ -68,7 +67,7 @@ ExportLinearSolver& ExportLinearSolver::operator=( const ExportLinearSolver& arg
 	if( this != &arg )
 	{
 		ExportAlgorithm::operator=( arg );
-		init( arg.dim, arg.REUSE, arg.UNROLLING );
+		init(arg.nRows, arg.nCols, arg.nBacksolves, arg.REUSE, arg.UNROLLING, arg.identifier);
 	}
 
 	return *this;
@@ -80,7 +79,7 @@ returnValue ExportLinearSolver::init(	const uint newDim,
 										const BooleanType& unrolling
 										)
 {
-	return init( newDim, reuse, unrolling, String( "dim" ) << String( newDim ) << "_" );
+	return init(newDim, newDim, newDim, reuse, unrolling, String( "dim" ) << String( newDim ) << "_");
 }
 
 
@@ -90,16 +89,32 @@ returnValue ExportLinearSolver::init(	const uint newDim,
 										const String& newId
 										)
 {
-	REUSE = reuse;
-	UNROLLING = unrolling;
-	dim = newDim;
-	identifier = newId;
-	setup();
-	
-	return SUCCESSFUL_RETURN;
+	return init(newDim, newDim, newDim, reuse, unrolling, newId);
 }
 
+returnValue ExportLinearSolver::init(	unsigned _nRows,
+										unsigned _nCols,
+										unsigned _nBacksolves,
+										BooleanType _reuse,
+										BooleanType _unroll,
+										const String& _id
+										)
+{
+	ASSERT_RETURN(_nRows >= _nCols);
+	ASSERT_RETURN(_nBacksolves <= _nCols);
 
+	nRows = _nRows;
+	nCols = _nCols;
+	nBacksolves = _nBacksolves;
+	REUSE = _reuse;
+	UNROLLING = _unroll;
+	identifier = _id;
+
+	// This is more for compatibility reasons and should be deprecated.
+	dim = _nRows;
+
+	return setup();
+}
 
 uint ExportLinearSolver::getDim() const {
 	

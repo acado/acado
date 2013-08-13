@@ -108,9 +108,9 @@ int main( ){
 	Process process( dynamicSystem,INT_RK45 );
 
 	VariablesGrid disturbance = readFromFile( "dist.txt" );
-	process.setProcessDisturbance( disturbance );
+	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
-	
     // SETTING UP THE MPC CONTROLLER:
     // ------------------------------
 
@@ -131,17 +131,20 @@ int main( ){
 	x0.setZero();
 	x0(3) = 5.0;
 
-	sim.init( x0 );
-	sim.run( );
-
+	if (sim.init( x0 ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
+	if (sim.run( ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
     // ...AND PLOT THE RESULTS
     // ----------------------------------------------------------
 	VariablesGrid diffStates;
-	sim.getProcessDifferentialStates( diffStates );
+	if (sim.getProcessDifferentialStates( diffStates ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
 	VariablesGrid feedbackControl;
-	sim.getFeedbackControl( feedbackControl );
+	if (sim.getFeedbackControl( feedbackControl ) != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
 	GnuplotWindow window;
 		window.addSubplot( diffStates(0),   "POSITION OF THE TROLLEY" );
@@ -155,7 +158,7 @@ int main( ){
 	diffStates.printToFile( "diffStates.txt" );
 
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 /* <<< end tutorial code <<< */

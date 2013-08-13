@@ -107,7 +107,7 @@ returnValue MPCexport::exportCode(	const String& dirName,
 	get( PRINTLEVEL,printLevel );
 
 	// export mandatory source code files
-	if ( exportAcadoHeader( dirName,commonHeaderName,_realString,_intString,_precision ) != SUCCESSFUL_RETURN )
+	if ( exportAcadoHeader( dirName,getCommonHeaderName(),_realString,_intString,_precision ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
 	if( integrator != 0 )
@@ -115,7 +115,7 @@ returnValue MPCexport::exportCode(	const String& dirName,
 		String fileName( dirName );
 		fileName << "/integrator.c";
 
-		ExportFile integratorFile( fileName,commonHeaderName,_realString,_intString,_precision );
+		ExportFile integratorFile( fileName,getCommonHeaderName(),_realString,_intString,_precision );
 		integrator->getCode( integratorFile );
 		
 		if ( integratorFile.exportCode( ) != SUCCESSFUL_RETURN )
@@ -127,7 +127,7 @@ returnValue MPCexport::exportCode(	const String& dirName,
 		String fileName( dirName );
 		fileName << "/condensing.c";
 
-		ExportFile condenserFile( fileName,commonHeaderName,_realString,_intString,_precision );
+		ExportFile condenserFile( fileName,getCommonHeaderName(),_realString,_intString,_precision );
 		condenser->getCode( condenserFile );
 		
 		if ( condenserFile.exportCode( ) != SUCCESSFUL_RETURN )
@@ -139,7 +139,7 @@ returnValue MPCexport::exportCode(	const String& dirName,
 		String fileName( dirName );
 		fileName << "/gauss_newton_method.c";
 
-		ExportFile gaussNewtonFile( fileName,commonHeaderName,_realString,_intString,_precision );
+		ExportFile gaussNewtonFile( fileName,getCommonHeaderName(),_realString,_intString,_precision );
 		gaussNewton->getCode( gaussNewtonFile );
 		
 		if ( gaussNewtonFile.exportCode( ) != SUCCESSFUL_RETURN )
@@ -194,7 +194,7 @@ returnValue MPCexport::exportCode(	const String& dirName,
 	if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
 		String mpcInterface( dirName );
 		mpcInterface << "/MPCstep.c";
-		ExportMatlabMPC exportMexFun( MPC_MEX_TEMPLATE, mpcInterface, commonHeaderName,_realString,_intString,_precision );
+		ExportMatlabMPC exportMexFun( MPC_MEX_TEMPLATE, mpcInterface, getCommonHeaderName(),_realString,_intString,_precision );
 
 		int mexSteps, verbose;
 		get( MEX_ITERATION_STEPS, mexSteps );
@@ -303,7 +303,7 @@ returnValue MPCexport::setup( )
 	if ( integrator != NULL )
 		delete integrator;
 
-	integrator = IntegratorExportFactory::instance().createAlgorithm(this, commonHeaderName, static_cast<ExportIntegratorType>(integratorType));
+	integrator = IntegratorExportFactory::instance().createAlgorithm(this, getCommonHeaderName(), static_cast<ExportIntegratorType>(integratorType));
 
 	if ( integrator == NULL )
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -333,7 +333,7 @@ returnValue MPCexport::setup( )
 	if ( condenser != 0 )
 		delete condenser;
 
-	condenser = new CondensingExport( this,commonHeaderName );
+	condenser = new CondensingExport( this,getCommonHeaderName() );
 	condenser->setDimensions( ocp.getNX(),ocp.getNU(),ocp.getNP(),ocp.getN() );
 
 	condenser->setIntegratorExport( integrator );
@@ -392,7 +392,7 @@ returnValue MPCexport::setup( )
 	if ( gaussNewton != 0 )
 		delete gaussNewton;
 
-	gaussNewton = new GaussNewtonExport( this,commonHeaderName );
+	gaussNewton = new GaussNewtonExport( this,getCommonHeaderName() );
 	gaussNewton->setDimensions( ocp.getNX(),ocp.getNDX(),ocp.getNXA(),ocp.getNU(),ocp.getNP(),ocp.getN() );
 
 	gaussNewton->setCondensingExport( condenser );

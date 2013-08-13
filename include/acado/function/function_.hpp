@@ -41,7 +41,6 @@ BEGIN_NAMESPACE_ACADO
 
 
 class EvaluationPoint;
-class ExportVariable;
 template <typename T> class TevaluationPoint;
 
 
@@ -483,15 +482,6 @@ public:
 								uint		_numDX = 0
 								) const;
 
-	
-		ExportVariable getGlobalExportVariable( ) const;
-
-		/** This function will just set the name of the global export variable.
-		 *  \note It should laso set the structure.
-		 * */
-		returnValue setGlobalExportVariable(const ExportVariable& var);
-
-
      /** Clears the buffer and resets the buffer size \n
       *  to 1.                                        \n
       *  \return SUCCESFUL_RETURN                     \n
@@ -518,7 +508,14 @@ public:
 
      inline returnValue setMemoryOffset( int memoryOffset_ );
 
+     /** Set name of the variable that holds intermediate values. */
+     returnValue setGlobalExportVariableName(const String& var);
 
+     /** Get name of the variable that holds intermediate values. */
+     String getGlobalExportVariableName( ) const;
+
+     /** Get size of the variable that holds intermediate values. */
+     unsigned getGlobalExportVariableSize( ) const;
 
 // PROTECTED MEMBERS:
 // ------------------
