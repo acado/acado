@@ -100,8 +100,15 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER
 	#
 	# Compiler options from original Makefiles
 	#
-	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
-	SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
+	
+	# Cygwin complains in about the -fPIC flag...
+	IF( NOT CYGWIN )
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
+		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC" )
+	ENDIF( NOT CYGWIN )
+	
+	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
+	SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
 	
 	IF( ACADO_DEVELOPER )
 #		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline" )
