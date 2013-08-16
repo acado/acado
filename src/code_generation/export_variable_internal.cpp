@@ -499,6 +499,14 @@ BooleanType ExportVariableInternal::hasValue(	const ExportIndex& rowIdx,
 	return BT_FALSE;
 }
 
+BooleanType ExportVariableInternal::isSubMatrix() const
+{
+	if (nRows == 0 && nCols == 0)
+		return BT_FALSE;
+
+	return BT_TRUE;
+}
+
 
 CLOSE_NAMESPACE_ACADO
 

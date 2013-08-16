@@ -534,6 +534,8 @@ class ExportVariable : public ExportArgument
 		 */
 		Matrix getGivenMatrix( ) const;
 
+		/** Check whether the matrix is actually a submatrix. */
+		BooleanType isSubMatrix() const;
 
 		/** Prints contents of variable to screen.
 		 *
