@@ -166,8 +166,6 @@ returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _
 	u = Control(NU);
 	p = Parameter(NP);
 
-	setup();
-
 	return SUCCESSFUL_RETURN;
 }
 
@@ -273,8 +271,6 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		z = AlgebraicState(NXA);
 		u = Control(NU);
 		p = Parameter(NP);
-
-		setup();
 	}
 
 	return SUCCESSFUL_RETURN;

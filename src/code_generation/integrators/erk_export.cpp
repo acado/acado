@@ -78,7 +78,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	uint inputDim = NX*(NX+NU+1) + NU + NP;
 	if( !DERIVATIVES ) inputDim = NX + NU + NP;
 	const uint rkOrder  = getNumStages();
-	   
+
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
 
 	ExportVariable Ah ( "A*h",  Matrix( AA )*=h );
@@ -161,7 +161,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	{
 		loop.addStatement( rk_xxx.getCols( 0,rhsDim ) == rk_eta.getCols( 0,rhsDim ) + Ah.getRow(run1)*rk_kkk );
 		if( timeDependant ) loop.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt + ((double)cc(run1))/grid.getNumIntervals() );
-		loop.addFunctionCall( diffs_rhs.getName(),rk_xxx,rk_kkk.getAddress(run1,0) );
+		loop.addFunctionCall( getNameDiffsRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
 	loop.addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
@@ -277,18 +277,13 @@ returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 }
 
 
-returnValue ExplicitRungeKuttaExport::setModel(	const String& _rhs, const String& _diffs_rhs ) {
-
-	// You can't use this feature yet with explicit integrators, because they need the Variational Differential Equations !
-	return ACADOERROR( RET_INVALID_OPTION );
-}
-
-
 returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock& declarations,
 													ExportStruct dataStruct
 													) const
 {
-	declarations.addDeclaration( diffs_rhs.getGlobalExportVariable(),dataStruct );
+	if( exportRhs ) {
+		declarations.addDeclaration( getAuxVariable(),dataStruct );
+	}
 	declarations.addDeclaration( rk_ttt,dataStruct );
 	declarations.addDeclaration( rk_xxx,dataStruct );
 	declarations.addDeclaration( rk_kkk,dataStruct );
@@ -303,12 +298,28 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 														) const
 {
 	declarations.addDeclaration( integrate );
-	declarations.addDeclaration( diffs_rhs );
+	if( exportRhs ) {
+		declarations.addDeclaration( diffs_rhs );
+	}
+	else {
+		Function tmpFun;
+		tmpFun << zeros(1,1);
+		ExportODEfunction tmpExport(tmpFun, getNameDiffsRHS());
+		declarations.addDeclaration( tmpExport );
+	}
 
 	int matlabInterface;
 	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
 	if (matlabInterface) {
-		declarations.addDeclaration( rhs );
+		if( exportRhs ) {
+			declarations.addDeclaration( rhs );
+		}
+		else {
+			Function tmpFun;
+			tmpFun << zeros(1,1);
+			ExportODEfunction tmpExport(tmpFun, getNameRHS());
+			declarations.addDeclaration( tmpExport );
+		}
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -341,7 +352,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		code.addStatement( s.str().c_str() );
 	}
 
-	code.addFunction( diffs_rhs );
+	if( exportRhs ) code.addFunction( diffs_rhs );
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 	code.addComment(String("Fixed step size:") << String(h));
@@ -350,7 +361,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	int matlabInterface;
 	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
 	if (matlabInterface) {
-		code.addFunction( rhs );
+		if( exportRhs ) code.addFunction( rhs );
 	}
 
 // 	if ( (PrintLevel)printLevel >= HIGH ) 

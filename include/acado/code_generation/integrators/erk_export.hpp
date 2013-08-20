@@ -123,17 +123,6 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
 
 
-		/** Assigns the model to be used by the integrator.
-		 *
-		 *	@param[in] _rhs				Name of the function, evaluating the right-hand side.
-		 *	@param[in] _diffs_rhs		Name of the function, evaluating the derivatives of the right-hand side.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-
-		returnValue setModel( const String& _rhs, const String& _diffs_rhs );
-
-
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
 		 *
 		 *	@param[in] declarations		List of declarations.
