@@ -495,6 +495,10 @@ ExportVariable diag(	const String& _name,
 	return t;
 }
 
+BooleanType ExportVariable::isSubMatrix() const
+{
+	return (*this)->isSubMatrix();
+}
 
 CLOSE_NAMESPACE_ACADO
 

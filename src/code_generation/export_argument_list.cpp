@@ -135,7 +135,9 @@ returnValue ExportArgumentList::exportCode(	FILE* file,
 	{
 		// Allow only undefined arguments and defined integer scalars
 		if (	arguments[ i ].isGiven( ) == BT_TRUE &&
-				(arguments[ i ].getDim() > 1 || arguments[ i ].getType() != INT)
+				(arguments[ i ].getDim() > 1 || arguments[ i ].getType() != INT) &&
+				arguments[ i ].getType() != STATIC_CONST_INT &&
+				arguments[ i ].getType() != STATIC_CONST_REAL
 				)
 			continue;
 

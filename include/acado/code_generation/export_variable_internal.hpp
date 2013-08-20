@@ -339,6 +339,9 @@ class ExportVariableInternal : public ExportArgumentInternal
 								double _value
 								) const;
 
+		/** Check whether the matrix is actually a submatrix. */
+		BooleanType isSubMatrix() const;
+
 	protected:
 
 		BooleanType doAccessTransposed;				/**< Flag indicating whether variable is to be accessed in a transposed manner. */

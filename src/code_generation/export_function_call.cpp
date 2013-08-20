@@ -158,7 +158,10 @@ returnValue ExportFunctionCall::init(	const ExportFunction& _f,
 									_argument7,_argument8,_argument9 );
 
 	if ( _f.getNumArguments() != functionArguments.getNumArguments() )
+	{
+		LOG( LVL_ERROR ) << "The function" << _f.getName() << " expects: " << _f.getNumArguments() << " arguments" << std::endl;
 		return ACADOERROR( RET_INVALID_CALL_TO_EXPORTED_FUNCTION );
+	}
 
 	return SUCCESSFUL_RETURN;
 }

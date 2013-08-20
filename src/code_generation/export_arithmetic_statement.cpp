@@ -635,10 +635,10 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 	if ( ( rhs1.getNumRows( ) != lhs.getNumRows( ) ) ||
 		 ( rhs1.getNumCols( ) != lhs.getNumCols( ) ) )
 	{
-		cout << "lhs name is " << lhs.getName().getName() <<
-				", size: " << lhs.getNumRows() << " x " << lhs.getNumCols() << endl;
-		cout << "rhs1 name is " << rhs1.getName().getName() <<
-				", size: " << rhs1.getNumRows() << " x " << rhs1.getNumCols() << endl;
+		LOG( LVL_DEBUG ) << "lhs name is " << lhs.getName().getName()
+				<< ", size: " << lhs.getNumRows() << " x " << lhs.getNumCols()
+				<< "rhs1 name is " << rhs1.getName().getName()
+				<< ", size: " << rhs1.getNumRows() << " x " << rhs1.getNumCols() << endl;
 
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
 	}
@@ -648,7 +648,13 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 
 	unsigned numOps = lhs.getNumRows() * lhs.getNumCols();
 
-	if ((numOps < 128) || (rhs1.isGiven() == BT_TRUE))
+	if (	lhs.isSubMatrix() == BT_FALSE && lhs.getDim() > 1 &&
+			rhs1.isGiven() == BT_TRUE && rhs1.getGivenMatrix().isZero() == BT_TRUE)
+	{
+		s 	<< "{ int lCopy; for (lCopy = 0; lCopy < "<< lhs.getDim() << "; lCopy++) "
+			<< lhs.getFullName() << "[ lCopy ] = 0.0; }" << endl;
+	}
+	else if ((numOps < 128) || (rhs1.isGiven() == BT_TRUE))
 	{
 		for(unsigned i = 0; i < lhs.getNumRows( ); ++i)
 			for(unsigned j = 0; j < lhs.getNumCols( ); ++j)
