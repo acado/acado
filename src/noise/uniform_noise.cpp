@@ -67,7 +67,9 @@ UniformNoise::UniformNoise(	uint _dim,
 							) : Noise( )
 {
 	w.init( _dim,1 );
-
+	lowerLimit.init(_dim);
+	upperLimit.init(_dim);
+	
 	for( uint i=0; i<_dim; ++i )
 	{
 		lowerLimit(i) = _lowerLimit;
