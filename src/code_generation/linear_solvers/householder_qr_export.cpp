@@ -92,9 +92,6 @@ returnValue ExportHouseholderQR::getFunctionDeclarations(	ExportStatementBlock& 
 returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 											)
 {
-	if (REUSE == BT_TRUE)
-		return ACADOERRORTEXT(RET_NOT_IMPLEMENTED_YET, "There is a bug in the QR based lin. solver with reusing the factorization. Please use LU solver instead.");
-
 	unsigned run1, run2, run3;
 
 	//
@@ -181,7 +178,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 			if (REUSE)
 			{
 				// replace zeros by results that can be reused:
-				for (run2 = run1; run2 < dim - 1; run2++)
+				for (run2 = run1; run2 < nRows - 1; run2++)
 				{
 					solve.addStatement(
 							A.getSubMatrix(run2 + 1, run2 + 2, run1, run1 + 1)
@@ -223,7 +220,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 			{
 				// store last element to be reused:
 				solve.addStatement(
-						rk_temp.getCol(run1) == rk_temp.getCol(dim - 1));
+						rk_temp.getCol(run1) == rk_temp.getCol(nRows - 1));
 			}
 		}
 	}
@@ -242,7 +239,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[j] = A[j*" << String( nCols ) << "+i];\n" );
 		solve.addStatement( String( "	}\n" ) );
 		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] = " << rk_temp.getFullName() << "[i]*" << rk_temp.getFullName() << "[i];\n" );
-		solve.addStatement( String( "	for( j=i+1; j < " ) << String( dim ) << "; j++ ) {\n" );
+		solve.addStatement( String( "	for( j=i+1; j < " ) << String( nRows ) << "; j++ ) {\n" );
 		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] += " << rk_temp.getFullName() << "[j]*" << rk_temp.getFullName() << "[j];\n" );
 		solve.addStatement( String( "	}\n" ) );
 		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] = sqrt(" << rk_temp.getFullName() << "[" << String( nRows ) << "]);\n" );
@@ -266,8 +263,8 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 		solve.addStatement( String( "	" ) << determinant.getFullName() << " *= " << "	A[i * " << String( nCols ) << " + i];\n" );
 
 		if( REUSE ) {
-			solve.addStatement( String( "	for( j=i; j < (" ) << String( dim ) << "-1); j++ ) {\n" );
-			solve.addStatement( String( "		A[(j+1)*" ) << String( dim ) << "+i] = " << rk_temp.getFullName() << "[j];\n" );
+			solve.addStatement( String( "	for( j=i; j < (" ) << String( nRows ) << "-1); j++ ) {\n" );
+			solve.addStatement( String( "		A[(j+1)*" ) << String( nCols ) << "+i] = " << rk_temp.getFullName() << "[j];\n" );
 			solve.addStatement( String( "	}\n" ) );
 		}
 		solve.addStatement( String( "	for( j=i+1; j < " ) << String( nCols ) << "; j++ ) {\n" );
@@ -289,15 +286,11 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 		solve.addStatement( String( "		b[k] -= " ) << rk_temp.getFullName() << "[k]*" << rk_temp.getFullName() << "[" << String( nRows ) << "];\n" );
 		solve.addStatement( String( "	}\n" ) );
 		if( REUSE ) {
-			solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[i] = " << rk_temp.getFullName() << "[" << String( dim-1 ) << "];\n" );
+			solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[i] = " << rk_temp.getFullName() << "[" << String( nRows-1 ) << "];\n" );
 		}
 		solve.addStatement( String( "}\n" ) );
 	}
 	solve.addLinebreak();
-
-//	// updates last column: Something is wrong here!
-//	solve.addStatement(String("A[") << String(nCols * nCols - 1) << "] *= -1.0;\n");
-//	solve.addStatement(String("b[") << String(nCols - 1) << "] *= -1.0;\n");
 
 	solve.addFunctionCall(solveTriangular, A, b);
 	code.addFunction( solve );
@@ -305,19 +298,18 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
     code.addLinebreak( 2 );
 	if( REUSE ) { // Also export the extra function which reuses the factorization of the matrix A
 		// update right-hand side:
-		for( run1 = 0; run1 < (dim-1); run1++ ) {
-			solveReuse.addStatement( rk_temp.getCol( dim ) == A.getSubMatrix( run1+1,run1+2,run1,run1+1 )*b.getRow( run1 ) );
-			for( run2 = run1+1; run2 < (dim-1); run2++ ) {
-				solveReuse.addStatement( rk_temp.getCol( dim ) += A.getSubMatrix( run2+1,run2+2,run1,run1+1 )*b.getRow( run2 ) );
+		for( run1 = 0; run1 < nCols; run1++ ) {
+			solveReuse.addStatement( rk_temp.getCol( nRows ) == A.getSubMatrix( run1+1,run1+2,run1,run1+1 )*b.getRow( run1 ) );
+			for( run2 = run1+1; run2 < (nRows-1); run2++ ) {
+				solveReuse.addStatement( rk_temp.getCol( nRows ) += A.getSubMatrix( run2+1,run2+2,run1,run1+1 )*b.getRow( run2 ) );
 			}
-			solveReuse.addStatement( rk_temp.getCol( dim ) += rk_temp.getCol( run1 )*b.getRow( dim-1 ) );
-			solveReuse.addStatement( String( "" ) << rk_temp.getFullName() << "[" << String( dim ) << "] *= 2;\n" );
-			for( run3 = run1; run3 < (dim-1); run3++ ) {
-				solveReuse.addStatement( b.getRow( run3 ) -= A.getSubMatrix( run3+1,run3+2,run1,run1+1 )*rk_temp.getCol( dim ) );
+			solveReuse.addStatement( rk_temp.getCol( nRows ) += rk_temp.getCol( run1 )*b.getRow( nRows-1 ) );
+			solveReuse.addStatement( String( "" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] *= 2;\n" );
+			for( run3 = run1; run3 < (nRows-1); run3++ ) {
+				solveReuse.addStatement( b.getRow( run3 ) -= A.getSubMatrix( run3+1,run3+2,run1,run1+1 )*rk_temp.getCol( nRows ) );
 			}
-			solveReuse.addStatement( b.getRow( dim-1 ) -= rk_temp.getCol( run1 )*rk_temp.getCol( dim ) );
+			solveReuse.addStatement( b.getRow( nRows-1 ) -= rk_temp.getCol( run1 )*rk_temp.getCol( nRows ) );
 		}
-		solveReuse.addStatement( String( "b[" ) << String( dim-1 ) << "] *= -1;\n" );
 		solveReuse.addLinebreak();
 
 		solveReuse.addFunctionCall( solveTriangular, A, b );
