@@ -42,6 +42,8 @@
 
 BEGIN_NAMESPACE_ACADO
 
+class ExportQpOasesInterface;
+
 
 /** 
  *	\brief ...
@@ -57,6 +59,8 @@ class ExportTemplatedFile : public ExportFile
     //
 
     public:
+
+		friend class ExportQpOasesInterface;
 
 		/** Default constructor. 
 		 *
