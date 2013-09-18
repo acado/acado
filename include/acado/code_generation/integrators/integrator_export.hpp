@@ -36,7 +36,7 @@
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
-#include <acado/code_generation/export_algorithm.hpp>
+#include <acado/code_generation/export_algorithm_factory.hpp>
 #include <acado/code_generation/model_data.hpp>
 
 
@@ -532,6 +532,11 @@ enum ExportSensitivityType{
     FORWARD_OVER_BACKWARD         	/**< Sensitivities (first and second order) are computed.					 */
 };
 
+/** Factory for creation of exported integrators.*/
+typedef ExportAlgorithmFactory<IntegratorExport, ExportIntegratorType> IntegratorExportFactory;
+
+/** Shared pointer to an integrator. */
+typedef std::tr1::shared_ptr< IntegratorExport > IntegratorExportPtr;
 
 CLOSE_NAMESPACE_ACADO
 

@@ -32,6 +32,7 @@
 
 #include <acado/code_generation/export_algorithm.hpp>
 #include <acado/utils/acado_types.hpp>
+#include <acado/utils/acado_message_handling.hpp>
 
 #include <map>
 
@@ -42,27 +43,29 @@ BEGIN_NAMESPACE_ACADO
  * 	Note that the class is implemented as a singleton
  *
  * 	\author Milan Vukov
- * 	\date   2012
+ * 	\date   2012 - 2013
  * */
 template
 <
-	/** Base class, derived from ExportAlgorithm class*/
+	/** Base class, derived from ExportAlgorithm class. */
 	class	 AlgorithmBase,
-	/** Type identifier*/
+	/** Type identifier. */
 	typename AlgorithmType
 >
 class ExportAlgorithmFactory
 {
 public:
+	/** Helper type. */
 	typedef AlgorithmBase* (*exportAlgorithmCreator)(UserInteraction* _userInteraction, const String &_commonHeaderName);
 
-	/** */
+	/** Static creator function. */
 	static ExportAlgorithmFactory& instance()
 	{
 		static ExportAlgorithmFactory instance;
 		return instance;
 	}
 
+	/** Function for algorithm registration. */
 	BooleanType registerAlgorithm(	const AlgorithmType& id,
 									exportAlgorithmCreator creator)
 	{
@@ -75,6 +78,7 @@ public:
 		return BT_FALSE;
 	}
 
+	/** Function to unregister an algorithm. */
 	BooleanType unregisterAlgorithm(	const AlgorithmType& id)
 	{
 		bool status = associations_.erase( id ) == 1;
@@ -85,6 +89,7 @@ public:
 		return BT_FALSE;
 	}
 
+	/** Function to create an instance of an algorithm. */
 	AlgorithmBase* createAlgorithm(	UserInteraction* _userInteraction,
 									const String& _commonHeaderName,
 									const AlgorithmType& id)
@@ -94,6 +99,8 @@ public:
 		{
 			return (it->second)(_userInteraction, _commonHeaderName);
 		}
+
+		LOG( LVL_DEBUG ) << "Algorithm is not registered!" << std::endl;
 
 		return NULL;
 	}
@@ -113,13 +120,6 @@ private:
 	~ExportAlgorithmFactory()
 	{}
 };
-
-//
-// Type definitions for common algorithms
-//
-
-/** Factory for creation of exported integrators.*/
-typedef ExportAlgorithmFactory<IntegratorExport, ExportIntegratorType> IntegratorExportFactory;
 
 CLOSE_NAMESPACE_ACADO
 
