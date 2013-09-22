@@ -14,6 +14,7 @@ doc/latex
 doc/debug.txt
 
 *.o
+*.obj
 *.so
 *.dll
 *.lib
@@ -22,6 +23,8 @@ doc/debug.txt
 
 *.exe
 
+*.pyc
+
 *.log
 
 *.pdf
@@ -29,9 +32,8 @@ doc/debug.txt
 *.out
 *.orig
 
-*.obj
-
 # Eclipse
 .project
 .cproject
 .settings
+.pydevproject
