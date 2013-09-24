@@ -45,12 +45,8 @@
 #include <acado/code_generation/export_arithmetic_statement.hpp>
 #include <acado/code_generation/export_function_call.hpp>
 #include <acado/code_generation/export_for_loop.hpp>
-#include <acado/code_generation/export_printf.hpp>
-
-
 
 BEGIN_NAMESPACE_ACADO
-
 
 /** 
  *	\brief Allows to export automatically generated algorithms for fast model predictive control

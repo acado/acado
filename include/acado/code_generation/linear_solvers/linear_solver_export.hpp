@@ -40,7 +40,6 @@
 #include <acado/code_generation/export_arithmetic_statement.hpp>
 #include <acado/code_generation/export_function_call.hpp>
 #include <acado/code_generation/export_for_loop.hpp>
-#include <acado/code_generation/export_printf.hpp>
 #include <acado/function/function.hpp>
 
 #include <acado/user_interaction/options.hpp>
