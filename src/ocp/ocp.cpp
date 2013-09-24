@@ -31,6 +31,7 @@
  */
 
 #include <acado/ocp/ocp.hpp>
+#include <acado/code_generation/export_variable.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -94,20 +95,8 @@ OCP::OCP( const double    &tStart_,
 }
 
 
-void OCP::copy( const OCP &rhs ){
-
-    QQ = rhs.QQ;
-    RR = rhs.RR;
-    QF = rhs.QF;
-	QS = rhs.QS;
-	QS2 = rhs.QS2;
-
-	mQ = rhs.mQ;
-	mR = rhs.mR;
-	mQF = rhs.mQF;
-	mPL = rhs.mPL;
-	mCs = rhs.mCs;
-
+void OCP::copy( const OCP &rhs )
+{
     grid                 = rhs.grid                ;
     modelData			 = rhs.modelData		   ;
     objective            = rhs.objective           ;
@@ -238,37 +227,10 @@ returnValue OCP::subjectTo( const double lb_, const Expression& arg1,
 }
 
 
-returnValue OCP::subjectTo( const double lb_, const Expression *arguments, const double ub_ ){
-    printf("Call line 204");
+returnValue OCP::subjectTo( const double lb_, const Expression *arguments, const double ub_ )
+{
     return constraint.add( lb_, arguments, ub_ );
 }
-
-
-returnValue OCP::minimizeLSQ( const ExportVariable &Q_, const ExportVariable &R_ ){ QQ = Q_; RR = R_; return SUCCESSFUL_RETURN; }
-
-returnValue OCP::minimizeLSQEndTerm( const ExportVariable &S_ ){ QF = S_; return SUCCESSFUL_RETURN;}
-
-
-returnValue OCP::minimizeLSQStartTerm(	const ExportVariable& S_,
-										const ExportVariable& S2_
-										)
-{
-	QS  = S_;
-	QS2 = S2_;
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue OCP::getQRmatrices( ExportVariable &Q_, ExportVariable &R_, ExportVariable &QF_, ExportVariable &QS_, ExportVariable &QS2_ ) const
-{
-	Q_  = QQ;
-	R_  = RR;
-	QF_ = QF;
-	QS_ = QS;
-	QS2_ = QS2;
-	return SUCCESSFUL_RETURN;
-}
-
 
 returnValue OCP::minimizeMayerTerm   ( const Expression& arg ){ return objective.addMayerTerm   ( arg ); }
 returnValue OCP::maximizeMayerTerm   ( const Expression& arg ){ return objective.addMayerTerm   (-arg ); }
@@ -390,47 +352,6 @@ returnValue OCP::getObjective( const int &multiObjectiveIdx, Expression **arg ) 
 
 double OCP::getStartTime ( ) const{ return grid.getFirstTime(); }
 double OCP::getEndTime   ( ) const{ return grid.getLastTime (); }
-
-//
-// MHE related stuff
-//
-returnValue OCP::minimizeLSQMHE( const Matrix& Q_, const Matrix& R_ )
-{
-	mQ = Q_;
-	mR = R_;
-
-	return SUCCESSFUL_RETURN;
-}
-
-returnValue OCP::minimizeLSQMHEArrivalCost( const Matrix& PL_ )
-{
-	mPL = PL_;
-
-	return SUCCESSFUL_RETURN;
-}
-
-returnValue OCP::setMHEMeasurementMatrix( const Matrix& Cs_ )
-{
-	mCs = Cs_;
-
-	return SUCCESSFUL_RETURN;
-}
-
-returnValue OCP::getMHEMeasurementMatrix( Matrix& Cs_ )
-{
-	Cs_ = mCs;
-
-	return SUCCESSFUL_RETURN;
-}
-
-returnValue OCP::getMHEWeightingMatrices( Matrix& Q_, Matrix& R_, Matrix& PL_ )
-{
-	Q_ = mQ;
-	R_ = mR;
-	PL_ = mPL;
-
-	return SUCCESSFUL_RETURN;
-}
 
 BooleanType OCP::hasEquidistantGrid( ) const{
 	

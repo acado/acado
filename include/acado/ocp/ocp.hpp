@@ -41,7 +41,6 @@
 #include <acado/constraint/constraint.hpp>
 #include <acado/objective/objective.hpp>
 #include <acado/ocp/multi_objective_functionality.hpp>
-#include <acado/code_generation/export_variable.hpp>
 #include <acado/code_generation/model_container.hpp>
 
 
@@ -225,12 +224,6 @@ public:
 								const char*  rFilename    /**< filename where the reference is stored */ );
 
 	/** \note Applicable only for automatic code generation.
-	 *  \warning This function will be deprecated in the next release.
-	 * */
-	returnValue minimizeLSQ(	const ExportVariable &Q_,	/**< a weighting matrix for differential states. */
-								const ExportVariable &R_	/**< a weighting matrix for controls. */ );
-
-	/** \note Applicable only for automatic code generation.
 	 *  \warning Experimental. */
 	returnValue minimizeLSQ(	const ExportVariable& S,	/**< a weighting matrix */
 								const Function& h			/**< the LSQ-Function   */ );
@@ -388,28 +381,6 @@ public:
 										const ExportVariable& Slu	/**< a weighting vector for controls. */ );
 	/** @} */
 
-	/** \name MHE Code generation related functions.
-	 *  \warning These functions will be deprecated in next release.
-	 *  \note Experimental.
-	 *
-	 *  @{ */
-	returnValue minimizeLSQMHE( const Matrix& Q_, const Matrix& R_ );
-	returnValue minimizeLSQMHEArrivalCost( const Matrix& PL_ );
-
-	returnValue setMHEMeasurementMatrix( const Matrix& Cs_ );
-	returnValue getMHEWeightingMatrices( Matrix& Q_, Matrix& R_, Matrix& PL_ );
-	returnValue getMHEMeasurementMatrix( Matrix& Cs_ );
-
-	returnValue minimizeLSQStartTerm(	const ExportVariable& S_,
-										const ExportVariable& S2_ = emptyConstExportVariable );
-
-	returnValue getQRmatrices(	ExportVariable &Q_,
-								ExportVariable &R_,
-								ExportVariable &QF_,
-								ExportVariable& QS_,
-								ExportVariable& QS2_ ) const;
-	/** @} */
-
 protected:
 
 	void setupGrid( double tStart, double tEnd, int N );
@@ -421,14 +392,6 @@ protected:
 	Grid		grid;		/**< Common discretization grid. */
 	Objective	objective;	/**< The Objective. */
 	Constraint	constraint;	/**< The Constraints. */
-
-	/** \name Weighting matrices used in automatic code generation.
-	 *  \warning These variables will be removed in next release.
-	 *  @{ */
-	ExportVariable QQ,RR,QF;
-	ExportVariable QS,QS2;
-	Matrix mQ, mR, mQF, mPL, mCs;
-	/** @} */
 };
 
 
