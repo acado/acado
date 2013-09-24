@@ -2,9 +2,10 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2009 by Boris Houska and Hans Joachim Ferreau, K.U.Leuven.
- *    Developed within the Optimization in Engineering Center (OPTEC) under
- *    supervision of Moritz Diehl. All rights reserved.
+ *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Milan Vukov, Rien Quirynen, KU Leuven.
+ *    Developed within the Optimization in Engineering Center (OPTEC)
+ * 	  under supervision of Moritz Diehl. All rights reserved.
  *
  *    ACADO Toolkit is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -19,20 +20,7 @@
  *    You should have received a copy of the GNU Lesser General Public
  *    License along with ACADO Toolkit; if not, write to the Free Software
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
- *  OBJECTIVE FUNCTION
- *  - r, phi, theta and derivatives as reference
- *  - control variation penalized
- *  - (soft) zero terminal constraint as extra least-squares term for all states and controls at the
- *    end of the horizon
- *  SETUP
- *  - 10s horizon - 1s sampling 
- *  - w0 disturbed in f_sim (simulation model) only
- *  TO DO
- *  - et[3] oder F_L "CL*(we[1]*et[2]-we[2]*et[1])" & F_D "2.Term" ausgeben (sollte zusammen mit r, phi, 
- *    theta fuer Orientierung ausreichend sein)
- *  - m*ddr ausgeben = kraft die auf das kabel wirkt(line force)
- *  - Rechenzeiten ausgeben
+ *
  */
 
 
