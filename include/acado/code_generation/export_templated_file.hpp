@@ -44,6 +44,7 @@
 BEGIN_NAMESPACE_ACADO
 
 class ExportQpOasesInterface;
+class ExportSimulinkInterface;
 
 
 /** 
@@ -62,6 +63,7 @@ class ExportTemplatedFile : public ExportFile
     public:
 
 		friend class ExportQpOasesInterface;
+		friend class ExportSimulinkInterface;
 
 		/** Default constructor. 
 		 *
