@@ -83,8 +83,8 @@ returnValue NARXExport::setup( )
 	ExportIndex j( "j" );
 	ExportIndex k( "k" );
 	ExportIndex tmp_index("tmp_index");
-	uint diffsDim = NX*(NX+NU);
-	uint inputDim = NX*(NX+NU+1) + NU + NP;
+	diffsDim = NX*(NX+NU);
+	inputDim = NX*(NX+NU+1) + NU + NP;
 	// setup INTEGRATE function
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );

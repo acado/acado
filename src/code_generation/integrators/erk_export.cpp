@@ -76,7 +76,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	// export RK scheme
 	uint rhsDim   = NX*(NX+NU+1);
 	if( !DERIVATIVES ) rhsDim = NX;
-	uint inputDim = NX*(NX+NU+1) + NU + NP;
+	inputDim = NX*(NX+NU+1) + NU + NP;
 	if( !DERIVATIVES ) inputDim = NX + NU + NP;
 	const uint rkOrder  = getNumStages();
 
