@@ -1,37 +1,23 @@
-##
-##	This file is part of qpOASES.
-##
-##	qpOASES -- An Implementation of the Online Active Set Strategy.
-##	Copyright (C) 2007-2011 by Hans Joachim Ferreau, Andreas Potschka,
-##	Christian Kirches et al. All rights reserved.
-##
-##	qpOASES is free software; you can redistribute it and/or
-##	modify it under the terms of the GNU Lesser General Public
-##	License as published by the Free Software Foundation; either
-##	version 2.1 of the License, or (at your option) any later version.
-##
-##	qpOASES is distributed in the hope that it will be useful,
-##	but WITHOUT ANY WARRANTY; without even the implied warranty of
-##	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-##	See the GNU Lesser General Public License for more details.
-##
-##	You should have received a copy of the GNU Lesser General Public
-##	License along with qpOASES; if not, write to the Free Software
-##	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-##
-
-
-
-##
-##	Filename:  CMakeLists.txt
-##	Authors:   Hans Joachim Ferreau, Milan Vukov
-##	Version:   3.0beta
-##	Date:      2007-2013.
-##
-##
-##  NOTE:      This is (a very) modified version of the original qpOASES build
-##             script. 
-
+################################################################################
+#
+# Description:
+#	CMake script for building qpOASES library and examples
+#
+# Authors:
+#   Hans Joachim Ferreau
+#	Milan Vukov, milan.vukov@esat.kuleuven.be
+#
+# Year:
+#	2011 - 2013
+#
+# NOTE:
+#   - This is a quite modified version of the original qpOASES build script.
+#
+# Usage:
+#	- TBD
+#
+#
+################################################################################
 
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 
@@ -73,7 +59,7 @@ OPTION( QPOASES_WITH_BLAS
 INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/include )
 
 #
-# compile qpOASES libraries
+# Compile qpOASES libraries
 #
 
 SET( QPOASES_SOURCES
@@ -91,7 +77,9 @@ SET( QPOASES_SOURCES
 	src/Utils.cpp
 )
 
-# find LAPACK
+#
+# Find LAPACK
+#
 IF ( QPOASES_WITH_LAPACK )
 	ENABLE_LANGUAGE( C )
 	ENABLE_LANGUAGE( Fortran )
@@ -106,7 +94,9 @@ ELSE ( QPOASES_WITH_LAPACK )
 	SET( QPOASES_SOURCES ${QPOASES_SOURCES} src/LAPACKReplacement.cpp )
 ENDIF ( QPOASES_WITH_LAPACK )
 
-# find BLAS
+#
+# Find BLAS
+#
 IF ( QPOASES_WITH_BLAS )
 	ENABLE_LANGUAGE( C )
 	ENABLE_LANGUAGE( Fortran )
@@ -145,7 +135,7 @@ IF ( QPOASES_WITH_BLAS AND BLAS_FOUND )
 	)
 ENDIF()
 
-# compile examples only if the option is enabled (set to ON)
+# Compile examples only if the option is enabled (set to ON)
 SET(EXAMPLE_NAMES
 example1
 example1a
@@ -155,9 +145,8 @@ example5
 example6
 exampleLP
 qrecipe
-)
 
-SET(EXTRAS_EXAMPLE_NAMES
+# Extra examples
 example2
 example3
 example3b
@@ -168,11 +157,6 @@ IF( QPOASES_WITH_EXAMPLES )
 		ADD_EXECUTABLE(${ELEMENT} examples/${ELEMENT}.cpp)
 		TARGET_LINK_LIBRARIES(${ELEMENT} acado_qpOASESextras)
 	ENDFOREACH(ELEMENT ${EXAMPLE_NAMES})
-
-	FOREACH(ELEMENT ${EXTRAS_EXAMPLE_NAMES})
-		ADD_EXECUTABLE(${ELEMENT} examples/${ELEMENT}.cpp)
-		TARGET_LINK_LIBRARIES(${ELEMENT} acado_qpOASESextras)
-	ENDFOREACH(ELEMENT ${EXTRAS_EXAMPLE_NAMES})
 ENDIF( QPOASES_WITH_EXAMPLES )
 
 #
@@ -185,8 +169,3 @@ INSTALL(
 	DESTINATION
 		${INSTALL_DATA_DIR}/external_packages/qpOASES-3.0
 )
-
-
-##
-##   end of file
-##
