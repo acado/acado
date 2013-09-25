@@ -184,6 +184,9 @@ ExportVariable ExportODEfunction::getGlobalExportVariable( ) const
 
 returnValue ExportODEfunction::setGlobalExportVariable(const ExportVariable& var)
 {
+	if (getFunctionDim() == 0)
+		return SUCCESSFUL_RETURN;
+
 	ASSERT(var.getNumRows() >= f->getGlobalExportVariableSize() && var.getNumCols() == 1);
 
 	globalVar = var;

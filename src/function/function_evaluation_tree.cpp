@@ -989,18 +989,9 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
     acadoFPrintf(file,"/* COMPUTE INTERMEDIATE STATES: */\n");
     acadoFPrintf(file,"/* ---------------------------- */\n");
 
-    //
-    // This is a (not so quick) hack to have a flexible name for interm.
-    // quantities, but helps. It general case it should be done with
-    // ExportVariable -- to be able to set a working structure, too. So:
-    //
-    // TODO: setGlobalExportvariable should set the full name once....
-    //
-
     Stream *auxVarIndividualNames = new Stream[nni];
 	for( run1 = 0; run1 < n; run1++ )
 		auxVarIndividualNames[lhs_comp[run1]] << globalExportVariableName << "[" << run1 << "]";
-
 
     // Export intermediate quantities
     for( run1 = 0; run1 < n; run1++ )
