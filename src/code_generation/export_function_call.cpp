@@ -152,6 +152,12 @@ returnValue ExportFunctionCall::init(	const ExportFunction& _f,
 {
 	clear( );
 
+	if (_f.isDefined() == BT_FALSE)
+	{
+		LOG( LVL_DEBUG ) << "ExportFunctionCall: " << _f.getName() << " is empty" << std::endl;
+		return SUCCESSFUL_RETURN;
+	}
+
 	setName( _f.getName() );
 
 	functionArguments.addArgument( 	_argument1,_argument2,_argument3,
