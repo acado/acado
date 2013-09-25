@@ -66,10 +66,10 @@ static const char* autogenerationNotice[ AUTOGEN_NOTICE_LENGTH ] =
 		"\n",
 		"ACADO Code Generation tool is a sub-package of ACADO toolkit --\n",
 		"A Toolkit for Automatic Control and Dynamic Optimization.\n",
-		"Copyright (C) 2008 - 2013 by Boris Houska, Hans Joachim Ferreau,\n",
-		"Milan Vukov and Rien Quirynen.\n",
-		"Developed within the Optimization in Engineering Center (OPTEC) under\n",
-		"supervision of Moritz Diehl. All rights reserved.\n",
+		"Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,\n",
+		"Milan Vukov, Rien Quirynen, KU Leuven.\n",
+		"Developed within the Optimization in Engineering Center (OPTEC)\n",
+		"under supervision of Moritz Diehl. All rights reserved.\n",
 		"\n",
 		"ACADO Toolkit is free software; you can redistribute it and/or\n",
 		"modify it under the terms of the GNU Lesser General Public\n",
@@ -97,10 +97,10 @@ returnValue acadoPrintCopyrightNotice(	const char* subpackage
 	if ( subpackage == 0 )
 		return ((returnValue) acadoPrintf(
 				"\nACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.\n" \
-				"Copyright (C) 2008 - 2013 by Boris Houska, Hans Joachim Ferreau,\n" \
-				"Milan Vukov and Rien Quirynen, KU Leuven.\n" \
-				"Developed within the Optimization in Engineering Center (OPTEC) under\n" \
-				"supervision of Moritz Diehl. All rights reserved.\n\n" \
+				"Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,\n" \
+				"Milan Vukov, Rien Quirynen, KU Leuven.\n" \
+				"Developed within the Optimization in Engineering Center (OPTEC)\n" \
+				"under supervision of Moritz Diehl. All rights reserved.\n\n" \
 				"ACADO Toolkit is distributed under the terms of the GNU Lesser\n" \
 				"General Public License 3 in the hope that it will be useful,\n" \
 				"but WITHOUT ANY WARRANTY; without even the implied warranty of\n" \
@@ -109,10 +109,10 @@ returnValue acadoPrintCopyrightNotice(	const char* subpackage
 	else
 		return ((returnValue) acadoPrintf(
 				"\nACADO Toolkit::%s\n" \
-				"Copyright (C) 2008 - 2013 by Boris Houska, Hans Joachim Ferreau,\n"
-				"Milan Vukov and Rien Quirynen, KU Leuven.\n" \
-				"Developed within the Optimization in Engineering Center (OPTEC) under\n" \
-				"supervision of Moritz Diehl. All rights reserved.\n\n" \
+				"Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,\n"
+				"Milan Vukov, Rien Quirynen, KU Leuven.\n" \
+				"Developed within the Optimization in Engineering Center (OPTEC)\n" \
+				"under supervision of Moritz Diehl. All rights reserved.\n\n" \
 				"ACADO Toolkit is distributed under the terms of the GNU Lesser\n" \
 				"General Public License 3 in the hope that it will be useful,\n" \
 				"but WITHOUT ANY WARRANTY; without even the implied warranty of\n" \
