@@ -1,0 +1,111 @@
+/*
+ *    This file is part of ACADO Toolkit.
+ *
+ *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
+ *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Milan Vukov, Rien Quirynen, KU Leuven.
+ *    Developed within the Optimization in Engineering Center (OPTEC)
+ *    under supervision of Moritz Diehl. All rights reserved.
+ *
+ *    ACADO Toolkit is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation; either
+ *    version 3 of the License, or (at your option) any later version.
+ *
+ *    ACADO Toolkit is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ *
+ *    You should have received a copy of the GNU Lesser General Public
+ *    License along with ACADO Toolkit; if not, write to the Free Software
+ *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
+
+/**
+ *    \file include/acado/code_generation/export_qpoases_interface.hpp
+ *    \author Milan Vukov
+ *    \date 2012 - 2013
+ */
+
+#ifndef ACADO_TOOLKIT_EXPORT_QPOASES_INTERFACE_HPP
+#define ACADO_TOOLKIT_EXPORT_QPOASES_INTERFACE_HPP
+
+#include <acado/code_generation/export_templated_file.hpp>
+
+BEGIN_NAMESPACE_ACADO
+
+/**
+ *	\brief A class for generating the glue code for interfacing qpOASES.
+ *
+ *	\ingroup AuxiliaryFunctionality
+ *
+ *	\author Milan Vukov
+ *
+ *	\note Based on code originally developed by Hans Joachim Ferreau and Boris Houska.
+ */
+class ExportQpOasesInterface
+{
+public:
+
+	/** Default constructor.
+	 *
+	 *	@param[in] _headerFileName		Name of exported file for header file.
+	 *	@param[in] _sourceFileName		Name of exported file for source file.
+	 *	@param[in] _commonHeaderName	Name of common header file to be included.
+	 *	@param[in] _realString			String to be used to declare real variables.
+	 *	@param[in] _intString			String to be used to declare integer variables.
+	 *	@param[in] _precision			Number of digits to be used for exporting real values.
+	 *	@param[in] _commentString		String to be used for exporting comments.
+	 *
+	 *	\return SUCCESSFUL_RETURN
+	 */
+	ExportQpOasesInterface(	const String& _headerFileName,
+							const String& _sourceFileName,
+							const String& _commonHeaderName = "",
+							const String& _realString = "real_t",
+							const String& _intString = "int",
+							int _precision = 16,
+							const String& _commentString = emptyConstString
+							);
+
+	/** Destructor. */
+	virtual ~ExportQpOasesInterface()
+	{}
+
+	/** Configure the template
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue configure(	const std::string& _prefix,
+							const std::string& _solverDefine,
+							const int nvmax,
+							const int ncmax,
+							const int nwsrmax,
+							const std::string& _printLevel,
+							const double _eps,
+							const std::string& _reat_t,
+
+							const std::string& _commonHeader,
+							const std::string& _solverName,
+							const std::string& _namespace,
+							const std::string& _callSolver,
+							const std::string& _primalSolution,
+							const std::string& _dualSolution,
+							const std::string& _ctor,
+							const std::string& _sigma
+							);
+
+	/** Export the interface. */
+	returnValue exportCode();
+
+private:
+
+	ExportTemplatedFile qpoHeader;
+	ExportTemplatedFile qpoSource;
+};
+
+CLOSE_NAMESPACE_ACADO
+
+#endif  // ACADO_TOOLKIT_EXPORT_QPOASES_INTERFACE_HPP

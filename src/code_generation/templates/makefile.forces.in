@@ -1,0 +1,33 @@
+LDLIBS = -lm 
+CFLAGS = -O3 -finline-functions -I. -I./forces/include
+CC     = gcc
+CXX    = g++
+
+OBJECTS = \
+	./forces/src/forces.o \
+	acado_integrator.o \
+	acado_solver.o \
+	acado_auxiliary_functions.o
+
+.PHONY: all
+all: libacado_exported_rti.a
+
+test: ${OBJECTS} test.o
+
+./forces/src/forces.o       : ./forces/include/forces.h
+acado_solver.o              : acado_common.h
+acado_integrator.o          : acado_common.h
+acado_auxiliary_functions.o : acado_common.h \
+                              acado_auxiliary_functions.h
+test.o                      : acado_common.h \
+                              ./forces/include/forces.h \
+                              acado_auxiliary_functions.h
+
+libacado_exported_rti.a: ${OBJECTS}
+	ar r $@ $?
+
+${OBJECTS} : acado_common.h
+
+.PHONY : clean
+clean :
+	-rm -f *.o *.a ./forces/src/*.o ./forces/src/*.a test
