@@ -98,7 +98,6 @@ ENDIF( NOT CMAKE_BUILD_TYPE )
 
 #
 # Folders
-# Temporary disable code generation examples
 #
 SET( EXAMPLE_DIRS
 	basic_data_structures/curve
@@ -228,6 +227,5 @@ ENDFOREACH( DIR ${EXAMPLE_DIRS} )
 
 #
 # Build code generation examples
-# XXX Temporary disable building of the code generation NMPC examples
 #
-ADD_SUBDIRECTORY( ./code_generation/nmpc )
+ADD_SUBDIRECTORY( ./code_generation/mpc_mhe )
