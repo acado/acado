@@ -20,7 +20,7 @@
 !validated_integrator
 !code_generation
 !code_generation/simulation
-!code_generation/nmpc
+!code_generation/mpc_mhe
 !integration_algorithm
 !nlp
 !process
