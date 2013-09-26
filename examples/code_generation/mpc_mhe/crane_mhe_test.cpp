@@ -3,9 +3,9 @@
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
  *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
- *    Milan Vukov and Rien Quirynen, KU Leuven.
- *    Developed within the Optimization in Engineering Center (OPTEC) under
- *    supervision of Moritz Diehl. All rights reserved.
+ *    Milan Vukov, Rien Quirynen, KU Leuven.
+ *    Developed within the Optimization in Engineering Center (OPTEC)
+ *    under supervision of Moritz Diehl. All rights reserved.
  *
  *    ACADO Toolkit is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -29,23 +29,23 @@
 #include <vector>
 #include <string>
 #include <iomanip>
-#include <string.h>
+#include <cstring>
 #include <cmath>
-#include <stdlib.h>
+#include <cstdlib>
 
 using namespace std;
 
 #include "acado_common.h"
 #include "acado_auxiliary_functions.h"
 
-#define NX          ACADO_NX      /* number of differential states  */
-#define NXA         ACADO_NXA      /* number of alg. states  */
-#define NU          ACADO_NU      /* number of control inputs       */
-#define N          	ACADO_N      /* number of control intervals    */
-#define NY			ACADO_NY
-#define NYN			ACADO_NYN
-#define NUM_STEPS   1000      /* number of real time iterations */
-#define VERBOSE     1      /* show iterations: 1, silent: 0  */
+#define NX          ACADO_NX	/* number of differential states */
+#define NXA         ACADO_NXA	/* number of algebraic states */
+#define NU          ACADO_NU	/* number of control inputs */
+#define N          	ACADO_N		/* number of control intervals */
+#define NY			ACADO_NY	/* number of measurements, nodes 0..N-1 */
+#define NYN			ACADO_NYN	/* number of measurements, node N */
+#define NUM_STEPS   1000		/* number of simulation steps */
+#define VERBOSE     1			/* show iterations: 1, silent: 0  */
 
 ACADOvariables acadoVariables;
 ACADOworkspace acadoWorkspace;
@@ -81,21 +81,28 @@ bool readDataFromFile( const char* fileName, vector< vector< double > >& data )
 
 int main()
 {
-	int    i, iter, j   , k     ;
+	int i, j, iter;
 
-	// Reset all memory, just for safety
+	real_t t1, t2;
+	real_t fdbSum = 0.0;
+	real_t prepSum = 0.0;
+	int status;
+
+	t1 = t2 = 0;
+
+	timer t;
+
+	// Reset all solver memory
 	memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));
 	memset(&acadoVariables, 0, sizeof( acadoVariables ));
 
 	bool fileStatus;
 	vector< vector< double > > measurements;
-	fileStatus = readDataFromFile("../../crane_mhe_data.txt", measurements);
-	if (fileStatus == false)
+	if (readDataFromFile("./crane_mhe_data.txt", measurements) == false)
 	{
-		cout << "Cannot read the meas. file" << endl;
-		exit( 1 );
+		cout << "Cannot read measurements" << endl;
+		return EXIT_FAILURE;
 	}
-	cout << "Input array size is: " << measurements.size() << " x " << measurements[ 0 ].size() << endl;
 
 	//
 	// Initialize the solver
@@ -119,33 +126,28 @@ int main()
 		acadoVariables.u[i * NU + 1] = measurements[ i ][ 6 ];
 	}
 
-	// TODO Initialize
-
 	//
 	// Logger initalization
 	//
 	vector< vector< double > > log;
 
 	log.resize(NUM_STEPS);
-	for (unsigned i = 0; i < log.size(); ++i)
-		log[ i ].resize(NX + NXA + NU + 6, 0.0);
+	for (i = 0; i < log.size(); ++i)
+		log[ i ].resize(NX + NXA + NU + 5, 0.0);
 
 	//
-	// Timing stuff
+	// Warm-up the solver
 	//
-	real_t t1, t2, t3, t4;
-	real_t fdbSum = 0.0;
-	real_t prepSum = 0.0;
-	int status, nIt;
+	preparationStep();
 
-	t1 = 0; t2 = 0; t3 = 0; t4 = 0;
-
-	timer t;
-
-   // THE REAL-TIME ITERATION LOOP:
-   // ----------------------------------------------
+	//
+	// Main simulation loop
+	//
 	for( iter = 0; iter < NUM_STEPS; iter++ )
 	{
+		//
+		// Read new measurements
+		//
 		for (i = 0; i < N; ++i)
 			for (j = 0; j < NY; ++j)
 				acadoVariables.y[i * NY + j] = measurements[iter + i][ j ];
@@ -153,16 +155,17 @@ int main()
 		for (j = 0; j < NYN; ++j)
 			acadoVariables.yN[ j ] = measurements[iter + i][ j ];
 
-		tic( &t );
-		preparationStep();
-		t1 = toc( &t );
-
+		//
+		// Run the feedback step
+		//
 		tic( &t );
 		status = feedbackStep( );
-		t3 = toc( &t );
+		t2 = toc( &t );
 
+#if VERBOSE
 //		printDifferentialVariables();
 //		printControlVariables();
+#endif // VERBOSE
 
 		if ( status )
 		{
@@ -171,42 +174,54 @@ int main()
 			break;
 		}
 
-		for (unsigned ii = 0; ii < (N + 1) * NX; ++ii)
-			if (acadoVariables.x[ ii ] != acadoVariables.x[ ii ])
-			{
-				cout << "Iteration:" << iter << ", NaN problems with diff. variables" << endl;
-
-				exit( 1 );
-			}
-
+		//
+		// Logging
+		//
 		for(i = 0; i < NX; i++)
 			log[ iter ][ i ] = acadoVariables.x[ i ];
-		for(k = 0;  i < NX + NU; i++, k++)
-			log[ iter ][ i ] = acadoVariables.u[ k ];
+		for(j = 0;  i < NX + NU; i++, j++)
+			log[ iter ][ i ] = acadoVariables.u[ j ];
 
 		log[ iter ][ i++ ] = t1;
 		log[ iter ][ i++ ] = t2;
-		log[ iter ][ i++ ] = t3;
 		log[ iter ][ i++ ] = getObjective();
 		log[ iter ][ i++ ] = getKKT();
 		log[ iter ][ i++ ] = getNWSR();
 
+		//
+		// Prepare for the next simulation step
+		//
+
+		// Shift states and controls
 		shiftStates(2, 0, 0);
 		shiftControls( 0 );
 
+		// Execute the preparation step of the RTI scheme
+		tic( &t );
+		preparationStep();
+		t1 = toc( &t );
+
+		//
+		// More logging
+		//
 		prepSum += t1;
-		fdbSum += t3;
+		fdbSum += t2;
 	}
 
-	cout << "Average fdbTime: " << scientific << fdbSum / NUM_STEPS * 1e6 << "usec" << endl;
-	cout << "Average prepTime: " << scientific << prepSum / NUM_STEPS * 1e6 << "usec" << endl;
+#if VERBOSE
+	cout << "Average feedback time:    " << scientific << fdbSum / NUM_STEPS * 1e6 << "microseconds" << endl;
+	cout << "Average preparation time: " << scientific << prepSum / NUM_STEPS * 1e6 << "microseconds" << endl;
+#endif // VERBOSE
 
-	ofstream dataLog( "./crane_mhe_test_sim_log.txt" );
+	//
+	// Save log to a file
+	//
+	ofstream dataLog( "./pendulum_dae_nmpc_test_sim_log.txt" );
 	if ( dataLog.is_open() )
 	{
 		for (i = 0; i < log.size(); i++)
 		{
-			for (unsigned j = 0; j < log[ i ].size(); j++)
+			for (j = 0; j < log[ i ].size(); j++)
 				dataLog << log[ i ][ j ] << " ";
 			dataLog << endl;
 		}
@@ -220,7 +235,14 @@ int main()
 		return 1;
 	}
 
-    return 0;
+	// For debugging
+	if ( status )
+	{
+		cout << "Solver failed!" << endl;
+		return EXIT_FAILURE;
+	}
+
+    return EXIT_SUCCESS;
 }
 
 
