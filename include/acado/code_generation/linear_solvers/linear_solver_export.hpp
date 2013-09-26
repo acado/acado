@@ -34,7 +34,7 @@
 #ifndef ACADO_TOOLKIT_EXPORT_LINEAR_SOLVER_HPP
 #define ACADO_TOOLKIT_EXPORT_LINEAR_SOLVER_HPP
 
-#include <acado/code_generation/export_ode_function.hpp>
+#include <acado/code_generation/export_acado_function.hpp>
 #include <acado/code_generation/export_variable.hpp>
 #include <acado/code_generation/export_algorithm.hpp>
 #include <acado/code_generation/export_arithmetic_statement.hpp>

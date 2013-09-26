@@ -564,7 +564,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportVariable  rk_auxSolver;			/**< Variable containing auxiliary values for the exported linear solver. */
 		ExportVariable 	rk_rhsTemp;				/**< Variable containing intermediate results of evaluations of the right-hand side expression. */
 
-		ExportODEfunction lin_output;
+		ExportAcadoFunction lin_output;
 		ExportVariable	rk_mat3;
 		ExportVariable 	rk_dk3;
 		ExportVariable  rk_diffsTemp3;

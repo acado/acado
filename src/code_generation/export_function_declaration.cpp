@@ -54,10 +54,10 @@ ExportFunctionDeclaration::ExportFunctionDeclaration(	const ExportFunction& _f
 }
 
 
-ExportFunctionDeclaration::ExportFunctionDeclaration(	const ExportODEfunction& _f
+ExportFunctionDeclaration::ExportFunctionDeclaration(	const ExportAcadoFunction& _f
 														) : ExportStatement( )
 {
-	f = new ExportODEfunction( _f );
+	f = new ExportAcadoFunction( _f );
 }
 
 

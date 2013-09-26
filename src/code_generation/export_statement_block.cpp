@@ -33,7 +33,7 @@
 
 #include <acado/code_generation/export_statement_block.hpp>
 #include <acado/code_generation/export_function.hpp>
-#include <acado/code_generation/export_ode_function.hpp>
+#include <acado/code_generation/export_acado_function.hpp>
 #include <acado/code_generation/export_function_call.hpp>
 #include <acado/code_generation/export_statement_string.hpp>
 #include <acado/code_generation/export_function_declaration.hpp>
@@ -197,7 +197,7 @@ returnValue ExportStatementBlock::addDeclaration(	const ExportFunction& _f
 }
 
 
-returnValue ExportStatementBlock::addDeclaration(	const ExportODEfunction& _f
+returnValue ExportStatementBlock::addDeclaration(	const ExportAcadoFunction& _f
 													)
 {
 	ExportFunctionDeclaration tmp( _f );

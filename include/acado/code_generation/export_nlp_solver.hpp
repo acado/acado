@@ -243,8 +243,8 @@ protected:
 	ExportVariable objEvFx, objEvFu, objEvFxEnd; // aliasing
 
 	ExportVariable objAuxVar, objValueIn, objValueOut;
-	ExportODEfunction evaluateLSQ;
-	ExportODEfunction evaluateLSQEndTerm;
+	ExportAcadoFunction evaluateLSQ;
+	ExportAcadoFunction evaluateLSQEndTerm;
 	String evaluateExternLSQ, evaluateExternLSQEndTerm;
 
 	BooleanType externObjective;
@@ -267,7 +267,7 @@ protected:
 	/** \name Evaluation of path constraints */
 	/** @{ */
 	unsigned dimPacH;
-	ExportODEfunction evaluatePathConstraints;
+	ExportAcadoFunction evaluatePathConstraints;
 	ExportVariable conAuxVar;
 	ExportVariable conValueIn;
 	ExportVariable conValueOut;
@@ -280,7 +280,7 @@ protected:
 	/** \name Evaluation of point constraints */
 	/** @{ */
 	unsigned dimPocH;
-	std::vector< std::tr1::shared_ptr< ExportODEfunction > > evaluatePointConstraints;
+	std::vector< std::tr1::shared_ptr< ExportAcadoFunction > > evaluatePointConstraints;
 	Vector pocLB, pocUB;
 
 	std::vector< Vector > pocLbStack, pocUbStack;

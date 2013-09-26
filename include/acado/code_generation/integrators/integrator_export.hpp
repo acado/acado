@@ -456,13 +456,13 @@ class IntegratorExport : public ExportAlgorithm
 		ExportVariable	rhs_out;
 		
 		ExportFunction integrate;			/**< Function that integrates the exported ODE. */
-		ExportODEfunction rhs;				/**< Module to export ODE. */
-		ExportODEfunction diffs_rhs;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
+		ExportAcadoFunction rhs;				/**< Module to export ODE. */
+		ExportAcadoFunction diffs_rhs;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
 
-		ExportODEfunction lin_input;
+		ExportAcadoFunction lin_input;
 
-		ExportODEfunction rhs3;
-		ExportODEfunction diffs_rhs3;
+		ExportAcadoFunction rhs3;
+		ExportAcadoFunction diffs_rhs3;
 
 		ExportVariable  error_code;			/**< Variable containing the error code, returned by the integrator. */
 		ExportVariable  reset_int;			/**< Variable containing the number of the current integration step. */
@@ -490,8 +490,8 @@ class IntegratorExport : public ExportAlgorithm
         std::vector<Grid> outputGrids;					/**< A separate grid for each output. */
         std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
         std::vector<Matrix> outputDependencies;			/**< A separate dependency matrix for each output. */
-        std::vector<ExportODEfunction> outputs;			/**< Module to export output functions. */
-        std::vector<ExportODEfunction> diffs_outputs;	/**< Module to export the evaluation of the derivatives of the output functions. */
+        std::vector<ExportAcadoFunction> outputs;			/**< Module to export output functions. */
+        std::vector<ExportAcadoFunction> diffs_outputs;	/**< Module to export the evaluation of the derivatives of the output functions. */
 		
         std::vector<String> name_outputs;				/**< A separate function name for each output. */
         std::vector<String> name_diffs_outputs;			/**< A separate function name for evaluating the derivatives of each output. */

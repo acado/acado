@@ -154,11 +154,11 @@ returnValue ForwardIRKExport::getFunctionDeclarations(	ExportStatementBlock& dec
 	else {
 		Function tmpFun;
 		tmpFun << zeros(1,1);
-		ExportODEfunction tmpExport(tmpFun, getNameDiffsRHS());
+		ExportAcadoFunction tmpExport(tmpFun, getNameDiffsRHS());
 		declarations.addDeclaration( tmpExport );
 
 		if( NX3 > 0 ) {
-			tmpExport = ExportODEfunction(tmpFun, getNameOutputDiffs());
+			tmpExport = ExportAcadoFunction(tmpFun, getNameOutputDiffs());
 			declarations.addDeclaration( tmpExport );
 		}
 	}
@@ -172,7 +172,7 @@ returnValue ForwardIRKExport::getFunctionDeclarations(	ExportStatementBlock& dec
 		for( i = 0; i < name_outputs.size(); i++ ) {
 			Function tmpFun;
 			tmpFun << zeros(1,1);
-			ExportODEfunction tmpExport(tmpFun, getNameDiffsOUTPUT(i));
+			ExportAcadoFunction tmpExport(tmpFun, getNameDiffsOUTPUT(i));
 			declarations.addDeclaration( tmpExport );
 		}
 	}

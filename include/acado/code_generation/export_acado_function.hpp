@@ -23,18 +23,14 @@
  *
  */
 
-
-
 /**
  *    \file include/acado/code_generation/export_ode_function.hpp
  *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  *    \date 2010 - 2013
  */
 
-
 #ifndef ACADO_TOOLKIT_EXPORT_ODE_FUNCTION_HPP
 #define ACADO_TOOLKIT_EXPORT_ODE_FUNCTION_HPP
-
 
 #include <acado/code_generation/export_function.hpp>
 
@@ -43,22 +39,19 @@ BEGIN_NAMESPACE_ACADO
 class Function;
 
 /** 
- *	\brief Allows to export code of an ODE function.
+ *	\brief Allows to export code of an ACADO function.
  *
  *	\ingroup AuxiliaryFunctionality
  *
- *	The class ExportODEfunction allows to export code of an ACADO function.
- *
- *	\todo: This class should be renamed to something like ExportACADOFunction,
- *	       since it allows now export of a general ACADO function.
+ *	The class ExportAcadoFunction allows to export code of an ACADO function.
  *
  *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-class ExportODEfunction : public ExportFunction
+class ExportAcadoFunction : public ExportFunction
 {
 public:
 	/** Default constructor. */
-	ExportODEfunction( );
+	ExportAcadoFunction( );
 
 	/** Constructor which takes the differential equation to be exported
 	 *	as well as the name of the exported ODE.
@@ -66,24 +59,24 @@ public:
 	 *	@param[in] _f			Differential equation to be exported.
 	 *	@param[in] _name		Name of exported ODE function.
 	 */
-	ExportODEfunction(	const Function& _f,
-						const String& _name = "acadoFcn"
-						);
+	ExportAcadoFunction(	const Function& _f,
+							const String& _name = "acadoFcn"
+							);
 
 	/** Copy constructor (deep copy).
 	 *
 	 *	@param[in] arg		Right-hand side object.
 	 */
-	ExportODEfunction(const ExportODEfunction& arg);
+	ExportAcadoFunction(const ExportAcadoFunction& arg);
 
 	/** Destructor. */
-	virtual ~ExportODEfunction( );
+	virtual ~ExportAcadoFunction( );
 
 	/** Assignment operator (deep copy).
 	 *
 	 *	@param[in] arg		Right-hand side object.
 	 */
-	ExportODEfunction& operator=(const ExportODEfunction& arg);
+	ExportAcadoFunction& operator=(const ExportAcadoFunction& arg);
 
 	/** Clone constructor (deep copy).
 	 *
@@ -205,8 +198,6 @@ protected:
 	ExportVariable globalVar;
 };
 
-
 CLOSE_NAMESPACE_ACADO
-
 
 #endif  // ACADO_TOOLKIT_EXPORT_FUNCTION_HPP

@@ -142,9 +142,9 @@ returnValue DiscreteTimeExport::getFunctionDeclarations(	ExportStatementBlock& d
 	else {
 		Function tmpFun;
 		tmpFun << zeros(1,1);
-		ExportODEfunction tmpExport(tmpFun, getNameRHS());
+		ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
 		declarations.addDeclaration( tmpExport );
-		tmpExport = ExportODEfunction(tmpFun, getNameDiffsRHS());
+		tmpExport = ExportAcadoFunction(tmpFun, getNameDiffsRHS());
 		declarations.addDeclaration( tmpExport );
 	}
 

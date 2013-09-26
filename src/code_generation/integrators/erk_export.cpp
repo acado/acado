@@ -305,7 +305,7 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 	else {
 		Function tmpFun;
 		tmpFun << zeros(1,1);
-		ExportODEfunction tmpExport(tmpFun, getNameDiffsRHS());
+		ExportAcadoFunction tmpExport(tmpFun, getNameDiffsRHS());
 		declarations.addDeclaration( tmpExport );
 	}
 
@@ -318,7 +318,7 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 		else {
 			Function tmpFun;
 			tmpFun << zeros(1,1);
-			ExportODEfunction tmpExport(tmpFun, getNameRHS());
+			ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
 			declarations.addDeclaration( tmpExport );
 		}
 	}

@@ -39,7 +39,7 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_statement.hpp>
 #include <acado/code_generation/export_function.hpp>
-#include <acado/code_generation/export_ode_function.hpp>
+#include <acado/code_generation/export_acado_function.hpp>
 
 
 
@@ -78,7 +78,7 @@ class ExportFunctionDeclaration : public ExportStatement
 		 *
 		 *	@param[in] _f		ODE function to be declared.
 		 */
-		ExportFunctionDeclaration(	const ExportODEfunction& _f
+		ExportFunctionDeclaration(	const ExportAcadoFunction& _f
 									);
 
 		/** Copy constructor (deep copy).

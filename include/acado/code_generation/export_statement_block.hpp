@@ -45,7 +45,7 @@
 BEGIN_NAMESPACE_ACADO
 
 class ExportFunction;
-class ExportODEfunction;
+class ExportAcadoFunction;
 class ExportFunctionDeclaration;
 class ExportVariable;
 class ExportIndex;
@@ -197,7 +197,7 @@ class ExportStatementBlock : public ExportStatement
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue addDeclaration(	const ExportODEfunction& _f
+		returnValue addDeclaration(	const ExportAcadoFunction& _f
 									);
 
 

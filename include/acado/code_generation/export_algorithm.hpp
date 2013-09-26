@@ -41,7 +41,7 @@
 
 #include <acado/code_generation/export_variable.hpp>
 #include <acado/code_generation/export_function.hpp>
-#include <acado/code_generation/export_ode_function.hpp>
+#include <acado/code_generation/export_acado_function.hpp>
 #include <acado/code_generation/export_arithmetic_statement.hpp>
 #include <acado/code_generation/export_function_call.hpp>
 #include <acado/code_generation/export_for_loop.hpp>

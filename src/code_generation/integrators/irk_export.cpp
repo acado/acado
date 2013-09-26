@@ -269,11 +269,11 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 	else {
 		Function tmpFun;
 		tmpFun << zeros(1,1);
-		ExportODEfunction tmpExport(tmpFun, getNameRHS());
+		ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
 		declarations.addDeclaration( tmpExport );
 
 		if( NX3 > 0 ) {
-			tmpExport = ExportODEfunction(tmpFun, getNameOutputRHS());
+			tmpExport = ExportAcadoFunction(tmpFun, getNameOutputRHS());
 			declarations.addDeclaration( tmpExport );
 		}
 	}
@@ -287,7 +287,7 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 		for( i = 0; i < name_outputs.size(); i++ ) {
 			Function tmpFun;
 			tmpFun << zeros(1,1);
-			ExportODEfunction tmpExport(tmpFun, getNameOUTPUT(i));
+			ExportAcadoFunction tmpExport(tmpFun, getNameOUTPUT(i));
 			declarations.addDeclaration( tmpExport );
 		}
 	}
@@ -1294,7 +1294,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		}
 		if( numVARS_output(i) > maxVARS ) maxVARS = numVARS_output(i);
 	
-		ExportODEfunction OUTPUT, diffs_OUTPUT;
+		ExportAcadoFunction OUTPUT, diffs_OUTPUT;
 		val = val & OUTPUT.init( f_Output,String("acado_output")<<String(i)<<"_rhs",NX,NXA,NU ) & diffs_OUTPUT.init( g_Output,String("acado_output")<<String(i)<<"_diffs",NX,NXA,NU );
 		
 		ExportVariable rk_output( String("rk_output")<<String(i), 1, outputDim, REAL );

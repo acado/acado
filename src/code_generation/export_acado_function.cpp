@@ -31,7 +31,7 @@
  *    \date 2010-2013
  */
 
-#include <acado/code_generation/export_ode_function.hpp>
+#include <acado/code_generation/export_acado_function.hpp>
 #include <acado/function/function_.hpp>
 
 
@@ -42,7 +42,7 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportODEfunction::ExportODEfunction( ) : ExportFunction( )
+ExportAcadoFunction::ExportAcadoFunction( ) : ExportFunction( )
 {
 	numX = 0;
 	numXA = 0;
@@ -53,7 +53,7 @@ ExportODEfunction::ExportODEfunction( ) : ExportFunction( )
 }
 
 
-ExportODEfunction::ExportODEfunction(	const Function& _f,
+ExportAcadoFunction::ExportAcadoFunction(	const Function& _f,
 										const String& _name
 										) : ExportFunction( _name )
 {
@@ -61,7 +61,7 @@ ExportODEfunction::ExportODEfunction(	const Function& _f,
 }
 
 
-ExportODEfunction::ExportODEfunction( const ExportODEfunction& arg ) : ExportFunction( arg )
+ExportAcadoFunction::ExportAcadoFunction( const ExportAcadoFunction& arg ) : ExportFunction( arg )
 {
 	numX = arg.numX;
 	numXA = arg.numXA;
@@ -73,11 +73,11 @@ ExportODEfunction::ExportODEfunction( const ExportODEfunction& arg ) : ExportFun
 }
 
 
-ExportODEfunction::~ExportODEfunction( )
+ExportAcadoFunction::~ExportAcadoFunction( )
 {}
 
 
-ExportODEfunction& ExportODEfunction::operator=( const ExportODEfunction& arg )
+ExportAcadoFunction& ExportAcadoFunction::operator=( const ExportAcadoFunction& arg )
 {
 	if( this != &arg )
 	{
@@ -93,20 +93,20 @@ ExportODEfunction& ExportODEfunction::operator=( const ExportODEfunction& arg )
 }
 
 
-ExportStatement* ExportODEfunction::clone( ) const
+ExportStatement* ExportAcadoFunction::clone( ) const
 {
-	return new ExportODEfunction(*this);
+	return new ExportAcadoFunction(*this);
 }
 
 
-ExportFunction* ExportODEfunction::cloneFunction( ) const
+ExportFunction* ExportAcadoFunction::cloneFunction( ) const
 {
-	return new ExportODEfunction(*this);
+	return new ExportAcadoFunction(*this);
 }
 
 
 
-returnValue ExportODEfunction::init(	const Function& _f,
+returnValue ExportAcadoFunction::init(	const Function& _f,
 										const String& _name,
 										const uint _numX,
 										const uint _numXA,
@@ -132,7 +132,7 @@ returnValue ExportODEfunction::init(	const Function& _f,
 
 
 
-returnValue ExportODEfunction::exportDataDeclaration(	FILE* file,
+returnValue ExportAcadoFunction::exportDataDeclaration(	FILE* file,
 														const String& _realString,
 														const String& _intString,
 														int _precision
@@ -142,7 +142,7 @@ returnValue ExportODEfunction::exportDataDeclaration(	FILE* file,
 }
 
 
-returnValue ExportODEfunction::exportForwardDeclaration(	FILE* file,
+returnValue ExportAcadoFunction::exportForwardDeclaration(	FILE* file,
 															const String& _realString,
 															const String& _intString,
 															int _precision
@@ -152,7 +152,7 @@ returnValue ExportODEfunction::exportForwardDeclaration(	FILE* file,
 }
 
 
-returnValue ExportODEfunction::exportCode(	FILE* file,
+returnValue ExportAcadoFunction::exportCode(	FILE* file,
 											const String& _realString,
 											const String& _intString,
 											int _precision
@@ -163,7 +163,7 @@ returnValue ExportODEfunction::exportCode(	FILE* file,
 }
 
 
-BooleanType ExportODEfunction::isDefined( ) const
+BooleanType ExportAcadoFunction::isDefined( ) const
 {
 	if (f->getDim() > 0)
 		return BT_TRUE;
@@ -172,17 +172,17 @@ BooleanType ExportODEfunction::isDefined( ) const
 }
 
 
-unsigned ExportODEfunction::getFunctionDim( void )
+unsigned ExportAcadoFunction::getFunctionDim( void )
 {
 	return f->getDim();
 }
 
-ExportVariable ExportODEfunction::getGlobalExportVariable( ) const
+ExportVariable ExportAcadoFunction::getGlobalExportVariable( ) const
 {
 	return deepcopy( globalVar );
 }
 
-returnValue ExportODEfunction::setGlobalExportVariable(const ExportVariable& var)
+returnValue ExportAcadoFunction::setGlobalExportVariable(const ExportVariable& var)
 {
 	if (getFunctionDim() == 0)
 		return SUCCESSFUL_RETURN;
