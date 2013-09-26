@@ -43,7 +43,7 @@ SET( QPOASES_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/qpoases_solver.cpp.in)
 SET( QPDUNES_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/qpdunes_interface.in)
 
 SET( AUXILIARY_FUNCTIONS_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/acado_auxiliary_functions.h.in)
-SET( AUXILIARY_FUNCTIONS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}acado_auxiliary_functions.c.in)
+SET( AUXILIARY_FUNCTIONS_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/acado_auxiliary_functions.c.in)
 SET( SOLVER_MEX ${CMAKE_CURRENT_SOURCE_DIR}/acado_solver_mex.c.in)
 SET( MAKE_MEX_FORCES ${CMAKE_CURRENT_SOURCE_DIR}/make_acado_solver_forces.m.in)
 SET( MAKE_MEX_QPOASES ${CMAKE_CURRENT_SOURCE_DIR}/make_acado_solver_qpoases.m.in)
