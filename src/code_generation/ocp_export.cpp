@@ -129,15 +129,17 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	else
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
+	LOG( LVL_DEBUG ) << "Export templates" << endl;
+
 	//
 	// Export auxiliary functions, always
 	//
 	String str;
 
 	str = dirName.getName() + String("/") + getName() + String("_auxiliary_functions.h");
-	acadoCopyFile(AUXILIARY_FUNCTIONS_HEADER, str.getName(), 0, BT_TRUE);
+	acadoCopyTempateFile(AUXILIARY_FUNCTIONS_HEADER, str.getName(), 0, BT_TRUE);
 	str = dirName.getName() + String("/") + getName() + String("_auxiliary_functions.c");
-	acadoCopyFile(AUXILIARY_FUNCTIONS_SOURCE, str.getName(), 0, BT_TRUE);
+	acadoCopyTempateFile(AUXILIARY_FUNCTIONS_SOURCE, str.getName(), 0, BT_TRUE);
 
 	//
 	// Export Makefile
@@ -152,11 +154,11 @@ returnValue OCPexport::exportCode(	const String& dirName,
 		switch ( (QPSolverName)qpSolver )
 		{
 			case QP_QPOASES:
-				acadoCopyFile(MAKEFILE_QPOASES, str.getName(), "#", BT_TRUE);
+				acadoCopyTempateFile(MAKEFILE_QPOASES, str.getName(), "#", BT_TRUE);
 				break;
 
 			case QP_FORCES:
-				acadoCopyFile(MAKEFILE_FORCES, str.getName(), "#", BT_TRUE);
+				acadoCopyTempateFile(MAKEFILE_FORCES, str.getName(), "#", BT_TRUE);
 				break;
 
 			case QP_QPDUNES:
@@ -175,7 +177,7 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	get(GENERATE_TEST_FILE, generateTestFile);
 	String testFileName = dirName + "/test.c";
 	if ((BooleanType) generateTestFile == BT_TRUE)
-		acadoCopyFile(DUMMY_TEST_FILE, testFileName.getName(), 0, BT_TRUE);
+		acadoCopyTempateFile(DUMMY_TEST_FILE, testFileName.getName(), 0, BT_TRUE);
 
 	//
 	// Generate MATLAB MEX interface
@@ -186,18 +188,18 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	{
 		str = dirName + String("/") + getName() + String("_solver_mex.c");
 
-		acadoCopyFile(SOLVER_MEX, str.getName(), 0, BT_TRUE);
+		acadoCopyTempateFile(SOLVER_MEX, str.getName(), 0, BT_TRUE);
 
 		str = dirName + String("/make_") + getName() + String("_solver.m");
 
 		switch ( (QPSolverName)qpSolver )
 		{
 		case QP_QPOASES:
-			acadoCopyFile(MAKE_MEX_QPOASES, str.getName(), "%", BT_TRUE);
+			acadoCopyTempateFile(MAKE_MEX_QPOASES, str.getName(), "%", BT_TRUE);
 			break;
 
 		case QP_FORCES:
-			acadoCopyFile(MAKE_MEX_FORCES, str.getName(), "%", BT_TRUE);
+			acadoCopyTempateFile(MAKE_MEX_FORCES, str.getName(), "%", BT_TRUE);
 			break;
 
 		case QP_QPDUNES:

@@ -211,6 +211,13 @@ returnValue acadoCopyFile(	const char* source,
 							BooleanType printCodegenNotice = BT_FALSE
 							);
 
+/** A function for copying of template files. */
+returnValue acadoCopyTempateFile(	const char* source,
+									const char* destination,
+									const char* commentString = 0,
+									BooleanType printCodegenNotice = BT_FALSE
+									);
+
 /** A function to create a folder. */
 returnValue acadoCreateFolder(const char* name);
 

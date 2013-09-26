@@ -26,25 +26,20 @@
 
 
 /**
- *    \file ...
+ *    \file src/code_generation/export_templated_file.cpp
  *    \author Milan Vukov
- *    \date 2012
+ *    \date 2012 - 2013
  */
 
 #include <acado/code_generation/export_templated_file.hpp>
+#include <acado/code_generation/templates/templates.hpp>
 
 #include <iostream>
 #include <fstream>
 
-
 BEGIN_NAMESPACE_ACADO
 
 using namespace std;
-
-
-//
-// PUBLIC MEMBER FUNCTIONS:
-//
 
 ExportTemplatedFile::ExportTemplatedFile(	const String& _templateName,
 											const String& _fileName,
@@ -55,123 +50,79 @@ ExportTemplatedFile::ExportTemplatedFile(	const String& _templateName,
 											const String& _commentString
 						) : ExportFile(_fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
 {
+	folders = TEMPLATE_PATHS;
 	templateName = _templateName;
 }
 
-
-ExportTemplatedFile::ExportTemplatedFile(	const ExportTemplatedFile& arg
-						) : ExportFile( arg )
-{
-	copy( arg );
-}
-
-
-ExportTemplatedFile::~ExportTemplatedFile( )
-{
-}
-
-
-ExportTemplatedFile& ExportTemplatedFile::operator=(	const ExportTemplatedFile& arg
-														)
-{
-	if( this != &arg )
-	{
-		ExportFile::operator=( arg );
-		copy( arg );
-	}
-	
-	return *this;
-}
-
-
-
-returnValue ExportTemplatedFile::exportCode( ) const
-{
-	FILE* file = openFile( );
-
-	if ( file == 0 )
-		return ACADOERROR( RET_DOES_DIRECTORY_EXISTS );
-
-	returnValue returnvalue =  ExportStatementBlock::exportCode(file, realString, intString, precision);
-
-	if ( file != 0 )
-		fclose( file );
-
-	return returnvalue;
-}
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
 returnValue ExportTemplatedFile::fillTemplate( )
 {
-	ifstream inputFile( templateName.getName() );
-
-	unsigned maxDim = 0;
-	for (map<string, string>::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
-		maxDim = maxDim < it->second.length() ? it->second.length() : maxDim;
-
-	if ( inputFile.is_open() )
+	ifstream inputFile;
+	size_t oldPos = 0;
+	while( 1 )
 	{
-		string str;
- 		while ( getline(inputFile, str) )
+		size_t pos;
+		string tmp;
+
+		pos = folders.find(";", oldPos);
+		tmp = folders.substr(oldPos, pos) + "/" + templateName.getName();
+
+		inputFile.open(tmp.c_str());
+
+		if (inputFile.is_open() == true)
+			break;
+
+		if (pos == string::npos)
 		{
-			for (map<string, string>::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
-			{
-				size_t pos = 0;
-				while ((pos = str.find(it->first, pos)) != string::npos)
-				{
-					str.replace(pos, it->first.length(), it->second);
-					pos += it->second.length();
-				}
-			}
-
-			if ( str.size() )
-			{
-				size_t pos = 0;
-				while ( 1 )
-				{
-					if ((str.size() - pos) < 256)
-					{
-						string tmp = str.substr( pos );
-
-						if ( tmp.size() )
-							addStatement( static_cast< String >( tmp.c_str() ) );
-
-						break;
-					}
-					else
-					{
-						addStatement( static_cast< String >( str.substr(pos, 256).c_str() ) );
-
-						pos += 256;
-					}
-				}
-			}
-			addStatement( (String)"\n" );
+			LOG( LVL_ERROR ) << "Unable to open the file: " << tmp << endl;
+			return ACADOERROR( RET_DOES_DIRECTORY_EXISTS );
 		}
 
-		inputFile.close();
+		oldPos = pos + 1;
 	}
-	else
-		return ACADOERRORTEXT(RET_DOES_DIRECTORY_EXISTS, "Could not open the template file.");
+
+	string str;
+	while ( getline(inputFile, str) )
+	{
+		for (map<string, string>::const_iterator it = dictionary.begin(); it != dictionary.end(); ++it)
+		{
+			size_t pos = 0;
+			while ((pos = str.find(it->first, pos)) != string::npos)
+			{
+				str.replace(pos, it->first.length(), it->second);
+				pos += it->second.length();
+			}
+		}
+
+		// This is some extremely stupid hack we had to do. Namely, String() class
+		// cannot handle long strings, so we have to cut them in smaller pieces.
+		if ( str.size() )
+		{
+			size_t pos = 0;
+			while ( 1 )
+			{
+				if ((str.size() - pos) < 256)
+				{
+					string tmp = str.substr( pos );
+
+					if ( tmp.size() )
+						addStatement( static_cast< String >( tmp.c_str() ) );
+
+					break;
+				}
+				else
+				{
+					addStatement( static_cast< String >( str.substr(pos, 256).c_str() ) );
+
+					pos += 256;
+				}
+			}
+		}
+		addStatement( (String)"\n" );
+	}
+
+	inputFile.close();
 	
 	return SUCCESSFUL_RETURN;
 }
-
-returnValue ExportTemplatedFile::copy(	const ExportTemplatedFile& arg
-								)
-{
-	templateName = arg.templateName;
-	
-	dictionary = arg.dictionary;
-
-	return SUCCESSFUL_RETURN;
-}
-
 
 CLOSE_NAMESPACE_ACADO
-
-// end of file.

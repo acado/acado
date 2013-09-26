@@ -51,6 +51,7 @@
 
 
 #include <acado/utils/acado_utils.hpp>
+#include <acado/code_generation/templates/templates.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -440,6 +441,39 @@ returnValue acadoCopyFile(	const char* source,
 	dst << src.rdbuf();
 
 	return SUCCESSFUL_RETURN;
+}
+
+returnValue acadoCopyTempateFile(	const char* source,
+									const char* destination,
+									const char* commentString,
+									BooleanType printCodegenNotice
+									)
+{
+	const string folders( TEMPLATE_PATHS );
+	ifstream inputFile;
+	size_t oldPos = 0;
+
+	while( 1 )
+	{
+		size_t pos;
+		string tmp;
+
+		pos = folders.find(";", oldPos);
+		tmp = folders.substr(oldPos, pos) + "/" + source;
+
+		inputFile.open(tmp.c_str());
+
+		if (inputFile.is_open() == true)
+			return acadoCopyFile(tmp.c_str(), destination, commentString, printCodegenNotice);
+
+		if (pos == string::npos)
+			break;
+
+		oldPos = pos + 1;
+	}
+
+	LOG( LVL_ERROR ) << "Could not open the template file: " << source << std::endl;
+	return ACADOERROR( RET_INVALID_ARGUMENTS );
 }
 
 returnValue acadoCreateFolder(const char* name)
