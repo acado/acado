@@ -23,17 +23,14 @@
  *
  */
 
-
-
  /**
- *    \file   examples/code_generation/crane_mpc.cpp
+ *    \file   examples/code_generation/cstr22.cpp
  *    \author Boris Houska, Hans Joachim Ferreau
- *    \date   2010
+ *    \date   2010-2013
  */
 
 
-#include <acado_code_generation.hpp>
-
+#include <acado_toolkit.hpp>
 
 const double k10 =  1.287e12;
 const double k20 =  1.287e12;
@@ -91,77 +88,68 @@ const double P44 =   29.28;
 const double R_OMEGA = 90.0;
 
 
-int main( ){
+int main()
+{
+	USING_NAMESPACE_ACADO
 
-    USING_NAMESPACE_ACADO
-	
-    // Define a Right-Hand-Side:
-    // -------------------------
+	// Define a Right-Hand-Side:
+	DifferentialState cA, cB, theta, thetaK;
+	Control           u( 2 );
 
-    DifferentialState cA, cB, theta, thetaK;
-	Control u(2);
+	DifferentialEquation f;
 
-    DifferentialEquation f;
-
-    IntermediateState k1, k2, k3;
+	IntermediateState k1, k2, k3;
 
 	k1 = k10*exp(E1/(273.15 +theta));
 	k2 = k20*exp(E2/(273.15 +theta));
 	k3 = k30*exp(E3/(273.15 +theta));
 
-	f << dot(cA) == (1/TIMEUNITS_PER_HOUR)*(u(0)*(cA0-cA) - k1*cA - k3*cA*cA); 
-	f << dot(cB) == (1/TIMEUNITS_PER_HOUR)* (- u(0)*cB + k1*cA - k2*cB); 
-	f << dot(theta) == (1/TIMEUNITS_PER_HOUR)*(u(0)*(theta0-theta) - (1/(rho*Cp)) *(k1*cA*H1 + k2*cB*H2 + k3*cA*cA*H3)+(kw*AR/(rho*Cp*VR))*(thetaK -theta)); 
+	f << dot(cA) == (1/TIMEUNITS_PER_HOUR)*(u(0)*(cA0-cA) - k1*cA - k3*cA*cA);
+	f << dot(cB) == (1/TIMEUNITS_PER_HOUR)* (- u(0)*cB + k1*cA - k2*cB);
+	f << dot(theta) == (1/TIMEUNITS_PER_HOUR)*(u(0)*(theta0-theta) - (1/(rho*Cp)) *(k1*cA*H1 + k2*cB*H2 + k3*cA*cA*H3)+(kw*AR/(rho*Cp*VR))*(thetaK -theta));
 	f << dot(thetaK) == (1/TIMEUNITS_PER_HOUR)*((1/(mK*CPK))*(u(1) + kw*AR*(theta-thetaK)));
 
+	// Reference functions and weighting matrices:
+	Function h, hN;
+	h << cA << cB << theta << thetaK << u;
+	hN << cA << cB << theta << thetaK;
 
-    // DEFINE THE WEIGHTING MATRICES:
-    // ----------------------------------------------------------
-       Matrix Q  = eye(4);
-//       Matrix S  = eye(4);
-       Matrix R  = eye(2);
-    // ----------------------------------------------------------
+	Matrix S = eye( h.getDim() );
+	Matrix SN = eye( hN.getDim() );
 
-	Q(0,0) = sqrt(0.2);
-	Q(1,1) = sqrt(1.0);
-	Q(2,2) = sqrt(0.5);
-	Q(3,3) = sqrt(0.2);
+	S(0, 0) = SN(0, 0) = sqrt(0.2);
+	S(1, 1) = SN(1, 1) = sqrt(1.0);
+	S(2, 2) = SN(2, 2) = sqrt(0.5);
+	S(3, 3) = SN(3, 3) = sqrt(0.2);
 
-	R(0,0) = 0.5000;
-	R(1,1) = 0.0000005;
+	S(4, 4) = 0.5000;
+	S(5, 5) = 0.0000005;
 
+	//
+	// Optimal Control Problem:
+	//
+	OCP ocp(0.0, 1500.0, 22);
 
+	ocp.subjectTo( f );
 
-    // SET UP THE MPC - OPTIMAL CONTROL PROBLEM:
-    // ----------------------------------------------------------
-       OCP ocp( 0.0, 1500.0, 22 );
+	ocp.minimizeLSQ(S, h);
+	ocp.minimizeLSQEndTerm(SN, hN);
 
-       ocp.minimizeLSQ ( Q, R );
-// ocp.minimizeLSQEndTerm( S    );
-
-       ocp.subjectTo( f );
-	ocp.subjectTo( 3.0     <= u(0) <= 35.0 );
+	ocp.subjectTo( 3.0 <= u(0) <= 35.0 );
 	ocp.subjectTo( -9000.0 <= u(1) <= 0.0 );
-	
-	
-    // ----------------------------------------------------------
 
+	// Export the code:
+	OCPexport mpc(ocp);
 
-    // DEFINE AN MPC EXPORT MODULE AND GENERATE THE CODE:
-    // ----------------------------------------------------------
-       MPCexport mpc(ocp);
+	mpc.set( INTEGRATOR_TYPE , INT_RK4 );
+	mpc.set( NUM_INTEGRATOR_STEPS , 23 );
+	mpc.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON );
+	mpc.set( GENERATE_TEST_FILE,NO );
 
-       mpc.set( INTEGRATOR_TYPE      , INT_RK4      );
-       mpc.set( NUM_INTEGRATOR_STEPS , 23           );
-       mpc.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON );
-	   mpc.set( GENERATE_TEST_FILE,NO );
+	if (mpc.exportCode("cstr22_export") != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
-       if (mpc.exportCode("cstr22_export") != SUCCESSFUL_RETURN)
-    	   exit( EXIT_FAILURE );
-    // ----------------------------------------------------------
-
-
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 

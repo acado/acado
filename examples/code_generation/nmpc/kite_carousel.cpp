@@ -23,141 +23,119 @@
  *
  */
 
-
-
  /**
- *    \file   carousel_plane/steady_state_tracking.cpp
+ *    \file   examples/code_generation/kite_carousel.cpp
  *    \author Boris Houska, Hans Joachim Ferreau, Kurt Geebelen
- *    \date   2010
+ *    \date   2010-2013
  */
 
+#include <acado_toolkit.hpp>
 
-#include <acado_code_generation.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+int main()
+{
+	USING_NAMESPACE_ACADO
 
+	// Variables:
+	DifferentialState phi;
+	DifferentialState theta;
+	DifferentialState dphi;
+	DifferentialState dtheta;
 
-int main( ){
+	Control u1;
+	Control u2;
 
-    USING_NAMESPACE_ACADO
+	IntermediateState c;// c := rho * |we|^2 / (2*m)
+	DifferentialEquation f;// the right-hand side of the model
 
-    // DEFINE THE STATES OF THE MODEL:
-    // -------------------------------
-       DifferentialState          phi;
-       DifferentialState        theta;
-       DifferentialState         dphi;
-       DifferentialState       dtheta;
+	// Parameters:
+	const double R = 1.00;// radius of the carousel arm
+	const double Omega = 1.00;// constant rotational velocity of the carousel arm
+	const double m = 0.80;// the mass of the plane
+	const double r = 1.00;// length of the cable between arm and plane
+	const double A = 0.15;// wing area of the plane
 
-       Control                     u1;
-       Control                     u2;
+	const double rho = 1.20;// density of the air
+	const double CL = 1.00;// nominal lift coefficient
+	const double CD = 0.15;// nominal drag coefficient
+	const double b = 15.00;// roll stabilization coefficient
+	const double g = 9.81;// gravitational constant
 
-       IntermediateState            c;  // c := rho * |we|^2 / (2*m) 
-       DifferentialEquation         f;  // the right-hand side of the model
+	// COMPUTE THE CONSTANT c:
+	// -------------------------
+	c = ( (R*R*Omega*Omega)
+			+ (r*r)*( (Omega+dphi)*(Omega+dphi) + dtheta*dtheta )
+			+ (2.0*r*R*Omega)*( (Omega+dphi)*sin(theta)*cos(phi)
+					+ dtheta*cos(theta)*sin(phi) ) ) * ( A*rho/( 2.0*m ) );
 
+	f << dot( phi ) == dphi;
+	f << dot( theta ) == dtheta;
 
-    // SETUP THE MODEL PARAMETERS:
-    // -------------------------------
-       const double          R =  1.00;  // radius of the carousel arm
-       const double      Omega =  1.00;  // constant rotational velocity of the carousel arm
-       const double          m =  0.80;  // the mass of the plane
-       const double          r =  1.00;  // length of the cable between arm and plane
-       const double          A =  0.15;  // wing area of the plane
+	f << dot( dphi ) == ( 2.0*r*(Omega+dphi)*dtheta*cos(theta)
+			+ (R*Omega*Omega)*sin(phi)
+			+ c*(CD*(1.0+u2)+CL*(1.0+0.5*u2)*phi) ) / (-r*sin(theta));
 
-       const double        rho =  1.20;  // density of the air
-       const double         CL =  1.00;  // nominal lift coefficient
-       const double         CD =  0.15;  // nominal drag coefficient
-       const double          b = 15.00;  // roll stabilization coefficient
-       const double          g =  9.81;  // gravitational constant
+	f << dot( dtheta ) == ( (R*Omega*Omega)*cos(theta)*cos(phi)
+			+ r*(Omega+dphi)*sin(theta)*cos(theta)
+			+ g*sin(theta) - c*( CL*u1 + b*dtheta ) ) / r;
 
-    // COMPUTE THE CONSTANT c:
-    // -------------------------
-       c = (   (R*R*Omega*Omega)
-             + (r*r)*( (Omega+dphi)*(Omega+dphi) + dtheta*dtheta )
-             + (2.0*r*R*Omega)*(  (Omega+dphi)*sin(theta)*cos(phi)
-                                + dtheta*cos(theta)*sin(phi)       ) ) * ( A*rho/( 2.0*m ) );
+	// Reference functions and weighting matrices:
+	Function h, hN;
+	h << phi << theta << dphi << dtheta << u1 << u2;
+	hN << phi << theta << dphi << dtheta;
 
-       f << dot(    phi ) ==  dphi  ;
-       f << dot(  theta ) ==  dtheta;
+	Matrix S = eye( h.getDim() );
+	Matrix SN = eye( hN.getDim() );
 
-       f << dot(   dphi ) ==  (   2.0*r*(Omega+dphi)*dtheta*cos(theta)
-                                + (R*Omega*Omega)*sin(phi)
-                                + c*(CD*(1.0+u2)+CL*(1.0+0.5*u2)*phi)   ) / (-r*sin(theta));
+	S(0,0) = 5.000;
+	S(1,1) = 1.000;
+	S(2,2) = 10.000;
+	S(3,3) = 10.000;
+	S(4,4) = 0.1;
+	S(5,5) = 0.1;
 
-       f << dot( dtheta ) ==  (   (R*Omega*Omega)*cos(theta)*cos(phi)
-                                + r*(Omega+dphi)*sin(theta)*cos(theta)
-                                + g*sin(theta) - c*( CL*u1 + b*dtheta ) ) / r;
+	SN(0,0) = 1.0584373059248833e+01;
+	SN(0,1) = 1.2682415889087276e-01;
+	SN(0,2) = 1.2922232012424681e+00;
+	SN(0,3) = 3.7982078044271374e-02;
+	SN(1,0) = 1.2682415889087265e-01;
+	SN(1,1) = 3.2598407653299275e+00;
+	SN(1,2) = -1.1779732282636639e-01;
+	SN(1,3) = 9.8830655348904548e-02;
+	SN(2,0) = 1.2922232012424684e+00;
+	SN(2,1) = -1.1779732282636640e-01;
+	SN(2,2) = 4.3662024133354898e+00;
+	SN(2,3) = -5.9269992411260908e-02;
+	SN(3,0) = 3.7982078044271367e-02;
+	SN(3,1) = 9.8830655348904534e-02;
+	SN(3,2) = -5.9269992411260901e-02;
+	SN(3,3) = 3.6495564367004318e-01;
 
+	//
+	// Optimal Control Problem
+	//
 
-    // DEFINE THE WEIGHTING MATRICES:
-    // ----------------------------------------------------------
-       Matrix QQ  = eye(4);
-       Matrix PP  = eye(4);
-       Matrix RR  = eye(2);
-    // ----------------------------------------------------------
+//	OCP ocp( 0.0, 12.0, 15 );
+	OCP ocp( 0.0, 2.0 * M_PI, 10 );
 
-       QQ(0,0) = 5.000;
-       QQ(1,1) = 1.000;
-       QQ(2,2) = 10.000;
-       QQ(3,3) = 10.000;
-       RR(0,0) = 0.1;
-       RR(1,1) = 0.1;
+	ocp.subjectTo( f );
 
-    PP(0,0) =  1.0584373059248833e+01;
-    PP(0,1) =  1.2682415889087276e-01;
-    PP(0,2) =  1.2922232012424681e+00;
-    PP(0,3) =  3.7982078044271374e-02;
-    PP(1,0) =  1.2682415889087265e-01;
-    PP(1,1) =  3.2598407653299275e+00;
-    PP(1,2) = -1.1779732282636639e-01;
-    PP(1,3) =  9.8830655348904548e-02;
-    PP(2,0) =  1.2922232012424684e+00;
-    PP(2,1) = -1.1779732282636640e-01;
-    PP(2,2) =  4.3662024133354898e+00;
-    PP(2,3) = -5.9269992411260908e-02;
-    PP(3,0) =  3.7982078044271367e-02;
-    PP(3,1) =  9.8830655348904534e-02;
-    PP(3,2) = -5.9269992411260901e-02;
-    PP(3,3) =  3.6495564367004318e-01;
-	   
-// 		Vector ref = zeros(6);
-// 		ref(0) = - 4.2155955213988627e-02;
-// 		ref(1) =   1.8015724412870739e+00;
-// 		ref(2) =   0.0                   ;
-// 		ref(3) =   0.0                   ;
-// 		ref(4) =  20.5                   ;
-// 		ref(5) = - 0.1                   ;
+	ocp.minimizeLSQ(S, h);
+	ocp.minimizeLSQEndTerm(SN, hN);
 
-	   
-    // SET UP THE MPC - OPTIMAL CONTROL PROBLEM:
-    // ----------------------------------------------------------
-//        OCP ocp( 0.0, 12.0, 15 );
-       OCP ocp( 0.0, 2.0*M_PI, 10 );
+	ocp.subjectTo( 18.0 <= u1 <= 22.0 );
+	ocp.subjectTo( -0.2 <= u2 <= 0.2 );
 
-       ocp.minimizeLSQ       ( QQ, RR );
-       ocp.minimizeLSQEndTerm( PP    );
+	// Export the code:
+	OCPexport mpc(ocp);
 
-       ocp.subjectTo( f );
+	mpc.set( INTEGRATOR_TYPE , INT_RK4 );
+	mpc.set( NUM_INTEGRATOR_STEPS , 30 );
+	mpc.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON );
+	mpc.set( HOTSTART_QP, YES );
+	mpc.set( GENERATE_TEST_FILE, NO );
 
-       ocp.subjectTo(  18.0 <= u1 <= 22.0 );
-       ocp.subjectTo( -0.2  <= u2 <= 0.2 );
-    // ----------------------------------------------------------
-
-
-    // DEFINE AN MPC EXPORT MODULE AND GENERATE THE CODE:
-    // ----------------------------------------------------------
-       MPCexport mpc(ocp);
-
-       mpc.set( INTEGRATOR_TYPE      , INT_RK4      );
-       mpc.set( NUM_INTEGRATOR_STEPS , 30           );
-       mpc.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON );
-// 	   mpc.set( QP_SOLVER, QP_CVXGEN );
-	   mpc.set( HOTSTART_QP, YES );
-	   mpc.set( GENERATE_TEST_FILE,NO );
-// 	   mpc.set( USE_SINGLE_PRECISION,YES );
-
-       if (mpc.exportCode("kite_carousel_export") != SUCCESSFUL_RETURN)
-    	   exit( EXIT_FAILURE );
-    // ----------------------------------------------------------
-
+	if (mpc.exportCode("kite_carousel_export") != SUCCESSFUL_RETURN)
+		exit( EXIT_FAILURE );
 
 // 	DifferentialState Gx(4,4), Gu(4,2);
 // 
@@ -190,8 +168,7 @@ int main( ){
 //     Vector result = Df.evaluate( z );
 // 	result.print( "x" );
 
-
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 

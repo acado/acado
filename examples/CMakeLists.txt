@@ -106,7 +106,7 @@ SET( EXAMPLE_DIRS
 	basic_data_structures/matrix_vector
 	basic_data_structures/symbolics
 	basic_data_structures/variables_grid
-#	code_generation/simulation
+	code_generation/simulation
 	controller
 	getting_started
 	integration_algorithm
@@ -230,4 +230,4 @@ ENDFOREACH( DIR ${EXAMPLE_DIRS} )
 # Build code generation examples
 # XXX Temporary disable building of the code generation NMPC examples
 #
-#ADD_SUBDIRECTORY( ./code_generation/nmpc )
+ADD_SUBDIRECTORY( ./code_generation/nmpc )

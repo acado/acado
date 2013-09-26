@@ -23,24 +23,19 @@
  *
  */
 
-
-
  /**
  *    \file   examples/code_generation/getting_started.cpp
  *    \author Hans Joachim Ferreau, Boris Houska
- *    \date   2011
+ *    \date   2011-2013
  */
 
-
-#include <acado_code_generation.hpp>
-
+#include <acado_toolkit.hpp>
 
 int main( )
 {
 	USING_NAMESPACE_ACADO
 
-	// DEFINE THE VARIABLES:
-	// ----------------------------------------------------------
+	// Variables:
 	DifferentialState   p    ;  // the trolley position
 	DifferentialState   v    ;  // the trolley velocity 
 	DifferentialState   phi  ;  // the excitation angle
@@ -49,64 +44,56 @@ int main( )
 
 	const double     g = 9.81;  // the gravitational constant 
 	const double     b = 0.20;  // the friction coefficient
-	// ----------------------------------------------------------
 
-
-	// DEFINE THE MODEL EQUATIONS:
-	// ----------------------------------------------------------
+	// Model equations:
 	DifferentialEquation f; 
 
-	f << dot( p     )  ==  v                                ;
-	f << dot( v     )  ==  a                                ;
-	f << dot( phi   )  ==  omega                            ;
+	f << dot( p )      ==  v;
+	f << dot( v )      ==  a;
+	f << dot( phi )    ==  omega;
 	f << dot( omega )  == -g*sin(phi) - a*cos(phi) - b*omega;
-	// ----------------------------------------------------------
 
+	// Reference functions and weighting matrices:
+	Function h, hN;
+	h << p << v << phi << omega << a;
+	hN << p << v << phi << omega;
 
-	// DEFINE THE WEIGHTING MATRICES:
-	// ----------------------------------------------------------
-	Matrix Q  = eye(4);
-	Matrix R  = eye(1);
-	
-	Matrix P  = eye(4);
-	P *= 5.0;
-	// ----------------------------------------------------------
+	Matrix S = eye( h.getDim() );
+	Matrix SN = eye( hN.getDim() );
+	SN *= 5;
 
-
-	// SET UP THE MPC - OPTIMAL CONTROL PROBLEM:
-	// ----------------------------------------------------------
-	OCP ocp( 0.0,3.0, 10 );
-
-	ocp.minimizeLSQ       ( Q,R );
-	ocp.minimizeLSQEndTerm( P   );
+	//
+	// Optimal Control Problem
+	//
+	OCP ocp(0.0, 3.0, 10);
 
 	ocp.subjectTo( f );
+
+	ocp.minimizeLSQ(S, h);
+	ocp.minimizeLSQEndTerm(SN, hN);
+
 	ocp.subjectTo( -1.0 <= a <= 1.0 );
-// 	ocp.subjectTo( -0.5 <= v <= 1.5 );
-	// ----------------------------------------------------------
+//	ocp.subjectTo( -0.5 <= v <= 1.5 );
 
-
-	// DEFINE AN MPC EXPORT MODULE AND GENERATE THE CODE:
-	// ----------------------------------------------------------
-	MPCexport mpc( ocp );
+	// Export the code:
+	OCPexport mpc( ocp );
 
 	mpc.set( HESSIAN_APPROXIMATION,       GAUSS_NEWTON    );
 	mpc.set( DISCRETIZATION_TYPE,         SINGLE_SHOOTING );
 	mpc.set( INTEGRATOR_TYPE,             INT_RK4         );
 	mpc.set( NUM_INTEGRATOR_STEPS,        30              );
+
 	mpc.set( QP_SOLVER,                   QP_QPOASES      );
-// 	mpc.set( MAX_NUM_QP_ITERATIONS,       20              );
 // 	mpc.set( HOTSTART_QP,                 YES             );
 // 	mpc.set( LEVENBERG_MARQUARDT,         1.0e-4          );
 	mpc.set( GENERATE_TEST_FILE,          YES             );
 	mpc.set( GENERATE_MAKE_FILE,          YES             );
 	mpc.set( GENERATE_SIMULINK_INTERFACE, NO              );
-// 	mpc.set( OPERATING_SYSTEM,            OS_WINDOWS      );
+
 // 	mpc.set( USE_SINGLE_PRECISION,        YES             );
 
 	if (mpc.exportCode( "getting_started_export" ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
-	// ----------------------------------------------------------
 
 	return EXIT_SUCCESS;
 }
