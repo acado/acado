@@ -793,18 +793,6 @@ returnValue SIMexport::exportAcadoHeader(	const String& _dirName,
 
 	switch ( (QPSolverName)qpSolver )
 	{
-		case QP_CVXGEN:
-			acadoHeader.addStatement( "#define USE_CVXGEN\n" );
-			acadoHeader.addStatement( "#include \"cvxgen/solver.h\"\n" );
-			acadoHeader.addLinebreak( 2 );
-
-			if ( (BooleanType)useSinglePrecision == BT_TRUE )
-				acadoHeader.addStatement( "typedef float real_t;\n" );
-			else
-				acadoHeader.addStatement( "typedef double real_t;\n" );
-			acadoHeader.addLinebreak( 2 );
-			break;
-
 		case QP_QPOASES:
 			acadoHeader.addStatement( "#ifndef __MATLAB__\n" );
 			acadoHeader.addStatement( "#ifdef __cplusplus\n" );
@@ -911,9 +899,6 @@ returnValue SIMexport::exportAcadoHeader(	const String& _dirName,
 
 	switch ( (QPSolverName) qpSolver )
 	{
-		case QP_CVXGEN:
-			break;
-
 		case QP_QPOASES:
 			acadoHeader.addStatement( "#ifndef __MATLAB__\n");
 			acadoHeader.addStatement( "#ifdef __cplusplus\n" );
