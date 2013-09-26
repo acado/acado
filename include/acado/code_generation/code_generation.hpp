@@ -55,7 +55,6 @@
 #include <acado/code_generation/linear_solvers/gaussian_elimination_export.hpp>
 #include <acado/code_generation/linear_solvers/householder_qr_export.hpp>
 #include <acado/code_generation/export_algorithm.hpp>
-#include <acado/code_generation/sim_export.hpp>
 #include <acado/code_generation/export_module.hpp>
 #include <acado/code_generation/export_data.hpp>
 #include <acado/code_generation/export_index.hpp>
@@ -72,5 +71,8 @@
 #include <acado/code_generation/export_statement_string.hpp>
 #include <acado/code_generation/export_data_declaration.hpp>
 #include <acado/code_generation/export_function_declaration.hpp>
+
+#include <acado/code_generation/sim_export.hpp>
+#include <acado/code_generation/ocp_export.hpp>
 
 #endif  // ACADO_TOOLKIT_CODE_GENERATION_HPP
