@@ -156,5 +156,7 @@ int main()
 	if (mpc.exportCode( "cstr_export" ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
 
+	mpc.printDimensionsQP( );
+
 	return EXIT_SUCCESS;
 }

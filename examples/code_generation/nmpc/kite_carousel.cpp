@@ -137,6 +137,8 @@ int main()
 	if (mpc.exportCode("kite_carousel_export") != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
 
+	mpc.printDimensionsQP( );
+
 // 	DifferentialState Gx(4,4), Gu(4,2);
 // 
 // 	Expression rhs;

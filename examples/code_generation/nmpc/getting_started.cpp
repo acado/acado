@@ -95,5 +95,7 @@ int main( )
 	if (mpc.exportCode( "getting_started_export" ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
 
+	mpc.printDimensionsQP( );
+
 	return EXIT_SUCCESS;
 }
