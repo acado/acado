@@ -288,20 +288,20 @@ returnValue QProblem::hotstart(	const real_t* const g_new, const real_t* const l
 
 	int FR_idx[NVMAX];
 	int FX_idx[NVMAX];
-	int AC_idx[NCMAX];
-	int IAC_idx[NCMAX];
+	int AC_idx[NCMAX_ALLOC];
+	int IAC_idx[NCMAX_ALLOC];
 
 	real_t delta_g[NVMAX];
 	real_t delta_lb[NVMAX];
 	real_t delta_ub[NVMAX];
-	real_t delta_lbA[NCMAX];
-	real_t delta_ubA[NCMAX];
+	real_t delta_lbA[NCMAX_ALLOC];
+	real_t delta_ubA[NCMAX_ALLOC];
 
 	real_t delta_xFR[NVMAX];
 	real_t delta_xFX[NVMAX];
-	real_t delta_yAC[NCMAX];
+	real_t delta_yAC[NCMAX_ALLOC];
 	real_t delta_yFX[NVMAX];
-	real_t delta_Ax[NCMAX];
+	real_t delta_Ax[NCMAX_ALLOC];
 
 	int BC_idx;
 	SubjectToStatus BC_status;
@@ -602,7 +602,7 @@ returnValue QProblem::setupCholeskyDecompositionProjected( )
 			if ( bounds.getFree( )->getNumberArray( FR_idx ) != SUCCESSFUL_RETURN )
 				return THROWERROR( RET_INDEXLIST_CORRUPTED );
 
-			int AC_idx[NCMAX];
+			int AC_idx[NCMAX_ALLOC];
 			if ( constraints.getActive( )->getNumberArray( AC_idx ) != SUCCESSFUL_RETURN )
 				return THROWERROR( RET_INDEXLIST_CORRUPTED );
 
@@ -795,8 +795,8 @@ returnValue QProblem::solveInitialQP(	const real_t* const xOpt, const real_t* co
 	real_t g_original[NVMAX];
 	real_t lb_original[NVMAX];
 	real_t ub_original[NVMAX];
-	real_t lbA_original[NCMAX];
-	real_t ubA_original[NCMAX];
+	real_t lbA_original[NCMAX_ALLOC];
+	real_t ubA_original[NCMAX_ALLOC];
 
 	for( i=0; i<nV; ++i )
 	{
@@ -1557,8 +1557,8 @@ returnValue QProblem::addConstraint_ensureLI( int number, SubjectToStatus C_stat
 	if ( bounds.getFixed( )->getNumberArray( FX_idx ) != SUCCESSFUL_RETURN )
 		return THROWERROR( RET_ENSURELI_FAILED );
 
-	real_t xiC[NCMAX];
-	real_t xiC_TMP[NCMAX];
+	real_t xiC[NCMAX_ALLOC];
+	real_t xiC_TMP[NCMAX_ALLOC];
 	real_t xiB[NVMAX];
 
 	/* 2) Calculate xiC */
@@ -1594,7 +1594,7 @@ returnValue QProblem::addConstraint_ensureLI( int number, SubjectToStatus C_stat
 	}
 
 	/* 3) Calculate xiB. */
-	int AC_idx[NCMAX];
+	int AC_idx[NCMAX_ALLOC];
 	if ( constraints.getActive( )->getNumberArray( AC_idx ) != SUCCESSFUL_RETURN )
 		return THROWERROR( RET_ENSURELI_FAILED );
 
@@ -1887,7 +1887,7 @@ returnValue QProblem::addBound(	int number, SubjectToStatus B_status,
 	if ( nAC > 0 )	  /* ( nAC == 0 ) <=> ( nZ == nFR ) <=> Y and T are empty => nothing to do */
 	{
 		/* store new column a in a temporary vector instead of shifting T one column to the left */
-		real_t tmp[NCMAX];
+		real_t tmp[NCMAX_ALLOC];
 		for( i=0; i<nAC; ++i )
 			tmp[i] = 0.0;
 
@@ -2001,12 +2001,12 @@ returnValue QProblem::addBound_ensureLI( int number, SubjectToStatus B_status )
 	if ( bounds.getFixed( )->getNumberArray( FX_idx ) != SUCCESSFUL_RETURN )
 		return THROWERROR( RET_ENSURELI_FAILED );
 
-	int AC_idx[NCMAX];
+	int AC_idx[NCMAX_ALLOC];
 	if ( constraints.getActive( )->getNumberArray( AC_idx ) != SUCCESSFUL_RETURN )
 		return THROWERROR( RET_ENSURELI_FAILED );
 
-	real_t xiC[NCMAX];
-	real_t xiC_TMP[NCMAX];
+	real_t xiC[NCMAX_ALLOC];
+	real_t xiC_TMP[NCMAX_ALLOC];
 	real_t xiB[NVMAX];
 
 	/* 2) Calculate xiC. */
@@ -2396,11 +2396,11 @@ returnValue QProblem::removeBound(	int number,
 	if ( nAC > 0 )
 	{
 		/* store new column a in a temporary vector instead of shifting T one column to the left and appending a */
-		int AC_idx[NCMAX];
+		int AC_idx[NCMAX_ALLOC];
 		if ( constraints.getActive( )->getNumberArray( AC_idx ) != SUCCESSFUL_RETURN )
 			return THROWERROR( RET_REMOVEBOUND_FAILED );
 
-		real_t tmp[NCMAX];
+		real_t tmp[NCMAX_ALLOC];
 		for( i=0; i<nAC; ++i )
 		{
 			ii = AC_idx[i];
@@ -2722,7 +2722,7 @@ returnValue QProblem::hotstart_determineStepDirection(	const int* const FR_idx, 
 		HFR_YFR_delta_xFRy[i] = 0.0;
 	}
 
-	real_t delta_xFRy[NCMAX];
+	real_t delta_xFRy[NCMAX_ALLOC];
 	real_t delta_xFRz[NVMAX];
 	for( i=0; i<nZ; ++i )
 		delta_xFRz[i] = 0.0;
@@ -2759,7 +2759,7 @@ returnValue QProblem::hotstart_determineStepDirection(	const int* const FR_idx, 
 			else
 			{
 				/* auxillary variable */
-				real_t delta_xFRy_TMP[NCMAX];
+				real_t delta_xFRy_TMP[NCMAX_ALLOC];
 
 				for( i=0; i<nAC; ++i )
 				{
@@ -2926,7 +2926,7 @@ returnValue QProblem::hotstart_determineStepDirection(	const int* const FR_idx, 
 	if ( nAC > 0 ) /* => ( nFR = nZ + nAC > 0 ) */
 	{
 		/* auxiliary variables */
-		real_t delta_yAC_TMP[NCMAX];
+		real_t delta_yAC_TMP[NCMAX_ALLOC];
 		for( i=0; i<nAC; ++i )
 			delta_yAC_TMP[i] = 0.0;
 		real_t delta_yAC_RHS[NVMAX];
@@ -3066,7 +3066,7 @@ returnValue QProblem::hotstart_determineStepLength(	const int* const FR_idx, con
 	int nIAC = getNIAC( );
 
 	/* initialise maximum steplength array */
-	real_t maxStepLength[2*(NVMAX+NCMAX)];
+	real_t maxStepLength[2*(NVMAX+NCMAX_ALLOC)];
 	for ( i=0; i<2*(nV+nC); ++i )
 		maxStepLength[i] = 1.0;
 
@@ -3665,7 +3665,7 @@ returnValue QProblem::checkKKTconditions( )
 	real_t tmp;
 	real_t maxKKTviolation = 0.0;
 
-	int AC_idx[NCMAX];
+	int AC_idx[NCMAX_ALLOC];
 	constraints.getActive( )->getNumberArray( AC_idx );
 
 	/* 1) check for Hx + g - [yFX yAC]*[Id A]' = 0. */

@@ -54,6 +54,9 @@ class SolutionAnalysis;
  */
 class QProblemB
 {
+	/* allow SolutionAnalysis class to access private members */
+	friend class SolutionAnalysis;
+	
 	/*
 	 *	PUBLIC MEMBER FUNCTIONS
 	 */

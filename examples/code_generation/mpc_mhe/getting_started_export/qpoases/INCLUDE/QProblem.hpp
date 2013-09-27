@@ -52,6 +52,9 @@
  */
 class QProblem : public QProblemB
 {
+	/* allow SolutionAnalysis class to access private members */
+	friend class SolutionAnalysis;
+	
 	/*
 	 *	PUBLIC MEMBER FUNCTIONS
 	 */
@@ -604,9 +607,9 @@ class QProblem : public QProblemB
 	 *	PROTECTED MEMBER VARIABLES
 	 */
 	protected:
-		real_t A[NCMAX*NVMAX];				/**< Constraint matrix. */
-		real_t lbA[NCMAX];					/**< Lower constraints' bound vector. */
-		real_t ubA[NCMAX];					/**< Upper constraints' bound vector. */
+		real_t A[NCMAX_ALLOC*NVMAX];		/**< Constraint matrix. */
+		real_t lbA[NCMAX_ALLOC];			/**< Lower constraints' bound vector. */
+		real_t ubA[NCMAX_ALLOC];			/**< Upper constraints' bound vector. */
 
 		Constraints constraints;			/**< Data structure for problem's constraints. */
 
@@ -614,7 +617,7 @@ class QProblem : public QProblemB
 		real_t Q[NVMAX*NVMAX];				/**< Orthonormal quadratic matrix, A = [0 T]*Q'. */
 		int sizeT;							/**< Matrix T is stored in a (sizeT x sizeT) array. */
 
-		real_t Ax[NCMAX];					/**< Stores the current product A*x (for increased efficiency only). */
+		real_t Ax[NCMAX_ALLOC];				/**< Stores the current product A*x (for increased efficiency only). */
 
 		CyclingManager cyclingManager;		/**< Data structure for storing (possible) cycling information (NOT YET IMPLEMENTED!). */
 };

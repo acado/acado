@@ -34,10 +34,10 @@
 #ifndef QPOASES_CONSTANTS_HPP
 #define QPOASES_CONSTANTS_HPP
 
-#ifdef ACADO_CMAKE_BUILD
-	#include "solver.hpp"
+#ifndef QPOASES_CUSTOM_INTERFACE
+#include "acado_qpoases_interface.hpp"
 #else
-	#include "../solver.hpp"
+#include QPOASES_CUSTOM_INTERFACE
 #endif
 
 /** Maximum number of variables within a QP formulation.

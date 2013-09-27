@@ -34,7 +34,11 @@
 #ifndef QPOASES_CONSTANTS_HPP
 #define QPOASES_CONSTANTS_HPP
 
-#include "../solver.hpp"
+#ifndef QPOASES_CUSTOM_INTERFACE
+#include "acado_qpoases_interface.hpp"
+#else
+#include QPOASES_CUSTOM_INTERFACE
+#endif
 
 /** Maximum number of variables within a QP formulation.
 	Note: this value has to be positive! */
@@ -43,6 +47,10 @@ const int NVMAX = QPOASES_NVMAX;
 /** Maximum number of constraints within a QP formulation.
 	Note: this value has to be positive! */
 const int NCMAX = QPOASES_NCMAX;
+
+/** Redefinition of NCMAX used for memory allocation, to avoid zero sized arrays
+    and compiler errors. */
+const int NCMAX_ALLOC = (NCMAX == 0) ? 1 : NCMAX;
 
 /**< Maximum number of working set recalculations.
 	Note: this value has to be positive! */

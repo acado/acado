@@ -88,7 +88,8 @@ int main( )
 // 	mpc.set( LEVENBERG_MARQUARDT,         1.0e-4          );
 	mpc.set( GENERATE_TEST_FILE,          YES             );
 	mpc.set( GENERATE_MAKE_FILE,          YES             );
-	mpc.set( GENERATE_SIMULINK_INTERFACE, NO              );
+	mpc.set( GENERATE_MATLAB_INTERFACE,   YES             );
+	mpc.set( GENERATE_SIMULINK_INTERFACE, YES             );
 
 // 	mpc.set( USE_SINGLE_PRECISION,        YES             );
 

@@ -2249,8 +2249,9 @@ returnValue ExportGaussNewtonCondensed::setupQPInterface( )
 	ExportQpOasesInterface* qpInterface;
 
 	String folderName = dynamic_cast< ExportModule* >( userInteraction )->getExportFolderName();
-	String sourceFile = folderName + "/qpoases/solver.cpp";
-	String headerFile = folderName + "/qpoases/solver.hpp";
+	String moduleName = dynamic_cast< ExportModule* >( userInteraction )->getName();
+	String sourceFile = folderName + "/" + moduleName + "_qpoases_interface.cpp";
+	String headerFile = folderName + "/" + moduleName + "_qpoases_interface.hpp";
 
 	qpInterface = new ExportQpOasesInterface(headerFile, sourceFile, "");
 

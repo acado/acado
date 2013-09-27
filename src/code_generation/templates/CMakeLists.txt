@@ -32,8 +32,8 @@ SET( RHS_MEX_TEMPLATE rhs_mex.c.in)
 
 SET( FORCES_TEMPLATE forces_interface.in)
 SET( FORCES_GENERATOR acado_forces_generator.m.in)
-SET( QPOASES_HEADER qpoases_solver.hpp.in)
-SET( QPOASES_SOURCE qpoases_solver.cpp.in)
+SET( QPOASES_HEADER qpoases_interface.hpp.in)
+SET( QPOASES_SOURCE qpoases_interface.cpp.in)
 SET( QPDUNES_TEMPLATE qpdunes_interface.in)
 
 SET( AUXILIARY_FUNCTIONS_HEADER acado_auxiliary_functions.h.in)

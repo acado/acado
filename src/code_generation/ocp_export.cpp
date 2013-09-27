@@ -76,13 +76,6 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	if (dirStatus != SUCCESSFUL_RETURN)
 		return dirStatus;
 
-	if ((QPSolverName)qpSolver == QP_QPOASES)
-	{
-		dirStatus = acadoCreateFolder( (dirName + "/qpoases").getName() );
-		if (dirStatus != SUCCESSFUL_RETURN)
-			return dirStatus;
-	}
-
 	//
 	// Setup the export structures
 	//
@@ -494,13 +487,12 @@ returnValue OCPexport::exportAcadoHeader(	const String& _dirName,
 	{
 	case QP_QPOASES:
 		acadoHeader.addStatement(
-				"#include \"solver.hpp\"\n"
+				String("#include \"") + getName() + "_qpoases_interface.hpp\"\n"
 		);
 
 		break;
 
 	case QP_FORCES:
-//	case QP_QPDUNES:
 
 		acadoHeader.addStatement( "/** Definition of the floating point data type. */\n" );
 		if ( (BooleanType)useSinglePrecision == BT_TRUE )
