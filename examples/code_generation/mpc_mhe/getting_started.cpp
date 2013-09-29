@@ -48,10 +48,10 @@ int main( )
 	// Model equations:
 	DifferentialEquation f; 
 
-	f << dot( p )      ==  v;
-	f << dot( v )      ==  a;
-	f << dot( phi )    ==  omega;
-	f << dot( omega )  == -g*sin(phi) - a*cos(phi) - b*omega;
+	f << dot( p ) == v;
+	f << dot( v ) == a;
+	f << dot( phi ) == omega;
+	f << dot( omega ) == -g * sin(phi) - a * cos(phi) - b * omega;
 
 	// Reference functions and weighting matrices:
 	Function h, hN;
@@ -73,7 +73,7 @@ int main( )
 	ocp.minimizeLSQEndTerm(SN, hN);
 
 	ocp.subjectTo( -1.0 <= a <= 1.0 );
-//	ocp.subjectTo( -0.5 <= v <= 1.5 );
+	ocp.subjectTo( -0.5 <= v <= 1.5 );
 
 	// Export the code:
 	OCPexport mpc( ocp );
