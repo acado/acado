@@ -58,10 +58,15 @@ SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR} )
 ################################################################################
 
 IF ( NOT ACADO_BUILD )
-	# CMake module(s) path
-	SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/../cmake" )
+	FIND_PACKAGE( ACADO REQUIRED )
 
-	FIND_PACKAGE( ACADO REQUIRED )		
+	SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$ENV{ACADO_ENV_CMAKE_DIR}" )
+
+	INCLUDE( CompilerOptions )
+	
+	IF( ACADO_WITH_TESTING )
+		ENABLE_TESTING()
+	ENDIF( ACADO_WITH_TESTING )
 ENDIF()
 
 ################################################################################
@@ -128,11 +133,15 @@ SET( EXAMPLE_DIRS
 
 IF ( NOT ACADO_BUILD )
 	INCLUDE_DIRECTORIES( . ${ACADO_INCLUDE_DIRS} )
-	
-	IF( ACADO_WITH_TESTING )
-		ENABLE_TESTING()
-	ENDIF( ACADO_WITH_TESTING )
 ENDIF( )
+
+################################################################################
+#
+# ACADO macros
+#
+################################################################################
+
+INCLUDE( UseACADO )
 
 ################################################################################
 #

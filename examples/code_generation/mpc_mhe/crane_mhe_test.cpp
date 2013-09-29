@@ -44,7 +44,7 @@ using namespace std;
 #define N          	ACADO_N		/* number of control intervals */
 #define NY			ACADO_NY	/* number of measurements, nodes 0..N-1 */
 #define NYN			ACADO_NYN	/* number of measurements, node N */
-#define NUM_STEPS   1000		/* number of simulation steps */
+#define NUM_STEPS   100		/* number of simulation steps */
 #define VERBOSE     1			/* show iterations: 1, silent: 0  */
 
 ACADOvariables acadoVariables;
@@ -81,7 +81,7 @@ bool readDataFromFile( const char* fileName, vector< vector< double > >& data )
 
 int main()
 {
-	int i, j, iter;
+	unsigned i, j, iter;
 
 	real_t t1, t2;
 	real_t fdbSum = 0.0;
@@ -96,7 +96,6 @@ int main()
 	memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));
 	memset(&acadoVariables, 0, sizeof( acadoVariables ));
 
-	bool fileStatus;
 	vector< vector< double > > measurements;
 	if (readDataFromFile("./crane_mhe_data.txt", measurements) == false)
 	{
@@ -188,6 +187,13 @@ int main()
 		log[ iter ][ i++ ] = getKKT();
 		log[ iter ][ i++ ] = getNWSR();
 
+#if VERBOSE
+		cout	<< "Interation #" << setw( 4 ) << iter
+				<< ", KKT value: " << scientific << getKKT()
+				<< ", objective value: " << scientific << getObjective()
+				<< endl;
+#endif // VERBOSE
+
 		//
 		// Prepare for the next simulation step
 		//
@@ -209,8 +215,8 @@ int main()
 	}
 
 #if VERBOSE
-	cout << "Average feedback time:    " << scientific << fdbSum / NUM_STEPS * 1e6 << "microseconds" << endl;
-	cout << "Average preparation time: " << scientific << prepSum / NUM_STEPS * 1e6 << "microseconds" << endl;
+	cout << "Average feedback time:    " << scientific << fdbSum / NUM_STEPS * 1e6 << " microseconds" << endl;
+	cout << "Average preparation time: " << scientific << prepSum / NUM_STEPS * 1e6 << " microseconds" << endl;
 #endif // VERBOSE
 
 	//

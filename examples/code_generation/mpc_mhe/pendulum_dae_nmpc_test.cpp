@@ -29,6 +29,7 @@
 #include <string>
 #include <iomanip>
 #include <cstring>
+#include <cstdlib>
 #include <cmath>
 
 using namespace std;
@@ -50,7 +51,7 @@ ACADOworkspace acadoWorkspace;
 
 int main()
 {
-	int  i, j, iter;
+	unsigned  i, j, iter;
 	timer t;
 	real_t t1, t2;
 	real_t fdbSum = 0.0;
@@ -72,7 +73,7 @@ int main()
 	// Prepare a consistent initial guess
 	//
 
-	for (unsigned i = 0; i < N + 1; ++i)
+	for (i = 0; i < N + 1; ++i)
 	{
 		acadoVariables.x[i * NX + 0] = 1;
 		acadoVariables.x[i * NX + 1] = sqrt(1.0 - 0.1 * 0.1);
@@ -86,7 +87,7 @@ int main()
 	// Prepare references
 	//
 
-	for (unsigned i = 0; i < N; ++i)
+	for (i = 0; i < N; ++i)
 	{
 		acadoVariables.y[i * NY + 0] = 0; // x
 		acadoVariables.y[i * NY + 1] = 1.0; // y
@@ -135,8 +136,8 @@ int main()
 		t2 = toc( &t );
 
 #if VERBOSE
-		printDifferentialVariables();
-		printControlVariables();
+//		printDifferentialVariables();
+//		printControlVariables();
 #endif // VERBOSE
 
 		if ( status )
@@ -163,6 +164,13 @@ int main()
 		log[ iter ][ i++ ] = getKKT();
 		log[ iter ][ i++ ] = getNWSR();
 
+#if VERBOSE
+		cout	<< "Interation #" << setw( 4 ) << iter
+				<< ", KKT value: " << scientific << getKKT()
+				<< ", objective value: " << scientific << getObjective()
+				<< endl;
+#endif // VERBOSE
+
 		//
 		// Prepare for the next iteration
 		//
@@ -188,8 +196,8 @@ int main()
 	}
 
 #if VERBOSE
-	cout << "Average feedback time:    " << scientific << fdbSum / NUM_STEPS * 1e6 << "microseconds" << endl;
-	cout << "Average preparation time: " << scientific << prepSum / NUM_STEPS * 1e6 << "microseconds" << endl;
+	cout << "Average feedback time:    " << scientific << fdbSum / NUM_STEPS * 1e6 << " microseconds" << endl;
+	cout << "Average preparation time: " << scientific << prepSum / NUM_STEPS * 1e6 << " microseconds" << endl;
 #endif // VERBOSE
 
 	//
