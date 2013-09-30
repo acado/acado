@@ -1188,13 +1188,16 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	ExportForLoop xLoop(index, 0, N);
 	xLoop.addStatement( x.getRow( index ) == x.getRow(index + 1) );
+	shiftStates.addStatement( xLoop );
+
 	if (NXA > 0)
 	{
-		xLoop.addLinebreak();
-		xLoop.addStatement( z.getRow( index ) == z.getRow(index + 1) );
+		ExportForLoop zLoop(index, 0, N - 1);
+		zLoop.addStatement( z.getRow( index ) == z.getRow(index + 1) );
+		shiftStates.addStatement( zLoop );
 	}
 
-	shiftStates.addStatement( xLoop );
+
 	shiftStates.addLinebreak( );
 	shiftStates.addStatement( "if (strategy == 1 && xEnd != 0)\n{\n" );
 	shiftStates.addStatement( x.getRow( N ) == xEnd.getTranspose() );
@@ -1233,7 +1236,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	shiftStates.addLinebreak( );
 	shiftStates.addStatement( x.getRow( N ) == state.getCols(0, NX) );
-	if (NXA > 0)
+	if ( NXA )
 	{
 		shiftStates.addLinebreak();
 		shiftStates.addStatement(z.getRow(N - 1) == state.getCols(NX, NX + NXA));
@@ -1255,7 +1258,12 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 
 	iLoop.addStatement( state.getCols(0, NX)		== x.getRow( index ) );
-	iLoop.addStatement( state.getCols(NX, NX + NXA)	== z.getRow( index ) );
+	if ( NXA )
+	{
+		iLoop << String("if (") << index.getFullName() << String(" > 0){");
+		iLoop.addStatement( state.getCols(NX, NX + NXA)	== z.getRow(index - 1) );
+		iLoop << String("}\n");
+	}
 	iLoop.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( index ) );
 	iLoop.addStatement( state.getCols(indexU, indexP)	== p );
 	iLoop.addLinebreak( );
@@ -1277,7 +1285,9 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	iLoop.addLinebreak();
 	iLoop.addStatement( x.getRow(index + 1) == state.getCols(0, NX) );
-	iLoop.addStatement( z.getRow(index + 1) == state.getCols(NX, NX + NXA) );
+
+	// Store improved initial guess from the integrator
+	iLoop.addStatement( z.getRow(index) == state.getCols(NX, NX + NXA) );
 
 	initializeNodes.addStatement( iLoop );
 

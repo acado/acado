@@ -71,6 +71,13 @@ MACRO( ACADO_GENERATE_COMPILE generator exportFolder testFile )
 			# qpOASES embedded sources
 			${ACADO_QPOASES_EMBEDDED_SOURCES}
 		)
+
+		IF( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
+			TARGET_LINK_LIBRARIES(
+				${EXEC_NAME}
+				rt
+			)
+		ENDIF( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
 		
 		SET_TARGET_PROPERTIES(
 			${EXEC_NAME}
