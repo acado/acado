@@ -19,6 +19,7 @@ OBJECTS = \
 	./qpoases/SRC/QProblemB.o \
 	./qpoases/SRC/SubjectTo.o \
 	./qpoases/SRC/Utils.o \
+	./qpoases/SRC/EXTRAS/SolutionAnalysis.o \
 	acado_qpoases_interface.o \
 	acado_integrator.o \
 	acado_solver.o \
