@@ -369,14 +369,14 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 		if (variableObjS == YES)
 		{
-			objS.setup("S", N * NY, NY, REAL, ACADO_VARIABLES);
+			objS.setup("W", N * NY, NY, REAL, ACADO_VARIABLES);
 		}
 		else
 		{
-			objS.setup("S", NY, NY, REAL, ACADO_VARIABLES);
+			objS.setup("W", NY, NY, REAL, ACADO_VARIABLES);
 		}
 		objSEndTerm = CasADi::deepcopy( objSEndTermTemp );
-		objSEndTerm.setName( "SN" );
+		objSEndTerm.setName( "WN" );
 
 		evaluateExternLSQ = lsqExternFunctions[ 0 ];
 		evaluateExternLSQEndTerm = lsqExternEndTermFunctions[ 0 ];
@@ -467,11 +467,11 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		{
 			// We allow user to define different w. matrix on every node
 
-			objS.setup("S", N * NY, NY, REAL, ACADO_VARIABLES);
+			objS.setup("W", N * NY, NY, REAL, ACADO_VARIABLES);
 		}
 		else
 		{
-			objS.setup("S", NY, NY, REAL, ACADO_VARIABLES);
+			objS.setup("W", NY, NY, REAL, ACADO_VARIABLES);
 		}
 	}
 	else
@@ -481,7 +481,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		if (mObjS.isPositiveDefinite() == BT_FALSE)
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
 
-		objS.setup("S", mObjS, REAL, ACADO_VARIABLES);
+		objS.setup("W", mObjS, REAL, ACADO_VARIABLES);
 	}
 
 	Expression expF;
@@ -656,16 +656,16 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	// Setup the SN matrix
 	if (objSEndTermTemp.isGiven() == BT_FALSE || objSEndTermTemp.getDim() != (NYN * NYN))
 	{
-		objSEndTerm.setup("SN", NYN, NYN, REAL, ACADO_VARIABLES);
+		objSEndTerm.setup("WN", NYN, NYN, REAL, ACADO_VARIABLES);
 	}
 	else
 	{
-		Matrix mSN = objSEndTermTemp.getGivenMatrix();
+		Matrix mWN = objSEndTermTemp.getGivenMatrix();
 
-		if (mSN.isPositiveDefinite() == BT_FALSE)
+		if (mWN.isPositiveDefinite() == BT_FALSE)
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
 
-		objSEndTerm.setup("SN", mSN, REAL, ACADO_VARIABLES);
+		objSEndTerm.setup("WN", mWN, REAL, ACADO_VARIABLES);
 	}
 
 	Expression expFEndTerm;
@@ -768,9 +768,9 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 				return ACADOERROR(RET_INVALID_ARGUMENTS);
 
 			if (vSlx[ 0 ].isGiven() == BT_TRUE)
-				objSlx.setup("Slx", vSlx[ 0 ].getGivenMatrix(), REAL, ACADO_VARIABLES);
+				objSlx.setup("Wlx", vSlx[ 0 ].getGivenMatrix(), REAL, ACADO_VARIABLES);
 			else
-				objSlx.setup("Slx", NX, 1, REAL, ACADO_VARIABLES);
+				objSlx.setup("Wlx", NX, 1, REAL, ACADO_VARIABLES);
 		}
 
 		if (vSlu[ 0 ].getDim() > 0)
@@ -779,9 +779,9 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 				return ACADOERROR(RET_INVALID_ARGUMENTS);
 
 			if (vSlu[ 0 ].isGiven() == BT_TRUE)
-				objSlu.setup("Slu", vSlu[ 0 ].getGivenMatrix(), REAL, ACADO_VARIABLES);
+				objSlu.setup("Wlu", vSlu[ 0 ].getGivenMatrix(), REAL, ACADO_VARIABLES);
 			else
-				objSlu.setup("Slu", NU, 1, REAL, ACADO_VARIABLES);
+				objSlu.setup("Wlu", NU, 1, REAL, ACADO_VARIABLES);
 		}
 	}
 

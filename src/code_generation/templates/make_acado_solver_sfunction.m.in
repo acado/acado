@@ -43,13 +43,13 @@ avCells{ 6 }{ idx } = {'y', [1, ACADO_N * ACADO_NY], aRealT, -1, 'real', 'Sample
 avCells{ 6 }{ idx } = {'yN', [1, ACADO_NYN], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 
 if ACADO_WEIGHTING_MATRICES_TYPE == 1
-    avCells{ 6 }{ idx } = {'S', [1, ACADO_NY * ACADO_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+    avCells{ 6 }{ idx } = {'W', [1, ACADO_NY * ACADO_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 elseif ACADO_WEIGHTING_MATRICES_TYPE == 2
-    avCells{ 6 }{ idx } = {'S', [1, ACADO_NY * ACADO_N * ACADO_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+    avCells{ 6 }{ idx } = {'W', [1, ACADO_NY * ACADO_N * ACADO_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
 if ACADO_WEIGHTING_MATRICES_TYPE ~= 0
-    avCells{ 6 }{ idx } = {'SN', [1, ACADO_NYN * ACADO_NYN], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+    avCells{ 6 }{ idx } = {'WN', [1, ACADO_NYN * ACADO_NYN], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
 if ACADO_USE_ARRIVAL_COST == 1

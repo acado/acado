@@ -58,9 +58,13 @@ int main( )
 	h << p << v << phi << omega << a;
 	hN << p << v << phi << omega;
 
-	Matrix S = eye( h.getDim() );
-	Matrix SN = eye( hN.getDim() );
-	SN *= 5;
+	Matrix W = eye( h.getDim() );
+	Matrix WN = eye( hN.getDim() );
+	WN *= 5;
+
+	// Or:
+//	ExportVariable W("W", h.getDim(), h.getDim());
+//	ExportVariable WN("WN", hN.getDim(), hN.getDim());
 
 	//
 	// Optimal Control Problem
@@ -69,8 +73,8 @@ int main( )
 
 	ocp.subjectTo( f );
 
-	ocp.minimizeLSQ(S, h);
-	ocp.minimizeLSQEndTerm(SN, hN);
+	ocp.minimizeLSQ(W, h);
+	ocp.minimizeLSQEndTerm(WN, hN);
 
 	ocp.subjectTo( -1.0 <= a <= 1.0 );
 	ocp.subjectTo( -0.5 <= v <= 1.5 );

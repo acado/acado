@@ -241,11 +241,11 @@ void mexFunction(	int nlhs,
 #endif /* ACADO_INITIAL_STATE_FIXED */
 
 #if ACADO_WEIGHTING_MATRICES_TYPE == 1
-	getArray(1, src, 0, "S", acadoVariables.S, ACADO_NY, ACADO_NY);
-	getArray(1, src, 0, "SN", acadoVariables.SN, ACADO_NYN, ACADO_NYN);
+	getArray(1, src, 0, "W", acadoVariables.W, ACADO_NY, ACADO_NY);
+	getArray(1, src, 0, "WN", acadoVariables.WN, ACADO_NYN, ACADO_NYN);
 #elif ACADO_WEIGHTING_MATRICES_TYPE == 2
-	getArray(1, src, 0, "S", acadoVariables.S, ACADO_N * ACADO_NY, ACADO_NY);
-	getArray(1, src, 0, "SN", acadoVariables.SN, ACADO_NYN, ACADO_NYN);
+	getArray(1, src, 0, "W", acadoVariables.W, ACADO_N * ACADO_NY, ACADO_NY);
+	getArray(1, src, 0, "WN", acadoVariables.WN, ACADO_NYN, ACADO_NYN);
 #endif /* ACADO_WEIGHTING_MATRICES_TYPE */
 
 #if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPOASES)

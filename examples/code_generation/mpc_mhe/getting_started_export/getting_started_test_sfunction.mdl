@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.46"
+    ComputedModelVersion    "1.75"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -31,7 +31,7 @@ Model {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [399.0, 164.0, 1175.0, 687.0]
+      Location		      [67.0, 22.0, 1175.0, 687.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -57,7 +57,7 @@ Model {
 	LoadSaveID		"0"
 	Extents			[951.0, 514.0]
 	ZoomFactor		[0.98716577540106953]
-	Offset			[5.8179848320693388, -158.84127843987]
+	Offset			[5.8179848320693281, -158.84127843987]
       }
     }
   }
@@ -67,9 +67,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "madwolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Sun Sep 29 16:50:56 2013"
-  RTWModifiedTimeStamp	  302374202
-  ModelVersionFormat	  "1.%<AutoIncrement:46>"
+  LastModifiedDate	  "Tue Oct 01 15:14:36 2013"
+  RTWModifiedTimeStamp	  302541275
+  ModelVersionFormat	  "1.%<AutoIncrement:75>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -94,7 +94,7 @@ Model {
   StatusBar		  on
   BrowserShowLibraryLinks off
   BrowserLookUnderMasks	  off
-  SimulationMode	  "normal"
+  SimulationMode	  "accelerator"
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
@@ -504,7 +504,7 @@ Model {
 	  CodeProfilingSaveOptions "SummaryOnly"
 	  CodeProfilingInstrumentation off
 	  SILDebugging		  off
-	  TargetLang		  "C"
+	  TargetLang		  "C++"
 	  IncludeBusHierarchyInRTWFileBlockHierarchyMap	off
 	  IncludeERTFirstTime	  off
 	  GenerateTraceInfo	  off
@@ -675,8 +675,8 @@ Model {
 	PropName		"Components"
       }
       Name		      "Configuration"
-      CurrentDlgPage	      "Solver"
-      ConfigPrmDlgPosition     [ 470, 127, 1431, 891 ] 
+      CurrentDlgPage	      "Code Generation"
+      ConfigPrmDlgPosition     [ 34, 22, 995, 796 ] 
     }
     PropName		    "ConfigurationSets"
   }
@@ -851,7 +851,7 @@ Model {
   }
   System {
     Name		    "getting_started_test_sfunction"
-    Location		    [399, 164, 1574, 851]
+    Location		    [67, 22, 1242, 709]
     Open		    on
     ModelBrowserVisibility  on
     ModelBrowserWidth	    200
@@ -912,7 +912,7 @@ Model {
       Name		      "MPC test"
       SID		      "2"
       Ports		      [1, 1]
-      Position		      [35, 51, 180, 99]
+      Position		      [35, 50, 180, 100]
       ZOrder		      3
       LibraryVersion	      "1.32"
       ErrorFcn		      "Stateflow.Translate.translate"
@@ -941,7 +941,7 @@ Model {
 	TiledPageScale		1
 	ShowPageBoundaries	off
 	ZoomFactor		"100"
-	SIDHighWatermark	"23"
+	SIDHighWatermark	"24"
 	Block {
 	  BlockType		  Inport
 	  Name			  "mpcOutput"
@@ -1164,7 +1164,7 @@ Model {
       Position		      [920, 21, 955, 99]
       ZOrder		      8
       Floating		      off
-      Location		      [254, 295, 951, 888]
+      Location		      [243, 111, 940, 704]
       Open		      off
       NumInputPorts	      "4"
       List {
@@ -1260,6 +1260,7 @@ Model {
     Line {
       SrcBlock		      "MPC test"
       SrcPort		      1
+      Points		      [0, 0]
       DstBlock		      "acado_solver_sfun"
       DstPort		      1
     }
@@ -1348,7 +1349,10 @@ Stateflow {
     firstTransition	    8
     firstJunction	    7
     viewObj		    2
+    visible		    1
     machine		    1
+    subviewS {
+    }
     ssIdHighWaterMark	    6
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -1374,9 +1378,8 @@ Stateflow {
     eml {
       isEML		      1
       script		      "function [state,control] = fcn(mpcOutput)\n%#codegen\n\n%% Setup dimensions\n%  Those dimensions "
-      "must match ones defined in the c++ code generator.\nN   = 10;\nNX  = 4;\nNU  = 1;\nNY  = 5;\nNYN = 4;\n\nstate ="
-      " zeros(1, NX);\ncontrol = zeros(1, NU);\n\n%% Output data\nstate = mpcOutput.data.x(1, 1: NX);\ncontrol = mpcOut"
-      "put.data.u(1, 1: NU);\n"
+      "must match ones defined in the c++ code generator.\nN   = 10;\nNX  = 4;\nNU  = 1;\nNY  = 5;\nNYN = 4;\n\n%% Outp"
+      "ut data\nstate = mpcOutput.data.x(1, 1: NX);\ncontrol = mpcOutput.data.u(1, 1: NU);\n"
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
@@ -1491,8 +1494,11 @@ Stateflow {
     firstTransition	    15
     firstJunction	    14
     viewObj		    10
+    visible		    1
     machine		    1
-    ssIdHighWaterMark	    5
+    subviewS {
+    }
+    ssIdHighWaterMark	    6
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
     firstData		    12
@@ -1519,13 +1525,15 @@ Stateflow {
       script		      "function mpcInput  = fcn(mpcOutput)\n%#codegen\n\n%% Setup dimensions\n%  Those dimensions must m"
       "atch ones defined in the c++ code generator.\nN   = 10;\nNX  = 4;\nNU  = 1;\nNY  = 5;\nNYN = 4;\n\n%% Setup data"
       " structures\n\npersistent firstRun\nif isempty( firstRun )\n    firstRun = 1;\nend;\n\npersistent input\nif isem"
-      "pty ( input )\n    % Set the control flag to initialization for starters\n    input.control = int32( 0 );\n    %"
-      " Always use integration from the last node for shifting\n    input.shifting = int32( 2 );\n    % Initialization "
-      "by a forward simulation.\n    input.initialization = int32( 1 );\n    \n    input.data.x = zeros(1, (N + 1) * NX"
-      ");\n    input.data.u = zeros(1, N * NU);\n    input.data.y = zeros(1, N * NY);\n    input.data.yN = zeros(1, NYN"
-      ");\n    input.data.x0 = zeros(1, NX);\nend;\n\nif firstRun == 1\n    input.data.x0 = [2, 0, 0, 0];\n\n    firstR"
-      "un = 0;\nelse\n    input.data.x = mpcOutput.data.x;\n    input.data.u = mpcOutput.data.u;\n    \n    input.data."
-      "x0 = mpcOutput.data.x(1, NX + 1: 2 * NX);\nend;\n\n%% Output the data structures\nmpcInput = input;\n\n"
+      "pty ( input )\n    % Simple running more\n    input.control = int32( 0 );\n    % Always use integration from the"
+      " last node for shifting\n    input.shifting = int32( 2 );\n    % Initialization by a forward simulation.\n    in"
+      "put.initialization = int32( 1 );\n    \n    %%% NOTE: All arrays are 1-D.\n    input.data.x = zeros(1, (N + 1) *"
+      " NX);\n    input.data.u = zeros(1, N * NU);\n    input.data.y = zeros(1, N * NY);\n    input.data.yN = zeros(1, "
+      "NYN);\n    \n    %%%  In case the weighting matrices are not fixed, add for example:\n%     eye1 = eye( NY ) * 1"
+      ";\n%     eye5 = eye( NYN ) * 5;\n%     \n%     input.data.W = eye1(:)';\n%     input.data.WN = eye5(:)';\n    %%"
+      "%\n    \n    input.data.x0 = zeros(1, NX);\nend;\n\nif firstRun == 1\n    input.data.x0 = [2, 0, 0, 0];\n\n    f"
+      "irstRun = 0;\nelse\n    input.data.x = mpcOutput.data.x;\n    input.data.u = mpcOutput.data.u;\n    \n    input."
+      "data.x0 = mpcOutput.data.x(1, NX + 1: 2 * NX);\nend;\n\n%% Output the data structures\nmpcInput = input;\n\n"
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }

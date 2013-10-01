@@ -17,10 +17,19 @@ NU  = 1;
 NY  = 5;
 NYN = 4;
 
+% Always use integration from the last node for shifting
+mpcInput.shifting.strategy = 2;
+% Initialization by a forward simulation.
+mpcInput.initialization = 1;
+
 mpcInput.x = zeros(N + 1, NX);
 mpcInput.u = zeros(N, NU);
 mpcInput.y = zeros(N, NY);
 mpcInput.yN = zeros(NYN, 1);
+
+% In case weighting matrices are not defined, you can use:
+% mpcInput.W = eye( NY );
+% mpcInput.WN = eye( NYN ) * 5;
 
 mpcInput.x0 = [2, 0, 0, 0]';
 

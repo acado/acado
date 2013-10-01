@@ -100,28 +100,28 @@ int main( void )
 	h << xT << xL << phi << uT << uL << duT << duL;
 
 	// Weighting matrices and measurement functions
-	Matrix S = eye( 7 );
-//	S(0,0) = 16.5;
-//	S(1,1) = 23.9;
-//	S(2,2) = 25.1;
-//	S(3,3) = 12.1;
-//	S(4,4) = 119.4;
-//	S(5,5) = 45.0;
-//	S(6,6) = 1.2;
-//	S(7,7) = 0.4;
+	Matrix W = eye( 7 );
+//	W(0,0) = 16.5;
+//	W(1,1) = 23.9;
+//	W(2,2) = 25.1;
+//	W(3,3) = 12.1;
+//	W(4,4) = 119.4;
+//	W(5,5) = 45.0;
+//	W(6,6) = 1.2;
+//	W(7,7) = 0.4;
 
 	Function hN;
 	hN << xT << xL << phi << uT << uL;
 
-	Matrix SN = eye( 5 );
-	SN(0,0) = S(0,0);
-	SN(1,1) = S(1,1);
-	SN(2,2) = S(2,2);
-	SN(3,3) = S(3,3);
-	SN(4,4) = S(4,4);
+	Matrix WN = eye( 5 );
+	WN(0, 0) = W(0, 0);
+	WN(1, 1) = W(1, 1);
+	WN(2, 2) = W(2, 2);
+	WN(3, 3) = W(3, 3);
+	WN(4, 4) = W(4, 4);
 
-	ocp.minimizeLSQ(S, h);
-	ocp.minimizeLSQEndTerm(SN, hN);
+	ocp.minimizeLSQ(W, h);
+	ocp.minimizeLSQEndTerm(WN, hN);
 
 	OCPexport mhe( ocp );
 

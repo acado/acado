@@ -75,8 +75,8 @@ int main(int argc, char * const argv[ ])
 	rf << x << y << w << dx << dy << dw << F;
 	rfN << x << y << w << dx << dy << dw;
 
-	Matrix S = eye( rf.getDim() );
-	Matrix SN = eye( rfN.getDim() );
+	Matrix W = eye( rf.getDim() );
+	Matrix WN = eye( rfN.getDim() );
 
 	//
 	// Optimal Control Problem
@@ -90,8 +90,8 @@ int main(int argc, char * const argv[ ])
 
 	ocp.subjectTo( f );
 
-	ocp.minimizeLSQ(S, rf);
-	ocp.minimizeLSQEndTerm(SN, rfN);
+	ocp.minimizeLSQ(W, rf);
+	ocp.minimizeLSQEndTerm(WN, rfN);
 
 	ocp.subjectTo(-20 <= F <= 20);
 //	ocp.subjectTo( -5 <= x <= 5 );

@@ -28,11 +28,11 @@ typedef struct
 	real_t yN[ACADO_NYN];
 	
 #if ACADO_WEIGHTING_MATRICES_TYPE == 1
-	real_t S[ACADO_NY * ACADO_NY];
-	real_t SN[ACADO_NYN * ACADO_NYN];
+	real_t W[ACADO_NY * ACADO_NY];
+	real_t WN[ACADO_NYN * ACADO_NYN];
 #elif ACADO_WEIGHTING_MATRICES_TYPE == 2
-	real_t S[ACADO_N * ACADO_NY * ACADO_NY];
-	real_t SN[ACADO_NYN * ACADO_NYN];
+	real_t W[ACADO_N * ACADO_NY * ACADO_NY];
+	real_t WN[ACADO_NYN * ACADO_NYN];
 #endif
 
 #if ACADO_USE_ARRIVAL_COST == 1

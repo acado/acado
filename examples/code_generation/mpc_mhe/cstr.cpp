@@ -114,16 +114,16 @@ int main()
 	h << cA << cB << theta << thetaK << u;
 	hN << cA << cB << theta << thetaK;
 
-	Matrix S = eye( h.getDim() );
-	Matrix SN = eye( hN.getDim() );
+	Matrix W = eye( h.getDim() );
+	Matrix WN = eye( hN.getDim() );
 
-	S(0, 0) = SN(0, 0) = 0.2;
-	S(1, 1) = SN(1, 1) = 1.0;
-	S(2, 2) = SN(2, 2) = 0.5;
-	S(3, 3) = SN(3, 3) = 0.2;
+	W(0, 0) = WN(0, 0) = 0.2;
+	W(1, 1) = WN(1, 1) = 1.0;
+	W(2, 2) = WN(2, 2) = 0.5;
+	W(3, 3) = WN(3, 3) = 0.2;
 
-	S(4, 4) = 0.5000;
-	S(5, 5) = 0.0000005;
+	W(4, 4) = 0.5000;
+	W(5, 5) = 0.0000005;
 
 	//
 	// Optimal Control Problem
@@ -132,8 +132,8 @@ int main()
 
 	ocp.subjectTo( f );
 
-	ocp.minimizeLSQ(S, h);
-	ocp.minimizeLSQEndTerm(SN, hN);
+	ocp.minimizeLSQ(W, h);
+	ocp.minimizeLSQEndTerm(WN, hN);
 
 	ocp.subjectTo( 3.0 <= u(0) <= 35.0 );
 	ocp.subjectTo( -9000.0 <= u(1) <= 0.0 );
