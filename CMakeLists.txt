@@ -510,6 +510,10 @@ SET( ACADO_SHARED_LIBRARIES
 	${ACADO_INSTALL_SHARED_LIBRARIES}
 )
 
+SET( ACADO_QPOASES_EMBEDDED_FOLDER 
+	${PROJECT_SOURCE_DIR}/external_packages/qpoases
+)
+
 SET( ACADO_QPOASES_EMBEDDED_SOURCES
 	${PROJECT_SOURCE_DIR}/external_packages/qpoases/SRC/Bounds.cpp
 	${PROJECT_SOURCE_DIR}/external_packages/qpoases/SRC/CyclingManager.cpp 
