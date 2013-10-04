@@ -2,7 +2,7 @@
 
 [TOC]
 
-Here is explained how to download, compile and use ACADO toolkit with [CMake](http://www.cmake.org) build system in Windows.
+Here is explained how to download, compile and use ACADO toolkit with [CMake](http://www.cmake.org) build system in Windows. The preferred way is to use the Cygwin based installation.
 
 ## Installation for usage within Cygwin {#md_iwin_cyg}
 
@@ -29,6 +29,8 @@ Here is explained how to download, compile and use ACADO toolkit with [CMake](ht
 Please proceed to [this](@ref md_installation_cmake_unix_common) webpage for further instructions.
 
 ## Installation for usage with Visual Studio {#md_iwin_vs}
+
+> **NOTE** Initial efforts have been made to compile ACADO with Visual Studio to be used from C++. However, our time and man power are limited plus our main development platforms are Linux and OS X. That said, we expect community to contribute here. In case you want to contribute, please make your own fork, develop code and make a pull request on GitHub. Thank you for your understanding!
 
 ### Prerequisites {#md_iwin_vs_pre}
 

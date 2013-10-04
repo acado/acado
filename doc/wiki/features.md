@@ -18,9 +18,13 @@ An important class of optimal control problems, which obtains a special attentio
 
 Another highlight of ACADO Toolkit are its model based feedback control algorithms. The corresponding problems can be divided into two kinds of online dynamic optimization problems: the Model Predictive %Control (MPC) problem of finding (approximately) optimal control actions to be fed back to the controlled process \[3\], and the Moving Horizon Estimation (MHE) problem of estimating the current process states using measurements of its outputs.
 
-## Code Generation for Fast NMPC {#md_feat_codegen}
+## Code Generation for Fast NMPC and MHE {#md_feat_codegen}
 
-The ACADO Code Generation tool can automatically generate Gauss-Newton real-time iteration algorithms for fast nonlinear MPC applications \[4\]. Based on the symbolic syntax of the ACADO Toolkit, it allows the user to export highly efficient and self-contained C code that is tailored to each respective MPC problem formulation. Computational speed is increased by hard-coding all problem dimensions, avoiding dynamic memory allocations, loop unrolling, symbolic simplifications and the use of a fixed-step integrator. This can lead to significant speed-ups compared to generic implementations.
+The ACADO Code Generation tool can automatically generate Gauss-Newton real-time iteration algorithms for fast nonlinear MPC  and MHE applications \[4, 5\]. Based on the symbolic syntax of the ACADO Toolkit, it allows the user to export highly efficient and self-contained C code that is tailored to each respective MPC or MHE problem formulations. Computational speed is increased by hard-coding all problem dimensions, avoiding dynamic memory allocations, loop unrolling, symbolic simplifications and the use of a fixed-step integrator. This can lead to significant speed-ups compared to generic implementations. 
+
+The first experimental validation of the Code Generation Tool on an overhead crane is described in \[6\].
+
+Comparison between condensing based NMPC solver that employs qpOASES QP solver and an NMPC solver based on structure exploiting QP solver FORCES can be found in \[7\].
 
 # References #
  
@@ -28,3 +32,8 @@ The ACADO Code Generation tool can automatically generate Gauss-Newton real-time
 2.    Filip Logist, Boris Houska, Moritz Diehl, Jan van Impe. Fast Pareto set generation for nonlinear optimal control problems with multiple objectives. Structural and Multidisciplinary Optimization, 42(4), pp:591-603, 2010.
 3.    Hans Joachim Ferreau, Boris Houska, Moritz Diehl. Numerical Methods for Embedded Optimisation and their Implementation within the ACADO Toolkit. In: 7th Conference - Computer Methods and Systems (CMS'09); R. Tadeusiewicz, A. Ligeza, W. Mitkowski, M. Szymkat (eds.), pp. 13-29, Oprogramowanie Naukowo- Techniczne, 2009.
 4.    B. Houska, H.J. Ferreau, M. Diehl. An Auto-Generated Real-Time Iteration Algorithm for Nonlinear MPC in the Microsecond Range. Automatica, 47(10), pp:2279-2285, 2011.
+5.    H.J. Ferreau, T. Kraus, M. Vukov, W. Saeys, M. Diehl. High-Speed Moving Horizon Estimation based on Automatic Code Generation, Proceedings of the 51th IEEE Conference on Decision and Control, 2012.
+6.    M. Vukov, W. Van Loock, B. Houska, H.J. Ferreau, J. Swevers, M. Diehl. Experimental Validation of Nonlinear MPC on an Overhead Crane using Automatic Code Generation, The 2012 American Control Conference, Montreal, Canada.
+7.    Vukov, M., Domahidi, A., Ferreau, H. J., Morari, M., Diehl, M. Auto-generated Algorithms for Nonlinear Model Predictive Control on Long and on Short Horizons, Proceedings of the 52nd Conference on Decision and Control (CDC), 2013.
+
+Please consult [this](@ref md_citing) page on how to cite the toolkit.

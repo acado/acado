@@ -4,11 +4,11 @@
 
 ## Tutorials {#md_doc_tutorials}
  
-The best way for getting started with the ACADO Toolkit is to work through the tutorials that can be found [here](tutorial.html). A user's manual will become available together with the first non-beta release. ACADO for MATLAB users are refered to the ACADO for MATLAB user manual and the MATLAB examples.
+The best way for getting started with the ACADO Toolkit is to work through the tutorials that can be found [here](tutorial.html). ACADO for MATLAB users are refered to the ACADO for MATLAB user manual and the MATLAB examples.
 
 ## Manuals {#md_doc_manuals}
  
-ACADO Toolkit comes along with a manual in PDF format, which will only become available soon. However, in order to getting started with ACADO Toolkit, it is recommended to work through the online tutorials.
+ACADO Toolkit comes along with a manual in PDF format. However, in order to getting started with ACADO Toolkit, it is recommended to work through the online tutorials.
 
 * Download ACADO Toolkit User's Manual: [PDF](http://acado.sourceforge.net/doc/pdf/acado_manual.pdf)
 * Download ACADO for Matlab User's Manual: [PDF](http://acado.sourceforge.net/doc/pdf/acado_matlab_manual.pdf)

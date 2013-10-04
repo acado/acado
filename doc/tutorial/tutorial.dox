@@ -61,4 +61,10 @@ The best way for getting started with the ACADO Toolkit is to work through the o
 	<li>\subpage example_020</li>
 </ul>
 
+\section tutorial_008 Code Generation Tool
+
+<ul>
+	<li>\subpage cgt_getting_started</li>
+</ul>
+
 */

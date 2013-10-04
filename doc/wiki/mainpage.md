@@ -9,7 +9,7 @@ ACADO Toolkit is a software environment and algorithm collection for automatic c
 * [Multi-Objective Optimal Control](@ref md_feat_mooc)
 * [State and Parameter Estimation](@ref md_feat_spe)
 * [Model Predictive Control](@ref md_feat_mpc)
-* [Code Generation for Fast NMPC](@ref md_feat_codegen)
+* [Code Generation Tool](@ref md_feat_codegen)
 
 ## Download and installation instructions {#md_main_download}
 
@@ -22,6 +22,10 @@ The ACADO Toolkit has been tested under Linux, OS X and Windows. Please choose a
 ## Some pointers {#md_main_pointers}
 
 * [Documentation](@ref md_documentation)
+	- [Tutorials](@ref md_doc_tutorials)
+	- [Manuals](@ref md_doc_manuals)
+	- [Source code documentation](@ref md_doc_api)
+	- [Debugging tools](@ref md_doc_debugging_tools)
 
 * [MATLAB interface](@ref md_matlab_interface)
 
@@ -29,16 +33,30 @@ The ACADO Toolkit has been tested under Linux, OS X and Windows. Please choose a
 
 * [Support](@ref md_support)
 
+* [Citing the toolkit](@ref md_citing)
+
 * [Developers](@ref md_developers)
 
 # Licensing information {#md_license}
 
-ACADO Toolkit – A Toolkit for Automatic %Control and Dynamic Optimization.
+\verbatim
+ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
+Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+Milan Vukov, Rien Quirynen, KU Leuven.
+Developed within the Optimization in Engineering Center (OPTEC)
+under supervision of Moritz Diehl. All rights reserved.
 
-Copyright (C) 2008 - 2013 by Boris Houska, Hans Joachim Ferreau, Milan Vukov and Rien Quirynen. Developed within the Optimization in Engineering Center (OPTEC), KU Leuven, Belgium, under supervision of Moritz Diehl. All rights reserved.
+ACADO Toolkit is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 3 of the License, or (at your option) any later version.
 
-ACADO Toolkit is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+ACADO Toolkit is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-ACADO Toolkit is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License along with ACADO Toolkit; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+You should have received a copy of the GNU Lesser General Public
+License along with ACADO Toolkit; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+\endverbatim
