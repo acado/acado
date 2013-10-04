@@ -27,8 +27,8 @@
 
 /**
  *    \file include/acado/code_generation/export_module.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010 - 2013
  */
 
 

@@ -27,8 +27,8 @@
 
 /**
  *    \file src/code_generation/mpc_module.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010 - 2013
  */
 
 #include <acado/code_generation/export_module.hpp>
@@ -152,6 +152,8 @@ returnValue ExportModule::setName(const String& _name)
 {
 	if ( _name.isEmpty() == BT_TRUE )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
+
+	name = _name;
 
 	return SUCCESSFUL_RETURN;
 }
