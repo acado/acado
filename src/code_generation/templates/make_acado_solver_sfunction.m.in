@@ -1,20 +1,20 @@
 %% Legacy code wrapper for the ACADO CGT generated OCP solver
 
 % Dimensions
-ACADO_N   = @N@;
-ACADO_NX  = @NX@;
-ACADO_NDX = @NDX@;
-ACADO_NXA = @NXA@;
-ACADO_NU  = @NU@;
-ACADO_NP  = @NP@;
-ACADO_NY  = @NY@;
-ACADO_NYN = @NYN@;
+@MODULE_NAME@_N   = @N@;
+@MODULE_NAME@_NX  = @NX@;
+@MODULE_NAME@_NDX = @NDX@;
+@MODULE_NAME@_NXA = @NXA@;
+@MODULE_NAME@_NU  = @NU@;
+@MODULE_NAME@_NP  = @NP@;
+@MODULE_NAME@_NY  = @NY@;
+@MODULE_NAME@_NYN = @NYN@;
 
-ACADO_INITIAL_STATE_FIXED         = @INIT_STATE_FIXED@;
-ACADO_WEIGHTING_MATRICES_TYPE     = @WEIGHT_MATRIX_TYPE@;
-ACADO_HARDCODED_CONSTRAINT_VALUES = @HARCODED_CONSTRAINTS@;
-ACADO_USE_ARRIVAL_COST            = @ARRIVAL_COST@;
-ACADO_COMPUTE_COVARIANCE_MATRIX   = @COV_MATRIX@;
+@MODULE_NAME@_INITIAL_STATE_FIXED         = @INIT_STATE_FIXED@;
+@MODULE_NAME@_WEIGHTING_MATRICES_TYPE     = @WEIGHT_MATRIX_TYPE@;
+@MODULE_NAME@_HARDCODED_CONSTRAINT_VALUES = @HARCODED_CONSTRAINTS@;
+@MODULE_NAME@_USE_ARRIVAL_COST            = @ARRIVAL_COST@;
+@MODULE_NAME@_COMPUTE_COVARIANCE_MATRIX   = @COV_MATRIX@;
 
 aSfunName  = '@MODULE_NAME@_solver_sfun';
 aRealT     = '@REAL_TYPE@';
@@ -28,42 +28,42 @@ clear avCells aInput aOutput @MODULE_NAME@data @MODULE_NAME@input @MODULE_NAME@o
 avCells = {'@MODULE_NAME@data', aHeaderFile, '', 'Auto', '-1', {}};
 
 idx = 1;
-avCells{ 6 }{ idx } = {'x', [1, (ACADO_N + 1) * ACADO_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1; 
-avCells{ 6 }{ idx } = {'u', [1, ACADO_N * ACADO_NU], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+avCells{ 6 }{ idx } = {'x', [1, (@MODULE_NAME@_N + 1) * @MODULE_NAME@_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1; 
+avCells{ 6 }{ idx } = {'u', [1, @MODULE_NAME@_N * @MODULE_NAME@_NU], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 
-if ACADO_NXA > 0
-    avCells{ 6 }{ idx } = {'z', [1, ACADO_N * ACADO_NXA], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+if @MODULE_NAME@_NXA > 0
+    avCells{ 6 }{ idx } = {'z', [1, @MODULE_NAME@_N * @MODULE_NAME@_NXA], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
-if ACADO_NP > 0
-    avCells{ 6 }{ idx } = {'p', [1, ACADO_NP], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+if @MODULE_NAME@_NP > 0
+    avCells{ 6 }{ idx } = {'p', [1, @MODULE_NAME@_NP], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
-avCells{ 6 }{ idx } = {'y', [1, ACADO_N * ACADO_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1; 
-avCells{ 6 }{ idx } = {'yN', [1, ACADO_NYN], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+avCells{ 6 }{ idx } = {'y', [1, @MODULE_NAME@_N * @MODULE_NAME@_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1; 
+avCells{ 6 }{ idx } = {'yN', [1, @MODULE_NAME@_NYN], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 
-if ACADO_WEIGHTING_MATRICES_TYPE == 1
-    avCells{ 6 }{ idx } = {'W', [1, ACADO_NY * ACADO_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
-elseif ACADO_WEIGHTING_MATRICES_TYPE == 2
-    avCells{ 6 }{ idx } = {'W', [1, ACADO_NY * ACADO_N * ACADO_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+if @MODULE_NAME@_WEIGHTING_MATRICES_TYPE == 1
+    avCells{ 6 }{ idx } = {'W', [1, @MODULE_NAME@_NY * @MODULE_NAME@_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+elseif @MODULE_NAME@_WEIGHTING_MATRICES_TYPE == 2
+    avCells{ 6 }{ idx } = {'W', [1, @MODULE_NAME@_NY * @MODULE_NAME@_N * @MODULE_NAME@_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
-if ACADO_WEIGHTING_MATRICES_TYPE ~= 0
-    avCells{ 6 }{ idx } = {'WN', [1, ACADO_NYN * ACADO_NYN], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+if @MODULE_NAME@_WEIGHTING_MATRICES_TYPE ~= 0
+    avCells{ 6 }{ idx } = {'WN', [1, @MODULE_NAME@_NYN * @MODULE_NAME@_NYN], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
-if ACADO_USE_ARRIVAL_COST == 1
-	avCells{ 6 }{ idx } = {'xAC', [1, ACADO_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
-	avCells{ 6 }{ idx } = {'SAC', [1, ACADO_NX * ACADO_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
-	avCells{ 6 }{ idx } = {'WL', [1, ACADO_NX * ACADO_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+if @MODULE_NAME@_USE_ARRIVAL_COST == 1
+	avCells{ 6 }{ idx } = {'xAC', [1, @MODULE_NAME@_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+	avCells{ 6 }{ idx } = {'SAC', [1, @MODULE_NAME@_NX * @MODULE_NAME@_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+	avCells{ 6 }{ idx } = {'WL', [1, @MODULE_NAME@_NX * @MODULE_NAME@_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
-if ACADO_INITIAL_STATE_FIXED == 1
-    avCells{ 6 }{ idx } = {'x0', [1, ACADO_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+if @MODULE_NAME@_INITIAL_STATE_FIXED == 1
+    avCells{ 6 }{ idx } = {'x0', [1, @MODULE_NAME@_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
-if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
-    avCells{ 6 }{ idx } = {'sigmaN', [1, ACADO_NX * ACADO_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+if @MODULE_NAME@_COMPUTE_COVARIANCE_MATRIX == 1
+    avCells{ 6 }{ idx } = {'sigmaN', [1, @MODULE_NAME@_NX * @MODULE_NAME@_NX], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
 % Define input bus for the Simulink component:
@@ -138,6 +138,12 @@ if (isunix() && ~ismac())
 	ldFlags = [ldFlags ' -lrt'];
 end;
 
+% Add an extra option for qpOASES
+iFlags = '';
+if (~strcmp(aSfunName, 'acado_solver_sfun'))
+    iFlags = '-DQPOASES_CUSTOM_INTERFACE=\\\"@MODULE_NAME@_qpoases_interface.hpp\\\"';    
+end;
+
 % Define output function declaration
 aDef.OutputFcnSpec = [ ...
 	'@MODULE_NAME@_solver_wrapper(' ... % Wrapper function name
@@ -149,7 +155,7 @@ aDef.OutputFcnSpec = [ ...
 legacy_code('sfcn_cmex_generate', aDef);
 
 %% Compile the code
-legacy_code('compile', aDef, ldFlags);
+legacy_code('compile', aDef, {iFlags, ldFlags});
 
 %% Generate a TLC file and simulation block
 legacy_code('slblock_generate', aDef);
