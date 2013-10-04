@@ -1,7 +1,7 @@
 #ifndef ACADO_AUXILIARY_FUNCTIONS_H
 #define ACADO_AUXILIARY_FUNCTIONS_H
 
-#include "acado_common.h"
+#include "@MODULE_NAME@_common.h"
 
 #ifndef __MATLAB__
 #ifdef __cplusplus

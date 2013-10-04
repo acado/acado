@@ -1,4 +1,4 @@
-#include "acado_auxiliary_functions.h"
+#include "@MODULE_NAME@_auxiliary_functions.h"
 
 #include <stdio.h>
 

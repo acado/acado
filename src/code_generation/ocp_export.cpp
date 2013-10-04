@@ -31,6 +31,7 @@
 
 #include <acado/code_generation/ocp_export.hpp>
 #include <acado/code_generation/export_simulink_interface.hpp>
+#include <acado/code_generation/export_auxiliary_functions.hpp>
 
 #include <acado/code_generation/templates/templates.hpp>
 
@@ -129,10 +130,13 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	//
 	String str;
 
-	str = dirName.getName() + String("/") + getName() + String("_auxiliary_functions.h");
-	acadoCopyTempateFile(AUXILIARY_FUNCTIONS_HEADER, str.getName(), 0, BT_TRUE);
-	str = dirName.getName() + String("/") + getName() + String("_auxiliary_functions.c");
-	acadoCopyTempateFile(AUXILIARY_FUNCTIONS_SOURCE, str.getName(), 0, BT_TRUE);
+	ExportAuxiliaryFunctions eaf(
+			dirName + String("/") + getName() + String("_auxiliary_functions.h"),
+			dirName + String("/") + getName() + String("_auxiliary_functions.c"),
+			getName()
+			);
+	eaf.configure();
+	eaf.exportCode();
 
 	//
 	// Export Makefile
@@ -459,12 +463,14 @@ returnValue OCPexport::exportAcadoHeader(	const String& _dirName,
 	fileName << "/" << _fileName;
 	ExportFile acadoHeader( fileName,"", _realString,_intString,_precision );
 
-	acadoHeader.addStatement(
-			"#ifndef ACADO_COMMON_H\n"
-			"#define ACADO_COMMON_H\n\n"
+	// TODO Here we might put it to uppercase...
+	String moduleName = getName();
 
-			"#include <math.h>\n"
-	);
+	acadoHeader
+		<< String("#ifndef ") + moduleName + String("_COMMON_H\n")
+		<< String("#define ") + moduleName + String("_COMMON_H\n\n")
+		<< String("#include <math.h>\n");
+
 	if ((QPSolverName)qpSolver == QP_FORCES)
 		acadoHeader.addStatement( "#include <string.h>\n" );
 
@@ -668,7 +674,7 @@ returnValue OCPexport::exportAcadoHeader(	const String& _dirName,
 			"} /* extern \"C\" */\n"
 			"#endif /* __cplusplus */\n"
 			"#endif /* __MATLAB__ */\n\n"
-			"#endif /* ACADO_COMMON_H */\n"
+			"#endif /* Close the module */\n"
 	);
 
 	return acadoHeader.exportCode( );
