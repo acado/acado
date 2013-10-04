@@ -63,8 +63,8 @@ int main( )
 	WN *= 5;
 
 	// Or:
-//	ExportVariable W("W", h.getDim(), h.getDim());
-//	ExportVariable WN("WN", hN.getDim(), hN.getDim());
+//	ExportVariable W(h.getDim(), h.getDim());
+//	ExportVariable WN(hN.getDim(), hN.getDim());
 
 	//
 	// Optimal Control Problem
