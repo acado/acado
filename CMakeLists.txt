@@ -104,16 +104,12 @@ OPTION( ACADO_WITH_TESTING "Building the testing framework" OFF )
 #
 # ACADO developer flag
 #
-SET( ACADO_DEVELOPER OFF CACHE STRING
-	"Choose developer/user building mode"
-)
+OPTION ( ACADO_DEVELOPER "Choose developer/user building mode" OFF )
 
 #
 # ACADO internal stuff
 #
-SET( ACADO_INTERNAL OFF CACHE STRING
-	"Select building of ACADO internal stuff."
-)
+OPTION( ACADO_INTERNAL "Select building of ACADO internal stuff" OFF )
 
 #
 # Build type
