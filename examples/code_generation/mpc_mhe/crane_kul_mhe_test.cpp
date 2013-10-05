@@ -97,7 +97,7 @@ int main()
 	memset(&acadoVariables, 0, sizeof( acadoVariables ));
 
 	vector< vector< double > > measurements;
-	if (readDataFromFile("./crane_mhe_data.txt", measurements) == false)
+	if (readDataFromFile("./crane_kul_mhe_data.txt", measurements) == false)
 	{
 		cout << "Cannot read measurements" << endl;
 		return EXIT_FAILURE;

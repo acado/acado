@@ -139,7 +139,7 @@ int main( void )
 
 //	mhe.set( LEVENBERG_MARQUARDT, 1e-10 );
 
-	if (mhe.exportCode("crane_mhe_export") != SUCCESSFUL_RETURN)
+	if (mhe.exportCode("crane_kul_mhe_export") != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
 
 	mhe.printDimensionsQP( );
