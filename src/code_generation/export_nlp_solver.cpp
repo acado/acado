@@ -328,7 +328,9 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	if ( useArrivalCost )
 	{
 		SAC.setup("SAC", NX, NX, REAL, ACADO_VARIABLES);
+		SAC.setDoc("Arrival cost term: inverse of the covariance matrix.");
 		xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
+		xAC.setDoc("Arrival cost term: a priori state estimate.");
 		DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
 	}
 
@@ -1407,7 +1409,8 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	ExportVariable evRet("ret", 1, 1, INT, ACADO_LOCAL, BT_TRUE);
 
 	ExportVariable evReset("reset", 1, 1, INT, ACADO_LOCAL, BT_TRUE);
-	evReset.setDoc("Reset S_{AC}.");
+	evReset.setDoc("Reset S_{AC}. Set it to 1 to initialize arrival cost calculation, "
+				   "and later should set it to 0.");
 
 	updateArrivalCost.init("updateArrivalCost", evReset);
 	updateArrivalCost.doc("Use this function to update the arrival cost.");
@@ -1422,6 +1425,8 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	acP.setup("acP", NX, NX, REAL, ACADO_WORKSPACE);
 
 	acWL.setup("WL", NX, NX, REAL, ACADO_VARIABLES);
+	acWL.setDoc("Arrival cost term: Cholesky decomposition, lower triangular, "
+				" of the inverse of the state noise covariance matrix.");
 	acVL.setup("acVL", NY, NY, REAL, ACADO_WORKSPACE);
 
 	acHx.setup("acHx", NY, NX, REAL, ACADO_WORKSPACE);
