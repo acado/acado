@@ -32,11 +32,7 @@
  */
 
 #include <time.h>
-
-#include <utils/acado_utils.hpp>
-#include <user_interaction/user_interaction.hpp>
-#include <symbolic_expression/symbolic_expression.hpp>
-#include <function/function.hpp>
+#include <acado_toolkit.hpp>
 
 
 /* >>> start tutorial code >>> */
@@ -66,67 +62,68 @@ int main( ){
     const int  nw  = 0;  // the number of disturbances
     const int  ndx = 0;  // the number of differential state derivatives
 
-    f.setCFunction( dim, nt, nx, na, nu, nv, np, nq, nw, ndx, my_function );
-
-    // TEST THE FUNCTION f:
-    // --------------------
-       int x_index, y_index;
-
-       x_index = f.index(VT_DIFFERENTIAL_STATE,0);
-       y_index = f.index(VT_DIFFERENTIAL_STATE,1);
-
-       double *xx     = new double[f.getNumberOfVariables()+1];
-       double *lambda = new double[f.getNumberOfVariables()+1];
-       double *mu     = new double[f.getNumberOfVariables()+1];
-       double *mu_    = new double[f.getNumberOfVariables()+1];
-       double *ff     = new double[f.getDim()                ];
-       double *df1    = new double[f.getDim()                ];
-       double *df2    = new double[f.getDim()                ];
-       double *ddf    = new double[f.getDim()                ];
-
-       df1[0] = 0.0;
-       df2[0] = 0.0;
-       ddf[0] = 0.0;
-
-       xx[x_index] = 1.0;
-       xx[y_index] = 1.0;
-
-       lambda[x_index] = 0.5;
-       lambda[y_index] = 1.0;
-
-       mu[x_index] = 1.0;
-       mu[y_index] = 0.5;
-
-       mu_[x_index] = 0.0;
-       mu_[y_index] = 0.0;
-
-    // FORWARD DIFFERENTIATION:
-    // (FIRST AND SECOND ORDER DERIVATIVES)
-    // ------------------------------------
-       f.AD_forward(  0, xx, lambda, ff, df1 );
-       f.AD_forward2( 0, mu, mu_, df2, ddf );
-
-    // PRINT THE RESULTS:
-    // ------------------
-       printf("      x  = %10.16e \n",     xx[x_index] );
-       printf("      y  = %10.16e \n",     xx[y_index] );
-       printf("lambda_x = %10.16e \n", lambda[x_index] );
-       printf("lambda_y = %10.16e \n", lambda[y_index] );
-       printf("mu_x     = %10.16e \n",     mu[x_index] );
-       printf("mu_y     = %10.16e \n",     mu[y_index] );
-       printf("      f  = %10.16e \n",     ff[0      ] );
-       printf("     df1 = %10.16e \n",    df1[0      ] );
-       printf("     df2 = %10.16e \n",    df2[0      ] );
-       printf("    ddf  = %10.16e \n",    ddf[0      ] );
-
-    delete[] xx;
-    delete[] lambda;
-    delete[] mu;
-    delete[] mu_;
-    delete[] ff;
-    delete[] df1;
-    delete[] df2;
-    delete[] ddf;
+    // Code cannot be even compiled!
+//    f.setCFunction( dim, nt, nx, na, nu, nv, np, nq, nw, ndx, my_function );
+//
+//    // TEST THE FUNCTION f:
+//    // --------------------
+//       int x_index, y_index;
+//
+//       x_index = f.index(VT_DIFFERENTIAL_STATE,0);
+//       y_index = f.index(VT_DIFFERENTIAL_STATE,1);
+//
+//       double *xx     = new double[f.getNumberOfVariables()+1];
+//       double *lambda = new double[f.getNumberOfVariables()+1];
+//       double *mu     = new double[f.getNumberOfVariables()+1];
+//       double *mu_    = new double[f.getNumberOfVariables()+1];
+//       double *ff     = new double[f.getDim()                ];
+//       double *df1    = new double[f.getDim()                ];
+//       double *df2    = new double[f.getDim()                ];
+//       double *ddf    = new double[f.getDim()                ];
+//
+//       df1[0] = 0.0;
+//       df2[0] = 0.0;
+//       ddf[0] = 0.0;
+//
+//       xx[x_index] = 1.0;
+//       xx[y_index] = 1.0;
+//
+//       lambda[x_index] = 0.5;
+//       lambda[y_index] = 1.0;
+//
+//       mu[x_index] = 1.0;
+//       mu[y_index] = 0.5;
+//
+//       mu_[x_index] = 0.0;
+//       mu_[y_index] = 0.0;
+//
+//    // FORWARD DIFFERENTIATION:
+//    // (FIRST AND SECOND ORDER DERIVATIVES)
+//    // ------------------------------------
+//       f.AD_forward(  0, xx, lambda, ff, df1 );
+//       f.AD_forward2( 0, mu, mu_, df2, ddf );
+//
+//    // PRINT THE RESULTS:
+//    // ------------------
+//       printf("      x  = %10.16e \n",     xx[x_index] );
+//       printf("      y  = %10.16e \n",     xx[y_index] );
+//       printf("lambda_x = %10.16e \n", lambda[x_index] );
+//       printf("lambda_y = %10.16e \n", lambda[y_index] );
+//       printf("mu_x     = %10.16e \n",     mu[x_index] );
+//       printf("mu_y     = %10.16e \n",     mu[y_index] );
+//       printf("      f  = %10.16e \n",     ff[0      ] );
+//       printf("     df1 = %10.16e \n",    df1[0      ] );
+//       printf("     df2 = %10.16e \n",    df2[0      ] );
+//       printf("    ddf  = %10.16e \n",    ddf[0      ] );
+//
+//    delete[] xx;
+//    delete[] lambda;
+//    delete[] mu;
+//    delete[] mu_;
+//    delete[] ff;
+//    delete[] df1;
+//    delete[] df2;
+//    delete[] ddf;
 
     return 0;
 }

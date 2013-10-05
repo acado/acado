@@ -33,12 +33,7 @@
 
 
 #include <time.h>
-
-#include <utils/acado_utils.hpp>
-#include <user_interaction/user_interaction.hpp>
-#include <symbolic_expression/symbolic_expression.hpp>
-#include <function/function.hpp>
-
+#include <acado_toolkit.hpp>
 
 /* >>> start tutorial code >>> */
 int main( ){
