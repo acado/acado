@@ -94,17 +94,17 @@ Simulink.Bus.cellToObject( {avCells, aInput, aOutput} );
 
 %% Define S-function wrapper
 
-clear aDef;
+clear @MODULE_NAME@Def;
 
-aDef = legacy_code('initialize');
+@MODULE_NAME@Def = legacy_code('initialize');
 
-aDef.Options.language='C++';
+@MODULE_NAME@Def.Options.language='C++';
 
 % Define the S-function name
-aDef.SFunctionName = aSfunName;
+@MODULE_NAME@Def.SFunctionName = aSfunName;
 
 % Define source files
-aDef.SourceFiles = { ...
+@MODULE_NAME@Def.SourceFiles = { ...
 	'qpoases/SRC/QProblem.cpp', ...
 	'qpoases/SRC/QProblemB.cpp', ...
 	'qpoases/SRC/Bounds.cpp', ...
@@ -123,10 +123,10 @@ aDef.SourceFiles = { ...
 	};
 
 % Define header files
-aDef.HeaderFiles = {'@MODULE_NAME@_common.h', aHeaderFile};
+@MODULE_NAME@Def.HeaderFiles = {'@MODULE_NAME@_common.h', aHeaderFile};
 
 % Define include folders
-aDef.IncPaths = { ...
+@MODULE_NAME@Def.IncPaths = { ...
     'qpoases', ...
 	'qpoases/INCLUDE', ...
 	'qpoases/SRC' ...
@@ -145,23 +145,23 @@ if (~strcmp(aSfunName, 'acado_solver_sfun'))
 end;
 
 % Define output function declaration
-aDef.OutputFcnSpec = [ ...
+@MODULE_NAME@Def.OutputFcnSpec = [ ...
 	'@MODULE_NAME@_solver_wrapper(' ... % Wrapper function name
 	'@MODULE_NAME@input u1[1], ' ...	% Input argument
 	'@MODULE_NAME@output y1[1])' ...	% Output argument
 	];
 
 %% Generate S-function source file
-legacy_code('sfcn_cmex_generate', aDef);
+legacy_code('sfcn_cmex_generate', @MODULE_NAME@Def);
 
 %% Compile the code
-legacy_code('compile', aDef, {iFlags, ldFlags});
+legacy_code('compile', @MODULE_NAME@Def, {iFlags, ldFlags});
 
 %% Generate a TLC file and simulation block
-legacy_code('slblock_generate', aDef);
-legacy_code('sfcn_tlc_generate', aDef);
+legacy_code('slblock_generate', @MODULE_NAME@Def);
+legacy_code('sfcn_tlc_generate', @MODULE_NAME@Def);
 % Mandatory, because not all the source and header files are in the same folder
-legacy_code('rtwmakecfg_generate', aDef);
+legacy_code('rtwmakecfg_generate', @MODULE_NAME@Def);
 
 %% Remove dependency on the header file and regenerate the Simulink structures
 
@@ -173,4 +173,4 @@ aOutput{ 2 } = '';
 Simulink.Bus.cellToObject( {avCells, aInput, aOutput} );
 
 %% Clear byproducts
-clear aInput aOutput avCells idx ldFlags aSfunName aRealT aHeaderFile;
+clear aInput aOutput avCells idx iFlags ldFlags aSfunName aRealT aHeaderFile;
