@@ -168,8 +168,13 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	//
 
 	// \todo Move to something like: setupInitialization
+	ExportVariable retInit("ret", 1, 1, INT, ACADO_LOCAL);
+	retInit.setDoc("=0: OK, otherwise an error code of a QP solver.");
 	initialize.setup( "initializeSolver" );
 	initialize.doc( "Solver initialization. Must be called once before any other function call." );
+	initialize.setReturnValue(retInit);
+	initialize << retInit.getFullName() << String(" = 0;\n");
+
 	initialize.addComment( "This is a function which must be called once before any other function call!" );
 	initialize.addLinebreak( 2 );
 

@@ -58,9 +58,12 @@ returnValue ExportGaussNewtonQpDunes::setup( )
 
 	//
 	// Add QP initialization call to the initialization
+	// TODO Return value name is fixed. Make this more flexible ;)
 	//
 	ExportFunction initializeQpDunes( "initializeQpDunes" );
-	initialize.addFunctionCall( initializeQpDunes );
+	initialize
+		<< String("ret = (int)initializeQpDunes();\n")
+		<< String("if ((return_t)ret != QPDUNES_OK) return ret;\n");
 
 	cleanup.setup( "cleanupSolver" );
 	ExportFunction cleanupQpDunes( "cleanupQpDunes" );
