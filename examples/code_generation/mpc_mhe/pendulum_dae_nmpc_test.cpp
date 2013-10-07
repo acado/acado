@@ -165,7 +165,7 @@ int main()
 		log[ iter ][ i++ ] = getNWSR();
 
 #if VERBOSE
-		cout	<< "Interation #" << setw( 4 ) << iter
+		cout	<< "Iteration #" << setw( 4 ) << iter
 				<< ", KKT value: " << scientific << getKKT()
 				<< ", objective value: " << scientific << getObjective()
 				<< endl;
