@@ -187,7 +187,10 @@ returnValue ExportAcadoFunction::setGlobalExportVariable(const ExportVariable& v
 	if (getFunctionDim() == 0)
 		return SUCCESSFUL_RETURN;
 
-	ASSERT(var.getNumRows() >= f->getGlobalExportVariableSize() && var.getNumCols() == 1);
+	// TODO This is more hurting that helping. The dev has to take care of the size
+	//      outside this function, the whole point of this function is to set names,
+	//      not to check sizes.
+//	ASSERT(var.getNumRows() >= f->getGlobalExportVariableSize() && var.getNumCols() == 1);
 
 	globalVar = var;
 	f->setGlobalExportVariableName( globalVar.getFullName() );

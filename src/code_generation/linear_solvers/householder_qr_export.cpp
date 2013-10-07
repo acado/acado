@@ -329,8 +329,6 @@ returnValue ExportHouseholderQR::appendVariableNames( stringstream& string )
 
 returnValue ExportHouseholderQR::setup( )
 {
-	ASSERT_RETURN(nRows != nCols && REUSE == BT_TRUE);
-
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 
