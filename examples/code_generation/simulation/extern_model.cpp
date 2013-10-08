@@ -35,6 +35,7 @@
 int main() {
 	USING_NAMESPACE_ACADO
 	
+	// Define variables, functions and constants:
 	// ----------------------------------------------------------
     DifferentialState   x;      
     DifferentialState   y;      
@@ -51,7 +52,7 @@ int main() {
 	
 	Control 			u;
 
-    DifferentialEquation   f;  
+    DifferentialEquation   f1, f2;  
     
     OutputFcn h;
     
@@ -63,53 +64,92 @@ int main() {
     const double      I = 0.1;
     const double	  g = 9.81;
 
-    f << 0			== dot( x ) - dx;
-    f << 0			== dot( y ) - dy;
-    f << 0			== dot( alpha ) - dalpha;
-    f << 0			== dot( dx ) - ddx ;
-    f << 0			== dot( dy ) - ddy;
-    f << 0			== dot( dalpha ) - ddalpha;
-    
-    f << 0		    == m*ddx - (Fx+u);
-    f << 0			== m*ddy + m*g - (Fy+u);
-    f << 0			== I*ddalpha - M - (Fx+u)*y + (Fy+u)*x;
-    f << 0			== ddx + dy*dalpha + y*ddalpha;
-    f << 0 			== ddy - dx*dalpha - x*ddalpha;
+	// Pendulum DAE model in ACADO syntax (semi-explicit):
 	// ----------------------------------------------------------
+    f1 << dot( x )		==  dx;
+    f1 << dot( y )		==  dy;
+    f1 << dot( alpha )	==  dalpha;
+    f1 << dot( dx )		==  ddx ;
+    f1 << dot( dy )		==  ddy;
+    f1 << dot( dalpha )	==  ddalpha;
+    
+    f1 << 0		    	== m*ddx - (Fx+u);
+    f1 << 0				== m*ddy + m*g - (Fy+u);
+    f1 << 0				== I*ddalpha - M - (Fx+u)*y + (Fy+u)*x;
+    f1 << 0				== ddx + dy*dalpha + y*ddalpha;
+    f1 << 0 			== ddy - dx*dalpha - x*ddalpha;
+
+
+	// Pendulum DAE model in ACADO syntax (implicit):
+	// ----------------------------------------------------------
+    f2 << 0			== dot( x ) - dx;
+    f2 << 0			== dot( y ) - dy;
+    f2 << 0			== dot( alpha ) - dalpha;
+    f2 << 0			== dot( dx ) - ddx ;
+    f2 << 0			== dot( dy ) - ddy;
+    f2 << 0			== dot( dalpha ) - ddalpha;
+    
+    f2 << 0		    == m*ddx - (Fx+u);
+    f2 << 0			== m*ddy + m*g - (Fy+u);
+    f2 << 0			== I*ddalpha - M - (Fx+u)*y + (Fy+u)*x;
+    f2 << 0			== ddx + dy*dalpha + y*ddalpha;
+    f2 << 0 		== ddy - dx*dalpha - x*ddalpha;
 	
 	Vector Meas(1);
 	Meas(0) = 5;
  
-    SIMexport sim( 1, 0.1 );
+	// ----------------------------------------------------------
+	// ----------------------------------------------------------
+    SIMexport sim1( 1, 0.1 );
     
-    sim.set( INTEGRATOR_TYPE, INT_IRK_RIIA3 );
-    sim.set( NUM_INTEGRATOR_STEPS, 4 );
-    sim.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
+    sim1.set( INTEGRATOR_TYPE, INT_IRK_RIIA3 );
+    sim1.set( NUM_INTEGRATOR_STEPS, 4 );
+    sim1.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
     
-    sim.setModel( f );
-    sim.addOutput( h );
-    sim.setMeasurements( Meas );
-	sim.setTimingSteps( 10000 );
+    sim1.setModel( f1 );
+    sim1.addOutput( h );
+    sim1.setMeasurements( Meas );
+	sim1.setTimingSteps( 10000 );
     
-    acadoPrintf( "-----------------------------------------\n  Using a Pendulum DAE model in ACADO syntax:\n-----------------------------------------\n" );
-    sim.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
-    
-    
+    acadoPrintf( "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (semi-explicit):\n-----------------------------------------------------------\n" );
+    sim1.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
+ 
+ 
+	// ----------------------------------------------------------
+	// ----------------------------------------------------------
     SIMexport sim2( 1, 0.1 );
     
     sim2.set( INTEGRATOR_TYPE, INT_IRK_RIIA3 );
     sim2.set( NUM_INTEGRATOR_STEPS, 4 );
     sim2.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
     
-    sim2.setModel( "model", "rhs", "rhs_jac" );
-    sim2.setDimensions( 6, 6, 5, 1 );
-    
-    sim2.addOutput( "out", "out_jac", 2 );
+    sim2.setModel( f2 );
+    sim2.addOutput( h );
     sim2.setMeasurements( Meas );
 	sim2.setTimingSteps( 10000 );
     
-    acadoPrintf( "-----------------------------------------\n  Using an externally defined Pendulum DAE model:\n-----------------------------------------\n" );
+    acadoPrintf( "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (implicit):\n-----------------------------------------------------------\n" );
     sim2.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
+    
+    
+	// ----------------------------------------------------------
+	// ----------------------------------------------------------
+    SIMexport sim3( 1, 0.1 );
+    
+    sim3.set( INTEGRATOR_TYPE, INT_IRK_RIIA3 );
+    sim3.set( NUM_INTEGRATOR_STEPS, 4 );
+    sim3.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
+    
+    sim3.setModel( "model", "rhs", "rhs_jac" );
+    sim3.setDimensions( 6, 6, 5, 1 );
+    
+    sim3.addOutput( "out", "out_jac", 2 );
+    sim3.setMeasurements( Meas );
+	sim3.setTimingSteps( 10000 );
+    
+    acadoPrintf( "-----------------------------------------------------------\n  Using an externally defined Pendulum DAE model:\n-----------------------------------------------------------\n" );
+    sim3.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
+    
     
 	return 0;
 } 
