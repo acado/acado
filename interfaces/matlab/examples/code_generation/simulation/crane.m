@@ -38,7 +38,7 @@ sim = acado.SIMexport( h );
 sim.setModel(f);
 sim.addOutput([xT; vT; xL; vL]);
 sim.setMeasurements(3);
-sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5' );
+sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA3' );
 sim.set( 'NUM_INTEGRATOR_STEPS',        numSteps        );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1               );
 sim.set( 'MEASUREMENT_GRID',       'ONLINE_GRID'        );
@@ -58,7 +58,6 @@ for i = 1:N
 end
 
 options = odeset('RelTol',1e-12,'AbsTol',1e-12);
-% use of an anonymous function in matlab: http://stackoverflow.com/questions/2256229/matlab-how-do-i-pass-a-parameter-to-a-function
 [tout exact] = ode45(@(t, y) rhs(t, y, u),[0:h:N*h],x,options);
 exact = exact';
 format long e
@@ -71,5 +70,5 @@ for i = 1:Nt
     [statesOr outOr] = integrate(x,u,grid);
 end
 time = toc/Nt;
-disp(['average time per integration: ' num2str(round(time*10^6)) ' ?s'])
+disp(['average time per integration: ' num2str(round(time*10^6)) ' μs'])
 

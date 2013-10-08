@@ -27,7 +27,7 @@ f = [ dx; ...
     sin(alpha)*L - x; ...
     -y - cos(alpha)*L; ...
     I*ddalpha + sin(alpha)*L*Fy + cos(alpha)*L*Fx + c*dalpha];
-% http://www.multibody.net/mbsymba/dynamics/pendulum-dae/
+
 
 %% SIMexport
 numMeas = 6;
@@ -40,6 +40,7 @@ sim.set( 'NUM_INTEGRATOR_STEPS',        10                      );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1                       );
 % sim.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'                       );
 
+sim.setInterface('integrate', 'rhs');
 sim.exportCode('pendulum_export');
 
 %% accuracy states wrt ode15s:
@@ -64,5 +65,36 @@ for i = 1:N
     axis square
     title('Falling pendulum')
     pause(0.05);
+end
+
+%% define the pendulum model now using an external C-function:
+disp('-----------------------------------------------------------')
+disp('Let us use an external pendulum model, defined in C-code...')
+    
+sim = acado.SIMexport( h );
+sim.setModel('model', 'rhs', 'rhs_jac');
+sim.setDimensions(6,0,3,1);
+sim.addOutput('out', 'out_jac', 2);
+sim.setMeasurements(numMeas);
+sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5'         );
+sim.set( 'NUM_INTEGRATOR_STEPS',        10                      );
+sim.set( 'GENERATE_MATLAB_INTERFACE',   1                       );
+% sim.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'                       );
+
+sim.setInterface('integrate2', 'rhs2');
+sim.exportCode('pendulum_export');
+
+
+[states out] = integrate(xs(:,end),u);
+[states2 out2] = integrate2(xs(:,end),u);
+
+err = max(abs(states.value-states2.value)) + max(max(abs(states.sensX-states2.sensX))) + ...
+    max(max(abs(states.sensU-states2.sensU))) + max(max(abs(out.value-out2.value))) + ...
+    max(max(abs(out.sensX-out2.sensX))) + max(max(abs(out.sensU-out2.sensU)));
+
+if( err > 1e-6 )
+    error('Unusual mismatch between ACADO and externally defined model !')
+else
+    disp('Small, numerically justifiable mismatch between ACADO and externally defined model !')
 end
 

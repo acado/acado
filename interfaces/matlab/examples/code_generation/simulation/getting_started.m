@@ -35,7 +35,6 @@ for i = 1:N
 end
 
 options = odeset('RelTol',1e-12,'AbsTol',1e-12);
-% use of an anonymous function in matlab: http://stackoverflow.com/questions/2256229/matlab-how-do-i-pass-a-parameter-to-a-function
 [tout exact] = ode45(@(t, y) rhs(t, y, u, mu),[0:h:N*h],x,options);
 exact = exact';
 
