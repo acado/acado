@@ -24,16 +24,28 @@
 %    Date: 2012
 % 
 
-templateFiles = {'integrator_mex.c.in', 'rhs_mex.c.in', 'mpc_mex.c.in', 'mhe_mex.c.in'};
-templates = {'INTEGRATOR_MEX_TEMPLATE', 'RHS_MEX_TEMPLATE', 'MPC_MEX_TEMPLATE', 'MHE_MEX_TEMPLATE'};
+templateFiles = {'integrator_mex.c.in', 'rhs_mex.c.in', 'forces_interface.in', ...
+    'acado_forces_generator.m.in', 'qpoases_interface.hpp.in', 'qpoases_interface.cpp.in', ...
+    'qpdunes_interface.in', 'acado_auxiliary_functions.h.in', 'acado_auxiliary_functions.c.in', ...
+    'acado_solver_mex.c.in', 'make_acado_solver_forces.m.in', 'make_acado_solver_qpoases.m.in', ...
+    'makefile.forces.in', 'makefile.qpoases.in', 'make_acado_solver_sfunction.m.in', 'acado_solver_sfunction.c.in', ...
+    'acado_solver_sfunction.h.in', 'dummy_test_file.in'};
+
+templates = {'INTEGRATOR_MEX_TEMPLATE', 'RHS_MEX_TEMPLATE', 'FORCES_TEMPLATE', ...
+    'FORCES_GENERATOR', 'QPOASES_HEADER', 'QPOASES_SOURCE', 'QPDUNES_TEMPLATE', ...
+    'AUXILIARY_FUNCTIONS_HEADER', 'AUXILIARY_FUNCTIONS_SOURCE', 'SOLVER_MEX', ...
+    'MAKE_MEX_FORCES', 'MAKE_MEX_QPOASES', 'MAKEFILE_FORCES', 'MAKEFILE_QPOASES', ...
+    'MAKEFILE_SFUN_QPOASES', 'SOLVER_SFUN_SOURCE', 'SOLVER_SFUN_HEADER', 'DUMMY_TEST_FILE'};
 
 fid = fopen('./bin/include/acado/code_generation/templates/templates.hpp', 'w+');
 
 fprintf(fid, '%s \n', ' #ifndef ACADO_TOOLKIT_TEMPLATES_HPP');
 fprintf(fid, '%s \n\n', ' #define ACADO_TOOLKIT_TEMPLATES_HPP');
+fprintf(fid, '%s "%s/../../src/code_generation/templates" \n\n', ' #define TEMPLATE_PATHS', pwd);
+
 
 for i = 1:length(templates)
-    tempString = sprintf(' #define %s "%s/../../src/code_generation/templates/%s" \n\n', char(templates(i)), pwd, char(templateFiles(i)));
+    tempString = sprintf(' #define %s "%s" \n\n', char(templates(i)), char(templateFiles(i)));
     if ispc
         tempString = regexprep( tempString, '\', '/' );
     end
