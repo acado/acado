@@ -66,6 +66,27 @@ output
 
 #define FREE( mem ) { if( mem ) { mxFree( mem ); mem = NULL; } }
 
+/* Define number of outputs */
+#define NOO 3
+
+#if ACADO_NXA > 0
+#define NOO_2 NOO + 1
+#else
+#define NOO_2 NOO
+#endif
+
+#if ACADO_USE_ARRIVAL_COST == 1
+#define NOO_3 NOO_2 + 2
+#else
+#define NOO_3 NOO_2
+#endif
+
+#if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
+#define NOO_4 NOO_3 + 1
+#else
+#define NOO_4 NOO_3
+#endif
+
 /** Instance of the user data structure. */
 ACADOvariables acadoVariables;
 /** Instance of the private workspace structure. */
@@ -184,11 +205,6 @@ void mexFunction(	int nlhs,
 	real_t* xEnd = NULL;
 	real_t* uEnd = NULL;
 	const mxArray* src = prhs[ 0 ];
-#if ACADO_USE_ARRIVAL_COST == 0
-	const char *outNames[ 3 ] = {"x", "u", "info"};
-#else
-	const char *outNames[ 5 ] = {"x", "u", "xAC", "SAC", "info"};
-#endif
 	
 	const char *infoNames[ 5 ] = {"status", "cpuTime", "kktValue", "objValue", "nIterations"};
 	mxArray* info;
@@ -197,6 +213,22 @@ void mexFunction(	int nlhs,
 	mxArray* shPtr;
 	timer tmr;
 	double nIterations = 0;
+	
+	const char *outNames[ NOO_4 ];
+	outNames[ 0 ] = "info";
+	outNames[ 1 ] = "x";
+	outNames[ 2 ] = "u";
+#if ACADO_NXA
+	outNames[ NOO ] = "z";
+#endif	
+		
+#if ACADO_USE_ARRIVAL_COST == 1
+	outNames[ NOO_2 ] = "xAC";
+	outNames[NOO_2  + 1] = "SAC";
+#endif
+#if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
+	outNames[ NOO_3 ] = "sigmaN";
+#endif
 	
 	if (nrhs != 1)
 		mexErrMsgTxt(
@@ -224,6 +256,10 @@ void mexFunction(	int nlhs,
 	/* Copy MATLAB arrays to C arrays. */
 	getArray(1, src, 0, "x", acadoVariables.x, ACADO_N + 1, ACADO_NX);
 	getArray(1, src, 0, "u", acadoVariables.u, ACADO_N, ACADO_NU);
+	
+#if ACADO_NXA	
+	getArray(1, src, 0, "z", acadoVariables.z, ACADO_N, ACADO_NXA);
+#endif	
 	
 #if ACADO_NP
 	/* TODO Change to ACADO_N, ACADO_NP later. */
@@ -400,23 +436,22 @@ void mexFunction(	int nlhs,
 	cpuTime = toc( &tmr );
 	
 	/* Prepare return argument */
-
-#if ACADO_USE_ARRIVAL_COST == 0
-	plhs[ 0 ] = mxCreateStructMatrix(1, 1, 3, outNames);
-#else
-	plhs[ 0 ] = mxCreateStructMatrix(1, 1, 5, outNames);
-#endif /* ACADO_USE_ARRIVAL_COST == 0 */
+	
+	plhs[ 0 ] = mxCreateStructMatrix(1, 1, NOO_4, outNames);
 		
 	setArray(plhs[ 0 ], 0, "x", acadoVariables.x, ACADO_N + 1, ACADO_NX);
 	setArray(plhs[ 0 ], 0, "u", acadoVariables.u, ACADO_N, ACADO_NU);
-	
+#if ACADO_NXA > 0
+	setArray(plhs[ 0 ], 0, "z", acadoVariables.z, ACADO_N, ACADO_NXA);
+#endif	
+		
 #if ACADO_USE_ARRIVAL_COST == 1
 	setArray(plhs[ 0 ], 0, "xAC", acadoVariables.xAC, ACADO_NX, 1);
 	setArray(plhs[ 0 ], 0, "SAC", acadoVariables.SAC, ACADO_NX, ACADO_NX);
 #endif /* ACADO_USE_ARRIVAL_COST */
 
 #if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
-/*	setArray(plhs[ 0 ], 0, "sigmaN", acadoVariables.sigmaN, ACADO_NX, ACADO_NX); */
+	setArray(plhs[ 0 ], 0, "sigmaN", acadoVariables.sigmaN, ACADO_NX, ACADO_NX);
 #endif /* ACADO_COMPUTE_COVARIANCE_MATRIX */
 
 	/* Create the info structure. */
