@@ -104,6 +104,15 @@ returnValue SIMexport::exportCode(	const String& dirName,
 	if (!modelDimensionsSet()) return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 	set( QP_SOLVER, QP_NONE );
 
+	//
+	// Create the export folders
+	//
+	setExportFolderName( dirName );
+
+	returnValue dirStatus = acadoCreateFolder( dirName.getName() );
+	if (dirStatus != SUCCESSFUL_RETURN)
+		return dirStatus;
+
 	if ( setup( ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
