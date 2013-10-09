@@ -28,7 +28,6 @@ f = [ dx; ...
     -y - cos(alpha)*L; ...
     I*ddalpha + sin(alpha)*L*Fy + cos(alpha)*L*Fx + c*dalpha];
 
-
 %% SIMexport
 numMeas = 6;
 sim = acado.SIMexport( h );

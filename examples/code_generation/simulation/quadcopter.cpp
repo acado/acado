@@ -67,7 +67,7 @@ int main( ){
     const double alpha = 0.0;
 
 
-	// Define the quadcopter ODE model in fully implicit form:
+	// Define the quadcopter ODE model in fully nonlinear form:
 	// ----------------------------------------------------------
 	f1 << U1*gain; 
 	f1 << U2*gain; 
@@ -163,7 +163,7 @@ int main( ){
 	sim1.set( NUM_INTEGRATOR_STEPS, 50 );
 	sim1.setTimingSteps( 10000 );
 	
-	acadoPrintf( "-----------------------------------------------------------\n  Using a QuadCopter ODE model in fully implicit form:\n-----------------------------------------------------------\n" );
+	acadoPrintf( "-----------------------------------------------------------\n  Using a QuadCopter ODE model in fully nonlinear form:\n-----------------------------------------------------------\n" );
 	sim1.exportAndRun( "quadcopter_export", "init_quadcopter.txt", "controls_quadcopter.txt" );
 
 
