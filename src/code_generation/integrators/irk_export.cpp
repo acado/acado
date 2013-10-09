@@ -1209,6 +1209,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	rhs_in = ExportVariable( "x", inputDim+NX, 1, REAL, ACADO_LOCAL );
 	rhs_out = ExportVariable( "f", NX+NXA, 1, REAL, ACADO_LOCAL );
 	fullRhs = ExportFunction( "full_rhs", rhs_in, rhs_out );
+	fullRhs.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 
 	if( NX2 > 0 || NXA > 0 ) {
 		// setup linear solver:
