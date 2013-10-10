@@ -432,7 +432,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	integrate.addIndex( run1 );
 	integrate.addIndex( tmp_index1 );
 	integrate.addIndex( tmp_index2 );
-	integrate.addIndex( tmp_index3 );
+	if( rk_outputs.size() > 0 ) integrate.addIndex( tmp_index3 );
 	if( rk_outputs.size() > 0 && (grid.getNumIntervals() > 1 || !equidistantControlGrid()) ) {
 		integrate.addIndex( tmp_index4 );
 	}
