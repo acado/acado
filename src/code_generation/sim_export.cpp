@@ -126,7 +126,7 @@ returnValue SIMexport::exportCode(	const String& dirName,
 	if( integrator != 0 )
 	{
 		String fileName( dirName );
-		fileName << "/acado_integrator.c";
+		fileName << "/integrator.c";
 
 		ExportFile integratorFile( fileName,commonHeaderName,_realString,_intString,_precision );
 		integrator->getCode( integratorFile );
@@ -174,7 +174,7 @@ returnValue SIMexport::exportCode(	const String& dirName,
 	// export the evaluation file
 	int exportTestFile;
 	get( GENERATE_TEST_FILE, exportTestFile );
-	if ( exportTestFile && exportEvaluation( dirName, String( "acado_compare.c" ) ) != SUCCESSFUL_RETURN )
+	if ( exportTestFile && exportEvaluation( dirName, String( "compare.c" ) ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
@@ -339,7 +339,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     String fileName( _dirName );
     fileName << "/" << _fileName;
 
-	ExportFile main( fileName,"acado_common.h" );
+	ExportFile main( fileName,"acado.h" );
 	main.addLinebreak( 2 );
 
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
@@ -536,7 +536,7 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     String fileName( _dirName );
     fileName << "/" << _fileName;
 
-	ExportFile main( fileName,"acado_common.h" );
+	ExportFile main( fileName,"acado.h" );
 	
     main.addLinebreak( 2 );
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
@@ -693,7 +693,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 							const String& ref
 										)
 {
-	String test( "acado_test.c" );
+	String test( "test.c" );
 	set( GENERATE_TEST_FILE, 1 );
 
 	Grid integrationGrid;
@@ -750,7 +750,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 
 	// THE EVALUATION:
 	int nil;
-	nil = system( (String(dirName) << "/./acado_compare").getName() );
+	nil = system( (String(dirName) << "/./compare").getName() );
 	nil = nil+1;
 	
 	return SUCCESSFUL_RETURN;
@@ -955,30 +955,30 @@ returnValue SIMexport::exportMakefile(	const String& _dirName,
 	Makefile.addStatement( "CC     = g++\n" );
 	Makefile.addLinebreak( );
 	Makefile.addStatement( "OBJECTS = \\\n" );
-	Makefile.addStatement( "\tacado_integrator.o \\\n" );
+	Makefile.addStatement( "\tintegrator.o \\\n" );
 	if( !modelData.exportRhs() ) {
 		Makefile.addStatement( (String)"\t" << modelData.getFileNameModel() << ".o \n" );
 	}
 	Makefile.addLinebreak( 2 );
 	Makefile.addStatement( ".PHONY: all\n" );
-	Makefile.addStatement( "all: acado_test acado_compare \n" );
+	Makefile.addStatement( "all: test compare \n" );
 	Makefile.addLinebreak( );
-	Makefile.addStatement( "acado_test: ${OBJECTS} acado_test.o\n" );
+	Makefile.addStatement( "test: ${OBJECTS} test.o\n" );
 	Makefile.addLinebreak( );
-	Makefile.addStatement( "acado_compare: ${OBJECTS} acado_compare.o\n" );
+	Makefile.addStatement( "compare: ${OBJECTS} compare.o\n" );
 	Makefile.addLinebreak( );
-	Makefile.addStatement( "acado_integrator.o          : acado_common.h\n" );
-	Makefile.addStatement( "acado_test.o                : acado_common.h\n" );
-	Makefile.addStatement( "acado_compare.o             : acado_common.h\n" );
+	Makefile.addStatement( "integrator.o          : acado.h\n" );
+	Makefile.addStatement( "test.o                : acado.h\n" );
+	Makefile.addStatement( "compare.o             : acado.h\n" );
 	if( !modelData.exportRhs() ) {
-		Makefile.addStatement( (String)modelData.getFileNameModel() << ".o             : acado_common.h\n" );
+		Makefile.addStatement( (String)modelData.getFileNameModel() << ".o             : acado.h\n" );
 	}
 	Makefile.addLinebreak( );
 	Makefile.addStatement( "${OBJECTS} : \n" );
 	Makefile.addLinebreak( );
 	Makefile.addStatement( ".PHONY : clean\n" );
 	Makefile.addStatement( "clean :\n" );
-	Makefile.addStatement( "\t-rm -f *.o *.a acado_test\n" );
+	Makefile.addStatement( "\t-rm -f *.o *.a test\n" );
 	Makefile.addLinebreak( );
 
 	return Makefile.exportCode( );
@@ -1017,7 +1017,7 @@ returnValue SIMexport::executeTest( const String& _dirName ) {
 	int nil;
 	nil = system( ((String) String("make clean -s -C ") << _dirName).getName() );
 	nil = system( ((String) String("make -s -C ") << _dirName).getName() );
-	nil = system( (String(_dirName) << "/./acado_test").getName() );
+	nil = system( (String(_dirName) << "/./test").getName() );
 	nil = nil+1;
 	
 	return SUCCESSFUL_RETURN;
