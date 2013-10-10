@@ -147,9 +147,9 @@ returnValue AdjointIRKExport::getFunctionDeclarations(	ExportStatementBlock& dec
 	ImplicitRungeKuttaExport::getFunctionDeclarations( declarations );
 
 	if( exportRhs ) {
-		if( NX3 > 0 ) {
-			declarations.addDeclaration( diffs_rhs3 );
-		}
+//		if( NX3 > 0 ) {
+//			declarations.addDeclaration( diffs_rhs3 );
+//		}
 	}
 	else {
 		Function tmpFun;
@@ -164,9 +164,9 @@ returnValue AdjointIRKExport::getFunctionDeclarations(	ExportStatementBlock& dec
 	}
 	uint i;
 	if( exportRhs && CONTINUOUS_OUTPUT ) {
-		for( i = 0; i < outputs.size(); i++ ) {
-			declarations.addDeclaration( diffs_outputs[i] );
-		}
+//		for( i = 0; i < outputs.size(); i++ ) {
+//			declarations.addDeclaration( diffs_outputs[i] );
+//		}
 	}
 	else {
 		for( i = 0; i < name_outputs.size(); i++ ) {
@@ -267,6 +267,8 @@ returnValue AdjointIRKExport::getCode(	ExportStatementBlock& code )
 			}
 		}
 	}
+	if( NX2 > 0 || NXA > 0 ) solver->getCode( code );
+	code.addLinebreak(2);
 
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
@@ -560,7 +562,6 @@ returnValue AdjointIRKExport::getCode(	ExportStatementBlock& code )
 	code.addFunction( integrate );
     code.addLinebreak( 2 );
 
-	if( NX2 > 0 || NXA > 0 ) solver->getCode( code );
 	if( NX2 != NX ) {
 		prepareFullRhs();
 		code.addFunction( fullRhs );

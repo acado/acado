@@ -128,16 +128,18 @@ returnValue DiscreteTimeExport::getFunctionDeclarations(	ExportStatementBlock& d
 														) const
 {
 	declarations.addDeclaration( integrate );
-	if( NX2 != NX ) declarations.addDeclaration( fullRhs );
+
+	if( NX2 != NX ) 		declarations.addDeclaration( fullRhs );
+	else if( exportRhs )	declarations.addDeclaration( rhs );
 
 	if( exportRhs ) {
-		if( NX1 > 0 ) {
-			declarations.addDeclaration( lin_input );
-		}
-		if( NX2 > 0 ) {
-			declarations.addDeclaration( rhs );
-			declarations.addDeclaration( diffs_rhs );
-		}
+//		if( NX1 > 0 ) {
+//			declarations.addDeclaration( lin_input );
+//		}
+//		if( NX2 > 0 ) {
+//			declarations.addDeclaration( rhs );
+//			declarations.addDeclaration( diffs_rhs );
+//		}
 	}
 	else {
 		Function tmpFun;
@@ -182,6 +184,11 @@ returnValue DiscreteTimeExport::setup( )
 		integrate = ExportFunction( "integrate", rk_eta, reset_int, rk_index );
 	}
 	integrate.setReturnValue( error_code );
+	rk_eta.setDoc( "Working array to pass the input values and return the results." );
+	reset_int.setDoc( "The internal memory of the integrator can be reset." );
+	rk_index.setDoc( "Number of the shooting interval." );
+	error_code.setDoc( "Status code of the integrator." );
+	integrate.doc( "Performs the integration and sensitivity propagation for one shooting interval." );
 	integrate.addIndex( run );
 	integrate.addIndex( i );
 	integrate.addIndex( j );
@@ -190,6 +197,9 @@ returnValue DiscreteTimeExport::setup( )
 	rhs_in = ExportVariable( "x", inputDim-diffsDim, 1, REAL, ACADO_LOCAL );
 	rhs_out = ExportVariable( "f", NX, 1, REAL, ACADO_LOCAL );
 	fullRhs = ExportFunction( "full_rhs", rhs_in, rhs_out );
+	rhs_in.setDoc( "The state and parameter values." );
+	rhs_out.setDoc( "Right-hand side evaluation." );
+	fullRhs.doc( "Evaluates the right-hand side of the full model." );
 	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim-diffsDim, REAL, structWspace );
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
 		rk_diffsPrev1 = ExportVariable( "rk_diffsPrev1", NX1, NX1+NU, REAL, structWspace );

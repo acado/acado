@@ -99,6 +99,15 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 											)
 {
 	uint run1, run2, run3;
+	// Solve the upper triangular system of equations:
+	for( run1 = dim; run1 > 0; run1--) {
+		for( run2 = dim-1; run2 > (run1-1); run2--) {
+			solveTriangular.addStatement( b.getRow( (run1-1) ) -= A.getSubMatrix( (run1-1),(run1-1)+1,run2,run2+1 ) * b.getRow( run2 ) );
+		}
+		solveTriangular.addStatement( String( "b[" ) << String( (run1-1) ) << "] = b[" << String( (run1-1) ) << "]/A[" << String( (run1-1)*dim+(run1-1) ) << "];\n" );
+	}
+	code.addFunction( solveTriangular );
+
 	ExportIndex i( "i" );
 	solve.addIndex( i );
 	ExportIndex j( "j" );
@@ -239,15 +248,6 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 
 		code.addFunction( solveReuse );
 	}
-
-	// Solve the upper triangular system of equations:
-	for( run1 = dim; run1 > 0; run1--) {
-		for( run2 = dim-1; run2 > (run1-1); run2--) {
-			solveTriangular.addStatement( b.getRow( (run1-1) ) -= A.getSubMatrix( (run1-1),(run1-1)+1,run2,run2+1 ) * b.getRow( run2 ) );
-		}
-		solveTriangular.addStatement( String( "b[" ) << String( (run1-1) ) << "] = b[" << String( (run1-1) ) << "]/A[" << String( (run1-1)*dim+(run1-1) ) << "];\n" );
-	}
-	code.addFunction( solveTriangular );
 	
 	return SUCCESSFUL_RETURN;
 }

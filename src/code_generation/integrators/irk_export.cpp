@@ -251,20 +251,22 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 													) const
 {
 	declarations.addDeclaration( integrate );
-	if( NX2 > 0) solver->getFunctionDeclarations( declarations );
-	if( NX2 != NX ) declarations.addDeclaration( fullRhs );
+//	if( NX2 > 0) solver->getFunctionDeclarations( declarations );
 
-	if( NX1 > 0 ) {
-		declarations.addDeclaration( lin_input );
-	}
+	if( NX2 != NX ) 		declarations.addDeclaration( fullRhs );
+	else if( exportRhs )	declarations.addDeclaration( rhs );
+
+//	if( NX1 > 0 ) {
+//		declarations.addDeclaration( lin_input );
+//	}
 	if( exportRhs ) {
-		if( NX2 > 0 || NXA > 0 ) {
-			declarations.addDeclaration( rhs );
-			declarations.addDeclaration( diffs_rhs );
-		}
-		if( NX3 > 0 ) {
-			declarations.addDeclaration( rhs3 );
-		}
+//		if( NX2 > 0 || NXA > 0 ) {
+//			declarations.addDeclaration( rhs );
+//			declarations.addDeclaration( diffs_rhs );
+//		}
+//		if( NX3 > 0 ) {
+//			declarations.addDeclaration( rhs3 );
+//		}
 	}
 	else {
 		Function tmpFun;
@@ -279,9 +281,9 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 	}
 	uint i;
 	if( exportRhs && CONTINUOUS_OUTPUT ) {
-		for( i = 0; i < outputs.size(); i++ ) {
-			declarations.addDeclaration( outputs[i] );
-		}
+//		for( i = 0; i < outputs.size(); i++ ) {
+//			declarations.addDeclaration( outputs[i] );
+//		}
 	}
 	else {
 		for( i = 0; i < name_outputs.size(); i++ ) {
@@ -364,6 +366,8 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 			}
 		}
 	}
+	if( NX2 > 0 || NXA > 0 ) solver->getCode( code );
+	code.addLinebreak(2);
 
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
@@ -536,7 +540,6 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	code.addFunction( integrate );
     code.addLinebreak( 2 );
 
-	if( NX2 > 0 || NXA > 0 ) solver->getCode( code );
 	if( NX2 != NX ) {
 		prepareFullRhs();
 		code.addFunction( fullRhs );
@@ -1204,11 +1207,23 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	integrate.addArgument( reset_int );
 	if( !equidistantControlGrid() ) integrate.addArgument( rk_index );
 	integrate.setReturnValue( error_code );
+
+	rk_eta.setDoc( "Working array to pass the input values and return the results." );
+	for( i = 0; i < rk_outputs.size(); i++ ) {
+		rk_outputs[i].setDoc( "Working array to return the extra output results." );
+	}
+	reset_int.setDoc( "The internal memory of the integrator can be reset." );
+	rk_index.setDoc( "Number of the shooting interval." );
+	error_code.setDoc( "Status code of the integrator." );
+	integrate.doc( "Performs the integration and sensitivity propagation for one shooting interval." );
 	integrate.addLinebreak( );	// TO MAKE SURE IT GETS EXPORTED
 	
 	rhs_in = ExportVariable( "x", inputDim+NX, 1, REAL, ACADO_LOCAL );
 	rhs_out = ExportVariable( "f", NX+NXA, 1, REAL, ACADO_LOCAL );
 	fullRhs = ExportFunction( "full_rhs", rhs_in, rhs_out );
+	rhs_in.setDoc( "The state and parameter values." );
+	rhs_out.setDoc( "Right-hand side evaluation." );
+	fullRhs.doc( "Evaluates the right-hand side of the full model." );
 	fullRhs.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 
 	if( NX2 > 0 || NXA > 0 ) {

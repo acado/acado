@@ -120,6 +120,11 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		integrate = ExportFunction( "integrate", rk_eta, reset_int, rk_index );
 	}
 	integrate.setReturnValue( error_code );
+	rk_eta.setDoc( "Working array to pass the input values and return the results." );
+	reset_int.setDoc( "The internal memory of the integrator can be reset." );
+	rk_index.setDoc( "Number of the shooting interval." );
+	error_code.setDoc( "Status code of the integrator." );
+	integrate.doc( "Performs the integration and sensitivity propagation for one shooting interval." );
 	integrate.addIndex( run );
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
@@ -300,7 +305,7 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 {
 	declarations.addDeclaration( integrate );
 	if( exportRhs ) {
-		declarations.addDeclaration( diffs_rhs );
+//		declarations.addDeclaration( diffs_rhs );
 	}
 	else {
 		Function tmpFun;
