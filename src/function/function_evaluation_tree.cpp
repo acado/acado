@@ -891,9 +891,17 @@ returnValue FunctionEvaluationTree::exportHeader(	FILE *file,
 returnValue FunctionEvaluationTree::exportForwardDeclarations(	FILE *file,
 																const char *fcnName,
 																const char *realString
-																) const{
-
-    acadoFPrintf(file,"void %s( const %s*, %s* );\n", fcnName,realString,realString );
+																) const
+{
+	acadoFPrintf(file,
+			"\n"
+			"/** Export of an ACADO symbolic function.\n"
+			" *\n"
+			" *  \\param acado_x Input to the exported function.\n"
+			" *  \\param acado_f Output of the exported function.\n"
+			" */\n"
+	);
+	acadoFPrintf(file, "void %s(const %s* acado_x, %s* acado_f);\n", fcnName, realString, realString);
 
     return SUCCESSFUL_RETURN;
 }
@@ -957,7 +965,7 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
 		numDX = getNDX();
 	}
 
-    acadoFPrintf(file,"void %s( const %s* acado_x, %s* acado_f ){\n", fcnName,realString,realString );
+    acadoFPrintf(file,"void %s(const %s* acado_x, %s* acado_f)\n{\n", fcnName,realString,realString );
     if( numX > 0 ){
         acadoFPrintf(file,"const %s* acado_xd = acado_x;\n", realString );
     }
@@ -985,9 +993,8 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
     if( getNT() > 0 ){
         acadoFPrintf(file,"const %s* acado_t = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+numP+getNPI()+getNW()+numDX );
     }
-    acadoFPrintf(file,"\n");
-    acadoFPrintf(file,"/* COMPUTE INTERMEDIATE STATES: */\n");
-    acadoFPrintf(file,"/* ---------------------------- */\n");
+    if (n > 0)
+    	acadoFPrintf(file,"\n/* Compute intermediate quantities; */\n");
 
     Stream *auxVarIndividualNames = new Stream[nni];
 	for( run1 = 0; run1 < n; run1++ )
@@ -1004,9 +1011,7 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
         acadoFPrintf(file,";\n");
     }
 
-    acadoFPrintf(file,"\n");
-    acadoFPrintf(file,"/* COMPUTE OUTPUT: */\n");
-    acadoFPrintf(file,"/* --------------- */\n");
+    acadoFPrintf(file,"\n/* Compute outputs: */\n");
 
     // Export output quantities
     for( run1 = 0; run1 < dim; run1++ )

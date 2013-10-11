@@ -260,12 +260,16 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 				acadoFPrintf(file, " *  \\param %s %s\n", args[ i ].getName().getName(), args[ i ].getDoc().getName());
 			}
 		}
+		else
+		{
+			acadoFPrintf(file, "\n");
+		}
 
 		if (retVal != 0)
 		{
 			String tmp = retVal->getDoc();
 			if (tmp.isEmpty() == BT_FALSE)
-				acadoFPrintf(file, "\n *\n *  \\return %s\n", tmp.getName());
+				acadoFPrintf(file, " *\n *  \\return %s\n", tmp.getName());
 		}
 		acadoFPrintf(file, " */\n");
 	}
