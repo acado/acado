@@ -59,9 +59,13 @@ sim = acado.SIMexport( h );
 sim.setModel(f);
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_GL4'   );
 sim.set( 'NUM_INTEGRATOR_STEPS',        5               );
-sim.setInterface('integrate', 'rhs');
 if EXPORT
     sim.exportCode( 'quadcopter_export' );
+    
+    cd quadcopter_export
+    make_acado_integrator('integrate_quadcopter')
+    make_acado_model('rhs_quadcopter')
+    cd ..
 end
 
 %% Define the quadcopter ODE model in 3-stage format:
@@ -113,31 +117,34 @@ sim2.setModel(f2);
 sim2.setLinearOutput(M3,A3,f3);
 sim2.set( 'INTEGRATOR_TYPE',             'INT_IRK_GL4'   );
 sim2.set( 'NUM_INTEGRATOR_STEPS',        5               );
-sim2.setInterface('integrate2', 'rhs2');
 if EXPORT
     sim2.exportCode( 'quadcopter_export' );
+    
+    cd quadcopter_export
+    make_acado_integrator('integrate_quadcopter2')
+    make_acado_model('rhs_quadcopter2')
 end
 
 
 %% Timing results:
-load controller_quadcopter.mat P X0
+load ../controller_quadcopter.mat P X0
 T = 500; U = -P.K*(X0 - P.Xref);
 tic
 for i = 1:T
-    states = integrate(X0', U);
+    states = integrate_quadcopter(X0', U);
 end
 time = toc/T;
 tic
 for i = 1:T
-    states2 = integrate2(X0', U);
+    states2 = integrate_quadcopter2(X0', U);
 end
 time2 = toc/T;
 
-states = integrate(X0', U);
-f = rhs(0, X0', U);
+states = integrate_quadcopter(X0', U);
+f = rhs_quadcopter(0, X0', U);
 
-states2 = integrate2(X0', U);
-f2 = rhs2(0, X0', U);
+states2 = integrate_quadcopter2(X0', U);
+f2 = rhs_quadcopter2(0, X0', U);
 
 err_int = max(abs(states.value-states2.value)) + max(max(abs(states.sensX-states2.sensX))) + ...
     max(max(abs(states.sensU-states2.sensU)));
@@ -161,7 +168,7 @@ for i = 1:N
     state = xs(end,:)';
     U = -P.K*(state - P.Xref);
     
-    states = integrate(state, U);
+    states = integrate_quadcopter(state, U);
     
     xs = [xs; states.value'];
     controls = [controls; U'];

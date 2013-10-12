@@ -29,6 +29,9 @@ f = [ vC; ...
     duC; ...
     duL ];
 
+h = [diffStates; controls];
+hN = [diffStates];
+
 %% SIMexport
 acadoSet('problemname', 'sim');
 
@@ -41,45 +44,63 @@ sim.set( 'NUM_INTEGRATOR_STEPS',        numSteps        );
 
 if EXPORT
     sim.exportCode('export_SIM');
+    
+    cd export_SIM
+    make_acado_integrator('integrate_crane')
+    make_acado_model('rhs_crane')
+    cd ..
 end
+addpath('./export_SIM');
 
 %% MPCexport
 acadoSet('problemname', 'mpc');
 
 N = 20;
 ocp = acado.OCP( 0.0, N*Ts, N );
-ExportVariable QQ(n_XD,n_XD) RR(n_U,n_U) QT(n_XD,n_XD)
-ocp.minimizeLSQ( QQ,RR );
-ocp.minimizeLSQEndTerm( QT );
+ExportVariable W(n_XD+n_U,n_XD+n_U) WN(n_XD,n_XD)
+ocp.minimizeLSQ( W, h );
+ocp.minimizeLSQEndTerm( WN, hN );
 
 ocp.subjectTo( -10.0 <= [uC;uL] <= 10.0 );
 ocp.subjectTo( -100.0 <= [duC;duL] <= 100.0 );
 ocp.setModel( f );
 
-mpc = acado.MPCexport( ocp );
+mpc = acado.OCPexport( ocp );
 mpc.set( 'HESSIAN_APPROXIMATION',       'GAUSS_NEWTON'      );
 mpc.set( 'DISCRETIZATION_TYPE',         'MULTIPLE_SHOOTING' );
 mpc.set( 'SPARSE_QP_SOLUTION',          'FULL_CONDENSING'   );
 mpc.set( 'INTEGRATOR_TYPE',             'INT_IRK_GL4'       );
 mpc.set( 'NUM_INTEGRATOR_STEPS',        N                   );
 mpc.set( 'MEX_VERBOSE',                 1                   );
+% mpc.set( 'GENERATE_SIMULINK_INTERFACE', 'YES'               );
 % mpc.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'                   );
 
 if EXPORT
     mpc.exportCode( 'export_MPC' );
+    
+    cd export_MPC
+    make_acado_solver('MPCstep')
+    cd ..
 end
+addpath('./export_MPC');
 
 %% PARAMETERS SIMULATION
 X0 = [0.0 0 0.8 0 0 0 0 0];
 Xref = [0.5 0 0.4 0 0 0 0 0];
-X = repmat(Xref,N+1,1);
+input.x = repmat(Xref,N+1,1);
 Xref = repmat(Xref,N,1);
+input.p = [];
 
 Uref = zeros(N,n_U);
-U = Uref;
+input.u = Uref;
 
-Q = diag([6e-1, 1.5e-1, 5e-2, 1e-3, 3e-3, 1e-1, 1e-6, 1e-6]); S = Q;
+input.y = [Xref(1:N,:) Uref];
+input.yN = Xref(N,:).';
+
+Q = diag([6e-1, 1.5e-1, 5e-2, 1e-3, 3e-3, 1e-1, 1e-6, 1e-6]);
 R = diag([1e-6, 1e-6]);
+input.W = blkdiag(Q,R); 
+input.WN = Q;
 
 %% SIMULATION LOOP
 display('------------------------------------------------------------------')
@@ -96,18 +117,18 @@ visualize; pause
 while time(end) < Tf
     tic
     % Solve NMPC OCP
-    X0 = state_sim(end,:);
-    [U_mpc,X_mpc,info_mpc] = MPCstep(X0,X,U,Xref,Uref,Q,R,S);
+    input.x0 = state_sim(end,:).';
+    output = MPCstep(input);
     
     % Save the MPC step
-    INFO_MPC = [INFO_MPC; info_mpc];
-    KKT_MPC = [KKT_MPC; info_mpc.KKTvalue];
-    controls_MPC = [controls_MPC; U_mpc(1,:)];
-    X = X_mpc;
-    U = U_mpc;
+    INFO_MPC = [INFO_MPC; output.info];
+    KKT_MPC = [KKT_MPC; output.info.kktValue];
+    controls_MPC = [controls_MPC; output.u(1,:)];
+    input.x = output.x;
+    input.u = output.u;
     
     % Simulate system
-    states = integrate(state_sim(end,:), U_mpc(1,:));
+    states = integrate(state_sim(end,:), output.u(1,:));
     state_sim = [state_sim; states.value'];
     
     nextTime = time(end)+Ts; disp(['current time: ' num2str(nextTime)])

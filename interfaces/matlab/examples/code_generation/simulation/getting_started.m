@@ -25,17 +25,21 @@ sim.set( 'GENERATE_MATLAB_INTERFACE',   1               );
 
 sim.exportCode('getting_started_export');
 
+cd getting_started_export
+make_acado_integrator('integrate_getting_started')
+make_acado_model('rhs_getting_started')
+
 %% simulation (test results):
 mu = 0.5;
 x = [-0.683; -0.864]; xs = x;
 u = 2;
 for i = 1:N
-    states = integrate(xs(:,end),u,mu);
+    states = integrate_getting_started(xs(:,end),u,mu);
     xs(:,i+1) = states.value;
 end
 
 options = odeset('RelTol',1e-12,'AbsTol',1e-12);
-[tout exact] = ode45(@(t, y) rhs(t, y, u, mu),[0:h:N*h],x,options);
+[tout exact] = ode45(@(t, y) rhs_getting_started(t, y, u, mu),[0:h:N*h],x,options);
 exact = exact';
 
 format long e
@@ -58,7 +62,7 @@ title('State 2')
 Nt = 500000;
 tic
 for i = 1:Nt
-    statesOr = integrate(x,u,mu);
+    statesOr = integrate_getting_started(x,u,mu);
 end
 time = toc/Nt;
 disp(['average time per integration: ' num2str(round(time*10^6)) ' μs'])

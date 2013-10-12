@@ -46,6 +46,10 @@ sim.set( 'MEASUREMENT_GRID',       'ONLINE_GRID'        );
 
 sim.exportCode('crane_export')
 
+cd crane_export
+make_acado_integrator('integrate_crane')
+make_acado_model('rhs_crane')
+
 %% accuracy states wrt ode45:
 grid = [1/3 2/3 3/3];
 
@@ -53,12 +57,12 @@ x = [0.5; 0.1; 0.7; -0.1; 0.5; -0.07; 0.2; -0.3];
 u = zeros(2,1);
 xs = x; N = 5;
 for i = 1:N
-    [states out] = integrate(xs(:,end),u,grid);
+    [states out] = integrate_crane(xs(:,end),u,grid);
     xs(:,end+1) = states.value;
 end
 
 options = odeset('RelTol',1e-12,'AbsTol',1e-12);
-[tout exact] = ode45(@(t, y) rhs(t, y, u),[0:h:N*h],x,options);
+[tout exact] = ode45(@(t, y) rhs_crane(t, y, u),[0:h:N*h],x,options);
 exact = exact';
 format long e
 mean_error = mean(abs(xs(:,2:end)-exact(:,2:end))./abs(exact(:,2:end)))
@@ -67,7 +71,7 @@ mean_error = mean(abs(xs(:,2:end)-exact(:,2:end))./abs(exact(:,2:end)))
 Nt = 50000;
 tic
 for i = 1:Nt
-    [statesOr outOr] = integrate(x,u,grid);
+    [statesOr outOr] = integrate_crane(x,u,grid);
 end
 time = toc/Nt;
 disp(['average time per integration: ' num2str(round(time*10^6)) ' μs'])

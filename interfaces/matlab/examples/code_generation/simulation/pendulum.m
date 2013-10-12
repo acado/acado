@@ -39,8 +39,10 @@ sim.set( 'NUM_INTEGRATOR_STEPS',        10                      );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1                       );
 % sim.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'                       );
 
-sim.setInterface('integrate', 'rhs');
 sim.exportCode('pendulum_export');
+
+cd pendulum_export
+make_acado_integrator('integrate_pendulum')
 
 %% accuracy states wrt ode15s:
 x = [zeros(6,1); ones(3,1)];       
@@ -49,7 +51,7 @@ x(3) = pi;
 xs = x;
 u = 0.01;
 for i = 1:N
-    [states out] = integrate(xs(:,end),u);
+    [states out] = integrate_pendulum(xs(:,end),u);
     xs(:,end+1) = states.value;
 end
 
@@ -66,6 +68,7 @@ for i = 1:N
     pause(0.05);
 end
 
+cd ..
 %% define the pendulum model now using an external C-function:
 disp('-----------------------------------------------------------')
 disp('Let us use an external pendulum model, defined in C-code...')
@@ -80,12 +83,13 @@ sim.set( 'NUM_INTEGRATOR_STEPS',        10                      );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1                       );
 % sim.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'                       );
 
-sim.setInterface('integrate2', 'rhs2');
 sim.exportCode('pendulum_export');
 
+cd pendulum_export
+make_acado_integrator_custom('integrate_pendulum2')
 
-[states out] = integrate(xs(:,end),u);
-[states2 out2] = integrate2(xs(:,end),u);
+[states out] = integrate_pendulum(xs(:,end),u);
+[states2 out2] = integrate_pendulum2(xs(:,end),u);
 
 err = max(abs(states.value-states2.value)) + max(max(abs(states.sensX-states2.sensX))) + ...
     max(max(abs(states.sensU-states2.sensU))) + max(max(abs(out.value-out2.value))) + ...
