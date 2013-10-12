@@ -252,30 +252,12 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
         end
         
         
-        function setInterface(obj, integrate, rhs)
-           if ~ischar(integrate) ||  ~ischar(rhs)
-              error('Invalid call to setInterface.') 
-           end
-           global ACADO_;
-           ACADO_.helper.addMEXoutput(integrate, rhs);
-        end
-        
-        
         function setMEXFiles(obj, dir)
             global ACADO_;
             if ~ischar(dir)
                 error('Invalid directory name.');
             end
-            ACADO_.helper.addMEX(dir, 'integrate.c', 'rhs.c')
-        end
-        
-        
-        function setMainFiles(obj, dir)
-            global ACADO_;
-            if ~ischar(dir)
-                error('Invalid directory name.');
-            end
-            ACADO_.helper.addMain(dir, 'test.c', 'compare.c')
+            ACADO_.helper.addMEX(dir)
         end
         
     end

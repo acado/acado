@@ -86,13 +86,12 @@ classdef ExportModule < acado.UserInteraction
                 
             end
             obj.setMEXFiles(obj.dir);
-            obj.setMainFiles(obj.dir);
             
             GEN_ACADO; 
             global ACADO_;
             try
                 run(sprintf('%s_RUN', ACADO_.helper.problemname));
-                buildInterface
+%                 buildInterface
             catch err
                 if ~isempty(ACADO_.helper.in)
                     disp(['You should now run the file "' sprintf('%s_RUN', ACADO_.helper.problemname) '" with the right inputs..']);
@@ -104,13 +103,6 @@ classdef ExportModule < acado.UserInteraction
         
         
         function setMEXFiles(obj, dir)
-            if ~ischar(dir)
-                error('Invalid directory name.');
-            end
-        end
-        
-        
-        function setMainFiles(obj, dir)
             if ~ischar(dir)
                 error('Invalid directory name.');
             end

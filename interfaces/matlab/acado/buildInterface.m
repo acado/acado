@@ -29,93 +29,29 @@ global ACADO_
 if ~isempty(ACADO_)
     h = ACADO_.helper;
     num = length(h.mexList);
-    if num ~= length(h.mainList)
-        error('Internal error: contact developer ACADO Matlab interface for info.')
-    end
-    if num > 0
-        disp(' ');
-        disp('COMPILATION OF MEX FILES...');
-    end
+    
+    disp(' ');
+    disp('COMPILATION OF MEX FILES...');
+%     d = dir('.');
+%     isub = [d(:).isdir];
+%     nameFolds = {d(isub).name}';
+%     nameFolds(ismember(nameFolds,{'.','..'})) = []
+    
+    num_files = 0;
     for i = 1:num
-        m = h.mexList{i};
-        out = h.mexOutList{i};
-        dirName = m{1};
-        [files, objs] = getFilesAndObjectNames( dirName, {'*.c', '*.cpp'}, {'EXAMPLES'} );
-        k = 1;
-        while k <= length(files)
-            found = 0;
-            for j = 1:length(m)-1
-                mexF = fullfile(dirName, m{1+j});
-                if strcmp(files(k), mexF)
-                    files = [files(1:k-1); files(k+1:end)];
-                    objs = [objs(1:k-1) objs(k+1:end)];
-                    found = 1;
-                    break;
-                end
-            end
-            if ~found
-                main = h.mainList{i};
-                for j = 1:length(main)-1
-                    mainF = fullfile(dirName, main{1+j});
-                    if strcmp(files(k), mainF)
-                        files = [files(1:k-1); files(k+1:end)];
-                        objs = [objs(1:k-1) objs(k+1:end)];
-                        found = 1;
-                        break;
-                    end
-                end
-            end
-            k = k + (~found);
-        end
-        
-        dirData = dir(dirName);
-        dirIndex = [dirData.isdir];
-        subDirs = {dirData(dirIndex).name};
-        validIndex = ~ismember(subDirs, {'.', '..', '.svn'});
-        subDirs = subDirs(validIndex);
-        for j = 1:length(subDirs)
-           subDirs{j} = fullfile(dirName, subDirs{j}); 
-        end
-        newDirs = subDirs;
-        while ~isempty(newDirs)
-            newSubs = {};
-            for j = 1:length(newDirs)
-                dirData = dir(newDirs{j});
-                dirIndex = [dirData.isdir];
-                tmp = {dirData(dirIndex).name};
-                validIndex = ~ismember(tmp, {'.', '..', '.svn'});
-                tmp = tmp(validIndex);
-                for k = 1:length(tmp)
-                    tmp{k} = fullfile(newDirs{j}, tmp{k});
-                end
-                newSubs = {newSubs{:}, tmp{:}};
-            end
-            subDirs = {subDirs{:}, newSubs{:}};
-            newDirs = newSubs;
-        end
-        
-        for j = 1:length(m)-1
-            p = strfind(m{1+j},'.');
-            if isempty(out)
-                output = [m{1+j}(1:p-1) '.' mexext];
-            else
-                output = [out{j} '.' mexext];
-            end
-            mexF = fullfile(dirName, m{1+j});
-            cmd = sprintf('mex CFLAGS=''\\$CFLAGS -std=c99'' COPTIMFLAGS=''\\$COPTIMFLAGS -O3'' -output %s %s', output, mexF);
-            for k = 1:length(subDirs)
-                cmd = [cmd sprintf(' -I./%s', subDirs{k})];
-            end
-            for k = 1:length(files)
-                cmd = [cmd sprintf(' %s', files{k})];
-            end
-            disp(cmd)
-            eval(cmd)
+        dir = h.mexList{i};
+        string = [char(dir) '/make_*.m'];
+        [files, objs] = getFilesAndObjectNames( '.', {string} );
+        for j = 1:length(files)
+            disp([char(files(j)) '...']);
+            run([char(dir) '/' char(files(j))]);
+            num_files = num_files + 1;
         end
     end
+        
+    disp(['COMPILATION DONE (' num2str(num_files) ' files)!']);
     disp(' ');
     h.clearMEX;
-    h.clearMain;
 end
 
 end

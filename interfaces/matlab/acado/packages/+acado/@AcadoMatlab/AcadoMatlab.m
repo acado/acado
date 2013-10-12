@@ -46,8 +46,6 @@ classdef AcadoMatlab < handle
         
         %mex files
         mexList = {};
-        mexOutList = {};
-        mainList = {};
     
         problemname = '';
         fileMEX = '';
@@ -281,63 +279,12 @@ classdef AcadoMatlab < handle
         
         % Add mex files to be compiled
         function addMEX(obj, dir, varargin)
-            if nargin > 2 && ischar(dir)
-                tmp{1} = dir;
-                for i = 1:length(varargin)
-                    if ischar(varargin{i})
-                        tmp{1+i} = varargin{i};
-                    else
-                        error('Invalid MEX filename.');
-                    end
-                end
-                obj.mexList{end+1} = tmp;
-                if length(obj.mexOutList) < length(obj.mexList)
-                    obj.mexOutList{end+1} = {};
-                else
-                    outList = obj.mexOutList{end};
-                    if length(tmp) ~= 1+length(outList)
-                        error('Invalid call to addMEX.');
-                    end
-                end
-                if length(obj.mexList) ~= length(obj.mexOutList)
-                   error('Internal error: contact developer ACADO Matlab interface for info.'); 
-                end
-            end
-        end
-        function addMEXoutput(obj, varargin)
-            if nargin > 1
-                tmp = {};
-                for i = 1:length(varargin)
-                    if ischar(varargin{i})
-                        tmp{i} = varargin{i};
-                    else
-                        error('Invalid MEX output filename.');
-                    end
-                end
-                obj.mexOutList{end+1} = tmp;
+            if nargin > 1 && ischar(dir)
+                obj.mexList{end+1} = dir;
             end
         end
         function clearMEX(obj)
             obj.mexList = {};
-            obj.mexOutList = {};
-        end
-        
-        % Add main files to be compiled
-        function addMain(obj, dir, varargin)
-            if nargin > 2 && ischar(dir)
-                tmp{1} = dir;
-                for i = 1:length(varargin)
-                    if ischar(varargin{i})
-                        tmp{1+i} = varargin{i};
-                    else
-                        error('Invalid filename.');
-                    end
-                end
-                obj.mainList{end+1} = tmp;
-            end
-        end
-        function clearMain(obj)
-            obj.mainList = {};
         end
         
         generateCPP(obj);
