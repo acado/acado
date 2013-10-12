@@ -1,7 +1,7 @@
-function make_acado_model( name )
+function make_acado_model( name, extern )
 
 	% Output file name, and also function name
-	if (nargin == 1)
+	if (nargin > 0)
 		fileOut = name;
 	else
 		fileOut = 'acado_rhs';
@@ -15,6 +15,9 @@ function make_acado_model( name )
 		'rhs.c ' ...
 		'integrator.c ' ...
 		];
+	if (nargin > 1)
+		CGSources = [CGSources extern];
+	end
 		
 	% Adding additional linker flags for Linux
 	ldFlags = '';

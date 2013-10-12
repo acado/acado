@@ -63,8 +63,8 @@ if EXPORT
     sim.exportCode( 'quadcopter_export' );
     
     cd quadcopter_export
-    make_acado_integrator('integrate_quadcopter')
-    make_acado_model('rhs_quadcopter')
+    make_acado_integrator('../integrate_quadcopter')
+    make_acado_model('../rhs_quadcopter')
     cd ..
 end
 
@@ -121,13 +121,14 @@ if EXPORT
     sim2.exportCode( 'quadcopter_export' );
     
     cd quadcopter_export
-    make_acado_integrator('integrate_quadcopter2')
-    make_acado_model('rhs_quadcopter2')
+    make_acado_integrator('../integrate_quadcopter2')
+    make_acado_model('../rhs_quadcopter2')
+    cd ..
 end
 
 
 %% Timing results:
-load ../controller_quadcopter.mat P X0
+load controller_quadcopter.mat P X0
 T = 500; U = -P.K*(X0 - P.Xref);
 tic
 for i = 1:T

@@ -1,7 +1,7 @@
-function make_acado_integrator( name )
+function make_acado_integrator( name, extern )
 
 	% Output file name, and also function name
-	if (nargin == 1)
+	if (nargin > 0)
 		fileOut = name;
 	else
 		fileOut = 'acado_integrator';
@@ -15,6 +15,9 @@ function make_acado_integrator( name )
 		'integrate.c ' ...
 		'integrator.c ' ...
 		];
+	if (nargin > 1)
+		CGSources = [CGSources extern];
+	end
 		
 	% Adding additional linker flags for Linux
 	ldFlags = '';
