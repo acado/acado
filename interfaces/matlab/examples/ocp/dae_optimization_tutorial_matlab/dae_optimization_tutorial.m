@@ -1,4 +1,4 @@
-clear;
+ clear;
 
 BEGIN_ACADO;                                % Always start with "BEGIN_ACADO". 
     
