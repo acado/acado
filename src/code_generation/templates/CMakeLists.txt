@@ -41,6 +41,8 @@ SET( AUXILIARY_FUNCTIONS_SOURCE acado_auxiliary_functions.c.in)
 SET( SOLVER_MEX acado_solver_mex.c.in)
 SET( MAKE_MEX_FORCES make_acado_solver_forces.m.in)
 SET( MAKE_MEX_QPOASES make_acado_solver_qpoases.m.in)
+SET( MAKE_MEX_INTEGRATOR make_acado_integrator.m.in)
+SET( MAKE_MEX_MODEL make_acado_model.m.in)
 SET( MAKEFILE_FORCES makefile.forces.in)
 SET( MAKEFILE_QPOASES makefile.qpoases.in)
 

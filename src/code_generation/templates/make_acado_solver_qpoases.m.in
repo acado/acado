@@ -57,4 +57,6 @@ CGRecipe = regexprep(CGRecipe, 'qpOASESSources', qpOASESSources);
 CGRecipe = regexprep(CGRecipe, 'ldFlags', ldFlags);
 
 % disp( sprintf( CGRecipe, fileOut, mexext ) ); 
+fprintf( 'compiling... ' );
 eval( sprintf(CGRecipe, fileOut, mexext) );
+fprintf( ['done! --> ' fileOut '.' mexext '\n'] );

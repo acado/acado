@@ -1,29 +1,19 @@
-function make_acado_solver( name )
+function make_acado_model( name )
 
 	% Output file name, and also function name
 	if (nargin == 1)
 		fileOut = name;
 	else
-		fileOut = 'acado_solver';
+		fileOut = 'acado_rhs';
 	end;
 		
 	% Root folder of code generation
-	CGRoot = '.';
-	
-	% Call FORCES generator
-	acado_forces_generator;
-	
-	% FORCES source files
-	qpFORCESSources = [ ...
-		'CGRoot/forces/src/forces.c ' ...
-		];
+	CGRoot = '.';	
 		
 	% Auto-generated files
 	CGSources = [ ...
-		'CGRoot/acado_solver_mex.c ' ...
-		'CGRoot/acado_solver.c ' ...
-		'CGRoot/acado_integrator.c ' ...
-		'CGRoot/acado_auxiliary_functions.c ' ...
+		'rhs.c ' ...
+		'integrator.c ' ...
 		];
 		
 	% Adding additional linker flags for Linux
@@ -35,22 +25,19 @@ function make_acado_solver( name )
 	% Recipe for compilation
 	CGRecipe = [ ...
 		'mex -O' ...
-		' -I. -I''CGRoot'' -I''CGRoot/forces/include''' ...
+		' -I. -I''CGRoot''' ...
 		' ldFlags' ...
-		'  -D__MATLAB__ -O CGSources qpFORCESSources -output %s.%s' ...
+		' -D__MATLAB__ -O CGSources -output %s.%s' ...
 		];
 
 % Compilation
-qpFORCESSources = regexprep(qpFORCESSources, 'CGRoot', CGRoot);
 CGSources = regexprep(CGSources, 'CGRoot', CGRoot);
 
 CGRecipe = regexprep(CGRecipe, 'CGRoot', CGRoot);
 CGRecipe = regexprep(CGRecipe, 'CGSources', CGSources);
-CGRecipe = regexprep(CGRecipe, 'qpFORCESSources', qpFORCESSources);
 CGRecipe = regexprep(CGRecipe, 'ldFlags', ldFlags);
 
 % disp( sprintf( CGRecipe, fileOut, mexext ) ); 
 fprintf( 'compiling... ' );
 eval( sprintf(CGRecipe, fileOut, mexext) );
 fprintf( ['done! --> ' fileOut '.' mexext '\n'] );
-disp( ['finished mexing ' fileOut '.' mexext '!'] );

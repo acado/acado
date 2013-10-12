@@ -151,11 +151,17 @@ returnValue SIMexport::exportCode(	const String& dirName,
 			exportMexFun.configure((OperatingSystem)operatingSystem == OS_WINDOWS, (ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
 			exportMexFun.exportCode();
 
+			integrateInterface = dirName + String("/make_acado_integrator.m");
+			acadoCopyTempateFile(MAKE_MEX_INTEGRATOR, integrateInterface.getName(), "%", BT_TRUE);
+
 			String rhsInterface( dirName );
 			rhsInterface << "/rhs.c";
 			ExportMatlabRhs exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
 			exportMexFun2.configure(integrator->getNameFullRHS());
 			exportMexFun2.exportCode();
+
+			rhsInterface = dirName + String("/make_acado_model.m");
+			acadoCopyTempateFile(MAKE_MEX_MODEL, rhsInterface.getName(), "%", BT_TRUE);
 		}
 	}
 
