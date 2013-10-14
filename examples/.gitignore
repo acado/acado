@@ -3,6 +3,12 @@
 !*.cpp
 !*.txt
 
+results*.txt
+ref*.txt
+output*.txt
+refOutput*.txt
+*log.txt
+
 !controller
 !integrator
 !ocp

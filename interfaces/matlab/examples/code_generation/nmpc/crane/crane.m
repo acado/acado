@@ -46,11 +46,10 @@ if EXPORT
     sim.exportCode('export_SIM');
     
     cd export_SIM
-    make_acado_integrator('integrate_crane')
-    make_acado_model('rhs_crane')
+    make_acado_integrator('../integrate_crane')
+    make_acado_model('../rhs_crane')
     cd ..
 end
-addpath('./export_SIM');
 
 %% MPCexport
 acadoSet('problemname', 'mpc');
@@ -79,10 +78,9 @@ if EXPORT
     mpc.exportCode( 'export_MPC' );
     
     cd export_MPC
-    make_acado_solver('MPCstep')
+    make_acado_solver('../acado_MPCstep')
     cd ..
 end
-addpath('./export_MPC');
 
 %% PARAMETERS SIMULATION
 X0 = [0.0 0 0.8 0 0 0 0 0];
@@ -118,7 +116,7 @@ while time(end) < Tf
     tic
     % Solve NMPC OCP
     input.x0 = state_sim(end,:).';
-    output = MPCstep(input);
+    output = acado_MPCstep(input);
     
     % Save the MPC step
     INFO_MPC = [INFO_MPC; output.info];

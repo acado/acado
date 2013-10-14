@@ -42,7 +42,8 @@ sim.set( 'GENERATE_MATLAB_INTERFACE',   1                       );
 sim.exportCode('pendulum_export');
 
 cd pendulum_export
-make_acado_integrator('integrate_pendulum')
+make_acado_integrator('../integrate_pendulum')
+cd ..
 
 %% accuracy states wrt ode15s:
 x = [zeros(6,1); ones(3,1)];       
@@ -68,7 +69,6 @@ for i = 1:N
     pause(0.05);
 end
 
-cd ..
 %% define the pendulum model now using an external C-function:
 disp('-----------------------------------------------------------')
 disp('Let us use an external pendulum model, defined in C-code...')
@@ -86,7 +86,8 @@ sim.set( 'GENERATE_MATLAB_INTERFACE',   1                       );
 sim.exportCode('pendulum_export');
 
 cd pendulum_export
-make_acado_integrator_custom('integrate_pendulum2')
+make_acado_integrator('../integrate_pendulum2', 'model.c')
+cd ..
 
 [states out] = integrate_pendulum(xs(:,end),u);
 [states2 out2] = integrate_pendulum2(xs(:,end),u);

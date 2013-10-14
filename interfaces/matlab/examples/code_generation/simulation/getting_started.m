@@ -26,8 +26,9 @@ sim.set( 'GENERATE_MATLAB_INTERFACE',   1               );
 sim.exportCode('getting_started_export');
 
 cd getting_started_export
-make_acado_integrator('integrate_getting_started')
-make_acado_model('rhs_getting_started')
+make_acado_integrator('../integrate_getting_started')
+make_acado_model('../rhs_getting_started')
+cd ..
 
 %% simulation (test results):
 mu = 0.5;

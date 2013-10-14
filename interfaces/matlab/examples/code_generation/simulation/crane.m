@@ -47,8 +47,9 @@ sim.set( 'MEASUREMENT_GRID',       'ONLINE_GRID'        );
 sim.exportCode('crane_export')
 
 cd crane_export
-make_acado_integrator('integrate_crane')
-make_acado_model('rhs_crane')
+make_acado_integrator('../integrate_crane')
+make_acado_model('../rhs_crane')
+cd ..
 
 %% accuracy states wrt ode45:
 grid = [1/3 2/3 3/3];
