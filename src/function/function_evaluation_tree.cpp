@@ -897,11 +897,11 @@ returnValue FunctionEvaluationTree::exportForwardDeclarations(	FILE *file,
 			"\n"
 			"/** Export of an ACADO symbolic function.\n"
 			" *\n"
-			" *  \\param acado_x Input to the exported function.\n"
-			" *  \\param acado_f Output of the exported function.\n"
+			" *  \\param in Input to the exported function.\n"
+			" *  \\param out Output of the exported function.\n"
 			" */\n"
 	);
-	acadoFPrintf(file, "void %s(const %s* acado_x, %s* acado_f);\n", fcnName, realString, realString);
+	acadoFPrintf(file, "void %s(const %s* in, %s* out);\n", fcnName, realString, realString);
 
     return SUCCESSFUL_RETURN;
 }
@@ -921,108 +921,79 @@ returnValue FunctionEvaluationTree::exportCode(	FILE *file,
     int run1;
     int nni = 0;
 
-    for( run1 = 0; run1 < n; run1++ )
-        if( lhs_comp[run1]+1 > nni )
-            nni = lhs_comp[run1]+1;
+	for (run1 = 0; run1 < n; run1++)
+		if (lhs_comp[run1] + 1 > nni)
+			nni = lhs_comp[run1] + 1;
 	
-	uint numX;
-	if( _numX > 0 ) {
-		numX = _numX;
-	}
-	else {
-		numX = getNX();
-	}
-	
-	uint numXA;
-	if( _numXA > 0 ) {
-		numXA = _numXA;
-	}
-	else {
-		numXA = getNXA();
-	}
-	
-	uint numU;
-	if( _numU > 0 ) {
-		numU = _numU;
-	}
-	else {
-		numU = getNU();
-	}
+	unsigned numX = _numX > 0 ? _numX : getNX();
+	unsigned numXA = _numXA > 0 ? _numXA : getNXA();
+	unsigned numU = _numU > 0 ? _numU : getNU();
+	unsigned numP = _numP > 0 ? _numP : getNP();
+	unsigned numDX = _numDX > 0 ? _numDX : getNDX();
 
-	uint numP;
-	if( _numP > 0 ) {
-		numP = _numP;
-	}
-	else {
-		numP = getNP();
-	}
-
-	uint numDX;
-	if( _numDX > 0 ) {
-		numDX = _numDX;
-	}
-	else {
-		numDX = getNDX();
-	}
-
-    acadoFPrintf(file,"void %s(const %s* acado_x, %s* acado_f)\n{\n", fcnName,realString,realString );
+	acadoFPrintf(file, "void %s(const %s* in, %s* out)\n{\n", fcnName,
+			realString, realString);
     if( numX > 0 ){
-        acadoFPrintf(file,"const %s* acado_xd = acado_x;\n", realString );
+        acadoFPrintf(file,"const %s* xd = in;\n", realString );
     }
     if( numXA > 0 ){
-        acadoFPrintf(file,"const %s* acado_xa = acado_x + %d;\n", realString,numX );
+        acadoFPrintf(file,"const %s* xa = in + %d;\n", realString,numX );
     }
     if( getNU() > 0 ){
-        acadoFPrintf(file,"const %s* acado_u  = acado_x + %d;\n", realString,numX+numXA );
+        acadoFPrintf(file,"const %s* u  = in + %d;\n", realString,numX+numXA );
     }
     if( getNUI() > 0 ){
-        acadoFPrintf(file,"const %s* acado_v  = acado_x + %d;\n", realString,numX+numXA+numU );
+        acadoFPrintf(file,"const %s* v  = in + %d;\n", realString,numX+numXA+numU );
     }
     if( numP > 0 ){
-        acadoFPrintf(file,"const %s* acado_p  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI() );
+        acadoFPrintf(file,"const %s* p  = in + %d;\n", realString,numX+numXA+numU+getNUI() );
     }
     if( getNPI() > 0 ){
-        acadoFPrintf(file,"const %s* acado_q  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+numP );
+        acadoFPrintf(file,"const %s* q  = in + %d;\n", realString,numX+numXA+numU+getNUI()+numP );
     }
     if( getNW() > 0 ){
-        acadoFPrintf(file,"const %s* acado_w  = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+numP+getNPI() );
+        acadoFPrintf(file,"const %s* w  = in + %d;\n", realString,numX+numXA+numU+getNUI()+numP+getNPI() );
     }
     if( numDX > 0 ){
-        acadoFPrintf(file,"const %s* acado_dx = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+numP+getNPI()+getNW() );
+        acadoFPrintf(file,"const %s* dx = in + %d;\n", realString,numX+numXA+numU+getNUI()+numP+getNPI()+getNW() );
     }
     if( getNT() > 0 ){
-        acadoFPrintf(file,"const %s* acado_t = acado_x + %d;\n", realString,numX+numXA+numU+getNUI()+numP+getNPI()+getNW()+numDX );
+        acadoFPrintf(file,"const %s* t = in + %d;\n", realString,numX+numXA+numU+getNUI()+numP+getNPI()+getNW()+numDX );
     }
     if (n > 0)
-    	acadoFPrintf(file,"\n/* Compute intermediate quantities; */\n");
+    {
+    	acadoFPrintf(file, "/* Vector of auxiliary variables; number of elements: %d. */\n", n);
+    	acadoFPrintf(file, "%s* a = %s;\n", realString, globalExportVariableName.getName() );
+    	acadoFPrintf(file, "\n/* Compute intermediate quantities; */\n");
+    }
 
     Stream *auxVarIndividualNames = new Stream[nni];
 	for( run1 = 0; run1 < n; run1++ )
-		auxVarIndividualNames[lhs_comp[run1]] << globalExportVariableName << "[" << run1 << "]";
+		auxVarIndividualNames[lhs_comp[run1]] << "a" << "[" << run1 << "]";
 
-    // Export intermediate quantities
-    for( run1 = 0; run1 < n; run1++ )
-    {
-    	// Convert the name for intermediate variables for subexpressions
-    	sub[ run1 ]->setVariableExportName(VT_INTERMEDIATE_STATE, auxVarIndividualNames );
+	// Export intermediate quantities
+	for (run1 = 0; run1 < n; run1++)
+	{
+		// Convert the name for intermediate variables for subexpressions
+		sub[run1]->setVariableExportName(VT_INTERMEDIATE_STATE, auxVarIndividualNames);
 
-        acadoFPrintf(file,"%s[%d] = ", globalExportVariableName.getName(), run1 );
-        file << *sub[run1];
-        acadoFPrintf(file,";\n");
-    }
+		acadoFPrintf(file, "%s[%d] = ", "a", run1);
+		file << *sub[run1];
+		acadoFPrintf(file, ";\n");
+	}
 
     acadoFPrintf(file,"\n/* Compute outputs: */\n");
 
-    // Export output quantities
-    for( run1 = 0; run1 < dim; run1++ )
-    {
-    	// Convert names for interm. quantities for output expressions
-    	f[ run1 ]->setVariableExportName(VT_INTERMEDIATE_STATE, auxVarIndividualNames );
+	// Export output quantities
+	for (run1 = 0; run1 < dim; run1++)
+	{
+		// Convert names for interm. quantities for output expressions
+		f[run1]->setVariableExportName(VT_INTERMEDIATE_STATE, auxVarIndividualNames);
 
-    	acadoFPrintf(file,"acado_f[%d] = ", run1 );
-        file << *f[run1];
-        acadoFPrintf(file,";\n");
-    }
+		acadoFPrintf(file, "out[%d] = ", run1);
+		file << *f[run1];
+		acadoFPrintf(file, ";\n");
+	}
 
     acadoFPrintf(file,"}\n\n");
 

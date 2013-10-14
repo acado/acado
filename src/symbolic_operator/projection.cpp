@@ -79,43 +79,43 @@ Projection::Projection( VariableType variableType_, int vIndex_, const String &n
     switch(variableType){
 
          case VT_DIFFERENTIAL_STATE:
-              name << "acado_xd" << "[" << vIndex <<"]";
+              name << "xd" << "[" << vIndex <<"]";
               break;
 
          case VT_ALGEBRAIC_STATE:
-              name << "acado_xa" << "[" << vIndex <<"]";
+              name << "xa" << "[" << vIndex <<"]";
               break;
 
          case VT_CONTROL:
-              name << "acado_u" << "[" << vIndex <<"]";
+              name << "u" << "[" << vIndex <<"]";
               break;
 
          case VT_INTEGER_CONTROL:
-              name << "acado_v" << "[" << vIndex <<"]";
+              name << "v" << "[" << vIndex <<"]";
               break;
 
          case VT_PARAMETER:
-              name << "acado_p" << "[" << vIndex <<"]";
+              name << "p" << "[" << vIndex <<"]";
               break;
 
          case VT_INTEGER_PARAMETER:
-              name << "acado_q" << "[" << vIndex <<"]";
+              name << "q" << "[" << vIndex <<"]";
               break;
 
          case VT_DISTURBANCE:
-              name << "acado_w" << "[" << vIndex <<"]";
+              name << "w" << "[" << vIndex <<"]";
               break;
 
          case VT_TIME:
-              name << "acado_t" << "[" << vIndex <<"]";
+              name << "t" << "[" << vIndex <<"]";
               break;
 
          case VT_INTERMEDIATE_STATE:
-              name << "acado_aux" << "[" << vIndex <<"]";
+              name << "a" << "[" << vIndex <<"]";
               break;
 
          case VT_DDIFFERENTIAL_STATE:
-              name << "acado_dx" << "[" << vIndex <<"]";
+              name << "dx" << "[" << vIndex <<"]";
               break;
 
          default: break;

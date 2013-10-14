@@ -288,7 +288,7 @@ returnValue TreeProjection::loadIndices( SymbolicIndexList *indexList ){
     }
 
     if( name.isEmpty() == BT_TRUE ){
-        name << "acadoWorkspace.acado_aux" << "[" << vIndex << "]";
+        name << "a" << "[" << vIndex << "]";
     }
 
     return returnvalue;
