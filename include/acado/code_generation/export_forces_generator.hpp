@@ -78,7 +78,7 @@ public:
 	 */
 	returnValue configure(	const unsigned _nx,
 							const unsigned _nu,
-							const unsigned _N,
+							const unsigned _NN,
 							const std::vector< std::vector< unsigned > >& _lbIdx,
 							const std::vector< std::vector< unsigned > >& _ubIdx,
 							const bool _constHessian,
