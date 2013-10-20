@@ -49,7 +49,7 @@ ExportForcesGenerator::ExportForcesGenerator(	const String& _templateName,
 
 returnValue ExportForcesGenerator::configure(	const unsigned _nx,
 												const unsigned _nu,
-												const unsigned _N,
+												const unsigned _NN,
 												const std::vector< std::vector< unsigned > >& _lbIdx,
 												const std::vector< std::vector< unsigned > >& _ubIdx,
 												const bool _constHessian,
@@ -76,7 +76,7 @@ returnValue ExportForcesGenerator::configure(	const unsigned _nx,
 
 	// NOTE FORCES needs number of shooting nodes...
 	s.str(std::string());
-	s << _N + 1;
+	s << _NN + 1;
 	dictionary[ "@N@" ] =  s.str();
 
 	s.str(std::string());

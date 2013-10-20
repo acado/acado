@@ -49,11 +49,11 @@ ExportQpDunesInterface::ExportQpDunesInterface(	const String& _fileName,
 
 returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 												const unsigned _printLevel,
-												const std::string& _H,
+												const std::string& _HH,
 												const std::string& _g,
-												const std::string& _C,
+												const std::string& _CC,
 												const std::string& _c,
-												const std::string& _D,
+												const std::string& _DD,
 												const std::string& _lb0,
 												const std::string& _ub0,
 												const std::string& _lb,
@@ -77,9 +77,9 @@ returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 	ss << _printLevel;
 	dictionary[ "@PRINT_LEVEL@" ] =  ss.str();
 
-	dictionary[ "@QP_H@" ] =  _H;
+	dictionary[ "@QP_H@" ] =  _HH;
 	dictionary[ "@QP_G@" ] =  _g;
-	dictionary[ "@QP_C@" ] =  _C;
+	dictionary[ "@QP_C@" ] =  _CC;
 	dictionary[ "@QP_c@" ] =  _c;
 
 	dictionary[ "@QP_LB@" ] =  _lb;
@@ -90,7 +90,7 @@ returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 
 	if (conDim.size() > 0)
 	{
-		dictionary[ "@QP_D@" ]   =  _D;
+		dictionary[ "@QP_D@" ]   =  _DD;
 		dictionary[ "@QP_LBA@" ] =  _lbA;
 		dictionary[ "@QP_UBA@" ] =  _ubA;
 
