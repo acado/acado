@@ -79,12 +79,14 @@ ENDIF( NOT CMAKE_VERBOSE_MAKEFILE )
 #
 # Enable building of shared and static libraries
 #
-IF( NOT MSVC )
-	OPTION( ACADO_BUILD_SHARED "Build shared libraries" ON )
-	OPTION( ACADO_BUILD_STATIC "Build static libraries" OFF )
-ELSE()
+IF ( MSVC OR CYGWIN )
+	# All Windows builds that we currently support
 	SET( ACADO_BUILD_SHARED OFF )
 	SET( ACADO_BUILD_STATIC ON )
+ELSE()
+	# Linux or OS X
+	OPTION( ACADO_BUILD_SHARED "Build shared libraries" ON )
+	OPTION( ACADO_BUILD_STATIC "Build static libraries" OFF )	
 ENDIF()
 
 IF((NOT ACADO_BUILD_SHARED) AND (NOT ACADO_BUILD_STATIC))
