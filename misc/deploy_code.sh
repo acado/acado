@@ -1,16 +1,12 @@
 #!/bin/bash
 
-# Get the current branch name
-BRANCH=$(git symbolic-ref --short HEAD)
-# Get the current remote origin
-ORIGIN=$(git ls-remote --get-url origin)
 # Name of the archive
-ZIP_FILE=acadotoolkit-current-$BRANCH.zip
+ZIP_FILE=acadotoolkit-current-$TRAVIS_BRANCH.zip
 
 # Deploy only if the code is pushed to the "blessed" remote
-if [ "$ORIGIN" == "git@github.com:acado/acado.git" ] && [ "$CXX" == "g++" ]; then
-	# Make an archive of the current HEAD
-	git archive -o $ZIP_FILE HEAD
+if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ]; then
+	# Make an archive of the current travis-ci checked commit
+	git archive -o $ZIP_FILE $TRAVIS_COMMIT
 	# Deploy the archive to the website
 	curl -T $ZIP_FILE -u $FTP_USER:$FTP_PASS ftp://ftp.acadotoolkit.org/zip/$ZIP_FILE
 else
