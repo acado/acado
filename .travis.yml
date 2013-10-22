@@ -15,7 +15,7 @@ after_success:
  # Run the tests, allowed to fail
  - make test
  # Deploy the source code
- - "./misc/deploy_code.sh"
+ - "../misc/deploy_code.sh"
 notifications:
   recipients:
     - builds@acadotoolkit.org
