@@ -1107,12 +1107,9 @@ ExportNLPSolver* createGaussNewtonQpDunes(	UserInteraction* _userInteraction,
 	return new ExportGaussNewtonQpDunes(_userInteraction, _commonHeaderName);
 }
 
-static struct RegisterGaussNewtonQpDunes
+RegisterGaussNewtonQpDunes::RegisterGaussNewtonQpDunes()
 {
-	RegisterGaussNewtonQpDunes()
-	{
-		NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES, createGaussNewtonQpDunes);
-	}
-} registerGaussNewtonQpDunes;
+	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES, createGaussNewtonQpDunes);
+}
 
 CLOSE_NAMESPACE_ACADO

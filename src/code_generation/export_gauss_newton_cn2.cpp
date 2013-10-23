@@ -1596,12 +1596,9 @@ ExportNLPSolver* createGaussNewtonCN2(	UserInteraction* _userInteraction,
 	return new ExportGaussNewtonCN2(_userInteraction, _commonHeaderName);
 }
 
-static struct RegisterGaussNewtonCN2
+RegisterGaussNewtonCN2::RegisterGaussNewtonCN2()
 {
-	RegisterGaussNewtonCN2()
-	{
-		NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2, createGaussNewtonCN2);
-	}
-} registerGaussNewtonCN2;
+	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2, createGaussNewtonCN2);
+}
 
 CLOSE_NAMESPACE_ACADO

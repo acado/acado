@@ -356,6 +356,8 @@ returnValue OCPexport::setup( )
 	default:
 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "QP solver option is invalid");
 	}
+	if (solver == 0)
+		return ACADOERRORTEXT(RET_INVALID_OPTION, "Cannot allocate the solver object");
 
 	solver->setDimensions(ocp.getNX(), ocp.getNDX(), ocp.getNXA(), ocp.getNU(), ocp.getNP(), ocp.getN());
 	solver->setIntegratorExport( integrator );

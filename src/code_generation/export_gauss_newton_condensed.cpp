@@ -2392,12 +2392,9 @@ ExportNLPSolver* createGaussNewtonCondensed(	UserInteraction* _userInteraction,
 	return new ExportGaussNewtonCondensed(_userInteraction, _commonHeaderName);
 }
 
-static struct RegisterGaussNewtonCondensed
+RegisterGaussNewtonCondensed::RegisterGaussNewtonCondensed()
 {
-	RegisterGaussNewtonCondensed()
-	{
-		NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CONDENSED, createGaussNewtonCondensed);
-	}
-} registerGaussNewtonCondensed;
+	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CONDENSED, createGaussNewtonCondensed);
+}
 
 CLOSE_NAMESPACE_ACADO

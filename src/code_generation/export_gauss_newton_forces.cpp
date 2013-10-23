@@ -1048,12 +1048,9 @@ ExportNLPSolver* createGaussNewtonForces(	UserInteraction* _userInteraction,
 	return new ExportGaussNewtonForces(_userInteraction, _commonHeaderName);
 }
 
-static struct RegisterGaussNewtonForces
+RegisterGaussNewtonForces::RegisterGaussNewtonForces()
 {
-	RegisterGaussNewtonForces()
-	{
-		NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_FORCES, createGaussNewtonForces);
-	}
-} registerGaussNewtonForces;
+	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_FORCES, createGaussNewtonForces);
+}
 
 CLOSE_NAMESPACE_ACADO

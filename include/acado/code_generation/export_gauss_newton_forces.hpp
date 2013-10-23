@@ -212,6 +212,12 @@ private:
 	/** @} */
 };
 
+/** \internal */
+static struct RegisterGaussNewtonForces
+{
+	RegisterGaussNewtonForces();
+} registerGaussNewtonForces;
+
 CLOSE_NAMESPACE_ACADO
 
 #endif  // ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_FORCES_HPP
