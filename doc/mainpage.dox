@@ -1,13 +1,12 @@
-Introduction {#mainpage}
-============
+/*! \mainpage Introduction 
 
-[TOC]
+\tableofcontents
 
 ACADO Toolkit is a software environment and algorithm collection for automatic control and dynamic optimization. It provides a general framework for using a great variety of algorithms for direct optimal control, including model predictive control, state and parameter estimation and robust optimization. ACADO Toolkit is implemented as self-contained C++ code and comes along with user-friendly MATLAB interface. The object-oriented design allows for convenient coupling of existing optimization packages and for extending it with user-written optimization routines.
 
-[Learn more about the features of the toolkit here.](http://www.acadotoolkit.org)
+<a href="http://www.acadotoolkit.org">Learn more about the features of the toolkit here.</a>
 
-# Licensing information {#md_license}
+\section lic_info Licensing information
 
 \verbatim
 ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
@@ -30,3 +29,5 @@ You should have received a copy of the GNU Lesser General Public
 License along with ACADO Toolkit; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 \endverbatim
+
+*/
