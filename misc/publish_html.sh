@@ -23,9 +23,6 @@
 if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ] && [ "$TRAVIS_BRANCH" == "master" ]; then
 	# Move to the build folder
 	cd build
-	# Install necessary packages from apt-get
-	sudo apt-get update -qq
-	sudo apt-get install -qq doxygen graphviz
 	# Make documentation
 	make -j2 doc
 	# Change to doc folder
