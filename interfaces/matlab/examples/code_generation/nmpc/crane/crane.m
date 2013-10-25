@@ -40,7 +40,6 @@ sim = acado.SIMexport( Ts );
 sim.setModel(f);
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5' );
 sim.set( 'NUM_INTEGRATOR_STEPS',        numSteps        );
-% sim.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'               );
 
 if EXPORT
     sim.exportCode('export_SIM');
@@ -72,7 +71,6 @@ mpc.set( 'INTEGRATOR_TYPE',             'INT_IRK_GL4'       );
 mpc.set( 'NUM_INTEGRATOR_STEPS',        N                   );
 mpc.set( 'MEX_VERBOSE',                 1                   );
 % mpc.set( 'GENERATE_SIMULINK_INTERFACE', 'YES'               );
-% mpc.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'                   );
 
 if EXPORT
     mpc.exportCode( 'export_MPC' );

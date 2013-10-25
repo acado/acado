@@ -142,13 +142,11 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
 		int debugMode;
 		get( INTEGRATOR_DEBUG_MODE, debugMode );
-		int operatingSystem;
-		get( OPERATING_SYSTEM,operatingSystem );
 		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
 			String integrateInterface( dirName );
 			integrateInterface << "/integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure((OperatingSystem)operatingSystem == OS_WINDOWS, (ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
+			exportMexFun.configure((ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
 			exportMexFun.exportCode();
 
 			integrateInterface = dirName + String("/make_acado_integrator.m");
@@ -773,9 +771,6 @@ returnValue SIMexport::exportAcadoHeader(	const String& _dirName,
 	int qpSolver;
 	get( QP_SOLVER,qpSolver );
 
-	int operatingSystem;
-	get( OPERATING_SYSTEM,operatingSystem );
-
 	int useSinglePrecision;
 	get( USE_SINGLE_PRECISION,useSinglePrecision );
 
@@ -790,17 +785,15 @@ returnValue SIMexport::exportAcadoHeader(	const String& _dirName,
 	acadoHeader.addStatement( "#include <stdio.h>\n" );
 	acadoHeader.addStatement( "#include <math.h>\n" );
 
-	if ( (OperatingSystem)operatingSystem == OS_WINDOWS )
-	{
-		acadoHeader.addStatement( "#include <windows.h>\n" );
-	}
-	else
-	{
-		// OS_UNIX
-		acadoHeader.addStatement( "#include <time.h>\n" );
-		acadoHeader.addStatement( "#include <sys/stat.h>\n" );
-		acadoHeader.addStatement( "#include <sys/time.h>\n" );
-	}
+	acadoHeader.addStatement( "#if (defined WIN32 || defined _WIN64)\n" );
+	acadoHeader.addStatement( "#include <windows.h>\n" );
+	acadoHeader.addStatement( "#else\n" );
+	// OS_UNIX
+	acadoHeader.addStatement( "#include <time.h>\n" );
+	acadoHeader.addStatement( "#include <sys/stat.h>\n" );
+	acadoHeader.addStatement( "#include <sys/time.h>\n" );
+	acadoHeader.addStatement( "#endif\n" );
+
 	acadoHeader.addLinebreak( );
 
 	acadoHeader.addStatement( "#ifndef ACADO_H\n" );
