@@ -5,7 +5,6 @@
 #define FIRST_ORDER_SENS @FIRST_ORDER_SENS@
 #define CALLS_TIMING @CALLS_TIMING@
 #define NUM_STAGES @NUM_STAGES@
-#define OS_WINDOWS @OS_WINDOWS@
 
 /* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
 /* --------------------------------------------------- */
@@ -22,7 +21,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		real_t next[ACADO_NX+ACADO_NXA+ACADO_NU+ACADO_NP];
     #endif
     const char *fieldnames[3], *infonames[3];
-    #if OS_WINDOWS
+    #if (defined WIN32 || defined _WIN64)
         LARGE_INTEGER counter, frequency;
     #else
         struct timeval theclock;
@@ -212,7 +211,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		#endif
     }
     
-    #if OS_WINDOWS
+    #if (defined WIN32 || defined _WIN64)
         QueryPerformanceFrequency(&frequency);
         QueryPerformanceCounter(&counter);
         start = ((real_t) counter.QuadPart) / ((real_t) frequency.QuadPart);
@@ -238,7 +237,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	    #endif
 	    reset = 0;
     }
-    #if OS_WINDOWS
+    #if (defined WIN32 || defined _WIN64)
         QueryPerformanceFrequency(&frequency);
         QueryPerformanceCounter(&counter);
         end = ((real_t) counter.QuadPart) / ((real_t) frequency.QuadPart);
