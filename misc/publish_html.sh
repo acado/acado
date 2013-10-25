@@ -20,7 +20,7 @@
 # - the code is pushed to the "blessed" remote and
 # - a g++ compiler is being used and
 # - and if we pushed to the stable branch
-if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ] && [ "$TRAVIS_BRANCH" == "master" ]; then
+if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ] && [ "$TRAVIS_BRANCH" == "stable" ]; then
 	# Move to the build folder
 	cd build
 	# Make documentation
@@ -28,7 +28,7 @@ if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ] && [ "$TRAVIS
 	# Change to doc folder
 	cd ../doc
 	# Synchronize the documentation folders
-	sshpass -p "$SF_PASS" rsync -avzP --delete -e "ssh -o StrictHostKeyChecking=no" html "mvukov,acado@web.sourceforge.net:/home/groups/a/ac/acado/htdocs/doc"
+	sshpass -p "$SF_PASS" rsync -azP --delete -e "ssh -o StrictHostKeyChecking=no" html "$SF_USER,acado@web.sourceforge.net:/home/groups/a/ac/acado/htdocs/doc"
 	# Move back to the root folder
 	cd ..
 fi

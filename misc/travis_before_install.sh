@@ -20,7 +20,7 @@
 # - the code is pushed to the "blessed" remote and
 # - a g++ compiler is being used and
 # - and if we pushed to the stable branch
-if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ] && [ "$TRAVIS_BRANCH" == "master" ]; then
+if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ] && [ "$TRAVIS_BRANCH" == "stable" ]; then
 	# Install necessary deps
 	sudo apt-get update -qq
 	sudo apt-get install -qq doxygen graphviz sshpass
