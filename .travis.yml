@@ -6,6 +6,7 @@ env:
  global:
    - secure: "XVZ3qVCwiqySzDWl9prD1+CtNZDod8IWiBEdPGrRpJmcj+RUuBGqkveiTmOKOKKpSf2cJ+8ulconMcntrAQe98I0UE8g7pytkdITr0iSJL4uK/kLQY1aoP+Yy/6tgwFbbj66rvPBeAZl6nWoSEN+r/zNL9O6KGrE+JvYFEWoteQ="
    - secure: "naQwKgv0Huuna+Jrs6WJdTHvyYv2TGsQlzgL0kUuFEibMNY/AcAJceWHXDSZx13oIvZLRgjixmvNuJYlcVVV4K9KmAYvUhggQobHhLgS50x1xe80c4TIvn6Zf12vK3H+byGwfF1KQVIN1i0O1JF/ltK9/PBCit1dfaRgu/nFdRM="
+   - secure: "PtNedKDEUJTlajoUnl93hWBSkTNS0351cPWjjPRNMxvucazkJBYDRIntZBhHxj6EQLg0YVoKzdytIh3pl/elviVTizf1SeoTuMfnbxmn5pTprr0fzWhgNqSGOloqFZOMQG7f0V8P+0G92yvmg031xQWe1DdvNTzdI/A7ySZVuA0="
 before_install:
  # Install necessary packages from apt-get
  - "./misc/travis_before_install.sh"

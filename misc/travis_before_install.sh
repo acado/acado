@@ -23,5 +23,5 @@
 if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ] && [ "$TRAVIS_BRANCH" == "master" ]; then
 	# Install necessary deps
 	sudo apt-get update -qq
-	sudo apt-get install -qq doxygen graphviz
+	sudo apt-get install -qq doxygen graphviz sshpass
 fi
