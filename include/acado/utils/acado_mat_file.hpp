@@ -35,8 +35,8 @@
 
 
 #include <acado/utils/acado_namespace_macros.hpp>
-#include <fstream>
 
+#include <fstream>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -56,7 +56,8 @@ class MatFile
 	/*
 	 *	INTERNAL DATA STRUCTURES
 	 */
-	typedef struct {
+	typedef struct
+	{
 		long type;
 		long mrows;
 		long ncols;
@@ -87,6 +88,5 @@ class MatFile
 };
 
 CLOSE_NAMESPACE_ACADO
-
 
 #endif	// ACADO_TOOLKIT_ACADO_MAT_FILE_HPP

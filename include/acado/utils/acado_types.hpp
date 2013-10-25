@@ -26,30 +26,31 @@
 
 /**
  *    \file include/acado/utils/acado_types.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  *
- *    This file collects all declarations of all non-built-in types
- *    (except for classes).
+ *    This file collects all declarations of all non-built-in types (except for classes).
  */
-
 
 #ifndef ACADO_TOOLKIT_ACADO_TYPES_HPP
 #define ACADO_TOOLKIT_ACADO_TYPES_HPP
 
-
 #include <acado/utils/acado_namespace_macros.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
 
 /** Short-cut for unsigned integer. */
 typedef unsigned int uint;
 
-
-/** Alias for DifferentialEquation. */
-//typedef DifferentialEquation DynamicModel;
-
+/** Boolean type aliasing. */
+typedef bool BooleanType;
+/** Aliasing true. */
+#define BT_TRUE true
+/** Aliasing false. */
+#define BT_FALSE false
+/** Aliasing yes. */
+#define YES true
+/** Aliasing no. */
+#define NO false
 
 /** Function pointer type for functions given as C source code. */
 typedef void (*cFcnPtr)( double* x, double* f, void *userData );
@@ -57,19 +58,8 @@ typedef void (*cFcnPtr)( double* x, double* f, void *userData );
 /** Function pointer type for derivatives given as C source code. */
 typedef void (*cFcnDPtr)( int number, double* x, double* seed, double* f, double* df, void *userData );
 
-/** Summarises all possible logical values. */
-enum BooleanType{
-
-    BT_FALSE,    /**< Logical value for "false". */
-    BT_TRUE      /**< Logical value for "true".  */
-};
-
-#define NO  BT_FALSE
-#define YES BT_TRUE
-
-
-/** Defines the Neutral Elements ZERO and ONE as well as the default \n
- *  NEITHER_ONE_NOR_ZERO                                             \n
+/** Defines the Neutral Elements ZERO and ONE as well as the default
+ *  NEITHER_ONE_NOR_ZERO
  */
 enum NeutralElement{
 
@@ -78,9 +68,7 @@ enum NeutralElement{
     NE_NEITHER_ONE_NOR_ZERO
 };
 
-
-/** Defines the names of all implemented symbolic operators.
-*/
+/** Defines the names of all implemented symbolic operators. */
 enum OperatorName{
 
     ON_SIN,
@@ -102,8 +90,6 @@ enum OperatorName{
     ON_DIFFERENTIAL_STATE,
     ON_CEXPRESSION
 };
-
-
 
 /** Defines the names of all implemented variable types. */
 enum VariableType{
@@ -817,7 +803,6 @@ enum ExportType
 	STATIC_CONST_REAL
 };
 
-
 enum ExportStruct
 {
 	ACADO_VARIABLES,
@@ -831,14 +816,9 @@ enum ExportStruct
 	FORCES_INFO
 };
 
-
-
 CLOSE_NAMESPACE_ACADO
 
-
-
 #endif	// ACADO_TOOLKIT_ACADO_TYPES_HPP
-
 
 /*
  *    end of file

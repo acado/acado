@@ -26,63 +26,44 @@
 
 /**
  *    \file include/acado/utils/acado_io_utils.hpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 29.12.2008
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date 2008 - 2013
  *
- *    This file declares several utility functions that are
- *    useful for low-level file reading and printing.
+ *    This file declares several utility functions that are useful for low-level
+ *    file reading and printing.
  *
  */
-
 
 #ifndef ACADO_TOOLKIT_ACADO_IO_UTILS_HPP
 #define ACADO_TOOLKIT_ACADO_IO_UTILS_HPP
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
+#include <cstdlib>
+#include <cstring>
+#include <string>
+#include <fstream>
 
 #include <acado/utils/acado_message_handling.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
 
+#ifdef _snprintf
+	#define snprintf _snprintf
+#endif
 
-/** Global definition of the default line    \n
- *  separation symbol. This constant should  \n
- *  be used for all text-file interaction.   \n
+/** Global definition of the default line separation symbol. This constant should
+ *  be used for all text-file interaction.
  */
 const char LINE_SEPARATOR = '\n';
 
-
-/** Global definition of the default text     \n
- *  separation symbol. This constant  \n
- *  should be used for all text-files \n
- *  interactions.                     \n
+/** Global definition of the default text separation symbol. This constant
+ *  should be used for all text-files interactions.
  */
 const char TEXT_SEPARATOR = ' ';
 
-
-/** Global definition of the default text     \n
- *  separation symbol. This constant  \n
- *  should be used for all text-files \n
- *  interactions.                     \n
+/** Global definition of the default text separation symbol. This constant
+ *  should be used for all text-files interactions.
  */
 const char NOT_A_NUMBER[3] = { 'n', 'a', 'n' };
-
-
-
-/** Global definition of the default \n
- *  output stream. This constant  \n
- *  should be used for all text-files \n
- *  interactions.                     \n
- */
-FILE* const TEXT_OUTPUT_STREAM = stdout; //fopen( "a.txt","wb+" );
-
-
-
 
 const char  DEFAULT_LABEL         [1]   = { '\0'                              };
 const char  DEFAULT_START_STRING  [3]   = { '[' , '\t', '\0'                  };
@@ -92,8 +73,7 @@ const uint  DEFAULT_PRECISION           = 16;
 const char  DEFAULT_COL_SEPARATOR [2]   = { '\t', '\0'                        };
 const char  DEFAULT_ROW_SEPARATOR [6]   = { '\t', ']' , '\n', '[', '\t', '\0' };
 
-
-
+/** Get global string definitions. */
 returnValue getGlobalStringDefinitions(	PrintScheme _printScheme,
 										char** _startString,
 										char** _endString,
@@ -103,129 +83,49 @@ returnValue getGlobalStringDefinitions(	PrintScheme _printScheme,
 										char** _rowSeparator
 										);
 
+/** A function for file copying. */
+returnValue acadoCopyFile(	std::string& source,
+							std::string& destination,
+							std::string& commentString,
+							bool printCodegenNotice = false
+							);
 
-/** Returns the length of a string;
- * \return length of the string (or 0 if not allocated!) */
-uint getStringLength( const char* string );
+/** A function for copying of template files. */
+returnValue acadoCopyTempateFile(	std::string& source,
+									std::string& destination,
+									std::string& commentString,
+									bool printCodegenNotice = false
+									);
 
+/** A function to create a folder. */
+returnValue acadoCreateFolder(std::string& name);
 
+/** Prints ACADO Toolkit's copyright notice.
+ *
+ *  \return SUCCESSFUL_RETURN */
+returnValue acadoPrintCopyrightNotice( );
 
+/** Prints ACADO Toolkit's copyright notice for sub-packages.
+ *
+ *  \return SUCCESSFUL_RETURN */
+returnValue acadoPrintCopyrightNotice(std::string& subpackage);
 
-int acadoPrintf( const char* format, ... );
+/** Prints ACADO Toolkit's copyright notice for auto generated code.
+ *
+ *  \return SUCCESSFUL_RETURN */
+returnValue acadoPrintAutoGenerationNotice(	std::ofstream& s,
+											std::string& commentString
+											);
 
-FILE* acadoFOpen( const char * filename, const char * mode );
-int acadoFClose ( FILE * stream );
-int acadoFPrintf ( FILE * stream, const char * format, ... );
-int acadoVFPrintf ( FILE * stream, const char * format, va_list arg );
-
-/** Global utility function to allocate a double* from an open file.   \n
- *  The file is closed at the end of the routine. Note that this       \n
- *  function returns the number "dim" of allocated double values which \n
- *  have been detected in the file. If a non positive value for dim is \n
- *  returned, the routine will also return x = NULL. (Thus, you can    \n
- *  either check for x != 0 or dim > 0 to ensure that x has been       \n
- *  allocated by the routine.)                                         \n
- *                                                                     \n
- *  \return SUCCESSFUL_RETURN                                          \n
- *          RET_FILE_NOT_FOUND                                         \n
- *          RET_FILE_CAN_NOT_BE_OPENED                                 \n
- *          RET_FILE_CAN_NOT_BE_CLOSED                                 \n
- *          RET_FILE_HAS_NO_VALID_ENTRIES                              \n
+/** Returns the current system time.
+ *
+ *  \return current system time
  */
-
-returnValue allocateDoublePointerFromFile( FILE    *file, /**< the file to read         */
-                                           double **x   , /**< the double* to allocate  */
-                                           int     &dim   /**< dimension of the double* */ );
-
-
-
-/** Global utility function to allocate a double* from an open file.  \n
- *  The file is closed at the end of the routine. Note that the       \n
- *  dimension of the allocated double pointer will be                 \n
- *                                                                    \n
- *                       nCols x nRows  .                             \n
- *                                                                    \n
- *  If a non positive value for nRows and/or nCols is returned, the   \n
- *  routine will also return x = NULL. (Thus, you can either check    \n
- *  for x != 0 or dim > 0 to ensure that x has been                   \n
- *  allocated by the routine.)                                        \n
- *                                                                    \n
- *  \return SUCCESSFUL_RETURN                                         \n
- *          RET_FILE_NOT_FOUND                                        \n
- *          RET_FILE_CAN_NOT_BE_OPENED                                \n
- *          RET_FILE_CAN_NOT_BE_CLOSED                                \n
- *          RET_FILE_HAS_NO_VALID_ENTRIES                             \n
- */
-
-returnValue allocateDoublePointerFromFile( FILE    *file , /**< the file to read         */
-                                           double **x    , /**< the double* to allocate  */
-                                           int     &nRows, /**< number of rows           */
-                                           int     &nCols  /**< number of columns        */ );
-
-
-/** Global utility function to write a double* into an open file.    \n
- *                                                                   \n
- *  \return SUCCESSFUL_RETURN                                        \n
- *          RET_CAN_NOT_WRITE_INTO_FILE                              \n
- */
-
-returnValue writeDoublePointerToFile( double *x   , /**< the double* to write     */
-                                      int     dim , /**< dimension of the double* */
-                                      FILE   *file  /**< the file to write to     */ );
-
-
-
-/** Global utility function to write a double* into an string.       \n
- *                                                                   \n
- *  \return IF SUCCESSFUL: number entries written to the buffer >= 0 \n
- *          OTHERWISE    : -1                                        \n
- */
-
-int writeDoublePointerToString( double *x     , /**< the double* to write     */
-                                int     dim   , /**< dimension of the double* */
-                                char   *buffer  /**< the buffer to write to   */ );
-
-
-
-
-/** Global utility function to write a double* into an open file.    \n
- *  (the dimension of the double* should be  nRows x nCols.)         \n
- *                                                                   \n
- *  \return SUCCESSFUL_RETURN                                        \n
- *          RET_CAN_NOT_WRITE_INTO_FILE                              \n
- */
-
-returnValue writeDoublePointerToFile( double *x    , /**< the double* to write     */
-                                      int     nRows, /**< number of rows           */
-                                      int     nCols, /**< number of columns        */
-                                      FILE   *file   /**< the file to write to     */ );
-
-
-
-/** Global utility function to write a double* into an string.       \n
- *                                                                   \n
- *  \return IF SUCCESSFUL: number entries written to the buffer >= 0 \n
- *          OTHERWISE    : -1                                        \n
- */
-
-int writeDoublePointerToString( double *x     , /**< the double* to write     */
-                                int     nRows , /**< number of rows           */
-                                int     nCols , /**< number of columns        */
-                                char   *buffer  /**< the buffer to write to   */ );
-
-
-FILE* readFromFile(	const char* filename
-					);
-
-
-
+double acadoGetTime( );
 
 CLOSE_NAMESPACE_ACADO
 
-
-
 #endif	// ACADO_TOOLKIT_ACADO_IO_UTILS_HPP
-
 
 /*
  *	end of file

@@ -37,9 +37,7 @@
 #define ACADO_TOOLKIT_ACADO_DEBUGGING_HPP
 
 #ifdef __MATLAB__
-
 	#include <mex.h>
-	//#define ASSERT(expr) do { if (!(expr)) { mexErrMsgTxt("An error while executing your program occurred. Assertion " #expr " failed!"); } } while(0);
 #endif
 
 #if __DEBUG__
@@ -55,10 +53,7 @@
 
 #endif
 
-
-
 #endif   // ACADO_TOOLKIT_ACADO_DEBUGGING_HPP
-
 
 /*
  *    end of file

@@ -42,14 +42,8 @@
  *    namespace notation.
  */
 
-
 #ifndef ACADO_TOOLKIT_ACADO_NAMESPACE_MACROS_HPP
 #define ACADO_TOOLKIT_ACADO_NAMESPACE_MACROS_HPP
-
-
-/** hard coded compiler flag */
-//#define __WITHOUT_NAMESPACE__
-
 
 #ifdef __WITHOUT_NAMESPACE__
 
@@ -66,7 +60,6 @@
     #define REFER_NAMESPACE_ACADO  ACADO::
 
 #endif
-
 
 #endif   // ACADO_TOOLKIT_ACADO_NAMESPACE_MACROS_HPP
 

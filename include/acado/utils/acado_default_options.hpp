@@ -32,14 +32,10 @@
  *    This file collects default values for all options within the ACADO Toolkit.
  */
 
-
 #ifndef ACADO_TOOLKIT_ACADO_DEFAULT_OPTIONS_HPP
 #define ACADO_TOOLKIT_ACADO_DEFAULT_OPTIONS_HPP
 
-
-
 #include <acado/utils/acado_types.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 
@@ -111,10 +107,7 @@ const int 		defaultOutputPlotting = PLOT_REAL;							/**< Default value for spec
 
 CLOSE_NAMESPACE_ACADO
 
-
-
 #endif	// ACADO_TOOLKIT_ACADO_DEFAULT_OPTIONS_HPP
-
 
 /*
  *	end of file

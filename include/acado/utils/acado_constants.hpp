@@ -26,22 +26,18 @@
 
 /**
  *    \file include/acado/utils/acado_constants.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 31.05.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  *
- *    This file collects all global constants used within the rtcTOOLKIT.
+ *    This file collects all global constants used within the toolkit.
  */
-
 
 #ifndef ACADO_TOOLKIT_ACADO_CONSTANTS_HPP
 #define ACADO_TOOLKIT_ACADO_CONSTANTS_HPP
 
-
 #include <acado/utils/acado_types.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
 
 /** Numerical value of machine precision (min eps, s.t. 1+eps > 1). */
 const double EPS = 2.221e-16;
@@ -87,11 +83,8 @@ const double BOUNDTOL = 1.0e-10;
  *  Note: this value has to be positive! */
 const double BOUNDRELAXATION = 1.0e3;
 
-
 /** Default sampling time for blocks of the simulation environment. */
 const double DEFAULT_SAMPLING_TIME = 1.0;
-
-
 
 /** Maximum length of a string. */
 const unsigned int MAX_LENGTH_STRING = 1024;
@@ -99,27 +92,9 @@ const unsigned int MAX_LENGTH_STRING = 1024;
 /** Maximum length of a name or unit. */
 const unsigned int MAX_LENGTH_NAME = 80;
 
-
-
-
-
-
-// METHODS:
-// ---------------------
-
-/** Checks whether a constant is infty:  */
-inline BooleanType isInfty( const double x );
-
-
-
 CLOSE_NAMESPACE_ACADO
 
-
-
-#include <acado/utils/acado_constants.ipp>
-
 #endif	// ACADO_TOOLKIT_ACADO_CONSTANTS_HPP
-
 
 /*
  *	end of file

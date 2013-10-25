@@ -196,46 +196,46 @@ INCLUDE( CompilerOptions )
 SET( ACADO_SOURCE_DIRS
 	# Integrators source folders
 	./src/utils
-	./src/clock
-	./src/matrix_vector
-	./src/set_arithmetics
-	./src/variables_grid
-	./src/curve
-	./src/user_interaction
-	./src/symbolic_operator
-	./src/symbolic_expression
-	./src/function
-	./src/integrator
-	./src/validated_integrator
-	./src/sparse_solver
-	./external_packages/src/acado_csparse
-	./external_packages/src/acado_gnuplot
+#	./src/clock
+#	./src/matrix_vector
+#	./src/set_arithmetics
+#	./src/variables_grid
+#	./src/curve
+#	./src/user_interaction
+#	./src/symbolic_operator
+#	./src/symbolic_expression
+#	./src/function
+#	./src/integrator
+#	./src/validated_integrator
+#	./src/sparse_solver
+#	./external_packages/src/acado_csparse
+#	./external_packages/src/acado_gnuplot
 	
 	# Optimal Control source folders
-	./src/code_generation
-	./src/code_generation/integrators
-	./src/code_generation/linear_solvers
-	./src/dynamic_system
-	./src/dynamic_discretization
-	./src/objective
-	./src/constraint
-	./src/ocp
-	./src/conic_program
-	./src/conic_solver
-	./src/nlp_solver
-	./src/nlp_derivative_approximation
-	./src/optimization_algorithm
-	./external_packages/src/acado_qpoases
+#	./src/code_generation
+#	./src/code_generation/integrators
+#	./src/code_generation/linear_solvers
+#	./src/dynamic_system
+#	./src/dynamic_discretization
+#	./src/objective
+#	./src/constraint
+#	./src/ocp
+#	./src/conic_program
+#	./src/conic_solver
+#	./src/nlp_solver
+#	./src/nlp_derivative_approximation
+#	./src/optimization_algorithm
+#	./external_packages/src/acado_qpoases
 	
 	# Simulation source folders
-	./src/process
-	./src/noise
-	./src/transfer_device
-	./src/controller
-	./src/control_law
-	./src/estimator
-	./src/reference_trajectory
-	./src/simulation_environment
+#	./src/process
+#	./src/noise
+#	./src/transfer_device
+#	./src/controller
+#	./src/control_law
+#	./src/estimator
+#	./src/reference_trajectory
+#	./src/simulation_environment
 )
 
 ################################################################################

@@ -30,14 +30,11 @@
  *    \date 16.04.2010
  */
 
-
 #include <acado/utils/acado_mat_file.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <string.h>
 
-
 BEGIN_NAMESPACE_ACADO
-
 
 void MatFile::open(	const char * fileName
 					)
@@ -107,6 +104,5 @@ void MatFile::write(	const Vector& vec,
 	
 	// imaginary numbers should be stored just after the real ones
 }
-
 
 CLOSE_NAMESPACE_ACADO

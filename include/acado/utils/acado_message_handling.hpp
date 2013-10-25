@@ -29,21 +29,17 @@
  *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
-
 #ifndef ACADO_TOOLKIT_ACADO_MESSAGE_HANDLING_HPP
 #define ACADO_TOOLKIT_ACADO_MESSAGE_HANDLING_HPP
 
-
 #include <acado/utils/acado_namespace_macros.hpp>
-#include <stdio.h>
-#include <stdlib.h>
 
+#include <cstdlib>
 #include <iostream>
 #include <vector>
-
+#include <string>
 
 BEGIN_NAMESPACE_ACADO
-
 
 /**
  *	\brief Defines all symbols for global return values.
@@ -522,15 +518,9 @@ public:
 	#define __LINE__ 0
 #endif
 
-// define SNPRINTF if necessary
-#ifdef _snprintf
-	#define snprintf _snprintf
-#endif
-
-// Macro to quote macro values as strings, e.g. __LINE__ number to string, used in other macros
+/** Macro to quote macro values as strings, e.g. __LINE__ number to string, used in other macros */
 #define QUOTE_(x) #x
 #define QUOTE(x) QUOTE_(x)
-
 
 /** Macro to return a error */
 #define ACADOERROR(retval) \
