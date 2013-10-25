@@ -42,7 +42,6 @@ sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA3' );
 sim.set( 'NUM_INTEGRATOR_STEPS',        numSteps        );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1               );
 sim.set( 'MEASUREMENT_GRID',       'ONLINE_GRID'        );
-% sim.set( 'OPERATING_SYSTEM', 'OS_WINDOWS'               );
 
 sim.exportCode('crane_export')
 
