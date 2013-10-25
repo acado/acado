@@ -28,7 +28,7 @@ if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ] && [ "$TRAVIS
 	# Change to doc folder
 	cd ../doc
 	# Synchronize the documentation folders
-	rsync -avzP --delete -e 'ssh -o StrictHostKeyChecking' html "mvukov,acado@web.sourceforge.net:/home/groups/a/ac/acado/htdocs/doc"
+	rsync -avzP --delete -e "ssh -o StrictHostKeyChecking=no" html "mvukov,acado@web.sourceforge.net:/home/groups/a/ac/acado/htdocs/doc"
 	# Move back to the root folder
 	cd ..
 fi
