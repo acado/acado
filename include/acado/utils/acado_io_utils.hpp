@@ -39,16 +39,17 @@
 
 #include <cstdlib>
 #include <cstring>
+
 #include <string>
+#include <sstream>
+
 #include <fstream>
+#include <vector>
+#include <iterator>
 
 #include <acado/utils/acado_message_handling.hpp>
 
 BEGIN_NAMESPACE_ACADO
-
-#ifdef _snprintf
-	#define snprintf _snprintf
-#endif
 
 /** Global definition of the default line separation symbol. This constant should
  *  be used for all text-file interaction.
@@ -125,6 +126,42 @@ returnValue acadoPrintAutoGenerationNotice(	std::ofstream& stream,
 double acadoGetTime( );
 
 CLOSE_NAMESPACE_ACADO
+
+namespace std
+{
+
+/** Read vector data from a text file. */
+template< class T >
+istream& operator>>(	istream& stream,
+						vector< T >& array
+						)
+{
+	copy(istream_iterator< T >( stream ), istream_iterator< T >(), back_inserter( array ));
+
+	return stream;
+}
+
+/** Read matrix data from a text file. */
+template< class T >
+istream& operator>>(	istream& stream,
+						vector< vector< T > >& array
+						)
+{
+	while (stream.good() == true)
+	{
+		string line;
+		vector< T > data;
+		getline(stream, line);
+		stringstream ss( line );
+		copy(istream_iterator< T >( ss ), istream_iterator< T >(), back_inserter( data ));
+		array.push_back( data );
+	}
+
+	return stream;
+}
+
+}
+
 
 #endif	// ACADO_TOOLKIT_ACADO_IO_UTILS_HPP
 
