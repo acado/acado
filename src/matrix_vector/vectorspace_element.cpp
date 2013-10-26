@@ -34,7 +34,7 @@
 #include <acado/matrix_vector/vector.hpp>
 #include <acado/matrix_vector/acado_mat_file.hpp>
 
-#include <sstream>
+#include <iostream>
 #include <iomanip>
 
 BEGIN_NAMESPACE_ACADO
@@ -282,7 +282,7 @@ returnValue VectorspaceElement::print(	std::ostream& stream,
 										PrintScheme printScheme
 										) const
 {
-	MatFile* matFile;
+	MatFile* matFile = 0;
 
 	switch ( printScheme )
 	{
@@ -329,21 +329,54 @@ returnValue VectorspaceElement::print(	const char* const filename,
 										) const
 {
 	ofstream stream( filename );
+	returnValue status;
 
 	if ( stream.is_open() )
-		return print(stream, name, printScheme);
+		status = print(stream, name, printScheme);
 	else
 		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
 
 	stream.close();
 
-	return SUCCESSFUL_RETURN;
+	return status;
 }
 
 std::ostream& operator<<(std::ostream& stream, const VectorspaceElement& arg)
 {
 	if (arg.print( stream ) != SUCCESSFUL_RETURN)
 		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Cannot write to output stream.");
+
+	return stream;
+}
+
+returnValue VectorspaceElement::read( std::istream& stream )
+{
+	vector< double > data;
+	stream >> data;
+
+	return init(data.size(), data.data());
+}
+
+returnValue VectorspaceElement::read(	const char* const filename
+										)
+{
+	ifstream stream( filename );
+	returnValue status;
+
+	if (stream.is_open())
+		status = read( stream );
+	else
+		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
+
+	stream.close();
+
+	return status;
+}
+
+std::istream& operator>>(std::istream& stream, VectorspaceElement& arg)
+{
+	if (arg.read( stream ) != SUCCESSFUL_RETURN)
+		ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
 
 	return stream;
 }

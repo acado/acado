@@ -76,10 +76,6 @@ class Vector : public VectorspaceElement
         /** Destructor. */
         virtual ~Vector( );
 
-        /** Assignment operator (deep copy). */
-		Vector& operator=(	const Vector& rhs	/**< Right-hand side object. */
-							);
-
 		/** Adds (element-wise) two vectors to a temporary object.
 		 *  \return Temporary object containing the sum of the vectors. */
 		inline Vector operator+(	const Vector& arg	/**< Second summand. */

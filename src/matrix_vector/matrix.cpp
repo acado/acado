@@ -309,7 +309,7 @@ returnValue Matrix::print(	std::ostream& stream,
 		for (unsigned col = 0; col < nCols; ++col)
 		{
 			if (precision > 0)
-				stream	<< setw(width) << setprecision(precision) << operator()(row, col);
+				stream << setw(width) << setprecision(precision) << operator()(row, col);
 			else
 				stream << setw(width) << (int)operator()(row, col);
 
@@ -343,7 +343,27 @@ returnValue Matrix::print(	std::ostream& stream,
 		return SUCCESSFUL_RETURN;
 
 	default:
-		return print(stream, name, printScheme);
+		char* startString = 0;
+		char* endString = 0;
+		uint width = 0;
+		uint precision = 0;
+		char* colSeparator = 0;
+		char* rowSeparator = 0;
+
+		returnValue ret = getGlobalStringDefinitions(printScheme, &startString,
+				&endString, width, precision, &colSeparator, &rowSeparator);
+		if (ret != SUCCESSFUL_RETURN)
+			return ret;
+
+		returnValue status = print(stream, name, startString, endString, width,
+				precision, colSeparator, rowSeparator);
+
+		if ( startString != 0 )   delete[] startString;
+		if ( endString != 0 )     delete[] endString;
+		if ( colSeparator != 0 )  delete[] colSeparator;
+		if ( rowSeparator != 0 )  delete[] rowSeparator;
+
+		return status;
 	}
 }
 
@@ -351,6 +371,40 @@ std::ostream& operator<<(std::ostream& stream, const Matrix& arg)
 {
 	if (arg.print( stream ) != SUCCESSFUL_RETURN)
 		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Cannot write to output stream.");
+
+	return stream;
+}
+
+returnValue Matrix::read( std::istream& stream )
+{
+	vector< vector< double > > data;
+	stream >> data;
+
+	if (data.size() == 0)
+		return init(0, 0);
+
+	// Sanity check
+	unsigned nc = data[ 0 ].size();
+	unsigned nr = data.size();
+	for (unsigned row = 0; row < nr; ++row)
+		if (data[ row ].size() != nc)
+			return ACADOERROR( RET_INVALID_ARGUMENTS );
+
+	// Data conversion
+	vector< double > tmp;
+	for (unsigned row = 0; row < nr; ++row)
+		for (unsigned col = 0; col < nc; ++col)
+			tmp.push_back( data[ row ][ col ] );
+
+	return init(nr, nc, tmp.data());
+}
+
+std::istream& operator>>(	std::istream& stream,
+   							Matrix& arg
+   							)
+{
+	if (arg.read( stream ) != SUCCESSFUL_RETURN )
+		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Cannot read from input stream.");
 
 	return stream;
 }

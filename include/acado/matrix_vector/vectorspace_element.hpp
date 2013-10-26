@@ -317,9 +317,22 @@ class VectorspaceElement
 									PrintScheme printScheme
 									) const;
 
+		/** Read data from an input file. */
+		virtual returnValue read(	std::istream& stream
+									);
+
+		/** Read data from an input file. */
+		virtual returnValue read(	const char* const filename
+									);
+
 		/** Output streaming operator. */
 		friend std::ostream& operator<<(	std::ostream& stream,
 											const VectorspaceElement& arg
+											);
+
+		/** Input streaming operator. */
+		friend std::istream& operator>>(	std::istream& stream,
+											VectorspaceElement& arg
 											);
 
     //

@@ -559,10 +559,18 @@ class Matrix : public VectorspaceElement
 									PrintScheme printScheme
 									) const;
 
+        /** Read matrix data from an input stream. */
+        virtual returnValue read( std::istream& stream );
+
         /** Prints the matrix into a stream. */
         friend std::ostream& operator<<(	std::ostream& stream, /**< the stream to print to */
-											Matrix& arg           /**< the matrix to print  */
+											const Matrix& arg     /**< the matrix to print  */
 											);
+
+        /** Read a matrix from an input stream. */
+        friend std::istream& operator>>(	std::istream& stream,
+        									Matrix& arg
+        									);
 
     //
     // PROTECTED MEMBER FUNCTIONS:
