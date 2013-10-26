@@ -96,7 +96,7 @@ ENDIF()
 #
 # Enable building of ...
 #
-OPTION( ACADO_WITH_EXAMPLES "Building ACADO examples" ON )
+OPTION( ACADO_WITH_EXAMPLES "Building ACADO examples" OFF )
 
 #
 # Compilation of testing suite
