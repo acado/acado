@@ -25,10 +25,9 @@
 
 
 /**
- *	\file include/acado/utils/acado_mat_file.hpp
+ *	\file include/acado/matrix_vector/acado_mat_file.hpp
  *	\author Carlo Savorgnan, Hans Joachim Ferreau, Boris Houska
  */
-
 
 #ifndef ACADO_TOOLKIT_ACADO_MAT_FILE_HPP
 #define ACADO_TOOLKIT_ACADO_MAT_FILE_HPP
@@ -36,20 +35,19 @@
 
 #include <acado/utils/acado_namespace_macros.hpp>
 
-#include <fstream>
+#include <ostream>
 
 BEGIN_NAMESPACE_ACADO
 
 class Vector;
 class Matrix;
 
-
 /**
  *	\brief Simple class for writing binary data file that are compatible with Matlab.
  *	
  *  Simple class for writing binary data file that are compatible with Matlab.
  *
- *	\author Carlo Savorgnan, Hans Joachim Ferreau, Boris Houska
+ *	\author Carlo Savorgnan, Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class MatFile
 {
@@ -70,21 +68,16 @@ class MatFile
 	 *	PUBLIC MEMBER FUNCTIONS
 	 */
 	public:
-		void open(	const char* fileName
-					);
 
-		void close( );
-
-		void write(	const Matrix& mat,
+		void write( std::ostream& stream,
+					const Matrix& mat,
 					const char* name
 					);
 
-		void write(	const Vector& vec,
+		void write(	std::ostream& stream,
+					const Vector& vec,
 					const char* name
 					);
-
-	private:
-		std::ofstream file;
 };
 
 CLOSE_NAMESPACE_ACADO

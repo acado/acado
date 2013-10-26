@@ -84,21 +84,21 @@ returnValue getGlobalStringDefinitions(	PrintScheme _printScheme,
 										);
 
 /** A function for file copying. */
-returnValue acadoCopyFile(	std::string& source,
-							std::string& destination,
-							std::string& commentString,
+returnValue acadoCopyFile(	const std::string& source,
+							const std::string& destination,
+							const std::string& commentString,
 							bool printCodegenNotice = false
 							);
 
 /** A function for copying of template files. */
-returnValue acadoCopyTempateFile(	std::string& source,
-									std::string& destination,
-									std::string& commentString,
+returnValue acadoCopyTempateFile(	const std::string& source,
+									const std::string& destination,
+									const std::string& commentString,
 									bool printCodegenNotice = false
 									);
 
 /** A function to create a folder. */
-returnValue acadoCreateFolder(std::string& name);
+returnValue acadoCreateFolder(const std::string& name);
 
 /** Prints ACADO Toolkit's copyright notice.
  *
@@ -108,13 +108,14 @@ returnValue acadoPrintCopyrightNotice( );
 /** Prints ACADO Toolkit's copyright notice for sub-packages.
  *
  *  \return SUCCESSFUL_RETURN */
-returnValue acadoPrintCopyrightNotice(std::string& subpackage);
+returnValue acadoPrintCopyrightNotice(	const std::string& subpackage
+										);
 
 /** Prints ACADO Toolkit's copyright notice for auto generated code.
  *
  *  \return SUCCESSFUL_RETURN */
-returnValue acadoPrintAutoGenerationNotice(	std::ofstream& s,
-											std::string& commentString
+returnValue acadoPrintAutoGenerationNotice(	std::ofstream& stream,
+											const std::string& commentString
 											);
 
 /** Returns the current system time.

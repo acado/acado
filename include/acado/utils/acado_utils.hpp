@@ -44,7 +44,6 @@
 #include <acado/utils/acado_message_handling.hpp>
 #include <acado/utils/acado_debugging.hpp>
 #include <acado/utils/acado_io_utils.hpp>
-#include <acado/utils/acado_mat_file.hpp>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

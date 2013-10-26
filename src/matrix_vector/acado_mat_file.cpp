@@ -25,31 +25,19 @@
 
 
 /**
- *    \file src/utils/acado_mat_file.cpp
- *    \author Carlo Savorgnan, Hans Joachim Ferreau, Boris Houska
- *    \date 16.04.2010
+ *    \file src/matrix_vector/acado_mat_file.cpp
+ *    \author Carlo Savorgnan, Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010 - 2013
  */
 
-#include <acado/utils/acado_mat_file.hpp>
+#include <acado/matrix_vector/acado_mat_file.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
-#include <string.h>
 
 BEGIN_NAMESPACE_ACADO
 
-void MatFile::open(	const char * fileName
-					)
-{
-	file.open( fileName );
-}
 
-
-void MatFile::close( )
-{
-	file.close( );
-}
-
-
-void MatFile::write(	const Matrix& mat,
+void MatFile::write(	std::ostream& stream,
+						const Matrix& mat,
 						const char* name
 						)
 {
@@ -62,16 +50,16 @@ void MatFile::write(	const Matrix& mat,
 	x.imagf = 0;  // no imaginary part
 	x.namelen = 1+strlen(name); // matrix name length 
 	
-	file.write( (char*) &x, sizeof(Fmatrix));
-	file.write(name, x.namelen);
+	stream.write( (char*) &x, sizeof(Fmatrix));
+	stream.write(name, x.namelen);
 	
 	// mat files store data in column-major format
-	for (uint col=0; col<mat.getNumCols(); ++col)
+	for (uint col = 0; col < mat.getNumCols(); ++col)
 	{
-		for (uint row=0; row<mat.getNumRows(); ++row)
+		for (uint row = 0; row < mat.getNumRows(); ++row)
 		{
-			tmp = mat( row,col );
-			file.write( (char*) &tmp, sizeof(double));
+			tmp = mat(row, col);
+			stream.write((char*) &tmp, sizeof(double));
 		}
 	}
 	
@@ -79,7 +67,8 @@ void MatFile::write(	const Matrix& mat,
 }
 
 
-void MatFile::write(	const Vector& vec,
+void MatFile::write(	std::ostream& stream,
+						const Vector& vec,
 						const char* name
 						)
 {
@@ -92,14 +81,14 @@ void MatFile::write(	const Vector& vec,
 	x.imagf = 0;  // no imaginary part
 	x.namelen = 1+strlen(name); // matrix name length 
 	
-	file.write( (char*) &x, sizeof(Fmatrix));
-	file.write(name, x.namelen);
+	stream.write( (char*) &x, sizeof(Fmatrix));
+	stream.write(name, x.namelen);
 	
 	// mat files store data in column-major format
 	for (uint row=0; row<vec.getDim(); ++row)
 	{
 		tmp = vec( row );
-		file.write((char*) &tmp, sizeof(double));
+		stream.write((char*) &tmp, sizeof(double));
 	}
 	
 	// imaginary numbers should be stored just after the real ones

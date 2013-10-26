@@ -183,9 +183,9 @@ returnValue getGlobalStringDefinitions(	PrintScheme _printScheme,
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue acadoCopyFile(	std::string& source,
-							std::string& destination,
-							std::string& commentString,
+returnValue acadoCopyFile(	const std::string& source,
+							const std::string& destination,
+							const std::string& commentString,
 							bool printCodegenNotice
 							)
 {
@@ -223,12 +223,15 @@ returnValue acadoCopyFile(	std::string& source,
 
 	dst << src.rdbuf();
 
+	src.close();
+	dst.close();
+
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue acadoCopyTempateFile(	std::string& source,
-									std::string& destination,
-									std::string& commentString,
+returnValue acadoCopyTempateFile(	const std::string& source,
+									const std::string& destination,
+									const std::string& commentString,
 									bool printCodegenNotice
 									)
 {
@@ -259,7 +262,8 @@ returnValue acadoCopyTempateFile(	std::string& source,
 	return ACADOERROR( RET_INVALID_ARGUMENTS );
 }
 
-returnValue acadoCreateFolder(std::string& name)
+returnValue acadoCreateFolder(	const std::string& name
+								)
 {
 #if defined( __WIN32__ ) || defined( WIN32 )
 
@@ -296,7 +300,8 @@ returnValue acadoCreateFolder(std::string& name)
 /*
  *	p r i n t C o p y r i g h t N o t i c e
  */
-returnValue acadoPrintCopyrightNotice(std::string& subpackage)
+returnValue acadoPrintCopyrightNotice(	const std::string& subpackage
+										)
 {
 	if (subpackage.empty())
 		cout << "\nACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.\n" \
@@ -325,28 +330,28 @@ returnValue acadoPrintCopyrightNotice(std::string& subpackage)
 }
 
 
-returnValue acadoPrintAutoGenerationNotice(	std::ofstream& s,
-											std::string& commentString
+returnValue acadoPrintAutoGenerationNotice(	std::ofstream& stream,
+											const std::string& commentString
 											)
 {
-	if (s.is_open() == false)
+	if (stream.is_open() == false)
 		return RET_INVALID_ARGUMENTS;
 
 	if (commentString.empty())
 	{
-		s << "/*\n";
+		stream << "/*\n";
 		for (unsigned i = 0; i < AUTOGEN_NOTICE_LENGTH; ++i)
-			s << " *    " << autogenerationNotice[ i ];
-		s << " */\n";
+			stream << " *    " << autogenerationNotice[ i ];
+		stream << " */\n";
 	}
 	else
 	{
-		s << commentString << endl;
+		stream << commentString << endl;
 		for (unsigned i = 0; i < AUTOGEN_NOTICE_LENGTH; ++i)
-			s << commentString << "    " << autogenerationNotice[ i ];
+			stream << commentString << "    " << autogenerationNotice[ i ];
 	}
 
-	s << endl << endl;
+	stream << endl << endl;
 
     return SUCCESSFUL_RETURN;
 }
