@@ -33,6 +33,7 @@
 
 #include <acado/sparse_solver/sparse_solver.hpp>
 
+#include <iostream>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -212,7 +213,8 @@ returnValue ConjugateGradientMethod::solve( double *b ){
         }
 
         if( printLevel == HIGH )
-            acadoPrintf("STEP NUMBER %d,  WEIGHTED NORM = %.16e \n", pCounter, norm1 );
+            std::cout << "STEP NUMBER " << pCounter << ",  WEIGHTED NORM = "
+                 << std::scientific << norm1 << std::endl;
 
         if( norm1 < TOL ) break;
 

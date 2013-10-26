@@ -196,10 +196,10 @@ INCLUDE( CompilerOptions )
 SET( ACADO_SOURCE_DIRS
 	# Integrators source folders
 	./src/utils
-#	./src/clock
+	./src/clock
 	./src/matrix_vector
-#	./src/set_arithmetics
-#	./src/variables_grid
+	./src/set_arithmetics
+	./src/variables_grid
 #	./src/curve
 #	./src/user_interaction
 #	./src/symbolic_operator
@@ -207,8 +207,8 @@ SET( ACADO_SOURCE_DIRS
 #	./src/function
 #	./src/integrator
 #	./src/validated_integrator
-#	./src/sparse_solver
-#	./external_packages/src/acado_csparse
+	./src/sparse_solver
+	./external_packages/src/acado_csparse
 #	./external_packages/src/acado_gnuplot
 	
 	# Optimal Control source folders

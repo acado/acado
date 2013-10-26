@@ -26,7 +26,7 @@
 
 /**
  *    \file include/acado/variables_grid/variables_grid.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
@@ -181,23 +181,6 @@ class VariablesGrid : public MatrixVariablesGrid
 						VariableType _type = VT_UNKNOWN
 						);
 
-		/** Constructor which reads data from a file. The data is interpreted 
-		 *	as follows: the first entry of each row is taken as time of the 
-		 *	grid point to be added, all remaining entries of each row are taken 
-		 *	as numerical values of a vector-valued MatrixVariable with exactly 
-		 *	one column. In effect, a MatrixVariablesGrid consisting of 
-		 *	<number of columns - 1>-by-1 MatrixVariables defined on 
-		 *	<number of rows> grid points is setup. Note that all rows are expected 
-		 *	to have equal number of columns.
-		 *	
-		 *	@param[in] file		File to be read.
-		 *
-		 *	\note The file is closed at the end of routine.
-		 */
-        VariablesGrid(	FILE *file
-						);
-
-
 		/** Copy constructor (deep copy).
 		 *
 		 *	@param[in] rhs	Right-hand side object.
@@ -232,22 +215,7 @@ class VariablesGrid : public MatrixVariablesGrid
         VariablesGrid& operator=(	const MatrixVariablesGrid& rhs
 									);
 
-		/** Assignment operator which reads data from a file. The data is expected 
-		 *	to be in matrix format and is interpreted as follows: the first entry 
-		 *	of each row is taken as time of the grid point to be added, all remaining
-		 *	entries of each row are taken as numerical values of a vector-valued
-		 *	MatrixVariable with exactly one column. In effect, a MatrixVariablesGrid
-		 *	consisting of <number of columns - 1>-by-1 MatrixVariables defined on 
-		 *	<number of rows> grid points is setup. Note that all rows are expected
-		 *	to have equal number of columns.
-		 *	
-		 *	@param[in] rhs		File to be read.
-		 *
-		 *	\note The file is closed at the end of routine.
-		 *
-		 */
-        VariablesGrid& operator=(	FILE *rhs
-									);
+
 
 		/** Assignment operator which reads data from a matrix. The data is interpreted 
 		 *	as follows: the first entry of each row is taken as time of the grid point 
@@ -264,17 +232,15 @@ class VariablesGrid : public MatrixVariablesGrid
 									);
 
 
-	/** Tests for equality, 
-		*
-		*	@param[in] rhs	Object of comparison.
-		*
-		*  \return BT_TRUE  iff both objects are equal, \n
-		*	        BT_FALSE otherwise
-		*/
-	inline BooleanType operator==(	const VariablesGrid& arg
-									) const;
-
-
+        /** Tests for equality,
+         *
+         *	@param[in] rhs	Object of comparison.
+         *
+         *  \return BT_TRUE  iff both objects are equal, \n
+         *	        BT_FALSE otherwise
+         */
+        inline BooleanType operator==(	const VariablesGrid& arg
+        								) const;
 
         /** Returns the value of a certain component at a certain grid point.
 		 *
@@ -661,22 +627,6 @@ class VariablesGrid : public MatrixVariablesGrid
 									Vector& value
 									) const;
 
-
-
-		/** Prints the MatrixVariablesGrid into a file. \n
-		 *
-		 *	@param[in] file			File to print to.
-		 *	@param[in] arg			VariablesGrid to print.
-		 *
-		 *  \return SUCCESSFUL_RETURN            \n
-		 *          RET_CAN_NOT_WRITE_INTO_FILE  \n
-		 */
-		friend returnValue operator<<(	FILE          *file,
-										VariablesGrid &arg
-										);
-
-
-
     //
     // PROTECTED MEMBER FUNCTIONS:
     //
@@ -691,21 +641,11 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *  \return SUCCESSFUL_RETURN
          */
         returnValue initializeFromBounds( );
-
-
-    //
-    // DATA MEMBERS:
-    //
-    protected:
-		
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
 #include <acado/variables_grid/variables_grid.ipp>
-
 
 BEGIN_NAMESPACE_ACADO
 
@@ -713,7 +653,6 @@ static       VariablesGrid emptyVariablesGrid;
 static const VariablesGrid emptyConstVariablesGrid;
 
 CLOSE_NAMESPACE_ACADO
-
 
 #endif  // ACADO_TOOLKIT_VARIABLES_GRID_HPP
 

@@ -26,18 +26,19 @@
 
 /**
  *    \file src/variables_grid/matrix_variables_grid.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 20.08.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 
 #include <acado/variables_grid/matrix_variables_grid.hpp>
 #include <acado/variables_grid/variables_grid.hpp>
 
+#include <iomanip>
+
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -111,36 +112,6 @@ MatrixVariablesGrid::MatrixVariablesGrid(	const Matrix& arg,
 	init( arg,_grid,_type );
 }
 
-
-
-MatrixVariablesGrid::MatrixVariablesGrid(	FILE *file
-											) : Grid( )
-{
-	values = 0;
-	operator=( file );
-}
-
-
-MatrixVariablesGrid::MatrixVariablesGrid(	const char* filename
-											) : Grid( )
-{
-	values = 0;
-
-	FILE* file = fopen( filename,"r" );
-	
-	if ( file == 0 )
-		ACADOERRORTEXT( RET_FILE_CAN_NOT_BE_OPENED,filename );
-
-	operator=( file );
-
-	/** Closing the file throws a "glibc detected : double free or corruption (!prev)" error */
-	/** Someone already closed the file!?*/
-	/** Indeed, a subcall to allocateDoublePointerFromFile is made
-	"The file is closed at the end of the routine" **/
-	//fclose(file); 
-}
-
-
 MatrixVariablesGrid::MatrixVariablesGrid(	const MatrixVariablesGrid& rhs
 											) : Grid( rhs )
 {
@@ -177,36 +148,6 @@ MatrixVariablesGrid& MatrixVariablesGrid::operator=(	const MatrixVariablesGrid& 
 	
 		for( uint i=0; i<nPoints; ++i )
 			values[i] = new MatrixVariable( *(rhs.values[i]) );
-    }
-
-    return *this;
-}
-
-
-MatrixVariablesGrid& MatrixVariablesGrid::operator=(	FILE *rhs
-														)
-{
-    int     nR, nC, run1, run2;
-    double *x  ;
-    returnValue returnvalue;
-
-    x = 0; 
-    returnvalue = allocateDoublePointerFromFile(rhs, &x, nR, nC); 
-
-    if ( ( returnvalue == SUCCESSFUL_RETURN ) && ( nR > 0 ) && ( nC > 0 ) )
-	{
-		init( nC-1,1,nR,getType() );
-        for( run1 = 0; run1 < nR; run1++ )
-            setTime( x[run1*nC] );
-
-        for( run1 = 0; run1 < nR; run1++ )
-            for( run2 = 0; run2 < nC-1; run2++ )
-                operator()( run1,run2,0 ) = x[run1*nC+1+run2];
-        if( x != 0 ) free(x);
-    }
-    else{
-        if( x != 0 ) free(x);
-//         ACADOINFO(returnvalue);
     }
 
     return *this;
@@ -750,15 +691,8 @@ Vector MatrixVariablesGrid::linearInterpolation( double time ) const
     return tmp;
 }
 
-
-
-returnValue operator<<( FILE *file, MatrixVariablesGrid &arg )
-{
-	return arg.printToFile(file);
-}
-
-
-returnValue MatrixVariablesGrid::print(	const char* const name,
+returnValue MatrixVariablesGrid::print(	std::ostream& stream,
+										const char* const name,
 										const char* const startString,
 										const char* const endString,
 										uint width,
@@ -767,308 +701,180 @@ returnValue MatrixVariablesGrid::print(	const char* const name,
 										const char* const rowSeparator
 										) const
 {
-	char* string = 0;
+	if (strlen(name) > 0)
+		stream << name << " = ";
+	if (strlen(startString) > 0)
+		stream << startString;
 
-	printToString( &string, name,startString,endString,width,precision,colSeparator,rowSeparator );
-	acadoPrintf( "%s",string );
+	for (unsigned k = 0; k < getNumPoints(); ++k)
+	{
+		if ( precision > 0 )
+			stream << setw( width ) << setprecision( precision ) << getTime( k );
+		else
+			stream << setw( width ) << (int)getTime( k );
 
-	if ( string != 0 )
-	  delete[] string;
+		if (strlen(colSeparator) > 0)
+			stream << colSeparator;
+
+		values[k]->print(stream, 0, 0, 0, width, precision, colSeparator, colSeparator);
+
+		if (k < (getNumPoints() - 1) && strlen(rowSeparator) > 0)
+			stream << rowSeparator;
+	}
 
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue MatrixVariablesGrid::print(	const char* const filename,
+										const char* const name,
+										const char* const startString,
+										const char* const endString,
+										uint width,
+										uint precision,
+										const char* const colSeparator,
+										const char* const rowSeparator
+										) const
+{
+	ofstream stream( filename );
+	returnValue status;
 
-returnValue MatrixVariablesGrid::print(	const char* const name,
+	if (stream.is_open() == true)
+		status = print(stream, name, startString, endString, width, precision,
+				colSeparator, rowSeparator);
+	else
+		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
+
+	stream.close();
+
+	return status;
+}
+
+returnValue MatrixVariablesGrid::print(	const char* const filename,
+										const char* const name,
 										PrintScheme printScheme
 										) const
 {
-	char* string = 0;
+	ofstream stream(filename);
+	returnValue status;
 
-	printToString( &string, name,printScheme );
-	acadoPrintf( "%s",string );
-
-	if ( string != 0 )
-	  delete[] string;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue MatrixVariablesGrid::printToFile(	const char* const filename,
-												const char* const name,
-												const char* const startString,
-												const char* const endString,
-												uint width,
-												uint precision,
-												const char* const colSeparator,
-												const char* const rowSeparator
-												) const
-{
-	FILE* file = fopen( filename,"w+" );
-
-	if ( file == 0 )
+	if (stream.is_open())
+		status = print(stream, name, printScheme);
+	else
 		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
 
-	printToFile( file, name,startString,endString,width,precision,colSeparator,rowSeparator );
-	fclose( file );
+	stream.close();
 
-	return SUCCESSFUL_RETURN;
+	return status;
 }
 
-
-returnValue MatrixVariablesGrid::printToFile(	FILE* file,
-												const char* const name,
-												const char* const startString,
-												const char* const endString,
-												uint width,
-												uint precision,
-												const char* const colSeparator,
-												const char* const rowSeparator
-												) const
+returnValue MatrixVariablesGrid::print(	std::ostream& stream,
+										const char* const name,
+										PrintScheme printScheme
+										) const
 {
-	char* string = 0;
-
-	printToString( &string, name,startString,endString,width,precision,colSeparator,rowSeparator );
-	acadoFPrintf( file,"%s",string );
-
-	if ( string != 0 )
-	  delete[] string;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue MatrixVariablesGrid::printToFile(	const char* const filename,
-												const char* const name,
-												PrintScheme printScheme
-												) const
-{
-	FILE* file = 0;
 	MatFile* matFile = 0;
-	
-	switch ( printScheme )
-	{
-		case PS_MATLAB_BINARY:
-			matFile = new MatFile;
-			
-			matFile->open( filename );
-			matFile->write( (const VariablesGrid)*this,name );
-			matFile->close( );
-			
-			delete matFile;
-			return SUCCESSFUL_RETURN;
 
-		default:
-			file = fopen( filename,"w+" );
+	switch (printScheme) {
+	case PS_MATLAB_BINARY:
+		matFile = new MatFile;
 
-			if ( file == 0 )
-				return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
+		matFile->write(stream, (const VariablesGrid) *this, name);
 
-			printToFile( file, name,printScheme );
+		delete matFile;
 
-			fclose( file );
-			return SUCCESSFUL_RETURN;
+		return SUCCESSFUL_RETURN;
+
+	default:
+		char* startString = 0;
+		char* endString = 0;
+		uint width = 0;
+		uint precision = 0;
+		char* colSeparator = 0;
+		char* rowSeparator = 0;
+
+		returnValue ret = getGlobalStringDefinitions(printScheme, &startString,
+				&endString, width, precision, &colSeparator, &rowSeparator);
+
+		returnValue status;
+		if (status == SUCCESSFUL_RETURN)
+			status = print(stream, name, startString, endString, width, precision,
+					colSeparator, rowSeparator);
+
+		if (startString != 0)
+			delete[] startString;
+		if (endString != 0)
+			delete[] endString;
+		if (colSeparator != 0)
+			delete[] colSeparator;
+		if (rowSeparator != 0)
+			delete[] rowSeparator;
+
+		return status;
 	}
 }
 
-
-returnValue MatrixVariablesGrid::printToFile(	FILE* file,
-												const char* const name,
-												PrintScheme printScheme
-												) const
+returnValue MatrixVariablesGrid::read( std::istream& stream )
 {
-	char* string = 0;
+	vector< vector< double > > data;
+	stream >> data;
 
-	printToString( &string, name,printScheme );
-	acadoFPrintf( file,"%s",string );
+	if (data.size() == 0)
+		return SUCCESSFUL_RETURN;
 
-	if ( string != 0 )
-	  delete[] string;
+	// Sanity check
+	unsigned nc = data[ 0 ].size();
+	unsigned nr = data.size();
+	for (unsigned row = 0; row < nr; ++row)
+		if (data[ row ].size() != nc)
+			return ACADOERROR( RET_INVALID_ARGUMENTS );
+
+	// Data conversions and initialization
+	init(nc - 1, 1, nr, getType());
+
+	for (unsigned row = 0; row < nr; ++row)
+		setTime( data[ row ][ 0 ] );
+
+	for (unsigned row = 0; row < nr; ++row)
+		for (unsigned col = 0; col < nc - 1; ++col)
+			operator()(row, col, 0) = data[ row ][col + 1];
 
 	return SUCCESSFUL_RETURN;
 }
 
-
-returnValue MatrixVariablesGrid::printToString(	char** string,
-												const char* const name,
-												const char* const startString,
-												const char* const endString,
-												uint width,
-												uint precision,
-												const char* const colSeparator,
-												const char* const rowSeparator
-												) const
-{ 
-	uint i,k;
-
-	/* determine length of time */
-	uint timeLength = width;
-
-	// 0.e-0000
-	if ( timeLength < (9 + (uint)precision) )
-		timeLength = 9 + precision;
-
-	char* timeString = new char[timeLength];
-
-	char* matrixString = 0;
-	
-	/* determine length of whole string */
-	uint stringLength = determineStringLength( name,startString,endString,
-											   width,precision,colSeparator,rowSeparator );
-
-	if ( *string != 0 )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
-
-	*string = new char[stringLength];
-
-	for( i=0; i<stringLength; ++i )
-		(*string)[i] = '\0';
-
-	if ( getStringLength(name) > 0 )
-	{
-		strcat( *string,name );
-		strcat( *string," = " );
-	}
-
-	if ( getStringLength(startString) > 0 )
-		strcat( *string,startString );
-
-	int writtenChars = 0;
-
-	for( k=0; k<getNumPoints( ); ++k )
-	{
-		// write time
-		if ( precision > 0 )
-			writtenChars = ::sprintf( timeString,"%*.*e",width,precision,getTime( k ) );
-		else
-			writtenChars = ::sprintf( timeString,"%*.d",width,(int)getTime( k ) );
-
-		if ( ( writtenChars < 0 ) || ( (uint)writtenChars+1 > timeLength ) )
-		{
-			delete[] timeString;
-			return ACADOERROR( RET_UNKNOWN_BUG );
-		}
-
-		strcat( *string,timeString );
-		strcat( *string,colSeparator );
-
-		// write matrix string
-		//matrixString = new char[ values[k]->determineStringLength( 0,0,0,width,precision,colSeparator,colSeparator ) ];
-		values[k]->printToString( &matrixString,0,0,0,width,precision,colSeparator,colSeparator );
-
-		strcat( *string,matrixString );
-
-		if ( matrixString != 0 )
-			delete[] matrixString;
-
-		// write separator
-		if ( k < getNumPoints( )-1 )
-			if ( getStringLength(rowSeparator) > 0 )
-				strcat( *string,rowSeparator );
-	}
-
-	if ( getStringLength(endString) > 0 )
-		strcat( *string,endString );
-
-	delete[] timeString;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue MatrixVariablesGrid::printToString(	char** string,
-												const char* const name,
-												PrintScheme printScheme
-												) const
+returnValue MatrixVariablesGrid::read( const char* const filename )
 {
-	char* startString = 0;
-	char* endString = 0;
-	uint width = 0;
-	uint precision = 0;
-	char* colSeparator = 0;
-	char* rowSeparator = 0;
+	ifstream stream( filename );
+	returnValue status;
 
-	returnValue returnvalue;
-	returnvalue = getGlobalStringDefinitions( printScheme,&startString,&endString,
-											  width,precision,&colSeparator,&rowSeparator );
+	if (stream.is_open())
+		status = read( stream );
+	else
+		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
 
-	if ( returnvalue == SUCCESSFUL_RETURN )
-	{
-		returnvalue = printToString( string,name,startString,endString,width,precision,colSeparator,rowSeparator );
-	}
+	stream.close();
 
-	if ( startString != 0 )   delete[] startString;
-	if ( endString != 0 )     delete[] endString;
-	if ( colSeparator != 0 )  delete[] colSeparator;
-	if ( rowSeparator != 0 )  delete[] rowSeparator;
-
-	return returnvalue;
+	return status;
 }
 
-
-uint MatrixVariablesGrid::determineStringLength(	const char* const name,
-													const char* const startString,
-													const char* const endString,
-													uint width,
-													uint precision,
-													const char* const colSeparator,
-													const char* const rowSeparator
-													) const
+std::ostream& operator<<(std::ostream& stream, const MatrixVariablesGrid& arg)
 {
-	uint componentLength = width;
+	if (arg.print( stream ) != SUCCESSFUL_RETURN)
+		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Cannot write to output stream.");
 
-	// 0.e-0000
-	if ( componentLength < (9 + (uint)precision) )
-		componentLength = 9 + precision;
-	
-
-	// allocate string of sufficient size (being quite conservative)
-	uint stringLength = 1 
-						+ getStringLength(startString) 
-						+ getStringLength(endString)
-						+ getNumPoints( ) * ( componentLength + getStringLength(colSeparator) + getStringLength(rowSeparator) );
-
-	if ( getStringLength(name) > 0 )
-		stringLength += getStringLength(name)+3;
-
-	for( uint k=0; k<getNumPoints(); ++k )
-		stringLength += values[k]->determineStringLength( 0,0,0,width,precision,colSeparator,colSeparator );
-
-	return stringLength; 
+	return stream;
 }
 
-
-int MatrixVariablesGrid::sprintf( char* buffer )
+std::istream& operator>>(std::istream& stream, MatrixVariablesGrid& arg)
 {
-    int returnvalue;
-    uint run1, run2, run3;
+	if (arg.read( stream ) != SUCCESSFUL_RETURN)
+		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Cannot read from input stream.");
 
-    double *tmp = new double[getNumPoints()*(getNumRows()+1)];
-
-    if( times == 0 ) return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
-
-    for( run1 = 0; run1 < getNumPoints(); run1++ ){
-        tmp[run1*(getNumValues()+1)] = getTime(run1);
-
-        for( run2 = 0; run2 < getNumRows(); run2++ ){
-			for( run3 = 0; run3 < getNumCols(); run3++ ){
-	            tmp[run1*(getNumValues()+1)+1+run2*getNumCols() + run3] = operator()( run1,run2,run3 );
-			}
-        }
-    }
-
-    returnvalue = writeDoublePointerToString( tmp,getNumPoints(),getNumValues()+1,buffer );
-    delete[] tmp;
-    return returnvalue;
+	return stream;
 }
-
-
 
 //
 // PROTECTED MEMBER FUNCTIONS:
 //
-
 
 returnValue MatrixVariablesGrid::clearValues( )
 {

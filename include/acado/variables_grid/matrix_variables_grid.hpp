@@ -26,7 +26,7 @@
 
 /**
  *    \file include/acado/variables_grid/matrix_variables_grid.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
@@ -36,13 +36,10 @@
 #include <acado/variables_grid/matrix_variable.hpp>
 #include <acado/variables_grid/grid.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
 
 const Grid emptyGrid;
 const Grid trivialGrid( 1 );
-
 
 class VariablesGrid;
 
@@ -58,7 +55,7 @@ class VariablesGrid;
  *	The class inherits from the Grid class and stores the matrix-valued
  *	optimization variables in an re-allocatable array of MatrixVariables.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class MatrixVariablesGrid : public Grid
 {
@@ -170,43 +167,6 @@ class MatrixVariablesGrid : public Grid
 								VariableType _type = VT_UNKNOWN
 								);
 
-		/** Constructor which reads data from a file. The data is expected 
-		 *	to be in matrix format and is interpreted as follows: the first entry 
-		 *	of each row is taken as time of the grid point to be added, all
-		 *	remaining entries of each row are taken as numerical values of a
-		 *	MatrixVariable with exactly one column. In effect, a MatrixVariablesGrid
-		 *	consisting of <number of columns - 1>-by-1 MatrixVariables defined on 
-		 *	<number of rows> grid points is setup. Note that all rows are expected
-		 *	to have equal number of columns.
-		 *	
-		 *	@param[in] file		File to be read.
-		 *
-		 *	\note The file is closed at the end of routine.
-		 *
-		 *	\note The routine is significantly different from the constructor that
-		 *	      takes a single matrix.
-		 */
-        MatrixVariablesGrid(	FILE* file
-								);
-
-        /** Constructor which reads data from a file with given name. The data is expected 
-		 *	to be in matrix format and is interpreted as follows: the first entry 
-		 *	of each row is taken as time of the grid point to be added, all
-		 *	remaining entries of each row are taken as numerical values of a
-		 *	MatrixVariable with exactly one column. In effect, a MatrixVariablesGrid
-		 *	consisting of <number of columns - 1>-by-1 MatrixVariables defined on 
-		 *	<number of rows> grid points is setup. Note that all rows are expected
-		 *	to have equal number of columns.
-		 *	
-		 *	@param[in] filename		Name fo file to be read.
-		 *
-		 *	\note The routine is significantly different from the constructor that
-		 *	      takes a single matrix.
-		 */
-		MatrixVariablesGrid(	const char* const filename
-								);
-
-
 		/** Copy constructor (deep copy).
 		 *
 		 *	@param[in] rhs	Right-hand side object.
@@ -227,23 +187,6 @@ class MatrixVariablesGrid : public Grid
 
 
 
-
-		/** Assignment operator which reads data from a file. The data is expected 
-		 *	to be in matrix format and is interpreted as follows: the first entry 
-		 *	of each row is taken as time of the grid point to be added, all
-		 *	remaining entries of each row are taken as numerical values of a
-		 *	MatrixVariable with exactly one column. In effect, a MatrixVariablesGrid
-		 *	consisting of <number of columns - 1>-by-1 MatrixVariables defined on 
-		 *	<number of rows> grid points is setup. Note that all rows are expected
-		 *	to have equal number of columns.
-		 *	
-		 *	@param[in] rhs		File to be read.
-		 *
-		 *	\note The file is closed at the end of routine.
-		 *
-		 */
-        MatrixVariablesGrid& operator=(	FILE *rhs
-										);
 
 		/** Assignment operator which reads data from a matrix. The data is interpreted 
 		 *	as follows: the first entry of each row is taken as time of the grid point 
@@ -287,7 +230,6 @@ class MatrixVariablesGrid : public Grid
 									uint rowIdx,
 									uint colIdx
 									) const;
-
 
         /** Returns a MatrixVariablesGrid consisting only of the given row.
 		 *
@@ -460,7 +402,6 @@ class MatrixVariablesGrid : public Grid
 							VariableType _type = VT_UNKNOWN
 							);
 
-
 		/** Adds a new grid point with given matrix and time to grid.
 		 *
 		 *	@param[in] newMatrix	Matrix of grid point to be added.
@@ -472,7 +413,6 @@ class MatrixVariablesGrid : public Grid
 		returnValue addMatrix(	const Matrix& newMatrix,
 								double newTime = -INFTY
 								);
-
 
 		/** Assigns new matrix to grid point with given index.
 		 *
@@ -610,7 +550,6 @@ class MatrixVariablesGrid : public Grid
 									VariableType _type
 									);
 
-
 		/** Returns name label of given component of MatrixVariable at grid point with given index.
 		 *
 		 *	@param[in]  pointIdx	Index of grid point.
@@ -672,7 +611,6 @@ class MatrixVariablesGrid : public Grid
 									const char* const _unit
 									);
 
-
 		/** Returns scaling of MatrixVariable at grid point with given index.
 		 *
 		 *	@param[in] pointIdx		Index of grid point.
@@ -723,7 +661,6 @@ class MatrixVariablesGrid : public Grid
 										uint valueIdx,
 										double _scaling
 										);
-
 
 		/** Returns lower bounds of MatrixVariable at grid point with given index.
 		 *
@@ -919,7 +856,6 @@ class MatrixVariablesGrid : public Grid
 		 */
 		inline double getMean( ) const;
 
-	
 		/** Assigns zero to all components of all matrices at all grid points.
 		 *
 		 *  \return SUCCESSFUL_RETURN
@@ -934,7 +870,6 @@ class MatrixVariablesGrid : public Grid
 		 */
 		inline returnValue setAll(	double _value
 									);
-
 
 		/** Appends grid point of given grid to object. A merge
 		 *	method defines the way duplicate entries are handled.
@@ -960,7 +895,6 @@ class MatrixVariablesGrid : public Grid
 		returnValue appendValues(	const MatrixVariablesGrid& arg
 									);
 
-
 		/** Constructs the set union in time of current and given grid. A merge
 		 *	method defines the way duplicate entries are handled. Moreover,
 		 *	it can be specified whether an overlap in time of both grids shall
@@ -978,7 +912,6 @@ class MatrixVariablesGrid : public Grid
 							MergeMethod _mergeMethod = MM_DUPLICATE,
 							BooleanType keepOverlap = BT_TRUE
 							);
-
 
 		/** Returns the time grid of MatrixVariablesGrid.
 		 *
@@ -998,7 +931,6 @@ class MatrixVariablesGrid : public Grid
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		inline Grid getTimePoints( ) const;
-
 
 		/** Returns the sub grid in time starting and ending at given 
 		 *	indices.
@@ -1028,7 +960,6 @@ class MatrixVariablesGrid : public Grid
 												uint endIdx
 												) const;
 
-
 		/** Refines the grid by adding all grid points of given grid that are not
 		 *	not yet included. For doing so, the given grid has to be a superset of 
 		 *  the current grid. Values at newly added grid points are obtained by
@@ -1056,7 +987,6 @@ class MatrixVariablesGrid : public Grid
 		returnValue coarsenGrid(	const Grid& arg
 									);
 
-
 		/** Returns a refined grid by adding all grid points of given grid that are 
 		 *	not yet included. For doing so, the given grid has to be a superset of the
 		 *  current grid. Values at newly added grid points are obtained by
@@ -1082,7 +1012,6 @@ class MatrixVariablesGrid : public Grid
 		MatrixVariablesGrid getCoarsenedGrid(	const Grid& arg
 												) const;
 
-
 		/** Shifts times at all grid points by a given offset.
 		 *
 		 *	@param[in] timeShift	Time offset for shifting.
@@ -1100,7 +1029,6 @@ class MatrixVariablesGrid : public Grid
 		 */
 		MatrixVariablesGrid& shiftBackwards( Matrix lastValue = emptyMatrix );
 
-
 		/** Returns a vector with interpolated values of the MatrixVariablesGrid 
 		 *	at given time. If given time lies in between two grid points, the 
 		 *	value of the vector will be determined by linear interpolation between 
@@ -1116,23 +1044,10 @@ class MatrixVariablesGrid : public Grid
 		Vector linearInterpolation(	double time
 									) const;
 
-
-		/** Prints the MatrixVariablesGrid into a file. \n
-		 *
-		 *	@param[in] file			File to print to.
-		 *	@param[in] arg			MatrixVariablesGrid to print.
-		 *
-		 *  \return SUCCESSFUL_RETURN            \n
-		 *          RET_CAN_NOT_WRITE_INTO_FILE  \n
-		 */
-		friend returnValue operator<<(	FILE* file,
-										MatrixVariablesGrid& arg
-										);
-
-
 		/** Prints object to standard ouput stream. Various settings can
 		 *	be specified defining its output format. 
 		 *
+		 *	@param[in] stream			Output stream for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] startString		Prefix before printing the numerical values.
 		 *	@param[in] endString		Suffix after printing the numerical values.
@@ -1144,7 +1059,8 @@ class MatrixVariablesGrid : public Grid
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue print(	const char* const name         = DEFAULT_LABEL,
+		returnValue print(	std::ostream& stream           = std::cout,
+							const char* const name         = DEFAULT_LABEL,
 							const char* const startString  = DEFAULT_START_STRING,
 							const char* const endString    = DEFAULT_END_STRING,
 							uint width                     = DEFAULT_WIDTH,
@@ -1153,75 +1069,51 @@ class MatrixVariablesGrid : public Grid
 							const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
 							) const;
 
-		/** Prints object to standard ouput stream. Various settings can
+		/** Prints object to file with given name. Various settings can
 		 *	be specified defining its output format. 
 		 *
+		 *	@param[in] filename			Filename for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] printScheme		Print scheme defining the output format of the information.
+		 *	@param[in] startString		Prefix before printing the numerical values.
+		 *	@param[in] endString		Suffix after printing the numerical values.
+		 *	@param[in] width			Total number of digits per single numerical value.
+		 *	@param[in] precision		Number of decimals per single numerical value.
+		 *	@param[in] colSeparator		Separator between the columns of the numerical values.
+		 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue print(	const char* const name,
+		returnValue print(	const char* const filename,
+							const char* const name         = DEFAULT_LABEL,
+							const char* const startString  = DEFAULT_START_STRING,
+							const char* const endString    = DEFAULT_END_STRING,
+							uint width                     = DEFAULT_WIDTH,
+							uint precision                 = DEFAULT_PRECISION,
+							const char* const colSeparator = DEFAULT_COL_SEPARATOR,
+							const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
+							) const;
+
+		/** Prints object to file with given name. Various settings can
+		 *	be specified defining its output format. 
+		 *
+		 *	@param[in] filename			Filename for printing.
+		 *	@param[in] name				Name label to be printed before the numerical values.
+		 *	@param[in] printScheme		Print scheme defining the output format of the information.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
+		 *	        RET_UNKNOWN_BUG
+		 */
+		returnValue print(	const char* const filename,
+							const char* const name,
 							PrintScheme printScheme
 							) const;
 
-
-		/** Prints object to file with given name. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in] filename			Filename for printing.
-		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] startString		Prefix before printing the numerical values.
-		 *	@param[in] endString		Suffix after printing the numerical values.
-		 *	@param[in] width			Total number of digits per single numerical value.
-		 *	@param[in] precision		Number of decimals per single numerical value.
-		 *	@param[in] colSeparator		Separator between the columns of the numerical values.
-		 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		returnValue printToFile(	const char* const filename,
-									const char* const name         = DEFAULT_LABEL,
-									const char* const startString  = DEFAULT_START_STRING,
-									const char* const endString    = DEFAULT_END_STRING,
-									uint width                     = DEFAULT_WIDTH,
-									uint precision                 = DEFAULT_PRECISION,
-									const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-									const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
-									) const;
-
 		/** Prints object to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] file				File for printing.
-		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] startString		Prefix before printing the numerical values.
-		 *	@param[in] endString		Suffix after printing the numerical values.
-		 *	@param[in] width			Total number of digits per single numerical value.
-		 *	@param[in] precision		Number of decimals per single numerical value.
-		 *	@param[in] colSeparator		Separator between the columns of the numerical values.
-		 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		returnValue printToFile(	FILE* file,
-									const char* const name         = DEFAULT_LABEL,
-									const char* const startString  = DEFAULT_START_STRING,
-									const char* const endString    = DEFAULT_END_STRING,
-									uint width                     = DEFAULT_WIDTH,
-									uint precision                 = DEFAULT_PRECISION,
-									const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-									const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
-									) const;
-
-		/** Prints object to file with given name. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in] filename			Filename for printing.
+		 *	@param[in] stream			Output stream for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] printScheme		Print scheme defining the output format of the information.
 		 *
@@ -1229,114 +1121,54 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue printToFile(	const char* const filename,
-									const char* const name,
-									PrintScheme printScheme
-									) const;
+		returnValue print(	std::ostream& stream,
+							const char* const name,
+							PrintScheme printScheme
+							) const;
 
-		/** Prints object to given file. Various settings can
-		 *	be specified defining its output format. 
+		/** A fuction that reads data from a file. The data is expected
+		 *	to be in matrix format and is interpreted as follows: the first entry
+		 *	of each row is taken as time of the grid point to be added, all
+		 *	remaining entries of each row are taken as numerical values of a
+		 *	MatrixVariable with exactly one column. In effect, a MatrixVariablesGrid
+		 *	consisting of <number of columns - 1>-by-1 MatrixVariables defined on
+		 *	<number of rows> grid points is setup. Note that all rows are expected
+		 *	to have equal number of columns.
 		 *
-		 *	@param[in] filen			File for printing.
-		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] printScheme		Print scheme defining the output format of the information.
+		 *	@param[in] stream An input stream to be read.
 		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_UNKNOWN_BUG
+		 *	\note The routine is significantly different from the constructor that
+		 *	      takes a single matrix.
 		 */
-		returnValue printToFile(	FILE* file,
-									const char* const name,
-									PrintScheme printScheme
-									) const;
+		returnValue read(	std::istream& stream
+							);
 
-
-		/** Prints object to given string. Various settings can
-		 *	be specified defining its output format. 
+        /** A function that reads data from a file with given name. The data is expected
+		 *	to be in matrix format and is interpreted as follows: the first entry
+		 *	of each row is taken as time of the grid point to be added, all
+		 *	remaining entries of each row are taken as numerical values of a
+		 *	MatrixVariable with exactly one column. In effect, a MatrixVariablesGrid
+		 *	consisting of <number of columns - 1>-by-1 MatrixVariables defined on
+		 *	<number of rows> grid points is setup. Note that all rows are expected
+		 *	to have equal number of columns.
 		 *
-		 *	@param[in,out] string			File for printing.
-		 *	@param[in]     name				Name label to be printed before the numerical values.
-		 *	@param[in]     startString		Prefix before printing the numerical values.
-		 *	@param[in]     endString		Suffix after printing the numerical values.
-		 *	@param[in]     width			Total number of digits per single numerical value.
-		 *	@param[in]     precision		Number of decimals per single numerical value.
-		 *	@param[in]     colSeparator		Separator between the columns of the numerical values.
-		 *	@param[in]     rowSeparator		Separator between the rows of the numerical values.
+		 *	@param[in] filename		Name of file to be read.
 		 *
-		 *	\note It is assumed that no memory is allocated to the 'string' pointer when calling.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_INVALID_ARGUMENTS, \n
-		 *	        RET_UNKNOWN_BUG
+		 *	\note The routine is significantly different from the constructor that
+		 *	      takes a single matrix.
 		 */
-		virtual returnValue printToString(	char** string,
-											const char* const name         = DEFAULT_LABEL,
-											const char* const startString  = DEFAULT_START_STRING,
-											const char* const endString    = DEFAULT_END_STRING,
-											uint width                     = DEFAULT_WIDTH,
-											uint precision                 = DEFAULT_PRECISION,
-											const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-											const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
-											) const;
+		returnValue read(	const char* const filename
+							);
 
-		/** Prints object to given string. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in,out] string			File for printing.
-		 *	@param[in]     name				Name label to be printed before the numerical values.
-		 *	@param[in]     printScheme		Print scheme defining the output format of the information.
-		 *
-		 *	\note It is assumed that no memory is allocated to the 'string' pointer when calling.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_INVALID_ARGUMENTS, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		virtual returnValue printToString(	char** string,			/**< Output: String */
-											const char* const name,
-											PrintScheme printScheme
-											) const;
+		/**  Output streaming operator. */
+		friend std::ostream& operator<<(	std::ostream& stream,
+											const MatrixVariablesGrid& arg
+											);
 
-
-		/** Determines length of string required for printing object with 
-		 *	given settings defining its output format. 
-		 *
-		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] startString		Prefix before printing the numerical values.
-		 *	@param[in] endString		Suffix after printing the numerical values.
-		 *	@param[in] width			Total number of digits per single numerical value.
-		 *	@param[in] precision		Number of decimals per single numerical value.
-		 *	@param[in] colSeparator		Separator between the columns of the numerical values.
-		 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
-		 *
-		 *  \return Length of string required for printing object
-		 */
-		virtual uint determineStringLength(	const char* const name,
-											const char* const startString,
-											const char* const endString,
-											uint width,
-											uint precision,
-											const char* const colSeparator,
-											const char* const rowSeparator
-											) const;
-
-
-        /** Prints MatrixVariablesGrid into a char*.
-         *  If the char* buffer is equal to zero the length of the requested 
-         *  printing data will be returned (can be used to allocate memory 
-         *  exactly the same way how it would be done with standard C library).
-		 *
-		 *	@param[in,out] buffer			Buffer for printing.
-		 *
-		 *	\return >= 0: number of written characters, \n
-		 *	          -1: an error occured
-         */
-        int sprintf(	char* buffer
-						);
-
-
+		/** Read a MatrixVariablesGrid from an input stream. */
+		friend std::istream& operator>>(	std::istream& stream,
+		        							MatrixVariablesGrid& arg
+		        							);
 
     //
     // PROTECTED MEMBER FUNCTIONS:
@@ -1389,22 +1221,18 @@ class MatrixVariablesGrid : public Grid
 								double newTime = -INFTY
 								);
 
-
     //
     // DATA MEMBERS:
     //
     protected:
 
-		MatrixVariable** values;				/**< Matrix-valued optimization variable at all grid points. */
+		/** Matrix-valued optimization variable at all grid points. */
+		MatrixVariable** values;
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
-
 #include <acado/variables_grid/matrix_variables_grid.ipp>
-
 
 #endif  // ACADO_TOOLKIT_MATRIX_VARIABLES_GRID_HPP
 

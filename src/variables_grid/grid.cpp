@@ -32,8 +32,9 @@
 
 
 #include <acado/variables_grid/grid.hpp>
+#include <iomanip>
 
-
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -698,10 +699,9 @@ returnValue Grid::getSubGrid(	double tStart,
 
 returnValue Grid::print( ) const
 {
-    uint run1;
-    for( run1 = 0; run1 < getNumPoints(); run1++ )
-        acadoPrintf( "%.8e  ", getTime(run1) );
-    acadoPrintf( "\n" );
+	for (unsigned t = 0; t < getNumPoints(); t++)
+		cout << setprecision( 8 ) << getTime( t ) << "  ";
+	cout << endl;
 	
 	return SUCCESSFUL_RETURN;
 }

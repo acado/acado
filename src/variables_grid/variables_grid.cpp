@@ -26,8 +26,8 @@
 
 /**
  *    \file src/variables_grid/variables_grid.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 20.08.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 
@@ -115,12 +115,6 @@ VariablesGrid::VariablesGrid(	const Matrix& arg,
 }
 
 
-VariablesGrid::VariablesGrid(	FILE *file	
-								) : MatrixVariablesGrid( file )
-{
-}
-
-
 VariablesGrid::VariablesGrid(	const VariablesGrid& rhs
 								) : MatrixVariablesGrid( rhs )
 {
@@ -161,13 +155,6 @@ VariablesGrid& VariablesGrid::operator=( const MatrixVariablesGrid& rhs )
     }
 
     return *this;
-}
-
-
-VariablesGrid& VariablesGrid::operator=( FILE *rhs )
-{
-	MatrixVariablesGrid::operator=( rhs );
-	return *this;
 }
 
 
@@ -671,20 +658,9 @@ returnValue VariablesGrid::getIntegral(	InterpolationMode mode,
 	return SUCCESSFUL_RETURN;
 }
 
-
-returnValue operator<<(	FILE *file,
-						VariablesGrid &arg
-						)
-{
-    return arg.printToFile(file);
-}
-
-
-
 //
 // PROTECTED MEMBER FUNCTIONS:
 //
-
 
 returnValue VariablesGrid::initializeFromBounds( )
 {
