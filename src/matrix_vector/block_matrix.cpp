@@ -26,18 +26,15 @@
 
 /**
  *    \file src/matrix_vector/block_matrix.cpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 19.01.2009
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date 2009 - 2013
  */
-
 
 #include <acado/matrix_vector/matrix_vector.hpp>
 
-
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -50,7 +47,6 @@ BlockMatrix::BlockMatrix( ){
     elements = 0;
     types    = 0;
 }
-
 
 BlockMatrix::BlockMatrix( uint _nRows, uint _nCols )
 {
@@ -349,20 +345,6 @@ BlockMatrix BlockMatrix::operator-( const BlockMatrix& arg ) const{
     return tmp;
 }
 
-
-
-// 
-// 
-// BlockMatrix BlockMatrix::operator-=(	const BlockMatrix& arg ){
-// 
-// 	ASSERT( ( getNumRows( ) == arg.getNumRows( ) ) && ( getNumCols( ) == arg.getNumCols( ) ) );
-// 
-// 
-// 
-// 	return *this;
-// }
-
-
 BlockMatrix BlockMatrix::operator*=( double scalar ){
 
 	uint i,j;
@@ -607,27 +589,26 @@ BlockMatrix BlockMatrix::getNegative() const{
 }
 
 
-returnValue BlockMatrix::print( ) const{
+returnValue BlockMatrix::print( ) const
+{
+	cout << "Printing Block Matrix:" << endl << endl;
 
-	uint i,j;
-
-    acadoPrintf("Printing Block Matrix: \n\n");
-
-	for( i=0; i<getNumRows( ); ++i ){
-
-		acadoPrintf( "Row %d \n", i );
-
-		for( j=0; j<getNumCols( ); ++j ){
-
-            if( elements != 0 ){
+	for (unsigned i = 0; i < getNumRows(); ++i)
+	{
+		cout << "Row " << i << endl;
+		for (unsigned j = 0; j < getNumCols(); ++j)
+		{
+            if( elements != 0 )
+            {
                 if( types[i][j] == SBMT_DENSE ) elements[i][j].print();
-                if( types[i][j] == SBMT_ONE   ) acadoPrintf("ONE \n");
-                if( types[i][j] == SBMT_ZERO  ) acadoPrintf("ZERO \n");
+                if( types[i][j] == SBMT_ONE   ) cout << "ONE " << endl;
+                if( types[i][j] == SBMT_ZERO  ) cout << "ZERO " <<  endl;
             }
-            else acadoPrintf("ZERO \n");
-		    acadoPrintf( "\n" );
+            else
+            	cout << "ZERO " << endl;
+		    cout << endl;
 		}
-		acadoPrintf( "\n\n" );
+		cout << endl << endl;
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -683,14 +664,6 @@ returnValue BlockMatrix::getSubBlock( uint rowIdx, uint colIdx,
 
     return SUCCESSFUL_RETURN;
 }
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-
-
 
 CLOSE_NAMESPACE_ACADO
 

@@ -312,14 +312,6 @@ inline double VectorspaceElement::getMean( ) const
 	return ( value / (double)getDim() );
 }
 
-
-
-// inline returnValue VectorspaceElement::print( FILE *file ){
-// 
-//     return writeDoublePointerToFile(element,getDim(),file);
-// }
-
-
 inline returnValue VectorspaceElement::convert( double *lhs ) const{
 
     uint i;
@@ -330,11 +322,7 @@ inline returnValue VectorspaceElement::convert( double *lhs ) const{
     return SUCCESSFUL_RETURN;
 }
 
-
-
-
 CLOSE_NAMESPACE_ACADO
-
 
 /*
  *	end of file

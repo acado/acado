@@ -26,18 +26,14 @@
 
 /**
  *    \file include/acado/matrix_vector/vector.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-
 
 #ifndef ACADO_TOOLKIT_VECTOR_HPP
 #define ACADO_TOOLKIT_VECTOR_HPP
 
-
 BEGIN_NAMESPACE_ACADO
 
-
-class Function;
 class Matrix;
 
 
@@ -52,10 +48,10 @@ class Matrix;
  *  not be used for efficiency-critical operations, in particular not for 
  *  large-scale or sparse (matrix) objects.
  *
- *	 \author Hans Joachim Ferreau, Boris Houska
+ *	 \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-class Vector : public VectorspaceElement{
-
+class Vector : public VectorspaceElement
+{
     //
     // PUBLIC MEMBER FUNCTIONS:
     //
@@ -73,19 +69,6 @@ class Vector : public VectorspaceElement{
 				const double* const _values	/**< Double array. */
 				);
 
-
-		/** Constructor which takes a file. */
-        Vector(	FILE *file	/**< Vector dimension. */
-				);
-
-//	/** Constructor which takes a filename */
-//        Vector( const char * filename	/**< Vector dimension. */
-//				);
-
-        /** Copy constructor (deep copy). */
-        Vector(	const Vector& rhs	/**< Right-hand side object. */
-				);
-
         /** Copy constructor (deep copy). */
         Vector(	const VectorspaceElement& rhs	/**< Right-hand side object. */
 				);
@@ -93,15 +76,9 @@ class Vector : public VectorspaceElement{
         /** Destructor. */
         virtual ~Vector( );
 
-
         /** Assignment operator (deep copy). */
 		Vector& operator=(	const Vector& rhs	/**< Right-hand side object. */
 							);
-
-		Vector& operator=(	FILE *rhs	/**< Right-hand side object. */
-							);
-
-
 
 		/** Adds (element-wise) two vectors to a temporary object.
 		 *  \return Temporary object containing the sum of the vectors. */
@@ -150,9 +127,7 @@ class Vector : public VectorspaceElement{
 		inline Matrix operator%(	const Vector& arg	/**< Vector factor. */
 									) const;
 
-
 		returnValue append( const Vector& arg );
-
 
         /** Returns a vector whose components are the absolute
          *  values of the components of this object.
@@ -165,39 +140,16 @@ class Vector : public VectorspaceElement{
          */
         inline Vector getAbsolute() const;
 
-
 		/** Sets vector to the <idx>th unit vector.
 		 *  \return SUCCESSFUL_RETURN */
 		inline returnValue setUnitVector(	uint idx	/**< Index. */
 											);
-
-
-    //
-    // PROTECTED MEMBER FUNCTIONS:
-    //
-    protected:
-
-
-
-    //
-    // DATA MEMBERS:
-    //
-    protected:
 };
 
+/** Unary minus operator */
+Vector operator-(const  Vector &arg);
 
 CLOSE_NAMESPACE_ACADO
-
-
-
-// UNARY MINUS OPERATOR:
-// ---------------------
-
-REFER_NAMESPACE_ACADO Vector operator-(const REFER_NAMESPACE_ACADO Vector &arg);
-
-
-
-
 
 #endif  // ACADO_TOOLKIT_VECTOR_HPP
 

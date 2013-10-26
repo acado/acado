@@ -26,103 +26,39 @@
 
 /**
  *    \file src/matrix_vector/vector.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 31.05.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  */
-
 
 #include <acado/matrix_vector/matrix_vector.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
 Vector::Vector( ) : VectorspaceElement( )
-{
-}
-
+{}
 
 Vector::Vector( uint _dim ) : VectorspaceElement( _dim )
-{
-}
+{}
 
-Vector::Vector( uint _dim, const double* const _values ) : VectorspaceElement( _dim,_values )
-{
-}
-
-Vector::Vector( FILE *file ) : VectorspaceElement()
-{
-
-    operator=(file);
-}
-
-//Vector::Vector( const char* filename ) : VectorspaceElement()
-//{
-//	FILE* file  = fopen(filename,"r");
-//	if( !file ) ACADOERRORTEXT(RET_FILE_CAN_NOT_BE_OPENED,filename);
-//	operator=(file);
-//}
-
-
-Vector::Vector( const Vector& rhs ) : VectorspaceElement( rhs )
-{
-}
+Vector::Vector( uint _dim, const double* const _values ) : VectorspaceElement(_dim, _values)
+{}
 
 Vector::Vector( const VectorspaceElement& rhs ) : VectorspaceElement( rhs )
-{
-}
-
+{}
 
 Vector::~Vector( )
-{
-}
-
-
-Vector& Vector::operator=( const Vector& rhs )
-{
-
-    if ( this != &rhs )
-    {
-		VectorspaceElement::operator=( rhs );
-    }
-
-    return *this;
-}
-
-
-Vector& Vector::operator=( FILE *rhs ){
-
-    int     m;
-    double *x;
-    returnValue returnvalue;
-
-    x = 0;
-    returnvalue = allocateDoublePointerFromFile(rhs, &x, m);   
-
-    if( returnvalue == SUCCESSFUL_RETURN ){
-        VectorspaceElement::init( m, x );
-        if( x != 0 ) free(x);
-    }
-    else{
-        if( x != 0 ) free(x);
-        ACADOINFO(returnvalue);
-    }
-
-    return *this;
-}
-
+{}
 
 returnValue Vector::append( const Vector& arg )
 {
 	return VectorspaceElement::append( arg );
 }
-
-
 
 Vector operator-(const Vector &arg){
 
@@ -136,15 +72,7 @@ Vector operator-(const Vector &arg){
     return tmp;
 }
 
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-
 CLOSE_NAMESPACE_ACADO
-
 
 /*
  *	end of file

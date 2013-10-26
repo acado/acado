@@ -48,6 +48,8 @@
 #include <acado/matrix_vector/matrix.ipp>
 #include <acado/matrix_vector/block_matrix.ipp>
 
+#include <acado/matrix_vector/acado_mat_file.hpp>
+
 
 BEGIN_NAMESPACE_ACADO
 

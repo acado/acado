@@ -26,22 +26,17 @@
 
 /**
  *    \file include/acado/matrix_vector/vectorspace_element.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-
 
 #ifndef ACADO_TOOLKIT_VECTORSPACE_ELEMENT_HPP
 #define ACADO_TOOLKIT_VECTORSPACE_ELEMENT_HPP
 
-
 #include <acado/utils/acado_utils.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 
-
 class Vector;
-
 
 /**
  *	\brief Basis of the rudimentary dense Matrix and Vector classes.
@@ -59,7 +54,7 @@ class Vector;
  *  operators and can be used to derive further special variants of vector 
  *  space objects.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class VectorspaceElement
 {
@@ -155,25 +150,15 @@ class VectorspaceElement
 		inline BooleanType operator>=(	const VectorspaceElement& arg	/**< Object of comparison. */
 										) const;
 
-
 		returnValue append( const VectorspaceElement& arg );
 
-
-
-		/** Returns dimension of vector space.
-		 *  \return Dimension of vector space. */
+		/** Returns dimension of vector space. */
 		inline uint getDim( ) const;
 
-
-		/** Returns whether the vectorspace element is empty.
-		 *  \return BT_TRUE  iff vectorspace element has dimension zero,
-		 *			BT_FALSE otherwise. */
+		/** Returns whether the vectorspace element is empty. */
 		inline BooleanType isEmpty( ) const;
 
-
-		/** Returns whether all components are equal to _value.
-		 *  \return BT_TRUE  iff all components are equal to _value,
-		 *			BT_FALSE otherwise. */
+		/** Returns whether all components are equal to _value. */
 		inline BooleanType isEqualTo(	double _value
 										) const;
 
@@ -182,7 +167,6 @@ class VectorspaceElement
 
 		inline BooleanType isSmallerThan(	double _value
 											) const;
-
 
 		inline BooleanType isZero( ) const;
 
@@ -194,25 +178,28 @@ class VectorspaceElement
 
 		inline BooleanType hasNaN( ) const;
 
-
 		/** Returns whether all components have same value.
 		 *  \return BT_TRUE  iff all components have same value,
 		 *			BT_FALSE otherwise. */
 		inline BooleanType hasEqualComponents( ) const;
 
-
 		/** Sets all component to zero.
-		 *  \return SUCCESSFUL_RETURN */
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
 		inline returnValue setZero( );
 
 		/** Sets all component to given value.
-		 *  \return SUCCESSFUL_RETURN */
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
 		inline returnValue setAll(	double _value	/**< Value for all components. */
 									);
 
-
 		/** Returns maximum element.
-		 *  \return Maximum element. */
+		 *
+		 *  \return Maximum element.
+		 */
 		inline double getMax( ) const;
 
 		/** Returns minimum element.
@@ -223,7 +210,6 @@ class VectorspaceElement
 		 *  \return Mean value of all elements. */
 		inline double getMean( ) const;
 
-
         /** Returns specified norm of the vectorspace element \n
          *  interpreted as a vector.                          \n
          *                                                    \n
@@ -232,7 +218,6 @@ class VectorspaceElement
          *  \return Norm of the vector.                       \n
          */
         double getNorm( VectorNorm norm ) const;
-
 
         /** Returns specified norm of the vectorspace element \n
          *  interpreted as a vector (with scaling).           \n
@@ -245,19 +230,13 @@ class VectorspaceElement
         double getNorm( VectorNorm                norm ,
                         const VectorspaceElement &scale  ) const;
 
+        /** Get a pointer to underlying data structure. */
+        double* getDoublePointer( );
 
-		/** Prints the object into a file. \n
-		 *
-		 *  \return SUCCESSFUL_RETURN            \n
-		 *          RET_CAN_NOT_WRITE_INTO_FILE  \n
-		 */
-		friend returnValue operator<<(	FILE              *file, /**< the file to print to  */
-										VectorspaceElement &arg  /**< the element to print  */
-										);
-
-		/** Prints object to standard ouput stream. Various settings can
+		/** Prints object to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
+		 *	@param[in] stream			Output stream for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] startString		Prefix before printing the numerical values.
 		 *	@param[in] endString		Suffix after printing the numerical values.
@@ -267,33 +246,21 @@ class VectorspaceElement
 		 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
+		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue print(	const char* const name         = DEFAULT_LABEL,
-							const char* const startString  = DEFAULT_START_STRING,
-							const char* const endString    = DEFAULT_END_STRING,
-							uint width                     = DEFAULT_WIDTH,
-							uint precision                 = DEFAULT_PRECISION,
-							const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-							const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
-							) const;
-
-		/** Prints object to standard ouput stream. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] printScheme		Print scheme defining the output format of the information.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		returnValue print(	const char* const name,
-							PrintScheme printScheme
-							) const;
-
+		virtual returnValue print(	std::ostream& stream           = std::cout,
+									const char* const name         = DEFAULT_LABEL,
+									const char* const startString  = DEFAULT_START_STRING,
+									const char* const endString    = DEFAULT_END_STRING,
+									uint width                     = DEFAULT_WIDTH,
+									uint precision                 = DEFAULT_PRECISION,
+									const char* const colSeparator = DEFAULT_COL_SEPARATOR,
+									const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
+									) const;
 
 		/** Prints object to file with given name. Various settings can
-		 *	be specified defining its output format. 
+		 *	be specified defining its output format.
 		 *
 		 *	@param[in] filename			Filename for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
@@ -308,44 +275,34 @@ class VectorspaceElement
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		virtual returnValue printToFile(	const char* const filename,
-											const char* const name         = DEFAULT_LABEL,
-											const char* const startString  = DEFAULT_START_STRING,
-											const char* const endString    = DEFAULT_END_STRING,
-											uint width                     = DEFAULT_WIDTH,
-											uint precision                 = DEFAULT_PRECISION,
-											const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-											const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
-											) const;
+		virtual returnValue print(	const char* const filename,
+									const char* const name         = DEFAULT_LABEL,
+									const char* const startString  = DEFAULT_START_STRING,
+									const char* const endString    = DEFAULT_END_STRING,
+									uint width                     = DEFAULT_WIDTH,
+									uint precision                 = DEFAULT_PRECISION,
+									const char* const colSeparator = DEFAULT_COL_SEPARATOR,
+									const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
+									) const;
 
 		/** Prints object to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] file				File for printing.
+		 *	@param[in] stream			Output stream for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] startString		Prefix before printing the numerical values.
-		 *	@param[in] endString		Suffix after printing the numerical values.
-		 *	@param[in] width			Total number of digits per single numerical value.
-		 *	@param[in] precision		Number of decimals per single numerical value.
-		 *	@param[in] colSeparator		Separator between the columns of the numerical values.
-		 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
+		 *	@param[in] printScheme		Print scheme defining the output format of the information.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		virtual returnValue printToFile(	FILE* file,
-											const char* const name         = DEFAULT_LABEL,
-											const char* const startString  = DEFAULT_START_STRING,
-											const char* const endString    = DEFAULT_END_STRING,
-											uint width                     = DEFAULT_WIDTH,
-											uint precision                 = DEFAULT_PRECISION,
-											const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-											const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
-											) const;
+		virtual returnValue print(	std::ostream& stream,
+									const char* const name,
+									PrintScheme printScheme
+									) const;
 
-		/** Prints object to file with given name. Various settings can
-		 *	be specified defining its output format. 
+		/** Prints object to given file. Various settings can
+		 *	be specified defining its output format.
 		 *
 		 *	@param[in] filename			Filename for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
@@ -355,118 +312,15 @@ class VectorspaceElement
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		virtual returnValue printToFile(	const char* const filename,
-											const char* const name,
-											PrintScheme printScheme
-											) const;
+		virtual returnValue print(	const char* const filename,
+									const char* const name,
+									PrintScheme printScheme
+									) const;
 
-		/** Prints object to given file. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in] filen			File for printing.
-		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] printScheme		Print scheme defining the output format of the information.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		virtual returnValue printToFile(	FILE* file,
-											const char* const name,
-											PrintScheme printScheme
-											) const;
-
-
-		/** Prints object to given string. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in,out] string			File for printing.
-		 *	@param[in]     name				Name label to be printed before the numerical values.
-		 *	@param[in]     startString		Prefix before printing the numerical values.
-		 *	@param[in]     endString		Suffix after printing the numerical values.
-		 *	@param[in]     width			Total number of digits per single numerical value.
-		 *	@param[in]     precision		Number of decimals per single numerical value.
-		 *	@param[in]     colSeparator		Separator between the columns of the numerical values.
-		 *	@param[in]     rowSeparator		Separator between the rows of the numerical values.
-		 *	@param[in]     allocateMemory	Flag indicating whether memory for string shall be allocated.
-		 *
-		 *	\note If 'allocateMemory' flag is set to BT_TRUE, it is assumed that no
-		 *	      memory is allocated to the 'string' pointer. Otherwise, it is assumed
-		 *	      that sufficient memory has been allocated, e.g. by using the determineStringLength()
-		 *	      member function.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		virtual returnValue printToString(	char** string,
-											const char* const name         = DEFAULT_LABEL,
-											const char* const startString  = DEFAULT_START_STRING,
-											const char* const endString    = DEFAULT_END_STRING,
-											uint width                     = DEFAULT_WIDTH,
-											uint precision                 = DEFAULT_PRECISION,
-											const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-											const char* const rowSeparator = DEFAULT_ROW_SEPARATOR,
-											BooleanType allocateMemory     = BT_TRUE
-											) const;
-
-		/** Prints object to given string. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in,out] string			File for printing.
-		 *	@param[in]     name				Name label to be printed before the numerical values.
-		 *	@param[in]     printScheme		Print scheme defining the output format of the information.
-		 *	@param[in]     allocateMemory	Flag indicating whether memory for string shall be allocated.
-		 *
-		 *	\note If 'allocateMemory' flag is set to BT_TRUE, it is assumed that no
-		 *	      memory is allocated to the 'string' pointer. Otherwise, it is assumed
-		 *	      that sufficient memory has been allocated, e.g. by using the determineStringLength()
-		 *	      member function.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		virtual returnValue printToString(	char** string,
-											const char* const name,
-											PrintScheme printScheme,
-											BooleanType allocateMemory = BT_TRUE
-											) const;
-
-
-		/** Determines length of string required for printing object with 
-		 *	given settings defining its output format. 
-		 *
-		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] startString		Prefix before printing the numerical values.
-		 *	@param[in] endString		Suffix after printing the numerical values.
-		 *	@param[in] width			Total number of digits per single numerical value.
-		 *	@param[in] precision		Number of decimals per single numerical value.
-		 *	@param[in] colSeparator		Separator between the columns of the numerical values.
-		 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
-		 *
-		 *  \return Length of string required for printing object
-		 */
-		virtual uint determineStringLength(	const char* const name,
-											const char* const startString,
-											const char* const endString,
-											uint width,
-											uint precision,
-											const char* const colSeparator,
-											const char* const rowSeparator
-											) const;
-
-
-		double* getDoublePointer( );
-
-
-
-    //
-    // PROTECTED MEMBER FUNCTIONS:
-    //
-    protected:
-
-
+		/** Output streaming operator. */
+		friend std::ostream& operator<<(	std::ostream& stream,
+											const VectorspaceElement& arg
+											);
 
     //
     // DATA MEMBERS:
@@ -476,17 +330,12 @@ class VectorspaceElement
 		unsigned int dim;			/**< Vector space dimension. */
 };
 
-
 CLOSE_NAMESPACE_ACADO
 
-
-
 #include <acado/matrix_vector/vectorspace_element.ipp>
-
 
 #endif  // ACADO_TOOLKIT_VECTORSPACE_ELEMENT_HPP
 
 /*
  *	end of file
  */
-

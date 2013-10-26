@@ -26,21 +26,20 @@
 
 /**
  *    \file src/matrix_vector/matrix.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 31.05.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  */
-
 
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/variables_grid/variables_grid.hpp>
 #include <acado/sparse_solver/sparse_solver.hpp>
 #include <include/acado_csparse/acado_csparse.hpp>
 
+#include <iomanip>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -68,14 +67,6 @@ Matrix::Matrix( uint _nRows, uint _nCols, const double* const _values ) : Vector
 	nCols = _nCols;
 	solver = 0;
 }
-
-
-Matrix::Matrix( FILE *file ) : VectorspaceElement( )
-{
-	operator=( file );
-	solver = 0;
-}
-
 
 Matrix::Matrix( int value ) : VectorspaceElement( 1 )
 {
@@ -171,25 +162,25 @@ Matrix& Matrix::operator=( const Matrix& rhs ){
 }
 
 
-Matrix& Matrix::operator=( FILE *rhs ){
-
-    int     nR, nC;
-    double *x  ;
-    returnValue returnvalue;
-
-    x = 0;
-    returnvalue = allocateDoublePointerFromFile(rhs, &x, nR, nC);
-
-    if( returnvalue == SUCCESSFUL_RETURN && nR > 0 && nC > 0 ){
-        init( nR, nC, x );
-        if( x != 0 ) free(x);
-    }
-    else{
-        if( x != 0 ) free(x);
-        ACADOINFO(returnvalue);
-    }
-    return *this;
-}
+//Matrix& Matrix::operator=( FILE *rhs ){
+//
+//    int     nR, nC;
+//    double *x  ;
+//    returnValue returnvalue;
+//
+//    x = 0;
+//    returnvalue = allocateDoublePointerFromFile(rhs, &x, nR, nC);
+//
+//    if( returnvalue == SUCCESSFUL_RETURN && nR > 0 && nC > 0 ){
+//        init( nR, nC, x );
+//        if( x != 0 ) free(x);
+//    }
+//    else{
+//        if( x != 0 ) free(x);
+//        ACADOINFO(returnvalue);
+//    }
+//    return *this;
+//}
 
 
 Matrix& Matrix::operator^=( const double *rhs ){
@@ -268,7 +259,6 @@ returnValue Matrix::appendRows( const Matrix& arg )
 	return SUCCESSFUL_RETURN;
 }
 
-
 returnValue Matrix::appendCols( const Matrix& arg )
 {
 	if( isEmpty() == BT_TRUE ){
@@ -298,225 +288,72 @@ returnValue Matrix::appendCols( const Matrix& arg )
 	return SUCCESSFUL_RETURN;
 }
 
-
-
-returnValue operator<<( FILE *file, Matrix& arg ){
-
-    return arg.printToFile(file);
-}
-
-
-returnValue Matrix::printToFile(	const char* const filename,
-									const char* const name,
-									const char* const startString,
-									const char* const endString,
-									uint width,
-									uint precision,
-									const char* const colSeparator,
-									const char* const rowSeparator
-									) const
+returnValue Matrix::print(	std::ostream& stream,
+							const char* const name,
+							const char* const startString,
+							const char* const endString,
+							uint width,
+							uint precision,
+							const char* const colSeparator,
+							const char* const rowSeparator
+							) const
 {
-	return VectorspaceElement::printToFile( filename,name,startString,endString,width,precision,colSeparator,rowSeparator );
-}
+	if (strlen(name) > 0)
+		stream << name << " = ";
 
+	if (strlen(startString) > 0)
+		stream << startString;
 
-returnValue Matrix::printToFile(	FILE* file,
-									const char* const name,
-									const char* const startString,
-									const char* const endString,
-									uint width,
-									uint precision,
-									const char* const colSeparator,
-									const char* const rowSeparator
-									) const
-{
-	return VectorspaceElement::printToFile( file,name,startString,endString,width,precision,colSeparator,rowSeparator );
-}
-
-
-
-returnValue Matrix::printToFile(	const char* const filename,
-									const char* const name,
-									PrintScheme printScheme
-									) const
-{
-	FILE* file = 0;
-	MatFile* matFile = 0;
-	
-	switch ( printScheme )
+	for (unsigned row = 0; row < nRows; ++row)
 	{
-		case PS_MATLAB_BINARY:
-			matFile = new MatFile;
-			
-			matFile->open( filename );
-			matFile->write( *this,name );
-			matFile->close( );
-			
-			delete matFile;
-			return SUCCESSFUL_RETURN;
-
-		default:
-			file = fopen( filename,"w+" );
-
-			if ( file == 0 )
-				return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
-
-			printToFile( file, name,printScheme );
-
-			fclose( file );
-			return SUCCESSFUL_RETURN;
-	}
-}
-
-
-returnValue Matrix::printToFile(	FILE* file,
-									const char* const name,
-									PrintScheme printScheme
-									) const
-{
-	return VectorspaceElement::printToFile( file,name,printScheme );
-}
-
-
-returnValue Matrix::printToString(	char** string,
-									const char* const name,
-									const char* const startString,
-									const char* const endString,
-									uint width,
-									uint precision,
-									const char* const colSeparator,
-									const char* const rowSeparator,
-									BooleanType allocateMemory
-									) const
-{
-	uint i,j;
-
-	/* determine length of single component */
-	uint componentLength = width;
-
-	// 0.e-0000
-	if ( componentLength < (9 + (uint)precision) )
-		componentLength = 9 + precision;
-
-	char* componentString = new char[componentLength];
-
-	/* determine length of whole string */
-	if ( allocateMemory == BT_TRUE )
-	{
-		uint stringLength = determineStringLength( name,startString,endString,
-												   width,precision,colSeparator,rowSeparator );
-
-		*string = new char[stringLength];
-
-		for( i=0; i<stringLength; ++i )
-			(*string)[i] = '\0';
-	}
-
-	if ( getStringLength(name) > 0 )
-	{
-		strcat( *string,name );
-		strcat( *string," = " );
-	}
-
-	if ( getStringLength(startString) > 0 )
-		strcat( *string,startString );
-
-	int writtenChars;
-
-	for( i=0; i<getNumRows( ); ++i )
-	{
-		for( j=0; j<getNumCols( ); ++j )
+		for (unsigned col = 0; col < nCols; ++col)
 		{
-			if ( precision > 0 )
-				writtenChars = ::sprintf( componentString,"%*.*e",width,precision,operator()( i,j ) );
+			if (precision > 0)
+				stream	<< setw(width) << setprecision(precision) << operator()(row, col);
 			else
-			{
-				writtenChars = ::sprintf( componentString,"%*.0d",width,(int)operator()( i,j ) );
+				stream << setw(width) << (int)operator()(row, col);
 
-				// spritf does not print zeros, that's a hack to circumvent this!
-				if ( ( (int)operator()( i,j ) == 0 ) && ( writtenChars > 0 ) )
-					componentString[writtenChars-1] = '0';
-			}
-
-			if ( ( writtenChars < 0 ) || ( (uint)writtenChars+1 > componentLength ) )
-			{
-				delete[] componentString;
-				return ACADOERROR( RET_UNKNOWN_BUG );
-			}
-
-			strcat( *string,componentString );
-
-			if ( j < getNumCols( )-1 )
-				if ( getStringLength(colSeparator) > 0 )
-					strcat( *string,colSeparator );
+			if (col < (nCols - 1) && strlen(colSeparator) > 0)
+				stream << colSeparator;
 		}
 		
-		if ( i < getNumRows( )-1 )
-			if ( getStringLength(rowSeparator) > 0 )
-				strcat( *string,rowSeparator );
+		if (row < (nRows - 1) && strlen(rowSeparator) > 0)
+			stream << rowSeparator;
 	}
-
-	if ( getStringLength(endString) > 0 )
-		strcat( *string,endString );
-
-	delete[] componentString;
 
 	return SUCCESSFUL_RETURN;
 }
 
-
-returnValue Matrix::printToString(	char** string,
-									const char* const name,
-									PrintScheme printScheme,
-									BooleanType allocateMemory
-									) const
+returnValue Matrix::print(	std::ostream& stream,
+							const char* const name,
+							PrintScheme printScheme
+							) const
 {
-	return VectorspaceElement::printToString( string,name,printScheme,allocateMemory );
+	MatFile* matFile;
+
+	switch ( printScheme )
+	{
+	case PS_MATLAB_BINARY:
+		matFile = new MatFile;
+
+		matFile->write(stream, *this, name);
+
+		delete matFile;
+
+		return SUCCESSFUL_RETURN;
+
+	default:
+		return print(stream, name, printScheme);
+	}
 }
 
-
-uint Matrix::determineStringLength(	const char* const name,
-									const char* const startString,
-									const char* const endString,
-									uint width,
-									uint precision,
-									const char* const colSeparator,
-									const char* const rowSeparator
-									) const
+std::ostream& operator<<(std::ostream& stream, const Matrix& arg)
 {
-	uint componentLength = width;
+	if (arg.print( stream ) != SUCCESSFUL_RETURN)
+		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Cannot write to output stream.");
 
-	// 0.e-0000
-	if ( componentLength < (9 + (uint)precision) )
-		componentLength = 9 + precision;
-	
-
-	// allocate string of sufficient size (being quite conservative)
-	uint stringLength;
-
-	if ( getNumRows( ) * getNumCols( ) > 0 )
-	{
-		stringLength =	1
-						+ getNumRows( ) * getStringLength(startString)
-						+ ( getNumRows( )*getNumCols( ) ) * componentLength
-						+ ( (getNumCols( )-1)*getNumRows( ) ) * getStringLength(colSeparator)
-						+ ( getNumRows( )-1 ) * getStringLength(rowSeparator)
-						+ getNumRows( ) * getStringLength(endString);
-	}
-	else
-	{
-		stringLength =	1
-						+ getStringLength(startString) 
-						+ getStringLength(endString);
-	}
-
-	if ( getStringLength(name) > 0 )
-		stringLength += getStringLength(name)+3;
-
-	return stringLength; 
+	return stream;
 }
-
-
 
 BooleanType Matrix::isSymmetric( ) const
 {

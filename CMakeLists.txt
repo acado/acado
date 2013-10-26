@@ -197,7 +197,7 @@ SET( ACADO_SOURCE_DIRS
 	# Integrators source folders
 	./src/utils
 #	./src/clock
-#	./src/matrix_vector
+	./src/matrix_vector
 #	./src/set_arithmetics
 #	./src/variables_grid
 #	./src/curve

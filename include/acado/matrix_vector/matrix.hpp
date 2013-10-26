@@ -23,12 +23,10 @@
  *
  */
 
-
 /**
  *    \file include/acado/matrix_vector/matrix.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-
 
 #ifndef ACADO_TOOLKIT_MATRIX_HPP
 #define ACADO_TOOLKIT_MATRIX_HPP
@@ -39,15 +37,12 @@
     #include <tr1/memory>
 #endif
 
-
 BEGIN_NAMESPACE_ACADO
-
 
 class Vector;
 class MatrixVariablesGrid;
 class VariablesGrid;
 class SparseSolver;
-
 
 /**
  *  \brief Implements a rudimentary dense matrix class.
@@ -111,14 +106,11 @@ class SparseSolver;
  *
  *  \sa Vector
  *
- *  \author Hans Joachim Ferreau, Boris Houska
+ *  \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
-
-
-class Matrix : public VectorspaceElement{
-
-
+class Matrix : public VectorspaceElement
+{
     //
     // PUBLIC MEMBER FUNCTIONS:
     //
@@ -134,7 +126,7 @@ class Matrix : public VectorspaceElement{
          *  @param _nRows Number of rows.                                \n
          *  @param _nCols Number of columns.                             \n
          */
-        Matrix( uint _nRows, uint _nCols );
+        Matrix(uint _nRows, uint _nCols);
 
 
         /** \brief Constructor which takes dimension of the matrix and a double array \n
@@ -145,23 +137,7 @@ class Matrix : public VectorspaceElement{
          *  @param _nCols Number of columns.                                          \n
          *  @param _nCols Double array.                                               \n
          */
-        Matrix( uint _nRows, uint _nCols, const double* const _values );
-
-
-        /** Constructor which takes a file.                                                      \n
-         *                                                                                       \n
-         *  Example:                                                                             \n
-         *                                                                                       \n
-         *  \verbatim
-            Matrix A = fopen("matrix.dat", "r");  // loading a matrix from the file "matrix.dat"
-            A.print("A");                         // printing the matrix.
-            \endverbatim                                                                         \n
-         *                                                                                       \n
-         *  @param file A file from which the matrix should be loaded.                           \n
-         *                                                                                       \n
-         */
-        Matrix( FILE *file );
-
+        Matrix(uint _nRows, uint _nCols, const double* const _values);
 
         /** \brief Constructor which takes an integer to construct a 1x1-matrix. */
         Matrix( int value /**< The value of the matrix element*/ );
@@ -183,7 +159,6 @@ class Matrix : public VectorspaceElement{
         /** \brief Destructor. */
         virtual ~Matrix( );
 
-
         /** \brief Initializer, which takes the dimensions of the matrix.  \n
          *
          *
@@ -191,8 +166,6 @@ class Matrix : public VectorspaceElement{
          *  @param _nCols Number of columns.                               \n
          */
         returnValue init( uint _nRows, uint _nCols );
-
-
 
         /** \brief Initializer,which takes dimension of the matrix and a double array \n
          *  of appropriate size (_nRows*_nCols) containing the (initial)              \n
@@ -204,37 +177,23 @@ class Matrix : public VectorspaceElement{
          */
         returnValue init( uint _nRows, uint _nCols, double* _values );
 
-
-
         /** \brief Appends rows at the end of the matrix.
          */
         returnValue appendRows( const Matrix& arg /**< The matrix to be appended.*/ );
 
-
-
         /** \brief Appends columns at the end of the matrix. */
         returnValue appendCols( const Matrix& arg /**< The matrix to be appended.*/ );
-
-
 
         /** \brief Assignment operator (deep copy). */
         Matrix& operator=( const Matrix& rhs /**< The right-hand side object. */ );
 
-
-        /** \brief Assignment operator, which loads a matrix from a file. */
-        Matrix& operator=( FILE *rhs /**< A file containing the matrix data. */ );
-
-
         /** \brief Assignment operator, which assigns the elements from a double*. */
         Matrix& operator^=( const double *rhs );
-
 
         /** \brief Assignment operator, which assigns the elements from a double*. \n
          *  (friend version)                                                       \n
          */
         friend double* operator^=( double *lhs, Matrix &rhs );
-
-
 
 		/** Access operator that return the value of a certain component.
 		 *  \return Value of component (<rowIdx>,<colIdx>) */
@@ -314,14 +273,11 @@ class Matrix : public VectorspaceElement{
 		inline BooleanType operator==(	const Matrix& arg
 										) const;
 
-
-
 		/** Multiplies a matrix from the right to the matrix object and
 		 *  stores the result to a temporary object.
 		 *  \return Temporary object containing result of multiplication. */
 		inline Matrix operator*(	const Matrix& arg	/**< Matrix factor. */
 									) const;
-
 
 		/** Multiplies a matrix from the right to the transposed matrix object and
 		 *  stores the result to a temporary object.
@@ -341,14 +297,11 @@ class Matrix : public VectorspaceElement{
 		inline Vector operator^(	const Vector& arg	/**< Vector factor. */
 									) const;
 
-
         inline Matrix transpose() const;
 
         inline Matrix negativeTranspose() const;
 
-
 		inline Matrix& makeVector( );
-
 
 		/** Returns number of rows of the matrix object.
 		 *  \return Number of rows. */
@@ -357,7 +310,6 @@ class Matrix : public VectorspaceElement{
 		/** Returns number of columns of the matrix object.
 		 *  \return Number of columns. */
 		inline uint getNumCols( ) const;
-
 
 		/** Returns a given row of the matrix object.
 		 *  \return Temporary object containing the row. */
@@ -381,7 +333,6 @@ class Matrix : public VectorspaceElement{
 									const Vector& arg	/**< New values of the column. */
 									);
 
-
 		/** Returns given rows of the matrix object.
 		 *  \return Temporary object containing the rows. */
 		inline Matrix getRows(	uint idx1,	/**< Start index of the rows to be returned. */
@@ -394,11 +345,9 @@ class Matrix : public VectorspaceElement{
 								uint idx2		/**< End index of the columns to be returned. */
 								) const;
 
-
 		/** Returns a vector containing the diagonal elements of a square matrix.
 		 *  \return Vector containing the diagonal elements. */
 		inline Vector getDiag( ) const;
-
 
 		/** Sets object to the identity matrix.
 		 *  \return SUCCESSFUL_RETURN */
@@ -407,7 +356,6 @@ class Matrix : public VectorspaceElement{
 		/** Tests if object is a square matrix.
 		 *  \return BT_TRUE iff matrix object is square. */
 		inline BooleanType isSquare( ) const;
-
 
 		/** Tests if object is a symmetric matrix.
 		 *  \return BT_TRUE iff matrix object is symmetric. */
@@ -418,7 +366,6 @@ class Matrix : public VectorspaceElement{
 		BooleanType isDiagonal( ) const;
 
 		returnValue symmetrize( );
-
 
 		/** Tests if object is a positive semi-definite matrix.
 		 *	Note that this test involves a Cholesky decomposition and
@@ -437,13 +384,11 @@ class Matrix : public VectorspaceElement{
          */
         inline Matrix absolute();
 
-
         /** Returns the a matrix whose components are equal to
          *  the components of this object, if they are positive or zero,
          *  but zero otherwise.
          */
         inline Matrix positive();
-
 
         /** Returns the a matrix whose components are equal to
          *  the components of this object, if they are negative or zero,
@@ -451,11 +396,8 @@ class Matrix : public VectorspaceElement{
          */
         inline Matrix negative();
 
-
-        /** Switches the sign of all components.
-         */
+        /** Switches the sign of all components. */
         inline Matrix minus();
-
 
 		/** Returns specified norm of the matrix.
 		 *  \return Norm of the matrix. */
@@ -466,14 +408,12 @@ class Matrix : public VectorspaceElement{
 		 *  \return Trace of the matrix. */
 		double getTrace( ) const;
 
-
         /** Returns a vector containing the eigenvalues of the matrix.    \n
          *  Note that this routine requires that the matrix is symmetric. \n
          *                                                                \n
          *  \return The eigenvalues of the matrix.
          */
         Vector getEigenvalues( ) const;
-
 
         /** Returns a vector containing the eigenvalues of the matrix as  \n
          *  well as the corresponding eigenvectors. The eigenvectors are  \n
@@ -484,14 +424,11 @@ class Matrix : public VectorspaceElement{
          */
         Vector getEigenvalues( Matrix &Q ) const;
 
-
         /**  Prints the eigenvalues of the standard output stream.        \n
          *                                                                \n
          *  \return SUCCESSFUL_RETURN.
          */
         returnValue printEigenvalues( ) const;
-
-
 
         /**  Computes the Singular Value Decomposition of the matrix and  \n
          *   stores the result in the form                                \n
@@ -506,15 +443,11 @@ class Matrix : public VectorspaceElement{
          */
         returnValue getSingularValueDecomposition( Matrix &U, Vector &D, Matrix &V ) const;
 
-
-
         /**  Computes the inverse matrix. \n
          *
          *   \return The inverse A^{-1}.  \n
          */
         Matrix getInverse() const;
-
-
 
         /**  Computes the Cholesky Decomposition of the matrix            \n
          *                                                                \n
@@ -524,8 +457,6 @@ class Matrix : public VectorspaceElement{
          */
         Matrix getCholeskyDecomposition() const;
 
-
-
         /**  Computes the Cholesky Decomposition of the matrix            \n
          *                                                                \n
          *            A = L D L^T                                         \n
@@ -534,16 +465,12 @@ class Matrix : public VectorspaceElement{
          */
         Matrix getCholeskyDecomposition( Vector &D ) const;
 
-
-
         /**  Computes the inverse of a positive definite matrix based on  \n
          *   the Cholesky decomposition.                                  \n
          *                                                                \n
          *   \return  The matrix  A^{-1} = L^{-T}L^{-1}                   \n
          */
         Matrix getCholeskyInverse() const;
-
-
 
         /**  Computes the QR decomposition of the matrix.                 \n
          *   The result of the decomposition will be strored in this      \n
@@ -555,14 +482,12 @@ class Matrix : public VectorspaceElement{
          */
         returnValue computeQRdecomposition();
 
-
         /**  Solves the system  A x = b provided that the routine         \n
          *   computeQRdecomposition() has been used before.               \n
          *                                                                \n
          *   \return  The solution x.                                     \n
          */
         Vector solveQR( const Vector &b ) const;
-
 
         /**  Solves the system  A^T x = b provided that the routine       \n
          *   computeQRdecomposition() has been used before.               \n
@@ -571,15 +496,12 @@ class Matrix : public VectorspaceElement{
          */
         Vector solveTransposeQR( const Vector &b ) const;
 
-
-
         /**  Computes the sparse LU decomposition of the matrix.          \n
          *                                                                \n
          *   \return  The matrix decomposition  A = LU  in an efficient   \n
          *            sparse storage format.                              \n
          */
         returnValue computeSparseLUdecomposition();
-
 
         /**  Solves the system  A x = b provided that the routine         \n
          *   computeQRdecomposition() has been used before.               \n
@@ -588,7 +510,6 @@ class Matrix : public VectorspaceElement{
          */
         Vector solveSparseLU( const Vector &b ) const;
 
-
         /**  Solves the system  A^T x = b provided that the routine       \n
          *   computeQRdecomposition() has been used before.               \n
          *                                                                \n
@@ -596,20 +517,10 @@ class Matrix : public VectorspaceElement{
          */
         Vector solveTransposeSparseLU( const Vector &b ) const;
 
-
-        /** Prints the matrix into a file. \n
-         *
-         *  \return SUCCESSFUL_RETURN            \n
-         *          RET_CAN_NOT_WRITE_INTO_FILE  \n
-         */
-        friend returnValue operator<<(	FILE          *file, /**< the file to print to */
-										Matrix        &arg   /**< the matrix to print  */
-										);
-
-		/** Prints object to file with given name. Various settings can
-		 *	be specified defining its output format. 
+		/** Prints object to given file. Various settings can
+		 *	be specified defining its output format.
 		 *
-		 *	@param[in] filename			Filename for printing.
+		 *	@param[in] stream			Output stream for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] startString		Prefix before printing the numerical values.
 		 *	@param[in] endString		Suffix after printing the numerical values.
@@ -622,46 +533,20 @@ class Matrix : public VectorspaceElement{
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		virtual returnValue printToFile(	const char* const filename,
-											const char* const name         = DEFAULT_LABEL,
-											const char* const startString  = DEFAULT_START_STRING,
-											const char* const endString    = DEFAULT_END_STRING,
-											uint width                     = DEFAULT_WIDTH,
-											uint precision                 = DEFAULT_PRECISION,
-											const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-											const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
-											) const;
+		virtual returnValue print(	std::ostream& stream           = std::cout,
+									const char* const name         = DEFAULT_LABEL,
+									const char* const startString  = DEFAULT_START_STRING,
+									const char* const endString    = DEFAULT_END_STRING,
+									uint width                     = DEFAULT_WIDTH,
+									uint precision                 = DEFAULT_PRECISION,
+									const char* const colSeparator = DEFAULT_COL_SEPARATOR,
+									const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
+									) const;
 
 		/** Prints object to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] file				File for printing.
-		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] startString		Prefix before printing the numerical values.
-		 *	@param[in] endString		Suffix after printing the numerical values.
-		 *	@param[in] width			Total number of digits per single numerical value.
-		 *	@param[in] precision		Number of decimals per single numerical value.
-		 *	@param[in] colSeparator		Separator between the columns of the numerical values.
-		 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		virtual returnValue printToFile(	FILE* file,
-											const char* const name         = DEFAULT_LABEL,
-											const char* const startString  = DEFAULT_START_STRING,
-											const char* const endString    = DEFAULT_END_STRING,
-											uint width                     = DEFAULT_WIDTH,
-											uint precision                 = DEFAULT_PRECISION,
-											const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-											const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
-											) const;
-
-		/** Prints object to file with given name. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in] filename			Filename for printing.
+		 *	@param[in] stream			Output stream for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] printScheme		Print scheme defining the output format of the information.
 		 *
@@ -669,107 +554,15 @@ class Matrix : public VectorspaceElement{
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		virtual returnValue printToFile(	const char* const filename,		/**< Filename for printing */
-											const char* const name,
-											PrintScheme printScheme
-											) const;
+		virtual returnValue print(	std::ostream& stream,
+									const char* const name,
+									PrintScheme printScheme
+									) const;
 
-		/** Prints object to given file. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in] filen			File for printing.
-		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] printScheme		Print scheme defining the output format of the information.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		virtual returnValue printToFile(	FILE* file,
-											const char* const name,
-											PrintScheme printScheme
-											) const;
-
-		/** Prints object to given string. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in,out] string			File for printing.
-		 *	@param[in]     name				Name label to be printed before the numerical values.
-		 *	@param[in]     startString		Prefix before printing the numerical values.
-		 *	@param[in]     endString		Suffix after printing the numerical values.
-		 *	@param[in]     width			Total number of digits per single numerical value.
-		 *	@param[in]     precision		Number of decimals per single numerical value.
-		 *	@param[in]     colSeparator		Separator between the columns of the numerical values.
-		 *	@param[in]     rowSeparator		Separator between the rows of the numerical values.
-		 *	@param[in]     allocateMemory	Flag indicating whether memory for string shall be allocated.
-		 *
-		 *	\note If 'allocateMemory' flag is set to BT_TRUE, it is assumed that no
-		 *	      memory is allocated to the 'string' pointer. Otherwise, it is assumed
-		 *	      that sufficient memory has been allocated, e.g. by using the determineStringLength()
-		 *	      member function.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		virtual returnValue printToString(	char** string,
-											const char* const name         = DEFAULT_LABEL,
-											const char* const startString  = DEFAULT_START_STRING,
-											const char* const endString    = DEFAULT_END_STRING,
-											uint width                     = DEFAULT_WIDTH,
-											uint precision                 = DEFAULT_PRECISION,
-											const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-											const char* const rowSeparator = DEFAULT_ROW_SEPARATOR,
-											BooleanType allocateMemory     = BT_TRUE
-											) const;
-
-		/** Prints object to given string. Various settings can
-		 *	be specified defining its output format. 
-		 *
-		 *	@param[in,out] string			File for printing.
-		 *	@param[in]     name				Name label to be printed before the numerical values.
-		 *	@param[in]     printScheme		Print scheme defining the output format of the information.
-		 *	@param[in]     allocateMemory	Flag indicating whether memory for string shall be allocated.
-		 *
-		 *	\note If 'allocateMemory' flag is set to BT_TRUE, it is assumed that no
-		 *	      memory is allocated to the 'string' pointer. Otherwise, it is assumed
-		 *	      that sufficient memory has been allocated, e.g. by using the determineStringLength()
-		 *	      member function.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
-		 *	        RET_UNKNOWN_BUG
-		 */
-		virtual returnValue printToString(	char** string,
-											const char* const name,
-											PrintScheme printScheme,
-											BooleanType allocateMemory = BT_TRUE
-											) const;
-
-
-		/** Determines length of string required for printing object with 
-		 *	given settings defining its output format. 
-		 *
-		 *	@param[in] name				Name label to be printed before the numerical values.
-		 *	@param[in] startString		Prefix before printing the numerical values.
-		 *	@param[in] endString		Suffix after printing the numerical values.
-		 *	@param[in] width			Total number of digits per single numerical value.
-		 *	@param[in] precision		Number of decimals per single numerical value.
-		 *	@param[in] colSeparator		Separator between the columns of the numerical values.
-		 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
-		 *
-		 *  \return Length of string required for printing object
-		 */
-		virtual uint determineStringLength(	const char* const name,
-											const char* const startString,
-											const char* const endString,
-											uint width,
-											uint precision,
-											const char* const colSeparator,
-											const char* const rowSeparator
-											) const;
-
-
+        /** Prints the matrix into a stream. */
+        friend std::ostream& operator<<(	std::ostream& stream, /**< the stream to print to */
+											Matrix& arg           /**< the matrix to print  */
+											);
 
     //
     // PROTECTED MEMBER FUNCTIONS:
@@ -802,8 +595,6 @@ class Matrix : public VectorspaceElement{
 
         void lowerTriangularInverse( double *L, int n ) const;
 
-
-
     //
     // DATA MEMBERS:
     //
@@ -815,19 +606,13 @@ class Matrix : public VectorspaceElement{
 
 };
 
+/** Unary minus operator. */
+Matrix operator-(const Matrix &arg);
+
 /** Shared pointer of the Matrix class. */
 typedef std::tr1::shared_ptr< Matrix > matrixPtr;
 
-
 CLOSE_NAMESPACE_ACADO
-
-
-// UNARY MINUS OPERATOR:
-// ---------------------
-
-REFER_NAMESPACE_ACADO Matrix operator-(const REFER_NAMESPACE_ACADO Matrix &arg);
-
-
 
 #endif  // ACADO_TOOLKIT_MATRIX_HPP
 

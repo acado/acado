@@ -26,19 +26,20 @@
 
 /**
  *    \file src/matrix_vector/vectorspace_element.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 31.05.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan vukov
+ *    \date 2008 - 2013
  */
-
 
 #include <acado/matrix_vector/vectorspace_element.hpp>
 #include <acado/matrix_vector/vector.hpp>
+#include <acado/matrix_vector/acado_mat_file.hpp>
 
-
+#include <sstream>
+#include <iomanip>
 
 BEGIN_NAMESPACE_ACADO
 
-
+using namespace std;
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -220,15 +221,11 @@ double VectorspaceElement::getNorm( VectorNorm norm, const VectorspaceElement &s
     return value;
 }
 
+double* VectorspaceElement::getDoublePointer( )
+{ return element; }
 
-
-returnValue operator<<( FILE *file, VectorspaceElement& arg ){
-
-    return arg.printToFile(file);
-}
-
-
-returnValue VectorspaceElement::print(	const char* const name,
+returnValue VectorspaceElement::print(	std::ostream& stream,
+										const char* const name,
 										const char* const startString,
 										const char* const endString,
 										uint width,
@@ -237,292 +234,121 @@ returnValue VectorspaceElement::print(	const char* const name,
 										const char* const rowSeparator
 										) const
 {
-	char* string = 0;
+	if (strlen( name ) > 0)
+		stream << name << " = ";
 
-	printToString( &string, name,startString,endString,width,precision,colSeparator,rowSeparator );
-	acadoPrintf( "%s",string );
+	if (strlen(startString) > 0)
+		stream << startString;
 
-	if ( string != 0 )
-	  delete[] string;
+	for (unsigned i = 0; i < dim; ++i)
+	{
+		if (precision > 0)
+			stream << setw( width ) << setprecision( precision ) << operator()( i );
+		else
+			stream << setw( width ) << width << (int)operator()( i );
+
+		if (i < (dim - 1) && strlen( rowSeparator ) > 0)
+			stream << rowSeparator;
+	}
 
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue VectorspaceElement::print(	const char* const filename,
+										const char* const name,
+										const char* const startString,
+										const char* const endString,
+										uint width,
+										uint precision,
+										const char* const colSeparator,
+										const char* const rowSeparator
+										) const
+{
+	ofstream stream( filename );
 
-returnValue VectorspaceElement::print(	const char* const name,
+	if ( stream.is_open() )
+		return print(stream, name, startString, endString, width, precision,
+				colSeparator, rowSeparator);
+	else
+		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
+
+	stream.close();
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue VectorspaceElement::print(	std::ostream& stream,
+										const char* const name,
 										PrintScheme printScheme
 										) const
 {
-	char* string = 0;
+	MatFile* matFile;
 
-	printToString( &string, name,printScheme );
-	acadoPrintf( "%s",string );
-
-	if ( string != 0 )
-	  delete[] string;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue VectorspaceElement::printToFile(	const char* const filename,
-												const char* const name,
-												const char* const startString,
-												const char* const endString,
-												uint width,
-												uint precision,
-												const char* const colSeparator,
-												const char* const rowSeparator
-												) const
-{
-	FILE* file = fopen( filename,"w+" );
-
-	if ( file == 0 )
-		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
-
-	printToFile( file, name,startString,endString,width,precision,colSeparator,rowSeparator );
-	fclose( file );
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue VectorspaceElement::printToFile(	FILE* file,
-												const char* const name,
-												const char* const startString,
-												const char* const endString,
-												uint width,
-												uint precision,
-												const char* const colSeparator,
-												const char* const rowSeparator
-												) const
-{
-	char* string = 0;
-
-	printToString( &string, name,startString,endString,width,precision,colSeparator,rowSeparator );
-	acadoFPrintf( file,"%s",string );
-
-	if ( string != 0 )
-	  delete[] string;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-
-returnValue VectorspaceElement::printToFile(	const char* const filename,
-												const char* const name,
-												PrintScheme printScheme
-												) const
-{
-	FILE* file = 0;
-	MatFile* matFile = 0;
-	
 	switch ( printScheme )
 	{
-		case PS_MATLAB_BINARY:
-			matFile = new MatFile;
-			
-			matFile->open( filename );
-			matFile->write( *this,name );
-			matFile->close( );
-			
-			delete matFile;
-			return SUCCESSFUL_RETURN;
+	case PS_MATLAB_BINARY:
+		matFile = new MatFile;
 
-		default:
-			file = fopen( filename,"w+" );
+		matFile->write(stream, *this, name);
 
-			if ( file == 0 )
-				return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
+		delete matFile;
 
-			printToFile( file, name,printScheme );
+		return SUCCESSFUL_RETURN;
 
-			fclose( file );
-			return SUCCESSFUL_RETURN;
+	default:
+
+		char* startString = 0;
+		char* endString = 0;
+		uint width = 0;
+		uint precision = 0;
+		char* colSeparator = 0;
+		char* rowSeparator = 0;
+
+		returnValue ret = getGlobalStringDefinitions(printScheme, &startString,
+				&endString, width, precision, &colSeparator, &rowSeparator);
+		if (ret != SUCCESSFUL_RETURN)
+			return ret;
+
+		returnValue status = print(stream, name, startString, endString, width,
+				precision, colSeparator, rowSeparator);
+
+		if ( startString != 0 )   delete[] startString;
+		if ( endString != 0 )     delete[] endString;
+		if ( colSeparator != 0 )  delete[] colSeparator;
+		if ( rowSeparator != 0 )  delete[] rowSeparator;
+
+		return status;
 	}
-}
-
-
-returnValue VectorspaceElement::printToFile(	FILE* file,
-												const char* const name,
-												PrintScheme printScheme
-												) const
-{
-	char* string = 0;
-
-	printToString( &string, name,printScheme );
-	acadoFPrintf( file,"%s",string );
-
-	if ( string != 0 )
-	  delete[] string;
 
 	return SUCCESSFUL_RETURN;
 }
 
-
-returnValue VectorspaceElement::printToString(	char** string,
-												const char* const name,
-												const char* const startString,
-												const char* const endString,
-												uint width,
-												uint precision,
-												const char* const colSeparator,
-												const char* const rowSeparator,
-												BooleanType allocateMemory
-												) const
+returnValue VectorspaceElement::print(	const char* const filename,
+										const char* const name = DEFAULT_LABEL,
+										PrintScheme printScheme = PS_DEFAULT
+										) const
 {
-	uint i;
+	ofstream stream( filename );
 
-	/* determine length of single component */
-	uint componentLength = width;
-
-	// 0.e-0000
-	if ( componentLength < (9 + (uint)precision) )
-		componentLength = 9 + precision;
-
-	char* componentString = new char[componentLength];
-
-	/* determine length of whole string */
-	if ( allocateMemory == BT_TRUE )
-	{
-		uint stringLength = determineStringLength( name,startString,endString,
-												   width,precision,colSeparator,rowSeparator );
-
-		*string = new char[stringLength];
-
-		for( i=0; i<stringLength; ++i )
-			(*string)[i] = '\0';
-	}
-
-	if ( getStringLength(name) > 0 )
-	{
-		strcat( *string,name );
-		strcat( *string," = " );
-	}
-
-	if ( getStringLength(startString) > 0 )
-		strcat( *string,startString );
-
-	int writtenChars;
-
-	for( i=0; i<getDim( ); ++i )
-	{
-		if ( precision > 0 )
-			writtenChars = sprintf( componentString,"%*.*e",width,precision,operator()( i ) );
-		else
-			writtenChars = sprintf( componentString,"%*.d",width,(int)operator()( i ) );
-
-		if ( ( writtenChars < 0 ) || ( (uint)writtenChars+1 > componentLength ) )
-		{
-			delete[] componentString;
-			return ACADOERROR( RET_UNKNOWN_BUG );
-		}
-
-		strcat( *string,componentString );
-		
-		if ( i < getDim( )-1 )
-			if ( getStringLength(rowSeparator) > 0 )
-				strcat( *string,rowSeparator );
-	}
-
-	if ( getStringLength(endString) > 0 )
-		strcat( *string,endString );
-
-	delete[] componentString;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue VectorspaceElement::printToString(	char** string,
-												const char* const name,
-												PrintScheme printScheme,
-												BooleanType allocateMemory
-												) const
-{
-	char* startString = 0;
-	char* endString = 0;
-	uint width = 0;
-	uint precision = 0;
-	char* colSeparator = 0;
-	char* rowSeparator = 0;
-
-	returnValue returnvalue;
-	returnvalue = getGlobalStringDefinitions( printScheme,&startString,&endString,
-											  width,precision,&colSeparator,&rowSeparator );
-
-	if ( returnvalue == SUCCESSFUL_RETURN )
-	{
-		returnvalue = printToString( string,name,startString,endString,width,precision,colSeparator,rowSeparator,allocateMemory );
-	}
-
-	if ( startString != 0 )   delete[] startString;
-	if ( endString != 0 )     delete[] endString;
-	if ( colSeparator != 0 )  delete[] colSeparator;
-	if ( rowSeparator != 0 )  delete[] rowSeparator;
-
-	return returnvalue;
-}
-
-
-uint VectorspaceElement::determineStringLength(	const char* const name,
-												const char* const startString,
-												const char* const endString,
-												uint width,
-												uint precision,
-												const char* const colSeparator,
-												const char* const rowSeparator
-												) const
-{
-	uint componentLength = width;
-
-	// 0.e-0000
-	if ( componentLength < (9 + (uint)precision) )
-		componentLength = 9 + precision;
-	
-
-	// allocate string of sufficient size (being quite conservative)
-	uint stringLength;
-
-	if ( getDim( ) > 0 )
-	{
-		stringLength =	1
-						+ getDim( ) * getStringLength(startString)
-						+ getDim( ) * componentLength
-						+ ( getDim( )-1 ) * getStringLength(rowSeparator)
-						+ getDim( ) * getStringLength(endString);
-	}
+	if ( stream.is_open() )
+		return print(stream, name, printScheme);
 	else
-	{
-		stringLength =	1
-						+ getStringLength(startString) 
-						+ getStringLength(endString);
-	}
+		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
 
-	if ( getStringLength(name) > 0 )
-		stringLength += getStringLength(name)+3;
+	stream.close();
 
-	return stringLength; 
+	return SUCCESSFUL_RETURN;
 }
 
-
-
-double* VectorspaceElement::getDoublePointer( )
+std::ostream& operator<<(std::ostream& stream, const VectorspaceElement& arg)
 {
-	return element;
+	if (arg.print( stream ) != SUCCESSFUL_RETURN)
+		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Cannot write to output stream.");
+
+	return stream;
 }
-
-
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
 
 CLOSE_NAMESPACE_ACADO
-
 
 /*
  *	end of file
