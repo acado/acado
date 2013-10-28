@@ -132,25 +132,38 @@ returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const String& rh
 }
 
 
-uint ModelContainer::addOutput( const OutputFcn& outputEquation_ ) {
-	return modelData.addOutput( outputEquation_ );
+uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const Grid& measurements ) {
+	return modelData.addOutput( outputEquation_, measurements );
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim ) {
-	return modelData.addOutput( output, diffs_output, dim );
+uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const uint numberMeasurements ) {
+	Grid grid( 0.0, 1.0, (int)numberMeasurements + 1 );
+	return modelData.addOutput( outputEquation_, grid );
 }
 
+
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim, const Grid& measurements ) {
+	return modelData.addOutput( output, diffs_output, dim, measurements );
+}
+
+
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim, const uint numberMeasurements ) {
+	Grid grid( 0.0, 1.0, (int)numberMeasurements + 1 );
+	return modelData.addOutput( output, diffs_output, dim, grid );
+}
 
 
 uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
-								const String& colInd, const String& rowPtr	) {
-	return modelData.addOutput( output, diffs_output, dim, colInd, rowPtr );
+								const Grid& measurements, const String& colInd, const String& rowPtr	) {
+	return modelData.addOutput( output, diffs_output, dim, measurements, colInd, rowPtr );
 }
 
 
-returnValue ModelContainer::setMeasurements( const Vector& numberMeasurements ) {
-	return modelData.setMeasurements( numberMeasurements );
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
+								const uint numberMeasurements, const String& colInd, const String& rowPtr	) {
+	Grid grid( 0.0, 1.0, (int)numberMeasurements + 1 );
+	return modelData.addOutput( output, diffs_output, dim, grid, colInd, rowPtr );
 }
 
 

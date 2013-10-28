@@ -86,11 +86,12 @@ public:
 
 	/** Adds an output function.
 	 *
-	 *  \param outputEquation_ 	  an output function to be added
+	 *  \param outputEquation_ 	  	an output function to be added
+     *  \param measurements	  		The measurement grid per interval
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( const OutputFcn& outputEquation_ );
+	uint addOutput( const OutputFcn& outputEquation_, const Grid& measurements );
 
 
 	/** Adds an output function.
@@ -98,10 +99,11 @@ public:
 	 *  \param output 	  			The output function to be added.
 	 *  \param diffs_output 	  	The derivatives of the output function to be added.
 	 *  \param dim					The dimension of the output function.
+     *  \param measurements	  		The measurement grid per interval
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( const String& output, const String& diffs_output, const uint dim );
+	uint addOutput( const String& output, const String& diffs_output, const uint dim, const Grid& measurements );
 
 
 	/** Adds an output function.
@@ -109,13 +111,14 @@ public:
 	 *  \param output 	  			The output function to be added.
 	 *  \param diffs_output 	  	The derivatives of the output function to be added.
 	 *  \param dim					The dimension of the output function.
+     *  \param measurements	  		The measurement grid per interval
 	 *  \param colInd				Vector stores the column indices of the elements for Compressed Row Storage (CRS).
 	 *  \param rowPtr				Vector stores the locations that start a row for Compressed Row Storage (CRS).
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
 	uint addOutput( 	const String& output, const String& diffs_output, const uint dim,
-						const String& colInd, const String& rowPtr	);
+						const Grid& measurements, const String& colInd, const String& rowPtr	);
 
 
 	/** Returns true if there are extra outputs, specified for the integrator.
@@ -132,15 +135,6 @@ public:
 	 *  \return The dimension of a specific output function.
 	 */
 	uint getDimOutput( uint index ) const;
-
-
-    /** Sets up the output functions. 																			\n
-     *                                                                      									\n
-     *  \param numberMeasurements	  the number of measurements per horizon for each output function  			\n
-     *                                                                      									\n
-     *  \return SUCCESSFUL_RETURN
-     */
-    returnValue setMeasurements( const Vector& numberMeasurements );
 
 
 	 /** Returns the number of integration steps along the horizon.

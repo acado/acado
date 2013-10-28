@@ -75,13 +75,18 @@ returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX
 }
 
 
-uint ModelData::addOutput( const OutputFcn& outputEquation_ ){
+uint ModelData::addOutput( const OutputFcn& outputEquation_, const Grid& grid ){
 
 	if( rhs_name.isEmpty() && outputNames.size() == 0 ) {
 		Expression next;
 		outputEquation_.getExpression( next );
 		outputExpressions.push_back( next );
 		dim_outputs.push_back( next.getDim() );
+
+		outputGrids.push_back( grid );
+
+		uint numOuts = (int) ceil((double)grid.getNumIntervals());
+		num_meas.push_back( numOuts );
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -91,12 +96,17 @@ uint ModelData::addOutput( const OutputFcn& outputEquation_ ){
 }
 
 
-uint ModelData::addOutput( const String& output, const String& diffs_output, const uint dim ){
+uint ModelData::addOutput( const String& output, const String& diffs_output, const uint dim, const Grid& grid ){
 
 	if( outputExpressions.size() == 0 && differentialEquation.getNumDynamicEquations() == 0 ) {
 		outputNames.push_back( output );
 		diffs_outputNames.push_back( diffs_output );
 		dim_outputs.push_back( dim );
+
+		outputGrids.push_back( grid );
+
+		uint numOuts = (int) ceil((double)grid.getNumIntervals());
+		num_meas.push_back( numOuts );
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -107,7 +117,7 @@ uint ModelData::addOutput( const String& output, const String& diffs_output, con
 
 
 uint ModelData::addOutput( 	const String& output, const String& diffs_output, const uint dim,
-							const String& colInd, const String& rowPtr	){
+							const Grid& grid, const String& colInd, const String& rowPtr	){
 
 
 	Vector colIndV = readFromFile( colInd.getName() );
@@ -118,9 +128,7 @@ uint ModelData::addOutput( 	const String& output, const String& diffs_output, co
 	colInd_outputs.push_back( colIndV );
 	rowPtr_outputs.push_back( rowPtrV );
 
-	addOutput( output, diffs_output, dim );
-
-    return addOutput( output, diffs_output, dim );
+    return addOutput( output, diffs_output, dim, grid );
 }
 
 
@@ -128,26 +136,6 @@ BooleanType ModelData::hasOutputs() const{
 
 	if( outputExpressions.size() == 0 && outputNames.size() == 0 ) return BT_FALSE;
 	return BT_TRUE;
-}
-
-
-returnValue ModelData::setMeasurements( const Vector& numberMeasurements ){
-
-	int i;
-	if( outputExpressions.size() != numberMeasurements.getDim() && outputNames.size() != numberMeasurements.getDim() ) {
-		return ACADOERROR( RET_INVALID_OPTION );
-	}
-	outputGrids.clear();
-	num_meas.clear();
-	for( i = 0; i < (int)numberMeasurements.getDim(); i++ ) {
-		Grid nextGrid( 0.0, 1.0, (int)numberMeasurements(i) + 1 );
-		outputGrids.push_back( nextGrid );
-
-		uint numOuts = (int) ceil((double)outputGrids[i].getNumIntervals()/((double) N) - 10.0*EPS);
-		num_meas.push_back( numOuts );
-	}
-
-    return SUCCESSFUL_RETURN;
 }
 
 

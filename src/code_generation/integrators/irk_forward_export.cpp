@@ -514,8 +514,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	loop->addStatement( String( reset_int.get(0,0) ) << " = 0;\n" );
 
 	for( run5 = 0; run5 < rk_outputs.size(); run5++ ) {
-		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) loop->addStatement( numMeas[run5] == numMeas[run5]+totalMeas[run5] );
-		else if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
+		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 			loop->addStatement( numMeas[run5].getName() << " += " << numMeasVariables[run5].get(0,run) << ";\n" );
 		}
 		else { // ONLINE_GRID
@@ -582,9 +581,7 @@ returnValue ForwardIRKExport::propagateOutputs(	ExportStatementBlock* block, con
 	// chain rule for the sensitivities of the continuous output:
 	for( i = 0; i < rk_outputs.size(); i++ ) {
 		ExportStatementBlock *loop01;
-		ExportForLoop tmpLoop( index0,0,totalMeas[i] );
-		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) loop01 = &tmpLoop;
-		else if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
+		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 			loop01 = block;
 			loop01->addStatement( String("for(") << index0.getName() << " = 0; " << index0.getName() << " < (int)" << numMeasVariables[i].get(0,index) << "; " << index0.getName() << "++) {\n" );
 		}
@@ -666,12 +663,7 @@ returnValue ForwardIRKExport::propagateOutputs(	ExportStatementBlock* block, con
 		}
 
 		loop01->addStatement( loop03 );
-		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) {
-			block->addStatement( *loop01 );
-		}
-		else {
-			loop01->addStatement( "}\n" );
-		}
+		loop01->addStatement( "}\n" );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -980,19 +972,7 @@ returnValue ForwardIRKExport::sensitivitiesOutputs( ExportStatementBlock* block,
 	for( i = 0; i < rk_outputs.size(); i++ ) {
 		uint NVARS = numVARS_output(i);
 		ExportStatementBlock *loop;
-		ExportForLoop tmpLoop( index2,0,totalMeas[i] );
-		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) {
-			loop = &tmpLoop;
-			for( j = 0; j < numStages; j++ ) {
-				loop->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( index2,index2+1,j,j+1 ) );
-			}
-			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) {
-				for( j = 0; j < numStages; j++ ) {
-					loop->addStatement( rk_out.getRow(j) == polynDerVariables[i].getSubMatrix( index2,index2+1,j,j+1 ) );
-				}
-			}
-		}
-		else if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
+		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 			loop = block;
 			loop->addStatement( String("for(") << index2.getName() << " = 0; " << index2.getName() << " < (int)" << numMeasVariables[i].get(0,index0) << "; " << index2.getName() << "++) {\n" );
 			loop->addStatement( tmp_index2 == numMeas[i]+index2 );
@@ -1090,12 +1070,7 @@ returnValue ForwardIRKExport::sensitivitiesOutputs( ExportStatementBlock* block,
 				}
 			}
 		}
-		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) {
-			block->addStatement( *loop );
-		}
-		else {
-			loop->addStatement( "}\n" );
-		}
+		loop->addStatement( "}\n" );
 	}
 
 	return SUCCESSFUL_RETURN;

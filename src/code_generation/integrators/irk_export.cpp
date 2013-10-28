@@ -511,8 +511,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	loop->addStatement( String( reset_int.get(0,0) ) << " = 0;\n" );
 
 	for( run5 = 0; run5 < rk_outputs.size(); run5++ ) {
-		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) loop->addStatement( numMeas[run5] == numMeas[run5]+totalMeas[run5] );
-		else if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
+		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 			loop->addStatement( numMeas[run5].getName() << " += " << numMeasVariables[run5].get(0,run) << ";\n" );
 		}
 		else { // ONLINE_GRID
@@ -826,19 +825,7 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 
 	for( i = 0; i < rk_outputs.size(); i++ ) {
 		ExportStatementBlock *loop1;
-		ExportForLoop tmpLoop2( index1,0,totalMeas[i] );
-		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) {
-			loop1 = &tmpLoop2;
-			for( j = 0; j < numStages; j++ ) {
-				loop1->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( index1,index1+1,j,j+1 ) );
-			}
-			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) {
-				for( j = 0; j < numStages; j++ ) {
-					loop1->addStatement( rk_out.getRow(j) == polynDerVariables[i].getSubMatrix( index1,index1+1,j,j+1 ) );
-				}
-			}
-		}
-		else if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
+		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 			loop1 = block;
 			loop1->addStatement( String("for(") << index1.getName() << " = 0; " << index1.getName() << " < (int)" << numMeasVariables[i].get(0,index0) << "; " << index1.getName() << "++) {\n" );
 			loop1->addStatement( tmp_index1 == numMeas[i]+index1 );
@@ -894,12 +881,7 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 		for( j = 0; j < numOutputs; j++ ) {
 			loop1->addStatement( rk_outputs[i].getCol( tmp_index1+j ) == rk_rhsOutputTemp.getCol( j ) );
 		}
-		if( (MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID ) {
-			block->addStatement( *loop1 );
-		}
-		else {
-			loop1->addStatement( "}\n" );
-		}
+		loop1->addStatement( "}\n" );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -993,11 +975,10 @@ Matrix ImplicitRungeKuttaExport::evaluatePolynomial( uint index )
 	get( MEASUREMENT_GRID, measGrid );
 	Matrix polynV(totalMeas[index],numStages);
 
-	double scale = 1.0/outputGrids[index].getTime( totalMeas[index] );
 	double scale2 = 1.0/(grid.getLastTime() - grid.getFirstTime());
 	for( uint i = 0; i < totalMeas[index]; i++ ) {
-		double time = scale*outputGrids[index].getTime(i);
-		if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
+		double time = outputGrids[index].getTime(i);
+		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 			uint interv = getIntegrationInterval( time );
 			time = (time-scale2*grid.getTime(interv))/(scale2*(grid.getTime(interv+1)-grid.getTime(interv)));
 		}
@@ -1054,11 +1035,10 @@ Matrix ImplicitRungeKuttaExport::evaluateDerivedPolynomial( uint index )
 	get( MEASUREMENT_GRID, measGrid );
 	Matrix polynDerV(totalMeas[index],numStages);
 
-	double scale = 1.0/outputGrids[index].getTime( totalMeas[index] );
 	double scale2 = 1.0/(grid.getLastTime() - grid.getFirstTime());
 	for( uint i = 0; i < totalMeas[index]; i++ ) {
-		double time = scale*outputGrids[index].getTime(i);
-		if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
+		double time = outputGrids[index].getTime(i);
+		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 			uint interv = getIntegrationInterval( time );
 			time = (time-scale2*grid.getTime(interv))/(scale2*(grid.getTime(interv+1)-grid.getTime(interv)));
 		}
@@ -1325,9 +1305,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( dx ) );
 
 		outputDependencies.push_back( dependencyMat );
-
-		if((MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID) totalMeas.push_back( (int)ceil((double)outputGrids[i].getNumIntervals()/((double) grid.getNumIntervals()) - 10.0*EPS) );
-		else totalMeas.push_back( outputGrids[i].getNumIntervals() );
+		totalMeas.push_back( outputGrids[i].getNumIntervals() );
 
 		// Export output grids
 		ExportVariable gridVariable( (String)"gridOutput" << i, 1, totalMeas[i], REAL, ACADO_VARIABLES );
@@ -1395,8 +1373,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 			ExportVariable rk_output( String("rk_output")<<String(i), 1, outputDim, REAL );
 			rk_outputs.push_back( rk_output );
 
-			if((MeasurementGrid)measGrid == EQUIDISTANT_SUBGRID) totalMeas.push_back( (int)ceil((double)outputGrids[i].getNumIntervals()/((double) grid.getNumIntervals()) - 10.0*EPS) );
-			else totalMeas.push_back( outputGrids[i].getNumIntervals() );
+			totalMeas.push_back( outputGrids[i].getNumIntervals() );
 
 			// Export output grids
 			ExportVariable gridVariable( (String)"gridOutput" << i, 1, totalMeas[i], REAL, ACADO_VARIABLES );
@@ -1470,7 +1447,7 @@ returnValue ImplicitRungeKuttaExport::prepareOutputEvaluation( ExportStatementBl
 			}
 
 			ExportVariable numMeasVariable( (String)"numMeas" << i, measurements, STATIC_CONST_INT );
-			if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
+			if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 				code.addDeclaration( numMeasVariable );
 			}
 			numMeasVariables.push_back( numMeasVariable );
