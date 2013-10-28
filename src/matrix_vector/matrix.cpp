@@ -162,27 +162,6 @@ Matrix& Matrix::operator=( const Matrix& rhs ){
 }
 
 
-//Matrix& Matrix::operator=( FILE *rhs ){
-//
-//    int     nR, nC;
-//    double *x  ;
-//    returnValue returnvalue;
-//
-//    x = 0;
-//    returnvalue = allocateDoublePointerFromFile(rhs, &x, nR, nC);
-//
-//    if( returnvalue == SUCCESSFUL_RETURN && nR > 0 && nC > 0 ){
-//        init( nR, nC, x );
-//        if( x != 0 ) free(x);
-//    }
-//    else{
-//        if( x != 0 ) free(x);
-//        ACADOINFO(returnvalue);
-//    }
-//    return *this;
-//}
-
-
 Matrix& Matrix::operator^=( const double *rhs ){
 
     uint i,j;
