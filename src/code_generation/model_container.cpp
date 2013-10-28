@@ -132,8 +132,11 @@ returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const String& rh
 }
 
 
-uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const Grid& measurements ) {
-	return modelData.addOutput( outputEquation_, measurements );
+uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const Vector& measurements ) {
+	Vector newMeas(measurements);
+	newMeas.append( 1.0 );
+	Grid grid( newMeas );
+	return modelData.addOutput( outputEquation_, grid );
 }
 
 
@@ -143,8 +146,11 @@ uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const uint num
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim, const Grid& measurements ) {
-	return modelData.addOutput( output, diffs_output, dim, measurements );
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim, const Vector& measurements ) {
+	Vector newMeas(measurements);
+	newMeas.append( 1.0 );
+	Grid grid( newMeas );
+	return modelData.addOutput( output, diffs_output, dim, grid );
 }
 
 
@@ -155,8 +161,11 @@ uint ModelContainer::addOutput( const String& output, const String& diffs_output
 
 
 uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
-								const Grid& measurements, const String& colInd, const String& rowPtr	) {
-	return modelData.addOutput( output, diffs_output, dim, measurements, colInd, rowPtr );
+								const Vector& measurements, const String& colInd, const String& rowPtr	) {
+	Vector newMeas(measurements);
+	newMeas.append( 1.0 );
+	Grid grid( newMeas );
+	return modelData.addOutput( output, diffs_output, dim, grid, colInd, rowPtr );
 }
 
 

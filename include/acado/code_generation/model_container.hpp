@@ -216,11 +216,11 @@ public:
 	/** Adds an output function.
 	 *
 	 *  \param outputEquation_ 	  	an output function to be added
-     *  \param measurements	  		the measurement grid per interval
+     *  \param measurements	  		the measurement points per interval
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( const OutputFcn& outputEquation_, const Grid& measurements );
+	uint addOutput( const OutputFcn& outputEquation_, const Vector& measurements );
 
 
 	/** Adds an output function.
@@ -238,11 +238,11 @@ public:
 	 *  \param output 	  			The output function to be added.
 	 *  \param diffs_output 	  	The derivatives of the output function to be added.
 	 *  \param dim					The dimension of the output function.
-     *  \param measurements	  		The measurement grid per interval
+     *  \param measurements	  		The measurement points per interval
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( const String& output, const String& diffs_output, const uint dim, const Grid& measurements );
+	uint addOutput( const String& output, const String& diffs_output, const uint dim, const Vector& measurements );
 
 
 	/** Adds an output function.
@@ -262,14 +262,14 @@ public:
 	 *  \param output 	  			The output function to be added.
 	 *  \param diffs_output 	  	The derivatives of the output function to be added.
 	 *  \param dim					The dimension of the output function.
-     *  \param measurements	  		The measurement grid per interval
+     *  \param measurements	  		The measurement points per interval
 	 *  \param colInd				Vector stores the column indices of the elements for Compressed Row Storage (CRS).
 	 *  \param rowPtr				Vector stores the locations that start a row for Compressed Row Storage (CRS).
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
 	uint addOutput( 	const String& output, const String& diffs_output, const uint dim,
-						const Grid& measurements, const String& colInd, const String& rowPtr	);
+						const Vector& measurements, const String& colInd, const String& rowPtr	);
 
 
 	/** Adds an output function.

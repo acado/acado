@@ -109,13 +109,12 @@ int main() {
 	
 	acadoPrintf( "-----------------------------------------\n  Using a provided grid:\n-----------------------------------------\n" );
 	
-	Vector Meas(6);
+	Vector Meas(5);
 	Meas(0) = 0.0;
 	Meas(1) = 0.2;
 	Meas(2) = 0.4;
 	Meas(3) = 0.6;
 	Meas(4) = 0.8;
-	Meas(5) = 0.9;
 	
 	SIMexport sim2( 1, 0.1 );
 	
