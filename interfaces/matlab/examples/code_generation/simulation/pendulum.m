@@ -31,9 +31,10 @@ f = [ dx; ...
 %% SIMexport
 numMeas = 6;
 sim = acado.SIMexport( h );
+
 sim.setModel(f);
-sim.addOutput([Fx; Fy]);
-sim.setMeasurements(numMeas);
+sim.addOutput([Fx; Fy], numMeas);
+
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5'         );
 sim.set( 'NUM_INTEGRATOR_STEPS',        10                      );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1                       );
@@ -73,10 +74,11 @@ disp('-----------------------------------------------------------')
 disp('Let us use an external pendulum model, defined in C-code...')
     
 sim = acado.SIMexport( h );
+
 sim.setModel('model', 'rhs', 'rhs_jac');
 sim.setDimensions(6,0,3,1);
-sim.addOutput('out', 'out_jac', 2);
-sim.setMeasurements(numMeas);
+sim.addOutput('out', 'out_jac', 2, numMeas);
+
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5'         );
 sim.set( 'NUM_INTEGRATOR_STEPS',        10                      );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1                       );

@@ -35,9 +35,10 @@ numSteps = 2;
 
 %% SIMexport
 sim = acado.SIMexport( h );
+
 sim.setModel(f);
-sim.addOutput([xT; vT; xL; vL]);
-sim.setMeasurements(3);
+sim.addOutput([xT; vT; xL; vL], 3);
+
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA3' );
 sim.set( 'NUM_INTEGRATOR_STEPS',        numSteps        );
 sim.set( 'GENERATE_MATLAB_INTERFACE',   1               );

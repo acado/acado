@@ -56,7 +56,9 @@ f(27) = P2;
 f(28) = P3; 
 
 sim = acado.SIMexport( h );
+
 sim.setModel(f);
+
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_GL4'   );
 sim.set( 'NUM_INTEGRATOR_STEPS',        5               );
 if EXPORT
@@ -112,9 +114,11 @@ A3(6,3) = 1.0;
 f3 = [V1; V2; V3; zeros(3,1)];
     
 sim2 = acado.SIMexport( h );
+
 sim2.setLinearInput(M1,A1,B1);
 sim2.setModel(f2);
 sim2.setLinearOutput(M3,A3,f3);
+
 sim2.set( 'INTEGRATOR_TYPE',             'INT_IRK_GL4'   );
 sim2.set( 'NUM_INTEGRATOR_STEPS',        5               );
 if EXPORT

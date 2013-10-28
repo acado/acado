@@ -94,9 +94,6 @@ int main() {
     f2 << 0			== I*ddalpha - M - (Fx+u)*y + (Fy+u)*x;
     f2 << 0			== ddx + dy*dalpha + y*ddalpha;
     f2 << 0 		== ddy - dx*dalpha - x*ddalpha;
-	
-	Vector Meas(1);
-	Meas(0) = 5;
  
 	// ----------------------------------------------------------
 	// ----------------------------------------------------------
@@ -104,11 +101,10 @@ int main() {
     
     sim1.set( INTEGRATOR_TYPE, INT_IRK_RIIA3 );
     sim1.set( NUM_INTEGRATOR_STEPS, 4 );
-    sim1.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
+    sim1.set( MEASUREMENT_GRID, OFFLINE_GRID );
     
     sim1.setModel( f1 );
-    sim1.addOutput( h );
-    sim1.setMeasurements( Meas );
+    sim1.addOutput( h, 5 );
 	sim1.setTimingSteps( 10000 );
     
     acadoPrintf( "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (semi-explicit):\n-----------------------------------------------------------\n" );
@@ -121,11 +117,10 @@ int main() {
     
     sim2.set( INTEGRATOR_TYPE, INT_IRK_RIIA3 );
     sim2.set( NUM_INTEGRATOR_STEPS, 4 );
-    sim2.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
+    sim2.set( MEASUREMENT_GRID, OFFLINE_GRID );
     
     sim2.setModel( f2 );
-    sim2.addOutput( h );
-    sim2.setMeasurements( Meas );
+    sim2.addOutput( h, 5 );
 	sim2.setTimingSteps( 10000 );
     
     acadoPrintf( "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (implicit):\n-----------------------------------------------------------\n" );
@@ -138,13 +133,12 @@ int main() {
     
     sim3.set( INTEGRATOR_TYPE, INT_IRK_RIIA3 );
     sim3.set( NUM_INTEGRATOR_STEPS, 4 );
-    sim3.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
+    sim3.set( MEASUREMENT_GRID, OFFLINE_GRID );
     
     sim3.setModel( "model", "rhs", "rhs_jac" );
     sim3.setDimensions( 6, 6, 5, 1 );
     
-    sim3.addOutput( "out", "out_jac", 2 );
-    sim3.setMeasurements( Meas );
+    sim3.addOutput( "out", "out_jac", 2, 5 );
 	sim3.setTimingSteps( 10000 );
     
     acadoPrintf( "-----------------------------------------------------------\n  Using an externally defined Pendulum DAE model:\n-----------------------------------------------------------\n" );
