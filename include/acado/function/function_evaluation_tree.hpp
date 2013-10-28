@@ -414,25 +414,24 @@ public:
      *                                                                                    \n
      *  \return SUCCESFUL_RETURN                                                          \n
      */
-     returnValue C_print(	FILE       *file,
+     returnValue C_print(	std::ostream& stream = std::cout,
 							const char *fcnName = "ACADOfcn",
 							const char *realString = "double",
 							int         precision = 16
 							) const;
 
 
-     returnValue exportHeader(	FILE       *file,
+     returnValue exportHeader(	std::ostream& stream = std::cout,
 								const char *fcnName = "ACADOfcn",
 								const char *realString = "double"
 								) const;
 
-     returnValue exportForwardDeclarations(	FILE       *file,
+     returnValue exportForwardDeclarations(	std::ostream& stream = std::cout,
 											const char *fcnName = "ACADOfcn",
 											const char *realString = "double"
 											) const;
 
-
-     returnValue exportCode(	FILE       *file,
+     returnValue exportCode(	std::ostream& stream = std::cout,
 								const char *fcnName = "ACADOfcn",
 								const char *realString = "double",
 								int         precision = 16,
@@ -443,9 +442,7 @@ public:
 								uint		_numDX = 0
 								) const;
 
-		ExportVariable getGlobalExportVariable( ) const;
-
-
+     ExportVariable getGlobalExportVariable( ) const;
 
      /** Clears the buffer and resets the buffer size \n
       *  to 1.                                        \n
@@ -475,9 +472,9 @@ public:
 
      virtual returnValue getExpression( Expression& expression ) const;
 
-     returnValue setGlobalExportVariableName(const String& _name);
+     returnValue setGlobalExportVariableName(const std::string& _name);
 
-     String getGlobalExportVariableName() const;
+     std::string getGlobalExportVariableName() const;
 
      unsigned getGlobalExportVariableSize() const;
 
@@ -496,7 +493,7 @@ protected:
      Expression           safeCopy ;
 
      /** Name of the variable that holds intermediate expressions. */
-     String				globalExportVariableName;
+     std::string		globalExportVariableName;
 };
 
 

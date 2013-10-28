@@ -60,7 +60,7 @@ public:
     TIME();
 
     /** Default constructor */
-    TIME( uint nRows_, uint nCols_ = 1, String name_ = "" );
+    TIME(const std::string& name_, uint nRows_, uint nCols_);
 
     /** Copy constructor (deep copy). */
     TIME( const TIME &arg );
@@ -71,24 +71,12 @@ public:
     /** Assignment Operator (deep copy). */
     TIME& operator=( const TIME &arg );
 
-
      /** Provides a deep copy of the expression. \n
       *  \return a clone of the expression.      \n
       */
      virtual Expression* clone() const;
-
-
-//
-//  PROTECTED MEMBERS:
-//
-
-protected:
-
 };
 
-
 CLOSE_NAMESPACE_ACADO
-
-
 
 #endif

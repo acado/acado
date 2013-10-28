@@ -40,15 +40,15 @@ int Parameter::count = 0;
 
 
 Parameter::Parameter()
-          :Expression( 1, 1, VT_PARAMETER, count ){
-
+	: Expression("", 1, 1, VT_PARAMETER, count)
+{
     count++;
 }
 
 
-Parameter::Parameter( uint nRows_, uint nCols_, String name_ )
-          :Expression( nRows_, nCols_, VT_PARAMETER, (uint) count, name_ ){
-
+Parameter::Parameter(const std::string& name_, uint nRows_, uint nCols_)
+	: Expression(name_, nRows_, nCols_, VT_PARAMETER, count)
+{
     count += nRows_*nCols_;
 }
 

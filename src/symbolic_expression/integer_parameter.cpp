@@ -42,15 +42,15 @@ int IntegerParameter::count = 0;
 
 
 IntegerParameter::IntegerParameter()
-                 :Expression( 1, 1, VT_INTEGER_PARAMETER, count ){
-
+	: Expression("", 1, 1, VT_INTEGER_PARAMETER, count)
+{
     count++;
 }
 
 
-IntegerParameter::IntegerParameter( uint nRows_, uint nCols_, String name_ )
-                 :Expression( nRows_, nCols_, VT_INTEGER_PARAMETER, (uint) count, name_ ){
-
+IntegerParameter::IntegerParameter(const std::string& name_, uint nRows_, uint nCols_)
+	: Expression(name_, nRows_, nCols_, VT_INTEGER_PARAMETER, (uint) count)
+{
     count += nRows_*nCols_;
 }
 

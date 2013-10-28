@@ -178,13 +178,6 @@ BooleanType SmoothOperator::isSmooth( ) const
 
 double SmoothOperator::getValue() const{ return INFTY; }
 
-
-Stream SmoothOperator::operator<<( Stream &stream ){
-
-    return print( stream );
-}
-
-
 int SmoothOperator::getGlobalIndex( ) const{
 
 	ACADOERROR( RET_UNKNOWN_BUG );

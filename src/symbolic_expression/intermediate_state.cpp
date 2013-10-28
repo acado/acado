@@ -43,48 +43,34 @@ int IntermediateState::count = 0;
 
 
 IntermediateState::IntermediateState()
-                  :Expression( 1, 1, VT_INTERMEDIATE_STATE, count ){
-
+	: Expression("", 1, 1, VT_INTERMEDIATE_STATE, count)
+{
     count++;
 }
 
 
-IntermediateState::IntermediateState( uint nRows_, uint nCols_, String name_ )
-                  :Expression( nRows_, nCols_, VT_INTERMEDIATE_STATE, (uint) count, name_ ){
-
+IntermediateState::IntermediateState(const std::string& name_, uint nRows_, uint nCols_)
+	: Expression(name_, nRows_, nCols_, VT_INTERMEDIATE_STATE, count)
+{
     count += nRows_*nCols_;
 }
 
-IntermediateState::IntermediateState( uint nRows_, String name_ )
-                  :Expression( nRows_,(uint) 1, VT_INTERMEDIATE_STATE, (uint) count, name_ ){
-    count += nRows_;
-}
-
-IntermediateState::IntermediateState(String name_ )
-                  :Expression((uint) 1,(uint) 1, VT_INTERMEDIATE_STATE, (uint) count, name_ ){
-
+IntermediateState::IntermediateState(const std::string& name_)
+	: Expression(name_, 1, 1, VT_INTERMEDIATE_STATE, count)
+{
     count ++;
 }
 
-
-
-IntermediateState::IntermediateState( int nRows_, int nCols_, String name_ )
-                  :Expression( nRows_, nCols_, VT_INTERMEDIATE_STATE, count, name_ ){
-
-    count += nRows_*nCols_;
-}
-
-
-IntermediateState::IntermediateState( const double& arg ):Expression(){
-
+IntermediateState::IntermediateState( const double& arg ):Expression()
+{
     nRows = 1;
     nCols = 1;
     operator=(arg);
 }
 
 
-IntermediateState::IntermediateState( const Vector& arg ):Expression(){
-
+IntermediateState::IntermediateState( const Vector& arg ):Expression()
+{
     nRows = arg.getDim();
     nCols = 1;
     operator=(arg);

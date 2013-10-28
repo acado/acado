@@ -61,7 +61,7 @@ public:
     IntegerControl();
 
     /** Default constructor */
-    IntegerControl( uint nRows_, uint nCols_ = 1, String name_ = "" );
+    IntegerControl(const std::string& name_, uint nRows_, uint nCols_);
 
     /** Copy constructor (deep copy). */
     IntegerControl( const IntegerControl &arg );

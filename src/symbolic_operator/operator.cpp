@@ -209,35 +209,20 @@ ConstraintComponent operator>=( VariablesGrid ub, const Operator &arg ){ return 
 
 double Operator::getValue() const{ return INFTY; }
 
-
-Stream& Operator::operator<<( Stream &stream ) const{
-
-    return print( stream );
+std::ostream& operator<<(std::ostream &stream, const Operator &arg)
+{
+	return arg.print( stream );
 }
-
-
-Stream& operator<<( Stream &stream, const Operator &arg ){
-
-    return arg.print( stream );
-}
-
-
-returnValue operator<<( FILE* file, const Operator &arg ){
-
-    Stream tmp;
-    tmp = arg.print(tmp);
-	file << tmp;
-    return SUCCESSFUL_RETURN;
-}
-
 
 Operator* Operator::passArgument() const{
 
     return 0;
 }
 
-returnValue Operator::setVariableExportName( const VariableType &_type, const Stream *_name ){
-
+returnValue Operator::setVariableExportName(	const VariableType &_type,
+												const std::vector< std::string >& _name
+												)
+{
 	return SUCCESSFUL_RETURN;
 }
 

@@ -84,7 +84,7 @@ inline Operator* Expression::getOperatorClone( uint idx ) const{
 }
 
 
-inline TreeProjection Expression::getTreeProjection( const uint &idx, String name_ ) const{
+inline TreeProjection Expression::getTreeProjection( const uint &idx, const std::string& name_ ) const{
 
     TreeProjection tmp( name_ );
     tmp.operator=( *element[idx] );

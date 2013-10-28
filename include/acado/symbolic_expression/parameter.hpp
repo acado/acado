@@ -61,7 +61,7 @@ public:
     Parameter();
 
     /** Default constructor */
-    Parameter( uint nRows_, uint nCols_ = 1, String name_ = "" );
+    Parameter(const std::string& name_, uint nRows_, uint nCols_);
 
     /** Copy constructor (deep copy). */
     Parameter( const Parameter &arg );

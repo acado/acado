@@ -479,8 +479,8 @@ returnValue COperator::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream& COperator::print( Stream &stream ) const{
-
+std::ostream& COperator::print( std::ostream& stream ) const
+{
     return stream << "C functions can not be printed";
 }
 

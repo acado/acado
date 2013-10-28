@@ -52,20 +52,20 @@ Projection::Projection()
 }
 
 
-Projection::Projection( const String &name_ )
+Projection::Projection( const std::string& name_ )
            :SmoothOperator( ){
 
     scale          = 1.0             ;
     curvature      = CT_AFFINE       ;
     monotonicity   = MT_NONDECREASING;
     operatorName   = ON_VARIABLE     ;
-    name           << name_          ;
+    name           << name_    ;
 
     nCount = 0;
 }
 
 
-Projection::Projection( VariableType variableType_, int vIndex_, const String &name_ ) :SmoothOperator( )
+Projection::Projection( VariableType variableType_, int vIndex_, const std::string &name_ ) :SmoothOperator( )
 {
     variableType   = variableType_ ;
     vIndex         = vIndex_       ;
@@ -147,7 +147,7 @@ void Projection::copy( const Projection &arg ){
         variableIndex  = arg.variableIndex;
         vIndex         = arg.vIndex       ;
         scale          = arg.scale        ;
-        name           = arg.name         ;
+        name.str( arg.name.str() );
         operatorName   = arg.operatorName ;
         curvature      = arg.curvature    ;
         monotonicity   = arg.monotonicity ;
@@ -347,7 +347,7 @@ returnValue Projection::AD_backward2( int number, double seed1, double seed2,
 
 
 
-Stream& Projection::print( Stream &stream ) const{
+std::ostream& Projection::print( std::ostream &stream ) const{
 
     return stream << name;
 }
@@ -484,12 +484,13 @@ returnValue Projection::ADbackwardProtected( int dim,
 }
 
 
-returnValue Projection::setVariableExportName( const VariableType &_type, const Stream *_name ){
-
+returnValue Projection::setVariableExportName(	const VariableType &_type,
+												const std::vector< std::string >& _name
+												)
+{
 	if (variableType == _type)
-	{
-		this->name = _name[vIndex];
-	}
+		this->name.str( _name[ vIndex ] );
+
 	return Operator::setVariableExportName(_type, _name);
 }
 

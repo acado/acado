@@ -60,7 +60,7 @@ public:
     Control();
 
     /** Default constructor */
-    Control( uint nRows_, uint nCols_ = 1, String name_ = "" );
+    Control(const std::string& name_, uint nRows_, uint nCols_);
 
     /** Copy constructor (deep copy). */
     Control( const Control &arg );

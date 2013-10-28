@@ -359,7 +359,7 @@ returnValue UnaryOperator::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream& UnaryOperator::print( Stream &stream ) const{
+std::ostream& UnaryOperator::print( std::ostream &stream ) const{
 
     return stream << "(" << cName << "(" << *argument << "))";
 }
@@ -413,11 +413,13 @@ BooleanType UnaryOperator::isSymbolic() const{
 }
 
 
-returnValue UnaryOperator::setVariableExportName( const VariableType &type, const Stream *name )
+returnValue UnaryOperator::setVariableExportName(	const VariableType &_type,
+													const std::vector< std::string >& _name
+													)
 {
-	argument->setVariableExportName(type, name);
+	argument->setVariableExportName(_type, _name);
 
-	return Operator::setVariableExportName(type, name);
+	return Operator::setVariableExportName(_type, _name);
 }
 
 CLOSE_NAMESPACE_ACADO

@@ -61,13 +61,10 @@ public:
     DifferentialState();
 
     /** Default constructor */
-    DifferentialState( uint nRows_, uint nCols_ = 1, String name_ = "" );
-
-    /** vector constructor */
-    DifferentialState( uint nRows_, String name_ );
+    DifferentialState(const std::string& name_, uint nRows_, uint nCols_);
 
     /** scalar constructor */
-    DifferentialState( String name_ );
+    DifferentialState( std::string name_ );
 
     /** Copy constructor (deep copy). */
     DifferentialState( const DifferentialState &arg );

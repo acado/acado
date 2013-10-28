@@ -570,7 +570,7 @@ returnValue Power_Int::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream& Power_Int::print( Stream &stream ) const{
+std::ostream& Power_Int::print( std::ostream &stream ) const{
 
 	if ( argument->getName() == ON_POWER ) 
 	{
@@ -655,11 +655,13 @@ BooleanType Power_Int::isSymbolic() const{
     return BT_TRUE;
 }
 
-returnValue Power_Int::setVariableExportName( const VariableType &type, const Stream *name )
+returnValue Power_Int::setVariableExportName(	const VariableType &_type,
+												const std::vector< std::string >& _name
+												)
 {
-	argument->setVariableExportName(type, name);
+	argument->setVariableExportName(_type, _name);
 
-	return Operator::setVariableExportName(type, name);
+	return Operator::setVariableExportName(_type, _name);
 }
 
 

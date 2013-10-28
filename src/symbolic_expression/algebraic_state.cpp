@@ -40,15 +40,15 @@ int AlgebraicState::count = 0;
 
 
 AlgebraicState::AlgebraicState()
-               :Expression( 1, 1, VT_ALGEBRAIC_STATE, count ){
-
+               :Expression("", 1, 1, VT_ALGEBRAIC_STATE, count)
+{
     count++;
 }
 
 
-AlgebraicState::AlgebraicState( uint nRows_, uint nCols_, String name_ )
-               :Expression( nRows_, nCols_, VT_ALGEBRAIC_STATE, (uint) count, name_ ){
-
+AlgebraicState::AlgebraicState(const std::string& name_, uint nRows_, uint nCols_)
+               :Expression(name_, nRows_, nCols_, VT_ALGEBRAIC_STATE, (uint) count)
+{
     count += nRows_*nCols_;
 }
 

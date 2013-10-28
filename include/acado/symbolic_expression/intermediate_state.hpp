@@ -59,11 +59,10 @@ public:
     IntermediateState();
 
     /** Default constructor */
-    explicit IntermediateState( uint nRows_, uint nCols_ = 1, String name_ = "" );
-    explicit IntermediateState( int  nRows_,  int nCols_ = 1, String name_ = "" );
+    explicit IntermediateState(const std::string& name_, uint nRows_, uint nCols_);
 
-    explicit IntermediateState( uint  nRows_, String name_);
-    explicit IntermediateState( String name_ );
+    /** Default constructor */
+    explicit IntermediateState(const std::string& name_);
 
     /** Copy constructor (deep copy). */
     IntermediateState( const double      & arg );

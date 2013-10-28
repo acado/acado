@@ -43,28 +43,16 @@ int DifferentialState::count = 0;
 
 
 DifferentialState::DifferentialState()
-                  :Expression( 1, 1, VT_DIFFERENTIAL_STATE, count ){
-
+                  :Expression("", 1, 1, VT_DIFFERENTIAL_STATE, count)
+{
     count++;
 }
 
 
-DifferentialState::DifferentialState( uint nRows_, uint nCols_, String name_ )
-                  :Expression( nRows_, nCols_, VT_DIFFERENTIAL_STATE, (uint) count, name_ ){
-
+DifferentialState::DifferentialState(const std::string& name_, uint nRows_, uint nCols_)
+                  :Expression(name_, nRows_, nCols_, VT_DIFFERENTIAL_STATE, count)
+{
     count += nRows_*nCols_;
-}
-
-DifferentialState::DifferentialState( uint nRows_, String name_ )
-                  :Expression( nRows_, (uint) 1, VT_DIFFERENTIAL_STATE, (uint) count, name_ ){
-
-    count += nRows_;
-}
-
-DifferentialState::DifferentialState(String name_ )
-                  :Expression((uint) 1, (uint) 1, VT_DIFFERENTIAL_STATE, (uint) count, name_ ){
-
-    count ++;
 }
 
 DifferentialState::DifferentialState( const DifferentialState &arg )

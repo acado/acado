@@ -604,7 +604,7 @@ returnValue Quotient::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream& Quotient::print( Stream &stream ) const{
+std::ostream& Quotient::print( std::ostream &stream ) const{
 
     return stream << "(" << *argument1 << "/" << *argument2 << ")";
 }

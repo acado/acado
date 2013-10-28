@@ -43,30 +43,23 @@ int Output::count = 0;
 
 
 Output::Output()
-                  :Expression( 1, 1, VT_OUTPUT, count ){
-
+	: Expression("", 1, 1, VT_OUTPUT, count)
+{
     count++;
 }
 
 
-Output::Output( uint nRows_, uint nCols_, String name_ )
-                  :Expression( nRows_, nCols_, VT_OUTPUT, (uint) count, name_ ){
-
+Output::Output(const std::string& name_, uint nRows_, uint nCols_)
+	: Expression(name_, nRows_, nCols_, VT_OUTPUT, count)
+{
     count += nRows_*nCols_;
 }
 
-Output::Output( uint nRows_, String name_ )
-                  :Expression( nRows_, (uint) 1, VT_OUTPUT, (uint) count, name_ ){
-
-    count += nRows_;
-}
-
-Output::Output(String name_ )
-                  :Expression((uint) 1, (uint) 1, VT_OUTPUT, (uint) count, name_ ){
-
+Output::Output(std::string name_ )
+	: Expression(name_, 1, 1, VT_OUTPUT, count)
+{
     count ++;
 }
-
 
 Output::Output( const Expression& _expression,
 				uint componentIdx )

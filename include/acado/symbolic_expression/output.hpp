@@ -61,13 +61,10 @@ public:
     Output();
 
     /** Default constructor */
-    Output( uint nRows_, uint nCols_ = 1, String name_ = "" );
-
-    /** vector constructor */
-    Output( uint nRows_, String name_ );
+    Output(const std::string& name_, uint nRows_, uint nCols_);
 
     /** scalar constructor */
-    Output( String name_ );
+    Output( std::string name_ );
 
 	/** expression constructor */
     Output( const Expression& _expression,

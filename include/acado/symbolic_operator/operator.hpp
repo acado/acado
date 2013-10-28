@@ -422,34 +422,16 @@ public:
                                        double  *ddf  /**< the 2nd derivative
                                                           of the expression  */   ) = 0;
 
+     /** Prints the expression into a stream. \n
+      *  \return SUCCESFUL_RETURN             \n
+      */
+     virtual std::ostream& print(std::ostream& stream) const = 0;
 
 
-
-    /** Prints the expression into a stream. \n
-     *  \return SUCCESFUL_RETURN             \n
-     */
-     virtual Stream& print( Stream &stream ) const = 0;
-
-
-    /** Prints the expression into a stream ("flush" version). \n
-     *  \return SUCCESFUL_RETURN                               \n
-     */
-     friend Stream& operator<<( Stream &stream, const Operator &arg );
-
-
-    /** Prints the expression into a stream ("flush" version). \n
-     *  \return SUCCESFUL_RETURN                               \n
-     */
-     friend returnValue operator<<( FILE* file, const Operator &arg );
-
-
-
-    /** Prints the expression into a stream ("flush" version). \n
-     *  \return SUCCESFUL_RETURN                               \n
-     */
-     Stream& operator<<( Stream &stream ) const;
-
-
+     /** Prints the expression into a stream ("flush" version). \n
+      *  \return SUCCESFUL_RETURN                               \n
+      */
+     friend std::ostream& operator<<(std::ostream& stream, const Operator& arg);
 
      /** Provides a deep copy of the expression. \n
       *  \return a clone of the expression.      \n
@@ -552,7 +534,9 @@ public:
 	/** Sets the name of the variable that is used for code export.   \n
 	 *  \return SUCCESSFUL_RETURN                                     \n
 	 */
-    virtual returnValue setVariableExportName( const VariableType &_type, const Stream *_name );
+    virtual returnValue setVariableExportName(	const VariableType &_type,
+    											const std::vector< std::string >& _name
+    											);
 
 
 //

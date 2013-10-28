@@ -246,12 +246,14 @@ void BinaryOperator::deleteAll(){
     free( dargument2_result );
 }
 
-returnValue BinaryOperator::setVariableExportName( const VariableType &type, const Stream *name )
+returnValue BinaryOperator::setVariableExportName(	const VariableType &_type,
+													const std::vector< std::string >& _name
+													)
 {
-	argument1->setVariableExportName(type, name);
-	argument2->setVariableExportName(type, name);
+	argument1->setVariableExportName(_type, _name);
+	argument2->setVariableExportName(_type, _name);
 
-	return Operator::setVariableExportName(type, name);
+	return Operator::setVariableExportName(_type, _name);
 }
 
 CLOSE_NAMESPACE_ACADO

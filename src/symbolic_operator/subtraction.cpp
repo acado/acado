@@ -380,7 +380,7 @@ returnValue Subtraction::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream& Subtraction::print( Stream &stream ) const{
+std::ostream& Subtraction::print( std::ostream &stream ) const{
 
     return stream << "(" << *argument1 << "-" << *argument2 << ")";
 }

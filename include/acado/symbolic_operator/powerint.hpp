@@ -330,7 +330,7 @@ public:
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual Stream& print( Stream &stream ) const;
+     virtual std::ostream& print( std::ostream &stream ) const;
 
 
      /** Provides a deep copy of the expression. \n
@@ -406,7 +406,9 @@ public:
 	/** Sets the name of the variable that is used for code export.   \n
 	 *  \return SUCCESSFUL_RETURN                                     \n
 	 */
-    virtual returnValue setVariableExportName( const VariableType &_type, const Stream *_name );
+    virtual returnValue setVariableExportName(	const VariableType &_type,
+    											const std::vector< std::string >& _name
+    											);
 
 
 //

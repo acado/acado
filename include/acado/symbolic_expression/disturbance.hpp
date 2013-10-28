@@ -62,7 +62,7 @@ public:
     Disturbance();
 
     /** Default constructor */
-    Disturbance( uint nRows_, uint nCols_ = 1, String name_ = "" );
+    Disturbance(const std::string& name_, uint nRows_, uint nCols_);
 
     /** Copy constructor (deep copy). */
     Disturbance( const Disturbance &arg );

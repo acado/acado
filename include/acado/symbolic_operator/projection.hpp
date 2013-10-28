@@ -65,10 +65,10 @@ public:
     Projection();
 
     /** Default constructor */
-    Projection( const String &name_ );
+    Projection( const std::string& name_ );
 
     /** Default constructor */
-    Projection( VariableType variableType_, int vIndex_, const String &name_ );
+    Projection( VariableType variableType_, int vIndex_, const std::string& name_ );
 
 
     /** Default constructor */
@@ -339,7 +339,7 @@ public:
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual Stream& print( Stream &stream ) const;
+     virtual std::ostream& print( std::ostream &stream ) const;
 
 
 
@@ -441,7 +441,9 @@ public:
 	/** Sets the name of the variable that is used for code export.   \n
 	 *  \return SUCCESSFUL_RETURN                                     \n
 	 */
-    virtual returnValue setVariableExportName( const VariableType &_type, const Stream *_name );
+    virtual returnValue setVariableExportName(	const VariableType &_type,
+    											const std::vector< std::string >& _name
+    											);
 
 //
 //  PROTECTED FUNCTIONS:
@@ -494,7 +496,7 @@ protected:
     int               variableIndex;
     int               vIndex       ;
     double            scale        ;
-    Stream            name         ;
+    std::stringstream name         ;
 
     OperatorName      operatorName ;
 

@@ -226,12 +226,12 @@ returnValue CFunction::evaluate( double *x, double *result, PrintLevel printL ){
 
     evaluate(x,result);
 
-    if( printL == MEDIUM || printL == HIGH ){
-
-        acadoPrintf("c-function evaluation:\n");
-        for( run1 = 0; run1 < dim; run1++ )
-            acadoPrintf("f[%d]  = %.16e \n", run1, result[run1] );
-    }
+	if (printL == MEDIUM || printL == HIGH)
+	{
+		std::cout << "C-function evaluation: ";
+		for (run1 = 0; run1 < dim; run1++)
+			std::cout << "f[" << run1 << "] = " << std::scientific << result[ run1 ] << std::endl;
+	}
     return SUCCESSFUL_RETURN;
 }
 

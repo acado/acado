@@ -722,7 +722,7 @@ returnValue Power::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream& Power::print( Stream &stream ) const{
+std::ostream& Power::print( std::ostream &stream ) const{
 
 	if ( acadoIsEqual( argument2->getValue(),0.5 ) == BT_TRUE )
 	{

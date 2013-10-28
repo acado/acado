@@ -435,14 +435,8 @@ public:
     returnValue jacobian(Matrix &x);
     //returnValue jacobian(Matrix &x,Matrix &p=emptyMatrix,Matrix &u=emptyMatrix,Matrix &w=emptyMatrix);
 
-
-
-    /** Prints the function into a file. \n
-     *  \return SUCCESSFUL_RETURN        \n
-     */
-    friend returnValue operator<<( FILE *file, Function &arg );
-
-
+    /** Prints the function into a stream. */
+    friend std::ostream& operator<<( std::ostream& stream, const Function &arg);
 
     /** Prints the function in form of plain C-code into a file. The integer             \n
      *  "precision" must be in [1,16] and defines the number of internal decimal places  \n
@@ -454,25 +448,24 @@ public:
      *                                                                                   \n
      *  \return SUCCESFUL_RETURN                                                         \n
      */
-     returnValue print(	FILE       *file,
+     returnValue print(	std::ostream& stream,
 						const char *fcnName = "ACADOfcn",
 						const char *realString = "double",
 						int         precision = 16
 						) const;
 
 
-     returnValue exportHeader(	FILE       *file,
+     returnValue exportHeader(	std::ostream& stream,
 								const char *fcnName = "ACADOfcn",
 								const char *realString = "double"
 								) const;
 
-     returnValue exportForwardDeclarations(	FILE       *file,
+     returnValue exportForwardDeclarations(	std::ostream& stream,
 											const char *fcnName = "ACADOfcn",
 											const char *realString = "double"
 											) const;
 
-
-     returnValue exportCode(	FILE       *file,
+     returnValue exportCode(	std::ostream& stream,
 								const char *fcnName = "ACADOfcn",
 								const char *realString = "double",
 								int         precision = 16,
@@ -510,10 +503,10 @@ public:
      inline returnValue setMemoryOffset( int memoryOffset_ );
 
      /** Set name of the variable that holds intermediate values. */
-     returnValue setGlobalExportVariableName(const String& var);
+     returnValue setGlobalExportVariableName(const std::string& var);
 
      /** Get name of the variable that holds intermediate values. */
-     String getGlobalExportVariableName( ) const;
+     std::string getGlobalExportVariableName( ) const;
 
      /** Get size of the variable that holds intermediate values. */
      unsigned getGlobalExportVariableSize( ) const;

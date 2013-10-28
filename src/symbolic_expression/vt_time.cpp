@@ -33,26 +33,20 @@
 
 #include <acado/symbolic_expression/vt_time.hpp>
 
-
-
 BEGIN_NAMESPACE_ACADO
 
-
-
 TIME::TIME()
-     :Expression( 1, 1, VT_TIME, 0 ){ }
+	: Expression("", 1, 1, VT_TIME, 0)
+{}
 
-
-TIME::TIME( uint nRows_, uint nCols_, String name_ )
-     :Expression( nRows_, nCols_, VT_TIME, (uint) 0, name_ ){ }
-
+TIME::TIME(const std::string& name_, uint nRows_, uint nCols_)
+	: Expression(name_, nRows_, nCols_, VT_TIME, 0)
+{}
 
 TIME::TIME( const TIME &arg )
      :Expression(arg){ }
 
-
 TIME::~TIME(){ }
-
 
 TIME& TIME::operator=( const TIME &arg ){
 
@@ -64,12 +58,10 @@ TIME& TIME::operator=( const TIME &arg ){
     return *this;
 }
 
-
 Expression* TIME::clone() const{
 
     return new TIME(*this);
 }
-
 
 CLOSE_NAMESPACE_ACADO
 

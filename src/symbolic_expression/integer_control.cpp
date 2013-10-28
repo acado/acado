@@ -41,15 +41,15 @@ int IntegerControl::count = 0;
 
 
 IntegerControl::IntegerControl()
-               :Expression( 1, 1, VT_INTEGER_CONTROL, count ){
-
+	: Expression("", 1, 1, VT_INTEGER_CONTROL, count)
+{
     count++;
 }
 
 
-IntegerControl::IntegerControl( uint nRows_, uint nCols_, String name_ )
-               :Expression( nRows_, nCols_, VT_INTEGER_CONTROL, (uint) count, name_ ){
-
+IntegerControl::IntegerControl(const std::string& name_, uint nRows_, uint nCols_)
+	: Expression(name_, nRows_, nCols_, VT_INTEGER_CONTROL, count)
+{
     count += nRows_*nCols_;
 }
 

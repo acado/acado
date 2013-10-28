@@ -42,16 +42,16 @@ int Control::count = 0;
 
 
 Control::Control()
-        :Expression( 1, 1, VT_CONTROL, count ){
-
+        :Expression("", 1, 1, VT_CONTROL, count)
+{
     count++;
 }
 
 
-Control::Control( uint nRows_, uint nCols_, String name_ )
-        :Expression( nRows_, nCols_, VT_CONTROL, (uint) count, name_ ){
-
-    count += nRows_*nCols_;
+Control::Control(const std::string& name_, uint nRows_, uint nCols_)
+        :Expression(name_, nRows_, nCols_, VT_CONTROL, count)
+{
+	count += nRows_ * nCols_;
 }
 
 

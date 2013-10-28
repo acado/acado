@@ -61,7 +61,7 @@ public:
     DifferentialStateDerivative();
 
     /** Default constructor */
-    DifferentialStateDerivative( uint nRows_, uint nCols_ = 1, String name_ = "" );
+    DifferentialStateDerivative(const std::string& name_, uint nRows_, uint nCols_);
 
     /** Copy constructor (deep copy). */
     DifferentialStateDerivative( const DifferentialStateDerivative &arg );

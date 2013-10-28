@@ -340,9 +340,9 @@ returnValue NonsmoothOperator::AD_backward2( int number, double seed1, double se
 }
 
 
-Stream& NonsmoothOperator::print( Stream &stream ) const{
-
-    return stream;// << value;
+std::ostream& NonsmoothOperator::print( std::ostream &stream ) const
+{
+    return stream; // << value;
 }
 
 
@@ -392,13 +392,6 @@ BooleanType NonsmoothOperator::isSymbolic() const{
 
 
 double NonsmoothOperator::getValue() const{ return INFTY; }
-
-
-Stream NonsmoothOperator::operator<<( Stream &stream ){
-
-    return print( stream );
-}
-
 
 int NonsmoothOperator::getGlobalIndex( ) const{
 

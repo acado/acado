@@ -39,17 +39,16 @@ BEGIN_NAMESPACE_ACADO
 
 int DifferentialStateDerivative::count = 0;
 
-
 DifferentialStateDerivative::DifferentialStateDerivative()
-                            :Expression( 1, 1, VT_DDIFFERENTIAL_STATE, count ){
-
+	: Expression("", 1, 1, VT_DDIFFERENTIAL_STATE, count)
+{
     count++;
 }
 
 
-DifferentialStateDerivative::DifferentialStateDerivative( uint nRows_, uint nCols_, String name_ )
-                            :Expression( nRows_, nCols_, VT_DDIFFERENTIAL_STATE, (uint) count, name_ ){
-
+DifferentialStateDerivative::DifferentialStateDerivative(const std::string& name_, uint nRows_, uint nCols_)
+	: Expression(name_, nRows_, nCols_, VT_DDIFFERENTIAL_STATE, count)
+{
     count += nRows_*nCols_;
 }
 
@@ -72,14 +71,14 @@ DifferentialStateDerivative& DifferentialStateDerivative::operator=( const Diffe
 }
 
 
-Expression* DifferentialStateDerivative::clone() const{
-
+Expression* DifferentialStateDerivative::clone() const
+{
     return new DifferentialStateDerivative(*this);
 }
 
 
-returnValue DifferentialStateDerivative::clearStaticCounters(){
-
+returnValue DifferentialStateDerivative::clearStaticCounters()
+{
     count = 0;
     return SUCCESSFUL_RETURN;
 }

@@ -202,7 +202,7 @@ Expression getRiccatiODE( const Expression        &rhs,
                           const Matrix            &Q  ,
                           const Matrix            &R  ){
 
-    IntermediateState RHS(x.getDim(),x.getDim());
+	IntermediateState RHS("", x.getDim(), x.getDim());
 
     IntermediateState A = forwardDerivative( rhs, x );
     IntermediateState B = forwardDerivative( rhs, u );
@@ -235,7 +235,7 @@ Expression chol( const Expression &arg ){
     ASSERT( arg.getNumRows() == arg.getNumCols() );
 
     int dim = arg.getNumRows();
-    IntermediateState L(dim,dim);
+    IntermediateState L("", dim,dim);
 
     // COMPUTE THE LOWER TRIANGLE RECURSIVELY:
     // ---------------------------------------

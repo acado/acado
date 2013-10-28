@@ -396,16 +396,7 @@ public:
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual Stream& print( Stream &stream ) const;
-
-
-
-    /** Prints the expression into a stream ("flush" version). \n
-     *  \return SUCCESFUL_RETURN                               \n
-     */
-     Stream operator<<( Stream &stream );
-
-
+     virtual std::ostream& print( std::ostream &stream ) const;
 
      /** Provides a deep copy of the expression. \n
       *  \return a clone of the expression.      \n

@@ -80,23 +80,15 @@ class Expression{
         Expression( const Operator &tree_ );
 
         /** Casting constructor. */
-        Expression( const String &name_ );
-
-
-        /** Constructor which takes the arguments. */
-        explicit Expression( int          nRows_                     ,  /**< number of rows          */
-                             int          nCols_         = 1         ,  /**< number of columns       */
-                             VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
-                             int          globalTypeID   = 0         ,  /**< the global type ID      */
-                             String       name_          = ""           /**< the name                */  );
+        Expression( const std::string& name_ );
 
         /** Constructor which takes the arguments. */
-        explicit Expression( uint         nRows_                     ,  /**< number of rows          */
-                             uint         nCols_         = 1         ,  /**< number of columns       */
-                             VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
-                             uint         globalTypeID   = 0         ,  /**< the global type ID      */
-                             String       name_          = ""           /**< the name                */  );
-
+        explicit Expression(	const std::string&  name_,							/**< the name                */
+        						uint          		nRows_,							/**< number of rows          */
+        						uint          		nCols_,							/**< number of columns       */
+        						VariableType  		variableType_  = VT_UNKNOWN,	/**< the variable type       */
+        						uint          		globalTypeID   = 0				/**< the global type ID      */
+        						);
 
         /** Copy constructor (deep copy). */
         Expression( const double      & rhs );
@@ -136,7 +128,6 @@ class Expression{
          *  \param arg  the Expression to be assigned.   \n
          */
         Expression& operator=( const Expression& arg );
-
 
         Expression& operator<<( const double      & arg );
         Expression& operator<<( const Vector      & arg );
@@ -214,8 +205,8 @@ class Expression{
         friend Expression operator/( const Matrix       & arg1, const Expression& arg2 );
 
 
-        Stream print( Stream &stream ) const;
-        friend Stream operator<<( Stream &stream, const Expression &arg );
+        std::ostream& print( std::ostream &stream ) const;
+        friend std::ostream& operator<<( std::ostream& stream, const Expression &arg );
 
 
         /** Returns the symbolic inverse of a matrix (only for square matrices) */
@@ -350,9 +341,8 @@ class Expression{
 
 
 
-        /** Returns a tree projection with respect to the specified index.
-         */
-        inline TreeProjection getTreeProjection( const uint &idx, String name_="" ) const;
+        /** Returns a tree projection with respect to the specified index. */
+        inline TreeProjection getTreeProjection( const uint &idx, const std::string& name_ ) const;
 
 
 
@@ -367,7 +357,7 @@ class Expression{
                         uint          globalTypeID_,  /**< the global type ID     */
                         uint                 nRows_,  /**< The number of rows.    */
                         uint                 nCols_,  /**< The number of columns. */
-                        const String         &name_   /**< The name               */ );
+                        const std::string&   name_    /**< The name               */ );
 
 
         /** Generic copy routine (protected, only for internal use).
@@ -398,7 +388,7 @@ class Expression{
         uint               nRows, nCols;   /**< Matrix dimension.          */
         VariableType       variableType;   /**< Variable type.             */
         uint               component   ;   /**< The expression component   */
-        String             name        ;   /**< The name of the expression */
+        std::string             name   ;   /**< The name of the expression */
 };
 
 

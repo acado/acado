@@ -511,7 +511,7 @@ returnValue Product::AD_backward2( int number, double seed1, double seed2,
 
 
 
-Stream& Product::print( Stream &stream ) const{
+std::ostream& Product::print( std::ostream &stream ) const{
 
 	if ( ( acadoIsFinite( argument1->getValue() ) == BT_FALSE ) ||
 		 ( acadoIsFinite( argument2->getValue() ) == BT_FALSE ) )

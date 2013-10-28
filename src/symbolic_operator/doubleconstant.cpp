@@ -259,7 +259,7 @@ returnValue DoubleConstant::AD_backward2( int number, double seed1, double seed2
 
 
 
-Stream& DoubleConstant::print( Stream &stream ) const{
+std::ostream& DoubleConstant::print( std::ostream &stream ) const{
 
     return stream << "(real_t)(" << value << ")";
 }

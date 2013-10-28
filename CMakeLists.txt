@@ -202,9 +202,9 @@ SET( ACADO_SOURCE_DIRS
 	./src/variables_grid
 #	./src/curve
 #	./src/user_interaction
-#	./src/symbolic_operator
-#	./src/symbolic_expression
-#	./src/function
+	./src/symbolic_operator
+	./src/symbolic_expression
+	./src/function
 #	./src/integrator
 #	./src/validated_integrator
 	./src/sparse_solver

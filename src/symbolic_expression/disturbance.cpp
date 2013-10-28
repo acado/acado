@@ -42,15 +42,15 @@ int Disturbance::count = 0;
 
 
 Disturbance::Disturbance()
-            :Expression( 1, 1, VT_DISTURBANCE, count ){
-
-    count++;
+	: Expression("", 1, 1, VT_DISTURBANCE, count)
+{
+	count++;
 }
 
 
-Disturbance::Disturbance( uint nRows_, uint nCols_, String name_ )
-            :Expression( nRows_, nCols_, VT_DISTURBANCE, (uint) count, name_ ){
-
+Disturbance::Disturbance(const std::string& name_, uint nRows_, uint nCols_)
+	: Expression(name_, nRows_, nCols_, VT_DISTURBANCE, count)
+{
     count += nRows_*nCols_;
 }
 

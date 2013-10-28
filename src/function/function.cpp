@@ -438,50 +438,51 @@ returnValue Function::AD_backward2( int number, double *seed1, double *seed2,
 
 
 
-returnValue operator<<( FILE *file, Function &arg ){
+std::ostream& operator<<(std::ostream& stream, const Function& arg)
+{
+    arg.print( stream );
 
-    return arg.print(file);
+    return stream;
 }
 
-
-returnValue Function::print(	FILE       *file     ,
-								const char *fcnName  ,
+returnValue Function::print(	std::ostream& stream,
+								const char *fcnName ,
 								const char *realString,
 								int         precision
 								) const
 {
 	if (getDim() > 0)
-		return evaluationTree.C_print(file, fcnName, realString, precision);
+		return evaluationTree.C_print(stream, fcnName, realString, precision);
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue Function::exportHeader(	FILE       *file     ,
+returnValue Function::exportHeader(	std::ostream& stream,
 									const char *fcnName  ,
 									const char *realString
 									) const
 {
 	if (getDim() > 0)
-		return evaluationTree.exportHeader(file, fcnName, realString);
+		return evaluationTree.exportHeader(stream, fcnName, realString);
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue Function::exportForwardDeclarations(	FILE       *file     ,
+returnValue Function::exportForwardDeclarations(	std::ostream& stream,
 													const char *fcnName  ,
 													const char *realString
 													) const
 {
 	if (getDim() > 0)
-		return evaluationTree.exportForwardDeclarations(file, fcnName, realString);
+		return evaluationTree.exportForwardDeclarations(stream, fcnName, realString);
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue Function::exportCode(	FILE       *file,
+returnValue Function::exportCode(	std::ostream& stream,
 									const char *fcnName,
 									const char *realString,
 									int         precision,
@@ -493,7 +494,7 @@ returnValue Function::exportCode(	FILE       *file,
 									) const
 {
 	if (getDim() > 0)
-		return evaluationTree.exportCode(file, fcnName, realString, precision,
+		return evaluationTree.exportCode(stream, fcnName, realString, precision,
 				_numX, _numXA, _numU, _numP, _numDX);
 
 	return SUCCESSFUL_RETURN;
@@ -583,12 +584,12 @@ returnValue Function::AD_backward( const    Vector &seed  ,
     return SUCCESSFUL_RETURN;
 }
 
-String Function::getGlobalExportVariableName( ) const
+std::string Function::getGlobalExportVariableName( ) const
 {
 	return evaluationTree.getGlobalExportVariableName( );
 }
 
-returnValue Function::setGlobalExportVariableName(const String& var)
+returnValue Function::setGlobalExportVariableName(const std::string& var)
 {
 	return evaluationTree.setGlobalExportVariableName( var );
 }

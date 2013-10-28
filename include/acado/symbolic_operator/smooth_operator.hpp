@@ -391,21 +391,10 @@ public:
                                        double  *ddf  /**< the 2nd derivative
                                                           of the expression  */   ) = 0;
 
-
-
-
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual Stream& print( Stream &stream ) const = 0;
-
-
-    /** Prints the expression into a stream ("flush" version). \n
-     *  \return SUCCESFUL_RETURN                               \n
-     */
-     Stream operator<<( Stream &stream );
-
-
+     virtual std::ostream& print( std::ostream &stream ) const = 0;
 
      /** Provides a deep copy of the expression. \n
       *  \return a clone of the expression.      \n

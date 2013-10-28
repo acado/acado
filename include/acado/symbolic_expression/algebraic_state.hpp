@@ -61,7 +61,7 @@ public:
     AlgebraicState();
 
     /** Default constructor */
-    AlgebraicState( uint nRows_, uint nCols_ = 1, String name_ = "" );
+    AlgebraicState(const std::string& name_, uint nRows_, uint nCols_);
 
     /** Copy constructor (deep copy). */
     AlgebraicState( const AlgebraicState &arg );
@@ -76,7 +76,6 @@ public:
       *  \return a clone of the expression.      \n
       */
      virtual Expression* clone() const;
-
 
      /** This function clears all static counters. Although this \n
       *  function is public it should never be used in C-code.   \n

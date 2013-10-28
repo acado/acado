@@ -55,7 +55,7 @@ TreeProjection::TreeProjection( )
 }
 
 
-TreeProjection::TreeProjection( const String &name_ )
+TreeProjection::TreeProjection( const std::string &name_ )
                :Projection( name_ ){
 
     variableType   = VT_INTERMEDIATE_STATE ;
@@ -287,9 +287,8 @@ returnValue TreeProjection::loadIndices( SymbolicIndexList *indexList ){
         indexList->addOperatorPointer( argument, vIndex );
     }
 
-    if( name.isEmpty() == BT_TRUE ){
+    if (name.rdbuf()->in_avail() == 0)
         name << "a" << "[" << vIndex << "]";
-    }
 
     return returnvalue;
 }
@@ -364,7 +363,9 @@ Operator* TreeProjection::passArgument() const{
 }
 
 
-returnValue TreeProjection::setVariableExportName( const VariableType &_type, const Stream *_name )
+returnValue TreeProjection::setVariableExportName(	const VariableType &_type,
+													const std::vector< std::string >& _name
+													)
 {
 	if (argument->getName() == ON_POWER_INT)
 		argument->setVariableExportName(_type, _name);

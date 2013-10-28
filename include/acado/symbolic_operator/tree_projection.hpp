@@ -63,7 +63,7 @@ public:
     TreeProjection();
 
     /** Default constructor */
-    TreeProjection( const String &name_ );
+    TreeProjection( const std::string& name_ );
 
     /** Copy constructor (deep copy). */
     TreeProjection( const TreeProjection &arg );
@@ -240,7 +240,9 @@ protected:
 	/** Sets the name of the variable that is used for code export.   \n
 	 *  \return SUCCESSFUL_RETURN                                     \n
 	 */
-    virtual returnValue setVariableExportName( const VariableType &_type, const Stream *_name );
+    virtual returnValue setVariableExportName(	const VariableType &_type,
+        										const std::vector< std::string >& _name
+        										);
 
     //
     //  PROTECTED MEMBERS:

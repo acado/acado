@@ -60,7 +60,7 @@ public:
     IntegerParameter();
 
     /** Default constructor */
-    IntegerParameter( uint nRows_, uint nCols_ = 1, String name_ = "" );
+    IntegerParameter(const std::string& name_, uint nRows_, uint nCols_);
 
     /** Copy constructor (deep copy). */
     IntegerParameter( const IntegerParameter &arg );
