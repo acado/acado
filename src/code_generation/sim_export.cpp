@@ -713,7 +713,6 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	_controls = controls;
 	_results = results;
 	_ref = ref;
-	uint i;
 
 	int numSteps;
     get( NUM_INTEGRATOR_STEPS, numSteps );
