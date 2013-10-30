@@ -947,6 +947,43 @@ returnValue MatrixVariablesGrid::addMatrix(	const MatrixVariable& newMatrix,
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue MatrixVariablesGrid::sprint(	std::ostream& stream
+											)
+{
+	uint run1, run2, run3;
+
+	unsigned tmpSize = getNumPoints() * (getNumRows() + 1);
+	double *tmp = new double[tmpSize];
+
+	if( times == 0 ) return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
+
+	for( run1 = 0; run1 < getNumPoints(); run1++ ){
+		tmp[run1*(getNumValues()+1)] = getTime(run1);
+
+		for( run2 = 0; run2 < getNumRows(); run2++ ){
+			for( run3 = 0; run3 < getNumCols(); run3++ ){
+				tmp[run1*(getNumValues()+1)+1+run2*getNumCols() + run3] = operator()( run1,run2,run3 );
+			}
+		}
+	}
+
+	unsigned nRows = getNumPoints();
+	unsigned nCols = getNumValues() + 1;
+	for (run1 = 0; run1 < nRows; run1++) {
+		for (run2 = 0; run2 < nCols; run2++) {
+			if (tmp[nCols * run1 + run2] <= ACADO_NAN - 1.0)
+				stream << scientific << tmp[nCols * run1 + run2] << TEXT_SEPARATOR;
+			else
+				stream << NOT_A_NUMBER << TEXT_SEPARATOR;
+		}
+		stream << LINE_SEPARATOR;
+	}
+	stream << LINE_SEPARATOR;
+
+	delete[] tmp;
+
+	return SUCCESSFUL_RETURN;
+}
 
 
 CLOSE_NAMESPACE_ACADO

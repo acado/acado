@@ -1170,6 +1170,10 @@ class MatrixVariablesGrid : public Grid
 		        							MatrixVariablesGrid& arg
 		        							);
 
+		/** A printing function needed for plotting. */
+		returnValue sprint(	std::ostream& stream
+							);
+
     //
     // PROTECTED MEMBER FUNCTIONS:
     //
