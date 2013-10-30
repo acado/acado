@@ -175,7 +175,7 @@ class GnuplotWindow : public PlotWindow
 		 *	\return SUCCESSFUL_RETURN
          */
 		returnValue getPlotModeString(	PlotMode plotMode,
-										char** plotModeString
+										std::string& plotModeString
 										) const;
 
         /** Generates string in Gnuplot syntax for plotting in given plot style.
@@ -186,7 +186,7 @@ class GnuplotWindow : public PlotWindow
 		 *	\return SUCCESSFUL_RETURN
          */
 		returnValue getPlotStyleString(	VariableType _type,
-										char** plotStyleString
+										std::string& plotStyleString
 										) const;
 
         /** Generates string in Gnuplot syntax for plotting given data grid.
@@ -197,7 +197,7 @@ class GnuplotWindow : public PlotWindow
 		 *	\return SUCCESSFUL_RETURN
          */
 		returnValue obtainPlotDataString(	VariablesGrid& _dataGrid,
-											char** _plotDataString
+											std::string& _plotDataString
 											) const;
 	
 

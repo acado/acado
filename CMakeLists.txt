@@ -209,7 +209,7 @@ SET( ACADO_SOURCE_DIRS
 	./src/validated_integrator
 	./src/sparse_solver
 	./external_packages/src/acado_csparse
-#	./external_packages/src/acado_gnuplot
+	./external_packages/src/acado_gnuplot
 	
 	# Optimal Control source folders
 #	./src/code_generation
