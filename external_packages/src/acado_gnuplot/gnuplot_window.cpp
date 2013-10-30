@@ -621,15 +621,15 @@ returnValue GnuplotWindow::getPlotModeString(	PlotMode plotMode,
     switch( plotMode )
 	{
         case PM_LINES:
-        	plotModeString = string("lines lw 2.5","lines lw 2.5" );
+        	plotModeString = string("lines lw 2.5");
         	break;
 
         case PM_POINTS:
-        	plotModeString = string("points pt 2.5","points pt 2.5" );
+        	plotModeString = string("points pt 2.5");
         	break;
 
         default:
-        	plotModeString = string("lines lw 2.5","lines lw 2.5" );
+        	plotModeString = string("lines lw 2.5");
     }
 
     return SUCCESSFUL_RETURN;
@@ -643,32 +643,32 @@ returnValue GnuplotWindow::getPlotStyleString(	VariableType _type,
 	switch( _type )
 	{
 		case VT_DIFFERENTIAL_STATE:
-			plotStyleString = string("lt -1","lt -1"); //black
+			plotStyleString = string("lt -1"); //black
 			break;
 
 		case VT_ALGEBRAIC_STATE:
-			plotStyleString = string("lt 4","lt 4" ); //magenta
+			plotStyleString = string("lt 4"); //magenta
 			break;
 
 		case VT_PARAMETER:
-			plotStyleString = string("lt 8","lt 8" ); //orange
+			plotStyleString = string("lt 8"); //orange
 			break;
 
 		case VT_CONTROL:
-			plotStyleString = string("lt 3","lt 3" ); //blue
+			plotStyleString = string("lt 3"); //blue
 			break;
 
 		case VT_DISTURBANCE:
-			plotStyleString = string("lt 5","lt 5" ); //light blue
+			plotStyleString = string("lt 5"); //light blue
 			break;
 
 		case VT_INTERMEDIATE_STATE:
-			plotStyleString = string("lt 2","lt 2" ); //green
+			plotStyleString = string("lt 2"); //green
 			break;
 
 		default:
 		//case VT_OUTPUT:
-			plotStyleString = string("lt 1","lt 1" ); //red
+			plotStyleString = string("lt 1"); //red
 	}
 
 	return SUCCESSFUL_RETURN;
