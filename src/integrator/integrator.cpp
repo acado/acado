@@ -28,7 +28,7 @@
 /**
  *    \file src/integrator/integrator.cpp
  *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 31.12.2008
+ *    \date 2008 - 2013
  */
 
 #include <acado/utils/acado_utils.hpp>
@@ -43,6 +43,7 @@
 #include <acado/integrator/integrator_runge_kutta78.hpp>
 #include <acado/integrator/integrator_bdf.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -597,16 +598,16 @@ void Integrator::initializeOptions(){
 
 returnValue Integrator::setupLogging( ){
 
-    LogRecord tmp( LOG_AT_EACH_ITERATION,stdout,PS_DEFAULT );
+    LogRecord tmp(LOG_AT_EACH_ITERATION, PS_DEFAULT);
 
-    tmp.addItem( LOG_TIME_INTEGRATOR,                              "", "\n\nINTEGRATION TIME                 :  "," sec.\n", 9, 3 );
-    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_STEPS,                   "",   "\nNUMBER OF STEPS                  :  ","\n"     , 3, 0 );
-    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_REJECTED_STEPS,          "",   "\nNUMBER OF REJECTED STEPS         :  ","\n"     , 3, 0 );
-    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_FUNCTION_EVALUATIONS,    "",     "NUMBER OF RHS EVALUATIONS        :  ","\n"     , 3, 0 );
-    tmp.addItem( LOG_NUMBER_OF_BDF_INTEGRATOR_JACOBIAN_EVALUATIONS,"",     "NUMBER OF JACOBIAN EVALUATIONS   :  ","\n"     , 3, 0 );
-    tmp.addItem( LOG_TIME_INTEGRATOR_FUNCTION_EVALUATIONS,         "",   "\nTIME FOR RHS EVALUATIONS         :  "," sec.\n", 9, 3 );
-    tmp.addItem( LOG_TIME_BDF_INTEGRATOR_JACOBIAN_EVALUATION,      "",     "TIME FOR JACOBIAN EVALUATIONS    :  "," sec.\n", 9, 3 );
-    tmp.addItem( LOG_TIME_BDF_INTEGRATOR_JACOBIAN_DECOMPOSITION,   "",     "TIME FOR JACOBIAN DECOMPOSITIONS :  "," sec.\n", 9, 3 );
+    tmp.addItem( LOG_TIME_INTEGRATOR,                              "INTEGRATION TIME                 [sec]:  ");
+    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_STEPS,                   "NUMBER OF STEPS                       :  ");
+    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_REJECTED_STEPS,          "NUMBER OF REJECTED STEPS              :  ");
+    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_FUNCTION_EVALUATIONS,    "NUMBER OF RHS EVALUATIONS             :  ");
+    tmp.addItem( LOG_NUMBER_OF_BDF_INTEGRATOR_JACOBIAN_EVALUATIONS,"NUMBER OF JACOBIAN EVALUATIONS        :  ");
+    tmp.addItem( LOG_TIME_INTEGRATOR_FUNCTION_EVALUATIONS,         "TIME FOR RHS EVALUATIONS         [sec]:  ");
+    tmp.addItem( LOG_TIME_BDF_INTEGRATOR_JACOBIAN_EVALUATION,      "TIME FOR JACOBIAN EVALUATIONS    [sec]:  ");
+    tmp.addItem( LOG_TIME_BDF_INTEGRATOR_JACOBIAN_DECOMPOSITION,   "TIME FOR JACOBIAN DECOMPOSITIONS [sec]:  ");
 
     outputLoggingIdx = addLogRecord( tmp );
 
@@ -622,7 +623,7 @@ int Integrator::getDimX() const{
 
 returnValue Integrator::printRunTimeProfile() const{
 
-    return printLogRecord( outputLoggingIdx, PRINT_LAST_ITER );
+	return printLogRecord(cout, outputLoggingIdx, PRINT_LAST_ITER);
 }
 
 
