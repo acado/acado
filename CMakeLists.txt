@@ -200,8 +200,8 @@ SET( ACADO_SOURCE_DIRS
 	./src/matrix_vector
 	./src/set_arithmetics
 	./src/variables_grid
-#	./src/curve
-#	./src/user_interaction
+	./src/curve
+	./src/user_interaction
 	./src/symbolic_operator
 	./src/symbolic_expression
 	./src/function

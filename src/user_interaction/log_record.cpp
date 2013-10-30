@@ -26,16 +26,13 @@
 
 /**
  *    \file src/user_interaction/log_record.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 12.06.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  */
-
-
-#include <acado/user_interaction/log_record_item.hpp>
 
 #include <acado/user_interaction/log_record.hpp>
 
-
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -44,194 +41,24 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-
-LogRecord::LogRecord( )
-{
-	next     =  0;
-	aliasIdx = -1;
-
-	frequency      = LOG_AT_EACH_ITERATION;
-	outputFile     = stdout;
-	outputFileName = 0;
-	printScheme    = PS_DEFAULT;
-
-	first = 0;
-	last  = 0;
-
-	number = 0;
-}
-
-
 LogRecord::LogRecord(	LogFrequency _frequency,
-						FILE* _outputFile,
 						PrintScheme _printScheme
 						)
 {
-	next     =  0;
 	aliasIdx = -1;
 
 	frequency      = _frequency;
-	outputFile     = _outputFile;
-	outputFileName = 0;
 	printScheme    = _printScheme;
-
-	first = 0;
-	last  = 0;
-
-	number = 0;
 }
-
-
-LogRecord::LogRecord(	LogFrequency _frequency,
-						const char* _outputFileName,
-						PrintScheme _printScheme
-						)
-{
-	next     =  0;
-	aliasIdx = -1;
-
-	frequency      = _frequency;
-	outputFile     = 0;
-	outputFileName = 0;
-	acadoAssignString( &outputFileName,_outputFileName,"default.log" );
-	printScheme    = _printScheme;
-
-	first = 0;
-	last  = 0;
-
-	number = 0;
-}
-
-
-LogRecord::LogRecord( const LogRecord& rhs )
-{
-	next     =  0;
-	aliasIdx = rhs.aliasIdx; //-1
-
-	frequency      = rhs.frequency;
-	outputFile     = rhs.outputFile;
-	outputFileName = 0;
-	acadoAssignString( &outputFileName,rhs.outputFileName,"default.log" );
-	printScheme    = rhs.printScheme;
-
-	first = 0;
-	last  = 0;
-
-	number = 0;
-
-	/* if rhs log_record list is not empty, add all option items... */
-	LogRecordItem* current = rhs.first;
-
-	while ( current != 0 )
-	{
-		addItem( *current );
-		current = current->getNext( );
-	}
-}
-
 
 LogRecord::~LogRecord( )
-{
-	clearAllItems( );
-
-	if ( outputFileName != 0 )
-		delete[] outputFileName;
-}
-
-
-LogRecord& LogRecord::operator=( const LogRecord& rhs )
-{
-	if ( this != &rhs )
-	{
-		clearAllItems( );
-
-		if ( outputFileName != 0 )
-			delete[] outputFileName;
-
-		next     =  0;
-		aliasIdx = rhs.aliasIdx; //-1
-
-		frequency      = rhs.frequency;
-		outputFile     = rhs.outputFile;
-		outputFileName = 0;
-		acadoAssignString( &outputFileName,rhs.outputFileName,"default.log" );
-		printScheme    = rhs.printScheme;
-
-		/* if rhs log_record list is not empty, add all option items... */
-		LogRecordItem* current = rhs.first;
-
-		while ( current != 0 )
-		{
-			addItem( *current );
-			current = current->getNext( );
-		}
-	}
-
-	return *this;
-}
-
-
-BooleanType LogRecord::operator==(	const LogRecord& rhs
-									) const
-{
-	// no check for next
-	// no check for aliasIdx
-
-	if ( frequency != rhs.frequency )
-		return BT_FALSE;
-
-	if ( outputFile != rhs.outputFile )
-		return BT_FALSE;
-
-	if ( acadoIsEqual( outputFileName,rhs.outputFileName ) == BT_FALSE )
-		return BT_FALSE;
-
-	if ( printScheme != rhs.printScheme )
-		return BT_FALSE;
-
-
-	if ( number != rhs.number )
-		return BT_FALSE;
-
-	LogRecordItem* current = first;
-	LogRecordItem* rhsCurrent = rhs.first;
-
-	while ( ( current != 0 ) && ( rhsCurrent != 0 ) )
-	{
-		if ( (*current) != (*rhsCurrent) )
-			return BT_FALSE;
-
-		current = current->getNext( );
-		rhsCurrent = rhsCurrent->getNext( );
-	}
-
-	return BT_TRUE;
-}
-
-
-BooleanType LogRecord::operator!=(	const LogRecord& rhs
-										)
-{
-	if ( operator==( rhs ) == BT_TRUE )
-		return BT_FALSE;
-	else
-		return BT_TRUE;
-}
-
-
-
-returnValue LogRecord::operator<<(	LogRecordItem& _item
-									)
-{
-	return addItem( _item );
-}
+{}
 
 returnValue LogRecord::operator<<(	LogName _name
 									)
 {
 	return addItem( _name );
 }
-
 
 returnValue LogRecord::operator<<(	const Expression& _name
 									)
@@ -240,329 +67,111 @@ returnValue LogRecord::operator<<(	const Expression& _name
 }
 
 
-
-returnValue LogRecord::addItem(	LogRecordItem& _item
-								)
-{
-	// checks if item already exists
-	if ( hasItem( _item.getName( ),_item.getType( ) ) == BT_TRUE )
-		return SUCCESSFUL_RETURN;
-
-	// create new item
-	LogRecordItem* newItem = new LogRecordItem( _item );
-
-	if ( number == 0 )
-	{
-		first = newItem;
-		last = newItem;
-	}
-	else
-	{
-		if ( last->setNext( newItem ) != SUCCESSFUL_RETURN )
-			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
-		last = newItem;
-	}
-
-	++number;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-
 returnValue LogRecord::addItem(	LogName _name,
 								const char* const _label
 								)
 {
-	return addItem( _name,printScheme,_label );
-}
-
-
-returnValue LogRecord::addItem(	LogName _name,
-								PrintScheme _printScheme,
-								const char* const _label
-								)
-{
-	char* _startString = 0;
-	char* _endString = 0;
-	uint _width = 0;
-	uint _precision = 0;
-	char* _colSeparator = 0;
-	char* _rowSeparator = 0;
-
-	returnValue returnvalue;
-	returnvalue = getGlobalStringDefinitions( _printScheme,&_startString,&_endString,
-											  _width,_precision,&_colSeparator,&_rowSeparator );
-
-	if ( returnvalue == SUCCESSFUL_RETURN )
-	{
-		returnvalue = addItem( _name,_label,_startString,_endString,_width,_precision,_colSeparator,_rowSeparator );
-	}
-
-	if ( _startString != 0 )   delete[] _startString;
-	if ( _endString != 0 )     delete[] _endString;
-	if ( _colSeparator != 0 )  delete[] _colSeparator;
-	if ( _rowSeparator != 0 )  delete[] _rowSeparator;
-
-	return returnvalue;
-}
-
-
-returnValue LogRecord::addItem(	LogName _name,
-								const char* const _label,
-								const char* const _startString,
-								const char* const _endString,
-								uint _width,
-								uint _precision,
-								const char* const _colSeparator,
-								const char* const _rowSeparator
-								)
-{
-	// checks if item already exists
-	if ( hasItem( _name ) == BT_TRUE )
+	if (items.count(make_pair(_name, LRT_ENUM)))
 		return SUCCESSFUL_RETURN;
-
-	// create new item
-	LogRecordItem* newItem = new LogRecordItem( _name,_label,_startString,_endString,
-												_width,_precision,_colSeparator,_rowSeparator );
-
-	if ( number == 0 )
-	{
-		first = newItem;
-		last = newItem;
-	}
-	else
-	{
-		if ( last->setNext( newItem ) != SUCCESSFUL_RETURN )
-			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
-		last = newItem;
-	}
-
-	++number;
+	items[ make_pair(_name, LRT_ENUM) ] = LogRecordData( _label );
 
 	return SUCCESSFUL_RETURN;
 }
-
-
 
 returnValue LogRecord::addItem(	const Expression& _name,
 								const char* const _label
 								)
 {
-	return addItem( _name,printScheme,_label );
-}
-
-
-returnValue LogRecord::addItem(	const Expression& _name,
-								PrintScheme _printScheme,
-								const char* const _label
-								)
-{
-	char* _startString = 0;
-	char* _endString = 0;
-	uint _width = 0;
-	uint _precision = 0;
-	char* _colSeparator = 0;
-	char* _rowSeparator = 0;
-
-	returnValue returnvalue;
-	returnvalue = getGlobalStringDefinitions( _printScheme,&_startString,&_endString,
-											  _width,_precision,&_colSeparator,&_rowSeparator );
-
-	if ( returnvalue == SUCCESSFUL_RETURN )
-	{
-		returnvalue = addItem( _name,_label,_startString,_endString,_width,_precision,_colSeparator,_rowSeparator );
-	}
-
-	if ( _startString != 0 )   delete[] _startString;
-	if ( _endString != 0 )     delete[] _endString;
-	if ( _colSeparator != 0 )  delete[] _colSeparator;
-	if ( _rowSeparator != 0 )  delete[] _rowSeparator;
-
-	return returnvalue;
-}
-
-
-returnValue LogRecord::addItem(	const Expression& _name,
-								const char* const _label,
-								const char* const _startString,
-								const char* const _endString,
-								uint _width,
-								uint _precision,
-								const char* const _colSeparator,
-								const char* const _rowSeparator
-								)
-{
-	// checks if item already exists
-	if ( hasItem( _name ) == BT_TRUE )
+	if (items.count(make_pair(_name.getComponent( 0 ), LRT_VARIABLE)))
 		return SUCCESSFUL_RETURN;
-
-	// create new item
-	LogRecordItem* newItem = new LogRecordItem( _name,_label,_startString,_endString,
-												_width,_precision,_colSeparator,_rowSeparator );
-
-	if ( number == 0 )
-	{
-		first = newItem;
-		last = newItem;
-	}
-	else
-	{
-		if ( last->setNext( newItem ) != SUCCESSFUL_RETURN )
-			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
-		last = newItem;
-	}
-
-	++number;
+	items[ make_pair(_name.getComponent( 0 ), LRT_VARIABLE) ] = LogRecordData( _label );
 
 	return SUCCESSFUL_RETURN;
 }
 
-
-
-returnValue LogRecord::clearAllItems( )
-{
-	LogRecordItem* current = first;
-	LogRecordItem* tmp;
-
-	/* deallocate all LogRecordItems within list */
-	while ( current != 0 )
-	{
-		tmp = current->getNext( );
-		delete current;
-		current = tmp;
-	}
-
-	/* ... and initialise an empty list. */
-	first = 0;
-	last  = 0;
-
-	number = 0;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue LogRecord::print(	LogPrintMode _mode
+returnValue LogRecord::print(	std::ostream& _stream,
+								LogPrintMode _mode
 								) const
 {
-	uint stringLength = determineRecordStringLength( )+1;
+	LogRecordItems::const_iterator it;
+	returnValue status;
 
-	char* string      = new char[stringLength];
-	for( uint i=0; i<stringLength; ++i )
-		string[i] = '\0';
-	char* valueString = 0;
+	char* startString = 0;
+	char* endString = 0;
+	uint width = 0;
+	uint precision = 0;
+	char* colSeparator = 0;
+	char* rowSeparator = 0;
 
-	LogRecordItem* current = first;
+	getGlobalStringDefinitions(printScheme, &startString, &endString, width,
+			precision, &colSeparator, &rowSeparator);
 
-	switch( _mode )
+	switch (_mode)
 	{
-		case PRINT_ITEM_BY_ITEM:
-			while ( current != 0 )
-			{
-				if ( current->getValueString( &valueString ) != SUCCESSFUL_RETURN )
-				{
-					delete[] valueString; delete[] string;
-					return ACADOERROR( RET_UNKNOWN_BUG );
-				}
-
-				if ( valueString != 0 )
-				{
-					strcat( string,valueString );
-
-					delete[] valueString;
-					valueString = 0;
-				}
-
-				current = current->getNext( );
-			}
-			break;
-
-		case PRINT_ITER_BY_ITER:
-			for( uint i=0; i<getMaxNumMatrices( ); ++i )
-			{
-				current = first;
-				while ( current != 0 )
-				{
-					if ( current->getValueString( &valueString,i ) != SUCCESSFUL_RETURN )
-					{
-						delete[] valueString; delete[] string;
-						return ACADOERROR( RET_UNKNOWN_BUG );
-					}
-
-					if ( valueString != 0 )
-					{
-						strcat( string,valueString );
-
-						delete[] valueString;
-						valueString = 0;
-					}
-
-					current = current->getNext( );
-				}
-			}
-			break;
-
-		case PRINT_LAST_ITER:
-			while ( current != 0 )
-			{
-				if ( current->getValueString( &valueString,getMaxNumMatrices( )-1 ) != SUCCESSFUL_RETURN )
-				{
-					delete[] valueString; delete[] string;
-					return ACADOERROR( RET_UNKNOWN_BUG );
-				}
-
-				if ( valueString != 0 )
-				{
-					strcat( string,valueString );
-
-					delete[] valueString;
-					valueString = 0;
-				}
-
-				current = current->getNext( );
-			}
-			strcat( string,"\n" );
-			break;
-	}
-
-	if ( outputFile != 0 )
-	{
-		acadoFPrintf( outputFile,string );
-	}
-	else
-	{
-		if ( outputFileName != 0 )
+	case PRINT_ITEM_BY_ITEM:
+		for (it = items.begin(); it != items.end(); ++it)
 		{
-			FILE* outputFileFromName = fopen( outputFileName,"w" );
-			acadoFPrintf( outputFileFromName,string );
-			fclose( outputFileFromName );
+			Matrix tmp;
+
+			for (uint i = 0; i < it->second.values.getNumPoints(); ++i)
+				tmp.appendRows(it->second.values.getMatrix(i));
+
+			 status = tmp.print(
+					_stream, it->second.label.c_str(),
+					startString, endString, width, precision,
+					colSeparator, rowSeparator);
+			 if (status != SUCCESSFUL_RETURN)
+				 goto LogRecord_print_exit;
 		}
-		else
-		{
-			delete[] string;
-			return ACADOERROR( RET_INVALID_ARGUMENTS );
-		}
+
+		break;
+
+	case PRINT_ITER_BY_ITER:
+		for (unsigned i = 0; i < getMaxNumMatrices(); ++i)
+			for (it = items.begin(); it != items.end(); ++it)
+			{
+				if (i >= it->second.values.getNumPoints())
+					break;
+				if (it->second.values.getMatrix( i ).print(
+						_stream, it->second.label.c_str(),
+						startString, endString, width, precision,
+						colSeparator, rowSeparator)
+						!= SUCCESSFUL_RETURN)
+					goto LogRecord_print_exit;
+			}
+
+	break;
+
+	case PRINT_LAST_ITER:
+		for (it = items.begin(); it != items.end(); ++it)
+			if (it->second.values.getMatrix(getMaxNumMatrices() - 1).print(
+					_stream, it->second.label.c_str(),
+					startString, endString, width, precision,
+					colSeparator, rowSeparator) != SUCCESSFUL_RETURN)
+				goto LogRecord_print_exit;
+
+	break;
 	}
 
-	delete[] string;
+	if ( startString != 0 )   delete[] startString;
+	if ( endString != 0 )     delete[] endString;
+	if ( colSeparator != 0 )  delete[] colSeparator;
+	if ( rowSeparator != 0 )  delete[] rowSeparator;
 
-	return SUCCESSFUL_RETURN;
+	LogRecord_print_exit:
+
+	return status;
 }
-
 
 returnValue LogRecord::printInfo( ) const
 {
-	printf( "LogRecord having the following items:  " );
+	cout << "LogRecord having the following items: ";
 
-	LogRecordItem* current = first;
+	LogRecordItems::const_iterator it;
+	for (it = items.begin(); it != items.end(); ++it)
+		cout << it->first.first << ", ";
 
-	while ( current != 0 )
-	{
-		printf( "%d, ",current->getName( ) );
-		current = current->getNext( );
-	}
-	printf( "\n" );
+	cout << endl;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -570,16 +179,13 @@ returnValue LogRecord::printInfo( ) const
 
 uint LogRecord::getMaxNumMatrices( ) const
 {
-	uint maxNumMatrices = 0;
+	unsigned maxNumMatrices = 0;
 
-	LogRecordItem* current = first;
-
-	while ( current != 0 )
+	LogRecordItems::const_iterator it;
+	for (it = items.begin(); it != items.end(); ++it)
 	{
-//		if ( current->getNumPoints( ) > maxNumMatrices );
-		maxNumMatrices = current->getNumPoints( );
-
-		current = current->getNext( );
+//		if ( items[ i ].getNumPoints( ) > maxNumMatrices );
+		maxNumMatrices = it->second.values.getNumPoints( );
 	}
 
 	return maxNumMatrices;
@@ -596,13 +202,11 @@ returnValue LogRecord::getAll(	uint _name,
 								MatrixVariablesGrid& values
 								) const
 {
-	LogRecordItem* item = find( _name,_type );
-
-	// checks if item exists
-	if ( item == 0 )
+	LogRecordItems::const_iterator it = items.find(make_pair(_name, _type));
+	if (it == items.end())
 		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 
-	values = item->getAllValues( );
+	values = it->second.values;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -613,13 +217,11 @@ returnValue LogRecord::getFirst(	uint _name,
 									Matrix& lastValue
 									) const
 {
-	LogRecordItem* item = find( _name,_type );
-
-	// checks if item exists
-	if ( item == 0 )
+	LogRecordItems::const_iterator it = items.find(make_pair(_name, _type));
+	if (it == items.end())
 		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 
-	lastValue = item->getFirstValue( );
+	lastValue = it->second.values.getMatrix( 0 );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -630,13 +232,11 @@ returnValue LogRecord::getLast(	uint _name,
 								Matrix& lastValue
 								) const
 {
-	LogRecordItem* item = find( _name,_type );
-
-	// checks if item exists
-	if ( item == 0 )
+	LogRecordItems::const_iterator it = items.find(make_pair(_name, _type));
+	if (it == items.end())
 		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 
-	lastValue = item->getLastValue( );
+	lastValue = it->second.values.getMatrix(it->second.values.getNumPoints() - 1);
 
 	return SUCCESSFUL_RETURN;
 }
@@ -648,18 +248,32 @@ returnValue LogRecord::setAll(	uint _name,
 								const MatrixVariablesGrid& values
 								)
 {
-	LogRecordItem* item = find( _name,_type );
+	LogRecordItems::iterator it = items.find(make_pair(_name, _type));
+	if (it == items.end())
+		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 
-	// checks if item exists
-	if ( ( item != 0 ) && ( item->isWriteProtected( ) == BT_FALSE ) )
+	if (it->second.values.getNumPoints( ) <= 0)
+		return it->second.values.init( );
+
+	switch( frequency )
 	{
-		if ( item->setAllValues( frequency,values ) != SUCCESSFUL_RETURN )
-			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
+	case LOG_AT_START:
+		it->second.values.init();
+		it->second.values.addMatrix(values.getFirstMatrix( ), values.getFirstTime( ));
+		break;
+
+	case LOG_AT_END:
+		it->second.values.init();
+		it->second.values.addMatrix(values.getLastMatrix( ), values.getFirstTime( ));
+		break;
+
+	case LOG_AT_EACH_ITERATION:
+		it->second.values = values;
+		break;
 	}
 
 	return SUCCESSFUL_RETURN;
 }
-
 
 returnValue LogRecord::setLast(	uint _name,
 								LogRecordItemType _type,
@@ -667,91 +281,69 @@ returnValue LogRecord::setLast(	uint _name,
 								double time
 								)
 {
-	LogRecordItem* item = find( _name,_type );
+	LogRecordItems::iterator it = items.find(make_pair(_name, _type));
+	if (it == items.end())
+		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 
-	// checks if item exists
-	if ( ( item != 0 ) && ( item->isWriteProtected( ) == BT_FALSE ) )
+	double logTime = time;
+
+	switch( frequency )
 	{
-		if ( item->setValue( frequency,value,time ) != SUCCESSFUL_RETURN )
-			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
+	case LOG_AT_START:
+		// only log if no matrix has been logged so far
+		if (it->second.values.getNumPoints() == 0)
+		{
+			if (acadoIsEqual(logTime, -INFTY) == BT_TRUE)
+				logTime = 0.0;
+
+			it->second.values.addMatrix(value, logTime);
+		}
+		break;
+
+	case LOG_AT_END:
+		// always overwrite existing matrices in order to keep only the last one
+		it->second.values.init();
+
+		if (acadoIsEqual(logTime, -INFTY) == BT_TRUE)
+			logTime = 0.0;
+
+		it->second.values.addMatrix(value, logTime);
+		break;
+
+	case LOG_AT_EACH_ITERATION:
+		// add matrix to list
+		if (acadoIsEqual(logTime, -INFTY) == BT_TRUE)
+			logTime = (double)it->second.values.getNumPoints() + 1.0;
+
+		it->second.values.addMatrix(value, logTime);
+		break;
+	}
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue LogRecord::updateLogRecord( LogRecord& _record
+										) const
+{
+	LogRecordItems::iterator it1;
+	LogRecordItems::const_iterator it2;
+
+	for (it1 = _record.items.begin(); it1 != _record.items.end(); ++it1)
+	{
+		if (it1->second.writeProtection == true)
+			continue;
+
+		it2 = items.find( it1->first );
+		if ( it2!= items.end())
+		{
+			it1->second.values = it2->second.values;
+			it1->second.label = it2->second.label;
+		}
 	}
 
 	return SUCCESSFUL_RETURN;
 }
 
-
-
-LogRecordItem* LogRecord::find(	LogName _name
-								) const
-{
-	return find( (uint)_name,LRT_ENUM );
-}
-
-
-LogRecordItem* LogRecord::find(	const Expression& _name
-								) const
-{
-	return find( _name.getComponent( 0 ),LRT_VARIABLE );
-}
-
-
-LogRecordItem* LogRecord::find(	uint _name,
-								LogRecordItemType _type
-								) const
-{
-	LogRecordItem* item = first;
-
-	while ( item != 0 )
-	{
-		if ( ( item->getName( ) == (int)_name ) && ( item->getType( ) == _type ) )
-			return item;
-
-		item = item->getNext( );
-	}
-
-	return 0;
-}
-
-
-LogRecordItem* LogRecord::findNonEmpty(	uint _name,
-										LogRecordItemType _type
-										) const
-{
-	LogRecordItem* item = first;
-
-	while ( item != 0 )
-	{
-		if ( ( item->getName( ) == (int)_name ) && 
-			 ( item->getType( ) == _type )      && 
-			 ( item->isEmpty( ) == BT_FALSE )   )
-			return item;
-
-		item = item->getNext( );
-	}
-
-	return 0;
-}
-
-
-uint LogRecord::determineRecordStringLength( ) const
-{
-	uint stringLength = 0;
-
-	LogRecordItem* current = first;
-
-	while ( current != 0 )
-	{
-		stringLength += current->determineStringLength( );
-		current = current->getNext( );
-	}
-
-	return stringLength;
-}
-
-
-
 CLOSE_NAMESPACE_ACADO
-
 
 /*
  *	end of file

@@ -26,25 +26,19 @@
 
 /**
  *    \file include/acado/user_interaction/logging.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
 #ifndef ACADO_TOOLKIT_LOGGING_HPP
 #define ACADO_TOOLKIT_LOGGING_HPP
 
-
 #include <acado/utils/acado_utils.hpp>
-#include <acado/user_interaction/log_collection.hpp>
 #include <acado/user_interaction/log_record.hpp>
-
-
 
 BEGIN_NAMESPACE_ACADO
 
-
 static LogRecord emptyLogRecord;
-
 
 /**
  *	\brief Provides a generic way to store algorithmic information during runtime.
@@ -56,7 +50,7 @@ static LogRecord emptyLogRecord;
  *	that are intended to interact with the user inherit the public functionality 
  *	of the Logging class.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class Logging
 {
@@ -70,23 +64,8 @@ class Logging
 		/** Default constructor. */
 		Logging( );
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 */
-		Logging(	const Logging& rhs
-					);
-
 		/** Destructor. */
 		virtual ~Logging( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 */
-		Logging& operator=(	const Logging& rhs
-							);
-
 
 		/** Adds a record to the log collection.
 		 *
@@ -137,7 +116,6 @@ class Logging
 		returnValue getLogRecord(	LogRecord& _record
 									) const;
 
-
 		/** Updates all items with the record given as argument. In doing so,
 		 *	it is checked for each item whether it is contained within one of 
 		 *	of the records of the collection; and if so, the numerical values
@@ -149,7 +127,6 @@ class Logging
 		 */
 		returnValue updateLogRecord(	LogRecord& _record
 										) const;
-
 
 		/** Gets all numerical values at all time instants of the item
 		 *	with given name. If this item exists in more than one record,
@@ -165,7 +142,6 @@ class Logging
 		inline returnValue getAll(	LogName _name,
 									MatrixVariablesGrid& values
 									) const;
-
 
 		/** Gets numerical value at first time instant of the item
 		 *	with given name. If this item exists in more than one record,
@@ -196,7 +172,6 @@ class Logging
 		inline returnValue getFirst(	LogName _name,
 										VariablesGrid& firstValue
 										) const;
-
 
 		/** Gets numerical value at last time instant of the item
 		 *	with given name. If this item exists in more than one record,
@@ -256,25 +231,21 @@ class Logging
 		 */
 		virtual returnValue setupLogging( );
 
-
     //
     // DATA MEMBERS:
     //
 	protected:
-
-		LogCollection logCollection;				/**< Log collection containing a singly-linked list of log records. */
-		int logIdx;									/**< Index of a certain log record to be optionally used within derived classes. */
+		/** Log collection containing a singly-linked list of log records. */
+		std::vector< LogRecord > logCollection;
+		/** Index of a certain log record to be optionally used within derived classes. */
+		int logIdx;
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
 #include <acado/user_interaction/logging.ipp>
 
-
 #endif	// ACADO_TOOLKIT_LOGGING_HPP
-
 
 /*
  *	end of file

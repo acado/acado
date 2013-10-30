@@ -26,21 +26,15 @@
 
 /**
  *    \file src/user_interaction/logging.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 12.05.2009
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2009 - 2013
  */
 
-
-#include <acado/user_interaction/log_collection.hpp>
 #include <acado/user_interaction/logging.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
-
-// define static member
-//LogCollection Logging::logCollection;
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -52,30 +46,8 @@ Logging::Logging( )
   	logIdx = -1;
 }
 
-
-Logging::Logging( const Logging& rhs )
-{
-	logCollection = rhs.logCollection;
-	logIdx = rhs.logIdx;
-}
-
-
 Logging::~Logging( )
-{
-}
-
-
-Logging& Logging::operator=( const Logging& rhs )
-{
-	if ( this != &rhs )
-	{
-		logCollection = rhs.logCollection;
-		logIdx = rhs.logIdx;
-	}
-
-	return *this;
-}
-
+{}
 
 int Logging::operator<<(	LogRecord& _record
 							)
@@ -83,18 +55,29 @@ int Logging::operator<<(	LogRecord& _record
 	return addLogRecord( _record );
 }
 
-
 int Logging::addLogRecord(	LogRecord& _record
 							)
 {
-	return logCollection.addLogRecord( _record );
-}
+	unsigned newIndex;
+	if (_record.aliasIdx >= 0 && _record.aliasIdx < (int)logCollection.size())
+	{
+		logCollection[ _record.aliasIdx ] = _record;
+		newIndex = _record.aliasIdx;
+	}
+	else
+	{
+		logCollection.push_back( _record );
+		newIndex = logCollection.size() - 1;
+		logCollection.back().aliasIdx = newIndex;
+	}
 
+	return newIndex;
+}
 
 returnValue Logging::getLogRecord(	LogRecord& _record
 									) const
 {
-	return getLogRecord( _record.getAliasIdx( ),_record );
+	return getLogRecord(_record.aliasIdx, _record);
 }
 
 
@@ -102,10 +85,10 @@ returnValue Logging::getLogRecord(	uint idx,
 									LogRecord& _record
 									) const
 {
-	if (idx >= getNumLogRecords( ))
+	if (idx >= getNumLogRecords( ) - 1)
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 
-	_record = logCollection( idx );
+	_record = logCollection[ idx ];
 
 	return SUCCESSFUL_RETURN;
 }
@@ -115,34 +98,40 @@ returnValue Logging::getLogRecord(	uint idx,
 returnValue Logging::updateLogRecord(	LogRecord& _record
 										) const
 {
-	return logCollection.updateLogRecord( _record );
+	if (_record.aliasIdx < 0 || _record.aliasIdx >= (int)(logCollection.size() - 1))
+		return RET_INVALID_ARGUMENTS;
+
+	return logCollection[ _record.aliasIdx ].updateLogRecord( _record );
 }
-
-
 
 uint Logging::getNumLogRecords( ) const
 {
-	return logCollection.getNumLogRecords( );
+	return logCollection.size();
 }
-
-
 
 returnValue Logging::printLoggingInfo( ) const
 {
-	printf( "LogCollection having the following records: \n" );
-	for( uint i=0; i<logCollection.getNumLogRecords( ); ++i )
-		logCollection( i ).printInfo( );
+	cout << "LogCollection having the following records: \n";
+	for (uint i = 0; i < logCollection.size(); ++i)
+		logCollection[ i ].printInfo();
 
 	return SUCCESSFUL_RETURN;
 }
-
 
 returnValue Logging::printNumDoubles( ) const
 {
-	printf( "LogCollection contains  %d  doubles.\n",logCollection.getNumDoubles( ) );
+	unsigned nDoubles = 0;
+
+	for (unsigned i = 0; i < logCollection.size(); ++i)
+	{
+		nDoubles += logCollection[ i ].getNumDoubles();
+	}
+
+	return nDoubles;
+
+	cout << "LogCollection contains " << nDoubles <<  "doubles.\n";
 	return SUCCESSFUL_RETURN;
 }
-
 
 //
 // PROTECTED MEMBER FUNCTIONS:
@@ -153,11 +142,7 @@ returnValue Logging::setupLogging( )
 	return SUCCESSFUL_RETURN;
 }
 
-
-
-
 CLOSE_NAMESPACE_ACADO
-
 
 /*
  *	end of file

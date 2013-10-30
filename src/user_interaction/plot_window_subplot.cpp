@@ -53,10 +53,6 @@ PlotWindowSubplot::PlotWindowSubplot( )
 	plotExpressionY   = 0;
 	plotEnum          = PLOT_NOTHING;
 
-	title  = 0;
-	xLabel = 0;
-	yLabel = 0;
-
 	plotMode   = PM_UNKNOWN;
 	plotFormat = PF_PLAIN;
 
@@ -107,10 +103,6 @@ PlotWindowSubplot::PlotWindowSubplot(	const Expression& _expression,
     }
 
 	plotEnum = PLOT_NOTHING;
-
-	title = 0;
-	xLabel = 0;
-	yLabel = 0;
 
 	setTitle( _title );
 	setXLabel( _xLabel );
@@ -165,10 +157,6 @@ PlotWindowSubplot::PlotWindowSubplot(	const Expression& _expressionX,
 
 	plotEnum          = PLOT_NOTHING;
 
-	title = 0;
-	xLabel = 0;
-	yLabel = 0;
-
 	setTitle( _title );
 	setXLabel( _xLabel );
 	setYLabel( _yLabel );
@@ -209,10 +197,6 @@ PlotWindowSubplot::PlotWindowSubplot(	PlotName _name,
 	plotExpressionY   = 0;
 	plotEnum          = _name;
 
-	title = 0;
-	xLabel = 0;
-	yLabel = 0;
-
 	setTitle( _title );
 	setXLabel( _xLabel );
 	setYLabel( _yLabel );
@@ -251,10 +235,6 @@ PlotWindowSubplot::PlotWindowSubplot( const VariablesGrid& _plotVariable,
 	plotExpressionX   = 0;
 	plotExpressionY   = 0;
 	plotEnum          = PLOT_NOTHING;
-
-    title = 0;
-    xLabel = 0;
-    yLabel = 0;
 
     setTitle( _title );
     setXLabel( _xLabel );
@@ -300,10 +280,6 @@ PlotWindowSubplot::PlotWindowSubplot( const Curve& _curve,
 	// discretize function for plotting
     Grid grid( _xRangeLowerLimit,_xRangeUpperLimit,100 );
     _curve.discretize( grid,*plotVariablesGrid );
-
-    title = 0;
-    xLabel = 0;
-    yLabel = 0;
 
     setTitle( _title );
     setXLabel( _xLabel );
@@ -354,11 +330,6 @@ PlotWindowSubplot::PlotWindowSubplot( const PlotWindowSubplot& rhs )
 
 	plotEnum = rhs.plotEnum;
 
-
-	title = 0;
-	xLabel = 0;
-	yLabel = 0;
-
 	setTitle( rhs.title );
 	setXLabel( rhs.xLabel );
 	setYLabel( rhs.yLabel );
@@ -407,15 +378,6 @@ PlotWindowSubplot::~PlotWindowSubplot( )
 	if ( plotExpressionY != 0 )
 		delete plotExpressionY;
 
-	if ( title != 0 )
-		delete[] title;
-
-	if ( xLabel != 0 )
-		delete[] xLabel;
-
-	if ( yLabel != 0 )
-		delete[] yLabel;
-
 	if ( lineValues != 0 )
 		free( lineValues );
 
@@ -446,15 +408,6 @@ PlotWindowSubplot& PlotWindowSubplot::operator=( const PlotWindowSubplot& rhs )
 
 		if ( plotExpressionY != 0 )
 			delete plotExpressionY;
-
-		if ( title != 0 )
-			delete[] title;
-
-		if ( xLabel != 0 )
-			delete[] xLabel;
-
-		if ( yLabel != 0 )
-			delete[] yLabel;
 
 		if ( lineValues != 0 )
 			free( lineValues );
@@ -489,10 +442,6 @@ PlotWindowSubplot& PlotWindowSubplot::operator=( const PlotWindowSubplot& rhs )
 			plotExpressionY = 0;
 
 		plotEnum = rhs.plotEnum;
-
-		title = 0;
-		xLabel = 0;
-		yLabel = 0;
 
 		setTitle( rhs.title );
 		setXLabel( rhs.xLabel );

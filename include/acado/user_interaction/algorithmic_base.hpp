@@ -528,7 +528,7 @@ class AlgorithmicBase
 									);
 
 
-		/** Prints whole record with specified index into internally specified file;
+		/** Prints whole record with specified index;
 		 *	all items are printed according to the output format settings.
 		 *
 		 *	@param[in]  idx			Index of record to be printed.
@@ -539,7 +539,8 @@ class AlgorithmicBase
 		 *	        RET_INVALID_ARGUMENTS, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		inline returnValue printLogRecord(	int idx,
+		inline returnValue printLogRecord(	std::ostream& _stream,
+											int idx,
 											LogPrintMode _mode = PRINT_ITEM_BY_ITEM
 											) const;
 

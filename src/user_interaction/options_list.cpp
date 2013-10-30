@@ -37,6 +37,7 @@
 #include <acado/user_interaction/options_item_int.hpp>
 #include <acado/user_interaction/options_item_double.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -299,7 +300,7 @@ returnValue OptionsList::printOptionsList( ) const
 {
 	OptionsItem* current = first;
 
-	acadoPrintf( "\nThis class provides the following %d user options:\n",number );
+	cout << "\nThis class provides the following" << number << "user options:\n";
 
 	while ( current != 0 )
 	{
@@ -307,19 +308,21 @@ returnValue OptionsList::printOptionsList( ) const
 		{
 			int curVal;
 			current->getValue( curVal );
-			acadoPrintf( "  --> set( \"%-22d\", <int>    );  current value: %d\n",current->getName(),curVal );
+
+			cout << "  --> set( \"" << current->getName() << "\", <int>    );  current value: " << curVal << endl;
 		}
 		else
 		{
 			double curVal;
 			current->getValue( curVal );
-			acadoPrintf( "  --> set( \"%-22d\", <double> );  current value: %e\n",current->getName(),curVal );
+
+			cout << "  --> set( \"" << current->getName() << "\", <double>    );  current value: " << curVal << endl;
 		}
 
 		current = current->getNext( );
 	}
 
-	acadoPrintf( "\n" );
+	cout << endl;
 
 	return SUCCESSFUL_RETURN;
 }

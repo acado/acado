@@ -42,10 +42,11 @@ inline returnValue Logging::getAll(	LogName _name,
 									MatrixVariablesGrid& _values
 									) const
 {
-	if ( logCollection.hasNonEmptyItem( _name ) == BT_TRUE )
-		return logCollection.getAll( _name,_values );
-	else
-		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasNonEmptyItem( _name ) == true)
+			return logCollection[ it ].getAll(_name, _values); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -53,10 +54,11 @@ inline returnValue Logging::getFirst(	LogName _name,
 										Matrix& _firstValue
 										) const
 {
-	if ( logCollection.hasNonEmptyItem( _name ) == BT_TRUE )
-		return logCollection.getFirst( _name,_firstValue );
-	else
-		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasNonEmptyItem( _name ) == true)
+			return logCollection[ it ].getFirst(_name, _firstValue); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -64,10 +66,11 @@ inline returnValue Logging::getFirst(	LogName _name,
 										VariablesGrid& _firstValue
 										) const
 {
-	if ( logCollection.hasNonEmptyItem( _name ) == BT_TRUE )
-		return logCollection.getFirst( _name,_firstValue );
-	else
-		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasNonEmptyItem( _name ) == BT_TRUE)
+			return logCollection[ it ].getFirst(_name, _firstValue); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -75,10 +78,11 @@ inline returnValue Logging::getLast(	LogName _name,
 										Matrix& _lastValue
 										) const
 {
-	if ( logCollection.hasNonEmptyItem( _name ) == BT_TRUE )
-		return logCollection.getLast( _name,_lastValue );
-	else
-		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasNonEmptyItem( _name ) == BT_TRUE)
+			return logCollection[ it ].getLast(_name, _lastValue); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -86,10 +90,11 @@ inline returnValue Logging::getLast(	LogName _name,
 										VariablesGrid& _lastValue
 										) const
 {
-	if ( logCollection.hasNonEmptyItem( _name ) == BT_TRUE )
-		return logCollection.getLast( _name,_lastValue );
-	else
-		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasNonEmptyItem( _name ) == BT_TRUE)
+			return logCollection[ it ].getLast(_name, _lastValue); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 

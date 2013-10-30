@@ -170,7 +170,11 @@ inline returnValue AlgorithmicBase::setAll(	LogName _name,
 											const MatrixVariablesGrid& values
 											)
 {
-	return userInteraction->logCollection.setAll( _name,values );
+	for (unsigned it = 0; it < userInteraction->logCollection.size(); ++it)
+		if (userInteraction->logCollection[ it ].hasItem( _name ) == BT_TRUE)
+			return userInteraction->logCollection[ it ].setAll(_name, values); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -180,7 +184,13 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 												double time
 												)
 {
-	return userInteraction->logCollection.setLast( _name,value,time );
+	Matrix tmp( value );
+
+	for (unsigned it = 0; it < userInteraction->logCollection.size(); ++it)
+		if (userInteraction->logCollection[ it ].hasItem( _name ) == BT_TRUE)
+			return userInteraction->logCollection[ it ].setLast( _name,tmp,time ); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -189,7 +199,13 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 												double time
 												)
 {
-	return userInteraction->logCollection.setLast( _name,value,time );
+	Matrix tmp( value );
+
+	for (unsigned it = 0; it < userInteraction->logCollection.size(); ++it)
+		if (userInteraction->logCollection[ it ].hasItem( _name ) == BT_TRUE)
+			return userInteraction->logCollection[ it ].setLast( _name, tmp,time ); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -198,7 +214,13 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 												double time
 												)
 {
-	return userInteraction->logCollection.setLast( _name,value,time );
+	Matrix tmp( value );
+
+	for (unsigned it = 0; it < userInteraction->logCollection.size(); ++it)
+		if (userInteraction->logCollection[ it ].hasItem( _name ) == BT_TRUE)
+			return userInteraction->logCollection[ it ].setLast( _name, tmp,time ); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -207,7 +229,11 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 												double time
 												)
 {
-	return userInteraction->logCollection.setLast( _name,value,time );
+	for (unsigned it = 0; it < userInteraction->logCollection.size(); ++it)
+		if (userInteraction->logCollection[ it ].hasItem( _name ) == BT_TRUE)
+			return userInteraction->logCollection[ it ].setLast( _name, value,time ); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -216,7 +242,13 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 												double time
 												)
 {
-	return userInteraction->logCollection.setLast( _name,value,time );
+	Matrix tmp( value );
+
+	for (unsigned it = 0; it < userInteraction->logCollection.size(); ++it)
+		if (userInteraction->logCollection[ it ].hasItem( _name ) == BT_TRUE)
+			return userInteraction->logCollection[ it ].setLast( _name, tmp,time ); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -228,15 +260,16 @@ inline int AlgorithmicBase::addLogRecord(	LogRecord& _record
 }
 
 
-inline returnValue AlgorithmicBase::printLogRecord(	int idx,
+inline returnValue AlgorithmicBase::printLogRecord(	std::ostream& _stream,
+													int idx,
 													LogPrintMode _mode
 													) const
 {
-	if ( ( idx < 0 ) || ( idx >= (int)userInteraction->logCollection.getNumLogRecords( ) ) )
+	if ( ( idx < 0 ) || ( idx >= (int)userInteraction->logCollection.size( ) ) )
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 		
-	return userInteraction->logCollection( idx ).print( _mode );
-}	
+	return userInteraction->logCollection[ idx ].print(_stream, _mode);
+}
 
 
 inline returnValue AlgorithmicBase::plot(	PlotFrequency _frequency

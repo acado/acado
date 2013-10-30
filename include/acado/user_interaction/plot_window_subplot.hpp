@@ -210,7 +210,7 @@ class PlotWindowSubplot
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue setTitle(	const char* const _title
+		inline returnValue setTitle(	const std::string& _title
 										);
 
 		/** Sets label of x-axis of the subplot.
@@ -219,7 +219,7 @@ class PlotWindowSubplot
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue setXLabel(	const char* const _xLabel
+		inline returnValue setXLabel(	const std::string& _xLabel
 										);
 
 		/** Sets label of y-axis of the subplot.
@@ -228,7 +228,7 @@ class PlotWindowSubplot
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue setYLabel(	const char* const _yLabel
+		inline returnValue setYLabel(	const std::string& _yLabel
 										);
 
 		/** Sets plot mode of the subplot, defining how the data points are to be plotted.
@@ -290,7 +290,7 @@ class PlotWindowSubplot
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue getTitle(	char** _title
+		inline returnValue getTitle(	std::string& _title
 										);
 
 		/** Returns current label of x-axis of the subplot.
@@ -299,7 +299,7 @@ class PlotWindowSubplot
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue getXLabel(	char** _xLabel
+		inline returnValue getXLabel(	std::string& _xLabel
 										);
 
 		/** Returns current label of y-axis of the subplot.
@@ -308,7 +308,7 @@ class PlotWindowSubplot
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue getYLabel(	char** _yLabel
+		inline returnValue getYLabel(	std::string& _yLabel
 										);
 
 		/** Returns current plot mode of the subplot.
@@ -422,9 +422,9 @@ class PlotWindowSubplot
 		Expression*    plotExpressionY;				/**< Continuous expression on x-axis to be plotted. */
 		PlotName       plotEnum;					/**< Pre-defined information to be plotted (on y-axis). */
 
-		char* title;								/**< Title of the subplot. */
-		char* xLabel;								/**< Label of x-axis of the subplot. */
-		char* yLabel;								/**< Label of y-axis of the subplot. */
+		std::string title;							/**< Title of the subplot. */
+		std::string xLabel;							/**< Label of x-axis of the subplot. */
+		std::string yLabel;							/**< Label of y-axis of the subplot. */
 
 		PlotMode plotMode;							/**< Plot mode defining how the data points are to be plotted. */
 		PlotFormat plotFormat;						/**< Plot format of the axes of the subplot. */
