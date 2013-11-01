@@ -27,10 +27,9 @@
 
 /**
  *    \file include/acado/objective/objective.hpp
- *    \author Boris Houska, Hans Joachim Ferreau
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  *
  */
-
 
 #ifndef ACADO_TOOLKIT_OBJECTIVE_HPP
 #define ACADO_TOOLKIT_OBJECTIVE_HPP
@@ -41,10 +40,7 @@
 #include <acado/objective/mayer_term.hpp>
 #include <acado/constraint/constraint.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
-class ExportVariable;
 
 /** 
  *	\brief Stores and evaluates the objective function of optimal control problems.
@@ -67,7 +63,7 @@ class ExportVariable;
  *  memory to store Expressions that are added by the
  *  user.)
  *
- *	\author Boris Houska, Hans Joachim Ferreau
+ *	\author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
 
 class Objective : public LagrangeTerm{
@@ -151,17 +147,17 @@ class Objective : public LagrangeTerm{
         // Code generation related functions
         //
 
-        returnValue addLSQ(const ExportVariable& S, const Function& h);
+        returnValue addLSQ(const Matrix& S, const Function& h);
 
-        returnValue addLSQEndTerm(const ExportVariable& S, const Function& h);
+        returnValue addLSQEndTerm(const Matrix& S, const Function& h);
 
-        returnValue addLSQ(const ExportVariable& S, const String& h);
+        returnValue addLSQ(const Matrix& S, const std::string& h);
 
-        returnValue addLSQEndTerm(const ExportVariable& S, const String& h);
+        returnValue addLSQEndTerm(const Matrix& S, const std::string& h);
 
         returnValue addLSQLinearTerms(const Vector& Slx, const Vector& Slu);
 
-        returnValue addLSQLinearTerms(const ExportVariable& Slx, const ExportVariable& Slu);
+        returnValue addLSQLinearTerms(const Matrix& Slx, const Matrix& Slu);
 
 
 // =======================================================================================
@@ -392,13 +388,13 @@ class Objective : public LagrangeTerm{
         //
         // Code generation related stuff
         //
-        returnValue getLSQTerms( std::vector<ExportVariable>& _matrices, std::vector<Function>& _functions ) const;
-        returnValue getLSQEndTerms( std::vector<ExportVariable>& _matrices, std::vector<Function>& _functions ) const;
+        returnValue getLSQTerms( std::vector<Matrix>& _matrices, std::vector<Function>& _functions ) const;
+        returnValue getLSQEndTerms( std::vector<Matrix>& _matrices, std::vector<Function>& _functions ) const;
 
-        returnValue getLSQTerms( std::vector<ExportVariable>& _matrices, std::vector<String>& _functions ) const;
-        returnValue getLSQEndTerms( std::vector<ExportVariable>& _matrices, std::vector<String>& _functions ) const;
+        returnValue getLSQTerms( std::vector<Matrix>& _matrices, std::vector<std::string>& _functions ) const;
+        returnValue getLSQEndTerms( std::vector<Matrix>& _matrices, std::vector<std::string>& _functions ) const;
 
-        returnValue getLSQLinearTerms(std::vector<ExportVariable>& _vSlx, std::vector<ExportVariable>& _vSlu) const;
+        returnValue getLSQLinearTerms(std::vector<Matrix>& _vSlx, std::vector<Matrix>& _vSlu) const;
 
     //
     // DATA MEMBERS:
@@ -413,26 +409,23 @@ class Objective : public LagrangeTerm{
     uint        nEndLSQ   ;   /**< number of end LSQ terms     */
     uint        nMayer    ;   /**< number of Mayer terms       */
 
-    std::vector<ExportVariable> cgLSQWeightingMatrices;
+    std::vector<Matrix> cgLSQWeightingMatrices;
     std::vector<Function> cgLSQFunctions;
 
-    std::vector<ExportVariable> cgLSQEndTermWeightingMatrices;
+    std::vector<Matrix> cgLSQEndTermWeightingMatrices;
     std::vector<Function> cgLSQEndTermFunctions;
 
-    std::vector<ExportVariable> cgExternLSQWeightingMatrices;
-    std::vector<String> cgExternLSQFunctions;
+    std::vector<Matrix> cgExternLSQWeightingMatrices;
+    std::vector<std::string> cgExternLSQFunctions;
 
-    std::vector<ExportVariable> cgExternLSQEndTermWeightingMatrices;
-    std::vector<String> cgExternLSQEndTermFunctions;
+    std::vector<Matrix> cgExternLSQEndTermWeightingMatrices;
+    std::vector<std::string> cgExternLSQEndTermFunctions;
 
-    std::vector<ExportVariable> cgLSQWeightingVectorsSlx;
-    std::vector<ExportVariable> cgLSQWeightingVectorsSlu;
+    std::vector<Matrix> cgLSQWeightingVectorsSlx;
+    std::vector<Matrix> cgLSQWeightingVectorsSlu;
 };
 
-
 CLOSE_NAMESPACE_ACADO
-
-
 
 #include <acado/objective/objective.ipp>
 

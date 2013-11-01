@@ -32,7 +32,7 @@
 
 
 #include <include/acado_qpoases/qp_solver_qpoases.hpp>
-
+#include <qpOASES-3.0beta/include/qpOASES.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -128,7 +128,7 @@ returnValue QPsolver_qpOASES::solve(	double* H,
 
 	//printf( "nV: %d,  nC: %d \n",qp->getNV(),qp->getNC() );
 
-	if ( qp->isInitialised( ) == qpOASES::BT_FALSE )
+	if ( (bool)qp->isInitialised( ) == false )
 	{
 		returnvalue = qp->init( H,g,A,lb,ub,lbA,ubA,numberOfSteps,0 );
 	}
@@ -137,7 +137,7 @@ returnValue QPsolver_qpOASES::solve(	double* H,
 		int performHotstart = 0;
 		get( HOTSTART_QP,performHotstart );
 
-		if ( (BooleanType)performHotstart == BT_TRUE )
+		if ( (bool)performHotstart == true )
 		{
 			 returnvalue = qp->hotstart( H,g,A,lb,ub,lbA,ubA,numberOfSteps,0 );
 		}
@@ -149,8 +149,6 @@ returnValue QPsolver_qpOASES::solve(	double* H,
 		}
 	}
 	setLast( LOG_NUM_QP_ITERATIONS, numberOfSteps );
-
-//	acadoPrintf( "nEC: %d\n", qp->getNEC( ) );
 
 	/* update QP status and determine return value */
 	return updateQPstatus( returnvalue );
@@ -253,10 +251,10 @@ returnValue QPsolver_qpOASES::getDualSolution( Vector& yOpt ) const
 
 double QPsolver_qpOASES::getObjVal( ) const
 {
-	if ( isUnbounded( ) == BT_TRUE )
+	if ( isUnbounded( ) == true )
 		return -INFTY;
 
-	if ( ( isSolved( ) == BT_FALSE ) || ( qp == 0 ) )
+	if ( ( isSolved( ) == false ) || ( qp == 0 ) )
 		return INFTY;
 
 	return qp->getObjVal( );
@@ -291,7 +289,7 @@ returnValue QPsolver_qpOASES::getVarianceCovariance( Matrix &H, Matrix &var ){
     if ( qp == 0 )
         return ACADOERROR( RET_INITIALIZE_FIRST );
 
-    if ( isSolved( ) == BT_FALSE ) return ACADOERROR( RET_QP_NOT_SOLVED );
+    if ( (bool)isSolved( ) == false ) return ACADOERROR( RET_QP_NOT_SOLVED );
 
     qpOASES::returnValue      returnvalue;
     qpOASES::SolutionAnalysis analyser   ;
@@ -359,9 +357,11 @@ returnValue QPsolver_qpOASES::setupQPobject( uint nV, uint nC )
 	{
 		case HIGH:
 			qp->setPrintLevel( qpOASES::PL_MEDIUM );
+			break;
 
 		case DEBUG:
 			qp->setPrintLevel( qpOASES::PL_HIGH );
+			break;
 
 		// PL_NONE, PL_LOW, PL_MEDIUM
 		default:
@@ -374,11 +374,9 @@ returnValue QPsolver_qpOASES::setupQPobject( uint nV, uint nC )
 }
 
 
-returnValue QPsolver_qpOASES::updateQPstatus( qpOASES::returnValue returnvalue )
+returnValue QPsolver_qpOASES::updateQPstatus( int ret )
 {
-// 	printf( "QP return value: %d\n\n", returnvalue );
-
-	switch ( returnvalue )
+	switch ( (qpOASES::returnValue)ret )
 	{
 		case qpOASES::SUCCESSFUL_RETURN:
 			qpStatus = QPS_SOLVED;
@@ -392,14 +390,14 @@ returnValue QPsolver_qpOASES::updateQPstatus( qpOASES::returnValue returnvalue )
 			qpStatus = QPS_NOTSOLVED;
 
 			/* check for infeasibility */
-			if ( qp->isInfeasible( ) == qpOASES::BT_TRUE )
+			if ( (bool)qp->isInfeasible( ) == true )
 			{
 				qpStatus = QPS_INFEASIBLE;
 				return RET_QP_INFEASIBLE;
 			}
 
 			/* check for unboundedness */
-			if ( qp->isUnbounded( ) == qpOASES::BT_TRUE )
+			if ( (bool)qp->isUnbounded( ) == true )
 			{
 				qpStatus = QPS_UNBOUNDED;
 				return RET_QP_UNBOUNDED;

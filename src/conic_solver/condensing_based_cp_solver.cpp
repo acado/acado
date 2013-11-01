@@ -33,7 +33,7 @@
 #include <acado/conic_solver/condensing_based_cp_solver.hpp>
 #include <include/acado_qpoases/qp_solver_qpoases.hpp>
 
-
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -170,7 +170,7 @@ returnValue CondensingBasedCPsolver::prepareSolve(	BandedCP& cp
 	get( PRINTLEVEL,printLevel );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Condesing banded QP ...\n" );
+		cout << "--> Condesing banded QP ...\n";
 
 	clock.reset( );
 	clock.start( );
@@ -182,7 +182,7 @@ returnValue CondensingBasedCPsolver::prepareSolve(	BandedCP& cp
 	setLast( LOG_TIME_CONDENSING,clock.getTime() );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "<-- Condesing banded QP done.\n" );
+		cout << "<-- Condesing banded QP done.\n";
 
 	return SUCCESSFUL_RETURN;
 }
@@ -224,7 +224,7 @@ returnValue CondensingBasedCPsolver::solve(	BandedCP& cp
 	get( PRINTLEVEL,printLevel );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Solving condesed QP ...\n" );
+		cout << "--> Solving condesed QP ...\n";
 	
 	
 	
@@ -232,7 +232,7 @@ returnValue CondensingBasedCPsolver::solve(	BandedCP& cp
     if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR( RET_BANDED_CP_SOLUTION_FAILED );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "<-- Solving condesed QP done.\n" );
+		cout << "<-- Solving condesed QP done.\n";
 
     // Expand the KKT-System if neccessary:
     // ------------------------------------
@@ -253,7 +253,7 @@ returnValue CondensingBasedCPsolver::finalizeSolve(	BandedCP& cp
 	get( PRINTLEVEL,printLevel );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Expanding condensed QP solution ...\n" );
+		cout << "--> Expanding condensed QP solution ...\n";
 
     // Expand the KKT-System if neccessary:
     // ------------------------------------
@@ -267,7 +267,7 @@ returnValue CondensingBasedCPsolver::finalizeSolve(	BandedCP& cp
 	setLast( LOG_TIME_EXPAND,clock.getTime() );
 	
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "<-- Expanding condensed QP solution done.\n" );
+		cout << "<-- Expanding condensed QP solution done.\n";
 
     return returnvalue;
 }

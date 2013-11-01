@@ -212,20 +212,17 @@ SET( ACADO_SOURCE_DIRS
 	./external_packages/src/acado_gnuplot
 	
 	# Optimal Control source folders
-#	./src/code_generation
-#	./src/code_generation/integrators
-#	./src/code_generation/linear_solvers
-#	./src/dynamic_system
-#	./src/dynamic_discretization
-#	./src/objective
-#	./src/constraint
+	./src/dynamic_system
+	./src/dynamic_discretization
+	./src/objective
+	./src/constraint
 #	./src/ocp
-#	./src/conic_program
-#	./src/conic_solver
-#	./src/nlp_solver
-#	./src/nlp_derivative_approximation
+	./src/conic_program
+	./src/conic_solver
+	./src/nlp_solver
+	./src/nlp_derivative_approximation
 #	./src/optimization_algorithm
-#	./external_packages/src/acado_qpoases
+	./external_packages/src/acado_qpoases
 	
 	# Simulation source folders
 #	./src/process
@@ -236,6 +233,11 @@ SET( ACADO_SOURCE_DIRS
 #	./src/estimator
 #	./src/reference_trajectory
 #	./src/simulation_environment
+
+	# Code Generation Tool
+#	./src/code_generation
+#	./src/code_generation/integrators
+#	./src/code_generation/linear_solvers
 )
 
 ################################################################################

@@ -186,7 +186,7 @@ class DenseCP{
 		/** Prints CP to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] file				File for printing.
+		 *	@param[in] stream			File for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] startString		Prefix before printing the numerical values.
 		 *	@param[in] endString		Suffix after printing the numerical values.
@@ -199,7 +199,7 @@ class DenseCP{
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue printToFile(	FILE* file,
+		returnValue printToFile(	std::ostream& stream,
 									const char* const name         = DEFAULT_LABEL,
 									const char* const startString  = DEFAULT_START_STRING,
 									const char* const endString    = DEFAULT_END_STRING,
@@ -228,7 +228,7 @@ class DenseCP{
 		/** Prints CP to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] filen			File for printing.
+		 *	@param[in] stream			File for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] printScheme		Print scheme defining the output format of the information.
 		 *
@@ -236,7 +236,7 @@ class DenseCP{
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue printToFile(	FILE* file,
+		returnValue printToFile(	std::ostream& stream,
 									const char* const name,
 									PrintScheme printScheme
 									) const;
@@ -307,7 +307,7 @@ class DenseCP{
 		/** Prints CP solution to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] file				File for printing.
+		 *	@param[in] stream			File for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] startString		Prefix before printing the numerical values.
 		 *	@param[in] endString		Suffix after printing the numerical values.
@@ -320,7 +320,7 @@ class DenseCP{
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue printSolutionToFile(	FILE* file,
+		returnValue printSolutionToFile(	std::ostream& stream,
 											const char* const name         = DEFAULT_LABEL,
 											const char* const startString  = DEFAULT_START_STRING,
 											const char* const endString    = DEFAULT_END_STRING,
@@ -349,7 +349,7 @@ class DenseCP{
 		/** Prints CP solution to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] filen			File for printing.
+		 *	@param[in] stream			File for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] printScheme		Print scheme defining the output format of the information.
 		 *
@@ -357,7 +357,7 @@ class DenseCP{
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue printSolutionToFile(	FILE* file,
+		returnValue printSolutionToFile(	std::ostream& stream,
 											const char* const name,
 											PrintScheme printScheme
 											) const;

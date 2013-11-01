@@ -153,8 +153,7 @@ uint DenseQPsolver::getNumberOfIterations( ) const
 
 returnValue DenseQPsolver::setupLogging( )
 {
-  	//printf( "DenseQPsolver::setupLogging( ) called!\n" );
-	LogRecord tmp( LOG_AT_EACH_ITERATION,stdout,PS_DEFAULT );
+	LogRecord tmp(LOG_AT_EACH_ITERATION, PS_DEFAULT);
 
 	tmp.addItem( LOG_NUM_QP_ITERATIONS );
 	tmp.addItem( LOG_IS_QP_RELAXED );

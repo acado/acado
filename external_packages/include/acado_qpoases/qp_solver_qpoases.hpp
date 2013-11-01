@@ -36,10 +36,13 @@
 
 
 #include <acado/conic_solver/dense_qp_solver.hpp>
-#include <qpOASES-3.0beta/include/qpOASES.hpp>
+
+namespace qpOASES
+{
+	class SQProblem;
+}
 
 BEGIN_NAMESPACE_ACADO
-
 
 /**
  *	\brief (not yet documented)
@@ -189,7 +192,7 @@ class QPsolver_qpOASES : public DenseQPsolver
 											uint nC		/**< Number of QP constraints (without bounds). */
 											);
 
-		returnValue updateQPstatus(	qpOASES::returnValue returnvalue
+		returnValue updateQPstatus(	int ret
 									);
 
 
