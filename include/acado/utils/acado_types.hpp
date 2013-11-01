@@ -264,8 +264,7 @@ enum IntegratorType{
  */
 enum MeasurementGrid{
 
-	EQUIDISTANT_SUBGRID,    /**< An equidistant subgrid, within one interval of the integration grid.       */
-	EQUIDISTANT_GRID,       /**< An equidistant grid specified independent of the integration grid.           		*/
+	OFFLINE_GRID,       	/**< An equidistant grid specified independent of the integration grid.         */
 	ONLINE_GRID         	/**< A random grid, provided online by the user.           						*/
 };
 

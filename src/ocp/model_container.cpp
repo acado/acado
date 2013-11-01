@@ -25,12 +25,12 @@
 
 
 /**
- *    \file src/code_generation/Model_container.cpp
+ *    \file src/ocp/Model_container.cpp
  *    \author Rien Quirynen
  *    \date 2012
  */
 
-#include <acado/code_generation/model_container.hpp>
+#include <acado/ocp/model_container.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -132,25 +132,47 @@ returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const String& rh
 }
 
 
-uint ModelContainer::addOutput( const OutputFcn& outputEquation_ ) {
-	return modelData.addOutput( outputEquation_ );
+uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const Vector& measurements ) {
+	Vector newMeas(measurements);
+	newMeas.append( 1.0 );
+	Grid grid( newMeas );
+	return modelData.addOutput( outputEquation_, grid );
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim ) {
-	return modelData.addOutput( output, diffs_output, dim );
+uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const uint numberMeasurements ) {
+	Grid grid( 0.0, 1.0, (int)numberMeasurements + 1 );
+	return modelData.addOutput( outputEquation_, grid );
 }
 
+
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim, const Vector& measurements ) {
+	Vector newMeas(measurements);
+	newMeas.append( 1.0 );
+	Grid grid( newMeas );
+	return modelData.addOutput( output, diffs_output, dim, grid );
+}
+
+
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim, const uint numberMeasurements ) {
+	Grid grid( 0.0, 1.0, (int)numberMeasurements + 1 );
+	return modelData.addOutput( output, diffs_output, dim, grid );
+}
 
 
 uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
-								const String& colInd, const String& rowPtr	) {
-	return modelData.addOutput( output, diffs_output, dim, colInd, rowPtr );
+								const Vector& measurements, const String& colInd, const String& rowPtr	) {
+	Vector newMeas(measurements);
+	newMeas.append( 1.0 );
+	Grid grid( newMeas );
+	return modelData.addOutput( output, diffs_output, dim, grid, colInd, rowPtr );
 }
 
 
-returnValue ModelContainer::setMeasurements( const Vector& numberMeasurements ) {
-	return modelData.setMeasurements( numberMeasurements );
+uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
+								const uint numberMeasurements, const String& colInd, const String& rowPtr	) {
+	Grid grid( 0.0, 1.0, (int)numberMeasurements + 1 );
+	return modelData.addOutput( output, diffs_output, dim, grid, colInd, rowPtr );
 }
 
 

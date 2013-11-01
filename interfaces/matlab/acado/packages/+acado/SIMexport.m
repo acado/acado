@@ -57,8 +57,8 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
         outputDim = {};
         outputColIndName = {};
         outputRowPtrName = {};
-        meas;
         outputDefined = [];
+        meas = {};
     end
     
     methods
@@ -102,12 +102,13 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
         function addOutput(obj, varargin)
             
             global ACADO_;
-            if (nargin == 2 && isa(varargin{1}, 'acado.OutputFcn'))
+            if (nargin == 3 && isa(varargin{1}, 'acado.OutputFcn') && (isnumeric(varargin{2}) || isa(varargin{2}, 'acado.Vector')))
                 obj.outputDefined(end+1) = 1;
-                % SIMexport.addOutput( h );
+                % SIMexport.addOutput( h, meas );
                 obj.output{end+1} = varargin{1};
+                obj.meas{end+1} = varargin{2};
                 
-            elseif (nargin == 2 && (isa(varargin{1}, 'cell') || isa(varargin{1}, 'acado.Expression')))
+            elseif (nargin == 3 && (isa(varargin{1}, 'cell') || isa(varargin{1}, 'acado.Expression')) && (isnumeric(varargin{2}) || isa(varargin{2}, 'acado.Vector')))
                 if ~isvector(varargin{1})
                     error('ERROR: Please provide a vector of expressions instead of a matrix.');
                 end
@@ -116,40 +117,28 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
                 ACADO_.helper.removeInstruction(tmp);
                 tmp(:) = varargin{1};
                 obj.output{end+1} = tmp;
+                obj.meas{end+1} = varargin{2};
                 
-            elseif (nargin == 4 && isa(varargin{1}, 'char') && isa(varargin{2}, 'char') && isa(varargin{3}, 'numeric'))
+            elseif (nargin == 5 && isa(varargin{1}, 'char') && isa(varargin{2}, 'char') && isa(varargin{3}, 'numeric') && (isnumeric(varargin{4}) || isa(varargin{4}, 'acado.Vector')))
                 obj.outputDefined(end+1) = 1;
-                % SIMexport.addOutput( output, diffs_output, dim );
+                % SIMexport.addOutput( output, diffs_output, dim, meas );
                 obj.outputName{end+1} = varargin{1};
                 obj.outputDiffsName{end+1} = varargin{2};
                 obj.outputDim{end+1} = varargin{3};
+                obj.meas{end+1} = varargin{4};
                 
-            elseif (nargin == 6 && isa(varargin{1}, 'char') && isa(varargin{2}, 'char') && isa(varargin{3}, 'numeric')) && isa(varargin{4}, 'char')  && isa(varargin{5}, 'char') 
+            elseif (nargin == 7 && isa(varargin{1}, 'char') && isa(varargin{2}, 'char') && isa(varargin{3}, 'numeric')) && (isnumeric(varargin{4}) || isa(varargin{4}, 'acado.Vector')) && isa(varargin{5}, 'char')  && isa(varargin{6}, 'char') 
                 obj.outputDefined(end+1) = 1;
-                % SIMexport.addOutput( output, diffs_output, dim, colInd, rowPtr );
+                % SIMexport.addOutput( output, diffs_output, dim, meas, colInd, rowPtr );
                 obj.outputName{end+1} = varargin{1};
                 obj.outputDiffsName{end+1} = varargin{2};
                 obj.outputDim{end+1} = varargin{3};
-                obj.outputColIndName{end+1} = varargin{4};
-                obj.outputRowPtrName{end+1} = varargin{5};
+                obj.meas{end+1} = varargin{4};
+                obj.outputColIndName{end+1} = varargin{5};
+                obj.outputRowPtrName{end+1} = varargin{6};
                 
             else
                 error('ERROR: Invalid output added.');
-            end
-            
-        end
-        
-        
-        function setMeasurements(obj, varargin)
-            
-            if (nargin == 2 && isa(varargin{1}, 'numeric'))
-                obj.meas = acado.Vector(varargin{1});
-                
-            elseif (nargin == 2 && isa(varargin{1}, 'acado.Vector'))
-                obj.meas = varargin{1};
-                
-            else
-                error('ERROR: Invalid measurements provided.');
             end
             
         end
@@ -208,7 +197,11 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
                         if (~obj.outputDefined(i))
                            obj.output{i}.getInstructions(cppobj, get);
                         end
-                        fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( %s );\n', obj.name, obj.output{i}.name));
+                        if isnumeric(obj.meas{i})
+                            fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( %s, %s );\n', obj.name, obj.output{i}.name, num2str(obj.meas{i})));
+                        else
+                            fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( %s, %s );\n', obj.name, obj.output{i}.name, obj.meas{i}.name)); 
+                        end
                     end
                     
                 elseif (~isempty(obj.outputName))
@@ -218,21 +211,23 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
                     numOutputs = length(obj.outputName);
                     if (~isempty(obj.outputColIndName)) && (length(obj.outputColIndName) == length(obj.outputRowPtrName)) && (length(obj.outputColIndName) == numOutputs)
                         for i = 1:numOutputs
-                            fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( "%s", "%s", %s, "%s", "%s" );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i}), obj.outputColIndName{i}, obj.outputRowPtrName{i}));
+                            if isnumeric(obj.meas{i})
+                                fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( "%s", "%s", %s, %s, "%s", "%s" );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i}), num2str(obj.meas{i}), obj.outputColIndName{i}, obj.outputRowPtrName{i}));
+                            else
+                                fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( "%s", "%s", %s, %s, "%s", "%s" );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i}), obj.meas{i}.name, obj.outputColIndName{i}, obj.outputRowPtrName{i}));
+                            end
                         end
                     elseif (~isempty(obj.outputColIndName))
                         error('ERROR: Invalid SIMexport object in getInstructions !\n');
                     else
                         for i = 1:numOutputs
-                            fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( "%s", "%s", %s );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i})));
+                            if isnumeric(obj.meas{i})
+                                fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( "%s", "%s", %s, %s );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i}), num2str(obj.meas{i})));
+                            else
+                                fprintf(cppobj.fileMEX,sprintf('    %s.addOutput( "%s", "%s", %s, %s );\n', obj.name, obj.outputName{i}, obj.outputDiffsName{i}, num2str(obj.outputDim{i}), obj.meas{i}.name));
+                            end
                         end
                     end
-                end
-                if (numOutputs > 0 && numOutputs ~= obj.meas.dim)
-                    error('ERROR: Invalid SIMexport object in getInstructions !\n');
-                end
-                if (~isempty(obj.meas))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setMeasurements( %s );\n', obj.name, obj.meas.name));
                 end
                 
                 % EXPORT (AND RUN)

@@ -713,13 +713,6 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	_controls = controls;
 	_results = results;
 	_ref = ref;
-	uint i;
-	Vector meas( (uint)outputGrids.size() );
-	Vector measRef( (uint)outputGrids.size() );
-	for( i = 0; i < outputGrids.size(); i++ ) {
-		meas(i) = (double)outputGrids[i].getNumIntervals();
-		measRef(i) = (double)outputGrids[i].getNumIntervals()*factorRef;
-	}
 
 	int numSteps;
     get( NUM_INTEGRATOR_STEPS, numSteps );
@@ -728,24 +721,14 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
     
     if( !referenceProvided ) {
 	    // REFERENCE:
-    	if( (MeasurementGrid)measGrid == EQUIDISTANT_GRID ) {
-    		modelData.setMeasurements( meas );
-    		set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
-    		exportCode(	dirName );
-    		exportTest(	dirName, test, _ref, _refOutputFiles, BT_FALSE, 1 );
-    	}
-    	else {
-    		modelData.setMeasurements( measRef );
-    		set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
-    		exportCode(	dirName );
-    		exportTest(	dirName, test, _ref, _refOutputFiles, BT_FALSE, factorRef );
-    	}
-		executeTest( dirName );
+    	set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
+    	exportCode(	dirName );
+    	exportTest(	dirName, test, _ref, _refOutputFiles, BT_FALSE, 1 );
+    	executeTest( dirName );
 	}
     modelData.clearIntegrationGrid();
     
     // THE INTEGRATOR:
-    modelData.setMeasurements( meas );
 	set( NUM_INTEGRATOR_STEPS,  numSteps );
 	exportCode(	dirName );
 	if(timingSteps > 0 && timingCalls > 0) 	exportTest(	dirName, test, _results, _outputFiles, BT_TRUE, 1 );

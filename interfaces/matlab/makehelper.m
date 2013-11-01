@@ -119,6 +119,9 @@ function [ ] = makehelper( type, optmake, varargin )
     if (ispc)
         % Microsoft Visual C++ (express) compiler
         CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -O ' ];    
+    elseif (ismac)
+        % Other compilers
+        CPPFLAGS  = [ IFLAGS, ' CXXFLAGS=''\$CXXFLAGS -fPIC'' -DLINUX -D__cpluplus -D__MATLAB__ -O ' ];
     else
         % Other compilers
         CPPFLAGS  = [ IFLAGS, ' CXXFLAGS=''\$CXXFLAGS -fPIC -Wno-c++11-compat -Wno-unused-comparison'' -DLINUX -D__cpluplus -D__MATLAB__ -O ' ];

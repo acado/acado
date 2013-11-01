@@ -38,7 +38,7 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/code_generation/export_algorithm_factory.hpp>
-#include <acado/code_generation/model_data.hpp>
+#include <acado/ocp/model_data.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

@@ -330,21 +330,13 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	setup( );
 
 	if( data.hasOutputs() ) {
-		uint i;
-
-		std::vector<Grid> newGrids_;
 		std::vector<Grid> outputGrids_;
 		data.getOutputGrids(outputGrids_);
 		std::vector<Expression> outputExpressions_;
 		data.getOutputExpressions(outputExpressions_);
-		for( i = 0; i < outputGrids_.size(); i++ ) {
-			uint numOuts = (int) ceil((double)outputGrids_[i].getNumIntervals()/((double) data.getN()) - 10.0*EPS);
-			Grid nextGrid( 0.0, 1.0, numOuts + 1 );
-			newGrids_.push_back( nextGrid );
-		}
 
 		if( outputExpressions_.size() > 0 ) {
-			setupOutput( newGrids_, outputExpressions_ );
+			setupOutput( outputGrids_, outputExpressions_ );
 		}
 		else {
 			std::vector<String> outputNames;
@@ -355,10 +347,10 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 			data.getNameDiffsOutputs(diffs_outputNames);
 			data.getDimOutputs(dim_outputs);
 			if( !data.hasCompressedStorage() ) {
-				setupOutput( newGrids_, outputNames, diffs_outputNames, dim_outputs );
+				setupOutput( outputGrids_, outputNames, diffs_outputNames, dim_outputs );
 			}
 			else {
-				setupOutput( newGrids_, outputNames, diffs_outputNames, dim_outputs, outputDependencies_ );
+				setupOutput( outputGrids_, outputNames, diffs_outputNames, dim_outputs, outputDependencies_ );
 			}
 		}
 	}

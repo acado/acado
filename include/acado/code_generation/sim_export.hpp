@@ -41,7 +41,7 @@
 #include <acado/code_generation/integrators/export_matlab_rhs.hpp>
 #include <acado/code_generation/integrators/integrator_generation.hpp>
 #include <acado/code_generation/export_file.hpp>
-#include <acado/code_generation/model_container.hpp>
+#include <acado/ocp/model_container.hpp>
 
 
 

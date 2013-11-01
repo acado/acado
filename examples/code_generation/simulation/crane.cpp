@@ -89,37 +89,42 @@ int main() {
 	h << aT;
 	h << aL;
 
-	Vector Meas(1);
-	Meas(0) = 5;
-
 	//
 	// SET UP THE SIMULATION EXPORT MODULE:
 	//
 	
-	
-	acadoPrintf( "-----------------------------------------\n  Using option 'EQUIDISTANT_SUBGRID':\n-----------------------------------------\n" );
+	acadoPrintf( "-----------------------------------------\n  Using an equidistant grid:\n-----------------------------------------\n" );
 	
 	SIMexport sim( 1, 0.1 );
+	
 	sim.setModel( f );
-	sim.addOutput( h );
-	sim.setMeasurements( Meas );
+	sim.addOutput( h, 5 );
+	
 	sim.set( INTEGRATOR_TYPE, INT_IRK_RIIA5 );
 	sim.set( NUM_INTEGRATOR_STEPS, 5 );
 	sim.setTimingSteps( 10000 );
-	sim.set( MEASUREMENT_GRID, EQUIDISTANT_SUBGRID );
+	
 	sim.exportAndRun( "crane_export", "init_crane.txt", "controls_crane.txt" );
 	
 	
-	acadoPrintf( "-----------------------------------------\n  Using option 'EQUIDISTANT_GRID':\n-----------------------------------------\n" );
+	acadoPrintf( "-----------------------------------------\n  Using a provided grid:\n-----------------------------------------\n" );
+	
+	Vector Meas(5);
+	Meas(0) = 0.0;
+	Meas(1) = 0.2;
+	Meas(2) = 0.4;
+	Meas(3) = 0.6;
+	Meas(4) = 0.8;
 	
 	SIMexport sim2( 1, 0.1 );
+	
 	sim2.setModel( f );
-	sim2.addOutput( h );
-	sim2.setMeasurements( Meas );
+	sim2.addOutput( h, Meas );
+	
 	sim2.set( INTEGRATOR_TYPE, INT_IRK_RIIA5 );
 	sim2.set( NUM_INTEGRATOR_STEPS, 5 );
 	sim2.setTimingSteps( 10000 );
-	sim2.set( MEASUREMENT_GRID, EQUIDISTANT_GRID );
+	
 	sim2.exportAndRun( "crane_export", "init_crane.txt", "controls_crane.txt" );
 
 	return 0;

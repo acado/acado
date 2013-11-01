@@ -117,7 +117,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( LINEAR_ALGEBRA_SOLVER,       GAUSS_LU        );
 	addOption( UNROLL_LINEAR_SOLVER,       	BT_FALSE	    );
 	addOption( NUM_INTEGRATOR_STEPS,        30              );
-	addOption( MEASUREMENT_GRID, 			EQUIDISTANT_GRID);
+	addOption( MEASUREMENT_GRID, 			OFFLINE_GRID);
 	addOption( INTEGRATOR_DEBUG_MODE, 		0				);
 	addOption( IMPLICIT_INTEGRATOR_MODE,	IFTR 			);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	5				);
