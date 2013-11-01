@@ -38,50 +38,49 @@
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/function/function.hpp>
 
+using namespace std;
 
 USING_NAMESPACE_ACADO
 
-
-Expression myProduct( const Expression &x, const Expression &y ){
-
-    return x*y;
+Expression myProduct(const Expression &x, const Expression &y)
+{
+	return x * y;
 }
 
+int main()
+{
+	// DEFINE VARIABLES:
+	// -----------------------
 
-int main( ){
+	DifferentialState x("",2, 2);
+	Expression z;
 
-    // DEFINE VARIABLES:
-    // -----------------------
-	
-       DifferentialState x(2,2);
-       Expression   z;
-	
-       Function             f;
-	
-       z.appendRows(x);
-       z.appendRows(x);
-	
-       f << z;
+	Function f;
 
-       printf("x is %d by %d = %d\n",x.getNumRows(),x.getNumCols(),x.getDim());
-       printf("z is %d by %d = %d\n",z.getNumRows(),z.getNumCols(),z.getDim());
-	
-    // TEST THE FUNCTION f:
-    // --------------------
-       EvaluationPoint zz(f);
+	z.appendRows(x);
+	z.appendRows(x);
 
-       Vector xx(4), result;
-       xx(0) = 2.0;
-       xx(1) = 3.0;
-       xx(2) = 4.0;
-       xx(3) = 5.0;
-       
-       zz.setX( xx );
-       result = f.evaluate( zz );
+	f << z;
 
-       result.print("result");
+	cout << "x is " << x.getNumRows() << " by " << x.getNumCols() << endl;
+	cout << "z is " << z.getNumRows() << " by " << z.getNumCols() << endl;
 
-    return 0;
+	// TEST THE FUNCTION f:
+	// --------------------
+	EvaluationPoint zz(f);
+
+	Vector xx(4), result;
+	xx(0) = 2.0;
+	xx(1) = 3.0;
+	xx(2) = 4.0;
+	xx(3) = 5.0;
+
+	zz.setX(xx);
+	result = f.evaluate(zz);
+
+	cout << "Result: " << endl << result << endl;
+
+	return 0;
 }
 
 

@@ -32,16 +32,14 @@
  */
 
 
-#include <acado_optimal_control.hpp>
+#include <acado_integrators.hpp>
 #include <include/acado_gnuplot/gnuplot_window.hpp>
 
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
-
-    USING_NAMESPACE_ACADO
-
-
+int main( )
+{
     // DEFINE A VARIABLES GRID:
     // ------------------------
     Grid dataGrid( 0.0, 5.0, 6 );
@@ -71,8 +69,6 @@ int main( ){
          window.addSubplot( c1, 0.0,5.0, "Constant data Interpolation"   );
          window.addSubplot( c2, 0.0,5.0, "Linear data Interpolation"   );
     window.plot();
-
-
 
     return 0;
 }

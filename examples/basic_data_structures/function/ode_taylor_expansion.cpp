@@ -36,48 +36,45 @@
 #include <acado/function/function.hpp>
 #include <acado/set_arithmetics/set_arithmetics.hpp>
 
+using namespace std;
 
-    USING_NAMESPACE_ACADO
+USING_NAMESPACE_ACADO
 
 typedef TaylorVariable<Interval> T;
 
-
 /* >>> start tutorial code >>> */
-int main( ){
+int main() {
 
-    // DEFINE VARIABLES:
-    // ----------------------
-	DifferentialState      x,y;
-	DifferentialEquation   f;
-	
+	// DEFINE VARIABLES:
+	// ----------------------
+	DifferentialState x, y;
+	DifferentialEquation f;
+
 	IntermediateState test;
-	
+
 	test = sin(x);
-	
+
 	f << dot(x) == sin(x);
 //	f << dot(y) == y*y;
-	
-	double time = acadoGetTime();
-	
-	Function g;
-    g << f.getODEexpansion( 6 );
-	
-	time -= acadoGetTime();
-	printf("time = %.16e \n", time );
-	
-	time = acadoGetTime();
-	
-	FILE *file = fopen("my_function.c", "w");
-	
-	file << g;
-	
-	fclose(file);
-	
-	time -= acadoGetTime();
-	printf("time = %.16e \n", time );
-	
 
-    return 0;
+	double time = acadoGetTime();
+
+	Function g;
+	g << f.getODEexpansion(6);
+
+	time -= acadoGetTime();
+	cout << "Time = " << scientific << time << endl;
+
+	time = acadoGetTime();
+
+	ofstream stream( "my_function.c" );
+	stream << g;
+	stream.close();
+
+	time -= acadoGetTime();
+	cout << "Time = " << scientific << time << endl;
+
+	return 0;
 }
 /* <<< end tutorial code <<< */
 

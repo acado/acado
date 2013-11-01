@@ -39,12 +39,13 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
-
-    USING_NAMESPACE_ACADO
-
+int main( )
+{
     // DEFINE A MATRIX:
     // ----------------
     Matrix A(2,2);
@@ -59,8 +60,7 @@ int main( ){
     Matrix L;
     L = A.getCholeskyDecomposition();
 
-    L.print("L");
-
+    cout << "L = " << L << endl;
 
     // COMPUTE THE INVERSE OF A:
     // -------------------------
@@ -68,12 +68,11 @@ int main( ){
     Matrix A_;  // invers of A
     A_ = A.getCholeskyInverse();
 
-    A_.print("A_");
-
+    cout << "A_ = " << A_ << endl;
 
     // CHECK THE ACCURACY OF THE INVERSE:
     // ----------------------------------
-    (A*A_).print("A*A_");
+    cout << "A * A_ = " << (A*A_) << endl;
 
     return 0;
 }

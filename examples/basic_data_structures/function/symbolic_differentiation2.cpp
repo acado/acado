@@ -45,27 +45,27 @@ int main( ){
 
     // DEFINE VALRIABLES:
     // ---------------------------
-    DifferentialState x(3);
+    DifferentialState x("", 3, 1);
 
     // DEFINE A TEST FUNCTION:
     // -----------------------
     Function f;
 
     f << backwardDerivative( x, x );
-
-    ( x.getDependencyPattern( x ) ).print();
-
-
-    // TEST THE FUNCTION f:
-    // --------------------
-//    double xx[3] = { 1.0, 1.0, 1.0 };
-    double *result = new double[ f.getDim() ];
-
-    // EVALUATE f AT THE POINT  (tt,xx):
-    // ---------------------------------
-    f.evaluate( 0.0, 0, result );
-
-    delete[] result;
+//
+//    x.getDependencyPattern( x ).print();
+//
+//
+//    // TEST THE FUNCTION f:
+//    // --------------------
+////    double xx[3] = { 1.0, 1.0, 1.0 };
+//    double *result = new double[ f.getDim() ];
+//
+//    // EVALUATE f AT THE POINT  (tt,xx):
+//    // ---------------------------------
+//    f.evaluate( 0.0, 0, result );
+//
+//    delete[] result;
 
     return 0;
 }

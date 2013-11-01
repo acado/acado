@@ -48,7 +48,7 @@ int main( ){
     // ---------------------------
     Matrix                 A(3,3);
     Vector                 b(3)  ;
-    DifferentialState      x(3)  ;
+    DifferentialState      x("", 3, 1);
     Function               f     ;
 
 
@@ -78,7 +78,7 @@ int main( ){
 
     Vector result = f.evaluate( zz );
 
-    result.print("result: \n");
+    result.print(std::cout, "result");
 
     return 0;
 }

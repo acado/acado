@@ -32,7 +32,7 @@
  */
 
  
-#include <acado_optimal_control.hpp>
+#include <acado_integrators.hpp>
 #include <include/acado_gnuplot/gnuplot_window.hpp>
 
 
@@ -52,7 +52,7 @@ int main( ){
 
     sine   << sin(t);
     cosine << cos(t);
- 
+
     ramp1  <<  t      ;
     ramp2  <<  t - 1.0;
     ramp3  <<  t - 2.0;
@@ -85,8 +85,6 @@ int main( ){
          window.addSubplot( c3, 0.0,3.0,      "Sampled ramp function"   );
          window.addSubplot( c4, 0.0,2.0*M_PI, "composed curve"          );
     window.plot();
-
-
 
     return 0;
 }

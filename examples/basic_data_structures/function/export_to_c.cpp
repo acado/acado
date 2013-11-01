@@ -58,7 +58,7 @@ int main( ){
     // --------------------------------------
 
 	// Print the function on standard output
-	stdout << f;
+	f.print( std::cout );
 
     // ... or print it out to a custom file
 

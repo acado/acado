@@ -31,26 +31,25 @@
  *    \date 2008
  */
 
-#include <time.h>
-
 #include <acado/utils/acado_utils.hpp>
 #include <acado/user_interaction/user_interaction.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/function/function.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
-
-    USING_NAMESPACE_ACADO
-
+int main( )
+{
     int i;
 
     // DEFINE VALRIABLES:
     // ---------------------------
     Matrix                 A(3,3);
     Vector                 b(3);
-    DifferentialState      x(3);
+	DifferentialState      x("", 3, 1);
     DifferentialState      y;
     Function               f[7];
 
@@ -71,17 +70,20 @@ int main( ){
 //    f[5] << entropy( y );
     f[6] << -sum_square( x );
 
+    for (i = 0; i < 7; i++)
+    {
+		if (f[i].isConvex() == BT_TRUE)
+			cout << "f[" << i << "] is convex" << endl;
 
-    for( i = 0; i < 7; i++ ){
-        if( f[i].isConvex() == BT_TRUE )
-            printf("f[%d] is convex. \n", i );
-        else{
-            if( f[i].isConcave() == BT_TRUE )
-                  printf("f[%d] is concave. \n", i );
-            else
-                  printf("f[%d] is neither convex nor concave. \n", i );
-        }
+		else
+		{
+			if (f[i].isConcave() == BT_TRUE)
+				cout << "f[" << i << "] is concave" << endl;
+			else
+				cout << "f[" << i << "] is neither convex nor concave" << endl;
+		}
     }
+
     return 0;
 }
 /* <<< end tutorial code <<< */

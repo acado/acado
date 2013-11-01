@@ -39,11 +39,14 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
 int main( ){
 
-    USING_NAMESPACE_ACADO
+
 
     // DEFINE A MATRIX:
     // ----------------
@@ -68,11 +71,11 @@ int main( ){
 
     A.getSingularValueDecomposition( U, D, V );
 
-    printf("\nSVD of the matrix A: \n");
+    cout << "\nSVD of the matrix A: \n";
 
-    U.print("U");
-    D.print("D");
-    V.print("V");
+    cout << "U = " << endl << U << endl;
+    cout << "D = " << endl << D << endl;
+    cout << "V = " << endl << V << endl;
 
 
     // DEFINE ANOTHER MATRIX:
@@ -94,11 +97,11 @@ int main( ){
 
     B.getSingularValueDecomposition( U, D, V );
 
-    printf("\n\nSVD of the matrix B: \n");
+    cout << "\n\nSVD of the matrix B: \n";
 
-    U.print("U");
-    D.print("D");
-    V.print("V");
+    cout << "U = " << endl << U << endl;
+    cout << "D = " << endl << D << endl;
+    cout << "V = " << endl << V << endl;
 
     return 0;
 }

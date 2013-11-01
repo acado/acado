@@ -35,15 +35,24 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
+int main( )
+{
+	Matrix a;
 
-    USING_NAMESPACE_ACADO
+	ifstream stream( "matrix.dat" );
 
-    Matrix a = readFromFile( "matrix.dat" );
+	a.read( stream );
 
     a.print();
+    // OR
+//    cout << a;
+
+    stream.close();
 
     return 0;
 }

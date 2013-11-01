@@ -53,7 +53,7 @@ int main( ){
     // DEFINE VALRIABLES:
     // ---------------------------
     Vector                 b(3)  ;
-    DifferentialState      x(2,2);
+    DifferentialState      x("", 2, 2);
     Function               f     ;
 
 
@@ -82,7 +82,7 @@ int main( ){
 
     // EVALUATE f AT THE POINT  (tt,xx):
     // ---------------------------------
-    (f.evaluate( zz )).print("f ");
+    std::cout << "f: " << std::endl << f.evaluate( zz ) << std::endl;
 
     return 0;
 }

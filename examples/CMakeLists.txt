@@ -110,19 +110,19 @@ SET( EXAMPLE_DIRS
 	basic_data_structures/matrix_vector
 	basic_data_structures/symbolics
 	basic_data_structures/variables_grid
-	code_generation/simulation
-	controller
-	getting_started
-	integration_algorithm
-	integrator
-	validated_integrator
-	multi_objective
-	my_examples
-	nlp
-	ocp
-	parameter_estimation
-	process
-	simulation_environment
+#	code_generation/simulation
+#	controller
+#	getting_started
+#	integration_algorithm
+#	integrator
+#	validated_integrator
+#	multi_objective
+#	my_examples
+#	nlp
+#	ocp
+#	parameter_estimation
+#	process
+#	simulation_environment
 )
 
 ################################################################################
@@ -237,4 +237,4 @@ ENDFOREACH( DIR ${EXAMPLE_DIRS} )
 #
 # Build code generation examples
 #
-ADD_SUBDIRECTORY( ./code_generation/mpc_mhe )
+# ADD_SUBDIRECTORY( ./code_generation/mpc_mhe )
