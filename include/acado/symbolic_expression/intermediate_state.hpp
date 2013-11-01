@@ -64,6 +64,12 @@ public:
     /** Default constructor */
     explicit IntermediateState(const std::string& name_);
 
+    /** Default constructor */
+    explicit IntermediateState( unsigned nRows_, unsigned nCols_ = 1);
+
+    /** Default constructor */
+    explicit IntermediateState( int nRows_, int nCols_ = 1);
+
     /** Copy constructor (deep copy). */
     IntermediateState( const double      & arg );
     IntermediateState( const Vector      & arg );
@@ -71,10 +77,8 @@ public:
     IntermediateState( const Operator    & arg );
     IntermediateState( const Expression  & arg );
 
-
-    /** Default destructor. */
+    /** Destructor. */
     virtual ~IntermediateState();
-
 
     Expression & operator=( const double      & arg );
     Expression & operator=( const Vector      & arg );

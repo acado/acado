@@ -447,28 +447,14 @@ std::ostream& operator<<(std::ostream& stream, const Function& arg)
 
 returnValue Function::print(	std::ostream& stream,
 								const char *fcnName ,
-								const char *realString,
-								int         precision
+								const char *realString
 								) const
 {
 	if (getDim() > 0)
-		return evaluationTree.C_print(stream, fcnName, realString, precision);
+		return evaluationTree.C_print(stream, fcnName, realString);
 
 	return SUCCESSFUL_RETURN;
 }
-
-
-returnValue Function::exportHeader(	std::ostream& stream,
-									const char *fcnName  ,
-									const char *realString
-									) const
-{
-	if (getDim() > 0)
-		return evaluationTree.exportHeader(stream, fcnName, realString);
-
-	return SUCCESSFUL_RETURN;
-}
-
 
 returnValue Function::exportForwardDeclarations(	std::ostream& stream,
 													const char *fcnName  ,
@@ -485,17 +471,18 @@ returnValue Function::exportForwardDeclarations(	std::ostream& stream,
 returnValue Function::exportCode(	std::ostream& stream,
 									const char *fcnName,
 									const char *realString,
-									int         precision,
 									uint        _numX,
 									uint		_numXA,
 									uint		_numU,
 									uint		_numP,
-									uint		_numDX
+									uint		_numDX,
+									bool       allocateMemory,
+									bool       staticMemory
 									) const
 {
 	if (getDim() > 0)
-		return evaluationTree.exportCode(stream, fcnName, realString, precision,
-				_numX, _numXA, _numU, _numP, _numDX);
+		return evaluationTree.exportCode(stream, fcnName, realString,
+				_numX, _numXA, _numU, _numP, _numDX, allocateMemory, staticMemory);
 
 	return SUCCESSFUL_RETURN;
 }

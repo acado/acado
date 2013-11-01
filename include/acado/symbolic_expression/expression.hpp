@@ -80,7 +80,8 @@ class Expression{
         Expression( const Operator &tree_ );
 
         /** Casting constructor. */
-        Expression( const std::string& name_ );
+        explicit Expression(	const std::string& name_
+        						);
 
         /** Constructor which takes the arguments. */
         explicit Expression(	const std::string&  name_,							/**< the name                */
@@ -88,6 +89,20 @@ class Expression{
         						uint          		nCols_,							/**< number of columns       */
         						VariableType  		variableType_  = VT_UNKNOWN,	/**< the variable type       */
         						uint          		globalTypeID   = 0				/**< the global type ID      */
+        						);
+
+        /** Constructor which takes the arguments. */
+        explicit Expression(	int          nRows_                     ,  /**< number of rows          */
+        						int          nCols_         = 1         ,  /**< number of columns       */
+        						VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
+        						int          globalTypeID   = 0            /**< the global type ID      */
+        						);
+
+        /** Constructor which takes the arguments. */
+        explicit Expression(	uint         nRows_                     ,  /**< number of rows          */
+        						uint         nCols_         = 1         ,  /**< number of columns       */
+        						VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
+        						uint         globalTypeID   = 0            /**< the global type ID      */
         						);
 
         /** Copy constructor (deep copy). */
@@ -100,7 +115,6 @@ class Expression{
 
         /** Destructor. */
         virtual ~Expression( );
-
 
         /** Assignment Operator.                                             \n
          *                                                                   \n

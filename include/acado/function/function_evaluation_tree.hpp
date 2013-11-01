@@ -404,27 +404,18 @@ public:
                                                           of the expression  */   );
 
 
-    /** Prints the expression as C-code into a file. The integer                          \n
-     *  "precision" must be in [1,16].                                                    \n
+    /** Prints the expression as C-code into a file.
      *                                                                                    \n
      *  \param file       The file to which the expression should be printed.             \n
      *  \param fcnName    The name of the generated function (default: "ACADOfcn").       \n
-	 *  \param realString         \n
-     *  \param precision  The number of internal dec. places to be printed (default: 16). \n
+	 *  \param realString                                                                 \n
      *                                                                                    \n
      *  \return SUCCESFUL_RETURN                                                          \n
      */
      returnValue C_print(	std::ostream& stream = std::cout,
 							const char *fcnName = "ACADOfcn",
-							const char *realString = "double",
-							int         precision = 16
+							const char *realString = "double"
 							) const;
-
-
-     returnValue exportHeader(	std::ostream& stream = std::cout,
-								const char *fcnName = "ACADOfcn",
-								const char *realString = "double"
-								) const;
 
      returnValue exportForwardDeclarations(	std::ostream& stream = std::cout,
 											const char *fcnName = "ACADOfcn",
@@ -434,12 +425,13 @@ public:
      returnValue exportCode(	std::ostream& stream = std::cout,
 								const char *fcnName = "ACADOfcn",
 								const char *realString = "double",
-								int         precision = 16,
-								uint        _numX = 0,
-								uint		_numXA = 0,
-								uint		_numU = 0,
-								uint		_numP = 0,
-								uint		_numDX = 0
+								uint       _numX = 0,
+								uint	   _numXA = 0,
+								uint       _numU = 0,
+								uint       _numP = 0,
+								uint       _numDX = 0,
+								bool       allocateMemory = true,
+								bool       staticMemory   = false
 								) const;
 
      ExportVariable getGlobalExportVariable( ) const;

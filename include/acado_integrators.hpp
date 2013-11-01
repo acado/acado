@@ -41,4 +41,4 @@
 #include <acado/function/function.hpp>
 #include <acado/integrator/integrator.hpp>
 #include <acado/sparse_solver/sparse_solver.hpp>
-#include <acado/modeling_tools/modeling_tools.hpp>
+//#include <acado/modeling_tools/modeling_tools.hpp>

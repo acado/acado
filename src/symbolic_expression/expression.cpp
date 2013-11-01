@@ -63,6 +63,16 @@ Expression::Expression( const std::string &name_ )
 	construct(VT_UNKNOWN, 0, 0, 0, name_);
 }
 
+Expression::Expression( uint nRows_, uint nCols_, VariableType variableType_, uint globalTypeID){
+
+       construct( variableType_, globalTypeID, nRows_, nCols_, "" );
+   }
+
+Expression::Expression( int nRows_, int nCols_, VariableType variableType_, int globalTypeID){
+
+       construct( variableType_, globalTypeID, nRows_, nCols_, "" );
+   }
+
 Expression::Expression(const Operator &tree_)
 {
 	VariableType tmpType;
@@ -1382,7 +1392,7 @@ void Expression::copy( const Expression &rhs ){
          else                       element[i] = 0;
     }
 	
-	// name not copied!?
+	// Name not copied?
 }
 
 
@@ -1436,7 +1446,7 @@ Expression& Expression::assignmentSetup( const Expression &arg ){
 
 Expression Expression::convert( const double& arg ) const{
 
-     Expression tmp(1);
+     Expression tmp("", 1, 1);
      delete tmp.element[0];
 
      tmp.element[0] = new DoubleConstant( arg, NE_NEITHER_ONE_NOR_ZERO );

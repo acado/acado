@@ -496,7 +496,7 @@ protected:
     int               variableIndex;
     int               vIndex       ;
     double            scale        ;
-    std::stringstream name         ;
+    std::string       name         ;
 
     OperatorName      operatorName ;
 

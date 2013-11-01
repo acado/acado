@@ -287,8 +287,12 @@ returnValue TreeProjection::loadIndices( SymbolicIndexList *indexList ){
         indexList->addOperatorPointer( argument, vIndex );
     }
 
-    if (name.rdbuf()->in_avail() == 0)
-        name << "a" << "[" << vIndex << "]";
+    if (name.empty())
+    {
+    	std::stringstream ss;
+        ss << "a" << "[" << vIndex << "]";
+        name = ss.str();
+    }
 
     return returnvalue;
 }

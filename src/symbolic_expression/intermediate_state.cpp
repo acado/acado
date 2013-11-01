@@ -61,6 +61,19 @@ IntermediateState::IntermediateState(const std::string& name_)
     count ++;
 }
 
+IntermediateState::IntermediateState( unsigned nRows_, unsigned nCols_)
+	: Expression("", nRows_, nCols_, VT_INTERMEDIATE_STATE, count)
+{
+	count++;
+}
+
+IntermediateState::IntermediateState( int nRows_, int nCols_)
+	: Expression("", nRows_, nCols_, VT_INTERMEDIATE_STATE, count)
+{
+
+	count++;
+}
+
 IntermediateState::IntermediateState( const double& arg ):Expression()
 {
     nRows = 1;

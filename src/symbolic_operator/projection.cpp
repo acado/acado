@@ -35,7 +35,7 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/symbolic_operator/symbolic_operator.hpp>
 
-
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -59,7 +59,7 @@ Projection::Projection( const std::string& name_ )
     curvature      = CT_AFFINE       ;
     monotonicity   = MT_NONDECREASING;
     operatorName   = ON_VARIABLE     ;
-    name           << name_    ;
+    name           = name_    ;
 
     nCount = 0;
 }
@@ -76,50 +76,52 @@ Projection::Projection( VariableType variableType_, int vIndex_, const std::stri
     monotonicity = MT_NONDECREASING;
     operatorName = ON_VARIABLE     ;
 
+    stringstream ss;
     switch(variableType){
 
          case VT_DIFFERENTIAL_STATE:
-              name << "xd" << "[" << vIndex <<"]";
+              ss << "xd" << "[" << vIndex <<"]";
               break;
 
          case VT_ALGEBRAIC_STATE:
-              name << "xa" << "[" << vIndex <<"]";
+              ss << "xa" << "[" << vIndex <<"]";
               break;
 
          case VT_CONTROL:
-              name << "u" << "[" << vIndex <<"]";
+              ss << "u" << "[" << vIndex <<"]";
               break;
 
          case VT_INTEGER_CONTROL:
-              name << "v" << "[" << vIndex <<"]";
+              ss << "v" << "[" << vIndex <<"]";
               break;
 
          case VT_PARAMETER:
-              name << "p" << "[" << vIndex <<"]";
+              ss << "p" << "[" << vIndex <<"]";
               break;
 
          case VT_INTEGER_PARAMETER:
-              name << "q" << "[" << vIndex <<"]";
+              ss << "q" << "[" << vIndex <<"]";
               break;
 
          case VT_DISTURBANCE:
-              name << "w" << "[" << vIndex <<"]";
+              ss << "w" << "[" << vIndex <<"]";
               break;
 
          case VT_TIME:
-              name << "t" << "[" << vIndex <<"]";
+              ss << "t" << "[" << vIndex <<"]";
               break;
 
          case VT_INTERMEDIATE_STATE:
-              name << "a" << "[" << vIndex <<"]";
+              ss << "a" << "[" << vIndex <<"]";
               break;
 
          case VT_DDIFFERENTIAL_STATE:
-              name << "dx" << "[" << vIndex <<"]";
+              ss << "dx" << "[" << vIndex <<"]";
               break;
 
          default: break;
     }
+    name = ss.str();
     nCount = 0;
 }
 
@@ -147,7 +149,7 @@ void Projection::copy( const Projection &arg ){
         variableIndex  = arg.variableIndex;
         vIndex         = arg.vIndex       ;
         scale          = arg.scale        ;
-        name.str( arg.name.str() );
+        name           = arg.name         ;
         operatorName   = arg.operatorName ;
         curvature      = arg.curvature    ;
         monotonicity   = arg.monotonicity ;
@@ -489,7 +491,7 @@ returnValue Projection::setVariableExportName(	const VariableType &_type,
 												)
 {
 	if (variableType == _type)
-		this->name.str( _name[ vIndex ] );
+		this->name = _name[ vIndex ];
 
 	return Operator::setVariableExportName(_type, _name);
 }
