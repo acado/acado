@@ -234,22 +234,29 @@ returnValue VectorspaceElement::print(	std::ostream& stream,
 										const char* const rowSeparator
 										) const
 {
-	if (strlen( name ) > 0)
+	if (name != NULL && strlen( name ) > 0)
 		stream << name << " = ";
 
-	if (strlen(startString) > 0)
+	if (startString != NULL && strlen(startString) > 0)
 		stream << startString;
+
+	if (precision > 0)
+		stream << setw( width ) << setprecision( precision ) << scientific;
+	else
+		stream << setw( width );
 
 	for (unsigned i = 0; i < dim; ++i)
 	{
 		if (precision > 0)
-			stream << setw( width ) << setprecision( precision ) << operator()( i );
+			stream << operator()( i );
 		else
-			stream << setw( width ) << width << (int)operator()( i );
+			stream << (int)operator()( i );
 
-		if (i < (dim - 1) && strlen( rowSeparator ) > 0)
+		if (i < (dim - 1) && rowSeparator != NULL && strlen( rowSeparator ) > 0)
 			stream << rowSeparator;
 	}
+	if (endString != NULL && strlen(endString) > 0)
+		stream << endString;
 
 	return SUCCESSFUL_RETURN;
 }

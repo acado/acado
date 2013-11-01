@@ -559,8 +559,55 @@ class Matrix : public VectorspaceElement
 									PrintScheme printScheme
 									) const;
 
+		/** Prints object to file with given name. Various settings can
+		 *	be specified defining its output format.
+		 *
+		 *	@param[in] filename			Filename for printing.
+		 *	@param[in] name				Name label to be printed before the numerical values.
+		 *	@param[in] startString		Prefix before printing the numerical values.
+		 *	@param[in] endString		Suffix after printing the numerical values.
+		 *	@param[in] width			Total number of digits per single numerical value.
+		 *	@param[in] precision		Number of decimals per single numerical value.
+		 *	@param[in] colSeparator		Separator between the columns of the numerical values.
+		 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
+		 *	        RET_UNKNOWN_BUG
+		 */
+		virtual returnValue print(	const char* const filename,
+									const char* const name         = DEFAULT_LABEL,
+									const char* const startString  = DEFAULT_START_STRING,
+									const char* const endString    = DEFAULT_END_STRING,
+									uint width                     = DEFAULT_WIDTH,
+									uint precision                 = DEFAULT_PRECISION,
+									const char* const colSeparator = DEFAULT_COL_SEPARATOR,
+									const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
+									) const;
+
+		/** Prints object to given file. Various settings can
+		 *	be specified defining its output format.
+		 *
+		 *	@param[in] filename			Filename for printing.
+		 *	@param[in] name				Name label to be printed before the numerical values.
+		 *	@param[in] printScheme		Print scheme defining the output format of the information.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
+		 *	        RET_UNKNOWN_BUG
+		 */
+		virtual returnValue print(	const char* const filename,
+									const char* const name,
+									PrintScheme printScheme
+									) const;
+
         /** Read matrix data from an input stream. */
-        virtual returnValue read( std::istream& stream );
+        virtual returnValue read(	std::istream& stream
+        							);
+
+        /** Read data from an input file. */
+        virtual returnValue read(	const char* const filename
+        							);
 
         /** Prints the matrix into a stream. */
         friend std::ostream& operator<<(	std::ostream& stream, /**< the stream to print to */

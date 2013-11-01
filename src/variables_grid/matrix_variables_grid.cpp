@@ -701,26 +701,33 @@ returnValue MatrixVariablesGrid::print(	std::ostream& stream,
 										const char* const rowSeparator
 										) const
 {
-	if (strlen(name) > 0)
+	if (name != NULL && strlen(name) > 0)
 		stream << name << " = ";
-	if (strlen(startString) > 0)
+	if (startString != NULL && strlen(startString) > 0)
 		stream << startString;
+
+	if ( precision > 0 )
+		stream << setw( width ) << setprecision( precision ) << scientific;
+	else
+		stream << setw( width );
 
 	for (unsigned k = 0; k < getNumPoints(); ++k)
 	{
 		if ( precision > 0 )
-			stream << setw( width ) << setprecision( precision ) << getTime( k );
+			stream << getTime( k );
 		else
-			stream << setw( width ) << (int)getTime( k );
+			stream << (int)getTime( k );
 
-		if (strlen(colSeparator) > 0)
+		if (colSeparator != NULL && strlen(colSeparator) > 0)
 			stream << colSeparator;
 
 		values[k]->print(stream, 0, 0, 0, width, precision, colSeparator, colSeparator);
 
-		if (k < (getNumPoints() - 1) && strlen(rowSeparator) > 0)
+		if (k < (getNumPoints() - 1) && rowSeparator != NULL && strlen(rowSeparator) > 0)
 			stream << rowSeparator;
 	}
+	if (endString != NULL and strlen(endString) > 0)
+		stream << endString;
 
 	return SUCCESSFUL_RETURN;
 }

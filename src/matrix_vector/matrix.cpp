@@ -277,28 +277,35 @@ returnValue Matrix::print(	std::ostream& stream,
 							const char* const rowSeparator
 							) const
 {
-	if (strlen(name) > 0)
+	if (name != NULL && strlen(name) > 0)
 		stream << name << " = ";
 
-	if (strlen(startString) > 0)
+	if (startString != NULL && strlen(startString) > 0)
 		stream << startString;
+
+	if (precision > 0)
+		stream << scientific << setw( width ) << setprecision( precision );
+	else
+		stream << setw( width );
 
 	for (unsigned row = 0; row < nRows; ++row)
 	{
 		for (unsigned col = 0; col < nCols; ++col)
 		{
 			if (precision > 0)
-				stream << setw(width) << setprecision(precision) << operator()(row, col);
+				stream << operator()(row, col);
 			else
-				stream << setw(width) << (int)operator()(row, col);
+				stream << (int)operator()(row, col);
 
-			if (col < (nCols - 1) && strlen(colSeparator) > 0)
+			if (col < (nCols - 1) && colSeparator != NULL && strlen(colSeparator) > 0)
 				stream << colSeparator;
 		}
 		
-		if (row < (nRows - 1) && strlen(rowSeparator) > 0)
+		if (row < (nRows - 1) && rowSeparator != NULL && strlen(rowSeparator) > 0)
 			stream << rowSeparator;
 	}
+	if (endString != NULL && strlen(endString) > 0)
+		stream << endString;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -354,6 +361,27 @@ std::ostream& operator<<(std::ostream& stream, const Matrix& arg)
 	return stream;
 }
 
+returnValue Matrix::print(	const char* const filename,
+							const char* const name,
+							const char* const startString,
+							const char* const endString,
+							uint width,
+							uint precision,
+							const char* const colSeparator,
+							const char* const rowSeparator
+							) const
+{
+	return VectorspaceElement::print(filename, name, startString, endString, width, precision, colSeparator, rowSeparator);
+}
+
+returnValue Matrix::print(	const char* const filename,
+							const char* const name,
+							PrintScheme printScheme
+							) const
+{
+	return VectorspaceElement::print(filename, name, printScheme);
+}
+
 returnValue Matrix::read( std::istream& stream )
 {
 	vector< vector< double > > data;
@@ -376,6 +404,11 @@ returnValue Matrix::read( std::istream& stream )
 			tmp.push_back( data[ row ][ col ] );
 
 	return init(nr, nc, tmp.data());
+}
+
+returnValue Matrix::read(const char* filename)
+{
+	return VectorspaceElement::read(filename);
 }
 
 std::istream& operator>>(	std::istream& stream,

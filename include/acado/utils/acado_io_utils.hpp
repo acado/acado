@@ -130,13 +130,50 @@ CLOSE_NAMESPACE_ACADO
 namespace std
 {
 
+/** Print vector data to output stream. */
+template< class T >
+ostream& operator<<(	ostream& stream,
+						vector<T>& array
+						)
+{
+	copy(array.begin(), array.end(), ostream_iterator< T >(stream, "\t"));
+	return stream;
+}
+
+/** Print matrix data to output stream. */
+template< class T >
+ostream& operator<<(	ostream& stream,
+						vector< vector<T> >& array
+						)
+{
+	typename vector< vector< T > >::iterator it;
+	for (it = array.begin(); it != array.end(); ++it)
+	{
+		copy(it->begin(), it->end(), ostream_iterator< T >(stream, "\t"));
+		stream << endl;
+	}
+	return stream;
+}
+
 /** Read vector data from a text file. */
 template< class T >
 istream& operator>>(	istream& stream,
 						vector< T >& array
 						)
 {
-	copy(istream_iterator< T >( stream ), istream_iterator< T >(), back_inserter( array ));
+	while (stream.good() == true)
+	{
+		string line;
+		getline(stream, line);
+		// Skip lines beginning with "/" or "#" or empty lines
+		if (line[ 0 ] == '/' or line[ 0 ] == '#' or line.empty())
+			continue;
+
+		stringstream ss( line );
+		T val;
+		ss >> val;
+		array.push_back( val );
+	}
 
 	return stream;
 }
@@ -152,9 +189,15 @@ istream& operator>>(	istream& stream,
 		string line;
 		vector< T > data;
 		getline(stream, line);
+		// Skip lines beginning with "/" or "#" or empty lines
+		if (line[ 0 ] == '/' or line[ 0 ] == '#' or line.empty())
+			continue;
+
 		stringstream ss( line );
 		copy(istream_iterator< T >( ss ), istream_iterator< T >(), back_inserter( data ));
-		array.push_back( data );
+		// Skip lines where we could not read anything
+		if (data.size())
+			array.push_back( data );
 	}
 
 	return stream;
