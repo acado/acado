@@ -41,7 +41,7 @@
 #include <acado/constraint/constraint.hpp>
 #include <acado/objective/objective.hpp>
 #include <acado/ocp/multi_objective_functionality.hpp>
-#include <acado/code_generation/model_container.hpp>
+#include <acado/ocp/model_container.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

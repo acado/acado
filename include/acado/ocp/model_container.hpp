@@ -25,7 +25,7 @@
 
 
 /**
- *    \file include/acado/code_generation/model_container.hpp
+ *    \file include/acado/ocp/model_container.hpp
  *    \author Rien Quirynen
  */
 
@@ -33,9 +33,7 @@
 #ifndef ACADO_TOOLKIT_MODELCONTAINER_HPP
 #define ACADO_TOOLKIT_MODELCONTAINER_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
-#include <acado/code_generation/model_data.hpp>
+#include <acado/ocp/model_data.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

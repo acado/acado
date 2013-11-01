@@ -25,12 +25,12 @@
 
 
 /**
- *    \file src/code_generation/modelData.cpp
+ *    \file src/ocp/modelData.cpp
  *    \author Rien Quirynen
  *    \date 2012
  */
 
-#include <acado/code_generation/model_data.hpp>
+#include <acado/ocp/model_data.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

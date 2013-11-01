@@ -25,7 +25,7 @@
 
 
 /**
- *    \file include/acado/code_generation/modelData.hpp
+ *    \file include/acado/ocp/modelData.hpp
  *    \author Rien Quirynen
  */
 
@@ -33,8 +33,6 @@
 #ifndef ACADO_TOOLKIT_MODELDATA_HPP
 #define ACADO_TOOLKIT_MODELDATA_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/function/function.hpp>
 
