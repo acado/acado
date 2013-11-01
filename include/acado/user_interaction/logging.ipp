@@ -97,9 +97,45 @@ inline returnValue Logging::getLast(	LogName _name,
 	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
+		
+inline returnValue Logging::setAll(	LogName _name,
+									const MatrixVariablesGrid& values
+									)
+{
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasItem( _name ) == true)
+			return logCollection[ it ].setAll(_name, values); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+}
+
+
+		
+inline returnValue Logging::setLast(	LogName _name,
+										const Matrix& value,
+										double time
+										)
+{
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasItem( _name ) == true)
+			return logCollection[ it ].setLast(_name, value, time); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+}
+
+inline returnValue Logging::setLast(	LogName _name,
+										VariablesGrid& value,
+										double time
+										)
+{
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasItem( _name ) == true)
+			return logCollection[ it ].setLast(_name, value, time); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+}
 
 CLOSE_NAMESPACE_ACADO
-
 
 /*
  *	end of file

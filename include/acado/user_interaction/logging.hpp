@@ -203,6 +203,55 @@ class Logging
 									VariablesGrid& lastValue
 									) const;
 
+		/** Sets all numerical values at all time instants of the item
+		 *	with given name.
+		 *
+		 *	@param[in]  _name	Internal name of item.
+		 *	@param[in]  values	All numerical values at all time instants of given item.
+		 *
+		 *	\note All public setAll member functions make use of the <em>protected</em> setAll function.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *	        RET_LOG_RECORD_CORRUPTED
+		 */
+		inline returnValue setAll(	LogName _name,
+									const MatrixVariablesGrid& values
+									);
+
+
+		/** Sets numerical value at last time instant of the item
+		 *	with given name.
+		 *
+		 *	@param[in]  _name		Internal name of item.
+		 *	@param[in]  lastValue	Numerical value at last time instant of given item.
+		 *	@param[in]  time		Time label of the instant.
+		 *
+		 *	\note All public setLast member functions make use of the <em>protected</em> setLast function.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
+		 */
+		inline returnValue setLast(	LogName _name,
+									const Matrix& value,
+									double time = -INFTY
+									);
+
+		/** Sets numerical value at last time instant of the item
+		 *	with given name.
+		 *
+		 *	@param[in]  _name		Internal name of item.
+		 *	@param[in]  lastValue	Numerical value at last time instant of given item.
+		 *	@param[in]  time		Time label of the instant.
+		 *
+		 *	\note All public setLast member functions make use of the <em>protected</em> setLast function.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
+		 */
+		inline returnValue setLast(	LogName _name,
+									VariablesGrid& value,
+									double time = -INFTY
+									);
 
 		/** Returns number of records contained in the log collection.
 		 *
