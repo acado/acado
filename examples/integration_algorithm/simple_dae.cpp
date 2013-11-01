@@ -32,14 +32,16 @@
  */
 
 
-#include <acado_toolkit.hpp>
+#include <acado_optimal_control.hpp>
+#include <include/acado_gnuplot/gnuplot_window.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
-
-    USING_NAMESPACE_ACADO
-
+int main( )
+{
     // DEFINE A RIGHT-HAND-SIDE:
     // -------------------------
     DifferentialState         x;
@@ -94,13 +96,12 @@ int main( ){
     VariablesGrid differentialStates;
     VariablesGrid algebraicStates   ;
 
-//     intAlg.getX ( differentialStates );
+//    intAlg.getX ( differentialStates );
     intAlg.getLast( LOG_DIFFERENTIAL_STATES,differentialStates );
     intAlg.getXA( algebraicStates    );
 
-	differentialStates.print( "x" );
-	algebraicStates.print( "z" );
-
+    cout << "x = " << endl << differentialStates << endl;
+    cout << "z = " << endl << algebraicStates << endl;
 
     return 0;
 }

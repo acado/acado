@@ -105,8 +105,8 @@ int main( ){
 
     // Define a Right-Hand-Side:
     // -------------------------
-    DifferentialState x(4), P(4,4);
-    Control           u(2);
+    DifferentialState x("", 4, 1), P("", 4, 4);
+    Control           u("", 2, 1);
 
     IntermediateState rhs = cstrModel( x, u );
 
@@ -164,7 +164,7 @@ int main( ){
 	for( int i=0; i<4; ++i )
 		for( int j=0; j<4; ++j )
 			PPP(i,j) = PP(4+i*4+j);
-	PPP.printToFile( "P1.txt","",PS_PLAIN );
+	PPP.print( "P1.txt","",PS_PLAIN );
 //	PPP.printToFile( "P2.txt","",PS_PLAIN );
 
     GnuplotWindow window;

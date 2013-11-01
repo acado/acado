@@ -114,7 +114,7 @@ SET( EXAMPLE_DIRS
 #	controller
 #	getting_started
 #	integration_algorithm
-#	integrator
+	integrator
 #	validated_integrator
 #	multi_objective
 #	my_examples

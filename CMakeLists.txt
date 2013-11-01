@@ -86,7 +86,7 @@ IF ( MSVC OR CYGWIN )
 ELSE()
 	# Linux or OS X
 	OPTION( ACADO_BUILD_SHARED "Build shared libraries" ON )
-	OPTION( ACADO_BUILD_STATIC "Build static libraries" OFF )	
+	OPTION( ACADO_BUILD_STATIC "Build static libraries" OFF )
 ENDIF()
 
 IF((NOT ACADO_BUILD_SHARED) AND (NOT ACADO_BUILD_STATIC))

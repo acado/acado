@@ -31,9 +31,7 @@
  *    \date 2008
  */
 
-
-#include <acado_toolkit.hpp>
-
+#include <acado_optimal_control.hpp>
 
 /* >>> start tutorial code >>> */
 int main( ){

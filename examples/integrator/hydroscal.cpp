@@ -94,9 +94,9 @@ int main( ){
 	//const int  nw  =   0;  // the number of disturbances
 
     TIME t;
-    DifferentialState x(nx);
-    AlgebraicState z(nxa);
-    Control u(nu);
+    DifferentialState x("", nx, 1);
+    AlgebraicState z("", nxa, 1);
+    Control u("", nu, 1);
 
 
     IntermediateState is(1+nx+nxa+nu);

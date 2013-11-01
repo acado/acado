@@ -31,14 +31,15 @@
  */
 
 
-#include <acado_toolkit.hpp>
+#include <acado_optimal_control.hpp>
 #include <include/acado_gnuplot/gnuplot_window.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 int main( )
 {
-	USING_NAMESPACE_ACADO;
-
 	// Parameters
 	double h_hw = 10;    // water level
 	double A_hw = 1.0;   // amplitude of the waves
@@ -76,7 +77,6 @@ int main( )
 
 	Grid timeHorizon( 0.0,25.0 );
 
-
     // DEFINE AN INTEGRATOR:
     // ---------------------
 
@@ -95,12 +95,10 @@ int main( )
 	
 	intAlg << window;
 
-
 	// START THE INTEGRATION:
     // ----------------------
 
 	intAlg.integrate( timeHorizon, xStart );
-
 
 	return 0;
 }
