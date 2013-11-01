@@ -32,8 +32,9 @@
 
 
 #include <acado/optimization_algorithm/optimization_algorithm_base.hpp>
-#include <assert.h>
+#include <acado/ocp/ocp.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -104,7 +105,8 @@ OptimizationAlgorithmBase& OptimizationAlgorithmBase::operator=( const Optimizat
 
 returnValue OptimizationAlgorithmBase::initializeDifferentialStates( const char* fileName , BooleanType autoinit)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty() == BT_TRUE )
 		return RET_FILE_CAN_NOT_BE_OPENED;
@@ -115,7 +117,8 @@ returnValue OptimizationAlgorithmBase::initializeDifferentialStates( const char*
 
 returnValue OptimizationAlgorithmBase::initializeAlgebraicStates( const char* fileName , BooleanType autoinit)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty() == BT_TRUE )
 		return RET_FILE_CAN_NOT_BE_OPENED;
@@ -126,7 +129,8 @@ returnValue OptimizationAlgorithmBase::initializeAlgebraicStates( const char* fi
 
 returnValue OptimizationAlgorithmBase::initializeParameters( const char* fileName)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty() == BT_TRUE )
 		return RET_FILE_CAN_NOT_BE_OPENED;
@@ -137,7 +141,8 @@ returnValue OptimizationAlgorithmBase::initializeParameters( const char* fileNam
 
 returnValue OptimizationAlgorithmBase::initializeControls( const char* fileName)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty() == BT_TRUE )
 		return RET_FILE_CAN_NOT_BE_OPENED;
@@ -148,7 +153,8 @@ returnValue OptimizationAlgorithmBase::initializeControls( const char* fileName)
 
 returnValue OptimizationAlgorithmBase::initializeDisturbances( const char* fileName)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty() == BT_TRUE )
 		return RET_FILE_CAN_NOT_BE_OPENED;
@@ -276,9 +282,7 @@ returnValue OptimizationAlgorithmBase::getDifferentialStates( const char* fileNa
     returnvalue = nlpSolver->getDifferentialStates( xx );
     if( returnvalue != SUCCESSFUL_RETURN ) return returnvalue;
 
-    FILE *file = fopen(fileName,"w");
-    file << xx;
-    fclose(file);
+    xx.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
@@ -293,9 +297,7 @@ returnValue OptimizationAlgorithmBase::getAlgebraicStates( const char* fileName 
     returnvalue = nlpSolver->getAlgebraicStates( xx );
     if( returnvalue != SUCCESSFUL_RETURN ) return returnvalue;
 
-    FILE *file = fopen(fileName,"w");
-    file << xx;
-    fclose(file);
+    xx.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
@@ -310,9 +312,7 @@ returnValue OptimizationAlgorithmBase::getParameters( const char* fileName ) con
     returnvalue = nlpSolver->getParameters( xx );
     if( returnvalue != SUCCESSFUL_RETURN ) return returnvalue;
 
-    FILE *file = fopen(fileName,"w");
-    file << xx;
-    fclose(file);
+    xx.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
@@ -327,9 +327,7 @@ returnValue OptimizationAlgorithmBase::getControls( const char* fileName ) const
     returnvalue = nlpSolver->getControls( xx );
     if( returnvalue != SUCCESSFUL_RETURN ) return returnvalue;
 
-    FILE *file = fopen(fileName,"w");
-    file << xx;
-    fclose(file);
+    xx.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
@@ -344,19 +342,17 @@ returnValue OptimizationAlgorithmBase::getDisturbances( const char* fileName ) c
     returnvalue = nlpSolver->getDisturbances( xx );
     if( returnvalue != SUCCESSFUL_RETURN ) return returnvalue;
 
-    FILE *file = fopen(fileName,"w");
-    file << xx;
-    fclose(file);
+    xx.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
 
 
-double OptimizationAlgorithmBase::getObjectiveValue( const char* fileName ) const{
-
-    FILE *file = fopen(fileName,"w");
-    acadoFPrintf( file , "%.16e \n", getObjectiveValue() );
-    fclose(file);
+double OptimizationAlgorithmBase::getObjectiveValue( const char* fileName ) const
+{
+	ofstream stream( fileName );
+	stream << scientific << getObjectiveValue();
+	stream.close();
 
     return SUCCESSFUL_RETURN;
 }

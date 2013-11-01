@@ -186,7 +186,7 @@ public:
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setLinearOutput( const Matrix& A3_, const String& _rhs3, const String& _diffs_rhs3 );
+    returnValue setLinearOutput( const Matrix& A3_, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
     /** .
@@ -195,7 +195,7 @@ public:
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setLinearOutput( const Matrix& M3_, const Matrix& A3_, const String& _rhs3, const String& _diffs_rhs3 );
+    returnValue setLinearOutput( const Matrix& M3_, const Matrix& A3_, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
     /** Assigns the model to be used by the integrator.
@@ -206,9 +206,9 @@ public:
      *	\return SUCCESSFUL_RETURN
      */
 
-    returnValue setModel( 	const String& fileName,
-   		 	 	 	 		const String& _rhs_ODE,
-   		 	 	 	 		const String& _diffs_rhs_ODE );
+    returnValue setModel( 	const std::string& fileName,
+   		 	 	 	 		const std::string& _rhs_ODE,
+   		 	 	 	 		const std::string& _diffs_rhs_ODE );
 
 
 	/** Adds an output function.
@@ -240,7 +240,7 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( const String& output, const String& diffs_output, const uint dim, const Vector& measurements );
+	uint addOutput( const std::string& output, const std::string& diffs_output, const uint dim, const Vector& measurements );
 
 
 	/** Adds an output function.
@@ -252,7 +252,7 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( const String& output, const String& diffs_output, const uint dim, const uint numberMeasurements );
+	uint addOutput( const std::string& output, const std::string& diffs_output, const uint dim, const uint numberMeasurements );
 
 
 	/** Adds an output function.
@@ -266,8 +266,8 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( 	const String& output, const String& diffs_output, const uint dim,
-						const Vector& measurements, const String& colInd, const String& rowPtr	);
+	uint addOutput( 	const std::string& output, const std::string& diffs_output, const uint dim,
+						const Vector& measurements, const std::string& colInd, const std::string& rowPtr	);
 
 
 	/** Adds an output function.
@@ -281,8 +281,8 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( 	const String& output, const String& diffs_output, const uint dim,
-						const uint numberMeasurements, const String& colInd, const String& rowPtr	);
+	uint addOutput( 	const std::string& output, const std::string& diffs_output, const uint dim,
+						const uint numberMeasurements, const std::string& colInd, const std::string& rowPtr	);
 
 
     /** Sets integration grid.
@@ -396,7 +396,7 @@ public:
     returnValue setModelData( const ModelData& data );
 
 
-    const String getFileNameModel() const;
+    const std::string getFileNameModel() const;
 
 
     //

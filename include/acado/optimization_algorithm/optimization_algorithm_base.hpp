@@ -33,17 +33,16 @@
 #ifndef ACADO_TOOLKIT_OPTIMIZATION_ALGORITHM_BASE_HPP
 #define ACADO_TOOLKIT_OPTIMIZATION_ALGORITHM_BASE_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
-
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/variables_grid/variables_grid.hpp>
-#include <acado/ocp/ocp.hpp>
+//#include <acado/ocp/ocp.hpp>
 #include <acado/nlp_solver/nlp_solver.hpp>
 #include <acado/nlp_solver/scp_method.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
+
+class OCP;
 
 
 /**
@@ -99,11 +98,10 @@ class OptimizationAlgorithmBase
         returnValue initializeControls          ( const VariablesGrid &p_init_);
         returnValue initializeDisturbances      ( const VariablesGrid &w_init_);
 
-	/**
-	Use this call to overwrite all states by a single shooting initialization.
-	This function takes the initial state and controls and overwrite all states
-        apart from the first one by simulation.
-	*/
+        /** Use this call to overwrite all states by a single shooting initialization.
+         *  This function takes the initial state and controls and overwrite all states
+         *  apart from the first one by simulation.
+         */
         returnValue simulateStatesForInitialization();
 
         returnValue getDifferentialStates( VariablesGrid &xd_ ) const;
@@ -250,10 +248,7 @@ class OptimizationAlgorithmBase
 		OCPiterate userInit;
 };
 
-
 CLOSE_NAMESPACE_ACADO
-
-
 
 #endif  // ACADO_TOOLKIT_OPTIMIZATION_ALGORITHM_BASE_HPP
 

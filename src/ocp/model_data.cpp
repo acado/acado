@@ -77,7 +77,7 @@ returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX
 
 uint ModelData::addOutput( const OutputFcn& outputEquation_, const Grid& grid ){
 
-	if( rhs_name.isEmpty() && outputNames.size() == 0 ) {
+	if( rhs_name.empty() && outputNames.size() == 0 ) {
 		Expression next;
 		outputEquation_.getExpression( next );
 		outputExpressions.push_back( next );
@@ -96,7 +96,7 @@ uint ModelData::addOutput( const OutputFcn& outputEquation_, const Grid& grid ){
 }
 
 
-uint ModelData::addOutput( const String& output, const String& diffs_output, const uint dim, const Grid& grid ){
+uint ModelData::addOutput( const std::string& output, const std::string& diffs_output, const uint dim, const Grid& grid ){
 
 	if( outputExpressions.size() == 0 && differentialEquation.getNumDynamicEquations() == 0 ) {
 		outputNames.push_back( output );
@@ -116,12 +116,15 @@ uint ModelData::addOutput( const String& output, const String& diffs_output, con
 }
 
 
-uint ModelData::addOutput( 	const String& output, const String& diffs_output, const uint dim,
-							const Grid& grid, const String& colInd, const String& rowPtr	){
+uint ModelData::addOutput( 	const std::string& output, const std::string& diffs_output, const uint dim,
+							const Grid& grid, const std::string& colInd, const std::string& rowPtr	){
 
 
-	Vector colIndV = readFromFile( colInd.getName() );
-	Vector rowPtrV = readFromFile( rowPtr.getName() );
+	Vector colIndV, rowPtrV;
+
+	colIndV.read( colInd.c_str() );
+	rowPtrV.read( rowPtr.c_str() );
+
 	if( rowPtrV.getDim() != (dim+1) ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
@@ -234,7 +237,7 @@ returnValue ModelData::getLinearOutput( Matrix& M3_, Matrix& A3_ ) const {
 
 returnValue ModelData::setModel( const DifferentialEquation& _f )
 {
-	if( rhs_name.isEmpty() && NX2 == 0 ) {
+	if( rhs_name.empty() && NX2 == 0 ) {
 		differentialEquation = _f;
 		Expression rhs;
 		differentialEquation.getExpression( rhs );
@@ -257,7 +260,7 @@ returnValue ModelData::setModel( const DifferentialEquation& _f )
 
 returnValue ModelData::setNARXmodel( const uint _delay, const Matrix& _parms ) {
 
-	if( rhs_name.isEmpty() && NX2 == 0 && NX3 == 0 ) {
+	if( rhs_name.empty() && NX2 == 0 && NX3 == 0 ) {
 		NX2 = _parms.getNumRows();
 		delay = _delay;
 		uint numParms = 1;
@@ -317,15 +320,15 @@ returnValue ModelData::setLinearOutput( const Matrix& M3_, const Matrix& A3_, co
 }
 
 
-returnValue ModelData::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const String& rhs3_, const String& diffs3_ )
+returnValue ModelData::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const std::string& rhs3_, const std::string& diffs3_ )
 {
 	if( !export_rhs ) {
 		M3 = M3_;
 		A3 = A3_;
 		NX3 = A3.getNumCols();
 
-		rhs3_name = String(rhs3_);
-		diffs3_name = String(diffs3_);
+		rhs3_name = std::string(rhs3_);
+		diffs3_name = std::string(diffs3_);
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -335,12 +338,12 @@ returnValue ModelData::setLinearOutput( const Matrix& M3_, const Matrix& A3_, co
 }
 
 
-returnValue ModelData::setModel( const String& fileName, const String& _rhs_ODE, const String& _diffs_ODE )
+returnValue ModelData::setModel( const std::string& fileName, const std::string& _rhs_ODE, const std::string& _diffs_ODE )
 {
 	if( differentialEquation.getNumDynamicEquations() == 0 ) {
-		externModel = String(fileName);
-		rhs_name = String(_rhs_ODE);
-		diffs_name = String(_diffs_ODE);
+		externModel = std::string(fileName);
+		rhs_name = std::string(_rhs_ODE);
+		diffs_name = std::string(_diffs_ODE);
 
 		export_rhs = BT_FALSE;
 	}
@@ -561,38 +564,38 @@ Vector ModelData::getNumMeas( ) const
 }
 
 
-const String ModelData::getFileNameModel() const {
+const std::string ModelData::getFileNameModel() const {
 	return externModel;
 }
 
 
-const String ModelData::getNameRhs() const {
+const std::string ModelData::getNameRhs() const {
 	return rhs_name;
 }
 
 
-const String ModelData::getNameDiffsRhs() const {
+const std::string ModelData::getNameDiffsRhs() const {
 	return diffs_name;
 }
 
 
-const String ModelData::getNameOutput() const {
+const std::string ModelData::getNameOutput() const {
 	return rhs3_name;
 }
 
 
-const String ModelData::getNameDiffsOutput() const {
+const std::string ModelData::getNameDiffsOutput() const {
 	return diffs3_name;
 }
 
 
-returnValue ModelData::getNameOutputs( std::vector<String>& names ) const {
+returnValue ModelData::getNameOutputs( std::vector<std::string>& names ) const {
 	names = outputNames;
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ModelData::getNameDiffsOutputs( std::vector<String>& names ) const {
+returnValue ModelData::getNameDiffsOutputs( std::vector<std::string>& names ) const {
 	names = diffs_outputNames;
 	return SUCCESSFUL_RETURN;
 }

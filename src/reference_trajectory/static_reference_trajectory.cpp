@@ -75,7 +75,8 @@ StaticReferenceTrajectory::StaticReferenceTrajectory(	const VariablesGrid& _yRef
 StaticReferenceTrajectory::StaticReferenceTrajectory(	const char* const _yRefFileName
 														)
 {
-    VariablesGrid _yRef = fopen( _yRefFileName, "r" );
+    VariablesGrid _yRef;
+    _yRef.read( _yRefFileName );
 
 	if ( _yRef.isEmpty( ) == BT_TRUE )
 	{

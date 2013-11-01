@@ -225,11 +225,11 @@ public:
 
 	/** \note Applicable only for automatic code generation.
 	 *  \warning Experimental. */
-	returnValue minimizeLSQ(	const ExportVariable& S,	/**< a weighting matrix */
+	returnValue minimizeLSQ(	const Matrix& S,	/**< a weighting matrix */
 								const Function& h			/**< the LSQ-Function   */ );
 
-	returnValue minimizeLSQ(	const ExportVariable& S,	/**< a weighting matrix */
-								const String& h				/**< the externally defined LSQ-Function   */ );
+	returnValue minimizeLSQ(	const Matrix& S,	/**< a weighting matrix */
+								const std::string& h				/**< the externally defined LSQ-Function   */ );
 	/** @} */
 
 
@@ -258,17 +258,17 @@ public:
 	/** \note Applicable only for automatic code generation.
 	 *  \warning This function will be deprecated in the next release.
 	 */
-	returnValue minimizeLSQEndTerm(	const ExportVariable &S		/**< a weighting matrix for differential states */ );
+	returnValue minimizeLSQEndTerm(	const Matrix &S		/**< a weighting matrix for differential states */ );
 
 	/** \note Applicable only for automatic code generation.
 	 *  \warning Experimental. */
-	returnValue minimizeLSQEndTerm(	const ExportVariable& S,	/**< a weighting matrix */
+	returnValue minimizeLSQEndTerm(	const Matrix& S,	/**< a weighting matrix */
 									const Function& m			/**< the LSQ-Function   */ );
 
 	/** \note Applicable only for automatic code generation.
 	 *  \warning Experimental. */
-	returnValue minimizeLSQEndTerm(	const ExportVariable& S,	/**< a weighting matrix */
-									const String& m				/**< the externally defined LSQ-Function   */ );
+	returnValue minimizeLSQEndTerm(	const Matrix& S,	/**< a weighting matrix */
+									const std::string& m				/**< the externally defined LSQ-Function   */ );
 	/** @} */
 
 	/** Adds an differential equation (as a continuous equality constraint). \n
@@ -377,8 +377,8 @@ public:
 
 	/** Applicable only for automatic code generation.
 	 *  \note Experimental. */
-	returnValue minimizeLSQLinearTerms(	const ExportVariable& Slx,	/**< a weighting vector for differential states. */
-										const ExportVariable& Slu	/**< a weighting vector for controls. */ );
+	returnValue minimizeLSQLinearTerms(	const Matrix& Slx,	/**< a weighting vector for differential states. */
+										const Matrix& Slu	/**< a weighting vector for controls. */ );
 	/** @} */
 
 protected:

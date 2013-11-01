@@ -32,11 +32,9 @@
 
 
 #include <acado/optimization_algorithm/multi_objective_algorithm.hpp>
-
-
+#include <acado/ocp/ocp.hpp>
 
 BEGIN_NAMESPACE_ACADO
-
 
 
 //
@@ -169,7 +167,7 @@ returnValue MultiObjectiveAlgorithm::solveSingleObjective( const int &number_ ){
 
     setStatus( BS_NOT_INITIALIZED );
 
-    acadoPrintf("\n\n Optimization of individual objective %d out of %d \n\n",number_ +1, m );
+    printf("\n\n Optimization of individual objective %d out of %d \n\n",number_ +1, m );
     totalCPUtime = -acadoGetTime();
     returnvalue = OptimizationAlgorithm::solve();
     totalCPUtime += acadoGetTime();
@@ -330,7 +328,7 @@ returnValue MultiObjectiveAlgorithm::solve( ){
 
         // PRINT THE ITERATION NUMBER:
         // ---------------------------
-        acadoPrintf("\n\n Multi-objective point: %d out of %d \n\n",run1+1, (int) Weights.getNumCols() );
+    	printf("\n\n Multi-objective point: %d out of %d \n\n",run1+1, (int) Weights.getNumCols() );
 
 
         ocp->getConstraint( tmp_con );
@@ -392,7 +390,7 @@ returnValue MultiObjectiveAlgorithm::solve( ){
             }
         }
         else{
-            acadoPrintf(" Result from single objective optimization is adopted. \n\n" );
+        	printf(" Result from single objective optimization is adopted. \n\n" );
             for( run2 = 0; run2 < m; run2++ ){
                 result(count,run2) = vertices(vertex,run2);
             }

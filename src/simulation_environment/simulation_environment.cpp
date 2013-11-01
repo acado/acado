@@ -41,6 +41,7 @@
 
 // #define SIM_DEBUG
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -205,7 +206,8 @@ returnValue SimulationEnvironment::initializeAlgebraicStates( const VariablesGri
 
 returnValue SimulationEnvironment::initializeAlgebraicStates( const char* fileName )
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty( ) == BT_TRUE )
 		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
@@ -229,7 +231,7 @@ returnValue SimulationEnvironment::init(	const Vector &x0_,
 	if ( controller != 0 )
 	{
 		if ( (PrintLevel)printLevel >= HIGH ) 
-			acadoPrintf( "--> Initializing controller ...\n" );
+			cout << "--> Initializing controller ...\n";
 
 		if ( controller->init( startTime,x0_,p_ ) != SUCCESSFUL_RETURN )
 			return ACADOERROR( RET_ENVIRONMENT_INIT_FAILED );
@@ -241,7 +243,7 @@ returnValue SimulationEnvironment::init(	const Vector &x0_,
 			return ACADOERROR( RET_ENVIRONMENT_INIT_FAILED );
 		
 		if ( (PrintLevel)printLevel >= HIGH ) 
-			acadoPrintf( "<-- Initializing controller done.\n" );
+			cout << "<-- Initializing controller done.\n";
 	}
 	else
 		return ACADOERROR( RET_NO_CONTROLLER_SPECIFIED );
@@ -250,7 +252,7 @@ returnValue SimulationEnvironment::init(	const Vector &x0_,
 	if ( process != 0 )
 	{
 		if ( (PrintLevel)printLevel >= HIGH ) 
-			acadoPrintf( "--> Initializing process ...\n" );
+			cout << "--> Initializing process ...\n";
 
 		if ( process->init( startTime,x0_,uStart,pStart ) != SUCCESSFUL_RETURN )
 			return ACADOERROR( RET_ENVIRONMENT_INIT_FAILED );
@@ -259,7 +261,7 @@ returnValue SimulationEnvironment::init(	const Vector &x0_,
 			return ACADOERROR( RET_ENVIRONMENT_INIT_FAILED );
 		
 		if ( (PrintLevel)printLevel >= HIGH ) 
-			acadoPrintf( "<-- Initializing process done.\n" );
+			cout << "<-- Initializing process done.\n";
 	}
 	else
 		return ACADOERROR( RET_NO_PROCESS_SPECIFIED );
@@ -307,7 +309,7 @@ returnValue SimulationEnvironment::step( )
 
 
 	++nSteps;
-	acadoPrintf( "\n*** SIMULATION LOOP NO. %d (starting at time %.3f) ***\n",nSteps,simulationClock.getTime( ) );
+	printf( "\n*** SIMULATION LOOP NO. %d (starting at time %.3f) ***\n",nSteps,simulationClock.getTime( ) );
 
 	/* Perform one single simulation loop */
 	Vector u, p;
@@ -333,7 +335,7 @@ returnValue SimulationEnvironment::step( )
 	get( PRINTLEVEL,printLevel );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Calling controller ...\n" );
+		cout << "--> Calling controller ...\n";
 
 // 	yPrevious.print( "yPrevious" );
 
@@ -349,7 +351,7 @@ returnValue SimulationEnvironment::step( )
 		return ACADOERROR( RET_ENVIRONMENT_STEP_FAILED );*/
 	
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "<-- Calling controller done.\n" );
+		cout << "<-- Calling controller done.\n";
 
 	double compDelay = determineComputationalDelay( controller->getPreviousRealRuntime( ) );
 	double nextSamplingInstant = controller->getNextSamplingInstant( simulationClock.getTime( ) );
@@ -374,7 +376,7 @@ returnValue SimulationEnvironment::step( )
 	}
 	
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Simulating process ...\n" );
+		cout << "--> Simulating process ...\n";
 
 	if ( fabs( compDelay ) < 100.0*EPS )
 	{
@@ -441,7 +443,7 @@ returnValue SimulationEnvironment::step( )
 			processOutput.    add( y,IM_LINEAR );
 	}
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "<-- Simulating process done.\n" );
+		cout <<  "<-- Simulating process done.\n";
 
 	// update simulation clock
 	simulationClock.init( nextSamplingInstant );

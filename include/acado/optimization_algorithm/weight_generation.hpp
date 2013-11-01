@@ -33,14 +33,7 @@
 #ifndef ACADO_TOOLKIT_WEIGHT_GENERATION_HPP
 #define ACADO_TOOLKIT_WEIGHT_GENERATION_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
-#include <acado/variables_grid/variables_grid.hpp>
-#include <acado/ocp/ocp.hpp>
-#include <acado/nlp_solver/nlp_solver.hpp>
-#include <acado/optimization_algorithm/optimization_algorithm.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 

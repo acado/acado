@@ -33,11 +33,8 @@
 #ifndef ACADO_TOOLKIT_OPTIMIZATION_ALGORITHM_HPP
 #define ACADO_TOOLKIT_OPTIMIZATION_ALGORITHM_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
-#include <acado/optimization_algorithm/optimization_algorithm_base.hpp>
 #include <acado/user_interaction/user_interaction.hpp>
-
+#include <acado/optimization_algorithm/optimization_algorithm_base.hpp>
 
 BEGIN_NAMESPACE_ACADO
 

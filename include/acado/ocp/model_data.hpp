@@ -101,7 +101,7 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( const String& output, const String& diffs_output, const uint dim, const Grid& measurements );
+	uint addOutput( const std::string& output, const std::string& diffs_output, const uint dim, const Grid& measurements );
 
 
 	/** Adds an output function.
@@ -115,8 +115,8 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( 	const String& output, const String& diffs_output, const uint dim,
-						const Grid& measurements, const String& colInd, const String& rowPtr	);
+	uint addOutput( 	const std::string& output, const std::string& diffs_output, const uint dim,
+						const Grid& measurements, const std::string& colInd, const std::string& rowPtr	);
 
 
 	/** Returns true if there are extra outputs, specified for the integrator.
@@ -215,8 +215,8 @@ public:
       *	\return SUCCESSFUL_RETURN
       */
      returnValue setLinearOutput( 	const Matrix& M3_, const Matrix& A3_,
-    		 	 	 	 			const String& _rhs3,
-    		 	 	 	 			const String& _diffs3 );
+    		 	 	 	 			const std::string& _rhs3,
+    		 	 	 	 			const std::string& _diffs3 );
 
 
      /** Assigns the model to be used by the integrator.
@@ -227,9 +227,9 @@ public:
       *	\return SUCCESSFUL_RETURN
       */
 
-     returnValue setModel( 	const String& fileName,
-    		 	 	 	 	const String& _rhs_ODE,
-    		 	 	 	 	const String& _diffs_rhs_ODE );
+     returnValue setModel( 	const std::string& fileName,
+    		 	 	 	 	const std::string& _rhs_ODE,
+    		 	 	 	 	const std::string& _diffs_rhs_ODE );
 
 
      /** Returns the grid to be used by the integrator.
@@ -386,13 +386,13 @@ public:
      Vector getNumMeas( ) const;
 
 
-     const String getFileNameModel() const;
-     const String getNameRhs() const;
-     const String getNameDiffsRhs() const;
-     const String getNameOutput() const;
-     const String getNameDiffsOutput() const;
-     returnValue getNameOutputs( std::vector<String>& names ) const;
-     returnValue getNameDiffsOutputs( std::vector<String>& names ) const;
+     const std::string getFileNameModel() const;
+     const std::string getNameRhs() const;
+     const std::string getNameDiffsRhs() const;
+     const std::string getNameOutput() const;
+     const std::string getNameDiffsOutput() const;
+     returnValue getNameOutputs( std::vector<std::string>& names ) const;
+     returnValue getNameDiffsOutputs( std::vector<std::string>& names ) const;
 
 
  	/**
@@ -426,11 +426,11 @@ public:
 
      BooleanType export_rhs;						/**< True if the right-hand side and their derivatives should be exported too. */
      BooleanType model_dimensions_set;				/**< True if the model dimensions have been set. */
-     String externModel;							/**< The name of the file containing the needed functions, if provided. */
-     String rhs_name;								/**< The name of the function evaluating the ODE right-hand side, if provided. */
-     String diffs_name;								/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
-     String rhs3_name;								/**< The name of the nonlinear function in the linear output system, if provided. */
-     String diffs3_name;							/**< The name of the function evaluating the derivatives for the linear output system, if provided. */
+     std::string externModel;							/**< The name of the file containing the needed functions, if provided. */
+     std::string rhs_name;								/**< The name of the function evaluating the ODE right-hand side, if provided. */
+     std::string diffs_name;								/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+     std::string rhs3_name;								/**< The name of the nonlinear function in the linear output system, if provided. */
+     std::string diffs3_name;							/**< The name of the function evaluating the derivatives for the linear output system, if provided. */
      DifferentialEquation differentialEquation;  	/**< The differential equations in the model. */
 
      Grid integrationGrid;							/**< Integration grid. */
@@ -440,8 +440,8 @@ public:
      std::vector<Grid> outputGrids;					/**< A separate grid for each output function.  			*/
      std::vector<uint> dim_outputs;					/**< Dimensions of the different output functions. */
      std::vector<uint> num_meas;					/**< Number of measurements for the different output functions. */
-     std::vector<String> outputNames;				/**< A separate function name for each output. */
-     std::vector<String> diffs_outputNames;			/**< A separate function name for evaluating the derivatives of each output. */
+     std::vector<std::string> outputNames;				/**< A separate function name for each output. */
+     std::vector<std::string> diffs_outputNames;			/**< A separate function name for evaluating the derivatives of each output. */
      std::vector<Vector> colInd_outputs;			/**< A separate Vector of column indices for each output if in CRS format. */
      std::vector<Vector> rowPtr_outputs;			/**< A separate Vector of row pointers for each output if in CRS format. */
 

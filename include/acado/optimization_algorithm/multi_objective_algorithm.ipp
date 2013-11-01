@@ -207,10 +207,8 @@ inline returnValue MultiObjectiveAlgorithm::getWeights( const char*fileName ) co
 
     Matrix Weights;
     Weights = getWeights();
-
-    FILE *tmpFile = fopen( fileName, "w" );
-    tmpFile << Weights;
-    fclose( tmpFile );
+    
+    Weights.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
@@ -252,9 +250,7 @@ inline returnValue MultiObjectiveAlgorithm::getWeightsWithFilter( const char*fil
         for( run2 = 0; run2 < (int) Weights.getNumRows(); run2++ )
             FilteredWeights( run2, run1 ) = Weights( run2, Pp[run1] );
 
-    FILE *tmpFile = fopen( fileName, "w" );
-    tmpFile << FilteredWeights;
-    fclose( tmpFile );
+	FilteredWeights.print( fileName );
 
     delete[] Pp;
 
@@ -273,9 +269,7 @@ inline returnValue MultiObjectiveAlgorithm::printAuxiliaryRoutine( const char*fi
         char *tmp = new char[MAX_LENGTH_STRING];
         sprintf( tmp, "MO%d%s", run1, fileName );
         if( x_[run1].getNumPoints() != 0 ){
-            FILE *file = fopen(tmp,"w");
-            file << x_[run1];
-            fclose(file);
+        	x_[run1].print( tmp );
         }
         else{
             FILE *file = fopen(tmp,"w");
@@ -319,12 +313,12 @@ inline returnValue MultiObjectiveAlgorithm::getAllDisturbances( const char*fileN
 
 
 
-inline returnValue MultiObjectiveAlgorithm::printInfo(){
-
-    acadoPrintf("\n\n--------------- INFO: ------------------------\n");
-    acadoPrintf("\n    Total number of SQP iterations:  %d \n", totalNumberOfSQPiterations );
-    acadoPrintf("    Total CPU time                :  %.3e sec \n", totalCPUtime );
-    acadoPrintf("\n\n----------------------------------------------\n\n");
+inline returnValue MultiObjectiveAlgorithm::printInfo()
+{
+    std::cout << "\n\n--------------- INFO: ------------------------\n";
+    std::cout << "\n    Total number of SQP iterations:  " <<  totalNumberOfSQPiterations << std::endl;
+    std::cout << "    Total CPU time                :    " << totalCPUtime << " sec" << std::endl;
+    std::cout << "\n\n----------------------------------------------\n\n";
 
     return SUCCESSFUL_RETURN;
 }

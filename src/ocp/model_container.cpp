@@ -88,7 +88,7 @@ returnValue ModelContainer::setNARXmodel( const uint _delay, const Matrix& _parm
 }
 
 
-returnValue ModelContainer::setModel( 	const String& fileName, const String& _rhs_ODE, const String& _diffs_rhs_ODE ) {
+returnValue ModelContainer::setModel( 	const std::string& fileName, const std::string& _rhs_ODE, const std::string& _diffs_rhs_ODE ) {
 	return modelData.setModel( fileName, _rhs_ODE, _diffs_rhs_ODE );
 }
 
@@ -119,13 +119,13 @@ returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const OutputFcn&
 }
 
 
-returnValue ModelContainer::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const String& rhs3_, const String& diffs_rhs3_ )
+returnValue ModelContainer::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const std::string& rhs3_, const std::string& diffs_rhs3_ )
 {
 	return modelData.setLinearOutput( M3_, A3_, rhs3_, diffs_rhs3_ );
 }
 
 
-returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const String& rhs3_, const String& diffs_rhs3_ )
+returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const std::string& rhs3_, const std::string& diffs_rhs3_ )
 {
 	Matrix M3_ = eye(A3_.getNumRows());
 	return modelData.setLinearOutput( M3_, A3_, rhs3_, diffs_rhs3_ );
@@ -146,7 +146,7 @@ uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const uint num
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim, const Vector& measurements ) {
+uint ModelContainer::addOutput( const std::string& output, const std::string& diffs_output, const uint dim, const Vector& measurements ) {
 	Vector newMeas(measurements);
 	newMeas.append( 1.0 );
 	Grid grid( newMeas );
@@ -154,14 +154,14 @@ uint ModelContainer::addOutput( const String& output, const String& diffs_output
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim, const uint numberMeasurements ) {
+uint ModelContainer::addOutput( const std::string& output, const std::string& diffs_output, const uint dim, const uint numberMeasurements ) {
 	Grid grid( 0.0, 1.0, (int)numberMeasurements + 1 );
 	return modelData.addOutput( output, diffs_output, dim, grid );
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
-								const Vector& measurements, const String& colInd, const String& rowPtr	) {
+uint ModelContainer::addOutput( const std::string& output, const std::string& diffs_output, const uint dim,
+								const Vector& measurements, const std::string& colInd, const std::string& rowPtr	) {
 	Vector newMeas(measurements);
 	newMeas.append( 1.0 );
 	Grid grid( newMeas );
@@ -169,8 +169,8 @@ uint ModelContainer::addOutput( const String& output, const String& diffs_output
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
-								const uint numberMeasurements, const String& colInd, const String& rowPtr	) {
+uint ModelContainer::addOutput( const std::string& output, const std::string& diffs_output, const uint dim,
+								const uint numberMeasurements, const std::string& colInd, const std::string& rowPtr	) {
 	Grid grid( 0.0, 1.0, (int)numberMeasurements + 1 );
 	return modelData.addOutput( output, diffs_output, dim, grid, colInd, rowPtr );
 }
@@ -279,7 +279,7 @@ Vector ModelContainer::getNumMeas( ) const
 }
 
 
-const String ModelContainer::getFileNameModel( ) const
+const std::string ModelContainer::getFileNameModel( ) const
 {
 	return modelData.getFileNameModel();
 }

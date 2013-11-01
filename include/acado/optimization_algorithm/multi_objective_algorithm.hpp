@@ -26,7 +26,7 @@
 
 /**
  *    \file include/acado/optimization_algorithm/multi_objective_algorithm.hpp
- *    \author Boris Houska, Filip Logist, Hans Joachim Ferreau
+ *    \author Boris Houska, Filip Logist, Hans Joachim Ferreau, Milan Vukov
  */
 
 
@@ -34,8 +34,8 @@
 #define ACADO_TOOLKIT_MULTI_OBJECTIVE_ALGORITHM_HPP
 
 
+#include <acado/optimization_algorithm/optimization_algorithm.hpp>
 #include <acado/optimization_algorithm/weight_generation.hpp>
-
 
 
 BEGIN_NAMESPACE_ACADO

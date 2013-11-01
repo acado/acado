@@ -31,7 +31,6 @@
  */
 
 #include <acado/ocp/ocp.hpp>
-#include <acado/code_generation/export_variable.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -134,9 +133,11 @@ returnValue OCP::minimizeMayerTerm( const int &multiObjectiveIdx,  const Express
 
 returnValue OCP::minimizeLSQ( const MatrixVariablesGrid &S,
                               const Function            &h,
-                              const char*        rFilename ){
+                              const char*        rFilename )
+{
 
-    VariablesGrid r = readFromFile( rFilename );
+    VariablesGrid r;
+    r.read( rFilename );
 
     if( r.isEmpty() == BT_TRUE )
         return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
@@ -149,7 +150,8 @@ returnValue OCP::minimizeLSQ( const Matrix        &S,
                               const Function      &h,
                               const char*  rFilename  ){
 
-    VariablesGrid r = readFromFile( rFilename );
+    VariablesGrid r;
+    r.read( rFilename );
 
     if( r.isEmpty() == BT_TRUE )
         return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
@@ -161,7 +163,8 @@ returnValue OCP::minimizeLSQ( const Matrix        &S,
 returnValue OCP::minimizeLSQ( const Function      &h,
                               const char*  rFilename  ){
 
-    VariablesGrid r = readFromFile( rFilename );
+    VariablesGrid r;
+    r.read( rFilename );
 
     if( r.isEmpty() == BT_TRUE )
         return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
@@ -360,22 +363,22 @@ BooleanType OCP::hasEquidistantGrid( ) const{
 	return numSteps.isEmpty();
 }
 
-returnValue OCP::minimizeLSQ(const ExportVariable& S, const Function& h)
+returnValue OCP::minimizeLSQ(const Matrix& S, const Function& h)
 {
 	return objective.addLSQ(S, h);
 }
 
-returnValue OCP::minimizeLSQEndTerm(const ExportVariable& S, const Function& h)
+returnValue OCP::minimizeLSQEndTerm(const Matrix& S, const Function& h)
 {
 	return objective.addLSQEndTerm(S, h);
 }
 
-returnValue OCP::minimizeLSQ(const ExportVariable& S, const String& h)
+returnValue OCP::minimizeLSQ(const Matrix& S, const std::string& h)
 {
 	return objective.addLSQ(S, h);
 }
 
-returnValue OCP::minimizeLSQEndTerm(const ExportVariable& S, const String& h)
+returnValue OCP::minimizeLSQEndTerm(const Matrix& S, const std::string& h)
 {
 	return objective.addLSQEndTerm(S, h);
 }
@@ -385,7 +388,7 @@ returnValue OCP::minimizeLSQLinearTerms(const Vector& Slx, const Vector& Slu)
 	return objective.addLSQLinearTerms(Slx, Slu);
 }
 
-returnValue OCP::minimizeLSQLinearTerms(const ExportVariable& Slx, const ExportVariable& Slu)
+returnValue OCP::minimizeLSQLinearTerms(const Matrix& Slx, const Matrix& Slu)
 {
 	return objective.addLSQLinearTerms(Slx, Slu);
 }

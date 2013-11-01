@@ -256,7 +256,8 @@ returnValue Controller::initializeAlgebraicStates(	const VariablesGrid& _xa_init
 returnValue Controller::initializeAlgebraicStates( 	const char* fileName
 													)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 
 	if ( tmp.isEmpty( ) == BT_TRUE )
 		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
@@ -349,9 +350,9 @@ returnValue Controller::step(	double currentTime,
 	/* Do nothing if controller is disabled */
 	if ( isEnabled == BT_FALSE )
 	{
-		logCollection.setLast( LOG_TIME_CONTROLLER,0.0 );
-		logCollection.setLast( LOG_TIME_CONTROL_LAW,0.0 );
-		logCollection.setLast( LOG_TIME_ESTIMATOR,0.0 );
+		setLast( LOG_TIME_CONTROLLER,0.0 );
+		setLast( LOG_TIME_CONTROL_LAW,0.0 );
+		setLast( LOG_TIME_ESTIMATOR,0.0 );
 		return SUCCESSFUL_RETURN;
 	}
 
@@ -407,7 +408,7 @@ returnValue Controller::obtainEstimates(	double currentTime,
 	}
 
 	clock.stop();
-	logCollection.setLast( LOG_TIME_ESTIMATOR,clock.getTime() );
+	setLast(LOG_TIME_ESTIMATOR, clock.getTime());
 
 	// step internal reference trajectory
 	if ( referenceTrajectory != 0 )
@@ -496,11 +497,11 @@ returnValue Controller::preparationStep(	double nextTime,
 		return ACADOERROR( RET_CONTROLLER_STEP_FAILED );
 
 	controlLawClock.stop();
-	logCollection.setLast( LOG_TIME_CONTROL_LAW,controlLawClock.getTime() );
+	setLast(LOG_TIME_CONTROL_LAW, controlLawClock.getTime());
 	
 	// stop real runtime measurement
 	realClock.stop();
-	logCollection.setLast( LOG_TIME_CONTROLLER,realClock.getTime() );
+	setLast(LOG_TIME_CONTROLLER, realClock.getTime());
 
 
 	#ifdef SIM_DEBUG
@@ -556,7 +557,7 @@ returnValue Controller::setupOptions( )
 
 returnValue Controller::setupLogging( )
 {
-	LogRecord tmp( LOG_AT_EACH_ITERATION,stdout,PS_DEFAULT );
+	LogRecord tmp(LOG_AT_EACH_ITERATION, PS_DEFAULT);
 
 	tmp.addItem( LOG_FEEDBACK_CONTROL );
 	tmp.addItem( LOG_TIME_CONTROLLER );
