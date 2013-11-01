@@ -133,10 +133,7 @@ int main( ){
 
     // SAVE INFORMATION:
     // -----------------
-    FILE *file = fopen("fed_batch_bioreactor2_ws_pareto.txt","w");
     paretoFront.print();
-    file << paretoFront;
-    fclose(file);
 
     return 0;
 }

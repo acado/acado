@@ -157,7 +157,7 @@ int main( )
 	window.addSubplot( feedbackControl(1), "F2");
     window.plot();
     
-	diffStates.printToFile("result.txt","diffstates",PS_MATLAB);
+	diffStates.print("result.txt","diffstates",PS_MATLAB);
 
     //algorithm.set( HESSIAN_APPROXIMATION, EXACT_HESSIAN );
     

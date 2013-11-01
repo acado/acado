@@ -84,11 +84,7 @@ int main( ){
     //window.addSubplot3D( paretoFront, "Pareto Front y1 vs y2 vs y3","y1","y2", PM_POINTS );
     //window.plot( );
 
-    FILE *file = fopen("scalar3_ws_pareto.txt","w");
     paretoFront.print();
-    file << paretoFront;
-    fclose(file);
-
 
     // PRINT INFORMATION ABOUT THE ALGORITHM:
     // --------------------------------------

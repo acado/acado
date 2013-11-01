@@ -127,9 +127,7 @@ int main( ){
 
     // SAVE INFORMATION:
     // -----------------
-    FILE *file = fopen("catalyst_mixing_ennc_pareto.txt","w");
-    file << paretoFront;
-    fclose(file);
+    paretoFront.print( "catalyst_mixing_ennc_pareto.txt" );
 
     return 0;
 }

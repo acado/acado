@@ -147,10 +147,7 @@ int main( ){
 
     // SAVE INFORMATION:
     // -----------------
-    FILE *file = fopen("crane_ws_pareto.txt","w");
-    paretoFront.print();
-    file << paretoFront;
-    fclose(file);
+    paretoFront.print( "crane_ws_pareto.txt" );
 
     return 0;
 }

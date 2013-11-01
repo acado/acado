@@ -92,7 +92,7 @@ int main( ){
     // --------------------------------------
 
     VariablesGrid measurements;
-    measurements = readFromFile( "parameter_estimation_data2.txt" );
+    measurements.read( "parameter_estimation_data2.txt" );
 
     if( measurements.isEmpty() == BT_TRUE )
         printf("The file \"parameter_estimation_data2.txt\" can't be opened.");
@@ -103,7 +103,7 @@ int main( ){
     // ----------------------------------------
 
     VariablesGrid F_reference;
-    F_reference = readFromFile( "parameter_estimation_controls.txt" );
+    F_reference.read( "parameter_estimation_controls.txt" );
 
     if( F_reference.isEmpty() == BT_TRUE )
         printf("The file \"parameter_estimation_controls.txt\" can't be opened.");

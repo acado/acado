@@ -80,10 +80,7 @@ int main( ){
     window1.addSubplot( paretoFront, "Pareto Front y1 vs y2", "y1","y2", PM_POINTS );
     window1.plot( );
 
-    FILE *file = fopen("scalar2_ws_pareto.txt","w");
     paretoFront.print();
-    file << paretoFront;
-    fclose(file);
 
 
     // FILTER THE PARETO FRONT AND PLOT IT:
@@ -94,10 +91,7 @@ int main( ){
     window2.addSubplot( paretoFront, "Pareto Front (with filter) y1 vs y2", "y1","y2", PM_POINTS );
     window2.plot( );
 
-    FILE *file2 = fopen("scalar2_ws_pareto_filtered.txt","w");
     paretoFront.print();
-    file2 << paretoFront;
-    fclose(file2);
 
 
     // PRINT INFORMATION ABOUT THE ALGORITHM:

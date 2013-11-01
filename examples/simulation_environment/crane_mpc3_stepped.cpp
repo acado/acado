@@ -108,7 +108,7 @@ int main( ){
 
 	Process process( dynamicSystem,INT_RK45 );
 
-	VariablesGrid disturbance = readFromFile( "dist.txt" );
+	VariablesGrid disturbance; disturbance.read( "dist.txt" );
 	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
 
@@ -151,7 +151,7 @@ int main( ){
 
 	while ( currentTime <= endTime )
 	{
-		acadoPrintf( "\n*** Simulation Loop No. %d (starting at time %.3f) ***\n",nSteps,currentTime );
+		printf( "\n*** Simulation Loop No. %d (starting at time %.3f) ***\n",nSteps,currentTime );
 	
 		if (controller.step( currentTime,ySim.getLastVector() ) != SUCCESSFUL_RETURN)
 			exit( EXIT_FAILURE );

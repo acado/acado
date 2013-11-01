@@ -40,7 +40,7 @@ int main( ){
 
     Matrix             A(3,3);
     Vector             b(3);
-    DifferentialState  x(3);
+    DifferentialState  x("", 3, 1);
     Function           f;
 
     A.setZero() ;

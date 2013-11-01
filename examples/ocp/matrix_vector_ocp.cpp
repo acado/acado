@@ -43,9 +43,9 @@ int main( ){
 
     // INTRODUCE THE VARIABLES:
     // ----------------------------
-    DifferentialState    x(10);    // a differential state vector with dimension 10. (vector)
+    DifferentialState    x("", 10, 1);    // a differential state vector with dimension 10. (vector)
     DifferentialState    y    ;    // another differential state y                   (scalar)
-    Control              u(2 );    // a control input with dimension 2.              (vector)
+    Control              u("", 2, 1);    // a control input with dimension 2.              (vector)
     Parameter            p    ;    // a parameter (here a scalar).                   (scalar)
 
     DifferentialEquation f    ;    // the differential equation
@@ -56,13 +56,13 @@ int main( ){
 
     // READ A MATRIX "A" FROM A FILE:
     // ------------------------------
-    Matrix A = readFromFile( "matrix_vector_ocp_A.txt" );
-    Matrix B = readFromFile( "matrix_vector_ocp_B.txt" );
+    Matrix A; A.read( "matrix_vector_ocp_A.txt" );
+    Matrix B; B.read( "matrix_vector_ocp_B.txt" );
 
 
     // READ A VECTOR "x0" FROM A FILE:
     // -------------------------------
-    Vector x0 = readFromFile( "matrix_vector_ocp_x0.txt" );
+    Vector x0; x0.read( "matrix_vector_ocp_x0.txt" );
 
 
     // DEFINE A DIFFERENTIAL EQUATION:

@@ -94,10 +94,10 @@ int main( ){
 	int    i;
 
 	TIME t;
-	DifferentialState 		x(NXD);
-	AlgebraicState 			z(NXA);
-	Control 				u(NU);
-	Parameter 				p(NP);
+	DifferentialState 		x("", NXD, 1);
+	AlgebraicState 			z("", NXA, 1);
+	Control 				u("", NU, 1);
+	Parameter 				p("", NP, 1);
 	IntermediateState 		is(1+NXD+NXA+NU+NP);
 
 	                        is(0)              = t;
@@ -295,15 +295,15 @@ int main( ){
 	// ---------------------------------------------------
 	VariablesGrid out_states;
 	algorithm.getDifferentialStates( out_states );
-	out_states.printToFile( "OUT_states.m","STATES",PS_MATLAB );
+	out_states.print( "OUT_states.m","STATES",PS_MATLAB );
 
 	VariablesGrid out_controls;
 	algorithm.getControls( out_controls );
-	out_controls.printToFile( "OUT_controls.m","CONTROLS",PS_MATLAB );
+	out_controls.print( "OUT_controls.m","CONTROLS",PS_MATLAB );
 
 	VariablesGrid out_algstates;
 	algorithm.getAlgebraicStates( out_algstates );
-	out_algstates.printToFile( "OUT_algstates.m","ALGSTATES",PS_MATLAB );
+	out_algstates.print( "OUT_algstates.m","ALGSTATES",PS_MATLAB );
 
 	GnuplotWindow window;
 	window.addSubplot( out_algstates(94),  "Temperature tray 14" );

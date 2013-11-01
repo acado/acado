@@ -103,7 +103,7 @@ int main( ){
     // -------------------------
 
     DifferentialState cA, cB, theta, thetaK;
-	Control u(2);
+	Control u("", 2, 1);
 
     DifferentialEquation f;
 
@@ -193,8 +193,11 @@ int main( ){
 	ocp.subjectTo( -9000.0 <= u(1) <= 0.0 );
 
 	
-	VariablesGrid cstr75states( "cstr75_states.txt" );
-	VariablesGrid cstr75controls( "cstr75_controls.txt" );
+	VariablesGrid cstr75states;
+	VariablesGrid cstr75controls;
+
+	cstr75states.read( "cstr75_states.txt" );
+	cstr75controls.read( "cstr75_controls.txt" );
 
     // Additionally, flush a plotting object
     GnuplotWindow window1;

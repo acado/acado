@@ -73,7 +73,7 @@ int main( )
 
 	Process process( dynamicSystem,INT_RK45 );
 
-	VariablesGrid disturbance = readFromFile( "road.txt" );
+	VariablesGrid disturbance; disturbance.read( "road.txt" );
 	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
 

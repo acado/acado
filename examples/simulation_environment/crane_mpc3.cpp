@@ -108,7 +108,7 @@ int main( ){
 
 	Process process( dynamicSystem,INT_RK45 );
 
-	VariablesGrid disturbance = readFromFile( "dist.txt" );
+	VariablesGrid disturbance; disturbance.read( "dist.txt" );
 	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
 
@@ -156,7 +156,7 @@ int main( ){
 	//	window.addSubplot( disturbance,     "Disturbance [m/s^2]" );
 	window.plot();
 	
-	diffStates.printToFile( "diffStates.txt" );
+	diffStates.print( "diffStates.txt" );
 
 
     return EXIT_SUCCESS;

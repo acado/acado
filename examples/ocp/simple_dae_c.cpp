@@ -59,7 +59,7 @@ int main( ){
     USING_NAMESPACE_ACADO
 
     TIME autotime;
-    DifferentialState x(2);
+    DifferentialState x("", 2, 1);
     AlgebraicState z;
     Control u;
     DifferentialEquation f1;

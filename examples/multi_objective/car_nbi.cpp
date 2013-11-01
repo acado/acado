@@ -129,9 +129,7 @@ int main( ){
 
     // SAVE INFORMATION:
     // -----------------
-    FILE *file = fopen("car_nbi_pareto.txt","w");
-    file << paretoFront;
-    fclose(file);
+    paretoFront.print( "car_nbi_pareto.txt" );
 
     return 0;
 }

@@ -90,7 +90,7 @@ int main( ){
     Process process( dynamicSystem,INT_RK45 );
 
 
-	VariablesGrid disturbance = fopen( "my_disturbance.txt", "r" );
+	VariablesGrid disturbance; disturbance.read( "my_disturbance.txt" );
 
 // 	GnuplotWindow window2;
 // 		window2.addSubplot( disturbance, "my disturbance"   );
@@ -136,7 +136,7 @@ int main( ){
     // SETTING UP THE NMPC CONTROLLER:
     // -------------------------------
 
-    VariablesGrid myReference = fopen( "my_reference.txt", "r" );
+    VariablesGrid myReference; myReference.read( "my_reference.txt" );
     PeriodicReferenceTrajectory reference( myReference );
 
 // 	GnuplotWindow window3;

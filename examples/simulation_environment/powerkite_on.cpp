@@ -331,7 +331,7 @@ int main( )
 
 // REFERENCE TRAJECTORY:
 // ---------------------------------------------------------------
-        VariablesGrid myReference = fopen( "ref_w_zeros.txt", "r" );// read the measurements
+        VariablesGrid myReference; myReference.read( "ref_w_zeros.txt" );// read the measurements
         PeriodicReferenceTrajectory reference( myReference );
 
 
@@ -423,7 +423,7 @@ int main( )
     Process process( dynamicSystem,INT_RK45 );
 
 
-	VariablesGrid disturbance = readFromFile( "my_wind_disturbance_controlsfree.txt" );
+	VariablesGrid disturbance; disturbance.read( "my_wind_disturbance_controlsfree.txt" );
 	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
 
@@ -480,23 +480,23 @@ int main( )
 
 	VariablesGrid diffStates;
 	sim.getProcessDifferentialStates( diffStates );
-	diffStates.printToFile( "diffStates.txt" );
-	diffStates.printToFile( "diffStates.m","DIFFSTATES",PS_MATLAB );
+	diffStates.print( "diffStates.txt" );
+	diffStates.print( "diffStates.m","DIFFSTATES",PS_MATLAB );
 
 	VariablesGrid interStates;
 	sim.getProcessIntermediateStates( interStates );
-	interStates.printToFile( "interStates.txt" );
-	interStates.printToFile( "interStates.m","INTERSTATES",PS_MATLAB );
+	interStates.print( "interStates.txt" );
+	interStates.print( "interStates.m","INTERSTATES",PS_MATLAB );
 
     VariablesGrid sampledProcessOutput;
     sim.getSampledProcessOutput( sampledProcessOutput );
-    sampledProcessOutput.printToFile( "sampledOut.txt" );
-    sampledProcessOutput.printToFile( "sampledOut.m","OUT",PS_MATLAB );
+    sampledProcessOutput.print( "sampledOut.txt" );
+    sampledProcessOutput.print( "sampledOut.m","OUT",PS_MATLAB );
 
     VariablesGrid feedbackControl;
     sim.getFeedbackControl( feedbackControl );
-	feedbackControl.printToFile( "controls.txt" );
-	feedbackControl.printToFile( "controls.m","CONTROL",PS_MATLAB );
+	feedbackControl.print( "controls.txt" );
+	feedbackControl.print( "controls.m","CONTROL",PS_MATLAB );
 
     GnuplotWindow window;
 		window.addSubplot( sampledProcessOutput(0), "DIFFERENTIAL STATE: r" );

@@ -83,7 +83,7 @@ int main( ){
         window.addSubplot( u,"Control u" );
 
     // Additionally, flush a logging object
-    LogRecord logRecord( LOG_AT_EACH_ITERATION,"kkt.txt" );
+    LogRecord logRecord( LOG_AT_EACH_ITERATION );
     logRecord << LOG_KKT_TOLERANCE;
 
     algorithm << logRecord;

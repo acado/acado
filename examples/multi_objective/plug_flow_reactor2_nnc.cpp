@@ -139,10 +139,7 @@ int main( ){
 
     // SAVE INFORMATION:
     // -----------------
-    FILE *file = fopen("plug_flow_reactor2_nnc_pareto.txt","w");
     paretoFront.print();
-    file << paretoFront;
-    fclose(file);
 
     return 0;
 }

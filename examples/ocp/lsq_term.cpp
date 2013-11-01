@@ -45,7 +45,7 @@ int main( ){
     // -------------------------
     const int N = 2;
 
-    DifferentialState        x,y(N);
+    DifferentialState        x, y("", N, 1);
     Control                   u;
     DifferentialEquation      f;
 

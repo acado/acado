@@ -51,7 +51,7 @@ int main( ){
 
     // READ THE MEASUREMENT FROM A DATA FILE:
     // --------------------------------------
-    Matrix m = readFromFile( "michaelis_menten_data.txt" );
+    Matrix m; m.read( "michaelis_menten_data.txt" );
 
 
     // DEFINE A MEASUREMENT FUNCTION:
