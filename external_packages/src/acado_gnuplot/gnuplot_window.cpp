@@ -39,14 +39,11 @@
 #define round( value ) floor( value + 0.5 )
 #endif
 
-#include <stdio.h>
-#include <cstdlib>
-#include <string>
 #include <unistd.h>
 
-BEGIN_NAMESPACE_ACADO
-
 using namespace std;
+
+BEGIN_NAMESPACE_ACADO
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -125,7 +122,7 @@ returnValue GnuplotWindow::init()
 #ifndef __NO_PIPES__
 	gnuPipe = popen("gnuplot -persist -background white", "w");
 
-	// In principle, we should just print out a warning, plot is not going
+	// TODO In principle, we should just print out a warning, plot is not going
 	// to generated anyways.
 	if ( !gnuPipe )
 		ACADOWARNING( RET_PLOT_WINDOW_CAN_NOT_BE_OPEN );
@@ -621,15 +618,15 @@ returnValue GnuplotWindow::getPlotModeString(	PlotMode plotMode,
     switch( plotMode )
 	{
         case PM_LINES:
-        	plotModeString = string("lines lw 2.5");
+        	plotModeString = "lines lw 2.5";
         	break;
 
         case PM_POINTS:
-        	plotModeString = string("points pt 2.5");
+        	plotModeString = "points pt 2.5";
         	break;
 
         default:
-        	plotModeString = string("lines lw 2.5");
+        	plotModeString = "lines lw 2.5";
     }
 
     return SUCCESSFUL_RETURN;
@@ -643,32 +640,32 @@ returnValue GnuplotWindow::getPlotStyleString(	VariableType _type,
 	switch( _type )
 	{
 		case VT_DIFFERENTIAL_STATE:
-			plotStyleString = string("lt -1"); //black
+			plotStyleString = "lt -1"; //black
 			break;
 
 		case VT_ALGEBRAIC_STATE:
-			plotStyleString = string("lt 4"); //magenta
+			plotStyleString = "lt 4"; //magenta
 			break;
 
 		case VT_PARAMETER:
-			plotStyleString = string("lt 8"); //orange
+			plotStyleString = "lt 8"; //orange
 			break;
 
 		case VT_CONTROL:
-			plotStyleString = string("lt 3"); //blue
+			plotStyleString = "lt 3"; //blue
 			break;
 
 		case VT_DISTURBANCE:
-			plotStyleString = string("lt 5"); //light blue
+			plotStyleString = "lt 5"; //light blue
 			break;
 
 		case VT_INTERMEDIATE_STATE:
-			plotStyleString = string("lt 2"); //green
+			plotStyleString = "lt 2"; //green
 			break;
 
 		default:
 		//case VT_OUTPUT:
-			plotStyleString = string("lt 1"); //red
+			plotStyleString = "lt 1"; //red
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -681,7 +678,7 @@ returnValue GnuplotWindow::obtainPlotDataString(	VariablesGrid& _dataGrid,
 {
     stringstream ss;
 
-    _dataGrid.print( ss );
+    _dataGrid.sprint( ss );
 
 	_plotDataString = ss.str();
 
