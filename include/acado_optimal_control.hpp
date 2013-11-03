@@ -34,7 +34,6 @@
 
 #include <acado_integrators.hpp>
 
-#include <acado/code_generation/code_generation.hpp>
 #include <acado/dynamic_system/dynamic_system.hpp>
 #include <acado/dynamic_discretization/dynamic_discretization.hpp>
 #include <acado/dynamic_discretization/integration_algorithm.hpp>
@@ -45,3 +44,5 @@
 #include <acado/optimization_algorithm/real_time_algorithm.hpp>
 #include <acado/optimization_algorithm/parameter_estimation_algorithm.hpp>
 #include <acado/optimization_algorithm/multi_objective_algorithm.hpp>
+
+//#include <acado/code_generation/code_generation.hpp>
