@@ -32,6 +32,8 @@
 
 
 #include <acado/nlp_solver/scp_method.hpp>
+#include <iomanip>
+#include <iostream>
 
 
 // #define SIM_DEBUG
@@ -646,7 +648,7 @@ returnValue SCPmethod::setupLogging( )
 
 	timeLoggingIdx = addLogRecord( tmp );
 
-	LogRecord iterationOutput(LOG_AT_EACH_ITERATION, PS_DEFAULT);
+	LogRecord iterationOutput(LOG_AT_EACH_ITERATION, PS_PLAIN);
 
 	iterationOutput.addItem( LOG_NUM_SQP_ITERATIONS,"SQP iteration");
 	iterationOutput.addItem( LOG_KKT_TOLERANCE,"KKT tolerance");
@@ -842,7 +844,38 @@ returnValue SCPmethod::printIteration( )
 	get( PRINTLEVEL,printLevel );
 
 	if ( (PrintLevel)printLevel >= MEDIUM ) 
-		printLogRecord(cout, outputLoggingIdx, PRINT_LAST_ITER);
+	{
+		if (numberOfSteps == 1 or (numberOfSteps % 10) == 0)
+			cout	<< "sqp it | "
+					<< "qp its | "
+					<< "      kkt tol | "
+					<< "      obj val | "
+					<< "    merit val | "
+					<< "     ls param | "
+					<< endl;
+
+		Matrix foo;
+
+		// Get cout flags
+		ios::fmtflags f( cout.flags() );
+
+		getLast(LOG_NUM_SQP_ITERATIONS, foo);
+		cout << setw( 6 ) << right << (int) foo(0, 0) << " | ";
+		getLast(LOG_NUM_QP_ITERATIONS, foo);
+		cout << setw( 6 ) << right << (int) foo(0, 0) << " | ";
+		getLast(LOG_KKT_TOLERANCE, foo);
+		cout << setw( 13 ) << setprecision( 6 ) << right << scientific << foo(0, 0) << " | ";
+		getLast(LOG_OBJECTIVE_VALUE, foo);
+		cout << setw( 13 ) << setprecision( 6 ) << right << scientific << foo(0, 0) << " | ";
+		getLast(LOG_MERIT_FUNCTION_VALUE, foo);
+		cout << setw( 13 ) << setprecision( 6 ) << right << scientific << foo(0, 0) << " | ";
+		getLast(LOG_LINESEARCH_STEPLENGTH, foo);
+		cout << setw( 13 ) << setprecision( 6 ) << right << scientific << foo(0, 0) << " | ";
+		cout << endl;
+
+		// Restore cout flags
+		cout.flags( f );
+	}
 
 	replot( PLOT_AT_EACH_ITERATION );
 
@@ -857,7 +890,7 @@ returnValue SCPmethod::checkForConvergence( )
 
 	// NEEDS TO BE CHECKED CARFULLY !!!
 	double KKTmultiplierRegularisation;
-    get( KKT_TOLERANCE_SAFEGUARD,KKTmultiplierRegularisation );
+	get(KKT_TOLERANCE_SAFEGUARD, KKTmultiplierRegularisation);
 
 	if( eval->getKKTtolerance( iter,bandedCP,KKTmultiplierRegularisation ) <= tol )
 	{
@@ -876,7 +909,10 @@ returnValue SCPmethod::checkForConvergence( )
 
 		if ( (PrintLevel)printLevel >= MEDIUM )
 		{
-			cout <<"\nconvergence achieved. \n\n";
+			cout	<< endl
+					<< "Covergence achieved. Demanded KKT tolerance is "
+					<< scientific << tol
+					<< "." << endl << endl;
 		}
 		return CONVERGENCE_ACHIEVED;
 	}
