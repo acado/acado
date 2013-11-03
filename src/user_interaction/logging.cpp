@@ -59,7 +59,7 @@ int Logging::addLogRecord(	LogRecord& _record
 							)
 {
 	unsigned newIndex;
-	if (_record.aliasIdx >= 0 && _record.aliasIdx < (int)logCollection.size())
+	if (_record.aliasIdx >= 0)
 	{
 		logCollection[ _record.aliasIdx ] = _record;
 		newIndex = _record.aliasIdx;
@@ -68,7 +68,7 @@ int Logging::addLogRecord(	LogRecord& _record
 	{
 		logCollection.push_back( _record );
 		newIndex = logCollection.size() - 1;
-		logCollection.back().aliasIdx = newIndex;
+		logCollection.back().aliasIdx = _record.aliasIdx = newIndex;
 	}
 
 	return newIndex;
@@ -77,22 +77,13 @@ int Logging::addLogRecord(	LogRecord& _record
 returnValue Logging::getLogRecord(	LogRecord& _record
 									) const
 {
-	return getLogRecord(_record.aliasIdx, _record);
-}
-
-
-returnValue Logging::getLogRecord(	uint idx,
-									LogRecord& _record
-									) const
-{
-	if (idx >= getNumLogRecords( ) - 1)
+	if (_record.aliasIdx < 0  or _record.aliasIdx >= ((int)getNumLogRecords( ) - 1))
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 
-	_record = logCollection[ idx ];
+	_record = logCollection[ _record.aliasIdx ];
 
 	return SUCCESSFUL_RETURN;
 }
-
 
 
 returnValue Logging::updateLogRecord(	LogRecord& _record
@@ -123,9 +114,7 @@ returnValue Logging::printNumDoubles( ) const
 	unsigned nDoubles = 0;
 
 	for (unsigned i = 0; i < logCollection.size(); ++i)
-	{
 		nDoubles += logCollection[ i ].getNumDoubles();
-	}
 
 	return nDoubles;
 

@@ -72,7 +72,10 @@ returnValue LogRecord::addItem(	LogName _name,
 								)
 {
 	if (items.count(make_pair(_name, LRT_ENUM)))
+	{
+//		LOG( LVL_DEBUG ) << "Log record "<< _name << " exists!" << endl;
 		return SUCCESSFUL_RETURN;
+	}
 	items[ make_pair(_name, LRT_ENUM) ] = LogRecordData( _label );
 
 	return SUCCESSFUL_RETURN;
@@ -130,7 +133,8 @@ returnValue LogRecord::print(	std::ostream& _stream,
 		for (unsigned i = 0; i < getMaxNumMatrices(); ++i)
 			for (it = items.begin(); it != items.end(); ++it)
 			{
-				if (i >= it->second.values.getNumPoints())
+				if (i >= it->second.values.getNumPoints()
+						or it->second.values.getNumPoints() == 0)
 					break;
 				if (it->second.values.getMatrix( i ).print(
 						_stream, it->second.label.c_str(),
@@ -144,21 +148,25 @@ returnValue LogRecord::print(	std::ostream& _stream,
 
 	case PRINT_LAST_ITER:
 		for (it = items.begin(); it != items.end(); ++it)
+		{
+			if (it->second.values.getNumPoints() == 0)
+				continue;
 			if (it->second.values.getMatrix(getMaxNumMatrices() - 1).print(
 					_stream, it->second.label.c_str(),
 					startString, endString, width, precision,
 					colSeparator, rowSeparator) != SUCCESSFUL_RETURN)
 				goto LogRecord_print_exit;
+		}
 
 	break;
 	}
+
+	LogRecord_print_exit:
 
 	if ( startString != 0 )   delete[] startString;
 	if ( endString != 0 )     delete[] endString;
 	if ( colSeparator != 0 )  delete[] colSeparator;
 	if ( rowSeparator != 0 )  delete[] rowSeparator;
-
-	LogRecord_print_exit:
 
 	return status;
 }
@@ -214,14 +222,17 @@ returnValue LogRecord::getAll(	uint _name,
 
 returnValue LogRecord::getFirst(	uint _name,
 									LogRecordItemType _type,
-									Matrix& lastValue
+									Matrix& firstValue
 									) const
 {
 	LogRecordItems::const_iterator it = items.find(make_pair(_name, _type));
 	if (it == items.end())
 		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 
-	lastValue = it->second.values.getMatrix( 0 );
+	if (it->second.values.getNumPoints() == 0)
+		firstValue = Matrix();
+	else
+		firstValue = it->second.values.getMatrix( 0 );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -236,7 +247,10 @@ returnValue LogRecord::getLast(	uint _name,
 	if (it == items.end())
 		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 
-	lastValue = it->second.values.getMatrix(it->second.values.getNumPoints() - 1);
+	if (it->second.values.getNumPoints() == 0)
+		lastValue = Matrix();
+	else
+		lastValue = it->second.values.getMatrix(it->second.values.getNumPoints() - 1);
 
 	return SUCCESSFUL_RETURN;
 }
@@ -252,7 +266,7 @@ returnValue LogRecord::setAll(	uint _name,
 	if (it == items.end())
 		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 
-	if (it->second.values.getNumPoints( ) <= 0)
+	if (it->second.values.getNumPoints( ) == 0)
 		return it->second.values.init( );
 
 	switch( frequency )
@@ -333,11 +347,9 @@ returnValue LogRecord::updateLogRecord( LogRecord& _record
 			continue;
 
 		it2 = items.find( it1->first );
-		if ( it2!= items.end())
-		{
-			it1->second.values = it2->second.values;
-			it1->second.label = it2->second.label;
-		}
+		if ( it2 != items.end() )
+			if (it2->second.values.getNumPoints() > 0)
+				it1->second.values = it2->second.values;
 	}
 
 	return SUCCESSFUL_RETURN;

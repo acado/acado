@@ -543,7 +543,7 @@ class LogRecord
 		 */
 		returnValue getFirst(	uint _name,
 								LogRecordItemType _type,
-								Matrix& lastValue
+								Matrix& firstValue
 								) const;
 
 		/** Gets numerical value at last time instant of the item

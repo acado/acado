@@ -631,7 +631,7 @@ returnValue SCPmethod::printRuntimeProfile() const
 
 returnValue SCPmethod::setupLogging( )
 {
-	LogRecord tmp(LOG_AT_EACH_ITERATION, PS_DEFAULT);
+	LogRecord tmp(LOG_AT_EACH_ITERATION, PS_PLAIN);
 
 	tmp.addItem( LOG_TIME_SQP_ITERATION,         "TIME FOR THE WHOLE SQP ITERATION     [sec]" );
 	tmp.addItem( LOG_TIME_CONDENSING,            "TIME FOR CONDENSING                  [sec]" );
@@ -648,17 +648,16 @@ returnValue SCPmethod::setupLogging( )
 
 	LogRecord iterationOutput(LOG_AT_EACH_ITERATION, PS_DEFAULT);
 
-	iterationOutput.addItem( LOG_NUM_SQP_ITERATIONS,"# QP iterations");
+	iterationOutput.addItem( LOG_NUM_SQP_ITERATIONS,"SQP iteration");
 	iterationOutput.addItem( LOG_KKT_TOLERANCE,"KKT tolerance");
 	iterationOutput.addItem( LOG_LINESEARCH_STEPLENGTH,"line search parameter");
 	iterationOutput.addItem( LOG_OBJECTIVE_VALUE,"objective value");
 	iterationOutput.addItem( LOG_MERIT_FUNCTION_VALUE,"merit function value");
-//	iterationOutput.addItem( LOG_IS_QP_RELAXED,"QP relaxation");
-//	iterationOutput.addItem( LOG_NUM_QP_ITERATIONS,"No. QP iterations");
-// 	iterationOutput.addItem( LOG_TIME_SQP_ITERATION,"computation time");
+	iterationOutput.addItem( LOG_IS_QP_RELAXED,"QP relaxation");
+	iterationOutput.addItem( LOG_NUM_QP_ITERATIONS,"No. QP iterations");
 	
 	outputLoggingIdx = addLogRecord( iterationOutput );
-	
+
 	return SUCCESSFUL_RETURN;
 }
 

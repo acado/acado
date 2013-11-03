@@ -90,19 +90,6 @@ class Logging
 		int addLogRecord(	LogRecord& record
 							);
 
-
-		/** Returns the record with given index from the log collection.
-		 *
-		 *	@param[in]  idx			Index of desired record.
-		 *	@param[out] _record		Desired record.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_INDEX_OUT_OF_BOUNDS 
-		 */
-		returnValue getLogRecord(	uint idx,
-									LogRecord& _record
-									) const;
-
 		/** Returns the record with certain index from the log collection. 
 		 *	This index is not provided when calling the function, but 
 		 *	rather obtained by using the alias index of the record. If the

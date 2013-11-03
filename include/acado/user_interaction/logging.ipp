@@ -106,7 +106,7 @@ inline returnValue Logging::setAll(	LogName _name,
 		if (logCollection[ it ].hasItem( _name ) == true)
 			return logCollection[ it ].setAll(_name, values); 
 
-	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -120,7 +120,7 @@ inline returnValue Logging::setLast(	LogName _name,
 		if (logCollection[ it ].hasItem( _name ) == true)
 			return logCollection[ it ].setLast(_name, value, time); 
 
-	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	return SUCCESSFUL_RETURN;
 }
 
 inline returnValue Logging::setLast(	LogName _name,
@@ -130,9 +130,9 @@ inline returnValue Logging::setLast(	LogName _name,
 {
 	for (unsigned it = 0; it < logCollection.size(); ++it)
 		if (logCollection[ it ].hasItem( _name ) == true)
-			return logCollection[ it ].setLast(_name, value, time); 
+			return logCollection[ it ].setLast(_name, value, time);
 
-	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	return SUCCESSFUL_RETURN;
 }
 
 CLOSE_NAMESPACE_ACADO

@@ -224,7 +224,7 @@ class AlgorithmicBase
 		 *	@param[out] values	All numerical values at all time instants of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue getAll(	LogName _name,
 									MatrixVariablesGrid& values
@@ -240,22 +240,22 @@ class AlgorithmicBase
 		 *	@param[out] firstValue	Numerical value at first time instant of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue getFirst(	LogName _name,
 										Matrix& firstValue
 										) const;
 
 		/** Gets numerical value at first time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid). 
-		 *	If this item exists in more than one record, the first one is choosen 
+		 *	with given name (converts internally used Matrix into VariablesGrid).
+		 *	If this item exists in more than one record, the first one is choosen
 		 *	as they are expected to have identical values anyhow.
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] firstValue	Numerical value at first time instant of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue getFirst(	LogName _name,
 										VariablesGrid& firstValue
@@ -271,22 +271,22 @@ class AlgorithmicBase
 		 *	@param[out] lastValue	Numerical value at last time instant of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue getLast(	LogName _name,
 									Matrix& lastValue
 									) const;
 
 		/** Gets numerical value at last time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid). 
-		 *	If this item exists in more than one record, the first one is choosen 
+		 *	with given name (converts internally used Matrix into VariablesGrid).
+		 *	If this item exists in more than one record, the first one is choosen
 		 *	as they are expected to have identical values anyhow.
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] lastValue	Numerical value at last time instant of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue getLast(	LogName _name,
 									VariablesGrid& lastValue
@@ -434,7 +434,7 @@ class AlgorithmicBase
 		 *	@param[in]  values	All numerical values at all time instants of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_COLLECTION_CORRUPTED 
+		 *	        RET_LOG_COLLECTION_CORRUPTED
 		 */
 		inline returnValue setAll(	LogName _name,
 									const MatrixVariablesGrid& values
@@ -449,7 +449,7 @@ class AlgorithmicBase
 		 *	@param[in]  time		Time label of the instant.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
 									int lastValue,
@@ -464,7 +464,7 @@ class AlgorithmicBase
 		 *	@param[in]  time		Time label of the instant.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
 									double lastValue,
@@ -479,7 +479,7 @@ class AlgorithmicBase
 		 *	@param[in]  time		Time label of the instant.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
 									const Vector& lastValue,
@@ -494,7 +494,7 @@ class AlgorithmicBase
 		 *	@param[in]  time		Time label of the instant.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
 									const Matrix& lastValue,
@@ -509,7 +509,7 @@ class AlgorithmicBase
 		 *	@param[in]  time		Time label of the instant.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
 									const VariablesGrid& lastValue,
@@ -522,7 +522,7 @@ class AlgorithmicBase
 		 *	@param[in] record	Record to be added.
 		 *
 		 *  \return >= 0: index of added record, \n
-		 *	        -RET_LOG_COLLECTION_CORRUPTED 
+		 *	        -RET_LOG_COLLECTION_CORRUPTED
 		 */
 		inline int addLogRecord(	LogRecord& _record
 									);
