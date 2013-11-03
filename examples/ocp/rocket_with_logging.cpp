@@ -40,6 +40,8 @@ int main( ){
 
     USING_NAMESPACE_ACADO
 
+    Logger::instance().setLogLevel( LVL_DEBUG );
+
     // INTRODUCE THE VARIABLES:
     // -------------------------
     DifferentialState     s,v,m;
