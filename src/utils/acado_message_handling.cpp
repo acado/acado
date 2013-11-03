@@ -426,7 +426,11 @@ returnValue::~returnValue() {
 				delete data;
 			}
 
+#ifdef ACADO_WITH_TESTING
+			if (level == LVL_FATAL or level == LVL_ERROR)
+#else
 			if (level == LVL_FATAL)
+#endif
 			{
 				exit( 1 );
 			}
