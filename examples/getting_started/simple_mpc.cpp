@@ -35,12 +35,12 @@
 #include <acado_toolkit.hpp>
 #include <include/acado_gnuplot/gnuplot_window.hpp>
 
-
-int main( ){
+using namespace std;
 
 USING_NAMESPACE_ACADO
 
-
+int main( )
+{
     // INTRODUCE THE VARIABLES:
     // -------------------------
 	DifferentialState xB;
