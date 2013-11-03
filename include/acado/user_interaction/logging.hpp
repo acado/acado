@@ -104,7 +104,7 @@ class Logging
 									) const;
 
 		/** Updates all items with the record given as argument. In doing so,
-		 *	it is checked for each item whether it is contained within one of 
+		 *	it is checked for each item whether it is contained within one of
 		 *	of the records of the collection; and if so, the numerical values
 		 *	are copied into the argument record.
 		 *

@@ -338,18 +338,17 @@ returnValue LogRecord::setLast(	uint _name,
 returnValue LogRecord::updateLogRecord( LogRecord& _record
 										) const
 {
-	LogRecordItems::iterator it1;
-	LogRecordItems::const_iterator it2;
+	LogRecordItems::iterator it;
 
-	for (it1 = _record.items.begin(); it1 != _record.items.end(); ++it1)
+	for (it = _record.items.begin(); it != _record.items.end(); ++it)
 	{
-		if (it1->second.writeProtection == true)
+		if (it->second.writeProtection == true)
 			continue;
 
-		it2 = items.find( it1->first );
-		if ( it2 != items.end() )
-			if (it2->second.values.getNumPoints() > 0)
-				it1->second.values = it2->second.values;
+		LogRecordItems::const_iterator cit = items.find( it->first );
+
+		if (cit != items.end())
+			it->second = cit->second;
 	}
 
 	return SUCCESSFUL_RETURN;

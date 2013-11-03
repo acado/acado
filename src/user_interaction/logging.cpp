@@ -89,10 +89,15 @@ returnValue Logging::getLogRecord(	LogRecord& _record
 returnValue Logging::updateLogRecord(	LogRecord& _record
 										) const
 {
-	if (_record.aliasIdx < 0 || _record.aliasIdx >= (int)(logCollection.size() - 1))
-		return RET_INVALID_ARGUMENTS;
+	for (unsigned ind = 0; ind < logCollection.size(); ++ind)
+	{
+		if (logCollection[ ind ].getLogFrequency() != _record.getLogFrequency())
+			continue;
 
-	return logCollection[ _record.aliasIdx ].updateLogRecord( _record );
+		logCollection[ ind ].updateLogRecord( _record );
+	}
+
+	return SUCCESSFUL_RETURN;
 }
 
 uint Logging::getNumLogRecords( ) const
