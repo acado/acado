@@ -42,7 +42,7 @@ BEGIN_NAMESPACE_ACADO
 
 inline uint OptionsList::getNumber( ) const
 {
-	return number;
+	return items.size();
 }
 
 
@@ -50,10 +50,11 @@ inline BooleanType OptionsList::hasOption(	OptionsName name,
 											OptionsItemType type
 											) const
 {
-	if ( find( name,type) != 0 )
-		return BT_TRUE;
-	else
-		return BT_FALSE;
+	OptionItems::const_iterator it = items.find(std::make_pair(name, type));
+	if (it != items.end())
+		return true;
+		
+	return false;
 }
 
 

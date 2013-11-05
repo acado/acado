@@ -26,21 +26,17 @@
 
 /**
  *    \file include/acado/user_interaction/options.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
 #ifndef ACADO_TOOLKIT_OPTIONS_HPP
 #define ACADO_TOOLKIT_OPTIONS_HPP
 
-
 #include <acado/utils/acado_utils.hpp>
 #include <acado/user_interaction/options_list.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
-
 
 /**
  *	\brief Provides a generic way to set and pass user-specified options.
@@ -64,7 +60,7 @@ BEGIN_NAMESPACE_ACADO
  *	functionality is modified or new functionality is added to this class, the 
  *	AlgorithmicBase class has to be adapted accordingly.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class Options
 {
@@ -86,24 +82,9 @@ class Options
 		Options(	const OptionsList& _optionsList
 					);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 */
-		Options(	const Options& rhs
-					);
-
 		/** Destructor.
 		 */
 		virtual ~Options( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 */
-		Options& operator=(	const Options& rhs
-							);
-
 
 		/** Adds an additional OptionsList to internal array.
 		 *
@@ -268,7 +249,7 @@ class Options
 		 *
 		 *  \return Total number of option lists
 		 */
-		inline uint getNumOptionsLists( ) const;
+		uint getNumOptionsLists( ) const;
 
 
 		/** Prints a list of all available options of all option lists.
@@ -407,21 +388,13 @@ class Options
     //
 	protected:
 
-		OptionsList** optionsList;			/**< Array consisting of OptionsLists. */
-		uint nOptionsList;					/**< Total number of OptionsLists. */
+		/** A list consisting of OptionsLists. */
+		std::vector< OptionsList > lists;
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
-
-#include <acado/user_interaction/options.ipp>
-
-
-
 #endif	// ACADO_TOOLKIT_OPTIONS_HPP
-
 
 /*
  *	end of file

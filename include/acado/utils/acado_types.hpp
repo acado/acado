@@ -294,17 +294,6 @@ enum PrintLevel
                      *   debugging the code.                                                */
 };
 
-
-/** Summarises all possible types of OptionItems.
- */
-enum OptionsItemType
-{
-	OIT_INT,			/**< Option item comprising a value of integer type. */
-	OIT_DOUBLE,			/**< Option item comprising a value of double type.  */
-	OIT_UNKNOWN			/**< Option item comprising a value of unknown type. */
-};
-
-
 enum LogRecordItemType{
 
     LRT_ENUM,
