@@ -43,8 +43,11 @@ fid = fopen('./bin/include/acado/code_generation/templates/templates.hpp', 'w+')
 
 fprintf(fid, '%s \n', ' #ifndef ACADO_TOOLKIT_TEMPLATES_HPP');
 fprintf(fid, '%s \n\n', ' #define ACADO_TOOLKIT_TEMPLATES_HPP');
-fprintf(fid, '%s "%s/../../src/code_generation/templates" \n\n', ' #define TEMPLATE_PATHS', pwd);
-
+tempString = sprintf('%s "%s/../../src/code_generation/templates" \n\n', ' #define TEMPLATE_PATHS', pwd);
+if ispc
+    tempString = regexprep( tempString, '\', '/' );
+end
+fprintf(fid, '%s', tempString);
 
 for i = 1:length(templates)
     tempString = sprintf(' #define %s "%s" \n\n', char(templates(i)), char(templateFiles(i)));
