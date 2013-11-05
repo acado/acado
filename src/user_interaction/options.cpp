@@ -81,6 +81,13 @@ returnValue Options::get(	OptionsName name,
 	return lists[0].get( name,value );
 }
 
+returnValue Options::get(	OptionsName name,
+							std::string& value
+							) const
+{
+	return lists[0].get( name,value );
+}
+
 
 returnValue Options::get(	uint idx,
 							OptionsName name,
@@ -105,6 +112,16 @@ returnValue Options::get(	uint idx,
 	return lists[idx].get( name,value );
 }
 
+returnValue Options::get(	uint idx,
+							OptionsName name,
+							std::string& value
+							) const
+{
+	if ( idx >= getNumOptionsLists( ) )
+		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
+
+	return lists[idx].get( name,value );
+}
 
 returnValue Options::set(	OptionsName name,
 							int value
@@ -121,6 +138,12 @@ returnValue Options::set(	OptionsName name,
 	return lists[0].set( name,value );
 }
 
+returnValue Options::set(	OptionsName name,
+							std::string& value
+							)
+{
+	return lists[0].set( name,value );
+}
 
 returnValue Options::set(	uint idx,
 							OptionsName name,
@@ -142,6 +165,17 @@ returnValue Options::set(	uint idx,
 	if ( idx >= getNumOptionsLists( ) )
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 	
+	return lists[idx].set( name,value );
+}
+
+returnValue Options::set(	uint idx,
+							OptionsName name,
+							std::string& value
+							)
+{
+	if ( idx >= getNumOptionsLists( ) )
+		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
+
 	return lists[idx].set( name,value );
 }
 

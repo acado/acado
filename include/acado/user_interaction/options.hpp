@@ -117,6 +117,18 @@ class Options
 							double& value
 							) const;
 
+		/** Returns value of an existing option item of string type.
+		 *
+		 *	@param[in]  name	Name of option item.
+		 *	@param[out] value	Value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS
+		 */
+		returnValue get(	OptionsName name,
+							std::string& value
+							) const;
+
 		/** Returns value of an existing option item of integer type 
 		 *	within the option list of given index.
 		 *
@@ -149,6 +161,21 @@ class Options
 							double& value
 							) const;
 
+		/** Returns value of an existing option item of string type
+		 *	within the option list of given index.
+		 *
+		 *	@param[in]  idx		Index of option list.
+		 *	@param[in]  name	Name of option item.
+		 *	@param[out] value	Value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS, \n
+		 *	        RET_INDEX_OUT_OF_BOUNDS
+		 */
+		returnValue get(	uint idx,
+							OptionsName name,
+							std::string& value
+							) const;
 
 		/** Sets value of an existing option item of integer type to a given value.
 		 *
@@ -174,6 +201,19 @@ class Options
 		 */
 		returnValue set(	OptionsName name,
 							double value
+							);
+
+		/** Sets value of an existing option item of string type to a given value.
+		 *
+		 *	@param[in] name		Name of option item.
+		 *	@param[in] value	New value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS, \n
+		 *          RET_OPTIONS_LIST_CORRUPTED
+		 */
+		returnValue set(	OptionsName name,
+							std::string& value
 							);
 
 		/** Sets value of an existing option item of integer type 
@@ -208,6 +248,23 @@ class Options
 		returnValue set(	uint idx,
 							OptionsName name,
 							double value
+							);
+
+		/** Sets value of an existing option item of string type
+		 *	within the option list of given index to a given value.
+		 *
+		 *	@param[in]  idx		Index of option list.
+		 *	@param[in] name		Name of option item.
+		 *	@param[in] value	New value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS, \n
+		 *          RET_OPTIONS_LIST_CORRUPTED, \n
+		 *	        RET_INDEX_OUT_OF_BOUNDS
+		 */
+		returnValue set(	uint idx,
+							OptionsName name,
+							std::string& value
 							);
 
 
