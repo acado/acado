@@ -26,8 +26,8 @@
 
 /**
  *    \file src/user_interaction/options_list.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 12.06.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 
@@ -103,7 +103,6 @@ returnValue OptionsList::printOptionsList( ) const
 
 		it->second->print( cout );
 		cout << endl;
-
 	}
 
 	cout << endl;

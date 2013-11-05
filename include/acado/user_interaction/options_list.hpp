@@ -238,7 +238,9 @@ inline OptionsItemType OptionsList::getType< std::string >() const
 { return OIT_STRING; }
 
 template< typename T >
-inline returnValue OptionsList::add( OptionsName name, T& value )
+inline returnValue OptionsList::add(	OptionsName name,
+										T& value
+										)
 {
 	if (getType< T >() == OIT_UNKNOWN)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -251,8 +253,8 @@ inline returnValue OptionsList::add( OptionsName name, T& value )
 
 template< typename T >
 inline returnValue OptionsList::get(	OptionsName name,
-								T& value
-								) const
+										T& value
+										) const
 {
 	if (getType< T >() == OIT_UNKNOWN)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -291,15 +293,11 @@ inline returnValue OptionsList::set(	OptionsName name,
 	return ACADOERROR( RET_OPTION_DOESNT_EXIST );
 }
 
-
 CLOSE_NAMESPACE_ACADO
-
 
 #include <acado/user_interaction/options_list.ipp>
 
-
 #endif	// ACADO_TOOLKIT_OPTIONS_LIST_HPP
-
 
 /*
  *	end of file
