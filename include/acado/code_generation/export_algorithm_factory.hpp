@@ -57,7 +57,7 @@ class ExportAlgorithmFactory
 {
 public:
 	/** Helper type. */
-	typedef AlgorithmBase* (*exportAlgorithmCreator)(UserInteraction* _userInteraction, const String &_commonHeaderName);
+	typedef AlgorithmBase* (*exportAlgorithmCreator)(UserInteraction* _userInteraction, const std::string &_commonHeaderName);
 
 	/** Static creator function. */
 	static ExportAlgorithmFactory& instance()
@@ -92,7 +92,7 @@ public:
 
 	/** Function to create an instance of an algorithm. */
 	AlgorithmBase* createAlgorithm(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName,
+									const std::string& _commonHeaderName,
 									const AlgorithmType& id)
 	{
 		typename idToProductMap::const_iterator it = associations_.find( id );

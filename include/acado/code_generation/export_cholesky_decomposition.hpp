@@ -57,7 +57,7 @@ public:
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
 	ExportCholeskyDecomposition(	UserInteraction* _userInteraction = 0,
-									const String& _commonHeaderName = ""
+									const std::string& _commonHeaderName = ""
 									);
 
 	/** Destructor. */
@@ -68,7 +68,7 @@ public:
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	returnValue init(	const String& _name,
+	returnValue init(	const std::string& _name,
 						unsigned _dim,
 						BooleanType _unrolling = BT_FALSE
 						);
@@ -108,7 +108,7 @@ public:
 									);
 
 	/** Get name of the function that perform the decomposition. */
-	const String getName();
+	const std::string getName();
 
 private:
 

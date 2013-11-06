@@ -68,7 +68,7 @@ public:
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
 	ExportNLPSolver(	UserInteraction* _userInteraction = 0,
-						const String& _commonHeaderName = ""
+						const std::string& _commonHeaderName = ""
 						);
 
 	/** Destructor. */
@@ -245,7 +245,7 @@ protected:
 	ExportVariable objAuxVar, objValueIn, objValueOut;
 	ExportAcadoFunction evaluateLSQ;
 	ExportAcadoFunction evaluateLSQEndTerm;
-	String evaluateExternLSQ, evaluateExternLSQEndTerm;
+	std::string evaluateExternLSQ, evaluateExternLSQEndTerm;
 
 	BooleanType externObjective;
 

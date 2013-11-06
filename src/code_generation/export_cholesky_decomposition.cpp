@@ -39,13 +39,13 @@ using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 ExportCholeskyDecomposition::ExportCholeskyDecomposition(	UserInteraction* _userInteraction,
-															const String& _commonHeaderName
+															const std::string& _commonHeaderName
 															) : ExportAlgorithm(_userInteraction, _commonHeaderName)
 {
 	init("choleskyDecomposition", 0, BT_FALSE);
 }
 
-returnValue ExportCholeskyDecomposition::init(	const String& _name,
+returnValue ExportCholeskyDecomposition::init(	const std::string& _name,
 												unsigned _dim,
 												BooleanType _unrolling
 												)
@@ -125,7 +125,7 @@ returnValue ExportCholeskyDecomposition::getCode(	ExportStatementBlock& code
 	return SUCCESSFUL_RETURN;
 }
 
-const String ExportCholeskyDecomposition::getName()
+const std::string ExportCholeskyDecomposition::getName()
 {
 	return fcn.getName();
 }

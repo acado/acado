@@ -38,13 +38,13 @@ using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
-ExportQpDunesInterface::ExportQpDunesInterface(	const String& _fileName,
-												const String& _commonHeaderName,
-												const String& _realString,
-												const String& _intString,
+ExportQpDunesInterface::ExportQpDunesInterface(	const std::string& _fileName,
+												const std::string& _commonHeaderName,
+												const std::string& _realstd::string,
+												const std::string& _intstd::string,
 												int _precision,
-												const String& _commentString
-						) : ExportTemplatedFile(QPDUNES_TEMPLATE, _fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
+												const std::string& _commentstd::string
+						) : ExportTemplatedFile(QPDUNES_TEMPLATE, _fileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string)
 {}
 
 returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,

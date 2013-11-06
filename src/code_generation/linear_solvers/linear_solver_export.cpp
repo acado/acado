@@ -42,7 +42,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExportLinearSolver::ExportLinearSolver(	UserInteraction* _userInteraction,
-										const String& _commonHeaderName
+										const std::string& _commonHeaderName
 										) : ExportAlgorithm(_userInteraction, _commonHeaderName)
 {
 	REUSE = BT_TRUE;
@@ -80,14 +80,14 @@ returnValue ExportLinearSolver::init(	const uint newDim,
 										const BooleanType& unrolling
 										)
 {
-	return init(newDim, newDim, newDim, reuse, unrolling, String( "dim" ) << String( newDim ) << "_");
+	return init(newDim, newDim, newDim, reuse, unrolling, std::string( "dim" ) << std::string( newDim ) << "_");
 }
 
 
 returnValue ExportLinearSolver::init(	const uint newDim,
 										const BooleanType& reuse,
 										const BooleanType& unrolling,
-										const String& newId
+										const std::string& newId
 										)
 {
 	return init(newDim, newDim, newDim, reuse, unrolling, newId);
@@ -98,7 +98,7 @@ returnValue ExportLinearSolver::init(	unsigned _nRows,
 										unsigned _nBacksolves,
 										BooleanType _reuse,
 										BooleanType _unroll,
-										const String& _id
+										const std::string& _id
 										)
 {
 	ASSERT_RETURN(_nRows >= _nCols);
@@ -151,15 +151,15 @@ returnValue ExportLinearSolver::setUnrolling( const BooleanType& unrolling ) {
 } 
 
 
-const String ExportLinearSolver::getNameSolveFunction() {
+const std::string ExportLinearSolver::getNameSolveFunction() {
 	
-	return String( "solve_" ) << identifier << "system";
+	return std::string( "solve_" ) << identifier << "system";
 }
 
 
-const String ExportLinearSolver::getNameSolveReuseFunction() {
+const std::string ExportLinearSolver::getNameSolveReuseFunction() {
 	
-	return String( "solve_" ) << identifier << "system_reuse";
+	return std::string( "solve_" ) << identifier << "system_reuse";
 }
 
 

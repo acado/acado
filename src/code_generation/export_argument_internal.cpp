@@ -57,13 +57,13 @@ ExportArgumentInternal::ExportArgumentInternal( ) : ExportDataInternal()
 	callItByValue = BT_FALSE;
 }
 
-ExportArgumentInternal::ExportArgumentInternal(	const String& _name,
+ExportArgumentInternal::ExportArgumentInternal(	const std::string& _name,
 												const matrixPtr& _data,
 												ExportType _type,
 												ExportStruct _dataStruct,
 												BooleanType _callItByValue,
 												const ExportIndex& _addressIdx,
-												const String& _prefix
+												const std::string& _prefix
 												)
 	: ExportDataInternal(_name, _type, _dataStruct, _prefix)
 {
@@ -107,12 +107,12 @@ ExportArgument ExportArgumentInternal::getAddress(	const ExportIndex& rowIdx,
 }
 
 
-const String ExportArgumentInternal::getAddressString(	BooleanType withDataStruct
+const std::string ExportArgumentInternal::getAddressstd::string(	BooleanType withDataStruct
 														) const
 {
 	stringstream s;
 
-	String nameStr;
+	std::string nameStr;
 
 	if (withDataStruct == BT_TRUE)
 		nameStr = getFullName();
@@ -131,7 +131,7 @@ const String ExportArgumentInternal::getAddressString(	BooleanType withDataStruc
 		s << "&(" << nameStr.getName() << "[ " << addressIdx.get().getName()  << " ])";
 	}
 
-	String str( s.str().c_str() );
+	std::string str( s.str().c_str() );
 
 	return str;
 }
@@ -184,8 +184,8 @@ returnValue ExportArgumentInternal::callByValue( )
 
 
 returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
-															const String& _realString,
-															const String& _intString,
+															const std::string& _realstd::string,
+															const std::string& _intstd::string,
 															int _precision
 															) const
 {
@@ -199,7 +199,7 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
 
 	if ( ( isCalledByValue() == BT_TRUE ) && ( getDim() == 1 ) )
 	{
-		acadoFPrintf( file,"%s %s", getTypeString( _realString,_intString ).getName(),name.getName() );
+		acadoFPrintf( file,"%s %s", getTypestd::string( _realstd::string,_intstd::string ).getName(),name.getName() );
 	}
 	else
 	{
@@ -223,7 +223,7 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
 
 		acadoFPrintf(file," */\n");
 
-		acadoFPrintf( file,"%s %s[ %d ]", getTypeString( _realString,_intString ).getName(),name.getName(),getDim() );
+		acadoFPrintf( file,"%s %s[ %d ]", getTypestd::string( _realstd::string,_intstd::string ).getName(),name.getName(),getDim() );
 	}
 
 	if ( isGiven() == BT_FALSE )

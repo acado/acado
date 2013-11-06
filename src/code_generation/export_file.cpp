@@ -42,21 +42,21 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportFile::ExportFile(	const String& _fileName,
-						const String& _commonHeaderName,
-						const String& _realString,
-						const String& _intString,
+ExportFile::ExportFile(	const std::string& _fileName,
+						const std::string& _commonHeaderName,
+						const std::string& _realstd::string,
+						const std::string& _intstd::string,
 						int _precision,
-						const String& _commentString
+						const std::string& _commentstd::string
 						) : ExportStatementBlock( )
 {
 	fileName         = _fileName;
 	commonHeaderName = _commonHeaderName;
 	
-	realString    = _realString;
-	intString     = _intString;
+	realstd::string    = _realstd::string;
+	intstd::string     = _intstd::string;
 	precision     = _precision;
-	commentString = _commentString;
+	commentstd::string = _commentstd::string;
 }
 
 
@@ -93,7 +93,7 @@ returnValue ExportFile::exportCode( ) const
 	if ( file == 0 )
 		return ACADOERROR( RET_DOES_DIRECTORY_EXISTS );
 
-	returnValue returnvalue = ExportStatementBlock::exportCode( file,realString,intString,precision );
+	returnValue returnvalue = ExportStatementBlock::exportCode( file,realstd::string,intstd::string,precision );
 
 	if ( file != 0 )
 		fclose( file );
@@ -114,10 +114,10 @@ returnValue ExportFile::copy(	const ExportFile& arg
 	fileName         = arg.fileName;
 	commonHeaderName = arg.commonHeaderName;
 
-	realString    = arg.realString;
-	intString     = arg.intString;
+	realstd::string    = arg.realstd::string;
+	intstd::string     = arg.intstd::string;
 	precision     = arg.precision;
-	commentString = arg.commentString;
+	commentstd::string = arg.commentstd::string;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -130,10 +130,10 @@ FILE* ExportFile::openFile( ) const
 	if ( file == 0 )
 		return 0;
 
-	if ( commentString.isEmpty() == BT_TRUE )
+	if ( commentstd::string.isEmpty() == BT_TRUE )
 		acadoPrintAutoGenerationNotice( file );
 	else
-		acadoPrintAutoGenerationNotice( file,commentString.getName() );
+		acadoPrintAutoGenerationNotice( file,commentstd::string.getName() );
 
 	if ( commonHeaderName.isEmpty() == BT_FALSE )
 		acadoFPrintf( file, "#include \"%s\"\n\n\n",commonHeaderName.getName() );

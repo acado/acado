@@ -39,17 +39,17 @@ using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 
-ExportAuxiliaryFunctions::ExportAuxiliaryFunctions(	const String& _headerFileName,
-													const String& _sourceFileName,
-													const String& _moduleName,
-													const String& _commonHeaderName,
-													const String& _realString,
-													const String& _intString,
+ExportAuxiliaryFunctions::ExportAuxiliaryFunctions(	const std::string& _headerFileName,
+													const std::string& _sourceFileName,
+													const std::string& _moduleName,
+													const std::string& _commonHeaderName,
+													const std::string& _realstd::string,
+													const std::string& _intstd::string,
 													int _precision,
-													const String& _commentString
+													const std::string& _commentstd::string
 													)
-	: source(AUXILIARY_FUNCTIONS_SOURCE, _sourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
-	  header(AUXILIARY_FUNCTIONS_HEADER, _headerFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
+	: source(AUXILIARY_FUNCTIONS_SOURCE, _sourceFileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string),
+	  header(AUXILIARY_FUNCTIONS_HEADER, _headerFileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string),
 	  moduleName( _moduleName )
 {}
 

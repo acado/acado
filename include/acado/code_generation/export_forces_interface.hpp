@@ -52,20 +52,20 @@ public:
 	 *	@param[in] _templateName		Name of a template.
 	 *	@param[in] _fileName			Name of exported file.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
-	 *	@param[in] _realString			String to be used to declare real variables.
-	 *	@param[in] _intString			String to be used to declare integer variables.
+	 *	@param[in] _realstd::string			std::string to be used to declare real variables.
+	 *	@param[in] _intstd::string			std::string to be used to declare integer variables.
 	 *	@param[in] _precision			Number of digits to be used for exporting real values.
-	 *	@param[in] _commentString		String to be used for exporting comments.
+	 *	@param[in] _commentstd::string		std::string to be used for exporting comments.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	ExportForcesInterface(	const String& _templateName,
-							const String& _fileName,
-							const String& _commonHeaderName = "",
-							const String& _realString = "real_t",
-							const String& _intString = "int",
+	ExportForcesInterface(	const std::string& _templateName,
+							const std::string& _fileName,
+							const std::string& _commonHeaderName = "",
+							const std::string& _realstd::string = "real_t",
+							const std::string& _intstd::string = "int",
 							int _precision = 16,
-							const String& _commentString = emptyConstString
+							const std::string& _commentstd::string = emptyConststd::string
 							);
 
 	/** Destructor. */

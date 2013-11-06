@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExportAlgorithm::ExportAlgorithm(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : AlgorithmicBase( _userInteraction )
 {
 	setDimensions( 0,0,0,0 );
@@ -166,11 +166,11 @@ uint ExportAlgorithm::getNYN( ) const
 
 
 
-FILE* ExportAlgorithm::openFile(	const String& dirName,
-									const String& fileName
+FILE* ExportAlgorithm::openFile(	const std::string& dirName,
+									const std::string& fileName
 									) const
 {
-	String fullFileName( dirName );
+	std::string fullFileName( dirName );
     fullFileName << "/" << fileName;
 
     FILE* file = acadoFOpen( fullFileName.getName(), "w" );

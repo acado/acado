@@ -75,7 +75,7 @@ class ExportFunctionCall : public ExportStatement
 		 *	@param[in] _argument8	Calling argument no. 8.
 		 *	@param[in] _argument9	Calling argument no. 9.
 		 */
-		ExportFunctionCall(	const String& _name = "acadoFcn",
+		ExportFunctionCall(	const std::string& _name = "acadoFcn",
 							const ExportArgument& _argument1 = emptyConstExportArgument,
 							const ExportArgument& _argument2 = emptyConstExportArgument,
 							const ExportArgument& _argument3 = emptyConstExportArgument,
@@ -153,7 +153,7 @@ class ExportFunctionCall : public ExportStatement
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue init(	const String& _name = "defaultFunctionName",
+		returnValue init(	const std::string& _name = "defaultFunctionName",
 							const ExportArgument& _argument1 = emptyConstExportArgument,
 							const ExportArgument& _argument2 = emptyConstExportArgument,
 							const ExportArgument& _argument3 = emptyConstExportArgument,
@@ -198,16 +198,16 @@ class ExportFunctionCall : public ExportStatement
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export function call.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
 		virtual returnValue exportCode(	FILE* file,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+										const std::string& _realstd::string = "real_t",
+										const std::string& _intstd::string = "int",
 										int _precision = 16
 										) const;
 
@@ -230,13 +230,13 @@ class ExportFunctionCall : public ExportStatement
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue	setName(	const String& _name
+		returnValue	setName(	const std::string& _name
 								);
 
 
     protected:
 
-		String name;								/**< Name of function to be called. */
+		std::string name;								/**< Name of function to be called. */
 		ExportArgumentList functionArguments;		/**< List of calling arguments. */
 };
 

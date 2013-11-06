@@ -42,10 +42,10 @@ public:
 	 *	@param[in] _dataStruct		Global data struct to which the data object belongs to (if any).
 	 *	@param[in] _prefix			Optional prefix that will be put in front of the name.
 	 */
-	explicit ExportDataInternal(	const String& _name = emptyConstString,
+	explicit ExportDataInternal(	const std::string& _name = emptyConststd::string,
 									ExportType _type = REAL,
 									ExportStruct _dataStruct = ACADO_LOCAL,
-									const String& _prefix = emptyConstString
+									const std::string& _prefix = emptyConststd::string
 									);
 
 	/** Destructor.
@@ -60,7 +60,7 @@ public:
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	returnValue	setName(	const String& _name
+	returnValue	setName(	const std::string& _name
 							);
 
 	/** Sets the data type of the data object.
@@ -87,13 +87,13 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	returnValue setPrefix(	const String& _prefix
+	returnValue setPrefix(	const std::string& _prefix
 							);
 	/** Returns the name of the data object.
 	 *
 	 *	\return Name of the data object
 	 */
-	String getName( ) const;
+	std::string getName( ) const;
 
 	/** Returns the data type of the data object.
 	 *
@@ -103,13 +103,13 @@ public:
 
 	/** Returns a string containing the data type of the data object.
 	 *
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+	 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 	 *
-	 *	\return String containing the data type of the data object.
+	 *	\return std::string containing the data type of the data object.
 	 */
-	String getTypeString(	const String& _realString = "real_t",
-							const String& _intString = "int"
+	std::string getTypestd::string(	const std::string& _realstd::string = "real_t",
+							const std::string& _intstd::string = "int"
 							) const;
 
 	/** Returns the global data struct to which the data object belongs to.
@@ -120,37 +120,37 @@ public:
 
 	/** Returns a string containing the global data struct to which the data object belongs to.
 	 *
-	 *	\return String containing the global data struct to which the data object belongs to.
+	 *	\return std::string containing the global data struct to which the data object belongs to.
 	 */
-	String getDataStructString( ) const;
+	std::string getDataStructstd::string( ) const;
 
 	/** Returns a string which contains a prefix name.
 	 *
 	 *  \return Prefix name
 	 */
-	String getPrefix( ) const;
+	std::string getPrefix( ) const;
 
 	/** Returns the full name of the data object including the possible prefix
 	 *	of the global data struct.
 	 *
 	 *	\return Full name of the data object
 	 */
-	String getFullName( ) const;
+	std::string getFullName( ) const;
 
 
 	/** Exports declaration of the index variable. Its appearance can
 	 *  can be adjusted by various options.
 	 *
 	 *	@param[in] file				Name of file to be used to export function.
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+	 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 	 *	@param[in] _precision		Number of digits to be used for exporting real values.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	virtual returnValue exportDataDeclaration(	FILE* file,
-												const String& _realString = "real_t",
-												const String& _intString = "int",
+												const std::string& _realstd::string = "real_t",
+												const std::string& _intstd::string = "int",
 												int _precision = 16
 												) const = 0;
 
@@ -161,8 +161,8 @@ public:
 	 */
 	virtual BooleanType isGiven( ) const = 0;
 
-	virtual returnValue setDoc( const String& _doc );
-	virtual String getDoc( ) const;
+	virtual returnValue setDoc( const std::string& _doc );
+	virtual std::string getDoc( ) const;
 
 	//
 	// PROTECTED MEMBER FUNCTIONS:
@@ -174,22 +174,22 @@ protected:
 protected:
 
 	/** Name of the data object. */
-	String name;
+	std::string name;
 
 	/** Data type of the data object. */
 	ExportType type;
 
 	/** Prefix, which is added before the structure name*/
-	String prefix;
+	std::string prefix;
 
 	/** Global data struct to which the data object belongs to (if any). */
 	ExportStruct dataStruct;
 
 	/** Full name of the data object including the possible prefix of the global data struct. */
-	String fullName;
+	std::string fullName;
 
 	/** Description of the variable */
-	String description;
+	std::string description;
 };
 
 CLOSE_NAMESPACE_ACADO

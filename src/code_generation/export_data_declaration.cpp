@@ -92,12 +92,12 @@ ExportStatement* ExportDataDeclaration::clone( ) const
 
 
 returnValue ExportDataDeclaration::exportCode(	FILE* file,
-												const String& _realString,
-												const String& _intString,
+												const std::string& _realstd::string,
+												const std::string& _intstd::string,
 												int _precision
 												) const
 {
-	return data.exportDataDeclaration(file, _realString, _intString, _precision);
+	return data.exportDataDeclaration(file, _realstd::string, _intstd::string, _precision);
 }
 
 

@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 GaussLegendre4Export::GaussLegendre4Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ImplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 2;
@@ -71,7 +71,7 @@ GaussLegendre4Export::~GaussLegendre4Export( )
 //
 
 IntegratorExport* createGaussLegendre4Export(	UserInteraction* _userInteraction,
-												const String &_commonHeaderName)
+												const std::string &_commonHeaderName)
 {
 	Matrix AA(2,2);
 	Vector bb(2);

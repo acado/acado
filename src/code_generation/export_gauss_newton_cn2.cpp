@@ -41,7 +41,7 @@ using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 ExportGaussNewtonCN2::ExportGaussNewtonCN2(	UserInteraction* _userInteraction,
-														const String& _commonHeaderName
+														const std::string& _commonHeaderName
 														) : ExportNLPSolver( _userInteraction,_commonHeaderName )
 {}
 
@@ -742,7 +742,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		{
 			int offset = col * (2 * N - col + 1) / 2;
 
-			condensePrep.addComment( (String)"Column: " << col );
+			condensePrep.addComment( (std::string)"Column: " << col );
 			condensePrep.addFunctionCall(
 					moveGuE, evGu.getAddress(col * NX), E.getAddress(offset * NX)
 			);
@@ -1116,7 +1116,7 @@ returnValue ExportGaussNewtonCN2::setupVariables( )
 	if (initialStateFixed() == BT_TRUE)
 	{
 		x0.setup("x0",  NX, 1, REAL, ACADO_VARIABLES);
-		x0.setDoc( (String)"Current state feedback vector." );
+		x0.setDoc( (std::string)"Current state feedback vector." );
 		Dx0.setup("Dx0", NX, 1, REAL, ACADO_WORKSPACE);
 	}
 
@@ -1423,9 +1423,9 @@ returnValue ExportGaussNewtonCN2::setupEvaluation( )
 	ExportForLoop bLoop(index, 0, getNumQPvars());
 
 	bLoop.addStatement( prd == yVars.getRow( index ) );
-	bLoop.addStatement( (String)"if (" << prd.getFullName() << " > " << 1.0 / INFTY << ")\n" );
+	bLoop.addStatement( (std::string)"if (" << prd.getFullName() << " > " << 1.0 / INFTY << ")\n" );
 	bLoop.addStatement( kkt.getFullName() << " += fabs(" << lb.get(index, 0) << " * " << prd.getFullName() << ");\n" );
-	bLoop.addStatement( (String)"else if (" << prd.getFullName() << " < " << -1.0 / INFTY << ")\n" );
+	bLoop.addStatement( (std::string)"else if (" << prd.getFullName() << " < " << -1.0 / INFTY << ")\n" );
 	bLoop.addStatement( kkt.getFullName() << " += fabs(" << ub.get(index, 0) << " * " << prd.getFullName() << ");\n" );
 	getKKT.addStatement( bLoop );
 
@@ -1434,9 +1434,9 @@ returnValue ExportGaussNewtonCN2::setupEvaluation( )
 		ExportForLoop cLoop(index, 0, getNumStateBounds() + getNumComplexConstraints());
 
 		cLoop.addStatement( prd == yVars.getRow( getNumQPvars() + index ) );
-		cLoop.addStatement( (String)"if (" << prd.getFullName() << " > " << 1.0 / INFTY << ")\n" );
+		cLoop.addStatement( (std::string)"if (" << prd.getFullName() << " > " << 1.0 / INFTY << ")\n" );
 		cLoop.addStatement( kkt.getFullName() << " += fabs(" << lbA.get(index, 0) << " * " << prd.getFullName() << ");\n" );
-		cLoop.addStatement( (String)"else if (" << prd.getFullName() << " < " << -1.0 / INFTY << ")\n" );
+		cLoop.addStatement( (std::string)"else if (" << prd.getFullName() << " < " << -1.0 / INFTY << ")\n" );
 		cLoop.addStatement( kkt.getFullName() << " += fabs(" << ubA.get(index, 0) << " * " << prd.getFullName() << ");\n" );
 
 		getKKT.addStatement( cLoop );
@@ -1449,10 +1449,10 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 {
 	ExportQpOasesInterface* qpInterface;
 
-	String folderName = dynamic_cast< ExportModule* >( userInteraction )->getExportFolderName();
-	String moduleName = dynamic_cast< ExportModule* >( userInteraction )->getName();
-	String sourceFile = folderName + "/" + moduleName + "_qpoases_interface.cpp";
-	String headerFile = folderName + "/" + moduleName + "_qpoases_interface.hpp";
+	std::string folderName = dynamic_cast< ExportModule* >( userInteraction )->getExportFolderName();
+	std::string moduleName = dynamic_cast< ExportModule* >( userInteraction )->getName();
+	std::string sourceFile = folderName + "/" + moduleName + "_qpoases_interface.cpp";
+	std::string headerFile = folderName + "/" + moduleName + "_qpoases_interface.hpp";
 
 	qpInterface = new ExportQpOasesInterface(headerFile, sourceFile, "");
 
@@ -1590,7 +1590,7 @@ BooleanType ExportGaussNewtonCN2::performFullCondensing() const
 //
 
 ExportNLPSolver* createGaussNewtonCN2(	UserInteraction* _userInteraction,
-										const String& _commonHeaderName
+										const std::string& _commonHeaderName
 										)
 {
 	return new ExportGaussNewtonCN2(_userInteraction, _commonHeaderName);

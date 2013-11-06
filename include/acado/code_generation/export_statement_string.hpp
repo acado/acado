@@ -47,11 +47,11 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\ingroup AuxiliaryFunctionality
  *
- *  The class ExportStatementString allows to export code writing a string.
+ *  The class ExportStatementstd::string allows to export code writing a string.
  *
  *	\author Hans Joachim Ferreau, Boris Houska
  */
-class ExportStatementString : public ExportStatement
+class ExportStatementstd::string : public ExportStatement
 {
     //
     // PUBLIC MEMBER FUNCTIONS:
@@ -60,27 +60,27 @@ class ExportStatementString : public ExportStatement
 
 		/** Default constructor which optionally takes the string to be exported.
 		 *
-		 *	@param[in] _statementString		String to be exported.
+		 *	@param[in] _statementstd::string		std::string to be exported.
 		 */
-        ExportStatementString(	const String& _statementString = " "
+        ExportStatementstd::string(	const std::string& _statementstd::string = " "
 								);
 
 		/** Copy constructor (deep copy).
 		 *
 		 *	@param[in] arg		Right-hand side object.
 		 */
-        ExportStatementString(	const ExportStatementString& arg
+        ExportStatementstd::string(	const ExportStatementstd::string& arg
 								);
 
         /** Destructor.
 		 */
-        virtual ~ExportStatementString( );
+        virtual ~ExportStatementstd::string( );
 
 		/** Assignment operator (deep copy).
 		 *
 		 *	@param[in] arg		Right-hand side object.
 		 */
-        ExportStatementString& operator=(	const ExportStatementString& arg
+        ExportStatementstd::string& operator=(	const ExportStatementstd::string& arg
 											);
 
 		/** Clone constructor (deep copy).
@@ -94,15 +94,15 @@ class ExportStatementString : public ExportStatement
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export string.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue exportCode(	FILE* file,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+										const std::string& _realstd::string = "real_t",
+										const std::string& _intstd::string = "int",
 										int _precision = 16
 										) const;
 
@@ -116,7 +116,7 @@ class ExportStatementString : public ExportStatement
 
     protected:
 
-		String statementString;					/**< String to be exported. */
+		std::string statementstd::string;					/**< std::string to be exported. */
 };
 
 

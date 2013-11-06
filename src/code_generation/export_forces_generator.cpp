@@ -37,14 +37,14 @@ using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
-ExportForcesGenerator::ExportForcesGenerator(	const String& _templateName,
-												const String& _fileName,
-												const String& _commonHeaderName,
-												const String& _realString,
-												const String& _intString,
+ExportForcesGenerator::ExportForcesGenerator(	const std::string& _templateName,
+												const std::string& _fileName,
+												const std::string& _commonHeaderName,
+												const std::string& _realstd::string,
+												const std::string& _intstd::string,
 												int _precision,
-												const String& _commentString
-						) : ExportTemplatedFile(_templateName, _fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
+												const std::string& _commentstd::string
+						) : ExportTemplatedFile(_templateName, _fileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string)
 {}
 
 returnValue ExportForcesGenerator::configure(	const unsigned _nx,

@@ -134,15 +134,15 @@ class ExportArithmeticStatement : public ExportStatement
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue exportDataDeclaration(	FILE *file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+													const std::string& _realstd::string = "real_t",
+													const std::string& _intstd::string = "int",
 													int _precision = 16
 													) const;
 
@@ -150,15 +150,15 @@ class ExportArithmeticStatement : public ExportStatement
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue exportCode(	FILE* file,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+										const std::string& _realstd::string = "real_t",
+										const std::string& _intstd::string = "int",
 										int _precision = 16
 										) const;
 
@@ -173,17 +173,17 @@ class ExportArithmeticStatement : public ExportStatement
 		 *  Its appearance can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _sign			String of the operation ("+" or "-").
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _sign			std::string of the operation ("+" or "-").
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue exportCodeAddSubtract(	FILE* file,
-											const String& _sign = "+",
-											const String& _realString = "real_t",
-											const String& _intString = "int",
+											const std::string& _sign = "+",
+											const std::string& _realstd::string = "real_t",
+											const std::string& _intstd::string = "int",
 											int _precision = 16
 											) const;
 
@@ -192,16 +192,16 @@ class ExportArithmeticStatement : public ExportStatement
 		 *
 		 *	@param[in] file				Name of file to be used to export statement.
 		 *	@param[in] transposeRhs1	Flag indicating whether rhs1 shall be transposed.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue exportCodeMultiply(	FILE* file,
 										BooleanType transposeRhs1 = BT_FALSE,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+										const std::string& _realstd::string = "real_t",
+										const std::string& _intstd::string = "int",
 										int _precision = 16
 										) const;
 
@@ -209,28 +209,28 @@ class ExportArithmeticStatement : public ExportStatement
 		 *  Its appearance can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _op				String of the assignment operation ("=", "+=" or "-=").
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _op				std::string of the assignment operation ("=", "+=" or "-=").
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue exportCodeAssign(	FILE* file,
-										const String& _op = "=",
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+										const std::string& _op = "=",
+										const std::string& _realstd::string = "real_t",
+										const std::string& _intstd::string = "int",
 										int _precision = 16
 										) const;
 
 		/** Returns string containing the assignment operation.
 		 *
-		 *	@param[out] _assignString	String containing the assignment operation.
+		 *	@param[out] _assignstd::string	std::string containing the assignment operation.
 		 *
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_UNABLE_TO_EXPORT_STATEMENT
 		 */
-		returnValue getAssignString(	String& _assignString
+		returnValue getAssignstd::string(	std::string& _assignstd::string
 										) const;
 
 

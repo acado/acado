@@ -50,13 +50,13 @@ static const double undefinedEntry = 1073741824.03125; // = 2^30 + 2^-5
 //
 
 
-ExportVariable::ExportVariable(	const String& _name,
+ExportVariable::ExportVariable(	const std::string& _name,
 								uint _nRows,
 								uint _nCols,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callItByValue,
-								const String& _prefix
+								const std::string& _prefix
 								)
 {
 	Matrix m(_nRows, _nCols);
@@ -66,12 +66,12 @@ ExportVariable::ExportVariable(	const String& _name,
 }
 
 
-ExportVariable::ExportVariable(	const String& _name,
+ExportVariable::ExportVariable(	const std::string& _name,
 								const Matrix& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callItByValue,
-								const String& _prefix
+								const std::string& _prefix
 								)
 {
 	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
@@ -82,7 +82,7 @@ ExportVariable::ExportVariable(	unsigned _nRows,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callItByValue,
-								const String& _prefix
+								const std::string& _prefix
 								)
 {
 	Matrix m(_nRows, _nCols);
@@ -91,12 +91,12 @@ ExportVariable::ExportVariable(	unsigned _nRows,
 	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
-ExportVariable::ExportVariable(	const String& _name,
+ExportVariable::ExportVariable(	const std::string& _name,
 								const matrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callItByValue,
-								const String& _prefix
+								const std::string& _prefix
 								)
 {
 	assignNode(new ExportVariableInternal(_name, _data, _type, _dataStruct, _callItByValue, _prefix));
@@ -143,13 +143,13 @@ const ExportVariableInternal* ExportVariable::operator->() const
 }
 
 
-ExportVariable& ExportVariable::setup(	const String& _name,
+ExportVariable& ExportVariable::setup(	const std::string& _name,
 										uint _nRows,
 										uint _nCols,
 										ExportType _type,
 										ExportStruct _dataStruct,
 										BooleanType _callItByValue,
-										const String& _prefix
+										const std::string& _prefix
 										)
 {
 	Matrix m(_nRows, _nCols);
@@ -161,12 +161,12 @@ ExportVariable& ExportVariable::setup(	const String& _name,
 }
 
 
-ExportVariable& ExportVariable::setup(	const String& _name,
+ExportVariable& ExportVariable::setup(	const std::string& _name,
 										const Matrix& _data,
 										ExportType _type,
 										ExportStruct _dataStruct,
 										BooleanType _callItByValue,
-										const String& _prefix
+										const std::string& _prefix
 										)
 {
 	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
@@ -190,7 +190,7 @@ double ExportVariable::operator()(	uint totalIdx
 }
 
 
-ExportVariable ExportVariable::operator()(	const String& _name
+ExportVariable ExportVariable::operator()(	const std::string& _name
 											) const
 {
 	ExportVariable tmp = deepcopy( *this );
@@ -243,7 +243,7 @@ BooleanType ExportVariable::isGiven( ) const
 }
 
 
-const String ExportVariable::get(	const ExportIndex& rowIdx,
+const std::string ExportVariable::get(	const ExportIndex& rowIdx,
 									const ExportIndex& colIdx
 									) const
 {
@@ -487,7 +487,7 @@ returnValue ExportVariable::print( ) const
 	return (*this)->print();
 }
 
-ExportVariable diag(	const String& _name,
+ExportVariable diag(	const std::string& _name,
 						unsigned int _n )
 {
 	ExportVariable t(_name, _n, _n);

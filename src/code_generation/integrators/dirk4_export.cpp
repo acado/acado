@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 DiagonallyIRK4Export::DiagonallyIRK4Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : DiagonallyImplicitRKExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 3;
@@ -71,7 +71,7 @@ DiagonallyIRK4Export::~DiagonallyIRK4Export( )
 //
 
 IntegratorExport* createDiagonallyIRK4Export(	UserInteraction* _userInteraction,
-												const String &_commonHeaderName)
+												const std::string &_commonHeaderName)
 {
 	const double alpha = 1.137158042603258;
 

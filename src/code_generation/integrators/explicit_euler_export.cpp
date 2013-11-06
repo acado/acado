@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExplicitEulerExport::ExplicitEulerExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ExplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 1;
@@ -71,7 +71,7 @@ ExplicitEulerExport::~ExplicitEulerExport( )
 //
 
 IntegratorExport* createExplicitEulerExport(	UserInteraction* _userInteraction,
-												const String &_commonHeaderName)
+												const std::string &_commonHeaderName)
 {
 	Matrix AA(1,1);
 	Vector bb(1);

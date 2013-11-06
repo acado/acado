@@ -54,7 +54,7 @@ ExportAcadoFunction::ExportAcadoFunction( ) : ExportFunction( )
 
 
 ExportAcadoFunction::ExportAcadoFunction(	const Function& _f,
-										const String& _name
+										const std::string& _name
 										) : ExportFunction( _name )
 {
 	init(_f, _name);
@@ -107,7 +107,7 @@ ExportFunction* ExportAcadoFunction::cloneFunction( ) const
 
 
 returnValue ExportAcadoFunction::init(	const Function& _f,
-										const String& _name,
+										const std::string& _name,
 										const uint _numX,
 										const uint _numXA,
 										const uint _numU,
@@ -133,32 +133,32 @@ returnValue ExportAcadoFunction::init(	const Function& _f,
 
 
 returnValue ExportAcadoFunction::exportDataDeclaration(	FILE* file,
-														const String& _realString,
-														const String& _intString,
+														const std::string& _realstd::string,
+														const std::string& _intstd::string,
 														int _precision
 														) const
 {
-	return f->exportHeader(file, name.getName(), _realString.getName());
+	return f->exportHeader(file, name.getName(), _realstd::string.getName());
 }
 
 
 returnValue ExportAcadoFunction::exportForwardDeclaration(	FILE* file,
-															const String& _realString,
-															const String& _intString,
+															const std::string& _realstd::string,
+															const std::string& _intstd::string,
 															int _precision
 															) const
 {
-	return f->exportForwardDeclarations(file, name.getName(), _realString.getName());
+	return f->exportForwardDeclarations(file, name.getName(), _realstd::string.getName());
 }
 
 
 returnValue ExportAcadoFunction::exportCode(	FILE* file,
-											const String& _realString,
-											const String& _intString,
+											const std::string& _realstd::string,
+											const std::string& _intstd::string,
 											int _precision
 											) const
 {
-	return f->exportCode(file, name.getName(), _realString.getName(),
+	return f->exportCode(file, name.getName(), _realstd::string.getName(),
 			_precision, numX, numXA, numU, numP, numDX);
 }
 

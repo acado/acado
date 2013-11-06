@@ -39,19 +39,19 @@ using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 
-ExportSimulinkInterface::ExportSimulinkInterface(	const String& _makefileName,
-													const String& _wrapperHeaderFileName,
-													const String& _wrapperSourceFileName,
-													const String& _moduleName,
-													const String& _commonHeaderName,
-													const String& _realString,
-													const String& _intString,
+ExportSimulinkInterface::ExportSimulinkInterface(	const std::string& _makefileName,
+													const std::string& _wrapperHeaderFileName,
+													const std::string& _wrapperSourceFileName,
+													const std::string& _moduleName,
+													const std::string& _commonHeaderName,
+													const std::string& _realstd::string,
+													const std::string& _intstd::string,
 													int _precision,
-													const String& _commentString
+													const std::string& _commentstd::string
 													)
-	: makefile(MAKEFILE_SFUN_QPOASES, _makefileName, "", _realString, _intString, _precision, "%"),
-	  wrapperSource(SOLVER_SFUN_SOURCE, _wrapperSourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
-	  wrapperHeader(SOLVER_SFUN_HEADER, _wrapperHeaderFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
+	: makefile(MAKEFILE_SFUN_QPOASES, _makefileName, "", _realstd::string, _intstd::string, _precision, "%"),
+	  wrapperSource(SOLVER_SFUN_SOURCE, _wrapperSourceFileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string),
+	  wrapperHeader(SOLVER_SFUN_HEADER, _wrapperHeaderFileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string),
 	  moduleName( _moduleName )
 {}
 
@@ -94,7 +94,7 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 	//
 
 	makefile.dictionary[ "@MODULE_NAME@" ] = string( moduleName.getName() );
-	makefile.dictionary[ "@REAL_TYPE@" ] = string( makefile.realString.getName() );
+	makefile.dictionary[ "@REAL_TYPE@" ] = string( makefile.realstd::string.getName() );
 
 	s.str(std::string()); s << N;
 	makefile.dictionary[ "@N@" ] = s.str();

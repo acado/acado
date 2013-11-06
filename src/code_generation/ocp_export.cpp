@@ -56,9 +56,9 @@ OCPexport::OCPexport(	const OCP& _ocp
 	setStatus( BS_NOT_INITIALIZED );
 }
 
-returnValue OCPexport::exportCode(	const String& dirName,
-									const String& _realString,
-									const String& _intString,
+returnValue OCPexport::exportCode(	const std::string& dirName,
+									const std::string& _realstd::string,
+									const std::string& _intstd::string,
 									int _precision
 									)
 {
@@ -87,7 +87,7 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	//
 	// Export common header
 	//
-	if (exportAcadoHeader(dirName, getCommonHeaderName(), _realString, _intString, _precision)
+	if (exportAcadoHeader(dirName, getCommonHeaderName(), _realstd::string, _intstd::string, _precision)
 			!= SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
@@ -97,7 +97,7 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	if (integrator != 0)
 	{
 		ExportFile integratorFile(dirName + "/" + getName() + "_integrator.c",
-				getCommonHeaderName(), _realString, _intString, _precision);
+				getCommonHeaderName(), _realstd::string, _intstd::string, _precision);
 
 		integrator->getCode( integratorFile );
 
@@ -113,7 +113,7 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	if( solver != 0 )
 	{
 		ExportFile solverFile(dirName + "/" + getName() + "_solver.c",
-				getCommonHeaderName(), _realString, _intString, _precision);
+				getCommonHeaderName(), _realstd::string, _intstd::string, _precision);
 
 		solver->getCode( solverFile );
 
@@ -128,11 +128,11 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	//
 	// Export auxiliary functions, always
 	//
-	String str;
+	std::string str;
 
 	ExportAuxiliaryFunctions eaf(
-			dirName + String("/") + getName() + String("_auxiliary_functions.h"),
-			dirName + String("/") + getName() + String("_auxiliary_functions.c"),
+			dirName + std::string("/") + getName() + std::string("_auxiliary_functions.h"),
+			dirName + std::string("/") + getName() + std::string("_auxiliary_functions.c"),
 			getName()
 			);
 	eaf.configure();
@@ -146,7 +146,7 @@ returnValue OCPexport::exportCode(	const String& dirName,
 
 	if ( (BooleanType)generateMakeFile == BT_TRUE )
 	{
-		str = dirName + String("/Makefile");
+		str = dirName + std::string("/Makefile");
 
 		switch ( (QPSolverName)qpSolver )
 		{
@@ -172,7 +172,7 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	//
 	int generateTestFile;
 	get(GENERATE_TEST_FILE, generateTestFile);
-	String testFileName = dirName + "/test.c";
+	std::string testFileName = dirName + "/test.c";
 	if ((BooleanType) generateTestFile == BT_TRUE)
 		acadoCopyTempateFile(DUMMY_TEST_FILE, testFileName.getName(), 0, BT_TRUE);
 
@@ -183,11 +183,11 @@ returnValue OCPexport::exportCode(	const String& dirName,
 	get(GENERATE_MATLAB_INTERFACE, generateMexInterface);
 	if ( (BooleanType)generateMexInterface == BT_TRUE )
 	{
-		str = dirName + String("/") + getName() + String("_solver_mex.c");
+		str = dirName + std::string("/") + getName() + std::string("_solver_mex.c");
 
 		acadoCopyTempateFile(SOLVER_MEX, str.getName(), 0, BT_TRUE);
 
-		str = dirName + String("/make_") + getName() + String("_solver.m");
+		str = dirName + std::string("/make_") + getName() + std::string("_solver.m");
 
 		switch ( (QPSolverName)qpSolver )
 		{
@@ -219,9 +219,9 @@ returnValue OCPexport::exportCode(	const String& dirName,
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
 					"At the moment, Simulink interface is available only with qpOASES based OCP solver.");
 
-		String makefileName = dirName + String("/make_") + getName() + "_solver_sfunction.m";
-		String wrapperHeaderName = dirName + String("/") + getName() + "_solver_sfunction.h";
-		String wrapperSourceName = dirName + String("/") + getName() + "_solver_sfunction.c";
+		std::string makefileName = dirName + std::string("/make_") + getName() + "_solver_sfunction.m";
+		std::string wrapperHeaderName = dirName + std::string("/") + getName() + "_solver_sfunction.h";
+		std::string wrapperSourceName = dirName + std::string("/") + getName() + "_solver_sfunction.c";
 
 		ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, getName());
 
@@ -445,10 +445,10 @@ returnValue OCPexport::collectFunctionDeclarations(	ExportStatementBlock& declar
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue OCPexport::exportAcadoHeader(	const String& _dirName,
-											const String& _fileName,
-											const String& _realString,
-											const String& _intString,
+returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
+											const std::string& _fileName,
+											const std::string& _realstd::string,
+											const std::string& _intstd::string,
 											int _precision
 											) const
 {
@@ -461,17 +461,17 @@ returnValue OCPexport::exportAcadoHeader(	const String& _dirName,
 	int hardcodeConstraintValues;
 	get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
 
-	String fileName( _dirName );
+	std::string fileName( _dirName );
 	fileName << "/" << _fileName;
-	ExportFile acadoHeader( fileName,"", _realString,_intString,_precision );
+	ExportFile acadoHeader( fileName,"", _realstd::string,_intstd::string,_precision );
 
 	// TODO Here we might put it to uppercase...
-	String moduleName = getName();
+	std::string moduleName = getName();
 
 	acadoHeader
-		<< String("#ifndef ") + moduleName + String("_COMMON_H\n")
-		<< String("#define ") + moduleName + String("_COMMON_H\n\n")
-		<< String("#include <math.h>\n");
+		<< std::string("#ifndef ") + moduleName + std::string("_COMMON_H\n")
+		<< std::string("#define ") + moduleName + std::string("_COMMON_H\n\n")
+		<< std::string("#include <math.h>\n");
 
 	if ((QPSolverName)qpSolver == QP_FORCES)
 		acadoHeader.addStatement( "#include <string.h>\n" );
@@ -495,7 +495,7 @@ returnValue OCPexport::exportAcadoHeader(	const String& _dirName,
 	{
 	case QP_QPOASES:
 		acadoHeader.addStatement(
-				String("#include \"") + getName() + "_qpoases_interface.hpp\"\n"
+				std::string("#include \"") + getName() + "_qpoases_interface.hpp\"\n"
 		);
 
 		break;
@@ -567,17 +567,17 @@ returnValue OCPexport::exportAcadoHeader(	const String& _dirName,
 	switch ( (QPSolverName)qpSolver )
 	{
 	case QP_QPOASES:
-		acadoHeader.addStatement( (String)"#define ACADO_QP_SOLVER ACADO_QPOASES\n" );
+		acadoHeader.addStatement( (std::string)"#define ACADO_QP_SOLVER ACADO_QPOASES\n" );
 
 		break;
 
 	case QP_FORCES:
-		acadoHeader.addStatement( (String)"#define ACADO_QP_SOLVER ACADO_FORCES\n" );
+		acadoHeader.addStatement( (std::string)"#define ACADO_QP_SOLVER ACADO_FORCES\n" );
 
 		break;
 
 	case QP_QPDUNES:
-		acadoHeader.addStatement( (String)"#define ACADO_QP_SOLVER ACADO_QPDUNES\n" );
+		acadoHeader.addStatement( (std::string)"#define ACADO_QP_SOLVER ACADO_QPDUNES\n" );
 
 		break;
 

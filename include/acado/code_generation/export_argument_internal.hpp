@@ -83,13 +83,13 @@ class ExportArgumentInternal : public ExportDataInternal
 		 *	@param[in] _addressIdx		If an address index is specified, not the argument itself but
 		 *								a pointer to this address within the memory of the argument is passed.
 		 */
-		ExportArgumentInternal(	const String& _name,
+		ExportArgumentInternal(	const std::string& _name,
 								const matrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callByValue,
 								const ExportIndex& _addressIdx,
-								const String& _prefix
+								const std::string& _prefix
 								);
 
 		/** Destructor.
@@ -118,9 +118,9 @@ class ExportArgumentInternal : public ExportDataInternal
 		 *	desired location. The string also depends on whether the argument is
 		 *	to be called by value or not.
 		 *
-		 *	\return String containing the address of the argument
+		 *	\return std::string containing the address of the argument
 		 */
-		const String getAddressString(	BooleanType withDataStruct = BT_TRUE
+		const std::string getAddressstd::string(	BooleanType withDataStruct = BT_TRUE
 										) const;
 
 
@@ -167,15 +167,15 @@ class ExportArgumentInternal : public ExportDataInternal
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export declaration.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue exportDataDeclaration(	FILE *file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+													const std::string& _realstd::string = "real_t",
+													const std::string& _intstd::string = "int",
 													int _precision = 16
 													) const;
 

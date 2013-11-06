@@ -84,12 +84,12 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
-		ExportVariableInternal(	const String& _name,
+		ExportVariableInternal(	const std::string& _name,
 								const matrixPtr& _data,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
 								BooleanType _callItByValue = BT_FALSE,
-								const String& _prefix = emptyConstString
+								const std::string& _prefix = emptyConststd::string
 								);
 
         /** Destructor.
@@ -160,9 +160,9 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return String containing the value of a given component
+		 *	\return std::string containing the value of a given component
 		 */
-		const String get(	const ExportIndex& rowIdx,
+		const std::string get(	const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 

@@ -65,7 +65,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         DiagonallyImplicitRKExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -285,7 +285,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 // Create the integrator
 //
 inline DiagonallyImplicitRKExport* createDiagonallyImplicitRKExport(	UserInteraction* _userInteraction,
-		const String &_commonHeaderName	)
+		const std::string &_commonHeaderName	)
 {
 	int sensGen;
 	_userInteraction->get( DYNAMIC_SENSITIVITY, sensGen );

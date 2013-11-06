@@ -38,7 +38,7 @@ BEGIN_NAMESPACE_ACADO
 // Create the correct integrator
 //
 inline ImplicitRungeKuttaExport* createImplicitRungeKuttaExport(	UserInteraction* _userInteraction,
-																	const String &_commonHeaderName	)
+																	const std::string &_commonHeaderName	)
 {
 	int sensGen;
 	_userInteraction->get( DYNAMIC_SENSITIVITY, sensGen );

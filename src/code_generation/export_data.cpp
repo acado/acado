@@ -58,7 +58,7 @@ const ExportDataInternal* ExportData::operator->() const
 	return (const ExportDataInternal*)(SharedObject::operator->());
 }
 
-returnValue	ExportData::setName(	const String& _name
+returnValue	ExportData::setName(	const std::string& _name
 									)
 {
 	return (*this)->setName( _name );
@@ -71,7 +71,7 @@ returnValue	ExportData::setType(	ExportType _type
 	return (*this)->setType( _type );
 }
 
-returnValue ExportData::setPrefix(	const String& _prefix
+returnValue ExportData::setPrefix(	const std::string& _prefix
 									)
 {
 	return (*this)->setPrefix( _prefix );
@@ -83,7 +83,7 @@ returnValue	ExportData::setDataStruct(	ExportStruct _dataStruct
 	return (*this)->setDataStruct( _dataStruct );
 }
 
-String ExportData::getName( ) const
+std::string ExportData::getName( ) const
 {
 	return (*this)->getName();
 }
@@ -93,16 +93,16 @@ ExportType ExportData::getType( ) const
 	return (*this)->getType();
 }
 
-String ExportData::getPrefix() const
+std::string ExportData::getPrefix() const
 {
 	return (*this)->getPrefix();
 }
 
-String ExportData::getTypeString(	const String& _realString,
-									const String& _intString
+std::string ExportData::getTypestd::string(	const std::string& _realstd::string,
+									const std::string& _intstd::string
 									) const
 {
-	return (*this)->getTypeString();
+	return (*this)->getTypestd::string();
 }
 
 
@@ -112,24 +112,24 @@ ExportStruct ExportData::getDataStruct( ) const
 }
 
 
-String ExportData::getDataStructString( ) const
+std::string ExportData::getDataStructstd::string( ) const
 {
-	return (*this)->getDataStructString();
+	return (*this)->getDataStructstd::string();
 }
 
 
-String ExportData::getFullName( ) const
+std::string ExportData::getFullName( ) const
 {
 	return (*this)->getFullName();
 }
 
 returnValue ExportData::exportDataDeclaration(	FILE* file,
-												const String& _realString,
-												const String& _intString,
+												const std::string& _realstd::string,
+												const std::string& _intstd::string,
 												int _precision
 												) const
 {
-	return (*this)->exportDataDeclaration(file, _realString, _intString, _precision);
+	return (*this)->exportDataDeclaration(file, _realstd::string, _intstd::string, _precision);
 }
 
 BooleanType ExportData::isGiven( )
@@ -137,13 +137,13 @@ BooleanType ExportData::isGiven( )
 	return (*this)->isGiven();
 }
 
-returnValue ExportData::setDoc(	const String& _doc
+returnValue ExportData::setDoc(	const std::string& _doc
 								)
 {
 	return (*this)->setDoc( _doc );
 }
 
-String ExportData::getDoc( ) const
+std::string ExportData::getDoc( ) const
 {
 	return (*this)->getDoc();
 }

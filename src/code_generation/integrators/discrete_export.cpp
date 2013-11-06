@@ -46,7 +46,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 DiscreteTimeExport::DiscreteTimeExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : IntegratorExport( _userInteraction,_commonHeaderName )
 {
 }
@@ -214,7 +214,7 @@ returnValue DiscreteTimeExport::setup( )
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
 		ExportVariable numStepsV( "numSteps", numSteps, STATIC_CONST_INT );
-		integrate.addStatement( String( "int " ) << numInt.getName() << " = " << numStepsV.getName() << "[" << rk_index.getName() << "];\n" );
+		integrate.addStatement( std::string( "int " ) << numInt.getName() << " = " << numStepsV.getName() << "[" << rk_index.getName() << "];\n" );
 	}
 
 	integrate.addStatement( rk_xxx.getCols( NX,inputDim-diffsDim ) == rk_eta.getCols( NX+diffsDim,inputDim ) );
@@ -248,14 +248,14 @@ returnValue DiscreteTimeExport::setup( )
 	}
 	else {
 		loop = &integrate;
-		loop->addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+		loop->addStatement( std::string("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
 	}
 
 	loop->addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
 		// Set rk_diffsPrev:
-		loop->addStatement( String("if( run > 0 ) {\n") );
+		loop->addStatement( std::string("if( run > 0 ) {\n") );
 		if( NX1 > 0 ) {
 			ExportForLoop loopTemp1( i,0,NX1 );
 			loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,0,NX1 ) == rk_eta.getCols( i*NX+NX+NXA,i*NX+NX+NXA+NX1 ) );
@@ -274,7 +274,7 @@ returnValue DiscreteTimeExport::setup( )
 			if( NU > 0 ) loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,NX,NX+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU,i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU+NU ) );
 			loop->addStatement( loopTemp3 );
 		}
-		loop->addStatement( String("}\n") );
+		loop->addStatement( std::string("}\n") );
 	}
 
 	// evaluate states:
@@ -306,7 +306,7 @@ returnValue DiscreteTimeExport::setup( )
 
 	// computation of the sensitivities using chain rule:
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( String( "if( run == 0 ) {\n" ) );
+		loop->addStatement( std::string( "if( run == 0 ) {\n" ) );
 	}
 	// PART 1
 	updateInputSystem(loop, i, j, tmp_index);
@@ -316,15 +316,15 @@ returnValue DiscreteTimeExport::setup( )
 	updateOutputSystem(loop, i, j, tmp_index);
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( String( "}\n" ) );
-		loop->addStatement( String( "else {\n" ) );
+		loop->addStatement( std::string( "}\n" ) );
+		loop->addStatement( std::string( "else {\n" ) );
 		// PART 1
 		propagateInputSystem(loop, i, j, k, tmp_index);
 		// PART 2
 		propagateImplicitSystem(loop, i, j, k, tmp_index);
 		// PART 3
 		propagateOutputSystem(loop, i, j, k, tmp_index);
-		loop->addStatement( String( "}\n" ) );
+		loop->addStatement( std::string( "}\n" ) );
 	}
 
 	// end of the integrator loop.
@@ -421,7 +421,7 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 		code.addLinebreak( 2 );
 	}
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-	code.addComment(String("Fixed step size:") << String(h));
+	code.addComment(std::string("Fixed step size:") << std::string(h));
 
 	code.addFunction( integrate );
 
@@ -447,8 +447,8 @@ returnValue DiscreteTimeExport::setupOutput( const std::vector<Grid> outputGrids
 
 
 returnValue DiscreteTimeExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  	  	  	const std::vector<String> _outputNames,
-									  	  	  	  	const std::vector<String> _diffs_outputNames,
+									  	  	  	  	const std::vector<std::string> _outputNames,
+									  	  	  	  	const std::vector<std::string> _diffs_outputNames,
 									  	  	  	  	const std::vector<uint> _dims_output ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
@@ -456,8 +456,8 @@ returnValue DiscreteTimeExport::setupOutput(  const std::vector<Grid> outputGrid
 
 
 returnValue DiscreteTimeExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  	  	  	const std::vector<String> _outputNames,
-									  	  	  	  	const std::vector<String> _diffs_outputNames,
+									  	  	  	  	const std::vector<std::string> _outputNames,
+									  	  	  	  	const std::vector<std::string> _diffs_outputNames,
 									  	  	  	  	const std::vector<uint> _dims_output,
 									  	  	  	  	const std::vector<Matrix> _outputDependencies ) {
 
@@ -486,7 +486,7 @@ DiscreteTimeExport& DiscreteTimeExport::operator=( const DiscreteTimeExport& arg
 //
 
 IntegratorExport* createDiscreteTimeExport(	UserInteraction* _userInteraction,
-											const String &_commonHeaderName )
+											const std::string &_commonHeaderName )
 {
 	return new DiscreteTimeExport(_userInteraction, _commonHeaderName);
 }

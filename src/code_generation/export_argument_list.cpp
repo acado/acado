@@ -127,8 +127,8 @@ uint ExportArgumentList::getNumArguments( ) const
 
 
 returnValue ExportArgumentList::exportCode(	FILE* file,
-											const String& _realString,
-											const String& _intString,
+											const std::string& _realstd::string,
+											const std::string& _intstd::string,
 											int _precision
 											) const
 {
@@ -145,15 +145,15 @@ returnValue ExportArgumentList::exportCode(	FILE* file,
 		if ( includeType == BT_TRUE )
 		{
 			if ( arguments[ i ].isCalledByValue( ) == BT_TRUE )
-				acadoFPrintf(file, "%s ", arguments[ i ].getTypeString(_realString, _intString).getName());
+				acadoFPrintf(file, "%s ", arguments[ i ].getTypestd::string(_realstd::string, _intstd::string).getName());
 			else
-				acadoFPrintf(file, "%s* const ", arguments[ i ].getTypeString(_realString, _intString).getName());
+				acadoFPrintf(file, "%s* const ", arguments[ i ].getTypestd::string(_realstd::string, _intstd::string).getName());
 		}
 
 		if ( includeType == BT_FALSE )
-			acadoFPrintf(file, "%s", arguments[ i ].getAddressString( ).getName());
+			acadoFPrintf(file, "%s", arguments[ i ].getAddressstd::string( ).getName());
 		else
-			acadoFPrintf(file, "%s", arguments[ i ].getAddressString( BT_FALSE ).getName());
+			acadoFPrintf(file, "%s", arguments[ i ].getAddressstd::string( BT_FALSE ).getName());
 
 		if (i < arguments.size() - 1)
 			acadoFPrintf(file, ", ");

@@ -62,12 +62,12 @@ ExportVariableInternal::ExportVariableInternal( ) : ExportArgumentInternal( )
 	nCols = 0;
 }
 
-ExportVariableInternal::ExportVariableInternal(	const String& _name,
+ExportVariableInternal::ExportVariableInternal(	const std::string& _name,
 												const matrixPtr& _data,
 												ExportType _type,
 												ExportStruct _dataStruct,
 												BooleanType _callItByValue,
-												const String& _prefix
+												const std::string& _prefix
 												)
 	: ExportArgumentInternal(_name, _data, _type, _dataStruct, _callItByValue, emptyConstExportIndex, _prefix)
 {
@@ -142,7 +142,7 @@ BooleanType ExportVariableInternal::isGiven() const
 }
 
 
-const String ExportVariableInternal::get(	const ExportIndex& rowIdx,
+const std::string ExportVariableInternal::get(	const ExportIndex& rowIdx,
 											const ExportIndex& colIdx
 											) const
 {
@@ -169,7 +169,7 @@ const String ExportVariableInternal::get(	const ExportIndex& rowIdx,
 	else
 		s << getFullName().getName() << "[" << totalIdx.get( ).getName() << "]";
 
-	String str( s.str().c_str() );
+	std::string str( s.str().c_str() );
 
 	return str;
 }

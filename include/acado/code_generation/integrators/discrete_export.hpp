@@ -66,7 +66,7 @@ class DiscreteTimeExport : public IntegratorExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         DiscreteTimeExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -136,8 +136,8 @@ class DiscreteTimeExport : public IntegratorExport
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output );
 
 
@@ -152,8 +152,8 @@ class DiscreteTimeExport : public IntegratorExport
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
 										  const std::vector<Matrix> _outputDependencies );
 

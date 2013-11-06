@@ -52,22 +52,22 @@ public:
 	 *
 	 *	@param[in] _moduleName		    Module name for customization.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
-	 *	@param[in] _realString			String to be used to declare real variables.
-	 *	@param[in] _intString			String to be used to declare integer variables.
+	 *	@param[in] _realstd::string			std::string to be used to declare real variables.
+	 *	@param[in] _intstd::string			std::string to be used to declare integer variables.
 	 *	@param[in] _precision			Number of digits to be used for exporting real values.
-	 *	@param[in] _commentString		String to be used for exporting comments.
+	 *	@param[in] _commentstd::string		std::string to be used for exporting comments.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	ExportSimulinkInterface(	const String& _makefileName,
-								const String& _wrapperHeaderFileName,
-								const String& _wrapperSourceFileName,
-								const String& _moduleName = "acado",
-								const String& _commonHeaderName = "",
-								const String& _realString = "double",
-								const String& _intString = "int",
+	ExportSimulinkInterface(	const std::string& _makefileName,
+								const std::string& _wrapperHeaderFileName,
+								const std::string& _wrapperSourceFileName,
+								const std::string& _moduleName = "acado",
+								const std::string& _commonHeaderName = "",
+								const std::string& _realstd::string = "double",
+								const std::string& _intstd::string = "int",
 								int _precision = 16,
-								const String& _commentString = emptyConstString
+								const std::string& _commentstd::string = emptyConststd::string
 								);
 
 	/** Destructor. */
@@ -101,7 +101,7 @@ private:
 	ExportTemplatedFile makefile;
 	ExportTemplatedFile wrapperSource;
 	ExportTemplatedFile wrapperHeader;
-	String moduleName;
+	std::string moduleName;
 };
 
 CLOSE_NAMESPACE_ACADO

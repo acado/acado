@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 DiagonallyIRK5Export::DiagonallyIRK5Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : DiagonallyImplicitRKExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 5;
@@ -71,7 +71,7 @@ DiagonallyIRK5Export::~DiagonallyIRK5Export( )
 //
 
 IntegratorExport* createDiagonallyIRK5Export(	UserInteraction* _userInteraction,
-												const String &_commonHeaderName)
+												const std::string &_commonHeaderName)
 {
 	Matrix AA(5,5);
 	Vector bb(5);

@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 RadauIIA1Export::RadauIIA1Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ImplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 1;
@@ -71,7 +71,7 @@ RadauIIA1Export::~RadauIIA1Export( )
 //
 
 IntegratorExport* createRadauIIA1Export(	UserInteraction* _userInteraction,
-											const String &_commonHeaderName)
+											const std::string &_commonHeaderName)
 {
 	Matrix AA(1,1);
 	Vector bb(1);

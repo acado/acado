@@ -72,7 +72,7 @@ class ExportAlgorithm : public AlgorithmicBase
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ExportAlgorithm(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -218,8 +218,8 @@ class ExportAlgorithm : public AlgorithmicBase
 		 *  \return Pointer to prepared file with given name, \n
 		 *	        NULL iff file could not be opened
 		 */
-		FILE* openFile(	const String& dirName,
-						const String& fileName
+		FILE* openFile(	const std::string& dirName,
+						const std::string& fileName
 						) const;
 
 
@@ -247,7 +247,7 @@ class ExportAlgorithm : public AlgorithmicBase
 		uint NY;							/**< Number of measurements, k = 0,..., N - 1. */
 		uint NYN;							/**< Number of measurements, k = N. */
 
-		String commonHeaderName;			/**< Name of common header file. */
+		std::string commonHeaderName;			/**< Name of common header file. */
 };
 
 

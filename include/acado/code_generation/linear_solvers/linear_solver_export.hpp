@@ -75,7 +75,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ExportLinearSolver(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -136,7 +136,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		returnValue init(	const uint newDim,
 							const BooleanType& reuse,
 							const BooleanType& unrolling,
-							const String& newId
+							const std::string& newId
 							);
 
 		/** \todo DOC */
@@ -145,7 +145,7 @@ class ExportLinearSolver : public ExportAlgorithm
 							unsigned _nBacksolves,
 							BooleanType _reuse,
 							BooleanType _unroll,
-							const String& _id
+							const std::string& _id
 							);
 
 		/** Adds all data declarations of the auto-generated algorithm to given list of declarations.
@@ -241,7 +241,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *
 		 *  \return A string containing the name of the function which is exported to solve the linear system.
 		 */
-		const String getNameSolveFunction(); 
+		const std::string getNameSolveFunction(); 
 		
 		
 		/** Returns a string containing the name of the function which is exported to solve the linear system with
@@ -250,7 +250,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *  \return A string containing the name of the function which is exported to solve the linear system with
 		 * 			the reuse of previous results.
 		 */
-		const String getNameSolveReuseFunction(); 
+		const std::string getNameSolveReuseFunction(); 
 
 
 	//
@@ -261,7 +261,7 @@ class ExportLinearSolver : public ExportAlgorithm
 
     protected:
     
-		String identifier;							/**< This identifier allows the use of more than one exported linear solver. */
+		std::string identifier;							/**< This identifier allows the use of more than one exported linear solver. */
     
 		BooleanType UNROLLING;						/**< The boolean that defines the unrolling. */
 		BooleanType REUSE;							/**< The boolean that defines the reuse. */

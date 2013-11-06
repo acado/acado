@@ -51,8 +51,8 @@ ExportIndex::ExportIndex(	const int _value )
 	assignNode(new ExportIndexNode( _value ));
 }
 
-ExportIndex::ExportIndex(	const String& _name,
-							const String& _prefix )
+ExportIndex::ExportIndex(	const std::string& _name,
+							const std::string& _prefix )
 {
 	assignNode(new ExportIndexNode(_name, _prefix));
 }
@@ -71,12 +71,12 @@ const ExportIndexNode* ExportIndex::operator->() const
 
 
 returnValue ExportIndex::exportDataDeclaration(	FILE* file,
-												const String& _realString ,
-												const String& _intString,
+												const std::string& _realstd::string ,
+												const std::string& _intstd::string,
 												int _precision
 												) const
 {
-	return (*this)->exportDataDeclaration(file, _realString, _intString, _precision);
+	return (*this)->exportDataDeclaration(file, _realstd::string, _intstd::string, _precision);
 }
 
 
@@ -233,18 +233,18 @@ ExportIndex operator%(	const ExportIndex& _arg1,
 	return tmp;
 }
 
-String operator==(	const ExportIndex& _arg1,
+std::string operator==(	const ExportIndex& _arg1,
 					const ExportIndex& _arg2
 					)
 {
-	String ret;
+	std::string ret;
 	ret << _arg1.get() << " = " << _arg2.get() << ";\n";
 
 	return ret;
 }
 
 
-const String ExportIndex::get( ) const
+const std::string ExportIndex::get( ) const
 {
 	return (*this)->get();
 }
@@ -274,7 +274,7 @@ BooleanType ExportIndex::isVariable() const
 
 ExportArgument ExportIndex::makeArgument( ) const
 {
-	String tmpName;
+	std::string tmpName;
 
 	// In principle, this is an ugly hack. In case when an index is given,
 	// We give it a name which is equal to its value. This is done in order

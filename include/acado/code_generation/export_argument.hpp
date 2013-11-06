@@ -81,14 +81,14 @@ class ExportArgument : public ExportData
 		 *	@param[in] _addressIdx		If an address index is specified, not the argument itself but 
 		 *								a pointer to this address within the memory of the argument is passed.
 		 */
-		ExportArgument(	const String& _name,
+		ExportArgument(	const std::string& _name,
 						uint _nRows = 1,
 						uint _nCols = 1,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callByValue = BT_FALSE,
 						const ExportIndex& _addressIdx = emptyConstExportIndex,
-						const String& _prefix = emptyConstString
+						const std::string& _prefix = emptyConststd::string
 						);
 
 		/** Constructor which takes the name and type of the argument.
@@ -103,13 +103,13 @@ class ExportArgument : public ExportData
 		 *	@param[in] _addressIdx		If an address index is specified, not the argument itself but 
 		 *								a pointer to this address within the memory of the argument is passed.
 		 */
-		ExportArgument(	const String& _name,
+		ExportArgument(	const std::string& _name,
 						const matrixPtr& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callByValue = BT_FALSE,
 						const ExportIndex& _addressIdx = emptyConstExportIndex,
-						const String& _prefix = emptyConstString
+						const std::string& _prefix = emptyConststd::string
 						);
 
 		ExportArgument(	const Matrix& _data
@@ -135,9 +135,9 @@ class ExportArgument : public ExportData
 		 *	desired location. The string also depends on whether the argument is 
 		 *	to be called by value or not.
 		 *
-		 *	\return String containing the address of the argument
+		 *	\return std::string containing the address of the argument
 		 */
-		const String getAddressString(	BooleanType withDataStruct = BT_TRUE
+		const std::string getAddressstd::string(	BooleanType withDataStruct = BT_TRUE
 										) const;
 
 
@@ -186,15 +186,15 @@ class ExportArgument : public ExportData
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export declaration.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue exportDataDeclaration(	FILE *file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+													const std::string& _realstd::string = "real_t",
+													const std::string& _intstd::string = "int",
 													int _precision = 16
 													) const;
 };

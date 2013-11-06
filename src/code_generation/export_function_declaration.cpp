@@ -114,15 +114,15 @@ ExportStatement* ExportFunctionDeclaration::clone( ) const
 
 
 returnValue ExportFunctionDeclaration::exportCode(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+													const std::string& _realstd::string,
+													const std::string& _intstd::string,
 													int _precision
 													) const
 {
 	if ( f == 0 )
 		return SUCCESSFUL_RETURN;
 	
-	return f->exportForwardDeclaration( file,_realString,_intString,_precision );
+	return f->exportForwardDeclaration( file,_realstd::string,_intstd::string,_precision );
 }
 
 

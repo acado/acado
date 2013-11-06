@@ -41,14 +41,14 @@ BEGIN_NAMESPACE_ACADO
 
 using namespace std;
 
-ExportTemplatedFile::ExportTemplatedFile(	const String& _templateName,
-											const String& _fileName,
-											const String& _commonHeaderName,
-											const String& _realString,
-											const String& _intString,
+ExportTemplatedFile::ExportTemplatedFile(	const std::string& _templateName,
+											const std::string& _fileName,
+											const std::string& _commonHeaderName,
+											const std::string& _realstd::string,
+											const std::string& _intstd::string,
 											int _precision,
-											const String& _commentString
-						) : ExportFile(_fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
+											const std::string& _commentstd::string
+						) : ExportFile(_fileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string)
 {
 	folders = TEMPLATE_PATHS;
 	templateName = _templateName;
@@ -93,7 +93,7 @@ returnValue ExportTemplatedFile::fillTemplate( )
 			}
 		}
 
-		// This is some extremely stupid hack we had to do. Namely, String() class
+		// This is some extremely stupid hack we had to do. Namely, std::string() class
 		// cannot handle long strings, so we have to cut them in smaller pieces.
 		if ( str.size() )
 		{
@@ -105,19 +105,19 @@ returnValue ExportTemplatedFile::fillTemplate( )
 					string tmp = str.substr( pos );
 
 					if ( tmp.size() )
-						addStatement( static_cast< String >( tmp.c_str() ) );
+						addStatement( static_cast< std::string >( tmp.c_str() ) );
 
 					break;
 				}
 				else
 				{
-					addStatement( static_cast< String >( str.substr(pos, 256).c_str() ) );
+					addStatement( static_cast< std::string >( str.substr(pos, 256).c_str() ) );
 
 					pos += 256;
 				}
 			}
 		}
-		addStatement( (String)"\n" );
+		addStatement( (std::string)"\n" );
 	}
 
 	inputFile.close();

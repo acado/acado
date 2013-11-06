@@ -115,8 +115,8 @@ returnValue ExportForLoop::init(	const ExportIndex& _loopVariable,
 
 
 returnValue ExportForLoop::exportDataDeclaration(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+													const std::string& _realstd::string,
+													const std::string& _intstd::string,
 													int _precision
 													) const
 {
@@ -125,8 +125,8 @@ returnValue ExportForLoop::exportDataDeclaration(	FILE* file,
 
 
 returnValue ExportForLoop::exportCode(	FILE* file,
-										const String& _realString,
-										const String& _intString,
+										const std::string& _realstd::string,
+										const std::string& _intstd::string,
 										int _precision
 										) const
 {
@@ -175,7 +175,7 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 
 		acadoFPrintf(file, "%s", s.str().c_str());
 
-		ExportStatementBlock::exportCode(file, _realString, _intString, _precision);
+		ExportStatementBlock::exportCode(file, _realstd::string, _intstd::string, _precision);
 
 		acadoFPrintf( file,"}\n");
 	}

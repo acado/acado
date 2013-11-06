@@ -55,7 +55,7 @@ public:
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
 	ExportGaussNewtonCN2(	UserInteraction* _userInteraction = 0,
-								const String& _commonHeaderName = ""
+								const std::string& _commonHeaderName = ""
 								);
 
 	/** Destructor. */

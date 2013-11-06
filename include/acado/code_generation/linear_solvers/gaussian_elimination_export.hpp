@@ -64,7 +64,7 @@ class ExportGaussElim : public ExportLinearSolver
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ExportGaussElim(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).

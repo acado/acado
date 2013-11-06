@@ -76,7 +76,7 @@ public:
 	 *	@param[in] _argument8	Calling argument no. 8.
 	 *	@param[in] _argument9	Calling argument no. 9.
 	 */
-	ExportFunction(	const String& _name = "defaultFunctionName",
+	ExportFunction(	const std::string& _name = "defaultFunctionName",
 					const ExportArgument& _argument1 = emptyConstExportArgument,
 					const ExportArgument& _argument2 = emptyConstExportArgument,
 					const ExportArgument& _argument3 = emptyConstExportArgument,
@@ -130,7 +130,7 @@ public:
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	returnValue init(	const String& _name = "defaultFunctionName",
+	returnValue init(	const std::string& _name = "defaultFunctionName",
 						const ExportArgument& _argument1 = emptyConstExportArgument,
 						const ExportArgument& _argument2 = emptyConstExportArgument,
 						const ExportArgument& _argument3 = emptyConstExportArgument,
@@ -157,7 +157,7 @@ public:
 	 *
 	 *	\return Reference to initialized object
 	 */
-	ExportFunction& setup(	const String& _name = "defaultFunctionName",
+	ExportFunction& setup(	const std::string& _name = "defaultFunctionName",
 							const ExportArgument& _argument1 = emptyConstExportArgument,
 							const ExportArgument& _argument2 = emptyConstExportArgument,
 							const ExportArgument& _argument3 = emptyConstExportArgument,
@@ -209,24 +209,24 @@ public:
 
 
 	/** Sets the name of the function. */
-	ExportFunction&	setName(const String& _name);
+	ExportFunction&	setName(const std::string& _name);
 
 	/** Returns the name of the function. */
-	String getName( ) const;
+	std::string getName( ) const;
 
 	/** Exports data declaration of the function into given file. Its appearance can
 	 *  can be adjusted by various options.
 	 *
 	 *	@param[in] file				Name of file to be used to export function.
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+	 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 	 *	@param[in] _precision		Number of digits to be used for exporting real values.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	virtual returnValue exportDataDeclaration(	FILE* file,
-												const String& _realString = "real_t",
-												const String& _intString = "int",
+												const std::string& _realstd::string = "real_t",
+												const std::string& _intstd::string = "int",
 												int _precision = 16
 												) const;
 
@@ -234,15 +234,15 @@ public:
 	 *  can be adjusted by various options.
 	 *
 	 *	@param[in] file				Name of file to be used to export statement.
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+	 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 	 *	@param[in] _precision		Number of digits to be used for exporting real values.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	virtual returnValue exportForwardDeclaration(	FILE* file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+													const std::string& _realstd::string = "real_t",
+													const std::string& _intstd::string = "int",
 													int _precision = 16
 													) const;
 
@@ -250,15 +250,15 @@ public:
 	 *  can be adjusted by various options.
 	 *
 	 *	@param[in] file				Name of file to be used to export function.
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+	 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 	 *	@param[in] _precision		Number of digits to be used for exporting real values.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	virtual returnValue exportCode(	FILE* file,
-									const String& _realString = "real_t",
-									const String& _intString = "int",
+									const std::string& _realstd::string = "real_t",
+									const std::string& _intstd::string = "int",
 									int _precision = 16
 									) const;
 
@@ -285,7 +285,7 @@ public:
 	virtual ExportFunction& release( const ExportIndex& obj );
 
 	/** Set a documentation string. */
-	virtual ExportFunction& doc( const String& _doc );
+	virtual ExportFunction& doc( const std::string& _doc );
 
 	/** Set the function as private. If this is true, then do not export it's declaration. */
 	virtual ExportFunction& setPrivate(	BooleanType _set = BT_TRUE );
@@ -301,9 +301,9 @@ protected:
 	returnValue clear( );
 
 	/** Name of the function. */
-	String name;
+	std::string name;
 	/** A description string. */
-	String description;
+	std::string description;
 
 	/** List of calling arguments. */
 	ExportArgumentList functionArguments;

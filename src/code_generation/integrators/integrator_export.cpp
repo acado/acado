@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ExportAlgorithm( _userInteraction,_commonHeaderName )
 {
 	NX1 = 0;
@@ -136,11 +136,11 @@ returnValue IntegratorExport::setLinearInput( const Matrix& M1, const Matrix& A1
 }
 
 
-returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _name_diffs_ODE ) {
+returnValue IntegratorExport::setModel(	const std::string& _name_ODE, const std::string& _name_diffs_ODE ) {
 
 	if( rhs.getFunctionDim() == 0 ) {
-		name_rhs = String(_name_ODE);
-		name_diffs_rhs = String(_name_diffs_ODE);
+		name_rhs = std::string(_name_ODE);
+		name_diffs_rhs = std::string(_name_diffs_ODE);
 
 		exportRhs = BT_FALSE;
 	}
@@ -242,7 +242,7 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 }
 
 
-returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 )
+returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
 {
 	if( !A3.isEmpty() ) {
 		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() ) {
@@ -252,8 +252,8 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		M33 = M3;
 		A33 = A3;
 
-		name_rhs3 = String(_rhs3);
-		name_diffs_rhs3 = String(_diffs_rhs3);
+		name_rhs3 = std::string(_rhs3);
+		name_diffs_rhs3 = std::string(_diffs_rhs3);
 		exportRhs = BT_FALSE;
 
 		Parameter         dummy0;
@@ -339,8 +339,8 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 			setupOutput( outputGrids_, outputExpressions_ );
 		}
 		else {
-			std::vector<String> outputNames;
-			std::vector<String> diffs_outputNames;
+			std::vector<std::string> outputNames;
+			std::vector<std::string> diffs_outputNames;
 			std::vector<uint> dim_outputs;
 			std::vector<Matrix> outputDependencies_ = data.getOutputDependencies();
 			data.getNameOutputs(outputNames);
@@ -688,7 +688,7 @@ BooleanType IntegratorExport::equidistantControlGrid( ) const{
 	return numSteps.isEmpty();
 }
 
-const String IntegratorExport::getNameRHS() const{
+const std::string IntegratorExport::getNameRHS() const{
 	if( exportRhs ) {
 		return rhs.getName();
 	}
@@ -697,7 +697,7 @@ const String IntegratorExport::getNameRHS() const{
 	}
 }
 
-const String IntegratorExport::getNameFullRHS() const{
+const std::string IntegratorExport::getNameFullRHS() const{
 	if( NX2 == NX ) {
 		return getNameRHS();
 	}
@@ -706,7 +706,7 @@ const String IntegratorExport::getNameFullRHS() const{
 	}
 }
 
-const String IntegratorExport::getNameOutputRHS() const{
+const std::string IntegratorExport::getNameOutputRHS() const{
 	if( exportRhs ) {
 		return rhs3.getName();
 	}
@@ -715,7 +715,7 @@ const String IntegratorExport::getNameOutputRHS() const{
 	}
 }
 
-const String IntegratorExport::getNameOutputDiffs() const{
+const std::string IntegratorExport::getNameOutputDiffs() const{
 	if( exportRhs ) {
 		return diffs_rhs3.getName();
 	}
@@ -724,7 +724,7 @@ const String IntegratorExport::getNameOutputDiffs() const{
 	}
 }
 
-const String IntegratorExport::getNameOUTPUT( uint index ) const{
+const std::string IntegratorExport::getNameOUTPUT( uint index ) const{
 	if( exportRhs ) {
 		return outputs[index].getName();
 	}
@@ -743,7 +743,7 @@ uint IntegratorExport::getDimOUTPUT( uint index ) const{
 }
 
 
-const String IntegratorExport::getNameDiffsRHS() const{
+const std::string IntegratorExport::getNameDiffsRHS() const{
 	if( exportRhs ) {
 		return diffs_rhs.getName();
 	}
@@ -752,7 +752,7 @@ const String IntegratorExport::getNameDiffsRHS() const{
 	}
 }
 
-const String IntegratorExport::getNameDiffsOUTPUT( uint index ) const{
+const std::string IntegratorExport::getNameDiffsOUTPUT( uint index ) const{
 	if( exportRhs ) {
 		return diffs_outputs[index].getName();
 	}

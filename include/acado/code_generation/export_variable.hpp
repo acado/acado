@@ -78,13 +78,13 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
-		ExportVariable(	const String& _name,
+		ExportVariable(	const std::string& _name,
 						uint _nRows,
 						uint _nCols,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callItByValue = BT_FALSE,
-						const String& _prefix = emptyConstString
+						const std::string& _prefix = emptyConststd::string
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -97,12 +97,12 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
-		ExportVariable(	const String& _name,
+		ExportVariable(	const std::string& _name,
 						const Matrix& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callItByValue = BT_FALSE,
-						const String& _prefix = emptyConstString
+						const std::string& _prefix = emptyConststd::string
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -115,12 +115,12 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
-		ExportVariable(	const String& _name,
+		ExportVariable(	const std::string& _name,
 						const matrixPtr& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callItByValue = BT_FALSE,
-						const String& _prefix = emptyConstString
+						const std::string& _prefix = emptyConststd::string
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -137,7 +137,7 @@ class ExportVariable : public ExportArgument
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callItByValue = BT_FALSE,
-						const String& _prefix = emptyConstString
+						const std::string& _prefix = emptyConststd::string
 						);
 
 		/** \name Constructor which converts a given matrix/vector/scalar into an ExportVariable.
@@ -174,13 +174,13 @@ class ExportVariable : public ExportArgument
 		 *
 		 *	\return Reference to initialized object
 		 */
-		ExportVariable& setup(	const String& _name,
+		ExportVariable& setup(	const std::string& _name,
 								uint _nRows = 1,
 								uint _nCols = 1,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
 								BooleanType _callItByValue = BT_FALSE,
-								const String& _prefix = emptyConstString
+								const std::string& _prefix = emptyConststd::string
 								);
 
 		/** Initializes variable with given name and type string of the variable.
@@ -195,12 +195,12 @@ class ExportVariable : public ExportArgument
 		 *
 		 *	\return Reference to initialized object
 		 */
-		ExportVariable& setup(	const String& _name,
+		ExportVariable& setup(	const std::string& _name,
 								const Matrix& _data,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
 								BooleanType _callItByValue = BT_FALSE,
-								const String& _prefix = emptyConstString
+								const std::string& _prefix = emptyConststd::string
 								);
 
 		/** Returns value of given component.
@@ -229,7 +229,7 @@ class ExportVariable : public ExportArgument
 		 *
 		 *	\return Copy of the variable with given name
 		 */
-		ExportVariable operator()(	const String& _name
+		ExportVariable operator()(	const std::string& _name
 									) const;
 
 
@@ -296,9 +296,9 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return String containing the value of a given component
+		 *	\return std::string containing the value of a given component
 		 */
-		const String get(	const ExportIndex& rowIdx,
+		const std::string get(	const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 
@@ -548,7 +548,7 @@ class ExportVariable : public ExportArgument
 		 *
 		 *  \return A diagonal variable.
 		 * */
-		friend ExportVariable diag( const String& _name, unsigned int _n );
+		friend ExportVariable diag( const std::string& _name, unsigned int _n );
 };
 
 

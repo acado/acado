@@ -48,18 +48,18 @@ ExportArgument::ExportArgument( )
 {
 	Matrix m(0, 0);
 	assignNode(new ExportArgumentInternal(
-				"defaultArgumentName", matrixPtr(new Matrix( m )), REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConstString));
+				"defaultArgumentName", matrixPtr(new Matrix( m )), REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConststd::string));
 }
 
 
-ExportArgument::ExportArgument(	const String& _name,
+ExportArgument::ExportArgument(	const std::string& _name,
 								uint _nRows,
 								uint _nCols,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callItByValue,
 								const ExportIndex& _addressIdx,
-								const String& _prefix
+								const std::string& _prefix
 								)
 {
 	Matrix m(_nRows, _nCols);
@@ -70,13 +70,13 @@ ExportArgument::ExportArgument(	const String& _name,
 }
 
 
-ExportArgument::ExportArgument(	const String& _name,
+ExportArgument::ExportArgument(	const std::string& _name,
 								const matrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								BooleanType _callItByValue,
 								const ExportIndex& _addressIdx,
-								const String& _prefix
+								const std::string& _prefix
 								)
 {
 	assignNode(new ExportArgumentInternal(
@@ -87,7 +87,7 @@ ExportArgument::ExportArgument( const Matrix& _data
 								)
 {
 	assignNode(new ExportArgumentInternal(
-			"defaultArgumentName", matrixPtr(new Matrix( _data )), REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConstString));
+			"defaultArgumentName", matrixPtr(new Matrix( _data )), REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConststd::string));
 }
 
 ExportArgumentInternal* ExportArgument::operator->()
@@ -107,10 +107,10 @@ ExportArgument ExportArgument::getAddress(	const ExportIndex& _rowIdx,
 	return (*this)->getAddress(_rowIdx, _colIdx);
 }
 
-const String ExportArgument::getAddressString(	BooleanType withDataStruct
+const std::string ExportArgument::getAddressstd::string(	BooleanType withDataStruct
 												) const
 {
-	return (*this)->getAddressString( withDataStruct );
+	return (*this)->getAddressstd::string( withDataStruct );
 }
 
 
@@ -154,12 +154,12 @@ returnValue ExportArgument::callByValue( )
 
 
 returnValue ExportArgument::exportDataDeclaration(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+													const std::string& _realstd::string,
+													const std::string& _intstd::string,
 													int _precision
 													) const
 {
-	return (*this)->exportDataDeclaration(file, _realString, _intString, _precision);
+	return (*this)->exportDataDeclaration(file, _realstd::string, _intstd::string, _precision);
 }
 
 CLOSE_NAMESPACE_ACADO

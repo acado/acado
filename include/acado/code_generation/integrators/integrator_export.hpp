@@ -68,7 +68,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         IntegratorExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -131,7 +131,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
 		/** Assigns the model to be used by the integrator.
@@ -142,8 +142,8 @@ class IntegratorExport : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		virtual returnValue setModel( 	const String& _name_ODE,
-										const String& _name_diffs_ODE );
+		virtual returnValue setModel( 	const std::string& _name_ODE,
+										const std::string& _name_diffs_ODE );
 
 
 		/** Sets a polynomial NARX model to be used by the integrator.
@@ -303,8 +303,8 @@ class IntegratorExport : public ExportAlgorithm
 		*  \return SUCCESSFUL_RETURN
 		*/
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output ) = 0;
 
 
@@ -319,8 +319,8 @@ class IntegratorExport : public ExportAlgorithm
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
 										  const std::vector<Matrix> _outputDependencies ) = 0;
 
@@ -360,15 +360,15 @@ class IntegratorExport : public ExportAlgorithm
 		virtual BooleanType equidistantControlGrid( ) const;
 
 
-		const String getNameRHS() const;
-		const String getNameDiffsRHS() const;
-		virtual const String getNameFullRHS() const;
+		const std::string getNameRHS() const;
+		const std::string getNameDiffsRHS() const;
+		virtual const std::string getNameFullRHS() const;
 
-		const String getNameOutputRHS() const;
-		const String getNameOutputDiffs() const;
+		const std::string getNameOutputRHS() const;
+		const std::string getNameOutputDiffs() const;
 
-		const String getNameOUTPUT( uint index ) const;
-		const String getNameDiffsOUTPUT( uint index ) const;
+		const std::string getNameOUTPUT( uint index ) const;
+		const std::string getNameDiffsOUTPUT( uint index ) const;
 		uint getDimOUTPUT( uint index ) const;
 
 
@@ -443,10 +443,10 @@ class IntegratorExport : public ExportAlgorithm
 
         BooleanType exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
         BooleanType crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
-        String name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
-        String name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
-        String name_rhs3;					/**< The name of the nonlinear function in the linear output system, if provided. */
-        String name_diffs_rhs3;				/**< The name of the function evaluating the derivatives for the linear output system, if provided. */
+        std::string name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
+        std::string name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
+        std::string name_rhs3;					/**< The name of the nonlinear function in the linear output system, if provided. */
+        std::string name_diffs_rhs3;				/**< The name of the function evaluating the derivatives for the linear output system, if provided. */
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
 		Vector numSteps;					/**< The number of integration steps per shooting interval. */
@@ -493,8 +493,8 @@ class IntegratorExport : public ExportAlgorithm
         std::vector<ExportAcadoFunction> outputs;			/**< Module to export output functions. */
         std::vector<ExportAcadoFunction> diffs_outputs;	/**< Module to export the evaluation of the derivatives of the output functions. */
 		
-        std::vector<String> name_outputs;				/**< A separate function name for each output. */
-        std::vector<String> name_diffs_outputs;			/**< A separate function name for evaluating the derivatives of each output. */
+        std::vector<std::string> name_outputs;				/**< A separate function name for each output. */
+        std::vector<std::string> name_diffs_outputs;			/**< A separate function name for evaluating the derivatives of each output. */
         std::vector<uint> num_outputs;					/**< A separate dimension for each output. */
 };
 

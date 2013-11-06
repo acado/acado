@@ -60,7 +60,7 @@ public:
 	 *	@param[in] _name		Name of exported ODE function.
 	 */
 	ExportAcadoFunction(	const Function& _f,
-							const String& _name = "acadoFcn"
+							const std::string& _name = "acadoFcn"
 							);
 
 	/** Copy constructor (deep copy).
@@ -104,7 +104,7 @@ public:
 	 * 	@param[in] _numDX		The number of differential state derivatives given for the evaluation of the system of equations.
 	 */
 	returnValue init(	const Function& _f,
-						const String& _name = "acadoFcn",
+						const std::string& _name = "acadoFcn",
 						const uint _numX = 0,
 						const uint _numXA = 0,
 						const uint _numU = 0,
@@ -116,15 +116,15 @@ public:
 	 *  can be adjusted by various options.
 	 *
 	 *	@param[in] file				Name of file to be used to export function.
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+	 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 	 *	@param[in] _precision		Number of digits to be used for exporting real values.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	virtual returnValue exportDataDeclaration(	FILE* file,
-												const String& _realString = "real_t",
-												const String& _intString = "int",
+												const std::string& _realstd::string = "real_t",
+												const std::string& _intstd::string = "int",
 												int _precision = 16
 												) const;
 
@@ -132,15 +132,15 @@ public:
 	 *  can be adjusted by various options.
 	 *
 	 *	@param[in] file				Name of file to be used to export statement.
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+	 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 	 *	@param[in] _precision		Number of digits to be used for exporting real values.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	virtual returnValue exportForwardDeclaration(	FILE* file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+													const std::string& _realstd::string = "real_t",
+													const std::string& _intstd::string = "int",
 													int _precision = 16
 													) const;
 
@@ -148,15 +148,15 @@ public:
 	 *  can be adjusted by various options.
 	 *
 	 *	@param[in] file				Name of file to be used to export function.
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+	 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 	 *	@param[in] _precision		Number of digits to be used for exporting real values.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	virtual returnValue exportCode(	FILE* file,
-									const String& _realString = "real_t",
-									const String& _intString = "int",
+									const std::string& _realstd::string = "real_t",
+									const std::string& _intstd::string = "int",
 									int _precision = 16
 									) const;
 

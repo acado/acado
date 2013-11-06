@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExplicitRungeKutta3Export::ExplicitRungeKutta3Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ExplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 3;
@@ -71,7 +71,7 @@ ExplicitRungeKutta3Export::~ExplicitRungeKutta3Export( )
 //
 
 IntegratorExport* createExplicitRungeKutta3Export(	UserInteraction* _userInteraction,
-													const String &_commonHeaderName)
+													const std::string &_commonHeaderName)
 {
 	Matrix AA(3,3);
 	Vector bb(3);

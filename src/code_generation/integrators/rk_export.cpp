@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 RungeKuttaExport::RungeKuttaExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : IntegratorExport( _userInteraction,_commonHeaderName )
 {
 }

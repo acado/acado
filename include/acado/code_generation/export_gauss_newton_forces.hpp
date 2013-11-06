@@ -60,7 +60,7 @@ public:
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
 	ExportGaussNewtonForces(	UserInteraction* _userInteraction = 0,
-								const String& _commonHeaderName = ""
+								const std::string& _commonHeaderName = ""
 								);
 
 	/** Destructor.
@@ -204,8 +204,8 @@ private:
 
 	/** \name QP interface */
 	/** @{ */
-	String qpModuleName;
-	String qpObjPrefix;
+	std::string qpModuleName;
+	std::string qpObjPrefix;
 
 	std::tr1::shared_ptr< ExportForcesInterface > qpInterface;
 	std::tr1::shared_ptr< ExportForcesGenerator > qpGenerator;

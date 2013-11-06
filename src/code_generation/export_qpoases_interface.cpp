@@ -39,16 +39,16 @@ using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 
-ExportQpOasesInterface::ExportQpOasesInterface(		const String& _headerFileName,
-													const String& _sourceFileName,
-													const String& _commonHeaderName,
-													const String& _realString,
-													const String& _intString,
+ExportQpOasesInterface::ExportQpOasesInterface(		const std::string& _headerFileName,
+													const std::string& _sourceFileName,
+													const std::string& _commonHeaderName,
+													const std::string& _realstd::string,
+													const std::string& _intstd::string,
 													int _precision,
-													const String& _commentString
+													const std::string& _commentstd::string
 													)
-	: qpoHeader(QPOASES_HEADER, _headerFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
-	  qpoSource(QPOASES_SOURCE, _sourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
+	: qpoHeader(QPOASES_HEADER, _headerFileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string),
+	  qpoSource(QPOASES_SOURCE, _sourceFileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string)
 {}
 
 

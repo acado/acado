@@ -44,7 +44,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExplicitRungeKuttaExport::ExplicitRungeKuttaExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : RungeKuttaExport( _userInteraction,_commonHeaderName )
 {
 }
@@ -129,13 +129,13 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
-		integrate.addStatement( String( "int numSteps[" ) << String( numSteps.getDim() ) << "] = {" << String( numSteps(0) ) );
+		integrate.addStatement( std::string( "int numSteps[" ) << std::string( numSteps.getDim() ) << "] = {" << std::string( numSteps(0) ) );
 		uint i;
 		for( i = 1; i < numSteps.getDim(); i++ ) {
-			integrate.addStatement( String( ", " ) << String( numSteps(i) ) );
+			integrate.addStatement( std::string( ", " ) << std::string( numSteps(i) ) );
 		}
-		integrate.addStatement( String( "};\n" ) );
-		integrate.addStatement( String( "int " ) << numInt.getName() << " = numSteps[" << rk_index.getName() << "];\n" );
+		integrate.addStatement( std::string( "};\n" ) );
+		integrate.addStatement( std::string( "int " ) << numInt.getName() << " = numSteps[" << rk_index.getName() << "];\n" );
 	}
 	
 	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
@@ -160,7 +160,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	}
 	else {
 		loop = ExportForLoop( run, 0, 1 );
-		loop.addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+		loop.addStatement( std::string("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
 	}
 
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
@@ -277,7 +277,7 @@ returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const M
 }
 
 
-returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 )
+returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
 {
 	return RET_INVALID_OPTION;
 }
@@ -361,7 +361,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	if( exportRhs ) code.addFunction( diffs_rhs );
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-	code.addComment(String("Fixed step size:") << String(h));
+	code.addComment(std::string("Fixed step size:") << std::string(h));
 	code.addFunction( integrate );
 
 	int matlabInterface;
@@ -384,8 +384,8 @@ returnValue ExplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 
 
 returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  	  	  	const std::vector<String> _outputNames,
-									  	  	  	  	const std::vector<String> _diffs_outputNames,
+									  	  	  	  	const std::vector<std::string> _outputNames,
+									  	  	  	  	const std::vector<std::string> _diffs_outputNames,
 									  	  	  	  	const std::vector<uint> _dims_output ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
@@ -393,8 +393,8 @@ returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 
 
 returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  	  	  	const std::vector<String> _outputNames,
-									  	  	  	  	const std::vector<String> _diffs_outputNames,
+									  	  	  	  	const std::vector<std::string> _outputNames,
+									  	  	  	  	const std::vector<std::string> _diffs_outputNames,
 									  	  	  	  	const std::vector<uint> _dims_output,
 									  	  	  	  	const std::vector<Matrix> _outputDependencies ) {
 

@@ -65,7 +65,7 @@ class NARXExport : public DiscreteTimeExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         NARXExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -105,7 +105,7 @@ class NARXExport : public DiscreteTimeExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		returnValue setModel( const String& _rhs, const String& _diffs_rhs );
+		returnValue setModel( const std::string& _rhs, const std::string& _diffs_rhs );
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -220,7 +220,7 @@ class NARXExport : public DiscreteTimeExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
 	protected:

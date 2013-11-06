@@ -44,7 +44,7 @@ BEGIN_NAMESPACE_ACADO
 using namespace std;
 
 ExportGaussNewtonForces::ExportGaussNewtonForces(	UserInteraction* _userInteraction,
-													const String& _commonHeaderName
+													const std::string& _commonHeaderName
 													) : ExportNLPSolver( _userInteraction,_commonHeaderName )
 {
 	qpObjPrefix = "acadoForces";
@@ -196,16 +196,16 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	objHessians.resize(N + 1);
 	for (unsigned i = 0; i < N; ++i)
 	{
-		objHessians[ i ].setup((String)"H" << (i + 1), dimHRows, dimHCols, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		objHessians[ i ].setup((std::string)"H" << (i + 1), dimHRows, dimHCols, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 	}
-	objHessians[ N ].setup((String)"H" << (N + 1), dimHNRows, dimHNCols, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+	objHessians[ N ].setup((std::string)"H" << (N + 1), dimHNRows, dimHNCols, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 
 	objGradients.resize(N + 1);
 	for (unsigned i = 0; i < N; ++i)
 	{
-		objGradients[ i ].setup((String)"f" << (i + 1), NX + NU, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		objGradients[ i ].setup((std::string)"f" << (i + 1), NX + NU, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 	}
-	objGradients[ N ].setup((String)"f" << (N + 1), NX, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+	objGradients[ N ].setup((std::string)"f" << (N + 1), NX, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 
 	//
 	// LM regularization preparation
@@ -638,8 +638,8 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 	//
 	for (unsigned i = 0; i < N + 1; ++i)
 	{
-		conLB[ i ].setup((String)"lb" << (i + 1), conLBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
-		conUB[ i ].setup((String)"ub" << (i + 1), conUBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		conLB[ i ].setup((std::string)"lb" << (i + 1), conLBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		conUB[ i ].setup((std::string)"ub" << (i + 1), conUBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 	}
 
 	evaluateConstraints.setup("evaluateConstraints");
@@ -659,7 +659,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 			else
 				s << u.getFullName().getName() << "[ " << i * NU + conLBIndices[ i ][ j ] - NX << " ];\n";
 
-			evaluateConstraints.addStatement( (String)s.str().c_str() );
+			evaluateConstraints.addStatement( (std::string)s.str().c_str() );
 		}
 	evaluateConstraints.addLinebreak();
 
@@ -674,7 +674,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 			else
 				s << u.getFullName().getName() << "[ " << i * NU + conUBIndices[ i ][ j ] - NX << " ];\n";
 
-			evaluateConstraints.addStatement( (String)s.str().c_str() );
+			evaluateConstraints.addStatement( (std::string)s.str().c_str() );
 		}
 	evaluateConstraints.addLinebreak();
 
@@ -696,7 +696,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 
 //	for (unsigned i = 1; i < N; ++i)
 	for (unsigned i = 0; i < N; ++i)
-		conC[ i ].setup((String)"C" << (i + 1), NX + NU, NX, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		conC[ i ].setup((std::string)"C" << (i + 1), NX + NU, NX, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 
 	ExportIndex index( "index" );
 	conStageC.setup("conStageC", NX + NU, NX, REAL);
@@ -751,7 +751,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 
 
 	for (unsigned i = 0; i < dNum; ++i)
-		cond[ i ].setup((String)"d" << i + 1, NX, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		cond[ i ].setup((std::string)"d" << i + 1, NX, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 
 	ExportVariable staged, stagedNew;
 
@@ -795,7 +795,7 @@ returnValue ExportGaussNewtonForces::setupVariables( )
 	if (initialStateFixed() == BT_TRUE)
 	{
 		x0.setup("x0",  NX, 1, REAL, ACADO_VARIABLES);
-		x0.setDoc( (String)"Current state feedback vector." );
+		x0.setDoc( (std::string)"Current state feedback vector." );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -865,12 +865,12 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	//
 	ExportFunction solveQP;
 	solveQP.setup("solve");
-	String prefix;
+	std::string prefix;
 	prefix = "forces";
 
 	feedback.addStatement(
 			returnValueFeedbackPhase.getFullName() << " = " <<
-			(String) qpModuleName.getName() << "_" << solveQP.getName( ) << "( " <<
+			(std::string) qpModuleName.getName() << "_" << solveQP.getName( ) << "( " <<
 			"&" << qpObjPrefix << "_" << "params" << ", " <<
 			"&" << qpObjPrefix << "_" << "output" << ", " <<
 			"&" << qpObjPrefix << "_" << "info" << " );\n"
@@ -886,8 +886,8 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	vecQPVars.clear();
 	vecQPVars.resize(N + 1);
 	for (unsigned i = 0; i < N; ++i)
-		vecQPVars[ i ].setup((String)"out" << i + 1, NX + NU, 1, REAL, FORCES_OUTPUT, BT_FALSE, qpObjPrefix);
-	vecQPVars[ N ].setup((String)"out" << N + 1, NX, 1, REAL, FORCES_OUTPUT, BT_FALSE, qpObjPrefix);
+		vecQPVars[ i ].setup((std::string)"out" << i + 1, NX + NU, 1, REAL, FORCES_OUTPUT, BT_FALSE, qpObjPrefix);
+	vecQPVars[ N ].setup((std::string)"out" << N + 1, NX, 1, REAL, FORCES_OUTPUT, BT_FALSE, qpObjPrefix);
 
 	ExportVariable stageOut("stageOut", 1, NX + NU, REAL, ACADO_LOCAL);
 	ExportIndex index( "index" );
@@ -985,21 +985,21 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			string( header ),
 
 			string( params ),
-			string( tmp1.getDataStructString().getName() ),
+			string( tmp1.getDataStructstd::string().getName() ),
 
 			string( output ),
-			string( tmp2.getDataStructString().getName() ),
+			string( tmp2.getDataStructstd::string().getName() ),
 
 			string( info ),
-			string( tmp3.getDataStructString().getName() )
+			string( tmp3.getDataStructstd::string().getName() )
 	);
 
 	//
 	// Configure and export QP generator
 	//
 
-	String folderName = dynamic_cast< ExportModule* >( userInteraction )->getExportFolderName();
-	String outFile = folderName + "/acado_forces_generator.m";
+	std::string folderName = dynamic_cast< ExportModule* >( userInteraction )->getExportFolderName();
+	std::string outFile = folderName + "/acado_forces_generator.m";
 
 	qpGenerator = std::tr1::shared_ptr< ExportForcesGenerator >(new ExportForcesGenerator(FORCES_GENERATOR, outFile, "", "real_t", "int", 16, "%"));
 
@@ -1042,7 +1042,7 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 //
 
 ExportNLPSolver* createGaussNewtonForces(	UserInteraction* _userInteraction,
-											const String& _commonHeaderName
+											const std::string& _commonHeaderName
 											)
 {
 	return new ExportGaussNewtonForces(_userInteraction, _commonHeaderName);

@@ -46,7 +46,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 DiagonallyImplicitRKExport::DiagonallyImplicitRKExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ForwardIRKExport( _userInteraction,_commonHeaderName )
 {
 
@@ -191,7 +191,7 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 {
 	if( NX2 > 0 || NXA > 0 ) {
 
-		if( REUSE ) block->addStatement( String( "if( " ) << reset_int.getFullName() << " ) {\n" );
+		if( REUSE ) block->addStatement( std::string( "if( " ) << reset_int.getFullName() << " ) {\n" );
 		// Initialization iterations:
 		ExportForLoop loop11( index2,0,numStages );
 		ExportForLoop loop1( index1,0,numItsInit+1 ); // NOTE: +1 because 0 will lead to NaNs, so the minimum number of iterations is 1 at the initialization
@@ -201,7 +201,7 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 		if(NXA > 0) loop1.addStatement( rk_kkk.getSubMatrix( NX,NX+NXA,index2,index2+1 ) += rk_b.getRows( NX2,NX2+NXA ) );		// algebraic states
 		loop11.addStatement( loop1 );
 		block->addStatement( loop11 );
-		if( REUSE ) block->addStatement( String( "}\n" ) );
+		if( REUSE ) block->addStatement( std::string( "}\n" ) );
 
 		// the rest (numIts) of the Newton iterations with reuse of the Jacobian (no evaluation or factorization needed)
 		ExportForLoop loop21( index2,0,numStages );
@@ -243,7 +243,7 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportState
 		ExportForLoop loop1( index2,0,numStages );
 		if( STATES && number == 1 ) {
 			ExportForLoop loop2( index3,0,NX1 );
-			loop2.addStatement( String(rk_rhsTemp.get( index3,0 )) << " = -(" << index3.getName() << " == " << index1.getName() << ");\n" );
+			loop2.addStatement( std::string(rk_rhsTemp.get( index3,0 )) << " = -(" << index3.getName() << " == " << index1.getName() << ");\n" );
 			ExportForLoop loop21( tmp_index1,0,index2+1 );
 			loop21.addStatement( rk_rhsTemp.getRow( index3 ) -= rk_diffK.getSubMatrix( index3,index3+1,tmp_index1,tmp_index1+1 )*Ah.getSubMatrix(index2,index2+1,tmp_index1,tmp_index1+1) );
 			loop2.addStatement( loop21 );
@@ -279,36 +279,36 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportState
 		ExportForLoop loop11( index3,0,NX2+NXA );
 		ExportForLoop loop12( tmp_index1,0,index2 );
 		ExportForLoop loop13( tmp_index2,NX1,NX1+NX2 );
-		loop13.addStatement( String( rk_b.get(index3,0) ) << " -= " << Ah.get(index2,tmp_index1) << "*" << rk_diffsTemp2.get(index2,index3*NVARS2+tmp_index2) << "*" << rk_diffK.get(tmp_index2,tmp_index1) << ";\n" );
+		loop13.addStatement( std::string( rk_b.get(index3,0) ) << " -= " << Ah.get(index2,tmp_index1) << "*" << rk_diffsTemp2.get(index2,index3*NVARS2+tmp_index2) << "*" << rk_diffK.get(tmp_index2,tmp_index1) << ";\n" );
 		loop12.addStatement( loop13 );
 		loop11.addStatement( loop12 );
 		loop1.addStatement( loop11 );
 		if( STATES && (number == 1 || NX1 == 0) ) {
-			loop1.addStatement( String( "if( 0 == " ) << index1.getName() << " ) {\n" );	// factorization of the new matrix rk_A not yet calculated!
+			loop1.addStatement( std::string( "if( 0 == " ) << index1.getName() << " ) {\n" );	// factorization of the new matrix rk_A not yet calculated!
 			loop1.addStatement( det.getFullName() << " = " << solver->getNameSolveFunction() << "( &" << rk_A.get(index2*(NX2+NXA),0) << ", " << rk_b.getFullName() << ", &" << rk_auxSolver.get(index2,0) << " );\n" );
-			loop1.addStatement( String( "}\n else {\n" ) );
+			loop1.addStatement( std::string( "}\n else {\n" ) );
 		}
 		loop1.addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(index2*(NX2+NXA),0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(index2,0) );
-		if( STATES && (number == 1 || NX1 == 0) ) loop1.addStatement( String( "}\n" ) );
+		if( STATES && (number == 1 || NX1 == 0) ) loop1.addStatement( std::string( "}\n" ) );
 		// update rk_diffK with the new sensitivities:
 		loop1.addStatement( rk_diffK.getSubMatrix(NX1,NX1+NX2,index2,index2+1) == rk_b.getRows(0,NX2) );
 		loop1.addStatement( rk_diffK.getSubMatrix(NX,NX+NXA,index2,index2+1) == rk_b.getRows(NX2,NX2+NXA) );
 		block->addStatement( loop1 );
 		// update rk_diffsNew with the new sensitivities:
 		ExportForLoop loop3( index2,0,NX2 );
-		if( STATES && number == 2 ) loop3.addStatement( String(rk_diffsNew2.get( index2,index1 )) << " = (" << index2.getName() << " == " << index1.getName() << "-" << String(NX1) << ");\n" );
+		if( STATES && number == 2 ) loop3.addStatement( std::string(rk_diffsNew2.get( index2,index1 )) << " = (" << index2.getName() << " == " << index1.getName() << "-" << std::string(NX1) << ");\n" );
 
 		if( STATES && number == 2 ) loop3.addStatement( rk_diffsNew2.getSubMatrix( index2,index2+1,index1,index1+1 ) += rk_diffK.getRow( NX1+index2 )*Bh );
 		else if( STATES )	loop3.addStatement( rk_diffsNew2.getSubMatrix( index2,index2+1,index1,index1+1 ) == rk_diffK.getRow( NX1+index2 )*Bh );
 		else		 		loop3.addStatement( rk_diffsNew2.getSubMatrix( index2,index2+1,index1+NX1+NX2,index1+NX1+NX2+1 ) == rk_diffK.getRow( NX1+index2 )*Bh );
 		block->addStatement( loop3 );
 		if( NXA > 0 ) {
-			block->addStatement( String("if( run == 0 ) {\n") );
+			block->addStatement( std::string("if( run == 0 ) {\n") );
 			ExportForLoop loop4( index2,0,NXA );
 			if( STATES ) loop4.addStatement( rk_diffsNew2.getSubMatrix( index2+NX2,index2+NX2+1,index1,index1+1 ) == rk_diffK.getRow( NX+index2 )*tempCoefs );
 			else 		 loop4.addStatement( rk_diffsNew2.getSubMatrix( index2+NX2,index2+NX2+1,index1+NX1+NX2,index1+NX1+NX2+1 ) == rk_diffK.getRow( NX+index2 )*tempCoefs );
 			block->addStatement( loop4 );
-			block->addStatement( String("}\n") );
+			block->addStatement( std::string("}\n") );
 		}
 	}
 
@@ -425,7 +425,7 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStateme
 		ExportForLoop loop1( index2,0,numStages );
 		if( STATES && number == 1 ) {
 			ExportForLoop loop2( index3,0,NX1 );
-			loop2.addStatement( String(rk_rhsTemp.get( index3,0 )) << " = (" << index3.getName() << " == " << index1.getName() << ");\n" );
+			loop2.addStatement( std::string(rk_rhsTemp.get( index3,0 )) << " = (" << index3.getName() << " == " << index1.getName() << ");\n" );
 			for( i = 0; i < numStages; i++ ) {
 				loop2.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getSubMatrix( index3,index3+1,i,i+1 )*Ah.getSubMatrix(index2,index2+1,i,i+1) );
 			}
@@ -448,7 +448,7 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStateme
 		}
 		else if( STATES && number == 2 ) {
 			ExportForLoop loop3( index3,NX1,NX1+NX2 );
-			loop3.addStatement( String(rk_rhsTemp.get( index3,0 )) << " = (" << index3.getName() << " == " << index1.getName() << ");\n" );
+			loop3.addStatement( std::string(rk_rhsTemp.get( index3,0 )) << " = (" << index3.getName() << " == " << index1.getName() << ");\n" );
 			for( i = 0; i < numStages; i++ ) {
 				loop3.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getSubMatrix( index3,index3+1,i,i+1 )*Ah.getSubMatrix(index2,index2+1,i,i+1) );
 			}
@@ -493,7 +493,7 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStateme
 			for( i = 0; i < NX3; i++ ) {
 				for( j = NX1+NX2; j < NX; j++ ) {
 					if( acadoRoundAway(A33(i,j-NX1-NX2)) != 0 ) {
-						loop12.addStatement( String( rk_b.get(i,0) ) << " += " << Ah.get(index2,tmp_index1) << "*" << String(A33(i,j-NX1-NX2)) << "*" << rk_diffK.get(j,tmp_index1) << ";\n" );
+						loop12.addStatement( std::string( rk_b.get(i,0) ) << " += " << Ah.get(index2,tmp_index1) << "*" << std::string(A33(i,j-NX1-NX2)) << "*" << rk_diffK.get(j,tmp_index1) << ";\n" );
 					}
 				}
 			}
@@ -515,15 +515,15 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStateme
 			block->addStatement( loop1 );
 		}
 		// update rk_diffsNew with the new sensitivities:
-		if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) block->addStatement( String( "if( run == 0 ) {\n" ) );
+		if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) block->addStatement( std::string( "if( run == 0 ) {\n" ) );
 		ExportForLoop loop8( index2,0,NX3 );
-		if( STATES && number == 3 ) loop8.addStatement( String(rk_diffsNew3.get( index2,index1 )) << " = (" << index2.getName() << " == " << index1.getName() << "-" << String(NX1+NX2) << ");\n" );
+		if( STATES && number == 3 ) loop8.addStatement( std::string(rk_diffsNew3.get( index2,index1 )) << " = (" << index2.getName() << " == " << index1.getName() << "-" << std::string(NX1+NX2) << ");\n" );
 
 		if( STATES && number == 3 ) loop8.addStatement( rk_diffsNew3.getSubMatrix( index2,index2+1,index1,index1+1 ) += rk_diffK.getRow( NX1+NX2+index2 )*Bh );
 		else if( STATES )	loop8.addStatement( rk_diffsNew3.getSubMatrix( index2,index2+1,index1,index1+1 ) == rk_diffK.getRow( NX1+NX2+index2 )*Bh );
 		else		 		loop8.addStatement( rk_diffsNew3.getSubMatrix( index2,index2+1,index1+NX,index1+NX+1 ) == rk_diffK.getRow( NX1+NX2+index2 )*Bh );
 		block->addStatement( loop8 );
-		if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) block->addStatement( String( "}\n" ) );
+		if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) block->addStatement( std::string( "}\n" ) );
 	}
 
 	return SUCCESSFUL_RETURN;

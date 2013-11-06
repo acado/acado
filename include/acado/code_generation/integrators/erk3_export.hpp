@@ -65,7 +65,7 @@ class ExplicitRungeKutta3Export : public ExplicitRungeKuttaExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ExplicitRungeKutta3Export(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).

@@ -50,8 +50,8 @@ enum ExportVariableType
 class ExportIndexNode : public ExportDataInternal
 {
 public:
-	ExportIndexNode(	const String& _name,
-						const String& _prefix,
+	ExportIndexNode(	const std::string& _name,
+						const std::string& _prefix,
 						const int _factor = 1,
 						const int _offset = 0)
 	:	ExportDataInternal(_name, INT, ACADO_LOCAL, _prefix)
@@ -97,13 +97,13 @@ public:
 	}
 
 	virtual returnValue exportDataDeclaration(	FILE* file,
-												const String& _realString = "real_t",
-												const String& _intString = "int",
+												const std::string& _realstd::string = "real_t",
+												const std::string& _intstd::string = "int",
 												int _precision = 16
 												) const;
 
 	/// Returns a string containing the value of the index.
-	const String get( ) const;
+	const std::string get( ) const;
 
 
 	/** Returns the given value of the index (if defined).

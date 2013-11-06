@@ -97,10 +97,10 @@ returnValue ExportStatementBlock::addStatement(	const ExportStatement& _statemen
 }
 
 
-returnValue ExportStatementBlock::addStatement(	const String& _statementString
+returnValue ExportStatementBlock::addStatement(	const std::string& _statementstd::string
 												)
 {
-	ExportStatementString tmp( _statementString );
+	ExportStatementstd::string tmp( _statementstd::string );
 	return addStatement( tmp );
 }
 
@@ -112,7 +112,7 @@ returnValue ExportStatementBlock::addFunction(	const ExportFunction& _function
 }
 
 
-returnValue ExportStatementBlock::addFunctionCall(	const String& _fName,
+returnValue ExportStatementBlock::addFunctionCall(	const std::string& _fName,
 													const ExportArgument& _argument1,
 													const ExportArgument& _argument2,
 													const ExportArgument& _argument3,
@@ -215,7 +215,7 @@ returnValue ExportStatementBlock::addLinebreak(	uint num
 	if ( num > 10 )
 		num = 10;
 
-	String tmp = "\n";
+	std::string tmp = "\n";
 
 	for( uint i=1; i<num; ++i )
 		tmp << "\n";
@@ -224,17 +224,17 @@ returnValue ExportStatementBlock::addLinebreak(	uint num
 }
 
 
-returnValue ExportStatementBlock::addComment(	const String& _comment
+returnValue ExportStatementBlock::addComment(	const std::string& _comment
 												)
 {
-	String tmp = "/* ";
+	std::string tmp = "/* ";
 	tmp << _comment << " */\n";
 	return addStatement( tmp );
 }
 
 
 returnValue ExportStatementBlock::addComment(	uint _nBlanks,
-												const String& _comment
+												const std::string& _comment
 												)
 {
 	char* blanks = new char[_nBlanks+1];
@@ -242,7 +242,7 @@ returnValue ExportStatementBlock::addComment(	uint _nBlanks,
 		blanks[i] = ' ';
 	blanks[_nBlanks] = '\0';
 	
-	String tmp = blanks;
+	std::string tmp = blanks;
 	tmp << "/* " << _comment << " */\n";
 	
 	delete[] blanks;
@@ -260,14 +260,14 @@ uint ExportStatementBlock::getNumStatements( ) const
 
 
 returnValue ExportStatementBlock::exportDataDeclaration(	FILE *file,
-															const String& _realString,
-															const String& _intString,
+															const std::string& _realstd::string,
+															const std::string& _intstd::string,
 															int _precision
 															) const
 {
 	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
-		if ((*it)->exportDataDeclaration(file, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
+		if ((*it)->exportDataDeclaration(file, _realstd::string, _intstd::string, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 
 	return SUCCESSFUL_RETURN;
@@ -276,14 +276,14 @@ returnValue ExportStatementBlock::exportDataDeclaration(	FILE *file,
 
 
 returnValue ExportStatementBlock::exportCode(	FILE* file,
-												const String& _realString,
-												const String& _intString,
+												const std::string& _realstd::string,
+												const std::string& _intstd::string,
 												int _precision
 												) const
 {
 	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
-		if ((*it)->exportCode(file, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
+		if ((*it)->exportCode(file, _realstd::string, _intstd::string, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 
 	return SUCCESSFUL_RETURN;
@@ -305,7 +305,7 @@ ExportStatementBlock& operator<<(ExportStatementBlock& _block, const ExportState
 	return _block;
 }
 
-ExportStatementBlock& operator<<(ExportStatementBlock& _block, const String& _statement)
+ExportStatementBlock& operator<<(ExportStatementBlock& _block, const std::string& _statement)
 {
 	returnValue status = _block.addStatement( _statement );
 	if (status != SUCCESSFUL_RETURN)
@@ -316,7 +316,7 @@ ExportStatementBlock& operator<<(ExportStatementBlock& _block, const String& _st
 
 ExportStatementBlock& operator<<(ExportStatementBlock& _block, const std::string& _statement)
 {
-	returnValue status = _block.addStatement( String(_statement.c_str()) );
+	returnValue status = _block.addStatement( std::string(_statement.c_str()) );
 	if (status != SUCCESSFUL_RETURN)
 		ACADOERROR( status );
 

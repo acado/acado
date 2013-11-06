@@ -44,7 +44,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 NARXExport::NARXExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : DiscreteTimeExport( _userInteraction,_commonHeaderName )
 {
 	delay = 1;
@@ -125,7 +125,7 @@ returnValue NARXExport::setup( )
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
 		ExportVariable numStepsV( "numSteps", numSteps, STATIC_CONST_INT );
-		integrate.addStatement( String( "int " ) << numInt.getName() << " = " << numStepsV.getName() << "[" << rk_index.getName() << "];\n" );
+		integrate.addStatement( std::string( "int " ) << numInt.getName() << " = " << numStepsV.getName() << "[" << rk_index.getName() << "];\n" );
 	}
 
 	integrate.addStatement( rk_xxx.getCols( NX,inputDim-diffsDim ) == rk_eta.getCols( NX+diffsDim,inputDim ) );
@@ -175,13 +175,13 @@ returnValue NARXExport::setup( )
 	}
 	else {
 		loop = &integrate;
-		loop->addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+		loop->addStatement( std::string("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
 	}
 
 	loop->addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( String("if( run > 0 ) {\n") );
+		loop->addStatement( std::string("if( run > 0 ) {\n") );
 		// SHIFT rk_diffsPrev:
 		// TODO: write using exportforloop
 		if( NX1 > 0 ) {
@@ -214,7 +214,7 @@ returnValue NARXExport::setup( )
 			if( NU > 0 ) loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,NX,NX+NU ) == rk_eta.getCols( i*NU+NX*(NX+1)+delay*(NX1+NX2)*NU,i*NU+NX*(NX+1)+delay*(NX1+NX2)*NU+NU ) );
 			loop->addStatement( loopTemp3 );
 		}
-		loop->addStatement( String("}\n") );
+		loop->addStatement( std::string("}\n") );
 	}
 
 	// evaluate states:
@@ -251,7 +251,7 @@ returnValue NARXExport::setup( )
 
 	// computation of the sensitivities using chain rule:
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( String( "if( run == 0 ) {\n" ) );
+		loop->addStatement( std::string( "if( run == 0 ) {\n" ) );
 	}
 	// PART 1
 	updateInputSystem(loop, i, j, tmp_index);
@@ -261,15 +261,15 @@ returnValue NARXExport::setup( )
 	updateOutputSystem(loop, i, j, tmp_index);
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( String( "}\n" ) );
-		loop->addStatement( String( "else {\n" ) );
+		loop->addStatement( std::string( "}\n" ) );
+		loop->addStatement( std::string( "else {\n" ) );
 		// PART 1
 		propagateInputSystem(loop, i, j, k, tmp_index);
 		// PART 2
 		propagateImplicitSystem(loop, i, j, k, tmp_index);
 		// PART 3
 		propagateOutputSystem(loop, i, j, k, tmp_index);
-		loop->addStatement( String( "}\n" ) );
+		loop->addStatement( std::string( "}\n" ) );
 	}
 
 	// end of the integrator loop.
@@ -589,7 +589,7 @@ returnValue NARXExport::setDifferentialEquation(	const Expression& rhs_ )
 }
 
 
-returnValue NARXExport::setModel(	const String& _rhs, const String& _diffs_rhs ) {
+returnValue NARXExport::setModel(	const std::string& _rhs, const std::string& _diffs_rhs ) {
 
 	// You can't use this feature yet with NARX integrators !
 	return ACADOERROR( RET_INVALID_OPTION );
@@ -718,7 +718,7 @@ returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, con
 }
 
 
-returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 )
+returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
 {
 	// You can't use this feature yet with NARX integrators !
 	return ACADOERROR( RET_INVALID_OPTION );
@@ -751,7 +751,7 @@ returnValue NARXExport::formNARXpolynomial( const uint num, const uint order, ui
 //
 
 IntegratorExport* createNARXExport(	UserInteraction* _userInteraction,
-													const String &_commonHeaderName)
+													const std::string &_commonHeaderName)
 {
 	return new NARXExport(_userInteraction, _commonHeaderName);
 }

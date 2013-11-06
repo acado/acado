@@ -38,7 +38,7 @@ BEGIN_NAMESPACE_ACADO
 using namespace std;
 
 ExportGaussNewtonQpDunes::ExportGaussNewtonQpDunes(	UserInteraction* _userInteraction,
-													const String& _commonHeaderName
+													const std::string& _commonHeaderName
 													) : ExportNLPSolver( _userInteraction,_commonHeaderName )
 {}
 
@@ -62,8 +62,8 @@ returnValue ExportGaussNewtonQpDunes::setup( )
 	//
 	ExportFunction initializeQpDunes( "initializeQpDunes" );
 	initialize
-		<< String("ret = (int)initializeQpDunes();\n")
-		<< String("if ((return_t)ret != QPDUNES_OK) return ret;\n");
+		<< std::string("ret = (int)initializeQpDunes();\n")
+		<< std::string("if ((return_t)ret != QPDUNES_OK) return ret;\n");
 
 	cleanup.setup( "cleanupSolver" );
 	ExportFunction cleanupQpDunes( "cleanupQpDunes" );
@@ -790,7 +790,7 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 			continue;
 
 		evaluateConstraints.addComment(
-				String( "Evaluating constraint on node: #" ) << String( i ) << "\n\n"
+				std::string( "Evaluating constraint on node: #" ) << std::string( i ) << "\n\n"
 		);
 
 		evaluateConstraints.addStatement(conValueIn.getCols(0, getNX()) == x.getRow( i ) );
@@ -928,7 +928,7 @@ returnValue ExportGaussNewtonQpDunes::setupVariables( )
 	if (initialStateFixed() == BT_TRUE)
 	{
 		x0.setup("x0",  NX, 1, REAL, ACADO_VARIABLES);
-		x0.setDoc( (String)"Current state feedback vector." );
+		x0.setDoc( (std::string)"Current state feedback vector." );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -1101,7 +1101,7 @@ returnValue ExportGaussNewtonQpDunes::setupQPInterface( )
 //
 
 ExportNLPSolver* createGaussNewtonQpDunes(	UserInteraction* _userInteraction,
-										const String& _commonHeaderName
+										const std::string& _commonHeaderName
 										)
 {
 	return new ExportGaussNewtonQpDunes(_userInteraction, _commonHeaderName);

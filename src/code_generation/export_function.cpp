@@ -45,7 +45,7 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportFunction::ExportFunction(	const String& _name,
+ExportFunction::ExportFunction(	const std::string& _name,
 								const ExportArgument& _argument1,
 								const ExportArgument& _argument2,
 								const ExportArgument& _argument3,
@@ -124,7 +124,7 @@ ExportFunction* ExportFunction::cloneFunction( ) const
 
 
 
-returnValue ExportFunction::init(	const String& _name,
+returnValue ExportFunction::init(	const std::string& _name,
 									const ExportArgument& _argument1,
 									const ExportArgument& _argument2,
 									const ExportArgument& _argument3,
@@ -149,7 +149,7 @@ returnValue ExportFunction::init(	const String& _name,
 }
 
 
-ExportFunction& ExportFunction::setup(	const String& _name,
+ExportFunction& ExportFunction::setup(	const std::string& _name,
 										const ExportArgument& _argument1,
 										const ExportArgument& _argument2,
 										const ExportArgument& _argument3,
@@ -200,7 +200,7 @@ ExportFunction& ExportFunction::setReturnValue(	const ExportVariable& _functionR
 }
 
 
-ExportFunction&	ExportFunction::setName(	const String& _name
+ExportFunction&	ExportFunction::setName(	const std::string& _name
 											)
 {
 	if ( _name.isEmpty() == BT_TRUE )
@@ -212,7 +212,7 @@ ExportFunction&	ExportFunction::setName(	const String& _name
 }
 
 
-String ExportFunction::getName( ) const
+std::string ExportFunction::getName( ) const
 {
 	return name;
 }
@@ -220,8 +220,8 @@ String ExportFunction::getName( ) const
 
 
 returnValue ExportFunction::exportDataDeclaration(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+													const std::string& _realstd::string,
+													const std::string& _intstd::string,
 													int _precision
 													) const
 {
@@ -230,8 +230,8 @@ returnValue ExportFunction::exportDataDeclaration(	FILE* file,
 
 
 returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
-														const String& _realString,
-														const String& _intString,
+														const std::string& _realstd::string,
+														const std::string& _intstd::string,
 														int _precision
 														) const
 {
@@ -267,7 +267,7 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 
 		if (retVal != 0)
 		{
-			String tmp = retVal->getDoc();
+			std::string tmp = retVal->getDoc();
 			if (tmp.isEmpty() == BT_FALSE)
 				acadoFPrintf(file, " *\n *  \\return %s\n", tmp.getName());
 		}
@@ -277,7 +277,7 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 
 	if (retVal != 0)
 	{
-		acadoFPrintf( file,"%s", retVal->getTypeString( _realString,_intString ).getName() );
+		acadoFPrintf( file,"%s", retVal->getTypestd::string( _realstd::string,_intstd::string ).getName() );
 		if ( returnAsPointer == BT_TRUE )
 			acadoFPrintf( file,"*" );
 	}
@@ -287,7 +287,7 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 	}
 
 	acadoFPrintf( file," %s( ", name.getName() );
-	functionArguments.exportCode( file,_realString,_intString,_precision );
+	functionArguments.exportCode( file,_realstd::string,_intstd::string,_precision );
 	acadoFPrintf( file," );\n" );
 
 	return SUCCESSFUL_RETURN;
@@ -295,8 +295,8 @@ returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
 
 
 returnValue ExportFunction::exportCode(	FILE *file,
-										const String& _realString,
-										const String& _intString,
+										const std::string& _realstd::string,
+										const std::string& _intstd::string,
 										int _precision
 										) const
 {
@@ -311,7 +311,7 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	//
 	if ( retVal != 0 )
 	{
-		acadoFPrintf( file,"%s", retVal->getTypeString( _realString,_intString ).getName() );
+		acadoFPrintf( file,"%s", retVal->getTypestd::string( _realstd::string,_intstd::string ).getName() );
 		if ( returnAsPointer == BT_TRUE )
 			acadoFPrintf( file,"*" );
 	}
@@ -321,16 +321,16 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	}
 	
 	acadoFPrintf( file," %s( ", name.getName() );
-	functionArguments.exportCode(file, _realString, _intString, _precision);
+	functionArguments.exportCode(file, _realstd::string, _intstd::string, _precision);
 	acadoFPrintf( file," )\n{\n");
 
 	if (retVal && retVal->getDataStruct() == ACADO_LOCAL)
 	{
-		acadoFPrintf(file, "%s ", retVal->getTypeString( _realString,_intString ).getName());
+		acadoFPrintf(file, "%s ", retVal->getTypestd::string( _realstd::string,_intstd::string ).getName());
 		acadoFPrintf(file, "%s;\n", retVal->getName().getName());
 	}
 
-	// ExportStatementBlock::exportDataDeclaration( file,_realString,_intString,_precision );
+	// ExportStatementBlock::exportDataDeclaration( file,_realstd::string,_intstd::string,_precision );
 
 	//
 	// Set parent pointers, and run memory allocation
@@ -344,20 +344,20 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	//
 	FILE* tmpFile;
 	tmpFile = tmpfile();
-	ExportStatementBlock::exportCode(tmpFile, _realString, _intString, _precision);
+	ExportStatementBlock::exportCode(tmpFile, _realstd::string, _intstd::string, _precision);
 
 	//
 	// Export local indices (allocated previously)
 	//
 	const std::vector< ExportIndex > indices = memAllocator->getPool();
 	for (unsigned i = 0; i < indices.size(); ++i)
-		indices[ i ].exportDataDeclaration(file, _realString, _intString, _precision);
+		indices[ i ].exportDataDeclaration(file, _realstd::string, _intstd::string, _precision);
 
 	//
 	// Export local variables -- still done in a very primitive way
 	//
 	for(unsigned i = 0; i < localVariables.size(); ++i)
-		localVariables[ i ].exportDataDeclaration(file, _realString, _intString, _precision);
+		localVariables[ i ].exportDataDeclaration(file, _realstd::string, _intstd::string, _precision);
 
 	//
 	// Copy temporary file to main file, and close te temporary file aftwarards
@@ -438,7 +438,7 @@ ExportFunction& ExportFunction::addVariable(const ExportVariable& _var)
 	return *this;
 }
 
-ExportFunction& ExportFunction::doc(const String& _doc)
+ExportFunction& ExportFunction::doc(const std::string& _doc)
 {
 	description = _doc;
 

@@ -64,8 +64,8 @@ public:
 
 	ExportIndex(	const int _value );
 
-	explicit ExportIndex(	const String& _name,
-							const String& _prefix = emptyConstString
+	explicit ExportIndex(	const std::string& _name,
+							const std::string& _prefix = emptyConststd::string
 							);
 
 	ExportIndexNode* operator->();
@@ -95,21 +95,21 @@ public:
 									const ExportIndex& _arg2
 									);
 
-	friend String operator==(	const ExportIndex& _arg1,
+	friend std::string operator==(	const ExportIndex& _arg1,
 								const ExportIndex& _arg2
 								);
 
 	virtual returnValue exportDataDeclaration(	FILE* file,
-												const String& _realString = "real_t",
-												const String& _intString = "int",
+												const std::string& _realstd::string = "real_t",
+												const std::string& _intstd::string = "int",
 												int _precision = 16
 												) const;
 
 	/** Returns a string containing the value of the index.
 	 *
-	 *	\return String containing the value of the index.
+	 *	\return std::string containing the value of the index.
 	 */
-	const String get( ) const;
+	const std::string get( ) const;
 
 	/** Returns the given value of the index (if defined).
 	 *

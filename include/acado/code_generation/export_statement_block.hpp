@@ -107,11 +107,11 @@ class ExportStatementBlock : public ExportStatement
 
 		/** Adds a string statement to the statement block.
 		 *
-		 *	@param[in] _statementString		String statement to be added.
+		 *	@param[in] _statementstd::string		std::string statement to be added.
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue addStatement(	const String& _statementString
+		returnValue addStatement(	const std::string& _statementstd::string
 									);
 
 
@@ -131,7 +131,7 @@ class ExportStatementBlock : public ExportStatement
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue addFunctionCall(	const String& _fName,
+		returnValue addFunctionCall(	const std::string& _fName,
 										const ExportArgument& _argument1 = emptyConstExportArgument,
 										const ExportArgument& _argument2 = emptyConstExportArgument,
 										const ExportArgument& _argument3 = emptyConstExportArgument,
@@ -216,7 +216,7 @@ class ExportStatementBlock : public ExportStatement
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue addComment(	const String& _comment
+		returnValue addComment(	const std::string& _comment
 								);
 
 		/** Adds a comment preceded by a given number of blanks to the statement block.
@@ -227,7 +227,7 @@ class ExportStatementBlock : public ExportStatement
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		returnValue addComment(	uint _nBlanks,
-								const String& _comment
+								const std::string& _comment
 								);
 
 
@@ -242,15 +242,15 @@ class ExportStatementBlock : public ExportStatement
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export statement block.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue exportDataDeclaration(	FILE *file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+													const std::string& _realstd::string = "real_t",
+													const std::string& _intstd::string = "int",
 													int _precision = 16
 													) const;
 
@@ -258,15 +258,15 @@ class ExportStatementBlock : public ExportStatement
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export statement block.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
+		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue exportCode(	FILE* file,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+										const std::string& _realstd::string = "real_t",
+										const std::string& _intstd::string = "int",
 										int _precision = 16
 										) const;
 
@@ -281,7 +281,7 @@ class ExportStatementBlock : public ExportStatement
 		friend ExportStatementBlock& operator<<(ExportStatementBlock& _block, const ExportStatement& _statement);
 
 		/** Add a string. */
-		friend ExportStatementBlock& operator<<(ExportStatementBlock& _block, const String& _statement);
+		friend ExportStatementBlock& operator<<(ExportStatementBlock& _block, const std::string& _statement);
 
 		/** Add an STL string. */
 		friend ExportStatementBlock& operator<<(ExportStatementBlock& _block, const std::string& _statement);

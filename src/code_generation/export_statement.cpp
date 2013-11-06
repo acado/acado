@@ -70,8 +70,8 @@ ExportStatement& ExportStatement::operator=(	const ExportStatement& arg
 
 
 returnValue ExportStatement::exportDataDeclaration(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+													const std::string& _realstd::string,
+													const std::string& _intstd::string,
 													int _precision
 													) const
 {

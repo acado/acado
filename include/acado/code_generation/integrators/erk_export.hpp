@@ -65,7 +65,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ExplicitRungeKuttaExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -121,7 +121,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
+		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -177,8 +177,8 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output );
 
 
@@ -193,8 +193,8 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
 										  const std::vector<Matrix> _outputDependencies );
 
@@ -218,7 +218,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 // Create the integrator
 //
 inline ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction* _userInteraction,
-																	const String &_commonHeaderName	)
+																	const std::string &_commonHeaderName	)
 {
 	return new ExplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
 }

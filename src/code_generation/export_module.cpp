@@ -85,7 +85,7 @@ returnValue ExportModule::setTimingCalls( uint _timingCalls ) {
 }
 
 
-String ExportModule::getCommonHeaderName( ) const
+std::string ExportModule::getCommonHeaderName( ) const
 {
 	return commonHeaderName;
 }
@@ -148,7 +148,7 @@ returnValue ExportModule::setupOptions( )
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportModule::setName(const String& _name)
+returnValue ExportModule::setName(const std::string& _name)
 {
 	if ( _name.isEmpty() == BT_TRUE )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
@@ -158,17 +158,17 @@ returnValue ExportModule::setName(const String& _name)
 	return SUCCESSFUL_RETURN;
 }
 
-String ExportModule::getName() const
+std::string ExportModule::getName() const
 {
 	return name;
 }
 
-const String& ExportModule::getExportFolderName() const
+const std::string& ExportModule::getExportFolderName() const
 {
 	return exportFolderName;
 }
 
-void ExportModule::setExportFolderName(const String& _name)
+void ExportModule::setExportFolderName(const std::string& _name)
 {
 	exportFolderName = _name;
 }

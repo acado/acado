@@ -41,7 +41,7 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportFunctionCall::ExportFunctionCall(	const String& _name,
+ExportFunctionCall::ExportFunctionCall(	const std::string& _name,
 										const ExportArgument& _argument1,
 										const ExportArgument& _argument2,
 										const ExportArgument& _argument3,
@@ -114,7 +114,7 @@ ExportStatement* ExportFunctionCall::clone( ) const
 
 
 
-returnValue ExportFunctionCall::init(	const String& _name,
+returnValue ExportFunctionCall::init(	const std::string& _name,
 										const ExportArgument& _argument1,
 										const ExportArgument& _argument2,
 										const ExportArgument& _argument3,
@@ -178,8 +178,8 @@ returnValue ExportFunctionCall::init(	const ExportFunction& _f,
 
 
 returnValue ExportFunctionCall::exportCode(	FILE *file,
-											const String& _realString,
-											const String& _intString,
+											const std::string& _realstd::string,
+											const std::string& _intstd::string,
 											int _precision
 											) const
 {
@@ -187,7 +187,7 @@ returnValue ExportFunctionCall::exportCode(	FILE *file,
 		return ACADOERROR( RET_MEMBER_NOT_INITIALISED );
 
 	acadoFPrintf( file,"%s( ", name.getName() );
-	functionArguments.exportCode( file,_realString,_intString,_precision );
+	functionArguments.exportCode( file,_realstd::string,_intstd::string,_precision );
 	acadoFPrintf( file," );\n");
 
 	return SUCCESSFUL_RETURN;
@@ -209,7 +209,7 @@ returnValue ExportFunctionCall::clear( )
 
 
 
-returnValue	ExportFunctionCall::setName(	const String& _name
+returnValue	ExportFunctionCall::setName(	const std::string& _name
 											)
 {
 	if ( _name.isEmpty() == BT_TRUE )

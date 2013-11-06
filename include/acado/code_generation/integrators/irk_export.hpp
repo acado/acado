@@ -66,7 +66,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ImplicitRungeKuttaExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -113,7 +113,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		returnValue setModel( const String& _rhs, const String& _diffs_rhs );
+		returnValue setModel( const std::string& _rhs, const std::string& _diffs_rhs );
 							
         
         /** Sets up the output with the grids for the different output functions.									\n
@@ -137,8 +137,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output );
 
 
@@ -153,8 +153,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
 										  const std::vector<Matrix> _outputDependencies );
         
@@ -264,7 +264,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		returnValue evaluatePolynomial( ExportStatementBlock& block, 
 										const ExportVariable& variable, 
 										const ExportVariable& grid, 
-										const String& h );
+										const std::string& h );
 
 
 		/** Exports the evaluation of the coefficients of the derived polynomial, representing the derivative of the continuous output with respect to time.

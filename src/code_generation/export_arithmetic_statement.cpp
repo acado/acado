@@ -153,8 +153,8 @@ uint ExportArithmeticStatement::getNumCols( ) const
 
 
 returnValue ExportArithmeticStatement::exportDataDeclaration(	FILE *file,
-																const String& _realString,
-																const String& _intString,
+																const std::string& _realstd::string,
+																const std::string& _intstd::string,
 																int _precision
 																) const
 {
@@ -163,8 +163,8 @@ returnValue ExportArithmeticStatement::exportDataDeclaration(	FILE *file,
 
 
 returnValue ExportArithmeticStatement::exportCode(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+													const std::string& _realstd::string,
+													const std::string& _intstd::string,
 													int _precision
 													) const
 {
@@ -181,25 +181,25 @@ returnValue ExportArithmeticStatement::exportCode(	FILE* file,
 	switch( op1 )
 	{
 		case ESO_ADD:
-			return exportCodeAddSubtract(file, "+", _realString, _intString, _precision);
+			return exportCodeAddSubtract(file, "+", _realstd::string, _intstd::string, _precision);
 
 		case ESO_SUBTRACT:
-			return exportCodeAddSubtract(file, "-", _realString, _intString, _precision);
+			return exportCodeAddSubtract(file, "-", _realstd::string, _intstd::string, _precision);
 			
 		case ESO_ADD_ASSIGN:
-			return exportCodeAssign( file,"+=",_realString,_intString,_precision );
+			return exportCodeAssign( file,"+=",_realstd::string,_intstd::string,_precision );
 
 		case ESO_SUBTRACT_ASSIGN:
-			return exportCodeAssign( file,"-=",_realString,_intString,_precision );
+			return exportCodeAssign( file,"-=",_realstd::string,_intstd::string,_precision );
 
 		case ESO_MULTIPLY:
-			return exportCodeMultiply( file,BT_FALSE,_realString,_intString,_precision );
+			return exportCodeMultiply( file,BT_FALSE,_realstd::string,_intstd::string,_precision );
 			
 		case ESO_MULTIPLY_TRANSPOSE:
-			return exportCodeMultiply( file,BT_TRUE,_realString,_intString,_precision );
+			return exportCodeMultiply( file,BT_TRUE,_realstd::string,_intstd::string,_precision );
 
 		case ESO_ASSIGN:
-			return exportCodeAssign( file,"=",_realString,_intString,_precision );
+			return exportCodeAssign( file,"=",_realstd::string,_intstd::string,_precision );
 
 		default:
 			return ACADOERROR( RET_UNKNOWN_BUG );
@@ -213,9 +213,9 @@ returnValue ExportArithmeticStatement::exportCode(	FILE* file,
 //
 
 returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
-																const String& _sign,
-																const String& _realString,
-																const String& _intString,
+																const std::string& _sign,
+																const std::string& _realstd::string,
+																const std::string& _intstd::string,
 																int _precision
 																) const
 {
@@ -243,8 +243,8 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 		}
 	}
 	
-	String assignString;
-	if ( getAssignString( assignString ) != SUCCESSFUL_RETURN )
+	std::string assignstd::string;
+	if ( getAssignstd::string( assignstd::string ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 	
 	//
@@ -276,7 +276,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 				}
 
 				if ( !lhs.isNull() )
-					acadoFPrintf( file,"%s %s ", lhs.get(i,j).getName(),assignString.getName() );
+					acadoFPrintf( file,"%s %s ", lhs.get(i,j).getName(),assignstd::string.getName() );
 
 				if ( rhs1->isZero(i, j) == BT_FALSE )
 				{
@@ -306,7 +306,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 
 		for(unsigned j = 0; j < getNumCols( ); ++j)
 		{
-			acadoFPrintf( file,"%s %s ", lhs->get(ii, j).getName(), assignString.getName() );
+			acadoFPrintf( file,"%s %s ", lhs->get(ii, j).getName(), assignstd::string.getName() );
 			acadoFPrintf( file,"%s %s;\n", _sign.getName(), rhs2->get(ii,j).getName() );
 		}
 
@@ -328,7 +328,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 		acadoFPrintf(file, "%s < %d; ", jj.getName().getName(), getNumRows());
 		acadoFPrintf(file, "++%s)\n{\n", jj.getName().getName());
 
-		acadoFPrintf( file,"%s %s ", lhs->get(ii, jj).getName(), assignString.getName() );
+		acadoFPrintf( file,"%s %s ", lhs->get(ii, jj).getName(), assignstd::string.getName() );
 		acadoFPrintf( file,"%s %s;\n", _sign.getName(), rhs2->get(ii,jj).getName() );
 
 		acadoFPrintf(file, "\n{\n");
@@ -343,8 +343,8 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 
 returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 															BooleanType transposeRhs1,
-															const String& _realString,
-															const String& _intString,
+															const std::string& _realstd::string,
+															const std::string& _intstd::string,
 															int _precision
 															) const
 {
@@ -354,8 +354,8 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 	if (lhs.getDim() == 0 || rhs1.getDim() == 0 || rhs2.getDim() == 0)
 		return SUCCESSFUL_RETURN;
 
-	String assignString;
-	if ( getAssignString( assignString ) != SUCCESSFUL_RETURN )
+	std::string assignstd::string;
+	if ( getAssignstd::string( assignstd::string ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 
 	uint nRowsRhs1;
@@ -424,7 +424,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 			{
 				allZero = BT_TRUE;
 
-				acadoFPrintf( file,"%s %s", lhs->get(ii,j).getName(), assignString.getName() );
+				acadoFPrintf( file,"%s %s", lhs->get(ii,j).getName(), assignstd::string.getName() );
 
 				for(uint k = 0; k < nColsRhs1; ++k)
 				{
@@ -490,7 +490,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 		{
 			allZero = BT_TRUE;
 
-			acadoFPrintf( file,"%s %s", lhs->get(ii,j).getName(), assignString.getName() );
+			acadoFPrintf( file,"%s %s", lhs->get(ii,j).getName(), assignstd::string.getName() );
 
 			for(uint k = 0; k < nColsRhs1; ++k)
 			{
@@ -564,7 +564,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 
 		allZero = BT_TRUE;
 
-		acadoFPrintf( file,"%s %s", lhs->get(ii,jj).getName(), assignString.getName() );
+		acadoFPrintf( file,"%s %s", lhs->get(ii,jj).getName(), assignstd::string.getName() );
 
 		for(uint k = 0; k < nColsRhs1; ++k)
 		{
@@ -624,9 +624,9 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 
 
 returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
-															const String& _op,
-															const String& _realString,
-															const String& _intString,
+															const std::string& _op,
+															const std::string& _realstd::string,
+															const std::string& _intstd::string,
 															int _precision
 															) const
 {
@@ -659,7 +659,7 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 	{
 		for(unsigned i = 0; i < lhs.getNumRows( ); ++i)
 			for(unsigned j = 0; j < lhs.getNumCols( ); ++j)
-				if ( ( _op == (String)"=" ) || ( rhs1.isZero(i,j) == BT_FALSE ) )
+				if ( ( _op == (std::string)"=" ) || ( rhs1.isZero(i,j) == BT_FALSE ) )
 				{
 					s << lhs->get(i, j).getName() << " " << _op.getName() << " ";
 					if (rhs1->isGiven() == BT_TRUE)
@@ -722,21 +722,21 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 }
 
 
-returnValue ExportArithmeticStatement::getAssignString(	String& _assignString
+returnValue ExportArithmeticStatement::getAssignstd::string(	std::string& _assignstd::string
 														) const
 {
 	switch ( op0 )
 	{
 		case ESO_ASSIGN:
-			_assignString = "=";
+			_assignstd::string = "=";
 			return SUCCESSFUL_RETURN;
 		
 		case ESO_ADD_ASSIGN:
-			_assignString = "+=";
+			_assignstd::string = "+=";
 			return SUCCESSFUL_RETURN;
 			
 		case ESO_SUBTRACT_ASSIGN:
-			_assignString = "-=";
+			_assignstd::string = "-=";
 			return SUCCESSFUL_RETURN;
 			
 		default:
