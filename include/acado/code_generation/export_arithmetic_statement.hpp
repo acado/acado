@@ -92,23 +92,9 @@ class ExportArithmeticStatement : public ExportStatement
 									const ExportVariable& _rhs3 = 0
 									);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportArithmeticStatement(	const ExportArithmeticStatement& arg
-									);
-
 		/** Destructor.
 		 */
 		virtual ~ExportArithmeticStatement( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportArithmeticStatement& operator=(	const ExportArithmeticStatement& arg
-												);
 
 		/** Clone constructor (deep copy).
 		 *
