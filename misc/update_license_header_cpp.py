@@ -39,7 +39,7 @@ def recursive_traversal(dir, copyright):
                 continue
             recursive_traversal(fullfn, copyright)
         else:
-            if (fullfn.endswith(".cpp") or fullfn.endswith(".hpp")):
+            if (fullfn.endswith(".cpp") or fullfn.endswith(".hpp") or fullfn.endswith(".ipp")):
                 update_license(fullfn, copyright)
 
 # Read copyright data
