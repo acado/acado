@@ -203,8 +203,16 @@ istream& operator>>(	istream& stream,
 	return stream;
 }
 
+/** "To string " conversion. */
+template< typename T >
+string toString(T const& value)
+{
+    stringstream ss;
+    ss << value;
+    return ss.str();
 }
 
+} // namespace std
 
 #endif	// ACADO_TOOLKIT_ACADO_IO_UTILS_HPP
 
