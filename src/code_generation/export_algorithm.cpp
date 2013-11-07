@@ -51,30 +51,8 @@ ExportAlgorithm::ExportAlgorithm(	UserInteraction* _userInteraction,
 }
 
 
-ExportAlgorithm::ExportAlgorithm(	const ExportAlgorithm& arg
-									) : AlgorithmicBase( arg )
-{
-	copy( arg );
-}
-
-
 ExportAlgorithm::~ExportAlgorithm( )
-{
-}
-
-
-ExportAlgorithm& ExportAlgorithm::operator=(	const ExportAlgorithm& arg
-												)
-{
-	if( this != &arg )
-	{
-		AlgorithmicBase::operator=( arg );
-		copy( arg );
-	}
-	
-	return *this;
-}
-
+{}
 
 
 returnValue ExportAlgorithm::setup( )
@@ -166,48 +144,29 @@ uint ExportAlgorithm::getNYN( ) const
 
 
 
-FILE* ExportAlgorithm::openFile(	const std::string& dirName,
-									const std::string& fileName
-									) const
-{
-	std::string fullFileName( dirName );
-    fullFileName << "/" << fileName;
-
-    FILE* file = acadoFOpen( fullFileName.getName(), "w" );
-	if ( file == 0 )
-		return 0;
-
-	acadoPrintAutoGenerationNotice( file );
-
-	if ( commonHeaderName.isEmpty() == BT_FALSE )
-		acadoFPrintf( file, "#include \"%s\"\n\n\n",commonHeaderName.getName() );
-	
-	return file;
-}
-
-
-
+//std::ofstream& ExportAlgorithm::openFile(	const std::string& dirName,
+//											const std::string& fileName
+//											) const
+//{
+//	// TODO Where is the file closed???
 //
-// PROTECTED MEMBER FUNCTIONS:
+//	std::stringstream fullFileName;
+//    fullFileName << dirName << "/" << fileName;
 //
-
-
-returnValue ExportAlgorithm::copy(	const ExportAlgorithm& arg
-									)
-{
-	NX = arg.NX;
-	NXA = arg.NXA;
-	NU = arg.NU;
-	NP = arg.NP;
-	N  = arg.N;
-	
-	NY = arg.NY;
-
-	commonHeaderName = arg.commonHeaderName;
-
-	return SUCCESSFUL_RETURN;
-}
-
+//    std::ofstream stream( fullFileName.str().c_str() );
+//    if (stream.good() == false)
+//    {
+//    	LOG( LVL_DEBUG ) << "Could not open the output stream: " << fullFileName.str() << endl;
+//    	ACADOFATAL( RET_CAN_NOT_WRITE_INTO_FILE );
+//    }
+//
+//	acadoPrintAutoGenerationNotice( stream );
+//
+//	if ( commonHeaderName.empty() == BT_FALSE )
+//		stream << "#include \"" << commonHeaderName << "\"" << endl << endl << endl;
+//
+//	return stream;
+//}
 
 CLOSE_NAMESPACE_ACADO
 

@@ -48,7 +48,7 @@ ExportArgument::ExportArgument( )
 {
 	Matrix m(0, 0);
 	assignNode(new ExportArgumentInternal(
-				"defaultArgumentName", matrixPtr(new Matrix( m )), REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConststd::string));
+				"defaultArgumentName", matrixPtr(new Matrix( m )), REAL, ACADO_LOCAL, BT_FALSE, 0, ""));
 }
 
 
@@ -87,7 +87,7 @@ ExportArgument::ExportArgument( const Matrix& _data
 								)
 {
 	assignNode(new ExportArgumentInternal(
-			"defaultArgumentName", matrixPtr(new Matrix( _data )), REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConststd::string));
+			"defaultArgumentName", matrixPtr(new Matrix( _data )), REAL, ACADO_LOCAL, BT_FALSE, 0, ""));
 }
 
 ExportArgumentInternal* ExportArgument::operator->()
@@ -107,10 +107,10 @@ ExportArgument ExportArgument::getAddress(	const ExportIndex& _rowIdx,
 	return (*this)->getAddress(_rowIdx, _colIdx);
 }
 
-const std::string ExportArgument::getAddressstd::string(	BooleanType withDataStruct
-												) const
+const std::string ExportArgument::getAddressString(	BooleanType withDataStruct
+													) const
 {
-	return (*this)->getAddressstd::string( withDataStruct );
+	return (*this)->getAddressString( withDataStruct );
 }
 
 
@@ -153,13 +153,13 @@ returnValue ExportArgument::callByValue( )
 
 
 
-returnValue ExportArgument::exportDataDeclaration(	FILE* file,
-													const std::string& _realstd::string,
-													const std::string& _intstd::string,
+returnValue ExportArgument::exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision
 													) const
 {
-	return (*this)->exportDataDeclaration(file, _realstd::string, _intstd::string, _precision);
+	return (*this)->exportDataDeclaration(stream, _realString, _intString, _precision);
 }
 
 CLOSE_NAMESPACE_ACADO

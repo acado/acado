@@ -33,9 +33,6 @@
 #include <acado/code_generation/export_qpoases_interface.hpp>
 #include <acado/code_generation/export_module.hpp>
 
-#include <sstream>
-#include <string>
-
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
@@ -87,8 +84,8 @@ returnValue ExportGaussNewtonCondensed::setup( )
 }
 
 returnValue ExportGaussNewtonCondensed::getDataDeclarations(	ExportStatementBlock& declarations,
-															ExportStruct dataStruct
-															) const
+																ExportStruct dataStruct
+																) const
 {
 	returnValue status;
 	status = ExportNLPSolver::getDataDeclarations(declarations, dataStruct);
@@ -634,7 +631,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 
 			ExportForLoop eLoopI(ii, 0, nXBounds);
 
-			eLoopI.addStatement( row.getFullName() << " = " << evXBounds.getFullName() << "[ " << ii.getFullName() << " ] - " << NX << ";\n" );
+			eLoopI << row.getFullName() << " = " << evXBounds.getFullName() << "[ " << ii.getFullName() << " ] - " << toString(NX) << ";\n";
 			eLoopI.addStatement( blk == row / NX + 1 );
 
 			if (performFullCondensing() == BT_FALSE)
@@ -1009,7 +1006,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 			if (evaluatePointConstraints[ i ] == 0)
 				continue;
 
-			condensePrep.addComment( std::string( "Evaluating constraint on node: #" ) << std::string( i ) );
+			condensePrep.addComment( string( "Evaluating constraint on node: #" ) + toString( i ) );
 			condensePrep.addLinebreak();
 
 			condensePrep.addStatement(conValueIn.getCols(0, getNX()) == x.getRow( i ) );
@@ -1063,7 +1060,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 				continue;
 
 			condensePrep.addComment(
-					std::string( "Evaluating multiplications of constraint functions on node: #" ) << std::string( row ) );
+					string( "Evaluating multiplications of constraint functions on node: #" ) + toString( row ) );
 			condensePrep.addLinebreak();
 
 			if (row < N)
@@ -1457,19 +1454,18 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 		{
 			for(jj = ii; jj < N; ++jj)
 			{
-				stringstream sz;
-				sz << zeroBlockH11.getName().getName() << "(" << ii <<  ", " << jj << ");" << endl;
-				condensePrep.addStatement( sz.str().c_str() );
+				condensePrep.addFunctionCall(
+						zeroBlockH11, ExportIndex(ii).makeArgument(), ExportIndex(jj).makeArgument()
+				);
 
 				for(unsigned kk = jj; kk < N; ++kk)
 				{
 					unsigned indl = (kk + 1) * kk / 2 + ii;
 					unsigned indr = (kk + 1) * kk / 2 + jj;
 
-					stringstream s;
-					s << setBlockH11.getName().getName() << "(" << ii <<  ", " << jj << ", ";
-					s << "&(" << E.get(indl * NX, 0).getName() << "), &(" << QE.get(indr * NX, 0).getName() << "));" << endl;
-					condensePrep.addStatement( s.str().c_str() );
+					condensePrep.addFunctionCall(
+							setBlockH11, ExportIndex(ii).makeArgument(), ExportIndex(jj).makeArgument(),
+							E.getAddress(indl * NX), QE.getAddress(indr * NX) );
 				}
 				condensePrep.addLinebreak();
 			}
@@ -1549,12 +1545,9 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 	{
 		for (unsigned ii = 0; ii < N; ++ii)
 			for(unsigned jj = 0; jj < ii; ++jj)
-			{
-				stringstream s;
-				s << copyHTH.getName().getName() << "(" << ii <<  ", " << jj << ");" << endl;
-
-				condensePrep.addStatement( s.str().c_str() );
-			}
+				condensePrep.addFunctionCall(
+						copyHTH, ExportIndex( ii ).makeArgument(), ExportIndex( jj ).makeArgument()
+				);
 	}
 	else
 	{
@@ -2186,9 +2179,7 @@ returnValue ExportGaussNewtonCondensed::setupEvaluation( )
 	feedback.addFunctionCall( condenseFdb );
 	feedback.addLinebreak();
 
-	stringstream s;
-	s << tmp.getName().getName() << " = " << solve.getName().getName() << "( );" << endl;
-	feedback.addStatement( s.str().c_str() );
+	feedback << tmp.getName() << " = " << solve.getName() << "( );\n";
 	feedback.addLinebreak();
 
 	feedback.addFunctionCall( expand );
@@ -2217,15 +2208,15 @@ returnValue ExportGaussNewtonCondensed::setupEvaluation( )
 
 	// ACC = |\nabla F^T * xVars|
 	getKKT.addStatement( kkt == (g ^ xVars) );
-	getKKT.addStatement( kkt.getFullName() << " = fabs( " << kkt.getFullName() << " );\n");
+	getKKT << kkt.getFullName() << " = fabs( " << kkt.getFullName() << " );\n";
 
 	ExportForLoop bLoop(index, 0, getNumQPvars());
 
 	bLoop.addStatement( prd == yVars.getRow( index ) );
-	bLoop.addStatement( (std::string)"if (" << prd.getFullName() << " > " << 1.0 / INFTY << ")\n" );
-	bLoop.addStatement( kkt.getFullName() << " += fabs(" << lb.get(index, 0) << " * " << prd.getFullName() << ");\n" );
-	bLoop.addStatement( (std::string)"else if (" << prd.getFullName() << " < " << -1.0 / INFTY << ")\n" );
-	bLoop.addStatement( kkt.getFullName() << " += fabs(" << ub.get(index, 0) << " * " << prd.getFullName() << ");\n" );
+	bLoop << "if (" << prd.getFullName() << " > " << toString(1.0 / INFTY) << ")\n";
+	bLoop << kkt.getFullName() << " += fabs(" << lb.get(index, 0) << " * " << prd.getFullName() << ");\n";
+	bLoop << "else if (" << prd.getFullName() << " < " << toString(-1.0 / INFTY) << ")\n";
+	bLoop << kkt.getFullName() << " += fabs(" << ub.get(index, 0) << " * " << prd.getFullName() << ");\n";
 	getKKT.addStatement( bLoop );
 
 	if ((getNumStateBounds() + getNumComplexConstraints())> 0)
@@ -2233,10 +2224,10 @@ returnValue ExportGaussNewtonCondensed::setupEvaluation( )
 		ExportForLoop cLoop(index, 0, getNumStateBounds() + getNumComplexConstraints());
 
 		cLoop.addStatement( prd == yVars.getRow( getNumQPvars() + index ) );
-		cLoop.addStatement( (std::string)"if (" << prd.getFullName() << " > " << 1.0 / INFTY << ")\n" );
-		cLoop.addStatement( kkt.getFullName() << " += fabs(" << lbA.get(index, 0) << " * " << prd.getFullName() << ");\n" );
-		cLoop.addStatement( (std::string)"else if (" << prd.getFullName() << " < " << -1.0 / INFTY << ")\n" );
-		cLoop.addStatement( kkt.getFullName() << " += fabs(" << ubA.get(index, 0) << " * " << prd.getFullName() << ");\n" );
+		cLoop << "if (" << prd.getFullName() << " > " << toString(1.0 / INFTY) << ")\n";
+		cLoop << kkt.getFullName() << " += fabs(" << lbA.get(index, 0) << " * " << prd.getFullName() << ");\n";
+		cLoop << "else if (" << prd.getFullName() << " < " << toString(-1.0 / INFTY) << ")\n";
+		cLoop << kkt.getFullName() << " += fabs(" << ubA.get(index, 0) << " * " << prd.getFullName() << ");\n";
 
 		getKKT.addStatement( cLoop );
 	}
@@ -2297,17 +2288,17 @@ returnValue ExportGaussNewtonCondensed::setupQPInterface( )
 	{
 		solverName = "QProblem";
 
-		s << H.getFullName().getName() << ", "
-				<< g.getFullName().getName() << ", "
-				<< A.getFullName().getName() << ", "
-				<< lb.getFullName().getName() << ", "
-				<< ub.getFullName().getName() << ", "
-				<< lbA.getFullName().getName() << ", "
-				<< ubA.getFullName().getName() << ", "
+		s << H.getFullName() << ", "
+				<< g.getFullName() << ", "
+				<< A.getFullName() << ", "
+				<< lb.getFullName() << ", "
+				<< ub.getFullName() << ", "
+				<< lbA.getFullName() << ", "
+				<< ubA.getFullName() << ", "
 				<< "nWSR";
 
 		if ( (BooleanType)hotstartQP == BT_TRUE )
-			s << ", " << yVars.getFullName().getName();
+			s << ", " << yVars.getFullName();
 
 		s << "";
 
@@ -2319,27 +2310,23 @@ returnValue ExportGaussNewtonCondensed::setupQPInterface( )
 	{
 		solverName = "QProblemB";
 
-		s << H.getFullName().getName() << ", "
-				<< g.getFullName().getName() << ", "
-				<< lb.getFullName().getName() << ", "
-				<< ub.getFullName().getName() << ", "
+		s << H.getFullName() << ", "
+				<< g.getFullName() << ", "
+				<< lb.getFullName() << ", "
+				<< ub.getFullName() << ", "
 				<< "nWSR";
 
 		if ( (BooleanType)hotstartQP == BT_TRUE )
-			s << ", " << yVars.getFullName().getName();
+			s << ", " << yVars.getFullName();
 
 		s << "";
 
 		ctor << solverName << " qp( " << getNumQPvars() << " )";
 	}
 
-	string primal( xVars.getFullName().getName() );
-	string dual( yVars.getFullName().getName() );
-	string commonHeader( commonHeaderName.getName() );
-
 	string strSigma;
 	if (covCalc)
-		strSigma = string( sigma.getFullName().getName() );
+		strSigma = sigma.getFullName();
 	else
 		strSigma = "";
 
@@ -2353,12 +2340,12 @@ returnValue ExportGaussNewtonCondensed::setupQPInterface( )
 			eps,
 			realT,
 
-			commonHeader,
+			commonHeaderName,
 			solverName,
 			"",
 			s.str(),
-			primal,
-			dual,
+			xVars.getFullName(),
+			yVars.getFullName(),
 			ctor.str(),
 			strSigma
 	);

@@ -52,10 +52,10 @@ public:
 	 *
 	 *	@param[in] _moduleName		    Module name for customization.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
-	 *	@param[in] _realstd::string			std::string to be used to declare real variables.
-	 *	@param[in] _intstd::string			std::string to be used to declare integer variables.
+	 *	@param[in] _realString			std::string to be used to declare real variables.
+	 *	@param[in] _intString			std::string to be used to declare integer variables.
 	 *	@param[in] _precision			Number of digits to be used for exporting real values.
-	 *	@param[in] _commentstd::string		std::string to be used for exporting comments.
+	 *	@param[in] _commentString		std::string to be used for exporting comments.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
@@ -64,10 +64,10 @@ public:
 								const std::string& _wrapperSourceFileName,
 								const std::string& _moduleName = "acado",
 								const std::string& _commonHeaderName = "",
-								const std::string& _realstd::string = "double",
-								const std::string& _intstd::string = "int",
+								const std::string& _realString = "double",
+								const std::string& _intString = "int",
 								int _precision = 16,
-								const std::string& _commentstd::string = emptyConststd::string
+								const std::string& _commentString = std::string()
 								);
 
 	/** Destructor. */

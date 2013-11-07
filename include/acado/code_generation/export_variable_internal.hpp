@@ -89,7 +89,7 @@ class ExportVariableInternal : public ExportArgumentInternal
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
 								BooleanType _callItByValue = BT_FALSE,
-								const std::string& _prefix = emptyConststd::string
+								const std::string& _prefix = std::string()
 								);
 
         /** Destructor.

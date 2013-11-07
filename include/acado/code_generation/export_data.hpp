@@ -122,14 +122,14 @@ class ExportData : public CasADi::SharedObject
 
 		/** Returns a string containing the data type of the data object.
 		 *
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *
 		 *	\return std::string containing the data type of the data object.
 		 */
-		std::string getTypestd::string(	const std::string& _realstd::string = "real_t",
-								const std::string& _intstd::string = "int"
-								) const;
+		std::string getTypeString(	const std::string& _realString = "real_t",
+									const std::string& _intString = "int"
+									) const;
 
 		/** Returns the global data struct to which the data object belongs to.
 		 *
@@ -141,7 +141,7 @@ class ExportData : public CasADi::SharedObject
 		 *
 		 *	\return std::string containing the global data struct to which the data object belongs to.
 		 */
-		std::string getDataStructstd::string( ) const;
+		std::string getDataStructString( ) const;
 		
 		/** Returns a string which contains a prefix name.
 		 *
@@ -160,16 +160,16 @@ class ExportData : public CasADi::SharedObject
 		/** Exports declaration of the index variable. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export function.
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] stream				Name of file to be used to export function.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportDataDeclaration(	FILE* file,
-													const std::string& _realstd::string = "real_t",
-													const std::string& _intstd::string = "int",
+		virtual returnValue exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString = "real_t",
+													const std::string& _intString = "int",
 													int _precision = 16
 													) const;
 

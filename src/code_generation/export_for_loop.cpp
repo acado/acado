@@ -114,9 +114,9 @@ returnValue ExportForLoop::init(	const ExportIndex& _loopVariable,
 
 
 
-returnValue ExportForLoop::exportDataDeclaration(	FILE* file,
-													const std::string& _realstd::string,
-													const std::string& _intstd::string,
+returnValue ExportForLoop::exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision
 													) const
 {
@@ -124,9 +124,9 @@ returnValue ExportForLoop::exportDataDeclaration(	FILE* file,
 }
 
 
-returnValue ExportForLoop::exportCode(	FILE* file,
-										const std::string& _realstd::string,
-										const std::string& _intstd::string,
+returnValue ExportForLoop::exportCode(	std::ostream& stream,
+										const std::string& _realString,
+										const std::string& _intString,
 										int _precision
 										) const
 {
@@ -140,44 +140,40 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 
 	if ( doLoopUnrolling == BT_FALSE )
 	{
-		stringstream s;
-
-		s << "for (" << loopVariable.get().getName() << " = " << startValue.get().getName() << "; ";
+		stream << "for (" << loopVariable.get() << " = " << startValue.get() << "; ";
 
 		if (increment.isGiven() ==  BT_TRUE && increment.getGivenValue() == -1)
-			s << finalValue.get().getName() << " < " << loopVariable.get().getName() << "; ";
+			stream << finalValue.get() << " < " << loopVariable.get() << "; ";
 		else
-			s << loopVariable.get().getName() << " < " << finalValue.get().getName() << "; ";
+			stream << loopVariable.get() << " < " << finalValue.get() << "; ";
 		
 		if (increment.isGiven() == BT_TRUE)
 		{
 			switch ( increment.getGivenValue() )
 			{
 				case 1:
-					s << "++" << loopVariable.get().getName();
+					stream << "++" << loopVariable.get();
 					break;
 
 				case -1:
-					s << "--" << loopVariable.get().getName();
+					stream << "--" << loopVariable.get();
 					break;
 
 				default:
-					s << loopVariable.get().getName() << " += " << increment.getGivenValue();
+					stream << loopVariable.get() << " += " << increment.getGivenValue();
 					break;
 			}
 		}
 		else
 		{
-			s << loopVariable.get().getName() << " += " << increment.get().getName();
+			stream << loopVariable.get() << " += " << increment.get();
 		}
 
-		s << ")" << endl << "{" << endl;
+		stream << ")" << endl << "{" << endl;
 
-		acadoFPrintf(file, "%s", s.str().c_str());
+		ExportStatementBlock::exportCode(stream, _realString, _intString, _precision);
 
-		ExportStatementBlock::exportCode(file, _realstd::string, _intstd::string, _precision);
-
-		acadoFPrintf( file,"}\n");
+		stream << "}\n";
 	}
 	
 	return SUCCESSFUL_RETURN;

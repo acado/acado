@@ -67,7 +67,7 @@ returnValue ExportCholeskyDecomposition::setup()
 	ExportVariable ret("ret", 1, 1, INT, ACADO_LOCAL);
 	fcn.setReturnValue( ret );
 
-	string name( A.getName().getName() );
+	string name( A.getName() );
 	unsigned n = A.getNumRows();
 
 	s 		<< "register unsigned i, j, k;" << endl
@@ -95,7 +95,7 @@ returnValue ExportCholeskyDecomposition::setup()
 			<< name << "[i * " << n << " + j] = 0.0;" << endl
 			<< ret.getName() << " = 0;" << endl;
 
-	fcn.addStatement( s.str().c_str() );
+	fcn.addStatement( s.str() );
 
 	return SUCCESSFUL_RETURN;
 }

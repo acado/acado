@@ -39,7 +39,7 @@ returnValue MemoryAllocator::acquire(ExportIndex& _obj)
 {
 	if (indices.busy() == true)
 	{
-		ExportIndex ind( (String)"lRun" << indices.size() + 1 );
+		ExportIndex ind( string("lRun") + toString(indices.size() + 1) );
 
 		indices.add( ind );
 
@@ -57,7 +57,7 @@ returnValue MemoryAllocator::release(const ExportIndex& _obj)
 {
 	if (indices.release( _obj ) == false)
 	{
-		LOG( LVL_ERROR ) << "Object '" << _obj.getFullName().getName() << "' is not found in an object pool" << endl;
+		LOG( LVL_ERROR ) << "Object '" << _obj.getFullName() << "' is not found in an object pool" << endl;
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 	}
 
@@ -68,7 +68,7 @@ returnValue MemoryAllocator::add(const ExportIndex& _obj)
 {
 	if (indices.add( _obj ) == false)
 	{
-		LOG( LVL_WARNING ) << "Object '" << _obj.getFullName().getName() << "' already exists in an object pool" << endl;
+		LOG( LVL_WARNING ) << "Object '" << _obj.getFullName() << "' already exists in an object pool" << endl;
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 	}
 

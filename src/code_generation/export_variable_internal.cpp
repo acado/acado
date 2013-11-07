@@ -143,8 +143,8 @@ BooleanType ExportVariableInternal::isGiven() const
 
 
 const std::string ExportVariableInternal::get(	const ExportIndex& rowIdx,
-											const ExportIndex& colIdx
-											) const
+												const ExportIndex& colIdx
+												) const
 {
 	stringstream s;
 	s.precision( 16 );
@@ -157,9 +157,9 @@ const std::string ExportVariableInternal::get(	const ExportIndex& rowIdx,
 		if (isGiven(rowIdx, colIdx) == BT_FALSE)
 		{
 			if ( ( isCalledByValue() == BT_TRUE ) && ( totalIdx.getGivenValue() == 0 ) )
-				s << getFullName().getName();
+				s << getFullName();
 			else
-				s << getFullName().getName() << "[" << totalIdx.getGivenValue() << "]";
+				s << getFullName() << "[" << totalIdx.getGivenValue() << "]";
 		}
 		else
 		{
@@ -167,11 +167,9 @@ const std::string ExportVariableInternal::get(	const ExportIndex& rowIdx,
 		}
 	}
 	else
-		s << getFullName().getName() << "[" << totalIdx.get( ).getName() << "]";
+		s << getFullName() << "[" << totalIdx.get( ) << "]";
 
-	std::string str( s.str().c_str() );
-
-	return str;
+	return s.str();
 }
 
 
@@ -223,7 +221,7 @@ ExportVariable ExportVariableInternal::getRow(	const ExportIndex& idx
 	{
 		LOG( LVL_ERROR )
 						<< "getRow: invalid row arguments, row index "
-						<< idx.getGivenValue() << " of variable " << getFullName().getName()
+						<< idx.getGivenValue() << " of variable " << getFullName()
 						<< " does not lie in the admissible range " << "0 - " << getNumRows( ) - 1 << endl;
 	}
 
@@ -245,7 +243,7 @@ ExportVariable ExportVariableInternal::getCol(	const ExportIndex& idx
 	{
 		LOG( LVL_ERROR )
 			<< "getCol: invalid column arguments, column index "
-			<< idx.getGivenValue() << " of variable " << getFullName().getName()
+			<< idx.getGivenValue() << " of variable " << getFullName()
 			<< " does not lie in the admissible range " << "0 - " << getNumCols( ) - 1 << endl;
 	}
 
@@ -273,11 +271,11 @@ ExportVariable ExportVariableInternal::getRows(	const ExportIndex& idx1,
 					idx1.getGivenValue() > idx2.getGivenValue() ||
 					idx2.getGivenValue() > (int) getNumRows( ) ))
 	{
-		LOG( LVL_ERROR ) << getFullName().getName() << ": getRows: invalid row arguments" << endl;
+		LOG( LVL_ERROR ) << getFullName() << ": getRows: invalid row arguments" << endl;
 	}
 	else if (size.isGiven() == BT_FALSE)
 	{
-		LOG( LVL_ERROR ) << getFullName().getName() << ": getRows: Cannot determine size" << endl;
+		LOG( LVL_ERROR ) << getFullName() << ": getRows: Cannot determine size" << endl;
 	}
 	else
 		tmp->setSubmatrixOffsets(idx1, 0, getNumRows(), getNumCols( ), size.getGivenValue(), getNumCols( ));
@@ -304,11 +302,11 @@ ExportVariable ExportVariableInternal::getCols(	const ExportIndex& idx1,
 					idx1.getGivenValue() > idx2.getGivenValue() ||
 					idx2.getGivenValue() > (int) getNumCols( ) ))
 	{
-		LOG( LVL_ERROR ) << getFullName().getName() << ": getCols: invalid column arguments" << endl;
+		LOG( LVL_ERROR ) << getFullName() << ": getCols: invalid column arguments" << endl;
 	}
 	else if (size.isGiven() == BT_FALSE)
 	{
-		LOG( LVL_ERROR ) << getFullName().getName() << ": getCols: Cannot determine size" << endl;
+		LOG( LVL_ERROR ) << getFullName() << ": getCols: Cannot determine size" << endl;
 	}
 	else
 		tmp->setSubmatrixOffsets(0, idx1, getNumRows(), getNumCols( ), getNumRows( ), size.getGivenValue() );
@@ -341,12 +339,12 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 					_rowIdx1.getGivenValue() > _rowIdx2.getGivenValue() ||
 					_rowIdx2.getGivenValue() > (int) getNumRows( ) ))
 	{
-		LOG( LVL_ERROR ) << getFullName().getName() << ": getSubMatrix: invalid row arguments" << endl;
+		LOG( LVL_ERROR ) << getFullName() << ": getSubMatrix: invalid row arguments" << endl;
 		return tmp;
 	}
 	else if (sizeRow.isGiven() == BT_FALSE)
 	{
-		LOG( LVL_ERROR ) << getFullName().getName() << ": getSubMatrix: cannot determine row size" << endl;
+		LOG( LVL_ERROR ) << getFullName() << ": getSubMatrix: cannot determine row size" << endl;
 		return tmp;
 	}
 
@@ -355,12 +353,12 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 					_colIdx1.getGivenValue() > _colIdx2.getGivenValue() ||
 					_colIdx2.getGivenValue() > (int) getNumCols( ) ))
 	{
-		LOG( LVL_ERROR ) << getFullName().getName() << ": getSubMatrix: invalid column arguments" << endl;
+		LOG( LVL_ERROR ) << getFullName() << ": getSubMatrix: invalid column arguments" << endl;
 		return tmp;
 	}
 	else if (sizeCol.isGiven() == BT_FALSE)
 	{
-		LOG( LVL_ERROR ) << getFullName().getName() << ": getSubMatrix: cannot determine column size" << endl;
+		LOG( LVL_ERROR ) << getFullName() << ": getSubMatrix: cannot determine column size" << endl;
 		return tmp;
 	}
 
@@ -425,7 +423,7 @@ Matrix ExportVariableInternal::getGivenMatrix( ) const
 
 returnValue ExportVariableInternal::print( ) const
 {
-	return data->print( name.getName() );
+	return data->print( );
 }
 
 

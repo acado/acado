@@ -33,7 +33,7 @@
 
 #include <acado/code_generation/export_file.hpp>
 
-
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -44,103 +44,37 @@ BEGIN_NAMESPACE_ACADO
 
 ExportFile::ExportFile(	const std::string& _fileName,
 						const std::string& _commonHeaderName,
-						const std::string& _realstd::string,
-						const std::string& _intstd::string,
+						const std::string& _realString,
+						const std::string& _intString,
 						int _precision,
-						const std::string& _commentstd::string
+						const std::string& _commentString
 						) : ExportStatementBlock( )
 {
 	fileName         = _fileName;
 	commonHeaderName = _commonHeaderName;
 	
-	realstd::string    = _realstd::string;
-	intstd::string     = _intstd::string;
+	realString    = _realString;
+	intString     = _intString;
 	precision     = _precision;
-	commentstd::string = _commentstd::string;
+	commentString = _commentString;
 }
-
-
-ExportFile::ExportFile(	const ExportFile& arg
-						) : ExportStatementBlock( arg )
-{
-	copy( arg );
-}
-
 
 ExportFile::~ExportFile( )
-{
-}
-
-
-ExportFile& ExportFile::operator=(	const ExportFile& arg
-									)
-{
-	if( this != &arg )
-	{
-		ExportStatementBlock::operator=( arg );
-		copy( arg );
-	}
-	
-	return *this;
-}
-
-
+{}
 
 returnValue ExportFile::exportCode( ) const
 {
-	FILE* file = openFile( );
+	ofstream stream( fileName.c_str() );
 
-	if ( file == 0 )
+	if (stream.good() == false)
 		return ACADOERROR( RET_DOES_DIRECTORY_EXISTS );
 
-	returnValue returnvalue = ExportStatementBlock::exportCode( file,realstd::string,intstd::string,precision );
+	returnValue returnvalue = ExportStatementBlock::exportCode(stream, realString, intString, precision);
 
-	if ( file != 0 )
-		fclose( file );
+	stream.close();
 
 	return returnvalue;
 }
-
-
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-returnValue ExportFile::copy(	const ExportFile& arg
-								)
-{
-	fileName         = arg.fileName;
-	commonHeaderName = arg.commonHeaderName;
-
-	realstd::string    = arg.realstd::string;
-	intstd::string     = arg.intstd::string;
-	precision     = arg.precision;
-	commentstd::string = arg.commentstd::string;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-
-FILE* ExportFile::openFile( ) const
-{
-	FILE* file = acadoFOpen( fileName.getName(), "w" );
-	if ( file == 0 )
-		return 0;
-
-	if ( commentstd::string.isEmpty() == BT_TRUE )
-		acadoPrintAutoGenerationNotice( file );
-	else
-		acadoPrintAutoGenerationNotice( file,commentstd::string.getName() );
-
-	if ( commonHeaderName.isEmpty() == BT_FALSE )
-		acadoFPrintf( file, "#include \"%s\"\n\n\n",commonHeaderName.getName() );
-	
-	return file;
-}
-
 
 CLOSE_NAMESPACE_ACADO
 

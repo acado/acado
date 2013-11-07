@@ -126,9 +126,9 @@ uint ExportArgumentList::getNumArguments( ) const
 
 
 
-returnValue ExportArgumentList::exportCode(	FILE* file,
-											const std::string& _realstd::string,
-											const std::string& _intstd::string,
+returnValue ExportArgumentList::exportCode(	std::ostream& stream,
+											const std::string& _realString,
+											const std::string& _intString,
 											int _precision
 											) const
 {
@@ -145,18 +145,18 @@ returnValue ExportArgumentList::exportCode(	FILE* file,
 		if ( includeType == BT_TRUE )
 		{
 			if ( arguments[ i ].isCalledByValue( ) == BT_TRUE )
-				acadoFPrintf(file, "%s ", arguments[ i ].getTypestd::string(_realstd::string, _intstd::string).getName());
+				stream << arguments[ i ].getTypeString(_realString, _intString) << " ";
 			else
-				acadoFPrintf(file, "%s* const ", arguments[ i ].getTypestd::string(_realstd::string, _intstd::string).getName());
+				stream << arguments[ i ].getTypeString(_realString, _intString) << "* const ";
 		}
 
 		if ( includeType == BT_FALSE )
-			acadoFPrintf(file, "%s", arguments[ i ].getAddressstd::string( ).getName());
+			stream << arguments[ i ].getAddressString( );
 		else
-			acadoFPrintf(file, "%s", arguments[ i ].getAddressstd::string( BT_FALSE ).getName());
+			stream << arguments[ i ].getAddressString( false );
 
 		if (i < arguments.size() - 1)
-			acadoFPrintf(file, ", ");
+			stream << ", ";
 	}
 
 	return SUCCESSFUL_RETURN;

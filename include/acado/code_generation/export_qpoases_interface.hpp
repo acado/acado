@@ -54,20 +54,20 @@ public:
 	 *	@param[in] _headerFileName		Name of exported file for header file.
 	 *	@param[in] _sourceFileName		Name of exported file for source file.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
-	 *	@param[in] _realstd::string			std::string to be used to declare real variables.
-	 *	@param[in] _intstd::string			std::string to be used to declare integer variables.
+	 *	@param[in] _realString			std::string to be used to declare real variables.
+	 *	@param[in] _intString			std::string to be used to declare integer variables.
 	 *	@param[in] _precision			Number of digits to be used for exporting real values.
-	 *	@param[in] _commentstd::string		std::string to be used for exporting comments.
+	 *	@param[in] _commentString		std::string to be used for exporting comments.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	ExportQpOasesInterface(	const std::string& _headerFileName,
 							const std::string& _sourceFileName,
 							const std::string& _commonHeaderName = "",
-							const std::string& _realstd::string = "real_t",
-							const std::string& _intstd::string = "int",
+							const std::string& _realString = "real_t",
+							const std::string& _intString = "int",
 							int _precision = 16,
-							const std::string& _commentstd::string = emptyConststd::string
+							const std::string& _commentString = std::string()
 							);
 
 	/** Destructor. */

@@ -61,20 +61,20 @@ class ExportMatlabIntegrator : public ExportTemplatedFile
 		 *	@param[in] _templateName		Name of a template.
 		 *	@param[in] _fileName			Name of exported file.
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
-		 *	@param[in] _realstd::string			std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string			std::string to be used to declare integer variables.
+		 *	@param[in] _realString			std::string to be used to declare real variables.
+		 *	@param[in] _intString			std::string to be used to declare integer variables.
 		 *	@param[in] _precision			Number of digits to be used for exporting real values.
-		 *	@param[in] _commentstd::string		std::string to be used for exporting comments.
+		 *	@param[in] _commentString		std::string to be used for exporting comments.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		ExportMatlabIntegrator(	const std::string& _templateName,
 								const std::string& _fileName,
 								const std::string& _commonHeaderName = "",
-								const std::string& _realstd::string = "real_t",
-								const std::string& _intstd::string = "int",
+								const std::string& _realString = "real_t",
+								const std::string& _intString = "int",
 								int _precision = 16,
-								const std::string& _commentstd::string = emptyConststd::string
+								const std::string& _commentString = ""
 								);
 
 		/** Copy constructor (deep copy).

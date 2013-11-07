@@ -41,50 +41,31 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportStatementstd::string::ExportStatementstd::string(	const std::string& _statementstd::string
+ExportStatementString::ExportStatementString(	const std::string& _statementString
 												) : ExportStatement( )
 {
-	statementstd::string = _statementstd::string;
+	statementString = _statementString;
 }
 
 
-ExportStatementstd::string::ExportStatementstd::string( const ExportStatementstd::string& arg ) : ExportStatement( arg )
-{
-	statementstd::string = arg.statementstd::string;
-}
-
-
-ExportStatementstd::string::~ExportStatementstd::string( )
+ExportStatementString::~ExportStatementString( )
 {
 }
 
 
-ExportStatementstd::string& ExportStatementstd::string::operator=( const ExportStatementstd::string& arg )
+ExportStatement* ExportStatementString::clone( ) const
 {
-	if( this != &arg )
-	{
-		// empty
-		ExportStatement::operator=( arg );
-		statementstd::string = arg.statementstd::string;
-	}
-
-	return *this;
+	return new ExportStatementString(*this);
 }
 
 
-ExportStatement* ExportStatementstd::string::clone( ) const
-{
-	return new ExportStatementstd::string(*this);
-}
-
-
-returnValue ExportStatementstd::string::exportCode(	FILE *file,
-												const std::string& _realstd::string,
-												const std::string& _intstd::string,
+returnValue ExportStatementString::exportCode(	std::ostream& stream,
+												const std::string& _realString,
+												const std::string& _intString,
 												int _precision
 												) const
 {
-	acadoFPrintf( file,"%s", statementstd::string.getName() );
+	stream << statementString;
 
 	return SUCCESSFUL_RETURN;
 }

@@ -97,10 +97,10 @@ returnValue ExportStatementBlock::addStatement(	const ExportStatement& _statemen
 }
 
 
-returnValue ExportStatementBlock::addStatement(	const std::string& _statementstd::string
+returnValue ExportStatementBlock::addStatement(	const std::string& _statementString
 												)
 {
-	ExportStatementstd::string tmp( _statementstd::string );
+	ExportStatementString tmp( _statementString );
 	return addStatement( tmp );
 }
 
@@ -215,21 +215,21 @@ returnValue ExportStatementBlock::addLinebreak(	uint num
 	if ( num > 10 )
 		num = 10;
 
-	std::string tmp = "\n";
+	std::stringstream ss;
+	ss << std::endl;
 
-	for( uint i=1; i<num; ++i )
-		tmp << "\n";
+	for (uint i = 1; i < num; ++i)
+		ss << std::endl;
 
-	return addStatement( tmp );
+	return addStatement( ss.str() );
 }
 
 
 returnValue ExportStatementBlock::addComment(	const std::string& _comment
 												)
 {
-	std::string tmp = "/* ";
-	tmp << _comment << " */\n";
-	return addStatement( tmp );
+	std::stringstream ss; ss << "/* " << _comment << " */\n";
+	return addStatement( ss.str() );
 }
 
 
@@ -237,17 +237,12 @@ returnValue ExportStatementBlock::addComment(	uint _nBlanks,
 												const std::string& _comment
 												)
 {
-	char* blanks = new char[_nBlanks+1];
-	for( uint i=0; i<_nBlanks; ++i )
-		blanks[i] = ' ';
-	blanks[_nBlanks] = '\0';
-	
-	std::string tmp = blanks;
-	tmp << "/* " << _comment << " */\n";
-	
-	delete[] blanks;
+	std::stringstream ss;
+	for(unsigned i = 0; i < _nBlanks; ++i)
+		ss << " ";
+	ss << "/* " << _comment << " */\n";
 
-	return addStatement( tmp );
+	return addStatement( ss.str() );
 }
 
 
@@ -259,15 +254,15 @@ uint ExportStatementBlock::getNumStatements( ) const
 
 
 
-returnValue ExportStatementBlock::exportDataDeclaration(	FILE *file,
-															const std::string& _realstd::string,
-															const std::string& _intstd::string,
+returnValue ExportStatementBlock::exportDataDeclaration(	std::ostream& stream,
+															const std::string& _realString,
+															const std::string& _intString,
 															int _precision
 															) const
 {
 	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
-		if ((*it)->exportDataDeclaration(file, _realstd::string, _intstd::string, _precision) != SUCCESSFUL_RETURN)
+		if ((*it)->exportDataDeclaration(stream, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 
 	return SUCCESSFUL_RETURN;
@@ -275,15 +270,15 @@ returnValue ExportStatementBlock::exportDataDeclaration(	FILE *file,
 
 
 
-returnValue ExportStatementBlock::exportCode(	FILE* file,
-												const std::string& _realstd::string,
-												const std::string& _intstd::string,
+returnValue ExportStatementBlock::exportCode(	std::ostream& stream,
+												const std::string& _realString,
+												const std::string& _intString,
 												int _precision
 												) const
 {
 	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
-		if ((*it)->exportCode(file, _realstd::string, _intstd::string, _precision) != SUCCESSFUL_RETURN)
+		if ((*it)->exportCode(stream, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 
 	return SUCCESSFUL_RETURN;
@@ -308,15 +303,6 @@ ExportStatementBlock& operator<<(ExportStatementBlock& _block, const ExportState
 ExportStatementBlock& operator<<(ExportStatementBlock& _block, const std::string& _statement)
 {
 	returnValue status = _block.addStatement( _statement );
-	if (status != SUCCESSFUL_RETURN)
-		ACADOERROR( status );
-
-	return _block;
-}
-
-ExportStatementBlock& operator<<(ExportStatementBlock& _block, const std::string& _statement)
-{
-	returnValue status = _block.addStatement( std::string(_statement.c_str()) );
 	if (status != SUCCESSFUL_RETURN)
 		ACADOERROR( status );
 

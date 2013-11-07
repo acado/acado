@@ -106,32 +106,32 @@ class ExportStatement
 		/** Exports data declaration of the statement into given file. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] stream				Name of file to be used to export statement.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportDataDeclaration(	FILE *file,
-													const std::string& _realstd::string = "real_t",
-													const std::string& _intstd::string = "int",
+		virtual returnValue exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString = "real_t",
+													const std::string& _intString = "int",
 													int _precision = 16
 													) const;
 
 		/** Exports source code of the statement into given file. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] stream				Name of file to be used to export statement.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportCode(	FILE* file,
-										const std::string& _realstd::string = "real_t",
-										const std::string& _intstd::string = "int",
+		virtual returnValue exportCode(	std::ostream& stream,
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										) const = 0;
 

@@ -34,7 +34,6 @@
 #include <acado/code_generation/export_arithmetic_statement.hpp>
 #include <acado/code_generation/export_variable_internal.hpp>
 
-#include <sstream>
 #include <iomanip>
 
 
@@ -52,7 +51,6 @@ ExportArithmeticStatement::ExportArithmeticStatement( )
 	op1 = ESO_UNDEFINED;
 	op2 = ESO_UNDEFINED;
 }
-
 
 ExportArithmeticStatement::ExportArithmeticStatement(	const ExportVariable& _lhs,
 														ExportStatementOperator _op0,
@@ -76,47 +74,8 @@ ExportArithmeticStatement::ExportArithmeticStatement(	const ExportVariable& _lhs
 	op2  = _op2;
 }
 
-
-ExportArithmeticStatement::ExportArithmeticStatement( const ExportArithmeticStatement& arg ) : ExportStatement( arg )
-{
-	lhs = arg.lhs;
-	rhs1 = arg.rhs1;
-	rhs2 = arg.rhs2;
-	rhs3 = arg.rhs3;
-
-	op0  = arg.op0;
-	op1  = arg.op1;
-	op2  = arg.op2;
-
-	memAllocator = arg.memAllocator;
-}
-
-
 ExportArithmeticStatement::~ExportArithmeticStatement( )
 {}
-
-
-ExportArithmeticStatement& ExportArithmeticStatement::operator=( const ExportArithmeticStatement& arg )
-{
-	if( this != &arg )
-	{
-		ExportStatement::operator=( arg );
-		
-		lhs = arg.lhs;
-		rhs1 = arg.rhs1;
-		rhs2 = arg.rhs2;
-		rhs3 = arg.rhs3;
-
-		op0  = arg.op0;
-		op1  = arg.op1;
-		op2  = arg.op2;
-
-		memAllocator = arg.memAllocator;
-	}
-
-	return *this;
-}
-
 
 ExportStatement* ExportArithmeticStatement::clone( ) const
 {
@@ -152,9 +111,9 @@ uint ExportArithmeticStatement::getNumCols( ) const
 }
 
 
-returnValue ExportArithmeticStatement::exportDataDeclaration(	FILE *file,
-																const std::string& _realstd::string,
-																const std::string& _intstd::string,
+returnValue ExportArithmeticStatement::exportDataDeclaration(	std::ostream& stream,
+																const std::string& _realString,
+																const std::string& _intString,
 																int _precision
 																) const
 {
@@ -162,15 +121,15 @@ returnValue ExportArithmeticStatement::exportDataDeclaration(	FILE *file,
 }
 
 
-returnValue ExportArithmeticStatement::exportCode(	FILE* file,
-													const std::string& _realstd::string,
-													const std::string& _intstd::string,
+returnValue ExportArithmeticStatement::exportCode(	std::ostream& stream,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision
 													) const
 {
 	if (lhs->isGiven() == BT_TRUE && lhs->getDim() > 0)
 	{
-		LOG( LVL_ERROR ) << "Left hand side ('" << lhs.getFullName().getName( ) << "') of an arithmetic "
+		LOG( LVL_ERROR ) << "Left hand side ('" << lhs.getFullName() << "') of an arithmetic "
 							"expression is given." << endl;
 		return ACADOERROR(RET_INVALID_ARGUMENTS);
 	}
@@ -181,25 +140,25 @@ returnValue ExportArithmeticStatement::exportCode(	FILE* file,
 	switch( op1 )
 	{
 		case ESO_ADD:
-			return exportCodeAddSubtract(file, "+", _realstd::string, _intstd::string, _precision);
+			return exportCodeAddSubtract(stream, "+", _realString, _intString, _precision);
 
 		case ESO_SUBTRACT:
-			return exportCodeAddSubtract(file, "-", _realstd::string, _intstd::string, _precision);
+			return exportCodeAddSubtract(stream, "-", _realString, _intString, _precision);
 			
 		case ESO_ADD_ASSIGN:
-			return exportCodeAssign( file,"+=",_realstd::string,_intstd::string,_precision );
+			return exportCodeAssign( stream,"+=",_realString,_intString,_precision );
 
 		case ESO_SUBTRACT_ASSIGN:
-			return exportCodeAssign( file,"-=",_realstd::string,_intstd::string,_precision );
+			return exportCodeAssign( stream,"-=",_realString,_intString,_precision );
 
 		case ESO_MULTIPLY:
-			return exportCodeMultiply( file,BT_FALSE,_realstd::string,_intstd::string,_precision );
+			return exportCodeMultiply( stream,BT_FALSE,_realString,_intString,_precision );
 			
 		case ESO_MULTIPLY_TRANSPOSE:
-			return exportCodeMultiply( file,BT_TRUE,_realstd::string,_intstd::string,_precision );
+			return exportCodeMultiply( stream,BT_TRUE,_realString,_intString,_precision );
 
 		case ESO_ASSIGN:
-			return exportCodeAssign( file,"=",_realstd::string,_intstd::string,_precision );
+			return exportCodeAssign( stream,"=",_realString,_intString,_precision );
 
 		default:
 			return ACADOERROR( RET_UNKNOWN_BUG );
@@ -212,10 +171,10 @@ returnValue ExportArithmeticStatement::exportCode(	FILE* file,
 // PROTECTED MEMBER FUNCTIONS:
 //
 
-returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
+returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stream,
 																const std::string& _sign,
-																const std::string& _realstd::string,
-																const std::string& _intstd::string,
+																const std::string& _realString,
+																const std::string& _intString,
 																int _precision
 																) const
 {
@@ -234,17 +193,18 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 		if ( ( rhs1->getNumRows() != lhs->getNumRows() ) || 
 		     ( rhs1->getNumCols() != lhs->getNumCols() ) )
 		{
-			cout << "lhs name is " << lhs.getName().getName() <<
-					", size: " << lhs.getNumRows() << " x " << lhs.getNumCols() << endl;
-			cout << "rhs1 name is " << rhs1.getName().getName() <<
+			LOG( LVL_DEBUG )
+					<< "lhs name is " << lhs.getName() <<
+					", size: " << lhs.getNumRows() << " x " << lhs.getNumCols() << endl
+					<< "rhs1 name is " << rhs1.getName() <<
 					", size: " << rhs1.getNumRows() << " x " << rhs1.getNumCols() << endl;
 
 			return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
 		}
 	}
 	
-	std::string assignstd::string;
-	if ( getAssignstd::string( assignstd::string ) != SUCCESSFUL_RETURN )
+	std::string assignString;
+	if ( getAssignString( assignString ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 	
 	//
@@ -276,22 +236,22 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 				}
 
 				if ( !lhs.isNull() )
-					acadoFPrintf( file,"%s %s ", lhs.get(i,j).getName(),assignstd::string.getName() );
+					stream << lhs.get(i, j) << " " << assignString << " ";
 
 				if ( rhs1->isZero(i, j) == BT_FALSE )
 				{
-					acadoFPrintf( file,"%s", rhs1->get(i,j).getName() );
+					stream << rhs1->get(i, j);
 					if ( rhs2->isZero(i,j) == BT_FALSE )
-						acadoFPrintf( file," %s %s;\n", _sign.getName(),rhs2->get(i,j).getName() );
+						stream << _sign << " " << rhs2->get(i, j) << ";\n";
 					else
-						acadoFPrintf( file,";\n" );
+						stream << endl;
 				}
 				else
 				{
-					if ( rhs2->isZero(i,j) == BT_FALSE )
-						acadoFPrintf( file,"%s %s;\n", _sign.getName(),rhs2->get(i,j).getName() );
+					if (rhs2->isZero(i, j) == BT_FALSE)
+						stream << _sign << " " << rhs2->get(i, j);
 					else
-						acadoFPrintf( file,"0.0;\n" );
+						stream << "0.0;\n";
 				}
 			}
 	}
@@ -300,17 +260,17 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 		ExportIndex ii;
 		memAllocator->acquire( ii );
 
-		acadoFPrintf(file, "for (%s = 0; ", ii.getName().getName());
-		acadoFPrintf(file, "%s < %d; ", ii.getName().getName(), getNumRows());
-		acadoFPrintf(file, "++%s)\n{\n", ii.getName().getName());
+		stream << "for (" << ii.getName() << " = 0; ";
+		stream << ii.getName() << " < " << getNumRows() << "; ";
+		stream << "++" << ii.getName() << ")\n{\n";
 
 		for(unsigned j = 0; j < getNumCols( ); ++j)
 		{
-			acadoFPrintf( file,"%s %s ", lhs->get(ii, j).getName(), assignstd::string.getName() );
-			acadoFPrintf( file,"%s %s;\n", _sign.getName(), rhs2->get(ii,j).getName() );
+			stream << lhs->get(ii, j) << " " << assignString;
+			stream << _sign << " " << rhs2->get(ii, j) << ";\n";
 		}
 
-		acadoFPrintf(file, "\n{\n");
+		stream << "\n{\n";
 
 		memAllocator->release( ii );
 	}
@@ -320,19 +280,19 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 		memAllocator->acquire( ii );
 		memAllocator->acquire( jj );
 
-		acadoFPrintf(file, "for (%s = 0; ", ii.getName().getName());
-		acadoFPrintf(file, "%s < %d; ", ii.getName().getName(), getNumRows());
-		acadoFPrintf(file, "++%s)\n{\n", ii.getName().getName());
+		stream	<< "for (" << ii.getName() << " = 0; "
+				<< ii.getName() << " < " << getNumRows() <<"; "
+				<< "++" << ii.getName() << ")\n{\n";
 
-		acadoFPrintf(file, "for (%s = 0; ", jj.getName().getName());
-		acadoFPrintf(file, "%s < %d; ", jj.getName().getName(), getNumRows());
-		acadoFPrintf(file, "++%s)\n{\n", jj.getName().getName());
+		stream	<< "for (" << jj.getName() << " = 0; "
+				<< jj.getName() << " < " << getNumCols() <<"; "
+				<< "++" << jj.getName() << ")\n{\n";
 
-		acadoFPrintf( file,"%s %s ", lhs->get(ii, jj).getName(), assignstd::string.getName() );
-		acadoFPrintf( file,"%s %s;\n", _sign.getName(), rhs2->get(ii,jj).getName() );
+		stream	<< lhs->get(ii, jj) << " " <<  assignString
+				<< _sign << " " << rhs2->get(ii, jj) << ";\n";
 
-		acadoFPrintf(file, "\n{\n");
-		acadoFPrintf(file, "\n{\n");
+		stream	<< "\n}\n"
+				<< "\n}\n";
 
 		memAllocator->release( ii );
 		memAllocator->release( jj );
@@ -341,10 +301,10 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	FILE* file,
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
+returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 															BooleanType transposeRhs1,
-															const std::string& _realstd::string,
-															const std::string& _intstd::string,
+															const std::string& _realString,
+															const std::string& _intString,
 															int _precision
 															) const
 {
@@ -354,8 +314,8 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 	if (lhs.getDim() == 0 || rhs1.getDim() == 0 || rhs2.getDim() == 0)
 		return SUCCESSFUL_RETURN;
 
-	std::string assignstd::string;
-	if ( getAssignstd::string( assignstd::string ) != SUCCESSFUL_RETURN )
+	std::string assignString;
+	if ( getAssignString( assignString ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 
 	uint nRowsRhs1;
@@ -424,7 +384,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 			{
 				allZero = BT_TRUE;
 
-				acadoFPrintf( file,"%s %s", lhs->get(ii,j).getName(), assignstd::string.getName() );
+				stream << lhs->get(ii,j) <<  " " << assignString;
 
 				for(uint k = 0; k < nColsRhs1; ++k)
 				{
@@ -447,29 +407,30 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 
 						if ( rhs1->isOne(iiRhs1,kkRhs1) == BT_FALSE )
 						{
-							acadoFPrintf( file," %s %s", sign,rhs1->get(iiRhs1,kkRhs1).getName() );
+							stream << sign << " " << rhs1->get(iiRhs1,kkRhs1);
+
 							if ( rhs2->isOne(kk,j) == BT_FALSE )
-							acadoFPrintf( file,"*%s", rhs2->get(kk,j).getName() );
+								stream << "*" << rhs2->get(kk, j);
 						}
 						else
 						{
 							if ( rhs2->isOne(kk,j) == BT_FALSE )
-							acadoFPrintf( file," %s %s", sign,rhs2->get(kk,j).getName() );
+								stream << " " << sign << rhs2->get(kk,j);
 							else
-							acadoFPrintf( file," %s 1.0", sign );
+								stream << " " << sign << " 1.0";
 						}
 					}
 				}
 
 				if ( ( op2 == ESO_ADD ) || ( op2 == ESO_SUBTRACT ) )
-					acadoFPrintf( file," + %s;\n", rhs3->get(ii,j).getName() );
+					stream << " + " << rhs3->get(ii, j) << ";\n";
 
 				if ( op2 == ESO_UNDEFINED )
 				{
 					if ( allZero == BT_TRUE )
-						acadoFPrintf( file," 0.0;\n" );
+						stream << " 0.0;\n";
 					else
-						acadoFPrintf( file,";\n" );
+						stream << ";\n";
 				}
 			}
 		}
@@ -482,15 +443,15 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 
 		memAllocator->acquire( ii );
 
-		acadoFPrintf(file, "for (%s = 0; ", ii.getName().getName());
-		acadoFPrintf(file, "%s < %d; ",ii.getName().getName(), getNumRows());
-		acadoFPrintf(file, "++%s)\n{\n",ii.getName().getName());
+		stream << "for (" << ii.getName() << " = 0; ";
+		stream << ii.getName() << " < " << getNumRows() <<"; ";
+		stream << "++" << ii.getName() << ")\n{\n";
 
 		for(uint j = 0; j < getNumCols( ); ++j)
 		{
 			allZero = BT_TRUE;
 
-			acadoFPrintf( file,"%s %s", lhs->get(ii,j).getName(), assignstd::string.getName() );
+			stream << lhs->get(ii,j) << " " << assignString;
 
 			for(uint k = 0; k < nColsRhs1; ++k)
 			{
@@ -513,32 +474,32 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 
 					if ( rhs1->isOne(iiRhs1,kkRhs1) == BT_FALSE )
 					{
-						acadoFPrintf( file," %s %s", sign,rhs1->get(iiRhs1,kkRhs1).getName() );
+						stream << sign << " " << rhs1->get(iiRhs1,kkRhs1);
 						if ( rhs2->isOne(kk,j) == BT_FALSE )
-							acadoFPrintf( file,"*%s", rhs2->get(kk,j).getName() );
+							stream << "*" << rhs2->get(kk, j);
 					}
 					else
 					{
 						if ( rhs2->isOne(kk,j) == BT_FALSE )
-							acadoFPrintf( file," %s %s", sign,rhs2->get(kk,j).getName() );
+							stream << " " <<  sign << " " << rhs2->get(kk,j);
 						else
-							acadoFPrintf( file," %s 1.0", sign );
+							stream << " " << sign << " 1.0";
 					}
 				}
 			}
 
 			if ( ( op2 == ESO_ADD ) || ( op2 == ESO_SUBTRACT ) )
-				acadoFPrintf( file," + %s;\n", rhs3->get(ii,j).getName() );
+				stream << " + " << rhs3->get(ii,j) << ";\n";
 
 			if ( op2 == ESO_UNDEFINED )
 			{
 				if ( allZero == BT_TRUE )
-					acadoFPrintf( file," 0.0;\n" );
+					stream << " 0.0;\n";
 				else
-					acadoFPrintf( file,";\n" );
+					stream << ";\n";
 			}
 		}
-		acadoFPrintf( file,"\n}\n" );
+		stream << "\n}\n";
 
 		memAllocator->release( ii );
 	}
@@ -552,19 +513,18 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 		memAllocator->acquire( jj );
 
 		// First loop
-		acadoFPrintf(file, "for (%s = 0; ", ii.getName().getName());
-		acadoFPrintf(file, "%s < %d; ", ii.getName().getName(), getNumRows());
-		acadoFPrintf(file, "++%s)\n{\n", ii.getName().getName());
+		stream << "for (" << ii.getName() << " = 0; ";
+		stream << ii.getName() << " < " << getNumRows() <<"; ";
+		stream << "++" << ii.getName() << ")\n{\n";
 
 		// Second loop
-
-		acadoFPrintf(file, "for (%s = 0; ", jj.getName().getName());
-		acadoFPrintf(file, "%s < %d; ", jj.getName().getName(), getNumCols());
-		acadoFPrintf(file, "++%s)\n{\n", jj.getName().getName());
+		stream << "for (" << jj.getName() << " = 0; ";
+		stream << jj.getName() << " < " << getNumCols() <<"; ";
+		stream << "++" << jj.getName() << ")\n{\n";
 
 		allZero = BT_TRUE;
 
-		acadoFPrintf( file,"%s %s", lhs->get(ii,jj).getName(), assignstd::string.getName() );
+		stream << lhs->get(ii, jj) << " " << assignString;
 
 		for(uint k = 0; k < nColsRhs1; ++k)
 		{
@@ -587,33 +547,34 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 
 				if ( rhs1->isOne(iiRhs1,kkRhs1) == BT_FALSE )
 				{
-					acadoFPrintf( file," %s %s", sign,rhs1->get(iiRhs1,kkRhs1).getName() );
+					stream << " " << sign << " " << rhs1->get(iiRhs1, kkRhs1);
+
 					if ( rhs2->isOne(kk,jj) == BT_FALSE )
-						acadoFPrintf( file,"*%s", rhs2->get(kk,jj).getName() );
+						stream << "*" << rhs2->get(kk, jj);
 				}
 				else
 				{
 					if ( rhs2->isOne(kk,jj) == BT_FALSE )
-						acadoFPrintf( file," %s %s", sign,rhs2->get(kk,jj).getName() );
+						stream << " " << sign << " " << rhs2->get(kk, jj);
 					else
-						acadoFPrintf( file," %s 1.0", sign );
+						stream << " " << sign << " 1.0";
 				}
 			}
 		}
 
 		if ( ( op2 == ESO_ADD ) || ( op2 == ESO_SUBTRACT ) )
-			acadoFPrintf( file," + %s;\n", rhs3->get(ii,jj).getName() );
+			stream << " + " << rhs3->get(ii,jj) << ";\n";
 
 		if ( op2 == ESO_UNDEFINED )
 		{
 			if ( allZero == BT_TRUE )
-				acadoFPrintf( file," 0.0;\n" );
+				stream << " 0.0;\n";
 			else
-				acadoFPrintf( file,";\n" );
+				stream << ";\n";
 		}
 
-		acadoFPrintf( file,"\n}\n" );
-		acadoFPrintf( file,"\n}\n" );
+		stream << "\n}\n";
+		stream << "\n}\n";
 
 		memAllocator->release( ii );
 		memAllocator->release( jj );
@@ -623,10 +584,10 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	FILE* file,
 }
 
 
-returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
+returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 															const std::string& _op,
-															const std::string& _realstd::string,
-															const std::string& _intstd::string,
+															const std::string& _realString,
+															const std::string& _intString,
 															int _precision
 															) const
 {
@@ -636,24 +597,23 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 	if ( ( rhs1.getNumRows( ) != lhs.getNumRows( ) ) ||
 		 ( rhs1.getNumCols( ) != lhs.getNumCols( ) ) )
 	{
-		LOG( LVL_DEBUG ) << "lhs name is " << lhs.getName().getName()
+		LOG( LVL_DEBUG ) << "lhs name is " << lhs.getName()
 				<< ", size: " << lhs.getNumRows() << " x " << lhs.getNumCols()
-				<< "rhs1 name is " << rhs1.getName().getName()
+				<< "rhs1 name is " << rhs1.getName()
 				<< ", size: " << rhs1.getNumRows() << " x " << rhs1.getNumCols() << endl;
 
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
 	}
 
-	stringstream s;
-	s.precision( 16 );
+	stream << setprecision( _precision );
 
 	unsigned numOps = lhs.getNumRows() * lhs.getNumCols();
 
 	if (	lhs.isSubMatrix() == BT_FALSE && lhs.getDim() > 1 &&
 			rhs1.isGiven() == BT_TRUE && rhs1.getGivenMatrix().isZero() == BT_TRUE)
 	{
-		s 	<< "{ int lCopy; for (lCopy = 0; lCopy < "<< lhs.getDim() << "; lCopy++) "
-			<< lhs.getFullName() << "[ lCopy ] = 0.0; }" << endl;
+		stream 	<< "{ int lCopy; for (lCopy = 0; lCopy < "<< lhs.getDim() << "; lCopy++) "
+				<< lhs.getFullName() << "[ lCopy ] = 0.0; }" << endl;
 	}
 	else if ((numOps < 128) || (rhs1.isGiven() == BT_TRUE))
 	{
@@ -661,16 +621,16 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 			for(unsigned j = 0; j < lhs.getNumCols( ); ++j)
 				if ( ( _op == (std::string)"=" ) || ( rhs1.isZero(i,j) == BT_FALSE ) )
 				{
-					s << lhs->get(i, j).getName() << " " << _op.getName() << " ";
+					stream << lhs->get(i, j) << " " << _op << " ";
 					if (rhs1->isGiven() == BT_TRUE)
 					{
-						s << scientific << rhs1(i, j);
+						stream << scientific << rhs1(i, j);
 					}
 					else
 					{
-						s << rhs1->get(i, j).getName();
+						stream << rhs1->get(i, j);
 					}
-					s << ";" << endl;
+					stream << ";" << endl;
 				}
 	}
 	else
@@ -681,18 +641,18 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 		{
 			memAllocator->acquire( ii );
 
-			s << "for (" << ii.get().getName() << " = 0; " << ii.get().getName() << " < ";
+			stream << "for (" << ii.get() << " = 0; " << ii.get() << " < ";
 
 			if (lhs->getNumCols() == 1)
 			{
-				s << lhs->getNumRows() << "; ++" << ii.getName().getName() << ")" << endl
-						<< lhs.get(ii, 0).getName() << " " << _op.getName() << " " << rhs1.get(ii, 0).getName()
+				stream << lhs->getNumRows() << "; ++" << ii.getName() << ")" << endl
+						<< lhs.get(ii, 0) << " " << _op << " " << rhs1.get(ii, 0)
 						<< ";" << endl << endl;
 			}
 			else
 			{
-				s << lhs.getNumCols() << "; ++" << ii.getName().getName() << ")" << endl;
-				s << lhs.get(0, ii).getName() << " " << _op.getName() << " " << rhs1.get(0, ii).getName()
+				stream << lhs.getNumCols() << "; ++" << ii.getName() << ")" << endl;
+				stream << lhs.get(0, ii) << " " << _op << " " << rhs1.get(0, ii)
 						<< ";" << endl << endl;
 			}
 
@@ -703,40 +663,38 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	FILE* file,
 			memAllocator->acquire( ii );
 			memAllocator->acquire( jj );
 
-			s << "for (" << ii.getName().getName() << " = 0;" << ii.getName().getName() << " < "
-					<< lhs->getNumRows() << "; ++" << ii.getName().getName() << ")" << endl;
+			stream << "for (" << ii.getName() << " = 0;" << ii.getName() << " < "
+					<< lhs->getNumRows() << "; ++" << ii.getName() << ")" << endl;
 
-			s << "for (" << jj.getName().getName() << " = 0;" << jj.getName().getName() << " < "
-					<< lhs->getNumCols() << "; ++" << jj.getName().getName() << ")" << endl;
+			stream << "for (" << jj.getName() << " = 0;" << jj.getName() << " < "
+					<< lhs->getNumCols() << "; ++" << jj.getName() << ")" << endl;
 
-			s << lhs->get(ii, jj).getName() << " " << _op.getName( ) << " " << rhs1->get(ii, jj).getName() << ";" << endl;
+			stream << lhs->get(ii, jj) << " " << _op << " " << rhs1->get(ii, jj) << ";" << endl;
 
 			memAllocator->release( ii );
 			memAllocator->release( jj );
 		}
 	}
-	
-	acadoFPrintf(file, "%s", s.str().c_str());
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ExportArithmeticStatement::getAssignstd::string(	std::string& _assignstd::string
+returnValue ExportArithmeticStatement::getAssignString(	std::string& _assignString
 														) const
 {
 	switch ( op0 )
 	{
 		case ESO_ASSIGN:
-			_assignstd::string = "=";
+			_assignString = "=";
 			return SUCCESSFUL_RETURN;
 		
 		case ESO_ADD_ASSIGN:
-			_assignstd::string = "+=";
+			_assignString = "+=";
 			return SUCCESSFUL_RETURN;
 			
 		case ESO_SUBTRACT_ASSIGN:
-			_assignstd::string = "-=";
+			_assignString = "-=";
 			return SUCCESSFUL_RETURN;
 			
 		default:

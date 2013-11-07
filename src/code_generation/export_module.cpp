@@ -150,7 +150,7 @@ returnValue ExportModule::setupOptions( )
 
 returnValue ExportModule::setName(const std::string& _name)
 {
-	if ( _name.isEmpty() == BT_TRUE )
+	if ( _name.empty() == BT_TRUE )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	name = _name;

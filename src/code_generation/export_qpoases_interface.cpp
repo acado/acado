@@ -42,13 +42,13 @@ BEGIN_NAMESPACE_ACADO
 ExportQpOasesInterface::ExportQpOasesInterface(		const std::string& _headerFileName,
 													const std::string& _sourceFileName,
 													const std::string& _commonHeaderName,
-													const std::string& _realstd::string,
-													const std::string& _intstd::string,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision,
-													const std::string& _commentstd::string
+													const std::string& _commentString
 													)
-	: qpoHeader(QPOASES_HEADER, _headerFileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string),
-	  qpoSource(QPOASES_SOURCE, _sourceFileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string)
+	: qpoHeader(QPOASES_HEADER, _headerFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
+	  qpoSource(QPOASES_SOURCE, _sourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
 {}
 
 

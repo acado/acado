@@ -790,7 +790,7 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 			continue;
 
 		evaluateConstraints.addComment(
-				std::string( "Evaluating constraint on node: #" ) << std::string( i ) << "\n\n"
+				string( "Evaluating constraint on node: #" ) + toString( i )
 		);
 
 		evaluateConstraints.addStatement(conValueIn.getCols(0, getNX()) == x.getRow( i ) );
@@ -989,9 +989,7 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	feedback.addStatement( qpg.getRows(N * (NX + NU), N * (NX + NU) + NX) == QN2 * DyN );
 	feedback.addLinebreak();
 
-	feedback.addStatement(
-			returnValueFeedbackPhase.getFullName() << " = solveQpDunes();\n"
-	);
+	feedback << returnValueFeedbackPhase.getFullName() << " = solveQpDunes();\n";
 
 	//
 	// Here we have to add the differences....
@@ -1076,20 +1074,20 @@ returnValue ExportGaussNewtonQpDunes::setupQPInterface( )
 	qpInterface->configure(
 			maxNumQPiterations,
 			printLevel,
-			string( qpH.getFullName().getName() ),
-			string( qpg.getFullName().getName() ),
-			string( qpC.getFullName().getName() ),
-			string( qpc.getFullName().getName() ),
-			string( qpA.getFullName().getName() ),
-			string( qpLb0.getFullName().getName() ),
-			string( qpUb0.getFullName().getName() ),
-			string( qpLb.getFullName().getName() ),
-			string( qpUb.getFullName().getName() ),
-			string( qpLbA.getFullName().getName() ),
-			string( qpUbA.getFullName().getName() ),
-			string( qpPrimal.getFullName().getName() ),
-			string( qpLambda.getFullName().getName() ),
-			string( qpMu.getFullName().getName() ),
+			qpH.getFullName(),
+			qpg.getFullName(),
+			qpC.getFullName(),
+			qpc.getFullName(),
+			qpA.getFullName(),
+			qpLb0.getFullName(),
+			qpUb0.getFullName(),
+			qpLb.getFullName(),
+			qpUb.getFullName(),
+			qpLbA.getFullName(),
+			qpUbA.getFullName(),
+			qpPrimal.getFullName(),
+			qpLambda.getFullName(),
+			qpMu.getFullName(),
 			qpConDim
 	);
 

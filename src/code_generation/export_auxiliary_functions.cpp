@@ -32,8 +32,6 @@
 #include <acado/code_generation/export_auxiliary_functions.hpp>
 #include <acado/code_generation/templates/templates.hpp>
 
-#include <sstream>
-
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
@@ -43,13 +41,13 @@ ExportAuxiliaryFunctions::ExportAuxiliaryFunctions(	const std::string& _headerFi
 													const std::string& _sourceFileName,
 													const std::string& _moduleName,
 													const std::string& _commonHeaderName,
-													const std::string& _realstd::string,
-													const std::string& _intstd::string,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision,
-													const std::string& _commentstd::string
+													const std::string& _commentString
 													)
-	: source(AUXILIARY_FUNCTIONS_SOURCE, _sourceFileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string),
-	  header(AUXILIARY_FUNCTIONS_HEADER, _headerFileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string),
+	: source(AUXILIARY_FUNCTIONS_SOURCE, _sourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
+	  header(AUXILIARY_FUNCTIONS_HEADER, _headerFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
 	  moduleName( _moduleName )
 {}
 
@@ -60,14 +58,14 @@ returnValue ExportAuxiliaryFunctions::configure( )
 	// Source file configuration
 	//
 
-	source.dictionary[ "@MODULE_NAME@" ] = string( moduleName.getName() );
+	source.dictionary[ "@MODULE_NAME@" ] = moduleName;
 
 	source.fillTemplate();
 
 	//
 	// Header file configuration
 	//
-	header.dictionary[ "@MODULE_NAME@" ] = string( moduleName.getName() );
+	header.dictionary[ "@MODULE_NAME@" ] = moduleName;
 
 	header.fillTemplate();
 

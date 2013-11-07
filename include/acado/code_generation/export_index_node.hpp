@@ -96,9 +96,9 @@ public:
 		return new ExportIndexNode( *this );
 	}
 
-	virtual returnValue exportDataDeclaration(	FILE* file,
-												const std::string& _realstd::string = "real_t",
-												const std::string& _intstd::string = "int",
+	virtual returnValue exportDataDeclaration(	std::ostream& stream,
+												const std::string& _realString = "real_t",
+												const std::string& _intString = "int",
 												int _precision = 16
 												) const;
 

@@ -54,43 +54,14 @@ ExportAcadoFunction::ExportAcadoFunction( ) : ExportFunction( )
 
 
 ExportAcadoFunction::ExportAcadoFunction(	const Function& _f,
-										const std::string& _name
-										) : ExportFunction( _name )
+											const std::string& _name
+											) : ExportFunction( _name )
 {
 	init(_f, _name);
 }
 
-
-ExportAcadoFunction::ExportAcadoFunction( const ExportAcadoFunction& arg ) : ExportFunction( arg )
-{
-	numX = arg.numX;
-	numXA = arg.numXA;
-	numU = arg.numU;
-	numP = arg.numP;
-	numDX = arg.numDX;
-	globalVar = arg.globalVar;
-	f = arg.f;
-}
-
-
 ExportAcadoFunction::~ExportAcadoFunction( )
 {}
-
-
-ExportAcadoFunction& ExportAcadoFunction::operator=( const ExportAcadoFunction& arg )
-{
-	if( this != &arg )
-	{
-		ExportFunction::operator=( arg );
-		numX = arg.numX;
-		numXA = arg.numXA;
-		numU = arg.numU;
-		globalVar = arg.globalVar;
-		f = arg.f;
-	}
-
-	return *this;
-}
 
 
 ExportStatement* ExportAcadoFunction::clone( ) const
@@ -103,8 +74,6 @@ ExportFunction* ExportAcadoFunction::cloneFunction( ) const
 {
 	return new ExportAcadoFunction(*this);
 }
-
-
 
 returnValue ExportAcadoFunction::init(	const Function& _f,
 										const std::string& _name,
@@ -130,36 +99,36 @@ returnValue ExportAcadoFunction::init(	const Function& _f,
 	return ExportFunction::init(_name, ExportArgument("input", 1, 1), ExportArgument("output", 1, 1));
 }
 
-
-
-returnValue ExportAcadoFunction::exportDataDeclaration(	FILE* file,
-														const std::string& _realstd::string,
-														const std::string& _intstd::string,
+returnValue ExportAcadoFunction::exportDataDeclaration(	std::ostream& stream,
+														const std::string& _realString,
+														const std::string& _intString,
 														int _precision
 														) const
 {
-	return f->exportHeader(file, name.getName(), _realstd::string.getName());
+	stream	<< _realString << " " << f->getGlobalExportVariableName()
+			<< "[ " << f->getGlobalExportVariableSize( ) << " ];" << std::endl;
+
+	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ExportAcadoFunction::exportForwardDeclaration(	FILE* file,
-															const std::string& _realstd::string,
-															const std::string& _intstd::string,
+returnValue ExportAcadoFunction::exportForwardDeclaration(	std::ostream& stream,
+															const std::string& _realString,
+															const std::string& _intString,
 															int _precision
 															) const
 {
-	return f->exportForwardDeclarations(file, name.getName(), _realstd::string.getName());
+	return f->exportForwardDeclarations(stream, name.c_str(), _realString.c_str());
 }
 
 
-returnValue ExportAcadoFunction::exportCode(	FILE* file,
-											const std::string& _realstd::string,
-											const std::string& _intstd::string,
-											int _precision
-											) const
+returnValue ExportAcadoFunction::exportCode(	std::ostream& stream,
+												const std::string& _realString,
+												const std::string& _intString,
+												int _precision
+												) const
 {
-	return f->exportCode(file, name.getName(), _realstd::string.getName(),
-			_precision, numX, numXA, numU, numP, numDX);
+	return f->exportCode(stream, name.c_str(), _realString.c_str(), numX, numXA, numU, numP, numDX);
 }
 
 
@@ -198,12 +167,4 @@ returnValue ExportAcadoFunction::setGlobalExportVariable(const ExportVariable& v
 	return SUCCESSFUL_RETURN;
 }
 
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-
 CLOSE_NAMESPACE_ACADO
-
-// end of file.

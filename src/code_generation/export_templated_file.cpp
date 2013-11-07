@@ -34,21 +34,18 @@
 #include <acado/code_generation/export_templated_file.hpp>
 #include <acado/code_generation/templates/templates.hpp>
 
-#include <iostream>
-#include <fstream>
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
-using namespace std;
 
 ExportTemplatedFile::ExportTemplatedFile(	const std::string& _templateName,
 											const std::string& _fileName,
 											const std::string& _commonHeaderName,
-											const std::string& _realstd::string,
-											const std::string& _intstd::string,
+											const std::string& _realString,
+											const std::string& _intString,
 											int _precision,
-											const std::string& _commentstd::string
-						) : ExportFile(_fileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string)
+											const std::string& _commentString
+						) : ExportFile(_fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
 {
 	folders = TEMPLATE_PATHS;
 	templateName = _templateName;
@@ -64,7 +61,7 @@ returnValue ExportTemplatedFile::fillTemplate( )
 		string tmp;
 
 		pos = folders.find(";", oldPos);
-		tmp = folders.substr(oldPos, pos) + "/" + templateName.getName();
+		tmp = folders.substr(oldPos, pos) + "/" + templateName;
 
 		inputFile.open(tmp.c_str());
 
@@ -93,31 +90,8 @@ returnValue ExportTemplatedFile::fillTemplate( )
 			}
 		}
 
-		// This is some extremely stupid hack we had to do. Namely, std::string() class
-		// cannot handle long strings, so we have to cut them in smaller pieces.
-		if ( str.size() )
-		{
-			size_t pos = 0;
-			while ( 1 )
-			{
-				if ((str.size() - pos) < 256)
-				{
-					string tmp = str.substr( pos );
-
-					if ( tmp.size() )
-						addStatement( static_cast< std::string >( tmp.c_str() ) );
-
-					break;
-				}
-				else
-				{
-					addStatement( static_cast< std::string >( str.substr(pos, 256).c_str() ) );
-
-					pos += 256;
-				}
-			}
-		}
-		addStatement( (std::string)"\n" );
+		addStatement( str );
+		addStatement( "\n" );
 	}
 
 	inputFile.close();

@@ -65,7 +65,7 @@ public:
 	ExportIndex(	const int _value );
 
 	explicit ExportIndex(	const std::string& _name,
-							const std::string& _prefix = emptyConststd::string
+							const std::string& _prefix = std::string()
 							);
 
 	ExportIndexNode* operator->();
@@ -96,12 +96,12 @@ public:
 									);
 
 	friend std::string operator==(	const ExportIndex& _arg1,
-								const ExportIndex& _arg2
-								);
+									const ExportIndex& _arg2
+									);
 
-	virtual returnValue exportDataDeclaration(	FILE* file,
-												const std::string& _realstd::string = "real_t",
-												const std::string& _intstd::string = "int",
+	virtual returnValue exportDataDeclaration(	std::ostream& stream,
+												const std::string& _realString = "real_t",
+												const std::string& _intString = "int",
 												int _precision = 16
 												) const;
 
@@ -139,7 +139,7 @@ struct ExportIndexComparator
 {
     bool operator() (const ExportIndex& val1, const ExportIndex& val2) const
     {
-    	int tmp = std::string( val1.getName().getName() ).compare( std::string( val2.getName().getName() ) );
+    	int tmp = std::string( val1.getName() ).compare( std::string( val2.getName() ) );
 
     	return (tmp < 0) ? true : false;
     }

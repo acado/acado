@@ -92,8 +92,7 @@ class ExportArgumentInternal : public ExportDataInternal
 								const std::string& _prefix
 								);
 
-		/** Destructor.
-		 */
+		/** Destructor. */
 		virtual ~ExportArgumentInternal( );
 
 		virtual ExportArgumentInternal* clone() const;
@@ -120,8 +119,8 @@ class ExportArgumentInternal : public ExportDataInternal
 		 *
 		 *	\return std::string containing the address of the argument
 		 */
-		const std::string getAddressstd::string(	BooleanType withDataStruct = BT_TRUE
-										) const;
+		const std::string getAddressString(	BooleanType withDataStruct = BT_TRUE
+											) const;
 
 
 		/** Returns number of rows of the argument.
@@ -166,16 +165,16 @@ class ExportArgumentInternal : public ExportDataInternal
 		/** Exports declaration of the argument into given file. Its appearance can
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export declaration.
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] stream			Name of file to be used to export declaration.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportDataDeclaration(	FILE *file,
-													const std::string& _realstd::string = "real_t",
-													const std::string& _intstd::string = "int",
+		virtual returnValue exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString = "real_t",
+													const std::string& _intString = "int",
 													int _precision = 16
 													) const;
 

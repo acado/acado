@@ -35,8 +35,6 @@
 #include <acado/code_generation/export_argument_internal.hpp>
 #include <acado/code_generation/export_argument.hpp>
 
-#include <sstream>
-
 
 BEGIN_NAMESPACE_ACADO
 
@@ -107,10 +105,10 @@ ExportArgument ExportArgumentInternal::getAddress(	const ExportIndex& rowIdx,
 }
 
 
-const std::string ExportArgumentInternal::getAddressstd::string(	BooleanType withDataStruct
-														) const
+const std::string ExportArgumentInternal::getAddressString(	BooleanType withDataStruct
+															) const
 {
-	stringstream s;
+	stringstream ss;
 
 	std::string nameStr;
 
@@ -122,18 +120,16 @@ const std::string ExportArgumentInternal::getAddressstd::string(	BooleanType wit
 	if ( addressIdx.isGiven() == BT_TRUE )
 	{
 		if ( addressIdx.getGivenValue() == 0 )
-			s << nameStr.getName();
+			ss << nameStr;
 		else
-			s << "&(" << nameStr.getName() << "[ " << addressIdx.getGivenValue() << " ])";
+			ss << "&(" << nameStr << "[ " << addressIdx.getGivenValue() << " ])";
 	}
 	else
 	{
-		s << "&(" << nameStr.getName() << "[ " << addressIdx.get().getName()  << " ])";
+		ss << "&(" << nameStr << "[ " << addressIdx.get()  << " ])";
 	}
 
-	std::string str( s.str().c_str() );
-
-	return str;
+	return ss.str();
 }
 
 
@@ -183,9 +179,9 @@ returnValue ExportArgumentInternal::callByValue( )
 }
 
 
-returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
-															const std::string& _realstd::string,
-															const std::string& _intstd::string,
+returnValue ExportArgumentInternal::exportDataDeclaration(	std::ostream& stream,
+															const std::string& _realString,
+															const std::string& _intString,
 															int _precision
 															) const
 {
@@ -199,51 +195,50 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
 
 	if ( ( isCalledByValue() == BT_TRUE ) && ( getDim() == 1 ) )
 	{
-		acadoFPrintf( file,"%s %s", getTypestd::string( _realstd::string,_intstd::string ).getName(),name.getName() );
+		stream <<  getTypeString(_realString, _intString) << " " << name;
 	}
 	else
 	{
 		if (data->getNumCols() > 1 && data->getNumRows() > 1)
 		{
-			acadoFPrintf(file,
-					"/** %s %d %s %d %s", "Matrix of size:", data->getNumRows(), "x", data->getNumCols(), "(row major format)");
+			stream << "/** " << "Matrix of size: " << data->getNumRows() << " x " << data->getNumCols() << " (row major format)";
 		}
 		else
 		{
 			if (data->getNumCols() == 1)
-				acadoFPrintf(file,"/** %s %d",      "Column vector of size:", data->getNumRows());
+				stream << "/** " << "Column vector of size: " << data->getNumRows();
 			else
-				acadoFPrintf(file,"/** %s %d",      "Row vector of size:", data->getNumCols());
+				stream << "/** " << "Row vector of size: " << data->getNumCols();
 		}
 
-		if (description.isEmpty() == BT_FALSE)
+		if (description.empty() == BT_FALSE)
 		{
-			acadoFPrintf(file, "\n * \n *  %s\n", description.getName());
+			stream << "\n * \n *  " << description << endl;
 		}
 
-		acadoFPrintf(file," */\n");
+		stream << " */\n";
 
-		acadoFPrintf( file,"%s %s[ %d ]", getTypestd::string( _realstd::string,_intstd::string ).getName(),name.getName(),getDim() );
+		stream << getTypeString(_realString, _intString) << " " << name << "[ " << getDim() << " ]";
 	}
 
 	if ( isGiven() == BT_FALSE )
 	{
-		acadoFPrintf( file,";\n\n" );
+		stream << ";\n\n";
 	}
 	else
 	{
-		acadoFPrintf( file," = " );
+		stream << " = ";
 
 		switch ( getType() )
 		{
 		case INT:
 		case STATIC_CONST_INT:
-			data->printToFile( file, "", "{ "," };\n", 5, 0, ", ",", \n" );
+			data->print(stream, "", "{ ", " };\n", 5, 0, ", ", ", \n");
 			break;
 
 		case REAL:
 		case STATIC_CONST_REAL:
-			data->printToFile( file, "", "{ "," };\n", 1, 16, ", ",", \n" );
+			data->print(stream, "", "{ ", " };\n", 1, 16, ", ", ", \n");
 			break;
 
 		default:

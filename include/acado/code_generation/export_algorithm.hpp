@@ -72,27 +72,11 @@ class ExportAlgorithm : public AlgorithmicBase
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ExportAlgorithm(	UserInteraction* _userInteraction = 0,
-							const std::string& _commonHeaderName = ""
+							const std::string& _commonHeaderName = std::string()
 							);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportAlgorithm(	const ExportAlgorithm& arg
-							);
-
-        /** Destructor. 
-		 */
+        /** Destructor. */
         virtual ~ExportAlgorithm( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportAlgorithm& operator=(	const ExportAlgorithm& arg
-									);
-
 
 		/** Initializes code export into given file.
 		 *
@@ -213,27 +197,12 @@ class ExportAlgorithm : public AlgorithmicBase
 		 *
 		 *	@param[in] dirName				Name of directory in which to open the file.
 		 *	@param[in] fileName				Name of file to be opened.
-		 *	@param[in] includeCommonHeader	Flag indicating whether common header shall be included.
 		 *
-		 *  \return Pointer to prepared file with given name, \n
-		 *	        NULL iff file could not be opened
+		 *  \return Output stream.
 		 */
-		FILE* openFile(	const std::string& dirName,
-						const std::string& fileName
-						) const;
-
-
-	protected:
-
-		/** Copies all class members from given object.
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue copy(	const ExportAlgorithm& arg
-							);
-
+//		std::ofstream& openFile(	const std::string& dirName,
+//									const std::string& fileName
+//									) const;
 
     protected:
 
@@ -244,10 +213,10 @@ class ExportAlgorithm : public AlgorithmicBase
 		uint NP;							/**< Number of parameters. */
 		uint N;								/**< Number of control intervals. */
 
-		uint NY;							/**< Number of measurements, k = 0,..., N - 1. */
-		uint NYN;							/**< Number of measurements, k = N. */
+		uint NY;							/**< Number of references/measurements, nodes 0,..., N - 1. */
+		uint NYN;							/**< Number of references/measurements, node N. */
 
-		std::string commonHeaderName;			/**< Name of common header file. */
+		std::string commonHeaderName;		/**< Name of common header file. */
 };
 
 

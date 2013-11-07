@@ -616,7 +616,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 
 			ExportForLoop eLoopI(boundIndex, 0, nXBounds);
 
-			eLoopI.addStatement( row.getFullName() << " = " << evXBounds.getFullName() << "[ " << boundIndex.getFullName() << " ] - " << NX << ";\n" );
+			eLoopI << row.getFullName() << " = " << evXBounds.getFullName() << "[ " << boundIndex.getFullName() << " ] - " << toString(NX) << ";\n";
 			eLoopI.addStatement( blkRow == row / NX + 1 );
 
 			ExportForLoop eLoopJ(blkCol, 0, blkRow);
@@ -742,7 +742,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		{
 			int offset = col * (2 * N - col + 1) / 2;
 
-			condensePrep.addComment( (std::string)"Column: " << col );
+			condensePrep.addComment( "Column: " + toString( col ) );
 			condensePrep.addFunctionCall(
 					moveGuE, evGu.getAddress(col * NX), E.getAddress(offset * NX)
 			);
@@ -895,12 +895,8 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	{
 		for (unsigned ii = 0; ii < N; ++ii)
 			for(unsigned jj = 0; jj < ii; ++jj)
-			{
-				stringstream s;
-				s << copyHTH.getName().getName() << "(" << jj <<  ", " << ii << ");" << endl;
-
-				condensePrep.addStatement( s.str().c_str() );
-			}
+				condensePrep.addFunctionCall(
+						copyHTH, ExportIndex( jj ).makeArgument(), ExportIndex( ii ).makeArgument());
 	}
 	else
 	{
@@ -1393,8 +1389,8 @@ returnValue ExportGaussNewtonCN2::setupEvaluation( )
 	feedback.addLinebreak();
 
 	stringstream s;
-	s << tmp.getName().getName() << " = " << solve.getName().getName() << "( );" << endl;
-	feedback.addStatement( s.str().c_str() );
+	s << tmp.getName() << " = " << solve.getName() << "( );" << endl;
+	feedback <<  s.str();
 	feedback.addLinebreak();
 
 	feedback.addFunctionCall( expand );
@@ -1418,26 +1414,26 @@ returnValue ExportGaussNewtonCN2::setupEvaluation( )
 
 	// ACC = |\nabla F^T * xVars|
 	getKKT.addStatement( kkt == (g ^ xVars) );
-	getKKT.addStatement( kkt.getFullName() << " = fabs( " << kkt.getFullName() << " );\n");
+	getKKT << kkt.getFullName() << " = fabs( " << kkt.getFullName() << " );\n";
 
 	ExportForLoop bLoop(index, 0, getNumQPvars());
 
 	bLoop.addStatement( prd == yVars.getRow( index ) );
-	bLoop.addStatement( (std::string)"if (" << prd.getFullName() << " > " << 1.0 / INFTY << ")\n" );
-	bLoop.addStatement( kkt.getFullName() << " += fabs(" << lb.get(index, 0) << " * " << prd.getFullName() << ");\n" );
-	bLoop.addStatement( (std::string)"else if (" << prd.getFullName() << " < " << -1.0 / INFTY << ")\n" );
-	bLoop.addStatement( kkt.getFullName() << " += fabs(" << ub.get(index, 0) << " * " << prd.getFullName() << ");\n" );
+	bLoop << "if (" << prd.getFullName() << " > " << toString(1.0 / INFTY) << ")\n";
+	bLoop << kkt.getFullName() << " += fabs(" << lb.get(index, 0) << " * " << prd.getFullName() << ");\n";
+	bLoop << "else if (" << prd.getFullName() << " < " << toString(-1.0 / INFTY) << ")\n";
+	bLoop << kkt.getFullName() << " += fabs(" << ub.get(index, 0) << " * " << prd.getFullName() << ");\n";
 	getKKT.addStatement( bLoop );
 
 	if ((getNumStateBounds() + getNumComplexConstraints())> 0)
 	{
 		ExportForLoop cLoop(index, 0, getNumStateBounds() + getNumComplexConstraints());
 
-		cLoop.addStatement( prd == yVars.getRow( getNumQPvars() + index ) );
-		cLoop.addStatement( (std::string)"if (" << prd.getFullName() << " > " << 1.0 / INFTY << ")\n" );
-		cLoop.addStatement( kkt.getFullName() << " += fabs(" << lbA.get(index, 0) << " * " << prd.getFullName() << ");\n" );
-		cLoop.addStatement( (std::string)"else if (" << prd.getFullName() << " < " << -1.0 / INFTY << ")\n" );
-		cLoop.addStatement( kkt.getFullName() << " += fabs(" << ubA.get(index, 0) << " * " << prd.getFullName() << ");\n" );
+		cLoop.addStatement( prd == yVars.getRow( getNumQPvars() + index ));
+		cLoop << "if (" << prd.getFullName() << " > " << toString(1.0 / INFTY) << ")\n";
+		cLoop << kkt.getFullName() << " += fabs(" << lbA.get(index, 0) << " * " << prd.getFullName() << ");\n";
+		cLoop << "else if (" << prd.getFullName() << " < " << toString(-1.0 / INFTY) << ")\n";
+		cLoop << kkt.getFullName() << " += fabs(" << ubA.get(index, 0) << " * " << prd.getFullName() << ");\n";
 
 		getKKT.addStatement( cLoop );
 	}
@@ -1498,19 +1494,17 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 	{
 		solverName = "QProblem";
 
-		s << H.getFullName().getName() << ", "
-				<< g.getFullName().getName() << ", "
-				<< A.getFullName().getName() << ", "
-				<< lb.getFullName().getName() << ", "
-				<< ub.getFullName().getName() << ", "
-				<< lbA.getFullName().getName() << ", "
-				<< ubA.getFullName().getName() << ", "
+		s << H.getFullName() << ", "
+				<< g.getFullName() << ", "
+				<< A.getFullName() << ", "
+				<< lb.getFullName() << ", "
+				<< ub.getFullName() << ", "
+				<< lbA.getFullName() << ", "
+				<< ubA.getFullName() << ", "
 				<< "nWSR";
 
 		if ( (BooleanType)hotstartQP == BT_TRUE )
-			s << ", " << yVars.getFullName().getName();
-
-		s << "";
+			s << ", " << yVars.getFullName();
 
 		ctor << solverName << " qp(" << getNumQPvars() << ", "
 				<< getNumStateBounds() + getNumComplexConstraints()
@@ -1520,23 +1514,19 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 	{
 		solverName = "QProblemB";
 
-		s << H.getFullName().getName() << ", "
-				<< g.getFullName().getName() << ", "
-				<< lb.getFullName().getName() << ", "
-				<< ub.getFullName().getName() << ", "
+		s << H.getFullName() << ", "
+				<< g.getFullName() << ", "
+				<< lb.getFullName() << ", "
+				<< ub.getFullName() << ", "
 				<< "nWSR";
 
 		if ( (BooleanType)hotstartQP == BT_TRUE )
-			s << ", " << yVars.getFullName().getName();
+			s << ", " << yVars.getFullName();
 
 		s << "";
 
 		ctor << solverName << " qp( " << getNumQPvars() << " )";
 	}
-
-	string primal( xVars.getFullName().getName() );
-	string dual( yVars.getFullName().getName() );
-	string commonHeader( commonHeaderName.getName() );
 
 	string strSigma;
 //	if (covCalc)
@@ -1554,12 +1544,12 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 			eps,
 			realT,
 
-			commonHeader,
+			commonHeaderName,
 			solverName,
 			"",
 			s.str(),
-			primal,
-			dual,
+			xVars.getFullName(),
+			yVars.getFullName(),
 			ctor.str(),
 			strSigma
 	);

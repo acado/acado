@@ -69,9 +69,9 @@ ExportStatement& ExportStatement::operator=(	const ExportStatement& arg
 
 
 
-returnValue ExportStatement::exportDataDeclaration(	FILE* file,
-													const std::string& _realstd::string,
-													const std::string& _intstd::string,
+returnValue ExportStatement::exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision
 													) const
 {

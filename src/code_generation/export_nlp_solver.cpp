@@ -187,13 +187,13 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	get(CG_USE_OPENMP, useOMP);
 
 	x.setup("x", (getN() + 1), getNX(), REAL, ACADO_VARIABLES);
-	x.setDoc( (std::string)"Matrix containing " << (getN() + 1) << " differential variable vectors." );
+	x.setDoc( string("Matrix containing ") + toString(getN() + 1) + " differential variable vectors." );
 	z.setup("z", getN(), getNXA(), REAL, ACADO_VARIABLES);
-	z.setDoc( (std::string)"Matrix containing " << N << " algebraic variable vectors." );
+	z.setDoc( string("Matrix containing ") + toString( N ) + " algebraic variable vectors." );
 	u.setup("u", getN(), getNU(), REAL, ACADO_VARIABLES);
-	u.setDoc( (std::string)"Matrix containing " << N << " control variable vectors." );
+	u.setDoc( string("Matrix containing ") + toString( N ) + " control variable vectors." );
 	p.setup("p", 1, getNP(), REAL, ACADO_VARIABLES);
-	p.setDoc( (std::string)"Vector of parameters." );
+	p.setDoc( "Vector of parameters." );
 
 	if (performsSingleShooting() == BT_FALSE)
 	{
@@ -231,14 +231,11 @@ returnValue ExportNLPSolver::setupSimulation( void )
 
 	if ( useOMP )
 	{
-		stringstream s;
-		s << "#pragma omp parallel for private(" << run.getName().getName() << ", " << state.getFullName().getName()
-				<< ") shared("
-				<< evGx.getDataStructstd::string().getName() << ", "
-				<< x.getDataStructstd::string().getName()
-				<< ")" << endl;
 
-		modelSimulation.addStatement( s.str().c_str() );
+		modelSimulation
+			<< "#pragma omp parallel for private(" << run.getName() << ", " << state.getFullName()
+				<< ") shared(" << evGx.getDataStructString() << ", "
+				<< x.getDataStructString() << ")\n";
 	}
 
 	if (performsSingleShooting() == BT_FALSE)
@@ -258,24 +255,23 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	if ( integrator->equidistantControlGrid() )
 	{
 		if (performsSingleShooting() == BT_FALSE)
-			loop.addStatement( (std::string)"integrate"
-					<< "(" << state.getFullName() << ", 1);\n"  );
+			loop << "integrate" << "(" << state.getFullName() << ", 1);\n";
 		else
-			loop.addStatement( (std::string)"integrate"
+			loop << "integrate"
 					<< "(" << state.getFullName() << ", "
 					<< run.getFullName() << " == 0"
-					<< ");\n"  );
+					<< ");\n";
 	}
 	else
 	{
 		if (performsSingleShooting() == BT_FALSE)
-			loop.addStatement( (std::string)"integrate"
-					<< "(" << state.getFullName() << ", 1, " << run.getFullName() << ");\n" );
+			loop << "integrate"
+					<< "(" << state.getFullName() << ", 1, " << run.getFullName() << ");\n";
 		else
-			loop.addStatement( (std::string)"integrate"
+			loop << "integrate"
 					<< "(" << state.getFullName() << ", "
 					<< run.getFullName() << " == 0"
-					<< ", " << run.getFullName() << ");\n" );
+					<< ", " << run.getFullName() << ");\n";
 	}
 	loop.addLinebreak( );
 
@@ -348,12 +344,12 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	vector<std::string> lsqExternFunctions;
 	vector<ExportVariable> lsqExternMatrices;
 
-	_objective.getLSQTerms(lsqExternMatrices, lsqExternFunctions);
+//	_objective.getLSQTerms(lsqExternMatrices, lsqExternFunctions);
 
 	vector<std::string> lsqExternEndTermFunctions;
 	vector<ExportVariable> lsqExternEndTermMatrices;
 
-	_objective.getLSQEndTerms(lsqExternEndTermMatrices, lsqExternEndTermFunctions);
+//	_objective.getLSQEndTerms(lsqExternEndTermMatrices, lsqExternEndTermFunctions);
 
 	if (lsqExternMatrices.size() > 0 || lsqExternEndTermMatrices.size() > 0)
 	{
@@ -428,7 +424,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 	Function objF, objFEndTerm;
 
-	_objective.getLSQTerms(lsqMatrices, lsqFunctions);
+//	_objective.getLSQTerms(lsqMatrices, lsqFunctions);
 
 	if(	lsqFunctions.size() == 0 || lsqMatrices.size() == 0 ||
 			lsqFunctions.size() != lsqMatrices.size() )
@@ -439,7 +435,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 				"Current implementation of code generation module\n"
 				"supports only one LSQ term definition per one OCP." );
 
-	_objective.getLSQEndTerms(lsqEndTermMatrices, lsqEndTermFunctions);
+//	_objective.getLSQEndTerms(lsqEndTermMatrices, lsqEndTermFunctions);
 
 	objF = lsqFunctions[ 0 ];
 	setNY( objF.getDim() );
@@ -456,8 +452,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	dummy0.clearStaticCounters();
 	dummy1.clearStaticCounters();
 
-	DifferentialState vX( NX );
-	Control vU( NU );
+	DifferentialState vX("", NX, 1);
+	Control vU("", NU, 1);
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -762,7 +758,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 	std::vector<ExportVariable> vSlx, vSlu;
 
-	_objective.getLSQLinearTerms(vSlx, vSlu);
+//	_objective.getLSQLinearTerms(vSlx, vSlu);
 
 	if (vSlx.size() > 0 && vSlu.size() > 0)
 	{
@@ -806,10 +802,10 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 returnValue ExportNLPSolver::setupResidualVariables()
 {
 	y.setup("y",  getN() * getNY(), 1, REAL, ACADO_VARIABLES);
-	y.setDoc( (std::string)"Matrix containing " << N <<
-			" reference/measurement vectors for first " << N <<" nodes." );
+	y.setDoc( string("Matrix containing ") + toString(N) +
+			" reference/measurement vectors for first " + toString(N) + " nodes." );
 	yN.setup("yN", getNYN(), 1, REAL, ACADO_VARIABLES);
-	yN.setDoc( (std::string)"Reference/measurement vector for the " << N + 1 << ". node." );
+	yN.setDoc( string("Reference/measurement vector for the ") + toString(N + 1) + ". node." );
 	Dy.setup("Dy", getN() * getNY(), 1, REAL,ACADO_WORKSPACE);
 	DyN.setup("DyN", getNYN(), 1, REAL, ACADO_WORKSPACE);
 
@@ -908,8 +904,8 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	dummy0.clearStaticCounters();
 	dummy1.clearStaticCounters();
 
-	DifferentialState vX( NX );
-	Control vU( NU );
+	DifferentialState vX("", NX, 1);
+	Control vU("", NU, 1);
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -1062,8 +1058,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 			std::string pocFName;
 
-			pocFName = "evaluatePointConstraint";
-			pocFName << std::string( i );
+			pocFName = "evaluatePointConstraint" + toString( i );
 
 			if (i < N)
 			{
@@ -1183,8 +1178,8 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	ExportVariable xEnd("xEnd", NX, 1, REAL, ACADO_LOCAL);
 	xEnd.setDoc( "Value for the x vector on the last node. If =0 the old value is used." );
 	ExportIndex strategy( "strategy" );
-	strategy.setDoc( (std::string)"Shifting strategy: 1. Initialize node "<< N + 1 << " with xEnd." \
-			" 2. Initialize node " << N + 1 << " by forward simulation." );
+	strategy.setDoc( string("Shifting strategy: 1. Initialize node ") + toString(N + 1) + " with xEnd." \
+			" 2. Initialize node " + toString(N + 1) + " by forward simulation." );
 	// TODO Think about adding zEnd here at some point...
 	shiftStates.setup("shiftStates", strategy.makeArgument(), xEnd, uEnd);
 	shiftStates.addIndex( index );
@@ -1232,13 +1227,11 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	if ( integrator->equidistantControlGrid() )
 	{
-		shiftStates.addStatement( (std::string)"integrate"
-				<< "(" << state.getFullName() << ", 1);\n"  );
+		shiftStates << "integrate" << "(" << state.getFullName() << ", 1);\n";
 	}
 	else
 	{
-		shiftStates.addStatement( (std::string)"integrate"
-				<< "(" << state.getFullName() << ", 1, " << N - 1 << ");\n" );
+		shiftStates << "integrate" << "(" << state.getFullName() << ", 1, " << toString(N - 1) << ");\n";
 	}
 
 	shiftStates.addLinebreak( );
@@ -1277,17 +1270,17 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	if ( integrator->equidistantControlGrid() )
 	{
-		iLoop.addStatement( (std::string)"integrate"
+		iLoop << "integrate"
 				<< "(" << state.getFullName() << ", "
 				<< index.getFullName() << " == 0"
-				<< ");\n"  );
+				<< ");\n";
 	}
 	else
 	{
-		iLoop.addStatement( (std::string)"integrate"
+		iLoop << "integrate"
 				<< "(" << state.getFullName() << ", "
 				<< index.getFullName() << " == 0"
-				<< ", " << index.getFullName() << ");\n" );
+				<< ", " << index.getFullName() << ");\n";
 	}
 
 	iLoop.addLinebreak();
@@ -1452,9 +1445,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	cholSAC.init("cholSAC", NX);
 	cholSAC.setup();
 
-	updateArrivalCost.addStatement(
-			std::string( "\nif ( " ) << evReset.getName() << " )\n{\n"
-	);
+	updateArrivalCost << "\nif ( " << evReset.getName() << " )\n{\n";
 	updateArrivalCost.addStatement( acXx == SAC );
 	updateArrivalCost.addFunctionCall(cholSAC.getName(), acXx);
 	updateArrivalCost << (acP == acXx.getTranspose());
@@ -1478,11 +1469,9 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	updateArrivalCost.addStatement( state.getCols(indexU, indexP) == p );
 
 	if (integrator->equidistantControlGrid())
-		updateArrivalCost.addStatement(
-				(std::string) "integrate" << "(" << state.getFullName() << ", 1);\n");
+		updateArrivalCost << "integrate" << "(" << state.getFullName() << ", 1);\n";
 	else
-		updateArrivalCost.addStatement(
-				(std::string) "integrate" << "(" << state.getFullName() << ", 1, " << 0 << ");\n");
+		updateArrivalCost << "integrate" << "(" << state.getFullName() << ", 1, " << toString(0) << ");\n";
 	updateArrivalCost.addLinebreak( );
 
 	//

@@ -177,18 +177,18 @@ returnValue ExportFunctionCall::init(	const ExportFunction& _f,
 
 
 
-returnValue ExportFunctionCall::exportCode(	FILE *file,
-											const std::string& _realstd::string,
-											const std::string& _intstd::string,
+returnValue ExportFunctionCall::exportCode(	std::ostream& stream,
+											const std::string& _realString,
+											const std::string& _intString,
 											int _precision
 											) const
 {
-	if ( name.isEmpty() == BT_TRUE )
+	if ( name.empty() == BT_TRUE )
 		return ACADOERROR( RET_MEMBER_NOT_INITIALISED );
 
-	acadoFPrintf( file,"%s( ", name.getName() );
-	functionArguments.exportCode( file,_realstd::string,_intstd::string,_precision );
-	acadoFPrintf( file," );\n");
+	stream << name << "( ";
+	functionArguments.exportCode(stream, _realString, _intString, _precision);
+	stream << " );\n";
 
 	return SUCCESSFUL_RETURN;
 }
@@ -212,7 +212,7 @@ returnValue ExportFunctionCall::clear( )
 returnValue	ExportFunctionCall::setName(	const std::string& _name
 											)
 {
-	if ( _name.isEmpty() == BT_TRUE )
+	if ( _name.empty() == BT_TRUE )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	name = _name;

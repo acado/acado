@@ -113,16 +113,16 @@ ExportStatement* ExportFunctionDeclaration::clone( ) const
 
 
 
-returnValue ExportFunctionDeclaration::exportCode(	FILE* file,
-													const std::string& _realstd::string,
-													const std::string& _intstd::string,
+returnValue ExportFunctionDeclaration::exportCode(	std::ostream& stream,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision
 													) const
 {
 	if ( f == 0 )
 		return SUCCESSFUL_RETURN;
 	
-	return f->exportForwardDeclaration( file,_realstd::string,_intstd::string,_precision );
+	return f->exportForwardDeclaration( stream,_realString,_intString,_precision );
 }
 
 

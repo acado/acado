@@ -88,7 +88,7 @@ class ExportArgument : public ExportData
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callByValue = BT_FALSE,
 						const ExportIndex& _addressIdx = emptyConstExportIndex,
-						const std::string& _prefix = emptyConststd::string
+						const std::string& _prefix = std::string()
 						);
 
 		/** Constructor which takes the name and type of the argument.
@@ -109,7 +109,7 @@ class ExportArgument : public ExportData
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callByValue = BT_FALSE,
 						const ExportIndex& _addressIdx = emptyConstExportIndex,
-						const std::string& _prefix = emptyConststd::string
+						const std::string& _prefix = std::string()
 						);
 
 		ExportArgument(	const Matrix& _data
@@ -135,10 +135,10 @@ class ExportArgument : public ExportData
 		 *	desired location. The string also depends on whether the argument is 
 		 *	to be called by value or not.
 		 *
-		 *	\return std::string containing the address of the argument
+		 *	\return String containing the address of the argument
 		 */
-		const std::string getAddressstd::string(	BooleanType withDataStruct = BT_TRUE
-										) const;
+		const std::string getAddressString(	BooleanType withDataStruct = BT_TRUE
+											) const;
 
 
 		/** Returns number of rows of the argument.
@@ -186,15 +186,15 @@ class ExportArgument : public ExportData
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export declaration.
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportDataDeclaration(	FILE *file,
-													const std::string& _realstd::string = "real_t",
-													const std::string& _intstd::string = "int",
+		virtual returnValue exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString = "real_t",
+													const std::string& _intString = "int",
 													int _precision = 16
 													) const;
 };

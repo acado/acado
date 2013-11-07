@@ -91,13 +91,13 @@ ExportStatement* ExportDataDeclaration::clone( ) const
 
 
 
-returnValue ExportDataDeclaration::exportCode(	FILE* file,
-												const std::string& _realstd::string,
-												const std::string& _intstd::string,
+returnValue ExportDataDeclaration::exportCode(	std::ostream& stream,
+												const std::string& _realString,
+												const std::string& _intString,
 												int _precision
 												) const
 {
-	return data.exportDataDeclaration(file, _realstd::string, _intstd::string, _precision);
+	return data.exportDataDeclaration(stream, _realString, _intString, _precision);
 }
 
 

@@ -84,7 +84,7 @@ class ExportVariable : public ExportArgument
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callItByValue = BT_FALSE,
-						const std::string& _prefix = emptyConststd::string
+						const std::string& _prefix = std::string()
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -102,7 +102,7 @@ class ExportVariable : public ExportArgument
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callItByValue = BT_FALSE,
-						const std::string& _prefix = emptyConststd::string
+						const std::string& _prefix = std::string()
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -120,7 +120,7 @@ class ExportVariable : public ExportArgument
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callItByValue = BT_FALSE,
-						const std::string& _prefix = emptyConststd::string
+						const std::string& _prefix = std::string()
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -137,7 +137,7 @@ class ExportVariable : public ExportArgument
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						BooleanType _callItByValue = BT_FALSE,
-						const std::string& _prefix = emptyConststd::string
+						const std::string& _prefix = std::string()
 						);
 
 		/** \name Constructor which converts a given matrix/vector/scalar into an ExportVariable.
@@ -180,7 +180,7 @@ class ExportVariable : public ExportArgument
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
 								BooleanType _callItByValue = BT_FALSE,
-								const std::string& _prefix = emptyConststd::string
+								const std::string& _prefix = std::string()
 								);
 
 		/** Initializes variable with given name and type string of the variable.
@@ -200,7 +200,7 @@ class ExportVariable : public ExportArgument
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
 								BooleanType _callItByValue = BT_FALSE,
-								const std::string& _prefix = emptyConststd::string
+								const std::string& _prefix = std::string()
 								);
 
 		/** Returns value of given component.
@@ -299,8 +299,8 @@ class ExportVariable : public ExportArgument
 		 *	\return std::string containing the value of a given component
 		 */
 		const std::string get(	const ExportIndex& rowIdx,
-							const ExportIndex& colIdx
-							) const;
+								const ExportIndex& colIdx
+								) const;
 
 		/** Returns number of rows of the variable.
 		 *

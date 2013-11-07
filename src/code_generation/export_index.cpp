@@ -70,13 +70,13 @@ const ExportIndexNode* ExportIndex::operator->() const
 }
 
 
-returnValue ExportIndex::exportDataDeclaration(	FILE* file,
-												const std::string& _realstd::string ,
-												const std::string& _intstd::string,
+returnValue ExportIndex::exportDataDeclaration(	std::ostream& stream,
+												const std::string& _realString ,
+												const std::string& _intString,
 												int _precision
 												) const
 {
-	return (*this)->exportDataDeclaration(file, _realstd::string, _intstd::string, _precision);
+	return (*this)->exportDataDeclaration(stream, _realString, _intString, _precision);
 }
 
 
@@ -234,13 +234,13 @@ ExportIndex operator%(	const ExportIndex& _arg1,
 }
 
 std::string operator==(	const ExportIndex& _arg1,
-					const ExportIndex& _arg2
-					)
+						const ExportIndex& _arg2
+						)
 {
-	std::string ret;
+	std::stringstream ret;
 	ret << _arg1.get() << " = " << _arg2.get() << ";\n";
 
-	return ret;
+	return ret.str();
 }
 
 

@@ -133,32 +133,32 @@ class ExportArithmeticStatement : public ExportStatement
 		/** Exports data declaration of the statement into given file. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] stream			Name of file to be used to export statement.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportDataDeclaration(	FILE *file,
-													const std::string& _realstd::string = "real_t",
-													const std::string& _intstd::string = "int",
+		virtual returnValue exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString = "real_t",
+													const std::string& _intString = "int",
 													int _precision = 16
 													) const;
 
 		/** Exports source code of the statement into given file. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] stream			Name of file to be used to export statement.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportCode(	FILE* file,
-										const std::string& _realstd::string = "real_t",
-										const std::string& _intstd::string = "int",
+		virtual returnValue exportCode(	std::ostream& stream,
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										) const;
 
@@ -172,65 +172,65 @@ class ExportArithmeticStatement : public ExportStatement
 		/** Exports source code for an addition or subtraction to given file. 
 		 *  Its appearance can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
+		 *	@param[in] stream			Name of file to be used to export statement.
 		 *	@param[in] _sign			std::string of the operation ("+" or "-").
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportCodeAddSubtract(	FILE* file,
+		returnValue exportCodeAddSubtract(	std::ostream& stream,
 											const std::string& _sign = "+",
-											const std::string& _realstd::string = "real_t",
-											const std::string& _intstd::string = "int",
+											const std::string& _realString = "real_t",
+											const std::string& _intString = "int",
 											int _precision = 16
 											) const;
 
 		/** Exports source code for a multiplication to given file.
 		 *  Its appearance can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
+		 *	@param[in] stream			Name of file to be used to export statement.
 		 *	@param[in] transposeRhs1	Flag indicating whether rhs1 shall be transposed.
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportCodeMultiply(	FILE* file,
+		returnValue exportCodeMultiply(	std::ostream& stream,
 										BooleanType transposeRhs1 = BT_FALSE,
-										const std::string& _realstd::string = "real_t",
-										const std::string& _intstd::string = "int",
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										) const;
 
 		/** Exports source code for an assignment to given file. 
 		 *  Its appearance can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
+		 *	@param[in] stream			Name of file to be used to export statement.
 		 *	@param[in] _op				std::string of the assignment operation ("=", "+=" or "-=").
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportCodeAssign(	FILE* file,
+		returnValue exportCodeAssign(	std::ostream& stream,
 										const std::string& _op = "=",
-										const std::string& _realstd::string = "real_t",
-										const std::string& _intstd::string = "int",
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										) const;
 
 		/** Returns string containing the assignment operation.
 		 *
-		 *	@param[out] _assignstd::string	std::string containing the assignment operation.
+		 *	@param[out] _assignString	std::string containing the assignment operation.
 		 *
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_UNABLE_TO_EXPORT_STATEMENT
 		 */
-		returnValue getAssignstd::string(	std::string& _assignstd::string
+		returnValue getAssignString(	std::string& _assignString
 										) const;
 
 

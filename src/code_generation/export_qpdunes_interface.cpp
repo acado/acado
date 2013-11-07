@@ -40,11 +40,11 @@ BEGIN_NAMESPACE_ACADO
 
 ExportQpDunesInterface::ExportQpDunesInterface(	const std::string& _fileName,
 												const std::string& _commonHeaderName,
-												const std::string& _realstd::string,
-												const std::string& _intstd::string,
+												const std::string& _realString,
+												const std::string& _intString,
 												int _precision,
-												const std::string& _commentstd::string
-						) : ExportTemplatedFile(QPDUNES_TEMPLATE, _fileName, _commonHeaderName, _realstd::string, _intstd::string, _precision, _commentstd::string)
+												const std::string& _commentString
+						) : ExportTemplatedFile(QPDUNES_TEMPLATE, _fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
 {}
 
 returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,

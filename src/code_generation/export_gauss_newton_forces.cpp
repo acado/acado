@@ -196,16 +196,16 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	objHessians.resize(N + 1);
 	for (unsigned i = 0; i < N; ++i)
 	{
-		objHessians[ i ].setup((std::string)"H" << (i + 1), dimHRows, dimHCols, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		objHessians[ i ].setup(string("H") + toString(i + 1), dimHRows, dimHCols, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 	}
-	objHessians[ N ].setup((std::string)"H" << (N + 1), dimHNRows, dimHNCols, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+	objHessians[ N ].setup(string("H") + toString(N + 1), dimHNRows, dimHNCols, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 
 	objGradients.resize(N + 1);
 	for (unsigned i = 0; i < N; ++i)
 	{
-		objGradients[ i ].setup((std::string)"f" << (i + 1), NX + NU, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		objGradients[ i ].setup(string("f") + toString(i + 1), NX + NU, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 	}
-	objGradients[ N ].setup((std::string)"f" << (N + 1), NX, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+	objGradients[ N ].setup(string("f") + toString(N + 1), NX, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 
 	//
 	// LM regularization preparation
@@ -439,7 +439,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 		);
 	else
 	{
-		setStageH.addStatement( index.getFullName() << " = " << index.getFullName() << ";\n" );
+		setStageH << index.getFullName() << " = " << index.getFullName() << ";\n";
 		if (diagH == false)
 		{
 			setStageH.addStatement(
@@ -477,9 +477,8 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 
 	if (Q1.isGiven() == BT_TRUE && R1.isGiven() == BT_TRUE)
 	{
-		initialize.addStatement(
-				setStageH.getName() << "( " << objHessians[ 0 ].getFullName() << ", " << "0" << " );\n"
-		);
+		initialize <<
+				setStageH.getName() << "( " << objHessians[ 0 ].getFullName() << ", " << "0" << " );\n";
 		initialize.addLinebreak();
 		if (diagHN == false)
 		{
@@ -497,12 +496,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	else
 	{
 		for (unsigned i = 0; i < N; ++i)
-		{
-			evaluateObjective.addStatement(
-					setStageH.getName() << "( " << objHessians[ i ].getFullName() << ", "
-					<< i << " );\n"
-			);
-		}
+			evaluateObjective.addFunctionCall(setStageH, objHessians[ i ], ExportIndex(i).makeArgument());
 		evaluateObjective.addLinebreak();
 		evaluateObjective.addStatement(
 				objHessians[ N ] == QN1 + evLmX
@@ -524,7 +518,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 		);
 	else
 	{
-		setStagef.addStatement( index.getFullName() << " = " << index.getFullName() << ";\n" );
+		setStagef <<  index.getFullName() << " = " << index.getFullName() << ";\n";
 		setStagef.addStatement(
 				stagef.getRows(0, NX) == Q2 *
 				Dy.getRows(index * NY, (index + 1) * NY)
@@ -638,8 +632,8 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 	//
 	for (unsigned i = 0; i < N + 1; ++i)
 	{
-		conLB[ i ].setup((std::string)"lb" << (i + 1), conLBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
-		conUB[ i ].setup((std::string)"ub" << (i + 1), conUBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		conLB[ i ].setup(string("lb") + toString(i + 1), conLBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		conUB[ i ].setup(string("ub") + toString(i + 1), conUBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 	}
 
 	evaluateConstraints.setup("evaluateConstraints");
@@ -650,31 +644,24 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 	for (unsigned i = 0; i < N + 1; ++i)
 		for (unsigned j = 0; j < conLBIndices[ i ].size(); ++j)
 		{
-			stringstream s;
-
-			s << conLB[ i ].getFullName().getName() << "[ " << j << " ]" << " = " << conLBValues[ i ][ j ] << " - ";
+			evaluateConstraints << conLB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << toString(conLBValues[ i ][ j ]) << " - ";
 
 			if (conLBIndices[ i ][ j ] < NX)
-				s << x.getFullName().getName() << "[ " << i * NX + conLBIndices[ i ][ j ] << " ];\n";
+				evaluateConstraints << x.getFullName() << "[ " << toString(i * NX + conLBIndices[ i ][ j ]) << " ];\n";
 			else
-				s << u.getFullName().getName() << "[ " << i * NU + conLBIndices[ i ][ j ] - NX << " ];\n";
-
-			evaluateConstraints.addStatement( (std::string)s.str().c_str() );
+				evaluateConstraints << u.getFullName() << "[ " << toString(i * NU + conLBIndices[ i ][ j ] - NX) << " ];\n";
 		}
 	evaluateConstraints.addLinebreak();
 
 	for (unsigned i = 0; i < N + 1; ++i)
 		for (unsigned j = 0; j < conUBIndices[ i ].size(); ++j)
 		{
-			stringstream s;
-
-			s << conUB[ i ].getFullName().getName() << "[ " << j << " ]" << " = " << conUBValues[ i ][ j ] << " - ";
+			evaluateConstraints << conUB[ i ].getFullName()
+					<< "[ " << toString(j) << " ]" << " = " << toString(conUBValues[ i ][ j ]) << " - ";
 			if (conUBIndices[ i ][ j ] < NX)
-				s << x.getFullName().getName() << "[ " << i * NX + conUBIndices[ i ][ j ] << " ];\n";
+				evaluateConstraints << x.getFullName() << "[ " << toString(i * NX + conUBIndices[ i ][ j ]) << " ];\n";
 			else
-				s << u.getFullName().getName() << "[ " << i * NU + conUBIndices[ i ][ j ] - NX << " ];\n";
-
-			evaluateConstraints.addStatement( (std::string)s.str().c_str() );
+				evaluateConstraints << u.getFullName() << "[ " << toString(i * NU + conUBIndices[ i ][ j ] - NX) << " ];\n";
 		}
 	evaluateConstraints.addLinebreak();
 
@@ -696,7 +683,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 
 //	for (unsigned i = 1; i < N; ++i)
 	for (unsigned i = 0; i < N; ++i)
-		conC[ i ].setup((std::string)"C" << (i + 1), NX + NU, NX, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		conC[ i ].setup(string("C") + toString(i + 1), NX + NU, NX, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 
 	ExportIndex index( "index" );
 	conStageC.setup("conStageC", NX + NU, NX, REAL);
@@ -730,13 +717,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 
 	unsigned start = 0; //initialStateFixed() == BT_TRUE ? 1 : 0;
 	for (unsigned i = start; i < N; ++i)
-	{
-		evaluateConstraints.addStatement(
-				conSetGxGu.getName() << "( " <<
-				conC[ i ].getFullName() <<
-				", " << i << " );\n"
-		);
-	}
+		evaluateConstraints.addFunctionCall(conSetGxGu, conC[ i ], ExportIndex( i ).makeArgument());
 	evaluateConstraints.addLinebreak();
 
 	cond.clear();
@@ -751,7 +732,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 
 
 	for (unsigned i = 0; i < dNum; ++i)
-		cond[ i ].setup((std::string)"d" << i + 1, NX, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
+		cond[ i ].setup(string("d") + toString(i + 1), NX, 1, REAL, FORCES_PARAMS, BT_FALSE, qpObjPrefix);
 
 	ExportVariable staged, stagedNew;
 
@@ -777,14 +758,9 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 
 		start = initialStateFixed() == BT_TRUE ? 1 : 0;
 		for (unsigned i = start; i < dNum; ++i)
-		{
-			stringstream s;
-
-			s << conSetd.getName().getName()
-					<< "( " << cond[ i ].getFullName().getName() << ", " << i - 1 << ");" << endl;
-
-			evaluateConstraints.addStatement( s.str().c_str() );
-		}
+			evaluateConstraints.addFunctionCall(
+					conSetd, cond[ i ], ExportIndex(i - 1).makeArgument()
+			);
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -795,7 +771,7 @@ returnValue ExportGaussNewtonForces::setupVariables( )
 	if (initialStateFixed() == BT_TRUE)
 	{
 		x0.setup("x0",  NX, 1, REAL, ACADO_VARIABLES);
-		x0.setDoc( (std::string)"Current state feedback vector." );
+		x0.setDoc( "Current state feedback vector." );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -847,12 +823,8 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	feedback.addLinebreak();
 
 	for (unsigned i = 0; i < N; ++i)
-	{
-		feedback.addStatement(
-				setStagef.getName() << "( " <<
-				objGradients[ i ].getFullName() << ", " << i <<  " );\n"
-		);
-	}
+		feedback.addFunctionCall(setStagef, objGradients[ i ], ExportIndex( i ).makeArgument());
+
 	feedback.addLinebreak();
 	feedback.addStatement( objGradients[ N ] == QN2 * DyN );
 	feedback.addLinebreak();
@@ -865,16 +837,15 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	//
 	ExportFunction solveQP;
 	solveQP.setup("solve");
-	std::string prefix;
+	string prefix;
 	prefix = "forces";
 
-	feedback.addStatement(
-			returnValueFeedbackPhase.getFullName() << " = " <<
-			(std::string) qpModuleName.getName() << "_" << solveQP.getName( ) << "( " <<
-			"&" << qpObjPrefix << "_" << "params" << ", " <<
-			"&" << qpObjPrefix << "_" << "output" << ", " <<
-			"&" << qpObjPrefix << "_" << "info" << " );\n"
-	);
+	feedback
+		<< returnValueFeedbackPhase.getFullName() << " = "
+		<< qpModuleName << "_" << solveQP << "( "
+		<< "&" << qpObjPrefix << "_" << "params" << ", "
+		<< "&" << qpObjPrefix << "_" << "output" << ", "
+		<< "&" << qpObjPrefix << "_" << "info" << " );\n";
 	feedback.addLinebreak();
 
 	//
@@ -886,8 +857,8 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	vecQPVars.clear();
 	vecQPVars.resize(N + 1);
 	for (unsigned i = 0; i < N; ++i)
-		vecQPVars[ i ].setup((std::string)"out" << i + 1, NX + NU, 1, REAL, FORCES_OUTPUT, BT_FALSE, qpObjPrefix);
-	vecQPVars[ N ].setup((std::string)"out" << N + 1, NX, 1, REAL, FORCES_OUTPUT, BT_FALSE, qpObjPrefix);
+		vecQPVars[ i ].setup(string("out") + toString(i + 1), NX + NU, 1, REAL, FORCES_OUTPUT, BT_FALSE, qpObjPrefix);
+	vecQPVars[ N ].setup(string("out") + toString(N + 1), NX, 1, REAL, FORCES_OUTPUT, BT_FALSE, qpObjPrefix);
 
 	ExportVariable stageOut("stageOut", 1, NX + NU, REAL, ACADO_LOCAL);
 	ExportIndex index( "index" );
@@ -921,13 +892,7 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	}
 
 	for (unsigned i = 0; i < N; ++i)
-	{
-		feedback.addStatement(
-				acc.getName() << "( " <<
-				vecQPVars[ i ].getFullName() << ", " <<
-				i << " );\n"
-		);
-	}
+		feedback.addFunctionCall(acc, vecQPVars[ i ], ExportIndex( i ).makeArgument());
 	feedback.addLinebreak();
 
 	if (performsSingleShooting() == BT_FALSE)
@@ -968,30 +933,25 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 	ExportVariable tmp2("tmp", 1, 1, REAL, FORCES_OUTPUT, BT_FALSE, qpObjPrefix);
 	ExportVariable tmp3("tmp", 1, 1, REAL, FORCES_INFO, BT_FALSE, qpObjPrefix);
 
-	string str( qpModuleName.getName() );
-	string params = str;
-	params += "_params";
+	string params = qpModuleName + "_params";
 
-	string output = str;
-	output += "_output";
+	string output = qpModuleName + "_output";
 
-	string info = str;
-	info += "_info";
+	string info = qpModuleName + "_info";
 
-	string header( qpModuleName.getName() );
-	header += ".h";
+	string header = qpModuleName + ".h";
 
 	qpInterface->configure(
-			string( header ),
+			header,
 
-			string( params ),
-			string( tmp1.getDataStructstd::string().getName() ),
+			params,
+			tmp1.getDataStructString(),
 
-			string( output ),
-			string( tmp2.getDataStructstd::string().getName() ),
+			output,
+			tmp2.getDataStructString(),
 
-			string( info ),
-			string( tmp3.getDataStructstd::string().getName() )
+			info,
+			tmp3.getDataStructString()
 	);
 
 	//
@@ -1026,7 +986,7 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			diagH,
 			diagHN,
 			true, // TODO enable MHE
-			qpModuleName.getName(),
+			qpModuleName,
 			(PrintLevel)printLevel == HIGH ? 2 : 0,
 			maxNumQPiterations,
 			useOMP

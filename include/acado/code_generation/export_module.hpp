@@ -92,15 +92,15 @@ class ExportModule : public UserInteraction
 		/** Exports all files of the auto-generated code into the given directory.
 		 *
 		 *	@param[in] dirName			Name of directory to be used to export files.
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
         virtual returnValue exportCode(	const std::string& dirName,
-										const std::string& _realstd::string = "real_t",
-										const std::string& _intstd::string = "int",
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										) = 0;
 
@@ -109,18 +109,18 @@ class ExportModule : public UserInteraction
 		 *
 		 *	@param[in] _dirName			Name of directory to be used to export file.
 		 *	@param[in] _fileName		Name of file to be exported.
-		 *	@param[in] _realstd::string		std::string to be used to declare real variables.
-		 *	@param[in] _intstd::string		std::string to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue exportAcadoHeader(	const std::string& _dirName,
-										const std::string& _fileName,
-										const std::string& _realstd::string = "real_t",
-										const std::string& _intstd::string = "int",
-										int _precision = 16
-										) const = 0;
+												const std::string& _fileName,
+												const std::string& _realString = "real_t",
+												const std::string& _intString = "int",
+												int _precision = 16
+												) const = 0;
 
 
 		/** Collects all data declarations of the auto-generated sub-modules to given
@@ -208,7 +208,7 @@ class ExportModule : public UserInteraction
 
     protected:
 		std::string commonHeaderName;			/**< Name of common header file. */
-		uint timingCalls;					/**< The number of calls to the exported function for the timing results. */
+		uint timingCalls;						/**< The number of calls to the exported function for the timing results. */
 
     private:
 		/** Module name. */

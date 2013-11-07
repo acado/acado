@@ -98,11 +98,11 @@ std::string ExportData::getPrefix() const
 	return (*this)->getPrefix();
 }
 
-std::string ExportData::getTypestd::string(	const std::string& _realstd::string,
-									const std::string& _intstd::string
+std::string ExportData::getTypeString(	const std::string& _realString,
+									const std::string& _intString
 									) const
 {
-	return (*this)->getTypestd::string();
+	return (*this)->getTypeString(_realString, _intString);
 }
 
 
@@ -112,9 +112,9 @@ ExportStruct ExportData::getDataStruct( ) const
 }
 
 
-std::string ExportData::getDataStructstd::string( ) const
+std::string ExportData::getDataStructString( ) const
 {
-	return (*this)->getDataStructstd::string();
+	return (*this)->getDataStructString();
 }
 
 
@@ -123,13 +123,13 @@ std::string ExportData::getFullName( ) const
 	return (*this)->getFullName();
 }
 
-returnValue ExportData::exportDataDeclaration(	FILE* file,
-												const std::string& _realstd::string,
-												const std::string& _intstd::string,
+returnValue ExportData::exportDataDeclaration(	std::ostream& stream,
+												const std::string& _realString,
+												const std::string& _intString,
 												int _precision
 												) const
 {
-	return (*this)->exportDataDeclaration(file, _realstd::string, _intstd::string, _precision);
+	return (*this)->exportDataDeclaration(stream, _realString, _intString, _precision);
 }
 
 BooleanType ExportData::isGiven( )
