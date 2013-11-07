@@ -171,7 +171,7 @@ returnValue DiscreteTimeExport::setup( )
 	diffsDim = NX*(NX+NU);
 	inputDim = NX*(NX+NU+1) + NU + NP;
 	// setup INTEGRATE function
-	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
+	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
 	if( equidistantControlGrid() ) {
 		integrate = ExportFunction( "integrate", rk_eta, reset_int );

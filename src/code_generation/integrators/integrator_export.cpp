@@ -53,13 +53,13 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 	NDX3 = 0;
 	NXA3 = 0;
 
-	timeDependant = BT_FALSE;
+	timeDependant = false;
 
-	exportRhs = BT_TRUE;
-	crsFormat = BT_FALSE;
+	exportRhs = true;
+	crsFormat = false;
 
-	reset_int = ExportVariable( "resetIntegrator", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
-	error_code = ExportVariable( "error", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
+	reset_int = ExportVariable( "resetIntegrator", 1, 1, INT, ACADO_LOCAL, true );
+	error_code = ExportVariable( "error", 1, 1, INT, ACADO_LOCAL, true );
 }
 
 
@@ -73,10 +73,10 @@ IntegratorExport::IntegratorExport(	const IntegratorExport& arg
 	NDX3 = arg.NDX3;
 	NXA3 = arg.NXA3;
 
-	timeDependant = BT_FALSE;
+	timeDependant = false;
 
-	exportRhs = BT_TRUE;
-	crsFormat = BT_FALSE;
+	exportRhs = true;
+	crsFormat = false;
 }
 
 
@@ -142,7 +142,7 @@ returnValue IntegratorExport::setModel(	const std::string& _name_ODE, const std:
 		name_rhs = std::string(_name_ODE);
 		name_diffs_rhs = std::string(_name_diffs_ODE);
 
-		exportRhs = BT_FALSE;
+		exportRhs = false;
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -254,7 +254,7 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 
 		name_rhs3 = std::string(_rhs3);
 		name_diffs_rhs3 = std::string(_diffs_rhs3);
-		exportRhs = BT_FALSE;
+		exportRhs = false;
 
 		Parameter         dummy0;
 		Control           dummy1;
@@ -683,7 +683,7 @@ returnValue IntegratorExport::getOutputGrids( std::vector<Grid>& outputGrids_ ) 
     return SUCCESSFUL_RETURN;
 }
 
-BooleanType IntegratorExport::equidistantControlGrid( ) const{
+bool IntegratorExport::equidistantControlGrid( ) const{
 	
 	return numSteps.isEmpty();
 }

@@ -47,9 +47,9 @@ ExportGaussNewtonCN2::ExportGaussNewtonCN2(	UserInteraction* _userInteraction,
 
 returnValue ExportGaussNewtonCN2::setup( )
 {
-	if (performFullCondensing() == BT_FALSE || initialStateFixed() == BT_FALSE || getNumComplexConstraints() > 0)
+	if (performFullCondensing() == false || initialStateFixed() == false || getNumComplexConstraints() > 0)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
-	if (performsSingleShooting() == BT_TRUE)
+	if (performsSingleShooting() == true)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 	LOG( LVL_DEBUG ) << "Solver: setup variables... " << endl;
@@ -114,7 +114,7 @@ returnValue ExportGaussNewtonCN2::getDataDeclarations(	ExportStatementBlock& dec
 	declarations.addDeclaration(lbAValues, dataStruct);
 	declarations.addDeclaration(ubAValues, dataStruct);
 
-	if (performFullCondensing() == BT_TRUE)
+	if (performFullCondensing() == true)
 		declarations.addDeclaration(A10, dataStruct);
 	declarations.addDeclaration(A20, dataStruct);
 
@@ -252,7 +252,7 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 
 unsigned ExportGaussNewtonCN2::getNumQPvars( ) const
 {
-	if (performFullCondensing() == BT_TRUE)
+	if (performFullCondensing() == true)
 		return (N * NU);
 
 	return (NX + N * NU);
@@ -288,7 +288,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	if (externObjective == BT_FALSE)
+	if (externObjective == false)
 		loopObjective.addFunctionCall( "evaluateLSQ", objValueIn, objValueOut );
 	else
 		loopObjective.addFunctionCall( evaluateExternLSQ, objValueIn, objValueOut );
@@ -306,25 +306,25 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 	ExportVariable tmpObjS, tmpFx, tmpFu;
 	ExportVariable tmpFxEnd, tmpObjSEndTerm;
 	tmpObjS.setup("tmpObjS", NY, NY, REAL, ACADO_LOCAL);
-	if (objS.isGiven() == BT_TRUE)
+	if (objS.isGiven() == true)
 		tmpObjS = objS;
 	tmpFx.setup("tmpFx", NY, NX, REAL, ACADO_LOCAL);
-	if (objEvFx.isGiven() == BT_TRUE)
+	if (objEvFx.isGiven() == true)
 		tmpFx = objEvFx;
 	tmpFu.setup("tmpFu", NY, NU, REAL, ACADO_LOCAL);
-	if (objEvFu.isGiven() == BT_TRUE)
+	if (objEvFu.isGiven() == true)
 		tmpFu = objEvFu;
 	tmpFxEnd.setup("tmpFx", NYN, NX, REAL, ACADO_LOCAL);
-	if (objEvFxEnd.isGiven() == BT_TRUE)
+	if (objEvFxEnd.isGiven() == true)
 		tmpFxEnd = objEvFxEnd;
 	tmpObjSEndTerm.setup("tmpObjSEndTerm", NYN, NYN, REAL, ACADO_LOCAL);
-	if (objSEndTerm.isGiven() == BT_TRUE)
+	if (objSEndTerm.isGiven() == true)
 		tmpObjSEndTerm = objSEndTerm;
 
 	//
 	// Optional computation of Q1, Q2
 	//
-	if (Q1.isGiven() == BT_FALSE)
+	if (Q1.isGiven() == false)
 	{
 		ExportVariable tmpQ1, tmpQ2;
 		tmpQ1.setup("tmpQ1", NX, NX, REAL, ACADO_LOCAL);
@@ -334,7 +334,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		setObjQ1Q2.addStatement( tmpQ2 == (tmpFx ^ tmpObjS) );
 		setObjQ1Q2.addStatement( tmpQ1 == tmpQ2 * tmpFx );
 
-		if (tmpFx.isGiven() == BT_TRUE)
+		if (tmpFx.isGiven() == true)
 		{
 			if (variableObjS == YES)
 			{
@@ -357,7 +357,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		{
 			if (variableObjS == YES)
 			{
-				if (objEvFx.isGiven() == BT_TRUE)
+				if (objEvFx.isGiven() == true)
 
 					loopObjective.addFunctionCall(
 							setObjQ1Q2,
@@ -379,7 +379,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		loopObjective.addLinebreak( );
 	}
 
-	if (R1.isGiven() == BT_FALSE)
+	if (R1.isGiven() == false)
 	{
 		ExportVariable tmpR1, tmpR2;
 		tmpR1.setup("tmpR1", NU, NU, REAL, ACADO_LOCAL);
@@ -389,7 +389,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		setObjR1R2.addStatement( tmpR2 == (tmpFu ^ tmpObjS) );
 		setObjR1R2.addStatement( tmpR1 == tmpR2 * tmpFu );
 
-		if (tmpFu.isGiven() == BT_TRUE)
+		if (tmpFu.isGiven() == true)
 		{
 			if (variableObjS == YES)
 			{
@@ -440,7 +440,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NP) == p );
 
 	// Evaluate the objective function
-	if (externObjective == BT_FALSE)
+	if (externObjective == false)
 		evaluateObjective.addFunctionCall( "evaluateLSQEndTerm", objValueIn, objValueOut );
 	else
 		evaluateObjective.addFunctionCall( evaluateExternLSQEndTerm, objValueIn, objValueOut );
@@ -449,7 +449,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) );
 	evaluateObjective.addLinebreak();
 
-	if (QN1.isGiven() == BT_FALSE)
+	if (QN1.isGiven() == false)
 	{
 		indexX = getNYN();
 
@@ -461,7 +461,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		setObjQN1QN2.addStatement( tmpQN2 == (tmpFxEnd ^ tmpObjSEndTerm) );
 		setObjQN1QN2.addStatement( tmpQN1 == tmpQN2 * tmpFxEnd );
 
-		if (tmpFxEnd.isGiven() == BT_TRUE)
+		if (tmpFxEnd.isGiven() == true)
 			evaluateObjective.addFunctionCall(
 					setObjQN1QN2,
 					tmpFxEnd, objSEndTerm,
@@ -482,7 +482,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 
 returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 {
-	ExportVariable tmp("tmp", 1, 1, REAL, ACADO_LOCAL, BT_TRUE);
+	ExportVariable tmp("tmp", 1, 1, REAL, ACADO_LOCAL, true);
 
 	int hardcodeConstraintValues;
 	get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
@@ -493,13 +493,13 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	unsigned numBounds = initialStateFixed( ) == BT_TRUE ? N * NU : NX + N * NU;
-	unsigned offsetBounds = initialStateFixed( ) == BT_TRUE ? 0 : NX;
+	unsigned numBounds = initialStateFixed( ) == true ? N * NU : NX + N * NU;
+	unsigned offsetBounds = initialStateFixed( ) == true ? 0 : NX;
 
 	Vector lbValuesMatrix( numBounds );
 	Vector ubValuesMatrix( numBounds );
 
-	if (initialStateFixed( ) == BT_FALSE)
+	if (initialStateFixed( ) == false)
 		for(unsigned run1 = 0; run1 < NX; ++run1)
 		{
 			lbValuesMatrix( run1 )= xBounds.getLowerBound(0, run1);
@@ -529,14 +529,14 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 
 	ExportFunction* boundSetFcn = hardcodeConstraintValues == YES ? &condensePrep : &condenseFdb;
 
-	if (performFullCondensing() == BT_TRUE)
+	if (performFullCondensing() == true)
 	{
 		boundSetFcn->addStatement( lb.getRows(0, getNumQPvars()) == lbValues - u.makeColVector() );
 		boundSetFcn->addStatement( ub.getRows(0, getNumQPvars()) == ubValues - u.makeColVector() );
 	}
 	else
 	{
-		if ( initialStateFixed( ) == BT_TRUE )
+		if ( initialStateFixed( ) == true )
 		{
 			condenseFdb.addStatement( lb.getRows(0, NX) == Dx0 );
 			condenseFdb.addStatement( ub.getRows(0, NX) == Dx0 );
@@ -602,7 +602,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 			Matrix vXBoundIndices(1, nXBounds);
 			for (unsigned i = 0; i < nXBounds; ++i)
 				vXBoundIndices(0, i) = xBoundsIdx[ i ];
-			ExportVariable evXBounds("xBoundIndices", vXBoundIndices, STATIC_CONST_INT, ACADO_LOCAL, BT_FALSE);
+			ExportVariable evXBounds("xBoundIndices", vXBoundIndices, STATIC_CONST_INT, ACADO_LOCAL, false);
 
 			condensePrep.addVariable( evXBounds );
 
@@ -754,7 +754,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				);
 			condensePrep.addLinebreak();
 
-			if (QN1.isGiven() == BT_TRUE)
+			if (QN1.isGiven() == true)
 				condensePrep.addFunctionCall(
 						multQN1Gu, E.getAddress((offset + N - col - 1) * NX), W1
 				);
@@ -774,7 +774,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 						multGxTGu, evGx.getAddress(row * NX), W1, W2
 				);
 
-				if (Q1.isGiven() == BT_TRUE)
+				if (Q1.isGiven() == true)
 					condensePrep.addFunctionCall(
 							macQEW2, Q1, E.getAddress((offset + row - col - 1) * NX), W2, W1
 					);
@@ -791,7 +791,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 			);
 
 			// TODO move this addition to multBTW1
-			if (R1.isGiven() == BT_TRUE)
+			if (R1.isGiven() == true)
 				condensePrep.addStatement(
 						H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
 						+= R1 + mRegH11
@@ -831,7 +831,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		cLoop.addStatement( fwdLoop );
 		cLoop.addLinebreak();
 
-		if (QN1.isGiven() == BT_TRUE)
+		if (QN1.isGiven() == true)
 			cLoop.addFunctionCall(
 					multQN1Gu, E.getAddress((offset - col + N - 1) * NX), W1
 			);
@@ -850,7 +850,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				multGxTGu, evGx.getAddress(row * NX), W1, W2
 		);
 
-		if (Q1.isGiven() == BT_TRUE)
+		if (Q1.isGiven() == true)
 			adjLoop.addFunctionCall(
 					macQEW2, Q1, E.getAddress((offset + row - col - 1) * NX), W2, W1
 			);
@@ -867,7 +867,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				col.makeArgument(), col.makeArgument()
 		);
 
-		if (R1.isGiven() == BT_TRUE)
+		if (R1.isGiven() == true)
 			cLoop.addStatement(
 					H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
 					+= R1 + mRegH11
@@ -926,7 +926,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 	//// NEW CODE START
 
-	if (initialStateFixed() == BT_FALSE)
+	if (initialStateFixed() == false)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 	LOG( LVL_DEBUG ) << "Setup condensing: create Dx0, Dy and DyN" << endl;
@@ -943,7 +943,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	// Compute RDy
 	for(unsigned run1 = 0; run1 < N; ++run1)
 	{
-		if (R2.isGiven() == BT_TRUE)
+		if (R2.isGiven() == true)
 			condenseFdb.addFunctionCall(
 					multRDy, R2,
 					Dy.getAddress(run1 * NY, 0),
@@ -960,7 +960,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	// NOTE: This is just for the MHE case :: run1 starts from 0; in MPC :: from 1 ;)
 	for(unsigned run1 = 0; run1 < N; run1++ )
 	{
-		if (Q2.isGiven() == BT_TRUE)
+		if (Q2.isGiven() == true)
 			condenseFdb.addFunctionCall(
 					multQDy, Q2,
 					Dy.getAddress(run1 * NY),
@@ -1003,7 +1003,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 	condenseFdb.addStatement( sbar.getRows(0, NX) == Dx0 );
 
-	if( performsSingleShooting() == BT_FALSE )
+	if( performsSingleShooting() == false )
 		condensePrep.addStatement( sbar.getRows(NX, (N + 1) * NX) == d );
 	else
 		condensePrep.addStatement( sbar.getRows(NX, (N + 1) * NX) == zeros(N, 1) );
@@ -1025,7 +1025,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		condenseFdb.addFunctionCall(
 				macATw1QDy, evGx.getAddress(i * NX), w1, QDy.getAddress(i * NX), w2 // Proveri indexiranje za QDy
 		);
-		if (Q1.isGiven() == BT_TRUE)
+		if (Q1.isGiven() == true)
 			condenseFdb.addFunctionCall(
 					macQSbarW2, Q1, sbar.getAddress(i * NX), w2, w1
 			);
@@ -1075,7 +1075,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 	expand.setup( "expand" );
 
-	if (performFullCondensing() == BT_TRUE)
+	if (performFullCondensing() == true)
 	{
 		expand.addStatement( u.makeRowVector() += xVars.getTranspose() );
 	}
@@ -1089,7 +1089,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	expand.addLinebreak();
 
 	expand.addStatement( sbar.getRows(0, NX) == Dx0 );
-	if( performsSingleShooting() == BT_FALSE )
+	if( performsSingleShooting() == false )
 		expand.addStatement( sbar.getRows(NX, (N + 1) * NX) == d );
 	else
 		expand.addStatement( sbar.getRows(NX, (N + 1) * NX) == zeros(N, 1) );
@@ -1109,7 +1109,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 returnValue ExportGaussNewtonCN2::setupVariables( )
 {
-	if (initialStateFixed() == BT_TRUE)
+	if (initialStateFixed() == true)
 	{
 		x0.setup("x0",  NX, 1, REAL, ACADO_VARIABLES);
 		x0.setDoc( (std::string)"Current state feedback vector." );
@@ -1128,7 +1128,7 @@ returnValue ExportGaussNewtonCN2::setupVariables( )
 	H.setup("H", getNumQPvars(), getNumQPvars(), REAL, ACADO_WORKSPACE);
 
 	// Stupid aliasing to avoid copying of data
-	if (performFullCondensing() == BT_TRUE)
+	if (performFullCondensing() == true)
 	{
 		H11 = H;
 	}
@@ -1144,7 +1144,7 @@ returnValue ExportGaussNewtonCN2::setupVariables( )
 
 	g.setup("g",  getNumQPvars(), 1, REAL, ACADO_WORKSPACE);
 
-	if (performFullCondensing() == BT_TRUE)
+	if (performFullCondensing() == true)
 	{
 		g1 = g;
 	}
@@ -1216,7 +1216,7 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	moveGuE.setup("moveGuE", Gu1, Gu2);
 	moveGuE.addStatement( Gu2 == Gu1 );
 
-	unsigned offset = (performFullCondensing() == BT_TRUE) ? 0 : NX;
+	unsigned offset = (performFullCondensing() == true) ? 0 : NX;
 
 	// setBlockH11
 	setBlockH11.setup("setBlockH11", iRow.makeArgument(), iCol.makeArgument(), Gu1, Gu2);
@@ -1246,14 +1246,14 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	zeroBlockH10.setup("zeroBlockH10", H101);
 	zeroBlockH10.addStatement( H101 == zeros(NU, NX) );
 
-	if (performsSingleShooting() == BT_FALSE)
+	if (performsSingleShooting() == false)
 	{
 		// multEDu
 		multEDu.setup("multEDu", E1, U1, dn);
 		multEDu.addStatement( dn += E1 * U1 );
 	}
 
-	if (Q1.isGiven() == BT_TRUE)
+	if (Q1.isGiven() == true)
 	{
 		// multQ1Gx
 		multQ1Gx.setup("multQ1Gx", Gx1, Gx2);
@@ -1286,7 +1286,7 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 		multQ1d.addStatement( dn == Gx1 * dp );
 	}
 
-	if (performFullCondensing() == BT_FALSE)
+	if (performFullCondensing() == false)
 	{
 		// zeroBlockH00
 		zeroBlockH00.setup( "zeroBlockH00" );
@@ -1375,7 +1375,7 @@ returnValue ExportGaussNewtonCN2::setupEvaluation( )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	ExportVariable tmp("tmp", 1, 1, INT, ACADO_LOCAL, BT_TRUE);
+	ExportVariable tmp("tmp", 1, 1, INT, ACADO_LOCAL, true);
 	tmp.setDoc( "Status code of the qpOASES QP solver." );
 
 	ExportFunction solve("solve");
@@ -1401,8 +1401,8 @@ returnValue ExportGaussNewtonCN2::setupEvaluation( )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	ExportVariable kkt("kkt", 1, 1, REAL, ACADO_LOCAL, BT_TRUE);
-	ExportVariable prd("prd", 1, 1, REAL, ACADO_LOCAL, BT_TRUE);
+	ExportVariable kkt("kkt", 1, 1, REAL, ACADO_LOCAL, true);
+	ExportVariable prd("prd", 1, 1, REAL, ACADO_LOCAL, true);
 	ExportIndex index( "index" );
 
 	getKKT.setup( "getKKT" );
@@ -1503,7 +1503,7 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 				<< ubA.getFullName() << ", "
 				<< "nWSR";
 
-		if ( (BooleanType)hotstartQP == BT_TRUE )
+		if ( (bool)hotstartQP == true )
 			s << ", " << yVars.getFullName();
 
 		ctor << solverName << " qp(" << getNumQPvars() << ", "
@@ -1520,7 +1520,7 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 				<< ub.getFullName() << ", "
 				<< "nWSR";
 
-		if ( (BooleanType)hotstartQP == BT_TRUE )
+		if ( (bool)hotstartQP == true )
 			s << ", " << yVars.getFullName();
 
 		s << "";
@@ -1564,15 +1564,15 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 	return SUCCESSFUL_RETURN;
 }
 
-BooleanType ExportGaussNewtonCN2::performFullCondensing() const
+bool ExportGaussNewtonCN2::performFullCondensing() const
 {
 	int sparseQPsolution;
 	get(SPARSE_QP_SOLUTION, sparseQPsolution);
 
 	if ((SparseQPsolutionMethods)sparseQPsolution == CONDENSING)
-		return BT_FALSE;
+		return false;
 
-	return BT_TRUE;
+	return true;
 }
 
 //

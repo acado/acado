@@ -51,7 +51,7 @@ ExportDataInternal::~ExportDataInternal( )
 returnValue	ExportDataInternal::setName(	const std::string& _name
 											)
 {
-	if ( _name.empty() == BT_TRUE )
+	if ( _name.empty() == true )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	name = _name;
@@ -144,7 +144,7 @@ std::string ExportDataInternal::getDataStructString( ) const
 
 	tmp << prefix;
 
-	if (prefix.empty() == BT_FALSE)
+	if (prefix.empty() == false)
 		tmp << "_";
 
 	switch ( dataStruct )
@@ -188,7 +188,7 @@ std::string ExportDataInternal::getDataStructString( ) const
 
 std::string ExportDataInternal::getFullName( ) const
 {
-	if ( fullName.empty() == BT_TRUE )
+	if ( fullName.empty() == true )
 		return name;
 
 	return fullName;
@@ -209,7 +209,7 @@ returnValue ExportDataInternal::setFullName()
 {
 	if ( dataStruct == ACADO_LOCAL )
 	{
-		if ( prefix.empty() == BT_FALSE )
+		if ( prefix.empty() == false )
 		{
 			fullName = prefix;
 			fullName += std::string("_") + name;
@@ -221,7 +221,7 @@ returnValue ExportDataInternal::setFullName()
 	}
 	else
 	{
-//		if ( prefix.isEmpty() == BT_FALSE )
+//		if ( prefix.isEmpty() == false )
 //		{
 //			fullName = prefix;
 //			fullName << "_" << getDataStructstd::string();

@@ -150,10 +150,10 @@ public:
 
 	/** Returns whether function has been defined.
 	 *
-	 *	\return BT_TRUE  iff function has been defined, \n
-	 *	        BT_FALSE otherwise
+	 *	\return true  iff function has been defined, \n
+	 *	        false otherwise
 	 */
-	virtual BooleanType isDefined( ) const;
+	virtual bool isDefined( ) const;
 
 	/** Get output dimension of the ACADO function. */
 	unsigned getFunctionDim( void );

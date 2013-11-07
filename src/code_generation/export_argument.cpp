@@ -48,7 +48,7 @@ ExportArgument::ExportArgument( )
 {
 	Matrix m(0, 0);
 	assignNode(new ExportArgumentInternal(
-				"defaultArgumentName", matrixPtr(new Matrix( m )), REAL, ACADO_LOCAL, BT_FALSE, 0, ""));
+				"defaultArgumentName", matrixPtr(new Matrix( m )), REAL, ACADO_LOCAL, false, 0, ""));
 }
 
 
@@ -57,7 +57,7 @@ ExportArgument::ExportArgument(	const std::string& _name,
 								uint _nCols,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
+								bool _callItByValue,
 								const ExportIndex& _addressIdx,
 								const std::string& _prefix
 								)
@@ -74,7 +74,7 @@ ExportArgument::ExportArgument(	const std::string& _name,
 								const matrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
+								bool _callItByValue,
 								const ExportIndex& _addressIdx,
 								const std::string& _prefix
 								)
@@ -87,7 +87,7 @@ ExportArgument::ExportArgument( const Matrix& _data
 								)
 {
 	assignNode(new ExportArgumentInternal(
-			"defaultArgumentName", matrixPtr(new Matrix( _data )), REAL, ACADO_LOCAL, BT_FALSE, 0, ""));
+			"defaultArgumentName", matrixPtr(new Matrix( _data )), REAL, ACADO_LOCAL, false, 0, ""));
 }
 
 ExportArgumentInternal* ExportArgument::operator->()
@@ -107,7 +107,7 @@ ExportArgument ExportArgument::getAddress(	const ExportIndex& _rowIdx,
 	return (*this)->getAddress(_rowIdx, _colIdx);
 }
 
-const std::string ExportArgument::getAddressString(	BooleanType withDataStruct
+const std::string ExportArgument::getAddressString(	bool withDataStruct
 													) const
 {
 	return (*this)->getAddressString( withDataStruct );
@@ -133,14 +133,14 @@ uint ExportArgument::getDim( ) const
 
 
 
-BooleanType ExportArgument::isGiven( ) const
+bool ExportArgument::isGiven( ) const
 {
 	return (*this)->isGiven();
 }
 
 
 
-BooleanType ExportArgument::isCalledByValue( ) const
+bool ExportArgument::isCalledByValue( ) const
 {
 	return (*this)->isCalledByValue();
 }

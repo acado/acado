@@ -83,7 +83,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	ExportVariable Ah ( "A*h",  Matrix( AA )*=h );
 	ExportVariable b4h( "b4*h", Matrix( bb )*=h );
 
-	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
+	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
 
 	int useOMP;
@@ -91,7 +91,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	rk_ttt.setup( "rk_ttt", 1, 1, REAL, structWspace, BT_TRUE );
+	rk_ttt.setup( "rk_ttt", 1, 1, REAL, structWspace, true );
 	uint timeDep = 0;
 	if( timeDependant ) timeDep = 1;
 	
@@ -245,7 +245,7 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		// no free parameters yet!
 		// f << forwardDerivative( rhs_, x ) * Gp + forwardDerivative( rhs_, p );
 
-		if( f.getNT() > 0 ) timeDependant = BT_TRUE;
+		if( f.getNT() > 0 ) timeDependant = true;
 	}
 
 	int matlabInterface;

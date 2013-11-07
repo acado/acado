@@ -176,10 +176,10 @@ class ExportData : public CasADi::SharedObject
 
 		/** Returns whether the index is set to a given value.
 		 *
-		 *	\return BT_TRUE  iff index is set to a given value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff index is set to a given value, \n
+		 *	        false otherwise
 		 */
-		virtual BooleanType isGiven( );
+		virtual bool isGiven( );
 
 		virtual returnValue setDoc(const std::string& _doc);
 

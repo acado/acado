@@ -285,12 +285,12 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	Ah = ExportVariable( "Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 
 	Vector BB( bb );
-	ExportVariable Bh( "Bh_mat", Matrix( BB*=h, BT_FALSE ) );
+	ExportVariable Bh( "Bh_mat", Matrix( BB*=h, false ) );
 
 	Vector CC( cc );
 	ExportVariable C;
 	if( timeDependant ) {
-		C = ExportVariable( "C_mat", Matrix( CC*=(1.0/grid.getNumIntervals()), BT_FALSE ), STATIC_CONST_REAL );
+		C = ExportVariable( "C_mat", Matrix( CC*=(1.0/grid.getNumIntervals()), false ), STATIC_CONST_REAL );
 		code.addDeclaration( C );
 		code.addLinebreak( 2 );
 		C = ExportVariable( "C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
@@ -298,7 +298,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 
 	code.addComment(std::string("Fixed step size:") + toString(h));
 
-	ExportVariable determinant( "det", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
+	ExportVariable determinant( "det", 1, 1, REAL, ACADO_LOCAL, true );
 	integrate.addDeclaration( determinant );
 
 	ExportIndex i( "i" );
@@ -333,7 +333,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	if( rk_outputs.size() > 0 && (grid.getNumIntervals() > 1 || !equidistantControlGrid()) ) {
 		integrate.addIndex( tmp_index4 );
 	}
-	ExportVariable time_tmp( "time_tmp", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
+	ExportVariable time_tmp( "time_tmp", 1, 1, REAL, ACADO_LOCAL, true );
 	if( CONTINUOUS_OUTPUT ) {
 		for( run5 = 0; run5 < outputGrids.size(); run5++ ) {
 			ExportIndex numMeasTmp( (std::string)"numMeasTmp" + toString(run5) );
@@ -407,11 +407,11 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	solveInputSystem( loop, i, run1, j, tmp_index1, Ah );
 
 	// PART 2: The fully implicit system
-	solveImplicitSystem( loop, i, run1, j, tmp_index1, Ah, C, determinant, BT_TRUE );
+	solveImplicitSystem( loop, i, run1, j, tmp_index1, Ah, C, determinant, true );
 
 	// PART 3: The linear output system
 	prepareOutputSystem( code );
-	solveOutputSystem( loop, i, run1, j, tmp_index1, Ah, BT_TRUE );
+	solveOutputSystem( loop, i, run1, j, tmp_index1, Ah, true );
 
 	// generate continuous OUTPUT:
 	generateOutput( loop, run, i, tmp_index2, tmp_index3, tmp_meas, time_tmp, NX+NU );
@@ -420,31 +420,31 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	if( NX1 > 0 ) {
 		ExportForLoop loop4( run1,0,NX1 );
 		// PART 1: The linear input system
-		sensitivitiesInputSystem( &loop4, run1, i, Bh, BT_TRUE );
+		sensitivitiesInputSystem( &loop4, run1, i, Bh, true );
 		// PART 2: The fully implicit system
-		sensitivitiesImplicitSystem( &loop4, run1, i, j, tmp_index1, tmp_index2, Ah, Bh, determinant, BT_TRUE, 1 );
+		sensitivitiesImplicitSystem( &loop4, run1, i, j, tmp_index1, tmp_index2, Ah, Bh, determinant, true, 1 );
 		// PART 3: The linear output system
-		sensitivitiesOutputSystem( &loop4, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, BT_TRUE, 1 );
+		sensitivitiesOutputSystem( &loop4, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, true, 1 );
 		// generate sensitivities wrt states for continuous output:
-		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, BT_TRUE, 0 );
+		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, true, 0 );
 		loop->addStatement( loop4 );
 	}
 	if( NX2 > 0 ) {
 		ExportForLoop loop4( run1,NX1,NX1+NX2 );
 		// PART 2: The fully implicit system
-		sensitivitiesImplicitSystem( &loop4, run1, i, j, tmp_index1, tmp_index2, Ah, Bh, determinant, BT_TRUE, 2 );
+		sensitivitiesImplicitSystem( &loop4, run1, i, j, tmp_index1, tmp_index2, Ah, Bh, determinant, true, 2 );
 		// PART 3: The linear output system
-		sensitivitiesOutputSystem( &loop4, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, BT_TRUE, 2 );
+		sensitivitiesOutputSystem( &loop4, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, true, 2 );
 		// generate sensitivities wrt states for continuous output:
-		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, BT_TRUE, NX1 );
+		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, true, NX1 );
 		loop->addStatement( loop4 );
 	}
 	if( NX3 > 0 ) {
 		ExportForLoop loop4( run1,NX1+NX2,NX );
 		// PART 3: The linear output system
-		sensitivitiesOutputSystem( &loop4, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, BT_TRUE, 3 );
+		sensitivitiesOutputSystem( &loop4, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, true, 3 );
 		// generate sensitivities wrt states for continuous output:
-		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, BT_TRUE, NX1+NX2 );
+		sensitivitiesOutputs( &loop4, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, true, NX1+NX2 );
 		loop->addStatement( loop4 );
 	}
 
@@ -453,13 +453,13 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	if( NU > 0 ) {
 		ExportForLoop loop5( run1,0,NU );
 		// PART 1: The linear input system
-		sensitivitiesInputSystem( &loop5, run1, i, Bh, BT_FALSE );
+		sensitivitiesInputSystem( &loop5, run1, i, Bh, false );
 		// PART 2: The fully implicit system
-		sensitivitiesImplicitSystem( &loop5, run1, i, j, tmp_index1, tmp_index2, Ah, Bh, determinant, BT_FALSE, 0 );
+		sensitivitiesImplicitSystem( &loop5, run1, i, j, tmp_index1, tmp_index2, Ah, Bh, determinant, false, 0 );
 		// PART 3: The linear output system
-		sensitivitiesOutputSystem( &loop5, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, BT_FALSE, 0 );
+		sensitivitiesOutputSystem( &loop5, run1, i, j, k, tmp_index1, tmp_index2, Ah, Bh, false, 0 );
 		// generate sensitivities wrt controls for continuous output:
-		sensitivitiesOutputs( &loop5, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, BT_FALSE, 0 );
+		sensitivitiesOutputs( &loop5, run, run1, i, tmp_index1, tmp_index2, tmp_index3, tmp_meas, time_tmp, false, 0 );
 		loop->addStatement( loop5 );
 	}
 
@@ -468,7 +468,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( rk_eta.getCol( run5 ) += rk_kkk.getRow( run5 )*Bh );
 	}
 	if( NXA > 0) {
-		Matrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), BT_FALSE );
+		Matrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
 		loop->addStatement( std::string("if( run == 0 ) {\n") );
 		for( run5 = 0; run5 < NXA; run5++ ) {
 			loop->addStatement( rk_eta.getCol( NX+run5 ) == rk_kkk.getRow( NX+run5 )*tempCoefs );
@@ -750,7 +750,7 @@ returnValue ForwardIRKExport::prepareOutputSystem(	ExportStatementBlock& code )
 }
 
 
-returnValue ForwardIRKExport::sensitivitiesInputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportVariable& Bh, BooleanType STATES )
+returnValue ForwardIRKExport::sensitivitiesInputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportVariable& Bh, bool STATES )
 {
 	if( NX1 > 0 ) {
 		// update rk_diffK with the new sensitivities:
@@ -771,11 +771,11 @@ returnValue ForwardIRKExport::sensitivitiesInputSystem( ExportStatementBlock* bl
 }
 
 
-returnValue ForwardIRKExport::sensitivitiesImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, const ExportVariable& det, BooleanType STATES, uint number )
+returnValue ForwardIRKExport::sensitivitiesImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, const ExportVariable& det, bool STATES, uint number )
 {
 	if( NX2 > 0 ) {
 		Matrix zeroM = zeros( NX2+NXA,1 );
-		Matrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), BT_FALSE );
+		Matrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
 		uint i;
 
 		ExportForLoop loop1( index2,0,numStages );
@@ -851,7 +851,7 @@ returnValue ForwardIRKExport::sensitivitiesImplicitSystem( ExportStatementBlock*
 }
 
 
-returnValue ForwardIRKExport::sensitivitiesOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& index4, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, BooleanType STATES, uint number )
+returnValue ForwardIRKExport::sensitivitiesOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& index4, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, bool STATES, uint number )
 {
 	if( NX3 > 0 ) {
 		uint i;
@@ -959,7 +959,7 @@ returnValue ForwardIRKExport::sensitivitiesOutputSystem( ExportStatementBlock* b
 
 returnValue ForwardIRKExport::sensitivitiesOutputs( ExportStatementBlock* block, const ExportIndex& index0,
 		const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2,
-		const ExportIndex& tmp_index3, const ExportVariable& tmp_meas, const ExportVariable& time_tmp, BooleanType STATES, uint base )
+		const ExportIndex& tmp_index3, const ExportVariable& tmp_meas, const ExportVariable& time_tmp, bool STATES, uint base )
 {
 	uint i, j, k;
 	int measGrid;

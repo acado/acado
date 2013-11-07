@@ -52,14 +52,14 @@ ExportArgumentInternal::ExportArgumentInternal( ) : ExportDataInternal()
 {
 	data->init(0, 0);
 
-	callItByValue = BT_FALSE;
+	callItByValue = false;
 }
 
 ExportArgumentInternal::ExportArgumentInternal(	const std::string& _name,
 												const matrixPtr& _data,
 												ExportType _type,
 												ExportStruct _dataStruct,
-												BooleanType _callItByValue,
+												bool _callItByValue,
 												const ExportIndex& _addressIdx,
 												const std::string& _prefix
 												)
@@ -99,25 +99,25 @@ ExportArgument ExportArgumentInternal::getAddress(	const ExportIndex& rowIdx,
 
 	ExportIndex ind = getTotalIdx(rowIdx, colIdx);
 
-	ExportArgument tmp(name, data, type, dataStruct, BT_FALSE, ind, prefix);
+	ExportArgument tmp(name, data, type, dataStruct, false, ind, prefix);
 
 	return tmp;
 }
 
 
-const std::string ExportArgumentInternal::getAddressString(	BooleanType withDataStruct
+const std::string ExportArgumentInternal::getAddressString(	bool withDataStruct
 															) const
 {
 	stringstream ss;
 
 	std::string nameStr;
 
-	if (withDataStruct == BT_TRUE)
+	if (withDataStruct == true)
 		nameStr = getFullName();
 	else
 		nameStr = getName();
 
-	if ( addressIdx.isGiven() == BT_TRUE )
+	if ( addressIdx.isGiven() == true )
 	{
 		if ( addressIdx.getGivenValue() == 0 )
 			ss << nameStr;
@@ -151,22 +151,22 @@ uint ExportArgumentInternal::getDim( ) const
 }
 
 
-BooleanType ExportArgumentInternal::isGiven( ) const
+bool ExportArgumentInternal::isGiven( ) const
 {
 	if ( getDim() == 0 )
-		return BT_TRUE;
+		return true;
 
 	for (uint i = 0; i < getNumRows(); ++i)
 		for (uint j = 0; j < getNumCols(); ++j)
-			if (acadoIsEqual(data->operator()(i, j), undefinedEntry) == BT_TRUE)
-				return BT_FALSE;
+			if (acadoIsEqual(data->operator()(i, j), undefinedEntry) == true)
+				return false;
 
-	return BT_TRUE;
+	return true;
 }
 
 
 
-BooleanType ExportArgumentInternal::isCalledByValue( ) const
+bool ExportArgumentInternal::isCalledByValue( ) const
 {
 	return callItByValue;
 }
@@ -174,7 +174,7 @@ BooleanType ExportArgumentInternal::isCalledByValue( ) const
 
 returnValue ExportArgumentInternal::callByValue( )
 {
-	callItByValue = BT_TRUE;
+	callItByValue = true;
 	return SUCCESSFUL_RETURN;
 }
 
@@ -190,10 +190,10 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	std::ostream& stream,
 		return SUCCESSFUL_RETURN;
 
 	// Variable will be hard-coded
-	if (isGiven() == BT_TRUE && getDataStruct() != ACADO_LOCAL)
+	if (isGiven() == true && getDataStruct() != ACADO_LOCAL)
 		return SUCCESSFUL_RETURN;
 
-	if ( ( isCalledByValue() == BT_TRUE ) && ( getDim() == 1 ) )
+	if ( ( isCalledByValue() == true ) && ( getDim() == 1 ) )
 	{
 		stream <<  getTypeString(_realString, _intString) << " " << name;
 	}
@@ -211,7 +211,7 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	std::ostream& stream,
 				stream << "/** " << "Row vector of size: " << data->getNumCols();
 		}
 
-		if (description.empty() == BT_FALSE)
+		if (description.empty() == false)
 		{
 			stream << "\n * \n *  " << description << endl;
 		}
@@ -221,7 +221,7 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	std::ostream& stream,
 		stream << getTypeString(_realString, _intString) << " " << name << "[ " << getDim() << " ]";
 	}
 
-	if ( isGiven() == BT_FALSE )
+	if ( isGiven() == false )
 	{
 		stream << ";\n\n";
 	}

@@ -156,10 +156,10 @@ public:
 
 	/** Returns whether the index is set to a given value.
 	 *
-	 *	\return BT_TRUE  iff index is set to a given value, \n
-	 *	        BT_FALSE otherwise
+	 *	\return true  iff index is set to a given value, \n
+	 *	        false otherwise
 	 */
-	virtual BooleanType isGiven( ) const = 0;
+	virtual bool isGiven( ) const = 0;
 
 	virtual returnValue setDoc( const std::string& _doc );
 	virtual std::string getDoc( ) const;

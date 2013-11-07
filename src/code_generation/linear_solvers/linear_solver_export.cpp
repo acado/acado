@@ -46,11 +46,11 @@ ExportLinearSolver::ExportLinearSolver(	UserInteraction* _userInteraction,
 										const std::string& _commonHeaderName
 										) : ExportAlgorithm(_userInteraction, _commonHeaderName)
 {
-	REUSE = BT_TRUE;
-	UNROLLING = BT_FALSE;
+	REUSE = true;
+	UNROLLING = false;
 	dim = nRows = nCols = nBacksolves = 0;
 
-	determinant = ExportVariable("det", 1, 1, REAL, ACADO_LOCAL, BT_TRUE);
+	determinant = ExportVariable("det", 1, 1, REAL, ACADO_LOCAL, true);
 }
 
 
@@ -59,8 +59,8 @@ ExportLinearSolver::~ExportLinearSolver( )
 
 
 returnValue ExportLinearSolver::init(	const uint newDim,
-										const BooleanType& reuse,
-										const BooleanType& unrolling
+										const bool& reuse,
+										const bool& unrolling
 										)
 {
 	return init(newDim, newDim, newDim, reuse, unrolling, std::string( "dim" ) + toString( newDim ) + "_");
@@ -68,8 +68,8 @@ returnValue ExportLinearSolver::init(	const uint newDim,
 
 
 returnValue ExportLinearSolver::init(	const uint newDim,
-										const BooleanType& reuse,
-										const BooleanType& unrolling,
+										const bool& reuse,
+										const bool& unrolling,
 										const std::string& newId
 										)
 {
@@ -79,8 +79,8 @@ returnValue ExportLinearSolver::init(	const uint newDim,
 returnValue ExportLinearSolver::init(	unsigned _nRows,
 										unsigned _nCols,
 										unsigned _nBacksolves,
-										BooleanType _reuse,
-										BooleanType _unroll,
+										bool _reuse,
+										bool _unroll,
 										const std::string& _id
 										)
 {
@@ -106,13 +106,13 @@ uint ExportLinearSolver::getDim() const {
 }
 
 
-BooleanType ExportLinearSolver::getReuse() const {
+bool ExportLinearSolver::getReuse() const {
 	
 	return REUSE;
 }
 
 
-returnValue ExportLinearSolver::setReuse( const BooleanType& reuse ) {
+returnValue ExportLinearSolver::setReuse( const bool& reuse ) {
 	
 	REUSE = reuse;
 	
@@ -120,13 +120,13 @@ returnValue ExportLinearSolver::setReuse( const BooleanType& reuse ) {
 } 
 
 
-BooleanType ExportLinearSolver::getUnrolling() const {
+bool ExportLinearSolver::getUnrolling() const {
 	
 	return UNROLLING;
 }
 
 
-returnValue ExportLinearSolver::setUnrolling( const BooleanType& unrolling ) {
+returnValue ExportLinearSolver::setUnrolling( const bool& unrolling ) {
 	
 	UNROLLING = unrolling;
 	

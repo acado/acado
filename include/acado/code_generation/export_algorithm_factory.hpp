@@ -67,27 +67,27 @@ public:
 	}
 
 	/** Function for algorithm registration. */
-	BooleanType registerAlgorithm(	const AlgorithmType& id,
+	bool registerAlgorithm(	const AlgorithmType& id,
 									exportAlgorithmCreator creator)
 	{
 		bool status = associations_.insert(
 				typename idToProductMap::value_type(id, creator)).second;
 
 		if ( status == true )
-			return BT_TRUE;
+			return true;
 
-		return BT_FALSE;
+		return false;
 	}
 
 	/** Function to unregister an algorithm. */
-	BooleanType unregisterAlgorithm(	const AlgorithmType& id)
+	bool unregisterAlgorithm(	const AlgorithmType& id)
 	{
 		bool status = associations_.erase( id ) == 1;
 
 		if ( status == true )
-			return BT_TRUE;
+			return true;
 
-		return BT_FALSE;
+		return false;
 	}
 
 	/** Function to create an instance of an algorithm. */

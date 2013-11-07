@@ -182,7 +182,7 @@ class SIMexport : public ExportModule, public ModelContainer
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */								
-		virtual returnValue printDetails( BooleanType details );
+		virtual returnValue printDetails( bool details );
 
 
 
@@ -272,7 +272,7 @@ class SIMexport : public ExportModule, public ModelContainer
 								const std::string& _fileName,
 								const std::string& _resultsFile,
 								const std::vector<std::string>& _outputFiles,
-								const BooleanType& TIMING = BT_FALSE,
+								const bool& TIMING = false,
 								const uint jumpReference = 1
 										) const;
 
@@ -329,8 +329,8 @@ class SIMexport : public ExportModule, public ModelContainer
         double T;								/**< The total simulation time. */
 		IntegratorExport*  integrator;			/**< Module for exporting a tailored integrator. */
 		
-		BooleanType referenceProvided;			/**< True if the user provided a file with the reference solution. */
-		BooleanType PRINT_DETAILS;				/**< True if the user wants all the details about the results being printed. */
+		bool referenceProvided;			/**< True if the user provided a file with the reference solution. */
+		bool PRINT_DETAILS;				/**< True if the user wants all the details about the results being printed. */
 		
 		static const uint factorRef = 10;		/**< The used factor in the number of integration steps to get the reference. */
 		uint timingSteps;						/**< The number of integration steps performed for the timing results. */

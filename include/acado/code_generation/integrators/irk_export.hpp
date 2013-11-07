@@ -368,7 +368,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportVariable& Ah,
 											const ExportVariable& C,
 											const ExportVariable& det,
-											BooleanType DERIVATIVES = BT_FALSE );
+											bool DERIVATIVES = false );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the linear output system.
@@ -385,7 +385,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& index3,
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
-										BooleanType DERIVATIVES = BT_FALSE );
+										bool DERIVATIVES = false );
 
 
 		/** Exports the evaluation of the states at a specific stage.
@@ -445,8 +445,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
 										const ExportVariable& C,
-										BooleanType evaluateB,
-										BooleanType DERIVATIVES );
+										bool evaluateB,
+										bool DERIVATIVES );
 
 
 		/** Prepares the structures to evaluate the continuous output and exports the resulting definitions.
@@ -517,8 +517,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
     protected:
     
-		BooleanType REUSE;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
-		BooleanType CONTINUOUS_OUTPUT;			/**< This boolean is true when continuous output needs to be provided. */
+		bool REUSE;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
+		bool CONTINUOUS_OUTPUT;			/**< This boolean is true when continuous output needs to be provided. */
 
 		uint numIts;							/**< This is the performed number of Newton iterations. */
 		uint numItsInit;						/**< This is the performed number of Newton iterations for the initialization of the first step. */

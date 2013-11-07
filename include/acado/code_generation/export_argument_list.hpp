@@ -204,7 +204,7 @@ class ExportArgumentList
 		std::vector< ExportArgument > arguments;
 		
 		/** Flag indicating whether variable types are to be included in calling arguments. */
-		BooleanType includeType;
+		bool includeType;
 };
 
 

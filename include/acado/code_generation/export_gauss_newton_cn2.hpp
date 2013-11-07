@@ -152,7 +152,7 @@ protected:
 
 	virtual returnValue setupCondensing( );
 
-	BooleanType performFullCondensing( ) const;
+	bool performFullCondensing( ) const;
 
 protected:
 

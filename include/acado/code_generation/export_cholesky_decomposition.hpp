@@ -70,7 +70,7 @@ public:
 	 */
 	returnValue init(	const std::string& _name,
 						unsigned _dim,
-						BooleanType _unrolling = BT_FALSE
+						bool _unrolling = false
 						);
 
 	/** Initializes code export into given file.
@@ -114,7 +114,7 @@ private:
 
 	ExportVariable A;
 	ExportFunction fcn;
-	BooleanType unrolling;
+	bool unrolling;
 };
 
 CLOSE_NAMESPACE_ACADO

@@ -55,8 +55,8 @@ ExportFunction::ExportFunction(	const std::string& _name,
 								const ExportArgument& _argument9
 								) : ExportStatementBlock( ), description()
 {
-	returnAsPointer = BT_FALSE;
-	flagPrivate = BT_FALSE;
+	returnAsPointer = false;
+	flagPrivate = false;
 
 	memAllocator = MemoryAllocatorPtr( new MemoryAllocator );
 
@@ -188,7 +188,7 @@ returnValue ExportFunction::addArgument(	const ExportArgument& _argument1,
 
 
 ExportFunction& ExportFunction::setReturnValue(	const ExportVariable& _functionReturnValue,
-												BooleanType _returnAsPointer
+												bool _returnAsPointer
 												)
 {
 	retVal = std::tr1::shared_ptr< ExportVariable >(new ExportVariable( _functionReturnValue ));
@@ -201,7 +201,7 @@ ExportFunction& ExportFunction::setReturnValue(	const ExportVariable& _functionR
 ExportFunction&	ExportFunction::setName(	const std::string& _name
 											)
 {
-	if ( _name.empty() == BT_TRUE )
+	if ( _name.empty() == true )
 		ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	name = _name;
@@ -234,13 +234,13 @@ returnValue ExportFunction::exportForwardDeclaration(	std::ostream& stream,
 														) const
 {
 	// do not export undefined (empty) functions
-	if (isDefined() == BT_FALSE)
+	if (isDefined() == false)
 		return SUCCESSFUL_RETURN;
 
-	if (flagPrivate == BT_TRUE)
+	if (flagPrivate == true)
 		return SUCCESSFUL_RETURN;
 
-	if (description.empty() == BT_FALSE)
+	if (description.empty() == false)
 	{
 		stream <<  "\n/** " << description;
 
@@ -252,7 +252,7 @@ returnValue ExportFunction::exportForwardDeclaration(	std::ostream& stream,
 
 			for (unsigned i = 0; i < args.size(); ++i)
 			{
-				if (args[ i ].isGiven() == BT_TRUE || args[ i ].getDoc().empty() == BT_TRUE)
+				if (args[ i ].isGiven() == true || args[ i ].getDoc().empty() == true)
 					continue;
 
 				stream << " *  \\param " << args[ i ].getName() << " " << args[ i ].getDoc() << endl;
@@ -266,7 +266,7 @@ returnValue ExportFunction::exportForwardDeclaration(	std::ostream& stream,
 		if (retVal != 0)
 		{
 			std::string tmp = retVal->getDoc();
-			if (tmp.empty() == BT_FALSE)
+			if (tmp.empty() == false)
 				stream << " *\n *  \\return " << tmp << endl;
 		}
 		stream << " */\n";
@@ -276,7 +276,7 @@ returnValue ExportFunction::exportForwardDeclaration(	std::ostream& stream,
 	if (retVal != 0)
 	{
 		stream << retVal->getTypeString(_realString, _intString);
-		if ( returnAsPointer == BT_TRUE )
+		if ( returnAsPointer == true )
 			stream << "*";
 	}
 	else
@@ -301,7 +301,7 @@ returnValue ExportFunction::exportCode(	std::ostream& stream,
 	//
 	// Do not export undefined (empty) functions
 	//
-	if ( isDefined() == BT_FALSE )
+	if ( isDefined() == false )
 		return SUCCESSFUL_RETURN;
 
 	//
@@ -310,7 +310,7 @@ returnValue ExportFunction::exportCode(	std::ostream& stream,
 	if ( retVal != 0 )
 	{
 		stream << retVal->getTypeString(_realString, _intString);
-		if ( returnAsPointer == BT_TRUE )
+		if ( returnAsPointer == true )
 			stream << "*";
 	}
 	else
@@ -372,13 +372,13 @@ returnValue ExportFunction::exportCode(	std::ostream& stream,
 }
 
 
-BooleanType ExportFunction::isDefined( ) const
+bool ExportFunction::isDefined( ) const
 {
-	if ( ( name.empty() == BT_FALSE ) &&
+	if ( ( name.empty() == false ) &&
 		 ( ( getNumStatements( ) > 0 ) || ( retVal != 0 ) ) )
-		return BT_TRUE;
+		return true;
 	else
-		return BT_FALSE;
+		return false;
 }
 
 
@@ -394,7 +394,7 @@ unsigned ExportFunction::getNumArguments( ) const
 
 returnValue ExportFunction::clear( )
 {
-	returnAsPointer = BT_FALSE;
+	returnAsPointer = false;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -434,14 +434,14 @@ ExportFunction& ExportFunction::doc(const std::string& _doc)
 	return *this;
 }
 
-ExportFunction& ExportFunction::setPrivate(BooleanType _set)
+ExportFunction& ExportFunction::setPrivate(bool _set)
 {
 	flagPrivate = _set;
 
 	return *this;
 }
 
-BooleanType ExportFunction::isPrivate() const
+bool ExportFunction::isPrivate() const
 {
 	return flagPrivate;
 }

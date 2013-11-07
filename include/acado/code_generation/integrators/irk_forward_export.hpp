@@ -172,7 +172,7 @@ class ForwardIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 														const ExportIndex& index1,
 														const ExportIndex& index2,
 														const ExportVariable& Bh,
-														BooleanType STATES  	);
+														bool STATES  	);
 
 
 		/** Exports the code needed to compute the sensitivities of the states defined by the nonlinear, fully implicit system.
@@ -195,7 +195,7 @@ class ForwardIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 													const ExportVariable& Ah,
 													const ExportVariable& Bh,
 													const ExportVariable& det,
-													BooleanType STATES,
+													bool STATES,
 													uint number 		);
 
 
@@ -218,7 +218,7 @@ class ForwardIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 												const ExportIndex& tmp_index2,
 												const ExportVariable& Ah,
 												const ExportVariable& Bh,
-												BooleanType STATES,
+												bool STATES,
 												uint number 		);
 
 
@@ -242,7 +242,7 @@ class ForwardIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 											const ExportIndex& tmp_index3,
 											const ExportVariable& tmp_meas,
 											const ExportVariable& time_tmp,
-											BooleanType STATES,
+											bool STATES,
 											uint base			);
 
 

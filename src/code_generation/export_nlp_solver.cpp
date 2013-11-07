@@ -50,7 +50,7 @@ ExportNLPSolver::ExportNLPSolver(	UserInteraction* _userInteraction,
 	dimPacH = 0;
 	dimPocH = 0;
 
-	externObjective = BT_FALSE;
+	externObjective = false;
 }
 
 returnValue ExportNLPSolver::setIntegratorExport(	IntegratorExportPtr const _integrator
@@ -76,15 +76,15 @@ returnValue ExportNLPSolver::setLevenbergMarquardt(	double _levenbergMarquardt
 	return SUCCESSFUL_RETURN;
 }
 
-BooleanType ExportNLPSolver::performsSingleShooting( ) const
+bool ExportNLPSolver::performsSingleShooting( ) const
 {
 	int discretizationType;
 	get( DISCRETIZATION_TYPE,discretizationType );
 
 	if ( discretizationType == SINGLE_SHOOTING )
-		return BT_TRUE;
+		return true;
 	else
-		return BT_FALSE;
+		return false;
 }
 
 returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarations,
@@ -195,7 +195,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	p.setup("p", 1, getNP(), REAL, ACADO_VARIABLES);
 	p.setDoc( "Vector of parameters." );
 
-	if (performsSingleShooting() == BT_FALSE)
+	if (performsSingleShooting() == false)
 	{
 		d.setup("d", getN() * getNX(), 1, REAL, ACADO_WORKSPACE);
 	}
@@ -204,7 +204,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	evGu.setup("evGu", N * NX, NU, REAL, ACADO_WORKSPACE);
 
 	ExportStruct dataStructWspace;
-	dataStructWspace = (useOMP && performsSingleShooting() == BT_FALSE) ? ACADO_LOCAL : ACADO_WORKSPACE;
+	dataStructWspace = (useOMP && performsSingleShooting() == false) ? ACADO_LOCAL : ACADO_WORKSPACE;
 	state.setup("state", 1, (getNX() + getNXA()) * (getNX() + getNU() + 1) + getNU() + getNP(), REAL, dataStructWspace);
 
 	unsigned indexZ   = NX + NXA;
@@ -220,7 +220,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	// Code for model simulation
 	//
 	////////////////////////////////////////////////////////////////////////////
-	if (performsSingleShooting() == BT_TRUE)
+	if (performsSingleShooting() == true)
 	{
 		modelSimulation.addStatement( state.getCols(0, NX)				== x.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(NX, NX + NXA)		== z.getRow( 0 ) );
@@ -238,7 +238,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 				<< x.getDataStructString() << ")\n";
 	}
 
-	if (performsSingleShooting() == BT_FALSE)
+	if (performsSingleShooting() == false)
 	{
 		loop.addStatement( state.getCols(0, NX)			== x.getRow( run ) );
 		loop.addStatement( state.getCols(NX, NX + NXA)	== z.getRow( run ) );
@@ -254,7 +254,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	// TODO make that function calls can accept constant defined scalars
 	if ( integrator->equidistantControlGrid() )
 	{
-		if (performsSingleShooting() == BT_FALSE)
+		if (performsSingleShooting() == false)
 			loop << "integrate" << "(" << state.getFullName() << ", 1);\n";
 		else
 			loop << "integrate"
@@ -264,7 +264,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	}
 	else
 	{
-		if (performsSingleShooting() == BT_FALSE)
+		if (performsSingleShooting() == false)
 			loop << "integrate"
 					<< "(" << state.getFullName() << ", 1, " << run.getFullName() << ");\n";
 		else
@@ -275,7 +275,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	}
 	loop.addLinebreak( );
 
-	if ( performsSingleShooting() == BT_TRUE )
+	if ( performsSingleShooting() == true )
 	{
 		// Single shooting case: prepare for the next iteration
 		loop.addStatement( x.getRow(run + 1) == state.getCols(0, NX) );
@@ -363,8 +363,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		objSEndTermTemp = lsqExternEndTermMatrices[ 0 ];
 		objSEndTermTemp.setDataStruct( ACADO_VARIABLES );
 
-		if (objSTemp.getGivenMatrix().isSquare() == BT_FALSE ||
-				objSEndTermTemp.getGivenMatrix().isSquare() == BT_FALSE)
+		if (objSTemp.getGivenMatrix().isSquare() == false ||
+				objSEndTermTemp.getGivenMatrix().isSquare() == false)
 			return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 		setNY( objSTemp.getNumRows() );
@@ -403,7 +403,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		objValueOut.setup("objValueOut", 1,
 				NY < NYN ? NYN * (1 + NX + NU): NY * (1 + NX + NU), REAL, ACADO_WORKSPACE);
 
-		externObjective = BT_TRUE;
+		externObjective = true;
 
 		setupResidualVariables();
 
@@ -464,7 +464,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	// TODO FunctionEvaluationTree: add isConstant()
 
 	// Setup the S matrix
-	if ( objSTemp.isGiven() == BT_FALSE || (objSTemp.getDim() != (NY * NY)) )
+	if ( objSTemp.isGiven() == false || (objSTemp.getDim() != (NY * NY)) )
 	{
 		if ( variableObjS == YES )
 		{
@@ -481,7 +481,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	{
 		Matrix mObjS = objSTemp.getGivenMatrix();
 
-		if (mObjS.isPositiveDefinite() == BT_FALSE)
+		if (mObjS.isPositiveDefinite() == false)
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
 
 		objS.setup("W", mObjS, REAL, ACADO_VARIABLES);
@@ -566,7 +566,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	// Optional pre-computing of Q1, Q2, R1, R2 matrices
 	//
 
-	if (objS.isGiven() == BT_TRUE && objEvFx.isGiven() == BT_TRUE)
+	if (objS.isGiven() == true && objEvFx.isGiven() == true)
 	{
 		if (useArrivalCost)
 			return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -604,7 +604,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 	// TODO ExportVariable, add function isZero()
 	// TODO This if-then-else part should be done in more elegant way
-	if (objS.isGiven() == BT_TRUE && objEvFu.isGiven() == BT_TRUE)
+	if (objS.isGiven() == true && objEvFu.isGiven() == true)
 	{
 		// Precompute R1 and R2
 
@@ -657,7 +657,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Wrong dimensions of the weighting matrix.");
 
 	// Setup the SN matrix
-	if (objSEndTermTemp.isGiven() == BT_FALSE || objSEndTermTemp.getDim() != (NYN * NYN))
+	if (objSEndTermTemp.isGiven() == false || objSEndTermTemp.getDim() != (NYN * NYN))
 	{
 		objSEndTerm.setup("WN", NYN, NYN, REAL, ACADO_VARIABLES);
 	}
@@ -665,7 +665,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	{
 		Matrix mWN = objSEndTermTemp.getGivenMatrix();
 
-		if (mWN.isPositiveDefinite() == BT_FALSE)
+		if (mWN.isPositiveDefinite() == false)
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
 
 		objSEndTerm.setup("WN", mWN, REAL, ACADO_VARIABLES);
@@ -720,7 +720,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		objValueOut.setup("objValueOut", 1, objFEndTerm.getDim(), REAL, ACADO_WORKSPACE);
 	}
 
-	if (objSEndTerm.isGiven() == BT_TRUE && objEvFxEnd.isGiven() == BT_TRUE)
+	if (objSEndTerm.isGiven() == true && objEvFxEnd.isGiven() == true)
 	{
 		// Precompute
 
@@ -770,7 +770,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 			if (vSlx[ 0 ].isGiven() && vSlx[ 0 ].getDim() != NX && vSlx[ 0 ].getNumCols() == 1)
 				return ACADOERROR(RET_INVALID_ARGUMENTS);
 
-			if (vSlx[ 0 ].isGiven() == BT_TRUE)
+			if (vSlx[ 0 ].isGiven() == true)
 				objSlx.setup("Wlx", vSlx[ 0 ].getGivenMatrix(), REAL, ACADO_VARIABLES);
 			else
 				objSlx.setup("Wlx", NX, 1, REAL, ACADO_VARIABLES);
@@ -781,7 +781,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 			if (vSlu[ 0 ].isGiven() && vSlu[ 0 ].getDim() != NU && vSlu[ 0 ].getNumCols() == 1)
 				return ACADOERROR(RET_INVALID_ARGUMENTS);
 
-			if (vSlu[ 0 ].isGiven() == BT_TRUE)
+			if (vSlu[ 0 ].isGiven() == true)
 				objSlu.setup("Wlu", vSlu[ 0 ].getGivenMatrix(), REAL, ACADO_VARIABLES);
 			else
 				objSlu.setup("Wlu", NU, 1, REAL, ACADO_VARIABLES);
@@ -834,7 +834,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 	constraints.getBounds( tmp );
 
-	BooleanType isFinite = BT_FALSE;
+	bool isFinite = false;
 	Vector lbTmp;
 	Vector ubTmp;
 
@@ -846,14 +846,14 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		lbTmp = tmp.u->getLowerBounds( i );
 		ubTmp = tmp.u->getUpperBounds( i );
 
-		if ( (ubTmp - lbTmp).isPositive() == BT_FALSE )
+		if ( (ubTmp - lbTmp).isPositive() == false )
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Some lower bounds are bigger than upper bounds?");
 
-		if ( (lbTmp.isFinite( ) == BT_TRUE) || (ubTmp.isFinite( ) == BT_TRUE) )
-			isFinite = BT_TRUE;
+		if ( (lbTmp.isFinite( ) == true) || (ubTmp.isFinite( ) == true) )
+			isFinite = true;
 	}
 
-	if (isFinite == BT_TRUE)
+	if (isFinite == true)
 		uBounds = *(tmp.u);
 	else
 		uBounds.init();
@@ -861,7 +861,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	//
 	// Extract box constraints on states
 	//
-	isFinite = BT_FALSE;
+	isFinite = false;
 	xBoundsIdx.clear();
 
 	for (unsigned i = 0; i < tmp.x->getNumPoints(); ++i)
@@ -869,26 +869,26 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		lbTmp = tmp.x->getLowerBounds( i );
 		ubTmp = tmp.x->getUpperBounds( i );
 
-		if ( (ubTmp - lbTmp).isPositive() == BT_FALSE )
+		if ( (ubTmp - lbTmp).isPositive() == false )
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Some lower bounds are bigger than upper bounds?");
 
-		if ( (lbTmp.isFinite( ) == BT_TRUE) || (ubTmp.isFinite( ) == BT_TRUE) )
-			isFinite = BT_TRUE;
+		if ( (lbTmp.isFinite( ) == true) || (ubTmp.isFinite( ) == true) )
+			isFinite = true;
 
 		// This is maybe not necessary
-		if (isFinite == BT_FALSE || i == 0)
+		if (isFinite == false || i == 0)
 			continue;
 
 		for (unsigned j = 0; j < lbTmp.getDim(); ++j)
 		{
-			if ( ( acadoIsFinite( ubTmp( j ) ) == BT_TRUE ) || ( acadoIsFinite( lbTmp( j ) ) == BT_TRUE ) )
+			if ( ( acadoIsFinite( ubTmp( j ) ) == true ) || ( acadoIsFinite( lbTmp( j ) ) == true ) )
 			{
 				xBoundsIdx.push_back(i * lbTmp.getDim() + j);
 			}
 		}
 	}
 
-	if ( isFinite == BT_TRUE )
+	if ( isFinite == true )
 		xBounds = *(tmp.x);
 	else
 		xBounds.init();
@@ -943,7 +943,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 			EvaluationPoint epPacHx( pacHx );
 			Vector v = pacHx.evaluate( epPacHx );
 
-			if (v.isZero() == BT_FALSE)
+			if (v.isZero() == false)
 			{
 				// Hard-code derivative evaluation
 
@@ -970,7 +970,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 			EvaluationPoint epPacHu( pacHu );
 			Vector v = pacHu.evaluate( epPacHu );
 
-			if (v.isZero() == BT_FALSE)
+			if (v.isZero() == false)
 			{
 				// Hard-code derivative evaluation
 
@@ -991,7 +991,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 			pacEvHu.setup("evHu", N * dimPacH, NU, REAL, ACADO_WORKSPACE);
 		}
 
-		if (performsSingleShooting() == BT_FALSE)
+		if (performsSingleShooting() == false)
 		{
 			pacEvHxd.setup("evHxd", dimPacH, 1, REAL, ACADO_WORKSPACE);
 		}
@@ -1125,7 +1125,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		pocEvHu.setup("pocEvHu", dimPocH, NU, REAL, ACADO_WORKSPACE);
 
 		// Setup one more variable for MS:
-		if (performsSingleShooting() == BT_FALSE)
+		if (performsSingleShooting() == false)
 		{
 			pocEvHxd.setup("pocEvHxd", dimPocH, 1, REAL, ACADO_WORKSPACE);
 		}
@@ -1139,12 +1139,12 @@ unsigned ExportNLPSolver::getNumComplexConstraints( void )
 	return N * dimPacH + dimPocH;
 }
 
-BooleanType ExportNLPSolver::initialStateFixed() const
+bool ExportNLPSolver::initialStateFixed() const
 {
 	int fixInitialState;
 	get(FIX_INITIAL_STATE, fixInitialState);
 
-	return (BooleanType)fixInitialState;
+	return (bool)fixInitialState;
 }
 
 returnValue ExportNLPSolver::setupAuxiliaryFunctions()
@@ -1299,7 +1299,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	getObjective.setup( "getObjective" );
 	getObjective.doc( "Calculate the objective value." );
-	ExportVariable objVal("objVal", 1, 1, REAL, ACADO_LOCAL, BT_TRUE);
+	ExportVariable objVal("objVal", 1, 1, REAL, ACADO_LOCAL, true);
 	objVal.setDoc( "Value of the objective function." );
 	getObjective.setReturnValue( objVal );
 
@@ -1323,7 +1323,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	if (externObjective == BT_FALSE)
+	if (externObjective == false)
 		loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 	else
 		loopObjective.addFunctionCall( evaluateExternLSQ, objValueIn, objValueOut );
@@ -1340,7 +1340,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	getObjective.addStatement( objValueIn.getCols(NX, NX + NP) == p );
 
 	// Evaluate the objective function
-	if (externObjective == BT_FALSE)
+	if (externObjective == false)
 		getObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
 	else
 		getObjective.addFunctionCall( evaluateExternLSQEndTerm, objValueIn, objValueOut );
@@ -1385,7 +1385,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 unsigned ExportNLPSolver::weightingMatricesType( void ) const
 {
-	if (objS.isGiven() == BT_TRUE && objSEndTerm.isGiven() == BT_TRUE)
+	if (objS.isGiven() == true && objSEndTerm.isGiven() == true)
 		return 0;
 
 	// get the option for variable objS matrix.
@@ -1404,9 +1404,9 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	if (useArrivalCost == NO)
 		return SUCCESSFUL_RETURN;
 
-	ExportVariable evRet("ret", 1, 1, INT, ACADO_LOCAL, BT_TRUE);
+	ExportVariable evRet("ret", 1, 1, INT, ACADO_LOCAL, true);
 
-	ExportVariable evReset("reset", 1, 1, INT, ACADO_LOCAL, BT_TRUE);
+	ExportVariable evReset("reset", 1, 1, INT, ACADO_LOCAL, true);
 	evReset.setDoc("Reset S_{AC}. Set it to 1 to initialize arrival cost calculation, "
 				   "and later should set it to 0.");
 
@@ -1482,7 +1482,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	updateArrivalCost.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( 0 ) );
 	updateArrivalCost.addStatement( objValueIn.getCols(NX + NU, NX + NU + NP) == p );
 
-	if (externObjective == BT_FALSE)
+	if (externObjective == false)
 		updateArrivalCost.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 	else
 		updateArrivalCost.addFunctionCall(evaluateExternLSQ, objValueIn, objValueOut);
@@ -1491,7 +1491,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	//
 	// Cholesky decomposition of the term objS
 	//
-	if (objS.isGiven() == BT_TRUE)
+	if (objS.isGiven() == true)
 	{
 		Matrix m = objS.getGivenMatrix();
 		Matrix mChol = m.getCholeskyDecomposition();
@@ -1544,7 +1544,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 		<< (acXu.makeRowVector() == state.getCols(indexGzx, indexGxu));
 
 	unsigned ind = NY;
-	if (objEvFx.isGiven() == BT_TRUE)
+	if (objEvFx.isGiven() == true)
 	{
 		initialize << (acHx == objEvFx);
 	}
@@ -1554,7 +1554,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 		ind += NY * NX;
 	}
 
-	if (objEvFu.isGiven() == BT_TRUE)
+	if (objEvFu.isGiven() == true)
 	{
 		initialize << (acHu == objEvFu);
 	}
@@ -1611,7 +1611,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	// Solver the linear system
 	// We need first NX back-solves to get solution of this linear system...
 	//
-	acSolver.init(AM, AN, NX, BT_FALSE, BT_FALSE, std::string("ac"));
+	acSolver.init(AM, AN, NX, false, false, std::string("ac"));
 	acTmp = acSolver.getGlobalExportVariable( 1 );
 	updateArrivalCost.addFunctionCall(acSolver.getNameSolveFunction(), acA, acb, acTmp);
 

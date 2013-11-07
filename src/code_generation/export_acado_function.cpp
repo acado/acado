@@ -132,12 +132,12 @@ returnValue ExportAcadoFunction::exportCode(	std::ostream& stream,
 }
 
 
-BooleanType ExportAcadoFunction::isDefined( ) const
+bool ExportAcadoFunction::isDefined( ) const
 {
 	if (f->getDim() > 0)
-		return BT_TRUE;
+		return true;
 
-	return BT_FALSE;
+	return false;
 }
 
 

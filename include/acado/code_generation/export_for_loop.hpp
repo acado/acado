@@ -73,7 +73,7 @@ class ExportForLoop : public ExportStatementBlock
 						const ExportIndex& _startValue = emptyConstExportIndex,
 						const ExportIndex& _finalValue = emptyConstExportIndex,
 						const ExportIndex& _increment = constExportIndexValueOne,
-						BooleanType _doLoopUnrolling = BT_FALSE
+						bool _doLoopUnrolling = false
 						);
 
 		/** Copy constructor (deep copy).
@@ -112,7 +112,7 @@ class ExportForLoop : public ExportStatementBlock
 							const ExportIndex& _startValue,
 							const ExportIndex& _finalValue,
 							const ExportIndex& _increment,
-							BooleanType _doLoopUnrolling
+							bool _doLoopUnrolling
 							);
 
 
@@ -189,7 +189,7 @@ class ExportForLoop : public ExportStatementBlock
 		ExportIndex finalValue;			/**< Final value of the loop counter. */
 		ExportIndex increment;			/**< Increment of the loop counter. */
 		
-		BooleanType doLoopUnrolling;	/**< Flag indicating whether loop shall be unrolled when exporting the code. */
+		bool doLoopUnrolling;	/**< Flag indicating whether loop shall be unrolled when exporting the code. */
 };
 
 

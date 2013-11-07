@@ -47,7 +47,7 @@ ExportForLoop::ExportForLoop(	const ExportIndex& _loopVariable,
 								const ExportIndex& _startValue,
 								const ExportIndex& _finalValue,
 								const ExportIndex& _increment,
-								BooleanType _doLoopUnrolling
+								bool _doLoopUnrolling
 							) : ExportStatementBlock( ),
 									loopVariable( _loopVariable ),
 									startValue( _startValue ),
@@ -97,7 +97,7 @@ returnValue ExportForLoop::init(	const ExportIndex& _loopVariable,
 									const ExportIndex& _startValue,
 									const ExportIndex& _finalValue,
 									const ExportIndex&  _increment,
-									BooleanType _doLoopUnrolling
+									bool _doLoopUnrolling
 									)
 {
 	clear();
@@ -134,20 +134,20 @@ returnValue ExportForLoop::exportCode(	std::ostream& stream,
 	if (status != SUCCESSFUL_RETURN)
 		return status;
 
-	if (startValue.isGiven() == BT_TRUE && finalValue.isGiven() == BT_TRUE)
+	if (startValue.isGiven() == true && finalValue.isGiven() == true)
 		if (startValue.getGivenValue() == finalValue.getGivenValue())
 			return SUCCESSFUL_RETURN;
 
-	if ( doLoopUnrolling == BT_FALSE )
+	if ( doLoopUnrolling == false )
 	{
 		stream << "for (" << loopVariable.get() << " = " << startValue.get() << "; ";
 
-		if (increment.isGiven() ==  BT_TRUE && increment.getGivenValue() == -1)
+		if (increment.isGiven() ==  true && increment.getGivenValue() == -1)
 			stream << finalValue.get() << " < " << loopVariable.get() << "; ";
 		else
 			stream << loopVariable.get() << " < " << finalValue.get() << "; ";
 		
-		if (increment.isGiven() == BT_TRUE)
+		if (increment.isGiven() == true)
 		{
 			switch ( increment.getGivenValue() )
 			{
@@ -183,14 +183,14 @@ returnValue ExportForLoop::exportCode(	std::ostream& stream,
 
 ExportForLoop& ExportForLoop::unrollLoop( )
 {
-	doLoopUnrolling = BT_TRUE;
+	doLoopUnrolling = true;
 	return *this;
 }
 
 
 ExportForLoop& ExportForLoop::keepLoop( )
 {
-	doLoopUnrolling = BT_FALSE;
+	doLoopUnrolling = false;
 	return *this;
 }
 
@@ -222,10 +222,10 @@ returnValue ExportForLoop::clear( )
 //
 returnValue ExportForLoop::sanityCheck() const
 {
-	if (doLoopUnrolling == BT_TRUE)
+	if (doLoopUnrolling == true)
 		return ACADOERRORTEXT(RET_NOT_IMPLEMENTED_YET, "Loop unrolling is not yet implemented");
 
-	if (startValue.isGiven() == BT_TRUE && finalValue.isGiven() == BT_TRUE && increment.isGiven() == BT_TRUE)
+	if (startValue.isGiven() == true && finalValue.isGiven() == true && increment.isGiven() == true)
 	{
 		if ( ( startValue.getGivenValue() > finalValue.getGivenValue() ) && ( increment.getGivenValue() >= 0 ) )
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Export for loop arguments are invalid");

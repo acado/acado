@@ -158,7 +158,7 @@ protected:
 	virtual returnValue setupCondensing( );
 
 	/** Indicator for full condensing. */
-	BooleanType performFullCondensing( ) const;
+	bool performFullCondensing( ) const;
 
 private:
 

@@ -55,7 +55,7 @@ ExportVariable::ExportVariable(	const std::string& _name,
 								uint _nCols,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
+								bool _callItByValue,
 								const std::string& _prefix
 								)
 {
@@ -70,7 +70,7 @@ ExportVariable::ExportVariable(	const std::string& _name,
 								const Matrix& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
+								bool _callItByValue,
 								const std::string& _prefix
 								)
 {
@@ -81,7 +81,7 @@ ExportVariable::ExportVariable(	unsigned _nRows,
 								unsigned _nCols,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
+								bool _callItByValue,
 								const std::string& _prefix
 								)
 {
@@ -95,7 +95,7 @@ ExportVariable::ExportVariable(	const std::string& _name,
 								const matrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
+								bool _callItByValue,
 								const std::string& _prefix
 								)
 {
@@ -148,7 +148,7 @@ ExportVariable& ExportVariable::setup(	const std::string& _name,
 										uint _nCols,
 										ExportType _type,
 										ExportStruct _dataStruct,
-										BooleanType _callItByValue,
+										bool _callItByValue,
 										const std::string& _prefix
 										)
 {
@@ -165,7 +165,7 @@ ExportVariable& ExportVariable::setup(	const std::string& _name,
 										const Matrix& _data,
 										ExportType _type,
 										ExportStruct _dataStruct,
-										BooleanType _callItByValue,
+										bool _callItByValue,
 										const std::string& _prefix
 										)
 {
@@ -213,7 +213,7 @@ returnValue ExportVariable::resetDiagonal( )
 }
 
 
-BooleanType ExportVariable::isZero(	const ExportIndex& rowIdx,
+bool ExportVariable::isZero(	const ExportIndex& rowIdx,
 									const ExportIndex& colIdx
 									) const
 {
@@ -221,7 +221,7 @@ BooleanType ExportVariable::isZero(	const ExportIndex& rowIdx,
 }
 
 
-BooleanType ExportVariable::isOne(	const ExportIndex& rowIdx,
+bool ExportVariable::isOne(	const ExportIndex& rowIdx,
 									const ExportIndex& colIdx
 									) const
 {
@@ -229,7 +229,7 @@ BooleanType ExportVariable::isOne(	const ExportIndex& rowIdx,
 }
 
 
-BooleanType ExportVariable::isGiven(	const ExportIndex& rowIdx,
+bool ExportVariable::isGiven(	const ExportIndex& rowIdx,
 										const ExportIndex& colIdx
 										) const
 {
@@ -237,7 +237,7 @@ BooleanType ExportVariable::isGiven(	const ExportIndex& rowIdx,
 }
 
 
-BooleanType ExportVariable::isGiven( ) const
+bool ExportVariable::isGiven( ) const
 {
 	return (*this)->isGiven();
 }
@@ -470,7 +470,7 @@ ExportVariable ExportVariable::makeColVector( ) const
 }
 
 
-BooleanType ExportVariable::isVector( ) const
+bool ExportVariable::isVector( ) const
 {
 	return (*this)->isVector();
 }
@@ -496,7 +496,7 @@ ExportVariable diag(	const std::string& _name,
 	return t;
 }
 
-BooleanType ExportVariable::isSubMatrix() const
+bool ExportVariable::isSubMatrix() const
 {
 	return (*this)->isSubMatrix();
 }

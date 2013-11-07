@@ -86,11 +86,11 @@ public:
 							unsigned NP,
 							unsigned NY,
 							unsigned NYN,
-							BooleanType _initialStateFixed,
+							bool _initialStateFixed,
 							unsigned _wMatrixType,
-							BooleanType _hardcodedConstraints,
-							BooleanType _useArrivalCost,
-							BooleanType _compCovMatrix
+							bool _hardcodedConstraints,
+							bool _useArrivalCost,
+							bool _compCovMatrix
 							);
 
 	/** Export the interface. */

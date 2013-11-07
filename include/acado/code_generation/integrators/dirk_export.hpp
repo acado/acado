@@ -128,7 +128,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 										const ExportIndex& index3,
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
-										BooleanType DERIVATIVES = BT_FALSE );
+										bool DERIVATIVES = false );
 
 
 		/** Exports the code needed to compute the sensitivities of the states, defined by the linear output system.
@@ -150,7 +150,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 												const ExportIndex& tmp_index2,
 												const ExportVariable& Ah,
 												const ExportVariable& Bh,
-												BooleanType STATES,
+												bool STATES,
 												uint number 		);
 
 
@@ -189,7 +189,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 											const ExportVariable& Ah,
 											const ExportVariable& C,
 											const ExportVariable& det,
-											BooleanType DERIVATIVES = BT_FALSE  	);
+											bool DERIVATIVES = false  	);
 
 
 		/** Exports the code needed to compute the sensitivities of the states defined by the nonlinear, fully implicit system.
@@ -212,7 +212,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 													const ExportVariable& Ah,
 													const ExportVariable& Bh,
 													const ExportVariable& det,
-													BooleanType STATES,
+													bool STATES,
 													uint number 		);
 
 
@@ -233,8 +233,8 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
 										const ExportVariable& C,
-										BooleanType evaluateB,
-										BooleanType DERIVATIVES );
+										bool evaluateB,
+										bool DERIVATIVES );
 
 
 		/** Exports the evaluation of the states at a specific stage.

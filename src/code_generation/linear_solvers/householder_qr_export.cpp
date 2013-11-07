@@ -312,7 +312,7 @@ returnValue ExportHouseholderQR::setup( )
 	b = ExportVariable("b", nRows, 1, REAL);
 	rk_temp = ExportVariable("rk_temp", 1, nRows + 1, REAL);
 	solve = ExportFunction(getNameSolveFunction(), A, b, rk_temp);
-	solve.setReturnValue(determinant, BT_FALSE);
+	solve.setReturnValue(determinant, false);
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	solveTriangular = ExportFunction( std::string( "solve_" ) + identifier + "triangular", A, b);
 	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
@@ -325,7 +325,7 @@ returnValue ExportHouseholderQR::setup( )
 	
 	int unrollOpt;
 	userInteraction->get(UNROLL_LINEAR_SOLVER, unrollOpt);
-	UNROLLING = (BooleanType) unrollOpt;
+	UNROLLING = (bool) unrollOpt;
 
     return SUCCESSFUL_RETURN;
 }

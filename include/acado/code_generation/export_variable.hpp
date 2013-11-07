@@ -83,7 +83,7 @@ class ExportVariable : public ExportArgument
 						uint _nCols,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callItByValue = BT_FALSE,
+						bool _callItByValue = false,
 						const std::string& _prefix = std::string()
 						);
 
@@ -101,7 +101,7 @@ class ExportVariable : public ExportArgument
 						const Matrix& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callItByValue = BT_FALSE,
+						bool _callItByValue = false,
 						const std::string& _prefix = std::string()
 						);
 
@@ -119,7 +119,7 @@ class ExportVariable : public ExportArgument
 						const matrixPtr& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callItByValue = BT_FALSE,
+						bool _callItByValue = false,
 						const std::string& _prefix = std::string()
 						);
 
@@ -136,7 +136,7 @@ class ExportVariable : public ExportArgument
 						unsigned _nCols,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callItByValue = BT_FALSE,
+						bool _callItByValue = false,
 						const std::string& _prefix = std::string()
 						);
 
@@ -179,7 +179,7 @@ class ExportVariable : public ExportArgument
 								uint _nCols = 1,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
-								BooleanType _callItByValue = BT_FALSE,
+								bool _callItByValue = false,
 								const std::string& _prefix = std::string()
 								);
 
@@ -199,7 +199,7 @@ class ExportVariable : public ExportArgument
 								const Matrix& _data,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
-								BooleanType _callItByValue = BT_FALSE,
+								bool _callItByValue = false,
 								const std::string& _prefix = std::string()
 								);
 
@@ -251,10 +251,10 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to zero, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to zero, \n
+		 *	        false otherwise
 		 */
-		BooleanType isZero( const ExportIndex& rowIdx,
+		bool isZero( const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 
@@ -263,10 +263,10 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to one, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to one, \n
+		 *	        false otherwise
 		 */
-		BooleanType isOne(	const ExportIndex& rowIdx,
+		bool isOne(	const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 
@@ -275,19 +275,19 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to a given value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to a given value, \n
+		 *	        false otherwise
 		 */
-		BooleanType isGiven(	const ExportIndex& rowIdx,
+		bool isGiven(	const ExportIndex& rowIdx,
 								const ExportIndex& colIdx
 								) const;
 
 		/** Returns whether all components of the variable are set to a given value.
 		 *
-		 *	\return BT_TRUE  iff all components of the variable are set to a given value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff all components of the variable are set to a given value, \n
+		 *	        false otherwise
 		 */
-		BooleanType isGiven( ) const;
+		bool isGiven( ) const;
 
 
 		/** Returns string containing the value of a given component. If its 
@@ -523,10 +523,10 @@ class ExportVariable : public ExportArgument
 
 		/** Returns whether variable is a vector.
 		 *
-		 *	\return BT_TRUE  iff variable is a vector, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff variable is a vector, \n
+		 *	        false otherwise
 		 */
-		BooleanType isVector( ) const;
+		bool isVector( ) const;
 
 
 		/** Returns the internal data matrix.
@@ -536,7 +536,7 @@ class ExportVariable : public ExportArgument
 		Matrix getGivenMatrix( ) const;
 
 		/** Check whether the matrix is actually a submatrix. */
-		BooleanType isSubMatrix() const;
+		bool isSubMatrix() const;
 
 		/** Prints contents of variable to screen.
 		 *

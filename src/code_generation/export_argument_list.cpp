@@ -135,22 +135,22 @@ returnValue ExportArgumentList::exportCode(	std::ostream& stream,
 	for (unsigned i = 0; i < arguments.size(); ++i)
 	{
 		// Allow only undefined arguments and defined integer scalars
-		if (	arguments[ i ].isGiven( ) == BT_TRUE &&
+		if (	arguments[ i ].isGiven( ) == true &&
 				(arguments[ i ].getDim() > 1 || arguments[ i ].getType() != INT) &&
 				arguments[ i ].getType() != STATIC_CONST_INT &&
 				arguments[ i ].getType() != STATIC_CONST_REAL
 				)
 			continue;
 
-		if ( includeType == BT_TRUE )
+		if ( includeType == true )
 		{
-			if ( arguments[ i ].isCalledByValue( ) == BT_TRUE )
+			if ( arguments[ i ].isCalledByValue( ) == true )
 				stream << arguments[ i ].getTypeString(_realString, _intString) << " ";
 			else
 				stream << arguments[ i ].getTypeString(_realString, _intString) << "* const ";
 		}
 
-		if ( includeType == BT_FALSE )
+		if ( includeType == false )
 			stream << arguments[ i ].getAddressString( );
 		else
 			stream << arguments[ i ].getAddressString( false );
@@ -175,14 +175,14 @@ returnValue ExportArgumentList::clear( )
 
 returnValue ExportArgumentList::doIncludeType( )
 {
-	includeType = BT_TRUE;
+	includeType = true;
 	return SUCCESSFUL_RETURN;
 }
 
 
 returnValue ExportArgumentList::doNotIncludeType( )
 {
-	includeType = BT_FALSE;
+	includeType = false;
 	return SUCCESSFUL_RETURN;
 }
 

@@ -142,10 +142,10 @@ public:
 
 	/** Returns whether a single shooting state discretization is used.
 	 *
-	 *	\return BT_TRUE  iff single shooting state discretization is used, \n
-	 *	        BT_FALSE otherwise
+	 *	\return true  iff single shooting state discretization is used, \n
+	 *	        false otherwise
 	 */
-	BooleanType performsSingleShooting( ) const;
+	bool performsSingleShooting( ) const;
 
 	/** Set objective function
 	 *  \return SUCCESSFUL_RETURN, \n
@@ -170,7 +170,7 @@ public:
 	unsigned weightingMatricesType( void ) const;
 
 	/** Indicates whether initial state is fixed. */
-	BooleanType initialStateFixed( ) const;
+	bool initialStateFixed( ) const;
 
 protected:
 
@@ -247,7 +247,7 @@ protected:
 	ExportAcadoFunction evaluateLSQEndTerm;
 	std::string evaluateExternLSQ, evaluateExternLSQEndTerm;
 
-	BooleanType externObjective;
+	bool externObjective;
 
 	ExportVariable Q1, Q2;
 	ExportVariable R1, R2;

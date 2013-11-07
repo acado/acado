@@ -144,18 +144,18 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	int generateMakeFile;
 	get(GENERATE_MAKE_FILE, generateMakeFile);
 
-	if ( (BooleanType)generateMakeFile == BT_TRUE )
+	if ( (bool)generateMakeFile == true )
 	{
 		str = dirName + "/Makefile";
 
 		switch ( (QPSolverName)qpSolver )
 		{
 			case QP_QPOASES:
-				acadoCopyTempateFile(MAKEFILE_QPOASES, str, "#", BT_TRUE);
+				acadoCopyTempateFile(MAKEFILE_QPOASES, str, "#", true);
 				break;
 
 			case QP_FORCES:
-				acadoCopyTempateFile(MAKEFILE_FORCES, str, "#", BT_TRUE);
+				acadoCopyTempateFile(MAKEFILE_FORCES, str, "#", true);
 				break;
 
 			case QP_QPDUNES:
@@ -173,30 +173,30 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	int generateTestFile;
 	get(GENERATE_TEST_FILE, generateTestFile);
 	string testFileName = dirName + "/test.c";
-	if ((BooleanType) generateTestFile == BT_TRUE)
-		acadoCopyTempateFile(DUMMY_TEST_FILE, testFileName, 0, BT_TRUE);
+	if ((bool) generateTestFile == true)
+		acadoCopyTempateFile(DUMMY_TEST_FILE, testFileName, 0, true);
 
 	//
 	// Generate MATLAB MEX interface
 	//
 	int generateMexInterface;
 	get(GENERATE_MATLAB_INTERFACE, generateMexInterface);
-	if ( (BooleanType)generateMexInterface == BT_TRUE )
+	if ( (bool)generateMexInterface == true )
 	{
 		str = dirName + "/" + getName() + "_solver_mex.c";
 
-		acadoCopyTempateFile(SOLVER_MEX, str, 0, BT_TRUE);
+		acadoCopyTempateFile(SOLVER_MEX, str, 0, true);
 
 		str = dirName + "/make_" + getName() + "_solver.m";
 
 		switch ( (QPSolverName)qpSolver )
 		{
 		case QP_QPOASES:
-			acadoCopyTempateFile(MAKE_MEX_QPOASES, str, "%", BT_TRUE);
+			acadoCopyTempateFile(MAKE_MEX_QPOASES, str, "%", true);
 			break;
 
 		case QP_FORCES:
-			acadoCopyTempateFile(MAKE_MEX_FORCES, str, "%", BT_TRUE);
+			acadoCopyTempateFile(MAKE_MEX_FORCES, str, "%", true);
 			break;
 
 		case QP_QPDUNES:
@@ -213,7 +213,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	//
 	int generateSimulinkInterface;
 	get(GENERATE_SIMULINK_INTERFACE, generateSimulinkInterface);
-	if ((BooleanType) generateSimulinkInterface == BT_TRUE)
+	if ((bool) generateSimulinkInterface == true)
 	{
 		if ((QPSolverName)qpSolver != QP_QPOASES)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
@@ -231,7 +231,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 
 		int hardcodeConstraintValues;
 		get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
-		if ((BooleanType)hardcodeConstraintValues == BT_FALSE)
+		if ((bool)hardcodeConstraintValues == false)
 			return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 		int fixInitialState;
@@ -245,11 +245,11 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 		esi.configure(
 				ocp.getN(), ocp.getNX(), ocp.getNDX(), ocp.getNXA(), ocp.getNU(), ocp.getNP(),
 				solver->getNY(), solver->getNYN(),
-				(BooleanType)fixInitialState,
+				(bool)fixInitialState,
 				(unsigned)solver->weightingMatricesType(),
-				(BooleanType)hardcodeConstraintValues,
-				(BooleanType)useAC,
-				(BooleanType)covCalc);
+				(bool)hardcodeConstraintValues,
+				(bool)useAC,
+				(bool)covCalc);
 
 		esi.exportCode();
 	}
@@ -392,13 +392,13 @@ returnValue OCPexport::checkConsistency( ) const
 	// Consistency checks:
 	//
 
- 	if ( ocp.hasObjective( ) == BT_TRUE )
+ 	if ( ocp.hasObjective( ) == true )
  		return ACADOERROR( RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT );
 
  	DifferentialEquation f;
  	ocp.getModel( f );
 
- 	if ( f.isDiscretized( ) == BT_TRUE )
+ 	if ( f.isDiscretized( ) == true )
  		return ACADOERROR( RET_NO_DISCRETE_ODE_FOR_CODE_EXPORT );
 
  	if ( f.getNUI( ) > 0 )
@@ -503,7 +503,7 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	case QP_FORCES:
 
 		acadoHeader.addStatement( "/** Definition of the floating point data type. */\n" );
-		if ( (BooleanType)useSinglePrecision == BT_TRUE )
+		if ( (bool)useSinglePrecision == true )
 			acadoHeader.addStatement( "typedef float real_t;\n" );
 		else
 			acadoHeader.addStatement( "typedef double real_t;\n" );

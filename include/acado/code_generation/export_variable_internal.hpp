@@ -88,7 +88,7 @@ class ExportVariableInternal : public ExportArgumentInternal
 								const matrixPtr& _data,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
-								BooleanType _callItByValue = BT_FALSE,
+								bool _callItByValue = false,
 								const std::string& _prefix = std::string()
 								);
 
@@ -120,10 +120,10 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to zero, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to zero, \n
+		 *	        false otherwise
 		 */
-		BooleanType isZero( const ExportIndex& rowIdx,
+		bool isZero( const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 
@@ -132,10 +132,10 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to one, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to one, \n
+		 *	        false otherwise
 		 */
-		BooleanType isOne(	const ExportIndex& rowIdx,
+		bool isOne(	const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 
@@ -144,14 +144,14 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to a given value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to a given value, \n
+		 *	        false otherwise
 		 */
-		BooleanType isGiven(	const ExportIndex& rowIdx,
+		bool isGiven(	const ExportIndex& rowIdx,
 								const ExportIndex& colIdx
 								) const;
 
-		virtual BooleanType isGiven() const;
+		virtual bool isGiven() const;
 
 
 		/** Returns string containing the value of a given component. If its
@@ -261,10 +261,10 @@ class ExportVariableInternal : public ExportArgumentInternal
 
 		/** Returns whether variable is a vector.
 		 *
-		 *	\return BT_TRUE  iff variable is a vector, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff variable is a vector, \n
+		 *	        false otherwise
 		 */
-		BooleanType isVector( ) const;
+		bool isVector( ) const;
 
 
 		/** Returns the internal data matrix.
@@ -332,20 +332,20 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *	@param[in] _value		Value used for comparison.
 		 *
-		 *	\return BT_TRUE  iff given component is set to given value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to given value, \n
+		 *	        false otherwise
 		 */
-		BooleanType hasValue(	const ExportIndex& _rowIdx,
+		bool hasValue(	const ExportIndex& _rowIdx,
 								const ExportIndex& _colIdx,
 								double _value
 								) const;
 
 		/** Check whether the matrix is actually a submatrix. */
-		BooleanType isSubMatrix() const;
+		bool isSubMatrix() const;
 
 	protected:
 
-		BooleanType doAccessTransposed;				/**< Flag indicating whether variable is to be accessed in a transposed manner. */
+		bool doAccessTransposed;				/**< Flag indicating whether variable is to be accessed in a transposed manner. */
 
 		ExportIndex rowOffset;						/**< Index of first row of a possible sub-matrix of the variable. */
 		ExportIndex colOffset;						/**< Index of first column of a possible sub-matrix of the variable. */

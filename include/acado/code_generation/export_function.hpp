@@ -204,7 +204,7 @@ public:
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	ExportFunction& setReturnValue(	const ExportVariable& _functionReturnValue,
-									BooleanType _returnAsPointer = BT_FALSE
+									bool _returnAsPointer = false
 									);
 
 
@@ -264,10 +264,10 @@ public:
 
 	/** Returns whether function has been defined.
 	 *
-	 *	\return BT_TRUE  iff function has been defined, \n
-	 *	        BT_FALSE otherwise
+	 *	\return true  iff function has been defined, \n
+	 *	        false otherwise
 	 */
-	virtual BooleanType isDefined( ) const;
+	virtual bool isDefined( ) const;
 
 	/** Return number of calling arguments of the function. */
 	unsigned getNumArguments( ) const;
@@ -288,10 +288,10 @@ public:
 	virtual ExportFunction& doc( const std::string& _doc );
 
 	/** Set the function as private. If this is true, then do not export it's declaration. */
-	virtual ExportFunction& setPrivate(	BooleanType _set = BT_TRUE );
+	virtual ExportFunction& setPrivate(	bool _set = true );
 
 	/** Is function private? */
-	virtual BooleanType isPrivate() const;
+	virtual bool isPrivate() const;
 
 protected:
 	/** Frees internal dynamic memory to yield an empty function.
@@ -310,13 +310,13 @@ protected:
 	/** Return value of the function (by default, if pointer is null, return value is void). */
 	std::tr1::shared_ptr< ExportVariable > retVal;
 	/** Flag indicating whether value shall be returned as pointer. */
-	BooleanType returnAsPointer;
+	bool returnAsPointer;
 	/** Memory allocator */
 	MemoryAllocatorPtr memAllocator;
 	/** Vector of local variables. */
 	std::vector< ExportVariable > localVariables;
 	/** Private flag. In principle if this guy is true, do not export function declaration. */
-	BooleanType flagPrivate;
+	bool flagPrivate;
 };
 
 

@@ -127,7 +127,7 @@ returnValue ExportArithmeticStatement::exportCode(	std::ostream& stream,
 													int _precision
 													) const
 {
-	if (lhs->isGiven() == BT_TRUE && lhs->getDim() > 0)
+	if (lhs->isGiven() == true && lhs->getDim() > 0)
 	{
 		LOG( LVL_ERROR ) << "Left hand side ('" << lhs.getFullName() << "') of an arithmetic "
 							"expression is given." << endl;
@@ -152,10 +152,10 @@ returnValue ExportArithmeticStatement::exportCode(	std::ostream& stream,
 			return exportCodeAssign( stream,"-=",_realString,_intString,_precision );
 
 		case ESO_MULTIPLY:
-			return exportCodeMultiply( stream,BT_FALSE,_realString,_intString,_precision );
+			return exportCodeMultiply( stream,false,_realString,_intString,_precision );
 			
 		case ESO_MULTIPLY_TRANSPOSE:
-			return exportCodeMultiply( stream,BT_TRUE,_realString,_intString,_precision );
+			return exportCodeMultiply( stream,true,_realString,_intString,_precision );
 
 		case ESO_ASSIGN:
 			return exportCodeAssign( stream,"=",_realString,_intString,_precision );
@@ -217,7 +217,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 	// Currently, optimizations cannot be performed on hard-coded matrices.
 	//
 	int optimizationsAllowed =
-			( rhs1->isGiven() == BT_FALSE ) && ( rhs2->isGiven() == BT_FALSE );
+			( rhs1->isGiven() == false ) && ( rhs2->isGiven() == false );
 
 	if ((numberOfFlops < 4096) || (optimizationsAllowed == 0))
 	{
@@ -225,30 +225,30 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 			for( uint j=0; j<getNumCols( ); ++j )
 			{
 				if ( ( op0 != ESO_ASSIGN ) &&
-						( rhs1->isGiven(i,j) == BT_TRUE ) && ( rhs2->isGiven(i,j) == BT_TRUE ) )
+						( rhs1->isGiven(i,j) == true ) && ( rhs2->isGiven(i,j) == true ) )
 				{
 					// check for zero value in case of "+=" or "-="
-					if ( ( op1 == ESO_ADD ) && ( acadoIsZero(rhs1(i, j) + rhs2(i, j)) == BT_TRUE ) )
+					if ( ( op1 == ESO_ADD ) && ( acadoIsZero(rhs1(i, j) + rhs2(i, j)) == true ) )
 						continue;
 
-					if ( ( op1 == ESO_SUBTRACT ) && ( acadoIsZero( rhs1(i, j) - rhs2(i, j)) == BT_TRUE ) )
+					if ( ( op1 == ESO_SUBTRACT ) && ( acadoIsZero( rhs1(i, j) - rhs2(i, j)) == true ) )
 						continue;
 				}
 
 				if ( !lhs.isNull() )
 					stream << lhs.get(i, j) << " " << assignString << " ";
 
-				if ( rhs1->isZero(i, j) == BT_FALSE )
+				if ( rhs1->isZero(i, j) == false )
 				{
 					stream << rhs1->get(i, j);
-					if ( rhs2->isZero(i,j) == BT_FALSE )
+					if ( rhs2->isZero(i,j) == false )
 						stream << _sign << " " << rhs2->get(i, j) << ";\n";
 					else
 						stream << endl;
 				}
 				else
 				{
-					if (rhs2->isZero(i, j) == BT_FALSE)
+					if (rhs2->isZero(i, j) == false)
 						stream << _sign << " " << rhs2->get(i, j);
 					else
 						stream << "0.0;\n";
@@ -302,7 +302,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 }
 
 returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
-															BooleanType transposeRhs1,
+															bool transposeRhs1,
 															const std::string& _realString,
 															const std::string& _intString,
 															int _precision
@@ -321,7 +321,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 	uint nRowsRhs1;
 	uint nColsRhs1;
 
-	if ( transposeRhs1 == BT_FALSE )
+	if ( transposeRhs1 == false )
 	{
 		nRowsRhs1 = rhs1->getNumRows( );
 		nColsRhs1 = rhs1->getNumCols( );
@@ -349,7 +349,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 		sign[0] = '-';
 	}
 
-	BooleanType allZero;
+	bool allZero;
 
 	ExportIndex ii, iiRhs1;
 	ExportIndex jj, jjRhs1;
@@ -365,7 +365,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 	// Currently, optimizations cannot be performed on hard-coded matrices.
 	//
 	int optimizationsAllowed =
-			( rhs1->isGiven() == BT_FALSE ) && ( rhs2->isGiven() == BT_FALSE );
+			( rhs1->isGiven() == false ) && ( rhs2->isGiven() == false );
 
 	//
 	// Depending on the flops count different export strategies are performed
@@ -382,14 +382,14 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 
 			for(uint j = 0; j < getNumCols( ); ++j)
 			{
-				allZero = BT_TRUE;
+				allZero = true;
 
 				stream << lhs->get(ii,j) <<  " " << assignString;
 
 				for(uint k = 0; k < nColsRhs1; ++k)
 				{
 					kk = k;
-					if ( transposeRhs1 == BT_FALSE )
+					if ( transposeRhs1 == false )
 					{
 						iiRhs1 = ii;
 						kkRhs1 = kk;
@@ -400,21 +400,21 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 						kkRhs1 = ii;
 					}
 
-					if ( ( rhs1->isZero(iiRhs1,kkRhs1) == BT_FALSE ) &&
-							( rhs2->isZero(kk,j) == BT_FALSE ) )
+					if ( ( rhs1->isZero(iiRhs1,kkRhs1) == false ) &&
+							( rhs2->isZero(kk,j) == false ) )
 					{
-						allZero = BT_FALSE;
+						allZero = false;
 
-						if ( rhs1->isOne(iiRhs1,kkRhs1) == BT_FALSE )
+						if ( rhs1->isOne(iiRhs1,kkRhs1) == false )
 						{
 							stream << sign << " " << rhs1->get(iiRhs1,kkRhs1);
 
-							if ( rhs2->isOne(kk,j) == BT_FALSE )
+							if ( rhs2->isOne(kk,j) == false )
 								stream << "*" << rhs2->get(kk, j);
 						}
 						else
 						{
-							if ( rhs2->isOne(kk,j) == BT_FALSE )
+							if ( rhs2->isOne(kk,j) == false )
 								stream << " " << sign << rhs2->get(kk,j);
 							else
 								stream << " " << sign << " 1.0";
@@ -427,7 +427,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 
 				if ( op2 == ESO_UNDEFINED )
 				{
-					if ( allZero == BT_TRUE )
+					if ( allZero == true )
 						stream << " 0.0;\n";
 					else
 						stream << ";\n";
@@ -449,14 +449,14 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 
 		for(uint j = 0; j < getNumCols( ); ++j)
 		{
-			allZero = BT_TRUE;
+			allZero = true;
 
 			stream << lhs->get(ii,j) << " " << assignString;
 
 			for(uint k = 0; k < nColsRhs1; ++k)
 			{
 				kk = k;
-				if ( transposeRhs1 == BT_FALSE )
+				if ( transposeRhs1 == false )
 				{
 					iiRhs1 = ii;
 					kkRhs1 = kk;
@@ -467,20 +467,20 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 					kkRhs1 = ii;
 				}
 
-				if ( ( rhs1->isZero(iiRhs1,kkRhs1) == BT_FALSE ) &&
-					( rhs2->isZero(kk,j) == BT_FALSE ) )
+				if ( ( rhs1->isZero(iiRhs1,kkRhs1) == false ) &&
+					( rhs2->isZero(kk,j) == false ) )
 				{
-					allZero = BT_FALSE;
+					allZero = false;
 
-					if ( rhs1->isOne(iiRhs1,kkRhs1) == BT_FALSE )
+					if ( rhs1->isOne(iiRhs1,kkRhs1) == false )
 					{
 						stream << sign << " " << rhs1->get(iiRhs1,kkRhs1);
-						if ( rhs2->isOne(kk,j) == BT_FALSE )
+						if ( rhs2->isOne(kk,j) == false )
 							stream << "*" << rhs2->get(kk, j);
 					}
 					else
 					{
-						if ( rhs2->isOne(kk,j) == BT_FALSE )
+						if ( rhs2->isOne(kk,j) == false )
 							stream << " " <<  sign << " " << rhs2->get(kk,j);
 						else
 							stream << " " << sign << " 1.0";
@@ -493,7 +493,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 
 			if ( op2 == ESO_UNDEFINED )
 			{
-				if ( allZero == BT_TRUE )
+				if ( allZero == true )
 					stream << " 0.0;\n";
 				else
 					stream << ";\n";
@@ -522,14 +522,14 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 		stream << jj.getName() << " < " << getNumCols() <<"; ";
 		stream << "++" << jj.getName() << ")\n{\n";
 
-		allZero = BT_TRUE;
+		allZero = true;
 
 		stream << lhs->get(ii, jj) << " " << assignString;
 
 		for(uint k = 0; k < nColsRhs1; ++k)
 		{
 			kk = k;
-			if ( transposeRhs1 == BT_FALSE )
+			if ( transposeRhs1 == false )
 			{
 				iiRhs1 = ii;
 				kkRhs1 = kk;
@@ -540,21 +540,21 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 				kkRhs1 = ii;
 			}
 
-			if ( ( rhs1->isZero(iiRhs1,kkRhs1) == BT_FALSE ) &&
-					( rhs2->isZero(kk,jj) == BT_FALSE ) )
+			if ( ( rhs1->isZero(iiRhs1,kkRhs1) == false ) &&
+					( rhs2->isZero(kk,jj) == false ) )
 			{
-				allZero = BT_FALSE;
+				allZero = false;
 
-				if ( rhs1->isOne(iiRhs1,kkRhs1) == BT_FALSE )
+				if ( rhs1->isOne(iiRhs1,kkRhs1) == false )
 				{
 					stream << " " << sign << " " << rhs1->get(iiRhs1, kkRhs1);
 
-					if ( rhs2->isOne(kk,jj) == BT_FALSE )
+					if ( rhs2->isOne(kk,jj) == false )
 						stream << "*" << rhs2->get(kk, jj);
 				}
 				else
 				{
-					if ( rhs2->isOne(kk,jj) == BT_FALSE )
+					if ( rhs2->isOne(kk,jj) == false )
 						stream << " " << sign << " " << rhs2->get(kk, jj);
 					else
 						stream << " " << sign << " 1.0";
@@ -567,7 +567,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 
 		if ( op2 == ESO_UNDEFINED )
 		{
-			if ( allZero == BT_TRUE )
+			if ( allZero == true )
 				stream << " 0.0;\n";
 			else
 				stream << ";\n";
@@ -609,20 +609,20 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 
 	unsigned numOps = lhs.getNumRows() * lhs.getNumCols();
 
-	if (	lhs.isSubMatrix() == BT_FALSE && lhs.getDim() > 1 &&
-			rhs1.isGiven() == BT_TRUE && rhs1.getGivenMatrix().isZero() == BT_TRUE)
+	if (	lhs.isSubMatrix() == false && lhs.getDim() > 1 &&
+			rhs1.isGiven() == true && rhs1.getGivenMatrix().isZero() == true)
 	{
 		stream 	<< "{ int lCopy; for (lCopy = 0; lCopy < "<< lhs.getDim() << "; lCopy++) "
 				<< lhs.getFullName() << "[ lCopy ] = 0.0; }" << endl;
 	}
-	else if ((numOps < 128) || (rhs1.isGiven() == BT_TRUE))
+	else if ((numOps < 128) || (rhs1.isGiven() == true))
 	{
 		for(unsigned i = 0; i < lhs.getNumRows( ); ++i)
 			for(unsigned j = 0; j < lhs.getNumCols( ); ++j)
-				if ( ( _op == (std::string)"=" ) || ( rhs1.isZero(i,j) == BT_FALSE ) )
+				if ( ( _op == (std::string)"=" ) || ( rhs1.isZero(i,j) == false ) )
 				{
 					stream << lhs->get(i, j) << " " << _op << " ";
-					if (rhs1->isGiven() == BT_TRUE)
+					if (rhs1->isGiven() == true)
 					{
 						stream << scientific << rhs1(i, j);
 					}

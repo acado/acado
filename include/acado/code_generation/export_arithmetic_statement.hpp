@@ -185,7 +185,7 @@ class ExportArithmeticStatement : public ExportStatement
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue exportCodeMultiply(	std::ostream& stream,
-										BooleanType transposeRhs1 = BT_FALSE,
+										bool transposeRhs1 = false,
 										const std::string& _realString = "real_t",
 										const std::string& _intString = "int",
 										int _precision = 16

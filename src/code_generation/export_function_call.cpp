@@ -154,7 +154,7 @@ returnValue ExportFunctionCall::init(	const ExportFunction& _f,
 
 	setName( _f.getName() );
 
-	if (_f.isDefined() == BT_FALSE)
+	if (_f.isDefined() == false)
 	{
 		LOG( LVL_DEBUG ) << "ExportFunctionCall: " << _f.getName() << " is empty" << std::endl;
 		return SUCCESSFUL_RETURN;
@@ -183,7 +183,7 @@ returnValue ExportFunctionCall::exportCode(	std::ostream& stream,
 											int _precision
 											) const
 {
-	if ( name.empty() == BT_TRUE )
+	if ( name.empty() == true )
 		return ACADOERROR( RET_MEMBER_NOT_INITIALISED );
 
 	stream << name << "( ";
@@ -212,7 +212,7 @@ returnValue ExportFunctionCall::clear( )
 returnValue	ExportFunctionCall::setName(	const std::string& _name
 											)
 {
-	if ( _name.empty() == BT_TRUE )
+	if ( _name.empty() == true )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	name = _name;

@@ -42,12 +42,12 @@ ExportCholeskyDecomposition::ExportCholeskyDecomposition(	UserInteraction* _user
 															const std::string& _commonHeaderName
 															) : ExportAlgorithm(_userInteraction, _commonHeaderName)
 {
-	init("choleskyDecomposition", 0, BT_FALSE);
+	init("choleskyDecomposition", 0, false);
 }
 
 returnValue ExportCholeskyDecomposition::init(	const std::string& _name,
 												unsigned _dim,
-												BooleanType _unrolling
+												bool _unrolling
 												)
 {
 	unrolling = _unrolling;

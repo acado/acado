@@ -61,8 +61,8 @@ SIMexport::SIMexport( const uint simIntervals, const double totalTime ) : Export
 	_controls = "controls.txt";
 	_results = "results.txt";
 	_ref = "ref.txt";
-	referenceProvided = BT_FALSE;
-	PRINT_DETAILS = BT_TRUE;
+	referenceProvided = false;
+	PRINT_DETAILS = true;
 
 	timingCalls = 0;
 
@@ -145,15 +145,15 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
 		int debugMode;
 		get( INTEGRATOR_DEBUG_MODE, debugMode );
-		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
+		if ( (bool)generateMatlabInterface == true ) {
 			std::string integrateInterface =  dirName;
 			integrateInterface += "/integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure((ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
+			exportMexFun.configure((ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (bool)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
 			exportMexFun.exportCode();
 
 			integrateInterface = dirName + std::string("/make_acado_integrator.m");
-			acadoCopyTempateFile(MAKE_MEX_INTEGRATOR, integrateInterface, "%", BT_TRUE);
+			acadoCopyTempateFile(MAKE_MEX_INTEGRATOR, integrateInterface, "%", true);
 
 			std::string rhsInterface = dirName;
 			rhsInterface += "/rhs.c";
@@ -162,7 +162,7 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 			exportMexFun2.exportCode();
 
 			rhsInterface = dirName + std::string("/make_acado_model.m");
-			acadoCopyTempateFile(MAKE_MEX_MODEL, rhsInterface, "%", BT_TRUE);
+			acadoCopyTempateFile(MAKE_MEX_MODEL, rhsInterface, "%", true);
 		}
 	}
 
@@ -174,7 +174,7 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 	// export a basic Makefile, if desired
 	int generateMakeFile;
 	get( GENERATE_MAKE_FILE,generateMakeFile );
-	if ( (BooleanType)generateMakeFile == BT_TRUE )
+	if ( (bool)generateMakeFile == true )
 		if ( exportMakefile( dirName,"Makefile",_realString,_intString,_precision ) != SUCCESSFUL_RETURN )
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 			
@@ -285,7 +285,7 @@ returnValue SIMexport::checkConsistency( ) const
 	// only time-continuous DAEs without parameter and disturbances supported!
 	DifferentialEquation f;
 	modelData.getModel(f);
-	if ( f.isDiscretized( ) == BT_TRUE )
+	if ( f.isDiscretized( ) == true )
 		return ACADOERROR( RET_NO_DISCRETE_ODE_FOR_CODE_EXPORT );
 	
 	if ( ( f.getNUI( ) > 0 ) || 
@@ -324,7 +324,7 @@ returnValue SIMexport::exportTest(	const std::string& _dirName,
 									const std::string& _fileName,
 									const std::string& _resultsFile,
 									const std::vector<std::string>& outputFiles,
-									const BooleanType& TIMING,
+									const bool& TIMING,
 									const uint jumpReference
 											) const
 {
@@ -353,8 +353,8 @@ returnValue SIMexport::exportTest(	const std::string& _dirName,
 	main.addComment( "---------------------------------------------------------------" );
 	main.addStatement( (std::string)"   #define JUMP           " + toString(jumpReference)  + "      /* jump for the output reference    */\n" );
 	main.addStatement( (std::string)"   #define h           " + toString(T/modelData.getN())  + "      /* length of one simulation interval    */\n" );
-	if( TIMING == BT_TRUE ) main.addStatement( (std::string)"   #define STEPS_TIMING   " + toString(timingSteps) + "      /* number of steps for the timing */\n" );
-	if( TIMING == BT_TRUE ) main.addStatement( (std::string)"   #define CALLS_TIMING   " + toString(timingCalls) + "      /* number of calls for the timing */\n" );
+	if( TIMING == true ) main.addStatement( (std::string)"   #define STEPS_TIMING   " + toString(timingSteps) + "      /* number of steps for the timing */\n" );
+	if( TIMING == true ) main.addStatement( (std::string)"   #define CALLS_TIMING   " + toString(timingCalls) + "      /* number of calls for the timing */\n" );
 	main.addStatement( (std::string)"   #define RESULTS_NAME	  \"" + _resultsFile + "\"\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (std::string)"   #define OUTPUT" + toString(i) +  "_NAME	  \"" + outputFiles[i] + "\"\n" );
@@ -396,7 +396,7 @@ returnValue SIMexport::exportTest(	const std::string& _dirName,
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addStatement( (std::string)"      real_t step" + toString(i) +  " = h/NMEAS[" + toString(i) +  "];\n" );
 	}
-    if( TIMING == BT_TRUE ) {
+    if( TIMING == true ) {
 		main.addStatement( "      struct timeval theclock;\n" );
 		main.addStatement( "      real_t start, end, time;\n" );
 		if( !DERIVATIVES )  main.addStatement( "      real_t xT[ACADO_NX+ACADO_NXA+ACADO_NU];\n" );
@@ -455,7 +455,7 @@ returnValue SIMexport::exportTest(	const std::string& _dirName,
     else  main.addStatement( "      			nil = fscanf( controls, \"%lf\", &x[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+j] );\n" );
     main.addStatement( "      		}\n" );
     main.addLinebreak( );
-    if( TIMING == BT_TRUE ) {
+    if( TIMING == true ) {
 		main.addStatement( "      		if( i == 0 ) {\n" );
 		if( !DERIVATIVES )  main.addStatement( "      			for( j=0; j < ACADO_NX+ACADO_NXA+ACADO_NU; j++ ) {\n" );
 		else  main.addStatement( "      			for( j=0; j < (ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU; j++ ) {\n" );
@@ -494,7 +494,7 @@ returnValue SIMexport::exportTest(	const std::string& _dirName,
 		main.addStatement( (std::string)"      fclose(output" + toString(i) +  ");\n" );
 	}
     main.addStatement( "      fclose(controls);\n" );
-    if( TIMING == BT_TRUE ) {
+    if( TIMING == true ) {
 		main.addStatement( "      gettimeofday( &theclock,0 );\n" );
 		main.addStatement( "      start = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;\n" );
 	    main.addStatement( "      reset = 1;\n" );
@@ -726,7 +726,7 @@ returnValue SIMexport::exportAndRun(	const std::string& dirName,
 	    // REFERENCE:
     	set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
     	exportCode(	dirName );
-    	exportTest(	dirName, test, _ref, _refOutputFiles, BT_FALSE, 1 );
+    	exportTest(	dirName, test, _ref, _refOutputFiles, false, 1 );
     	executeTest( dirName );
 	}
     modelData.clearIntegrationGrid();
@@ -734,8 +734,8 @@ returnValue SIMexport::exportAndRun(	const std::string& dirName,
     // THE INTEGRATOR:
 	set( NUM_INTEGRATOR_STEPS,  numSteps );
 	exportCode(	dirName );
-	if(timingSteps > 0 && timingCalls > 0) 	exportTest(	dirName, test, _results, _outputFiles, BT_TRUE, 1 );
-	else 									exportTest(	dirName, test, _results, _outputFiles, BT_FALSE, 1 );
+	if(timingSteps > 0 && timingCalls > 0) 	exportTest(	dirName, test, _results, _outputFiles, true, 1 );
+	else 									exportTest(	dirName, test, _results, _outputFiles, false, 1 );
 	executeTest( dirName );
 
 	// THE EVALUATION:
@@ -805,7 +805,7 @@ returnValue SIMexport::exportAcadoHeader(	const std::string& _dirName,
 			break;
 
 		case QP_NONE:
-			if ( (BooleanType)useSinglePrecision == BT_TRUE )
+			if ( (bool)useSinglePrecision == true )
 				acadoHeader.addStatement( "typedef float real_t;\n" );
 			else
 				acadoHeader.addStatement( "typedef double real_t;\n" );
@@ -972,10 +972,10 @@ returnValue SIMexport::exportMakefile(	const std::string& _dirName,
 
 returnValue SIMexport::setReference( const std::string& reference, const std::vector<std::string>& outputReference ) {
 	if( hasOutputs() && outputReference.size() == 0 ) {
-		referenceProvided = BT_FALSE;
+		referenceProvided = false;
 		return RET_UNABLE_TO_EXPORT_CODE;
 	}
-	referenceProvided = BT_TRUE;
+	referenceProvided = true;
 	_ref = reference;
 	if( outputReference.size() > 0 ) _refOutputFiles = outputReference;
 	
@@ -990,7 +990,7 @@ returnValue SIMexport::setTimingSteps( uint _timingSteps ) {
 }
 
 
-returnValue SIMexport::printDetails( BooleanType details ) {
+returnValue SIMexport::printDetails( bool details ) {
 	PRINT_DETAILS = details;
 	
 	return SUCCESSFUL_RETURN;

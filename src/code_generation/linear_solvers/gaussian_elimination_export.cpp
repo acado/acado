@@ -93,9 +93,9 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 	solve.addIndex( i );
 	ExportIndex j( "j" );
 	ExportIndex k( "k" );
-	ExportVariable indexMax( "indexMax", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
-	ExportVariable valueMax( "valueMax", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
-	ExportVariable temp( "temp", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
+	ExportVariable indexMax( "indexMax", 1, 1, INT, ACADO_LOCAL, true );
+	ExportVariable valueMax( "valueMax", 1, 1, REAL, ACADO_LOCAL, true );
+	ExportVariable temp( "temp", 1, 1, REAL, ACADO_LOCAL, true );
 	if( !UNROLLING ) {
 		solve.addIndex( j );
 		solve.addIndex( k );
@@ -256,13 +256,13 @@ returnValue ExportGaussElim::setup( )
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	rk_swap = ExportVariable( std::string( "rk_" ) + identifier + "swap", 1, 1, REAL, structWspace, BT_TRUE );
+	rk_swap = ExportVariable( std::string( "rk_" ) + identifier + "swap", 1, 1, REAL, structWspace, true );
 	rk_bPerm = ExportVariable( std::string( "rk_" ) + identifier + "bPerm", dim, 1, REAL, structWspace );
 	A = ExportVariable( "A", dim, dim, REAL );
 	b = ExportVariable( "b", dim, 1, REAL );
 	rk_perm = ExportVariable( "rk_perm", 1, dim, INT );
 	solve = ExportFunction( getNameSolveFunction(), A, b, rk_perm );
-	solve.setReturnValue( determinant, BT_FALSE );
+	solve.setReturnValue( determinant, false );
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	solveTriangular = ExportFunction( std::string( "solve_" ) + identifier + "triangular", A, b );
 	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
@@ -274,7 +274,7 @@ returnValue ExportGaussElim::setup( )
 	
 	int unrollOpt;
 	userInteraction->get( UNROLL_LINEAR_SOLVER, unrollOpt );
-	UNROLLING = (BooleanType) unrollOpt;
+	UNROLLING = (bool) unrollOpt;
 
     return SUCCESSFUL_RETURN;
 }

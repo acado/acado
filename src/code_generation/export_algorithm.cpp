@@ -162,7 +162,7 @@ uint ExportAlgorithm::getNYN( ) const
 //
 //	acadoPrintAutoGenerationNotice( stream );
 //
-//	if ( commonHeaderName.empty() == BT_FALSE )
+//	if ( commonHeaderName.empty() == false )
 //		stream << "#include \"" << commonHeaderName << "\"" << endl << endl << endl;
 //
 //	return stream;

@@ -51,7 +51,7 @@ static const double undefinedEntry = 1073741824.03125; // = 2^30 + 2^-5
 
 ExportVariableInternal::ExportVariableInternal( ) : ExportArgumentInternal( )
 {
-	doAccessTransposed = BT_FALSE;
+	doAccessTransposed = false;
 
 	rowOffset = 0;
 	colOffset = 0;
@@ -66,12 +66,12 @@ ExportVariableInternal::ExportVariableInternal(	const std::string& _name,
 												const matrixPtr& _data,
 												ExportType _type,
 												ExportStruct _dataStruct,
-												BooleanType _callItByValue,
+												bool _callItByValue,
 												const std::string& _prefix
 												)
 	: ExportArgumentInternal(_name, _data, _type, _dataStruct, _callItByValue, emptyConstExportIndex, _prefix)
 {
-	doAccessTransposed = BT_FALSE;
+	doAccessTransposed = false;
 
 	rowOffset = 0;
 	colOffset = 0;
@@ -111,14 +111,14 @@ returnValue ExportVariableInternal::resetDiagonal( )
 }
 
 
-BooleanType ExportVariableInternal::isZero(	const ExportIndex& rowIdx,
+bool ExportVariableInternal::isZero(	const ExportIndex& rowIdx,
 											const ExportIndex& colIdx
 											) const
 {
 	return hasValue(rowIdx, colIdx, 0.0);
 }
 
-BooleanType ExportVariableInternal::isOne(	const ExportIndex& rowIdx,
+bool ExportVariableInternal::isOne(	const ExportIndex& rowIdx,
 											const ExportIndex& colIdx
 											) const
 {
@@ -126,17 +126,17 @@ BooleanType ExportVariableInternal::isOne(	const ExportIndex& rowIdx,
 }
 
 
-BooleanType ExportVariableInternal::isGiven(	const ExportIndex& rowIdx,
+bool ExportVariableInternal::isGiven(	const ExportIndex& rowIdx,
 												const ExportIndex& colIdx
 												) const
 {
-	if (hasValue(rowIdx, colIdx, undefinedEntry) == BT_TRUE)
-		return BT_FALSE;
+	if (hasValue(rowIdx, colIdx, undefinedEntry) == true)
+		return false;
 
-	return BT_TRUE;
+	return true;
 }
 
-BooleanType ExportVariableInternal::isGiven() const
+bool ExportVariableInternal::isGiven() const
 {
 	return ExportArgumentInternal::isGiven();
 }
@@ -152,11 +152,11 @@ const std::string ExportVariableInternal::get(	const ExportIndex& rowIdx,
 
 	ExportIndex totalIdx = getTotalIdx(rowIdx + rowOffset, colIdx + colOffset);
 
-	if ( ( totalIdx.isGiven() == BT_TRUE ) && ( rowIdx.isGiven() == BT_TRUE ) && ( colIdx.isGiven() == BT_TRUE ) )
+	if ( ( totalIdx.isGiven() == true ) && ( rowIdx.isGiven() == true ) && ( colIdx.isGiven() == true ) )
 	{
-		if (isGiven(rowIdx, colIdx) == BT_FALSE)
+		if (isGiven(rowIdx, colIdx) == false)
 		{
-			if ( ( isCalledByValue() == BT_TRUE ) && ( totalIdx.getGivenValue() == 0 ) )
+			if ( ( isCalledByValue() == true ) && ( totalIdx.getGivenValue() == 0 ) )
 				s << getFullName();
 			else
 				s << getFullName() << "[" << totalIdx.getGivenValue() << "]";
@@ -203,7 +203,7 @@ ExportVariable ExportVariableInternal::getTranspose( ) const
 
 	ExportVariable transposed(name, m, type, dataStruct, callItByValue, prefix);
 	transposed->setSubmatrixOffsets(colOffset, rowOffset, colDim, rowDim, nCols, nRows);
-	transposed->doAccessTransposed = BT_TRUE;
+	transposed->doAccessTransposed = true;
 
 	return transposed;
 }
@@ -212,11 +212,11 @@ ExportVariable ExportVariableInternal::getTranspose( ) const
 ExportVariable ExportVariableInternal::getRow(	const ExportIndex& idx
 												) const
 {
-	ASSERT( doAccessTransposed == BT_FALSE );
+	ASSERT( doAccessTransposed == false );
 
 	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
-	if (idx.isGiven() == BT_TRUE
+	if (idx.isGiven() == true
 			&& (idx.getGivenValue() < 0 || idx.getGivenValue() > ((int) getNumRows( ) - 1)) )
 	{
 		LOG( LVL_ERROR )
@@ -234,11 +234,11 @@ ExportVariable ExportVariableInternal::getRow(	const ExportIndex& idx
 ExportVariable ExportVariableInternal::getCol(	const ExportIndex& idx
 												) const
 {
-	ASSERT( doAccessTransposed == BT_FALSE );
+	ASSERT( doAccessTransposed == false );
 
 	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
-	if (idx.isGiven() == BT_TRUE
+	if (idx.isGiven() == true
 			&& (idx.getGivenValue() < 0 || idx.getGivenValue() > (int) getNumCols( ) - 1) )
 	{
 		LOG( LVL_ERROR )
@@ -257,23 +257,23 @@ ExportVariable ExportVariableInternal::getRows(	const ExportIndex& idx1,
 												const ExportIndex& idx2
 												) const
 {
-	if (doAccessTransposed == BT_TRUE) ASSERT(data->getNumCols() == 1 || data->getNumRows() == 1);
+	if (doAccessTransposed == true) ASSERT(data->getNumCols() == 1 || data->getNumRows() == 1);
 
 	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
 	ExportIndex size = idx2 - idx1;
 
-	if (size.isGiven() == BT_TRUE && size.getGivenValue() == 0)
+	if (size.isGiven() == true && size.getGivenValue() == 0)
 		return tmp;
 
-	if (idx1.isGiven() == BT_TRUE && idx2.isGiven() == BT_TRUE
+	if (idx1.isGiven() == true && idx2.isGiven() == true
 			&& (	idx1.getGivenValue() < 0 ||
 					idx1.getGivenValue() > idx2.getGivenValue() ||
 					idx2.getGivenValue() > (int) getNumRows( ) ))
 	{
 		LOG( LVL_ERROR ) << getFullName() << ": getRows: invalid row arguments" << endl;
 	}
-	else if (size.isGiven() == BT_FALSE)
+	else if (size.isGiven() == false)
 	{
 		LOG( LVL_ERROR ) << getFullName() << ": getRows: Cannot determine size" << endl;
 	}
@@ -288,23 +288,23 @@ ExportVariable ExportVariableInternal::getCols(	const ExportIndex& idx1,
 												const ExportIndex& idx2
 												) const
 {
-	if (doAccessTransposed == BT_TRUE) ASSERT(data->getNumCols() == 1 || data->getNumRows() == 1);
+	if (doAccessTransposed == true) ASSERT(data->getNumCols() == 1 || data->getNumRows() == 1);
 
 	ExportVariable tmp(name, data, type, dataStruct, callItByValue, prefix);
 
 	ExportIndex size = idx2 - idx1;
 
-	if (size.isGiven() == BT_TRUE && size.getGivenValue() == 0)
+	if (size.isGiven() == true && size.getGivenValue() == 0)
 		return tmp;
 
-	if (idx1.isGiven() == BT_TRUE && idx2.isGiven() == BT_TRUE
+	if (idx1.isGiven() == true && idx2.isGiven() == true
 			&& (	idx1.getGivenValue() < 0 ||
 					idx1.getGivenValue() > idx2.getGivenValue() ||
 					idx2.getGivenValue() > (int) getNumCols( ) ))
 	{
 		LOG( LVL_ERROR ) << getFullName() << ": getCols: invalid column arguments" << endl;
 	}
-	else if (size.isGiven() == BT_FALSE)
+	else if (size.isGiven() == false)
 	{
 		LOG( LVL_ERROR ) << getFullName() << ": getCols: Cannot determine size" << endl;
 	}
@@ -321,20 +321,20 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 														const ExportIndex& _colIdx2
 														) const
 {
-	ASSERT(doAccessTransposed == BT_FALSE);
+	ASSERT(doAccessTransposed == false);
 
 	ExportVariable tmp;
 
 	ExportIndex sizeRow = _rowIdx2 - _rowIdx1;
 	ExportIndex sizeCol = _colIdx2 - _colIdx1;
 
-	if (sizeRow.isGiven() == BT_TRUE && sizeRow.getGivenValue() == 0)
+	if (sizeRow.isGiven() == true && sizeRow.getGivenValue() == 0)
 		return tmp;
 
-	if (sizeCol.isGiven() == BT_TRUE && sizeCol.getGivenValue() == 0)
+	if (sizeCol.isGiven() == true && sizeCol.getGivenValue() == 0)
 		return tmp;
 
-	if (_rowIdx1.isGiven() == BT_TRUE && _rowIdx2.isGiven() == BT_TRUE
+	if (_rowIdx1.isGiven() == true && _rowIdx2.isGiven() == true
 			&& (	_rowIdx1.getGivenValue() < 0 ||
 					_rowIdx1.getGivenValue() > _rowIdx2.getGivenValue() ||
 					_rowIdx2.getGivenValue() > (int) getNumRows( ) ))
@@ -342,13 +342,13 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 		LOG( LVL_ERROR ) << getFullName() << ": getSubMatrix: invalid row arguments" << endl;
 		return tmp;
 	}
-	else if (sizeRow.isGiven() == BT_FALSE)
+	else if (sizeRow.isGiven() == false)
 	{
 		LOG( LVL_ERROR ) << getFullName() << ": getSubMatrix: cannot determine row size" << endl;
 		return tmp;
 	}
 
-	if (_colIdx1.isGiven() == BT_TRUE && _colIdx2.isGiven() == BT_TRUE
+	if (_colIdx1.isGiven() == true && _colIdx2.isGiven() == true
 			&& (	_colIdx1.getGivenValue() < 0 ||
 					_colIdx1.getGivenValue() > _colIdx2.getGivenValue() ||
 					_colIdx2.getGivenValue() > (int) getNumCols( ) ))
@@ -356,7 +356,7 @@ ExportVariable ExportVariableInternal::getSubMatrix(	const ExportIndex& _rowIdx1
 		LOG( LVL_ERROR ) << getFullName() << ": getSubMatrix: invalid column arguments" << endl;
 		return tmp;
 	}
-	else if (sizeCol.isGiven() == BT_FALSE)
+	else if (sizeCol.isGiven() == false)
 	{
 		LOG( LVL_ERROR ) << getFullName() << ": getSubMatrix: cannot determine column size" << endl;
 		return tmp;
@@ -403,18 +403,18 @@ ExportVariable ExportVariableInternal::makeColVector( ) const
 }
 
 
-BooleanType ExportVariableInternal::isVector( ) const
+bool ExportVariableInternal::isVector( ) const
 {
 	if ( ( getNumRows( ) == 1 ) || ( getNumCols( ) == 1 ) )
-		return BT_TRUE;
+		return true;
 	else
-		return BT_FALSE;
+		return false;
 }
 
 
 Matrix ExportVariableInternal::getGivenMatrix( ) const
 {
-	if ( isGiven() == BT_TRUE )
+	if ( isGiven() == true )
 		return Matrix( *data.get() );
 	else
 		return Matrix();
@@ -434,7 +434,7 @@ returnValue ExportVariableInternal::print( ) const
 
 uint ExportVariableInternal::getColDim( ) const
 {
-	if (doAccessTransposed == BT_TRUE)
+	if (doAccessTransposed == true)
 		return rowDim;
 
 	return colDim;
@@ -447,7 +447,7 @@ ExportIndex	ExportVariableInternal::getTotalIdx(	const ExportIndex& _rowIdx,
 {
 	ExportIndex tmp;
 
-	if ( doAccessTransposed == BT_FALSE )
+	if ( doAccessTransposed == false )
 		tmp = _rowIdx * getColDim() + _colIdx;
 	else
 		tmp = _colIdx * getColDim() + _rowIdx;
@@ -464,13 +464,13 @@ returnValue ExportVariableInternal::setSubmatrixOffsets(	const ExportIndex& _row
 															unsigned _nCols
 															)
 {
-	if ( ( _rowOffset.isGiven() == BT_TRUE ) && ( _rowOffset.getGivenValue() < 0 ) )
+	if ( ( _rowOffset.isGiven() == true ) && ( _rowOffset.getGivenValue() < 0 ) )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
-	if ( ( _colOffset.isGiven() == BT_TRUE ) && ( _colOffset.getGivenValue() < 0 ) )
+	if ( ( _colOffset.isGiven() == true ) && ( _colOffset.getGivenValue() < 0 ) )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
-	if ( ( _colOffset.isGiven() == BT_TRUE ) && ( _colOffset.getGivenValue() > (int)_colDim ) )
+	if ( ( _colOffset.isGiven() == true ) && ( _colOffset.getGivenValue() > (int)_colDim ) )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	rowOffset = _rowOffset;
@@ -485,25 +485,25 @@ returnValue ExportVariableInternal::setSubmatrixOffsets(	const ExportIndex& _row
 }
 
 
-BooleanType ExportVariableInternal::hasValue(	const ExportIndex& rowIdx,
+bool ExportVariableInternal::hasValue(	const ExportIndex& rowIdx,
 												const ExportIndex& colIdx,
 												double _value
 												) const
 {
 	ExportIndex ind = getTotalIdx(rowIdx + rowOffset, colIdx + colOffset);
-	if (ind.isGiven() == BT_TRUE)
+	if (ind.isGiven() == true)
 		return acadoIsEqual(
 				static_cast<const VectorspaceElement&>(*data).operator ()(ind.getGivenValue()), _value );
 
-	return BT_FALSE;
+	return false;
 }
 
-BooleanType ExportVariableInternal::isSubMatrix() const
+bool ExportVariableInternal::isSubMatrix() const
 {
 	if (nRows == 0 && nCols == 0)
-		return BT_FALSE;
+		return false;
 
-	return BT_TRUE;
+	return true;
 }
 
 

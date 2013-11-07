@@ -87,7 +87,7 @@ class ExportArgumentInternal : public ExportDataInternal
 								const matrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callByValue,
+								bool _callByValue,
 								const ExportIndex& _addressIdx,
 								const std::string& _prefix
 								);
@@ -119,7 +119,7 @@ class ExportArgumentInternal : public ExportDataInternal
 		 *
 		 *	\return std::string containing the address of the argument
 		 */
-		const std::string getAddressString(	BooleanType withDataStruct = BT_TRUE
+		const std::string getAddressString(	bool withDataStruct = true
 											) const;
 
 
@@ -144,17 +144,17 @@ class ExportArgumentInternal : public ExportDataInternal
 
 		/** Returns whether all components of the argument are given.
 		 *
-		 *	\return BT_TRUE  iff all components of the argument have given values, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff all components of the argument have given values, \n
+		 *	        false otherwise
 		 */
-		virtual BooleanType isGiven( ) const;
+		virtual bool isGiven( ) const;
 
 		/** Returns whether argument is to be called by value.
 		 *
-		 *	\return BT_TRUE  iff argument is to be called by value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff argument is to be called by value, \n
+		 *	        false otherwise
 		 */
-		BooleanType isCalledByValue( ) const;
+		bool isCalledByValue( ) const;
 
 		/** Specifies to call argument by value.
 		 *
@@ -208,7 +208,7 @@ class ExportArgumentInternal : public ExportDataInternal
 													 *   (by default, all entries are undefined). */
 		ExportIndex addressIdx;						/**< Address index in case not the argument itself but a pointer to
 													 *   this address within the memory of the argument is to be passed. */
-		BooleanType callItByValue;					/**< Flag indicating whether argument it to be called by value. */
+		bool callItByValue;					/**< Flag indicating whether argument it to be called by value. */
 };
 
 

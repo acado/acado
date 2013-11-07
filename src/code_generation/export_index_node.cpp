@@ -36,9 +36,9 @@ returnValue ExportIndexNode::exportDataDeclaration(	std::ostream& stream,
 													int _precision
 													) const
 {
-	if (isGiven() == BT_TRUE)
+	if (isGiven() == true)
 		return ACADOERRORTEXT(RET_UNABLE_TO_EXPORT_CODE, "Declaration of given indices is not supported.");
-	else if (isBinary() == BT_TRUE)
+	else if (isBinary() == true)
 		return ACADOERRORTEXT(RET_UNABLE_TO_EXPORT_CODE, "Declaration of binary node indices is not supported.");
 
 	stream << _intString << " " << getFullName() << ";" << endl;
@@ -133,12 +133,12 @@ const int ExportIndexNode::getGivenValue( ) const
 }
 
 
-BooleanType ExportIndexNode::isGiven( ) const
+bool ExportIndexNode::isGiven( ) const
 {
 	if (varType == EVT_VALUE)
-		return BT_TRUE;
+		return true;
 
-	return BT_FALSE;
+	return false;
 }
 
 

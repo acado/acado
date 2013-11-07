@@ -64,11 +64,11 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 												unsigned NP,
 												unsigned NY,
 												unsigned NYN,
-												BooleanType _initialStateFixed,
+												bool _initialStateFixed,
 												unsigned _wMatrixType,
-												BooleanType _hardcodedConstraints,
-												BooleanType _useArrivalCost,
-												BooleanType _compCovMatrix
+												bool _hardcodedConstraints,
+												bool _useArrivalCost,
+												bool _compCovMatrix
 												)
 {
 	stringstream s;
@@ -113,16 +113,16 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 	s.str(std::string()); s << NYN;
 	makefile.dictionary[ "@NYN@" ] = s.str();
 
-	makefile.dictionary[ "@INIT_STATE_FIXED@" ] = _initialStateFixed == BT_TRUE ? "1" : "0";
+	makefile.dictionary[ "@INIT_STATE_FIXED@" ] = _initialStateFixed == true ? "1" : "0";
 
 	s.str(std::string()); s << _wMatrixType;
 	makefile.dictionary[ "@WEIGHT_MATRIX_TYPE@" ] = s.str();
 
-	makefile.dictionary[ "@HARCODED_CONSTRAINTS@" ] = _hardcodedConstraints == BT_TRUE ? "1" : "0";
+	makefile.dictionary[ "@HARCODED_CONSTRAINTS@" ] = _hardcodedConstraints == true ? "1" : "0";
 
-	makefile.dictionary[ "@ARRIVAL_COST@" ] = _useArrivalCost == BT_TRUE ? "1" : "0";
+	makefile.dictionary[ "@ARRIVAL_COST@" ] = _useArrivalCost == true ? "1" : "0";
 
-	makefile.dictionary[ "@COV_MATRIX@" ] = _compCovMatrix == BT_TRUE? "1" : "0";
+	makefile.dictionary[ "@COV_MATRIX@" ] = _compCovMatrix == true? "1" : "0";
 
 	makefile.fillTemplate();
 

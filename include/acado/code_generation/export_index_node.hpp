@@ -115,25 +115,25 @@ public:
 
 	/** Returns whether the index is set to a given value.
 	 *
-	 *	\return BT_TRUE  iff index is set to a given value, \n
-	 *	        BT_FALSE otherwise
+	 *	\return true  iff index is set to a given value, \n
+	 *	        false otherwise
 	 */
-	virtual BooleanType isGiven( ) const;
+	virtual bool isGiven( ) const;
 
-	BooleanType isBinary() const
+	bool isBinary() const
 	{
 		if (varType == EVT_BINARY_OPERATOR)
-			return BT_TRUE;
+			return true;
 
-		return BT_FALSE;
+		return false;
 	}
 
-	BooleanType isVariable() const
+	bool isVariable() const
 	{
 		if (varType == EVT_VARIABLE)
-			return BT_TRUE;
+			return true;
 
-		return BT_FALSE;
+		return false;
 	}
 
 	const int getFactor( ) const

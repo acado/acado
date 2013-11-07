@@ -187,7 +187,7 @@ Matrix DiagonallyImplicitRKExport::formMatrix( const Matrix& mass, const Matrix&
 }
 
 
-returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, const ExportVariable& det, BooleanType DERIVATIVES )
+returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, const ExportVariable& det, bool DERIVATIVES )
 {
 	if( NX2 > 0 || NXA > 0 ) {
 
@@ -195,7 +195,7 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 		// Initialization iterations:
 		ExportForLoop loop11( index2,0,numStages );
 		ExportForLoop loop1( index1,0,numItsInit+1 ); // NOTE: +1 because 0 will lead to NaNs, so the minimum number of iterations is 1 at the initialization
-		evaluateMatrix( &loop1, index2, index3, tmp_index, Ah, C, BT_TRUE, DERIVATIVES );
+		evaluateMatrix( &loop1, index2, index3, tmp_index, Ah, C, true, DERIVATIVES );
 		loop1.addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( &" + rk_A.get(index2*(NX2+NXA),0) + ", " + rk_b.getFullName() + ", &" + rk_auxSolver.get(index2,0) + " );\n" );
 		loop1.addStatement( rk_kkk.getSubMatrix( NX1,NX1+NX2,index2,index2+1 ) += rk_b.getRows( 0,NX2 ) );													// differential states
 		if(NXA > 0) loop1.addStatement( rk_kkk.getSubMatrix( NX,NX+NXA,index2,index2+1 ) += rk_b.getRows( NX2,NX2+NXA ) );		// algebraic states
@@ -217,14 +217,14 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 		if( DERIVATIVES ) {
 			// solution calculated --> evaluate and save the necessary derivatives in rk_diffsTemp and update the matrix rk_A:
 			ExportForLoop loop3( index2,0,numStages );
-			evaluateMatrix( &loop3, index2, index3, tmp_index, Ah, C, BT_FALSE, DERIVATIVES );
+			evaluateMatrix( &loop3, index2, index3, tmp_index, Ah, C, false, DERIVATIVES );
 			block->addStatement( loop3 );
 		}
 
 		// IF DEBUG MODE:
 		int debugMode;
 		get( INTEGRATOR_DEBUG_MODE, debugMode );
-		if ( (BooleanType)debugMode == BT_TRUE ) {
+		if ( (bool)debugMode == true ) {
 			block->addStatement( debug_mat == rk_A );
 		}
 	}
@@ -233,11 +233,11 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 }
 
 
-returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, const ExportVariable& det, BooleanType STATES, uint number )
+returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, const ExportVariable& det, bool STATES, uint number )
 {
 	if( NX2 > 0 ) {
 		Matrix zeroM = zeros( NX2+NXA,1 );
-		Matrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), BT_FALSE );
+		Matrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
 		uint i;
 
 		ExportForLoop loop1( index2,0,numStages );
@@ -316,7 +316,7 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportState
 }
 
 
-returnValue DiagonallyImplicitRKExport::evaluateMatrix( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, BooleanType evaluateB, BooleanType DERIVATIVES )
+returnValue DiagonallyImplicitRKExport::evaluateMatrix( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, bool evaluateB, bool DERIVATIVES )
 {
 	evaluateStatesImplicitSystem( block, Ah, C, index1, index2, tmp_index );
 
@@ -391,7 +391,7 @@ returnValue DiagonallyImplicitRKExport::evaluateRhsImplicitSystem( ExportStateme
 }
 
 
-returnValue DiagonallyImplicitRKExport::solveOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, BooleanType DERIVATIVES )
+returnValue DiagonallyImplicitRKExport::solveOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, bool DERIVATIVES )
 {
 	if( NX3 > 0 ) {
 		ExportForLoop loop( index1,0,numStages );
@@ -418,7 +418,7 @@ returnValue DiagonallyImplicitRKExport::solveOutputSystem( ExportStatementBlock*
 }
 
 
-returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& index4, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, BooleanType STATES, uint number )
+returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& index4, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, bool STATES, uint number )
 {
 	if( NX3 > 0 ) {
 		uint i, j;
@@ -582,7 +582,7 @@ returnValue DiagonallyImplicitRKExport::setup( )
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
 	rk_A = ExportVariable( "rk_A", numStages*(NX2+NXA), NX2+NXA, REAL, structWspace );
-	if ( (BooleanType)debugMode == BT_TRUE && useOMP ) {
+	if ( (bool)debugMode == true && useOMP ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 	else {

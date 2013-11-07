@@ -119,14 +119,14 @@ public:
 
 	/** Returns whether the index is set to a given value.
 	 *
-	 *	\return BT_TRUE  iff index is set to a given value, \n
-	 *	        BT_FALSE otherwise
+	 *	\return true  iff index is set to a given value, \n
+	 *	        false otherwise
 	 */
-	BooleanType isGiven( ) const;
+	bool isGiven( ) const;
 
-	BooleanType isBinary() const;
+	bool isBinary() const;
 
-	BooleanType isVariable() const;
+	bool isVariable() const;
 
 	/** Converts index into a calling argument.
 	 *

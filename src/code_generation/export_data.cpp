@@ -132,7 +132,7 @@ returnValue ExportData::exportDataDeclaration(	std::ostream& stream,
 	return (*this)->exportDataDeclaration(stream, _realString, _intString, _precision);
 }
 
-BooleanType ExportData::isGiven( )
+bool ExportData::isGiven( )
 {
 	return (*this)->isGiven();
 }

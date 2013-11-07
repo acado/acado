@@ -355,9 +355,9 @@ class IntegratorExport : public ExportAlgorithm
 
 		/** Returns whether the grid is equidistant.	\n
 		 *  
-		 * \return BT_TRUE  iff the grid is equidistant, BT_FALSE otherwise. \n
+		 * \return true  iff the grid is equidistant, false otherwise. \n
 		 */
-		virtual BooleanType equidistantControlGrid( ) const;
+		virtual bool equidistantControlGrid( ) const;
 
 
 		const std::string getNameRHS() const;
@@ -436,13 +436,13 @@ class IntegratorExport : public ExportAlgorithm
 		uint diffsDim;							/**< This is the total number of sensitivities needed. */
 		uint inputDim;							/**< This is the dimension of the input to the integrator. */
 
-		BooleanType timeDependant;
+		bool timeDependant;
 
 		Matrix M11, A11, B11;
 		Matrix A33, M33;
 
-        BooleanType exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
-        BooleanType crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
+        bool exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
+        bool crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
         std::string name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
         std::string name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
         std::string name_rhs3;					/**< The name of the nonlinear function in the linear output system, if provided. */
