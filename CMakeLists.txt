@@ -237,8 +237,7 @@ SET( ACADO_SOURCE_DIRS
 	# Code Generation Tool
 	./src/code_generation
 	./src/code_generation/linear_solvers	
-#	./src/code_generation/integrators
-
+	./src/code_generation/integrators
 )
 
 ################################################################################

@@ -123,9 +123,9 @@ returnValue IntegratorExport::setLinearInput( const Matrix& M1, const Matrix& A1
 		dummy0.clearStaticCounters();
 		dummy1.clearStaticCounters();
 		dummy2.clearStaticCounters();
-		x = DifferentialState(NX1);
-		u = Control(NU);
-		p = Parameter(NP);
+		x = DifferentialState("", NX1, 1);
+		u = Control("", NU, 1);
+		p = Parameter("", NP, 1);
 
 		DifferentialEquation fun_input;
 		fun_input << A11*x+B11*u;
@@ -161,11 +161,11 @@ returnValue IntegratorExport::setModel(	const std::string& _name_ODE, const std:
 
 	NX2 = NX-NX1-NX3;
 
-	x = DifferentialState(NX);
-	dx = DifferentialStateDerivative(NDX);
-	z = AlgebraicState(NXA);
-	u = Control(NU);
-	p = Parameter(NP);
+	x = DifferentialState("", NX, 1);
+	dx = DifferentialStateDerivative("", NDX, 1);
+	z = AlgebraicState("", NXA, 1);
+	u = Control("", NU, 1);
+	p = Parameter("", NP, 1);
 
 	return SUCCESSFUL_RETURN;
 }
@@ -191,9 +191,9 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		dummy0.clearStaticCounters();
 		dummy1.clearStaticCounters();
 		dummy2.clearStaticCounters();
-		x = DifferentialState(NX1+NX2);
-		u = Control(NU);
-		p = Parameter(NP);
+		x = DifferentialState("", NX1+NX2, 1);
+		u = Control("", NU, 1);
+		p = Parameter("", NP, 1);
 
 		if( (uint)f.getNDX() > (NX1+NX2) ) {
 			return ACADOERROR( RET_INVALID_OPTION );
@@ -201,7 +201,7 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		if( f.getNDX() > 0 ) NDX3 = NX1+NX2;
 		else NDX3 = 0;
 		dummy4.clearStaticCounters();
-		dx = DifferentialStateDerivative(NDX3);
+		dx = DifferentialStateDerivative("", NDX3, 1);
 
 		if( f.getNXA() > 0 && NXA == 0 ) {
 			return ACADOERROR( RET_INVALID_OPTION );
@@ -209,7 +209,7 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		if( f.getNXA() > 0 ) NXA3 = NXA;
 		else NXA3 = 0;
 		dummy3.clearStaticCounters();
-		z = AlgebraicState(NXA3);
+		z = AlgebraicState("", NXA3, 1);
 
 		uint i;
 		OutputFcn g;
@@ -221,7 +221,7 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		}
 
 		dummy2.clearStaticCounters();
-		x = DifferentialState(NX);
+		x = DifferentialState("", NX, 1);
 
 		Matrix dependencyMat = _rhs.getDependencyPattern( x );
 		Vector dependency = sumRow( dependencyMat );
@@ -267,11 +267,11 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		dummy3.clearStaticCounters();
 		dummy4.clearStaticCounters();
 
-		x = DifferentialState(NX);
-		dx = DifferentialStateDerivative(NDX);
-		z = AlgebraicState(NXA);
-		u = Control(NU);
-		p = Parameter(NP);
+		x = DifferentialState("", NX, 1);
+		dx = DifferentialStateDerivative("", NDX, 1);
+		z = AlgebraicState("", NXA, 1);
+		u = Control("", NU, 1);
+		p = Parameter("", NP, 1);
 	}
 
 	return SUCCESSFUL_RETURN;

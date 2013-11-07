@@ -33,11 +33,9 @@
 
 #include <acado/code_generation/integrators/erk_export.hpp>
 
-#include <sstream>
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -129,13 +127,13 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
-		integrate.addStatement( std::string( "int numSteps[" ) << std::string( numSteps.getDim() ) << "] = {" << std::string( numSteps(0) ) );
+		integrate.addStatement( std::string( "int numSteps[" ) + toString( numSteps.getDim() ) + "] = {" + toString( numSteps(0) ) );
 		uint i;
 		for( i = 1; i < numSteps.getDim(); i++ ) {
-			integrate.addStatement( std::string( ", " ) << std::string( numSteps(i) ) );
+			integrate.addStatement( std::string( ", " ) + toString( numSteps(i) ) );
 		}
 		integrate.addStatement( std::string( "};\n" ) );
-		integrate.addStatement( std::string( "int " ) << numInt.getName() << " = numSteps[" << rk_index.getName() << "];\n" );
+		integrate.addStatement( std::string( "int " ) + numInt.getName() + " = numSteps[" + rk_index.getName() + "];\n" );
 	}
 	
 	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
@@ -160,7 +158,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	}
 	else {
 		loop = ExportForLoop( run, 0, 1 );
-		loop.addStatement( std::string("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+		loop.addStatement( std::string("for(") + run.getName() + " = 0; " + run.getName() + " < " + numInt.getName() + "; " + run.getName() + "++ ) {\n" );
 	}
 
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
@@ -205,11 +203,11 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	dummy3.clearStaticCounters();
 	dummy4.clearStaticCounters();
 
-	x = DifferentialState(NX);
-	dx = DifferentialStateDerivative(NDX);
-	z = AlgebraicState(NXA);
-	u = Control(NU);
-	p = Parameter(NP);
+	x = DifferentialState("", NX, 1);
+	dx = DifferentialStateDerivative("", NDX, 1);
+	z = AlgebraicState("", NXA, 1);
+	u = Control("", NU, 1);
+	p = Parameter("", NP, 1);
 	
 	if( NDX > 0 && NDX != NX ) {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -226,7 +224,7 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	}
 
 	if( DERIVATIVES ) {
-		DifferentialState Gx(NX,NX), Gu(NX,NU);
+		DifferentialState Gx("", NX,NX), Gu("", NX,NU);
 		// no free parameters yet!
 		// DifferentialState Gp(NX,NP);
 
@@ -347,21 +345,18 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	{
 		getDataDeclarations( code, ACADO_LOCAL );
 
-		stringstream s;
-		s << "#pragma omp threadprivate( "
-				<< diffs_rhs.getGlobalExportVariable().getFullName().getName()  << ", "
-				<< rk_xxx.getFullName().getName() << ", "
-				<< rk_ttt.getFullName().getName() << ", "
-				<< rk_kkk.getFullName().getName()
-				<< " )" << endl << endl;
-
-		code.addStatement( s.str().c_str() );
+		code << "#pragma omp threadprivate( "
+				<< diffs_rhs.getGlobalExportVariable().getFullName()  << ", "
+				<< rk_xxx.getFullName() << ", "
+				<< rk_ttt.getFullName() << ", "
+				<< rk_kkk.getFullName()
+				<< " )\n\n";
 	}
 
 	if( exportRhs ) code.addFunction( diffs_rhs );
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-	code.addComment(std::string("Fixed step size:") << std::string(h));
+	code.addComment(std::string("Fixed step size:") + toString(h));
 	code.addFunction( integrate );
 
 	int matlabInterface;

@@ -43,13 +43,13 @@ using namespace std;
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportMatlabRhs::ExportMatlabRhs(	const String& _templateName,
-												const String& _fileName,
-												const String& _commonHeaderName,
-												const String& _realString,
-												const String& _intString,
+ExportMatlabRhs::ExportMatlabRhs(	const std::string& _templateName,
+												const std::string& _fileName,
+												const std::string& _commonHeaderName,
+												const std::string& _realString,
+												const std::string& _intString,
 												int _precision,
-												const String& _commentString
+												const std::string& _commentString
 						) : ExportTemplatedFile(_templateName, _fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
 {}
 
@@ -74,10 +74,10 @@ ExportMatlabRhs& ExportMatlabRhs::operator=(	const ExportMatlabRhs& arg
 	return *this;
 }
 
-returnValue ExportMatlabRhs::configure(	const String& nameFunction )
+returnValue ExportMatlabRhs::configure(	const std::string& nameFunction )
 {	
 	// Configure the dictionary
-	dictionary[ "@ACADO_RHS@" ] =  std::string(nameFunction.getName());
+	dictionary[ "@ACADO_RHS@" ] =  nameFunction;
 	
 	// And then fill a template file
 	fillTemplate();

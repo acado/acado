@@ -33,13 +33,9 @@
 
 #include <acado/code_generation/integrators/discrete_export.hpp>
 
-#include <sstream>
 using namespace std;
 
-
-
 BEGIN_NAMESPACE_ACADO
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -80,11 +76,11 @@ returnValue DiscreteTimeExport::setDifferentialEquation(	const Expression& rhs_ 
 		dummy4.clearStaticCounters();
 
 		NX2 = rhs_.getDim() - NXA;
-		x = DifferentialState(NX1+NX2);
-		z = AlgebraicState(NXA);
-		dx = DifferentialStateDerivative(NDX);
-		u = Control(NU);
-		p = Parameter(NP);
+		x = DifferentialState("", NX1+NX2, 1);
+		z = AlgebraicState("", NXA, 1);
+		dx = DifferentialStateDerivative("", NDX, 1);
+		u = Control("", NU, 1);
+		p = Parameter("", NP, 1);
 
 		DifferentialEquation f;
 		f << rhs_;
@@ -214,7 +210,7 @@ returnValue DiscreteTimeExport::setup( )
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
 		ExportVariable numStepsV( "numSteps", numSteps, STATIC_CONST_INT );
-		integrate.addStatement( std::string( "int " ) << numInt.getName() << " = " << numStepsV.getName() << "[" << rk_index.getName() << "];\n" );
+		integrate.addStatement( std::string( "int " ) + numInt.getName() + " = " + numStepsV.getName() + "[" + rk_index.getName() + "];\n" );
 	}
 
 	integrate.addStatement( rk_xxx.getCols( NX,inputDim-diffsDim ) == rk_eta.getCols( NX+diffsDim,inputDim ) );
@@ -248,7 +244,7 @@ returnValue DiscreteTimeExport::setup( )
 	}
 	else {
 		loop = &integrate;
-		loop->addStatement( std::string("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+		loop->addStatement( std::string("for(") + run.getName() + " = 0; " + run.getName() + " < " + numInt.getName() + "; " + run.getName() + "++ ) {\n" );
 	}
 
 	loop->addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
@@ -377,20 +373,20 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 
 		stringstream s;
 		s << "#pragma omp threadprivate( "
-				<< max.getFullName().getName() << ", "
-				<< rk_xxx.getFullName().getName();
+				<< max.getFullName() << ", "
+				<< rk_xxx.getFullName();
 		if( NX1 > 0 ) {
-			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev1.getFullName().getName();
-			s << ", " << rk_diffsNew1.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev1.getFullName();
+			s << ", " << rk_diffsNew1.getFullName();
 		}
 		if( NX2 > 0 || NXA > 0 ) {
-			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev2.getFullName().getName();
-			s << ", " << rk_diffsNew2.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev2.getFullName();
+			s << ", " << rk_diffsNew2.getFullName();
 		}
 		if( NX3 > 0 ) {
-			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev3.getFullName().getName();
-			s << ", " << rk_diffsNew3.getFullName().getName();
-			s << ", " << rk_diffsTemp3.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev3.getFullName();
+			s << ", " << rk_diffsNew3.getFullName();
+			s << ", " << rk_diffsTemp3.getFullName();
 		}
 		s << " )" << endl << endl;
 		code.addStatement( s.str().c_str() );
@@ -421,7 +417,7 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 		code.addLinebreak( 2 );
 	}
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-	code.addComment(std::string("Fixed step size:") << std::string(h));
+	code.addComment(std::string("Fixed step size:") + toString(h));
 
 	code.addFunction( integrate );
 

@@ -34,13 +34,9 @@
 #include <acado/code_generation/integrators/irk_export.hpp>
 #include <acado/code_generation/integrators/irk_forward_export.hpp>
 
-#include <sstream>
 using namespace std;
 
-
-
 BEGIN_NAMESPACE_ACADO
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -210,29 +206,29 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 
 		stringstream s;
 		s << "#pragma omp threadprivate( "
-				<< max.getFullName().getName() << ", "
-				<< rk_ttt.getFullName().getName() << ", "
-				<< rk_xxx.getFullName().getName() << ", "
-				<< rk_kkk.getFullName().getName() << ", "
-				<< rk_diffK.getFullName().getName() << ", "
-				<< rk_rhsTemp.getFullName().getName() << ", "
-				<< rk_auxSolver.getFullName().getName();
+				<< max.getFullName() << ", "
+				<< rk_ttt.getFullName() << ", "
+				<< rk_xxx.getFullName() << ", "
+				<< rk_kkk.getFullName() << ", "
+				<< rk_diffK.getFullName() << ", "
+				<< rk_rhsTemp.getFullName() << ", "
+				<< rk_auxSolver.getFullName();
 		if( NX1 > 0 ) {
-			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev1.getFullName().getName();
-			s << ", " << rk_diffsNew1.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev1.getFullName();
+			s << ", " << rk_diffsNew1.getFullName();
 		}
 		if( NX2 > 0 || NXA > 0 ) {
-			s << ", " << rk_A.getFullName().getName();
-			s << ", " << rk_b.getFullName().getName();
-			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev2.getFullName().getName();
-			s << ", " << rk_diffsNew2.getFullName().getName();
-			s << ", " << rk_diffsTemp2.getFullName().getName();
+			s << ", " << rk_A.getFullName();
+			s << ", " << rk_b.getFullName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev2.getFullName();
+			s << ", " << rk_diffsNew2.getFullName();
+			s << ", " << rk_diffsTemp2.getFullName();
 			solver->appendVariableNames( s );
 		}
 		if( NX3 > 0 ) {
-			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev3.getFullName().getName();
-			s << ", " << rk_diffsNew3.getFullName().getName();
-			s << ", " << rk_diffsTemp3.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev3.getFullName();
+			s << ", " << rk_diffsNew3.getFullName();
+			s << ", " << rk_diffsTemp3.getFullName();
 		}
 		s << " )" << endl << endl;
 		code.addStatement( s.str().c_str() );
@@ -275,7 +271,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 
 	// export RK scheme
 	uint run5;
-	std::string tempstd::string;
+	std::string tempString;
 	
 	initializeDDMatrix();
 	initializeCoefficients();
@@ -300,7 +296,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 		C = ExportVariable( "C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 	}
 
-	code.addComment(std::string("Fixed step size:") << std::string(h));
+	code.addComment(std::string("Fixed step size:") + toString(h));
 
 	ExportVariable determinant( "det", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
 	integrate.addDeclaration( determinant );
@@ -321,7 +317,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 		ExportVariable numStepsV( "numSteps", numSteps, STATIC_CONST_INT );
 		code.addDeclaration( numStepsV );
 		code.addLinebreak( 2 );
-		integrate.addStatement( std::string( "int " ) << numInt.getName() << " = " << numStepsV.getName() << "[" << rk_index.getName() << "];\n" );
+		integrate.addStatement( std::string( "int " ) + numInt.getName() + " = " + numStepsV.getName() + "[" + rk_index.getName() + "];\n" );
 	}
 
 	prepareOutputEvaluation( code );
@@ -340,7 +336,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	ExportVariable time_tmp( "time_tmp", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
 	if( CONTINUOUS_OUTPUT ) {
 		for( run5 = 0; run5 < outputGrids.size(); run5++ ) {
-			ExportIndex numMeasTmp( (std::string)"numMeasTmp" << run5 );
+			ExportIndex numMeasTmp( (std::string)"numMeasTmp" + toString(run5) );
 			numMeas.push_back( numMeasTmp );
 			integrate.addIndex( numMeas[run5] );
 		}
@@ -369,16 +365,16 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	}
 	else {
 	    loop = &integrate;
-		loop->addStatement( std::string("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+		loop->addStatement( std::string("for(") + run.getName() + " = 0; " + run.getName() + " < " + numInt.getName() + "; " + run.getName() + "++ ) {\n" );
 	}
 
 	if( CONTINUOUS_OUTPUT && (MeasurementGrid)measGrid == ONLINE_GRID ) {
 		for( run5 = 0; run5 < outputGrids.size(); run5++ ) {
 			loop->addStatement( tmp_index1 == numMeas[run5] );
-			loop->addStatement( std::string("while( ") << tmp_index1.getName() << " < " << std::string(totalMeas[run5]) << " && " << gridVariables[run5].get(0,tmp_index1) << " <= (" << rk_ttt.getFullName() << "+" << std::string(1.0/grid.getNumIntervals()) << ") ) {\n" );
+			loop->addStatement( std::string("while( ") + tmp_index1.getName() + " < " + toString(totalMeas[run5]) + " && " + gridVariables[run5].get(0,tmp_index1) + " <= (" + rk_ttt.getFullName() + "+" + toString(1.0/grid.getNumIntervals()) + ") ) {\n" );
 			loop->addStatement( tmp_index1 == tmp_index1+1 );
 			loop->addStatement( std::string("}\n") );
-			loop->addStatement( std::string(tmp_meas.get( 0,run5 )) << " = " << tmp_index1.getName() << " - " << numMeas[run5].getName() << ";\n" );
+			loop->addStatement( std::string(tmp_meas.get( 0,run5 )) + " = " + tmp_index1.getName() + " - " + numMeas[run5].getName() + ";\n" );
 		}
 	}
 
@@ -511,14 +507,14 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( std::string( "}\n" ) );
 	}
 
-	loop->addStatement( std::string( reset_int.get(0,0) ) << " = 0;\n" );
+	loop->addStatement( std::string( reset_int.get(0,0) ) + " = 0;\n" );
 
 	for( run5 = 0; run5 < rk_outputs.size(); run5++ ) {
 		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
-			loop->addStatement( numMeas[run5].getName() << " += " << numMeasVariables[run5].get(0,run) << ";\n" );
+			loop->addStatement( numMeas[run5].getName() + " += " + numMeasVariables[run5].get(0,run) + ";\n" );
 		}
 		else { // ONLINE_GRID
-			loop->addStatement( numMeas[run5].getName() << " += " << tmp_meas.get(0,run5) << ";\n" );
+			loop->addStatement( numMeas[run5].getName() + " += " + tmp_meas.get(0,run5) + ";\n" );
 		}
 	}
 	loop->addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
@@ -550,9 +546,9 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
     	integrate.addStatement( loop3 );
     }
 
-    integrate.addStatement( std::string( "if( " ) << determinant.getFullName() << " < 1e-12 ) {\n" );
+    integrate.addStatement( std::string( "if( " ) + determinant.getFullName() + " < 1e-12 ) {\n" );
     integrate.addStatement( error_code == 2 );
-    integrate.addStatement( std::string( "} else if( " ) << determinant.getFullName() << " < 1e-6 ) {\n" );
+    integrate.addStatement( std::string( "} else if( " ) + determinant.getFullName() + " < 1e-6 ) {\n" );
     integrate.addStatement( error_code == 1 );
     integrate.addStatement( std::string( "} else {\n" ) );
     integrate.addStatement( error_code == 0 );
@@ -583,11 +579,11 @@ returnValue ForwardIRKExport::propagateOutputs(	ExportStatementBlock* block, con
 		ExportStatementBlock *loop01;
 		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 			loop01 = block;
-			loop01->addStatement( std::string("for(") << index0.getName() << " = 0; " << index0.getName() << " < (int)" << numMeasVariables[i].get(0,index) << "; " << index0.getName() << "++) {\n" );
+			loop01->addStatement( std::string("for(") + index0.getName() + " = 0; " + index0.getName() + " < (int)" + numMeasVariables[i].get(0,index) + "; " + index0.getName() + "++) {\n" );
 		}
 		else { // ONLINE_GRID
 			loop01 = block;
-			loop01->addStatement( std::string("for(") << index0.getName() << " = 0; " << index0.getName() << " < (int)" << tmp_meas.get(0,i) << "; " << index0.getName() << "++) {\n" );
+			loop01->addStatement( std::string("for(") + index0.getName() + " = 0; " + index0.getName() + " < (int)" + tmp_meas.get(0,i) + "; " + index0.getName() + "++) {\n" );
 		}
 
 		uint numOutputs = getDimOUTPUT( i );
@@ -763,7 +759,7 @@ returnValue ForwardIRKExport::sensitivitiesInputSystem( ExportStatementBlock* bl
 		// update rk_diffsNew with the new sensitivities:
 		if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) block->addStatement( std::string( "if( run == 0 ) {\n" ) );
 		ExportForLoop loop3( index2,0,NX1 );
-		if( STATES ) loop3.addStatement( std::string(rk_diffsNew1.get( index2,index1 )) << " = (" << index2.getName() << " == " << index1.getName() << ");\n" );
+		if( STATES ) loop3.addStatement( std::string(rk_diffsNew1.get( index2,index1 )) + " = (" + index2.getName() + " == " + index1.getName() + ");\n" );
 
 		if( STATES ) loop3.addStatement( rk_diffsNew1.getSubMatrix( index2,index2+1,index1,index1+1 ) += rk_diffK.getRow( index2 )*Bh );
 		else		 loop3.addStatement( rk_diffsNew1.getSubMatrix( index2,index2+1,index1+NX1,index1+NX1+1 ) == rk_diffK.getRow( index2 )*Bh );
@@ -785,7 +781,7 @@ returnValue ForwardIRKExport::sensitivitiesImplicitSystem( ExportStatementBlock*
 		ExportForLoop loop1( index2,0,numStages );
 		if( STATES && number == 1 ) {
 			ExportForLoop loop2( index3,0,NX1 );
-			loop2.addStatement( std::string(rk_rhsTemp.get( index3,0 )) << " = -(" << index3.getName() << " == " << index1.getName() << ");\n" );
+			loop2.addStatement( std::string(rk_rhsTemp.get( index3,0 )) + " = -(" + index3.getName() + " == " + index1.getName() + ");\n" );
 			for( i = 0; i < numStages; i++ ) {
 				loop2.addStatement( rk_rhsTemp.getRow( index3 ) -= rk_diffK.getSubMatrix( index3,index3+1,i,i+1 )*Ah.getSubMatrix(index2,index2+1,i,i+1) );
 			}
@@ -822,8 +818,8 @@ returnValue ForwardIRKExport::sensitivitiesImplicitSystem( ExportStatementBlock*
 		}
 		block->addStatement( loop1 );
 		if( STATES && (number == 1 || NX1 == 0) ) {
-			block->addStatement( std::string( "if( 0 == " ) << index1.getName() << " ) {\n" );	// factorization of the new matrix rk_A not yet calculated!
-			block->addStatement( det.getFullName() << " = " << solver->getNameSolveFunction() << "( " << rk_A.getFullName() << ", " << rk_b.getFullName() << ", " << rk_auxSolver.getFullName() << " );\n" );
+			block->addStatement( std::string( "if( 0 == " ) + index1.getName() + " ) {\n" );	// factorization of the new matrix rk_A not yet calculated!
+			block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_b.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 			block->addStatement( std::string( "}\n else {\n" ) );
 		}
 		block->addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
@@ -835,7 +831,7 @@ returnValue ForwardIRKExport::sensitivitiesImplicitSystem( ExportStatementBlock*
 		block->addStatement( loop2 );
 		// update rk_diffsNew with the new sensitivities:
 		ExportForLoop loop3( index2,0,NX2 );
-		if( STATES && number == 2 ) loop3.addStatement( std::string(rk_diffsNew2.get( index2,index1 )) << " = (" << index2.getName() << " == " << index1.getName() << "-" << std::string(NX1) << ");\n" );
+		if( STATES && number == 2 ) loop3.addStatement( std::string(rk_diffsNew2.get( index2,index1 )) + " = (" + index2.getName() + " == " + index1.getName() + "-" + toString(NX1) + ");\n" );
 
 		if( STATES && number == 2 ) loop3.addStatement( rk_diffsNew2.getSubMatrix( index2,index2+1,index1,index1+1 ) += rk_diffK.getRow( NX1+index2 )*Bh );
 		else if( STATES )	loop3.addStatement( rk_diffsNew2.getSubMatrix( index2,index2+1,index1,index1+1 ) == rk_diffK.getRow( NX1+index2 )*Bh );
@@ -862,7 +858,7 @@ returnValue ForwardIRKExport::sensitivitiesOutputSystem( ExportStatementBlock* b
 		ExportForLoop loop1( index2,0,numStages );
 		if( STATES && number == 1 ) {
 			ExportForLoop loop2( index3,0,NX1 );
-			loop2.addStatement( std::string(rk_rhsTemp.get( index3,0 )) << " = (" << index3.getName() << " == " << index1.getName() << ");\n" );
+			loop2.addStatement( std::string(rk_rhsTemp.get( index3,0 )) + " = (" + index3.getName() + " == " + index1.getName() + ");\n" );
 			for( i = 0; i < numStages; i++ ) {
 				loop2.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getSubMatrix( index3,index3+1,i,i+1 )*Ah.getSubMatrix(index2,index2+1,i,i+1) );
 			}
@@ -886,7 +882,7 @@ returnValue ForwardIRKExport::sensitivitiesOutputSystem( ExportStatementBlock* b
 		}
 		else if( STATES && number == 2 ) {
 			ExportForLoop loop3( index3,NX1,NX1+NX2 );
-			loop3.addStatement( std::string(rk_rhsTemp.get( index3,0 )) << " = (" << index3.getName() << " == " << index1.getName() << ");\n" );
+			loop3.addStatement( std::string(rk_rhsTemp.get( index3,0 )) + " = (" + index3.getName() + " == " + index1.getName() + ");\n" );
 			for( i = 0; i < numStages; i++ ) {
 				loop3.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getSubMatrix( index3,index3+1,i,i+1 )*Ah.getSubMatrix(index2,index2+1,i,i+1) );
 			}
@@ -948,7 +944,7 @@ returnValue ForwardIRKExport::sensitivitiesOutputSystem( ExportStatementBlock* b
 		// update rk_diffsNew with the new sensitivities:
 		if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) block->addStatement( std::string( "if( run == 0 ) {\n" ) );
 		ExportForLoop loop8( index2,0,NX3 );
-		if( STATES && number == 3 ) loop8.addStatement( std::string(rk_diffsNew3.get( index2,index1 )) << " = (" << index2.getName() << " == " << index1.getName() << "-" << std::string(NX1+NX2) << ");\n" );
+		if( STATES && number == 3 ) loop8.addStatement( std::string(rk_diffsNew3.get( index2,index1 )) + " = (" + index2.getName() + " == " + index1.getName() + "-" + toString(NX1+NX2) + ");\n" );
 
 		if( STATES && number == 3 ) loop8.addStatement( rk_diffsNew3.getSubMatrix( index2,index2+1,index1,index1+1 ) += rk_diffK.getRow( NX1+NX2+index2 )*Bh );
 		else if( STATES )	loop8.addStatement( rk_diffsNew3.getSubMatrix( index2,index2+1,index1,index1+1 ) == rk_diffK.getRow( NX1+NX2+index2 )*Bh );
@@ -974,7 +970,7 @@ returnValue ForwardIRKExport::sensitivitiesOutputs( ExportStatementBlock* block,
 		ExportStatementBlock *loop;
 		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 			loop = block;
-			loop->addStatement( std::string("for(") << index2.getName() << " = 0; " << index2.getName() << " < (int)" << numMeasVariables[i].get(0,index0) << "; " << index2.getName() << "++) {\n" );
+			loop->addStatement( std::string("for(") + index2.getName() + " = 0; " + index2.getName() + " < (int)" + numMeasVariables[i].get(0,index0) + "; " + index2.getName() + "++) {\n" );
 			loop->addStatement( tmp_index2 == numMeas[i]+index2 );
 			for( j = 0; j < numStages; j++ ) {
 				loop->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( tmp_index2,tmp_index2+1,j,j+1 ) );
@@ -987,15 +983,15 @@ returnValue ForwardIRKExport::sensitivitiesOutputs( ExportStatementBlock* block,
 		}
 		else { // ONLINE_GRID
 			loop = block;
-			loop->addStatement( std::string(tmp_index3.getName()) << " = " << tmp_meas.get( 0,i ) << ";\n" );
-			loop->addStatement( std::string("for(") << index2.getName() << " = 0; " << index2.getName() << " < (int)" << tmp_index3.getName() << "; " << index2.getName() << "++) {\n" );
+			loop->addStatement( std::string(tmp_index3.getName()) + " = " + tmp_meas.get( 0,i ) + ";\n" );
+			loop->addStatement( std::string("for(") + index2.getName() + " = 0; " + index2.getName() + " < (int)" + tmp_index3.getName() + "; " + index2.getName() + "++) {\n" );
 			loop->addStatement( tmp_index2 == numMeas[i]+index2 );
 
 			uint scale = grid.getNumIntervals();
 			double scale2 = 1.0/grid.getNumIntervals();
-			loop->addStatement( time_tmp.getName() << " = " << std::string(scale) << "*(" << gridVariables[i].get(0,tmp_index2) << "-" << std::string(scale2) << "*" << index0.getName() << ");\n" );
+			loop->addStatement( time_tmp.getName() + " = " + toString(scale) + "*(" + gridVariables[i].get(0,tmp_index2) + "-" + toString(scale2) + "*" + index0.getName() + ");\n" );
 
-			std::string h((grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals());
+			std::string h = toString((grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals());
 			evaluatePolynomial( *loop, rk_outH, time_tmp, h );
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) evaluateDerivedPolynomial( *loop, rk_out, time_tmp );
 		}
@@ -1009,7 +1005,7 @@ returnValue ForwardIRKExport::sensitivitiesOutputs( ExportStatementBlock* block,
 		for( j = 0; j < NX; j++ ) {
 			if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyX(j)) != 0 ) {
 				if( STATES && j >= base ) {
-					loop->addStatement( std::string(rk_rhsTemp.get( j,0 )) << " = (" << j << " == " << index1.getName() << ");\n" );
+					loop->addStatement( std::string(rk_rhsTemp.get( j,0 )) + " = (" + toString(j) + " == " + index1.getName() + ");\n" );
 				}
 				else if( j >= base ) {
 					loop->addStatement( rk_rhsTemp.getRow( j ) == 0.0 );
