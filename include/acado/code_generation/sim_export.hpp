@@ -313,9 +313,18 @@ class SIMexport : public ExportModule, public ModelContainer
 		 */
         returnValue executeTest( const std::string& _dirName );
 
-
+        /** This function sets the number of calls performed for the timing results.
+         *
+         *	@param[in] _timingCalls		The new number of calls performed for the timing results.
+         *
+         *	\return SUCCESSFUL_RETURN
+         */
+        virtual returnValue setTimingCalls( uint _timingCalls
+        									);
 
     protected:
+
+        uint timingCalls;						/**< The number of calls to the exported function for the timing results. */
 
         double T;								/**< The total simulation time. */
 		IntegratorExport*  integrator;			/**< Module for exporting a tailored integrator. */

@@ -45,45 +45,14 @@ ExportModule::ExportModule( ) : UserInteraction( )
 { 
 	setupOptions( );
 
-	timingCalls = 0;
-
 	commonHeaderName = "acado.h";
 	name = "acado";
 	exportFolderName = "acado_exported_code";
 }
 
 
-ExportModule::ExportModule(	const ExportModule& arg
-							) : UserInteraction( arg )
-{
-	copy( arg );
-}
-
-
 ExportModule::~ExportModule( )
-{
-}
-
-
-ExportModule& ExportModule::operator=(	const ExportModule& arg
-										)
-{
-	if( this != &arg )
-	{
-		UserInteraction::operator=( arg );
-		copy( arg );
-	}
-
-	return *this;
-}
-
-
-returnValue ExportModule::setTimingCalls( uint _timingCalls ) {
-	timingCalls = _timingCalls;
-
-	return SUCCESSFUL_RETURN;
-}
-
+{}
 
 std::string ExportModule::getCommonHeaderName( ) const
 {
@@ -94,19 +63,6 @@ std::string ExportModule::getCommonHeaderName( ) const
 //
 // PROTECTED MEMBER FUNCTIONS:
 //
-
-
-returnValue ExportModule::copy(	const ExportModule& arg
-								)
-{
-	commonHeaderName = arg.commonHeaderName;
-	timingCalls = arg.timingCalls;
-	name = arg.name;
-	exportFolderName = arg.exportFolderName;
-
-	return SUCCESSFUL_RETURN;
-}
-
 
 returnValue ExportModule::setupOptions( )
 {

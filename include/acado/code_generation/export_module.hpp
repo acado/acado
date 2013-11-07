@@ -66,28 +66,12 @@ class ExportModule : public UserInteraction
     //
     public:
 
-		/** Default constructor. 
-		 */
+		/** Default constructor. */
 		ExportModule( );
-
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportModule(	const ExportModule& arg
-						);
 
 		/** Destructor. 
 		 */
 		virtual ~ExportModule( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportModule& operator=(	const ExportModule& arg
-									);
-
 
 		/** Exports all files of the auto-generated code into the given directory.
 		 *
@@ -132,8 +116,8 @@ class ExportModule : public UserInteraction
 		 *	        RET_UNABLE_TO_EXPORT_CODE
 		 */
 		virtual returnValue collectDataDeclarations(	ExportStatementBlock& declarations,
-												ExportStruct dataStruct = ACADO_ANY
-												) const = 0;
+														ExportStruct dataStruct = ACADO_ANY
+														) const = 0;
 
 
 		/** Collects all function (forward) declarations of the auto-generated sub-modules
@@ -145,17 +129,7 @@ class ExportModule : public UserInteraction
 		 *	        RET_UNABLE_TO_EXPORT_CODE
 		 */
 		virtual returnValue collectFunctionDeclarations(	ExportStatementBlock& declarations
-													) const = 0;
-
-
-		/** This function sets the number of calls performed for the timing results.
-		 *
-		 *	@param[in] _timingCalls		The new number of calls performed for the timing results.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue setTimingCalls( uint _timingCalls
-										);
+															) const = 0;
 
 		/** Returns the name of common header file.
 		 *
@@ -190,15 +164,6 @@ class ExportModule : public UserInteraction
 
 	protected:
 
-		/** Copies all class members from given object.
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue copy(	const ExportModule& arg
-							);
-
 		/** Sets-up default options.
 		 *
 		 *  \return SUCCESSFUL_RETURN
@@ -207,8 +172,8 @@ class ExportModule : public UserInteraction
 
 
     protected:
-		std::string commonHeaderName;			/**< Name of common header file. */
-		uint timingCalls;						/**< The number of calls to the exported function for the timing results. */
+		/** Name of common header file. */
+		std::string commonHeaderName;
 
     private:
 		/** Module name. */

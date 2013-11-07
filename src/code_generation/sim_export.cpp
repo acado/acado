@@ -64,6 +64,8 @@ SIMexport::SIMexport( const uint simIntervals, const double totalTime ) : Export
 	referenceProvided = BT_FALSE;
 	PRINT_DETAILS = BT_TRUE;
 
+	timingCalls = 0;
+
 	setStatus( BS_NOT_INITIALIZED );
 }
 
@@ -1003,6 +1005,12 @@ returnValue SIMexport::executeTest( const std::string& _dirName ) {
 	nil = system((_dirName + "/./test").c_str());
 	nil = nil+1;
 	
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue SIMexport::setTimingCalls( uint _timingCalls ) {
+	timingCalls = _timingCalls;
+
 	return SUCCESSFUL_RETURN;
 }
 
