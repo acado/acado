@@ -33,9 +33,9 @@
 
 #include <acado/code_generation/linear_solvers/gaussian_elimination_export.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -47,27 +47,8 @@ ExportGaussElim::ExportGaussElim( UserInteraction* _userInteraction,
 {
 }
 
-
-ExportGaussElim::ExportGaussElim( const ExportGaussElim& arg ) : ExportLinearSolver( arg )
-{
-}
-
-
 ExportGaussElim::~ExportGaussElim( )
-{
-}
-
-
-ExportGaussElim& ExportGaussElim::operator=( const ExportGaussElim& arg )
-{
-	if( this != &arg )
-	{
-		ExportLinearSolver::operator=( arg );
-	}
-
-	return *this;
-}
-
+{}
 
 returnValue ExportGaussElim::getDataDeclarations(	ExportStatementBlock& declarations,
 														ExportStruct dataStruct
@@ -104,7 +85,7 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 		for( run2 = dim-1; run2 > (run1-1); run2--) {
 			solveTriangular.addStatement( b.getRow( (run1-1) ) -= A.getSubMatrix( (run1-1),(run1-1)+1,run2,run2+1 ) * b.getRow( run2 ) );
 		}
-		solveTriangular.addStatement( std::string( "b[" ) << std::string( (run1-1) ) << "] = b[" << std::string( (run1-1) ) << "]/A[" << std::string( (run1-1)*dim+(run1-1) ) << "];\n" );
+		solveTriangular << "b[" << toString( (run1-1) ) << "] = b[" << toString( (run1-1) ) << "]/A[" << toString( (run1-1)*dim+(run1-1) ) << "];\n";
 	}
 	code.addFunction( solveTriangular );
 
@@ -126,7 +107,7 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 	// initialise rk_perm (the permutation vector)
 	if( REUSE ) {
 		ExportForLoop loop1( i,0,dim );
-		loop1.addStatement( std::string( rk_perm.get( 0,i ) ) << " = " << i.getName() << ";\n" );
+		loop1 << rk_perm.get( 0,i ) << " = " << i.getName() << ";\n";
 		solve.addStatement( loop1 );
 	}
 	
@@ -137,20 +118,20 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 			// Search for pivot in column run1:
 			for( run2 = run1+1; run2 < dim; run2++ ) {
 				// add the test (if or else if):
-				std::string test;
+				stringstream test;
 				if( run2 == (run1+1) ) {
 					test << "if(";
 				} else {
 					test << "else if(";
 				}
-				test << "fabs(A[" << std::string( run2*dim+run1 ) << "]) > fabs(A[" << std::string( run1*dim+run1 ) << "])";
+				test << "fabs(A[" << toString( run2*dim+run1 ) << "]) > fabs(A[" << toString( run1*dim+run1 ) << "])";
 				for( run3 = run1+1; run3 < dim; run3++ ) {
 					if( run3 != run2) {
-						test << " && fabs(A[" << std::string( run2*dim+run1 ) << "]) > fabs(A[" << std::string( run3*dim+run1 ) << "])";
+						test << " && fabs(A[" << toString( run2*dim+run1 ) << "]) > fabs(A[" << toString( run3*dim+run1 ) << "])";
 					}
 				}
 				test << ") {\n";
-				solve.addStatement( test );
+				solve.addStatement( test.str() );
 			
 				// do the row swaps:
 				// for A:
@@ -170,13 +151,13 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 					solve.addStatement( rk_perm.getCol( run2 ) == rk_swap );
 				}
 			
-				solve.addStatement( std::string( "}\n" ) );
+				solve.addStatement( "}\n" );
 			}
 			// potentially needed row swaps are done
 			solve.addLinebreak();
 			// update of the next rows:
 			for( run2 = run1+1; run2 < dim; run2++ ) {
-				solve.addStatement( std::string( "A[" ) << std::string( run2*dim+run1 ) << "] = -A[" << std::string( run2*dim+run1 ) << "]/A[" << std::string( run1*dim+run1 ) << "];\n" );
+				solve << "A[" << toString( run2*dim+run1 ) << "] = -A[" << toString( run2*dim+run1 ) << "]/A[" << toString( run1*dim+run1 ) << "];\n";
 				solve.addStatement( A.getSubMatrix( run2,run2+1,run1+1,dim ) += A.getSubMatrix( run2,run2+1,run1,run1+1 ) * A.getSubMatrix( run1,run1+1,run1+1,dim ) );
 				solve.addStatement( b.getRow( run2 ) += A.getSubMatrix( run2,run2+1,run1,run1+1 ) * b.getRow( run1 ) );
 				solve.addLinebreak();
@@ -188,43 +169,43 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 		solve.addLinebreak();
 	}
 	else { // without UNROLLING:
-		solve.addStatement( std::string( "for( i=0; i < (" ) << std::string( dim-1 ) << "); i++ ) {\n" );
-		solve.addStatement( std::string( "	indexMax = i;\n") );
-		solve.addStatement( std::string( "	valueMax = fabs(A[i*" ) << std::string( dim ) << "+i]);\n" );
-		solve.addStatement( std::string( "	for( j=(i+1); j < " ) << std::string( dim ) << "; j++ ) {\n" );
-		solve.addStatement( std::string( "		temp = fabs(A[j*" ) << std::string( dim ) << "+i]);\n" );
-		solve.addStatement( std::string( "		if( temp > valueMax ) {\n" ) );
-		solve.addStatement( std::string( "			indexMax = j;\n" ) );
-		solve.addStatement( std::string( "			valueMax = temp;\n" ) );
-		solve.addStatement( std::string( "		}\n" ) );
-		solve.addStatement( std::string( "	}\n" ) );
-		solve.addStatement( std::string( "	if( indexMax > i ) {\n" ) );
+		solve << "for( i=0; i < (" << toString( dim-1 ) << "); i++ ) {\n";
+		solve << "	indexMax = i;\n";
+		solve << "	valueMax = fabs(A[i*" << toString( dim ) << "+i]);\n";
+		solve << "	for( j=(i+1); j < " << toString( dim ) << "; j++ ) {\n";
+		solve << "		temp = fabs(A[j*" << toString( dim ) << "+i]);\n";
+		solve << "		if( temp > valueMax ) {\n";
+		solve << "			indexMax = j;\n";
+		solve << "			valueMax = temp;\n";
+		solve << "		}\n";
+		solve << "	}\n";
+		solve << "	if( indexMax > i ) {\n";
 		ExportForLoop loop2( k,0,dim );
-		loop2.addStatement( std::string( "	" ) << rk_swap.getFullName() << " = A[i*" << std::string( dim ) << "+" << k.getName() << "];\n" );
-		loop2.addStatement( std::string( "	A[i*" ) << std::string( dim ) << "+" << k.getName() << "] = A[indexMax*" << std::string( dim ) << "+" << k.getName() << "];\n" );
-		loop2.addStatement( std::string( "	A[indexMax*" ) << std::string( dim ) << "+" << k.getName() << "] = " << rk_swap.getFullName() << ";\n" );
+		loop2 << "	" << rk_swap.getFullName() << " = A[i*" << toString( dim ) << "+" << k.getName() << "];\n";
+		loop2 << "	A[i*" << toString( dim ) << "+" << k.getName() << "] = A[indexMax*" << toString( dim ) << "+" << k.getName() << "];\n";
+		loop2 << "	A[indexMax*" << toString( dim ) << "+" << k.getName() << "] = " << rk_swap.getFullName() << ";\n";
 		solve.addStatement( loop2 );
-		solve.addStatement( std::string( "	" ) << rk_swap.getFullName() << " = b[i];\n" );
-		solve.addStatement( std::string( "	b[i] = b[indexMax];\n" ) );
-		solve.addStatement( std::string( "	b[indexMax] = " ) << rk_swap.getFullName() << ";\n" );
+		solve << "	" << rk_swap.getFullName() << " = b[i];\n";
+		solve << "	b[i] = b[indexMax];\n";
+		solve << "	b[indexMax] = " << rk_swap.getFullName() << ";\n";
 		if( REUSE ) {
-			solve.addStatement( std::string( "	" ) << rk_swap.getFullName() << " = " << rk_perm.getFullName() << "[i];\n" );
-			solve.addStatement( std::string( "	" ) << rk_perm.getFullName() << "[i] = " << rk_perm.getFullName() << "[indexMax];\n" );
-			solve.addStatement( std::string( "	" ) << rk_perm.getFullName() << "[indexMax] = " << rk_swap.getFullName() << ";\n" );
+			solve << "	" << rk_swap.getFullName() << " = " << rk_perm.getFullName() << "[i];\n";
+			solve << "	" << rk_perm.getFullName() << "[i] = " << rk_perm.getFullName() << "[indexMax];\n";
+			solve << "	" << rk_perm.getFullName() << "[indexMax] = " << rk_swap.getFullName() << ";\n";
 		}
-		solve.addStatement( std::string( "	}\n" ) );
-		solve.addStatement( std::string( "	" ) << determinant.getFullName() << " *= A[i*" << std::string( dim ) << "+i];\n" );
-		solve.addStatement( std::string( "	for( j=i+1; j < " ) << std::string( dim ) << "; j++ ) {\n" );
-		solve.addStatement( std::string( "		A[j*" ) << std::string( dim ) << "+i] = -A[j*" << std::string( dim ) << "+i]/A[i*" << std::string( dim ) << "+i];\n" );
-		solve.addStatement( std::string( "		for( k=i+1; k < " ) << std::string( dim ) << "; k++ ) {\n" );
-		solve.addStatement( std::string( "			A[j*" ) << std::string( dim ) << "+k] += A[j*" << std::string( dim ) << "+i] * A[i*" << std::string( dim ) << "+k];\n" );
-		solve.addStatement( std::string( "		}\n" ) );
-		solve.addStatement( std::string( "		b[j] += A[j*" ) << std::string( dim ) << "+i] * b[i];\n" );
-		solve.addStatement( std::string( "	}\n" ) );
-		solve.addStatement( std::string( "}\n" ) );
-		solve.addStatement( std::string( "" ) << determinant.getFullName() << " *= A[" << std::string( (dim-1)*dim+(dim-1) ) << "];\n" );
+		solve << "	}\n";
+		solve << "	" << determinant.getFullName() << " *= A[i*" << toString( dim ) << "+i];\n";
+		solve << "	for( j=i+1; j < " << toString( dim ) << "; j++ ) {\n";
+		solve << "		A[j*" << toString( dim ) << "+i] = -A[j*" << toString( dim ) << "+i]/A[i*" << toString( dim ) << "+i];\n";
+		solve << "		for( k=i+1; k < " << toString( dim ) << "; k++ ) {\n";
+		solve << "			A[j*" << toString( dim ) << "+k] += A[j*" << toString( dim ) << "+i] * A[i*" << toString( dim ) << "+k];\n";
+		solve << "		}\n";
+		solve << "		b[j] += A[j*" << toString( dim ) << "+i] * b[i];\n";
+		solve << "	}\n";
+		solve << "}\n";
+		solve << determinant.getFullName() << " *= A[" << toString( (dim-1)*dim+(dim-1) ) << "];\n";
 	}
-	solve.addStatement( std::string( "" ) << determinant.getFullName() << " = fabs(" << determinant.getFullName() << ");\n" );
+	solve << determinant.getFullName() << " = fabs(" << determinant.getFullName() << ");\n";
 	
 	solve.addFunctionCall( solveTriangular, A, b );
 	code.addFunction( solve );
@@ -232,12 +213,12 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
     code.addLinebreak( 2 );
 	if( REUSE ) { // Also export the extra function which reuses the factorization of the matrix A
 		for( run1 = 0; run1 < dim; run1++ ) {
-			solveReuse.addStatement( ((std::string)rk_bPerm.get( run1,0 ) << " = b[" << rk_perm.getFullName() << "[" << std::string( run1 ) << "]];\n" ) );
+			solveReuse << rk_bPerm.get( run1,0 ) << " = b[" << rk_perm.getFullName() << "[" << toString( run1 ) << "]];\n";
 		}
 
 		for( run2 = 1; run2 < dim; run2++ ) { 		// row run2
 			for( run1 = 0; run1 < run2; run1++ ) { 	// column run1
-				solveReuse.addStatement( ((std::string)rk_bPerm.get( run2,0 ) << " += A[" << std::string( run2*dim+run1 ) << "]*" << rk_bPerm.getFullName() << "[" << std::string( run1 ) << "];\n" ) );
+				solveReuse << rk_bPerm.get( run2,0 ) << " += A[" << toString( run2*dim+run1 ) << "]*" << rk_bPerm.getFullName() << "[" << toString( run1 ) << "];\n";
 			}
 			solveReuse.addLinebreak();
 		}
@@ -255,10 +236,10 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 
 returnValue ExportGaussElim::appendVariableNames( stringstream& string ) {
 
-	string << ", " << rk_swap.getFullName().getName();
+	string << ", " << rk_swap.getFullName();
 	if( REUSE ) {
 //		string << ", " << rk_perm.getFullName().getName();
-		string << ", " << rk_bPerm.getFullName().getName();
+		string << ", " << rk_bPerm.getFullName();
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -275,15 +256,15 @@ returnValue ExportGaussElim::setup( )
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	rk_swap = ExportVariable( std::string( "rk_" ) << identifier << "swap", 1, 1, REAL, structWspace, BT_TRUE );
-	rk_bPerm = ExportVariable( std::string( "rk_" ) << identifier << "bPerm", dim, 1, REAL, structWspace );
+	rk_swap = ExportVariable( std::string( "rk_" ) + identifier + "swap", 1, 1, REAL, structWspace, BT_TRUE );
+	rk_bPerm = ExportVariable( std::string( "rk_" ) + identifier + "bPerm", dim, 1, REAL, structWspace );
 	A = ExportVariable( "A", dim, dim, REAL );
 	b = ExportVariable( "b", dim, 1, REAL );
 	rk_perm = ExportVariable( "rk_perm", 1, dim, INT );
 	solve = ExportFunction( getNameSolveFunction(), A, b, rk_perm );
 	solve.setReturnValue( determinant, BT_FALSE );
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
-	solveTriangular = ExportFunction( std::string( "solve_" ) << identifier << "triangular", A, b );
+	solveTriangular = ExportFunction( std::string( "solve_" ) + identifier + "triangular", A, b );
 	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	
 	if( REUSE ) {
@@ -306,7 +287,7 @@ ExportVariable ExportGaussElim::getGlobalExportVariable( const uint factor ) con
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	return ExportVariable( std::string( "rk_" ) << identifier << "perm", factor, dim, INT, structWspace );
+	return ExportVariable( std::string( "rk_" ) + identifier + "perm", factor, dim, INT, structWspace );
 }
 
 

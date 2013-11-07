@@ -44,9 +44,6 @@
 
 #include <acado/user_interaction/options.hpp>
 
-#include <sstream>
-using namespace std;
-
 
 BEGIN_NAMESPACE_ACADO
 
@@ -78,24 +75,8 @@ class ExportLinearSolver : public ExportAlgorithm
 							const std::string& _commonHeaderName = ""
 							);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportLinearSolver(	const ExportLinearSolver& arg
-							);
-
-        /** Destructor. 
-		 */
+        /** Destructor. */
         virtual ~ExportLinearSolver( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportLinearSolver& operator=(	const ExportLinearSolver& arg
-									);
-
 
 		/** Initializes code export into given file.
 		 *
@@ -185,7 +166,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue appendVariableNames( stringstream& string ) = 0;
+		virtual returnValue appendVariableNames( std::stringstream& string ) = 0;
 
 
 		/** Returns the dimensions of the linear system.

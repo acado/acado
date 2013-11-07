@@ -33,6 +33,7 @@
 
 #include <acado/code_generation/linear_solvers/linear_solver_export.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -53,26 +54,8 @@ ExportLinearSolver::ExportLinearSolver(	UserInteraction* _userInteraction,
 }
 
 
-ExportLinearSolver::ExportLinearSolver( const ExportLinearSolver& arg ) : ExportAlgorithm( arg )
-{
-	init(arg.nRows, arg.nCols, arg.nBacksolves, arg.REUSE, arg.UNROLLING, arg.identifier);
-}
-
-
 ExportLinearSolver::~ExportLinearSolver( )
 {}
-
-
-ExportLinearSolver& ExportLinearSolver::operator=( const ExportLinearSolver& arg )
-{
-	if( this != &arg )
-	{
-		ExportAlgorithm::operator=( arg );
-		init(arg.nRows, arg.nCols, arg.nBacksolves, arg.REUSE, arg.UNROLLING, arg.identifier);
-	}
-
-	return *this;
-}
 
 
 returnValue ExportLinearSolver::init(	const uint newDim,
@@ -80,7 +63,7 @@ returnValue ExportLinearSolver::init(	const uint newDim,
 										const BooleanType& unrolling
 										)
 {
-	return init(newDim, newDim, newDim, reuse, unrolling, std::string( "dim" ) << std::string( newDim ) << "_");
+	return init(newDim, newDim, newDim, reuse, unrolling, std::string( "dim" ) + toString( newDim ) + "_");
 }
 
 
@@ -153,13 +136,13 @@ returnValue ExportLinearSolver::setUnrolling( const BooleanType& unrolling ) {
 
 const std::string ExportLinearSolver::getNameSolveFunction() {
 	
-	return std::string( "solve_" ) << identifier << "system";
+	return string( "solve_" ) + identifier + "system";
 }
 
 
 const std::string ExportLinearSolver::getNameSolveReuseFunction() {
 	
-	return std::string( "solve_" ) << identifier << "system_reuse";
+	return string( "solve_" ) + identifier + "system_reuse";
 }
 
 

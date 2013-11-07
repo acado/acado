@@ -67,23 +67,8 @@ class ExportGaussElim : public ExportLinearSolver
 							const std::string& _commonHeaderName = ""
 							);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportGaussElim(	const ExportGaussElim& arg
-							);
-
-        /** Destructor. 
-		 */
+        /** Destructor. */
         virtual ~ExportGaussElim( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportGaussElim& operator=(	const ExportGaussElim& arg
-									);
 
 
 		/** Initializes code export into given file.
@@ -130,7 +115,7 @@ class ExportGaussElim : public ExportLinearSolver
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue appendVariableNames( stringstream& string );
+		returnValue appendVariableNames( std::stringstream& string );
 
 
 		/** Returns the dimension of the auxiliary variables for the linear solver.

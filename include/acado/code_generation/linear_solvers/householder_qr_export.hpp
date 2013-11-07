@@ -67,24 +67,9 @@ class ExportHouseholderQR : public ExportLinearSolver
 							const std::string& _commonHeaderName = ""
 							);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportHouseholderQR(	const ExportHouseholderQR& arg
-							);
-
         /** Destructor. 
 		 */
         virtual ~ExportHouseholderQR( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportHouseholderQR& operator=(	const ExportHouseholderQR& arg
-									);
-
 
 		/** Initializes code export into given file.
 		 *
@@ -130,7 +115,7 @@ class ExportHouseholderQR : public ExportLinearSolver
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue appendVariableNames( stringstream& string );
+		returnValue appendVariableNames( std::stringstream& string );
 
 
 		/** Returns the dimension of the auxiliary variables for the linear solver.
