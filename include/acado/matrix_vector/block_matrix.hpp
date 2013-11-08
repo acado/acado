@@ -67,18 +67,11 @@ class BlockMatrix
         BlockMatrix(	const Matrix& value
 						);
 
-		/** Copy constructor (deep copy). */
-        BlockMatrix( const BlockMatrix& rhs	/**< Right-hand side object. */ );
-
         /** Destructor. */
         virtual ~BlockMatrix( );
 
         /** Initializer */
 		returnValue init( uint _nRows, uint _nCols );
-
-
-        /** Assignment operator (deep copy). */
-        BlockMatrix& operator=( const BlockMatrix& rhs /**< Right-hand side object. */ );
 
 		/** Set method that defines the value of a certain component.
 		 *  \return SUCCESSFUL_RETURN */
@@ -217,8 +210,8 @@ class BlockMatrix
 		uint nRows;			/**< Number of rows. */
 		uint nCols;			/**< Number of columns. */
 
-        Matrix             **elements;
-        SubBlockMatrixType **types   ;
+        std::vector< std::vector< Matrix > > elements;
+        std::vector< std::vector< SubBlockMatrixType > > types;
 };
 
 CLOSE_NAMESPACE_ACADO
