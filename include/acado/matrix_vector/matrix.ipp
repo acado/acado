@@ -45,7 +45,7 @@ inline double& Matrix::operator()(	uint rowIdx,
 {
 	ASSERT( rowIdx < getNumRows( ) );
 	ASSERT( colIdx < getNumCols( ) );
-	return element[rowIdx*getNumCols( ) + colIdx];
+	return data[rowIdx*getNumCols( ) + colIdx];
 }
 
 
@@ -55,7 +55,7 @@ inline double Matrix::operator()(	uint rowIdx,
 {
 	ASSERT( rowIdx < getNumRows( ) );
 	ASSERT( colIdx < getNumCols( ) );
-	return element[rowIdx*getNumCols( ) + colIdx];
+	return data[rowIdx*getNumCols( ) + colIdx];
 }
 
 
@@ -69,7 +69,7 @@ inline Matrix Matrix::operator+(	const Matrix& arg
 	Matrix tmp( arg );
 
 	for( i=0; i<getDim( ); ++i )
-		tmp.element[i] += element[i];
+		tmp.data[i] += data[i];
 
 	return tmp;
 }
@@ -83,7 +83,7 @@ inline BooleanType Matrix::operator==(	const Matrix& arg
 		uint i;
 		for( i=0; i<getDim( ); ++i )
 		{
-			equal = equal && (acadoIsEqual(element[i],arg.element[i]) == BT_TRUE);	
+			equal = equal && (acadoIsEqual(data[i],arg.data[i]) == BT_TRUE);	
 		}
 		if(equal)
 		{
@@ -109,7 +109,7 @@ inline Matrix& Matrix::operator+=(	const Matrix& arg
 	uint i;
 
 	for( i=0; i<getDim( ); ++i )
-		element[i] += arg.element[i];
+		data[i] += arg.data[i];
 
 	return *this;
 }
@@ -125,7 +125,7 @@ inline Matrix Matrix::operator-(	const Matrix& arg
 	Matrix tmp( getNumRows(), getNumCols() );
 
 	for( i=0; i<getDim( ); ++i )
-		tmp.element[i] = element[i] - arg.element[i];
+		tmp.data[i] = data[i] - arg.data[i];
 
 	return tmp;
 }
@@ -139,7 +139,7 @@ inline Matrix& Matrix::operator-=(	const Matrix& arg
 	uint i;
 
 	for( i=0; i<getDim( ); ++i )
-		element[i] -= arg.element[i];
+		data[i] -= arg.data[i];
 
 	return *this;
 }
@@ -153,7 +153,7 @@ inline Matrix& Matrix::operator*=(	double scalar
 	if ( fabs(scalar) >= ZERO_EPS )
 	{
 		for( i=0; i<getDim( ); ++i )
-			element[i] *= scalar;
+			data[i] *= scalar;
 	}
 	else
 	{
@@ -172,7 +172,7 @@ inline Matrix& Matrix::operator/=(	double scalar
 	if ( fabs(scalar) >= ZERO_EPS )
 	{
 		for( i=0; i<getDim( ); ++i )
-			element[i] /= scalar;
+			data[i] /= scalar;
 	}
 
 	return *this;
@@ -312,7 +312,7 @@ inline Matrix Matrix::minus(){
 
 // inline returnValue Matrix::print( FILE *file ){
 // 
-//     return writeDoublePointerToFile(element,getNumRows(),getNumCols(),file);
+//     return writeDoublePointerToFile(data,getNumRows(),getNumCols(),file);
 // }
 
 
@@ -485,7 +485,7 @@ inline Matrix Matrix::absolute(){
     Matrix result( nRows, nCols );
 
     for( i = 0; i < getDim(); i++ )
-        result.element[i] = fabs(element[i]);
+        result.data[i] = fabs(data[i]);
 
     return result;
 }
@@ -497,10 +497,10 @@ inline Matrix Matrix::positive(){
     Matrix result( nRows, nCols );
 
     for( i = 0; i < getDim(); i++ ){
-        if( element[i] >= 0.0 )
-            result.element[i] = element[i];
+        if( data[i] >= 0.0 )
+            result.data[i] = data[i];
         else
-            result.element[i] = 0.0;
+            result.data[i] = 0.0;
     }
     return result;
 }
@@ -512,10 +512,10 @@ inline Matrix Matrix::negative(){
     Matrix result( nRows, nCols );
 
     for( i = 0; i < getDim(); i++ ){
-        if( element[i] <= 0.0 )
-            result.element[i] = element[i];
+        if( data[i] <= 0.0 )
+            result.data[i] = data[i];
         else
-            result.element[i] = 0.0;
+            result.data[i] = 0.0;
     }
     return result;
 }

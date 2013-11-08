@@ -46,140 +46,43 @@ using namespace std;
 //
 
 VectorspaceElement::VectorspaceElement( )
-{
-	dim = 0;
-	element = 0;
-}
+	: data()
+{}
 
 
 VectorspaceElement::VectorspaceElement( uint _dim )
-{
-	dim = _dim;
-	element = new double[ dim ];
-}
+	: data(_dim, 0.0)
+{}
 
 
 VectorspaceElement::VectorspaceElement( uint _dim, const double* const _values )
-{
-	uint i;
-
-	dim = _dim;
-	element = new double[ dim ];
-
-	for( i=0; i<_dim; ++i )
-		operator()( i ) = _values[i];
-}
-
-
-VectorspaceElement::VectorspaceElement( const VectorspaceElement& rhs )
-{
-	uint i;
-
-	dim = rhs.dim;
-	element = new double[ dim ];
-
-	for( i=0; i<dim; ++i )
-		element[i] = rhs.element[i];
-}
-
+	: data(_values, _values + _dim)
+{}
 
 VectorspaceElement::VectorspaceElement( const Vector& rhs )
-{
-	uint i;
-
-	dim = rhs.dim;
-	element = new double[ dim ];
-
-	for( i=0; i<dim; ++i )
-		element[i] = rhs.element[i];
-}
-
+	: data( rhs.data )
+{}
 
 VectorspaceElement::~VectorspaceElement( )
-{
-	if ( element != 0 )
-		delete[] element;
-}
-
-
-VectorspaceElement& VectorspaceElement::operator=( const VectorspaceElement& rhs )
-{
-	uint i;
-
-    if ( this != &rhs )
-    {
-		if ( element != 0 )
-			delete[] element;
-
-		dim = rhs.dim;
-		element = new double[ dim ];
-
-		for( i=0; i<dim; ++i )
-			element[i] = rhs.element[i];
-    }
-
-    return *this;
-}
-
-
-VectorspaceElement& VectorspaceElement::operator<<( double *rhs ){
-
-    uint i;
-
-    for( i = 0; i < dim; i++ )
-        operator()(i) = rhs[i];
-
-    return *this;
-}
-
-
-double* operator<<( double *lhs, VectorspaceElement &rhs ){
-
-    uint i;
-
-    for( i = 0; i < rhs.getDim(); i++ )
-        lhs[i] = rhs.operator()(i);
-
-    return lhs;
-}
-
+{}
 
 returnValue VectorspaceElement::init( uint _dim, double* _values )
 {
-	uint i;
+	if ( data.size() )
+		data.clear();
 
-	if ( element != 0 )
-		delete[] element;
-
-	dim = _dim;
-	
-	if ( dim > 0 )
-		element = new double[ dim ];
-	else 
-		element = 0;
+	if ( _dim > 0 )
+		data.resize( _dim );
 
 	if ( _values != 0 )
-		for( i=0; i<dim; ++i )
-			operator()( i ) = _values[i];
+		data.assign(_values, _values + _dim);
 
 	return SUCCESSFUL_RETURN;
 }
 
-
 returnValue VectorspaceElement::append( const VectorspaceElement& arg )
 {
-	if ( arg.getDim( ) == 0 )
-		return SUCCESSFUL_RETURN;
-
-	VectorspaceElement old = *this;
-
-	if ( init( old.getDim()+arg.getDim() ) != SUCCESSFUL_RETURN )
-		return ACADOERROR( RET_UNKNOWN_BUG );
-
-	for( uint i=0; i<old.getDim(); ++i )
-		operator()( i ) = old( i );
-	for( uint i=0; i<arg.getDim(); ++i )
-		operator()( old.getDim()+i ) = arg( i );
+	data.insert(data.end(), arg.data.begin(), arg.data.end());
 
 	return SUCCESSFUL_RETURN;
 }
@@ -187,7 +90,7 @@ returnValue VectorspaceElement::append( const VectorspaceElement& arg )
 
 double VectorspaceElement::getNorm( VectorNorm norm ) const{
 
-    VectorspaceElement scale(dim);
+    VectorspaceElement scale( getDim() );
     scale.setAll(1.0);
     return getNorm( norm, scale );
 }
@@ -222,7 +125,9 @@ double VectorspaceElement::getNorm( VectorNorm norm, const VectorspaceElement &s
 }
 
 double* VectorspaceElement::getDoublePointer( )
-{ return element; }
+{
+	return data.data();
+}
 
 returnValue VectorspaceElement::print(	std::ostream& stream,
 										const char* const name,
@@ -245,14 +150,14 @@ returnValue VectorspaceElement::print(	std::ostream& stream,
 	else
 		stream << setw( width );
 
-	for (unsigned i = 0; i < dim; ++i)
+	for (unsigned i = 0; i < getDim(); ++i)
 	{
 		if (precision > 0)
 			stream << operator()( i );
 		else
 			stream << (int)operator()( i );
 
-		if (i < (dim - 1) && rowSeparator != NULL && strlen( rowSeparator ) > 0)
+		if (i < (getDim() - 1) && rowSeparator != NULL && strlen( rowSeparator ) > 0)
 			stream << rowSeparator;
 	}
 	if (endString != NULL && strlen(endString) > 0)
@@ -358,10 +263,10 @@ std::ostream& operator<<(std::ostream& stream, const VectorspaceElement& arg)
 
 returnValue VectorspaceElement::read( std::istream& stream )
 {
-	vector< double > data;
-	stream >> data;
+	vector< double > tmp;
+	stream >> tmp;
 
-	return init(data.size(), data.data());
+	return init(tmp.size(), tmp.data());
 }
 
 returnValue VectorspaceElement::read(	const char* const filename

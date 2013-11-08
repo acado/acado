@@ -24,7 +24,7 @@
 
 
 /**
- *    \file include/acado/matrix_vector/vectorspace_element.ipp
+ *    \file include/acado/matrix_vector/vectorspace_data.ipp
  *    \author Hans Joachim Ferreau, Boris Houska
  *    \date 31.05.2008
  */
@@ -43,7 +43,7 @@ inline double& VectorspaceElement::operator()(	uint idx
 									)
 {
 	ASSERT( idx < getDim( ) );
-	return element[idx];
+	return data[idx];
 }
 
 
@@ -51,7 +51,7 @@ inline double VectorspaceElement::operator()(	uint idx
 									) const
 {
 	ASSERT( idx < getDim( ) );
-	return element[idx];
+	return data[idx];
 }
 
 
@@ -61,7 +61,7 @@ inline BooleanType VectorspaceElement::operator==(	const VectorspaceElement& arg
 	uint i;
 
 	for( i=0; i<getDim( ); ++i )
-		if ( fabs( element[i] - arg.element[i] ) > 10*EPS )
+		if ( fabs( data[i] - arg.data[i] ) > 10*EPS )
 			return BT_FALSE;
 
 	return BT_TRUE;
@@ -88,7 +88,7 @@ inline BooleanType VectorspaceElement::operator<(	const VectorspaceElement& arg
 	uint i;
 
 	for( i=0; i<getDim( ); ++i )
-		if ( element[i] >= arg.element[i] - EPS )
+		if ( data[i] >= arg.data[i] - EPS )
 			return BT_FALSE;
 
 	return BT_TRUE;
@@ -103,7 +103,7 @@ inline BooleanType VectorspaceElement::operator<=(	const VectorspaceElement& arg
 	uint i;
 
 	for( i=0; i<getDim( ); ++i )
-		if ( element[i] > arg.element[i] + EPS )
+		if ( data[i] > arg.data[i] + EPS )
 			return BT_FALSE;
 
 	return BT_TRUE;
@@ -118,7 +118,7 @@ inline BooleanType VectorspaceElement::operator>(	const VectorspaceElement& arg
 	uint i;
 
 	for( i=0; i<getDim( ); ++i )
-		if ( element[i] <= arg.element[i] + EPS )
+		if ( data[i] <= arg.data[i] + EPS )
 			return BT_FALSE;
 
 	return BT_TRUE;
@@ -133,7 +133,7 @@ inline BooleanType VectorspaceElement::operator>=(	const VectorspaceElement& arg
 	uint i;
 
 	for( i=0; i<getDim( ); ++i )
-		if ( element[i] < arg.element[i] - EPS )
+		if ( data[i] < arg.data[i] - EPS )
 			return BT_FALSE;
 
 	return BT_TRUE;
@@ -143,7 +143,7 @@ inline BooleanType VectorspaceElement::operator>=(	const VectorspaceElement& arg
 
 inline unsigned int VectorspaceElement::getDim( ) const
 {
-	return dim;
+	return data.size();
 }
 
 
@@ -174,7 +174,7 @@ inline BooleanType VectorspaceElement::isGreaterThan(	double _value
 {
 	for( uint i=0; i<getDim( ); ++i )
 	{
-		if ( element[i] < _value )
+		if ( data[i] < _value )
 			return BT_FALSE;
 	}
 
@@ -187,7 +187,7 @@ inline BooleanType VectorspaceElement::isSmallerThan(	double _value
 {
 	for( uint i=0; i<getDim( ); ++i )
 	{
-		if ( element[i] > _value )
+		if ( data[i] > _value )
 			return BT_FALSE;
 	}
 
@@ -235,7 +235,7 @@ inline BooleanType VectorspaceElement::isFinite( ) const
 {
 	for( uint i=0; i<getDim( ); ++i )
 	{
-		if ( acadoIsFinite( element[i] ) == BT_TRUE )
+		if ( acadoIsFinite( data[i] ) == BT_TRUE )
 			return BT_TRUE;
 	}
 
@@ -247,7 +247,7 @@ inline BooleanType VectorspaceElement::hasNaN( ) const
 {
 	for( uint i=0; i<getDim( ); ++i )
 	{
-		if ( acadoIsNaN( element[i] ) == BT_TRUE )
+		if ( acadoIsNaN( data[i] ) == BT_TRUE )
 			return BT_TRUE;
 	}
 	
@@ -268,7 +268,7 @@ inline returnValue VectorspaceElement::setAll(	double _value
 	uint i;
 
 	for( i=0; i<getDim( ); ++i )
-		element[i] = _value;
+		data[i] = _value;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -280,8 +280,8 @@ inline double VectorspaceElement::getMax( ) const
 	double value = -INFTY;
 
 	for( uint i=0; i<getDim( ); ++i )
-		if ( element[i] > value )
-			value = element[i];
+		if ( data[i] > value )
+			value = data[i];
 
 	return value;
 }
@@ -292,8 +292,8 @@ inline double VectorspaceElement::getMin( ) const
 	double value = INFTY;
 
 	for( uint i=0; i<getDim( ); ++i )
-		if ( element[i] < value )
-			value = element[i];
+		if ( data[i] < value )
+			value = data[i];
 
 	return value;
 }
@@ -307,19 +307,9 @@ inline double VectorspaceElement::getMean( ) const
 		return value;
 
 	for( uint i=0; i<getDim( ); ++i )
-		value += element[i];
+		value += data[i];
 
 	return ( value / (double)getDim() );
-}
-
-inline returnValue VectorspaceElement::convert( double *lhs ) const{
-
-    uint i;
-
-    for( i = 0; i < getDim(); i++ )
-        lhs[i] = operator()(i);
-
-    return SUCCESSFUL_RETURN;
 }
 
 CLOSE_NAMESPACE_ACADO

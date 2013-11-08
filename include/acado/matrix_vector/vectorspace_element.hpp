@@ -77,34 +77,16 @@ class VectorspaceElement
 							);
 
         /** Copy constructor (deep copy). */
-        VectorspaceElement(	const VectorspaceElement& rhs	/**< Right-hand side object. */
-							);
-
-        /** Copy constructor (deep copy). */
         VectorspaceElement(	const Vector& rhs	/**< Right-hand side object. */
 							);
 
         /** Destructor. */
         virtual ~VectorspaceElement( );
 
-        /** Assignment operator (deep copy). */
-        VectorspaceElement& operator=(	const VectorspaceElement& rhs	/**< Right-hand side object. */
-										);
-
-        /** Assignment operator (deep copy). */
-        VectorspaceElement& operator<<( double *rhs );
-
-
-        /** Assignment operator (deep copy). */
-        friend double* operator<<( double *lhs, VectorspaceElement &rhs );
-
-        inline returnValue convert( double *lhs ) const;
-
-
 		/** Initializes vector space element with values taken from a double array
 		 *  of appropriate size. Previously allocated internal memory is freed.
 		 *  \return SUCCESSFUL_RETURN */
-		returnValue init(	uint _dim = 0,	/**< Vector space dimension. */
+        returnValue init(	uint _dim = 0,	/**< Vector space dimension. */
 							double* _values = 0
 							);
 
@@ -339,8 +321,8 @@ class VectorspaceElement
     // DATA MEMBERS:
     //
     protected:
-        double* element;			/**< Element of vector space. */
-		unsigned int dim;			/**< Vector space dimension. */
+		/** Element of vector space. */
+		std::vector< double > data;
 };
 
 CLOSE_NAMESPACE_ACADO

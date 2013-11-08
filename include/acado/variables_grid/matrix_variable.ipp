@@ -40,7 +40,7 @@ BEGIN_NAMESPACE_ACADO
 
 inline Matrix MatrixVariable::getMatrix( ) const
 {
-	return Matrix( nRows,nCols,element );
+	return Matrix(nRows, nCols, data.data());
 }
 
 

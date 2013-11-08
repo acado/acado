@@ -49,7 +49,7 @@ inline Vector Vector::operator+(	const Vector& arg
 	Vector tmp( arg );
 
 	for( i=0; i<getDim( ); ++i )
-		tmp.element[i] += element[i];
+		tmp.data[i] += data[i];
 
 	return tmp;
 }
@@ -63,7 +63,7 @@ inline Vector& Vector::operator+=(	const Vector& arg
 	uint i;
 
 	for( i=0; i<getDim( ); ++i )
-		element[i] += arg.element[i];
+		data[i] += arg.data[i];
 
 	return *this;
 }
@@ -79,7 +79,7 @@ inline Vector Vector::operator-(	const Vector& arg
 	Vector tmp(getDim());
 
 	for( i=0; i<getDim( ); ++i )
-		tmp.element[i] = element[i] - arg.element[i];
+		tmp.data[i] = data[i] - arg.data[i];
 
 	return tmp;
 }
@@ -93,7 +93,7 @@ inline Vector Vector::operator-=(	const Vector& arg
 	uint i;
 
 	for( i=0; i<getDim( ); ++i )
-		element[i] -= arg.element[i];
+		data[i] -= arg.data[i];
 
 	return *this;
 }
@@ -105,7 +105,7 @@ inline Vector& Vector::operator*=( double scalar ){
 
     if ( fabs(scalar) >= ZERO_EPS )
         for( i=0; i<getDim( ); ++i )
-            element[i] *= scalar;
+            data[i] *= scalar;
     else  setZero( );
 
     return *this;
@@ -118,7 +118,7 @@ inline Vector& Vector::operator/=( double scalar ){
 
     if ( fabs(scalar) >= ZERO_EPS )
         for( i=0; i<getDim( ); ++i )
-            element[i] /= scalar;
+            data[i] /= scalar;
 
     return *this;
 }
@@ -160,9 +160,9 @@ inline Matrix Vector::operator%(	const Vector& arg
 									) const
 {
 	uint i, j;
-	Matrix result( dim,arg.getDim( ) );
+	Matrix result(getDim(), arg.getDim( ));
 
-	for( i=0; i<dim; ++i )
+	for(i = 0; i < getDim(); ++i)
 		for( j=0; j<arg.getDim( ); ++j )
 			result( i,j ) = operator()( i ) * arg( j );
 
@@ -188,7 +188,7 @@ inline Vector Vector::absolute() {
     Vector result( getDim() );
 
     for( i = 0; i < getDim(); i++ )
-        result.element[i] = fabs(element[i]);
+        result.data[i] = fabs(data[i]);
     
     return result;
 }
@@ -199,7 +199,7 @@ inline Vector Vector::getAbsolute() const {
     Vector result( getDim() );
 
     for( i = 0; i < getDim(); i++ )
-        result.element[i] = fabs(element[i]);
+        result.data[i] = fabs(data[i]);
     
     return result;
 }

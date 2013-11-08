@@ -384,26 +384,26 @@ returnValue Matrix::print(	const char* const filename,
 
 returnValue Matrix::read( std::istream& stream )
 {
-	vector< vector< double > > data;
-	stream >> data;
+	vector< vector< double > > tmp;
+	stream >> tmp;
 
-	if (data.size() == 0)
+	if (tmp.size() == 0)
 		return init(0, 0);
 
 	// Sanity check
-	unsigned nc = data[ 0 ].size();
-	unsigned nr = data.size();
+	unsigned nc = tmp[ 0 ].size();
+	unsigned nr = tmp.size();
 	for (unsigned row = 0; row < nr; ++row)
-		if (data[ row ].size() != nc)
+		if (tmp[ row ].size() != nc)
 			return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	// Data conversion
-	vector< double > tmp;
+	vector< double > tmp2;
 	for (unsigned row = 0; row < nr; ++row)
 		for (unsigned col = 0; col < nc; ++col)
-			tmp.push_back( data[ row ][ col ] );
+			tmp2.push_back( tmp[ row ][ col ] );
 
-	return init(nr, nc, tmp.data());
+	return init(nr, nc, tmp2.data());
 }
 
 returnValue Matrix::read(const char* filename)
@@ -565,8 +565,8 @@ Vector Matrix::getEigenvalues( Matrix &Q ) const{
     ASSERT( n == (int) getNumCols() );
 
     double *eigenvalues  = new double[n  ];
-    double *eigenvectors = new double[dim];
-    double *d_element    = new double[dim];
+    double *eigenvectors = new double[getDim()];
+    double *d_element    = new double[getDim()];
 
     int i, j, k, mm;
     double *pAk, *pAm, *p_r, *p_e;
@@ -579,8 +579,8 @@ Vector Matrix::getEigenvalues( Matrix &Q ) const{
     double dum3;
     double max;
 
-    for(i = 0; i < (int) dim; i++)
-        d_element[i] = element[i];
+    for(i = 0; i < (int) getDim(); i++)
+        d_element[i] = data[i];
 
     for(p_e = eigenvectors, i = 0; i < n; i++)
         for(j = 0; j < n; p_e++, j++)
@@ -643,8 +643,8 @@ Vector Matrix::getEigenvalues( Matrix &Q ) const{
     for (pAk = d_element, k = 0; k < n; pAk += n, k++) eigenvalues[k] = *(pAk + k);
 
     Q.init(n,n);
-    for(i = 0; i < (int) dim; i++)
-        Q.element[i] = eigenvectors[i];
+    for(i = 0; i < (int) getDim(); i++)
+        Q.data[i] = eigenvectors[i];
     Vector tmp(n,eigenvalues);
 
     delete[] eigenvalues ;
@@ -665,13 +665,15 @@ returnValue Matrix::printEigenvalues( ) const{
 
 returnValue Matrix::getSingularValueDecomposition( Matrix &U_, Vector &D, Matrix &V_ ) const{
 
+	unsigned dim = getDim();
+
     if( getNumRows() >= getNumCols() ){
 
         int run1;
 
         double *A = new double[dim];
         for( run1 = 0; run1 < (int) dim; run1++ )
-            A[run1] = element[run1];
+            A[run1] = data[run1];
 
         double *U = new double[dim];
         double *V = new double[getNumCols()*getNumCols()];
@@ -686,11 +688,11 @@ returnValue Matrix::getSingularValueDecomposition( Matrix &U_, Vector &D, Matrix
 
         U_.init(getNumRows(),getNumCols());
         for( run1 = 0; run1 < (int) dim; run1++ )
-            U_.element[run1] = U[run1];
+            U_.data[run1] = U[run1];
 
         V_.init(getNumCols(),getNumCols());
         for( run1 = 0; run1 < (int) (getNumCols()*getNumCols()); run1++ )
-            V_.element[run1] = V[run1];
+            V_.data[run1] = V[run1];
 
         D.init(getNumCols());
 
@@ -710,7 +712,7 @@ returnValue Matrix::getSingularValueDecomposition( Matrix &U_, Vector &D, Matrix
         double *A = new double[dim];
         for( run1 = 0; run1 < (int) getNumRows(); run1++ )
             for( run2 = 0; run2 < (int) getNumCols(); run2++ )
-                A[run2*getNumRows()+run1] = element[run1*getNumCols()+run2];
+                A[run2*getNumRows()+run1] = data[run1*getNumCols()+run2];
 
         double *U = new double[dim];
         double *V = new double[getNumRows()*getNumRows()];
@@ -726,12 +728,12 @@ returnValue Matrix::getSingularValueDecomposition( Matrix &U_, Vector &D, Matrix
         U_.init(getNumRows(),getNumRows());
         for( run1 = 0; run1 < (int) getNumRows(); run1++ )
             for( run2 = 0; run2 < (int) getNumRows(); run2++ )
-                U_.element[run1+run2*getNumRows()] = V[run2+run1*getNumRows()];
+                U_.data[run1+run2*getNumRows()] = V[run2+run1*getNumRows()];
 
         V_.init(getNumRows(),getNumCols());
         for( run1 = 0; run1 < (int) getNumRows(); run1++ )
             for( run2 = 0; run2 < (int) getNumCols(); run2++ )
-                V_.element[run1*getNumCols()+run2] = U[run2*getNumRows()+run1];
+                V_.data[run1*getNumCols()+run2] = U[run2*getNumRows()+run1];
 
         D.init(getNumRows());
 
@@ -752,6 +754,8 @@ returnValue Matrix::getSingularValueDecomposition( Matrix &U_, Vector &D, Matrix
 
 Matrix Matrix::getCholeskyDecomposition() const{
 
+	unsigned dim = getDim();
+
     int n = getNumRows();
     ASSERT( n == (int) getNumCols() );
 
@@ -764,7 +768,7 @@ Matrix Matrix::getCholeskyDecomposition() const{
 
     double *A = new double[dim];
     for( k = 0; k < (int) dim; k++ )
-        A[k] = element[k];
+        A[k] = data[k];
 
     for (k = 0, p_Lk0 = A; k < n; p_Lk0 += n, k++) {
        p_Lkk = p_Lk0 + k;
@@ -797,6 +801,8 @@ Matrix Matrix::getCholeskyDecomposition() const{
 
 Matrix Matrix::getCholeskyDecomposition( Vector &D ) const{
 
+	unsigned dim = getDim();
+
    int n = getNumRows();
    ASSERT( n == (int) getNumCols() );
 
@@ -808,7 +814,7 @@ Matrix Matrix::getCholeskyDecomposition( Vector &D ) const{
 
     double *A = new double[dim];
     for( k = 0; k < (int) dim; k++ ){
-        A[k] = element[k];
+        A[k] = data[k];
     }
 
    for (i = 1, p_i = A + n; i < n; p_i += n, i++) {
@@ -1022,6 +1028,8 @@ Vector Matrix::solveTransposeQR( const Vector &b ) const{
 
 
 returnValue Matrix::computeSparseLUdecomposition(){
+
+	unsigned dim = getDim();
 
     ASSERT( solver == 0 );
     ASSERT( getNumRows() == getNumCols() );
