@@ -40,16 +40,20 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-Vector::Vector( ) : VectorspaceElement( )
+Vector::Vector( )
+	: VectorspaceElement( )
 {}
 
-Vector::Vector( uint _dim ) : VectorspaceElement( _dim )
+Vector::Vector( uint _dim )
+	: VectorspaceElement( _dim )
 {}
 
-Vector::Vector( uint _dim, const double* const _values ) : VectorspaceElement(_dim, _values)
+Vector::Vector( uint _dim, const double* const _values )
+	: VectorspaceElement(_dim, _values)
 {}
 
-Vector::Vector( const VectorspaceElement& rhs ) : VectorspaceElement( rhs )
+Vector::Vector( const VectorspaceElement& rhs )
+	: VectorspaceElement( rhs )
 {}
 
 Vector::~Vector( )

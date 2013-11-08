@@ -63,7 +63,6 @@ static       Matrix emptyMatrix;
 static const Matrix emptyConstMatrix;
 
 static       BlockMatrix emptyBlockMatrix;
-//static const BlockMatrix emptyConstBlockMatrix;
 
 CLOSE_NAMESPACE_ACADO
 

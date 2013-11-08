@@ -310,13 +310,6 @@ inline Matrix Matrix::minus(){
 }
 
 
-// inline returnValue Matrix::print( FILE *file ){
-// 
-//     return writeDoublePointerToFile(data,getNumRows(),getNumCols(),file);
-// }
-
-
-
 inline uint Matrix::getNumRows( ) const
 {
 	return nRows;
@@ -479,8 +472,8 @@ inline BooleanType Matrix::isSquare( ) const
 }
 
 
-inline Matrix Matrix::absolute(){
-
+inline Matrix Matrix::absolute() const
+{
     uint i;
     Matrix result( nRows, nCols );
 
@@ -491,7 +484,8 @@ inline Matrix Matrix::absolute(){
 }
 
 
-inline Matrix Matrix::positive(){
+inline Matrix Matrix::positive() const
+{
 
     uint i;
     Matrix result( nRows, nCols );
@@ -506,8 +500,8 @@ inline Matrix Matrix::positive(){
 }
 
 
-inline Matrix Matrix::negative(){
-
+inline Matrix Matrix::negative() const
+{
     uint i;
     Matrix result( nRows, nCols );
 

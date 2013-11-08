@@ -382,19 +382,19 @@ class Matrix : public VectorspaceElement
         /** Returns the a matrix whose components are the absolute
          *  values of the components of this object.
          */
-        inline Matrix absolute();
+        inline Matrix absolute() const;
 
         /** Returns the a matrix whose components are equal to
          *  the components of this object, if they are positive or zero,
          *  but zero otherwise.
          */
-        inline Matrix positive();
+        inline Matrix positive() const;
 
         /** Returns the a matrix whose components are equal to
          *  the components of this object, if they are negative or zero,
          *  but zero otherwise.
          */
-        inline Matrix negative();
+        inline Matrix negative() const;
 
         /** Switches the sign of all components. */
         inline Matrix minus();
