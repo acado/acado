@@ -85,8 +85,6 @@ T GenericVector< T >::getNorm(	VectorNorm _norm,
 		foo = Base::cwiseQuotient( _scale );
 		return foo.getAbsolute().sum();
 
-		break;
-
 	case VN_L2:
 		return Base::norm();
 
@@ -95,8 +93,10 @@ T GenericVector< T >::getNorm(	VectorNorm _norm,
 		return foo.getAbsolute().getMax();
 
 	default:
-		return T( 0 );
+		return T( -1 );
 	}
+
+	return T( -1 );
 }
 
 template<typename T>
@@ -210,8 +210,8 @@ returnValue GenericVector<T>::print(	std::ostream& stream,
 
 template<typename T>
 returnValue GenericVector<T>::print(	const char* const filename,
-										const char* const name = DEFAULT_LABEL,
-										PrintScheme printScheme = PS_DEFAULT
+										const char* const name,
+										PrintScheme printScheme
 										) const
 {
 	ofstream stream( filename );
