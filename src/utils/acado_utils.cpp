@@ -85,23 +85,6 @@ double acadoMin( const double x, const double y ){
 }
 
 
-BooleanType acadoIsEqual( const char* str1, const char* str2 )
-{
-	if ( ( str1 == 0 ) && ( str2 == 0 ) )
-		return BT_TRUE;
-
-	if ( ( str1 == 0 ) && ( str2 != 0 ) )
-		return BT_FALSE;
-
-	if ( ( str1 != 0 ) && ( str2 == 0 ) )
-		return BT_FALSE;
-
-	if ( strcmp( str1,str2 ) == 0 )
-		return BT_TRUE;
-	else
-		return BT_FALSE;
-}
-
 BooleanType acadoIsEqual( double x, double y, double TOL ){
 
   double maxabs= acadoMax(fabs(x),fabs(y));

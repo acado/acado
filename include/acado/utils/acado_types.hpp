@@ -699,27 +699,6 @@ enum ClockStatus
 };
 
 
-/** Defines flags for different vector norms.
- */
-enum VectorNorm
-{
-    VN_L1,
-    VN_L2,
-    VN_LINF
-};
-
-
-/** Defines flags for different vector norms.
- */
-enum MatrixNorm
-{
-    MN_COLUMN_SUM,
-    MN_ROW_SUM,
-    MN_FROBENIUS
-};
-
-
-
 /** Defines the time horizon start and end. \n
  */
 enum TimeHorizonElement{

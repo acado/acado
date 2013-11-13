@@ -64,7 +64,7 @@ class BlockMatrix
 				     uint _nCols    /**< Number of block columns. */ );
 
 		/** Constructor which takes ... */
-        BlockMatrix(	const Matrix& value
+        BlockMatrix(	const DMatrix& value
 						);
 
         /** Destructor. */
@@ -77,20 +77,20 @@ class BlockMatrix
 		 *  \return SUCCESSFUL_RETURN */
 		returnValue setDense( uint           rowIdx, /**< Row index of the component.    */
                               uint           colIdx, /**< Column index of the component. */
-                              const Matrix&  value );
+                              const DMatrix&  value );
 
 		/** Add method that adds a matrix to a certain component.
 		 *  \return SUCCESSFUL_RETURN */
 		returnValue addDense( uint           rowIdx, /**< Row index of the component.    */
                               uint           colIdx, /**< Column index of the component. */
-                              const Matrix&  value );
+                              const DMatrix&  value );
 
 		/** Access method that returns the value of a certain component.
 		 *  \return SUCCESSFUL_RETURN
          */
 		inline returnValue getSubBlock( uint    rowIdx,  /**< Row index of the component.    */
                                         uint    colIdx,  /**< Column index of the component. */
-                                        Matrix &value   )  const;
+                                        DMatrix &value   )  const;
 
 		/** Access method that returns the value of a certain component and requiring
          *  a given dimension.
@@ -98,7 +98,7 @@ class BlockMatrix
          */
 		returnValue getSubBlock( uint    rowIdx,  /**< Row index of the component.    */
                                  uint    colIdx,  /**< Column index of the component. */
-                                 Matrix &value,
+                                 DMatrix &value,
                                  uint nR,
                                  uint nC          )  const;
 
@@ -122,12 +122,12 @@ class BlockMatrix
 		/** Multiplies a matrix from the right to the matrix object and
 		 *  stores the result to a temporary object.
 		 *  \return Temporary object containing result of multiplication. */
-		BlockMatrix operator*( const BlockMatrix& arg /**< Block Matrix Factor. */ ) const;
+		BlockMatrix operator*( const BlockMatrix& arg /**< Block DMatrix Factor. */ ) const;
 
 		/** Multiplies a matrix from the right to the transposed matrix object and
 		 *  stores the result to a temporary object.
 		 *  \return Temporary object containing result of multiplication. */
-		BlockMatrix operator^( const BlockMatrix& arg	/**< Block Matrix Factor. */ ) const;
+		BlockMatrix operator^( const BlockMatrix& arg	/**< Block DMatrix Factor. */ ) const;
 
 		/** Returns number of block rows of the block matrix object.
 		 *  \return Number of rows. */
@@ -200,7 +200,8 @@ class BlockMatrix
 
 		/** Prints object to standard ouput stream.
 		 *  \return SUCCESSFUL_RETURN */
-		returnValue print( ) const;
+		returnValue print(	std::ostream& stream = std::cout
+							) const;
 
     //
     // DATA MEMBERS:
@@ -210,7 +211,7 @@ class BlockMatrix
 		uint nRows;			/**< Number of rows. */
 		uint nCols;			/**< Number of columns. */
 
-        std::vector< std::vector< Matrix > > elements;
+        std::vector< std::vector< DMatrix > > elements;
         std::vector< std::vector< SubBlockMatrixType > > types;
 };
 

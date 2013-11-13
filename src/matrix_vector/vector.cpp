@@ -30,54 +30,235 @@
  *    \date 2008 - 2013
  */
 
-#include <acado/matrix_vector/matrix_vector.hpp>
+#include <acado/matrix_vector/vector.hpp>
+#include <acado/matrix_vector/acado_mat_file.hpp>
+#include <iomanip>
 
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
-//
-// PUBLIC MEMBER FUNCTIONS:
-//
-
-Vector::Vector( )
-	: VectorspaceElement( )
-{}
-
-Vector::Vector( uint _dim )
-	: VectorspaceElement( _dim )
-{}
-
-Vector::Vector( uint _dim, const double* const _values )
-	: VectorspaceElement(_dim, _values)
-{}
-
-Vector::Vector( const VectorspaceElement& rhs )
-	: VectorspaceElement( rhs )
-{}
-
-Vector::~Vector( )
-{}
-
-returnValue Vector::append( const Vector& arg )
+template<typename T>
+GenericVector< T >& GenericVector<T>::append( 	const GenericVector<T>& _arg
+)
 {
-	return VectorspaceElement::append( arg );
+	unsigned oldDim = Base::rows();
+	unsigned argDim = _arg.rows();
+
+	Base::conservativeResize(oldDim + argDim);
+	Base::block(oldDim, 0, argDim, 1) = _arg;
+
+	return *this;
 }
 
-Vector operator-(const Vector &arg){
+template<typename T>
+GenericVector<T>& GenericVector< T >::setUnitVector(	unsigned _idx
+)
+{
+	ASSERT( _idx < Base::rows() );
 
-    uint i;
+	Base::setZero( );
+	Base::operator()( _idx ) = T( 1 );
 
-    Vector tmp(arg.getDim());
-
-    for( i = 0; i < arg.getDim(); i++ )
-        tmp(i) = -arg(i);
-
-    return tmp;
+	return *this;
 }
+
+template<typename T>
+T GenericVector< T >::getNorm(	VectorNorm _norm
+) const
+{
+	GenericVector scale( getDim() );
+	scale.setOnes();
+	return getNorm(_norm, scale);
+}
+
+template<typename T>
+T GenericVector< T >::getNorm(	VectorNorm _norm,
+		const GenericVector< T >& _scale
+) const
+{
+	GenericVector foo( getDim() );
+
+	switch( _norm )
+	{
+	case VN_L1:
+		foo = Base::cwiseQuotient( _scale );
+		return foo.getAbsolute().sum();
+
+		break;
+
+	case VN_L2:
+		return Base::norm();
+
+	case VN_LINF:
+		foo = Base::cwiseQuotient( _scale );
+		return foo.getAbsolute().getMax();
+
+	default:
+		return T( 0 );
+	}
+}
+
+template<typename T>
+returnValue GenericVector<T>::print(	std::ostream& stream,
+										const char* const name,
+										const char* const startString,
+										const char* const endString,
+										uint width,
+										uint precision,
+										const char* const colSeparator,
+										const char* const rowSeparator
+										) const
+{
+	if (name != NULL && strlen( name ) > 0)
+		stream << name << " = ";
+
+	if (startString != NULL && strlen(startString) > 0)
+		stream << startString;
+
+	if (precision > 0)
+		stream << setw( width ) << setprecision( precision ) << scientific;
+	else
+		stream << setw( width );
+
+	for (unsigned i = 0; i < getDim(); ++i)
+	{
+		if (precision > 0)
+			stream << Base::operator()( i );
+		else
+			stream << (int)Base::operator()( i );
+
+		if (i < (getDim() - 1) && rowSeparator != NULL && strlen( rowSeparator ) > 0)
+			stream << rowSeparator;
+	}
+	if (endString != NULL && strlen(endString) > 0)
+		stream << endString;
+
+	return SUCCESSFUL_RETURN;
+}
+
+template<typename T>
+returnValue GenericVector<T>::print(	const char* const filename,
+										const char* const name,
+										const char* const startString,
+										const char* const endString,
+										uint width,
+										uint precision,
+										const char* const colSeparator,
+										const char* const rowSeparator
+										) const
+{
+	ofstream stream( filename );
+
+	if ( stream.is_open() )
+		return print(stream, name, startString, endString, width, precision,
+				colSeparator, rowSeparator);
+	else
+		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
+
+	stream.close();
+
+	return SUCCESSFUL_RETURN;
+}
+
+template<typename T>
+returnValue GenericVector<T>::print(	std::ostream& stream,
+										const char* const name,
+										PrintScheme printScheme
+										) const
+{
+	MatFile<T>* matFile = 0;
+
+	switch ( printScheme )
+	{
+	case PS_MATLAB_BINARY:
+		matFile = new MatFile<T>;
+
+		matFile->write(stream, *this, name);
+
+		delete matFile;
+
+		return SUCCESSFUL_RETURN;
+
+	default:
+
+		char* startString = 0;
+		char* endString = 0;
+		uint width = 0;
+		uint precision = 0;
+		char* colSeparator = 0;
+		char* rowSeparator = 0;
+
+		returnValue ret = getGlobalStringDefinitions(printScheme, &startString,
+				&endString, width, precision, &colSeparator, &rowSeparator);
+		if (ret != SUCCESSFUL_RETURN)
+			return ret;
+
+		returnValue status = print(stream, name, startString, endString, width,
+				precision, colSeparator, rowSeparator);
+
+		if ( startString != 0 )   delete[] startString;
+		if ( endString != 0 )     delete[] endString;
+		if ( colSeparator != 0 )  delete[] colSeparator;
+		if ( rowSeparator != 0 )  delete[] rowSeparator;
+
+		return status;
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+template<typename T>
+returnValue GenericVector<T>::print(	const char* const filename,
+										const char* const name = DEFAULT_LABEL,
+										PrintScheme printScheme = PS_DEFAULT
+										) const
+{
+	ofstream stream( filename );
+	returnValue status;
+
+	if ( stream.is_open() )
+		status = print(stream, name, printScheme);
+	else
+		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
+
+	stream.close();
+
+	return status;
+}
+
+template<typename T>
+returnValue GenericVector<T>::read( std::istream& stream )
+{
+	vector< T > tmp;
+	stream >> tmp;
+
+	Base::_set(GenericVector<T>( tmp ));
+
+	return SUCCESSFUL_RETURN;
+}
+
+template<typename T>
+returnValue GenericVector<T>::read(	const char* const filename
+										)
+{
+	ifstream stream( filename );
+	returnValue status;
+
+	if (stream.is_open())
+		status = read( stream );
+	else
+		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
+
+	stream.close();
+
+	return status;
+}
+
+//
+// Explicit instantiations of templates
+//
+template class GenericVector<double>;
+template class GenericVector<int>;
 
 CLOSE_NAMESPACE_ACADO
-
-/*
- *	end of file
- */

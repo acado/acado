@@ -51,7 +51,7 @@ BlockMatrix::BlockMatrix( uint _nRows, uint _nCols )
 }
 
 
-BlockMatrix::BlockMatrix(	const Matrix& value
+BlockMatrix::BlockMatrix(	const DMatrix& value
 							)
 {
 	init(1, 1);
@@ -67,7 +67,7 @@ returnValue BlockMatrix::init( uint _nRows, uint _nCols )
 	nRows = _nRows;
 	nCols = _nCols;
 
-	vector< Matrix > foo(nCols, Matrix());
+	vector< DMatrix > foo(nCols, DMatrix());
 	for (unsigned row = 0; row < nRows; ++row)
 		elements.push_back( foo );
 
@@ -160,7 +160,7 @@ BlockMatrix BlockMatrix::operator-( const BlockMatrix& arg ) const{
                 }
                 else{
 
-                   Matrix nn(arg.elements[i][j].getNumRows(),arg.elements[i][j].getNumCols());
+                   DMatrix nn(arg.elements[i][j].getNumRows(),arg.elements[i][j].getNumCols());
                    nn.setZero();
 
                    tmp.types    [i][j]  = SBMT_DENSE;
@@ -290,8 +290,8 @@ BlockMatrix BlockMatrix::operator^( const BlockMatrix& arg ) const{
 
                         if( arg.types[k][j] == SBMT_DENSE ){
                             if( result.types[i][j] != SBMT_ZERO )
-                                  result.elements[i][j] += elements[k][i]^arg.elements[k][j];
-                            else  result.elements[i][j]  = elements[k][i]^arg.elements[k][j];
+                                  result.elements[i][j] += elements[k][i].transpose() * arg.elements[k][j];
+                            else  result.elements[i][j]  = elements[k][i].transpose() * arg.elements[k][j];
                         }
 
                         if( arg.types[k][j] == SBMT_ONE ){
@@ -417,33 +417,33 @@ BlockMatrix BlockMatrix::getNegative() const{
 }
 
 
-returnValue BlockMatrix::print( ) const
+returnValue BlockMatrix::print( std::ostream& stream) const
 {
-	cout << "Printing Block Matrix:" << endl << endl;
+	stream << "Printing Block DMatrix:" << endl << endl;
 
 	for (unsigned i = 0; i < getNumRows(); ++i)
 	{
-		cout << "Row " << i << endl;
+		stream << "Row " << i << endl;
 		for (unsigned j = 0; j < getNumCols(); ++j)
 		{
             if(nRows * nCols)
             {
-                if( types[i][j] == SBMT_DENSE ) elements[i][j].print();
-                if( types[i][j] == SBMT_ONE   ) cout << "ONE " << endl;
-                if( types[i][j] == SBMT_ZERO  ) cout << "ZERO " <<  endl;
+                if( types[i][j] == SBMT_DENSE ) stream << elements[i][j] << endl;
+                if( types[i][j] == SBMT_ONE   ) stream << "ONE " << endl;
+                if( types[i][j] == SBMT_ZERO  ) stream << "ZERO " <<  endl;
             }
             else
-            	cout << "ZERO " << endl;
-		    cout << endl;
+            	stream << "ZERO " << endl;
+            stream << endl;
 		}
-		cout << endl << endl;
+		stream << endl << endl;
 	}
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue BlockMatrix::setDense( uint rowIdx, uint colIdx, const Matrix& value ){
+returnValue BlockMatrix::setDense( uint rowIdx, uint colIdx, const DMatrix& value ){
 
 	ASSERT( rowIdx < getNumRows( ) );
 	ASSERT( colIdx < getNumCols( ) );
@@ -455,7 +455,7 @@ returnValue BlockMatrix::setDense( uint rowIdx, uint colIdx, const Matrix& value
 }
 
 
-returnValue BlockMatrix::addDense( uint rowIdx, uint colIdx, const Matrix& value ){
+returnValue BlockMatrix::addDense( uint rowIdx, uint colIdx, const DMatrix& value ){
 
 	ASSERT( rowIdx < getNumRows( ) );
 	ASSERT( colIdx < getNumCols( ) );
@@ -471,7 +471,7 @@ returnValue BlockMatrix::addDense( uint rowIdx, uint colIdx, const Matrix& value
 
 
 returnValue BlockMatrix::getSubBlock( uint rowIdx, uint colIdx,
-                                      Matrix &value, uint nR, uint nC )  const{
+                                      DMatrix &value, uint nR, uint nC )  const{
 
 
     ASSERT( rowIdx < getNumRows( ) );
@@ -486,7 +486,7 @@ returnValue BlockMatrix::getSubBlock( uint rowIdx, uint colIdx,
         value = elements[rowIdx][colIdx];
     }
     else{
-        value.init( nR, nC );
+        value.resize(nR, nC);
         value.setZero();
     }
 

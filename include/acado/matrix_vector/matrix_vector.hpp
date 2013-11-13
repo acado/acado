@@ -26,8 +26,8 @@
 
 /**
  *    \file include/acado/matrix_vector/matrix_vector.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 31.05.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 
@@ -37,35 +37,13 @@
 
 #include <acado/utils/acado_utils.hpp>
 
-#include <acado/matrix_vector/vectorspace_element.hpp>
-
 #include <acado/matrix_vector/vector.hpp>
 #include <acado/matrix_vector/matrix.hpp>
-#include <acado/matrix_vector/t_matrix.hpp>
-#include <acado/matrix_vector/block_matrix.hpp>
 
-#include <acado/matrix_vector/vector.ipp>
-#include <acado/matrix_vector/matrix.ipp>
+#include <acado/matrix_vector/block_matrix.hpp>
 #include <acado/matrix_vector/block_matrix.ipp>
 
-#include <acado/matrix_vector/acado_mat_file.hpp>
-
-
-BEGIN_NAMESPACE_ACADO
-
-static       VectorspaceElement emptyVectorspaceElement;
-static const VectorspaceElement emptyConstVectorspaceElement;
-
-static       Vector emptyVector;
-static const Vector emptyConstVector;
-
-static       Matrix emptyMatrix;
-static const Matrix emptyConstMatrix;
-
-static       BlockMatrix emptyBlockMatrix;
-
-CLOSE_NAMESPACE_ACADO
-
+#include <acado/matrix_vector/t_matrix.hpp>
 
 #endif  // ACADO_TOOLKIT_MATRIX_VECTOR_HPP
 

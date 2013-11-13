@@ -31,13 +31,12 @@
  */
 
 #include <acado/matrix_vector/acado_mat_file.hpp>
-#include <acado/matrix_vector/matrix_vector.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
-
-void MatFile::write(	std::ostream& stream,
-						const Matrix& mat,
+template<typename T>
+void MatFile< T >::write(	std::ostream& stream,
+						const GenericMatrix< T >& mat,
 						const char* name
 						)
 {
@@ -66,9 +65,9 @@ void MatFile::write(	std::ostream& stream,
 	// imaginary numbers should be stored just after the real ones
 }
 
-
-void MatFile::write(	std::ostream& stream,
-						const Vector& vec,
+template<typename T>
+void MatFile< T >::write(	std::ostream& stream,
+						const GenericVector< T >& vec,
 						const char* name
 						)
 {
@@ -93,5 +92,11 @@ void MatFile::write(	std::ostream& stream,
 	
 	// imaginary numbers should be stored just after the real ones
 }
+
+//
+// Explicit instantiations of templates.
+//
+template class MatFile< double >;
+template class MatFile< int >;
 
 CLOSE_NAMESPACE_ACADO
