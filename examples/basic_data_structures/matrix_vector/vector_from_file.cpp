@@ -42,12 +42,12 @@ USING_NAMESPACE_ACADO
 /* >>> start tutorial code >>> */
 int main( )
 {
-	Vector a;
+	DVector a;
 
-//	ifstream stream( "vector.dat" );
-//	stream >> a;
+	ifstream stream( "vector.dat" );
+	stream >> a;
 	// OR
-	a.read( "vector.dat" );
+//	a.read( "vector.dat" );
 
 	// Print vector to standard output stream.
     cout << a;

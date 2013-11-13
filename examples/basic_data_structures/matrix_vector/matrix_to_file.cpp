@@ -44,7 +44,7 @@ int main( )
 {
 	ofstream stream( "matrix_output.dat" );
 
-	Matrix A(3, 3);
+	DMatrix A(3, 3);
 
 	A.setIdentity();
 

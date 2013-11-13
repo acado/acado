@@ -42,14 +42,14 @@ USING_NAMESPACE_ACADO
 /* >>> start tutorial code >>> */
 int main( )
 {
-	Matrix a;
+	DMatrix a;
 
 	ifstream stream( "matrix.dat" );
 
 	a.read( stream );
 
     a.print();
-    // OR
+//    OR
 //    cout << a;
 
     stream.close();

@@ -105,24 +105,24 @@ ENDIF( NOT CMAKE_BUILD_TYPE )
 # Folders
 #
 SET( EXAMPLE_DIRS
-	basic_data_structures/curve
-	basic_data_structures/function
+#	basic_data_structures/curve
+#	basic_data_structures/function
 	basic_data_structures/matrix_vector
-	basic_data_structures/symbolics
-	basic_data_structures/variables_grid
-#	code_generation/simulation
-	controller
-	getting_started
-	integration_algorithm
-	integrator
-	validated_integrator
-	multi_objective
-	my_examples
-	nlp
-	ocp
-	parameter_estimation
-	process
-	simulation_environment
+#	basic_data_structures/symbolics
+#	basic_data_structures/variables_grid
+##	code_generation/simulation
+#	controller
+#	getting_started
+#	integration_algorithm
+#	integrator
+#	validated_integrator
+#	multi_objective
+#	my_examples
+#	nlp
+#	ocp
+#	parameter_estimation
+#	process
+#	simulation_environment
 )
 
 ################################################################################

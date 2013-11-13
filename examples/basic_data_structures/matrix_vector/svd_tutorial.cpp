@@ -40,6 +40,7 @@
 #include <acado/matrix_vector/matrix_vector.hpp>
 
 using namespace std;
+using namespace Eigen;
 
 USING_NAMESPACE_ACADO
 
@@ -50,7 +51,7 @@ int main( ){
 
     // DEFINE A MATRIX:
     // ----------------
-    Matrix A(3,2);
+    DMatrix A(3,2);
 
     A(0,0) = 1.0;  A(0,1) = 0.0;
     A(1,0) = 0.0;  A(1,1) = 3.0;
@@ -66,12 +67,11 @@ int main( ){
 //  matrix.
 //  ----------------------------------------------
 
-    Matrix U,V;
-    Vector D;
+    JacobiSVD< DMatrix > svdA(A, ComputeThinU | ComputeThinV );
 
-    A.getSingularValueDecomposition( U, D, V );
-
-    cout << "\nSVD of the matrix A: \n";
+    DMatrix U = svdA.matrixU();
+    DMatrix V = svdA.matrixV();
+    DVector D = svdA.singularValues();
 
     cout << "U = " << endl << U << endl;
     cout << "D = " << endl << D << endl;
@@ -80,7 +80,7 @@ int main( ){
 
     // DEFINE ANOTHER MATRIX:
     // ----------------------
-    Matrix B(2,3);
+    DMatrix B(2,3);
 
     B(0,0) = 1.0;   B(0,1) = 0.0;  B(0,2) = 0.0;
     B(1,0) = 0.0;   B(1,1) = 3.0;  B(1,2) = 2.0;
@@ -95,7 +95,11 @@ int main( ){
 //  matrix.
 //  ----------------------------------------------
 
-    B.getSingularValueDecomposition( U, D, V );
+    JacobiSVD< Eigen::MatrixXd > svdB(B, ComputeThinU | ComputeThinV);
+
+    U = svdB.matrixU();
+    V = svdB.matrixV();
+    D = svdB.singularValues();
 
     cout << "\n\nSVD of the matrix B: \n";
 

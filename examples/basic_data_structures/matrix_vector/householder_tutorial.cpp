@@ -35,40 +35,31 @@
  *    Matrix class.
  */
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
 int main( ){
 
-    USING_NAMESPACE_ACADO
-
     // DEFINE A MATRIX:
     // ----------------
-    Matrix A(2,2);
+    DMatrix A(2,2);
 
     A(0,0) = 3.0;  A(0,1) = 0.5;
     A(1,0) = 1.0;  A(1,1) = 3.0;
 
-    Vector b(2);
+    DVector b(2);
     b(0) = 1.0;
     b(1) = 0.0;
-    Matrix B = A;
 
-    A.computeQRdecomposition();
-    Vector x = A.solveQR(b);
+    DVector x = A.fullPivHouseholderQr().solve( b );
 
-    x.print("x");
- 
-    (B*x).print("A*x");
-
-    Vector y = A.solveTransposeQR(b);
-
-    y.print("y");
- 
-    (B^y).print("A^y");
+    cout << "A = " << endl << A << endl << endl;
+    cout << "b = " << endl << b << endl << endl;
+    cout << "x = " << endl << x << endl << endl;
 
     return 0;
 }
