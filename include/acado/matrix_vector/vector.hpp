@@ -28,7 +28,7 @@
  *    \file include/acado/matrix_vector/vector.hpp
  *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  *    \date 2008 - 2013
- *    \note The code in the class Vector is compatible with the original
+ *    \note The code in the class GenericVector is compatible with the original
  *          code developed by B. Houska and H.J. Ferreau.
  */
 

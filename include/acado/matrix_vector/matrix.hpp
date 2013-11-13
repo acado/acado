@@ -27,8 +27,8 @@
  *    \file include/acado/matrix_vector/matrix.hpp
  *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  *    \date 2008 - 2013
- *    \note The code in the class Vector is not 100% compatible with the original
- *          code developed by B. Houska and H.J. Ferreau.
+ *    \note The code in the class GenericMatrix is not 100% compatible with the
+ *          original code developed by B. Houska and H.J. Ferreau.
  */
 
 #ifndef ACADO_TOOLKIT_MATRIX_HPP
@@ -165,6 +165,10 @@ public:
 	/** Reshapes a matrix into a column vector. */
 	GenericMatrix& makeVector( );
 
+	/** Returns total number of elements of the matrix object. */
+	unsigned getDim( ) const
+	{ return (Base::rows() * Base::cols()); }
+
 	/** Returns number of rows of the matrix object. */
 	unsigned getNumRows( ) const
 	{ return Base::rows(); }
@@ -172,6 +176,10 @@ public:
 	/** Returns number of columns of the matrix object. */
 	unsigned getNumCols( ) const
 	{ return Base::cols(); }
+
+	/** Returns whether the vector is empty. */
+	bool isEmpty( ) const
+	{ return Base::rows() == 0 || Base::cols() == 0; }
 
 	/** Returns a given row of the matrix object. */
 	GenericVector< T > getRow(	unsigned _idx
@@ -264,6 +272,22 @@ public:
 	 *  this object, if they are negative or zero, but zero otherwise.
 	 */
 	GenericMatrix negative() const;
+
+	/** Returns maximum element. */
+	T getMax( ) const
+	{ return Base::maxCoeff(); }
+
+	/** Returns minimum element. */
+	T getMin( ) const
+	{ return Base::minCoeff(); }
+
+	/** Returns mean value of all elements. */
+	T getMean( ) const
+	{ return Base::mean(); }
+
+	/** Return a new vector with absolute elements. */
+	GenericMatrix< T > getAbsolute() const
+	{ return Base::cwiseAbs(); }
 
 	/** Returns Frobenius norm of the matrix. */
 	T getNorm( ) const;
@@ -390,6 +414,8 @@ std::istream& operator>>(	std::istream& _stream,
 
 /** Type definition of the matrix of doubles. */
 typedef GenericMatrix< double > DMatrix;
+/** Type definition of the matrix of integers. */
+typedef GenericMatrix< double > IMatrix;
 /** Shared pointer to a matrix of doubles. */
 typedef std::tr1::shared_ptr< GenericMatrix< double > > DMatrixPtr;
 
