@@ -779,17 +779,22 @@ returnValue MatrixVariablesGrid::print(	std::ostream& stream,
 										PrintScheme printScheme
 										) const
 {
-	MatFile* matFile = 0;
+//	MatFile* matFile = 0;
 
 	switch (printScheme) {
 	case PS_MATLAB_BINARY:
-		matFile = new MatFile;
 
-		matFile->write(stream, (const VariablesGrid) *this, name);
+		ACADOFATAL( RET_NOT_IMPLEMENTED_YET );
 
-		delete matFile;
+		break;
 
-		return SUCCESSFUL_RETURN;
+//		matFile = new MatFile;
+//
+//		matFile->write(stream, (const VariablesGrid) *this, name);
+//
+//		delete matFile;
+//
+//		return SUCCESSFUL_RETURN;
 
 	default:
 		char* startString = 0;
@@ -818,6 +823,8 @@ returnValue MatrixVariablesGrid::print(	std::ostream& stream,
 
 		return status;
 	}
+
+	return SUCCESSFUL_RETURN;
 }
 
 returnValue MatrixVariablesGrid::read( std::istream& stream )

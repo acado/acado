@@ -198,8 +198,8 @@ SET( ACADO_SOURCE_DIRS
 	./src/utils
 #	./src/clock
 	./src/matrix_vector
-#	./src/set_arithmetics
-#	./src/variables_grid
+	./src/set_arithmetics
+	./src/variables_grid
 #	./src/curve
 #	./src/user_interaction
 #	./src/symbolic_operator

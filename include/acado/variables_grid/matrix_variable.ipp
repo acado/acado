@@ -40,7 +40,7 @@ BEGIN_NAMESPACE_ACADO
 
 inline DMatrix MatrixVariable::getMatrix( ) const
 {
-	return DMatrix(nRows, nCols, data.data());
+	return DMatrix(rows(), cols(), data());
 }
 
 

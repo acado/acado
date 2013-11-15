@@ -115,8 +115,7 @@ returnValue MatrixVariable::init(	uint _nRows,
 									BooleanType _autoInit
 									)
 {
-	if ( DMatrix::init( _nRows,_nCols ) != SUCCESSFUL_RETURN )
-		return ACADOERROR( RET_UNKNOWN_BUG );
+	DMatrix::init( _nRows,_nCols );
 
 	if ( VariableSettings::init( _nRows*_nCols,_type,_names,_units,_scaling,_lb,_ub,_autoInit ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNKNOWN_BUG );
