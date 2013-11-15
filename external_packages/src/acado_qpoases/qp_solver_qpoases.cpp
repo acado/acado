@@ -164,13 +164,13 @@ returnValue QPsolver_qpOASES::solve( DMatrix *H,
                                      DVector *ubA,
                                      uint maxIter       )
 {
-	return solve(	H->getDoublePointer( ),
-					A->getDoublePointer( ),
-					g->getDoublePointer( ),
-					lb->getDoublePointer( ),
-					ub->getDoublePointer( ),
-					lbA->getDoublePointer( ),
-					ubA->getDoublePointer( ),
+	return solve(	H->data(),
+					A->data(),
+					g->data(),
+					lb->data(),
+					ub->data(),
+					lbA->data(),
+					ubA->data(),
 					maxIter
 					);
 }
@@ -215,7 +215,7 @@ returnValue QPsolver_qpOASES::getPrimalSolution( DVector& xOpt ) const
 
 	if ( qp->getPrimalSolution( xOptTmp ) == qpOASES::SUCCESSFUL_RETURN )
 	{
-		xOpt.init( dim,xOptTmp );
+		xOpt = DVector(dim, xOptTmp);
 		delete[] xOptTmp;
 		return SUCCESSFUL_RETURN;
 	}
@@ -237,7 +237,7 @@ returnValue QPsolver_qpOASES::getDualSolution( DVector& yOpt ) const
 
 	if ( qp->getDualSolution( yOptTmp ) == qpOASES::SUCCESSFUL_RETURN )
 	{
-		yOpt.init( dim,yOptTmp );
+		yOpt = DVector(dim, yOptTmp);
 		delete[] yOptTmp;
 		return SUCCESSFUL_RETURN;
 	}
