@@ -699,7 +699,20 @@ returnValue VariablesGrid::initializeFromBounds( )
 	return SUCCESSFUL_RETURN;
 }
 
+VariablesGrid::operator DMatrix() const
+{
+	DMatrix tmp(getNumPoints( ), getNumValues( ) + 1);
 
+	for (uint run1 = 0; run1 < getNumPoints(); ++run1)
+	{
+		tmp(run1, 0) = getTime(run1);
+
+		for (uint run2 = 0; run2 < getNumValues(); ++run2)
+			tmp(run1, 1 + run2) = operator()(run1, run2);
+	}
+
+	return tmp;
+}
 
 
 CLOSE_NAMESPACE_ACADO

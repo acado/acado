@@ -215,7 +215,7 @@ class VariablesGrid : public MatrixVariablesGrid
         VariablesGrid& operator=(	const MatrixVariablesGrid& rhs
 									);
 
-
+        operator DMatrix() const;
 
 		/** Assignment operator which reads data from a matrix. The data is interpreted 
 		 *	as follows: the first entry of each row is taken as time of the grid point 
