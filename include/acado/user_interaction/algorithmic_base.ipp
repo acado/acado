@@ -180,7 +180,7 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 												double time
 												)
 {
-	return userInteraction->setLast( _name,value,time );
+	return userInteraction->setLast( _name,DMatrix((double)value),time );
 }
 
 
@@ -189,7 +189,7 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 												double time
 												)
 {
-	return userInteraction->setLast( _name, value, time );
+	return userInteraction->setLast( _name, DMatrix(value), time );
 }
 
 
