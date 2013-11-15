@@ -52,9 +52,9 @@ VariablesGrid::VariablesGrid(	uint _dim,
 								VariableType _type,
 								const char** const _names,
 								const char** const _units,
-								const VectorspaceElement* const _scaling,
-								const VectorspaceElement* const _lb,
-								const VectorspaceElement* const _ub,
+								const DVector* const _scaling,
+								const DVector* const _lb,
+								const DVector* const _ub,
 								const BooleanType* const  _autoInit
 								) : MatrixVariablesGrid( _dim,1,_grid,_type,_names,_units,_scaling,_lb,_ub,_autoInit )
 {
@@ -66,9 +66,9 @@ VariablesGrid::VariablesGrid(	uint _dim,
 								VariableType _type,
 								const char** const _names,
 								const char** const _units,
-								const VectorspaceElement* const _scaling,
-								const VectorspaceElement* const _lb,
-								const VectorspaceElement* const _ub,
+								const DVector* const _scaling,
+								const DVector* const _lb,
+								const DVector* const _ub,
 								const BooleanType* const  _autoInit
 								) : MatrixVariablesGrid( _dim,1,_nPoints,_type,_names,_units,_scaling,_lb,_ub,_autoInit )
 {
@@ -82,9 +82,9 @@ VariablesGrid::VariablesGrid(	uint _dim,
 								VariableType _type,
 								const char** const _names,
 								const char** const _units,
-								const VectorspaceElement* const _scaling,
-								const VectorspaceElement* const _lb,
-								const VectorspaceElement* const _ub,
+								const DVector* const _scaling,
+								const DVector* const _lb,
+								const DVector* const _ub,
 								const BooleanType* const  _autoInit
 								) : MatrixVariablesGrid( _dim,1,_firstTime,_lastTime,_nPoints,_type,_names,_units,_scaling,_lb,_ub,_autoInit )
 {
@@ -215,9 +215,9 @@ returnValue VariablesGrid::init(	uint _dim,
 									VariableType _type,
 									const char** const _names,
 									const char** const _units,
-									const VectorspaceElement* const _scaling,
-									const VectorspaceElement* const _lb,
-									const VectorspaceElement* const _ub,
+									const DVector* const _scaling,
+									const DVector* const _lb,
+									const DVector* const _ub,
 									const BooleanType* const  _autoInit
 									)
 {
@@ -230,9 +230,9 @@ returnValue VariablesGrid::init(	uint _dim,
 									VariableType _type,
 									const char** const _names,
 									const char** const _units,
-									const VectorspaceElement* const _scaling,
-									const VectorspaceElement* const _lb,
-									const VectorspaceElement* const _ub,
+									const DVector* const _scaling,
+									const DVector* const _lb,
+									const DVector* const _ub,
 									const BooleanType* const _autoInit
 									)
 {
@@ -247,9 +247,9 @@ returnValue VariablesGrid::init(	uint _dim,
 									VariableType _type,
 									const char** const _names,
 									const char** const _units,
-									const VectorspaceElement* const _scaling,
-									const VectorspaceElement* const _lb,
-									const VectorspaceElement* const _ub,
+									const DVector* const _scaling,
+									const DVector* const _lb,
+									const DVector* const _ub,
 									const BooleanType* const  _autoInit
 									)
 {

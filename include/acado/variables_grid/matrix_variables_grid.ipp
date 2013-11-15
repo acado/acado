@@ -328,18 +328,18 @@ inline returnValue MatrixVariablesGrid::setUnit(	uint pointIdx,
 
 
 
-inline VectorspaceElement MatrixVariablesGrid::getScaling(	uint pointIdx
+inline DVector MatrixVariablesGrid::getScaling(	uint pointIdx
 															) const
 {
 	if( pointIdx >= getNumPoints( ) )
-		return emptyVectorspaceElement;
+		return emptyVector;
 
 	return values[pointIdx]->getScaling( );
 }
 
 
 inline returnValue MatrixVariablesGrid::setScaling(	uint pointIdx,
-													const VectorspaceElement& _scaling
+													const DVector& _scaling
 													)
 {
     if ( pointIdx >= getNumPoints( ) )
@@ -377,18 +377,18 @@ inline returnValue MatrixVariablesGrid::setScaling(	uint pointIdx,
 
 
 
-inline VectorspaceElement MatrixVariablesGrid::getLowerBounds(	uint pointIdx
+inline DVector MatrixVariablesGrid::getLowerBounds(	uint pointIdx
 																) const
 {
 	if( pointIdx >= getNumPoints( ) )
-		return emptyVectorspaceElement;
+		return emptyVector;
 
 	return values[pointIdx]->getLowerBounds( );
 }
 
 
 inline returnValue MatrixVariablesGrid::setLowerBounds(	uint pointIdx,
-														const VectorspaceElement& _lb
+														const DVector& _lb
 														)
 {
     if( pointIdx >= nPoints )
@@ -426,18 +426,18 @@ inline returnValue MatrixVariablesGrid::setLowerBound(	uint pointIdx,
 
 
 
-inline VectorspaceElement MatrixVariablesGrid::getUpperBounds(	uint pointIdx
+inline DVector MatrixVariablesGrid::getUpperBounds(	uint pointIdx
 																) const
 {
 	if( pointIdx >= getNumPoints( ) )
-		return emptyVectorspaceElement;
+		return emptyVector;
 
 	return values[pointIdx]->getUpperBounds( );
 }
 
 
 inline returnValue MatrixVariablesGrid::setUpperBounds(	uint pointIdx,
-														const VectorspaceElement& _ub
+														const DVector& _ub
 														)
 {
     if( pointIdx >= getNumPoints( ) )

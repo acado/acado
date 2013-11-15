@@ -228,7 +228,7 @@ returnValue Constraint::add( const DVector lb_, const Expression &arg, const DVe
     // ------------------
     if( lb_.getDim() != ub_.getDim()        )  return ACADOERROR(RET_INFEASIBLE_CONSTRAINT);
     if( lb_.getDim() != grid.getNumPoints() )  return ACADOERROR(RET_INFEASIBLE_CONSTRAINT);
-    if( (lb_ <= (const VectorspaceElement&)ub_) == BT_FALSE            )  return ACADOERROR(RET_INFEASIBLE_CONSTRAINT);
+    if( (lb_ <= (const DVector&)ub_) == BT_FALSE            )  return ACADOERROR(RET_INFEASIBLE_CONSTRAINT);
 
 
     // CHECK FOR A BOUND:

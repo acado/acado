@@ -80,9 +80,9 @@ class MatrixVariable : public DMatrix, public VariableSettings
 						VariableType _type = VT_UNKNOWN,
 						const char** const _names = 0,
 						const char** const _units = 0,
-						VectorspaceElement _scaling = emptyVectorspaceElement,
-						VectorspaceElement _lb = emptyVectorspaceElement,
-						VectorspaceElement _ub = emptyVectorspaceElement,
+						DVector _scaling = emptyVector,
+						DVector _lb = emptyVector,
+						DVector _ub = emptyVector,
 						BooleanType _autoInit = defaultAutoInit
 						);
 
@@ -142,9 +142,9 @@ class MatrixVariable : public DMatrix, public VariableSettings
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							VectorspaceElement _scaling = emptyVectorspaceElement,
-							VectorspaceElement _lb = emptyVectorspaceElement,
-							VectorspaceElement _ub = emptyVectorspaceElement,
+							DVector _scaling = emptyVector,
+							DVector _lb = emptyVector,
+							DVector _ub = emptyVector,
 							BooleanType _autoInit = defaultAutoInit
 							);
 

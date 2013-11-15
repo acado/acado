@@ -53,9 +53,9 @@ MatrixVariable::MatrixVariable(	uint _nRows,
 								VariableType _type,
 								const char** const _names,
 								const char** const _units,
-								VectorspaceElement _scaling,
-								VectorspaceElement _lb,
-								VectorspaceElement _ub,
+								DVector _scaling,
+								DVector _lb,
+								DVector _ub,
 								BooleanType _autoInit
 								) : DMatrix( _nRows,_nCols ), VariableSettings( _nRows*_nCols,_type,_names,_units,_scaling,_lb,_ub,_autoInit )
 {
@@ -109,9 +109,9 @@ returnValue MatrixVariable::init(	uint _nRows,
 									VariableType _type,
 									const char** const _names,
 									const char** const _units,
-									VectorspaceElement _scaling,
-									VectorspaceElement _lb,
-									VectorspaceElement _ub,
+									DVector _scaling,
+									DVector _lb,
+									DVector _ub,
 									BooleanType _autoInit
 									)
 {

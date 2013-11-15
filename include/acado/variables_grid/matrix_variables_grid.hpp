@@ -89,9 +89,9 @@ class MatrixVariablesGrid : public Grid
 								VariableType _type = VT_UNKNOWN,
 								const char** const _names = 0,
 								const char** const _units = 0,
-								const VectorspaceElement* const _scaling = 0,
-								const VectorspaceElement* const _lb = 0,
-								const VectorspaceElement* const _ub = 0,
+								const DVector* const _scaling = 0,
+								const DVector* const _lb = 0,
+								const DVector* const _ub = 0,
 								const BooleanType* const _autoInit = 0
 								);
 
@@ -116,9 +116,9 @@ class MatrixVariablesGrid : public Grid
 								VariableType _type = VT_UNKNOWN,
 								const char** const _names = 0,
 								const char** const _units = 0,
-								const VectorspaceElement* const _scaling = 0,
-								const VectorspaceElement* const _lb = 0,
-								const VectorspaceElement* const _ub = 0,
+								const DVector* const _scaling = 0,
+								const DVector* const _lb = 0,
+								const DVector* const _ub = 0,
 								const BooleanType* const _autoInit = 0
 								);
 
@@ -149,9 +149,9 @@ class MatrixVariablesGrid : public Grid
 								VariableType _type = VT_UNKNOWN,
 								const char** const _names = 0,
 								const char** const _units = 0,
-								const VectorspaceElement* const _scaling = 0,
-								const VectorspaceElement* const _lb = 0,
-								const VectorspaceElement* const _ub = 0,
+								const DVector* const _scaling = 0,
+								const DVector* const _lb = 0,
+								const DVector* const _ub = 0,
 								const BooleanType* const _autoInit = 0
 								);
 
@@ -318,9 +318,9 @@ class MatrixVariablesGrid : public Grid
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							const VectorspaceElement* const _scaling = 0,
-							const VectorspaceElement* const _lb = 0,
-							const VectorspaceElement* const _ub = 0,
+							const DVector* const _scaling = 0,
+							const DVector* const _lb = 0,
+							const DVector* const _ub = 0,
 							const BooleanType* const _autoInit = 0
 							);
 
@@ -347,9 +347,9 @@ class MatrixVariablesGrid : public Grid
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							const VectorspaceElement* const _scaling = 0,
-							const VectorspaceElement* const _lb = 0,
-							const VectorspaceElement* const _ub = 0,
+							const DVector* const _scaling = 0,
+							const DVector* const _lb = 0,
+							const DVector* const _ub = 0,
 							const BooleanType* const _autoInit = 0
 							);
 
@@ -382,9 +382,9 @@ class MatrixVariablesGrid : public Grid
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							const VectorspaceElement* const _scaling = 0,
-							const VectorspaceElement* const _lb = 0,
-							const VectorspaceElement* const _ub = 0,
+							const DVector* const _scaling = 0,
+							const DVector* const _lb = 0,
+							const DVector* const _ub = 0,
 							const BooleanType* const _autoInit = 0
 							);
 
@@ -617,7 +617,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Scaling of MatrixVariable at given grid point
 		 */
-		inline VectorspaceElement getScaling(	uint pointIdx
+		inline DVector getScaling(	uint pointIdx
 												) const;
 
 		/** Assigns new scaling to MatrixVariable at grid point with given index.
@@ -630,7 +630,7 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_INVALID_ARGUMENTS
 		 */
 		inline returnValue setScaling(	uint pointIdx,
-										const VectorspaceElement& _scaling
+										const DVector& _scaling
 										);
 
 		/** Returns scaling of given component of MatrixVariable at grid point 
@@ -668,7 +668,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Lower bounds of MatrixVariable at given grid point
 		 */
-		inline VectorspaceElement getLowerBounds(	uint pointIdx
+		inline DVector getLowerBounds(	uint pointIdx
 													) const;
 
 		/** Assigns new lower bounds to MatrixVariable at grid point with given index.
@@ -680,7 +680,7 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_INDEX_OUT_OF_BOUNDS
 		 */
 		inline returnValue setLowerBounds(	uint pointIdx,
-											const VectorspaceElement& _lb
+											const DVector& _lb
 											);
 
 		/** Returns lower bound of given component of MatrixVariable at grid point 
@@ -717,7 +717,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Upper bounds of MatrixVariable at given grid point
 		 */
-		inline VectorspaceElement getUpperBounds(	uint pointIdx
+		inline DVector getUpperBounds(	uint pointIdx
 													) const;
 
 		/** Assigns new upper bounds to MatrixVariable at grid point with given index.
@@ -729,7 +729,7 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_INDEX_OUT_OF_BOUNDS
 		 */
 		inline returnValue setUpperBounds(	uint pointIdx,
-											const VectorspaceElement& _ub
+											const DVector& _ub
 											);
 
 		/** Returns upper bound of given component of MatrixVariable at grid point 
@@ -1207,9 +1207,9 @@ class MatrixVariablesGrid : public Grid
 											VariableType _type = VT_UNKNOWN,
 											const char** const _names = 0,
 											const char** const _units = 0,
-											const VectorspaceElement* const _scaling = 0,
-											const VectorspaceElement* const _lb = 0,
-											const VectorspaceElement* const _ub = 0,
+											const DVector* const _scaling = 0,
+											const DVector* const _lb = 0,
+											const DVector* const _ub = 0,
 											const BooleanType* const _autoInit = 0
 											);
 

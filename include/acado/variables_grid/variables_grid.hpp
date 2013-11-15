@@ -88,9 +88,9 @@ class VariablesGrid : public MatrixVariablesGrid
 						VariableType _type = VT_UNKNOWN,
 						const char** const _names = 0,
 						const char** const _units = 0,
-						const VectorspaceElement* const _scaling = 0,
-						const VectorspaceElement* const _lb = 0,
-						const VectorspaceElement* const _ub = 0,
+						const DVector* const _scaling = 0,
+						const DVector* const _lb = 0,
+						const DVector* const _ub = 0,
 						const BooleanType* const _autoInit = 0
 						);
 
@@ -114,9 +114,9 @@ class VariablesGrid : public MatrixVariablesGrid
 						VariableType _type = VT_UNKNOWN,
 						const char** const _names = 0,
 						const char** const _units = 0,
-						const VectorspaceElement* const _scaling = 0,
-						const VectorspaceElement* const _lb = 0,
-						const VectorspaceElement* const _ub = 0,
+						const DVector* const _scaling = 0,
+						const DVector* const _lb = 0,
+						const DVector* const _ub = 0,
 						const BooleanType* const _autoInit = 0
 						);
 
@@ -145,9 +145,9 @@ class VariablesGrid : public MatrixVariablesGrid
 						VariableType _type = VT_UNKNOWN,
 						const char** const _names = 0,
 						const char** const _units = 0,
-						const VectorspaceElement* const _scaling = 0,
-						const VectorspaceElement* const _lb = 0,
-						const VectorspaceElement* const _ub = 0,
+						const DVector* const _scaling = 0,
+						const DVector* const _lb = 0,
+						const DVector* const _ub = 0,
 						const BooleanType* const _autoInit = 0
 						);
 
@@ -350,9 +350,9 @@ class VariablesGrid : public MatrixVariablesGrid
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							const VectorspaceElement* const _scaling = 0,
-							const VectorspaceElement* const _lb = 0,
-							const VectorspaceElement* const _ub = 0,
+							const DVector* const _scaling = 0,
+							const DVector* const _lb = 0,
+							const DVector* const _ub = 0,
 							const BooleanType* const _autoInit = 0
 							);
 
@@ -377,9 +377,9 @@ class VariablesGrid : public MatrixVariablesGrid
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							const VectorspaceElement* const _scaling = 0,
-							const VectorspaceElement* const _lb = 0,
-							const VectorspaceElement* const _ub = 0,
+							const DVector* const _scaling = 0,
+							const DVector* const _lb = 0,
+							const DVector* const _ub = 0,
 							const BooleanType* const _autoInit = 0
 							);
 
@@ -410,9 +410,9 @@ class VariablesGrid : public MatrixVariablesGrid
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							const VectorspaceElement* const _scaling = 0,
-							const VectorspaceElement* const _lb = 0,
-							const VectorspaceElement* const _ub = 0,
+							const DVector* const _scaling = 0,
+							const DVector* const _lb = 0,
+							const DVector* const _ub = 0,
 							const BooleanType* const _autoInit = 0
 							);
 

@@ -59,9 +59,9 @@ VariableSettings::VariableSettings(	uint _dim,
 									VariableType _type,
 									const char** const _names,
 									const char** const _units,
-									const VectorspaceElement& _scaling,
-									const VectorspaceElement& _lb,
-									const VectorspaceElement& _ub,
+									const DVector& _scaling,
+									const DVector& _lb,
+									const DVector& _ub,
 									BooleanType _autoInit
 									)
 {
@@ -245,9 +245,9 @@ returnValue VariableSettings::init(	uint _dim,
 									VariableType _type,
 									const char** const _names,
 									const char** const _units,
-									const VectorspaceElement& _scaling,
-									const VectorspaceElement& _lb,
-									const VectorspaceElement& _ub,
+									const DVector& _scaling,
+									const DVector& _lb,
+									const DVector& _ub,
 									BooleanType _autoInit
 									)
 {
@@ -271,9 +271,9 @@ returnValue VariableSettings::appendSettings(	const VariableSettings& rhs
 returnValue VariableSettings::appendSettings(	uint _dim,
 												const char** const _names,
 												const char** const _units,
-												const VectorspaceElement& _scaling,
-												const VectorspaceElement& _lb,
-												const VectorspaceElement& _ub
+												const DVector& _scaling,
+												const DVector& _lb,
+												const DVector& _ub
 												)
 {
 	uint i;
@@ -370,7 +370,7 @@ returnValue VariableSettings::appendSettings(	uint _dim,
 		}
 		else
 		{
-			VectorspaceElement tmp( _dim );
+			DVector tmp( _dim );
 			tmp.setAll( defaultScaling );
 			scaling.append( tmp );
 		}
@@ -393,7 +393,7 @@ returnValue VariableSettings::appendSettings(	uint _dim,
 		}
 		else
 		{
-			VectorspaceElement tmp( _dim );
+			DVector tmp( _dim );
 			tmp.setAll( defaultLowerBound );
 			lb.append( tmp );
 		}
@@ -416,7 +416,7 @@ returnValue VariableSettings::appendSettings(	uint _dim,
 		}
 		else
 		{
-			VectorspaceElement tmp( _dim );
+			DVector tmp( _dim );
 			tmp.setAll( defaultUpperBound );
 			ub.append( tmp );
 		}

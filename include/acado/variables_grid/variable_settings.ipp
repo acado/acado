@@ -54,11 +54,11 @@ inline returnValue VariableSettings::setType(	VariableType _type
 
 
 
-inline VectorspaceElement VariableSettings::getScaling( ) const
+inline DVector VariableSettings::getScaling( ) const
 {
 	if ( scaling.isEmpty( ) == BT_TRUE )
 	{
-		VectorspaceElement tmp( dim );
+		DVector tmp( dim );
 		tmp.setAll( defaultScaling );
 		return tmp;
 	}
@@ -67,7 +67,7 @@ inline VectorspaceElement VariableSettings::getScaling( ) const
 }
 
 
-inline returnValue VariableSettings::setScaling(	const VectorspaceElement& _scaling
+inline returnValue VariableSettings::setScaling(	const DVector& _scaling
 													)
 {
 	if ( dim != _scaling.getDim( ) )
@@ -115,11 +115,11 @@ inline returnValue VariableSettings::setScaling(	uint idx,
 }
 
 
-inline VectorspaceElement VariableSettings::getLowerBounds( ) const
+inline DVector VariableSettings::getLowerBounds( ) const
 {
 	if ( lb.isEmpty( ) == BT_TRUE )
 	{
-		VectorspaceElement tmp( dim );
+		DVector tmp( dim );
 		tmp.setAll( defaultLowerBound );
 		return tmp;
 	}
@@ -128,7 +128,7 @@ inline VectorspaceElement VariableSettings::getLowerBounds( ) const
 }
 
 
-inline returnValue VariableSettings::setLowerBounds(	const VectorspaceElement& _lb
+inline returnValue VariableSettings::setLowerBounds(	const DVector& _lb
 														)
 {
 	if( _lb.getDim() != dim )
@@ -171,11 +171,11 @@ inline returnValue VariableSettings::setLowerBound(	uint idx,
 
 
 
-inline VectorspaceElement VariableSettings::getUpperBounds( ) const
+inline DVector VariableSettings::getUpperBounds( ) const
 {
 	if ( ub.isEmpty( ) == BT_TRUE )
 	{
-		VectorspaceElement tmp( dim );
+		DVector tmp( dim );
 		tmp.setAll( defaultUpperBound );
 		return tmp;
 	}
@@ -184,7 +184,7 @@ inline VectorspaceElement VariableSettings::getUpperBounds( ) const
 }
 
 
-inline returnValue VariableSettings::setUpperBounds(	const VectorspaceElement& _ub 
+inline returnValue VariableSettings::setUpperBounds(	const DVector& _ub 
 														)
 {
 	if( _ub.getDim() != dim )

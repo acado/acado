@@ -163,7 +163,7 @@ const std::string ExportVariableInternal::get(	const ExportIndex& rowIdx,
 		}
 		else
 		{
-			s << "(real_t)" << static_cast<const VectorspaceElement&>(*data).operator ()(totalIdx.getGivenValue());
+			s << "(real_t)" << static_cast<const DVector&>(*data).operator ()(totalIdx.getGivenValue());
 		}
 	}
 	else
@@ -493,7 +493,7 @@ bool ExportVariableInternal::hasValue(	const ExportIndex& rowIdx,
 	ExportIndex ind = getTotalIdx(rowIdx + rowOffset, colIdx + colOffset);
 	if (ind.isGiven() == true)
 		return acadoIsEqual(
-				static_cast<const VectorspaceElement&>(*data).operator ()(ind.getGivenValue()), _value );
+				static_cast<const DVector&>(*data).operator ()(ind.getGivenValue()), _value );
 
 	return false;
 }
