@@ -5109,13 +5109,15 @@ void IntegratorBDF::printRKIntermediateResults(){
 
 returnValue IntegratorBDF::decomposeJacobian( DMatrix &J ) const{
 
+	ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
+
     switch( las ){
 
         case HOUSEHOLDER_METHOD:
-             return J.computeQRdecomposition();
+//             return J.computeQRdecomposition();
 
         case SPARSE_LU:
-             return J.computeSparseLUdecomposition();
+//             return J.computeSparseLUdecomposition();
 
         default:
              return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -5131,10 +5133,12 @@ double IntegratorBDF::applyNewtonStep( double *etakplus1, const double *etak, co
     DVector bb(m,FFF);
     DVector deltaX;
 
+    ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
+
     switch( las ){
 
-        case      HOUSEHOLDER_METHOD:  deltaX = J.solveQR      ( bb ); break;
-        case      SPARSE_LU:           deltaX = J.solveSparseLU( bb ); break;
+//        case      HOUSEHOLDER_METHOD:  deltaX = J.solveQR      ( bb ); break;
+//        case      SPARSE_LU:           deltaX = J.solveSparseLU( bb ); break;
         default:                       deltaX.setZero          (    ); break;        
     }
 
@@ -5155,10 +5159,12 @@ void IntegratorBDF::applyMTranspose( double *seed1, DMatrix &J, double *seed2 ){
 
     DVector deltaX;
 
+    ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
+
     switch( las ){
 
-        case      HOUSEHOLDER_METHOD:  deltaX = J.solveTransposeQR      ( bb ); break;
-        case      SPARSE_LU:           deltaX = J.solveTransposeSparseLU( bb ); break;
+//        case      HOUSEHOLDER_METHOD:  deltaX = J.solveTransposeQR      ( bb ); break;
+//        case      SPARSE_LU:           deltaX = J.solveTransposeSparseLU( bb ); break;
         default:                       deltaX.setZero                   (    ); break;
     }
 
