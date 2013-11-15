@@ -3,9 +3,9 @@ clear all;
 close all;
 
 Ts = 0.05;
-EXPORT = 1;
+EXPORT = 0;
 
-DifferentialState xC vC xL vL theta omega uC uL;
+DifferentialState xC vC xL vL uC uL theta omega;
 Control duC duL;
 
 n_XD = length(diffStates);
@@ -15,19 +15,27 @@ tau1 = 0.012790605943772;   a1   = 0.047418203070092;
 tau2 = 0.024695192379264;   a2   = 0.034087337273386;
 g = 9.81;
 m = 1318.0;
+c = 0;
 
 %% Differential Equation
 aC = is(-1.0/tau1*vC + a1/tau1*uC);
 aL = is(-1.0/tau2*vL + a2/tau2*uL);
 
-f = [ vC; ...
-    aC; ...
-    vL; ...
-    aL; ...
-    omega; ...
-    1.0/xL*(-g*sin(theta) - aC*cos(theta) - 2*vL*omega); ...
-    duC; ...
-    duL ];
+M1 = eye(6);
+A1 = zeros(6,6);
+B1 = zeros(6,2);
+A1(1,2) = 1;
+A1(2,2) = -1.0/tau1;
+A1(2,5) = a1/tau1;
+A1(3,4) = 1.0;
+A1(4,4) = -1.0/tau2;
+A1(4,6) = a2/tau2;
+
+B1(5,1) = 1;
+B1(6,2) = 1;
+
+f = dot([theta; omega]) == [ omega; ...
+    1.0/xL*(-g*sin(theta) - aC*cos(theta) - 2*vL*omega - c*omega/(m*xL)) ];
 
 h = [diffStates; controls];
 hN = [diffStates];
@@ -37,6 +45,7 @@ acadoSet('problemname', 'sim');
 
 numSteps = 5;
 sim = acado.SIMexport( Ts );
+sim.setLinearInput(M1,A1,B1);
 sim.setModel(f);
 sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5' );
 sim.set( 'NUM_INTEGRATOR_STEPS',        numSteps        );
@@ -61,7 +70,8 @@ ocp.minimizeLSQEndTerm( WN, hN );
 
 ocp.subjectTo( -10.0 <= [uC;uL] <= 10.0 );
 ocp.subjectTo( -100.0 <= [duC;duL] <= 100.0 );
-ocp.setModel( f );
+ocp.setLinearInput(M1,A1,B1);
+ocp.setModel(f);
 
 mpc = acado.OCPexport( ocp );
 mpc.set( 'HESSIAN_APPROXIMATION',       'GAUSS_NEWTON'      );
@@ -93,7 +103,7 @@ input.u = Uref;
 input.y = [Xref(1:N,:) Uref];
 input.yN = Xref(N,:).';
 
-Q = diag([6e-1, 1.5e-1, 5e-2, 1e-3, 3e-3, 1e-1, 1e-6, 1e-6]);
+Q = diag([6e-1, 1.5e-1, 5e-2, 1e-3, 1e-6, 1e-6, 3e-3, 1e-1]);
 R = diag([1e-6, 1e-6]);
 input.W = blkdiag(Q,R); 
 input.WN = Q;
@@ -124,10 +134,10 @@ while time(end) < Tf
     input.u = output.u;
     
     % Simulate system
-    states = integrate(state_sim(end,:), output.u(1,:));
+    states = integrate_crane(state_sim(end,:), output.u(1,:));
     state_sim = [state_sim; states.value'];
     
-    nextTime = time(end)+Ts; disp(['current time: ' num2str(nextTime)])
+    nextTime = time(end)+Ts; disp(['current time: ' num2str(nextTime) '   ' char(9) ' (RTI step: ' num2str(output.info.cpuTime*1e6) ' µs)'])
     time = [time nextTime];
     
     visualize; pause(abs(Ts-toc));
