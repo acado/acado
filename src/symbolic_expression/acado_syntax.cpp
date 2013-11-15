@@ -207,7 +207,7 @@ Expression getRiccatiODE( const Expression        &rhs,
     IntermediateState A = forwardDerivative( rhs, x );
     IntermediateState B = forwardDerivative( rhs, u );
 
-    return A.transpose()*P + P*A + Q - P*B*(R.getInverse())*B.transpose()*P;
+    return A.transpose()*P + P*A + Q - P*B*(DMatrix(R.inverse()))*B.transpose()*P;
 }
 
 

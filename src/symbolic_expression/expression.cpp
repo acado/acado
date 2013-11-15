@@ -1497,7 +1497,7 @@ BooleanType Expression::isDependingOn( VariableType type ) const{
 
 BooleanType Expression::isDependingOn( const Expression &e ) const{
     ASSERT( e.getDim() ==1 );
-    DVector sum=sumRow(getDependencyPattern(e));
+    DVector sum=getDependencyPattern(e).sumRow();
 
     if( fabs(sum(0) - EPS) > 0 ) return BT_TRUE;
     return BT_FALSE;
