@@ -152,7 +152,7 @@ public:
 	}
 
 	/** Initialization routine. */
-	void init(	unsigned _dim
+	void init(	unsigned _dim = 0
 				)
 	{ Base::_set(GenericVector< T >( _dim )); }
 

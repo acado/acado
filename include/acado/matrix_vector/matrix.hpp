@@ -136,8 +136,8 @@ public:
 	}
 
 	/** Initialization routine. */
-	void init(	unsigned _nRows,
-				unsigned _nCols
+	void init(	unsigned _nRows = 0,
+				unsigned _nCols = 0
 				)
 	{ Base::_set(GenericMatrix<T>(_nRows, _nCols)); }
 
