@@ -3,7 +3,7 @@ clear all;
 close all;
 
 Ts = 0.05;
-EXPORT = 0;
+EXPORT = 1;
 
 DifferentialState xC vC xL vL uC uL theta omega;
 Control duC duL;
