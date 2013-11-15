@@ -100,16 +100,6 @@ GenericMatrix<T>& GenericMatrix<T>::appendCols(	const GenericMatrix& _arg
 	return *this;
 }
 
-/** Computes the column-wise sum the DMatrix
- *
- *  Example:
- *  \code
- *  a   |  b
- *  c   |  d
- *  \endcode
- *
- *  returns [a+b;c+d]
- */
 template<typename T>
 GenericVector< T > GenericMatrix< T >::sumCol() const
 {
@@ -149,6 +139,19 @@ template<typename T>
 bool GenericMatrix<T>::isSymmetric( ) const
 { return Base::operator==(Base::transpose()); }
 
+template<>
+bool GenericMatrix<double>::isSymmetric( ) const
+{
+	if ( isSquare( ) == BT_FALSE )
+		return BT_FALSE;
+
+	for (unsigned r = 0; r < getNumRows(); ++r)
+		for (unsigned c = r + 1; c < getNumRows(); ++c)
+			if (acadoIsEqual(Base::operator()(r, c), Base::operator()(c, r)) == false)
+				return false;
+	return true;
+}
+
 template<typename T>
 returnValue GenericMatrix<T>::symmetrize( )
 {
@@ -169,7 +172,8 @@ returnValue GenericMatrix<T>::symmetrize( )
 template<typename T>
 bool GenericMatrix< T >::isPositiveSemiDefinite( ) const
 {
-	Eigen::LDLT< Base > foo = Base::ldlt();
+	Eigen::LDLT< Base > foo( Base::size() );
+	foo.compute( *this );
 	if (foo.info() == Eigen::Success && foo.isPositive() == true)
 		return true;
 
@@ -179,7 +183,7 @@ bool GenericMatrix< T >::isPositiveSemiDefinite( ) const
 template<typename T>
 bool GenericMatrix< T >::isPositiveDefinite( ) const
 {
-	if (Base::llt().info() == Eigen::Success)
+	if (this->llt().info() == Eigen::Success)
 		return true;
 
 	return false;

@@ -82,8 +82,8 @@ public:
 	GenericMatrix() : Base() {}
 
 	/** Ctor with scalar initializtion. */
-	explicit GenericMatrix(	const T& _value
-							)
+	GenericMatrix(	const T& _value
+					)
 		: Base(1, 1)
 	{ Base::data()[ 0 ] = _value; }
 
@@ -92,7 +92,7 @@ public:
 					unsigned _nCols
 					)
 		: Base(_nRows, _nCols)
-	{}
+	{ Base::setZero(); }
 
 	/** Ctor that accepts matrix dimensions and initialization data in C-like array. */
 	GenericMatrix(	unsigned _nRows,
