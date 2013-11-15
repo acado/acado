@@ -127,7 +127,7 @@ class Sensor : public TransferDevice
 		 *	        RET_INVALID_ARGUMENTS, \n
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
-		returnValue setOutputDeadTimes(	const Vector& _deadTimes
+		returnValue setOutputDeadTimes(	const DVector& _deadTimes
 										);
 
 		/** Assigns new dead time to all components of the sensor signal.
@@ -164,7 +164,7 @@ class Sensor : public TransferDevice
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue init(	double _startTime = 0.0,
-									const Vector& _startValue = emptyConstVector
+									const DVector& _startValue = emptyConstVector
 									);
 
 
@@ -212,7 +212,7 @@ class Sensor : public TransferDevice
 		 *
 		 *  \return Dead times of sensor signal
 		 */
-		inline Vector getOutputDeadTimes( ) const;
+		inline DVector getOutputDeadTimes( ) const;
 
 
 

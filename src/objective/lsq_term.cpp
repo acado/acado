@@ -87,14 +87,14 @@ LSQTerm::LSQTerm( const LSQTerm& rhs )
 
 
     if( rhs.S != NULL ){
-        S = new Matrix[grid.getNumPoints()];
+        S = new DMatrix[grid.getNumPoints()];
         for( run1 = 0; run1 < grid.getNumPoints(); run1++ )
             S[run1] = rhs.S[run1];
     }
     else S = NULL;
 
     if( rhs.r != NULL ){
-        r = new Vector[grid.getNumPoints()];
+        r = new DVector[grid.getNumPoints()];
         for( run1 = 0; run1 < grid.getNumPoints(); run1++ )
             r[run1] = rhs.r[run1];
     }
@@ -170,14 +170,14 @@ LSQTerm& LSQTerm::operator=( const LSQTerm& rhs ){
         else                  r_temp = 0;
 
         if( rhs.S != NULL ){
-            S = new Matrix[grid.getNumPoints()];
+            S = new DMatrix[grid.getNumPoints()];
             for( run1 = 0; run1 < grid.getNumPoints(); run1++ )
                 S[run1] = rhs.S[run1];
         }
         else S = NULL;
 
         if( rhs.r != NULL ){
-            r = new Vector[grid.getNumPoints()];
+            r = new DVector[grid.getNumPoints()];
             for( run1 = 0; run1 < grid.getNumPoints(); run1++ )
                 r[run1] = rhs.r[run1];
         }
@@ -202,7 +202,7 @@ returnValue LSQTerm::evaluate( const OCPiterate &x ){
 
     uint run1, run2, run3;
 
-    Vector h_res;
+    DVector h_res;
 
     const uint nh = fcn.getDim();
     const uint N  = grid.getNumPoints();
@@ -267,7 +267,7 @@ returnValue LSQTerm::evaluate( const OCPiterate &x ){
 		allValues( run1,0 ) = currentValue;
     }
 
-	Vector tmp(1);
+	DVector tmp(1);
 	allValues.getIntegral( IM_CONSTANT,tmp );
 	obj = tmp(0);
 
@@ -298,16 +298,16 @@ returnValue LSQTerm::evaluateSensitivities( BlockMatrix *hessian ){
 
         if( bSeed->getNumRows( 0, 0 ) != 1 ) return ACADOWARNING( RET_WRONG_DEFINITION_OF_SEEDS );
 
-        Matrix bseed_;
+        DMatrix bseed_;
         bSeed->getSubBlock( 0, 0, bseed_);
 
         dBackward.init( 1, 5*N );
 
-        Matrix Dx ( 1, nx );
-        Matrix Dxa( 1, na );
-        Matrix Dp ( 1, np );
-        Matrix Du ( 1, nu );
-        Matrix Dw ( 1, nw );
+        DMatrix Dx ( 1, nx );
+        DMatrix Dxa( 1, na );
+        DMatrix Dp ( 1, np );
+        DMatrix Du ( 1, nu );
+        DMatrix Dw ( 1, nw );
 
         for( run1 = 0; run1 < N; run1++ ){
 
@@ -354,7 +354,7 @@ returnValue LSQTerm::evaluateSensitivities( BlockMatrix *hessian ){
             // ---------------------------------
 
             const int nnn = nx+na+np+nu+nw;
-            Matrix tmp( nh, nnn );
+            DMatrix tmp( nh, nnn );
 
             for( run3 = 0; run3 < nnn; run3++ ){
                 for( run2 = 0; run2 < nh; run2++ ){
@@ -369,7 +369,7 @@ returnValue LSQTerm::evaluateSensitivities( BlockMatrix *hessian ){
                     }
                 }
             }
-            Matrix tmp2;
+            DMatrix tmp2;
             int i,j;
             int *Sidx = new int[6];
             int *Hidx = new int[5];
@@ -435,16 +435,16 @@ returnValue LSQTerm::evaluateSensitivitiesGN( BlockMatrix *GNhessian ){
 
         if( bSeed->getNumRows( 0, 0 ) != 1 ) return ACADOWARNING( RET_WRONG_DEFINITION_OF_SEEDS );
 
-        Matrix bseed_;
+        DMatrix bseed_;
         bSeed->getSubBlock( 0, 0, bseed_);
 
         dBackward.init( 1, 5*N );
 
-        Matrix Dx ( 1, nx );
-        Matrix Dxa( 1, na );
-        Matrix Dp ( 1, np );
-        Matrix Du ( 1, nu );
-        Matrix Dw ( 1, nw );
+        DMatrix Dx ( 1, nx );
+        DMatrix Dxa( 1, na );
+        DMatrix Dp ( 1, np );
+        DMatrix Du ( 1, nu );
+        DMatrix Dw ( 1, nw );
 
         for( run1 = 0; run1 < N; run1++ ){
 
@@ -510,7 +510,7 @@ returnValue LSQTerm::evaluateSensitivitiesGN( BlockMatrix *GNhessian ){
             if( GNhessian != 0 ){
 
                 const int nnn = nx+na+np+nu+nw;
-                Matrix tmp( nh, nnn );
+                DMatrix tmp( nh, nnn );
 
                 for( run3 = 0; run3 < nnn; run3++ ){
                     for( run2 = 0; run2 < nh; run2++ ){
@@ -525,7 +525,7 @@ returnValue LSQTerm::evaluateSensitivitiesGN( BlockMatrix *GNhessian ){
                         }
                     }
                 }
-                Matrix tmp2;
+                DMatrix tmp2;
                 int i,j;
                 int *Sidx = new int[6];
                 int *Hidx = new int[5];
@@ -572,7 +572,7 @@ returnValue LSQTerm::evaluateSensitivitiesGN( BlockMatrix *GNhessian ){
     return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
 }
 
-returnValue LSQTerm::getWeigthingtMatrix(const unsigned _index, Matrix& _matrix) const
+returnValue LSQTerm::getWeigthingtMatrix(const unsigned _index, DMatrix& _matrix) const
 {
 	if ( S_temp )
 	{

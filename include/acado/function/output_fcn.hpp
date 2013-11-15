@@ -103,7 +103,7 @@ class OutputFcn : public Function
          *                                         \n
          *  \return The result of the evaluation.  \n
          */
-        Vector evaluate( const EvaluationPoint &x         ,
+        DVector evaluate( const EvaluationPoint &x         ,
                          const int             &number = 0  );
 
 

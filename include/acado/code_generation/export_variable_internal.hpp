@@ -52,7 +52,7 @@ class ExportArithmeticStatement;
  *	\ingroup UserDataStructures
  *
  *	The class ExportVariableInternal defines a matrix-valued variable to be used for exporting
- *	code. Instances of this class can be used similar to usual Matrix objects
+ *	code. Instances of this class can be used similar to usual DMatrix objects
  *	but offer additional functionality, e.g. they allow to export arithmetic
  *	expressions and they can be passed as argument to exported functions. By
  *	default, all entries of a ExportVariableInternal are undefined, but each of its
@@ -79,7 +79,7 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Matrix used for initialization.
+		 *	@param[in] _data			DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
@@ -271,7 +271,7 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *
 		 *	\return Internal data matrix
 		 */
-		Matrix getGivenMatrix( ) const;
+		DMatrix getGivenMatrix( ) const;
 
 
 		/** Prints contents of variable to screen.

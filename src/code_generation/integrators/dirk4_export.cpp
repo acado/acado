@@ -75,9 +75,9 @@ IntegratorExport* createDiagonallyIRK4Export(	UserInteraction* _userInteraction,
 {
 	const double alpha = 1.137158042603258;
 
-	Matrix AA(3,3);
-	Vector bb(3);
-	Vector cc(3);
+	DMatrix AA(3,3);
+	DVector bb(3);
+	DVector cc(3);
 
 	AA(0,0) = (1.0+alpha)/2.0;	AA(0,1) = 0.0;					AA(0,2) = 0.0;
 	AA(1,0) = -alpha/2.0;		AA(1,1) = (1.0+alpha)/2.0;		AA(1,2) = 0.0;

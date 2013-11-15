@@ -78,8 +78,8 @@ class DenseCP{
 
 
 
-//         returnValue setBounds( const Vector &lb,
-//                                const Vector &ub  );
+//         returnValue setBounds( const DVector &lb,
+//                                const DVector &ub  );
 
 
         /** Returns whether or not the conic program is an LP */
@@ -107,7 +107,7 @@ class DenseCP{
          *                                                                   \n
          *  \return SUCCESSFUL_RETURN                                        \n
          */
-        returnValue setQPsolution( const Vector &x_, const Vector &y_ );
+        returnValue setQPsolution( const DVector &x_, const DVector &y_ );
 
 
         /** Sets the primal and dual solution converting the dual solution   \n
@@ -117,7 +117,7 @@ class DenseCP{
          *                                                                   \n
          *  \return SUCCESSFUL_RETURN                                        \n
          */
-        Vector getMergedDualSolution( ) const;
+        DVector getMergedDualSolution( ) const;
 
 
 		/** Prints CP to standard ouput stream. Various settings can
@@ -378,33 +378,33 @@ class DenseCP{
     // DENSE CP IN MATRIX-VECTOR FORMAT:
     // -------------------------------------------------------
 
-    Matrix        H;    /**< The Hessian matrix             */
-    Vector        g;    /**< The objective gradient         */
+    DMatrix        H;    /**< The Hessian matrix             */
+    DVector        g;    /**< The objective gradient         */
 
-    Vector       lb;    /**< Simple lower bounds            */
-    Vector       ub;    /**< Simple upper bounds            */
+    DVector       lb;    /**< Simple lower bounds            */
+    DVector       ub;    /**< Simple upper bounds            */
 
-    Matrix        A;    /**< Constraint matrix              */
-    Vector      lbA;    /**< Constraint lower bounds        */
-    Vector      ubA;    /**< Constraint upper bounds        */
+    DMatrix        A;    /**< Constraint matrix              */
+    DVector      lbA;    /**< Constraint lower bounds        */
+    DVector      ubA;    /**< Constraint upper bounds        */
 
-    Matrix      **B;    /**< SDP constraint tensor          */
-    Vector     *lbB;    /**< SDP lower bounds               */
-    Vector     *ubB;    /**< SDP upper bounds               */
+    DMatrix      **B;    /**< SDP constraint tensor          */
+    DVector     *lbB;    /**< SDP lower bounds               */
+    DVector     *ubB;    /**< SDP upper bounds               */
 
 
     // SOLUTION OF THE DENSE CP:
     // -------------------------------------------------------
-    Vector       *x;    /**< Primal Solution                */
+    DVector       *x;    /**< Primal Solution                */
 
-    Vector     *ylb;    /**< Dual solution, lower bound     */
-    Vector     *yub;    /**< Dual solution, upper bound     */
+    DVector     *ylb;    /**< Dual solution, lower bound     */
+    DVector     *yub;    /**< Dual solution, upper bound     */
 
-    Vector    *ylbA;    /**< Dual solution, LP lower bound  */
-    Vector    *yubA;    /**< Dual solution, LP upper bound  */
+    DVector    *ylbA;    /**< Dual solution, LP lower bound  */
+    DVector    *yubA;    /**< Dual solution, LP upper bound  */
 
-    Vector   **ylbB;    /**< Dual solution, SDB lower bound */
-    Vector   **yubB;    /**< Dual solution, SDP upper bound */
+    DVector   **ylbB;    /**< Dual solution, SDB lower bound */
+    DVector   **yubB;    /**< Dual solution, SDP upper bound */
 
 
 

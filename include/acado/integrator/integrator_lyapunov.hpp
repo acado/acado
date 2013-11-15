@@ -243,11 +243,11 @@ protected:
     /** Starts integration: cf. integrate(...) for  \n
       * more details.                               \n
       */
-    virtual returnValue evaluate( const Vector &x0    /**< the initial state           */,
-                                  const Vector &xa    /**< the initial algebraic state */,
-                                  const Vector &p     /**< the parameters              */,
-                                  const Vector &u     /**< the controls                */,
-                                  const Vector &w     /**< the disturbance             */,
+    virtual returnValue evaluate( const DVector &x0    /**< the initial state           */,
+                                  const DVector &xa    /**< the initial algebraic state */,
+                                  const DVector &p     /**< the parameters              */,
+                                  const DVector &u     /**< the controls                */,
+                                  const DVector &w     /**< the disturbance             */,
                                   const Grid   &t_    /**< the time interval           */  );
 
 
@@ -258,13 +258,13 @@ protected:
      *  \return SUCCESFUL RETURN         \n
      *          RET_INPUT_OUT_OF_RANGE   \n
      */
-    virtual returnValue setProtectedForwardSeed( const Vector &xSeed     /**< the seed w.r.t the
+    virtual returnValue setProtectedForwardSeed( const DVector &xSeed     /**< the seed w.r.t the
                                                                           *  initial states     */,
-                                                 const Vector &pSeed     /**< the seed w.r.t the
+                                                 const DVector &pSeed     /**< the seed w.r.t the
                                                                           *  parameters         */,
-                                                 const Vector &uSeed     /**< the seed w.r.t the
+                                                 const DVector &uSeed     /**< the seed w.r.t the
                                                                           *  controls           */,
-                                                 const Vector &wSeed     /**< the seed w.r.t the
+                                                 const DVector &wSeed     /**< the seed w.r.t the
                                                                           *  disturbances       */,
                                                  const int    &order    /**< the order of the
                                                                           *  seed.              */ );
@@ -276,7 +276,7 @@ protected:
      *   \return SUCCESFUL_RETURN         \n
      *           RET_INPUT_OUT_OF_RANGE   \n
      */
-    virtual returnValue setProtectedBackwardSeed(  const Vector &seed    /**< the seed
+    virtual returnValue setProtectedBackwardSeed(  const DVector &seed    /**< the seed
                                                                           *   matrix     */,
                                                    const int    &order   /**< the order of the
                                                                           *  seed.              */  );
@@ -288,7 +288,7 @@ protected:
     /** Returns the result for the state at the time tend.                           \n
      *  \return SUCCESSFUL_RETURN                                                    \n
      */
-    virtual returnValue getProtectedX(           Vector *xEnd /**< the result for the
+    virtual returnValue getProtectedX(           DVector *xEnd /**< the result for the
                                                                *  states at the time
                                                                *  tend.              */ ) const;
 
@@ -297,7 +297,7 @@ protected:
      *  \return SUCCESSFUL_RETURN                                                    \n
      *          RET_INPUT_OUT_OF_RANGE                                               \n
      */
-    virtual returnValue getProtectedForwardSensitivities( Matrix *Dx  /**< the result for the
+    virtual returnValue getProtectedForwardSensitivities( DMatrix *Dx  /**< the result for the
                                                                        *   forward sensitivi-
                                                                        *   ties               */,
                                                           int order   /**< the order          */ ) const;
@@ -315,10 +315,10 @@ protected:
      *  \return SUCCESSFUL_RETURN                                           \n
      *          RET_INPUT_OUT_OF_RANGE                                      \n
      */
-    virtual returnValue getProtectedBackwardSensitivities( Vector &Dx_x0,
-                                                           Vector &Dx_p ,
-                                                           Vector &Dx_u ,
-                                                           Vector &Dx_w ,
+    virtual returnValue getProtectedBackwardSensitivities( DVector &Dx_x0,
+                                                           DVector &Dx_p ,
+                                                           DVector &Dx_u ,
+                                                           DVector &Dx_w ,
                                                            int order      ) const;
 
 
@@ -400,19 +400,19 @@ protected:
 
     /** Initializes a second forward seed. (only for internal use)         \n
      */
-    returnValue setForwardSeed2( const Vector &xSeed          /**< the seed w.r.t the
+    returnValue setForwardSeed2( const DVector &xSeed          /**< the seed w.r.t the
                                                                 *  initial states     */,
-                                 const Vector &pSeed          /**< the seed w.r.t the
+                                 const DVector &pSeed          /**< the seed w.r.t the
                                                                 *  parameters         */,
-                                 const Vector &uSeed          /**< the seed w.r.t the
+                                 const DVector &uSeed          /**< the seed w.r.t the
                                                                 *  controls           */,
-                                 const Vector &wSeed          /**< the seed w.r.t the
+                                 const DVector &wSeed          /**< the seed w.r.t the
                                                                 *  disturbances       */);
 
 
     /** Initializes a second backward seed. (only for internal use)        \n
      */
-    virtual returnValue setBackwardSeed2( const Vector &seed     /**< the seed
+    virtual returnValue setBackwardSeed2( const DVector &seed     /**< the seed
                                                                   *   matrix     */ );
 
 
@@ -420,7 +420,7 @@ protected:
     void interpolate( int jj, double *e1, double *d1, double *e2, VariablesGrid &poly );
 
 
-	void logCurrentIntegratorStep(	const Vector& currentX  = emptyConstVector
+	void logCurrentIntegratorStep(	const DVector& currentX  = emptyConstVector
 									);
 
 
@@ -456,11 +456,11 @@ protected:
 
     // SENSITIVITIES:
     // --------------
-    Vector     fseed           ;  /**< The forward seed (only internal use)               */
-    Vector     bseed           ;  /**< The backward seed (only internal use)              */
+    DVector     fseed           ;  /**< The forward seed (only internal use)               */
+    DVector     bseed           ;  /**< The backward seed (only internal use)              */
 
-    Vector     fseed2          ;  /**< The forward seed 2 (only internal use)             */
-    Vector     bseed2          ;  /**< The backward seed 2 (only internal use)            */
+    DVector     fseed2          ;  /**< The forward seed 2 (only internal use)             */
+    DVector     bseed2          ;  /**< The backward seed 2 (only internal use)            */
 
     double    *G               ;  /**< Sensitivity matrix (only internal use)             */
     double    *etaG            ;  /**< Sensitivity matrix (only internal use)             */

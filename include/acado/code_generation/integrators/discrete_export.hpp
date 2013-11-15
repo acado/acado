@@ -112,7 +112,7 @@ class DiscreteTimeExport : public IntegratorExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setNARXmodel( const uint delay, const Matrix& parms );
+		virtual returnValue setNARXmodel( const uint delay, const DMatrix& parms );
 
 
         /** Sets up the output with the grids for the different output functions.									\n
@@ -155,7 +155,7 @@ class DiscreteTimeExport : public IntegratorExport
 									  	  const std::vector<std::string> _outputNames,
 									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
-										  const std::vector<Matrix> _outputDependencies );
+										  const std::vector<DMatrix> _outputDependencies );
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.

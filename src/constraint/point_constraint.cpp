@@ -198,11 +198,11 @@ returnValue PointConstraint::evaluate( const OCPiterate& iter ){
     if( nc == 0 )
 		return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
 
-    Matrix resL( nc, 1 );
-    Matrix resU( nc, 1 );
+    DMatrix resL( nc, 1 );
+    DMatrix resU( nc, 1 );
 
 	z[0].setZ( point_index, iter );
-	Vector result = fcn[0].evaluate( z[0] );
+	DVector result = fcn[0].evaluate( z[0] );
 
     for( run1 = 0; run1 < nc; run1++ ){
          resL( run1, 0 ) = lb[0][run1] - result(run1);
@@ -246,16 +246,16 @@ returnValue PointConstraint::evaluateSensitivities( ){
 
         int nBDirs = bSeed->getNumRows( 0, 0 );
 
-        Matrix bseed_;
+        DMatrix bseed_;
         bSeed->getSubBlock( 0, 0, bseed_);
 
 		dBackward.init( 1, 5*N );
 
-        Matrix Dx ( nBDirs, nx );
-        Matrix Dxa( nBDirs, na );
-        Matrix Dp ( nBDirs, np );
-        Matrix Du ( nBDirs, nu );
-        Matrix Dw ( nBDirs, nw );
+        DMatrix Dx ( nBDirs, nx );
+        DMatrix Dxa( nBDirs, na );
+        DMatrix Dp ( nBDirs, np );
+        DMatrix Du ( nBDirs, nu );
+        DMatrix Dw ( nBDirs, nw );
 
         for( run1 = 0; run1 < nBDirs; run1++ )
 		{
@@ -297,31 +297,31 @@ returnValue PointConstraint::evaluateSensitivities( ){
         dForward.init( 1, 5*N );
 
         if( xSeed != 0 ){
-            Matrix tmp;
+            DMatrix tmp;
             xSeed->getSubBlock(0,0,tmp);
             returnvalue = computeForwardSensitivityBlock( 0, 0, &tmp );
             if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
         }
         if( xaSeed != 0 ){
-            Matrix tmp;
+            DMatrix tmp;
             xaSeed->getSubBlock(0,0,tmp);
             returnvalue = computeForwardSensitivityBlock( nx, N+point_index, &tmp );
             if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
         }
         if( pSeed != 0 ){
-            Matrix tmp;
+            DMatrix tmp;
             pSeed->getSubBlock(0,0,tmp);
             returnvalue = computeForwardSensitivityBlock( nx+na, 2*N+point_index, &tmp );
             if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
         }
         if( uSeed != 0 ){
-            Matrix tmp;
+            DMatrix tmp;
             uSeed->getSubBlock(0,0,tmp);
             returnvalue = computeForwardSensitivityBlock( nx+na+np, 3*N+point_index, &tmp );
             if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
         }
         if( wSeed != 0 ){
-            Matrix tmp;
+            DMatrix tmp;
             wSeed->getSubBlock(0,0,tmp);
             returnvalue = computeForwardSensitivityBlock( nx+na+np+nu, 4*N+point_index, &tmp );
             if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
@@ -338,7 +338,7 @@ returnValue PointConstraint::evaluateSensitivities( ){
 
 
 
-returnValue PointConstraint::evaluateSensitivities( const Matrix &seed, BlockMatrix &hessian ){
+returnValue PointConstraint::evaluateSensitivities( const DMatrix &seed, BlockMatrix &hessian ){
 
     // EVALUATION OF THE SENSITIVITIES:
     // --------------------------------
@@ -369,17 +369,17 @@ returnValue PointConstraint::evaluateSensitivities( const Matrix &seed, BlockMat
 
     dBackward.init( 1, 5*N );
 
-    Matrix Dx ( nc, nx );
-    Matrix Dxa( nc, na );
-    Matrix Dp ( nc, np );
-    Matrix Du ( nc, nu );
-    Matrix Dw ( nc, nw );
+    DMatrix Dx ( nc, nx );
+    DMatrix Dxa( nc, na );
+    DMatrix Dp ( nc, np );
+    DMatrix Du ( nc, nu );
+    DMatrix Dw ( nc, nw );
 
-    Matrix Hx ( nx, nx );
-    Matrix Hxa( nx, na );
-    Matrix Hp ( nx, np );
-    Matrix Hu ( nx, nu );
-    Matrix Hw ( nx, nw );
+    DMatrix Hx ( nx, nx );
+    DMatrix Hxa( nx, na );
+    DMatrix Hp ( nx, np );
+    DMatrix Hu ( nx, nu );
+    DMatrix Hw ( nx, nw );
 
     for( run2 = 0; run2 < nx; run2++ ){
 
@@ -674,7 +674,7 @@ returnValue PointConstraint::getBounds( const OCPiterate& iter ){
 // PROTECTED MEMBER FUNCTIONS:
 //
 
-inline returnValue PointConstraint::computeForwardSensitivityBlock( int offset, int offset2, Matrix *seed ){
+inline returnValue PointConstraint::computeForwardSensitivityBlock( int offset, int offset2, DMatrix *seed ){
 
     if( seed == 0 ) return SUCCESSFUL_RETURN;
 
@@ -686,7 +686,7 @@ inline returnValue PointConstraint::computeForwardSensitivityBlock( int offset, 
     double* dresult1 = new double[nc                             ];
     double*   fseed1 = new double[fcn[0].getNumberOfVariables()+1];
 
-    Matrix tmp( nc, seed->getNumCols() );
+    DMatrix tmp( nc, seed->getNumCols() );
 
     for( run1 = 0; run1 < (int) seed->getNumCols(); run1++ ){
 

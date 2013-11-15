@@ -81,7 +81,7 @@ int main( )
 	myProcess.setDynamicSystem( dynSys,INT_RK45 );
 	myProcess.set( ABSOLUTE_TOLERANCE,1.0e-8 );
 	
-	Vector x0( 4 );
+	DVector x0( 4 );
 	x0.setZero( );
 	x0( 0 ) = 0.01;
 
@@ -116,7 +116,7 @@ int main( )
 	u( 4,0 ) = 0.0;
 	u( 5,0 ) = 0.0;
 
-	Vector p( 1 );
+	DVector p( 1 );
 	p(0) = 350.0;
 
 	myProcess.init( 0.0 );

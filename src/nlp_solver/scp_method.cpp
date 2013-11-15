@@ -257,8 +257,8 @@ returnValue SCPmethod::init(	VariablesGrid* x_init ,
 }
 
 
-returnValue SCPmethod::solve(	const Vector &x0_,
-								const Vector &p_
+returnValue SCPmethod::solve(	const DVector &x0_,
+								const DVector &p_
 								)
 {
 	if ( ( status != BS_READY ) && ( status != BS_RUNNING ) )
@@ -292,8 +292,8 @@ returnValue SCPmethod::solve(	const Vector &x0_,
 
 
 
-returnValue SCPmethod::step(	const Vector& x0_,
-								const Vector& p_
+returnValue SCPmethod::step(	const DVector& x0_,
+								const DVector& p_
 								)
 {
 	if ( numberOfSteps == 0 )
@@ -314,8 +314,8 @@ returnValue SCPmethod::step(	const Vector& x0_,
 }
 
 
-returnValue SCPmethod::feedbackStep(	const Vector& x0_,
-										const Vector& p_
+returnValue SCPmethod::feedbackStep(	const DVector& x0_,
+										const DVector& p_
 										)
 {
   
@@ -580,11 +580,11 @@ returnValue SCPmethod::setReference( const VariablesGrid &ref )
 
 
 returnValue SCPmethod::shiftVariables(	double timeShift,
-										Vector  lastX,
-										Vector  lastXA,
-										Vector  lastP,
-										Vector  lastU,
-										Vector  lastW
+										DVector  lastX,
+										DVector  lastXA,
+										DVector  lastP,
+										DVector  lastU,
+										DVector  lastW
 										)
 {
 	#ifdef SIM_DEBUG
@@ -594,7 +594,7 @@ returnValue SCPmethod::shiftVariables(	double timeShift,
 	if ( acadoIsNegative( timeShift ) == BT_TRUE )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
-// 	Matrix tmp;
+// 	DMatrix tmp;
 // 	for( uint i=1; i<iter.getNumPoints()-1; ++i )
 // 	{
 // 		bandedCP.lambdaDynamic.getSubBlock( i,0, tmp );
@@ -608,7 +608,7 @@ returnValue SCPmethod::shiftVariables(	double timeShift,
 
 
 
-returnValue SCPmethod::getVarianceCovariance( Matrix &var )
+returnValue SCPmethod::getVarianceCovariance( DMatrix &var )
 {
 	if( eval->hasLSQobjective( ) == BT_FALSE )
 		return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
@@ -854,7 +854,7 @@ returnValue SCPmethod::printIteration( )
 					<< "     ls param | "
 					<< endl;
 
-		Matrix foo;
+		DMatrix foo;
 
 		// Get cout flags
 		ios::fmtflags f( cout.flags() );
@@ -960,8 +960,8 @@ returnValue SCPmethod::initializeHessianProjection( )
 
 
 
-returnValue SCPmethod::checkForRealTimeMode(	const Vector &x0_,
-												const Vector &p_
+returnValue SCPmethod::checkForRealTimeMode(	const DVector &x0_,
+												const DVector &p_
 												)
 {
 	int useRealtimeIterations;
@@ -976,12 +976,12 @@ returnValue SCPmethod::checkForRealTimeMode(	const Vector &x0_,
 }
 
 
-returnValue SCPmethod::setupRealTimeParameters(	const Vector &x0_,
-												const Vector &p_
+returnValue SCPmethod::setupRealTimeParameters(	const DVector &x0_,
+												const DVector &p_
 												)
 {
-	Vector deltaX;
-	Vector deltaP;
+	DVector deltaX;
+	DVector deltaP;
 
 	if( x0_.isEmpty( ) == BT_FALSE )
 		deltaX = x0_ - iter.x->getVector(0);
@@ -1038,7 +1038,7 @@ returnValue SCPmethod::getParameters( VariablesGrid &p_  ) const{
 }
 
 
-returnValue SCPmethod::getParameters( Vector& p_  ) const{
+returnValue SCPmethod::getParameters( DVector& p_  ) const{
 
 	if( iter.p == 0 )
 		return ACADOERROR( RET_MEMBER_NOT_INITIALISED );
@@ -1058,7 +1058,7 @@ returnValue SCPmethod::getControls( VariablesGrid &u_  ) const{
 }
 
 
-returnValue SCPmethod::getFirstControl( Vector& u0_  ) const
+returnValue SCPmethod::getFirstControl( DVector& u0_  ) const
 {
 	#ifdef SIM_DEBUG
 	cout << "SCPmethod::getFirstControl\n";
@@ -1071,7 +1071,7 @@ returnValue SCPmethod::getFirstControl( Vector& u0_  ) const
 	
 	if ( hasPerformedStep == BT_FALSE )
 	{
-		Vector deltaU0( getNU() );
+		DVector deltaU0( getNU() );
 		bandedCPsolver->getFirstControl( deltaU0 );
 		
 		u0_ += deltaU0;
@@ -1142,7 +1142,7 @@ returnValue SCPmethod::getAnySensitivities(	BlockMatrix& _sens,
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	uint N = bandedCP.dynGradient.getNumRows();
-	Matrix tmp;
+	DMatrix tmp;
 	
 	_sens.init( N,1 );
 	

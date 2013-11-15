@@ -51,7 +51,7 @@ class ExportVariableInternal;
  *	\ingroup UserDataStructures
  *
  *	The class ExportVariable defines a matrix-valued variable to be used for exporting
- *	code. Instances of this class can be used similar to usual Matrix objects
+ *	code. Instances of this class can be used similar to usual DMatrix objects
  *	but offer additional functionality, e.g. they allow to export arithmetic 
  *	expressions and they can be passed as argument to exported functions. By 
  *	default, all entries of a ExportVariable are undefined, but each of its 
@@ -92,13 +92,13 @@ class ExportVariable : public ExportArgument
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Matrix used for initialization.
+		 *	@param[in] _data			DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
 		ExportVariable(	const std::string& _name,
-						const Matrix& _data,
+						const DMatrix& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						bool _callItByValue = false,
@@ -110,7 +110,7 @@ class ExportVariable : public ExportArgument
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Shared pointer to Matrix used for initialization.
+		 *	@param[in] _data			Shared pointer to DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
@@ -142,10 +142,10 @@ class ExportVariable : public ExportArgument
 
 		/** \name Constructor which converts a given matrix/vector/scalar into an ExportVariable.
 		  * @{ */
-		ExportVariable(	const Matrix& _data = emptyConstMatrix	/**< Matrix used for initialization */
+		ExportVariable(	const DMatrix& _data = emptyConstMatrix	/**< DMatrix used for initialization */
 						);
 
-		ExportVariable(	const Vector& _data	/**< Vector used for initialization */
+		ExportVariable(	const DVector& _data	/**< DVector used for initialization */
 						);
 
 		ExportVariable(	const double _data	/**< Scalar used for initialization */
@@ -188,7 +188,7 @@ class ExportVariable : public ExportArgument
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Matrix used for initialization.
+		 *	@param[in] _data			DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
@@ -196,7 +196,7 @@ class ExportVariable : public ExportArgument
 		 *	\return Reference to initialized object
 		 */
 		ExportVariable& setup(	const std::string& _name,
-								const Matrix& _data,
+								const DMatrix& _data,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
 								bool _callItByValue = false,
@@ -533,7 +533,7 @@ class ExportVariable : public ExportArgument
 		 *
 		 *	\return Internal data matrix
 		 */
-		Matrix getGivenMatrix( ) const;
+		DMatrix getGivenMatrix( ) const;
 
 		/** Check whether the matrix is actually a submatrix. */
 		bool isSubMatrix() const;

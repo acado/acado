@@ -75,8 +75,8 @@ int main(int argc, char * const argv[ ])
 	rf << x << y << w << dx << dy << dw << F;
 	rfN << x << y << w << dx << dy << dw;
 
-	Matrix W = eye( rf.getDim() );
-	Matrix WN = eye( rfN.getDim() );
+	DMatrix W = eye( rf.getDim() );
+	DMatrix WN = eye( rfN.getDim() );
 
 	//
 	// Optimal Control Problem

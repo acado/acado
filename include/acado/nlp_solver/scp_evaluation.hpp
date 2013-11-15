@@ -152,7 +152,7 @@ class SCPevaluation : public AlgorithmicBase
 
 		inline uint getNumConstraints( ) const;
 		inline uint getNumConstraintBlocks( ) const;
-		inline Vector getConstraintBlockDims( ) const;
+		inline DVector getConstraintBlockDims( ) const;
 
 
 		virtual returnValue freezeSensitivities( );

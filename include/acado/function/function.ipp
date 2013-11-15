@@ -71,7 +71,7 @@ inline returnValue Function::setMemoryOffset( int memoryOffset_ ){
 }
 
 
-inline Vector Function::operator()( const EvaluationPoint &x     ,
+inline DVector Function::operator()( const EvaluationPoint &x     ,
                                     const int             &number  ){
 
      return evaluate( x, number );

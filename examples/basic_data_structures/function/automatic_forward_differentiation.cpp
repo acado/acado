@@ -57,7 +57,7 @@ int main()
 	EvaluationPoint z(f);
 	EvaluationPoint dz(f);
 
-	Vector xx(2); Vector dx(2);
+	DVector xx(2); DVector dx(2);
 
 	xx(0) = 1.0; dx(0) = 0.5;
 	xx(1) = 1.0; dx(1) = 0.1;
@@ -66,8 +66,8 @@ int main()
 
 	// FORWARD DIFFERENTIATION:
 	// ------------------------
-	Vector ff = f.evaluate ( z );
-	Vector df = f.AD_forward( dz );
+	DVector ff = f.evaluate ( z );
+	DVector df = f.AD_forward( dz );
 
 	// PRINT THE RESULTS:
 	// ------------------

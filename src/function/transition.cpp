@@ -126,7 +126,7 @@ Transition& Transition::operator==( const double &arg ){
 }
 
 
-Transition& Transition::operator==( const Vector& arg ){
+Transition& Transition::operator==( const DVector& arg ){
 
     uint run1;
 
@@ -137,7 +137,7 @@ Transition& Transition::operator==( const Vector& arg ){
 }
 
 
-Transition& Transition::operator==( const Matrix& arg ){
+Transition& Transition::operator==( const DMatrix& arg ){
 
     uint run1, run2;
 

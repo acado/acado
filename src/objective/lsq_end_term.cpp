@@ -55,8 +55,8 @@ LSQEndTerm::LSQEndTerm( )
 }
 
 
-LSQEndTerm::LSQEndTerm( const Grid& grid_, const Matrix &S_,
-                        const Function& m, const Vector &r_ )
+LSQEndTerm::LSQEndTerm( const Grid& grid_, const DMatrix &S_,
+                        const Function& m, const DVector &r_ )
            :ObjectiveElement( grid_ ){
 
     fcn  = m ;
@@ -109,7 +109,7 @@ returnValue LSQEndTerm::evaluate( const OCPiterate &x ){
 
     z.setZ( grid.getLastIndex(), x );
 
-    Vector h_res = fcn.evaluate( z);
+    DVector h_res = fcn.evaluate( z);
 
     // EVALUATE THE OBJECTIVE:
     // -----------------------
@@ -160,16 +160,16 @@ returnValue LSQEndTerm::evaluateSensitivitiesGN( BlockMatrix *GNhessian ){
 
         if( bSeed->getNumRows( 0, 0 ) != 1 ) return ACADOWARNING( RET_WRONG_DEFINITION_OF_SEEDS );
 
-        Matrix bseed_;
+        DMatrix bseed_;
         bSeed->getSubBlock( 0, 0, bseed_);
 
         dBackward.init( 1, 5*N );
 
-        Matrix Dx ( 1, nx );
-        Matrix Dxa( 1, na );
-        Matrix Dp ( 1, np );
-        Matrix Du ( 1, nu );
-        Matrix Dw ( 1, nw );
+        DMatrix Dx ( 1, nx );
+        DMatrix Dxa( 1, na );
+        DMatrix Dp ( 1, np );
+        DMatrix Du ( 1, nu );
+        DMatrix Dw ( 1, nw );
 
         Dx .setZero();
         Dxa.setZero();
@@ -216,7 +216,7 @@ returnValue LSQEndTerm::evaluateSensitivitiesGN( BlockMatrix *GNhessian ){
         if( GNhessian != 0 ){
 
             const int nnn = nx+na+np+nu+nw;
-            Matrix tmp( nh, nnn );
+            DMatrix tmp( nh, nnn );
 
             for( run3 = 0; run3 < nnn; run3++ ){
                 for( run2 = 0; run2 < nh; run2++ ){
@@ -226,7 +226,7 @@ returnValue LSQEndTerm::evaluateSensitivitiesGN( BlockMatrix *GNhessian ){
                     }
                 }
             }
-            Matrix tmp2;
+            DMatrix tmp2;
             int i,j;
             int *Sidx = new int[6];
             int *Hidx = new int[5];

@@ -199,7 +199,7 @@ uint ExportVariableInternal::getDim( ) const
 
 ExportVariable ExportVariableInternal::getTranspose( ) const
 {
-	Matrix m = data->transpose();
+	DMatrix m = data->transpose();
 
 	ExportVariable transposed(name, m, type, dataStruct, callItByValue, prefix);
 	transposed->setSubmatrixOffsets(colOffset, rowOffset, colDim, rowDim, nCols, nRows);
@@ -373,7 +373,7 @@ ExportVariable ExportVariableInternal::makeRowVector( ) const
 {
 	ASSERT( ( nRows == 0 ) && ( nCols == 0 ) );
 
-	Matrix m(1, getDim());
+	DMatrix m(1, getDim());
 	unsigned nc = getNumCols();
 
 	for ( uint i=0; i<getNumRows(); ++i )
@@ -390,7 +390,7 @@ ExportVariable ExportVariableInternal::makeColVector( ) const
 {
 	ASSERT( ( nRows == 0 ) && ( nCols == 0 ) );
 
-	Matrix m(getDim(), 1);
+	DMatrix m(getDim(), 1);
 	unsigned nc = getNumCols();
 
 	for ( uint i=0; i<getNumRows(); ++i )
@@ -412,12 +412,12 @@ bool ExportVariableInternal::isVector( ) const
 }
 
 
-Matrix ExportVariableInternal::getGivenMatrix( ) const
+DMatrix ExportVariableInternal::getGivenMatrix( ) const
 {
 	if ( isGiven() == true )
-		return Matrix( *data.get() );
+		return DMatrix( *data.get() );
 	else
-		return Matrix();
+		return DMatrix();
 }
 
 

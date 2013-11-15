@@ -67,10 +67,10 @@ MHEalgorithm::MHEalgorithm( const OCP& ocp_ )
 MHEalgorithm::MHEalgorithm( const MHEalgorithm& arg )
              :OptimizationAlgorithm( arg ){
 
-    if( arg.eta != 0 ) eta = new Vector(*arg.eta);
+    if( arg.eta != 0 ) eta = new DVector(*arg.eta);
     else               eta = 0                   ;
 
-    if( arg.S  != 0 )  S   = new Matrix(*arg.S)  ;
+    if( arg.S  != 0 )  S   = new DMatrix(*arg.S)  ;
     else               S   = 0                   ;
 }
 
@@ -91,29 +91,29 @@ MHEalgorithm& MHEalgorithm::operator=( const MHEalgorithm& arg ){
 
         OptimizationAlgorithm::operator=(arg);
 
-        if( arg.eta != 0 ) eta = new Vector(*arg.eta);
+        if( arg.eta != 0 ) eta = new DVector(*arg.eta);
         else               eta = 0                   ;
 
-        if( arg.S  != 0 )  S   = new Matrix(*arg.S)  ;
+        if( arg.S  != 0 )  S   = new DMatrix(*arg.S)  ;
         else               S   = 0                   ;
     }
     return *this;
 }
 
 
-returnValue MHEalgorithm::init( const Vector &eta_, const Matrix &S_ ){
+returnValue MHEalgorithm::init( const DVector &eta_, const DMatrix &S_ ){
 
     if( eta  != 0 ) delete eta;
     if( S    != 0 ) delete S  ;
 
-    eta = new Vector(eta_);
-    S   = new Matrix(S_  );
+    eta = new DVector(eta_);
+    S   = new DMatrix(S_  );
 
     return OptimizationAlgorithm::init( );
 }
 
 
-returnValue MHEalgorithm::step( const Vector &eta_, const Matrix &S_ ){
+returnValue MHEalgorithm::step( const DVector &eta_, const DMatrix &S_ ){
 
     return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
 }
@@ -125,7 +125,7 @@ returnValue MHEalgorithm::shift( ){
 }
 
 
-returnValue MHEalgorithm::solve( const Vector &eta_, const Matrix &S_ ){
+returnValue MHEalgorithm::solve( const DVector &eta_, const DMatrix &S_ ){
 
     if ( status == BS_NOT_INITIALIZED ){
          if( init( eta_, S_ ) != SUCCESSFUL_RETURN )

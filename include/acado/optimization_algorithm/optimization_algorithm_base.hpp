@@ -107,7 +107,7 @@ class OptimizationAlgorithmBase
         returnValue getDifferentialStates( VariablesGrid &xd_ ) const;
         returnValue getAlgebraicStates   ( VariablesGrid &xa_ ) const;
         returnValue getParameters        ( VariablesGrid &u_  ) const;
-        returnValue getParameters        ( Vector &u_  ) const;
+        returnValue getParameters        ( DVector &u_  ) const;
         returnValue getControls          ( VariablesGrid &p_  ) const;
         returnValue getDisturbances      ( VariablesGrid &w_  ) const;
 

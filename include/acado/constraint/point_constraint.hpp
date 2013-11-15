@@ -113,7 +113,7 @@ class PointConstraint : public ConstraintElement{
           *                                                            \n
           * \return SUCESSFUL_RETURN                                   \n
           */
-        returnValue evaluateSensitivities( const Matrix &seed, BlockMatrix &hessian );
+        returnValue evaluateSensitivities( const DMatrix &seed, BlockMatrix &hessian );
 
 
 
@@ -140,7 +140,7 @@ class PointConstraint : public ConstraintElement{
 
         /** only for internal use (routine which computes a part of the block
          *  matrix needed for forward differentiation.) */
-        returnValue computeForwardSensitivityBlock( int offset, int offset2, Matrix *seed );
+        returnValue computeForwardSensitivityBlock( int offset, int offset2, DMatrix *seed );
 
 
 

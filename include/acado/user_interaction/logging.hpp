@@ -142,11 +142,11 @@ class Logging
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getFirst(	LogName _name,
-										Matrix& firstValue
+										DMatrix& firstValue
 										) const;
 
 		/** Gets numerical value at first time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid). 
+		 *	with given name (converts internally used DMatrix into VariablesGrid). 
 		 *	If this item exists in more than one record, the first one is choosen 
 		 *	as they are expected to have identical values anyhow.
 		 *
@@ -172,11 +172,11 @@ class Logging
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getLast(	LogName _name,
-									Matrix& lastValue
+									DMatrix& lastValue
 									) const;
 
 		/** Gets numerical value at last time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid). 
+		 *	with given name (converts internally used DMatrix into VariablesGrid). 
 		 *	If this item exists in more than one record, the first one is choosen 
 		 *	as they are expected to have identical values anyhow.
 		 *
@@ -219,7 +219,7 @@ class Logging
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
-									const Matrix& value,
+									const DMatrix& value,
 									double time = -INFTY
 									);
 

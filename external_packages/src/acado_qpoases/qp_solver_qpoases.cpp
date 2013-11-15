@@ -155,13 +155,13 @@ returnValue QPsolver_qpOASES::solve(	double* H,
 }
 
 
-returnValue QPsolver_qpOASES::solve( Matrix *H,
-                                     Matrix *A,
-                                     Vector *g,
-                                     Vector *lb,
-                                     Vector *ub,
-                                     Vector *lbA,
-                                     Vector *ubA,
+returnValue QPsolver_qpOASES::solve( DMatrix *H,
+                                     DMatrix *A,
+                                     DVector *g,
+                                     DVector *lb,
+                                     DVector *ub,
+                                     DVector *lbA,
+                                     DVector *ubA,
                                      uint maxIter       )
 {
 	return solve(	H->getDoublePointer( ),
@@ -191,13 +191,13 @@ returnValue QPsolver_qpOASES::step(	double* H,
 }
 
 
-returnValue QPsolver_qpOASES::step(	Matrix *H,
-									Matrix *A,
-									Vector *g,
-									Vector *lb,
-									Vector *ub,
-									Vector *lbA,
-									Vector *ubA
+returnValue QPsolver_qpOASES::step(	DMatrix *H,
+									DMatrix *A,
+									DVector *g,
+									DVector *lb,
+									DVector *ub,
+									DVector *lbA,
+									DVector *ubA
 									)
 {
 	/* perform a single QP iteration */
@@ -205,7 +205,7 @@ returnValue QPsolver_qpOASES::step(	Matrix *H,
 }
 
 
-returnValue QPsolver_qpOASES::getPrimalSolution( Vector& xOpt ) const
+returnValue QPsolver_qpOASES::getPrimalSolution( DVector& xOpt ) const
 {
 	if ( qp == 0 )
 		return ACADOERROR( RET_INITIALIZE_FIRST );
@@ -227,7 +227,7 @@ returnValue QPsolver_qpOASES::getPrimalSolution( Vector& xOpt ) const
 }
 
 
-returnValue QPsolver_qpOASES::getDualSolution( Vector& yOpt ) const
+returnValue QPsolver_qpOASES::getDualSolution( DVector& yOpt ) const
 {
 	if ( qp == 0 )
 		return ACADOERROR( RET_INITIALIZE_FIRST );
@@ -261,7 +261,7 @@ double QPsolver_qpOASES::getObjVal( ) const
 }
 
 
-returnValue QPsolver_qpOASES::getVarianceCovariance( Matrix &var ){
+returnValue QPsolver_qpOASES::getVarianceCovariance( DMatrix &var ){
 
     return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 }
@@ -284,7 +284,7 @@ uint QPsolver_qpOASES::getNumberOfConstraints( ) const
 }
 
 
-returnValue QPsolver_qpOASES::getVarianceCovariance( Matrix &H, Matrix &var ){
+returnValue QPsolver_qpOASES::getVarianceCovariance( DMatrix &H, DMatrix &var ){
 
     if ( qp == 0 )
         return ACADOERROR( RET_INITIALIZE_FIRST );

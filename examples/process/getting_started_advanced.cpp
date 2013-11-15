@@ -76,7 +76,7 @@ int main( )
 
     // SETUP THE PROCESS:
     // ------------------
-	Vector mean( 1 ), amplitude( 1 );
+	DVector mean( 1 ), amplitude( 1 );
 	mean.setZero( );
 	amplitude.setAll( 50.0 );
 
@@ -113,7 +113,7 @@ int main( )
 	myProcess.setActuator( myActuator );
 	myProcess.setSensor( mySensor );
 
-	Vector x0( 4 );
+	DVector x0( 4 );
 	x0.setZero( );
 	x0( 0 ) = 0.01;
 
@@ -151,10 +151,10 @@ int main( )
 	u( 4,0 ) = 0.0;
 	u( 5,0 ) = 0.0;
 
-	Vector p( 1 );
+	DVector p( 1 );
 	p(0) = 350.0;
 
-	Vector pInit( 1 );
+	DVector pInit( 1 );
 	pInit(0) = 300.0;
 
 	myProcess.init( 0.0,x0,u.getFirstVector(),pInit );

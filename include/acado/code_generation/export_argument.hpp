@@ -96,7 +96,7 @@ class ExportArgument : public ExportData
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Matrix used for initialization.
+		 *	@param[in] _data			DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
@@ -112,7 +112,7 @@ class ExportArgument : public ExportData
 						const std::string& _prefix = std::string()
 						);
 
-		ExportArgument(	const Matrix& _data
+		ExportArgument(	const DMatrix& _data
 						);
 
 		ExportArgumentInternal* operator->();

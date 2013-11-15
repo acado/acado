@@ -103,7 +103,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
+		virtual returnValue setLinearInput( const DMatrix& M1, const DMatrix& A1, const DMatrix& B1 );
 
 
 		/** .
@@ -112,7 +112,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& rhs );
 
 
 		/** .
@@ -121,7 +121,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -196,7 +196,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 									  	  const std::vector<std::string> _outputNames,
 									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
-										  const std::vector<Matrix> _outputDependencies );
+										  const std::vector<DMatrix> _outputDependencies );
 
 
 	protected:

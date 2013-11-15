@@ -313,7 +313,7 @@ protected:
 	bool returnAsPointer;
 	/** Memory allocator */
 	MemoryAllocatorPtr memAllocator;
-	/** Vector of local variables. */
+	/** DVector of local variables. */
 	std::vector< ExportVariable > localVariables;
 	/** Private flag. In principle if this guy is true, do not export function declaration. */
 	bool flagPrivate;

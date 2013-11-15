@@ -38,9 +38,9 @@
 BEGIN_NAMESPACE_ACADO
 
 
-inline Matrix MatrixVariable::getMatrix( ) const
+inline DMatrix MatrixVariable::getMatrix( ) const
 {
-	return Matrix(nRows, nCols, data.data());
+	return DMatrix(nRows, nCols, data.data());
 }
 
 

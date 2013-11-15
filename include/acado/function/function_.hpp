@@ -83,11 +83,11 @@ public:
     /** Loading Expressions (deep copy). */
     Function& operator<<( const double &arg );
 
-    /** Loading Symbolic Vector (deep copy). */
-    Function& operator<<( const Vector& arg );
+    /** Loading Symbolic DVector (deep copy). */
+    Function& operator<<( const DVector& arg );
 
-    /** Loading Symbolic Matrix (deep copy). */
-    Function& operator<<( const Matrix& arg );
+    /** Loading Symbolic DMatrix (deep copy). */
+    Function& operator<<( const DMatrix& arg );
 
 	Function operator()(	uint idx
 							) const;
@@ -196,7 +196,7 @@ public:
      *                                         \n
      *  \return The result of the evaluation.  \n
      */
-    Vector evaluate( const EvaluationPoint &x         ,
+    DVector evaluate( const EvaluationPoint &x         ,
                      const int             &number = 0  );
 
 
@@ -208,7 +208,7 @@ public:
      *                                                      \n
      *  \return The result of the evaluation.               \n
      */
-    inline Vector operator()( const EvaluationPoint &x         ,
+    inline DVector operator()( const EvaluationPoint &x         ,
                               const int             &number = 0  );
 
 
@@ -346,7 +346,7 @@ public:
      *                                             \n
      *  \return The result of the evaluation.      \n
      */
-    Vector AD_forward( const EvaluationPoint &x         ,
+    DVector AD_forward( const EvaluationPoint &x         ,
                        const int             &number = 0  );
 
 
@@ -372,7 +372,7 @@ public:
      *                                                             \n
      *  \return the result for the derivative.                     \n
      */
-     returnValue AD_backward( const    Vector &seed      ,
+     returnValue AD_backward( const    DVector &seed      ,
                               EvaluationPoint &df        ,
                               const    int    &number = 0  );
 
@@ -432,8 +432,8 @@ public:
     *
     * \param x will be assigned jacobian(fun,differential states)
     */
-    returnValue jacobian(Matrix &x);
-    //returnValue jacobian(Matrix &x,Matrix &p=emptyMatrix,Matrix &u=emptyMatrix,Matrix &w=emptyMatrix);
+    returnValue jacobian(DMatrix &x);
+    //returnValue jacobian(DMatrix &x,DMatrix &p=emptyMatrix,DMatrix &u=emptyMatrix,DMatrix &w=emptyMatrix);
 
     /** Prints the function into a stream. */
     friend std::ostream& operator<<( std::ostream& stream, const Function &arg);

@@ -85,9 +85,9 @@ inline double Actuator::getControlDeadTime(	uint idx
 }
 
 
-inline Vector Actuator::getControlDeadTimes( ) const
+inline DVector Actuator::getControlDeadTimes( ) const
 {
-	Vector tmp( getNU( ) );
+	DVector tmp( getNU( ) );
 
 	for( uint i=0; i<getNU( ); ++i )
 		tmp( i ) = deadTimes( i );
@@ -107,9 +107,9 @@ inline double Actuator::getParameterDeadTime(	uint idx
 }
 
 
-inline Vector Actuator::getParameterDeadTimes( ) const
+inline DVector Actuator::getParameterDeadTimes( ) const
 {
-	Vector tmp( getNP( ) );
+	DVector tmp( getNP( ) );
 
 	for( uint i=0; i<getNP( ); ++i )
 		tmp( i ) = deadTimes( getNU()+i );

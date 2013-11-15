@@ -49,7 +49,7 @@ inline returnValue MultiObjectiveAlgorithm::getParetoFront( VariablesGrid &paret
     if( result.getDim() == 0 )
         return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
 
-    Vector firstColumn(count);
+    DVector firstColumn(count);
     for( run1 = 0; run1 < count; run1++ )
         firstColumn(run1) = result(run1,0);
 
@@ -91,7 +91,7 @@ inline returnValue MultiObjectiveAlgorithm::getParetoFrontWithFilter( VariablesG
         }
     }
 
-    Vector firstColumn(nP);
+    DVector firstColumn(nP);
     for( run1 = 0; run1 < nP; run1++ )
         firstColumn(run1) = result(Pp[run1],0);
 
@@ -108,10 +108,10 @@ inline returnValue MultiObjectiveAlgorithm::getParetoFrontWithFilter( VariablesG
 }
 
 
-inline Matrix MultiObjectiveAlgorithm::getPayOffMatrix( ) const{
+inline DMatrix MultiObjectiveAlgorithm::getPayOffMatrix( ) const{
 
     int run1, run2;
-    Matrix tmp(m,m);
+    DMatrix tmp(m,m);
 
     for( run1 = 0; run1 < m; run1++ )
         for( run2 = 0; run2 < m; run2++ )
@@ -121,11 +121,11 @@ inline Matrix MultiObjectiveAlgorithm::getPayOffMatrix( ) const{
 }
 
 
-inline Matrix MultiObjectiveAlgorithm::getNormalizedPayOffMatrix( ) const{
+inline DMatrix MultiObjectiveAlgorithm::getNormalizedPayOffMatrix( ) const{
 
     int run1, run2;
-    Matrix tmp = getPayOffMatrix();
-    Vector L   = getNormalizationVector();
+    DMatrix tmp = getPayOffMatrix();
+    DVector L   = getNormalizationVector();
 
     for( run1 = 0; run1 < m; run1++ )
         for( run2 = 0; run2 < m; run2++ )
@@ -135,10 +135,10 @@ inline Matrix MultiObjectiveAlgorithm::getNormalizedPayOffMatrix( ) const{
 }
 
 
-inline Vector MultiObjectiveAlgorithm::getUtopiaVector( ) const{
+inline DVector MultiObjectiveAlgorithm::getUtopiaVector( ) const{
 
     int run1;
-    Vector tmp(m);
+    DVector tmp(m);
 
     for( run1 = 0; run1 < m; run1++ )
         tmp(run1) = vertices(run1,run1);
@@ -147,10 +147,10 @@ inline Vector MultiObjectiveAlgorithm::getUtopiaVector( ) const{
 }
 
 
-inline Vector MultiObjectiveAlgorithm::getNadirVector( ) const{
+inline DVector MultiObjectiveAlgorithm::getNadirVector( ) const{
 
     int run1,run2;
-    Vector tmp(m);
+    DVector tmp(m);
     double max;
 
     for( run1 = 0; run1 < m; run1++ ){
@@ -163,16 +163,16 @@ inline Vector MultiObjectiveAlgorithm::getNadirVector( ) const{
 }
 
 
-inline Vector MultiObjectiveAlgorithm::getNormalizationVector( ) const{
+inline DVector MultiObjectiveAlgorithm::getNormalizationVector( ) const{
 
     return (getNadirVector()-getUtopiaVector());
 }
 
 
-inline Matrix MultiObjectiveAlgorithm::getUtopiaPlaneVectors( ) const{
+inline DMatrix MultiObjectiveAlgorithm::getUtopiaPlaneVectors( ) const{
 
     int run1,run2;
-    Matrix tmp = getNormalizedPayOffMatrix();
+    DMatrix tmp = getNormalizedPayOffMatrix();
 
     for( run1 = 0; run1 < m; run1++ )
         for( run2 = 0; run2 < m; run2++ )
@@ -183,17 +183,17 @@ inline Matrix MultiObjectiveAlgorithm::getUtopiaPlaneVectors( ) const{
 
 
 
-inline Matrix MultiObjectiveAlgorithm::getWeights() const{
+inline DMatrix MultiObjectiveAlgorithm::getWeights() const{
 
    int tmp = N;
     if( tmp == 0 )
         get( PARETO_FRONT_DISCRETIZATION, tmp );
 
     WeightGeneration generator;
-    Matrix Weights;
-    Vector formers;
-    Vector  lb(m);
-    Vector  ub(m);
+    DMatrix Weights;
+    DVector formers;
+    DVector  lb(m);
+    DVector  ub(m);
     lb.setZero();
     ub.setAll(1.0);
     generator.getWeights( m, tmp, lb, ub, Weights, formers );
@@ -205,7 +205,7 @@ inline Matrix MultiObjectiveAlgorithm::getWeights() const{
 
 inline returnValue MultiObjectiveAlgorithm::getWeights( const char*fileName ) const{
 
-    Matrix Weights;
+    DMatrix Weights;
     Weights = getWeights();
     
     Weights.print( fileName );
@@ -241,10 +241,10 @@ inline returnValue MultiObjectiveAlgorithm::getWeightsWithFilter( const char*fil
         }
     }
 
-    Matrix Weights;
+    DMatrix Weights;
     Weights = getWeights();
 
-    Matrix FilteredWeights( Weights.getNumRows(), nP );
+    DMatrix FilteredWeights( Weights.getNumRows(), nP );
 
     for( run1 = 0; run1 < nP; run1++ )
         for( run2 = 0; run2 < (int) Weights.getNumRows(); run2++ )
@@ -262,7 +262,7 @@ inline returnValue MultiObjectiveAlgorithm::printAuxiliaryRoutine( const char*fi
 
     int run1;
 
-    Matrix Weights;
+    DMatrix Weights;
     Weights = getWeights();
 
     for( run1 = 0; run1 < (int) Weights.getNumCols(); run1++ ){

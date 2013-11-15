@@ -308,7 +308,7 @@ TaylorVariable<T>::_eigen
   ASSERT(1==0);
   
 // #ifdef MC__TVAR_DEBUG_EIGEN
-//   TaylorModel<T>::_display( n, n, a, n, "Matrix Q", std::cout );
+//   TaylorModel<T>::_display( n, n, a, n, "DMatrix Q", std::cout );
 // #endif
 // 
 //   // get optimal size
@@ -321,8 +321,8 @@ TaylorVariable<T>::_eigen
 //   double*work = new double[lwork];
 //   dsyev_( "Vectors", "Upper", &n, a, &n, d, work, &lwork, &info );
 // #ifdef MC__TVAR_DEBUG_EIGEN
-//   TaylorModel<T>::_display( n, n, a, n, "Matrix U", std::cout );
-//   TaylorModel<T>::_display( 1, n, d, 1, "Matrix D", std::cout );
+//   TaylorModel<T>::_display( n, n, a, n, "DMatrix U", std::cout );
+//   TaylorModel<T>::_display( 1, n, d, 1, "DMatrix D", std::cout );
 // #endif
 //   delete[] work;
 // 

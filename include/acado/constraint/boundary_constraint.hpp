@@ -113,7 +113,7 @@ class BoundaryConstraint : public ConstraintElement{
           *                                                            \n
           * \return SUCESSFUL_RETURN                                   \n
           */
-        returnValue evaluateSensitivities( const Matrix &seed, BlockMatrix &hessian );
+        returnValue evaluateSensitivities( const DMatrix &seed, BlockMatrix &hessian );
 
 
 

@@ -76,12 +76,12 @@ int main( )
 	h << vB;
     h << vW;
 
-    Matrix Q(4,4);
+    DMatrix Q(4,4);
     Q.setIdentity();
 	Q(0,0) = 10.0;
 	Q(1,1) = 10.0;
 
-    Vector r(4);
+    DVector r(4);
     r.setAll( 0.0 );
 
 
@@ -122,7 +122,7 @@ int main( )
     // ----------------------------------------------------------
 	SimulationEnvironment sim( 0.0,3.0,process,controller );
 
-	Vector x0(4);
+	DVector x0(4);
 	x0(0) = 0.01;
 	x0(1) = 0.0;
 	x0(2) = 0.0;

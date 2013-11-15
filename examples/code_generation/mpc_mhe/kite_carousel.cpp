@@ -83,8 +83,8 @@ int main()
 	h << phi << theta << dphi << dtheta << u1 << u2;
 	hN << phi << theta << dphi << dtheta;
 
-	Matrix W = eye( h.getDim() );
-	Matrix WN = eye( hN.getDim() );
+	DMatrix W = eye( h.getDim() );
+	DMatrix WN = eye( hN.getDim() );
 
 	W(0,0) = 5.000;
 	W(1,1) = 1.000;
@@ -152,7 +152,7 @@ int main()
 // 
 // 	EvaluationPoint z(Df);
 // 	
-// 	Vector xx(28);
+// 	DVector xx(28);
 // 	xx.setZero();
 // 
 //     xx(0) = -4.2155955213988627e-02;
@@ -160,14 +160,14 @@ int main()
 // 	xx(2) =  0.0;
 // 	xx(3) =  0.0;
 // 
-// 	Vector uu(2);
+// 	DVector uu(2);
 //     uu(0) = 20.5;
 // 	uu(1) = -0.1;
 // 	
 // 	z.setX( xx );
 //     z.setU( uu );
 // 
-//     Vector result = Df.evaluate( z );
+//     DVector result = Df.evaluate( z );
 // 	result.print( "x" );
 
 	return EXIT_SUCCESS;

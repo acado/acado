@@ -81,7 +81,7 @@ ExportArgumentInternal* ExportArgumentInternal::clone() const
 void ExportArgumentInternal::deepCopyMembers(	std::map<CasADi::SharedObjectNode*, CasADi::SharedObject>& already_copied
 												)
 {
-	data.reset(new Matrix( *data ));
+	data.reset(new DMatrix( *data ));
 }
 
 ExportArgument ExportArgumentInternal::getAddress(	const ExportIndex& rowIdx,
@@ -201,7 +201,7 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	std::ostream& stream,
 	{
 		if (data->getNumCols() > 1 && data->getNumRows() > 1)
 		{
-			stream << "/** " << "Matrix of size: " << data->getNumRows() << " x " << data->getNumCols() << " (row major format)";
+			stream << "/** " << "DMatrix of size: " << data->getNumRows() << " x " << data->getNumCols() << " (row major format)";
 		}
 		else
 		{

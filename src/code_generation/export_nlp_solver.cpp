@@ -187,13 +187,13 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	get(CG_USE_OPENMP, useOMP);
 
 	x.setup("x", (getN() + 1), getNX(), REAL, ACADO_VARIABLES);
-	x.setDoc( string("Matrix containing ") + toString(getN() + 1) + " differential variable vectors." );
+	x.setDoc( string("DMatrix containing ") + toString(getN() + 1) + " differential variable vectors." );
 	z.setup("z", getN(), getNXA(), REAL, ACADO_VARIABLES);
-	z.setDoc( string("Matrix containing ") + toString( N ) + " algebraic variable vectors." );
+	z.setDoc( string("DMatrix containing ") + toString( N ) + " algebraic variable vectors." );
 	u.setup("u", getN(), getNU(), REAL, ACADO_VARIABLES);
-	u.setDoc( string("Matrix containing ") + toString( N ) + " control variable vectors." );
+	u.setDoc( string("DMatrix containing ") + toString( N ) + " control variable vectors." );
 	p.setup("p", 1, getNP(), REAL, ACADO_VARIABLES);
-	p.setDoc( "Vector of parameters." );
+	p.setDoc( "DVector of parameters." );
 
 	if (performsSingleShooting() == false)
 	{
@@ -479,7 +479,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	}
 	else
 	{
-		Matrix mObjS = objSTemp.getGivenMatrix();
+		DMatrix mObjS = objSTemp.getGivenMatrix();
 
 		if (mObjS.isPositiveDefinite() == false)
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
@@ -504,9 +504,9 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	{
 		EvaluationPoint epFx( Fx );
 
-		Matrix mFx(NY, NX);
+		DMatrix mFx(NY, NX);
 
-		Vector vFx = Fx.evaluate( epFx );
+		DVector vFx = Fx.evaluate( epFx );
 
 		for (unsigned i = 0; i < NY; ++i)
 			for(unsigned j = 0; j < NX; ++j)
@@ -528,9 +528,9 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	{
 		EvaluationPoint epFu( Fu );
 
-		Matrix mFu(NY, NU);
+		DMatrix mFu(NY, NU);
 
-		Vector vFu = Fu.evaluate( epFu );
+		DVector vFu = Fu.evaluate( epFu );
 
 		for (unsigned i = 0; i < NY; ++i)
 			for(unsigned j = 0; j < NU; ++j)
@@ -573,7 +573,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 		// Precompute Q1 and Q2;
 
-		Matrix m1(NX,NX), m2(NX, NY);
+		DMatrix m1(NX,NX), m2(NX, NY);
 
 		m2 = objEvFx.getGivenMatrix().transpose() * objS.getGivenMatrix();
 		m1 = m2 * objEvFx.getGivenMatrix();
@@ -608,8 +608,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	{
 		// Precompute R1 and R2
 
-		Matrix m2 = objEvFu.getGivenMatrix().transpose() * objS.getGivenMatrix();
-		Matrix m1 = m2 * objEvFu.getGivenMatrix();
+		DMatrix m2 = objEvFu.getGivenMatrix().transpose() * objS.getGivenMatrix();
+		DMatrix m1 = m2 * objEvFu.getGivenMatrix();
 
 		R1 = m1;
 		if (m1 == m2)
@@ -663,7 +663,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	}
 	else
 	{
-		Matrix mWN = objSEndTermTemp.getGivenMatrix();
+		DMatrix mWN = objSEndTermTemp.getGivenMatrix();
 
 		if (mWN.isPositiveDefinite() == false)
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
@@ -685,9 +685,9 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	{
 		EvaluationPoint epFEndTermX( FEndTermX );
 
-		Matrix mFEndX(NYN, NX);
+		DMatrix mFEndX(NYN, NX);
 
-		Vector vFx = FEndTermX.evaluate( epFEndTermX );
+		DVector vFx = FEndTermX.evaluate( epFEndTermX );
 
 		// And now reshape vFx and vFu to export variables
 		for (unsigned i = 0; i < NYN; ++i)
@@ -724,7 +724,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	{
 		// Precompute
 
-		Matrix m2, m1;
+		DMatrix m2, m1;
 
 		m2 = objEvFxEnd.getTranspose().getGivenMatrix() * objSEndTerm.getGivenMatrix();
 		m1 = m2 * objEvFxEnd.getGivenMatrix();
@@ -802,7 +802,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 returnValue ExportNLPSolver::setupResidualVariables()
 {
 	y.setup("y",  getN() * getNY(), 1, REAL, ACADO_VARIABLES);
-	y.setDoc( string("Matrix containing ") + toString(N) +
+	y.setDoc( string("DMatrix containing ") + toString(N) +
 			" reference/measurement vectors for first " + toString(N) + " nodes." );
 	yN.setup("yN", getNYN(), 1, REAL, ACADO_VARIABLES);
 	yN.setDoc( string("Reference/measurement vector for the ") + toString(N + 1) + ". node." );
@@ -835,8 +835,8 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	constraints.getBounds( tmp );
 
 	bool isFinite = false;
-	Vector lbTmp;
-	Vector ubTmp;
+	DVector lbTmp;
+	DVector ubTmp;
 
 	//
 	// Extract box constraints on inputs
@@ -941,13 +941,13 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		if (pacHx.getNX() == 0 && pacHx.getNU() == 0 && pacHx.getNP() == 0)
 		{
 			EvaluationPoint epPacHx( pacHx );
-			Vector v = pacHx.evaluate( epPacHx );
+			DVector v = pacHx.evaluate( epPacHx );
 
 			if (v.isZero() == false)
 			{
 				// Hard-code derivative evaluation
 
-				Matrix m;
+				DMatrix m;
 				m.init(dimPacH, NX);
 
 				for (unsigned j = 0; j < dimPacH; ++j)
@@ -968,13 +968,13 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		if (pacHu.getNX() == 0 && pacHu.getNU() == 0 && pacHu.getNP() == 0)
 		{
 			EvaluationPoint epPacHu( pacHu );
-			Vector v = pacHu.evaluate( epPacHu );
+			DVector v = pacHu.evaluate( epPacHu );
 
 			if (v.isZero() == false)
 			{
 				// Hard-code derivative evaluation
 
-				Matrix m;
+				DMatrix m;
 				m.init(dimPacH, NU);
 
 				for (unsigned j = 0; j < dimPacH; ++j)
@@ -1012,7 +1012,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 	Function pocH;
 	Expression expPocH, expPocHx, expPocHu;
-	Matrix pocLBMatrix, pocUBMatrix;
+	DMatrix pocLBMatrix, pocUBMatrix;
 
 	evaluatePointConstraints.resize(N + 1);
 
@@ -1493,8 +1493,8 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	//
 	if (objS.isGiven() == true)
 	{
-		Matrix m = objS.getGivenMatrix();
-		Matrix mChol = m.getCholeskyDecomposition();
+		DMatrix m = objS.getGivenMatrix();
+		DMatrix mChol = m.getCholeskyDecomposition();
 
 		initialize << (acVL == mChol);
 	}

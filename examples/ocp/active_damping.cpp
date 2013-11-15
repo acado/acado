@@ -77,8 +77,8 @@ int main( ){
 	h << vBody;
     h << vWheel;
 
-    Matrix S(4,4);
-    Vector r(4);
+    DMatrix S(4,4);
+    DVector r(4);
 
     S.setIdentity();
 	S(0,0) = 10.0;

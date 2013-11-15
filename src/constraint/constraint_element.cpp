@@ -750,7 +750,7 @@ returnValue ConstraintElement::initializeEvaluationPoints( const OCPiterate& ite
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ConstraintElement::get(Function& function_, Matrix& lb_, Matrix& ub_)
+returnValue ConstraintElement::get(Function& function_, DMatrix& lb_, DMatrix& ub_)
 {
 	if ( fcn == NULL )
 		return RET_INITIALIZE_FIRST;

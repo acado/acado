@@ -79,14 +79,14 @@ NLPsolver& NLPsolver::operator=( const NLPsolver& rhs )
     return *this;
 }
 
-returnValue NLPsolver::solve(	const Vector &x0_, const Vector &p_
+returnValue NLPsolver::solve(	const DVector &x0_, const DVector &p_
 								){
     return ACADOERROR(RET_SOLVER_NOT_SUTIABLE_FOR_REAL_TIME_MODE);
 }
 
 
 
-returnValue NLPsolver::feedbackStep( const Vector &x0_, const Vector &p_ )
+returnValue NLPsolver::feedbackStep( const DVector &x0_, const DVector &p_ )
 {
     return ACADOERROR(RET_SOLVER_NOT_SUTIABLE_FOR_REAL_TIME_MODE);
 }
@@ -104,7 +104,7 @@ returnValue NLPsolver::prepareNextStep( )
 }
 
 
-returnValue NLPsolver::step( const Vector &x0_, const Vector &p_ )
+returnValue NLPsolver::step( const DVector &x0_, const DVector &p_ )
 {
     return ACADOERROR(RET_SOLVER_NOT_SUTIABLE_FOR_REAL_TIME_MODE);
 }
@@ -112,11 +112,11 @@ returnValue NLPsolver::step( const Vector &x0_, const Vector &p_ )
 
 
 returnValue NLPsolver::shiftVariables(	double timeShift,
-							    Vector  lastX,
-							    Vector  lastXA,
-								Vector  lastP,
-								Vector  lastU,
-								Vector  lastW	)
+							    DVector  lastX,
+							    DVector  lastXA,
+								DVector  lastP,
+								DVector  lastU,
+								DVector  lastW	)
 {
     return ACADOERROR(RET_SOLVER_NOT_SUTIABLE_FOR_REAL_TIME_MODE);
 }
@@ -145,7 +145,7 @@ returnValue NLPsolver::getParameters( VariablesGrid &p_  ) const{
     return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
 }
 
-returnValue NLPsolver::getParameters( Vector &p_  ) const{
+returnValue NLPsolver::getParameters( DVector &p_  ) const{
 
     return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
 }
@@ -157,7 +157,7 @@ returnValue NLPsolver::getControls( VariablesGrid &u_  ) const{
 }
 
 
-returnValue NLPsolver::getFirstControl( Vector& u_  ) const{
+returnValue NLPsolver::getFirstControl( DVector& u_  ) const{
 
     return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
 }

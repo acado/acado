@@ -120,7 +120,7 @@ uint ModelData::addOutput( 	const std::string& output, const std::string& diffs_
 							const Grid& grid, const std::string& colInd, const std::string& rowPtr	){
 
 
-	Vector colIndV, rowPtrV;
+	DVector colIndV, rowPtrV;
 
 	colIndV.read( colInd.c_str() );
 	rowPtrV.read( rowPtr.c_str() );
@@ -142,14 +142,14 @@ BooleanType ModelData::hasOutputs() const{
 }
 
 
-returnValue ModelData::getNumSteps( Vector& _numSteps ) const {
+returnValue ModelData::getNumSteps( DVector& _numSteps ) const {
 
     _numSteps = numSteps;
     return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ModelData::setNumSteps( const Vector& _numSteps ) {
+returnValue ModelData::setNumSteps( const DVector& _numSteps ) {
 
     numSteps = _numSteps;
     return SUCCESSFUL_RETURN;
@@ -163,14 +163,14 @@ returnValue ModelData::getOutputExpressions( std::vector<Expression>& outputExpr
 }
 
 
-std::vector<Matrix> ModelData::getOutputDependencies( ) const {
-	std::vector<Matrix> outputDependencies;
+std::vector<DMatrix> ModelData::getOutputDependencies( ) const {
+	std::vector<DMatrix> outputDependencies;
 	if( hasCompressedStorage() ) {
 		for( uint i = 0; i < outputNames.size(); i++ ) {
-			Vector colIndV = colInd_outputs[i];
-			Vector rowPtrV = rowPtr_outputs[i];
+			DVector colIndV = colInd_outputs[i];
+			DVector rowPtrV = rowPtr_outputs[i];
 
-			Matrix dependencyMat = zeros( dim_outputs[i],getNX()+NXA+NU+NDX );
+			DMatrix dependencyMat = zeros( dim_outputs[i],getNX()+NXA+NU+NDX );
 			int index = 1;
 			for( uint j = 0; j < dim_outputs[i]; j++ ) {
 				uint upper = (uint)rowPtrV(j+1);
@@ -200,7 +200,7 @@ returnValue ModelData::getModel( DifferentialEquation& _f ) const{
 }
 
 
-returnValue ModelData::getNARXmodel( uint& _delay, Matrix& _parms ) const{
+returnValue ModelData::getNARXmodel( uint& _delay, DMatrix& _parms ) const{
 
     _delay = delay;
     _parms = parms;
@@ -209,7 +209,7 @@ returnValue ModelData::getNARXmodel( uint& _delay, Matrix& _parms ) const{
 }
 
 
-returnValue ModelData::getLinearInput( Matrix& M1_, Matrix& A1_, Matrix& B1_ ) const {
+returnValue ModelData::getLinearInput( DMatrix& M1_, DMatrix& A1_, DMatrix& B1_ ) const {
 	M1_ = M1;
 	A1_ = A1;
 	B1_ = B1;
@@ -218,7 +218,7 @@ returnValue ModelData::getLinearInput( Matrix& M1_, Matrix& A1_, Matrix& B1_ ) c
 }
 
 
-returnValue ModelData::getLinearOutput( Matrix& M3_, Matrix& A3_, OutputFcn& rhs_ ) const {
+returnValue ModelData::getLinearOutput( DMatrix& M3_, DMatrix& A3_, OutputFcn& rhs_ ) const {
 	M3_ = M3;
 	A3_ = A3;
 	rhs_ = rhs3;
@@ -227,7 +227,7 @@ returnValue ModelData::getLinearOutput( Matrix& M3_, Matrix& A3_, OutputFcn& rhs
 }
 
 
-returnValue ModelData::getLinearOutput( Matrix& M3_, Matrix& A3_ ) const {
+returnValue ModelData::getLinearOutput( DMatrix& M3_, DMatrix& A3_ ) const {
 	M3_ = M3;
 	A3_ = A3;
 
@@ -258,7 +258,7 @@ returnValue ModelData::setModel( const DifferentialEquation& _f )
 }
 
 
-returnValue ModelData::setNARXmodel( const uint _delay, const Matrix& _parms ) {
+returnValue ModelData::setNARXmodel( const uint _delay, const DMatrix& _parms ) {
 
 	if( rhs_name.empty() && NX2 == 0 && NX3 == 0 ) {
 		NX2 = _parms.getNumRows();
@@ -288,7 +288,7 @@ returnValue ModelData::setNARXmodel( const uint _delay, const Matrix& _parms ) {
 }
 
 
-returnValue ModelData::setLinearInput( const Matrix& M1_, const Matrix& A1_, const Matrix& B1_ )
+returnValue ModelData::setLinearInput( const DMatrix& M1_, const DMatrix& A1_, const DMatrix& B1_ )
 {
 	M1 = M1_;
 	A1 = A1_;
@@ -304,7 +304,7 @@ returnValue ModelData::setLinearInput( const Matrix& M1_, const Matrix& A1_, con
 }
 
 
-returnValue ModelData::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const OutputFcn& rhs3_ )
+returnValue ModelData::setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, const OutputFcn& rhs3_ )
 {
 	M3 = M3_;
 	A3 = A3_;
@@ -320,7 +320,7 @@ returnValue ModelData::setLinearOutput( const Matrix& M3_, const Matrix& A3_, co
 }
 
 
-returnValue ModelData::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const std::string& rhs3_, const std::string& diffs3_ )
+returnValue ModelData::setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, const std::string& rhs3_, const std::string& diffs3_ )
 {
 	if( !export_rhs ) {
 		M3 = M3_;
@@ -370,7 +370,7 @@ returnValue ModelData::setIntegrationGrid(	const Grid& _ocpGrid, const uint _num
 	BooleanType equidistantControl = _ocpGrid.isEquidistant();
 	double T = _ocpGrid.getLastTime() - _ocpGrid.getFirstTime();
 	double h = T/((double)_numSteps);
-	Vector stepsVector( N );
+	DVector stepsVector( N );
 
 	if (integrationGrid.isEmpty() == BT_TRUE)
 	{
@@ -531,9 +531,9 @@ returnValue ModelData::setN( const uint N_ )
 }
 
 
-Vector ModelData::getDimOutputs( ) const
+DVector ModelData::getDimOutputs( ) const
 {
-	Vector nOutV( (uint)dim_outputs.size() );
+	DVector nOutV( (uint)dim_outputs.size() );
 	for( uint i = 0; i < dim_outputs.size(); i++ ) {
 		nOutV(i) = dim_outputs[i];
 	}
@@ -554,9 +554,9 @@ returnValue ModelData::getDimOutputs( std::vector<uint>& dims ) const
 }
 
 
-Vector ModelData::getNumMeas( ) const
+DVector ModelData::getNumMeas( ) const
 {
-	Vector nMeasV( (uint)num_meas.size() );
+	DVector nMeasV( (uint)num_meas.size() );
 	for( uint i = 0; i < num_meas.size(); i++ ) {
 		nMeasV(i) = num_meas[i];
 	}

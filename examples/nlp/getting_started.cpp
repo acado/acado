@@ -60,7 +60,7 @@ int main( ){
 
     // PRINT OPTIMAL SOLUTION:
     // -----------------------
-	Vector results;
+	DVector results;
 	algorithm.getParameters( results );
 	results.print( "optimal solution" );
 

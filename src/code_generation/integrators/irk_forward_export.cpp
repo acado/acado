@@ -277,20 +277,20 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	initializeCoefficients();
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-	Matrix tmp = AA;
+	DMatrix tmp = AA;
 	ExportVariable Ah( "Ah_mat", tmp*=h, STATIC_CONST_REAL );
 	code.addDeclaration( Ah );
 	code.addLinebreak( 2 );
 	// TODO: Ask Milan why this does NOT work properly !!
 	Ah = ExportVariable( "Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 
-	Vector BB( bb );
-	ExportVariable Bh( "Bh_mat", Matrix( BB*=h, false ) );
+	DVector BB( bb );
+	ExportVariable Bh( "Bh_mat", DMatrix( BB*=h, false ) );
 
-	Vector CC( cc );
+	DVector CC( cc );
 	ExportVariable C;
 	if( timeDependant ) {
-		C = ExportVariable( "C_mat", Matrix( CC*=(1.0/grid.getNumIntervals()), false ), STATIC_CONST_REAL );
+		C = ExportVariable( "C_mat", DMatrix( CC*=(1.0/grid.getNumIntervals()), false ), STATIC_CONST_REAL );
 		code.addDeclaration( C );
 		code.addLinebreak( 2 );
 		C = ExportVariable( "C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
@@ -351,7 +351,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 			integrate.addStatement( numMeas[run5] == 0 );
 		}
 	}
-	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
+	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 	if( (inputDim-diffsDim) > NX+NXA ) {
 		integrate.addStatement( rk_xxx.getCols( NX+NXA,inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
 	}
@@ -468,7 +468,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( rk_eta.getCol( run5 ) += rk_kkk.getRow( run5 )*Bh );
 	}
 	if( NXA > 0) {
-		Matrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
+		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
 		loop->addStatement( std::string("if( run == 0 ) {\n") );
 		for( run5 = 0; run5 < NXA; run5++ ) {
 			loop->addStatement( rk_eta.getCol( NX+run5 ) == rk_kkk.getRow( NX+run5 )*tempCoefs );
@@ -517,7 +517,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 			loop->addStatement( numMeas[run5].getName() + " += " + tmp_meas.get(0,run5) + ";\n" );
 		}
 	}
-	loop->addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
+	loop->addStatement( rk_ttt += DMatrix(1.0/grid.getNumIntervals()) );
 
     // end of the integrator loop.
     if( !equidistantControlGrid() ) {
@@ -528,13 +528,13 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
     }
     // PART 1
     if( NX1 > 0 ) {
-    	Matrix zeroR = zeros(1, NX2+NX3);
+    	DMatrix zeroR = zeros(1, NX2+NX3);
     	ExportForLoop loop1( i,0,NX1 );
     	loop1.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1,i*NX+NX+NXA+NX ) == zeroR );
     	integrate.addStatement( loop1 );
     }
     // PART 2
-    Matrix zeroR = zeros(1, NX3);
+    DMatrix zeroR = zeros(1, NX3);
     if( NX2 > 0 ) {
     	ExportForLoop loop2( i,NX1,NX1+NX2 );
     	loop2.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1+NX2,i*NX+NX+NXA+NX ) == zeroR );
@@ -669,22 +669,22 @@ returnValue ForwardIRKExport::propagateOutputs(	ExportStatementBlock* block, con
 returnValue ForwardIRKExport::prepareInputSystem(	ExportStatementBlock& code )
 {
 	if( NX1 > 0 ) {
-		Matrix mat1 = formMatrix( M11, A11 );
+		DMatrix mat1 = formMatrix( M11, A11 );
 		rk_mat1 = ExportVariable( "rk_mat1", mat1, STATIC_CONST_REAL );
 		code.addDeclaration( rk_mat1 );
 		// TODO: Ask Milan why this does NOT work properly !!
 		rk_mat1 = ExportVariable( "rk_mat1", numStages*NX1, numStages*NX1, STATIC_CONST_REAL, ACADO_LOCAL );
 
-		Matrix sens = zeros(NX1*(NX1+NU), numStages);
+		DMatrix sens = zeros(NX1*(NX1+NU), numStages);
 		uint i, j, k;
 		for( i = 0; i < NX1; i++ ) {
-			Vector vec(NX1*numStages);
+			DVector vec(NX1*numStages);
 			for( j = 0; j < numStages; j++ ) {
 				for( k = 0; k < NX1; k++ ) {
 					vec(j*NX1+k) = A11(k,i);
 				}
 			}
-			Vector sol = mat1*vec;
+			DVector sol = mat1*vec;
 			for( j = 0; j < numStages; j++ ) {
 				for( k = 0; k < NX1; k++ ) {
 					sens(i*NX1+k,j) = sol(j*NX1+k);
@@ -692,13 +692,13 @@ returnValue ForwardIRKExport::prepareInputSystem(	ExportStatementBlock& code )
 			}
 		}
 		for( i = 0; i < NU; i++ ) {
-			Vector vec(NX1*numStages);
+			DVector vec(NX1*numStages);
 			for( j = 0; j < numStages; j++ ) {
 				for( k = 0; k < NX1; k++ ) {
 					vec(j*NX1+k) = B11(k,i);
 				}
 			}
-			Vector sol = mat1*vec;
+			DVector sol = mat1*vec;
 			for( j = 0; j < numStages; j++ ) {
 				for( k = 0; k < NX1; k++ ) {
 					sens(NX1*NX1+i*NX1+k,j) = sol(j*NX1+k);
@@ -718,22 +718,22 @@ returnValue ForwardIRKExport::prepareInputSystem(	ExportStatementBlock& code )
 returnValue ForwardIRKExport::prepareOutputSystem(	ExportStatementBlock& code )
 {
 	if( NX3 > 0 ) {
-		Matrix mat3 = formMatrix( M33, A33 );
+		DMatrix mat3 = formMatrix( M33, A33 );
 		rk_mat3 = ExportVariable( "rk_mat3", mat3, STATIC_CONST_REAL );
 		code.addDeclaration( rk_mat3 );
 		// TODO: Ask Milan why this does NOT work properly !!
 		rk_mat3 = ExportVariable( "rk_mat3", numStages*NX3, numStages*NX3, STATIC_CONST_REAL, ACADO_LOCAL );
 
-		Matrix sens = zeros(NX3*NX3, numStages);
+		DMatrix sens = zeros(NX3*NX3, numStages);
 		uint i, j, k;
 		for( i = 0; i < NX3; i++ ) {
-			Vector vec(NX3*numStages);
+			DVector vec(NX3*numStages);
 			for( j = 0; j < numStages; j++ ) {
 				for( k = 0; k < NX3; k++ ) {
 					vec(j*NX3+k) = A33(k,i);
 				}
 			}
-			Vector sol = mat3*vec;
+			DVector sol = mat3*vec;
 			for( j = 0; j < numStages; j++ ) {
 				for( k = 0; k < NX3; k++ ) {
 					sens(i*NX3+k,j) = sol(j*NX3+k);
@@ -774,8 +774,8 @@ returnValue ForwardIRKExport::sensitivitiesInputSystem( ExportStatementBlock* bl
 returnValue ForwardIRKExport::sensitivitiesImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, const ExportVariable& det, bool STATES, uint number )
 {
 	if( NX2 > 0 ) {
-		Matrix zeroM = zeros( NX2+NXA,1 );
-		Matrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
+		DMatrix zeroM = zeros( NX2+NXA,1 );
+		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
 		uint i;
 
 		ExportForLoop loop1( index2,0,numStages );
@@ -996,7 +996,7 @@ returnValue ForwardIRKExport::sensitivitiesOutputs( ExportStatementBlock* block,
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) evaluateDerivedPolynomial( *loop, rk_out, time_tmp );
 		}
 
-		Vector dependencyX, dependencyZ, dependencyDX;
+		DVector dependencyX, dependencyZ, dependencyDX;
 		if( exportRhs || crsFormat ) {
 			dependencyX = sumRow( outputDependencies[i].getCols( 0,NX-1 ) );
 			if( numXA_output(i) > 0 ) dependencyZ = sumRow( outputDependencies[i].getCols( NX,NX+NXA-1 ) );

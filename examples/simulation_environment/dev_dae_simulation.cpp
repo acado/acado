@@ -89,7 +89,7 @@ int main( ){
     // ----------------------------------------------------------
 	SimulationEnvironment sim( 0.0,15.0,process,controller );
 
-	Vector x0(2);
+	DVector x0(2);
 	x0(0) = 1;
 	x0(1) = 0;
 

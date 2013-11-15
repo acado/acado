@@ -74,13 +74,13 @@ class KalmanFilter : public Estimator
 
         /** Initialization. */
         virtual returnValue init(	double startTime = 0.0,
-									const Vector &x0_ = emptyConstVector,
-									const Vector &p_  = emptyConstVector
+									const DVector &x0_ = emptyConstVector,
+									const DVector &p_  = emptyConstVector
 									);
 
         /** Executes next single step. */
         virtual returnValue step(	double currentTime,
-									const Vector& _y
+									const DVector& _y
 									);
 
 

@@ -70,7 +70,7 @@ int main( )
 
 	// Define an initial value:
 	// ------------------------
-	Vector xStart( 3 );
+	DVector xStart( 3 );
 	xStart(0) = h_hw - 2.0*A_hw;
 	xStart(1) = 0.0;
 	xStart(2) = 0.0;

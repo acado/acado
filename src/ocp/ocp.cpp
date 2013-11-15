@@ -50,12 +50,12 @@ OCP::OCP( const double &tStart_, const double &tEnd_, const int &N_ )
 }
 
 
-OCP::OCP( const double &tStart_, const double &tEnd_, const Vector& _numSteps )
+OCP::OCP( const double &tStart_, const double &tEnd_, const DVector& _numSteps )
     :MultiObjectiveFunctionality(){
 
         if( _numSteps.getDim() <= 0 ) ACADOERROR( RET_INVALID_ARGUMENTS );
       
-	Vector times( _numSteps.getDim()+1 );
+	DVector times( _numSteps.getDim()+1 );
 	times(0) = tStart_;
 	
 	double totalSteps = 0;
@@ -146,7 +146,7 @@ returnValue OCP::minimizeLSQ( const MatrixVariablesGrid &S,
 }
 
 
-returnValue OCP::minimizeLSQ( const Matrix        &S,
+returnValue OCP::minimizeLSQ( const DMatrix        &S,
                               const Function      &h,
                               const char*  rFilename  ){
 
@@ -241,7 +241,7 @@ returnValue OCP::minimizeLagrangeTerm( const Expression& arg ){ return objective
 returnValue OCP::maximizeLagrangeTerm( const Expression& arg ){ return objective.addLagrangeTerm(-arg ); }
 
 
-returnValue OCP::minimizeLSQ( const Matrix&S, const Function &h, const Vector &r ){
+returnValue OCP::minimizeLSQ( const DMatrix&S, const Function &h, const DVector &r ){
 
 	if ( S.isPositiveSemiDefinite() == BT_FALSE )
 		return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
@@ -252,9 +252,9 @@ returnValue OCP::minimizeLSQ( const Matrix&S, const Function &h, const Vector &r
     return objective.addLSQ( &tmpS, h, &tmpR );
 }
 
-returnValue OCP::minimizeLSQ( const Function &h, const Vector &r ){
+returnValue OCP::minimizeLSQ( const Function &h, const DVector &r ){
 
-    Matrix S( h.getDim( ),h.getDim( ) );
+    DMatrix S( h.getDim( ),h.getDim( ) );
     S.setIdentity( );
 
     return minimizeLSQ( S, h, r );
@@ -262,10 +262,10 @@ returnValue OCP::minimizeLSQ( const Function &h, const Vector &r ){
 
 returnValue OCP::minimizeLSQ( const Function &h ){
 
-    Matrix S( h.getDim( ),h.getDim( ) );
+    DMatrix S( h.getDim( ),h.getDim( ) );
     S.setIdentity( );
 
-    Vector r(h.getDim());
+    DVector r(h.getDim());
     r.setZero();
 
     return minimizeLSQ( S, h, r );
@@ -279,7 +279,7 @@ returnValue OCP::minimizeLSQ( const MatrixVariablesGrid &S,
     return objective.addLSQ( &S, h, &r );
 }
 
-returnValue OCP::minimizeLSQ( const Matrix        &S,
+returnValue OCP::minimizeLSQ( const DMatrix        &S,
                               const Function      &h,
                               const VariablesGrid &r ){
 
@@ -297,9 +297,9 @@ returnValue OCP::minimizeLSQ( const Function      &h,
 }
 
 
-returnValue OCP::minimizeLSQEndTerm( const Matrix   & S,
+returnValue OCP::minimizeLSQEndTerm( const DMatrix   & S,
                                      const Function & m,
-                                     const Vector   & r  ){
+                                     const DVector   & r  ){
 
 	if ( S.isPositiveSemiDefinite() == BT_FALSE )
 		return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
@@ -308,9 +308,9 @@ returnValue OCP::minimizeLSQEndTerm( const Matrix   & S,
 }
 
 returnValue OCP::minimizeLSQEndTerm( const Function & m,
-                                     const Vector   & r  ){
+                                     const DVector   & r  ){
 
-    Matrix S( m.getDim( ),m.getDim( ) );
+    DMatrix S( m.getDim( ),m.getDim( ) );
     S.setIdentity( );
     return minimizeLSQEndTerm( S, m, r );
 }
@@ -358,37 +358,37 @@ double OCP::getEndTime   ( ) const{ return grid.getLastTime (); }
 
 BooleanType OCP::hasEquidistantGrid( ) const{
 	
-	Vector numSteps;
+	DVector numSteps;
 	modelData.getNumSteps(numSteps);
 	return numSteps.isEmpty();
 }
 
-returnValue OCP::minimizeLSQ(const Matrix& S, const Function& h)
+returnValue OCP::minimizeLSQ(const DMatrix& S, const Function& h)
 {
 	return objective.addLSQ(S, h);
 }
 
-returnValue OCP::minimizeLSQEndTerm(const Matrix& S, const Function& h)
+returnValue OCP::minimizeLSQEndTerm(const DMatrix& S, const Function& h)
 {
 	return objective.addLSQEndTerm(S, h);
 }
 
-returnValue OCP::minimizeLSQ(const Matrix& S, const std::string& h)
+returnValue OCP::minimizeLSQ(const DMatrix& S, const std::string& h)
 {
 	return objective.addLSQ(S, h);
 }
 
-returnValue OCP::minimizeLSQEndTerm(const Matrix& S, const std::string& h)
+returnValue OCP::minimizeLSQEndTerm(const DMatrix& S, const std::string& h)
 {
 	return objective.addLSQEndTerm(S, h);
 }
 
-returnValue OCP::minimizeLSQLinearTerms(const Vector& Slx, const Vector& Slu)
+returnValue OCP::minimizeLSQLinearTerms(const DVector& Slx, const DVector& Slu)
 {
 	return objective.addLSQLinearTerms(Slx, Slu);
 }
 
-returnValue OCP::minimizeLSQLinearTerms(const Matrix& Slx, const Matrix& Slu)
+returnValue OCP::minimizeLSQLinearTerms(const DMatrix& Slx, const DMatrix& Slu)
 {
 	return objective.addLSQLinearTerms(Slx, Slu);
 }
@@ -406,7 +406,7 @@ void OCP::setupGrid( double tStart, double tEnd, int N ){
 }
 
 
-void OCP::setupGrid( const Vector& times ){
+void OCP::setupGrid( const DVector& times ){
 
     grid.init( times );
     objective.init ( grid );

@@ -68,10 +68,10 @@ inline int DifferentialEquation::getStateEnumerationIndex( int index_ ){
 }
 
 
-inline Vector DifferentialEquation::getDifferentialStateComponents() const{
+inline DVector DifferentialEquation::getDifferentialStateComponents() const{
 
     int run1;
-    Vector tmp(getNumDynamicEquations());
+    DVector tmp(getNumDynamicEquations());
 
     if( counter != 0 ){
         ASSERT( counter == getNumDynamicEquations() );

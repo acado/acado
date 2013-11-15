@@ -82,7 +82,7 @@ returnValue MayerTerm::evaluate( const OCPiterate &x ){
 
     z.setZ( grid.getLastIndex(), x );
 
-    Vector objective = fcn.evaluate( z );
+    DVector objective = fcn.evaluate( z );
 
     obj = objective(0);
 
@@ -97,18 +97,18 @@ returnValue MayerTerm::evaluateSensitivities( BlockMatrix *hessian ){
 
     if( (bSeed != 0) & (hessian == 0) ){
 
-        Matrix bseed_;
+        DMatrix bseed_;
         bSeed->getSubBlock( 0, 0, bseed_);
 
         fcn.AD_backward( bseed_.getRow(0), JJ );
 
         dBackward.init( 1, 5*N );
 
-        if( nx > 0 ) dBackward.setDense( 0,   N-1, Matrix( JJ.getX (), BT_TRUE ) );
-        if( na > 0 ) dBackward.setDense( 0, 2*N-1, Matrix( JJ.getXA(), BT_TRUE ) );
-        if( np > 0 ) dBackward.setDense( 0, 3*N-1, Matrix( JJ.getP (), BT_TRUE ) );
-        if( nu > 0 ) dBackward.setDense( 0, 4*N-1, Matrix( JJ.getU (), BT_TRUE ) );
-        if( nw > 0 ) dBackward.setDense( 0, 5*N-1, Matrix( JJ.getW (), BT_TRUE ) );
+        if( nx > 0 ) dBackward.setDense( 0,   N-1, DMatrix( JJ.getX (), BT_TRUE ) );
+        if( na > 0 ) dBackward.setDense( 0, 2*N-1, DMatrix( JJ.getXA(), BT_TRUE ) );
+        if( np > 0 ) dBackward.setDense( 0, 3*N-1, DMatrix( JJ.getP (), BT_TRUE ) );
+        if( nu > 0 ) dBackward.setDense( 0, 4*N-1, DMatrix( JJ.getU (), BT_TRUE ) );
+        if( nw > 0 ) dBackward.setDense( 0, 5*N-1, DMatrix( JJ.getW (), BT_TRUE ) );
 
         return SUCCESSFUL_RETURN;
     }
@@ -126,17 +126,17 @@ returnValue MayerTerm::evaluateSensitivities( BlockMatrix *hessian ){
 
         dBackward.init( 1, 5*N );
 
-        Matrix Dx ( 1, nx );
-        Matrix Dxa( 1, na );
-        Matrix Dp ( 1, np );
-        Matrix Du ( 1, nu );
-        Matrix Dw ( 1, nw );
+        DMatrix Dx ( 1, nx );
+        DMatrix Dxa( 1, na );
+        DMatrix Dp ( 1, np );
+        DMatrix Du ( 1, nu );
+        DMatrix Dw ( 1, nw );
 
-        Matrix Hx ( nx, nx );
-        Matrix Hxa( nx, na );
-        Matrix Hp ( nx, np );
-        Matrix Hu ( nx, nu );
-        Matrix Hw ( nx, nw );
+        DMatrix Hx ( nx, nx );
+        DMatrix Hxa( nx, na );
+        DMatrix Hp ( nx, np );
+        DMatrix Hu ( nx, nu );
+        DMatrix Hw ( nx, nw );
 
         for( run2 = 0; run2 < nx; run2++ ){
 

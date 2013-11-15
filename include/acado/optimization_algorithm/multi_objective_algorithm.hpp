@@ -129,14 +129,14 @@ class MultiObjectiveAlgorithm : public OptimizationAlgorithm
          *                                                   \n
          *  \return the pay-off matrix.                      \n
          */
-        inline Matrix getPayOffMatrix( ) const;
+        inline DMatrix getPayOffMatrix( ) const;
 
 
         /** Returns the normalized pay-off matrix.           \n
          *                                                   \n
          *  \return the pay-off matrix.                      \n
          */
-        inline Matrix getNormalizedPayOffMatrix( ) const;
+        inline DMatrix getNormalizedPayOffMatrix( ) const;
 
 
 
@@ -144,7 +144,7 @@ class MultiObjectiveAlgorithm : public OptimizationAlgorithm
          *                                                   \n
          *  \return the utopia vector.                       \n
          */
-        inline Vector getUtopiaVector( ) const;
+        inline DVector getUtopiaVector( ) const;
 
 
 
@@ -152,7 +152,7 @@ class MultiObjectiveAlgorithm : public OptimizationAlgorithm
          *                                                   \n
          *  \return the nadir vector.                        \n
          */
-        inline Vector getNadirVector( ) const;
+        inline DVector getNadirVector( ) const;
 
 
 
@@ -161,7 +161,7 @@ class MultiObjectiveAlgorithm : public OptimizationAlgorithm
          *                                                       \n
          *  \return the normalization vector.                    \n
          */
-        inline Vector getNormalizationVector( ) const;
+        inline DVector getNormalizationVector( ) const;
 
 
 
@@ -169,7 +169,7 @@ class MultiObjectiveAlgorithm : public OptimizationAlgorithm
          *                                                       \n
          *  \return the utopia plane vector (stored column-wise).\n
          */
-        inline Matrix getUtopiaPlaneVectors( ) const;
+        inline DMatrix getUtopiaPlaneVectors( ) const;
 
 
 
@@ -184,7 +184,7 @@ class MultiObjectiveAlgorithm : public OptimizationAlgorithm
          *                                \n
          *  \return SUCCESSFUL_RETURN     \n
          */
-        inline Matrix getWeights() const;
+        inline DMatrix getWeights() const;
 
 
         /** Prints the weights into a file (with pre-ordering) \n
@@ -257,10 +257,10 @@ class MultiObjectiveAlgorithm : public OptimizationAlgorithm
 
         int            N           ;   // number of discretization intervals
         int            m           ;   // number of objectives
-        Matrix         vertices    ;   // result for the objective values at the
+        DMatrix         vertices    ;   // result for the objective values at the
                                        // vertices of the simplex.
 
-        Matrix         result      ;   // the result stored in a matrix
+        DMatrix         result      ;   // the result stored in a matrix
         int            count       ;   // counter for the results being stored
 
 

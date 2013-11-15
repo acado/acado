@@ -101,8 +101,8 @@ Estimator* DynamicEstimator::clone( ) const
 
 
 returnValue DynamicEstimator::init(	double startTime,
-									const Vector &x0_,
-									const Vector &p_
+									const DVector &x0_,
+									const DVector &p_
 									)
 {
 	setStatus( BS_READY );
@@ -112,7 +112,7 @@ returnValue DynamicEstimator::init(	double startTime,
 
 
 returnValue DynamicEstimator::step(	double currentTime,
-									const Vector& _y
+									const DVector& _y
 									)
 {
 	return SUCCESSFUL_RETURN;

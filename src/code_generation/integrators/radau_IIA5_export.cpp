@@ -73,9 +73,9 @@ RadauIIA5Export::~RadauIIA5Export( )
 IntegratorExport* createRadauIIA5Export(	UserInteraction* _userInteraction,
 											const std::string &_commonHeaderName)
 {
-	Matrix AA(3,3);
-	Vector bb(3);
-	Vector cc(3);
+	DMatrix AA(3,3);
+	DVector bb(3);
+	DVector cc(3);
 
 	AA(0,0) = -(double)(1/(double)360)*(double)sqrt((double)6)*(double)(-(double)4+(double)(double)sqrt((double)6))*(double)(67+(double)(double)37*(double)sqrt((double)6))/(double)(6+(double)(double)sqrt((double)6));
 	AA(0,1) = (1/(double)720)*(double)(-(double)4+(double)(double)sqrt((double)6))*(double)(-(double)4+(double)(double)sqrt((double)6))*(double)sqrt((double)6)*(double)(26+(double)(double)sqrt((double)6))/(double)(-(double)6+(double)(double)sqrt((double)6));

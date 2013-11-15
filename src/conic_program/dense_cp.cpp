@@ -103,9 +103,9 @@ void DenseCP::copy( const DenseCP& rhs ){
 
 
     if( rhs.B != 0 ){
-        B = (Matrix**)calloc(nS,sizeof(Matrix*));
+        B = (DMatrix**)calloc(nS,sizeof(DMatrix*));
         for( run1 = 0; run1 < nS; run1++ ){
-            B[run1] = new Matrix[ getNV() ];
+            B[run1] = new DMatrix[ getNV() ];
             for( run2 = 0; run2 < getNV(); run2++ )
                 B[run1][run2] = rhs.B[run1][run2];
         }
@@ -114,45 +114,45 @@ void DenseCP::copy( const DenseCP& rhs ){
 
 
     if( rhs.lbB != 0 ){
-        lbB = (Vector*)calloc(nS,sizeof(Vector));
+        lbB = (DVector*)calloc(nS,sizeof(DVector));
         for( run1 = 0; run1 < nS; run1++ )
             lbB[run1] = rhs.lbB[run1];
     }
     else lbB = 0;
 
     if( rhs.ubB != 0 ){
-        ubB = (Vector*)calloc(nS,sizeof(Vector));
+        ubB = (DVector*)calloc(nS,sizeof(DVector));
         for( run1 = 0; run1 < nS; run1++ )
             ubB[run1] = rhs.ubB[run1];
     }
     else ubB = 0;
 
 
-    if( rhs.x != 0 ) x = new Vector(*rhs.x);
+    if( rhs.x != 0 ) x = new DVector(*rhs.x);
     else             x = 0                 ;
 
-    if( rhs.ylb != 0 ) ylb = new Vector(*rhs.ylb);
+    if( rhs.ylb != 0 ) ylb = new DVector(*rhs.ylb);
     else               ylb = 0                   ;
 
-    if( rhs.yub != 0 ) yub = new Vector(*rhs.yub);
+    if( rhs.yub != 0 ) yub = new DVector(*rhs.yub);
     else               yub = 0                   ;
 
-    if( rhs.ylbA != 0 ) ylbA = new Vector(*rhs.ylbA);
+    if( rhs.ylbA != 0 ) ylbA = new DVector(*rhs.ylbA);
     else                ylbA = 0                    ;
 
-    if( rhs.yubA != 0 ) yubA = new Vector(*rhs.yubA);
+    if( rhs.yubA != 0 ) yubA = new DVector(*rhs.yubA);
     else                yubA = 0                    ;
 
     if( nS > 0 ){
 
-        ylbB = (Vector**)calloc(nS,sizeof(Vector*));
-        yubB = (Vector**)calloc(nS,sizeof(Vector*));
+        ylbB = (DVector**)calloc(nS,sizeof(DVector*));
+        yubB = (DVector**)calloc(nS,sizeof(DVector*));
 
         for( run1 = 0; run1 < nS; run1++ ){
-            if( rhs.ylbB[run1] != 0 ) ylbB[run1] = new Vector(*rhs.ylbB[run1]);
+            if( rhs.ylbB[run1] != 0 ) ylbB[run1] = new DVector(*rhs.ylbB[run1]);
             else                      ylbB[run1] = 0                          ;
 
-            if( rhs.yubB[run1] != 0 ) yubB[run1] = new Vector(*rhs.yubB[run1]);
+            if( rhs.yubB[run1] != 0 ) yubB[run1] = new DVector(*rhs.yubB[run1]);
             else                      yubB[run1] = 0                          ;
         }
     }
@@ -201,7 +201,7 @@ returnValue DenseCP::init( uint nV_, uint nC_ ){
 }
 
 
-returnValue DenseCP::setQPsolution( const Vector &x_, const Vector &y_ ){
+returnValue DenseCP::setQPsolution( const DVector &x_, const DVector &y_ ){
 
     uint run1;
     clean();
@@ -212,13 +212,13 @@ returnValue DenseCP::setQPsolution( const Vector &x_, const Vector &y_ ){
 
     // SET THE PRIMAL SOLUTION:
     // ------------------------
-    x = new Vector(x_);
+    x = new DVector(x_);
 
 
     // SET THE DUAL SOLUTION FOR THE BOUNDS:
     // -------------------------------------
-    ylb = new Vector( getNV() );
-    yub = new Vector( getNV() );
+    ylb = new DVector( getNV() );
+    yub = new DVector( getNV() );
 
     for( run1 = 0; run1 < getNV(); run1++ ){
         if( fabs(x_(run1)-lb(run1)) <= BOUNDTOL ){
@@ -234,9 +234,9 @@ returnValue DenseCP::setQPsolution( const Vector &x_, const Vector &y_ ){
 
     // SET THE DUAL SOLUTION FOR THE CONSTRAINTS:
     // ------------------------------------------
-    Vector tmp = A*x_;
-    ylbA = new Vector( getNC() );
-    yubA = new Vector( getNC() );
+    DVector tmp = A*x_;
+    ylbA = new DVector( getNC() );
+    yubA = new DVector( getNC() );
 
     for( run1 = 0; run1 < getNC(); run1++ ){
         if( fabs(tmp(run1)-lbA(run1)) <= BOUNDTOL ){
@@ -254,9 +254,9 @@ returnValue DenseCP::setQPsolution( const Vector &x_, const Vector &y_ ){
 }
 
 
-Vector DenseCP::getMergedDualSolution( ) const
+DVector DenseCP::getMergedDualSolution( ) const
 {
-	Vector dualSolution( getNV()+getNC() );
+	DVector dualSolution( getNV()+getNC() );
 
 	uint i;
 	for( i=0; i<getNV(); ++i )

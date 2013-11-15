@@ -169,8 +169,8 @@ class SimulationEnvironment : public SimulationBlock
 		 *	        RET_NO_PROCESS_SPECIFIED, \n
 		 *	        RET_BLOCK_DIMENSION_MISMATCH
 		 */
-        returnValue init(	const Vector &x0_,
-							const Vector &p_ = emptyConstVector
+        returnValue init(	const DVector &x0_,
+							const DVector &p_ = emptyConstVector
 							);
 
 

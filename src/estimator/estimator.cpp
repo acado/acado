@@ -87,8 +87,8 @@ Estimator& Estimator::operator=( const Estimator& rhs )
 
 
 returnValue Estimator::init(	double startTime,
-								const Vector &x0_,
-								const Vector &p_
+								const DVector &x0_,
+								const DVector &p_
 								)
 {
 	setStatus( BS_READY );

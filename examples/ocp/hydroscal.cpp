@@ -225,8 +225,8 @@ int main( ){
 						1.8760537088149468E+02    // (not in use?)
 		             };
 
-	Vector x0(NXD, xd);
-	Vector p0(NP,  pd);
+	DVector x0(NXD, xd);
+	DVector p0(NP,  pd);
 
 
 	// DEFINE AN OPTIMAL CONTROL PROBLEM:

@@ -90,7 +90,7 @@ inline returnValue SimulationEnvironment::getSampledProcessOutput(	VariablesGrid
 	process->updateLogRecord( tmp );
     tmp.getAll( LOG_PROCESS_OUTPUT,sampledProcessOutput );
 	
-	Matrix sampledProcessOutputMatrix( sampledProcessOutput.getMatrix(0) );
+	DMatrix sampledProcessOutputMatrix( sampledProcessOutput.getMatrix(0) );
 
 	for( uint i=1; i<sampledProcessOutput.getNumPoints()-1; ++i )
 		sampledProcessOutputMatrix.appendRows( sampledProcessOutput.getMatrix(i) );

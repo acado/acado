@@ -73,9 +73,9 @@ GaussLegendre8Export::~GaussLegendre8Export( )
 IntegratorExport* createGaussLegendre8Export(	UserInteraction* _userInteraction,
 												const std::string &_commonHeaderName)
 {
-	Matrix AA(4,4);
-	Vector bb(4);
-	Vector cc(4);
+	DMatrix AA(4,4);
+	DVector bb(4);
+	DVector cc(4);
 
 	AA(0,0) = (1/(double)144)*(double)sqrt((double)(double)30)+(double)1/(double)8;
 	AA(0,1) = -(double)(1/(double)840)*(double)sqrt((double)(double)525-(double)70*(double)sqrt((double)(double)30))*(double)sqrt((double)(double)30)+(double)(1/(double)144)*(double)sqrt((double)(double)30)-(double)(1/(double)105)*(double)sqrt((double)(double)525-(double)70*(double)sqrt((double)(double)30))+(double)1/(double)8;		

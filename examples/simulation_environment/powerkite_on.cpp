@@ -362,7 +362,7 @@ int main( )
    model_response << dCL ;
 
 
-   Vector x_scal(9);
+   DVector x_scal(9);
 
 	x_scal(0) =   60.0; 
 	x_scal(1) =   1.0e-1;
@@ -375,9 +375,9 @@ int main( )
 	x_scal(8) =   2.5;  
 
                  
-   Matrix Q(9,9);
+   DMatrix Q(9,9);
    Q.setIdentity();
-   Matrix Q_end(9,9);
+   DMatrix Q_end(9,9);
    Q_end.setIdentity();
    int i;
    for( i = 0; i < 6; i++ ){
@@ -389,7 +389,7 @@ int main( )
            Q_end(i,i) = (5.0e-1/x_scal(i))*(5.0e-1/x_scal(i));            
      }                                           
 
-     Vector measurements(9);
+     DVector measurements(9);
      measurements.setAll( 0.0 );
 
 
@@ -445,7 +445,7 @@ int main( )
 	algorithm.set( USE_REALTIME_SHIFTS, YES );
 
 
-    Vector x0(10);
+    DVector x0(10);
     x0(0) =  1.8264164528775887e+03;
     x0(1) = -5.1770453309520573e-03;
     x0(2) =  1.2706440287266794e+00;

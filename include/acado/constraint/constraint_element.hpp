@@ -219,7 +219,7 @@ class ConstraintElement{
         /** returns whether the constraint element is affine. */
         inline BooleanType isAffine() const;
 
-        returnValue get(Function& function_, Matrix& lb_, Matrix& ub_);
+        returnValue get(Function& function_, DMatrix& lb_, DMatrix& ub_);
 
 // ==========================================================================
 //

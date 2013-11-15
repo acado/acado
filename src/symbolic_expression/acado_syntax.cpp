@@ -144,36 +144,36 @@ Expression laplace           ( const Expression &arg1,
 }
 
 
-Matrix ones( int nRows, int nCols ){
+DMatrix ones( int nRows, int nCols ){
 
-    Matrix t(nRows,nCols);
+    DMatrix t(nRows,nCols);
     t.setAll(1);
     return t;
 }
 
 
-Matrix zeros( int nRows, int nCols ){
+DMatrix zeros( int nRows, int nCols ){
 
-    Matrix t(nRows,nCols);
+    DMatrix t(nRows,nCols);
     t.setAll(0);
     return t;
 }
 
 
-Matrix eye( int n ){
+DMatrix eye( int n ){
 
-    Matrix t(n,n);
+    DMatrix t(n,n);
     t.setIdentity();
     return t;
 }
 
 
 
-Matrix diag( const Vector& v )
+DMatrix diag( const DVector& v )
 {
 	int n = v.getDim();
 
-    Matrix t = zeros( n,n );
+    DMatrix t = zeros( n,n );
     for( int i=0; i<n; ++i )
 		t(i,i) = v(i);
 
@@ -181,13 +181,13 @@ Matrix diag( const Vector& v )
 }
 
 
-Vector diag( const Matrix& M )
+DVector diag( const DMatrix& M )
 {
 	ASSERT( M.isSquare() == BT_TRUE );
 
 	int n = M.getNumRows();
 
-    Vector t( n );
+    DVector t( n );
     for( int i=0; i<n; ++i )
 		t(i) = M(i,i);
 
@@ -199,8 +199,8 @@ Expression getRiccatiODE( const Expression        &rhs,
                           const DifferentialState &x  ,
                           const Control           &u  ,
                           const DifferentialState &P  ,
-                          const Matrix            &Q  ,
-                          const Matrix            &R  ){
+                          const DMatrix            &Q  ,
+                          const DMatrix            &R  ){
 
 	IntermediateState RHS("", x.getDim(), x.getDim());
 

@@ -124,12 +124,12 @@ public:
 
 
     inline returnValue setT ( const double &t  );
-    inline returnValue setX ( const Vector &x  );
-    inline returnValue setXA( const Vector &xa );
-    inline returnValue setP ( const Vector &p  );
-    inline returnValue setU ( const Vector &u  );
-    inline returnValue setW ( const Vector &w  );
-    inline returnValue setDX( const Vector &dx );
+    inline returnValue setX ( const DVector &x  );
+    inline returnValue setXA( const DVector &xa );
+    inline returnValue setP ( const DVector &p  );
+    inline returnValue setU ( const DVector &u  );
+    inline returnValue setW ( const DVector &w  );
+    inline returnValue setDX( const DVector &dx );
 
     inline returnValue setZ ( const uint       &idx ,
                               const OCPiterate &iter  );
@@ -138,12 +138,12 @@ public:
 
 
     inline double getT () const;
-    inline Vector getX () const;
-    inline Vector getXA() const;
-    inline Vector getP () const;
-    inline Vector getU () const;
-    inline Vector getW () const;
-    inline Vector getDX() const;
+    inline DVector getX () const;
+    inline DVector getXA() const;
+    inline DVector getP () const;
+    inline DVector getU () const;
+    inline DVector getW () const;
+    inline DVector getDX() const;
 
 
 	    /** Prints the data of this object.              \n
@@ -161,14 +161,14 @@ public:
 
 protected:
 
-    inline returnValue copy( const int *order, const Vector &rhs );
+    inline returnValue copy( const int *order, const DVector &rhs );
 
     void copy( const EvaluationPoint &rhs );
     void deleteAll();
 
     void copyIdx( const uint &dim, const int *idx1, int **idx2 );
 
-    inline Vector backCopy( const int *order, const uint &dim ) const;
+    inline DVector backCopy( const int *order, const uint &dim ) const;
 
     inline double* getEvaluationPointer() const;
 

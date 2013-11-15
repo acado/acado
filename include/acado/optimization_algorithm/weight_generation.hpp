@@ -81,10 +81,10 @@ class WeightGeneration{
          */
         returnValue getWeights( const int    &m        ,
                                 const int    &pnts     ,
-                                const Vector &weightsLB,
-                                const Vector &weightsUB,
-                                Matrix       &Weights  ,
-                                Vector       &formers    ) const;
+                                const DVector &weightsLB,
+                                const DVector &weightsUB,
+                                DMatrix       &Weights  ,
+                                DVector       &formers    ) const;
 
 
 
@@ -106,11 +106,11 @@ class WeightGeneration{
           *
           */
         returnValue generateWeights( const  int    &n         ,
-                                     Vector        &weight    ,
-                                     Matrix        &Weights   ,
-                                     const  Vector &weightsLB ,
-                                     const  Vector &weightsUB ,
-                                     Vector        &formers   ,
+                                     DVector        &weight    ,
+                                     DMatrix        &Weights   ,
+                                     const  DVector &weightsLB ,
+                                     const  DVector &weightsUB ,
+                                     DVector        &formers   ,
                                      const int     &layer     ,
                                      int           &lastOne   ,
                                      int           &currentOne,

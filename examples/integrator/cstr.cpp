@@ -110,7 +110,7 @@ int main( ){
 
     IntermediateState rhs = cstrModel( x, u );
 
-    Matrix Q = zeros(4,4);
+    DMatrix Q = zeros(4,4);
 
     Q(0,0) = 0.2;
     Q(1,1) = 1.0;
@@ -118,7 +118,7 @@ int main( ){
     Q(3,3) = 0.2;
 
 
-    Matrix R = zeros(2,2);
+    DMatrix R = zeros(2,2);
 
     R(0,0) = 0.5;
     R(1,1) = 5e-7;
@@ -159,8 +159,8 @@ int main( ){
     VariablesGrid differentialStates;
     integrator.getX( differentialStates );
 
-	Vector PP = differentialStates.getLastVector();
-	Matrix PPP(4,4);
+	DVector PP = differentialStates.getLastVector();
+	DMatrix PPP(4,4);
 	for( int i=0; i<4; ++i )
 		for( int j=0; j<4; ++j )
 			PPP(i,j) = PP(4+i*4+j);

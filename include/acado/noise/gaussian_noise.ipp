@@ -38,7 +38,7 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-inline returnValue GaussianNoise::setMeans( const Vector& _mean )
+inline returnValue GaussianNoise::setMeans( const DVector& _mean )
 {
 	if ( mean.getDim( ) != _mean.getDim( ) )
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
@@ -70,7 +70,7 @@ inline returnValue GaussianNoise::setMean(	uint idx,
 
 
 
-inline returnValue GaussianNoise::setVariances( const Vector& _variance )
+inline returnValue GaussianNoise::setVariances( const DVector& _variance )
 {
 	if ( variance.getDim( ) != _variance.getDim( ) )
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
@@ -104,13 +104,13 @@ inline returnValue GaussianNoise::setVariance(	uint idx,
 
 
 
-inline const Vector& GaussianNoise::getMean( ) const
+inline const DVector& GaussianNoise::getMean( ) const
 {
 	return mean;
 }
 
 
-inline const Vector& GaussianNoise::getVariance( ) const
+inline const DVector& GaussianNoise::getVariance( ) const
 {
 	return variance;
 }

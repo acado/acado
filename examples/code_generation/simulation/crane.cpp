@@ -109,7 +109,7 @@ int main() {
 	
 	acadoPrintf( "-----------------------------------------\n  Using a provided grid:\n-----------------------------------------\n" );
 	
-	Vector Meas(5);
+	DVector Meas(5);
 	Meas(0) = 0.0;
 	Meas(1) = 0.2;
 	Meas(2) = 0.4;

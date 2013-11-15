@@ -147,7 +147,7 @@ class AlgebraicConsistencyConstraint : public ConstraintElement{
 		
         /** only for internal use (routine which computes a part of the block
          *  matrix needed for forward differentiation.) */
-        inline returnValue computeForwardSensitivityBlock( int offset1, int offset2, int offset3, int stageIdx, Matrix *seed );
+        inline returnValue computeForwardSensitivityBlock( int offset1, int offset2, int offset3, int stageIdx, DMatrix *seed );
 
 
 

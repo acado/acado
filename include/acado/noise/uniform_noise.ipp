@@ -37,13 +37,13 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-inline const Vector& UniformNoise::getLowerLimit( ) const
+inline const DVector& UniformNoise::getLowerLimit( ) const
 {
 	return lowerLimit;
 }
 
 
-inline const Vector& UniformNoise::getUpperLimit( ) const
+inline const DVector& UniformNoise::getUpperLimit( ) const
 {
 	return upperLimit;
 }

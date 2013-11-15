@@ -534,8 +534,8 @@ returnValue SIMexport::exportEvaluation(	const std::string& _dirName,
 	get( DYNAMIC_SENSITIVITY, sensGen );
 	bool DERIVATIVES = ((ExportSensitivityType) sensGen != NO_SENSITIVITY);
 	
-	Vector nMeasV = modelData.getNumMeas();
-	Vector nOutV = modelData.getDimOutputs();
+	DVector nMeasV = modelData.getNumMeas();
+	DVector nOutV = modelData.getDimOutputs();
 
 	std::vector<Grid> outputGrids;
 	modelData.getOutputGrids(outputGrids);
@@ -816,8 +816,8 @@ returnValue SIMexport::exportAcadoHeader(	const std::string& _dirName,
 			return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	Vector nMeasV = getNumMeas();
-	Vector nOutV = getDimOutputs();
+	DVector nMeasV = getNumMeas();
+	DVector nOutV = getDimOutputs();
 	if( nMeasV.getDim() != nOutV.getDim() ) return ACADOERROR( RET_INVALID_OPTION );
 
 	//

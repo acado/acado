@@ -156,7 +156,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 									  	  const std::vector<std::string> _outputNames,
 									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
-										  const std::vector<Matrix> _outputDependencies );
+										  const std::vector<DMatrix> _outputDependencies );
         
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -231,7 +231,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 * 
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		Vector computeCombinations( const Vector& cVec, uint index, uint numEls );
+		DVector computeCombinations( const DVector& cVec, uint index, uint numEls );
 		
 		
 		/** Returns the coefficients of the polynomial, representing the continuous output of the integrator.
@@ -240,7 +240,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return Coefficients of the polynomial, corresponding the given grid point
 		 */
-		Vector evaluatePolynomial( double time );
+		DVector evaluatePolynomial( double time );
 		
 		
 		/** Returns the coefficients of the derived polynomial, representing the derivative of the continuous output with respect to time.
@@ -249,7 +249,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return Coefficients of the polynomial, corresponding the given grid point
 		 */
-		Vector evaluateDerivedPolynomial( double time );
+		DVector evaluateDerivedPolynomial( double time );
 
 
 		/** Exports the evaluation of the coefficients of the polynomial, representing the continuous output of the integrator.
@@ -286,7 +286,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return Coefficients of the polynomial, corresponding the given continuous output
 		 */
-		Matrix evaluatePolynomial( uint index );
+		DMatrix evaluatePolynomial( uint index );
 
 
 		/** Returns the coefficients of the derived polynomial for the complete grid of the output, corresponding a certain index.
@@ -295,7 +295,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return Coefficients of the derived polynomial, corresponding the given continuous output
 		 */
-		Matrix evaluateDerivedPolynomial( uint index );
+		DMatrix evaluateDerivedPolynomial( uint index );
 
 
 		/** Divide the total number of measurements over the different integration steps.
@@ -304,7 +304,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return The division of measurements over the integration steps, corresponding the given continuous output.
 		 */
-		Vector divideMeasurements( uint index );
+		DVector divideMeasurements( uint index );
 
 
 		/** Precompute as much as possible for the linear input system and export the resulting definitions.
@@ -332,7 +332,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
+		virtual DMatrix formMatrix( const DMatrix& mass, const DMatrix& jacobian );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the linear input system.
@@ -530,12 +530,12 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 		ExportLinearSolver* solver;				/**< This is the exported linear solver that is used by the implicit Runge-Kutta method. */
 
-		Matrix DD;								/**< This matrix is used for the initialization of the variables for the next integration step. */
-		Matrix coeffs;							/**< This matrix contains coefficients of polynomials that are used to evaluate the continuous output (see evaluatePolynomial). */
+		DMatrix DD;								/**< This matrix is used for the initialization of the variables for the next integration step. */
+		DMatrix coeffs;							/**< This matrix contains coefficients of polynomials that are used to evaluate the continuous output (see evaluatePolynomial). */
 
-		Vector numDX_output;
-		Vector numXA_output;
-		Vector numVARS_output;
+		DVector numDX_output;
+		DVector numXA_output;
+		DVector numVARS_output;
 
         
         // DEFINITION OF THE EXPORTVARIABLES

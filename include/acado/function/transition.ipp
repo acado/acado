@@ -39,10 +39,10 @@
 BEGIN_NAMESPACE_ACADO
 
 
-inline Vector Transition::getDifferentialStateComponents() const{
+inline DVector Transition::getDifferentialStateComponents() const{
 
     int run1;
-    Vector tmp(counter);
+    DVector tmp(counter);
 
     for( run1 = 0; run1 < counter; run1++ )
         tmp(run1) = component[run1];

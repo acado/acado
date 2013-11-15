@@ -32,7 +32,7 @@
  *
  *    This tutorial example explains how to compute
  *    Cholesky factorization with the ACADO
- *    Matrix class.
+ *    DMatrix class.
  */
 
 #include <acado/matrix_vector/matrix_vector.hpp>

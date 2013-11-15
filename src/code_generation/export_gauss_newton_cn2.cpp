@@ -496,8 +496,8 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 	unsigned numBounds = initialStateFixed( ) == true ? N * NU : NX + N * NU;
 	unsigned offsetBounds = initialStateFixed( ) == true ? 0 : NX;
 
-	Vector lbValuesMatrix( numBounds );
-	Vector ubValuesMatrix( numBounds );
+	DVector lbValuesMatrix( numBounds );
+	DVector ubValuesMatrix( numBounds );
 
 	if (initialStateFixed( ) == false)
 		for(unsigned run1 = 0; run1 < NX; ++run1)
@@ -566,7 +566,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 	{
 		condenseFdb.addVariable( tmp );
 
-		Vector xLowerBounds( getNumStateBounds( )), xUpperBounds( getNumStateBounds( ) );
+		DVector xLowerBounds( getNumStateBounds( )), xUpperBounds( getNumStateBounds( ) );
 		for(unsigned i = 0; i < xBoundsIdx.size(); ++i)
 		{
 			xLowerBounds( i ) = xBounds.getLowerBound( xBoundsIdx[ i ] / NX, xBoundsIdx[ i ] % NX );
@@ -599,7 +599,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		{
 			unsigned nXBounds = getNumStateBounds( );
 
-			Matrix vXBoundIndices(1, nXBounds);
+			DMatrix vXBoundIndices(1, nXBounds);
 			for (unsigned i = 0; i < nXBounds; ++i)
 				vXBoundIndices(0, i) = xBoundsIdx[ i ];
 			ExportVariable evXBounds("xBoundIndices", vXBoundIndices, STATIC_CONST_INT, ACADO_LOCAL, false);
@@ -657,8 +657,8 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	//
 	// Define LM regularization terms
 	//
-	Matrix mRegH00 = eye( getNX() );
-	Matrix mRegH11 = eye( getNU() );
+	DMatrix mRegH00 = eye( getNX() );
+	DMatrix mRegH11 = eye( getNU() );
 
 	mRegH00 *= levenbergMarquardt;
 	mRegH11 *= levenbergMarquardt;

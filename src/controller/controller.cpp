@@ -268,8 +268,8 @@ returnValue Controller::initializeAlgebraicStates( 	const char* fileName
 
 
 returnValue Controller::init(	double startTime,
-								const Vector& _x0,
-								const Vector& _p,
+								const DVector& _x0,
+								const DVector& _p,
 								const VariablesGrid& _yRef
 								)
 {
@@ -278,9 +278,9 @@ returnValue Controller::init(	double startTime,
 
 	/* 1) Initialize all sub-blocks. */
 	/* a) Estimator */
-	Vector xEst( _x0 );
-	Vector pEst( _p );
-	Vector xaEst, uEst, wEst;
+	DVector xEst( _x0 );
+	DVector pEst( _p );
+	DVector xaEst, uEst, wEst;
 
 	if ( estimator != 0 )
 	{
@@ -336,7 +336,7 @@ returnValue Controller::init(	double startTime,
 
 
 returnValue Controller::step(	double currentTime,
-								const Vector& _y,
+								const DVector& _y,
 								const VariablesGrid& _yRef
 								)
 {
@@ -375,20 +375,20 @@ returnValue Controller::step(	double currentTime,
 								)
 {
 	/* Convert double array to vector and call standard step routine. */
-	Vector tmp( dim,_y );
+	DVector tmp( dim,_y );
 	return step( currentTime,tmp,_yRef );
 }
 
 
 returnValue Controller::obtainEstimates(	double currentTime,
-											const Vector& _y,
-											Vector& xEst,
-											Vector& pEst
+											const DVector& _y,
+											DVector& xEst,
+											DVector& pEst
 											)
 {
 	/* 1) Call Estimator */
 	RealClock clock;
-	Vector xaEst, uEst, wEst;
+	DVector xaEst, uEst, wEst;
 
 	clock.reset();
 	clock.start();
@@ -422,7 +422,7 @@ returnValue Controller::obtainEstimates(	double currentTime,
 
 
 returnValue Controller::feedbackStep(	double currentTime,
-										const Vector& _y,
+										const DVector& _y,
 										const VariablesGrid& _yRef
 										)
 {
@@ -438,7 +438,7 @@ returnValue Controller::feedbackStep(	double currentTime,
 	// start real runtime measurement
 	realClock.start( );
 	
-	Vector xEst, pEst;
+	DVector xEst, pEst;
 
 	/* 1) Call Estimator */
 	if ( obtainEstimates( currentTime,_y,xEst,pEst ) != SUCCESSFUL_RETURN )
@@ -462,7 +462,7 @@ returnValue Controller::feedbackStep(	double currentTime,
 	realClock.stop( );
 
 	#ifdef SIM_DEBUG
-	Vector uTmp;
+	DVector uTmp;
 	getU( uTmp );
 	uTmp.print("u(0) after feedbackStep");
 	#endif
@@ -505,7 +505,7 @@ returnValue Controller::preparationStep(	double nextTime,
 
 
 	#ifdef SIM_DEBUG
-	Vector uTmp;
+	DVector uTmp;
 	getU( uTmp );
 	uTmp.print("u(0) after preparationStep");
 	#endif
@@ -589,7 +589,7 @@ returnValue Controller::getCurrentReference(	double tStart,
 	
 	if ( (BooleanType)useReferencePrediction == BT_FALSE )
 	{
-		Vector firstVector = _yRef.getFirstVector( );
+		DVector firstVector = _yRef.getFirstVector( );
 		Grid predictionGrid( tStart,tEnd );
 		_yRef.init( firstVector,predictionGrid );
 	}

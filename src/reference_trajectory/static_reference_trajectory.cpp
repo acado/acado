@@ -123,11 +123,11 @@ ReferenceTrajectory* StaticReferenceTrajectory::clone( ) const
 
 
 returnValue StaticReferenceTrajectory::init(	double startTime,
-												const Vector& _x,
-												const Vector& _xa,
-												const Vector& _u,
-												const Vector& _p,
-												const Vector& _w
+												const DVector& _x,
+												const DVector& _xa,
+												const DVector& _u,
+												const DVector& _p,
+												const DVector& _w
 												)
 {
 	return SUCCESSFUL_RETURN;
@@ -135,19 +135,19 @@ returnValue StaticReferenceTrajectory::init(	double startTime,
 
 
 returnValue StaticReferenceTrajectory::step(	double _currentTime,
-												const Vector& _y,
-												const Vector& _x,
-												const Vector& _xa,
-												const Vector& _u,
-												const Vector& _p,
-												const Vector& _w
+												const DVector& _y,
+												const DVector& _x,
+												const DVector& _xa,
+												const DVector& _u,
+												const DVector& _p,
+												const DVector& _w
 												)
 {
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue StaticReferenceTrajectory::step(	const Vector& _x,
+returnValue StaticReferenceTrajectory::step(	const DVector& _x,
 												const VariablesGrid& _u,
 												const VariablesGrid& _p,
 												const VariablesGrid& _w

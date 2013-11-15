@@ -104,18 +104,18 @@ class SCPmethod : public NLPsolver
 
 
         /** Solves current, possibly parametric, optimization problem. */
-        virtual returnValue solve(	const Vector &x0_ = emptyConstVector,
-									const Vector &p_ = emptyConstVector
+        virtual returnValue solve(	const DVector &x0_ = emptyConstVector,
+									const DVector &p_ = emptyConstVector
 									);
 
         /** Executes a complete real-time step. */
-        virtual returnValue step(	const Vector &x0_ = emptyConstVector,
-									const Vector &p_ = emptyConstVector
+        virtual returnValue step(	const DVector &x0_ = emptyConstVector,
+									const DVector &p_ = emptyConstVector
 									);
 
         /** Executes a real-time feedback step */
-        virtual returnValue feedbackStep(	const Vector &x0_,
-											const Vector &p_ = emptyConstVector
+        virtual returnValue feedbackStep(	const DVector &x0_,
+											const DVector &p_ = emptyConstVector
 											);
 
 		virtual returnValue performCurrentStep( );
@@ -144,11 +144,11 @@ class SCPmethod : public NLPsolver
 		 *	\return RET_NOT_YET_IMPLEMENTED
 		 */
 		virtual returnValue shiftVariables(	double timeShift = -1.0,
-									Vector  lastX    =  emptyVector,
-									Vector lastXA    =  emptyVector,
-									Vector lastP     =  emptyVector,
-									Vector lastU     =  emptyVector,
-									Vector lastW     =  emptyVector  );
+									DVector  lastX    =  emptyVector,
+									DVector lastXA    =  emptyVector,
+									DVector lastP     =  emptyVector,
+									DVector lastU     =  emptyVector,
+									DVector lastW     =  emptyVector  );
 
 		
         /** Returns a variance-covariance estimate if possible or an error message otherwise.
@@ -156,7 +156,7 @@ class SCPmethod : public NLPsolver
          *  \return SUCCESSFUL_RETURN
          *          RET_MEMBER_NOT_INITIALISED
          */
-        virtual returnValue getVarianceCovariance( Matrix &var );
+        virtual returnValue getVarianceCovariance( DMatrix &var );
 
 
         /** Prints the run-time profile. This routine \n
@@ -195,12 +195,12 @@ class SCPmethod : public NLPsolver
         returnValue initializeHessianProjection( );
 
 
-		returnValue checkForRealTimeMode(	const Vector &x0_,
-											const Vector &p_
+		returnValue checkForRealTimeMode(	const DVector &x0_,
+											const DVector &p_
 											);
 
-		returnValue setupRealTimeParameters(	const Vector &x0_ = emptyConstVector,
-												const Vector &p_ = emptyConstVector
+		returnValue setupRealTimeParameters(	const DVector &x0_ = emptyConstVector,
+												const DVector &p_ = emptyConstVector
 												);
 
 
@@ -210,9 +210,9 @@ class SCPmethod : public NLPsolver
         virtual returnValue getDifferentialStates( VariablesGrid &xd_ ) const;
         virtual returnValue getAlgebraicStates   ( VariablesGrid &xa_ ) const;
         virtual returnValue getParameters        ( VariablesGrid &p_  ) const;
-		virtual returnValue getParameters        ( Vector        &p_  ) const;
+		virtual returnValue getParameters        ( DVector        &p_  ) const;
         virtual returnValue getControls          ( VariablesGrid &u_  ) const;
-		virtual returnValue getFirstControl      ( Vector        &u0_ ) const;
+		virtual returnValue getFirstControl      ( DVector        &u0_ ) const;
         virtual returnValue getDisturbances      ( VariablesGrid &w_  ) const;
         virtual double getObjectiveValue         (                    ) const;
 

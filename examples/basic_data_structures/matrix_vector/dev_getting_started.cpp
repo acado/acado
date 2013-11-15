@@ -43,7 +43,7 @@ int main( ){
 
     // DEFINE SOME VECTORS:
     // --------------------
-    Vector a(3), b(3), c;
+    DVector a(3), b(3), c;
 
     a(0) = 1.0; a(1) = 3.0; a(2) = 2.0;
     b(0) = 4.0; b(1) = 2.0; b(2) = 3.0;
@@ -62,7 +62,7 @@ int main( ){
 
     // DEFINE SOME MATRICES:
     // ---------------------
-    Matrix A(2,2), B(2,2);
+    DMatrix A(2,2), B(2,2);
 
     A(0,0) = 1.0;  A(0,1) = 1.0;
     A(1,0) = 0.0;  A(1,1) = 2.0;

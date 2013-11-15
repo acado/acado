@@ -149,7 +149,7 @@ returnValue DynamicDiscretization::getResiduum( BlockMatrix &residuum_ ) const{
     residuum_.init( N, 1 );
 
     for( run1 = 0; run1 < N; run1++ ){
-        Matrix tmp( residuum.getNumValues(), 1 );
+        DMatrix tmp( residuum.getNumValues(), 1 );
         for( run2 = 0; run2 < residuum.getNumValues(); run2++ )
                 tmp( run2, 0 ) = residuum(run1,run2);
         residuum_.setDense(run1,0,tmp);

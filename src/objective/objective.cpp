@@ -171,7 +171,7 @@ returnValue Objective::addLSQ( const MatrixVariablesGrid *S_,
     lsqTerm[nLSQ-1] = new LSQTerm(S_, h, r_);
     lsqTerm[nLSQ-1]->setGrid(grid);
 
-    Matrix temp = S_->getMatrix( 0 );
+    DMatrix temp = S_->getMatrix( 0 );
     cgLSQWeightingMatrices.push_back( temp );
     cgLSQFunctions.push_back( h );
 
@@ -180,9 +180,9 @@ returnValue Objective::addLSQ( const MatrixVariablesGrid *S_,
 
 
 
-returnValue Objective::addLSQEndTerm( const Matrix   & S,
+returnValue Objective::addLSQEndTerm( const DMatrix   & S,
                                              const Function & m,
-                                             const Vector   & r  )
+                                             const DVector   & r  )
 {
 
     nEndLSQ++;
@@ -599,7 +599,7 @@ BooleanType Objective::isEmpty() const{
     return BT_FALSE;
 }
 
-returnValue Objective::getLSQTerms( std::vector<Matrix>& _matrices, std::vector<Function>& _functions ) const
+returnValue Objective::getLSQTerms( std::vector<DMatrix>& _matrices, std::vector<Function>& _functions ) const
 {
 	_matrices = cgLSQWeightingMatrices;
 	_functions = cgLSQFunctions;
@@ -607,7 +607,7 @@ returnValue Objective::getLSQTerms( std::vector<Matrix>& _matrices, std::vector<
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue Objective::getLSQEndTerms( std::vector<Matrix>& _matrices, std::vector<Function>& _functions ) const
+returnValue Objective::getLSQEndTerms( std::vector<DMatrix>& _matrices, std::vector<Function>& _functions ) const
 {
 //	_matrices.clear();
 //	_functions.clear();
@@ -621,7 +621,7 @@ returnValue Objective::getLSQEndTerms( std::vector<Matrix>& _matrices, std::vect
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue Objective::getLSQTerms( std::vector<Matrix>& _matrices, std::vector<std::string>& _functions ) const
+returnValue Objective::getLSQTerms( std::vector<DMatrix>& _matrices, std::vector<std::string>& _functions ) const
 {
 	_matrices = cgExternLSQWeightingMatrices;
 	_functions = cgExternLSQFunctions;
@@ -629,7 +629,7 @@ returnValue Objective::getLSQTerms( std::vector<Matrix>& _matrices, std::vector<
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue Objective::getLSQEndTerms( std::vector<Matrix>& _matrices, std::vector<std::string>& _functions ) const
+returnValue Objective::getLSQEndTerms( std::vector<DMatrix>& _matrices, std::vector<std::string>& _functions ) const
 {
 	_matrices = cgExternLSQEndTermWeightingMatrices;
 	_functions = cgExternLSQEndTermFunctions;
@@ -637,7 +637,7 @@ returnValue Objective::getLSQEndTerms( std::vector<Matrix>& _matrices, std::vect
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue Objective::getLSQLinearTerms(std::vector<Matrix>& _vSlx, std::vector<Matrix>& _vSlu) const
+returnValue Objective::getLSQLinearTerms(std::vector<DMatrix>& _vSlx, std::vector<DMatrix>& _vSlu) const
 {
 	_vSlx = cgLSQWeightingVectorsSlx;
 	_vSlu = cgLSQWeightingVectorsSlu;
@@ -649,7 +649,7 @@ returnValue Objective::getLSQLinearTerms(std::vector<Matrix>& _vSlx, std::vector
 // Code generation related functions
 //
 
-returnValue Objective::addLSQ(const Matrix& S, const Function& h)
+returnValue Objective::addLSQ(const DMatrix& S, const Function& h)
 {
 	cgLSQWeightingMatrices.push_back( S );
 	cgLSQFunctions.push_back( h );
@@ -657,7 +657,7 @@ returnValue Objective::addLSQ(const Matrix& S, const Function& h)
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue Objective::addLSQEndTerm(const Matrix& S, const Function& h)
+returnValue Objective::addLSQEndTerm(const DMatrix& S, const Function& h)
 {
 	cgLSQEndTermWeightingMatrices.push_back( S );
 	cgLSQEndTermFunctions.push_back( h );
@@ -665,7 +665,7 @@ returnValue Objective::addLSQEndTerm(const Matrix& S, const Function& h)
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue Objective::addLSQ(const Matrix& S, const std::string& h)
+returnValue Objective::addLSQ(const DMatrix& S, const std::string& h)
 {
 	cgExternLSQWeightingMatrices.push_back( S );
 	cgExternLSQFunctions.push_back( h );
@@ -673,7 +673,7 @@ returnValue Objective::addLSQ(const Matrix& S, const std::string& h)
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue Objective::addLSQEndTerm(const Matrix& S, const std::string& h)
+returnValue Objective::addLSQEndTerm(const DMatrix& S, const std::string& h)
 {
 	cgExternLSQEndTermWeightingMatrices.push_back( S );
 	cgExternLSQEndTermFunctions.push_back( h );
@@ -681,10 +681,10 @@ returnValue Objective::addLSQEndTerm(const Matrix& S, const std::string& h)
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue Objective::addLSQLinearTerms(const Vector& Slx, const Vector& Slu)
+returnValue Objective::addLSQLinearTerms(const DVector& Slx, const DVector& Slu)
 {
-	Matrix evSlx( Slx );
-	Matrix evSlu( Slu );
+	DMatrix evSlx( Slx );
+	DMatrix evSlu( Slu );
 
 	cgLSQWeightingVectorsSlx.push_back( evSlx );
 	cgLSQWeightingVectorsSlu.push_back( evSlu );
@@ -692,7 +692,7 @@ returnValue Objective::addLSQLinearTerms(const Vector& Slx, const Vector& Slu)
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue Objective::addLSQLinearTerms(const Matrix& Slx, const Matrix& Slu)
+returnValue Objective::addLSQLinearTerms(const DMatrix& Slx, const DMatrix& Slu)
 {
 	cgLSQWeightingVectorsSlx.push_back( Slx );
 	cgLSQWeightingVectorsSlu.push_back( Slu );

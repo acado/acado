@@ -226,11 +226,11 @@ protected:
     /** Starts integration: cf. integrate(...) for  \n
       * more details.                               \n
       */
-    virtual returnValue evaluate( const Vector &x0    /**< the initial state           */,
-                                  const Vector &xa    /**< the initial algebraic state */,
-                                  const Vector &p     /**< the parameters              */,
-                                  const Vector &u     /**< the controls                */,
-                                  const Vector &w     /**< the disturbance             */,
+    virtual returnValue evaluate( const DVector &x0    /**< the initial state           */,
+                                  const DVector &xa    /**< the initial algebraic state */,
+                                  const DVector &p     /**< the parameters              */,
+                                  const DVector &u     /**< the controls                */,
+                                  const DVector &w     /**< the disturbance             */,
                                   const Grid   &t_    /**< the time interval           */  );
 
     // ================================================================================
@@ -251,13 +251,13 @@ protected:
      *  \return SUCCESFUL RETURN         \n
      *          RET_INPUT_OUT_OF_RANGE   \n
      */
-    virtual returnValue setProtectedForwardSeed( const Vector &xSeed     /**< the seed w.r.t the
+    virtual returnValue setProtectedForwardSeed( const DVector &xSeed     /**< the seed w.r.t the
                                                                           *  initial states     */,
-                                                 const Vector &pSeed     /**< the seed w.r.t the
+                                                 const DVector &pSeed     /**< the seed w.r.t the
                                                                           *  parameters         */,
-                                                 const Vector &uSeed     /**< the seed w.r.t the
+                                                 const DVector &uSeed     /**< the seed w.r.t the
                                                                           *  controls           */,
-                                                 const Vector &wSeed     /**< the seed w.r.t the
+                                                 const DVector &wSeed     /**< the seed w.r.t the
                                                                           *  disturbances       */,
                                                  const int    &order     /**< the order of the
                                                                           *  seed.              */ );
@@ -270,7 +270,7 @@ protected:
      *   \return SUCCESFUL_RETURN         \n
      *           RET_INPUT_OUT_OF_RANGE   \n
      */
-    virtual returnValue setProtectedBackwardSeed(  const Vector &seed   /**< the seed  matrix  */,
+    virtual returnValue setProtectedBackwardSeed(  const DVector &seed   /**< the seed  matrix  */,
                                                    const int    &order  /**< the order of the
                                                                          *  seed.              */  );
 
@@ -282,7 +282,7 @@ protected:
     /** Returns the result for the state at the time tend.                           \n
      *  \return SUCCESSFUL_RETURN                                                    \n
      */
-    virtual returnValue getProtectedX(           Vector *xEnd /**< the result for the
+    virtual returnValue getProtectedX(           DVector *xEnd /**< the result for the
                                                                *  states at the time
                                                                *  tend.              */ ) const;
 
@@ -291,7 +291,7 @@ protected:
      *  \return SUCCESSFUL_RETURN                                                    \n
      *          RET_INPUT_OUT_OF_RANGE                                               \n
      */
-    virtual returnValue getProtectedForwardSensitivities( Matrix *Dx  /**< the result for the
+    virtual returnValue getProtectedForwardSensitivities( DMatrix *Dx  /**< the result for the
                                                                        *   forward sensitivi-
                                                                        *   ties               */,
                                                           int order   /**< the order          */ ) const;
@@ -309,10 +309,10 @@ protected:
      *  \return SUCCESSFUL_RETURN                                           \n
      *          RET_INPUT_OUT_OF_RANGE                                      \n
      */
-    virtual returnValue getProtectedBackwardSensitivities( Vector &Dx_x0,
-                                                           Vector &Dx_p ,
-                                                           Vector &Dx_u ,
-                                                           Vector &Dx_w ,
+    virtual returnValue getProtectedBackwardSensitivities( DVector &Dx_x0,
+                                                           DVector &Dx_p ,
+                                                           DVector &Dx_u ,
+                                                           DVector &Dx_w ,
                                                            int order      ) const;
 
 
@@ -368,7 +368,7 @@ protected:
 
     /** prints final results of the BDF steps.                             \n
      */
-    void printBDFfinalResults2(Matrix &div);
+    void printBDFfinalResults2(DMatrix &div);
 
 
     /** prints intermediate results of the Runge Kutta starter             \n
@@ -380,37 +380,37 @@ protected:
      *  \return SUCCESSFUL_RETURN                \n
      *          RET_THE_DAE_INDEX_IS_TOO_LARGE   \n
      */
-    returnValue decomposeJacobian( Matrix &J ) const;
+    returnValue decomposeJacobian( DMatrix &J ) const;
 
 
     /** applies a newton step                                              \n
      *  \return the norm of the increment                                  \n
      */
-    double applyNewtonStep( double *etakplus1, const double *etak, const Matrix &J, const double *FFF );
+    double applyNewtonStep( double *etakplus1, const double *etak, const DMatrix &J, const double *FFF );
 
 
     /** applies the transpose of M (needed for automatic differentiation   \n
      *  in backward mode)                                                  \n
      *  \return (void)                                                     \n
      */
-    void applyMTranspose( double *seed1, Matrix &J, double *seed2 );
+    void applyMTranspose( double *seed1, DMatrix &J, double *seed2 );
 
 
     /** Initializes a second forward seed. (only for internal use)         \n
      */
-    returnValue setForwardSeed2( const Vector &xSeed           /**< the seed w.r.t the
+    returnValue setForwardSeed2( const DVector &xSeed           /**< the seed w.r.t the
                                                                  *  initial states     */,
-                                 const Vector &pSeed           /**< the seed w.r.t the
+                                 const DVector &pSeed           /**< the seed w.r.t the
                                                                  *  parameters         */,
-                                 const Vector &uSeed           /**< the seed w.r.t the
+                                 const DVector &uSeed           /**< the seed w.r.t the
                                                                  *  controls           */,
-                                 const Vector &wSeed           /**< the seed w.r.t the
+                                 const DVector &wSeed           /**< the seed w.r.t the
                                                                  *  disturbances       */   );
 
 
     /** Initializes a second backward seed. (only for internal use)        \n
      */
-    virtual returnValue setBackwardSeed2( const Vector &seed     /**< the seed
+    virtual returnValue setBackwardSeed2( const DVector &seed     /**< the seed
                                                                   *   matrix     */ );
 
 
@@ -483,20 +483,20 @@ protected:
     void relaxAlgebraic( double *residuum, double timePoint );
 
 
-    void prepareDividedDifferences( Matrix &div );
+    void prepareDividedDifferences( DMatrix &div );
 
-    void interpolate( int number_, Matrix &div, VariablesGrid &poly );
+    void interpolate( int number_, DMatrix &div, VariablesGrid &poly );
 
-	void logCurrentIntegratorStep(	const Vector& currentX  = emptyConstVector,
-									const Vector& currentXA = emptyConstVector
+	void logCurrentIntegratorStep(	const DVector& currentX  = emptyConstVector,
+									const DVector& currentXA = emptyConstVector
 									);
 
 
-    void copyBackward( Vector       &Dx_x0,
-                       Vector       &Dx_p ,
-                       Vector       &Dx_u ,
-                       Vector       &Dx_w ,
-                       const Matrix &div    ) const;
+    void copyBackward( DVector       &Dx_x0,
+                       DVector       &Dx_p ,
+                       DVector       &Dx_u ,
+                       DVector       &Dx_w ,
+                       const DMatrix &div    ) const;
 
 
 // DATA MEMBERS:
@@ -539,14 +539,14 @@ protected:
     double **psi               ; /**< the time differences (multi-step-sizes).            */
     double  *psi_              ; /**< the time differences (multi-step-sizes). (backup)   */
     double **gamma             ; /**< intermediate coefficients                           */
-    Matrix   nablaY            ; /**< the devided differences                             */
-    Matrix   nablaY_           ; /**< the devided differences (backup)                    */
-    Matrix   phi               ; /**< the modified divided differences                    */
-    Matrix   delta             ; /**< sums over the modified divided differences          */
-    Vector   c2                ; /**< the constant in the derivative of the corrector     \n
+    DMatrix   nablaY            ; /**< the devided differences                             */
+    DMatrix   nablaY_           ; /**< the devided differences (backup)                    */
+    DMatrix   phi               ; /**< the modified divided differences                    */
+    DMatrix   delta             ; /**< sums over the modified divided differences          */
+    DVector   c2                ; /**< the constant in the derivative of the corrector     \n
                                   *   polynom.                                            */
 
-    Matrix **M                 ; /**< the Jacobians for Newton's method                   */
+    DMatrix **M                 ; /**< the Jacobians for Newton's method                   */
     int     *M_index           ; /**< the index of the inverse approximation              */
     int      nOfM              ; /**< number of distinct inverse Jacobian approximations  */
     int      maxNM             ; /**< number of allocated Jacobian storage positions      */
@@ -571,38 +571,38 @@ protected:
     // --------------
     int        ndir            ;  /**< number of dependecy directions (only internal use) */
 
-    Vector     fseed           ;  /**< The forward seed (only internal use)               */
-    Vector     bseed           ;  /**< The backward seed (only internal use)              */
+    DVector     fseed           ;  /**< The forward seed (only internal use)               */
+    DVector     bseed           ;  /**< The backward seed (only internal use)              */
 
-    Vector     fseed2          ;  /**< The forward seed 2 (only internal use)             */
-    Vector     bseed2          ;  /**< The backward seed 2 (only internal use)            */
+    DVector     fseed2          ;  /**< The forward seed 2 (only internal use)             */
+    DVector     bseed2          ;  /**< The backward seed 2 (only internal use)            */
 
     double    *G               ;  /**< Sensitivity matrix (only internal use)             */
     double    *etaG            ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     nablaG          ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     phiG            ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     deltaG          ;  /**< Sensitivity matrix (only internal use)             */
-    Vector     c2G             ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     nablaG          ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     phiG            ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     deltaG          ;  /**< Sensitivity matrix (only internal use)             */
+    DVector     c2G             ;  /**< Sensitivity matrix (only internal use)             */
 
     double    *G2              ;  /**< Sensitivity matrix (only internal use)             */
     double    *G3              ;  /**< Sensitivity matrix (only internal use)             */
     double    *etaG2           ;  /**< Sensitivity matrix (only internal use)             */
     double    *etaG3           ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     nablaG2         ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     nablaG3         ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     phiG2           ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     phiG3           ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     deltaG2         ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     deltaG3         ;  /**< Sensitivity matrix (only internal use)             */
-    Vector     c2G2            ;  /**< Sensitivity matrix (only internal use)             */
-    Vector     c2G3            ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     nablaG2         ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     nablaG3         ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     phiG2           ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     phiG3           ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     deltaG2         ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     deltaG3         ;  /**< Sensitivity matrix (only internal use)             */
+    DVector     c2G2            ;  /**< Sensitivity matrix (only internal use)             */
+    DVector     c2G3            ;  /**< Sensitivity matrix (only internal use)             */
 
     double    *H               ;  /**< Sensitivity matrix (only internal use)             */
     double   **etaH            ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     nablaH          ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     nablaH_         ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     deltaH          ;  /**< Sensitivity matrix (only internal use)             */
-    Vector     c2H             ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     nablaH          ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     nablaH_         ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     deltaH          ;  /**< Sensitivity matrix (only internal use)             */
+    DVector     c2H             ;  /**< Sensitivity matrix (only internal use)             */
     double  ***kH              ;  /**< Sensitivity matrix (only internal use)             */
     double   **zH              ;  /**< Sensitivity matrix (only internal use)             */
 
@@ -610,14 +610,14 @@ protected:
     double    *H3              ;  /**< Sensitivity matrix (only internal use)             */
     double   **etaH2           ;  /**< Sensitivity matrix (only internal use)             */
     double   **etaH3           ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     nablaH2         ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     nablaH3         ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     nablaH2_        ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     nablaH3_        ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     deltaH2         ;  /**< Sensitivity matrix (only internal use)             */
-    Matrix     deltaH3         ;  /**< Sensitivity matrix (only internal use)             */
-    Vector     c2H2            ;  /**< Sensitivity matrix (only internal use)             */
-    Vector     c2H3            ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     nablaH2         ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     nablaH3         ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     nablaH2_        ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     nablaH3_        ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     deltaH2         ;  /**< Sensitivity matrix (only internal use)             */
+    DMatrix     deltaH3         ;  /**< Sensitivity matrix (only internal use)             */
+    DVector     c2H2            ;  /**< Sensitivity matrix (only internal use)             */
+    DVector     c2H3            ;  /**< Sensitivity matrix (only internal use)             */
     double  ***kH2             ;  /**< Sensitivity matrix (only internal use)             */
     double   **zH2             ;  /**< Sensitivity matrix (only internal use)             */
     double  ***kH3             ;  /**< Sensitivity matrix (only internal use)             */

@@ -70,25 +70,25 @@ public:
     /** Sets the argument (note that arg should have dimension 1). */
 
     virtual TreeProjection& operator=( const double      & arg );
-    virtual TreeProjection& operator=( const Vector      & arg );
-    virtual TreeProjection& operator=( const Matrix      & arg );
+    virtual TreeProjection& operator=( const DVector      & arg );
+    virtual TreeProjection& operator=( const DMatrix      & arg );
     virtual TreeProjection& operator=( const Expression  & arg );
     virtual TreeProjection& operator=( const Operator    & arg );
 
 
     TreeProjection& operator+=( const double      & arg );
-    TreeProjection& operator+=( const Vector      & arg );
-    TreeProjection& operator+=( const Matrix      & arg );
+    TreeProjection& operator+=( const DVector      & arg );
+    TreeProjection& operator+=( const DMatrix      & arg );
     TreeProjection& operator+=( const Expression  & arg );
 
     TreeProjection& operator-=( const double      & arg );
-    TreeProjection& operator-=( const Vector      & arg );
-    TreeProjection& operator-=( const Matrix      & arg );
+    TreeProjection& operator-=( const DVector      & arg );
+    TreeProjection& operator-=( const DMatrix      & arg );
     TreeProjection& operator-=( const Expression  & arg );
 
     TreeProjection& operator*=( const double      & arg );
-    TreeProjection& operator*=( const Vector      & arg );
-    TreeProjection& operator*=( const Matrix      & arg );
+    TreeProjection& operator*=( const DVector      & arg );
+    TreeProjection& operator*=( const DMatrix      & arg );
     TreeProjection& operator*=( const Expression  & arg );
 
     TreeProjection& operator/=( const double      & arg );
@@ -96,36 +96,36 @@ public:
 
 
     Expression operator+( const double        & arg ) const;
-    Expression operator+( const Vector        & arg ) const;
-    Expression operator+( const Matrix        & arg ) const;
+    Expression operator+( const DVector        & arg ) const;
+    Expression operator+( const DMatrix        & arg ) const;
     Expression operator+( const Operator& arg ) const;
     Expression operator+( const Expression    & arg ) const;
 
     friend Expression operator+( const double & arg1, const Operator& arg2 );
-    friend Expression operator+( const Vector & arg1, const Operator& arg2 );
-    friend Expression operator+( const Matrix & arg1, const Operator& arg2 );
+    friend Expression operator+( const DVector & arg1, const Operator& arg2 );
+    friend Expression operator+( const DMatrix & arg1, const Operator& arg2 );
 
     Expression operator-( const double          & arg ) const;
-    Expression operator-( const Vector          & arg ) const;
-    Expression operator-( const Matrix          & arg ) const;
+    Expression operator-( const DVector          & arg ) const;
+    Expression operator-( const DMatrix          & arg ) const;
     Expression operator-( const Operator  & arg ) const;
     Expression operator-( const Expression      & arg ) const;
 
     Expression operator-( ) const;
 
     friend Expression operator-( const double & arg1, const Operator& arg2 );
-    friend Expression operator-( const Vector & arg1, const Operator& arg2 );
-    friend Expression operator-( const Matrix & arg1, const Operator& arg2 );
+    friend Expression operator-( const DVector & arg1, const Operator& arg2 );
+    friend Expression operator-( const DMatrix & arg1, const Operator& arg2 );
 
     Expression operator*( const double         & arg ) const;
-    Expression operator*( const Vector         & arg ) const;
-    Expression operator*( const Matrix         & arg ) const;
+    Expression operator*( const DVector         & arg ) const;
+    Expression operator*( const DMatrix         & arg ) const;
     Expression operator*( const Operator & arg ) const;
     Expression operator*( const Expression     & arg ) const;
 
     friend Expression operator*( const double& arg1, const Operator& arg2 );
-    friend Expression operator*( const Vector& arg1, const Operator& arg2 );
-    friend Expression operator*( const Matrix& arg1, const Operator& arg2 );
+    friend Expression operator*( const DVector& arg1, const Operator& arg2 );
+    friend Expression operator*( const DMatrix& arg1, const Operator& arg2 );
 
     Expression operator/( const double         & arg ) const;
     Expression operator/( const Operator & arg ) const;
@@ -133,16 +133,16 @@ public:
 
 
     friend Expression operator/( const double& arg1, const Operator& arg2 );
-    friend Expression operator/( const Vector& arg1, const Operator& arg2 );
-    friend Expression operator/( const Matrix& arg1, const Operator& arg2 );
+    friend Expression operator/( const DVector& arg1, const Operator& arg2 );
+    friend Expression operator/( const DMatrix& arg1, const Operator& arg2 );
 
     ConstraintComponent operator<=( const double& ub ) const;
     ConstraintComponent operator>=( const double& lb ) const;
     ConstraintComponent operator==( const double&  b ) const;
 
-    ConstraintComponent operator<=( const Vector& ub ) const;
-    ConstraintComponent operator>=( const Vector& lb ) const;
-    ConstraintComponent operator==( const Vector&  b ) const;
+    ConstraintComponent operator<=( const DVector& ub ) const;
+    ConstraintComponent operator>=( const DVector& lb ) const;
+    ConstraintComponent operator==( const DVector&  b ) const;
 
     ConstraintComponent operator<=( const VariablesGrid& ub ) const;
     ConstraintComponent operator>=( const VariablesGrid& lb ) const;
@@ -152,9 +152,9 @@ public:
     friend ConstraintComponent operator==( double  b, const Operator &arg );
     friend ConstraintComponent operator>=( double ub, const Operator &arg );
 
-    friend ConstraintComponent operator<=( Vector lb, const Operator &arg );
-    friend ConstraintComponent operator==( Vector  b, const Operator &arg );
-    friend ConstraintComponent operator>=( Vector ub, const Operator &arg );
+    friend ConstraintComponent operator<=( DVector lb, const Operator &arg );
+    friend ConstraintComponent operator==( DVector  b, const Operator &arg );
+    friend ConstraintComponent operator>=( DVector ub, const Operator &arg );
 
     friend ConstraintComponent operator<=( VariablesGrid lb, const Operator &arg );
     friend ConstraintComponent operator==( VariablesGrid  b, const Operator &arg );

@@ -38,7 +38,7 @@
 BEGIN_NAMESPACE_ACADO
 
 
-inline returnValue ControlLaw::getU(	Vector& _u
+inline returnValue ControlLaw::getU(	DVector& _u
 										) const
 {
 	_u = u;
@@ -46,7 +46,7 @@ inline returnValue ControlLaw::getU(	Vector& _u
 }
 
 
-inline returnValue ControlLaw::getP(	Vector& _p
+inline returnValue ControlLaw::getP(	DVector& _p
 										) const
 {
 	_p = p;

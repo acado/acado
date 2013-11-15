@@ -58,7 +58,7 @@ const BooleanType defaultAutoInit = BT_TRUE;
  *	\ingroup BasicDataStructures
  *
  *  The class VariableSettings provides variable-specific settings for 
- *	enhancing a Vector or a Matrix to vector- or matrix-valued 
+ *	enhancing a DVector or a DMatrix to vector- or matrix-valued 
  *	optimization variables. It is intended for internal use only.
  *
  *	\author Hans Joachim Ferreau, Boris Houska

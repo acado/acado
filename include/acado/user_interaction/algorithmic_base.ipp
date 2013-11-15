@@ -46,7 +46,7 @@ inline returnValue AlgorithmicBase::getAll(	LogName _name,
 
 
 inline returnValue AlgorithmicBase::getFirst(	LogName _name,
-												Matrix& firstValue
+												DMatrix& firstValue
 												) const
 {
 	return userInteraction->getFirst( _name,firstValue );
@@ -62,7 +62,7 @@ inline returnValue AlgorithmicBase::getFirst(	LogName _name,
 
 
 inline returnValue AlgorithmicBase::getLast(	LogName _name,
-												Matrix& lastValue
+												DMatrix& lastValue
 												) const
 {
 	return userInteraction->getLast( _name,lastValue );
@@ -194,7 +194,7 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 
 
 inline returnValue AlgorithmicBase::setLast(	LogName _name,
-												const Vector& value,
+												const DVector& value,
 												double time
 												)
 {
@@ -203,7 +203,7 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 
 
 inline returnValue AlgorithmicBase::setLast(	LogName _name,
-												const Matrix& value,
+												const DMatrix& value,
 												double time
 												)
 {

@@ -133,7 +133,7 @@ ControlLaw* PIDcontroller::clone( ) const
 
 
 
-returnValue PIDcontroller::setProportionalWeights(	const Vector& _pWeights
+returnValue PIDcontroller::setProportionalWeights(	const DVector& _pWeights
 													)
 {
 	if ( _pWeights.getDim() != getNumInputs( ) )
@@ -145,7 +145,7 @@ returnValue PIDcontroller::setProportionalWeights(	const Vector& _pWeights
 }
 
 
-returnValue PIDcontroller::setIntegralWeights(		const Vector& _iWeights
+returnValue PIDcontroller::setIntegralWeights(		const DVector& _iWeights
 													)
 {
 	if ( _iWeights.getDim() != getNumInputs( ) )
@@ -157,7 +157,7 @@ returnValue PIDcontroller::setIntegralWeights(		const Vector& _iWeights
 }
 
 
-returnValue PIDcontroller::setDerivativeWeights(	const Vector& _dWeights
+returnValue PIDcontroller::setDerivativeWeights(	const DVector& _dWeights
 													)
 
 {
@@ -171,8 +171,8 @@ returnValue PIDcontroller::setDerivativeWeights(	const Vector& _dWeights
 
 
 returnValue PIDcontroller::init(	double startTime,
-									const Vector &x0_,
-									const Vector &p_,
+									const DVector &x0_,
+									const DVector &p_,
 									const VariablesGrid& _yRef
 									)
 {
@@ -181,7 +181,7 @@ returnValue PIDcontroller::init(	double startTime,
 
 	// Use reference trajectory if it is defined, 
 	// otherwise set default reference to zero
-	Vector xRef( x0_.getDim() );
+	DVector xRef( x0_.getDim() );
 
 	if ( _yRef.getNumPoints( ) > 0 )
 	{
@@ -212,8 +212,8 @@ returnValue PIDcontroller::init(	double startTime,
 
 
 returnValue PIDcontroller::step(	double currentTime,
-									const Vector& _x,
-									const Vector& _p,
+									const DVector& _x,
+									const DVector& _p,
 									const VariablesGrid& _yRef
 									)
 {
@@ -226,7 +226,7 @@ returnValue PIDcontroller::step(	double currentTime,
 
 	/* 1) Use reference trajectory if it is defined */
 	// set default reference to zero
-	Vector xRef( _x.getDim() );
+	DVector xRef( _x.getDim() );
 
 	if ( _yRef.getNumPoints( ) > 0 )
 	{
@@ -318,8 +318,8 @@ BooleanType PIDcontroller::isStatic( ) const
 // PROTECTED MEMBER FUNCTIONS:
 //
 
-returnValue PIDcontroller::determineControlAction(	const Vector& error,
-													Vector& output
+returnValue PIDcontroller::determineControlAction(	const DVector& error,
+													DVector& output
 													)
 {
 	uint i;

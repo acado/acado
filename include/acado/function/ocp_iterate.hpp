@@ -120,11 +120,11 @@ class OCPiterate{
 
         inline double getTime( const uint &idx ) const;
 
-        inline Vector getX   ( const uint &idx ) const;
-        inline Vector getXA  ( const uint &idx ) const;
-        inline Vector getP   ( const uint &idx ) const;
-        inline Vector getU   ( const uint &idx ) const;
-        inline Vector getW   ( const uint &idx ) const;
+        inline DVector getX   ( const uint &idx ) const;
+        inline DVector getXA  ( const uint &idx ) const;
+        inline DVector getP   ( const uint &idx ) const;
+        inline DVector getU   ( const uint &idx ) const;
+        inline DVector getW   ( const uint &idx ) const;
 
 
         inline Grid getGrid() const;
@@ -140,19 +140,19 @@ class OCPiterate{
 		BooleanType areGridsConsistent( );
 
 
-        returnValue getInitialData( Vector &x_  = emptyVector,
-                                    Vector &xa_ = emptyVector,
-                                    Vector &p_  = emptyVector,
-                                    Vector &u_  = emptyVector,
-                                    Vector &w_  = emptyVector  ) const;
+        returnValue getInitialData( DVector &x_  = emptyVector,
+                                    DVector &xa_ = emptyVector,
+                                    DVector &p_  = emptyVector,
+                                    DVector &u_  = emptyVector,
+                                    DVector &w_  = emptyVector  ) const;
 
 
         returnValue updateData(  double t                 ,
-                                 Vector &x_  = emptyVector,
-                                 Vector &xa_ = emptyVector,
-                                 Vector &p_  = emptyVector,
-                                 Vector &u_  = emptyVector,
-                                 Vector &w_  = emptyVector  );
+                                 DVector &x_  = emptyVector,
+                                 DVector &xa_ = emptyVector,
+                                 DVector &p_  = emptyVector,
+                                 DVector &u_  = emptyVector,
+                                 DVector &w_  = emptyVector  );
 
 
 		returnValue applyStep(	const BlockMatrix& bm,
@@ -171,11 +171,11 @@ class OCPiterate{
 		 *	        RET_INVALID_ARGUMENTS
 		 */
 		virtual returnValue shift(	double timeShift = -1.0,
-									Vector  lastX    =  emptyVector,
-									Vector lastXA    =  emptyVector,
-									Vector lastP     =  emptyVector,
-									Vector lastU     =  emptyVector,
-									Vector lastW     =  emptyVector );
+									DVector  lastX    =  emptyVector,
+									DVector lastXA    =  emptyVector,
+									DVector lastP     =  emptyVector,
+									DVector lastU     =  emptyVector,
+									DVector lastW     =  emptyVector );
 
 
     //
@@ -197,12 +197,12 @@ class OCPiterate{
 
 		void copy (const OCPiterate& rhs);
 
-		inline Vector copy ( const VariablesGrid *z, const uint &idx ) const;
+		inline DVector copy ( const VariablesGrid *z, const uint &idx ) const;
 
 		inline uint getDim( VariablesGrid *z ) const;
 
 
-        void update( double t, VariablesGrid &z1, Vector &z2 ) const;
+        void update( double t, VariablesGrid &z1, DVector &z2 ) const;
 
 
     //

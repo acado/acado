@@ -107,8 +107,8 @@ returnValue ControlLaw::initializeControls( const char* fileName )
 
 
 
-returnValue ControlLaw::step(	const Vector& _x,
-								const Vector& _p,
+returnValue ControlLaw::step(	const DVector& _x,
+								const DVector& _p,
 								const VariablesGrid& _yRef
 								)
 {
@@ -117,8 +117,8 @@ returnValue ControlLaw::step(	const Vector& _x,
 
 
 returnValue ControlLaw::feedbackStep(	double currentTime,
-										const Vector& _x,
-										const Vector& _p,
+										const DVector& _x,
+										const DVector& _p,
 										const VariablesGrid& _yRef
 										)
 {

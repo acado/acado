@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-MatrixVariable::MatrixVariable( ) : Matrix( ), VariableSettings( )
+MatrixVariable::MatrixVariable( ) : DMatrix( ), VariableSettings( )
 {
 }
 
@@ -57,19 +57,19 @@ MatrixVariable::MatrixVariable(	uint _nRows,
 								VectorspaceElement _lb,
 								VectorspaceElement _ub,
 								BooleanType _autoInit
-								) : Matrix( _nRows,_nCols ), VariableSettings( _nRows*_nCols,_type,_names,_units,_scaling,_lb,_ub,_autoInit )
+								) : DMatrix( _nRows,_nCols ), VariableSettings( _nRows*_nCols,_type,_names,_units,_scaling,_lb,_ub,_autoInit )
 {
 }
 
 
-MatrixVariable::MatrixVariable( const MatrixVariable& rhs ) : Matrix( rhs ), VariableSettings( rhs )
+MatrixVariable::MatrixVariable( const MatrixVariable& rhs ) : DMatrix( rhs ), VariableSettings( rhs )
 {
 }
 
 
-MatrixVariable::MatrixVariable(	const Matrix& _matrix,
+MatrixVariable::MatrixVariable(	const DMatrix& _matrix,
 								VariableType _type
-								) : Matrix( _matrix ), VariableSettings( _matrix.getDim(),_type )
+								) : DMatrix( _matrix ), VariableSettings( _matrix.getDim(),_type )
 {
 }
 
@@ -84,19 +84,19 @@ MatrixVariable& MatrixVariable::operator=( const MatrixVariable& rhs )
     if ( this != &rhs )
     {
 		VariableSettings::operator=( rhs );
-		Matrix::operator=( rhs );
+		DMatrix::operator=( rhs );
     }
 
     return *this;
 }
 
 
-MatrixVariable& MatrixVariable::operator=( const Matrix& rhs )
+MatrixVariable& MatrixVariable::operator=( const DMatrix& rhs )
 {
     if ( this != &rhs )
     {
 		VariableSettings::operator=( rhs.getDim() );
-		Matrix::operator=( rhs );
+		DMatrix::operator=( rhs );
     }
 
     return *this;
@@ -115,7 +115,7 @@ returnValue MatrixVariable::init(	uint _nRows,
 									BooleanType _autoInit
 									)
 {
-	if ( Matrix::init( _nRows,_nCols ) != SUCCESSFUL_RETURN )
+	if ( DMatrix::init( _nRows,_nCols ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNKNOWN_BUG );
 
 	if ( VariableSettings::init( _nRows*_nCols,_type,_names,_units,_scaling,_lb,_ub,_autoInit ) != SUCCESSFUL_RETURN )
@@ -139,7 +139,7 @@ MatrixVariable MatrixVariable::getRows(	uint startIdx,
 		return newMatrixVariable;
 
 	newMatrixVariable.init( endIdx-startIdx+1,getNumCols() );
-	newMatrixVariable.operator=( Matrix::getRows( startIdx,endIdx ) );
+	newMatrixVariable.operator=( DMatrix::getRows( startIdx,endIdx ) );
 	// needs to be implemented for VariableSettings!!
 
 	return newMatrixVariable;
@@ -160,7 +160,7 @@ MatrixVariable MatrixVariable::getCols(	uint startIdx,
 
 
 	newMatrixVariable.init( getNumRows(),endIdx-startIdx+1 );
-	newMatrixVariable.operator=( Matrix::getCols( startIdx,endIdx ) );
+	newMatrixVariable.operator=( DMatrix::getCols( startIdx,endIdx ) );
 	// needs to be implemented for VariableSettings!!
 
 	return newMatrixVariable;

@@ -156,8 +156,8 @@ class ControlLaw : public SimulationBlock
 		 *	        RET_CONTROLLAW_INIT_FAILED
 		 */
 		virtual returnValue init(	double startTime = 0.0,
-									const Vector& _x = emptyConstVector,
-									const Vector& _p = emptyConstVector,
+									const DVector& _x = emptyConstVector,
+									const DVector& _p = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									) = 0;
 
@@ -175,8 +175,8 @@ class ControlLaw : public SimulationBlock
 		 *	        RET_CONTROLLAW_STEP_FAILED
 		 */
 		virtual returnValue step(	double currentTime,
-									const Vector& _x,
-									const Vector& _p = emptyConstVector,
+									const DVector& _x,
+									const DVector& _p = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									) = 0;
 									
@@ -191,8 +191,8 @@ class ControlLaw : public SimulationBlock
 		 *	        RET_VECTOR_DIMENSION_MISMATCH, \n
 		 *	        RET_CONTROLLAW_STEP_FAILED
 		 */
-		virtual returnValue step(	const Vector& _x,
-									const Vector& _p = emptyConstVector,
+		virtual returnValue step(	const DVector& _x,
+									const DVector& _p = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									);
 
@@ -209,8 +209,8 @@ class ControlLaw : public SimulationBlock
 		 *	        RET_CONTROLLAW_STEP_FAILED
 		 */
 		virtual returnValue feedbackStep(	double currentTime,
-											const Vector& _x,
-											const Vector& _p = emptyConstVector,
+											const DVector& _x,
+											const DVector& _p = emptyConstVector,
 											const VariablesGrid& _yRef = emptyConstVariablesGrid
 											);
 
@@ -240,7 +240,7 @@ class ControlLaw : public SimulationBlock
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue getU(	Vector& _u
+		inline returnValue getU(	DVector& _u
 									) const;
 
 		/** Returns parameter signal as determined by the control law.
@@ -249,7 +249,7 @@ class ControlLaw : public SimulationBlock
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue getP(	Vector& _p
+		inline returnValue getP(	DVector& _p
 									) const;
 
 
@@ -338,8 +338,8 @@ class ControlLaw : public SimulationBlock
 	//
 	protected:
 
-		Vector u;							/**< First piece of time-varying control signals as determined by the control law. */
-		Vector p;							/**< Time-constant parameter signals as determined by the control law. */
+		DVector u;							/**< First piece of time-varying control signals as determined by the control law. */
+		DVector p;							/**< Time-constant parameter signals as determined by the control law. */
 };
 
 

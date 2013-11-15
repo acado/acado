@@ -146,7 +146,7 @@ class TransferDevice : public SimulationBlock
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue init(	double _startTime = 0.0,
-									const Vector& _startValue = emptyConstVector
+									const DVector& _startValue = emptyConstVector
 									);
 
 		/** Generates additive noise on the given time interval based on the internal
@@ -175,9 +175,9 @@ class TransferDevice : public SimulationBlock
 		VariablesGrid lastSignal;					/**< Most recent transfer device signal. */
 
 		Noise** additiveNoise;						/**< Array of additive noise for each component of the transfer device signal. */
-		Vector  noiseSamplingTimes;					/**< Noise sampling times for each component of the transfer device signal. */
+		DVector  noiseSamplingTimes;					/**< Noise sampling times for each component of the transfer device signal. */
 
-		Vector  deadTimes;							/**< Dead times for each component of the transfer device signal. */
+		DVector  deadTimes;							/**< Dead times for each component of the transfer device signal. */
 };
 
 

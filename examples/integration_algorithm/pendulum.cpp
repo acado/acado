@@ -63,16 +63,16 @@ int main( )
 	// DEFINE INITIAL VALUES:
 	// ----------------------
 
-	Vector xStart( 2 );
+	DVector xStart( 2 );
 	xStart(0) = 1.0;
 	xStart(1) = 0.0;
 
-	Vector xa;
+	DVector xa;
 
-	Vector u( 1 );
+	DVector u( 1 );
 	u(0) = 0.0;
 
-	Vector p( 1 );
+	DVector p( 1 );
 	p(0) = 1.0;
 
 	double tStart = 0.0;

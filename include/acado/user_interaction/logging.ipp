@@ -51,7 +51,7 @@ inline returnValue Logging::getAll(	LogName _name,
 
 
 inline returnValue Logging::getFirst(	LogName _name,
-										Matrix& _firstValue
+										DMatrix& _firstValue
 										) const
 {
 	for (unsigned it = 0; it < logCollection.size(); ++it)
@@ -75,7 +75,7 @@ inline returnValue Logging::getFirst(	LogName _name,
 
 
 inline returnValue Logging::getLast(	LogName _name,
-										Matrix& _lastValue
+										DMatrix& _lastValue
 										) const
 {
 	for (unsigned it = 0; it < logCollection.size(); ++it)
@@ -112,7 +112,7 @@ inline returnValue Logging::setAll(	LogName _name,
 
 		
 inline returnValue Logging::setLast(	LogName _name,
-										const Matrix& value,
+										const DMatrix& value,
 										double time
 										)
 {

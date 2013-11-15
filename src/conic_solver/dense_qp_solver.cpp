@@ -124,7 +124,7 @@ returnValue DenseQPsolver::solve( DenseCP *cp )
     // GET THE PRIMAL AND DUAL SOLUTION FROM THE QP SOLVER AND
     // STORE THEM IN THE RIGHT FORMAT:
     // -------------------------------------------------------
-    Vector xOpt, yOpt;
+    DVector xOpt, yOpt;
 
     getPrimalSolution( xOpt );
     getDualSolution  ( yOpt );

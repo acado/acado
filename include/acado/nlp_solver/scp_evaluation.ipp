@@ -85,10 +85,10 @@ inline uint SCPevaluation::getNumConstraintBlocks( ) const
 }
 
 
-inline Vector SCPevaluation::getConstraintBlockDims( ) const
+inline DVector SCPevaluation::getConstraintBlockDims( ) const
 {
 	if ( constraint == 0 )
-		return Vector();
+		return DVector();
 		
 	return constraint->getBlockDims( );
 }

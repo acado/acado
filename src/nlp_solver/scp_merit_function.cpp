@@ -103,7 +103,7 @@ returnValue SCPmeritFunction::evaluate(	double alpha,
 
 
     const double kappa = 1.2;
-    Matrix tmp;
+    DMatrix tmp;
 
 //     acadoPrintf("result1 = %.16e \n", result );
 

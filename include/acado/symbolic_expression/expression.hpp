@@ -107,8 +107,8 @@ class Expression{
 
         /** Copy constructor (deep copy). */
         Expression( const double      & rhs );
-        Expression( const Vector      & rhs );
-        Expression( const Matrix      & rhs );
+        Expression( const DVector      & rhs );
+        Expression( const DMatrix      & rhs );
 
         Expression( const Expression  & rhs );
 
@@ -127,14 +127,14 @@ class Expression{
          *                                                             \n
          *  \param arg  the vector to be assigned to the expression.   \n
          */
-        Expression& operator=( const Vector& arg );
+        Expression& operator=( const DVector& arg );
 
 
         /** Assignment Operator.                                       \n
          *                                                             \n
          *  \param arg  the matrix to be assigned to the expression.   \n
          */
-        Expression& operator=( const Matrix& arg );
+        Expression& operator=( const DMatrix& arg );
 
 
         /** Assignment Operator.                         \n
@@ -144,8 +144,8 @@ class Expression{
         Expression& operator=( const Expression& arg );
 
         Expression& operator<<( const double      & arg );
-        Expression& operator<<( const Vector      & arg );
-        Expression& operator<<( const Matrix      & arg );
+        Expression& operator<<( const DVector      & arg );
+        Expression& operator<<( const DMatrix      & arg );
         Expression& operator<<( const Expression  & arg );
 
 	/**
@@ -179,44 +179,44 @@ class Expression{
 
 
         Expression operator+( const double      & arg ) const;
-        Expression operator+( const Vector      & arg ) const;
-        Expression operator+( const Matrix      & arg ) const;
+        Expression operator+( const DVector      & arg ) const;
+        Expression operator+( const DMatrix      & arg ) const;
         Expression operator+( const Expression  & arg ) const;
 
         friend Expression operator+( const double       & arg1, const Expression& arg2 );
-        friend Expression operator+( const Vector       & arg1, const Expression& arg2 );
-        friend Expression operator+( const Matrix       & arg1, const Expression& arg2 );
+        friend Expression operator+( const DVector       & arg1, const Expression& arg2 );
+        friend Expression operator+( const DMatrix       & arg1, const Expression& arg2 );
 
 
         Expression operator-( const double      & arg ) const;
-        Expression operator-( const Vector      & arg ) const;
-        Expression operator-( const Matrix      & arg ) const;
+        Expression operator-( const DVector      & arg ) const;
+        Expression operator-( const DMatrix      & arg ) const;
         Expression operator-( const Expression  & arg ) const;
 
         Expression operator-( ) const;
 
         friend Expression operator-( const double       & arg1, const Expression& arg2 );
-        friend Expression operator-( const Vector       & arg1, const Expression& arg2 );
-        friend Expression operator-( const Matrix       & arg1, const Expression& arg2 );
+        friend Expression operator-( const DVector       & arg1, const Expression& arg2 );
+        friend Expression operator-( const DMatrix       & arg1, const Expression& arg2 );
 
 
 
         Expression operator*( const double      & arg ) const;
-        Expression operator*( const Vector      & arg ) const;
-        Expression operator*( const Matrix      & arg ) const;
+        Expression operator*( const DVector      & arg ) const;
+        Expression operator*( const DMatrix      & arg ) const;
         Expression operator*( const Expression  & arg ) const;
 
         friend Expression operator*( const double       & arg1, const Expression& arg2 );
-        friend Expression operator*( const Vector       & arg1, const Expression& arg2 );
-        friend Expression operator*( const Matrix       & arg1, const Expression& arg2 );
+        friend Expression operator*( const DVector       & arg1, const Expression& arg2 );
+        friend Expression operator*( const DMatrix       & arg1, const Expression& arg2 );
 
 
         Expression operator/( const double      & arg ) const;
         Expression operator/( const Expression  & arg ) const;
 
         friend Expression operator/( const double       & arg1, const Expression& arg2 );
-        friend Expression operator/( const Vector       & arg1, const Expression& arg2 );
-        friend Expression operator/( const Matrix       & arg1, const Expression& arg2 );
+        friend Expression operator/( const DVector       & arg1, const Expression& arg2 );
+        friend Expression operator/( const DMatrix       & arg1, const Expression& arg2 );
 
 
         std::ostream& print( std::ostream &stream ) const;
@@ -231,11 +231,11 @@ class Expression{
 	
 	
         /**
-	* When operated on an n x 1 Expression, returns an m x n Matrix.
+	* When operated on an n x 1 Expression, returns an m x n DMatrix.
 	* The element (i,j) of this matrix is zero when this(i) does not depend on arg(j)
 	* \param arg m x 1 Expression
 	*/
-        Matrix getDependencyPattern( const Expression& arg ) const;
+        DMatrix getDependencyPattern( const Expression& arg ) const;
 
         Expression getSin    ( ) const;
         Expression getCos    ( ) const;
@@ -275,9 +275,9 @@ class Expression{
         ConstraintComponent operator>=( const double& lb ) const;
         ConstraintComponent operator==( const double&  b ) const;
 
-        ConstraintComponent operator<=( const Vector& ub ) const;
-        ConstraintComponent operator>=( const Vector& lb ) const;
-        ConstraintComponent operator==( const Vector&  b ) const;
+        ConstraintComponent operator<=( const DVector& ub ) const;
+        ConstraintComponent operator>=( const DVector& lb ) const;
+        ConstraintComponent operator==( const DVector&  b ) const;
 
         ConstraintComponent operator<=( const VariablesGrid& ub ) const;
         ConstraintComponent operator>=( const VariablesGrid& lb ) const;
@@ -287,9 +287,9 @@ class Expression{
         friend ConstraintComponent operator==( double  b, const Expression &arg );
         friend ConstraintComponent operator>=( double ub, const Expression &arg );
 
-        friend ConstraintComponent operator<=( Vector lb, const Expression &arg );
-        friend ConstraintComponent operator==( Vector  b, const Expression &arg );
-        friend ConstraintComponent operator>=( Vector ub, const Expression &arg );
+        friend ConstraintComponent operator<=( DVector lb, const Expression &arg );
+        friend ConstraintComponent operator==( DVector  b, const Expression &arg );
+        friend ConstraintComponent operator>=( DVector ub, const Expression &arg );
 
         friend ConstraintComponent operator<=( VariablesGrid lb, const Expression &arg );
         friend ConstraintComponent operator==( VariablesGrid  b, const Expression &arg );
@@ -350,8 +350,8 @@ class Expression{
 
 
         Expression convert( const double      & arg ) const;
-        Expression convert( const Vector      & arg ) const;
-        Expression convert( const Matrix      & arg ) const;
+        Expression convert( const DVector      & arg ) const;
+        Expression convert( const DMatrix      & arg ) const;
 
 
 
@@ -398,8 +398,8 @@ class Expression{
     protected:
 
         Operator**         element     ;   /**< Element of vector space.   */
-        uint               dim         ;   /**< Vector space dimension.    */
-        uint               nRows, nCols;   /**< Matrix dimension.          */
+        uint               dim         ;   /**< DVector space dimension.    */
+        uint               nRows, nCols;   /**< DMatrix dimension.          */
         VariableType       variableType;   /**< Variable type.             */
         uint               component   ;   /**< The expression component   */
         std::string             name   ;   /**< The name of the expression */

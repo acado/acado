@@ -109,8 +109,8 @@ int main( ){
 
     // DEFINE A SEED MATRIX:
     // ---------------------
-    Vector seed1(2);
-    Vector seed2(2);
+    DVector seed1(2);
+    DVector seed2(2);
 
     seed1(0) = 1.0;
     seed1(1) = 0.0;
@@ -135,7 +135,7 @@ int main( ){
 	VariablesGrid differentialStates;
 	integrator.getX( differentialStates );
 	
-	Vector Dx( 2 ), DDx( 2 );
+	DVector Dx( 2 ), DDx( 2 );
 	integrator.getForwardSensitivities( Dx,1 );
 	integrator.getForwardSensitivities( DDx,2 );
 	

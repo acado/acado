@@ -247,7 +247,7 @@ void IntegratorBDF::allocateMemory( ){
     }
 
     maxNM = 1;
-    M     = (Matrix**)calloc(maxNM,sizeof(Matrix*));
+    M     = (DMatrix**)calloc(maxNM,sizeof(DMatrix*));
     M_index   = (int*)calloc(maxNM,sizeof(int));
 
     M_index[0] = 0;
@@ -579,7 +579,7 @@ void IntegratorBDF::constructAll( const IntegratorBDF& arg ){
 
 
     maxNM = 1;
-    M     = (Matrix**)calloc(maxNM,sizeof(Matrix*));
+    M     = (DMatrix**)calloc(maxNM,sizeof(DMatrix*));
     M_index   = (int*)calloc(maxNM,sizeof(int));
 
     M_index[0] = 0;
@@ -1097,7 +1097,7 @@ returnValue IntegratorBDF::unfreeze(){
 
     maxNM = 1;
     nOfM  = 0;
-    M       = (Matrix**)realloc(M,maxNM*sizeof(Matrix*));
+    M       = (DMatrix**)realloc(M,maxNM*sizeof(DMatrix*));
     M_index = (int*)realloc(M_index,maxAlloc*sizeof(int));
 
     h = (double*)realloc(h,maxAlloc*sizeof(double));
@@ -1108,11 +1108,11 @@ returnValue IntegratorBDF::unfreeze(){
 }
 
 
-returnValue IntegratorBDF::evaluate( const Vector &x0  ,
-                                     const Vector &xa  ,
-                                     const Vector &p   ,
-                                     const Vector &u   ,
-                                     const Vector &w   ,
+returnValue IntegratorBDF::evaluate( const DVector &x0  ,
+                                     const DVector &xa  ,
+                                     const DVector &p   ,
+                                     const DVector &u   ,
+                                     const DVector &w   ,
                                      const Grid   &t_    ){
 
     int         run1;
@@ -1355,10 +1355,10 @@ returnValue IntegratorBDF::evaluate( const Vector &x0  ,
 }
 
 
-returnValue IntegratorBDF::setProtectedForwardSeed( const Vector &xSeed ,
-                                                    const Vector &pSeed ,
-                                                    const Vector &uSeed ,
-                                                    const Vector &wSeed ,
+returnValue IntegratorBDF::setProtectedForwardSeed( const DVector &xSeed ,
+                                                    const DVector &pSeed ,
+                                                    const DVector &uSeed ,
+                                                    const DVector &wSeed ,
                                                     const int    &order   ){
 
     if( order == 2 ){
@@ -1425,10 +1425,10 @@ returnValue IntegratorBDF::setProtectedForwardSeed( const Vector &xSeed ,
 }
 
 
-returnValue IntegratorBDF::setForwardSeed2( const Vector &xSeed ,
-                                            const Vector &pSeed ,
-                                            const Vector &uSeed ,
-                                            const Vector &wSeed   ){
+returnValue IntegratorBDF::setForwardSeed2( const DVector &xSeed ,
+                                            const DVector &pSeed ,
+                                            const DVector &uSeed ,
+                                            const DVector &wSeed   ){
 
     int run2;
 
@@ -1499,7 +1499,7 @@ returnValue IntegratorBDF::setForwardSeed2( const Vector &xSeed ,
 }
 
 
-returnValue IntegratorBDF::setProtectedBackwardSeed( const Vector &seed, const int &order ){
+returnValue IntegratorBDF::setProtectedBackwardSeed( const DVector &seed, const int &order ){
 
     if( order == 2 ){
         return setBackwardSeed2(seed);
@@ -1562,7 +1562,7 @@ returnValue IntegratorBDF::setProtectedBackwardSeed( const Vector &seed, const i
 }
 
 
-returnValue IntegratorBDF::setBackwardSeed2( const Vector &seed ){
+returnValue IntegratorBDF::setBackwardSeed2( const DVector &seed ){
 
     int run1, run2, run3;
 
@@ -2088,7 +2088,7 @@ returnValue IntegratorBDF::stop(){
 
 
 
-returnValue IntegratorBDF::getProtectedX( Vector *xEnd ) const{
+returnValue IntegratorBDF::getProtectedX( DVector *xEnd ) const{
 
     int run1;
 
@@ -2102,7 +2102,7 @@ returnValue IntegratorBDF::getProtectedX( Vector *xEnd ) const{
 }
 
 
-returnValue IntegratorBDF::getProtectedForwardSensitivities( Matrix *Dx, int order ) const{
+returnValue IntegratorBDF::getProtectedForwardSensitivities( DMatrix *Dx, int order ) const{
 
     int run1;
 
@@ -2154,10 +2154,10 @@ returnValue IntegratorBDF::getProtectedForwardSensitivities( Matrix *Dx, int ord
 }
 
 
-returnValue IntegratorBDF::getProtectedBackwardSensitivities(Vector &Dx_x0,
-                                                             Vector &Dx_p ,
-                                                             Vector &Dx_u ,
-                                                             Vector &Dx_w ,
+returnValue IntegratorBDF::getProtectedBackwardSensitivities(DVector &Dx_x0,
+                                                             DVector &Dx_p ,
+                                                             DVector &Dx_u ,
+                                                             DVector &Dx_w ,
                                                              int order      ) const{
 
     if( order == 1 && nBDirs2 == 0 )
@@ -2401,16 +2401,16 @@ returnValue IntegratorBDF::determineCorrector( int stepnumber, BooleanType ini )
                if( nOfM >= maxNM ){
                    int oldMN = maxNM;
                    maxNM += maxNM;
-                   M = (Matrix**)realloc(M, maxNM*sizeof(Matrix*));
+                   M = (DMatrix**)realloc(M, maxNM*sizeof(DMatrix*));
                    for( run1 = oldMN; run1 < maxNM; run1++ )
                        M[run1] = 0;
                }
                M_index[stepnumber] = nOfM;
-               M[nOfM] = new Matrix(m,m);
+               M[nOfM] = new DMatrix(m,m);
                nOfM++;
            }
            else{
-               if( M[0] == 0 ) M[0] = new Matrix(m,m);
+               if( M[0] == 0 ) M[0] = new DMatrix(m,m);
                M_index[stepnumber] = 0;
                M[0]->init(m,m);
            }
@@ -2908,16 +2908,16 @@ returnValue IntegratorBDF::rk_start_solve( int stepnumber ){
                if( nOfM >= maxNM ){
                    int oldMN = maxNM;
                    maxNM += maxNM;
-                   M = (Matrix**)realloc(M, maxNM*sizeof(Matrix*));
+                   M = (DMatrix**)realloc(M, maxNM*sizeof(DMatrix*));
                    for( run1 = oldMN; run1 < maxNM; run1++ )
                        M[run1] = 0;
                }
                M_index[stepnumber] = nOfM;
-               M[nOfM] = new Matrix(m,m);
+               M[nOfM] = new DMatrix(m,m);
                nOfM++;
            }
            else{
-               if( M[0] == 0 ) M[0] = new Matrix(m,m);
+               if( M[0] == 0 ) M[0] = new DMatrix(m,m);
                M_index[stepnumber] = 0;
                M[0]->init(m,m);
            }
@@ -4882,7 +4882,7 @@ void IntegratorBDF::initializeButcherTableau(){
 
 
 
-void IntegratorBDF::printBDFfinalResults2( Matrix &div ){
+void IntegratorBDF::printBDFfinalResults2( DMatrix &div ){
 
     int run2;
 
@@ -5107,7 +5107,7 @@ void IntegratorBDF::printRKIntermediateResults(){
 }
 
 
-returnValue IntegratorBDF::decomposeJacobian( Matrix &J ) const{
+returnValue IntegratorBDF::decomposeJacobian( DMatrix &J ) const{
 
     switch( las ){
 
@@ -5125,11 +5125,11 @@ returnValue IntegratorBDF::decomposeJacobian( Matrix &J ) const{
 }
 
 
-double IntegratorBDF::applyNewtonStep( double *etakplus1, const double *etak, const Matrix &J, const double *FFF ){
+double IntegratorBDF::applyNewtonStep( double *etakplus1, const double *etak, const DMatrix &J, const double *FFF ){
 
     int run1;
-    Vector bb(m,FFF);
-    Vector deltaX;
+    DVector bb(m,FFF);
+    DVector deltaX;
 
     switch( las ){
 
@@ -5145,15 +5145,15 @@ double IntegratorBDF::applyNewtonStep( double *etakplus1, const double *etak, co
 }
 
 
-void IntegratorBDF::applyMTranspose( double *seed1, Matrix &J, double *seed2 ){
+void IntegratorBDF::applyMTranspose( double *seed1, DMatrix &J, double *seed2 ){
 
     int run1;
-    Vector bb(m);
+    DVector bb(m);
 
     for( run1 = 0; run1 < m; run1++ )
         bb(run1) = seed1[diff_index[run1]];
 
-    Vector deltaX;
+    DVector deltaX;
 
     switch( las ){
 
@@ -5226,7 +5226,7 @@ int IntegratorBDF::getDimX() const{
 }
 
 
-void IntegratorBDF::prepareDividedDifferences( Matrix &div ){
+void IntegratorBDF::prepareDividedDifferences( DMatrix &div ){
 
     int run1;
 
@@ -5247,11 +5247,11 @@ void IntegratorBDF::prepareDividedDifferences( Matrix &div ){
 }
 
 
-void IntegratorBDF::copyBackward( Vector       &Dx_x0,
-                                  Vector       &Dx_p ,
-                                  Vector       &Dx_u ,
-                                  Vector       &Dx_w ,
-                                  const Matrix &div    ) const{
+void IntegratorBDF::copyBackward( DVector       &Dx_x0,
+                                  DVector       &Dx_p ,
+                                  DVector       &Dx_u ,
+                                  DVector       &Dx_w ,
+                                  const DMatrix &div    ) const{
 
     int run1;
 
@@ -5275,7 +5275,7 @@ void IntegratorBDF::copyBackward( Vector       &Dx_x0,
 }
 
 
-void IntegratorBDF::interpolate( int number_, Matrix &div, VariablesGrid &poly ){
+void IntegratorBDF::interpolate( int number_, DMatrix &div, VariablesGrid &poly ){
 
     int i1 = timeInterval.getFloorIndex( t-h[0] );
     int i2 = timeInterval.getFloorIndex( t      );
@@ -5306,8 +5306,8 @@ void IntegratorBDF::interpolate( int number_, Matrix &div, VariablesGrid &poly )
 }
 
 
-void IntegratorBDF::logCurrentIntegratorStep(	const Vector& currentX,
-												const Vector& currentXA
+void IntegratorBDF::logCurrentIntegratorStep(	const DVector& currentX,
+												const DVector& currentXA
 												)
 {
 	return;
@@ -5317,7 +5317,7 @@ void IntegratorBDF::logCurrentIntegratorStep(	const Vector& currentX,
 	// log differential states
 	if ( currentX.isEmpty( ) == BT_TRUE )
 	{
-		Vector currentDiffStates(md);
+		DVector currentDiffStates(md);
 		for( run1 = 0; run1 < md; run1++ )
 			currentDiffStates( run1 ) = nablaY( 0,run1 );
 		setLast( LOG_DIFFERENTIAL_STATES,currentDiffStates,t );
@@ -5330,7 +5330,7 @@ void IntegratorBDF::logCurrentIntegratorStep(	const Vector& currentX,
 	// log algebraic states
 	if ( currentX.isEmpty( ) == BT_TRUE )
 	{
-		Vector currentAlgStates(ma);
+		DVector currentAlgStates(ma);
 		for( run1 = 0; run1 < ma; run1++ )
 			currentAlgStates( run1 ) = nablaY( 0,md+run1 );
 		setLast( LOG_ALGEBRAIC_STATES,currentAlgStates,t );

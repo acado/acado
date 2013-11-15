@@ -47,8 +47,8 @@ int main( )
 
     // DEFINE VALRIABLES:
     // ---------------------------
-    Matrix                 A(3,3);
-    Vector                 b(3);
+    DMatrix                 A(3,3);
+    DVector                 b(3);
 	DifferentialState      x("", 3, 1);
     DifferentialState      y;
     Function               f[7];

@@ -272,7 +272,7 @@ protected:
 	ExportVariable conValueIn;
 	ExportVariable conValueOut;
 
-	Matrix pacLBMatrix, pacUBMatrix;
+	DMatrix pacLBMatrix, pacUBMatrix;
 	ExportVariable pacEvH;
 	ExportVariable pacEvHx, pacEvHu, pacEvHxd;
 	/** @} */
@@ -281,9 +281,9 @@ protected:
 	/** @{ */
 	unsigned dimPocH;
 	std::vector< std::tr1::shared_ptr< ExportAcadoFunction > > evaluatePointConstraints;
-	Vector pocLB, pocUB;
+	DVector pocLB, pocUB;
 
-	std::vector< Vector > pocLbStack, pocUbStack;
+	std::vector< DVector > pocLbStack, pocUbStack;
 
 	ExportVariable pocEvH;
 	ExportVariable pocEvHx, pocEvHu, pocEvHxd;

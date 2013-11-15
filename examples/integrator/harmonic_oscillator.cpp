@@ -81,7 +81,7 @@ int main( ){
     window.plot();
 
 
-//     Vector seed(2);
+//     DVector seed(2);
 // 
 //     seed( 0 ) = 1.0;
 //     seed( 1 ) = 0.0;

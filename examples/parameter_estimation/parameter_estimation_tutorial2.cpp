@@ -82,7 +82,7 @@ int main( ){
 
    // DEFINE THE INVERSE OF THE VARIANCE-COVARIANCE MATRIX OF THE MEASUREMENTS:
    // -------------------------------------------------------------------------
-    Matrix S(1,1);
+    DMatrix S(1,1);
     S(0,0) = 1.0/pow(0.1,2);  // (1 over the variance of the measurement)
                               // HERE: the standard deviation of the measurement is
                               // assumed to be 0.1, thus S = 1/(0.1)^2.

@@ -118,7 +118,7 @@ Function& Function::operator<<( const double &arg ){
 }
 
 
-Function& Function::operator<<( const Vector& arg ){
+Function& Function::operator<<( const DVector& arg ){
 
     Expression tmp;
     tmp = arg;
@@ -127,7 +127,7 @@ Function& Function::operator<<( const Vector& arg ){
 }
 
 
-Function& Function::operator<<( const Matrix& arg ){
+Function& Function::operator<<( const DMatrix& arg ){
 
     Expression tmp;
     tmp = arg;
@@ -385,15 +385,15 @@ BooleanType Function::isConcave(){
     return BT_FALSE;
 }
 
-returnValue Function::jacobian(Matrix &x) {
+returnValue Function::jacobian(DMatrix &x) {
     int n=getDim();
     int N=getNumberOfVariables();
     returnValue ret;
 
-    x=Matrix(getNX(),n);x.setAll(0);
-    //u=Matrix(getNU(),n);u.setAll(0);
-    //p=Matrix(getNP(),n);p.setAll(0);
-    //w=Matrix(getNW(),n);w.setAll(0);
+    x=DMatrix(getNX(),n);x.setAll(0);
+    //u=DMatrix(getNU(),n);u.setAll(0);
+    //p=DMatrix(getNP(),n);p.setAll(0);
+    //w=DMatrix(getNW(),n);w.setAll(0);
     double *Jr=new double[N];
     double *seed=new double[n];
     for (int i=0;i<n;i++) seed[i]=0;
@@ -501,33 +501,33 @@ returnValue Function::setScale( double *scale_ ){
 }
 
 
-Vector Function::evaluate( const EvaluationPoint &x,
+DVector Function::evaluate( const EvaluationPoint &x,
                            const int        &number  ){
 
     //double *result = new double[getDim()];
 
     evaluate( number, x.getEvaluationPointer(), result );
-    Vector res( getDim(), result );
+    DVector res( getDim(), result );
 
     //delete[] result;
     return   res;
 }
 
 
-Vector Function::AD_forward( const EvaluationPoint &x,
+DVector Function::AD_forward( const EvaluationPoint &x,
                              const int        &number  ){
 
     //double *result = new double[getDim()];
 
     AD_forward( number, x.getEvaluationPointer(), result );
-    Vector res( getDim(), result );
+    DVector res( getDim(), result );
 
     //delete[] result;
     return   res;
 }
 
 
-returnValue Function::AD_backward( const    Vector &seed  ,
+returnValue Function::AD_backward( const    DVector &seed  ,
                                    EvaluationPoint &df    ,
                                    const int       &number  ){
 

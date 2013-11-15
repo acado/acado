@@ -130,7 +130,7 @@ returnValue NARXExport::setup( )
 	integrate.addLinebreak( );
 
 	// Linear input:
-	Matrix eyeM = eye((delay-1)*NX1);
+	DMatrix eyeM = eye((delay-1)*NX1);
 	eyeM.appendRows( zeros(NX1,(delay-1)*NX1) );
 	eyeM.appendCols( zeros(delay*NX1,NU) );
 	if( NX1 > 0 ) {
@@ -280,7 +280,7 @@ returnValue NARXExport::setup( )
 
 	// FILL IN ALL THE SENSITIVITIES OF THE DELAYED STATES BASED ON RK_DIFFSPREV + SPARSITY
 	if( NX1 > 0 ) {
-		Matrix zeroR = zeros(1, NX2);
+		DMatrix zeroR = zeros(1, NX2);
 		ExportForLoop loop1( i,0,NX1 );
 		loop1.addStatement( rk_eta.getCols( i*NX+NX+NX1,i*NX+NX+NX1+NX2 ) == zeroR );
 		zeroR = zeros(1, (delay-1)*(NX1+NX2)+NX3);
@@ -306,7 +306,7 @@ returnValue NARXExport::setup( )
 			ExportForLoop loop3( i,0,NX2 );
 			// STATES
 			if( s > 0 ) loop3.addStatement( rk_eta.getCols( i*NX+NX+s*(NX1+NX2)*NX+NX1*NX,i*NX+NX+s*(NX1+NX2)*NX+NX1*NX+delay*(NX1+NX2) ) == rk_diffsPrev2.getSubMatrix( i+(s-1)*NX2,i+(s-1)*NX2+1,0,delay*(NX1+NX2) ) );
-			Matrix zeroR;
+			DMatrix zeroR;
 			if( NX3 > 0 ) {
 				zeroR = zeros(1, NX3);
 				loop3.addStatement( rk_eta.getCols( i*NX+NX+s*(NX1+NX2)*NX+NX1*NX+delay*(NX1+NX2),i*NX+NX+s*(NX1+NX2)*NX+NX1*NX+NX ) == zeroR );
@@ -603,7 +603,7 @@ returnValue NARXExport::getDataDeclarations(	ExportStatementBlock& declarations,
 }
 
 
-returnValue NARXExport::setNARXmodel( const uint _delay, const Matrix& _parms ) {
+returnValue NARXExport::setNARXmodel( const uint _delay, const DMatrix& _parms ) {
 
 	NX2 = _parms.getNumRows();
 	delay = _delay;
@@ -646,7 +646,7 @@ returnValue NARXExport::setNARXmodel( const uint _delay, const Matrix& _parms ) 
 }
 
 
-returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs )
+returnValue NARXExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& _rhs )
 {
 	if( !A3.isEmpty() ) {
 		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() || A3.getNumRows() != _rhs.getDim() ) {
@@ -697,8 +697,8 @@ returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, con
 		dummy2.clearStaticCounters();
 		x = DifferentialState("", NX, 1);
 
-		Matrix dependencyMat = _rhs.getDependencyPattern( x );
-		Vector dependency = sumRow( dependencyMat );
+		DMatrix dependencyMat = _rhs.getDependencyPattern( x );
+		DVector dependency = sumRow( dependencyMat );
 		for( i = n; i < NX; i++ ) {
 			if( acadoRoundAway(dependency(i)) != 0 ) { // This expression should not depend on these differential states
 				return RET_UNABLE_TO_EXPORT_CODE;
@@ -706,7 +706,7 @@ returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, con
 		}
 
 		OutputFcn f_large;
-		Matrix A3_large = expandOutputMatrix(A3);
+		DMatrix A3_large = expandOutputMatrix(A3);
 		f_large << _rhs + A3_large*x;
 
 		return (rhs3.init( f_large,"acado_rhs3",NX,NXA,NU,NP ) & diffs_rhs3.init( g,"acado_diffs3",NX,NXA,NU,NP ) );
@@ -716,7 +716,7 @@ returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, con
 }
 
 
-returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
+returnValue NARXExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
 {
 	// You can't use this feature yet with NARX integrators !
 	return ACADOERROR( RET_INVALID_OPTION );

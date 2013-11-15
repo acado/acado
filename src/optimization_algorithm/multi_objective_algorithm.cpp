@@ -173,7 +173,7 @@ returnValue MultiObjectiveAlgorithm::solveSingleObjective( const int &number_ ){
     totalCPUtime += acadoGetTime();
 
     int index=0;
-    Matrix Weights = getWeights();
+    DMatrix Weights = getWeights();
 
     for( run1 = 0; run1 < (int) Weights.getNumCols(); run1++ ){
         if( fabs( Weights( number_, run1 ) - 1.0 ) < 1000.0*EPS )
@@ -301,10 +301,10 @@ returnValue MultiObjectiveAlgorithm::solve( ){
     double *idx = new double[m];
 
     WeightGeneration generator;
-    Matrix Weights;
-    Vector formers;
-    Vector  lb(m);
-    Vector  ub(m);
+    DMatrix Weights;
+    DVector formers;
+    DVector  lb(m);
+    DVector  ub(m);
     lb.setZero();
     ub.setAll(1.0);
 
@@ -483,17 +483,17 @@ returnValue MultiObjectiveAlgorithm::formulateOCP( double *idx, OCP *ocp_, Expre
         //tmp.addMayerTerm( *arg[m-1] );			// Select last (i.e., m-th) objective function
         //ocp_->setObjective( tmp );			// replace (overwrite) the objective in the ocp
 
-        Matrix P  = getNormalizedPayOffMatrix();
-        Matrix NK = getUtopiaPlaneVectors    ();
+        DMatrix P  = getNormalizedPayOffMatrix();
+        DMatrix NK = getUtopiaPlaneVectors    ();
 
-        Vector W(m);
+        DVector W(m);
         for( run1 = 0; run1 < m; run1++ )
             W(run1) = idx[run1];
 
-        Vector PW = P*W;
+        DVector PW = P*W;
 
-        Vector U = getUtopiaVector();
-        Vector L = getNormalizationVector();
+        DVector U = getUtopiaVector();
+        DVector L = getNormalizationVector();
 
         Expression *Fnorm;
         Fnorm = new Expression[m];
@@ -526,8 +526,8 @@ returnValue MultiObjectiveAlgorithm::formulateOCP( double *idx, OCP *ocp_, Expre
     if( paretoGeneration == PFG_ENHANCED_NORMALIZED_NORMAL_CONSTRAINT ){
 	// Normalization based on Sanchis et al 2008
 
-        Matrix P  = getPayOffMatrix();
-        Matrix PHI_N(m,m);
+        DMatrix P  = getPayOffMatrix();
+        DMatrix PHI_N(m,m);
 
         int run3, run4;
         for( run3 = 0; run3 < m; run3++ ){
@@ -538,10 +538,10 @@ returnValue MultiObjectiveAlgorithm::formulateOCP( double *idx, OCP *ocp_, Expre
         for( run3 = 0; run3 < m; run3++ )
             PHI_N(run3,run3) = 0.0;
 
-        Matrix T;
+        DMatrix T;
         T = PHI_N*P.getInverse();
 
-        Matrix NK(m,m-1);
+        DMatrix NK(m,m-1);
         NK.setZero();
 
         for( run3 = 0; run3 < m-1; run3++ )
@@ -551,13 +551,13 @@ returnValue MultiObjectiveAlgorithm::formulateOCP( double *idx, OCP *ocp_, Expre
              NK(m-1,run3) = -1.0;
 
 
-        Vector W(m);
+        DVector W(m);
         for( run1 = 0; run1 < m; run1++ )
             W(run1) = idx[run1];
 
-        Vector PW = PHI_N*W;
+        DVector PW = PHI_N*W;
 
-        Vector U = getUtopiaVector();
+        DVector U = getUtopiaVector();
 
         Expression *Fnorm;
         Fnorm = new Expression[m];
@@ -594,15 +594,15 @@ returnValue MultiObjectiveAlgorithm::formulateOCP( double *idx, OCP *ocp_, Expre
 
     if( paretoGeneration == PFG_NORMAL_BOUNDARY_INTERSECTION ){
 
-        Vector W(m);
+        DVector W(m);
         for( run1 = 0; run1 < m; run1++ )
             W(run1) = idx[run1];
 
-        Matrix P  = getPayOffMatrix();
-        Vector U  = getUtopiaVector();
-        Vector V  = P*W + U;
+        DMatrix P  = getPayOffMatrix();
+        DVector U  = getUtopiaVector();
+        DVector V  = P*W + U;
         W.setAll( 1.0 );
-        Vector X  = P*W;
+        DVector X  = P*W;
 
         Expression lambda;
 

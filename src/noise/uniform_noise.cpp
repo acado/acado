@@ -47,8 +47,8 @@ UniformNoise::UniformNoise( ) : Noise( )
 }
 
 
-UniformNoise::UniformNoise(	const Vector& _lowerLimit,
-							const Vector& _upperLimit
+UniformNoise::UniformNoise(	const DVector& _lowerLimit,
+							const DVector& _upperLimit
 							) : Noise( )
 {
 	if ( _lowerLimit.getDim( ) == _upperLimit.getDim( ) )
@@ -117,7 +117,7 @@ UniformNoise* UniformNoise::clone(	uint idx
 	if ( idx >= getDim( ) )
 		return 0;
 
-	UniformNoise tmp( Vector(1),Vector(1) );
+	UniformNoise tmp( DVector(1),DVector(1) );
 	tmp.Noise::operator=( *this );
 	tmp.w.init( 1,1 );
 	tmp.lowerLimit(0) = lowerLimit(idx);
@@ -128,8 +128,8 @@ UniformNoise* UniformNoise::clone(	uint idx
 
 
 
-returnValue UniformNoise::setLimits(	const Vector& _lowerLimit,
-										const Vector& _upperLimit
+returnValue UniformNoise::setLimits(	const DVector& _lowerLimit,
+										const DVector& _upperLimit
 										)
 {
 	if ( lowerLimit.getDim( ) != _lowerLimit.getDim( ) )
@@ -206,7 +206,7 @@ returnValue UniformNoise::init(	uint seed
 }
 
 
-returnValue UniformNoise::step(	Vector& _w
+returnValue UniformNoise::step(	DVector& _w
 								)
 {
 	if ( getStatus( ) != BS_READY )

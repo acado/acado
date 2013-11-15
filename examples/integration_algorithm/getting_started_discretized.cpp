@@ -67,13 +67,13 @@ int main( ){
     // Define an initial value:
     // ------------------------
 
-    Vector xStart( 1 );
+    DVector xStart( 1 );
 	xStart(0) = 1.0;
     
-	Vector uStart( 1 );
+	DVector uStart( 1 );
 	uStart(0) = 1.0;
 
-	Vector xaStart, pStart;
+	DVector xaStart, pStart;
 
 
     // START THE INTEGRATION
@@ -82,7 +82,7 @@ int main( ){
     intAlg.integrate( timeHorizon, xStart, xaStart, pStart, uStart );
 
     // ----------------------
-//     Vector seed(1);
+//     DVector seed(1);
 //     seed(0) = 1.0;
 // 
 //     integrator.setForwardSeed( 1, emptyVector, emptyVector, seed );
@@ -98,7 +98,7 @@ int main( ){
 // 	VariablesGrid differentialStates;
 // 	integrator.getX( differentialStates );
 // 
-// 	Vector Dx( 1 );
+// 	DVector Dx( 1 );
 // 	integrator.getForwardSensitivities( Dx,1 );
 // 	
 // 	differentialStates.print( "x" );

@@ -53,7 +53,7 @@ BEGIN_NAMESPACE_ACADO
  *                                                                                           \n
  *        0.5* sum_i || S(t_i) * ( h(t_i,x(t_i),u(t_i),p(t_i),...) - r(t_i) ) ||^2_2         \n
  *                                                                                           \n
- *  Here the sum is over all grid points of the objective grid. The Matrix S is assumed to   \n
+ *  Here the sum is over all grid points of the objective grid. The DMatrix S is assumed to   \n
  *  be symmetric and positive (semi-) definite.                                              \n
  *
  *  \author Boris Houska, Hans Joachim Ferreau
@@ -149,7 +149,7 @@ class LSQTerm : public ObjectiveElement{
 
 // =======================================================================================
 
-        returnValue getWeigthingtMatrix( const unsigned _index, Matrix& _matrix ) const;
+        returnValue getWeigthingtMatrix( const unsigned _index, DMatrix& _matrix ) const;
 
 
     //
@@ -166,8 +166,8 @@ class LSQTerm : public ObjectiveElement{
     MatrixVariablesGrid *S_temp         ;    /**< a symmetric weighting matrix */
     VariablesGrid       *r_temp         ;    /**< a tracking reference         */
 
-    Matrix              *S              ;    /**< a symmetric weighting matrix */
-    Vector              *r              ;    /**< a tracking reference         */
+    DMatrix              *S              ;    /**< a symmetric weighting matrix */
+    DVector              *r              ;    /**< a tracking reference         */
 
     double            **S_h_res         ;    /**< specific intermediate results \n
                                               *  to be stored for backward     \n

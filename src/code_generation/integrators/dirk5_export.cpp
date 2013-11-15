@@ -73,9 +73,9 @@ DiagonallyIRK5Export::~DiagonallyIRK5Export( )
 IntegratorExport* createDiagonallyIRK5Export(	UserInteraction* _userInteraction,
 												const std::string &_commonHeaderName)
 {
-	Matrix AA(5,5);
-	Vector bb(5);
-	Vector cc(5);
+	DMatrix AA(5,5);
+	DVector bb(5);
+	DVector cc(5);
 
 	AA(0,0) = (6.0-sqrt(6.0))/10.0;					AA(0,1) = 0.0;									AA(0,2) = 0.0;								AA(0,3) = 0.0;								AA(0,4) = 0.0;
 	AA(1,0) = (5.0*sqrt(6.0)-6.0)/14.0;				AA(1,1) = (6.0-sqrt(6.0))/10.0;					AA(1,2) = 0.0;								AA(1,3) = 0.0;								AA(1,4) = 0.0;

@@ -57,13 +57,13 @@ int main( )
     // DEFINE INITIAL VALUES:
     // ----------------------
 
-    Vector xStart( 1 );
+    DVector xStart( 1 );
 	xStart(0) = 1.0;
     
-	Vector zStart( 1 );
+	DVector zStart( 1 );
 	zStart(0) = 1.0;
 
-	Vector pp( 2 );
+	DVector pp( 2 );
 	pp(0) = 1.0;
 	pp(1) = 1.0;
 	

@@ -74,9 +74,9 @@ ExplicitRungeKutta4Export::~ExplicitRungeKutta4Export( )
 IntegratorExport* createExplicitRungeKutta4Export(	UserInteraction* _userInteraction,
 													const std::string &_commonHeaderName)
 {
-	Matrix AA(4,4);
-	Vector bb(4);
-	Vector cc(4);
+	DMatrix AA(4,4);
+	DVector bb(4);
+	DVector cc(4);
 
 	AA(0,0) = 0.0;		AA(0,1) = 0.0;		AA(0,2) = 0.0;		AA(0,3) = 0.0;
 	AA(1,0) = 1.0/2.0;	AA(1,1) = 0.0;		AA(1,2) = 0.0;		AA(1,3) = 0.0;

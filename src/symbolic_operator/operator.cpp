@@ -59,14 +59,14 @@ TreeProjection& Operator::operator=( const double &arg ){
     return emptyTreeProjection;
 }
 
-TreeProjection& Operator::operator=( const Vector &arg ){
+TreeProjection& Operator::operator=( const DVector &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& Operator::operator=( const Matrix &arg ){
+TreeProjection& Operator::operator=( const DMatrix &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
@@ -108,18 +108,18 @@ int Operator::getGlobalIndex( ) const{
 
 
 TreeProjection& Operator::operator+=( const double    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& Operator::operator+=( const Vector    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& Operator::operator+=( const Matrix    & arg ){ return operator=( this->operator+(arg) ); }
+TreeProjection& Operator::operator+=( const DVector    & arg ){ return operator=( this->operator+(arg) ); }
+TreeProjection& Operator::operator+=( const DMatrix    & arg ){ return operator=( this->operator+(arg) ); }
 TreeProjection& Operator::operator+=( const Expression& arg ){ return operator=( this->operator+(arg) ); }
 
 TreeProjection& Operator::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& Operator::operator-=( const Vector      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& Operator::operator-=( const Matrix      & arg ){ return operator=( this->operator-(arg) ); }
+TreeProjection& Operator::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
+TreeProjection& Operator::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
 TreeProjection& Operator::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
 
 TreeProjection& Operator::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& Operator::operator*=( const Vector      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& Operator::operator*=( const Matrix      & arg ){ return operator=( this->operator*(arg) ); }
+TreeProjection& Operator::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
+TreeProjection& Operator::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
 TreeProjection& Operator::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
 
 TreeProjection& Operator::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
@@ -129,30 +129,30 @@ TreeProjection& Operator::operator/=( const Expression  & arg ){ return operator
 
 
 Expression Operator::operator+( const double        & arg ) const{ return Expression(*this)+arg; }
-Expression Operator::operator+( const Vector        & arg ) const{ return Expression(*this)+arg; }
-Expression Operator::operator+( const Matrix        & arg ) const{ return Expression(*this)+arg; }
+Expression Operator::operator+( const DVector        & arg ) const{ return Expression(*this)+arg; }
+Expression Operator::operator+( const DMatrix        & arg ) const{ return Expression(*this)+arg; }
 Expression Operator::operator+( const Operator& arg ) const{ return Expression(*this)+arg; }
 Expression Operator::operator+( const Expression    & arg ) const{ return Expression(*this)+arg; }
 
 Expression operator+( const double & arg1, const Operator& arg2 ){ return arg1 + Expression(arg2); }
-Expression operator+( const Vector & arg1, const Operator& arg2 ){ return arg1 + Expression(arg2); }
-Expression operator+( const Matrix & arg1, const Operator& arg2 ){ return arg1 + Expression(arg2); }
+Expression operator+( const DVector & arg1, const Operator& arg2 ){ return arg1 + Expression(arg2); }
+Expression operator+( const DMatrix & arg1, const Operator& arg2 ){ return arg1 + Expression(arg2); }
 
 Expression Operator::operator-( const double        & arg ) const{ return Expression(*this)-arg; }
-Expression Operator::operator-( const Vector        & arg ) const{ return Expression(*this)-arg; }
-Expression Operator::operator-( const Matrix        & arg ) const{ return Expression(*this)-arg; }
+Expression Operator::operator-( const DVector        & arg ) const{ return Expression(*this)-arg; }
+Expression Operator::operator-( const DMatrix        & arg ) const{ return Expression(*this)-arg; }
 Expression Operator::operator-( const Operator& arg ) const{ return Expression(*this)-arg; }
 Expression Operator::operator-( const Expression    & arg ) const{ return Expression(*this)-arg; }
 
 Expression Operator::operator-( ) const{ return -Expression(*this); }
 
 Expression operator-( const double & arg1, const Operator& arg2 ){ return arg1 - Expression(arg2); }
-Expression operator-( const Vector & arg1, const Operator& arg2 ){ return arg1 - Expression(arg2); }
-Expression operator-( const Matrix & arg1, const Operator& arg2 ){ return arg1 - Expression(arg2); }
+Expression operator-( const DVector & arg1, const Operator& arg2 ){ return arg1 - Expression(arg2); }
+Expression operator-( const DMatrix & arg1, const Operator& arg2 ){ return arg1 - Expression(arg2); }
 
 Expression Operator::operator*( const double        & arg ) const{ return Expression(*this)*arg; }
-Expression Operator::operator*( const Vector        & arg ) const{ return Expression(*this)*arg; }
-Expression Operator::operator*( const Matrix        & arg ) const{ return Expression(*this)*arg; }
+Expression Operator::operator*( const DVector        & arg ) const{ return Expression(*this)*arg; }
+Expression Operator::operator*( const DMatrix        & arg ) const{ return Expression(*this)*arg; }
 
 
 Expression Operator::operator*( const Operator& arg ) const{
@@ -170,24 +170,24 @@ Expression Operator::operator*( const Operator& arg ) const{
 Expression Operator::operator*( const Expression    & arg ) const{ return Expression(*this)*arg; }
 
 Expression operator*( const double & arg1, const Operator& arg2 ){ return arg1 * Expression(arg2); }
-Expression operator*( const Vector & arg1, const Operator& arg2 ){ return arg1 * Expression(arg2); }
-Expression operator*( const Matrix & arg1, const Operator& arg2 ){ return arg1 * Expression(arg2); }
+Expression operator*( const DVector & arg1, const Operator& arg2 ){ return arg1 * Expression(arg2); }
+Expression operator*( const DMatrix & arg1, const Operator& arg2 ){ return arg1 * Expression(arg2); }
 
 Expression Operator::operator/( const double        & arg ) const{ return Expression(*this)/arg; }
 Expression Operator::operator/( const Operator& arg ) const{ return Expression(*this)/arg; }
 Expression Operator::operator/( const Expression    & arg ) const{ return Expression(*this)/arg; }
 
 Expression operator/( const double & arg1, const Operator& arg2 ){ return arg1 / Expression(arg2); }
-Expression operator/( const Vector & arg1, const Operator& arg2 ){ return arg1 / Expression(arg2); }
-Expression operator/( const Matrix & arg1, const Operator& arg2 ){ return arg1 / Expression(arg2); }
+Expression operator/( const DVector & arg1, const Operator& arg2 ){ return arg1 / Expression(arg2); }
+Expression operator/( const DMatrix & arg1, const Operator& arg2 ){ return arg1 / Expression(arg2); }
 
 ConstraintComponent Operator::operator<=( const double& ub ) const{ return Expression(*this) <= ub; }
 ConstraintComponent Operator::operator>=( const double& lb ) const{ return Expression(*this) >= lb; }
 ConstraintComponent Operator::operator==( const double&  b ) const{ return Expression(*this) ==  b; }
 
-ConstraintComponent Operator::operator<=( const Vector& ub ) const{ return Expression(*this) <= ub; }
-ConstraintComponent Operator::operator>=( const Vector& lb ) const{ return Expression(*this) >= lb; }
-ConstraintComponent Operator::operator==( const Vector&  b ) const{ return Expression(*this) ==  b; }
+ConstraintComponent Operator::operator<=( const DVector& ub ) const{ return Expression(*this) <= ub; }
+ConstraintComponent Operator::operator>=( const DVector& lb ) const{ return Expression(*this) >= lb; }
+ConstraintComponent Operator::operator==( const DVector&  b ) const{ return Expression(*this) ==  b; }
 
 ConstraintComponent Operator::operator<=( const VariablesGrid& ub ) const{ return Expression(*this) <= ub; }
 ConstraintComponent Operator::operator>=( const VariablesGrid& lb ) const{ return Expression(*this) >= lb; }
@@ -197,9 +197,9 @@ ConstraintComponent operator<=( double lb, const Operator &arg ){ return lb <= E
 ConstraintComponent operator==( double  b, const Operator &arg ){ return  b == Expression(arg); }
 ConstraintComponent operator>=( double ub, const Operator &arg ){ return ub >= Expression(arg); }
 
-ConstraintComponent operator<=( Vector lb, const Operator &arg ){ return lb <= Expression(arg); }
-ConstraintComponent operator==( Vector  b, const Operator &arg ){ return  b == Expression(arg); }
-ConstraintComponent operator>=( Vector ub, const Operator &arg ){ return ub >= Expression(arg); }
+ConstraintComponent operator<=( DVector lb, const Operator &arg ){ return lb <= Expression(arg); }
+ConstraintComponent operator==( DVector  b, const Operator &arg ){ return  b == Expression(arg); }
+ConstraintComponent operator>=( DVector ub, const Operator &arg ){ return ub >= Expression(arg); }
 
 ConstraintComponent operator<=( VariablesGrid lb, const Operator &arg ){ return lb <= Expression(arg); }
 ConstraintComponent operator==( VariablesGrid  b, const Operator &arg ){ return  b == Expression(arg); }

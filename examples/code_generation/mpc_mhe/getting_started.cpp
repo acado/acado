@@ -58,8 +58,8 @@ int main( )
 	h << p << v << phi << omega << a;
 	hN << p << v << phi << omega;
 
-	Matrix W = eye( h.getDim() );
-	Matrix WN = eye( hN.getDim() );
+	DMatrix W = eye( h.getDim() );
+	DMatrix WN = eye( hN.getDim() );
 	WN *= 5;
 
 	// Or:

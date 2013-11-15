@@ -209,7 +209,7 @@ Expression KinVec::explicitize(const Expression & ddq_) const {
     
     uint j;
     uint count;
-    Matrix p=ddq.getDependencyPattern(ddq_);
+    DMatrix p=ddq.getDependencyPattern(ddq_);
 
     for ( j = 0; j < ddq_.getDim(); j++ ){
        for ( i = 0; i < ddq.getDim(); i++ ){

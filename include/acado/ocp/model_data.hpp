@@ -110,8 +110,8 @@ public:
 	 *  \param diffs_output 	  	The derivatives of the output function to be added.
 	 *  \param dim					The dimension of the output function.
      *  \param measurements	  		The measurement grid per interval
-	 *  \param colInd				Vector stores the column indices of the elements for Compressed Row Storage (CRS).
-	 *  \param rowPtr				Vector stores the locations that start a row for Compressed Row Storage (CRS).
+	 *  \param colInd				DVector stores the column indices of the elements for Compressed Row Storage (CRS).
+	 *  \param rowPtr				DVector stores the locations that start a row for Compressed Row Storage (CRS).
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
@@ -139,14 +139,14 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	 returnValue getNumSteps( Vector& _numSteps ) const;
+	 returnValue getNumSteps( DVector& _numSteps ) const;
 
 
 	 /** Sets the number of integration steps along the horizon.
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	 returnValue setNumSteps( const Vector& _numSteps );
+	 returnValue setNumSteps( const DVector& _numSteps );
 
 
      /** Returns the output functions.
@@ -167,7 +167,7 @@ public:
       *
       * \return The dependency matrix for each output function, defined externally.
       */
-     std::vector<Matrix> getOutputDependencies( ) const;
+     std::vector<DMatrix> getOutputDependencies( ) const;
 
 
      /** Assigns Differential Equation to be used by the integrator.
@@ -187,7 +187,7 @@ public:
  	 *
  	 *	\return SUCCESSFUL_RETURN
  	 */
- 	returnValue setNARXmodel( const uint _delay, const Matrix& _parms );
+ 	returnValue setNARXmodel( const uint _delay, const DMatrix& _parms );
 
 
      /** .
@@ -196,7 +196,7 @@ public:
       *
       *	\return SUCCESSFUL_RETURN
       */
-     returnValue setLinearInput( const Matrix& M1_, const Matrix& A1_, const Matrix& B1_ );
+     returnValue setLinearInput( const DMatrix& M1_, const DMatrix& A1_, const DMatrix& B1_ );
 
 
      /** .
@@ -205,7 +205,7 @@ public:
       *
       *	\return SUCCESSFUL_RETURN
       */
-     returnValue setLinearOutput( const Matrix& M3_, const Matrix& A3_, const OutputFcn& rhs_ );
+     returnValue setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, const OutputFcn& rhs_ );
 
 
      /** .
@@ -214,7 +214,7 @@ public:
       *
       *	\return SUCCESSFUL_RETURN
       */
-     returnValue setLinearOutput( 	const Matrix& M3_, const Matrix& A3_,
+     returnValue setLinearOutput( 	const DMatrix& M3_, const DMatrix& A3_,
     		 	 	 	 			const std::string& _rhs3,
     		 	 	 	 			const std::string& _diffs3 );
 
@@ -268,7 +268,7 @@ public:
       *
       *  \return SUCCESSFUL_RETURN
       */
-     returnValue getNARXmodel( uint& _delay, Matrix& _parms ) const;
+     returnValue getNARXmodel( uint& _delay, DMatrix& _parms ) const;
 
 
      /** .
@@ -277,7 +277,7 @@ public:
       *
       *	\return SUCCESSFUL_RETURN
       */
-     returnValue getLinearInput( Matrix& M1_, Matrix& A1_, Matrix& B1_ ) const;
+     returnValue getLinearInput( DMatrix& M1_, DMatrix& A1_, DMatrix& B1_ ) const;
 
 
      /** .
@@ -286,7 +286,7 @@ public:
       *
       *	\return SUCCESSFUL_RETURN
       */
-     returnValue getLinearOutput( Matrix& M3_, Matrix& A3_, OutputFcn& rhs_ ) const;
+     returnValue getLinearOutput( DMatrix& M3_, DMatrix& A3_, OutputFcn& rhs_ ) const;
 
 
      /** .
@@ -295,7 +295,7 @@ public:
       *
       *	\return SUCCESSFUL_RETURN
       */
-     returnValue getLinearOutput( Matrix& M3_, Matrix& A3_ ) const;
+     returnValue getLinearOutput( DMatrix& M3_, DMatrix& A3_ ) const;
 
 
      BooleanType hasEquidistantControlGrid		() const;
@@ -362,7 +362,7 @@ public:
       *
       *  \return dimensions of the different output functions.
       */
-     Vector getDimOutputs( ) const;
+     DVector getDimOutputs( ) const;
 
 
      /** Returns the number of different output functions.
@@ -383,7 +383,7 @@ public:
       *
       *  \return number of measurements for the different output functions.
       */
-     Vector getNumMeas( ) const;
+     DVector getNumMeas( ) const;
 
 
      const std::string getFileNameModel() const;
@@ -434,7 +434,7 @@ public:
      DifferentialEquation differentialEquation;  	/**< The differential equations in the model. */
 
      Grid integrationGrid;							/**< Integration grid. */
-     Vector numSteps;								/**< The number of integration steps per shooting interval. */
+     DVector numSteps;								/**< The number of integration steps per shooting interval. */
 
      std::vector<Expression> outputExpressions;		/**< A vector with the output functions.     				*/
      std::vector<Grid> outputGrids;					/**< A separate grid for each output function.  			*/
@@ -442,25 +442,25 @@ public:
      std::vector<uint> num_meas;					/**< Number of measurements for the different output functions. */
      std::vector<std::string> outputNames;				/**< A separate function name for each output. */
      std::vector<std::string> diffs_outputNames;			/**< A separate function name for evaluating the derivatives of each output. */
-     std::vector<Vector> colInd_outputs;			/**< A separate Vector of column indices for each output if in CRS format. */
-     std::vector<Vector> rowPtr_outputs;			/**< A separate Vector of row pointers for each output if in CRS format. */
+     std::vector<DVector> colInd_outputs;			/**< A separate DVector of column indices for each output if in CRS format. */
+     std::vector<DVector> rowPtr_outputs;			/**< A separate DVector of row pointers for each output if in CRS format. */
 
      // ------------------------------------
      // ------------------------------------
      // 		NEW VARIABLES IN VERSION 2.0:
      // ------------------------------------
      // ------------------------------------
-     Matrix M1;
-     Matrix A1;
-     Matrix B1;
+     DMatrix M1;
+     DMatrix A1;
+     DMatrix B1;
 
-     Matrix M3;
-     Matrix A3;
+     DMatrix M3;
+     DMatrix A3;
      OutputFcn rhs3;
 
      // NARX model:
      uint delay;
-     Matrix parms;
+     DMatrix parms;
 
 };
 

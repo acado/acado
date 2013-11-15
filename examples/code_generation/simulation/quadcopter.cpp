@@ -103,7 +103,7 @@ int main( ){
 	// ----------------------------------------------------------
 	
 	// LINEAR INPUT SYSTEM (STAGE 1):
-	Matrix M1, A1, B1;
+	DMatrix M1, A1, B1;
 	M1 = eye(12);
 	A1 = zeros(12,12);
 	B1 = zeros(12,4);
@@ -135,7 +135,7 @@ int main( ){
 	f2 << (A*Cl*rho*(W1*W1 + W2*W2 + W3*W3 + W4*W4)*(q1*q1 - q2*q2 - q3*q3 + q4*q4))/(2*m) - g; 
 	
 	// LINEAR OUTPUT SYSTEM (STAGE 3):
-	Matrix M3, A3;
+	DMatrix M3, A3;
 	M3 = eye(6);
 	A3 = zeros(6,6);
 	

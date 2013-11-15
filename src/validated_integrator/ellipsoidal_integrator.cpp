@@ -241,7 +241,7 @@ void EllipsoidalIntegrator::updateQ( Tmatrix<double> C, Tmatrix<Interval> R ){
 	for( int i=0; i<nx; i++ ) trQ += Q(i,i)/(Q(i,i)+1e-8);
 	trQ = ::sqrt(trQ);
 	
-	Vector sqrR(nx);
+	DVector sqrR(nx);
 	for( int i=0; i<nx; i++ ) sqrR(i) = acadoMax(::fabs(R(i).l()),::fabs(R(i).u()))/::sqrt(Q(i,i)+1e-8);
 	
 	double kappa = trQ;

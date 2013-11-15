@@ -64,14 +64,14 @@ int main( ){
     // --------------------
        EvaluationPoint zz(f);
 
-       Vector xx(2);
+       DVector xx(2);
        xx.setZero();
        xx(0) = 2.0;
        xx(1) = 0.0;
 
        zz.setX(xx);
 
-       Vector result = f.evaluate( zz );
+       DVector result = f.evaluate( zz );
        result.print("result");
 
     return 0;

@@ -147,7 +147,7 @@ returnValue ShootingMethod::addStage( const DynamicSystem  &dynamicSystem_,
         tmp = (int) breakPoints( breakPoints.getNumRows()-1, 0 );
     }
 
-    Matrix stageIndices(1,5);
+    DMatrix stageIndices(1,5);
 
     stageIndices(0,0) = stageIntervals.getNumIntervals() + tmp;
     stageIndices(0,1) = differentialEquation_.getStartTimeIdx();
@@ -214,11 +214,11 @@ returnValue ShootingMethod::evaluate(	OCPiterate &iter
     uint run1;
     double tStart, tEnd;
 
-    Vector x ;  nx = iter.getNX ();
-    Vector xa;  na = iter.getNXA();
-    Vector p ;  np = iter.getNP ();
-    Vector u ;  nu = iter.getNU ();
-    Vector w ;  nw = iter.getNW ();
+    DVector x ;  nx = iter.getNX ();
+    DVector xa;  na = iter.getNXA();
+    DVector p ;  np = iter.getNP ();
+    DVector u ;  nu = iter.getNU ();
+    DVector w ;  nw = iter.getNW ();
 
 	VariablesGrid xAll;
 	VariablesGrid xaAll;
@@ -279,8 +279,8 @@ returnValue ShootingMethod::evaluate(	OCPiterate &iter
 			return ACADOERROR( RET_UNABLE_TO_INTEGRATE_SYSTEM );
 
 		
-		Vector xOld;
-		Vector pOld = p;
+		DVector xOld;
+		DVector pOld = p;
 		
 		if ( evaluationGrid.getNumPoints( ) <= 2 )
 		{
@@ -325,11 +325,11 @@ returnValue ShootingMethod::evaluate(	OCPiterate &iter
 
 
 returnValue ShootingMethod::differentiateBackward( const int    &idx ,
-                                                   const Matrix &seed,
-                                                         Matrix &Gx  ,
-                                                         Matrix &Gp  ,
-                                                         Matrix &Gu  ,
-                                                         Matrix &Gw    ){
+                                                   const DMatrix &seed,
+                                                         DMatrix &Gx  ,
+                                                         DMatrix &Gp  ,
+                                                         DMatrix &Gu  ,
+                                                         DMatrix &Gw    ){
 
     uint run1;
 
@@ -340,11 +340,11 @@ returnValue ShootingMethod::differentiateBackward( const int    &idx ,
 
     for( run1 = 0; run1 < seed.getNumRows(); run1++ ){
 
-         Vector tmp = seed.getRow( run1 );
-         Vector tmpX( nx );
-         Vector tmpP( np );
-         Vector tmpU( nu );
-         Vector tmpW( nw );
+         DVector tmp = seed.getRow( run1 );
+         DVector tmpX( nx );
+         DVector tmpP( np );
+         DVector tmpU( nu );
+         DVector tmpW( nw );
 
          ACADO_TRY( integrator[idx]->setBackwardSeed( 1, tmp )                              );
          ACADO_TRY( integrator[idx]->integrateSensitivities( )                              );
@@ -362,11 +362,11 @@ returnValue ShootingMethod::differentiateBackward( const int    &idx ,
 
 
 returnValue ShootingMethod::differentiateForward(  const int     &idx,
-                                                   const Matrix  &dX ,
-                                                   const Matrix  &dP ,
-                                                   const Matrix  &dU ,
-                                                   const Matrix  &dW ,
-                                                         Matrix  &D    ){
+                                                   const DMatrix  &dX ,
+                                                   const DMatrix  &dP ,
+                                                   const DMatrix  &dU ,
+                                                   const DMatrix  &dW ,
+                                                         DMatrix  &D    ){
 
     int run1;
     int n = 0;
@@ -380,12 +380,12 @@ returnValue ShootingMethod::differentiateForward(  const int     &idx,
 
     for( run1 = 0; run1 < n; run1++ ){
 
-         Vector tmp;
+         DVector tmp;
 
-         Vector tmpX; if( dX.isEmpty() == BT_FALSE ) tmpX = dX.getCol( run1 );
-         Vector tmpP; if( dP.isEmpty() == BT_FALSE ) tmpP = dP.getCol( run1 );
-         Vector tmpU; if( dU.isEmpty() == BT_FALSE ) tmpU = dU.getCol( run1 );
-         Vector tmpW; if( dW.isEmpty() == BT_FALSE ) tmpW = dW.getCol( run1 );
+         DVector tmpX; if( dX.isEmpty() == BT_FALSE ) tmpX = dX.getCol( run1 );
+         DVector tmpP; if( dP.isEmpty() == BT_FALSE ) tmpP = dP.getCol( run1 );
+         DVector tmpU; if( dU.isEmpty() == BT_FALSE ) tmpU = dU.getCol( run1 );
+         DVector tmpW; if( dW.isEmpty() == BT_FALSE ) tmpW = dW.getCol( run1 );
 
          ACADO_TRY( integrator[idx]->setForwardSeed( 1, tmpX, tmpP, tmpU, tmpW ) );
          ACADO_TRY( integrator[idx]->integrateSensitivities( )                   );
@@ -399,16 +399,16 @@ returnValue ShootingMethod::differentiateForward(  const int     &idx,
 
 
 returnValue ShootingMethod::differentiateForwardBackward( const int     &idx ,
-                                                          const Matrix  &dX  ,
-                                                          const Matrix  &dP  ,
-                                                          const Matrix  &dU  ,
-                                                          const Matrix  &dW  ,
-                                                          const Matrix  &seed,
-                                                                Matrix  &D   ,
-                                                                Matrix  &ddX ,
-                                                                Matrix  &ddP ,
-                                                                Matrix  &ddU ,
-                                                                Matrix  &ddW   ){
+                                                          const DMatrix  &dX  ,
+                                                          const DMatrix  &dP  ,
+                                                          const DMatrix  &dU  ,
+                                                          const DMatrix  &dW  ,
+                                                          const DMatrix  &seed,
+                                                                DMatrix  &D   ,
+                                                                DMatrix  &ddX ,
+                                                                DMatrix  &ddP ,
+                                                                DMatrix  &ddU ,
+                                                                DMatrix  &ddW   ){
 
     int run1;
     int n = 0;
@@ -427,12 +427,12 @@ returnValue ShootingMethod::differentiateForwardBackward( const int     &idx ,
 
     for( run1 = 0; run1 < n; run1++ ){
 
-         Vector tmp;
+         DVector tmp;
 
-         Vector tmpX; if( dX.isEmpty() == BT_FALSE ) tmpX = dX.getCol( run1 );
-         Vector tmpP; if( dP.isEmpty() == BT_FALSE ) tmpP = dP.getCol( run1 );
-         Vector tmpU; if( dU.isEmpty() == BT_FALSE ) tmpU = dU.getCol( run1 );
-         Vector tmpW; if( dW.isEmpty() == BT_FALSE ) tmpW = dW.getCol( run1 );
+         DVector tmpX; if( dX.isEmpty() == BT_FALSE ) tmpX = dX.getCol( run1 );
+         DVector tmpP; if( dP.isEmpty() == BT_FALSE ) tmpP = dP.getCol( run1 );
+         DVector tmpU; if( dU.isEmpty() == BT_FALSE ) tmpU = dU.getCol( run1 );
+         DVector tmpW; if( dW.isEmpty() == BT_FALSE ) tmpW = dW.getCol( run1 );
 
          ACADO_TRY( integrator[idx]->setForwardSeed( 1, tmpX, tmpP, tmpU, tmpW ) );
          ACADO_TRY( integrator[idx]->integrateSensitivities( )                   );
@@ -440,12 +440,12 @@ returnValue ShootingMethod::differentiateForwardBackward( const int     &idx ,
 
          D.setCol( run1, tmp );
 
-         Vector tmp2 = seed.getCol(0);
+         DVector tmp2 = seed.getCol(0);
 
-         Vector tmpX2( nx );
-         Vector tmpP2( np );
-         Vector tmpU2( nu );
-         Vector tmpW2( nw );
+         DVector tmpX2( nx );
+         DVector tmpP2( np );
+         DVector tmpU2( nu );
+         DVector tmpW2( nw );
 
          ACADO_TRY( integrator[idx]->setBackwardSeed( 2, tmp2 )                                 );
          ACADO_TRY( integrator[idx]->integrateSensitivities( )                                  );
@@ -477,7 +477,7 @@ returnValue ShootingMethod::evaluateSensitivities(){
 
         for( i = 0; i < N; i++ ){
 
-             Matrix seed, X, P, U, W;
+             DMatrix seed, X, P, U, W;
              bSeed.getSubBlock( 0, i, seed );
 
              ACADO_TRY( differentiateBackward( i, seed, X, P, U, W ) );
@@ -498,7 +498,7 @@ returnValue ShootingMethod::evaluateSensitivities(){
 
     for( i = 0; i < N; i++ ){
 
-        Matrix X, P, U, W, D, E;
+        DMatrix X, P, U, W, D, E;
 
         if( xSeed.isEmpty() == BT_FALSE ) xSeed.getSubBlock( i, 0, X );
         if( pSeed.isEmpty() == BT_FALSE ) pSeed.getSubBlock( i, 0, P );
@@ -516,14 +516,14 @@ returnValue ShootingMethod::evaluateSensitivities(){
 
 
 
-returnValue ShootingMethod::update( Matrix &G, const Matrix &A, const Matrix &B ){
+returnValue ShootingMethod::update( DMatrix &G, const DMatrix &A, const DMatrix &B ){
 
     if( B.getNumCols() == 0 ) return SUCCESSFUL_RETURN;
 
-    Matrix E = eye(B.getNumCols());
+    DMatrix E = eye(B.getNumCols());
     E *= 1e-10;
 
-    Matrix S = ((A^A)+E).getInverse();
+    DMatrix S = ((A^A)+E).getInverse();
     G += (B-G*A)*(S*A.transpose());
     return SUCCESSFUL_RETURN;
 }
@@ -535,8 +535,8 @@ returnValue ShootingMethod::evaluateSensitivitiesLifted( ){
     int i,j;
 
     dForward.init( N, 5 );
-    Matrix Gx, *Gu, b, d, D, E, X, P, U, W, A, B;
-    Gu = new Matrix[N];
+    DMatrix Gx, *Gu, b, d, D, E, X, P, U, W, A, B;
+    Gu = new DMatrix[N];
 
     for( i = 0; i < N; i++ ){
 
@@ -594,7 +594,7 @@ returnValue ShootingMethod::evaluateSensitivities( const BlockMatrix &seed, Bloc
 
     for( i = 0; i < N; i++ ){
 
-        Matrix X, P, U, W, D, E, HX, HP, HU, HW, S;
+        DMatrix X, P, U, W, D, E, HX, HP, HU, HW, S;
 
         if( xSeed.isEmpty() == BT_FALSE ) xSeed.getSubBlock( i, 0, X );
         if( pSeed.isEmpty() == BT_FALSE ) pSeed.getSubBlock( i, 0, P );
@@ -713,7 +713,7 @@ returnValue ShootingMethod::logTrajectory( const OCPiterate &iter ){
 
     VariablesGrid logX, logXA, logP, logU, logW, logI, tmp,tmp2;
 
-    Matrix intervalPoints(N+1,1);
+    DMatrix intervalPoints(N+1,1);
     intervalPoints(0,0) = 0.0;
 
     j = 0;

@@ -99,7 +99,7 @@ class ClippingFunctionality
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		returnValue setControlLowerLimits(	const Vector& _lowerLimit
+		returnValue setControlLowerLimits(	const DVector& _lowerLimit
 											);
 
 		/** Assigns new lower limit on given component of the control signal.
@@ -121,7 +121,7 @@ class ClippingFunctionality
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		returnValue setControlUpperLimits(	const Vector& _upperLimit
+		returnValue setControlUpperLimits(	const DVector& _upperLimit
 											);
 
 		/** Assigns new upper limit on given component of the control signal.
@@ -144,7 +144,7 @@ class ClippingFunctionality
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		returnValue setParameterLowerLimits(	const Vector& _lowerLimit
+		returnValue setParameterLowerLimits(	const DVector& _lowerLimit
 												);
 
 		/** Assigns new lower limit on given component of the parameter signal.
@@ -166,7 +166,7 @@ class ClippingFunctionality
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		returnValue setParameterUpperLimits(	const Vector& _upperLimit
+		returnValue setParameterUpperLimits(	const DVector& _upperLimit
 												);
 
 		/** Assigns new upper limit on given component of the parameter signal.
@@ -207,8 +207,8 @@ class ClippingFunctionality
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		returnValue clipSignals(	Vector& _u,
-									Vector& _p = emptyVector
+		returnValue clipSignals(	DVector& _u,
+									DVector& _p = emptyVector
 									);
 
 
@@ -231,11 +231,11 @@ class ClippingFunctionality
 	//
 	protected:
 
-		Vector lowerLimitControls;					/**< Lower limits on control signals. */
-		Vector upperLimitControls;					/**< Upper limits on control signals. */
+		DVector lowerLimitControls;					/**< Lower limits on control signals. */
+		DVector upperLimitControls;					/**< Upper limits on control signals. */
 
-		Vector lowerLimitParameters;				/**< Lower limits on parameter signals. */
-		Vector upperLimitParameters;				/**< Upper limits on parameter signals. */
+		DVector lowerLimitParameters;				/**< Lower limits on parameter signals. */
+		DVector upperLimitParameters;				/**< Upper limits on parameter signals. */
 };
 
 

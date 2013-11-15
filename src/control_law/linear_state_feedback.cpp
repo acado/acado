@@ -49,7 +49,7 @@ LinearStateFeedback::LinearStateFeedback( ) : ControlLaw( ), ClippingFunctionali
 }
 
 
-LinearStateFeedback::LinearStateFeedback(	const Matrix& _K,
+LinearStateFeedback::LinearStateFeedback(	const DMatrix& _K,
 											double _samplingTime
 											) : ControlLaw( _samplingTime ), ClippingFunctionality( _K.getNumRows() )
 {
@@ -90,8 +90,8 @@ ControlLaw* LinearStateFeedback::clone( ) const
 
 
 returnValue LinearStateFeedback::init(	double startTime,
-										const Vector &x0_,
-										const Vector &p_,
+										const DVector &x0_,
+										const DVector &p_,
 										const VariablesGrid& _yRef
 										)
 {
@@ -101,8 +101,8 @@ returnValue LinearStateFeedback::init(	double startTime,
 
 
 returnValue LinearStateFeedback::step(	double currentTime,
-										const Vector& _x,
-										const Vector& _p,
+										const DVector& _x,
+										const DVector& _p,
 										const VariablesGrid& _yRef
 										)
 {
@@ -115,7 +115,7 @@ returnValue LinearStateFeedback::step(	double currentTime,
 
 	/* 1) Use reference trajectory if it is defined */
 	// set default reference to zero
-	Vector xRef( _x );
+	DVector xRef( _x );
 	
 	if ( _yRef.getNumPoints( ) > 0 )
 	{

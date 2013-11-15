@@ -77,14 +77,14 @@ int main( )
     h << vW;
 	h << F;
 
-    Matrix Q = zeros(5,5); // LSQ coefficient matrix
+    DMatrix Q = zeros(5,5); // LSQ coefficient matrix
 	Q(0,0) = 10.0;
 	Q(1,1) = 10.0;
 	Q(2,2) = 1.0;
 	Q(3,3) = 1.0;
 	Q(4,4) = 1.0e-8;
 
-    Vector r(5); // Reference
+    DVector r(5); // Reference
     r.setAll( 0.0 );
 
 
@@ -132,13 +132,13 @@ int main( )
 	double startTime = 0.0;
 	double endTime   = 2.5;
 	
-	Vector x0(4);
+	DVector x0(4);
 	x0.setZero();
 
 	// 	hand-coding call to 
 	//	sim.init( x0 )
 
-	Vector uCon;
+	DVector uCon;
 	VariablesGrid ySim;
 	
 	if (controller.init( startTime,x0 ) != SUCCESSFUL_RETURN)
@@ -180,7 +180,7 @@ int main( )
 //     // ----------------------------------------------------------
 // 	SimulationEnvironment sim( 0.0,3.0,process,controller );
 // 
-// 	Vector x0(4);
+// 	DVector x0(4);
 // 	x0.setZero();
 // 
 // 	sim.init( x0 );

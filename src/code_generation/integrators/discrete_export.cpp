@@ -332,13 +332,13 @@ returnValue DiscreteTimeExport::setup( )
 	}
 	// PART 1
 	if( NX1 > 0 ) {
-		Matrix zeroR = zeros(1, NX2+NX3);
+		DMatrix zeroR = zeros(1, NX2+NX3);
 		ExportForLoop loop1( i,0,NX1 );
 		loop1.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1,i*NX+NX+NXA+NX ) == zeroR );
 		integrate.addStatement( loop1 );
 	}
     // PART 2
-    Matrix zeroR = zeros(1, NX3);
+    DMatrix zeroR = zeros(1, NX3);
     if( NX2 > 0 ) {
     	ExportForLoop loop2( i,NX1,NX1+NX2 );
     	loop2.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1+NX2,i*NX+NX+NXA+NX ) == zeroR );
@@ -430,7 +430,7 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 }
 
 
-returnValue DiscreteTimeExport::setNARXmodel( const uint delay, const Matrix& parms ) {
+returnValue DiscreteTimeExport::setNARXmodel( const uint delay, const DMatrix& parms ) {
 
 	return RET_INVALID_OPTION;
 }
@@ -455,7 +455,7 @@ returnValue DiscreteTimeExport::setupOutput(  const std::vector<Grid> outputGrid
 									  	  	  	  	const std::vector<std::string> _outputNames,
 									  	  	  	  	const std::vector<std::string> _diffs_outputNames,
 									  	  	  	  	const std::vector<uint> _dims_output,
-									  	  	  	  	const std::vector<Matrix> _outputDependencies ) {
+									  	  	  	  	const std::vector<DMatrix> _outputDependencies ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }

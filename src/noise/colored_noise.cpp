@@ -126,7 +126,7 @@ returnValue ColoredNoise::init(	uint seed
 }
 
 
-returnValue ColoredNoise::step( Vector& _w
+returnValue ColoredNoise::step( DVector& _w
 								)
 {
 	return ACADOERROR( RET_NOT_YET_IMPLEMENTED );

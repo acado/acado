@@ -56,13 +56,13 @@ int main( ){
 
     // READ A MATRIX "A" FROM A FILE:
     // ------------------------------
-    Matrix A; A.read( "matrix_vector_ocp_A.txt" );
-    Matrix B; B.read( "matrix_vector_ocp_B.txt" );
+    DMatrix A; A.read( "matrix_vector_ocp_A.txt" );
+    DMatrix B; B.read( "matrix_vector_ocp_B.txt" );
 
 
     // READ A VECTOR "x0" FROM A FILE:
     // -------------------------------
-    Vector x0; x0.read( "matrix_vector_ocp_x0.txt" );
+    DVector x0; x0.read( "matrix_vector_ocp_x0.txt" );
 
 
     // DEFINE A DIFFERENTIAL EQUATION:

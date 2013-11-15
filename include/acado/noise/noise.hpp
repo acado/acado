@@ -120,7 +120,7 @@ class Noise
 		 *	        RET_BLOCK_NOT_READY, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		virtual returnValue step(	Vector& _w
+		virtual returnValue step(	DVector& _w
 									) = 0;
 
 		/** Generates a noise vector sequence based on current internal settings.

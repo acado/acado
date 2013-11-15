@@ -49,7 +49,7 @@ int main( )
 
 	equidistantGrid.setZero();
 
-	Vector v(2);
+	DVector v(2);
 	v(0) = 1.0;
 	v(1) = 2.0;
 	equidistantGrid.setVector(1, v);

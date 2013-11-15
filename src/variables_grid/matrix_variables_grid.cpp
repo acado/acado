@@ -103,7 +103,7 @@ MatrixVariablesGrid::MatrixVariablesGrid(	uint _nRows,
 }
 
 
-MatrixVariablesGrid::MatrixVariablesGrid(	const Matrix& arg,
+MatrixVariablesGrid::MatrixVariablesGrid(	const DMatrix& arg,
 											const Grid& _grid,
 											VariableType _type
 											) : Grid( )
@@ -154,7 +154,7 @@ MatrixVariablesGrid& MatrixVariablesGrid::operator=(	const MatrixVariablesGrid& 
 }
 
 
-MatrixVariablesGrid& MatrixVariablesGrid::operator=(	const Matrix& rhs
+MatrixVariablesGrid& MatrixVariablesGrid::operator=(	const DMatrix& rhs
 														)
 {
 	init( rhs.getNumCols()-1,1,rhs.getNumRows( ),getType() );
@@ -254,7 +254,7 @@ returnValue MatrixVariablesGrid::init(	uint _nRows,
 }
 
 
-returnValue MatrixVariablesGrid::init(	const Matrix& arg,
+returnValue MatrixVariablesGrid::init(	const DMatrix& arg,
 										const Grid& _grid,
 										VariableType _type
 										)
@@ -275,7 +275,7 @@ returnValue MatrixVariablesGrid::init(	const Matrix& arg,
 
 
 
-returnValue MatrixVariablesGrid::addMatrix(	const Matrix& newMatrix,
+returnValue MatrixVariablesGrid::addMatrix(	const DMatrix& newMatrix,
 											double newTime
 											)
 {
@@ -285,7 +285,7 @@ returnValue MatrixVariablesGrid::addMatrix(	const Matrix& newMatrix,
 
 
 returnValue MatrixVariablesGrid::setMatrix(	uint pointIdx,
-											const Matrix& _value
+											const DMatrix& _value
 											) const
 {
 	ASSERT( values != 0 );
@@ -299,7 +299,7 @@ returnValue MatrixVariablesGrid::setMatrix(	uint pointIdx,
 }
 
 
-returnValue MatrixVariablesGrid::setAllMatrices(	const Matrix& _values
+returnValue MatrixVariablesGrid::setAllMatrices(	const DMatrix& _values
 													)
 {
 	for( uint i = 0; i < getNumPoints(); i++ )
@@ -309,7 +309,7 @@ returnValue MatrixVariablesGrid::setAllMatrices(	const Matrix& _values
 }
 
 
-Matrix MatrixVariablesGrid::getMatrix(	uint pointIdx
+DMatrix MatrixVariablesGrid::getMatrix(	uint pointIdx
 										) const
 {
 	ASSERT( values != 0 );
@@ -321,7 +321,7 @@ Matrix MatrixVariablesGrid::getMatrix(	uint pointIdx
 }
 
 
-Matrix MatrixVariablesGrid::getFirstMatrix( ) const
+DMatrix MatrixVariablesGrid::getFirstMatrix( ) const
 {
 	if ( getNumPoints( ) <= 0 )
 		return emptyMatrix;
@@ -330,7 +330,7 @@ Matrix MatrixVariablesGrid::getFirstMatrix( ) const
 }
 
 
-Matrix MatrixVariablesGrid::getLastMatrix( ) const
+DMatrix MatrixVariablesGrid::getLastMatrix( ) const
 {
 	if ( getNumPoints( ) <= 0 )
 		return emptyMatrix;
@@ -387,7 +387,7 @@ returnValue MatrixVariablesGrid::appendValues( const MatrixVariablesGrid& arg )
 	if ( getNumPoints( ) != arg.getNumPoints( ) )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
-	Vector tmp1,tmp2;
+	DVector tmp1,tmp2;
 
 	for( uint i=0; i<getNumPoints(); ++i )
 	{
@@ -646,7 +646,7 @@ MatrixVariablesGrid& MatrixVariablesGrid::shiftTimes(	double timeShift
 }
 
 
-MatrixVariablesGrid& MatrixVariablesGrid::shiftBackwards( Matrix lastValue )
+MatrixVariablesGrid& MatrixVariablesGrid::shiftBackwards( DMatrix lastValue )
 {
 	if ( getNumPoints() < 2 ){
         if( lastValue.isEmpty() == BT_FALSE )
@@ -665,7 +665,7 @@ MatrixVariablesGrid& MatrixVariablesGrid::shiftBackwards( Matrix lastValue )
 
 
 
-Vector MatrixVariablesGrid::linearInterpolation( double time ) const
+DVector MatrixVariablesGrid::linearInterpolation( double time ) const
 {
     uint idx1 = getFloorIndex( time );
     uint idx2 = getCeilIndex ( time );
@@ -674,8 +674,8 @@ Vector MatrixVariablesGrid::linearInterpolation( double time ) const
 	ASSERT( idx1 < getNumPoints( ) );
 	ASSERT( idx2 < getNumPoints( ) );
 
-    Vector tmp1( values[idx1]->getCol( 0 ) );
-    Vector tmp2( values[idx2]->getCol( 0 ) );
+    DVector tmp1( values[idx1]->getCol( 0 ) );
+    DVector tmp2( values[idx2]->getCol( 0 ) );
 
     double t1 = getTime( idx1 );
     double t2 = getTime( idx2 );
@@ -685,7 +685,7 @@ Vector MatrixVariablesGrid::linearInterpolation( double time ) const
     tmp1 *= (t2 - time);
     tmp2 *= (time - t1);
 
-    Vector tmp = tmp1 + tmp2;
+    DVector tmp = tmp1 + tmp2;
     tmp /= (t2 - t1);
 
     return tmp;

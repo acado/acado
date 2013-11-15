@@ -89,11 +89,11 @@ returnValue PathConstraint::evaluate( const OCPiterate& iter ){
 
     for( run1 = 0; run1 <= T; run1++ ){
 
-        Matrix resL( nc, 1 );
-        Matrix resU( nc, 1 );
+        DMatrix resL( nc, 1 );
+        DMatrix resU( nc, 1 );
 
 		z[0].setZ( run1, iter );
-		Vector result = fcn[0].evaluate( z[0],run1 );
+		DVector result = fcn[0].evaluate( z[0],run1 );
 
         for( run2 = 0; run2 < nc; run2++ ){
              resL( run2, 0 ) = lb[run1][run2] - result(run2);
@@ -137,16 +137,16 @@ returnValue PathConstraint::evaluateSensitivities(){
 
         for( run3 = 0; run3 < N; run3++ )
 		{
-            Matrix bseed_;
+            DMatrix bseed_;
             bSeed->getSubBlock( 0, run3, bseed_);
 			
             nBDirs = bSeed->getNumRows( 0, run3 );
 
-            Matrix Dx ( nBDirs, nx );
-            Matrix Dxa( nBDirs, na );
-            Matrix Dp ( nBDirs, np );
-            Matrix Du ( nBDirs, nu );
-            Matrix Dw ( nBDirs, nw );
+            DMatrix Dx ( nBDirs, nx );
+            DMatrix Dxa( nBDirs, na );
+            DMatrix Dp ( nBDirs, np );
+            DMatrix Du ( nBDirs, nu );
+            DMatrix Dw ( nBDirs, nw );
 
 			for( run1 = 0; run1 < nBDirs; run1++ )
 			{
@@ -200,7 +200,7 @@ returnValue PathConstraint::evaluateSensitivities( int &count, const BlockMatrix
 
     for( run3 = 0; run3 < N; run3++ ){
 
-        Matrix seed;
+        DMatrix seed;
         seed_.getSubBlock( count, 0, seed, nc, 1 );
         count++;
 
@@ -224,17 +224,17 @@ returnValue PathConstraint::evaluateSensitivities( int &count, const BlockMatrix
         for( run1 = 0; run1 < fcn[0].getNumberOfVariables()+1; run1++ )
             fseed[run1] = 0.0;
 
-        Matrix Dx ( nc, nx );
-        Matrix Dxa( nc, na );
-        Matrix Dp ( nc, np );
-        Matrix Du ( nc, nu );
-        Matrix Dw ( nc, nw );
+        DMatrix Dx ( nc, nx );
+        DMatrix Dxa( nc, na );
+        DMatrix Dp ( nc, np );
+        DMatrix Du ( nc, nu );
+        DMatrix Dw ( nc, nw );
 
-        Matrix Hx ( nx, nx );
-        Matrix Hxa( nx, na );
-        Matrix Hp ( nx, np );
-        Matrix Hu ( nx, nu );
-        Matrix Hw ( nx, nw );
+        DMatrix Hx ( nx, nx );
+        DMatrix Hxa( nx, na );
+        DMatrix Hp ( nx, np );
+        DMatrix Hu ( nx, nu );
+        DMatrix Hw ( nx, nw );
 
         for( run2 = 0; run2 < nx; run2++ ){
 

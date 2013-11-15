@@ -56,21 +56,21 @@ int main()
 	// ------------------------
 	EvaluationPoint z(f);
 
-	Vector diffState(2);
+	DVector diffState(2);
 
 	diffState(0) = 1.0;
 	diffState(1) = 2.0;
 
 	z.setX( diffState );
 
-	Vector ff = f(z);
+	DVector ff = f(z);
 
 	ff.print();
 
 	// COMPUTE THE BACKWARD DERIVATIVE:
 	// --------------------------------
 
-	Vector seed(f.getDim());
+	DVector seed(f.getDim());
 
 	seed(0) = 1.0;
 	seed(1) = 0.0;

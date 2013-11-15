@@ -82,15 +82,15 @@ public:
     /** Loading Expressions (deep copy). */
     Transition& operator==( const double &arg );
 
-    /** Loading Symbolic Vector (deep copy). */
-    Transition& operator==( const Vector& arg );
+    /** Loading Symbolic DVector (deep copy). */
+    Transition& operator==( const DVector& arg );
 
-    /** Loading Symbolic Matrix (deep copy). */
-    Transition& operator==( const Matrix& arg );
+    /** Loading Symbolic DMatrix (deep copy). */
+    Transition& operator==( const DMatrix& arg );
 
 
 
-    inline Vector getDifferentialStateComponents() const;
+    inline DVector getDifferentialStateComponents() const;
 
 
 

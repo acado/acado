@@ -217,15 +217,15 @@ returnValue SimulationEnvironment::initializeAlgebraicStates( const char* fileNa
 
 
 
-returnValue SimulationEnvironment::init(	const Vector &x0_,
-											const Vector &p_
+returnValue SimulationEnvironment::init(	const DVector &x0_,
+											const DVector &p_
 											)
 {
 	int printLevel;
 	get( PRINTLEVEL,printLevel );
 
 	// 1) initialise all sub-blocks and evaluate process at start time
-	Vector uStart, pStart;
+	DVector uStart, pStart;
 	VariablesGrid yStart;
 	
 	if ( controller != 0 )
@@ -312,8 +312,8 @@ returnValue SimulationEnvironment::step( )
 	printf( "\n*** SIMULATION LOOP NO. %d (starting at time %.3f) ***\n",nSteps,simulationClock.getTime( ) );
 
 	/* Perform one single simulation loop */
-	Vector u, p;
-	Vector uPrevious, pPrevious;
+	DVector u, p;
+	DVector uPrevious, pPrevious;
 
 	if ( getNU( ) > 0 )
 		feedbackControl.evaluate( simulationClock.getTime( ),uPrevious );
@@ -322,7 +322,7 @@ returnValue SimulationEnvironment::step( )
 		feedbackParameter.evaluate( simulationClock.getTime( ),pPrevious );
 
 	VariablesGrid y;
-	Vector yPrevious;
+	DVector yPrevious;
 
 	if ( getNY( ) > 0 )
 		processOutput.evaluate( simulationClock.getTime( ),yPrevious );

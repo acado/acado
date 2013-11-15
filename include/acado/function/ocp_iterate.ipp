@@ -45,11 +45,11 @@ inline uint OCPiterate::getNP ( ) const{ return getDim(p ); }
 inline uint OCPiterate::getNU ( ) const{ return getDim(u ); }
 inline uint OCPiterate::getNW ( ) const{ return getDim(w ); }
 
-inline Vector OCPiterate::getX ( const uint &idx ) const{ return copy( x , idx ); }
-inline Vector OCPiterate::getXA( const uint &idx ) const{ return copy( xa, idx ); }
-inline Vector OCPiterate::getP ( const uint &idx ) const{ return copy( p , idx ); }
-inline Vector OCPiterate::getU ( const uint &idx ) const{ return copy( u , idx ); }
-inline Vector OCPiterate::getW ( const uint &idx ) const{ return copy( w , idx ); }
+inline DVector OCPiterate::getX ( const uint &idx ) const{ return copy( x , idx ); }
+inline DVector OCPiterate::getXA( const uint &idx ) const{ return copy( xa, idx ); }
+inline DVector OCPiterate::getP ( const uint &idx ) const{ return copy( p , idx ); }
+inline DVector OCPiterate::getU ( const uint &idx ) const{ return copy( u , idx ); }
+inline DVector OCPiterate::getW ( const uint &idx ) const{ return copy( w , idx ); }
 
 
 inline uint OCPiterate::getDim( VariablesGrid *z ) const{
@@ -59,9 +59,9 @@ inline uint OCPiterate::getDim( VariablesGrid *z ) const{
 }
 
 
-inline Vector OCPiterate::copy( const VariablesGrid *z, const uint &idx ) const{
+inline DVector OCPiterate::copy( const VariablesGrid *z, const uint &idx ) const{
 
-    if( z == 0 ) return Vector();
+    if( z == 0 ) return DVector();
     else         return z->getVector(idx);
 }
 

@@ -114,19 +114,19 @@ class BoxConstraint{
     int              nb    ;   /**< counts the number of bounds */
     VariableType    *var   ;   /**< variable types              */
     int             *index ;   /**< component of the variable   */
-    Vector         **blb   ;   /**< lower bounds                */
-    Vector         **bub   ;   /**< upper bounds                */
+    DVector         **blb   ;   /**< lower bounds                */
+    DVector         **bub   ;   /**< upper bounds                */
 
-    Matrix     *residuumXL ;   /**< residuum of the differential states to the lower bound */
-    Matrix     *residuumXU ;   /**< residuum of the differential states to the upper bound */
-    Matrix     *residuumXAL;   /**< residuum of the algebraic states    to the lower bound */
-    Matrix     *residuumXAU;   /**< residuum of the algebraic states    to the upper bound */
-    Matrix     *residuumPL ;   /**< residuum of the parameters          to the lower bound */
-    Matrix     *residuumPU ;   /**< residuum of the parameters          to the upper bound */
-    Matrix     *residuumUL ;   /**< residuum of the controls            to the lower bound */
-    Matrix     *residuumUU ;   /**< residuum of the controls            to the upper bound */
-    Matrix     *residuumWL ;   /**< residuum of the disturbances        to the lower bound */
-    Matrix     *residuumWU ;   /**< residuum of the disturbances        to the upper bound */
+    DMatrix     *residuumXL ;   /**< residuum of the differential states to the lower bound */
+    DMatrix     *residuumXU ;   /**< residuum of the differential states to the upper bound */
+    DMatrix     *residuumXAL;   /**< residuum of the algebraic states    to the lower bound */
+    DMatrix     *residuumXAU;   /**< residuum of the algebraic states    to the upper bound */
+    DMatrix     *residuumPL ;   /**< residuum of the parameters          to the lower bound */
+    DMatrix     *residuumPU ;   /**< residuum of the parameters          to the upper bound */
+    DMatrix     *residuumUL ;   /**< residuum of the controls            to the lower bound */
+    DMatrix     *residuumUU ;   /**< residuum of the controls            to the upper bound */
+    DMatrix     *residuumWL ;   /**< residuum of the disturbances        to the lower bound */
+    DMatrix     *residuumWU ;   /**< residuum of the disturbances        to the upper bound */
 };
 
 

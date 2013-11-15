@@ -32,7 +32,7 @@
  *
  *    This tutorial example explains how to compute
  *    singular value decompositions with the ACADO
- *    Matrix class.
+ *    DMatrix class.
  */
 
 

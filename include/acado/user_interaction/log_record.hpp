@@ -184,7 +184,7 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getFirst(	LogName _name,
-										Matrix& firstValue
+										DMatrix& firstValue
 										) const;
 
 		/** Gets numerical value at first time instant of the item
@@ -199,11 +199,11 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getFirst(	const Expression& _name,
-										Matrix& firstValue
+										DMatrix& firstValue
 										) const;
 
 		/** Gets numerical value at first time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid).
+		 *	with given name (converts internally used DMatrix into VariablesGrid).
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] firstValue	Numerical value at first time instant of given item.
@@ -218,7 +218,7 @@ class LogRecord
 										) const;
 
 		/** Gets numerical value at first time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid).
+		 *	with given name (converts internally used DMatrix into VariablesGrid).
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] firstValue	Numerical value at first time instant of given item.
@@ -245,7 +245,7 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getLast(	LogName _name,
-									Matrix& lastValue
+									DMatrix& lastValue
 									) const;
 
 		/** Gets numerical value at last time instant of the item
@@ -260,11 +260,11 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getLast(	const Expression& _name,
-									Matrix& lastValue
+									DMatrix& lastValue
 									) const;
 
 		/** Gets numerical value at last time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid).
+		 *	with given name (converts internally used DMatrix into VariablesGrid).
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] lastValue	Numerical value at last time instant of given item.
@@ -279,7 +279,7 @@ class LogRecord
 									) const;
 
 		/** Gets numerical value at last time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid).
+		 *	with given name (converts internally used DMatrix into VariablesGrid).
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] lastValue	Numerical value at last time instant of given item.
@@ -338,7 +338,7 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue setLast(	LogName _name,
-									const Matrix& value,
+									const DMatrix& value,
 									double time = -INFTY
 									);
 
@@ -355,7 +355,7 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue setLast(	const Expression& _name,
-									const Matrix& value,
+									const DMatrix& value,
 									double time = -INFTY
 									);
 
@@ -543,7 +543,7 @@ class LogRecord
 		 */
 		returnValue getFirst(	uint _name,
 								LogRecordItemType _type,
-								Matrix& firstValue
+								DMatrix& firstValue
 								) const;
 
 		/** Gets numerical value at last time instant of the item
@@ -560,7 +560,7 @@ class LogRecord
 		 */
 		returnValue getLast(	uint _name,
 								LogRecordItemType _type,
-								Matrix& lastValue
+								DMatrix& lastValue
 								) const;
 
 		/** Sets all numerical values at all time instants of the item
@@ -595,7 +595,7 @@ class LogRecord
 		 */
 		returnValue setLast(	uint _name,
 								LogRecordItemType _type,
-								const Matrix& value,
+								const DMatrix& value,
 								double time = -INFTY
 								);
 

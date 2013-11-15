@@ -52,7 +52,7 @@ int main( )
 	// Define an initial value:
 	// ------------------------
 
-	Vector xStart(1);
+	DVector xStart(1);
 	xStart(0) = 1.0;
 
 	double tStart = 0.0;
@@ -92,7 +92,7 @@ int main( )
 
 	cout << "x = " << endl << differentialStates << endl;
 
-	Vector xEnd;
+	DVector xEnd;
 	intAlg.getX(xEnd);
 
 	cout << "xEnd = " << endl << xEnd << endl;

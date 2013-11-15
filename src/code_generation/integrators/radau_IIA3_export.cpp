@@ -73,9 +73,9 @@ RadauIIA3Export::~RadauIIA3Export( )
 IntegratorExport* createRadauIIA3Export(	UserInteraction* _userInteraction,
 											const std::string &_commonHeaderName)
 {
-	Matrix AA(2,2);
-	Vector bb(2);
-	Vector cc(2);
+	DMatrix AA(2,2);
+	DVector bb(2);
+	DVector cc(2);
 
 	AA(0,0) = 5/(double)12;
 	AA(0,1) = -1/(double)12;

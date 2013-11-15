@@ -77,20 +77,20 @@ int main( ){
     integrator.freezeAll();
     integrator.integrate( t_start, t_end, x_start );
 
-    Vector xEnd;
+    DVector xEnd;
     integrator.getX(xEnd);
 
     xEnd.print();
 
 
-    Vector seed(1);
+    DVector seed(1);
     seed(0) = 1.0;
 
     integrator.setBackwardSeed( 1, seed );
 
     integrator.integrateSensitivities();
 
-    Vector dX(1), dP, dU, dW;
+    DVector dX(1), dP, dU, dW;
 
     integrator.getBackwardSensitivities( dX, dP, dU, dW, 1 );
 

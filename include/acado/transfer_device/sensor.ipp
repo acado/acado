@@ -69,7 +69,7 @@ inline double Sensor::getOutputDeadTime(	uint idx
 }
 
 
-inline Vector Sensor::getOutputDeadTimes( ) const
+inline DVector Sensor::getOutputDeadTimes( ) const
 {
 	return deadTimes;
 }

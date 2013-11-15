@@ -83,10 +83,10 @@ int main( ){
     h << phi;
     h << dphi;
 
-    Matrix Q(4,4); // LSQ coefficient matrix
+    DMatrix Q(4,4); // LSQ coefficient matrix
     Q.setIdentity();
 
-    Vector r(4); // Reference
+    DVector r(4); // Reference
 
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
@@ -128,7 +128,7 @@ int main( ){
     // ----------------------------------------------------------
 	SimulationEnvironment sim( 0.0,20.0,process,controller );
 
-	Vector x0(4);
+	DVector x0(4);
 	x0.setZero();
 	x0(3) = 5.0;
 

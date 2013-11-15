@@ -52,7 +52,7 @@ int main( ){
 
     // DEFINE VALRIABLES:
     // ---------------------------
-    Vector                 b(3)  ;
+    DVector                 b(3)  ;
     DifferentialState      x("", 2, 2);
     Function               f     ;
 
@@ -71,7 +71,7 @@ int main( ){
     // --------------------
     EvaluationPoint zz(f);
 
-    Vector xx(4);
+    DVector xx(4);
 
     xx(0) = 2.0;
     xx(1) = 0.1;

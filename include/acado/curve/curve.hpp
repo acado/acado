@@ -96,7 +96,7 @@ class Curve{
          */
         returnValue add( double tStart,
                          double tEnd,
-                         const Vector constant );
+                         const DVector constant );
 
 
         /** Adds new curve pieces, which are given in a sampled form (VariablesGrid). In     \n
@@ -184,7 +184,7 @@ class Curve{
          *  this routine. For not time critical operations it is recommended to         \n
          *  use the routine                                                             \n
          *                                                                              \n
-         *  evaluate( const double t, const Vector &result )                           \n
+         *  evaluate( const double t, const DVector &result )                           \n
          *                                                                              \n
          *  instead, which will throw  an error if a dimension mismatch occurs.         \n 
          *  However, the routine based on double* is slightly more efficient.           \n
@@ -204,7 +204,7 @@ class Curve{
 
 
          /** Evaluates the curve at a given time point. This routine will store            \n
-          *  the result of the evaluation into the Vector &result.                         \n
+          *  the result of the evaluation into the DVector &result.                         \n
           *                                                                                \n
           *  \param  t      (input) the time at which the curve should be evaluated.       \n
           *  \param  result (output) the result of the evaluation.                         \n
@@ -214,7 +214,7 @@ class Curve{
           *          RET_INVALID_TIME_POINT         (if the time point t is out of domain.)\n
           *          RET_MEMBER_NOT_INITIALISED     (if the curve is empty)                \n
           */
-         returnValue evaluate( double t, Vector &result ) const;
+         returnValue evaluate( double t, DVector &result ) const;
 
 
 	  /** Evaluates the curve at a given time interval. This routine will store        \n

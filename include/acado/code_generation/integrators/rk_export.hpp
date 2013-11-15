@@ -96,7 +96,7 @@ class RungeKuttaExport : public IntegratorExport
 
 		/** This routine initializes the matrices AA, bb and cc which
 		 * 	form the Butcher Tableau. */
-		returnValue initializeButcherTableau( const Matrix& _AA, const Vector& _bb, const Vector& _cc );
+		returnValue initializeButcherTableau( const DMatrix& _AA, const DVector& _bb, const DVector& _cc );
 
 
 		/** Assigns Differential Equation to be used by the integrator.
@@ -116,7 +116,7 @@ class RungeKuttaExport : public IntegratorExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue setNARXmodel( const uint delay, const Matrix& parms );
+		returnValue setNARXmodel( const uint delay, const DMatrix& parms );
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -184,8 +184,8 @@ class RungeKuttaExport : public IntegratorExport
         
 		ExportVariable rk_kkk;				/**< Variable containing intermediate results of the RK integrator. */
 
-		Matrix AA;							/**< This matrix defines the Runge-Kutta method to be exported. */
-		Vector bb, cc;						/**< These vectors define the Runge-Kutta method to be exported. */
+		DMatrix AA;							/**< This matrix defines the Runge-Kutta method to be exported. */
+		DVector bb, cc;						/**< These vectors define the Runge-Kutta method to be exported. */
 		
 		uint numStages;						/**< This is the number of stages for the Runge-Kutta method. */
 };

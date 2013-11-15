@@ -72,8 +72,8 @@ public:
 
     /** Copy constructor (deep copy). */
     IntermediateState( const double      & arg );
-    IntermediateState( const Vector      & arg );
-    IntermediateState( const Matrix      & arg );
+    IntermediateState( const DVector      & arg );
+    IntermediateState( const DMatrix      & arg );
     IntermediateState( const Operator    & arg );
     IntermediateState( const Expression  & arg );
 
@@ -81,24 +81,24 @@ public:
     virtual ~IntermediateState();
 
     Expression & operator=( const double      & arg );
-    Expression & operator=( const Vector      & arg );
-    Expression & operator=( const Matrix      & arg );
+    Expression & operator=( const DVector      & arg );
+    Expression & operator=( const DMatrix      & arg );
     Expression & operator=( const Expression  & arg );
 
 
     Expression& operator+=( const double      & arg );
-    Expression& operator+=( const Vector      & arg );
-    Expression& operator+=( const Matrix      & arg );
+    Expression& operator+=( const DVector      & arg );
+    Expression& operator+=( const DMatrix      & arg );
     Expression& operator+=( const Expression  & arg );
 
     Expression& operator-=( const double      & arg );
-    Expression& operator-=( const Vector      & arg );
-    Expression& operator-=( const Matrix      & arg );
+    Expression& operator-=( const DVector      & arg );
+    Expression& operator-=( const DMatrix      & arg );
     Expression& operator-=( const Expression  & arg );
 
     Expression& operator*=( const double      & arg );
-    Expression& operator*=( const Vector      & arg );
-    Expression& operator*=( const Matrix      & arg );
+    Expression& operator*=( const DVector      & arg );
+    Expression& operator*=( const DMatrix      & arg );
     Expression& operator*=( const Expression  & arg );
 
     Expression& operator/=( const double      & arg );

@@ -38,8 +38,8 @@ int main( ){
 
     USING_NAMESPACE_ACADO
 
-    Matrix             A(3,3);
-    Vector             b(3);
+    DMatrix             A(3,3);
+    DVector             b(3);
     DifferentialState  x("", 3, 1);
     Function           f;
 
@@ -49,7 +49,7 @@ int main( ){
 
     f << A*x + b;
 
-	Vector x0(3), dummy(3);
+	DVector x0(3), dummy(3);
 	x0.setAll( 1.0 );
 	dummy.setZero( );
 	//f.evaluate( 0.0,&x0,&dummy,MEDIUM ); DOES NOT COMPILE

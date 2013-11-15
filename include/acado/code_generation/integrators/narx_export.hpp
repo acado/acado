@@ -202,7 +202,7 @@ class NARXExport : public DiscreteTimeExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		returnValue setNARXmodel( const uint _delay, const Matrix& _parms );
+		returnValue setNARXmodel( const uint _delay, const DMatrix& _parms );
 
 
 		/** .
@@ -211,7 +211,7 @@ class NARXExport : public DiscreteTimeExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& rhs );
 
 
 		/** .
@@ -220,7 +220,7 @@ class NARXExport : public DiscreteTimeExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
 	protected:
@@ -242,7 +242,7 @@ class NARXExport : public DiscreteTimeExport
     protected:
 
 		uint delay;
-		Matrix parms;
+		DMatrix parms;
 
 };
 

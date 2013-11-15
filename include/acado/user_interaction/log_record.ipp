@@ -51,14 +51,14 @@ inline returnValue LogRecord::getAll(	const Expression& _name,
 
 
 inline returnValue LogRecord::getFirst(	LogName _name,
-										Matrix& firstValue
+										DMatrix& firstValue
 										) const
 {
 	return getFirst( (uint)_name,LRT_ENUM,firstValue );
 }
 
 inline returnValue LogRecord::getFirst(	const Expression& _name,
-										Matrix& firstValue
+										DMatrix& firstValue
 										) const
 {
 	return getFirst( _name.getComponent( 0 ),LRT_VARIABLE,firstValue );
@@ -68,7 +68,7 @@ inline returnValue LogRecord::getFirst(	LogName _name,
 										VariablesGrid& firstValue
 										) const
 {
-	Matrix tmp;
+	DMatrix tmp;
 	getFirst( (uint)_name,LRT_ENUM,tmp );
 	firstValue = tmp;
 
@@ -79,7 +79,7 @@ inline returnValue LogRecord::getFirst(	const Expression& _name,
 										VariablesGrid& firstValue
 										) const
 {
-	Matrix tmp;
+	DMatrix tmp;
 	getFirst( _name.getComponent( 0 ),LRT_VARIABLE,tmp );
 	firstValue = tmp;
 	firstValue.setType( _name.getVariableType() );
@@ -90,7 +90,7 @@ inline returnValue LogRecord::getFirst(	const Expression& _name,
 
 
 inline returnValue LogRecord::getLast(	LogName _name,
-										Matrix& lastValue
+										DMatrix& lastValue
 										) const
 {
 	return getLast( (uint)_name,LRT_ENUM,lastValue );
@@ -98,7 +98,7 @@ inline returnValue LogRecord::getLast(	LogName _name,
 
 
 inline returnValue LogRecord::getLast(	const Expression& _name,
-										Matrix& lastValue
+										DMatrix& lastValue
 										) const
 {
 	return getLast( _name.getComponent( 0 ),LRT_VARIABLE,lastValue );
@@ -109,7 +109,7 @@ inline returnValue LogRecord::getLast(	LogName _name,
 										VariablesGrid& lastValue
 										) const
 {
-	Matrix tmp;
+	DMatrix tmp;
 	getLast( (uint)_name,LRT_ENUM,tmp );
 	lastValue = tmp;
 
@@ -121,7 +121,7 @@ inline returnValue LogRecord::getLast(	const Expression& _name,
 										VariablesGrid& lastValue
 										) const
 {
-	Matrix tmp;
+	DMatrix tmp;
 	getLast( _name.getComponent( 0 ),LRT_VARIABLE,tmp );
 	lastValue = tmp;
 
@@ -148,7 +148,7 @@ inline returnValue LogRecord::setAll(	const Expression& _name,
 
 
 inline returnValue LogRecord::setLast(	LogName _name,
-										const Matrix& value,
+										const DMatrix& value,
 										double time
 										)
 {
@@ -157,7 +157,7 @@ inline returnValue LogRecord::setLast(	LogName _name,
 
 
 inline returnValue LogRecord::setLast(	const Expression& _name,
-										const Matrix& value,
+										const DMatrix& value,
 										double time
 										)
 {	
@@ -170,7 +170,7 @@ inline returnValue LogRecord::setLast(	LogName _name,
 										double time
 										)
 {
-	Matrix tmp( value );
+	DMatrix tmp( value );
 	return setLast( _name,tmp,time );
 }
 
@@ -180,7 +180,7 @@ inline returnValue LogRecord::setLast(	const Expression& _name,
 										double time
 										)
 {
-	Matrix tmp( value );
+	DMatrix tmp( value );
 	return setLast( _name,tmp,time );
 }
 

@@ -155,11 +155,11 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *	At each grid point, the vector-valued MatrixVariable is constructed from the 
 		 *	vector passed.
 		 *
-		 *	@param[in] arg			Vector to be assign at each point of the grid.
+		 *	@param[in] arg			DVector to be assign at each point of the grid.
 		 *	@param[in] _grid		Grid on which the vector-valued MatrixVariable(s) are defined.
 		 *	@param[in] _type		Type of the variable(s).
 		 */
-        VariablesGrid(	const Vector& arg,
+        VariablesGrid(	const DVector& arg,
 						const Grid& _grid = trivialGrid,
 						VariableType _type = VT_UNKNOWN
 						);
@@ -177,7 +177,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *
 		 *	\note The file is closed at the end of routine.
 		 */
-        VariablesGrid(	const Matrix& arg,
+        VariablesGrid(	const DMatrix& arg,
 						VariableType _type = VT_UNKNOWN
 						);
 
@@ -224,11 +224,11 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *	MatrixVariablesGrid consisting of <number of columns - 1>-by-1 MatrixVariables 
 		 *	defined on <number of rows> grid points is setup.
 		 *	
-		 *	@param[in] rhs		Matrix to be read.
+		 *	@param[in] rhs		DMatrix to be read.
 		 *
 		 *	\note The file is closed at the end of routine.
 		 */
-        VariablesGrid& operator=(	const Matrix& rhs
+        VariablesGrid& operator=(	const DMatrix& rhs
 									);
 
 
@@ -419,13 +419,13 @@ class VariablesGrid : public MatrixVariablesGrid
 		/** Initializes the VariablesGrid on a given grid with given type.
 		 *	At each grid point, the vector-valued MatrixVariable is constructed from the matrix passed.
 		 *
-		 *	@param[in] arg			Vector to be assign at each point of the grid.
+		 *	@param[in] arg			DVector to be assign at each point of the grid.
 		 *	@param[in] _grid		Grid on which the vector-valued MatrixVariable(s) are defined.
 		 *	@param[in] _type		Type of the variable(s).
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-        returnValue init(	const Vector& arg,
+        returnValue init(	const DVector& arg,
 							const Grid& _grid = trivialGrid,
 							VariableType _type = VT_UNKNOWN
 							);
@@ -433,13 +433,13 @@ class VariablesGrid : public MatrixVariablesGrid
 
 		/** Adds a new grid point with given vector and time to grid.
 		 *
-		 *	@param[in] newVector	Vector of grid point to be added.
+		 *	@param[in] newVector	DVector of grid point to be added.
 		 *	@param[in] newTime		Time of grid point to be added.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INVALID_ARGUMENTS
 		 */
-		returnValue addVector(	const Vector& newVector,
+		returnValue addVector(	const DVector& newVector,
 								double newTime = -INFTY
 								);
 
@@ -454,7 +454,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *			RET_VECTOR_DIMENSION_MISMATCH
 		 */
 		returnValue setVector(	uint pointIdx,			/**< Index of the grid point. */
-								const Vector& _values	/**< New values of the sub-vector. */
+								const DVector& _values	/**< New values of the sub-vector. */
 								);
 
 		/** Assigns new vector to all grid points.
@@ -465,7 +465,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *	        RET_INDEX_OUT_OF_BOUNDS, \n
 		 *			RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		returnValue setAllVectors(	const Vector& _values
+		returnValue setAllVectors(	const DVector& _values
 									);
 
 
@@ -473,22 +473,22 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *
 		 *	@param[in] pointIdx		Index of grid point.
 		 *
-		 *  \return Vector at grid point with given index (empty if index is out of bounds)
+		 *  \return DVector at grid point with given index (empty if index is out of bounds)
 		 */
-		Vector getVector(	uint pointIdx
+		DVector getVector(	uint pointIdx
 							) const;
 
 		/** Returns vector at first grid point.
 		 *
-		 *  \return Vector at first grid point
+		 *  \return DVector at first grid point
 		 */
-		Vector getFirstVector( ) const;
+		DVector getFirstVector( ) const;
 
 		/** Returns vector at first grid point.
 		 *
-		 *  \return Vector at first grid point
+		 *  \return DVector at first grid point
 		 */
-		Vector getLastVector( ) const;
+		DVector getLastVector( ) const;
 
 
 		/** Appends grid point of given grid to object. A merge
@@ -513,7 +513,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_INVALID_ARGUMENTS
 		 */
-		returnValue appendTimes(	const Matrix& arg,
+		returnValue appendTimes(	const DMatrix& arg,
 									MergeMethod _mergeMethod = MM_DUPLICATE
 									);
 									
@@ -604,7 +604,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *
 		 *  \return Reference to object with shifted points
 		 */
-		VariablesGrid& shiftBackwards( Vector lastValue = emptyVector );
+		VariablesGrid& shiftBackwards( DVector lastValue = emptyVector );
 
 
 		/** Returns the component-wise sum over all vectors at all grid points.
@@ -613,7 +613,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue getSum(	Vector& sum
+		returnValue getSum(	DVector& sum
 							) const;
 
 		/** Returns a component-wise approximation of the integral over all vectors at all grid points.
@@ -624,7 +624,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		returnValue getIntegral(	InterpolationMode mode,
-									Vector& value
+									DVector& value
 									) const;
 
     //

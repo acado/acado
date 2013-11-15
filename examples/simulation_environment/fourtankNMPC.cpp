@@ -71,10 +71,10 @@ int main( )
     Function h;
     h << h1;
     h << h2;
-    Matrix Q(2,2);
+    DMatrix Q(2,2);
     Q.setIdentity();
 
-    Vector r(2);
+    DVector r(2);
     r(0)=x_ss1;
     r(1)=x_ss2;
 
@@ -132,7 +132,7 @@ int main( )
     double simEndTime = 1200.0;
     SimulationEnvironment sim(simStartTime,simEndTime,process,controller);
 
-    Vector x0(4);
+    DVector x0(4);
     x0.setZero( );
     x0(0)=0.1;
     x0(1)=0.1;

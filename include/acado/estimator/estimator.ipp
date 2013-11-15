@@ -38,11 +38,11 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-inline returnValue Estimator::getOutputs(	Vector& _x,
-											Vector& _xa,
-											Vector& _u,
-											Vector& _p,
-											Vector& _w 
+inline returnValue Estimator::getOutputs(	DVector& _x,
+											DVector& _xa,
+											DVector& _u,
+											DVector& _p,
+											DVector& _w 
 											) const
 {
 	_x   = x;
@@ -54,7 +54,7 @@ inline returnValue Estimator::getOutputs(	Vector& _x,
 	return SUCCESSFUL_RETURN;
 }
 
-inline returnValue Estimator::getX(	Vector& _x
+inline returnValue Estimator::getX(	DVector& _x
 									) const
 {
 	_x = x;
@@ -62,7 +62,7 @@ inline returnValue Estimator::getX(	Vector& _x
 }
 
 
-inline returnValue Estimator::getXA(	Vector& _xa
+inline returnValue Estimator::getXA(	DVector& _xa
 									) const
 {
 	_xa = xa;
@@ -70,7 +70,7 @@ inline returnValue Estimator::getXA(	Vector& _xa
 }
 
 
-inline returnValue Estimator::getU(	Vector& _u
+inline returnValue Estimator::getU(	DVector& _u
 									) const
 {
 	_u = u;
@@ -78,7 +78,7 @@ inline returnValue Estimator::getU(	Vector& _u
 }
 
 
-inline returnValue Estimator::getP(	Vector& _p
+inline returnValue Estimator::getP(	DVector& _p
 									) const
 {
 	_p = p;
@@ -86,7 +86,7 @@ inline returnValue Estimator::getP(	Vector& _p
 }
 
 
-inline returnValue Estimator::getW(	Vector& _w
+inline returnValue Estimator::getW(	DVector& _w
 									) const
 {
 	_w = w;

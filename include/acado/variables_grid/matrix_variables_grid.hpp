@@ -158,11 +158,11 @@ class MatrixVariablesGrid : public Grid
 		/** Constructor that creates a variables grid on a given grid with given type.
 		 *	At each grid point, the MatrixVariable is constructed from the matrix passed.
 		 *
-		 *	@param[in] arg			Matrix to be assign at each point of the grid.
+		 *	@param[in] arg			DMatrix to be assign at each point of the grid.
 		 *	@param[in] _grid		Grid on which the MatrixVariable(s) are defined.
 		 *	@param[in] _type		Type of the variable(s).
 		 */
-        MatrixVariablesGrid(	const Matrix& arg,
+        MatrixVariablesGrid(	const DMatrix& arg,
 								const Grid& _grid = trivialGrid,
 								VariableType _type = VT_UNKNOWN
 								);
@@ -195,11 +195,11 @@ class MatrixVariablesGrid : public Grid
 		 *	consisting of <number of columns - 1>-by-1 MatrixVariables defined on 
 		 *	<number of rows> grid points is setup.
 		 *	
-		 *	@param[in] rhs		Matrix to be read.
+		 *	@param[in] rhs		DMatrix to be read.
 		 *
 		 *	\note The file is closed at the end of routine.
 		 */
-		MatrixVariablesGrid& operator=(	const Matrix& rhs
+		MatrixVariablesGrid& operator=(	const DMatrix& rhs
 										);
 
 
@@ -391,26 +391,26 @@ class MatrixVariablesGrid : public Grid
 		/** Initializes the MatrixVariablesGrid on a given grid with given type.
 		 *	At each grid point, the MatrixVariable is constructed from the matrix passed.
 		 *
-		 *	@param[in] arg			Matrix to be assign at each point of the grid.
+		 *	@param[in] arg			DMatrix to be assign at each point of the grid.
 		 *	@param[in] _grid		Grid on which the MatrixVariable(s) are defined.
 		 *	@param[in] _type		Type of the variable(s).
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue init(	const Matrix& arg,
+		returnValue init(	const DMatrix& arg,
 							const Grid& _grid = trivialGrid,
 							VariableType _type = VT_UNKNOWN
 							);
 
 		/** Adds a new grid point with given matrix and time to grid.
 		 *
-		 *	@param[in] newMatrix	Matrix of grid point to be added.
+		 *	@param[in] newMatrix	DMatrix of grid point to be added.
 		 *	@param[in] newTime		Time of grid point to be added.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INVALID_ARGUMENTS
 		 */
-		returnValue addMatrix(	const Matrix& newMatrix,
+		returnValue addMatrix(	const DMatrix& newMatrix,
 								double newTime = -INFTY
 								);
 
@@ -423,7 +423,7 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_INDEX_OUT_OF_BOUNDS
 		 */
 		returnValue setMatrix(	uint pointIdx,
-								const Matrix& _value
+								const DMatrix& _value
 								) const;
 
 		/** Assigns new matrix to all grid points.
@@ -433,7 +433,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INDEX_OUT_OF_BOUNDS
 		 */
-		returnValue setAllMatrices(	const Matrix& _values
+		returnValue setAllMatrices(	const DMatrix& _values
 									);
 
 
@@ -441,22 +441,22 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *	@param[in] pointIdx		Index of grid point.
 		 *
-		 *  \return Matrix at grid point with given index (empty if index is out of bounds)
+		 *  \return DMatrix at grid point with given index (empty if index is out of bounds)
 		 */
-		Matrix getMatrix(	uint pointIdx
+		DMatrix getMatrix(	uint pointIdx
 							) const;
 
 		/** Returns matrix at first grid point.
 		 *
-		 *  \return Matrix at first grid point
+		 *  \return DMatrix at first grid point
 		 */
-		Matrix getFirstMatrix( ) const;
+		DMatrix getFirstMatrix( ) const;
 
 		/** Returns matrix at last grid point.
 		 *
-		 *  \return Matrix at last grid point
+		 *  \return DMatrix at last grid point
 		 */
-		Matrix getLastMatrix( ) const;
+		DMatrix getLastMatrix( ) const;
 
 
 		/** Returns total dimension of MatrixVariablesGrid, i.e. the sum
@@ -1027,7 +1027,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Reference to object with shifted points
 		 */
-		MatrixVariablesGrid& shiftBackwards( Matrix lastValue = emptyMatrix );
+		MatrixVariablesGrid& shiftBackwards( DMatrix lastValue = emptyMatrix );
 
 		/** Returns a vector with interpolated values of the MatrixVariablesGrid 
 		 *	at given time. If given time lies in between two grid points, the 
@@ -1039,9 +1039,9 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *	@param[in] time			Time for evaluation.
 		 *
-		 *  \return Vector with interpolated values at given time
+		 *  \return DVector with interpolated values at given time
 		 */
-		Vector linearInterpolation(	double time
+		DVector linearInterpolation(	double time
 									) const;
 
 		/** Prints object to standard ouput stream. Various settings can
@@ -1230,7 +1230,7 @@ class MatrixVariablesGrid : public Grid
     //
     protected:
 
-		/** Matrix-valued optimization variable at all grid points. */
+		/** DMatrix-valued optimization variable at all grid points. */
 		MatrixVariable** values;
 };
 

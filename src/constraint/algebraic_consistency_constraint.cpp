@@ -164,10 +164,10 @@ returnValue AlgebraicConsistencyConstraint::evaluate( const OCPiterate& iter ){
     for( run1 = 0; run1 <= T; run1++ ){
 
         int nc = numberOfAlgebraicStates[stageIdx];
-		Matrix res( nc, 1 );
+		DMatrix res( nc, 1 );
 		
 		z[stageIdx].setZ( run1, iter );
-		Vector result = fcn[stageIdx].evaluate( z[stageIdx],run1 );
+		DVector result = fcn[stageIdx].evaluate( z[stageIdx],run1 );
 
         for( run2 = 0; run2 < nc; run2++ )
              res( run2, 0 ) = -result(numberOfDifferentialStates[stageIdx]+run2);
@@ -216,19 +216,19 @@ returnValue AlgebraicConsistencyConstraint::evaluateSensitivities(){
 
         for( run3 = 0; run3 < N; run3++ )
 		{
-            Matrix bseed_;
+            DMatrix bseed_;
             bSeed->getSubBlock( 0, run3, bseed_ );
 
-			Vector bseedTmp( numberOfDifferentialStates[stageIdx] );
+			DVector bseedTmp( numberOfDifferentialStates[stageIdx] );
 			bseedTmp.setZero();
 
             nBDirs = bSeed->getNumRows( 0, run3 );
 
-            Matrix Dx ( nBDirs, nx );
-            Matrix Dxa( nBDirs, na );
-            Matrix Dp ( nBDirs, np );
-            Matrix Du ( nBDirs, nu );
-            Matrix Dw ( nBDirs, nw );
+            DMatrix Dx ( nBDirs, nx );
+            DMatrix Dxa( nBDirs, na );
+            DMatrix Dp ( nBDirs, np );
+            DMatrix Du ( nBDirs, nu );
+            DMatrix Dw ( nBDirs, nw );
 
             for( run1 = 0; run1 < nBDirs; run1++ )
 			{
@@ -279,35 +279,35 @@ returnValue AlgebraicConsistencyConstraint::evaluateSensitivities(){
         for( run3 = 0; run3 < N; run3++ ){
 
             if( xSeed != 0 ){
-                Matrix tmp;
+                DMatrix tmp;
                 xSeed->getSubBlock(0,0,tmp);
                 returnvalue = computeForwardSensitivityBlock( run3,     run3, 0, stageIdx, &tmp );
                 if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
             }
 
             if( xaSeed != 0 ){
-                Matrix tmp;
+                DMatrix tmp;
                 xaSeed->getSubBlock(0,0,tmp);
                 returnvalue = computeForwardSensitivityBlock( run3, 1*N+run3, nx, stageIdx, &tmp );
                 if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
             }
 
             if( pSeed != 0 ){
-                Matrix tmp;
+                DMatrix tmp;
                 pSeed->getSubBlock(0,0,tmp);
                 returnvalue = computeForwardSensitivityBlock( run3, 2*N+run3, nx+na, stageIdx, &tmp );
                 if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
             }
 
             if( uSeed != 0 ){
-                Matrix tmp;
+                DMatrix tmp;
                 uSeed->getSubBlock(0,0,tmp);
                 returnvalue = computeForwardSensitivityBlock( run3, 3*N+run3, nx+na+np, stageIdx, &tmp );
                 if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
             }
 
             if( wSeed != 0 ){
-                Matrix tmp;
+                DMatrix tmp;
                 wSeed->getSubBlock(0,0,tmp);
                 returnvalue = computeForwardSensitivityBlock( run3, 4*N+run3, nx+na+np+nu, stageIdx, &tmp );
                 if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
@@ -341,7 +341,7 @@ returnValue AlgebraicConsistencyConstraint::evaluateSensitivities( int &count,
 
         int nc = numberOfAlgebraicStates[stageIdx];
 
-        Matrix seed;
+        DMatrix seed;
         seed_.getSubBlock( count, 0, seed, nc, 1 );
         count++;
 
@@ -370,17 +370,17 @@ returnValue AlgebraicConsistencyConstraint::evaluateSensitivities( int &count,
         for( run1 = 0; run1 < fcn[stageIdx].getNumberOfVariables()+1; run1++ )
             fseed[run1] = 0.0;
 
-        Matrix Dx ( nc, nx );
-        Matrix Dxa( nc, na );
-        Matrix Dp ( nc, np );
-        Matrix Du ( nc, nu );
-        Matrix Dw ( nc, nw );
+        DMatrix Dx ( nc, nx );
+        DMatrix Dxa( nc, na );
+        DMatrix Dp ( nc, np );
+        DMatrix Du ( nc, nu );
+        DMatrix Dw ( nc, nw );
 
-        Matrix Hx ( nx, nx );
-        Matrix Hxa( nx, na );
-        Matrix Hp ( nx, np );
-        Matrix Hu ( nx, nu );
-        Matrix Hw ( nx, nw );
+        DMatrix Hx ( nx, nx );
+        DMatrix Hxa( nx, na );
+        DMatrix Hp ( nx, np );
+        DMatrix Hu ( nx, nu );
+        DMatrix Hw ( nx, nw );
 
         for( run2 = 0; run2 < nx; run2++ ){
 

@@ -112,7 +112,7 @@ class SCPstep : public AlgorithmicBase
 // 		virtual returnValue getUpdatedFirstControl(	const OCPiterate& iter,
 // 													const BandedCP& cp,
 // 													double alpha,
-// 													Vector& _u
+// 													DVector& _u
 // 													) const;
 
 

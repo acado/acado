@@ -62,21 +62,21 @@ inline ConstraintComponent ConstraintComponent::operator==( const double&  b_ ) 
     return tmp;
 }
 
-inline ConstraintComponent ConstraintComponent::operator<=( const Vector& ub_ ) const{
+inline ConstraintComponent ConstraintComponent::operator<=( const DVector& ub_ ) const{
 
     ConstraintComponent tmp(*this);
     tmp.setUB( ub_ );
     return tmp;
 }
 
-inline ConstraintComponent ConstraintComponent::operator>=( const Vector& lb_ ) const{
+inline ConstraintComponent ConstraintComponent::operator>=( const DVector& lb_ ) const{
 
     ConstraintComponent tmp(*this);
     tmp.setLB( lb_ );
     return tmp;
 }
 
-inline ConstraintComponent ConstraintComponent::operator==( const Vector&  b_ ) const{
+inline ConstraintComponent ConstraintComponent::operator==( const DVector&  b_ ) const{
 
     ConstraintComponent tmp(*this);
     tmp.setLB( b_ );
@@ -113,13 +113,13 @@ inline uint ConstraintComponent::getDim( ) const{
 }
 
 
-inline const Vector& ConstraintComponent::getLB() const{
+inline const DVector& ConstraintComponent::getLB() const{
 
     return lb;
 }
 
 
-inline const Vector& ConstraintComponent::getUB() const{
+inline const DVector& ConstraintComponent::getUB() const{
 
     return ub;
 }
@@ -134,7 +134,7 @@ inline returnValue ConstraintComponent::setLB( const double &lb_ ){
 }
 
 
-inline returnValue ConstraintComponent::setLB( const Vector& lb_ ){
+inline returnValue ConstraintComponent::setLB( const DVector& lb_ ){
 
     if( lb_.getDim() != expression.getDim() )
         return ACADOERROR( RET_INCOMPATIBLE_DIMENSIONS );;
@@ -165,7 +165,7 @@ inline returnValue ConstraintComponent::setUB( const double &ub_ ){
 }
 
 
-inline returnValue ConstraintComponent::setUB( const Vector& ub_ ){
+inline returnValue ConstraintComponent::setUB( const DVector& ub_ ){
 
     if( ub_.getDim() != expression.getDim() )
         return ACADOERROR( RET_INCOMPATIBLE_DIMENSIONS );;

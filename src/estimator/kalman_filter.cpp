@@ -81,8 +81,8 @@ Estimator* KalmanFilter::clone( ) const
 
 
 returnValue KalmanFilter::init(	double startTime,
-								const Vector &x0_,
-								const Vector &p_
+								const DVector &x0_,
+								const DVector &p_
 								)
 {
 	setStatus( BS_READY );
@@ -92,7 +92,7 @@ returnValue KalmanFilter::init(	double startTime,
 
 
 returnValue KalmanFilter::step(	double currentTime,
-								const Vector& _y
+								const DVector& _y
 								)
 {
 	return SUCCESSFUL_RETURN;

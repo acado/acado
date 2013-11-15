@@ -77,14 +77,14 @@ int main( )
     h << vW;
 	h << F;
 
-    Matrix Q(5,5); // LSQ coefficient matrix
+    DMatrix Q(5,5); // LSQ coefficient matrix
 	Q(0,0) = 10.0;
 	Q(1,1) = 10.0;
 	Q(2,2) = 1.0;
 	Q(3,3) = 1.0;
 	Q(4,4) = 1.0e-8;
 
-    Vector r(5); // Reference
+    DVector r(5); // Reference
     r.setAll( 0.0 );
 
 
@@ -126,7 +126,7 @@ int main( )
 
 	Controller controller( alg,zeroReference );
 
-	Vector y( 4 );
+	DVector y( 4 );
 	y.setZero( );
 	y(0) = 0.01;
 

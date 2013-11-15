@@ -65,7 +65,7 @@ int main( ){
     // --------------------
        EvaluationPoint zz(f);
 
-       Vector xx(2), result;
+       DVector xx(2), result;
        xx(0) = 2.0;
        xx(1) = 3.0;
 

@@ -95,7 +95,7 @@ ClippingFunctionality& ClippingFunctionality::operator=( const ClippingFunctiona
 
 
 
-returnValue ClippingFunctionality::setControlLowerLimits(	const Vector& _lowerLimit
+returnValue ClippingFunctionality::setControlLowerLimits(	const DVector& _lowerLimit
 															)
 {
 	if ( _lowerLimit.getDim( ) != getNumControlLimits( ) )
@@ -119,7 +119,7 @@ returnValue ClippingFunctionality::setControlLowerLimit(	uint idx,
 }
 
 
-returnValue ClippingFunctionality::setControlUpperLimits(	const Vector& _upperLimit
+returnValue ClippingFunctionality::setControlUpperLimits(	const DVector& _upperLimit
 															)
 {
 	if ( _upperLimit.getDim( ) != getNumControlLimits( ) )
@@ -144,7 +144,7 @@ returnValue ClippingFunctionality::setControlUpperLimit(	uint idx,
 
 
 
-returnValue ClippingFunctionality::setParameterLowerLimits(	const Vector& _lowerLimit
+returnValue ClippingFunctionality::setParameterLowerLimits(	const DVector& _lowerLimit
 															)
 {
 	if ( _lowerLimit.getDim( ) != getNumParameterLimits( ) )
@@ -168,7 +168,7 @@ returnValue ClippingFunctionality::setParameterLowerLimit(	uint idx,
 }
 
 
-returnValue ClippingFunctionality::setParameterUpperLimits(	const Vector& _upperLimit
+returnValue ClippingFunctionality::setParameterUpperLimits(	const DVector& _upperLimit
 															)
 {
 	if ( _upperLimit.getDim( ) != getNumParameterLimits( ) )
@@ -242,8 +242,8 @@ returnValue ClippingFunctionality::clipSignals(	VariablesGrid& _u,
 }
 
 
-returnValue ClippingFunctionality::clipSignals(	Vector& _u,
-												Vector& _p
+returnValue ClippingFunctionality::clipSignals(	DVector& _u,
+												DVector& _p
 												)
 {
 	// consistency checks

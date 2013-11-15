@@ -158,7 +158,7 @@ returnValue GnuplotWindow::waitForMouseEvents(){
 
 BooleanType GnuplotWindow::getMouseEvent( double &mouseX, double &mouseY )
 {
-    Vector tmp;
+    DVector tmp;
     if (tmp.read( "mouse.dat" ) != SUCCESSFUL_RETURN)
     	return BT_FALSE;
 

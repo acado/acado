@@ -216,10 +216,10 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 
 	if (levenbergMarquardt > 0.0)
 	{
-		Matrix lmX = eye( NX );
+		DMatrix lmX = eye( NX );
 		lmX *= levenbergMarquardt;
 
-		Matrix lmU = eye( NU );
+		DMatrix lmU = eye( NU );
 		lmU *= levenbergMarquardt;
 
 		evLmX = lmX;
@@ -568,7 +568,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 	conUBValues.clear();
 	conUBValues.resize(N + 1);
 
-	Vector lbTmp, ubTmp;
+	DVector lbTmp, ubTmp;
 
 	//
 	// Stack state constraints

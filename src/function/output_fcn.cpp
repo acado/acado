@@ -121,7 +121,7 @@ returnValue OutputFcn::evaluate( const VariablesGrid *x ,
 
 
 
-Vector OutputFcn::evaluate( const EvaluationPoint &x,
+DVector OutputFcn::evaluate( const EvaluationPoint &x,
                             const int              &number ){
 
     return Function::evaluate( x, number );

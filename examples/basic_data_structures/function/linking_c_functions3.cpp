@@ -74,7 +74,7 @@ int main( ){
 
     EvaluationPoint zz(f);
 
-    Vector xx(1);
+    DVector xx(1);
     double tt   ;
 
     xx(0) = 2.0;
@@ -86,7 +86,7 @@ int main( ){
 
     // EVALUATE f AT THE POINT  (tt,xx):
     // ---------------------------------
-    Vector result = f.evaluate( zz );
+    DVector result = f.evaluate( zz );
 
 
     // PRINT THE RESULT:

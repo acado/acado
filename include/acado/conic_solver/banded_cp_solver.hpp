@@ -114,8 +114,8 @@ class BandedCPsolver: public AlgorithmicBase
 											);
 
 
-		virtual returnValue getParameters        ( Vector        &p_  ) const = 0;
-		virtual returnValue getFirstControl      ( Vector        &u0_ ) const = 0;
+		virtual returnValue getParameters        ( DVector        &p_  ) const = 0;
+		virtual returnValue getFirstControl      ( DVector        &u0_ ) const = 0;
 
 
         /** Returns a variance-covariance estimate if possible or an error message otherwise.
@@ -123,11 +123,11 @@ class BandedCPsolver: public AlgorithmicBase
          *  \return SUCCESSFUL_RETURN
          *          RET_MEMBER_NOT_INITIALISED
          */
-        virtual returnValue getVarianceCovariance( Matrix &var );
+        virtual returnValue getVarianceCovariance( DMatrix &var );
 
 
-		virtual returnValue setRealTimeParameters(	const Vector& DeltaX,
-													const Vector& DeltaP = emptyConstVector
+		virtual returnValue setRealTimeParameters(	const DVector& DeltaX,
+													const DVector& DeltaP = emptyConstVector
 													);
 
 

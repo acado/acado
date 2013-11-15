@@ -114,7 +114,7 @@ returnValue LogRecord::print(	std::ostream& _stream,
 	case PRINT_ITEM_BY_ITEM:
 		for (it = items.begin(); it != items.end(); ++it)
 		{
-			Matrix tmp;
+			DMatrix tmp;
 
 			for (uint i = 0; i < it->second.values.getNumPoints(); ++i)
 				tmp.appendRows(it->second.values.getMatrix(i));
@@ -222,7 +222,7 @@ returnValue LogRecord::getAll(	uint _name,
 
 returnValue LogRecord::getFirst(	uint _name,
 									LogRecordItemType _type,
-									Matrix& firstValue
+									DMatrix& firstValue
 									) const
 {
 	LogRecordItems::const_iterator it = items.find(make_pair(_name, _type));
@@ -230,7 +230,7 @@ returnValue LogRecord::getFirst(	uint _name,
 		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 
 	if (it->second.values.getNumPoints() == 0)
-		firstValue = Matrix();
+		firstValue = DMatrix();
 	else
 		firstValue = it->second.values.getMatrix( 0 );
 
@@ -240,7 +240,7 @@ returnValue LogRecord::getFirst(	uint _name,
 
 returnValue LogRecord::getLast(	uint _name,
 								LogRecordItemType _type,
-								Matrix& lastValue
+								DMatrix& lastValue
 								) const
 {
 	LogRecordItems::const_iterator it = items.find(make_pair(_name, _type));
@@ -248,7 +248,7 @@ returnValue LogRecord::getLast(	uint _name,
 		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 
 	if (it->second.values.getNumPoints() == 0)
-		lastValue = Matrix();
+		lastValue = DMatrix();
 	else
 		lastValue = it->second.values.getMatrix(it->second.values.getNumPoints() - 1);
 
@@ -291,7 +291,7 @@ returnValue LogRecord::setAll(	uint _name,
 
 returnValue LogRecord::setLast(	uint _name,
 								LogRecordItemType _type,
-								const Matrix& value,
+								const DMatrix& value,
 								double time
 								)
 {

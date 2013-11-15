@@ -106,7 +106,7 @@ returnValue IntegratorExport::setGrid(	const Grid& _grid )
 }
 
 
-returnValue IntegratorExport::setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 )
+returnValue IntegratorExport::setLinearInput( const DMatrix& M1, const DMatrix& A1, const DMatrix& B1 )
 {
 	if( !A1.isEmpty() ) {
 		if( A1.getNumRows() != M1.getNumRows() || A1.getNumRows() != B1.getNumRows() || A1.getNumRows() != A1.getNumCols() || M1.getNumRows() != M1.getNumCols() || B1.getNumCols() != NU) {
@@ -171,7 +171,7 @@ returnValue IntegratorExport::setModel(	const std::string& _name_ODE, const std:
 }
 
 
-returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs )
+returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& _rhs )
 {
 	if( !A3.isEmpty() ) {
 		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() || A3.getNumRows() != _rhs.getDim() ) {
@@ -223,8 +223,8 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		dummy2.clearStaticCounters();
 		x = DifferentialState("", NX, 1);
 
-		Matrix dependencyMat = _rhs.getDependencyPattern( x );
-		Vector dependency = sumRow( dependencyMat );
+		DMatrix dependencyMat = _rhs.getDependencyPattern( x );
+		DVector dependency = sumRow( dependencyMat );
 		for( i = NX1+NX2; i < NX; i++ ) {
 			if( acadoRoundAway(dependency(i)) != 0 ) { // This expression should not depend on these differential states
 				return RET_UNABLE_TO_EXPORT_CODE;
@@ -232,7 +232,7 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		}
 
 		OutputFcn f_large;
-		Matrix A3_large = expandOutputMatrix(A3);
+		DMatrix A3_large = expandOutputMatrix(A3);
 		f_large << _rhs + A3_large*x;
 
 		return (rhs3.init( f_large,"acado_rhs3",NX,NXA,NU,NP ) & diffs_rhs3.init( g,"acado_diffs3",NX,NXA,NU,NP ) );
@@ -242,7 +242,7 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 }
 
 
-returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
+returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
 {
 	if( !A3.isEmpty() ) {
 		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() ) {
@@ -288,12 +288,12 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	NXA3 = data.getNXA3();
 	exportRhs = data.exportRhs();
 
-	Matrix M1, A1, B1;
+	DMatrix M1, A1, B1;
 	data.getLinearInput( M1, A1, B1 );
 	if ( M1.getNumRows() > 0 && setLinearInput( M1, A1, B1 ) != SUCCESSFUL_RETURN )
 		return RET_UNABLE_TO_EXPORT_CODE;
 
-	Matrix M3, A3;
+	DMatrix M3, A3;
 	data.getLinearOutput( M3, A3 );
 
 	if( exportRhs ) {
@@ -301,7 +301,7 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 		data.getModel(f);
 		OutputFcn f3;
 		data.getLinearOutput( M3, A3, f3 );
-		Matrix parms;
+		DMatrix parms;
 		uint delay;
 		data.getNARXmodel( delay, parms );
 
@@ -342,7 +342,7 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 			std::vector<std::string> outputNames;
 			std::vector<std::string> diffs_outputNames;
 			std::vector<uint> dim_outputs;
-			std::vector<Matrix> outputDependencies_ = data.getOutputDependencies();
+			std::vector<DMatrix> outputDependencies_ = data.getOutputDependencies();
 			data.getNameOutputs(outputNames);
 			data.getNameDiffsOutputs(diffs_outputNames);
 			data.getDimOutputs(dim_outputs);
@@ -612,8 +612,8 @@ returnValue IntegratorExport::prepareFullRhs( ) {
 // PROTECTED:
 
 
-Matrix IntegratorExport::expandOutputMatrix( const Matrix& A3 ) {
-	Matrix result = zeros(NX3,NX);
+DMatrix IntegratorExport::expandOutputMatrix( const DMatrix& A3 ) {
+	DMatrix result = zeros(NX3,NX);
 	uint i,j;
 	for( i = 0; i < NX3; i++ ) {
 		for( j = 0; j < NX3; j++ ) {
@@ -663,7 +663,7 @@ returnValue IntegratorExport::getGrid( Grid& grid_ ) const{
 }
 
 
-returnValue IntegratorExport::getNumSteps( Vector& _numSteps ) const{
+returnValue IntegratorExport::getNumSteps( DVector& _numSteps ) const{
 
     _numSteps = numSteps;
     return SUCCESSFUL_RETURN;

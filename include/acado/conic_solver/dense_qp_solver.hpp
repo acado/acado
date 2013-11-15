@@ -113,13 +113,13 @@ class DenseQPsolver : public DenseCPsolver
 									) = 0;
 
         /** Solves QP using at most <maxIter> iterations. */
-        virtual returnValue solve(  Matrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
-                                    Matrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
-                                    Vector *g,    /**< Gradient of neighbouring QP to be solved. */
-                                    Vector *lb,   /**< Lower bounds of neighbouring QP to be solved. */
-                                    Vector *ub,   /**< Upper bounds of neighbouring QP to be solved. */
-                                    Vector *lbA,  /**< Lower constraints' bounds of neighbouring QP to be solved. */
-                                    Vector *ubA,  /**< Upper constraints' bounds of neighbouring QP to be solved. */
+        virtual returnValue solve(  DMatrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
+                                    DMatrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
+                                    DVector *g,    /**< Gradient of neighbouring QP to be solved. */
+                                    DVector *lb,   /**< Lower bounds of neighbouring QP to be solved. */
+                                    DVector *ub,   /**< Upper bounds of neighbouring QP to be solved. */
+                                    DVector *lbA,  /**< Lower constraints' bounds of neighbouring QP to be solved. */
+                                    DVector *ubA,  /**< Upper constraints' bounds of neighbouring QP to be solved. */
                                     uint maxIter        /**< Maximum number of iterations. */
 									) = 0;
 
@@ -136,13 +136,13 @@ class DenseQPsolver : public DenseCPsolver
 
 
 		/** Performs exactly one QP iteration. */
-        virtual returnValue step( 	Matrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
-                                    Matrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
-                                    Vector *g,    /**< Gradient of neighbouring QP to be solved. */
-                                    Vector *lb,   /**< Lower bounds of neighbouring QP to be solved. */
-                                    Vector *ub,   /**< Upper bounds of neighbouring QP to be solved. */
-                                    Vector *lbA,  /**< Lower constraints' bounds of neighbouring QP to be solved. */
-                                    Vector *ubA  /**< Upper constraints' bounds of neighbouring QP to be solved. */
+        virtual returnValue step( 	DMatrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
+                                    DMatrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
+                                    DVector *g,    /**< Gradient of neighbouring QP to be solved. */
+                                    DVector *lb,   /**< Lower bounds of neighbouring QP to be solved. */
+                                    DVector *ub,   /**< Upper bounds of neighbouring QP to be solved. */
+                                    DVector *lbA,  /**< Lower constraints' bounds of neighbouring QP to be solved. */
+                                    DVector *ubA  /**< Upper constraints' bounds of neighbouring QP to be solved. */
 									) = 0;
 
 
@@ -166,13 +166,13 @@ class DenseQPsolver : public DenseCPsolver
 		/** Returns primal solution vector if QP has been solved.
 		 * \return SUCCESSFUL_RETURN \n
 		 *         RET_QP_NOT_SOLVED */
-		virtual returnValue getPrimalSolution(	Vector& xOpt	/**< OUTPUT: primal solution vector. */
+		virtual returnValue getPrimalSolution(	DVector& xOpt	/**< OUTPUT: primal solution vector. */
 												) const = 0;
 
 		/** Returns dual solution vector if QP has been solved.
 		 * \return SUCCESSFUL_RETURN \n
 		 *         RET_QP_NOT_SOLVED */
-		virtual returnValue getDualSolution(	Vector& yOpt	/**< OUTPUT: dual solution vector. */
+		virtual returnValue getDualSolution(	DVector& yOpt	/**< OUTPUT: dual solution vector. */
 												) const = 0;
 
 
@@ -196,7 +196,7 @@ class DenseQPsolver : public DenseCPsolver
          *  \return SUCCESSFUL_RETURN
          *          RET_MEMBER_NOT_INITIALISED
          */
-        virtual returnValue getVarianceCovariance( Matrix &var ) = 0;
+        virtual returnValue getVarianceCovariance( DMatrix &var ) = 0;
 
 
         /** Returns a variance-covariance estimate if possible or an error message otherwise.
@@ -204,7 +204,7 @@ class DenseQPsolver : public DenseCPsolver
          *  \return SUCCESSFUL_RETURN
          *          RET_MEMBER_NOT_INITIALISED
          */
-        virtual returnValue getVarianceCovariance( Matrix &H, Matrix &var ) = 0;
+        virtual returnValue getVarianceCovariance( DMatrix &H, DMatrix &var ) = 0;
 
 
 

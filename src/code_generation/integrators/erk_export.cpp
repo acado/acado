@@ -80,8 +80,8 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
 
-	ExportVariable Ah ( "A*h",  Matrix( AA )*=h );
-	ExportVariable b4h( "b4*h", Matrix( bb )*=h );
+	ExportVariable Ah ( "A*h",  DMatrix( AA )*=h );
+	ExportVariable b4h( "b4*h", DMatrix( bb )*=h );
 
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
@@ -136,12 +136,12 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		integrate.addStatement( std::string( "int " ) + numInt.getName() + " = numSteps[" + rk_index.getName() + "];\n" );
 	}
 	
-	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
+	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 
 	if( DERIVATIVES ) {
 		// initialize sensitivities:
-		Matrix idX    = eye( NX );
-		Matrix zeroXU = zeros( NX,NU );
+		DMatrix idX    = eye( NX );
+		DMatrix zeroXU = zeros( NX,NU );
 		integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
 		integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
 	}
@@ -168,7 +168,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		loop.addFunctionCall( getNameDiffsRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
-	loop.addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
+	loop.addStatement( rk_ttt += DMatrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop
 
 	if( !equidistantControlGrid() ) {
@@ -263,19 +263,19 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 }
 
 
-returnValue ExplicitRungeKuttaExport::setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 ) {
+returnValue ExplicitRungeKuttaExport::setLinearInput( const DMatrix& M1, const DMatrix& A1, const DMatrix& B1 ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }
 
 
-returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs ) {
+returnValue ExplicitRungeKuttaExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& _rhs ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }
 
 
-returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
+returnValue ExplicitRungeKuttaExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
 {
 	return RET_INVALID_OPTION;
 }
@@ -391,7 +391,7 @@ returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 									  	  	  	  	const std::vector<std::string> _outputNames,
 									  	  	  	  	const std::vector<std::string> _diffs_outputNames,
 									  	  	  	  	const std::vector<uint> _dims_output,
-									  	  	  	  	const std::vector<Matrix> _outputDependencies ) {
+									  	  	  	  	const std::vector<DMatrix> _outputDependencies ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }

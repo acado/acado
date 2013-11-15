@@ -642,11 +642,11 @@ returnValue IntegratorRK::unfreeze(){
 }
 
 
-returnValue IntegratorRK::evaluate( const Vector &x0  ,
-                                    const Vector &xa  ,
-                                    const Vector &p   ,
-                                    const Vector &u   ,
-                                    const Vector &w   ,
+returnValue IntegratorRK::evaluate( const DVector &x0  ,
+                                    const DVector &xa  ,
+                                    const DVector &p   ,
+                                    const DVector &u   ,
+                                    const DVector &w   ,
                                     const Grid   &t_    ){
 
     int         run1;
@@ -832,10 +832,10 @@ returnValue IntegratorRK::evaluate( const Vector &x0  ,
 
 
 
-returnValue IntegratorRK::setProtectedForwardSeed( const Vector &xSeed,
-                                                   const Vector &pSeed,
-                                                   const Vector &uSeed,
-                                                   const Vector &wSeed,
+returnValue IntegratorRK::setProtectedForwardSeed( const DVector &xSeed,
+                                                   const DVector &pSeed,
+                                                   const DVector &uSeed,
+                                                   const DVector &wSeed,
                                                    const int    &order  ){
 
     if( order == 2 ){
@@ -906,10 +906,10 @@ returnValue IntegratorRK::setProtectedForwardSeed( const Vector &xSeed,
 }
 
 
-returnValue IntegratorRK::setForwardSeed2( const Vector &xSeed ,
-                                           const Vector &pSeed ,
-                                           const Vector &uSeed ,
-                                           const Vector &wSeed   ){
+returnValue IntegratorRK::setForwardSeed2( const DVector &xSeed ,
+                                           const DVector &pSeed ,
+                                           const DVector &uSeed ,
+                                           const DVector &wSeed   ){
 
     int run2;
 
@@ -978,7 +978,7 @@ returnValue IntegratorRK::setForwardSeed2( const Vector &xSeed ,
 }
 
 
-returnValue IntegratorRK::setProtectedBackwardSeed( const Vector &seed, const int &order ){
+returnValue IntegratorRK::setProtectedBackwardSeed( const DVector &seed, const int &order ){
 
     if( order == 2 ){
         return setBackwardSeed2(seed);
@@ -1026,7 +1026,7 @@ returnValue IntegratorRK::setProtectedBackwardSeed( const Vector &seed, const in
 
 
 
-returnValue IntegratorRK::setBackwardSeed2( const Vector &seed ){
+returnValue IntegratorRK::setBackwardSeed2( const DVector &seed ){
 
     int run2;
 
@@ -1458,7 +1458,7 @@ returnValue IntegratorRK::stop(){
 }
 
 
-returnValue IntegratorRK::getProtectedX( Vector *xEnd ) const{
+returnValue IntegratorRK::getProtectedX( DVector *xEnd ) const{
 
     int run1;
 
@@ -1472,7 +1472,7 @@ returnValue IntegratorRK::getProtectedX( Vector *xEnd ) const{
 }
 
 
-returnValue IntegratorRK::getProtectedForwardSensitivities( Matrix *Dx, int order ) const{
+returnValue IntegratorRK::getProtectedForwardSensitivities( DMatrix *Dx, int order ) const{
 
     int run1;
 
@@ -1506,10 +1506,10 @@ returnValue IntegratorRK::getProtectedForwardSensitivities( Matrix *Dx, int orde
 }
 
 
-returnValue IntegratorRK::getProtectedBackwardSensitivities( Vector &Dx_x0,
-                                                             Vector &Dx_p ,
-                                                             Vector &Dx_u ,
-                                                             Vector &Dx_w ,
+returnValue IntegratorRK::getProtectedBackwardSensitivities( DVector &Dx_x0,
+                                                             DVector &Dx_p ,
+                                                             DVector &Dx_u ,
+                                                             DVector &Dx_w ,
                                                              int order      ) const{
 
     int run2;

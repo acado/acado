@@ -75,7 +75,7 @@ RungeKuttaExport& RungeKuttaExport::operator=( const RungeKuttaExport& arg
 }
 
 
-returnValue RungeKuttaExport::initializeButcherTableau( const Matrix& _AA, const Vector& _bb, const Vector& _cc ) {
+returnValue RungeKuttaExport::initializeButcherTableau( const DMatrix& _AA, const DVector& _bb, const DVector& _cc ) {
 
 	if( _cc.isEmpty() || !_AA.isSquare() || _AA.getNumRows() != _bb.getDim() || _bb.getDim() != _cc.getDim() ) return RET_INVALID_OPTION;
 
@@ -94,7 +94,7 @@ uint RungeKuttaExport::getNumStages() {
 }
 
 
-returnValue RungeKuttaExport::setNARXmodel( const uint delay, const Matrix& parms ) {
+returnValue RungeKuttaExport::setNARXmodel( const uint delay, const DMatrix& parms ) {
 
 	return RET_INVALID_OPTION;
 }

@@ -32,7 +32,7 @@
  *
  *    This tutorial example explains how to compute
  *    sparse LU factorizations with the ACADO
- *    Matrix class.
+ *    DMatrix class.
  */
 
 
@@ -49,33 +49,33 @@ int main( ){
 
     // DEFINE A MATRIX:
     // ----------------
-    Matrix A = readFromFile("J.txt");
+    DMatrix A = readFromFile("J.txt");
 
     const int m = A.getNumRows();
 
-    Vector b(m);
+    DVector b(m);
 
     for( i = 0; i < m; i++ )
         b(i) = 1.0;
 
-    Matrix B = A;
+    DMatrix B = A;
 
 
     double t2 = -acadoGetTime();
     A.computeSparseLUdecomposition();
     t2 += acadoGetTime();
-    Vector res2 = b - B*A.solveSparseLU(b);
+    DVector res2 = b - B*A.solveSparseLU(b);
 
     printf("LU:  TIME = %.16e   ,  error = %.16e \n", t2, res2.getNorm( VN_LINF ) );
 
-    Vector res3 = b - (B^A.solveTransposeSparseLU(b));
+    DVector res3 = b - (B^A.solveTransposeSparseLU(b));
     printf("LU:  (transpose)   ,  error = %.16e \n", res3.getNorm( VN_LINF ) );
 
 
 //     double t1 = -acadoGetTime();
     A.computeQRdecomposition();
 //     t1 += acadoGetTime();
-//     Vector res1 = b - B*A.solveQR(b);
+//     DVector res1 = b - B*A.solveQR(b);
 // 
 //     printf("QR:  TIME = %.16e   ,  error = %.16e \n", t1, res1.getNorm( VN_LINF ) );
 

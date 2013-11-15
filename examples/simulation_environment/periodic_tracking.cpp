@@ -63,10 +63,10 @@ int main( ){
     h << x;
     h << u;
 
-    Matrix Q(2,2);
+    DMatrix Q(2,2);
     Q.setIdentity();
 
-    Vector r(2);
+    DVector r(2);
     r.setAll( 0.0 );
 
 
@@ -120,7 +120,7 @@ int main( ){
 // 	algorithm.set( PRINTLEVEL,HIGH );
 
 
-    Vector x0(1);
+    DVector x0(1);
     x0(0)  = 1.0;
 
 // // 	algorithm.solve( x0 );

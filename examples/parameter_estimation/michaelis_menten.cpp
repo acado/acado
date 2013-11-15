@@ -51,7 +51,7 @@ int main( ){
 
     // READ THE MEASUREMENT FROM A DATA FILE:
     // --------------------------------------
-    Matrix m; m.read( "michaelis_menten_data.txt" );
+    DMatrix m; m.read( "michaelis_menten_data.txt" );
 
 
     // DEFINE A MEASUREMENT FUNCTION:
@@ -85,7 +85,7 @@ int main( ){
 	
     // GET THE VARIANCE COVARIANCE IN THE SOLUTION:
     // ---------------------------------------------
-    Matrix var;
+    DMatrix var;
     algorithm.getParameterVarianceCovariance( var );
 
     double LSSE = 2.0*algorithm.getObjectiveValue();

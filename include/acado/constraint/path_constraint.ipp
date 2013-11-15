@@ -71,7 +71,7 @@ inline BooleanType PathConstraint::isBoxConstraint( ) const
 
 
 
-inline returnValue PathConstraint::add( const Vector lb_, const Expression& arg, const Vector ub_  ){
+inline returnValue PathConstraint::add( const DVector lb_, const Expression& arg, const DVector ub_  ){
 
     uint run1;
 

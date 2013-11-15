@@ -314,7 +314,7 @@ returnValue SCPevaluation::evaluateLagrangeGradient(	uint N,
         												)
 {
     uint run1;
-    Matrix tmp1, tmp2;
+    DMatrix tmp1, tmp2;
     BlockMatrix aux( 5*N, 1 );
 
     for( run1 = 0; run1 < N-1; run1++ ){
@@ -404,7 +404,7 @@ double SCPevaluation::getKKTtolerance(	const OCPiterate& iter,
     double KKTtol = 0.0;
 	double eps = 0.0;
 
-    Matrix tmp;
+    DMatrix tmp;
 
 //     printf("obj Gradient \n");
 //     cp.objectiveGradient.print();

@@ -109,7 +109,7 @@ public:
 	 */
 	OCP( 	const double &tStart_,  		/**< start of the time horizon of the OCP */
 			const double &tEnd_,  			/**< end   of the time horizon of the OCP */
-			const Vector& _numSteps   		/**< number of integration steps in each discretization interval   */ );
+			const DVector& _numSteps   		/**< number of integration steps in each discretization interval   */ );
 
 
 	/** Constructor that takes a parametric version of the time horizon. This contructor
@@ -182,7 +182,7 @@ public:
 	 *  \f}
 	 *
 	 *  Here the sum is over all grid points of the objective grid. The
-	 *  Matrix \f$ S \f$ is assumed to be symmetric and positive (semi-) definite.
+	 *  DMatrix \f$ S \f$ is assumed to be symmetric and positive (semi-) definite.
 	 *  The Function \f$ r \f$ is called reference and can be
 	 *  specified by the user. The function \f$ h \f$ is a standard Function.
 	 *
@@ -191,12 +191,12 @@ public:
 	 *  \return SUCCESSFUL_RETURN
 	 *
 	 *  @{ */
-	returnValue minimizeLSQ(	const Matrix   &S,   /**< a weighting matrix */
+	returnValue minimizeLSQ(	const DMatrix   &S,   /**< a weighting matrix */
 								const Function &h,   /**< the LSQ-Function   */
-								const Vector   &r    /**< the reference      */ );
+								const DVector   &r    /**< the reference      */ );
 
 	returnValue minimizeLSQ(	const Function &h,   /**< the LSQ-Function   */
-								const Vector   &r    /**< the reference      */ );
+								const DVector   &r    /**< the reference      */ );
 
 	returnValue minimizeLSQ(	const Function &h    /**< the LSQ-Function   */ );
 
@@ -204,7 +204,7 @@ public:
 								const Function            &h,   /**< the LSQ-Function   */
 								const VariablesGrid       &r    /**< the reference      */ );
 
-	returnValue minimizeLSQ(	const Matrix        &S,   /**< a weighting matrix */
+	returnValue minimizeLSQ(	const DMatrix        &S,   /**< a weighting matrix */
 								const Function      &h,   /**< the LSQ-Function   */
 								const VariablesGrid &r    /**< the reference      */ );
 
@@ -216,7 +216,7 @@ public:
 								const char*        rFilename    /**< filename where the reference is stored */ );
 
 
-	returnValue minimizeLSQ(	const Matrix        &S,   /**< a weighting matrix */
+	returnValue minimizeLSQ(	const DMatrix        &S,   /**< a weighting matrix */
 								const Function      &h,   /**< the LSQ-Function   */
 								const char*  rFilename    /**< filename where the reference is stored */ );
 
@@ -225,10 +225,10 @@ public:
 
 	/** \note Applicable only for automatic code generation.
 	 *  \warning Experimental. */
-	returnValue minimizeLSQ(	const Matrix& S,	/**< a weighting matrix */
+	returnValue minimizeLSQ(	const DMatrix& S,	/**< a weighting matrix */
 								const Function& h			/**< the LSQ-Function   */ );
 
-	returnValue minimizeLSQ(	const Matrix& S,	/**< a weighting matrix */
+	returnValue minimizeLSQ(	const DMatrix& S,	/**< a weighting matrix */
 								const std::string& h				/**< the externally defined LSQ-Function   */ );
 	/** @} */
 
@@ -248,26 +248,26 @@ public:
 	 *  \return SUCCESSFUL_RETURN
 	 *
 	 *  @{ */
-	returnValue minimizeLSQEndTerm( const Matrix   & S,  /**< a weighting matrix */
+	returnValue minimizeLSQEndTerm( const DMatrix   & S,  /**< a weighting matrix */
 									const Function & m,  /**< the LSQ-Function   */
-									const Vector   & r   /**< the reference      */ );
+									const DVector   & r   /**< the reference      */ );
 
 	returnValue minimizeLSQEndTerm( const Function & m,  /**< the LSQ-Function   */
-									const Vector   & r   /**< the reference      */ );
+									const DVector   & r   /**< the reference      */ );
 
 	/** \note Applicable only for automatic code generation.
 	 *  \warning This function will be deprecated in the next release.
 	 */
-	returnValue minimizeLSQEndTerm(	const Matrix &S		/**< a weighting matrix for differential states */ );
+	returnValue minimizeLSQEndTerm(	const DMatrix &S		/**< a weighting matrix for differential states */ );
 
 	/** \note Applicable only for automatic code generation.
 	 *  \warning Experimental. */
-	returnValue minimizeLSQEndTerm(	const Matrix& S,	/**< a weighting matrix */
+	returnValue minimizeLSQEndTerm(	const DMatrix& S,	/**< a weighting matrix */
 									const Function& m			/**< the LSQ-Function   */ );
 
 	/** \note Applicable only for automatic code generation.
 	 *  \warning Experimental. */
-	returnValue minimizeLSQEndTerm(	const Matrix& S,	/**< a weighting matrix */
+	returnValue minimizeLSQEndTerm(	const DMatrix& S,	/**< a weighting matrix */
 									const std::string& m				/**< the externally defined LSQ-Function   */ );
 	/** @} */
 
@@ -372,19 +372,19 @@ public:
 
 	/** Applicable only for automatic code generation.
 	 *  \note Experimental. */
-	returnValue minimizeLSQLinearTerms(	const Vector& Slx,	/**< a weighting vector for differential states. */
-										const Vector& Slu	/**< a weighting vector for controls. */ );
+	returnValue minimizeLSQLinearTerms(	const DVector& Slx,	/**< a weighting vector for differential states. */
+										const DVector& Slu	/**< a weighting vector for controls. */ );
 
 	/** Applicable only for automatic code generation.
 	 *  \note Experimental. */
-	returnValue minimizeLSQLinearTerms(	const Matrix& Slx,	/**< a weighting vector for differential states. */
-										const Matrix& Slu	/**< a weighting vector for controls. */ );
+	returnValue minimizeLSQLinearTerms(	const DMatrix& Slx,	/**< a weighting vector for differential states. */
+										const DMatrix& Slu	/**< a weighting vector for controls. */ );
 	/** @} */
 
 protected:
 
 	void setupGrid( double tStart, double tEnd, int N );
-	void setupGrid( const Vector& times );
+	void setupGrid( const DVector& times );
 	void copy( const OCP &rhs );
 
 protected:

@@ -70,9 +70,9 @@ class LSQEndTerm : public ObjectiveElement{
 
         /** Default constructor. */
         LSQEndTerm( const Grid&     grid_,   /**< the objective grid    */
-                    const Matrix      &S_,   /**< the weighting matrix  */
+                    const DMatrix      &S_,   /**< the weighting matrix  */
                     const Function    &m_,   /**< the LSQ function      */
-                    const Vector      &r_    /**< the reference vector  */ );
+                    const DVector      &r_    /**< the reference vector  */ );
 
         /** Copy constructor (deep copy). */
         LSQEndTerm( const LSQEndTerm& rhs );
@@ -93,9 +93,9 @@ class LSQEndTerm : public ObjectiveElement{
 
 
         inline returnValue init( const Grid&     grid_,   /**< the objective grid    */
-                                 const Matrix      &S_,   /**< the weighting matrix  */
+                                 const DMatrix      &S_,   /**< the weighting matrix  */
                                  const Function&    m_,   /**< the LSQ function      */
-                                 const Vector      &r_    /**< the reference vectors */ );
+                                 const DVector      &r_    /**< the reference vectors */ );
 
 
 
@@ -144,7 +144,7 @@ class LSQEndTerm : public ObjectiveElement{
          *                                       \n
          *  \return SUCCESSFUL_RETURN
          */
-        inline returnValue setReference( const Vector &ref );
+        inline returnValue setReference( const DVector &ref );
 
 
 // =======================================================================================
@@ -155,8 +155,8 @@ class LSQEndTerm : public ObjectiveElement{
     //
     protected:
 
-    Matrix           S              ;    /**< a symmetric weighting matrix */
-    Vector           r              ;    /**< a tracking reference         */
+    DMatrix           S              ;    /**< a symmetric weighting matrix */
+    DVector           r              ;    /**< a tracking reference         */
 
     double          *S_h_res        ;    /**< specific intermediate results \n
                                            *  to be stored for backward     \n

@@ -46,8 +46,8 @@ int main( ){
 
     // DEFINE VALRIABLES:
     // ---------------------------
-    Matrix                 A(3,3);
-    Vector                 b(3)  ;
+    DMatrix                 A(3,3);
+    DVector                 b(3)  ;
     DifferentialState      x("", 3, 1);
     Function               f     ;
 
@@ -69,14 +69,14 @@ int main( ){
     // --------------------
     EvaluationPoint zz(f);
 
-    Vector xx(3);
+    DVector xx(3);
     xx(0) = 1.0;
     xx(1) = 2.0;
     xx(2) = 3.0;
 
     zz.setX( xx );
 
-    Vector result = f.evaluate( zz );
+    DVector result = f.evaluate( zz );
 
     result.print(std::cout, "result");
 

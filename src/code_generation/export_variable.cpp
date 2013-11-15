@@ -59,22 +59,22 @@ ExportVariable::ExportVariable(	const std::string& _name,
 								const std::string& _prefix
 								)
 {
-	Matrix m(_nRows, _nCols);
+	DMatrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, matrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 
 ExportVariable::ExportVariable(	const std::string& _name,
-								const Matrix& _data,
+								const DMatrix& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								bool _callItByValue,
 								const std::string& _prefix
 								)
 {
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, matrixPtr(new DMatrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 ExportVariable::ExportVariable(	unsigned _nRows,
@@ -85,10 +85,10 @@ ExportVariable::ExportVariable(	unsigned _nRows,
 								const std::string& _prefix
 								)
 {
-	Matrix m(_nRows, _nCols);
+	DMatrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal("var", matrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 ExportVariable::ExportVariable(	const std::string& _name,
@@ -102,19 +102,19 @@ ExportVariable::ExportVariable(	const std::string& _name,
 	assignNode(new ExportVariableInternal(_name, _data, _type, _dataStruct, _callItByValue, _prefix));
 }
 
-ExportVariable::ExportVariable( const Matrix& _data )
+ExportVariable::ExportVariable( const DMatrix& _data )
 {
-	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( _data ))));
+	assignNode(new ExportVariableInternal("var", matrixPtr(new DMatrix( _data ))));
 }
 
-ExportVariable::ExportVariable( const Vector& _data )
+ExportVariable::ExportVariable( const DVector& _data )
 {
-	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( _data ))));
+	assignNode(new ExportVariableInternal("var", matrixPtr(new DMatrix( _data ))));
 }
 
 ExportVariable::ExportVariable( const double _data )
 {
-	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( _data ))));
+	assignNode(new ExportVariableInternal("var", matrixPtr(new DMatrix( _data ))));
 }
 
 
@@ -152,24 +152,24 @@ ExportVariable& ExportVariable::setup(	const std::string& _name,
 										const std::string& _prefix
 										)
 {
-	Matrix m(_nRows, _nCols);
+	DMatrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, matrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 
 	return *this;
 }
 
 
 ExportVariable& ExportVariable::setup(	const std::string& _name,
-										const Matrix& _data,
+										const DMatrix& _data,
 										ExportType _type,
 										ExportStruct _dataStruct,
 										bool _callItByValue,
 										const std::string& _prefix
 										)
 {
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, matrixPtr(new DMatrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
 
 	return *this;
 }
@@ -476,7 +476,7 @@ bool ExportVariable::isVector( ) const
 }
 
 
-Matrix ExportVariable::getGivenMatrix( ) const
+DMatrix ExportVariable::getGivenMatrix( ) const
 {
 	return (*this)->getGivenMatrix();
 }

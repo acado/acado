@@ -73,9 +73,9 @@ RadauIIA1Export::~RadauIIA1Export( )
 IntegratorExport* createRadauIIA1Export(	UserInteraction* _userInteraction,
 											const std::string &_commonHeaderName)
 {
-	Matrix AA(1,1);
-	Vector bb(1);
-	Vector cc(1);
+	DMatrix AA(1,1);
+	DVector bb(1);
+	DVector cc(1);
 
 	AA(0,0) = 1;
 

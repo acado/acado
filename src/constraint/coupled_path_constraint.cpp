@@ -84,8 +84,8 @@ returnValue CoupledPathConstraint::evaluate( const OCPiterate& iter ){
 
     if( nc == 0 )  return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
 
-	Matrix resL( nc, 1 );
-	Matrix resU( nc, 1 );
+	DMatrix resL( nc, 1 );
+	DMatrix resU( nc, 1 );
 
     for( run1 = 0; run1 < nc; run1++ ){
          resL( run1, 0 ) = lb[0][run1];
@@ -93,7 +93,7 @@ returnValue CoupledPathConstraint::evaluate( const OCPiterate& iter ){
 	}
     
 
-	Vector result;
+	DVector result;
 
     for( run2 = 0; run2 <= T; run2++ ){
 
@@ -143,18 +143,18 @@ returnValue CoupledPathConstraint::evaluateSensitivities(){
 
 //         double*   bseed1 = new double[nc];
 
-        Matrix bseed_;
+        DMatrix bseed_;
         bSeed->getSubBlock( 0, 0, bseed_);
 
         dBackward.init( 1, 5*N );
 
         int nBDirs = bSeed->getNumRows( 0, 0 );
 
-        Matrix Dx ( nBDirs, nx );
-        Matrix Dxa( nBDirs, na );
-        Matrix Dp ( nBDirs, np );
-        Matrix Du ( nBDirs, nu );
-        Matrix Dw ( nBDirs, nw );
+        DMatrix Dx ( nBDirs, nx );
+        DMatrix Dxa( nBDirs, na );
+        DMatrix Dp ( nBDirs, np );
+        DMatrix Du ( nBDirs, nu );
+        DMatrix Dw ( nBDirs, nw );
 
         for( run3 = 0; run3 < N; run3++ )
 		{
@@ -228,7 +228,7 @@ returnValue CoupledPathConstraint::evaluateSensitivities(){
 
 // addition of second order derivatives --> see file test.cpp in constraint directory
 
-returnValue CoupledPathConstraint::evaluateSensitivities( const Matrix &seed, BlockMatrix &hessian ){
+returnValue CoupledPathConstraint::evaluateSensitivities( const DMatrix &seed, BlockMatrix &hessian ){
     // EVALUATION OF THE SENSITIVITIES:
     // --------------------------------
 
@@ -263,17 +263,17 @@ returnValue CoupledPathConstraint::evaluateSensitivities( const Matrix &seed, Bl
     for( run1 = 0; run1 < fcn[run3].getNumberOfVariables()+1; run1++ )
         fseed1[run1] = 0.0;
 
-    Matrix Dx ( nc, nx );
-    Matrix Dxa( nc, na );
-    Matrix Dp ( nc, np );
-    Matrix Du ( nc, nu );
-    Matrix Dw ( nc, nw );
+    DMatrix Dx ( nc, nx );
+    DMatrix Dxa( nc, na );
+    DMatrix Dp ( nc, np );
+    DMatrix Du ( nc, nu );
+    DMatrix Dw ( nc, nw );
    
-    Matrix Hx ( nx, nx );
-    Matrix Hxa( nx, na );
-    Matrix Hp ( nx, np );
-    Matrix Hu ( nx, nu );
-    Matrix Hw ( nx, nw );
+    DMatrix Hx ( nx, nx );
+    DMatrix Hxa( nx, na );
+    DMatrix Hp ( nx, np );
+    DMatrix Hu ( nx, nu );
+    DMatrix Hw ( nx, nw );
      
     // DERIVATIVES W.R.T. STATES
     for( run2 = 0; run2 < nx; run2++ ){

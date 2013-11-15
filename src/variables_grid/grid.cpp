@@ -60,7 +60,7 @@ Grid::Grid(	uint nPoints_,
 }
 
 
-Grid::Grid(	const Vector& times_
+Grid::Grid(	const DVector& times_
 			)
 {
 	times = 0;
@@ -133,7 +133,7 @@ returnValue Grid::init( uint _nPoints,
 }
 
 
-returnValue Grid::init(	const Vector& times_
+returnValue Grid::init(	const DVector& times_
 						)
 {
 	nPoints = times_.getDim();

@@ -76,7 +76,7 @@ class ExportArgumentInternal : public ExportDataInternal
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Matrix used for initialization.
+		 *	@param[in] _data			DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
@@ -204,7 +204,7 @@ class ExportArgumentInternal : public ExportDataInternal
 
 	protected:
 
-		matrixPtr data;								/**< Matrix containing the values of each component of the argument
+		matrixPtr data;								/**< DMatrix containing the values of each component of the argument
 													 *   (by default, all entries are undefined). */
 		ExportIndex addressIdx;						/**< Address index in case not the argument itself but a pointer to
 													 *   this address within the memory of the argument is to be passed. */

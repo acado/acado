@@ -376,20 +376,20 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	initializeCoefficients();
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-	Matrix tmp = AA;
+	DMatrix tmp = AA;
 	ExportVariable Ah( "Ah_mat", tmp*=h, STATIC_CONST_REAL );
 	code.addDeclaration( Ah );
 	code.addLinebreak( 2 );
 	// TODO: Ask Milan why this does NOT work properly !!
 	Ah = ExportVariable( "Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 
-	Vector BB( bb );
-	ExportVariable Bh( "Bh_mat", Matrix( BB*=h, false ) );
+	DVector BB( bb );
+	ExportVariable Bh( "Bh_mat", DMatrix( BB*=h, false ) );
 
-	Vector CC( cc );
+	DVector CC( cc );
 	ExportVariable C;
 	if( timeDependant ) {
-		C = ExportVariable( "C_mat", Matrix( CC*=(1.0/grid.getNumIntervals()), false ), STATIC_CONST_REAL );
+		C = ExportVariable( "C_mat", DMatrix( CC*=(1.0/grid.getNumIntervals()), false ), STATIC_CONST_REAL );
 		code.addDeclaration( C );
 		code.addLinebreak( 2 );
 		C = ExportVariable( "C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
@@ -450,7 +450,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 			integrate.addStatement( numMeas[run5] == 0 );
 		}
 	}
-	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
+	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 	if( inputDim > NX+NXA ) {
 		integrate.addStatement( rk_xxx.getCols( NX+NXA,inputDim ) == rk_eta.getCols( NX+NXA,inputDim ) );
 	}
@@ -496,7 +496,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( rk_eta.getCol( run5 ) += rk_kkk.getRow( run5 )*Bh );
 	}
 	if( NXA > 0) {
-		Matrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
+		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
 		loop->addStatement( std::string("if( run == 0 ) {\n") );
 		for( run5 = 0; run5 < NXA; run5++ ) {
 			loop->addStatement( rk_eta.getCol( NX+run5 ) == rk_kkk.getRow( NX+run5 )*tempCoefs );
@@ -514,7 +514,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 			loop->addStatement( numMeas[run5].getName() + " += " + tmp_meas.get(0,run5) + ";\n" );
 		}
 	}
-	loop->addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
+	loop->addStatement( rk_ttt += DMatrix(1.0/grid.getNumIntervals()) );
 
     // end of the integrator loop.
     if( !equidistantControlGrid() ) {
@@ -547,7 +547,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 returnValue ImplicitRungeKuttaExport::prepareInputSystem(	ExportStatementBlock& code )
 {
 	if( NX1 > 0 ) {
-		Matrix mat1 = formMatrix( M11, A11 );
+		DMatrix mat1 = formMatrix( M11, A11 );
 		rk_mat1 = ExportVariable( "rk_mat1", mat1, STATIC_CONST_REAL );
 		code.addDeclaration( rk_mat1 );
 		// TODO: Ask Milan why this does NOT work properly !!
@@ -561,7 +561,7 @@ returnValue ImplicitRungeKuttaExport::prepareInputSystem(	ExportStatementBlock& 
 returnValue ImplicitRungeKuttaExport::prepareOutputSystem(	ExportStatementBlock& code )
 {
 	if( NX3 > 0 ) {
-		Matrix mat3 = formMatrix( M33, A33 );
+		DMatrix mat3 = formMatrix( M33, A33 );
 		rk_mat3 = ExportVariable( "rk_mat3", mat3, STATIC_CONST_REAL );
 		code.addDeclaration( rk_mat3 );
 		// TODO: Ask Milan why this does NOT work properly !!
@@ -572,14 +572,14 @@ returnValue ImplicitRungeKuttaExport::prepareOutputSystem(	ExportStatementBlock&
 }
 
 
-Matrix ImplicitRungeKuttaExport::formMatrix( const Matrix& mass, const Matrix& jacobian ) {
+DMatrix ImplicitRungeKuttaExport::formMatrix( const DMatrix& mass, const DMatrix& jacobian ) {
 	if( jacobian.getNumRows() != jacobian.getNumCols() ) {
 		return RET_UNABLE_TO_EXPORT_CODE;
 	}
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 	uint vars = jacobian.getNumRows();
 	uint i1, j1, i2, j2;
-	Matrix result = zeros(numStages*vars, numStages*vars);
+	DMatrix result = zeros(numStages*vars, numStages*vars);
 	for( i1 = 0; i1 < numStages; i1++ ){
 		for( j1 = 0; j1 < numStages; j1++ ) {
 			for( i2 = 0; i2 < vars; i2++ ){
@@ -750,7 +750,7 @@ returnValue ImplicitRungeKuttaExport::evaluateStatesOutputSystem( ExportStatemen
 
 returnValue ImplicitRungeKuttaExport::evaluateRhsImplicitSystem( ExportStatementBlock* block, const ExportIndex& stage )
 {
-	Matrix zeroM = zeros( NX2+NXA,1 );
+	DMatrix zeroM = zeros( NX2+NXA,1 );
 	block->addFunctionCall( getNameRHS(), rk_xxx, rk_rhsTemp.getAddress(0,0) );
 	// matrix rk_b:
 	if( NDX2 == 0 ) {
@@ -793,7 +793,7 @@ returnValue ImplicitRungeKuttaExport::evaluateMatrix( ExportStatementBlock* bloc
 		}
 	}
 	if( NXA > 0 ) {
-		Matrix zeroM = zeros( 1,NXA );
+		DMatrix zeroM = zeros( 1,NXA );
 		for( i = 0; i < numStages; i++ ) { // algebraic states
 			loop2.addStatement( std::string( "if( " ) + toString(i) + " == " + index1.getName() + " ) {\n" );
 			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,numStages*NX2+i*NXA,numStages*NX2+i*NXA+NXA ) == rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1+NX2,index2*(NVARS2)+NX1+NX2+NXA ) );
@@ -849,7 +849,7 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) evaluateDerivedPolynomial( *loop1, rk_out, time_tmp );
 		}
 
-		Vector dependencyX, dependencyZ, dependencyDX;
+		DVector dependencyX, dependencyZ, dependencyDX;
 		if( exportRhs || crsFormat ) {
 			dependencyX = sumRow( outputDependencies[i].getCols( 0,NX-1 ) );
 			if( numXA_output(i) > 0 ) dependencyZ = sumRow( outputDependencies[i].getCols( NX,NX+NXA-1 ) );
@@ -887,7 +887,7 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 returnValue ImplicitRungeKuttaExport::initializeDDMatrix( )
 {
 	uint i, j, k;
-	DD = Matrix( numStages, numStages );
+	DD = DMatrix( numStages, numStages );
 	
 	for( i = 0; i < numStages; i++ ) {
 		for( j = 0; j < numStages; j++ ) {
@@ -907,9 +907,9 @@ returnValue ImplicitRungeKuttaExport::initializeCoefficients( )
 {
 	uint i, j, k, index;
 	double sum;
-	Vector cVec( numStages-1 );
-	Vector products;
-	coeffs = Matrix( numStages, numStages );
+	DVector cVec( numStages-1 );
+	DVector products;
+	coeffs = DMatrix( numStages, numStages );
 	
 	for( i = 0; i < numStages; i++ ) {
 		for( j = 0; j < numStages; j++ ) {
@@ -943,18 +943,18 @@ returnValue ImplicitRungeKuttaExport::initializeCoefficients( )
 }
 
 
-Vector ImplicitRungeKuttaExport::computeCombinations( const Vector& cVec, uint index, uint numEls ) {
+DVector ImplicitRungeKuttaExport::computeCombinations( const DVector& cVec, uint index, uint numEls ) {
 	uint k, l;
-	Vector products;
+	DVector products;
 	
 	if( numEls == 0 ) {
-		products = Vector(1);
+		products = DVector(1);
 		products(0) = 1;
 		return products;
 	}
-	products = Vector();
+	products = DVector();
 	for( k = index; k < cVec.getDim()-numEls+1; k++ ) {
-		Vector temp = computeCombinations( cVec, k+1, numEls-1 );
+		DVector temp = computeCombinations( cVec, k+1, numEls-1 );
 		for( l = 0; l < temp.getDim(); l++ ) {
 			temp(l) *= cVec(k);
 		}
@@ -965,11 +965,11 @@ Vector ImplicitRungeKuttaExport::computeCombinations( const Vector& cVec, uint i
 }
 
 
-Matrix ImplicitRungeKuttaExport::evaluatePolynomial( uint index )
+DMatrix ImplicitRungeKuttaExport::evaluatePolynomial( uint index )
 {
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
-	Matrix polynV(totalMeas[index],numStages);
+	DMatrix polynV(totalMeas[index],numStages);
 
 	double scale2 = 1.0/(grid.getLastTime() - grid.getFirstTime());
 	for( uint i = 0; i < totalMeas[index]; i++ ) {
@@ -985,10 +985,10 @@ Matrix ImplicitRungeKuttaExport::evaluatePolynomial( uint index )
 }
 
 
-Vector ImplicitRungeKuttaExport::evaluatePolynomial( double time )
+DVector ImplicitRungeKuttaExport::evaluatePolynomial( double time )
 {
 	uint i, j;
-	Vector coeffsPolyn( numStages );
+	DVector coeffsPolyn( numStages );
 	
 	for( j = 0; j < numStages; j++ ) {
 		coeffsPolyn( j ) = 0.0;
@@ -1025,11 +1025,11 @@ returnValue ImplicitRungeKuttaExport::evaluatePolynomial( ExportStatementBlock& 
 }
 
 
-Matrix ImplicitRungeKuttaExport::evaluateDerivedPolynomial( uint index )
+DMatrix ImplicitRungeKuttaExport::evaluateDerivedPolynomial( uint index )
 {
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
-	Matrix polynDerV(totalMeas[index],numStages);
+	DMatrix polynDerV(totalMeas[index],numStages);
 
 	double scale2 = 1.0/(grid.getLastTime() - grid.getFirstTime());
 	for( uint i = 0; i < totalMeas[index]; i++ ) {
@@ -1045,10 +1045,10 @@ Matrix ImplicitRungeKuttaExport::evaluateDerivedPolynomial( uint index )
 }
 
 
-Vector ImplicitRungeKuttaExport::evaluateDerivedPolynomial( double time )
+DVector ImplicitRungeKuttaExport::evaluateDerivedPolynomial( double time )
 {
 	uint i, j;
-	Vector coeffsPolyn( numStages );
+	DVector coeffsPolyn( numStages );
 
 	// construct the Lagrange interpolating polynomials:
 	for( i = 0; i < numStages; i++ ) {
@@ -1084,9 +1084,9 @@ returnValue ImplicitRungeKuttaExport::evaluateDerivedPolynomial( ExportStatement
 }
 
 
-Vector ImplicitRungeKuttaExport::divideMeasurements( uint index )
+DVector ImplicitRungeKuttaExport::divideMeasurements( uint index )
 {
-	Vector meas = zeros(1,grid.getNumIntervals());
+	DVector meas = zeros(1,grid.getNumIntervals());
 
 	for( uint i = 0; i < outputGrids[index].getNumIntervals(); i++ ) {
 		uint interv = getIntegrationInterval( outputGrids[index].getTime(i) );
@@ -1246,9 +1246,9 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
 
-	numDX_output = Vector(outputGrids.size());
-	numXA_output = Vector(outputGrids.size());
-	numVARS_output = Vector(outputGrids.size());
+	numDX_output = DVector(outputGrids.size());
+	numXA_output = DVector(outputGrids.size());
+	numVARS_output = DVector(outputGrids.size());
 
 	uint i;
 	uint maxOutputs = 0;
@@ -1295,7 +1295,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		outputs.push_back( OUTPUT );
 		if( sensGen ) diffs_outputs.push_back( diffs_OUTPUT );
 
-		Matrix dependencyMat = outputExpressions[i].getDependencyPattern( x );
+		DMatrix dependencyMat = outputExpressions[i].getDependencyPattern( x );
 		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( z ) );
 		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( u ) );
 		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( dx ) );
@@ -1346,9 +1346,9 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 		int measGrid;
 		get( MEASUREMENT_GRID, measGrid );
 
-		numDX_output = Vector(outputGrids.size());
-		numXA_output = Vector(outputGrids.size());
-		numVARS_output = Vector(outputGrids.size());
+		numDX_output = DVector(outputGrids.size());
+		numXA_output = DVector(outputGrids.size());
+		numVARS_output = DVector(outputGrids.size());
 
 		uint i;
 		uint maxOutputs = 0;
@@ -1404,7 +1404,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 									  	  const std::vector<std::string> _outputNames,
 									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
-										  const std::vector<Matrix> _outputDependencies ) {
+										  const std::vector<DMatrix> _outputDependencies ) {
 
 	outputDependencies = _outputDependencies;
 	crsFormat = true;
@@ -1425,9 +1425,9 @@ returnValue ImplicitRungeKuttaExport::prepareOutputEvaluation( ExportStatementBl
 
 	for( i = 0; i < outputGrids.size(); i++ ) {
 		if( (MeasurementGrid)measGrid != ONLINE_GRID ) {
-			Matrix polynV = evaluatePolynomial( i );
-			Matrix polynDerV = evaluateDerivedPolynomial( i );
-			Vector measurements = divideMeasurements( i );
+			DMatrix polynV = evaluatePolynomial( i );
+			DMatrix polynDerV = evaluateDerivedPolynomial( i );
+			DVector measurements = divideMeasurements( i );
 
 			double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 			ExportVariable polynVariable = ExportVariable( (std::string)"polynOutput" + toString( i ), polynV*=h, STATIC_CONST_REAL );

@@ -74,8 +74,8 @@ int main( ){
     m << 10.0*x  ;
     m <<  0.1*x*x;
 
-    Matrix S(2,2);
-    Vector r(2);
+    DMatrix S(2,2);
+    DVector r(2);
 
     S.setIdentity();
     r.setAll( 0.1 );

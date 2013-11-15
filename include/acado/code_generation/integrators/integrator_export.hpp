@@ -113,7 +113,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
+		virtual returnValue setLinearInput( const DMatrix& M1, const DMatrix& A1, const DMatrix& B1 );
 
 
 		/** .
@@ -122,7 +122,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& rhs );
 
 
 		/** .
@@ -131,7 +131,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
 		/** Assigns the model to be used by the integrator.
@@ -154,7 +154,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		virtual returnValue setNARXmodel( const uint delay, const Matrix& parms ) = 0;
+		virtual returnValue setNARXmodel( const uint delay, const DMatrix& parms ) = 0;
 
 
 		/** Passes all the necessary model data to the integrator.
@@ -322,7 +322,7 @@ class IntegratorExport : public ExportAlgorithm
 									  	  const std::vector<std::string> _outputNames,
 									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
-										  const std::vector<Matrix> _outputDependencies ) = 0;
+										  const std::vector<DMatrix> _outputDependencies ) = 0;
 
 
 		/** Returns the grid of the integrator. 	\n
@@ -336,7 +336,7 @@ class IntegratorExport : public ExportAlgorithm
 		* 
 		*  \return SUCCESSFUL_RETURN          		\n
 		*/
-		virtual returnValue getNumSteps( Vector& _numSteps ) const;
+		virtual returnValue getNumSteps( DVector& _numSteps ) const;
 		
 		
 		/** Returns the output expressions. 	\n
@@ -382,7 +382,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		Matrix expandOutputMatrix( const Matrix& A3 );
+		DMatrix expandOutputMatrix( const DMatrix& A3 );
 
 
 		/** Copies all class members from given object.
@@ -438,8 +438,8 @@ class IntegratorExport : public ExportAlgorithm
 
 		bool timeDependant;
 
-		Matrix M11, A11, B11;
-		Matrix A33, M33;
+		DMatrix M11, A11, B11;
+		DMatrix A33, M33;
 
         bool exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
         bool crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
@@ -449,7 +449,7 @@ class IntegratorExport : public ExportAlgorithm
         std::string name_diffs_rhs3;				/**< The name of the function evaluating the derivatives for the linear output system, if provided. */
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
-		Vector numSteps;					/**< The number of integration steps per shooting interval. */
+		DVector numSteps;					/**< The number of integration steps per shooting interval. */
 
 		ExportFunction fullRhs;				/**< Function that evaluates the full right-hand side. */
 		ExportVariable	rhs_in;
@@ -489,7 +489,7 @@ class IntegratorExport : public ExportAlgorithm
 
         std::vector<Grid> outputGrids;					/**< A separate grid for each output. */
         std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
-        std::vector<Matrix> outputDependencies;			/**< A separate dependency matrix for each output. */
+        std::vector<DMatrix> outputDependencies;			/**< A separate dependency matrix for each output. */
         std::vector<ExportAcadoFunction> outputs;			/**< Module to export output functions. */
         std::vector<ExportAcadoFunction> diffs_outputs;	/**< Module to export the evaluation of the derivatives of the output functions. */
 		

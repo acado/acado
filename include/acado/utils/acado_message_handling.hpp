@@ -84,7 +84,7 @@ RET_FILE_CAN_NOT_BE_CLOSED,						/**< The file could not be closed. */
 RET_FILE_HAS_NO_VALID_ENTRIES,					/**< The file has no valid entries. */
 RET_DOES_DIRECTORY_EXISTS,						/**< Could not open file, check if given directory exists. */
 
-/* Matrix/Vector */
+/* DMatrix/DVector */
 RET_VECTOR_DIMENSION_MISMATCH,					/**< Incompatible vector dimensions. */
 RET_DIFFERENTIAL_STATE_DIMENSION_MISMATCH,		/**< Incompatible differential state vector dimensions. */
 RET_ALGEBRAIC_STATE_DIMENSION_MISMATCH,			/**< Incompatible algebraic state vector dimensions. */
@@ -318,7 +318,7 @@ RET_STEPDIRECTION_FAILED_CHOLESKY,				/**< Abnormal termination due to Cholesky 
 RET_STEPLENGTH_DETERMINATION_FAILED,			/**< Determination of step direction failed. */
 RET_OPTIMAL_SOLUTION_FOUND,						/**< Optimal solution of neighbouring QP found. */
 RET_MAX_NWSR_REACHED,							/**< Maximum number of working set recalculations performed. */
-RET_MATRIX_NOT_SPD,								/**< Matrix is not positive definite. */
+RET_MATRIX_NOT_SPD,								/**< DMatrix is not positive definite. */
 
 /* CODE EXPORT */
 RET_CODE_EXPORT_SUCCESSFUL,						/**< Code generation successful. */

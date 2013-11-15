@@ -68,7 +68,7 @@ int main( ){
     // AND COPUTE FIRST ORDER
     // FORWARD SENSITIVITIES:
     // ----------------------
-    Vector seed(2);
+    DVector seed(2);
     seed(0) = 1.0;
     seed(1) = 0.0;
 
@@ -85,7 +85,7 @@ int main( ){
 	VariablesGrid differentialStates;
 	integrator.getX( differentialStates );
 
-	Vector Dx( 2 );
+	DVector Dx( 2 );
 	integrator.getForwardSensitivities( Dx,1 );
 	
 	differentialStates.print( "x" );

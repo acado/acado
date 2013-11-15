@@ -40,7 +40,7 @@ BEGIN_NAMESPACE_ACADO
 
 
 
-inline returnValue EvaluationPoint::copy( const int *order, const Vector &rhs ){
+inline returnValue EvaluationPoint::copy( const int *order, const DVector &rhs ){
 
     uint i;
     for( i = 0; i < rhs.getDim(); i++ )
@@ -49,22 +49,22 @@ inline returnValue EvaluationPoint::copy( const int *order, const Vector &rhs ){
 }
 
 
-inline Vector EvaluationPoint::backCopy( const int *order, const uint &dim ) const{
+inline DVector EvaluationPoint::backCopy( const int *order, const uint &dim ) const{
 
-    Vector tmp(dim);
+    DVector tmp(dim);
     uint i;
     for( i = 0; i < dim; i++ )
         tmp(i) = z[order[i]];
     return tmp;
 }
 
-inline returnValue EvaluationPoint::setT ( const double &t  ){ return copy( idx[0], Vector(1,&t) ); }
-inline returnValue EvaluationPoint::setX ( const Vector &x  ){ return copy( idx[1], x            ); }
-inline returnValue EvaluationPoint::setXA( const Vector &xa ){ return copy( idx[2], xa           ); }
-inline returnValue EvaluationPoint::setP ( const Vector &p  ){ return copy( idx[3], p            ); }
-inline returnValue EvaluationPoint::setU ( const Vector &u  ){ return copy( idx[4], u            ); }
-inline returnValue EvaluationPoint::setW ( const Vector &w  ){ return copy( idx[5], w            ); }
-inline returnValue EvaluationPoint::setDX( const Vector &dx ){ return copy( idx[6], dx           ); }
+inline returnValue EvaluationPoint::setT ( const double &t  ){ return copy( idx[0], DVector(1,&t) ); }
+inline returnValue EvaluationPoint::setX ( const DVector &x  ){ return copy( idx[1], x            ); }
+inline returnValue EvaluationPoint::setXA( const DVector &xa ){ return copy( idx[2], xa           ); }
+inline returnValue EvaluationPoint::setP ( const DVector &p  ){ return copy( idx[3], p            ); }
+inline returnValue EvaluationPoint::setU ( const DVector &u  ){ return copy( idx[4], u            ); }
+inline returnValue EvaluationPoint::setW ( const DVector &w  ){ return copy( idx[5], w            ); }
+inline returnValue EvaluationPoint::setDX( const DVector &dx ){ return copy( idx[6], dx           ); }
 
 
 inline returnValue EvaluationPoint::setZ ( const uint       &idx_,
@@ -96,12 +96,12 @@ inline returnValue EvaluationPoint::setZero( )
 
 
 inline double EvaluationPoint::getT () const{ return z[*idx[0]]            ; }
-inline Vector EvaluationPoint::getX () const{ return backCopy( idx[1], nx ); }
-inline Vector EvaluationPoint::getXA() const{ return backCopy( idx[2], na ); }
-inline Vector EvaluationPoint::getP () const{ return backCopy( idx[3], np ); }
-inline Vector EvaluationPoint::getU () const{ return backCopy( idx[4], nu ); }
-inline Vector EvaluationPoint::getW () const{ return backCopy( idx[5], nw ); }
-inline Vector EvaluationPoint::getDX() const{ return backCopy( idx[6], nd ); }
+inline DVector EvaluationPoint::getX () const{ return backCopy( idx[1], nx ); }
+inline DVector EvaluationPoint::getXA() const{ return backCopy( idx[2], na ); }
+inline DVector EvaluationPoint::getP () const{ return backCopy( idx[3], np ); }
+inline DVector EvaluationPoint::getU () const{ return backCopy( idx[4], nu ); }
+inline DVector EvaluationPoint::getW () const{ return backCopy( idx[5], nw ); }
+inline DVector EvaluationPoint::getDX() const{ return backCopy( idx[6], nd ); }
 
 inline double* EvaluationPoint::getEvaluationPointer() const{ return z; }
 

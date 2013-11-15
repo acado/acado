@@ -101,8 +101,8 @@ class QPsolver_qpOASES : public DenseQPsolver
 									);
 
         /** Solves QP using at most <maxIter> iterations. */
-        virtual returnValue solve(  Matrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
-                                    Matrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
+        virtual returnValue solve(  DMatrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
+                                    DMatrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
                                     Vector *g,    /**< Gradient of neighbouring QP to be solved. */
                                     Vector *lb,   /**< Lower bounds of neighbouring QP to be solved. */
                                     Vector *ub,   /**< Upper bounds of neighbouring QP to be solved. */
@@ -131,8 +131,8 @@ class QPsolver_qpOASES : public DenseQPsolver
 		 *         RET_QP_SOLUTION_REACHED_LIMIT \n
 		 *         RET_QP_SOLUTION_FAILED \n
 		 *         RET_INITIALIZE_FIRST */
-        virtual returnValue step(	Matrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
-                                    Matrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
+        virtual returnValue step(	DMatrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
+                                    DMatrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
                                     Vector *g,    /**< Gradient of neighbouring QP to be solved. */
                                     Vector *lb,   /**< Lower bounds of neighbouring QP to be solved. */
                                     Vector *ub,   /**< Upper bounds of neighbouring QP to be solved. */
@@ -169,7 +169,7 @@ class QPsolver_qpOASES : public DenseQPsolver
          *  \return SUCCESSFUL_RETURN
          *          RET_MEMBER_NOT_INITIALISED
          */
-        virtual returnValue getVarianceCovariance( Matrix &var );
+        virtual returnValue getVarianceCovariance( DMatrix &var );
 
 
         /** Returns a variance-covariance estimate if possible or an error message otherwise.
@@ -177,7 +177,7 @@ class QPsolver_qpOASES : public DenseQPsolver
          *  \return SUCCESSFUL_RETURN
          *          RET_MEMBER_NOT_INITIALISED
          */
-        virtual returnValue getVarianceCovariance( Matrix &H, Matrix &var );
+        virtual returnValue getVarianceCovariance( DMatrix &H, DMatrix &var );
 
 
 

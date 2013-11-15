@@ -139,25 +139,25 @@ class Objective : public LagrangeTerm{
          *                                                                        \n
          *  \return SUCCESSFUL_RETURN                                             \n
          */
-        returnValue addLSQEndTerm( const Matrix   & S,  /**< a weighting matrix */
+        returnValue addLSQEndTerm( const DMatrix   & S,  /**< a weighting matrix */
                                    const Function & m,  /**< the LSQ-Function   */
-                                   const Vector   & r   /**< the reference      */ );
+                                   const DVector   & r   /**< the reference      */ );
 
         //
         // Code generation related functions
         //
 
-        returnValue addLSQ(const Matrix& S, const Function& h);
+        returnValue addLSQ(const DMatrix& S, const Function& h);
 
-        returnValue addLSQEndTerm(const Matrix& S, const Function& h);
+        returnValue addLSQEndTerm(const DMatrix& S, const Function& h);
 
-        returnValue addLSQ(const Matrix& S, const std::string& h);
+        returnValue addLSQ(const DMatrix& S, const std::string& h);
 
-        returnValue addLSQEndTerm(const Matrix& S, const std::string& h);
+        returnValue addLSQEndTerm(const DMatrix& S, const std::string& h);
 
-        returnValue addLSQLinearTerms(const Vector& Slx, const Vector& Slu);
+        returnValue addLSQLinearTerms(const DVector& Slx, const DVector& Slu);
 
-        returnValue addLSQLinearTerms(const Matrix& Slx, const Matrix& Slu);
+        returnValue addLSQLinearTerms(const DMatrix& Slx, const DMatrix& Slu);
 
 
 // =======================================================================================
@@ -388,13 +388,13 @@ class Objective : public LagrangeTerm{
         //
         // Code generation related stuff
         //
-        returnValue getLSQTerms( std::vector<Matrix>& _matrices, std::vector<Function>& _functions ) const;
-        returnValue getLSQEndTerms( std::vector<Matrix>& _matrices, std::vector<Function>& _functions ) const;
+        returnValue getLSQTerms( std::vector<DMatrix>& _matrices, std::vector<Function>& _functions ) const;
+        returnValue getLSQEndTerms( std::vector<DMatrix>& _matrices, std::vector<Function>& _functions ) const;
 
-        returnValue getLSQTerms( std::vector<Matrix>& _matrices, std::vector<std::string>& _functions ) const;
-        returnValue getLSQEndTerms( std::vector<Matrix>& _matrices, std::vector<std::string>& _functions ) const;
+        returnValue getLSQTerms( std::vector<DMatrix>& _matrices, std::vector<std::string>& _functions ) const;
+        returnValue getLSQEndTerms( std::vector<DMatrix>& _matrices, std::vector<std::string>& _functions ) const;
 
-        returnValue getLSQLinearTerms(std::vector<Matrix>& _vSlx, std::vector<Matrix>& _vSlu) const;
+        returnValue getLSQLinearTerms(std::vector<DMatrix>& _vSlx, std::vector<DMatrix>& _vSlu) const;
 
     //
     // DATA MEMBERS:
@@ -409,20 +409,20 @@ class Objective : public LagrangeTerm{
     uint        nEndLSQ   ;   /**< number of end LSQ terms     */
     uint        nMayer    ;   /**< number of Mayer terms       */
 
-    std::vector<Matrix> cgLSQWeightingMatrices;
+    std::vector<DMatrix> cgLSQWeightingMatrices;
     std::vector<Function> cgLSQFunctions;
 
-    std::vector<Matrix> cgLSQEndTermWeightingMatrices;
+    std::vector<DMatrix> cgLSQEndTermWeightingMatrices;
     std::vector<Function> cgLSQEndTermFunctions;
 
-    std::vector<Matrix> cgExternLSQWeightingMatrices;
+    std::vector<DMatrix> cgExternLSQWeightingMatrices;
     std::vector<std::string> cgExternLSQFunctions;
 
-    std::vector<Matrix> cgExternLSQEndTermWeightingMatrices;
+    std::vector<DMatrix> cgExternLSQEndTermWeightingMatrices;
     std::vector<std::string> cgExternLSQEndTermFunctions;
 
-    std::vector<Matrix> cgLSQWeightingVectorsSlx;
-    std::vector<Matrix> cgLSQWeightingVectorsSlu;
+    std::vector<DMatrix> cgLSQWeightingVectorsSlx;
+    std::vector<DMatrix> cgLSQWeightingVectorsSlu;
 };
 
 CLOSE_NAMESPACE_ACADO

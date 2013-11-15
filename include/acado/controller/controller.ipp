@@ -39,7 +39,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 
-inline returnValue Controller::getU(	Vector& _u
+inline returnValue Controller::getU(	DVector& _u
 										) const
 {
 	if ( controlLaw != 0 )
@@ -49,7 +49,7 @@ inline returnValue Controller::getU(	Vector& _u
 }
 
 
-inline returnValue Controller::getP(	Vector& _p
+inline returnValue Controller::getP(	DVector& _p
 										) const
 {
 	if ( controlLaw != 0 )

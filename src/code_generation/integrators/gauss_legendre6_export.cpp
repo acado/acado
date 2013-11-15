@@ -73,9 +73,9 @@ GaussLegendre6Export::~GaussLegendre6Export( )
 IntegratorExport* createGaussLegendre6Export(	UserInteraction* _userInteraction,
 												const std::string &_commonHeaderName)
 {
-	Matrix AA(3,3);
-	Vector bb(3);
-	Vector cc(3);
+	DMatrix AA(3,3);
+	DVector bb(3);
+	DVector cc(3);
 
 	AA(0,0) = 5.0/36.0;
 	AA(0,1) = 2.0/9.0-1.0/15.0*sqrt(15.0);

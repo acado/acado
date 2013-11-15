@@ -73,9 +73,9 @@ ExplicitRungeKutta3Export::~ExplicitRungeKutta3Export( )
 IntegratorExport* createExplicitRungeKutta3Export(	UserInteraction* _userInteraction,
 													const std::string &_commonHeaderName)
 {
-	Matrix AA(3,3);
-	Vector bb(3);
-	Vector cc(3);
+	DMatrix AA(3,3);
+	DVector bb(3);
+	DVector cc(3);
 
 	AA(0,0) = 0.0;		AA(0,1) = 0.0;		AA(0,2) = 0.0;
 	AA(1,0) = 1.0/3.0;	AA(1,1) = 0.0;		AA(1,2) = 0.0;

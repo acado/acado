@@ -42,9 +42,9 @@ BEGIN_NAMESPACE_ACADO
 
 
 inline returnValue LSQEndTerm::init( const Grid&     grid_,
-                                     const Matrix      &S_,
+                                     const DMatrix      &S_,
                                      const Function&    m_,
-                                     const Vector      &r_  ){
+                                     const DVector      &r_  ){
 
     grid = grid_;
     fcn  = m_   ;
@@ -62,7 +62,7 @@ inline BooleanType LSQEndTerm::isQuadratic(){
 }
 
 
-inline returnValue LSQEndTerm::setReference( const Vector &ref ){
+inline returnValue LSQEndTerm::setReference( const DVector &ref ){
 
     r = ref;
     return SUCCESSFUL_RETURN;

@@ -69,7 +69,7 @@ class CondensingBasedCPsolver: public BandedCPsolver {
 		
         CondensingBasedCPsolver(	UserInteraction* _userInteraction,
 									uint nConstraints_,
-        							const Vector& blockDims_
+        							const DVector& blockDims_
         							);
 
         /** Copy constructor (deep copy). */
@@ -124,8 +124,8 @@ class CondensingBasedCPsolver: public BandedCPsolver {
 		inline uint getNumPoints( ) const;
 
 
-		virtual returnValue getParameters        ( Vector        &p_  ) const;
-		virtual returnValue getFirstControl      ( Vector        &u0_ ) const;
+		virtual returnValue getParameters        ( DVector        &p_  ) const;
+		virtual returnValue getFirstControl      ( DVector        &u0_ ) const;
 
 
         /** Returns a variance-covariance estimate if possible or an error message otherwise.
@@ -133,11 +133,11 @@ class CondensingBasedCPsolver: public BandedCPsolver {
          *  \return SUCCESSFUL_RETURN
          *          RET_MEMBER_NOT_INITIALISED
          */
-        virtual returnValue getVarianceCovariance( Matrix &var );
+        virtual returnValue getVarianceCovariance( DMatrix &var );
 
 		
-		virtual returnValue setRealTimeParameters(	const Vector& DeltaX,
-													const Vector& DeltaP = emptyConstVector
+		virtual returnValue setRealTimeParameters(	const DVector& DeltaX,
+													const DVector& DeltaP = emptyConstVector
 													);
 
 		inline BooleanType areRealTimeParametersDefined( ) const;
@@ -183,7 +183,7 @@ class CondensingBasedCPsolver: public BandedCPsolver {
          *                                                               \n
          *  \return SUCCESSFUL_RETURN.                                   \n
          */
-        returnValue projectHessian( Matrix &H_, double dampingFactor );
+        returnValue projectHessian( DMatrix &H_, double dampingFactor );
 
 
 		// --------
@@ -240,7 +240,7 @@ class CondensingBasedCPsolver: public BandedCPsolver {
     protected:
 
         OCPiterate iter;
-        Vector blockDims;
+        DVector blockDims;
         uint nConstraints;
 
 		CondensingStatus condensingStatus;
@@ -273,8 +273,8 @@ class CondensingBasedCPsolver: public BandedCPsolver {
 
         DenseCP        denseCP;
 
-		Vector deltaX;
-		Vector deltaP;
+		DVector deltaX;
+		DVector deltaP;
 };
 
 

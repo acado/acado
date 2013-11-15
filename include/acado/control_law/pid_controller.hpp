@@ -119,7 +119,7 @@ class PIDcontroller : public ControlLaw, public ClippingFunctionality
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		returnValue setProportionalWeights(	const Vector& _pWeights
+		returnValue setProportionalWeights(	const DVector& _pWeights
 											);
 
 		/** Assigns new integral weights to the input components.
@@ -129,7 +129,7 @@ class PIDcontroller : public ControlLaw, public ClippingFunctionality
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		returnValue setIntegralWeights(		const Vector& _iWeights
+		returnValue setIntegralWeights(		const DVector& _iWeights
 											);
 
 		/** Assigns new derivative weights to the input components.
@@ -139,7 +139,7 @@ class PIDcontroller : public ControlLaw, public ClippingFunctionality
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		returnValue setDerivativeWeights(	const Vector& _dWeights
+		returnValue setDerivativeWeights(	const DVector& _dWeights
 											);
 
 
@@ -154,8 +154,8 @@ class PIDcontroller : public ControlLaw, public ClippingFunctionality
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue init(	double startTime = 0.0,
-									const Vector &x0_ = emptyConstVector,
-									const Vector &p_ = emptyConstVector,
+									const DVector &x0_ = emptyConstVector,
+									const DVector &p_ = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									);
 
@@ -173,8 +173,8 @@ class PIDcontroller : public ControlLaw, public ClippingFunctionality
 		 *	        RET_CONTROLLAW_STEP_FAILED
 		 */
 		virtual returnValue step(	double currentTime,
-									const Vector& _x,
-									const Vector& _p = emptyConstVector,
+									const DVector& _x,
+									const DVector& _p = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									);
 
@@ -261,8 +261,8 @@ class PIDcontroller : public ControlLaw, public ClippingFunctionality
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue determineControlAction(	const Vector& error,
-											Vector& output
+		returnValue determineControlAction(	const DVector& error,
+											DVector& output
 											);
 
 
@@ -273,12 +273,12 @@ class PIDcontroller : public ControlLaw, public ClippingFunctionality
 		uint nInputs;					/**< Number of inputs. */
 		uint nOutputs;					/**< Number of outputs. */
 
-		Vector pWeights;				/**< Proportional weights for all input components. */
-		Vector iWeights;				/**< Integral weights for all input components. */
-		Vector dWeights;				/**< Derivative weights for all input components. */
+		DVector pWeights;				/**< Proportional weights for all input components. */
+		DVector iWeights;				/**< Integral weights for all input components. */
+		DVector dWeights;				/**< Derivative weights for all input components. */
 
-		Vector iValue;					/**< Integrated value for each input component. */
-		Vector lastError;				/**< Last error input (to be used for calculating the derivative via finite differences). */
+		DVector iValue;					/**< Integrated value for each input component. */
+		DVector lastError;				/**< Last error input (to be used for calculating the derivative via finite differences). */
 };
 
 

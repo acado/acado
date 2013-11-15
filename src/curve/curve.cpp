@@ -140,7 +140,7 @@ Curve Curve::operator()(	uint idx
 }
 
 
-returnValue Curve::add( double tStart, double tEnd, const Vector constant ){
+returnValue Curve::add( double tStart, double tEnd, const DVector constant ){
 
     uint     run1;
     Function tmp ;
@@ -354,7 +354,7 @@ returnValue Curve::evaluate( double t, double *result ) const{
 }
 
 
-returnValue Curve::evaluate( double t, Vector &result ) const{
+returnValue Curve::evaluate( double t, DVector &result ) const{
 
     uint        run1       ;
     returnValue returnvalue;
@@ -393,7 +393,7 @@ returnValue Curve::discretize( const Grid &discretizationGrid, VariablesGrid &re
 
     uint        run1       ;
     returnValue returnvalue;
-    Vector      tmp        ;
+    DVector      tmp        ;
 
     result.init( dim, discretizationGrid );
 

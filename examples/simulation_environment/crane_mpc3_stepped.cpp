@@ -83,10 +83,10 @@ int main( ){
     h << phi;
     h << dphi;
 
-    Matrix Q(4,4); // LSQ coefficient matrix
+    DMatrix Q(4,4); // LSQ coefficient matrix
     Q.setIdentity();
 
-    Vector r(4); // Reference
+    DVector r(4); // Reference
 
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
@@ -123,7 +123,7 @@ int main( ){
 
 	Controller controller( alg, zeroReference );
 	
-	Vector x0(4);
+	DVector x0(4);
 	x0.setZero();
 	x0(3) = 1.0;
 
@@ -131,7 +131,7 @@ int main( ){
 	double endTime   = 20.0;
 
 
-	Vector uCon;
+	DVector uCon;
 	VariablesGrid ySim;
 	
 	if (controller.init( startTime,x0 ) != SUCCESSFUL_RETURN)

@@ -243,7 +243,7 @@ returnValue OptimizationAlgorithmBase::getParameters( VariablesGrid &p_  ) const
 }
 
 
-returnValue OptimizationAlgorithmBase::getParameters( Vector &p_  ) const
+returnValue OptimizationAlgorithmBase::getParameters( DVector &p_  ) const
 {
 	if( nlpSolver == 0 ) return ACADOWARNING( RET_MEMBER_NOT_INITIALISED );
 
@@ -880,7 +880,7 @@ returnValue OptimizationAlgorithmBase::initializeOCPiterate(	Constraint* const _
     if( nx > 0 && userInit.x->getNumPoints() > 0 ){
         ai=userInit.x->getAutoInit(0);
         for( run1 = 0; run1 < _unionGrid.getNumPoints(); run1++ ){
-            Vector tmp = userInit.x->linearInterpolation( _unionGrid.getTime(run1) );
+            DVector tmp = userInit.x->linearInterpolation( _unionGrid.getTime(run1) );
             uint nxx = tmp.getDim();
             if( nxx > nx ) nxx = nx;
             for( run2 = 0; run2 < nxx; run2++ )
@@ -892,7 +892,7 @@ returnValue OptimizationAlgorithmBase::initializeOCPiterate(	Constraint* const _
     if( nxa > 0 && userInit.xa->getNumPoints() > 0 ){
         ai=userInit.xa->getAutoInit(0);
         for( run1 = 0; run1 < _unionGrid.getNumPoints(); run1++ ){
-            Vector tmp = userInit.xa->linearInterpolation( _unionGrid.getTime(run1) );
+            DVector tmp = userInit.xa->linearInterpolation( _unionGrid.getTime(run1) );
 			uint nxx = tmp.getDim();
             if( nxx > nxa ) nxx = nxa;
             for( run2 = 0; run2 < nxx; run2++ )
@@ -903,7 +903,7 @@ returnValue OptimizationAlgorithmBase::initializeOCPiterate(	Constraint* const _
 	
     if( nu > 0 && userInit.u->getNumPoints() > 0 ){
         for( run1 = 0; run1 < _unionGrid.getNumPoints(); run1++ ){
-            Vector tmp = userInit.u->linearInterpolation( _unionGrid.getTime(run1) );
+            DVector tmp = userInit.u->linearInterpolation( _unionGrid.getTime(run1) );
             uint nxx = tmp.getDim();
             if( nxx > nu ) nxx = nu;
             for( run2 = 0; run2 < nxx; run2++ )
@@ -921,7 +921,7 @@ returnValue OptimizationAlgorithmBase::initializeOCPiterate(	Constraint* const _
 
 //     if( np > 0 && userInit.p->getNumPoints() > 0 ){
 //         for( run1 = 0; run1 < _unionGrid.getNumPoints(); run1++ ){
-//             Vector tmp = userInit.p->getFirstVector( );
+//             DVector tmp = userInit.p->getFirstVector( );
 //             uint nxx = tmp.getDim();
 //             if( nxx > np ) nxx = np;
 //             for( run2 = 0; run2 < nxx; run2++ )
@@ -931,7 +931,7 @@ returnValue OptimizationAlgorithmBase::initializeOCPiterate(	Constraint* const _
 
     if( nw > 0 && userInit.w->getNumPoints() > 0 ){
         for( run1 = 0; run1 < _unionGrid.getNumPoints(); run1++ ){
-            Vector tmp = userInit.w->linearInterpolation( _unionGrid.getTime(run1) );
+            DVector tmp = userInit.w->linearInterpolation( _unionGrid.getTime(run1) );
             uint nxx = tmp.getDim();
             if( nxx > nw ) nxx = nw;
             for( run2 = 0; run2 < nxx; run2++ )

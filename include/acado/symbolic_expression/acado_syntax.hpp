@@ -126,12 +126,12 @@ REFER_NAMESPACE_ACADO Expression laplace           ( const REFER_NAMESPACE_ACADO
                                                      const REFER_NAMESPACE_ACADO Expression &arg2 );
 
 
-REFER_NAMESPACE_ACADO Matrix ones  ( int nRows, int nCols = 1 );
-REFER_NAMESPACE_ACADO Matrix zeros ( int nRows, int nCols = 1 );
-REFER_NAMESPACE_ACADO Matrix eye   ( int n                    );
+REFER_NAMESPACE_ACADO DMatrix ones  ( int nRows, int nCols = 1 );
+REFER_NAMESPACE_ACADO DMatrix zeros ( int nRows, int nCols = 1 );
+REFER_NAMESPACE_ACADO DMatrix eye   ( int n                    );
 
-REFER_NAMESPACE_ACADO Matrix diag        ( const REFER_NAMESPACE_ACADO Vector& v );
-REFER_NAMESPACE_ACADO Vector diag        ( const REFER_NAMESPACE_ACADO Matrix& M );
+REFER_NAMESPACE_ACADO DMatrix diag        ( const REFER_NAMESPACE_ACADO DVector& v );
+REFER_NAMESPACE_ACADO DVector diag        ( const REFER_NAMESPACE_ACADO DMatrix& M );
 
 
 
@@ -139,8 +139,8 @@ REFER_NAMESPACE_ACADO Expression getRiccatiODE( const REFER_NAMESPACE_ACADO Expr
                                                 const REFER_NAMESPACE_ACADO DifferentialState &x  ,
                                                 const REFER_NAMESPACE_ACADO Control           &u  ,
                                                 const REFER_NAMESPACE_ACADO DifferentialState &P  ,
-                                                const REFER_NAMESPACE_ACADO Matrix            &Q  ,
-                                                const REFER_NAMESPACE_ACADO Matrix            &R   );
+                                                const REFER_NAMESPACE_ACADO DMatrix            &Q  ,
+                                                const REFER_NAMESPACE_ACADO DMatrix            &R   );
 
 
 REFER_NAMESPACE_ACADO Expression chol( const REFER_NAMESPACE_ACADO Expression &arg );

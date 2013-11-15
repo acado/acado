@@ -327,8 +327,8 @@ returnValue Process::setProcessDisturbance(	const char* _processDisturbance
 
 
 
-returnValue Process::initializeStartValues(	const Vector& _xStart,
-											const Vector& _xaStart
+returnValue Process::initializeStartValues(	const DVector& _xStart,
+											const DVector& _xaStart
 											)
 {
 	x = _xStart;
@@ -342,7 +342,7 @@ returnValue Process::initializeStartValues(	const Vector& _xStart,
 }
 
 
-returnValue Process::initializeAlgebraicStates(	const Vector& _xaStart
+returnValue Process::initializeAlgebraicStates(	const DVector& _xaStart
 												)
 {
 	return initializeStartValues( x,_xaStart );
@@ -351,13 +351,13 @@ returnValue Process::initializeAlgebraicStates(	const Vector& _xaStart
 
 
 returnValue Process::init(	double _startTime,
-							const Vector& _xStart,
-							const Vector& _uStart,
-							const Vector& _pStart
+							const DVector& _xStart,
+							const DVector& _uStart,
+							const DVector& _pStart
 							)
 {
-	Vector uStart;
-	Vector pStart;
+	DVector uStart;
+	DVector pStart;
 
 	/* 1) Assign values */
 	lastTime = _startTime;
@@ -472,7 +472,7 @@ returnValue Process::init(	double _startTime,
 	currentGrid.setTime( _startTime );
 
 	// get process disturbances
-	Vector _wStart;
+	DVector _wStart;
 
 	if ( hasProcessDisturbance( ) == BT_TRUE )
 	{
@@ -485,7 +485,7 @@ returnValue Process::init(	double _startTime,
 		// y = outputFcn(x,xa,p,u,w)
 		y.init( dynSys->getNumOutputs( ),currentGrid,VT_OUTPUT );
 
-		Vector yTmp( dynSys->getNumOutputs( ) );
+		DVector yTmp( dynSys->getNumOutputs( ) );
  //     yTmp = outputFcn.evaluate( 0, _startTime, x, xa, _pStart, _uStart, _wStart );
 
 		y.setVector( 0,yTmp );
@@ -599,7 +599,7 @@ returnValue Process::step(	const VariablesGrid& _u,
 
 
 returnValue Process::step(	const VariablesGrid& _u,
-							const Vector& _p
+							const DVector& _p
 							)
 {
 	VariablesGrid pTmp( _p.getDim( ),_u.getFirstTime( ),_u.getLastTime( ),_u.getNumPoints(),VT_PARAMETER );
@@ -612,8 +612,8 @@ returnValue Process::step(	const VariablesGrid& _u,
 
 returnValue Process::step(	double startTime,
 							double endTime,
-							const Vector& _u,
-							const Vector& _p
+							const DVector& _u,
+							const DVector& _p
 							)
 {
 	VariablesGrid uTmp( _u.getDim( ),startTime,endTime,2,VT_CONTROL );
@@ -645,7 +645,7 @@ returnValue Process::run(	const VariablesGrid& _u,
 
 
 returnValue Process::run(	const VariablesGrid& _u,
-							const Vector& _p
+							const DVector& _p
 							)
 {
 	VariablesGrid pTmp( _p.getDim( ),_u.getFirstTime( ),_u.getLastTime( ),_u.getNumPoints(),VT_PARAMETER );
@@ -658,8 +658,8 @@ returnValue Process::run(	const VariablesGrid& _u,
 
 returnValue Process::run(	double startTime,
 							double endTime,
-							const Vector& _u,
-							const Vector& _p
+							const DVector& _u,
+							const DVector& _p
 							)
 {
 	VariablesGrid uTmp( _u.getDim( ),startTime,endTime,2,VT_CONTROL );
@@ -840,13 +840,13 @@ returnValue Process::simulate(	const VariablesGrid& _u,
 
 	// allocate memory for call to simulation algorithm
 	// and initialise states with start value
-	Vector xComponents = diffEqn.getDifferentialStateComponents( );
+	DVector xComponents = diffEqn.getDifferentialStateComponents( );
 
 	iter.x = new VariablesGrid( (int)round( xComponents.getMax( )+1.0 ),currentGrid,VT_DIFFERENTIAL_STATE );
 	for( uint i=0; i<xComponents.getDim( ); ++i )
 		iter.x->operator()( 0,(int)xComponents(i) ) = x(i);
 
-//	Vector xaComponents;
+//	DVector xaComponents;
 	if ( getNXA() > 0 )
 	{
 		iter.xa = new VariablesGrid( getNXA(),currentGrid,VT_ALGEBRAIC_STATE );
@@ -991,7 +991,7 @@ returnValue Process::checkInputConsistency(	const VariablesGrid& _u,
 
 returnValue Process::calculateOutput(	OutputFcn& _outputFcn,
 										const VariablesGrid* _x,
-										const Vector& _xComponents,
+										const DVector& _xComponents,
 										const VariablesGrid* _xa,
 										const VariablesGrid* _p,
 										const VariablesGrid* _u,
@@ -1026,7 +1026,7 @@ returnValue Process::calculateOutput(	OutputFcn& _outputFcn,
 
 
 returnValue Process::projectToComponents(	const VariablesGrid& _x,
-											const Vector& _xComponents,
+											const DVector& _xComponents,
 											VariablesGrid& _output
 											) const
 {

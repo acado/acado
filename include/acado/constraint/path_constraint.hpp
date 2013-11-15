@@ -83,7 +83,7 @@ class PathConstraint : public ConstraintElement{
          *   \return SUCCESSFUL_RETURN
          *           RET_MEMBER_NOT_INITIALISED  (if the ConstraintElement::fcn is not initialized)
          */
-        inline returnValue add( const Vector lb_, const Expression& arg, const Vector ub_  );
+        inline returnValue add( const DVector lb_, const Expression& arg, const DVector ub_  );
 
 
 // =======================================================================================

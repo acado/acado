@@ -239,11 +239,11 @@ inline int Constraint::getBlockDim( int idx ) const
 }
 
 
-inline Vector Constraint::getBlockDims( ) const
+inline DVector Constraint::getBlockDims( ) const
 {
 	uint dim = getNumberOfBlocks();
 	
-	Vector result( dim );
+	DVector result( dim );
 	for( uint i=0; i<dim; ++i )
 		result( i ) = (double)getBlockDim( i );
 		

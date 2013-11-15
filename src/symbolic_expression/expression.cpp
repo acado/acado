@@ -106,7 +106,7 @@ Expression::Expression(const Operator &tree_)
        assignmentSetup( convert(rhs) );
    }
 
-   Expression::Expression( const Vector& rhs ){
+   Expression::Expression( const DVector& rhs ){
 
        nRows   = rhs.getDim();
        nCols   = 1;
@@ -115,7 +115,7 @@ Expression::Expression(const Operator &tree_)
        assignmentSetup( convert(rhs) );
    }
 
-   Expression::Expression( const Matrix& rhs ){
+   Expression::Expression( const DMatrix& rhs ){
 
        nRows   = rhs.getNumRows();
        nCols   = rhs.getNumCols();
@@ -135,24 +135,24 @@ Expression::Expression(const Operator &tree_)
 
 
 Expression&  Expression::operator= ( const double & arg )      { return operator= ( convert(arg)  ); }
-Expression&  Expression::operator= ( const Vector & arg )      { return operator= ( convert(arg)  ); }
-Expression&  Expression::operator= ( const Matrix & arg )      { return operator= ( convert(arg)  ); }
+Expression&  Expression::operator= ( const DVector & arg )      { return operator= ( convert(arg)  ); }
+Expression&  Expression::operator= ( const DMatrix & arg )      { return operator= ( convert(arg)  ); }
 
 Expression&  Expression::operator<<( const double & arg )      { return operator<<( convert(arg)  ); }
-Expression&  Expression::operator<<( const Vector & arg )      { return operator<<( convert(arg)  ); }
-Expression&  Expression::operator<<( const Matrix & arg )      { return operator<<( convert(arg)  ); }
+Expression&  Expression::operator<<( const DVector & arg )      { return operator<<( convert(arg)  ); }
+Expression&  Expression::operator<<( const DMatrix & arg )      { return operator<<( convert(arg)  ); }
 
 Expression   Expression::operator+ ( const double & arg ) const{ return operator+ ( convert(arg)  ); }
-Expression   Expression::operator+ ( const Vector & arg ) const{ return operator+ ( convert(arg)  ); }
-Expression   Expression::operator+ ( const Matrix & arg ) const{ return operator+ ( convert(arg)  ); }
+Expression   Expression::operator+ ( const DVector & arg ) const{ return operator+ ( convert(arg)  ); }
+Expression   Expression::operator+ ( const DMatrix & arg ) const{ return operator+ ( convert(arg)  ); }
 
 Expression   Expression::operator- ( const double & arg ) const{ return operator- ( convert(arg)  ); }
-Expression   Expression::operator- ( const Vector & arg ) const{ return operator- ( convert(arg)  ); }
-Expression   Expression::operator- ( const Matrix & arg ) const{ return operator- ( convert(arg)  ); }
+Expression   Expression::operator- ( const DVector & arg ) const{ return operator- ( convert(arg)  ); }
+Expression   Expression::operator- ( const DMatrix & arg ) const{ return operator- ( convert(arg)  ); }
 
 Expression   Expression::operator* ( const double & arg ) const{ return operator* ( convert(arg)  ); }
-Expression   Expression::operator* ( const Vector & arg ) const{ return operator* ( convert(arg)  ); }
-Expression   Expression::operator* ( const Matrix & arg ) const{ return operator* ( convert(arg)  ); }
+Expression   Expression::operator* ( const DVector & arg ) const{ return operator* ( convert(arg)  ); }
+Expression   Expression::operator* ( const DMatrix & arg ) const{ return operator* ( convert(arg)  ); }
 
 Expression   Expression::operator/ ( const double & arg ) const{ return operator/ ( convert(arg)  ); }
 
@@ -162,26 +162,26 @@ Expression   Expression::operator/ ( const double & arg ) const{ return operator
 // -------------------------------------------------------------------------------------------------------------
 
 Expression operator+( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
-Expression operator+( const Vector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
-Expression operator+( const Matrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
+Expression operator+( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
+Expression operator+( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
 
 Expression operator-( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
-Expression operator-( const Vector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
-Expression operator-( const Matrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
+Expression operator-( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
+Expression operator-( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
 
 Expression operator*( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
-Expression operator*( const Vector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
-Expression operator*( const Matrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
+Expression operator*( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
+Expression operator*( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
 
 Expression operator/( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
-Expression operator/( const Vector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
-Expression operator/( const Matrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
+Expression operator/( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
+Expression operator/( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
 
 
 
 ConstraintComponent Expression::operator<=( const double& ub ) const{
 
-    Vector ub_(getDim());
+    DVector ub_(getDim());
     ub_.setAll(ub);
 
     return operator<=(ub_);
@@ -189,7 +189,7 @@ ConstraintComponent Expression::operator<=( const double& ub ) const{
 
 ConstraintComponent Expression::operator>=( const double& lb ) const{
 
-    Vector lb_(getDim());
+    DVector lb_(getDim());
     lb_.setAll(lb);
 
     return operator>=(lb_);
@@ -197,7 +197,7 @@ ConstraintComponent Expression::operator>=( const double& lb ) const{
 
 ConstraintComponent Expression::operator==( const double& b ) const{
 
-    Vector b_(getDim());
+    DVector b_(getDim());
     b_.setAll(b);
 
     return operator==(b_);
@@ -205,11 +205,11 @@ ConstraintComponent Expression::operator==( const double& b ) const{
 
 
 
-ConstraintComponent Expression::operator<=( const Vector& ub ) const{
+ConstraintComponent Expression::operator<=( const DVector& ub ) const{
 
     ConstraintComponent tmp;
 
-    Vector lb = ub;
+    DVector lb = ub;
     lb.setAll(-INFTY);
 
     tmp.initialize( lb, *this, ub );
@@ -218,11 +218,11 @@ ConstraintComponent Expression::operator<=( const Vector& ub ) const{
 }
 
 
-ConstraintComponent Expression::operator>=( const Vector& lb ) const{
+ConstraintComponent Expression::operator>=( const DVector& lb ) const{
 
     ConstraintComponent tmp;
 
-    Vector ub = lb;
+    DVector ub = lb;
     ub.setAll(INFTY);
 
     tmp.initialize( lb, *this, ub );
@@ -231,7 +231,7 @@ ConstraintComponent Expression::operator>=( const Vector& lb ) const{
 }
 
 
-ConstraintComponent Expression::operator==( const Vector& b ) const{
+ConstraintComponent Expression::operator==( const DVector& b ) const{
 
     ConstraintComponent tmp;
 
@@ -280,9 +280,9 @@ ConstraintComponent operator<=( double lb, const Expression &arg ){ return ( arg
 ConstraintComponent operator>=( double ub, const Expression &arg ){ return ( arg <= ub ); }
 ConstraintComponent operator==( double  b, const Expression &arg ){ return ( arg == b  ); }
 
-ConstraintComponent operator<=( Vector lb, const Expression &arg ){ return ( arg >= lb ); }
-ConstraintComponent operator>=( Vector ub, const Expression &arg ){ return ( arg <= ub ); }
-ConstraintComponent operator==( Vector  b, const Expression &arg ){ return ( arg == b  ); }
+ConstraintComponent operator<=( DVector lb, const Expression &arg ){ return ( arg >= lb ); }
+ConstraintComponent operator>=( DVector ub, const Expression &arg ){ return ( arg <= ub ); }
+ConstraintComponent operator==( DVector  b, const Expression &arg ){ return ( arg == b  ); }
 
 ConstraintComponent operator<=( VariablesGrid lb, const Expression &arg ){ return ( arg >= lb ); }
 ConstraintComponent operator>=( VariablesGrid ub, const Expression &arg ){ return ( arg <= ub ); }
@@ -711,7 +711,7 @@ Expression Expression::getCol( const uint& colIdx ) const{
 }
 
 
-Matrix Expression::getDependencyPattern( const Expression& arg ) const{
+DMatrix Expression::getDependencyPattern( const Expression& arg ) const{
 
     Function f;
     f << backwardDerivative( *this, arg );
@@ -733,7 +733,7 @@ Matrix Expression::getDependencyPattern( const Expression& arg ) const{
     // ---------------------------------
     f.evaluate( 0, x, result );
 
-    Matrix tmp( getDim(), arg.getDim(), result );
+    DMatrix tmp( getDim(), arg.getDim(), result );
 
     delete[] result;
     delete[] x;
@@ -1454,7 +1454,7 @@ Expression Expression::convert( const double& arg ) const{
 }
 
 
-Expression Expression::convert( const Vector& arg ) const{
+Expression Expression::convert( const DVector& arg ) const{
 
      uint run1;
      Expression tmp("", arg.getDim(), 1);
@@ -1467,7 +1467,7 @@ Expression Expression::convert( const Vector& arg ) const{
 }
 
 
-Expression Expression::convert( const Matrix& arg ) const{
+Expression Expression::convert( const DMatrix& arg ) const{
 
      uint run1,run2;
 	Expression tmp("", arg.getNumRows(), arg.getNumCols());
@@ -1497,7 +1497,7 @@ BooleanType Expression::isDependingOn( VariableType type ) const{
 
 BooleanType Expression::isDependingOn( const Expression &e ) const{
     ASSERT( e.getDim() ==1 );
-    Vector sum=sumRow(getDependencyPattern(e));
+    DVector sum=sumRow(getDependencyPattern(e));
 
     if( fabs(sum(0) - EPS) > 0 ) return BT_TRUE;
     return BT_FALSE;

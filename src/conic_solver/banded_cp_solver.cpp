@@ -95,15 +95,15 @@ returnValue BandedCPsolver::finalizeSolve(	BandedCP& cp
 
 
 
-returnValue BandedCPsolver::getVarianceCovariance( Matrix &var )
+returnValue BandedCPsolver::getVarianceCovariance( DMatrix &var )
 {
 	return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 }
 
 
 
-returnValue BandedCPsolver::setRealTimeParameters(	const Vector& DeltaX,
-													const Vector& DeltaP
+returnValue BandedCPsolver::setRealTimeParameters(	const DVector& DeltaX,
+													const DVector& DeltaP
 													)
 {
 	return ACADOERROR( RET_NOT_IMPLEMENTED_IN_BASE_CLASS );

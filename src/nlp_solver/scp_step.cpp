@@ -125,10 +125,10 @@ returnValue SCPstep::applyStep(	OCPiterate& iter,
 // returnValue SCPstep::getUpdatedFirstControl(	const OCPiterate& iter,
 // 												const BandedCP& cp,
 // 												double alpha,
-// 												Vector& _u
+// 												DVector& _u
 // 												) const
 // {
-//     Matrix tmp;
+//     DMatrix tmp;
 // 
 // 	cp.deltaX.getSubBlock( 3*iter.getNumPoints()+0, 0, tmp, _u.getDim(), 1 );
 // 

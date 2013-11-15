@@ -125,7 +125,7 @@ returnValue ExactHessian::initScaling(	BlockMatrix& B,
 										const BlockMatrix& y
 										)
 {
-    Matrix scale1, scale2;
+    DMatrix scale1, scale2;
 
     (x^x).getSubBlock(0,0,scale1,1,1);
     (y^y).getSubBlock(0,0,scale2,1,1);

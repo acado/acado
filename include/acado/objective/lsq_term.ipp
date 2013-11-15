@@ -49,7 +49,7 @@ returnValue LSQTerm::setGrid( const Grid &grid_ ){
 
     if( S_temp != 0 ){
          if( S_temp->getNumPoints() == 1 ){
-             Matrix tmp = S_temp->getMatrix(0);
+             DMatrix tmp = S_temp->getMatrix(0);
              S_temp->init( tmp,grid );
          }
          else{
@@ -60,7 +60,7 @@ returnValue LSQTerm::setGrid( const Grid &grid_ ){
 
     if( r_temp != 0 ){
          if( r_temp->getNumPoints() == 1 ){
-             Vector tmp = r_temp->getVector(0);
+             DVector tmp = r_temp->getVector(0);
              r_temp->init( tmp,grid );
          }
          else {ASSERT( grid.getNumPoints() == r_temp->getNumPoints() );}
@@ -68,7 +68,7 @@ returnValue LSQTerm::setGrid( const Grid &grid_ ){
 
     if( S_temp != 0 ){
 
-        S = new Matrix[grid.getNumPoints()];
+        S = new DMatrix[grid.getNumPoints()];
         for( run1 = 0; run1 < grid.getNumPoints(); run1++ ){
             S[run1] = S_temp->getMatrix(run1);
         }
@@ -77,13 +77,13 @@ returnValue LSQTerm::setGrid( const Grid &grid_ ){
 
     if( r_temp != 0 ){
 
-        r = new Vector[grid.getNumPoints()];
+        r = new DVector[grid.getNumPoints()];
         for( run1 = 0; run1 < grid.getNumPoints(); run1++ ){
             r[run1] = r_temp->getVector(run1);
             for( run2 = 0; run2 < r[run1].getDim(); run2++ ){
                 if( r[run1](run2) >= ACADO_NAN - 1.0 ){
                     if( S == 0 ){
-                        S = new Matrix[grid.getNumPoints()];
+                        S = new DMatrix[grid.getNumPoints()];
                         for( run3 = 0; run3 < grid.getNumPoints(); run3++ ){
                             S[run3].init( r[run1].getDim(), r[run1].getDim() );
                             S[run3].setIdentity();
@@ -127,7 +127,7 @@ inline returnValue LSQTerm::setReference( const VariablesGrid &ref ){
     const uint N  = grid.getNumPoints();
     //ASSERT( N == ref.getNumPoints() );
 // 	printf("setReference!!!!\n");
-    if( r == 0 ) r = new Vector[N];
+    if( r == 0 ) r = new DVector[N];
     if ( N == ref.getNumPoints() ) {
       for( run1 = 0; run1 < N; run1++ )
 	  r[run1] = ref.getVector(run1);

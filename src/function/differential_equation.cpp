@@ -288,7 +288,7 @@ DifferentialEquation& DifferentialEquation::addAlgebraic( const double &arg ){
 }
 
 
-DifferentialEquation& DifferentialEquation::addDifferential( const Vector& arg ){
+DifferentialEquation& DifferentialEquation::addDifferential( const DVector& arg ){
 
     uint run1;
 
@@ -299,7 +299,7 @@ DifferentialEquation& DifferentialEquation::addDifferential( const Vector& arg )
 }
 
 
-DifferentialEquation& DifferentialEquation::addAlgebraic( const Vector& arg ){
+DifferentialEquation& DifferentialEquation::addAlgebraic( const DVector& arg ){
 
     uint run1;
 
@@ -310,7 +310,7 @@ DifferentialEquation& DifferentialEquation::addAlgebraic( const Vector& arg ){
 }
 
 
-DifferentialEquation& DifferentialEquation::addDifferential( const Matrix& arg ){
+DifferentialEquation& DifferentialEquation::addDifferential( const DMatrix& arg ){
 
     uint run1, run2;
 
@@ -322,7 +322,7 @@ DifferentialEquation& DifferentialEquation::addDifferential( const Matrix& arg )
 }
 
 
-DifferentialEquation& DifferentialEquation::addAlgebraic( const Matrix& arg ){
+DifferentialEquation& DifferentialEquation::addAlgebraic( const DMatrix& arg ){
 
     uint run1, run2;
 
@@ -370,14 +370,14 @@ DifferentialEquation& DifferentialEquation::operator==( const double &arg ){
 }
 
 
-DifferentialEquation& DifferentialEquation::operator==( const Vector& arg ){
+DifferentialEquation& DifferentialEquation::operator==( const DVector& arg ){
 
     if( det == DET_DAE ) return addAlgebraic(arg);
     return addDifferential(arg);
 }
 
 
-DifferentialEquation& DifferentialEquation::operator==( const Matrix& arg ){
+DifferentialEquation& DifferentialEquation::operator==( const DMatrix& arg ){
 
     if( det == DET_DAE ) return addAlgebraic(arg);
     return addDifferential(arg);

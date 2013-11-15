@@ -57,14 +57,14 @@ int main( ){
     // ---------------------------------------
     EvaluationPoint z(f);
 
-    Vector xx(1);
+    DVector xx(1);
     xx(0) = 2.0;
     double tt = 1.0;
 
     z.setT( tt );
     z.setX( xx );
 
-    Vector result = f.evaluate( z );
+    DVector result = f.evaluate( z );
 
 
     // PRINT THE RESULT:

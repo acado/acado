@@ -170,7 +170,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
+		virtual DMatrix formMatrix( const DMatrix& mass, const DMatrix& jacobian );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the nonlinear, fully implicit system.

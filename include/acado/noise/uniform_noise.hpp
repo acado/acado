@@ -69,8 +69,8 @@ class UniformNoise : public Noise
 		 *	@param[in] _lowerLimit		Lower limit for each component.
 		 *	@param[in] _upperLimit		Upper limit for each component.
 		 */
-        UniformNoise(	const Vector& _lowerLimit,
-						const Vector& _upperLimit
+        UniformNoise(	const DVector& _lowerLimit,
+						const DVector& _upperLimit
 						);
 
 		/** Constructor which takes the dimension of the random variable as well as
@@ -128,8 +128,8 @@ class UniformNoise : public Noise
 		 *	        RET_VECTOR_DIMENSION_MISMATCH, \n
 		 *	        RET_INVALID_ARGUMENTS
 		 */
-		returnValue setLimits(	const Vector& _lowerLimit,
-								const Vector& _upperLimit
+		returnValue setLimits(	const DVector& _lowerLimit,
+								const DVector& _upperLimit
 								);
 
 		/** Assigns new lower and upper limits on the random variable.
@@ -185,7 +185,7 @@ class UniformNoise : public Noise
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
 
-		virtual returnValue step(	Vector& _w
+		virtual returnValue step(	DVector& _w
 									);
 
 		/** Generates a noise vector sequence based on current internal settings.
@@ -205,13 +205,13 @@ class UniformNoise : public Noise
 		 *
 		 *	\return Lower limits of the random variable
 		 */
-		inline const Vector& getLowerLimit( ) const;
+		inline const DVector& getLowerLimit( ) const;
 
 		/** Returns upper limits of the random variable.
 		 *
 		 *	\return Upper limits of the random variable
 		 */
-		inline const Vector& getUpperLimit( ) const;
+		inline const DVector& getUpperLimit( ) const;
 
 
 
@@ -226,8 +226,8 @@ class UniformNoise : public Noise
 	//
 	protected:
 
-		Vector lowerLimit;				/**< Lower limit for each component. */
-		Vector upperLimit;				/**< Upper limit for each component. */
+		DVector lowerLimit;				/**< Lower limit for each component. */
+		DVector upperLimit;				/**< Upper limit for each component. */
 };
 
 

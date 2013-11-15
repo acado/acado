@@ -185,8 +185,8 @@ class Controller : public SimulationBlock
 		 *	        RET_BLOCK_DIMENSION_MISMATCH
 		 */
         virtual returnValue init(	double startTime = 0.0,
-									const Vector& _x0 = emptyConstVector,
-									const Vector& _p  = emptyConstVector,
+									const DVector& _x0 = emptyConstVector,
+									const DVector& _p  = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									);
 
@@ -206,7 +206,7 @@ class Controller : public SimulationBlock
 		 *	        RET_NO_CONTROLLAW_SPECIFIED
 		 */
         virtual returnValue step(	double currentTime,
-									const Vector& _y,
+									const DVector& _y,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									);
 
@@ -246,7 +246,7 @@ class Controller : public SimulationBlock
 		 *	        RET_NO_CONTROLLAW_SPECIFIED
 		 */
         virtual returnValue feedbackStep(	double currentTime,
-											const Vector& _y,
+											const DVector& _y,
 											const VariablesGrid& _yRef = emptyConstVariablesGrid
 											);
 
@@ -267,9 +267,9 @@ class Controller : public SimulationBlock
 												);
 
 		virtual returnValue obtainEstimates(	double currentTime,
-												const Vector& _y,
-												Vector& xEst,
-												Vector& pEst
+												const DVector& _y,
+												DVector& xEst,
+												DVector& pEst
 												);
 
 
@@ -279,7 +279,7 @@ class Controller : public SimulationBlock
 		 *
 		 *  \return SUCCESSFUL_RETURN 
 		 */
-        inline returnValue getU(	Vector& _u
+        inline returnValue getU(	DVector& _u
 									) const;
 
 		/** Returns computed parameter signals.
@@ -288,7 +288,7 @@ class Controller : public SimulationBlock
 		 *
 		 *  \return SUCCESSFUL_RETURN 
 		 */
-        inline returnValue getP(	Vector& _p
+        inline returnValue getP(	DVector& _p
 									) const;
 
 

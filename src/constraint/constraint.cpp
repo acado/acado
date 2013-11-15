@@ -193,8 +193,8 @@ Constraint& Constraint::operator=( const Constraint& rhs ){
 
 returnValue Constraint::add( const double lb_, const Expression& arg, const double ub_  ){
 
-    Vector tmp_lb(grid.getNumPoints());
-    Vector tmp_ub(grid.getNumPoints());
+    DVector tmp_lb(grid.getNumPoints());
+    DVector tmp_ub(grid.getNumPoints());
 
     tmp_lb.setAll(lb_);
     tmp_ub.setAll(ub_);
@@ -204,25 +204,25 @@ returnValue Constraint::add( const double lb_, const Expression& arg, const doub
 
 
 
-returnValue Constraint::add( const Vector lb_, const Expression& arg, const double ub_  ){
+returnValue Constraint::add( const DVector lb_, const Expression& arg, const double ub_  ){
 
-    Vector tmp_ub(grid.getNumPoints());
+    DVector tmp_ub(grid.getNumPoints());
     tmp_ub.setAll(ub_);
 
     return add( lb_, arg, tmp_ub );
 }
 
 
-returnValue Constraint::add( const double lb_, const Expression& arg, const Vector ub_  ){
+returnValue Constraint::add( const double lb_, const Expression& arg, const DVector ub_  ){
 
-    Vector tmp_lb(grid.getNumPoints());
+    DVector tmp_lb(grid.getNumPoints());
     tmp_lb.setAll(lb_);
 
     return add( tmp_lb, arg, ub_ );
 }
 
 
-returnValue Constraint::add( const Vector lb_, const Expression &arg, const Vector ub_  ){
+returnValue Constraint::add( const DVector lb_, const Expression &arg, const DVector ub_  ){
 
     // CHECK FEASIBILITY:
     // ------------------
@@ -242,13 +242,13 @@ returnValue Constraint::add( const Vector lb_, const Expression &arg, const Vect
              nb++;
              var   = (VariableType*)realloc(var  , nb*sizeof(VariableType));
              index = (int*         )realloc(index, nb*sizeof(int         ));
-             blb   = (Vector**     )realloc(blb  , nb*sizeof(Vector*     ));
-             bub   = (Vector**     )realloc(bub  , nb*sizeof(Vector*     ));
+             blb   = (DVector**     )realloc(blb  , nb*sizeof(DVector*     ));
+             bub   = (DVector**     )realloc(bub  , nb*sizeof(DVector*     ));
 
              var  [nb-1] = varType  ;
              index[nb-1] = component;
-             blb  [nb-1] = new Vector( lb_ );
-             bub  [nb-1] = new Vector( ub_ );
+             blb  [nb-1] = new DVector( lb_ );
+             bub  [nb-1] = new DVector( ub_ );
 
              return SUCCESSFUL_RETURN;
        }
@@ -281,8 +281,8 @@ returnValue Constraint::add( const uint&                 endOfStage_ ,
 returnValue Constraint::add( const ConstraintComponent& component ){
 
 
-    Vector tmp_ub(grid.getNumPoints());
-    Vector tmp_lb(grid.getNumPoints());
+    DVector tmp_ub(grid.getNumPoints());
+    DVector tmp_lb(grid.getNumPoints());
 
     uint run1;
 
@@ -303,7 +303,7 @@ returnValue Constraint::add( const ConstraintComponent& component ){
         VariablesGrid LBgrid = component.getLBgrid();
 
         for( run1 = 0; run1 < grid.getNumPoints(); run1++ ){
-            Vector tmp = LBgrid.linearInterpolation( grid.getTime(run1) );
+            DVector tmp = LBgrid.linearInterpolation( grid.getTime(run1) );
             tmp_lb(run1) = tmp(0);
         }
     }
@@ -325,7 +325,7 @@ returnValue Constraint::add( const ConstraintComponent& component ){
         VariablesGrid UBgrid = component.getUBgrid();
 
         for( run1 = 0; run1 < grid.getNumPoints(); run1++ ){
-            Vector tmp = UBgrid.linearInterpolation( grid.getTime(run1) );
+            DVector tmp = UBgrid.linearInterpolation( grid.getTime(run1) );
             tmp_ub(run1) = tmp(0);
         }
     }
@@ -336,8 +336,8 @@ returnValue Constraint::add( const ConstraintComponent& component ){
 
 returnValue Constraint::add( const int index_, const ConstraintComponent& component ){
 
-    Vector tmp_ub(grid.getNumPoints());
-    Vector tmp_lb(grid.getNumPoints());
+    DVector tmp_ub(grid.getNumPoints());
+    DVector tmp_lb(grid.getNumPoints());
 
     if ( !(index_ < (int) grid.getNumPoints()) )
     	return ACADOERRORTEXT(RET_ASSERTION,
@@ -363,7 +363,7 @@ returnValue Constraint::add( const int index_, const ConstraintComponent& compon
         VariablesGrid LBgrid = component.getLBgrid();
 
         for( run1 = 0; run1 < grid.getNumPoints(); run1++ ){
-            Vector tmp = LBgrid.linearInterpolation( grid.getTime(run1) );
+            DVector tmp = LBgrid.linearInterpolation( grid.getTime(run1) );
             tmp_lb(run1) = tmp(0);
         }
     }
@@ -385,7 +385,7 @@ returnValue Constraint::add( const int index_, const ConstraintComponent& compon
         VariablesGrid UBgrid = component.getUBgrid();
 
         for( run1 = 0; run1 < grid.getNumPoints(); run1++ ){
-            Vector tmp = UBgrid.linearInterpolation( grid.getTime(run1) );
+            DVector tmp = UBgrid.linearInterpolation( grid.getTime(run1) );
             tmp_ub(run1) = tmp(0);
         }
     }
@@ -537,7 +537,7 @@ returnValue Constraint::evaluateSensitivities( const BlockMatrix &seed, BlockMat
     returnValue returnvalue;
 
     count = 0;
-    Matrix tmp;
+    DMatrix tmp;
 
     // EVALUATE BOUNDARY CONSTRAINS:
     // -----------------------------
@@ -817,8 +817,8 @@ returnValue Constraint::getConstraintResiduum( BlockMatrix &lowerRes, BlockMatri
         BlockMatrix resL, resU;
         returnvalue = boundary_constraint->getResiduum( resL, resU );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix resL_;
-        Matrix resU_;
+        DMatrix resL_;
+        DMatrix resU_;
         resL.getSubBlock( 0, 0, resL_ );
         resU.getSubBlock( 0, 0, resU_ );
         residuumL.setDense( nc, 0, resL_ );
@@ -834,8 +834,8 @@ returnValue Constraint::getConstraintResiduum( BlockMatrix &lowerRes, BlockMatri
         BlockMatrix resL, resU;
         returnvalue = coupled_path_constraint->getResiduum( resL, resU );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix resL_;
-        Matrix resU_;
+        DMatrix resL_;
+        DMatrix resU_;
         resL.getSubBlock( 0, 0, resL_ );
         resU.getSubBlock( 0, 0, resU_ );
         residuumL.setDense( nc, 0, resL_ );
@@ -851,8 +851,8 @@ returnValue Constraint::getConstraintResiduum( BlockMatrix &lowerRes, BlockMatri
         BlockMatrix resL, resU;
         returnvalue = path_constraint->getResiduum( resL, resU );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix resL_;
-        Matrix resU_;
+        DMatrix resL_;
+        DMatrix resU_;
         for( run1 = 0; run1 < N; run1++ ){
             resL.getSubBlock( run1, 0, resL_ );
             resU.getSubBlock( run1, 0, resU_ );
@@ -869,8 +869,8 @@ returnValue Constraint::getConstraintResiduum( BlockMatrix &lowerRes, BlockMatri
         BlockMatrix resL, resU;
         returnvalue = algebraic_consistency_constraint->getResiduum( resL, resU );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix resL_;
-        Matrix resU_;
+        DMatrix resL_;
+        DMatrix resU_;
         for( run1 = 0; run1 < N; run1++ ){
             resL.getSubBlock( run1, 0, resL_ );
             resU.getSubBlock( run1, 0, resU_ );
@@ -889,8 +889,8 @@ returnValue Constraint::getConstraintResiduum( BlockMatrix &lowerRes, BlockMatri
                 BlockMatrix resL, resU;
                 returnvalue = point_constraints[run1]->getResiduum( resL, resU );
                 if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-                Matrix resL_;
-                Matrix resU_;
+                DMatrix resL_;
+                DMatrix resU_;
                 resL.getSubBlock( 0, 0, resL_ );
                 resU.getSubBlock( 0, 0, resU_ );
                 residuumL.setDense( nc, 0, resL_ );
@@ -957,7 +957,7 @@ returnValue Constraint::getForwardSensitivities( BlockMatrix &D, int order ){
         BlockMatrix res;
         returnvalue = boundary_constraint->getForwardSensitivities( &res, order );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix res_;
+        DMatrix res_;
         for( run2 = 0; run2 < 5*N; run2++ ){
             res.getSubBlock( 0 , run2, res_ );
             if( res_.getDim() > 0 )
@@ -973,7 +973,7 @@ returnValue Constraint::getForwardSensitivities( BlockMatrix &D, int order ){
         BlockMatrix res;
         returnvalue = coupled_path_constraint->getForwardSensitivities( &res, order );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix res_;
+        DMatrix res_;
         for( run2 = 0; run2 < 5*N; run2++ ){
             res.getSubBlock( 0 , run2, res_ );
             if( res_.getDim() > 0 )
@@ -990,7 +990,7 @@ returnValue Constraint::getForwardSensitivities( BlockMatrix &D, int order ){
         BlockMatrix res;
         returnvalue = path_constraint->getForwardSensitivities( &res, order );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix res_;
+        DMatrix res_;
         for( run1 = 0; run1 < N; run1++ ){
             for( run2 = 0; run2 < 5*N; run2++ ){
                 res.getSubBlock( run1, run2, res_ );
@@ -1009,7 +1009,7 @@ returnValue Constraint::getForwardSensitivities( BlockMatrix &D, int order ){
         BlockMatrix res;
         returnvalue = algebraic_consistency_constraint->getForwardSensitivities( &res, order );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix res_;
+        DMatrix res_;
         for( run1 = 0; run1 < N; run1++ ){
             for( run2 = 0; run2 < 5*N; run2++ ){
                 res.getSubBlock( run1, run2, res_ );
@@ -1031,7 +1031,7 @@ returnValue Constraint::getForwardSensitivities( BlockMatrix &D, int order ){
                 BlockMatrix res;
                 returnvalue = point_constraints[run1]->getForwardSensitivities( &res, order );
                 if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-                Matrix res_;
+                DMatrix res_;
                 for( run2 = 0; run2 < 5*N; run2++ ){
                     res.getSubBlock( 0 , run2, res_ );
                     if( res_.getDim() > 0 )
@@ -1068,7 +1068,7 @@ returnValue Constraint::getBackwardSensitivities( BlockMatrix &D, int order ){
         BlockMatrix res;
         returnvalue = boundary_constraint->getBackwardSensitivities( &res, order );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix res_;
+        DMatrix res_;
         for( run2 = 0; run2 < 5*N; run2++ ){
             res.getSubBlock( 0 , run2, res_ );
             if( res_.getDim() > 0 )
@@ -1085,7 +1085,7 @@ returnValue Constraint::getBackwardSensitivities( BlockMatrix &D, int order ){
         BlockMatrix res;
         returnvalue = coupled_path_constraint->getBackwardSensitivities( &res, order );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix res_;
+        DMatrix res_;
         for( run2 = 0; run2 < 5*N; run2++ ){
             res.getSubBlock( 0 , run2, res_ );
             if( res_.getDim() > 0 )
@@ -1102,7 +1102,7 @@ returnValue Constraint::getBackwardSensitivities( BlockMatrix &D, int order ){
         BlockMatrix res;
         returnvalue = path_constraint->getBackwardSensitivities( &res, order );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix res_;
+        DMatrix res_;
         for( run1 = 0; run1 < N; run1++ ){
             for( run2 = 0; run2 < 5*N; run2++ ){
                 res.getSubBlock( run1, run2, res_ );
@@ -1121,7 +1121,7 @@ returnValue Constraint::getBackwardSensitivities( BlockMatrix &D, int order ){
         BlockMatrix res;
         returnvalue = algebraic_consistency_constraint->getBackwardSensitivities( &res, order );
         if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-        Matrix res_;
+        DMatrix res_;
         for( run1 = 0; run1 < N; run1++ ){
             for( run2 = 0; run2 < 5*N; run2++ ){
                 res.getSubBlock( run1, run2, res_ );
@@ -1143,7 +1143,7 @@ returnValue Constraint::getBackwardSensitivities( BlockMatrix &D, int order ){
                 BlockMatrix res;
                 returnvalue = point_constraints[run1]->getBackwardSensitivities( &res, order );
                 if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR(returnvalue);
-                Matrix res_;
+                DMatrix res_;
                 for( run2 = 0; run2 < 5*N; run2++ ){
                     res.getSubBlock( 0 , run2, res_ );
                     if( res_.getDim() > 0 )
@@ -1225,12 +1225,12 @@ returnValue Constraint::getBounds( const OCPiterate& iter ){
     return returnvalue;
 }
 
-returnValue Constraint::getPathConstraints(Function& function_, Matrix& lb_, Matrix& ub_) const
+returnValue Constraint::getPathConstraints(Function& function_, DMatrix& lb_, DMatrix& ub_) const
 {
 	return path_constraint->get(function_, lb_, ub_);
 }
 
-returnValue Constraint::getPointConstraint(const unsigned index_, Function& function_, Matrix& lb_, Matrix& ub_) const
+returnValue Constraint::getPointConstraint(const unsigned index_, Function& function_, DMatrix& lb_, DMatrix& ub_) const
 {
 	if (point_constraints[ index_ ] == 0)
 	{

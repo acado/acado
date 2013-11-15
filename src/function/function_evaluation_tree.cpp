@@ -944,7 +944,7 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 
     if (n > 0)
     {
-    	stream << "/* Vector of auxiliary variables; number of elements: " << n << ". */" << endl;
+    	stream << "/* DVector of auxiliary variables; number of elements: " << n << ". */" << endl;
 
     	if ( allocateMemory )
     	{

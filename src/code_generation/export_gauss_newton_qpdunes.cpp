@@ -213,10 +213,10 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 
 	if  (levenbergMarquardt > 0.0)
 	{
-		Matrix lmX = eye( NX );
+		DMatrix lmX = eye( NX );
 		lmX *= levenbergMarquardt;
 
-		Matrix lmU = eye( NU );
+		DMatrix lmU = eye( NU );
 		lmU *= levenbergMarquardt;
 
 		evLmX = lmX;
@@ -532,14 +532,14 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	qpLb.setup("qpLb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
 	qpUb.setup("qpUb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
 
-	Vector lbTmp, ubTmp;
-	Vector lbXValues, ubXValues;
-	Vector lbUValues, ubUValues;
+	DVector lbTmp, ubTmp;
+	DVector lbXValues, ubXValues;
+	DVector lbUValues, ubUValues;
 
-	Vector lbXInf( NX );
+	DVector lbXInf( NX );
 	lbXInf.setAll( -INFTY );
 
-	Vector ubXInf( NX );
+	DVector ubXInf( NX );
 	ubXInf.setAll( INFTY );
 
 	//
@@ -713,8 +713,8 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	//
 	// Setup constraint values for the whole horizon.
 	//
-	Vector lbAValues;
-	Vector ubAValues;
+	DVector lbAValues;
+	DVector ubAValues;
 
 	for (unsigned i = 0; i < N; ++i)
 	{
