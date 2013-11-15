@@ -104,11 +104,16 @@ returnValue MayerTerm::evaluateSensitivities( BlockMatrix *hessian ){
 
         dBackward.init( 1, 5*N );
 
-        if( nx > 0 ) dBackward.setDense( 0,   N-1, DMatrix( JJ.getX (), BT_TRUE ) );
-        if( na > 0 ) dBackward.setDense( 0, 2*N-1, DMatrix( JJ.getXA(), BT_TRUE ) );
-        if( np > 0 ) dBackward.setDense( 0, 3*N-1, DMatrix( JJ.getP (), BT_TRUE ) );
-        if( nu > 0 ) dBackward.setDense( 0, 4*N-1, DMatrix( JJ.getU (), BT_TRUE ) );
-        if( nw > 0 ) dBackward.setDense( 0, 5*N-1, DMatrix( JJ.getW (), BT_TRUE ) );
+        DMatrix tmp1 = JJ.getX(); tmp1.transposeInPlace();
+        if( nx > 0 ) dBackward.setDense( 0,   N-1, tmp1 );
+        DMatrix tmp2 = JJ.getXA(); tmp2.transposeInPlace();
+        if( na > 0 ) dBackward.setDense( 0, 2*N-1, tmp2 );
+        DMatrix tmp3 = JJ.getP(); tmp3.transposeInPlace();
+        if( np > 0 ) dBackward.setDense( 0, 3*N-1, tmp3 );
+        DMatrix tmp4 = JJ.getU(); tmp4.transposeInPlace();
+        if( nu > 0 ) dBackward.setDense( 0, 4*N-1, tmp4 );
+        DMatrix tmp5 = JJ.getW(); tmp5.transposeInPlace();
+        if( nw > 0 ) dBackward.setDense( 0, 5*N-1, tmp5 );
 
         return SUCCESSFUL_RETURN;
     }

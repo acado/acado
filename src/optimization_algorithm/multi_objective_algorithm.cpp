@@ -539,7 +539,7 @@ returnValue MultiObjectiveAlgorithm::formulateOCP( double *idx, OCP *ocp_, Expre
             PHI_N(run3,run3) = 0.0;
 
         DMatrix T;
-        T = PHI_N*P.getInverse();
+        T = PHI_N * P.inverse();
 
         DMatrix NK(m,m-1);
         NK.setZero();

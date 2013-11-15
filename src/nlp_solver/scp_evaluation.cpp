@@ -323,24 +323,24 @@ returnValue SCPevaluation::evaluateLagrangeGradient(	uint N,
 
         if( iter.getNX() != 0 ){
             cp.dynGradient.getSubBlock( run1, 0, tmp2, iter.getNX(), iter.getNX() );
-            aux.addDense( run1  , 0, tmp2^tmp1             );
-            aux.setDense( run1+1, 0, tmp1.minus()          );
+            aux.addDense( run1  , 0, tmp2.transpose() * tmp1             );
+            aux.setDense( run1+1, 0, -tmp1          );
         }
         if( iter.getNXA() != 0 ){
             cp.dynGradient.getSubBlock( run1, 1, tmp2, iter.getNX(), iter.getNXA() );
-            aux.setDense( N+run1, 0, tmp2^tmp1 );
+            aux.setDense( N+run1, 0, tmp2.transpose() * tmp1 );
         }
         if( iter.getNP() != 0 ){
             cp.dynGradient.getSubBlock( run1, 2, tmp2, iter.getNX(), iter.getNP() );
-            aux.setDense( 2*N+run1, 0, tmp2^tmp1 );
+            aux.setDense( 2*N+run1, 0, tmp2.transpose() * tmp1 );
         }
         if( iter.getNU() != 0 ){
             cp.dynGradient.getSubBlock( run1, 3, tmp2, iter.getNX(), iter.getNU() );
-            aux.setDense( 3*N+run1, 0, tmp2^tmp1 );
+            aux.setDense( 3*N+run1, 0, tmp2.transpose() * tmp1 );
         }
         if( iter.getNW() != 0 ){
             cp.dynGradient.getSubBlock( run1, 4, tmp2, iter.getNX(), iter.getNW() );
-            aux.setDense( 4*N+run1, 0, tmp2^tmp1 );
+            aux.setDense( 4*N+run1, 0, tmp2.transpose() * tmp1 );
         }
     }
 

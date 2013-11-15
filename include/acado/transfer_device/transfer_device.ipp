@@ -73,7 +73,7 @@ inline BooleanType TransferDevice::hasDeadTime( ) const
 	if ( deadTimes.getDim() == 0 )
 		return BT_FALSE;
 
-	if ( deadTimes.isNegative( ) == BT_TRUE )
+	if ( deadTimes < DVector( deadTimes.size() ) )
 		return BT_FALSE;
 	else
 		return BT_TRUE;

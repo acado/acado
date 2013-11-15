@@ -523,7 +523,7 @@ returnValue ShootingMethod::update( DMatrix &G, const DMatrix &A, const DMatrix 
     DMatrix E = eye(B.getNumCols());
     E *= 1e-10;
 
-    DMatrix S = ((A^A)+E).getInverse();
+    DMatrix S = ((A.transpose().eval() * A)+E).inverse();
     G += (B-G*A)*(S*A.transpose());
     return SUCCESSFUL_RETURN;
 }

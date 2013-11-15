@@ -33,6 +33,7 @@
 #include <acado/conic_solver/condensing_based_cp_solver.hpp>
 #include <include/acado_qpoases/qp_solver_qpoases.hpp>
 
+using namespace Eigen;
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
@@ -354,38 +355,29 @@ returnValue CondensingBasedCPsolver::projectHessian( DMatrix &H_, double damping
 
     if( dampingFactor < 0.0 ) return SUCCESSFUL_RETURN;
 
-    int run1,run2;
-
-
     // COMPUTE THE EIGENVALUES OF THE HESSIAN:
     // ---------------------------------------
 
-    DMatrix Q;
-    DVector D = H_.getEigenvalues( Q );
-    const int n = D.getDim();
-
+    SelfAdjointEigenSolver< MatrixXd > es( H_ );
+    MatrixXd V = es.eigenvectors();
+    VectorXd D = es.eigenvalues();
 
     // OVER-PROJECT THE EIGENVALUES BASED ON THE DAMPING TECHNIQUE:
     // ------------------------------------------------------------
 
-    for( run1 = 0; run1 < n; run1++ ){
-        if( D(run1) <= 0.1 * dampingFactor ){
-            if( fabs(D(run1)) >= dampingFactor ) D(run1) = fabs(D(run1));
-            else                                 D(run1) = dampingFactor;
-        }
-    }
-
+	for (unsigned el = 0; el < D.size(); el++)
+		if (D( el ) <= 0.1 * dampingFactor)
+		{
+			if (fabs(D( el )) >= dampingFactor)
+				D( el ) = fabs(D( el ));
+			else
+				D( el ) = dampingFactor;
+		}
 
     // RECONSTRUCT THE PROJECTED HESSIAN MATRIX:
     // -----------------------------------------
 
-    DMatrix tmp(n,n);
-
-    for( run1 = 0; run1 < n; run1++ )
-        for( run2 = 0; run2 < n; run2++ )
-            tmp(run1,run2) = D(run1)*Q(run2,run1);
-
-    H_ = Q*tmp;
+    H_ = V * D.asDiagonal() * V.inverse();
 
     return SUCCESSFUL_RETURN;
 }
@@ -1215,7 +1207,7 @@ returnValue CondensingBasedCPsolver::expand(	BandedCP& cp
 
         for( run1 = N-2; run1 >= 1; run1-- ){
             cp.dynGradient.getSubBlock( run1, 0,  Gx );
-            lambdaDyn[run1-1] = (Gx^lambdaDyn[run1]) + aux4[run1-1];
+            lambdaDyn[run1-1] = (Gx.transpose() * lambdaDyn[run1]) + aux4[run1-1];
         }
 
         cp.lambdaDynamic.init( N-1, 1 );

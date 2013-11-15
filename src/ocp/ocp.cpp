@@ -241,11 +241,8 @@ returnValue OCP::minimizeLagrangeTerm( const Expression& arg ){ return objective
 returnValue OCP::maximizeLagrangeTerm( const Expression& arg ){ return objective.addLagrangeTerm(-arg ); }
 
 
-returnValue OCP::minimizeLSQ( const DMatrix&S, const Function &h, const DVector &r ){
-
-	if ( S.isPositiveSemiDefinite() == BT_FALSE )
-		return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
-
+returnValue OCP::minimizeLSQ( const DMatrix&S, const Function &h, const DVector &r )
+{
     MatrixVariablesGrid tmpS(S);
     VariablesGrid       tmpR(r);
 

@@ -75,7 +75,9 @@ inline returnValue GaussianNoise::setVariances( const DVector& _variance )
 	if ( variance.getDim( ) != _variance.getDim( ) )
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
 
-	ASSERT( _variance.isGreaterThan( 0.0 ) );
+	
+
+	ASSERT( _variance > DVector( _variance.size() ) );
 
 	variance = _variance;
 	return SUCCESSFUL_RETURN;

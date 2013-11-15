@@ -165,13 +165,15 @@ returnValue Objective::addLSQ( const MatrixVariablesGrid *S_,
                                       const Function&            h ,
                                       const VariablesGrid       *r_  )
 {
-
     nLSQ++;
     lsqTerm = (LSQTerm**)realloc(lsqTerm,nLSQ*sizeof(LSQTerm*));
     lsqTerm[nLSQ-1] = new LSQTerm(S_, h, r_);
     lsqTerm[nLSQ-1]->setGrid(grid);
 
     DMatrix temp = S_->getMatrix( 0 );
+    if (temp.isPositiveSemiDefinite() == BT_FALSE)
+    	return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
+
     cgLSQWeightingMatrices.push_back( temp );
     cgLSQFunctions.push_back( h );
 

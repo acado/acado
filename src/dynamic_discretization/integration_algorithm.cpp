@@ -231,7 +231,8 @@ returnValue IntegrationAlgorithm::setBackwardSeed(	const BlockMatrix &seed
 returnValue IntegrationAlgorithm::setBackwardSeed(	const DVector &seed
 													)
 {
-	DMatrix seedTmpMatrix( seed,BT_TRUE );
+	DMatrix seedTmpMatrix( seed );
+	seedTmpMatrix.transposeInPlace();
 	BlockMatrix seedTmp( seedTmpMatrix );
 
 	return integrationMethod->setBackwardSeed( seedTmp );
