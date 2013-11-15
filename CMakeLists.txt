@@ -213,26 +213,26 @@ SET( ACADO_SOURCE_DIRS
 	
 	# Optimal Control and Simulation source folders.
 	## Optimal Control
-#	./src/dynamic_system
-#	./src/dynamic_discretization
-#	./src/objective
-#	./src/constraint
-#	./src/ocp
-#	./src/conic_program
-#	./src/conic_solver
-#	./src/nlp_solver
-#	./src/nlp_derivative_approximation
-#	./src/optimization_algorithm
-#	./external_packages/src/acado_qpoases
+	./src/dynamic_system
+	./src/dynamic_discretization
+	./src/objective
+	./src/constraint
+	./src/ocp
+	./src/conic_program
+	./src/conic_solver
+	./src/nlp_solver
+	./src/nlp_derivative_approximation
+	./src/optimization_algorithm
+	./external_packages/src/acado_qpoases
 	## Simulation
-#	./src/process
-#	./src/noise
-#	./src/transfer_device
-#	./src/controller
-#	./src/control_law
-#	./src/estimator
-#	./src/reference_trajectory
-#	./src/simulation_environment
+	./src/process
+	./src/noise
+	./src/transfer_device
+	./src/controller
+	./src/control_law
+	./src/estimator
+	./src/reference_trajectory
+	./src/simulation_environment
 
 	# Code Generation Tool
 #	./src/code_generation

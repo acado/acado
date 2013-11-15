@@ -111,18 +111,18 @@ SET( EXAMPLE_DIRS
 	basic_data_structures/symbolics
 	basic_data_structures/variables_grid
 ##	code_generation/simulation
-#	controller
-#	getting_started
-#	integration_algorithm
+	controller
+	getting_started
+	integration_algorithm
 	integrator
 	validated_integrator
-#	multi_objective
+	multi_objective
 #	my_examples
-#	nlp
-#	ocp
-#	parameter_estimation
-#	process
-#	simulation_environment
+	nlp
+	ocp
+	parameter_estimation
+	process
+	simulation_environment
 )
 
 ################################################################################
