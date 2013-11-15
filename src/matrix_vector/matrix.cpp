@@ -62,6 +62,12 @@ template<typename T>
 GenericMatrix<T>& GenericMatrix<T>::appendRows(	const GenericMatrix& _arg
 )
 {
+	if (getDim() == 0)
+	{
+		Base::_set( _arg );
+		return *this;
+	}
+
 	ASSERT(Base::cols() == _arg.cols());
 
 	unsigned oldRows = Base::rows();
@@ -77,6 +83,12 @@ template<typename T>
 GenericMatrix<T>& GenericMatrix<T>::appendCols(	const GenericMatrix& _arg
 )
 {
+	if (getDim() == 0)
+	{
+		Base::_set( _arg );
+		return *this;
+	}
+
 	ASSERT(Base::rows() == _arg.rows());
 
 	unsigned oldCols = Base::cols();
@@ -88,7 +100,7 @@ GenericMatrix<T>& GenericMatrix<T>::appendCols(	const GenericMatrix& _arg
 	return *this;
 }
 
-/** Computes the column-wise sum the Matrix
+/** Computes the column-wise sum the DMatrix
  *
  *  Example:
  *  \code

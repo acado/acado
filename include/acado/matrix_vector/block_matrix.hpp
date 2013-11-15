@@ -215,7 +215,12 @@ class BlockMatrix
         std::vector< std::vector< SubBlockMatrixType > > types;
 };
 
+static       BlockMatrix emptyBlockMatrix;
+static const BlockMatrix emptyConstBlockMatrix;
+
 CLOSE_NAMESPACE_ACADO
+
+#include <acado/matrix_vector/block_matrix.ipp>
 
 #endif  // ACADO_TOOLKIT_BLOCK_MATRIX_HPP
 

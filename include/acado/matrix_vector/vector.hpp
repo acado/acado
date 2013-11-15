@@ -35,8 +35,8 @@
 #ifndef ACADO_TOOLKIT_VECTOR_HPP
 #define ACADO_TOOLKIT_VECTOR_HPP
 
-#include <acado/matrix_vector/matrix_vector_tools.hpp>
 #include <acado/utils/acado_utils.hpp>
+#include <acado/matrix_vector/matrix_vector_tools.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -108,18 +108,57 @@ public:
 	{}
 
 	/** Equality operator. */
-	bool operator==(const GenericVector& arg)
+	bool operator==(const GenericVector& _arg) const
 	{
-		if (Base::rows() != arg.rows())
+		if (Base::rows() != _arg.rows())
 			return false;
-		return Base::isApprox(arg, EQUALITY_EPS);
+		return Base::isApprox(_arg, EQUALITY_EPS);
 	}
 
 	/** Inequality operator. */
-	bool operator!=(const GenericVector& arg)
+	bool operator!=(const GenericVector& _arg) const
 	{
-		return (operator==( arg ) == false);
+		return (operator==( _arg ) == false);
 	}
+
+	bool operator<=(const GenericVector& _arg) const
+	{
+		if (Base::rows() != _arg.rows())
+			return false;
+		for (unsigned el = 0; el < Base::rows(); ++el)
+			if (Base::data()[ el ] > _arg.data()[ el ])
+				return false;
+		return true;
+	}
+
+	bool operator>=(const GenericVector& _arg) const
+	{
+		if (Base::rows() != _arg.rows())
+			return false;
+		for (unsigned el = 0; el < Base::rows(); ++el)
+			if (Base::data()[ el ] < _arg.data()[ el ])
+				return false;
+		return true;
+	}
+
+	bool operator>(const GenericVector& _arg) const
+	{
+		return operator<=( _arg ) == false;
+	}
+
+	bool operator<(const GenericVector& _arg) const
+	{
+		return operator>=( _arg ) == false;
+	}
+
+	/** Initialization routine. */
+	void init(	unsigned _dim
+				)
+	{ Base::_set(GenericVector< T >( _dim )); }
+
+	/** Set all elements constant. */
+	void setAll( const T& _value)
+	{ Base::setConstant( _value ); }
 
 	/** Append elements to the vector. */
 	GenericVector& append(	const GenericVector& _arg
@@ -288,6 +327,9 @@ std::istream& operator>>(	std::istream& _stream,
 
 /** Type definition of the vector of doubles. */
 typedef GenericVector< double > DVector;
+
+static       DVector emptyVector;
+static const DVector emptyConstVector;
 
 CLOSE_NAMESPACE_ACADO
 

@@ -34,14 +34,9 @@
 #ifndef ACADO_TOOLKIT_MATRIX_VECTOR_HPP
 #define ACADO_TOOLKIT_MATRIX_VECTOR_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
-
 #include <acado/matrix_vector/vector.hpp>
 #include <acado/matrix_vector/matrix.hpp>
-
 #include <acado/matrix_vector/block_matrix.hpp>
-#include <acado/matrix_vector/block_matrix.ipp>
 
 #include <acado/matrix_vector/t_matrix.hpp>
 

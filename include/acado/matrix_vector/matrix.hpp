@@ -81,6 +81,12 @@ public:
 	/** Default ctor */
 	GenericMatrix() : Base() {}
 
+	/** Ctor with scalar initializtion. */
+	explicit GenericMatrix(	const T& _value
+							)
+		: Base(1, 1)
+	{ Base::data()[ 0 ] = _value; }
+
 	/** Ctor that accepts matrix dimensions. */
 	GenericMatrix(	unsigned _nRows,
 					unsigned _nCols
@@ -116,7 +122,7 @@ public:
 	{}
 
 	/** Equality operator. */
-	bool operator==(const GenericMatrix& arg)
+	bool operator==(const GenericMatrix& arg) const
 	{
 		if (Base::rows() != arg.rows() || Base::cols() != arg.cols())
 			return false;
@@ -124,10 +130,20 @@ public:
 	}
 
 	/** Inequality operator. */
-	bool operator!=(const GenericMatrix& arg)
+	bool operator!=(const GenericMatrix& arg) const
 	{
 		return (operator==( arg ) == false);
 	}
+
+	/** Initialization routine. */
+	void init(	unsigned _nRows,
+				unsigned _nCols
+				)
+	{ Base::_set(GenericMatrix<T>(_nRows, _nCols)); }
+
+	/** Set all elements constant. */
+	void setAll( const T& _value)
+	{ Base::setConstant( _value ); }
 
 	/** Appends rows at the end of the matrix. */
 	GenericMatrix& appendRows(	const GenericMatrix& _arg
@@ -137,7 +153,7 @@ public:
 	GenericMatrix& appendCols(	const GenericMatrix& _arg
 								);
 
-	/** Computes the column-wise sum the Matrix
+	/** Computes the column-wise sum the DMatrix
 	 *
 	 *  Example:
 	 *  \code
@@ -149,7 +165,7 @@ public:
 	 */
 	GenericVector< T > sumCol() const;
 
-	/** Computes the row-wise sum the Matrix
+	/** Computes the row-wise sum the DMatrix
 	 *
 	 *  Example:
 	 *
@@ -224,8 +240,10 @@ public:
 							unsigned _end
 							) const
 	{
-		ASSERT(_end < Base::rows() && _end > _start);
-		return Base::block(_start, 0, _end - _start, Base::cols());
+		if (_start >= Base::rows() || _end >= Base::rows() || _start > _end)
+			return GenericMatrix();
+
+		return Base::block(_start, 0, _end - _start + 1, Base::cols());
 	}
 
 	/** Returns given columns of the matrix object. */
@@ -233,8 +251,10 @@ public:
 							unsigned _end
 							) const
 	{
-		ASSERT(_end < Base::cols() && _end > _start);
-		return Base::block(0, _start, Base::rows(), _end - _start);
+		if (_start >= Base::cols() || _end >= Base::cols() || _start > _end)
+			return GenericMatrix();
+
+		return Base::block(0, _start, Base::rows(), _end - _start + 1);
 	}
 
 	/** Returns a vector containing the diagonal elements of a square matrix. */
@@ -418,6 +438,9 @@ typedef GenericMatrix< double > DMatrix;
 typedef GenericMatrix< double > IMatrix;
 /** Shared pointer to a matrix of doubles. */
 typedef std::tr1::shared_ptr< GenericMatrix< double > > DMatrixPtr;
+
+static       DMatrix emptyMatrix;
+static const DMatrix emptyConstMatrix;
 
 CLOSE_NAMESPACE_ACADO
 
