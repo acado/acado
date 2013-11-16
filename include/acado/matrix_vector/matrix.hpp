@@ -315,6 +315,11 @@ public:
 	/** Returns trace of the matrix. */
 	T getTrace( ) const;
 
+	/** Returns condition number of the square matrix based on SVD.
+	 *  \note Works for square matrices, only.
+	 */
+	T getConditionNumber( ) const;
+
 	/** Prints object to given file. Various settings can
 	 *  be specified defining its output format.
 	 *

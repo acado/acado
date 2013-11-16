@@ -232,6 +232,17 @@ T GenericMatrix< T >::getTrace( ) const
 { return Base::trace(); }
 
 template<typename T>
+T GenericMatrix< T >::getConditionNumber() const
+{
+	ASSERT(isSquare() == true);
+
+	Eigen::JacobiSVD<Base, Eigen::NoQRPreconditioner> foo( *this );
+	const GenericVector< T > V = foo.singularValues();
+
+	return (V( 0 ) / V(V.size() - 1));
+}
+
+template<typename T>
 returnValue GenericMatrix< T >::print(	std::ostream& _stream,
 										const char* const _name,
 										const char* const _startString,
