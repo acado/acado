@@ -109,6 +109,16 @@ BooleanType acadoIsInfty( double x, double TOL = 0.1 );
 /** Returns whether x lies within [-INFTY,INFTY]. */
 BooleanType acadoIsFinite( double x, double TOL = 0.1 );
 
+/** Checks if any of elements is greater than. \sa acadoIsFinite */
+template<class T>
+BooleanType isFinite( const T& _value )
+{
+	for (unsigned el = 0; el < _value.size(); ++el)
+		if ( acadoIsFinite( _value[ el ] ) == BT_TRUE )
+            return BT_TRUE;
+	return BT_FALSE;
+}
+
 /** Returns whether x is not a number. */
 BooleanType acadoIsNaN(	double x );
 
