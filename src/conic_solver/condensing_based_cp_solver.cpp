@@ -411,7 +411,6 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
 		double hessianProjectionFactor;
 		get( HESSIAN_PROJECTION_FACTOR, hessianProjectionFactor );
 		projectHessian( denseCP.H, hessianProjectionFactor );
-// 		denseCP.H.symmetrize();
 	}
 
     // APPLY LEVENBERG-MARQUARD REGULARISATION IF DESIRED:
@@ -423,10 +422,18 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
         for( run1 = 0; run1 < denseCP.H.getNumRows(); run1++ )
             denseCP.H(run1,run1) += levenbergMarquard;
 
-	// consistency check of Hessian matrix
-	if ( ( denseCP.H.getMax( ) > 1.0e16 ) || ( denseCP.H.getMin( ) < -1.0e16 ) )
-		return ACADOERROR( RET_ILLFORMED_HESSIAN_MATRIX );
-
+	// Check condition number of the condensed Hessian.
+    double denseHConditionNumber = denseCP.H.getConditionNumber();
+    if (denseHConditionNumber > 1.0e16)
+    {
+    	LOG( LVL_WARNING )
+    			<< "Condition number of the condensed Hessian is quite high: log_10(kappa( H )) = "
+    			<< log10( denseHConditionNumber ) << endl;
+    	ACADOWARNING( RET_ILLFORMED_HESSIAN_MATRIX );
+    }
+    // Check for max and min entry in the condensed Hessian:
+    if (denseCP.H.getMin() < -1.0e16 || denseCP.H.getMax() > 1.0e16)
+    	ACADOWARNING( RET_ILLFORMED_HESSIAN_MATRIX );
 
     // SOLVE QP ALLOWING THE GIVEN NUMBER OF ITERATIONS:
     // -------------------------------------------------------
