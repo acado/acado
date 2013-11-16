@@ -86,7 +86,7 @@ int main( ){
     OCP ocp( t_start, t_end, 5 );
 
     ocp.minimizeLSQ       ( S, h, r );
- // ocp.minimizeLSQEndTerm( S, m, r );
+    ocp.minimizeLSQEndTerm( S, m, r );
 
     ocp.subjectTo( f );
     ocp.subjectTo( AT_START, x == 1.0 );
@@ -106,17 +106,19 @@ int main( ){
     OptimizationAlgorithm algorithm(ocp);
     algorithm << window;
 
-    algorithm.set( PRINT_SCP_METHOD_PROFILE, YES );
- // algorithm.set( DYNAMIC_SENSITIVITY,  FORWARD_SENSITIVITY_LIFTED );
- // algorithm.set( HESSIAN_APPROXIMATION, CONSTANT_HESSIAN );
- //  algorithm.set( HESSIAN_APPROXIMATION, FULL_BFGS_UPDATE );
- //  algorithm.set( HESSIAN_APPROXIMATION, BLOCK_BFGS_UPDATE );
-     algorithm.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON );
- //  algorithm.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON_WITH_BLOCK_BFGS );
- //  algorithm.set( HESSIAN_APPROXIMATION, EXACT_HESSIAN );
+//    algorithm.set( PRINT_SCP_METHOD_PROFILE, YES );
+//    algorithm.set( DYNAMIC_SENSITIVITY,  FORWARD_SENSITIVITY_LIFTED );
+//    algorithm.set( HESSIAN_APPROXIMATION, CONSTANT_HESSIAN );
+//    algorithm.set( HESSIAN_APPROXIMATION, FULL_BFGS_UPDATE );
+//    algorithm.set( HESSIAN_APPROXIMATION, BLOCK_BFGS_UPDATE );
+    algorithm.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON );
+//    algorithm.set( HESSIAN_APPROXIMATION, GAUSS_NEWTON_WITH_BLOCK_BFGS );
+//    algorithm.set( HESSIAN_APPROXIMATION, EXACT_HESSIAN );
+
+    // Necessary to use with GN Hessian approximation.
+    algorithm.set( LEVENBERG_MARQUARDT, 1e-10 );
 
     algorithm.solve();
-
 
     return 0;
 }
