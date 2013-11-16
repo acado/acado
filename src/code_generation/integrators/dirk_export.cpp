@@ -175,7 +175,7 @@ DMatrix DiagonallyImplicitRKExport::formMatrix( const DMatrix& mass, const DMatr
 				tmp(i2, j2) = mass(i2,j2) - AA(i1,i1)*h*jacobian(i2,j2);
 			}
 		}
-		tmp = tmp.getInverse();
+		tmp = tmp.inverse();
 		for( i2 = 0; i2 < vars; i2++ ){
 			for( j2 = 0; j2 < vars; j2++ ) {
 				result(i1*vars+i2, j2) = tmp(i2, j2);
@@ -237,7 +237,7 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportState
 {
 	if( NX2 > 0 ) {
 		DMatrix zeroM = zeros( NX2+NXA,1 );
-		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
+		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ) );
 		uint i;
 
 		ExportForLoop loop1( index2,0,numStages );

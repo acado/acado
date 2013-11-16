@@ -68,6 +68,9 @@ class ExportVariable : public ExportArgument
     //
     public:
 
+		/** Default constructor. */
+		ExportVariable();
+
 		/** Constructor which takes the name, type string
 		 *	and dimensions of the variable.
 		 *
@@ -116,7 +119,7 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
 		ExportVariable(	const std::string& _name,
-						const matrixPtr& _data,
+						const DMatrixPtr& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						bool _callItByValue = false,
@@ -142,11 +145,13 @@ class ExportVariable : public ExportArgument
 
 		/** \name Constructor which converts a given matrix/vector/scalar into an ExportVariable.
 		  * @{ */
-		ExportVariable(	const DMatrix& _data = emptyConstMatrix	/**< DMatrix used for initialization */
-						);
 
-		ExportVariable(	const DVector& _data	/**< DVector used for initialization */
-						);
+		template<typename Derived>
+		ExportVariable(	const Eigen::MatrixBase<Derived>& _data
+						)
+		{
+			simpleForward(DMatrix( _data ));
+		}
 
 		ExportVariable(	const double _data	/**< Scalar used for initialization */
 						);
@@ -549,6 +554,9 @@ class ExportVariable : public ExportArgument
 		 *  \return A diagonal variable.
 		 * */
 		friend ExportVariable diag( const std::string& _name, unsigned int _n );
+
+    private:
+		void simpleForward(const DMatrix& _value);
 };
 
 

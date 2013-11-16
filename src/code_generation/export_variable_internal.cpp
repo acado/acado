@@ -63,7 +63,7 @@ ExportVariableInternal::ExportVariableInternal( ) : ExportArgumentInternal( )
 }
 
 ExportVariableInternal::ExportVariableInternal(	const std::string& _name,
-												const matrixPtr& _data,
+												const DMatrixPtr& _data,
 												ExportType _type,
 												ExportStruct _dataStruct,
 												bool _callItByValue,
@@ -95,7 +95,8 @@ ExportVariableInternal* ExportVariableInternal::clone() const
 
 returnValue ExportVariableInternal::resetAll( )
 {
-	return data->setAll( undefinedEntry );
+	data->setAll( undefinedEntry );
+	return SUCCESSFUL_RETURN;
 }
 
 

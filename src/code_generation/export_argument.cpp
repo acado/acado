@@ -48,7 +48,7 @@ ExportArgument::ExportArgument( )
 {
 	DMatrix m(0, 0);
 	assignNode(new ExportArgumentInternal(
-				"defaultArgumentName", matrixPtr(new DMatrix( m )), REAL, ACADO_LOCAL, false, 0, ""));
+				"defaultArgumentName", DMatrixPtr(new DMatrix( m )), REAL, ACADO_LOCAL, false, 0, ""));
 }
 
 
@@ -66,12 +66,12 @@ ExportArgument::ExportArgument(	const std::string& _name,
 	m.setAll( undefinedEntry );
 
 	assignNode(new ExportArgumentInternal(
-			_name, matrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _addressIdx, _prefix));
+			_name, DMatrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _addressIdx, _prefix));
 }
 
 
 ExportArgument::ExportArgument(	const std::string& _name,
-								const matrixPtr& _data,
+								const DMatrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								bool _callItByValue,
@@ -87,7 +87,7 @@ ExportArgument::ExportArgument( const DMatrix& _data
 								)
 {
 	assignNode(new ExportArgumentInternal(
-			"defaultArgumentName", matrixPtr(new DMatrix( _data )), REAL, ACADO_LOCAL, false, 0, ""));
+			"defaultArgumentName", DMatrixPtr(new DMatrix( _data )), REAL, ACADO_LOCAL, false, 0, ""));
 }
 
 ExportArgumentInternal* ExportArgument::operator->()

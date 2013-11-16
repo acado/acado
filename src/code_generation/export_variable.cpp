@@ -49,6 +49,10 @@ static const double undefinedEntry = 1073741824.03125; // = 2^30 + 2^-5
 // PUBLIC MEMBER FUNCTIONS:
 //
 
+ExportVariable::ExportVariable()
+{
+	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( ))));
+}
 
 ExportVariable::ExportVariable(	const std::string& _name,
 								uint _nRows,
@@ -62,7 +66,7 @@ ExportVariable::ExportVariable(	const std::string& _name,
 	DMatrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, DMatrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 
@@ -74,7 +78,7 @@ ExportVariable::ExportVariable(	const std::string& _name,
 								const std::string& _prefix
 								)
 {
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new DMatrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, DMatrixPtr(new DMatrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 ExportVariable::ExportVariable(	unsigned _nRows,
@@ -88,11 +92,11 @@ ExportVariable::ExportVariable(	unsigned _nRows,
 	DMatrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal("var", matrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 ExportVariable::ExportVariable(	const std::string& _name,
-								const matrixPtr& _data,
+								const DMatrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								bool _callItByValue,
@@ -102,19 +106,24 @@ ExportVariable::ExportVariable(	const std::string& _name,
 	assignNode(new ExportVariableInternal(_name, _data, _type, _dataStruct, _callItByValue, _prefix));
 }
 
-ExportVariable::ExportVariable( const DMatrix& _data )
+void ExportVariable::simpleForward(const DMatrix& _value)
 {
-	assignNode(new ExportVariableInternal("var", matrixPtr(new DMatrix( _data ))));
+	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( _value ))));
 }
 
-ExportVariable::ExportVariable( const DVector& _data )
-{
-	assignNode(new ExportVariableInternal("var", matrixPtr(new DMatrix( _data ))));
-}
+//ExportVariable::ExportVariable( const DMatrix& _data )
+//{
+//	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( _data ))));
+//}
+//
+//ExportVariable::ExportVariable( const DVector& _data )
+//{
+//	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( _data ))));
+//}
 
 ExportVariable::ExportVariable( const double _data )
 {
-	assignNode(new ExportVariableInternal("var", matrixPtr(new DMatrix( _data ))));
+	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( _data ))));
 }
 
 
@@ -155,7 +164,7 @@ ExportVariable& ExportVariable::setup(	const std::string& _name,
 	DMatrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, DMatrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 
 	return *this;
 }
@@ -169,7 +178,7 @@ ExportVariable& ExportVariable::setup(	const std::string& _name,
 										const std::string& _prefix
 										)
 {
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new DMatrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, DMatrixPtr(new DMatrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
 
 	return *this;
 }

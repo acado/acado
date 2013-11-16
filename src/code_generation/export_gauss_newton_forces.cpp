@@ -489,7 +489,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 		else
 		{
 			initialize.addStatement(
-					objHessians[ N ] == (QN1.getGivenMatrix().getDiag() + evLmX.getGivenMatrix().getDiag())
+					objHessians[ N ] == QN1.getGivenMatrix().getDiag() + evLmX.getGivenMatrix().getDiag()
 			);
 		}
 	}
@@ -579,7 +579,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 		lbTmp = xBounds.getLowerBounds( i );
 		ubTmp = xBounds.getUpperBounds( i );
 
-		if (lbTmp.isFinite() == false && ubTmp.isFinite() == false)
+		if (isFinite( lbTmp ) == false && isFinite( ubTmp ) == false)
 			continue;
 
 		++numStateBox;
@@ -608,7 +608,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 		lbTmp = uBounds.getLowerBounds( i );
 		ubTmp = uBounds.getUpperBounds( i );
 
-		if (lbTmp.isFinite() == false && ubTmp.isFinite() == false)
+		if (isFinite( lbTmp ) == false && isFinite( ubTmp ) == false)
 			continue;
 
 		for (unsigned j = 0; j < lbTmp.getDim(); ++j)

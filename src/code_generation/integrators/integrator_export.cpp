@@ -224,7 +224,7 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 		x = DifferentialState("", NX, 1);
 
 		DMatrix dependencyMat = _rhs.getDependencyPattern( x );
-		DVector dependency = sumRow( dependencyMat );
+		DVector dependency = dependencyMat.sumRow(  );
 		for( i = NX1+NX2; i < NX; i++ ) {
 			if( acadoRoundAway(dependency(i)) != 0 ) { // This expression should not depend on these differential states
 				return RET_UNABLE_TO_EXPORT_CODE;

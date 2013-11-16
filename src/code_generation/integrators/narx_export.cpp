@@ -698,7 +698,7 @@ returnValue NARXExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, c
 		x = DifferentialState("", NX, 1);
 
 		DMatrix dependencyMat = _rhs.getDependencyPattern( x );
-		DVector dependency = sumRow( dependencyMat );
+		DVector dependency = dependencyMat.sumRow();
 		for( i = n; i < NX; i++ ) {
 			if( acadoRoundAway(dependency(i)) != 0 ) { // This expression should not depend on these differential states
 				return RET_UNABLE_TO_EXPORT_CODE;

@@ -56,7 +56,7 @@ ExportArgumentInternal::ExportArgumentInternal( ) : ExportDataInternal()
 }
 
 ExportArgumentInternal::ExportArgumentInternal(	const std::string& _name,
-												const matrixPtr& _data,
+												const DMatrixPtr& _data,
 												ExportType _type,
 												ExportStruct _dataStruct,
 												bool _callItByValue,

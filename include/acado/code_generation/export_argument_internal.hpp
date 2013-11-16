@@ -84,7 +84,7 @@ class ExportArgumentInternal : public ExportDataInternal
 		 *								a pointer to this address within the memory of the argument is passed.
 		 */
 		ExportArgumentInternal(	const std::string& _name,
-								const matrixPtr& _data,
+								const DMatrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								bool _callByValue,
@@ -204,7 +204,7 @@ class ExportArgumentInternal : public ExportDataInternal
 
 	protected:
 
-		matrixPtr data;								/**< DMatrix containing the values of each component of the argument
+		DMatrixPtr data;								/**< DMatrix containing the values of each component of the argument
 													 *   (by default, all entries are undefined). */
 		ExportIndex addressIdx;						/**< Address index in case not the argument itself but a pointer to
 													 *   this address within the memory of the argument is to be passed. */

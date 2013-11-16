@@ -384,12 +384,12 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	Ah = ExportVariable( "Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 
 	DVector BB( bb );
-	ExportVariable Bh( "Bh_mat", DMatrix( BB*=h, false ) );
+	ExportVariable Bh( "Bh_mat", DMatrix( BB*=h ) );
 
 	DVector CC( cc );
 	ExportVariable C;
 	if( timeDependant ) {
-		C = ExportVariable( "C_mat", DMatrix( CC*=(1.0/grid.getNumIntervals()), false ), STATIC_CONST_REAL );
+		C = ExportVariable( "C_mat", DMatrix( CC*=(1.0/grid.getNumIntervals()) ), STATIC_CONST_REAL );
 		code.addDeclaration( C );
 		code.addLinebreak( 2 );
 		C = ExportVariable( "C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
@@ -496,7 +496,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( rk_eta.getCol( run5 ) += rk_kkk.getRow( run5 )*Bh );
 	}
 	if( NXA > 0) {
-		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), false );
+		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ) );
 		loop->addStatement( std::string("if( run == 0 ) {\n") );
 		for( run5 = 0; run5 < NXA; run5++ ) {
 			loop->addStatement( rk_eta.getCol( NX+run5 ) == rk_kkk.getRow( NX+run5 )*tempCoefs );
@@ -595,7 +595,7 @@ DMatrix ImplicitRungeKuttaExport::formMatrix( const DMatrix& mass, const DMatrix
 		}
 	}
 
-	return result.getInverse();
+	return result.inverse();
 }
 
 
@@ -851,9 +851,9 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 
 		DVector dependencyX, dependencyZ, dependencyDX;
 		if( exportRhs || crsFormat ) {
-			dependencyX = sumRow( outputDependencies[i].getCols( 0,NX-1 ) );
-			if( numXA_output(i) > 0 ) dependencyZ = sumRow( outputDependencies[i].getCols( NX,NX+NXA-1 ) );
-			if( numDX_output(i) > 0 ) dependencyDX = sumRow( outputDependencies[i].getCols( NX+NXA+NU,NX+NXA+NU+NDX-1 ) );
+			dependencyX = outputDependencies[i].getCols( 0,NX-1 ).sumRow();
+			if( numXA_output(i) > 0 ) dependencyZ = outputDependencies[i].getCols( NX,NX+NXA-1 ).sumRow();
+			if( numDX_output(i) > 0 ) dependencyDX = outputDependencies[i].getCols( NX+NXA+NU,NX+NXA+NU+NDX-1 ).sumRow();
 		}
 		for( j = 0; j < NX; j++ ) {
 			if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyX(j)) != 0 ) {

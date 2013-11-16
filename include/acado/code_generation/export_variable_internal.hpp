@@ -85,7 +85,7 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
 		ExportVariableInternal(	const std::string& _name,
-								const matrixPtr& _data,
+								const DMatrixPtr& _data,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
 								bool _callItByValue = false,

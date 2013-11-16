@@ -834,7 +834,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 	constraints.getBounds( tmp );
 
-	bool isFinite = false;
+	bool boxConIsFinite = false;
 	DVector lbTmp;
 	DVector ubTmp;
 
@@ -846,14 +846,14 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		lbTmp = tmp.u->getLowerBounds( i );
 		ubTmp = tmp.u->getUpperBounds( i );
 
-		if ( (ubTmp - lbTmp).isPositive() == false )
+		if ((ubTmp >= lbTmp) == false)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Some lower bounds are bigger than upper bounds?");
 
-		if ( (lbTmp.isFinite( ) == true) || (ubTmp.isFinite( ) == true) )
-			isFinite = true;
+		if (isFinite( lbTmp ) || isFinite( ubTmp ))
+			boxConIsFinite = true;
 	}
 
-	if (isFinite == true)
+	if (boxConIsFinite == true)
 		uBounds = *(tmp.u);
 	else
 		uBounds.init();
@@ -861,7 +861,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	//
 	// Extract box constraints on states
 	//
-	isFinite = false;
+	boxConIsFinite = false;
 	xBoundsIdx.clear();
 
 	for (unsigned i = 0; i < tmp.x->getNumPoints(); ++i)
@@ -869,14 +869,14 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		lbTmp = tmp.x->getLowerBounds( i );
 		ubTmp = tmp.x->getUpperBounds( i );
 
-		if ( (ubTmp - lbTmp).isPositive() == false )
+		if ((ubTmp >= lbTmp) == false)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Some lower bounds are bigger than upper bounds?");
 
-		if ( (lbTmp.isFinite( ) == true) || (ubTmp.isFinite( ) == true) )
-			isFinite = true;
+		if (isFinite( lbTmp ) || isFinite( ubTmp ))
+			boxConIsFinite = true;
 
 		// This is maybe not necessary
-		if (isFinite == false || i == 0)
+		if (boxConIsFinite == false || i == 0)
 			continue;
 
 		for (unsigned j = 0; j < lbTmp.getDim(); ++j)
@@ -888,7 +888,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		}
 	}
 
-	if ( isFinite == true )
+	if ( boxConIsFinite == true )
 		xBounds = *(tmp.x);
 	else
 		xBounds.init();
@@ -1494,7 +1494,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	if (objS.isGiven() == true)
 	{
 		DMatrix m = objS.getGivenMatrix();
-		DMatrix mChol = m.getCholeskyDecomposition();
+		DMatrix mChol = m.llt().matrixL();
 
 		initialize << (acVL == mChol);
 	}

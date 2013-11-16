@@ -104,7 +104,7 @@ class ExportArgument : public ExportData
 		 *								a pointer to this address within the memory of the argument is passed.
 		 */
 		ExportArgument(	const std::string& _name,
-						const matrixPtr& _data,
+						const DMatrixPtr& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						bool _callByValue = false,
