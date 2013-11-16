@@ -389,8 +389,6 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
 	if( denseCP.isQP() == BT_FALSE )
 		return ACADOERROR( RET_QP_SOLVER_CAN_ONLY_SOLVE_QP );
 
-
-    uint run1;
     returnValue returnvalue;
 
 	// ensure that Hessian matrix is symmetric
@@ -419,8 +417,7 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
     get(LEVENBERG_MARQUARDT, levenbergMarquard );
 
     if( levenbergMarquard > EPS )
-        for( run1 = 0; run1 < denseCP.H.getNumRows(); run1++ )
-            denseCP.H(run1,run1) += levenbergMarquard;
+    	denseCP.H += eye( denseCP.H.rows() ) * levenbergMarquard;
 
 	// Check condition number of the condensed Hessian.
     double denseHConditionNumber = denseCP.H.getConditionNumber();
@@ -433,7 +430,10 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
     }
     // Check for max and min entry in the condensed Hessian:
     if (denseCP.H.getMin() < -1.0e16 || denseCP.H.getMax() > 1.0e16)
+    {
+    	LOG( LVL_WARNING ) << "Ill formed condensed Hessian: min(.) < -1e16 or max(.) > 1e16" << endl;
     	ACADOWARNING( RET_ILLFORMED_HESSIAN_MATRIX );
+    }
 
     // SOLVE QP ALLOWING THE GIVEN NUMBER OF ITERATIONS:
     // -------------------------------------------------------
