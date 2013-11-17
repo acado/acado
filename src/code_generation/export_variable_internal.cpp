@@ -92,14 +92,14 @@ ExportVariableInternal* ExportVariableInternal::clone() const
 	return new ExportVariableInternal( *this );
 }
 
-
+// TODO We do not need this any more!
 returnValue ExportVariableInternal::resetAll( )
 {
 	data->setAll( undefinedEntry );
 	return SUCCESSFUL_RETURN;
 }
 
-
+// TODO We do not need this any more!
 returnValue ExportVariableInternal::resetDiagonal( )
 {
 	if (getNumRows() != getNumCols())
@@ -374,14 +374,10 @@ ExportVariable ExportVariableInternal::makeRowVector( ) const
 {
 	ASSERT( ( nRows == 0 ) && ( nCols == 0 ) );
 
-	DMatrix m(1, getDim());
-	unsigned nc = getNumCols();
+	DMatrix foo( *data.get() );
+	foo.makeVector().transposeInPlace();
 
-	for ( uint i=0; i<getNumRows(); ++i )
-		for ( uint j=0; j<getNumCols(); ++j )
-			m(0,i * nc + j) = data->operator()(i, j);
-
-	ExportVariable tmp(name, m, type, dataStruct, callItByValue, prefix);
+	ExportVariable tmp(name, foo, type, dataStruct, callItByValue, prefix);
 
 	return tmp;
 }
@@ -391,14 +387,10 @@ ExportVariable ExportVariableInternal::makeColVector( ) const
 {
 	ASSERT( ( nRows == 0 ) && ( nCols == 0 ) );
 
-	DMatrix m(getDim(), 1);
-	unsigned nc = getNumCols();
+	DMatrix foo( *data.get() );
+	foo.makeVector();
 
-	for ( uint i=0; i<getNumRows(); ++i )
-		for ( uint j=0; j<getNumCols(); ++j )
-			m(i * nc + j, 0) = data->operator()(i, j);
-
-	ExportVariable tmp(name, m, type, dataStruct, callItByValue, prefix);
+	ExportVariable tmp(name, foo, type, dataStruct, callItByValue, prefix);
 
 	return tmp;
 }
@@ -408,8 +400,8 @@ bool ExportVariableInternal::isVector( ) const
 {
 	if ( ( getNumRows( ) == 1 ) || ( getNumCols( ) == 1 ) )
 		return true;
-	else
-		return false;
+
+	return false;
 }
 
 
@@ -417,8 +409,8 @@ DMatrix ExportVariableInternal::getGivenMatrix( ) const
 {
 	if ( isGiven() == true )
 		return DMatrix( *data.get() );
-	else
-		return DMatrix();
+
+	return DMatrix();
 }
 
 
