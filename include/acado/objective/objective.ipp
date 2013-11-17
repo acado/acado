@@ -130,10 +130,6 @@ inline BooleanType Objective::hasLSQform(){
 }
 
 
-        /** returns whether the objective element is affine. */
- //       inline BooleanType isAffine();
-
-
 inline BooleanType Objective::isQuadratic(){
 
     uint run1;
@@ -156,12 +152,6 @@ inline returnValue Objective::setReference( const VariablesGrid &ref ){
 
     return SUCCESSFUL_RETURN;
 }
-
-
-
-        /** returns whether the objective is convex. */
-   //     inline BooleanType isConvex();
-
 
 CLOSE_NAMESPACE_ACADO
 

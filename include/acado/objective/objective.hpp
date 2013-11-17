@@ -42,6 +42,44 @@
 
 BEGIN_NAMESPACE_ACADO
 
+/** An LSQ element data type used for code generation. */
+struct LsqData
+{
+	LsqData(const DMatrix& _WW, const Function& _hh, bool _givenW = true)
+		: W( _WW ), h( _hh ), givenW( _givenW )
+	{}
+
+	/** A weighting matrix. If \a givenW is true, then this guy is used
+	 *  as a sparsity pattern, only. */
+	DMatrix W;
+	/** An LSQ underlying function. */
+	Function h;
+	/** Indicator, \sa W */
+	bool givenW;
+};
+
+/** A vector of LSQ data elements. */
+typedef std::vector< LsqData > LsqElements;
+
+/** An extern LSQ element data type, i.e. the function is defined externally. */
+struct LsqExternData
+{
+	LsqExternData(const DMatrix& _WW, const std::string& _hh, bool _givenW = true)
+		: W( _WW ), h( _hh ), givenW( _givenW )
+	{}
+
+	/** A weighting matrix. If \a givenW is true, then this guy is used
+	 *  as a sparsity pattern, only. */
+	DMatrix W;
+	/** An LSQ underlying function. */
+	std::string h;
+	/** Indicator, \sa W */
+	bool givenW;
+};
+
+/** A vector of externally defined LSQ data elements. */
+typedef std::vector< LsqExternData > LsqExternElements;
+
 /** 
  *	\brief Stores and evaluates the objective function of optimal control problems.
  *
@@ -65,10 +103,8 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
-
-class Objective : public LagrangeTerm{
-
-
+class Objective : public LagrangeTerm
+{
     //
     // PUBLIC MEMBER FUNCTIONS:
     //
@@ -156,9 +192,6 @@ class Objective : public LagrangeTerm{
         returnValue addLSQEndTerm(const DMatrix& S, const std::string& h);
 
         returnValue addLSQLinearTerms(const DVector& Slx, const DVector& Slu);
-
-        returnValue addLSQLinearTerms(const DMatrix& Slx, const DMatrix& Slu);
-
 
 // =======================================================================================
 //
@@ -385,16 +418,17 @@ class Objective : public LagrangeTerm{
          */
         BooleanType isEmpty() const;
 
-        //
-        // Code generation related stuff
-        //
-        returnValue getLSQTerms( std::vector<DMatrix>& _matrices, std::vector<Function>& _functions ) const;
-        returnValue getLSQEndTerms( std::vector<DMatrix>& _matrices, std::vector<Function>& _functions ) const;
+        /** \name Code generation related functions.
+         *  @{ */
+        returnValue getLSQTerms( LsqElements& _elements ) const;
+        returnValue getLSQEndTerms( LsqElements& _elements ) const;
 
-        returnValue getLSQTerms( std::vector<DMatrix>& _matrices, std::vector<std::string>& _functions ) const;
-        returnValue getLSQEndTerms( std::vector<DMatrix>& _matrices, std::vector<std::string>& _functions ) const;
+        returnValue getLSQTerms( LsqExternElements& _elements ) const;
+        returnValue getLSQEndTerms( LsqExternElements& _elements ) const;
 
         returnValue getLSQLinearTerms(std::vector<DMatrix>& _vSlx, std::vector<DMatrix>& _vSlu) const;
+
+        /** @} */
 
     //
     // DATA MEMBERS:
@@ -409,17 +443,11 @@ class Objective : public LagrangeTerm{
     uint        nEndLSQ   ;   /**< number of end LSQ terms     */
     uint        nMayer    ;   /**< number of Mayer terms       */
 
-    std::vector<DMatrix> cgLSQWeightingMatrices;
-    std::vector<Function> cgLSQFunctions;
+    LsqElements cgLsqElements;
+    LsqElements cgLsqEndTermElements;
 
-    std::vector<DMatrix> cgLSQEndTermWeightingMatrices;
-    std::vector<Function> cgLSQEndTermFunctions;
-
-    std::vector<DMatrix> cgExternLSQWeightingMatrices;
-    std::vector<std::string> cgExternLSQFunctions;
-
-    std::vector<DMatrix> cgExternLSQEndTermWeightingMatrices;
-    std::vector<std::string> cgExternLSQEndTermFunctions;
+    LsqExternElements cgExternLsqElements;
+    LsqExternElements cgExternLsqEndTermElements;
 
     std::vector<DMatrix> cgLSQWeightingVectorsSlx;
     std::vector<DMatrix> cgLSQWeightingVectorsSlu;

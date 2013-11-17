@@ -62,8 +62,6 @@ class Constraint : public BoxConstraint{
 	friend class OptimizationAlgorithmBase;
 	friend class OptimizationAlgorithm;
 	friend class RealTimeAlgorithm;
-	friend class MPCexport;
-	friend class MHEexport;
 	friend class TESTExport;
 	friend class ExportNLPSolver;
 
