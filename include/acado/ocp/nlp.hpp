@@ -23,28 +23,17 @@
  *
  */
 
-
 /**
  *    \file include/acado/ocp/nlp.hpp
  *    \author Boris Houska, Hans Joachim Ferreau
  */
 
-
 #ifndef ACADO_TOOLKIT_NLP_HPP
 #define ACADO_TOOLKIT_NLP_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
-#include <acado/function/function.hpp>
-
-#include <acado/variables_grid/grid.hpp>
-#include <acado/constraint/constraint.hpp>
-#include <acado/objective/objective.hpp>
 #include <acado/ocp/ocp.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
 
 /** 
  *	\brief Data class for defining static optimization problems.
@@ -55,49 +44,20 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\author Boris Houska, Hans Joachim Ferreau
  */
-class NLP: public OCP{
-
-
-//
-// PUBLIC MEMBER FUNCTIONS:
-//
+class NLP: public OCP
+{
 public:
-
     /** Default constructor. */
-    NLP( );
-
-    /** Copy constructor (deep copy). */
-    NLP( const NLP& rhs );
+    NLP();
 
     /** Destructor. */
-    virtual ~NLP( );
-
-    /** Assignment operator (deep copy). */
-    NLP& operator=( const NLP& rhs );
-
+    virtual ~NLP();
 
     returnValue minimize( const Expression& arg );
 
-
     returnValue minimize( const int &multiObjectiveIdx,  const Expression& arg );
-
-
-    //
-    // DATA MEMBERS:
-    //
-    protected:
-
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
-
-#include <acado/ocp/nlp.ipp>
-
 #endif  // ACADO_TOOLKIT_NLP_HPP
-
-/*
- *   end of file
- */

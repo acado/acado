@@ -93,37 +93,8 @@ OCP::OCP( const double    &tStart_,
     setupGrid( tStart_, tStart_ + 1.0, N_+1);
 }
 
-
-void OCP::copy( const OCP &rhs )
-{
-    grid                 = rhs.grid                ;
-    modelData			 = rhs.modelData		   ;
-    objective            = rhs.objective           ;
-    constraint           = rhs.constraint          ;
-}
-
-OCP::OCP( const OCP& rhs )
-    :MultiObjectiveFunctionality( rhs ){
-
-    copy( rhs );
-}
-
-
-OCP::~OCP( ){ 
-}
-
-
-OCP& OCP::operator=( const OCP& rhs ){
-
-    if ( this != &rhs ){
-
-        MultiObjectiveFunctionality::operator=(rhs);
-        copy(rhs);
-    }
-    return *this;
-}
-
-
+OCP::~OCP( )
+{}
 
 returnValue OCP::minimizeMayerTerm( const int &multiObjectiveIdx,  const Expression& arg ){
 
@@ -384,13 +355,6 @@ returnValue OCP::minimizeLSQLinearTerms(const DVector& Slx, const DVector& Slu)
 {
 	return objective.addLSQLinearTerms(Slx, Slu);
 }
-
-returnValue OCP::minimizeLSQLinearTerms(const DMatrix& Slx, const DMatrix& Slu)
-{
-	return objective.addLSQLinearTerms(Slx, Slu);
-}
-
-
 
 // PROTECTED FUNCTIONS:
 // --------------------

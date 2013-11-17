@@ -23,29 +23,23 @@
  *
  */
 
-
 /**
  *    \file include/acado/ocp/ocp.hpp
  *    \authors Boris Houska, Hans Joachim Ferreau, Milan Vukov, Rien Quirynen
+ *    \date 2008 - 2013
  */
-
 
 #ifndef ACADO_TOOLKIT_OCP_HPP
 #define ACADO_TOOLKIT_OCP_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/function/function.hpp>
-
 #include <acado/variables_grid/grid.hpp>
 #include <acado/constraint/constraint.hpp>
 #include <acado/objective/objective.hpp>
 #include <acado/ocp/multi_objective_functionality.hpp>
 #include <acado/ocp/model_container.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
 
 /** 
  *	\brief Data class for defining optimal control problems.
@@ -54,7 +48,7 @@ BEGIN_NAMESPACE_ACADO
  *
  *	The class OCP is a data class for defining optimal control problems.
  *  In the most easiest an optimal control problem can consists of an
- *  objecive only - i.e. in principle we can set up NLP's as well if no
+ *  objective only - i.e. in principle we can set up NLP's as well if no
  *  dynamic system is specified. However, in general the objective
  *  functional is optimized subject to a dynamic equation and different
  *  kind of constraints. \n
@@ -69,7 +63,7 @@ BEGIN_NAMESPACE_ACADO
  *  with the corresponding time interval. Here, the interval can consist of
  *  of given bounds, but in another variant a parameter can be passed in
  *  order to allow the setup of optimal control problems for which the end
- *  time is optimizaed, too.\n
+ *  time is optimized, too.\n
  *  \n
  *  Constraints can be specified with the "subjectTo" syntax. Please note
  *  that every parameter, state, control etc which is not fixed via a
@@ -81,7 +75,7 @@ BEGIN_NAMESPACE_ACADO
  *  Please note that the OCP class only collects the formulation of the
  *  problem. If initial values for non-linear problems should be specified,
  *  this needs to be done on the algorithm dealing with the OCP.
- *  (cf. OptimizationAlgorithm for more details.)\n
+ *  (\sa OptimizationAlgorithm)\n
  *  \n
  *  For advanced users and developers it might be important to know that the
  *  class OCP inherits the MultiObjectiveFunctionality which is needed if
@@ -94,8 +88,6 @@ BEGIN_NAMESPACE_ACADO
 
 class OCP: public MultiObjectiveFunctionality, public ModelContainer
 {
-	friend class OptimizationAlgorithmBase;
-
 public:
 
 	/** Default Constructor which can optionally set the time-horizon of the problem.
@@ -125,17 +117,8 @@ public:
 	OCP(	const Grid &grid_  /**< discretization grid  */ );
 
 
-	/** Copy constructor (makes a deep copy of the class). */
-	OCP(	const OCP& rhs );
-
-
 	/** Destructor (deletes everything). */
 	virtual ~OCP( );
-
-
-	/** Assignment operator (deep copy). */
-	OCP& operator=( const OCP& rhs );
-
 
 	/** Adds an expression as a the Mayer term to be minimized.
 	 *  \return SUCCESSFUL_RETURN
@@ -172,7 +155,6 @@ public:
 	 */
 	returnValue maximizeLagrangeTerm( const Expression& arg );
 
-
 	/** \name Least Squares terms.
 	 *
 	 *  Adds a Least Square term of the form
@@ -186,17 +168,17 @@ public:
 	 *  The Function \f$ r \f$ is called reference and can be
 	 *  specified by the user. The function \f$ h \f$ is a standard Function.
 	 *
-	 *  \see function_.hpp
+	 *  \sa Function
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 *
 	 *  @{ */
 	returnValue minimizeLSQ(	const DMatrix   &S,   /**< a weighting matrix */
-								const Function &h,   /**< the LSQ-Function   */
+								const Function  &h,   /**< the LSQ-Function   */
 								const DVector   &r    /**< the reference      */ );
 
 	returnValue minimizeLSQ(	const Function &h,   /**< the LSQ-Function   */
-								const DVector   &r    /**< the reference      */ );
+								const DVector  &r    /**< the reference      */ );
 
 	returnValue minimizeLSQ(	const Function &h    /**< the LSQ-Function   */ );
 
@@ -204,34 +186,32 @@ public:
 								const Function            &h,   /**< the LSQ-Function   */
 								const VariablesGrid       &r    /**< the reference      */ );
 
-	returnValue minimizeLSQ(	const DMatrix        &S,   /**< a weighting matrix */
+	returnValue minimizeLSQ(	const DMatrix       &S,   /**< a weighting matrix */
 								const Function      &h,   /**< the LSQ-Function   */
 								const VariablesGrid &r    /**< the reference      */ );
 
-	returnValue minimizeLSQ(	const Function      &h,   /**< the LSQ-Function   */
-								const VariablesGrid &r    /**< the reference      */ );
+	returnValue minimizeLSQ(	const Function      &h,	/**< the LSQ-Function   */
+								const VariablesGrid &r	/**< the reference      */ );
 
-	returnValue minimizeLSQ(	const MatrixVariablesGrid &S,   /**< a weighting matrix */
-								const Function            &h,   /**< the LSQ-Function   */
-								const char*        rFilename    /**< filename where the reference is stored */ );
+	returnValue minimizeLSQ(	const MatrixVariablesGrid &S,	/**< a weighting matrix */
+								const Function            &h,	/**< the LSQ-Function   */
+								const char*        rFilename	/**< filename where the reference is stored */ );
 
+	returnValue minimizeLSQ(	const DMatrix        &S,/**< a weighting matrix */
+								const Function      &h,	/**< the LSQ-Function   */
+								const char*  rFilename	/**< filename where the reference is stored */ );
 
-	returnValue minimizeLSQ(	const DMatrix        &S,   /**< a weighting matrix */
-								const Function      &h,   /**< the LSQ-Function   */
+	returnValue minimizeLSQ(	const Function      &h,   /**< the LSQ-Function */
 								const char*  rFilename    /**< filename where the reference is stored */ );
 
-	returnValue minimizeLSQ(	const Function      &h,   /**< the LSQ-Function   */
-								const char*  rFilename    /**< filename where the reference is stored */ );
-
-	/** \note Applicable only for automatic code generation.
-	 *  \warning Experimental. */
+	/** \note Applicable only for automatic code generation. */
 	returnValue minimizeLSQ(	const DMatrix& S,	/**< a weighting matrix */
-								const Function& h			/**< the LSQ-Function   */ );
+								const Function& h	/**< the LSQ-Function   */ );
 
-	returnValue minimizeLSQ(	const DMatrix& S,	/**< a weighting matrix */
-								const std::string& h				/**< the externally defined LSQ-Function   */ );
+	/** \note Applicable only for automatic code generation. */
+	returnValue minimizeLSQ(	const DMatrix& S,		/**< a weighting matrix */
+								const std::string& h	/**< the externally defined LSQ-Function   */ );
 	/** @} */
-
 
 	/** \name Least Squares end terms.
 	 *
@@ -248,27 +228,29 @@ public:
 	 *  \return SUCCESSFUL_RETURN
 	 *
 	 *  @{ */
-	returnValue minimizeLSQEndTerm( const DMatrix   & S,  /**< a weighting matrix */
-									const Function & m,  /**< the LSQ-Function   */
-									const DVector   & r   /**< the reference      */ );
+	returnValue minimizeLSQEndTerm( const DMatrix  & S,	/**< a weighting matrix */
+									const Function & m,	/**< the LSQ-Function   */
+									const DVector  & r	/**< the reference      */ );
 
-	returnValue minimizeLSQEndTerm( const Function & m,  /**< the LSQ-Function   */
-									const DVector   & r   /**< the reference      */ );
+	returnValue minimizeLSQEndTerm( const Function & m,	/**< the LSQ-Function   */
+									const DVector  & r	/**< the reference      */ );
 
-	/** \note Applicable only for automatic code generation.
-	 *  \warning This function will be deprecated in the next release.
-	 */
-	returnValue minimizeLSQEndTerm(	const DMatrix &S		/**< a weighting matrix for differential states */ );
+	/** \note Applicable only for automatic code generation. */
+	returnValue minimizeLSQEndTerm(	const DMatrix& S,		/**< a weighting matrix */
+									const Function& m		/**< the LSQ-Function   */ );
 
-	/** \note Applicable only for automatic code generation.
-	 *  \warning Experimental. */
-	returnValue minimizeLSQEndTerm(	const DMatrix& S,	/**< a weighting matrix */
-									const Function& m			/**< the LSQ-Function   */ );
+	/** \note Applicable only for automatic code generation. */
+	returnValue minimizeLSQEndTerm(	const DMatrix& S,		/**< a weighting matrix */
+									const std::string& m	/**< the externally defined LSQ-Function   */ );
+	/** @} */
 
-	/** \note Applicable only for automatic code generation.
-	 *  \warning Experimental. */
-	returnValue minimizeLSQEndTerm(	const DMatrix& S,	/**< a weighting matrix */
-									const std::string& m				/**< the externally defined LSQ-Function   */ );
+	/** \name Set linear terms in the LSQ formulation.
+	 *  @{ */
+
+	/** Applicable only for automatic code generation.
+	 *  \note Experimental. */
+	returnValue minimizeLSQLinearTerms(	const DVector& Slx,	/**< a weighting vector for differential states. */
+										const DVector& Slu	/**< a weighting vector for controls. */ );
 	/** @} */
 
 	/** Adds an differential equation (as a continuous equality constraint). \n
@@ -358,7 +340,7 @@ public:
 
 	/** Returns whether the ocp grid is equidistant.
 	 *
-	 * \return BT_TRUE  iff the OCP grid is equidistant, BT_FALSE otherwise.
+	 * \return true  iff the OCP grid is equidistant, false otherwise.
 	 */
 	virtual BooleanType hasEquidistantGrid( ) const;
 
@@ -366,39 +348,19 @@ public:
 	double getEndTime( ) const;
 	/** @} */
 
-	/** \name Set linear terms in the LSQ formulation.
-	 *
-	 *  @{ */
-
-	/** Applicable only for automatic code generation.
-	 *  \note Experimental. */
-	returnValue minimizeLSQLinearTerms(	const DVector& Slx,	/**< a weighting vector for differential states. */
-										const DVector& Slu	/**< a weighting vector for controls. */ );
-
-	/** Applicable only for automatic code generation.
-	 *  \note Experimental. */
-	returnValue minimizeLSQLinearTerms(	const DMatrix& Slx,	/**< a weighting vector for differential states. */
-										const DMatrix& Slu	/**< a weighting vector for controls. */ );
-	/** @} */
-
 protected:
 
 	void setupGrid( double tStart, double tEnd, int N );
 	void setupGrid( const DVector& times );
-	void copy( const OCP &rhs );
 
-protected:
-
-	Grid		grid;		/**< Common discretization grid. */
-	Objective	objective;	/**< The Objective. */
-	Constraint	constraint;	/**< The Constraints. */
+	/** Common discretization grid. */
+	Grid grid;
+	/** The Objective. */
+	Objective objective;
+	/** The Constraints. */
+	Constraint constraint;
 };
 
-
 CLOSE_NAMESPACE_ACADO
-
-
-#include <acado/ocp/ocp.ipp>
-#include <acado/ocp/nlp.hpp>
 
 #endif  // ACADO_TOOLKIT_OCP_HPP
