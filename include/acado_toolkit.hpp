@@ -47,3 +47,5 @@
 #include <acado/noise/noise.hpp>
 #include <acado/transfer_device/actuator.hpp>
 #include <acado/transfer_device/sensor.hpp>
+
+#include <acado/code_generation/code_generation.hpp>

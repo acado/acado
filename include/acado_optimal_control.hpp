@@ -40,9 +40,8 @@
 #include <acado/nlp_solver/nlp_solver.hpp>
 #include <acado/nlp_solver/scp_method.hpp>
 #include <acado/ocp/ocp.hpp>
+#include <acado/ocp/nlp.hpp>
 #include <acado/optimization_algorithm/optimization_algorithm.hpp>
 #include <acado/optimization_algorithm/real_time_algorithm.hpp>
 #include <acado/optimization_algorithm/parameter_estimation_algorithm.hpp>
 #include <acado/optimization_algorithm/multi_objective_algorithm.hpp>
-
-//#include <acado/code_generation/code_generation.hpp>
