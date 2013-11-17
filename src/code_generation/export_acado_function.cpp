@@ -128,7 +128,10 @@ returnValue ExportAcadoFunction::exportCode(	std::ostream& stream,
 												int _precision
 												) const
 {
-	return f->exportCode(stream, name.c_str(), _realString.c_str(), numX, numXA, numU, numP, numDX);
+	return f->exportCode(
+			stream, name.c_str(), _realString.c_str(), numX, numXA, numU, numP, numDX,
+			// TODO: Here we allocate local memory for the function, this should be extended.
+			false, false);
 }
 
 
