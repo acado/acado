@@ -970,12 +970,8 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 		auxVarIndividualNames[ lhs_comp[ run1 ] ] = ss.str();
 	}
 
-	std::streamsize precision = stream.precision();
-	std::streamsize width = stream.width();
-	std::ios_base::fmtflags flags = stream.flags();
-
-	stream.precision( 16 );
-	stream << scientific;
+	IoFormatter iof( stream );
+	iof.set(16, iof.width, ios::scientific);
 
 	// Export intermediate quantities
 	for (run1 = 0; run1 < n; run1++)
@@ -996,9 +992,7 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 		stream << "out[" << run1 << "] = " << *f[ run1 ] << ";" << endl;
 	}
 
-	stream.precision(precision);
-	stream.width(width);
-	stream.flags(flags);
+	iof.reset();
 
 	stream << "}" << endl << endl;
 
