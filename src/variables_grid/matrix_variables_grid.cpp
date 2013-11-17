@@ -721,7 +721,7 @@ returnValue MatrixVariablesGrid::print(	std::ostream& stream,
 		if (colSeparator != NULL && strlen(colSeparator) > 0)
 			stream << colSeparator;
 
-		values[k]->print(stream, 0, 0, 0, width, precision, colSeparator, colSeparator);
+		values[k]->print(stream, "", "", "", width, precision, colSeparator, colSeparator);
 
 		if (k < (getNumPoints() - 1) && rowSeparator != NULL && strlen(rowSeparator) > 0)
 			stream << rowSeparator;

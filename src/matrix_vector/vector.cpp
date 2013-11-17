@@ -101,54 +101,50 @@ T GenericVector< T >::getNorm(	VectorNorm _norm,
 
 template<typename T>
 returnValue GenericVector<T>::print(	std::ostream& stream,
-										const char* const name,
-										const char* const startString,
-										const char* const endString,
+										const std::string& name,
+										const std::string& startString,
+										const std::string& endString,
 										uint width,
 										uint precision,
-										const char* const colSeparator,
-										const char* const rowSeparator
+										const std::string& colSeparator,
+										const std::string& rowSeparator
 										) const
 {
-	if (name != NULL && strlen( name ) > 0)
+	IoFormatter iof( stream );
+
+	if (name.size())
 		stream << name << " = ";
 
-	if (startString != NULL && strlen(startString) > 0)
-		stream << startString;
+	stream << startString;
 
-	if (precision > 0)
-		stream << setw( width ) << setprecision( precision ) << scientific;
-	else
-		stream << setw( width );
+	iof.set(precision > 0 ? precision : iof.precision, width, precision > 0 ? ios::scientific : iof.flags);
 
 	for (unsigned i = 0; i < getDim(); ++i)
 	{
-		if (precision > 0)
-			stream << Base::operator()( i );
-		else
-			stream << (int)Base::operator()( i );
+		stream << Base::operator()( i );
 
-		if (i < (getDim() - 1) && rowSeparator != NULL && strlen( rowSeparator ) > 0)
+		if (i < (getDim() - 1))
 			stream << rowSeparator;
 	}
-	if (endString != NULL && strlen(endString) > 0)
-		stream << endString;
+	stream << endString;
+
+	iof.reset();
 
 	return SUCCESSFUL_RETURN;
 }
 
 template<typename T>
-returnValue GenericVector<T>::print(	const char* const filename,
-										const char* const name,
-										const char* const startString,
-										const char* const endString,
+returnValue GenericVector<T>::print(	const std::string& filename,
+										const std::string& name,
+										const std::string& startString,
+										const std::string& endString,
 										uint width,
 										uint precision,
-										const char* const colSeparator,
-										const char* const rowSeparator
+										const std::string& colSeparator,
+										const std::string& rowSeparator
 										) const
 {
-	ofstream stream( filename );
+	ofstream stream( filename.c_str() );
 
 	if ( stream.is_open() )
 		return print(stream, name, startString, endString, width, precision,
@@ -163,7 +159,7 @@ returnValue GenericVector<T>::print(	const char* const filename,
 
 template<typename T>
 returnValue GenericVector<T>::print(	std::ostream& stream,
-										const char* const name,
+										const std::string& name,
 										PrintScheme printScheme
 										) const
 {
@@ -174,7 +170,7 @@ returnValue GenericVector<T>::print(	std::ostream& stream,
 	case PS_MATLAB_BINARY:
 		matFile = new MatFile<T>;
 
-		matFile->write(stream, *this, name);
+		matFile->write(stream, *this, name.c_str());
 
 		delete matFile;
 
@@ -209,12 +205,12 @@ returnValue GenericVector<T>::print(	std::ostream& stream,
 }
 
 template<typename T>
-returnValue GenericVector<T>::print(	const char* const filename,
-										const char* const name,
+returnValue GenericVector<T>::print(	const std::string& filename,
+										const std::string& name,
 										PrintScheme printScheme
 										) const
 {
-	ofstream stream( filename );
+	ofstream stream( filename.c_str() );
 	returnValue status;
 
 	if ( stream.is_open() )
@@ -239,10 +235,10 @@ returnValue GenericVector<T>::read( std::istream& stream )
 }
 
 template<typename T>
-returnValue GenericVector<T>::read(	const char* const filename
-										)
+returnValue GenericVector<T>::read(	const std::string& filename
+									)
 {
-	ifstream stream( filename );
+	ifstream stream( filename.c_str() );
 	returnValue status;
 
 	if (stream.is_open())

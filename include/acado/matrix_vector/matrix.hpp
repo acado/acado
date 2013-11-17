@@ -336,14 +336,14 @@ public:
 	 *          RET_FILE_CAN_NOT_BE_OPENED, \n
 	 *          RET_UNKNOWN_BUG
 	 */
-	virtual returnValue print(	std::ostream& _stream           = std::cout,
-								const char* const _name         = DEFAULT_LABEL,
-								const char* const _startString  = DEFAULT_START_STRING,
-								const char* const _endString    = DEFAULT_END_STRING,
-								uint _width                     = DEFAULT_WIDTH,
-								uint _precision                 = DEFAULT_PRECISION,
-								const char* const _colSeparator = DEFAULT_COL_SEPARATOR,
-								const char* const _rowSeparator = DEFAULT_ROW_SEPARATOR
+	virtual returnValue print(	std::ostream& _stream            = std::cout,
+								const std::string& _name         = DEFAULT_LABEL,
+								const std::string& _startString  = DEFAULT_START_STRING,
+								const std::string& _endString    = DEFAULT_END_STRING,
+								uint _width                      = DEFAULT_WIDTH,
+								uint _precision                  = DEFAULT_PRECISION,
+								const std::string& _colSeparator = DEFAULT_COL_SEPARATOR,
+								const std::string& _rowSeparator = DEFAULT_ROW_SEPARATOR
 								) const;
 
 	/** Prints object to given file. Various settings can
@@ -358,7 +358,7 @@ public:
 	 *          RET_UNKNOWN_BUG
 	 */
 	virtual returnValue print(	std::ostream& stream,
-								const char* const name,
+								const std::string& name,
 								PrintScheme printScheme
 								) const;
 
@@ -378,14 +378,14 @@ public:
 	 *          RET_FILE_CAN_NOT_BE_OPENED, \n
 	 *          RET_UNKNOWN_BUG
 	 */
-	virtual returnValue print(	const char* const _filename,
-								const char* const _name         = DEFAULT_LABEL,
-								const char* const _startString  = DEFAULT_START_STRING,
-								const char* const _endString    = DEFAULT_END_STRING,
-								uint _width                     = DEFAULT_WIDTH,
-								uint _precision                 = DEFAULT_PRECISION,
-								const char* const _colSeparator = DEFAULT_COL_SEPARATOR,
-								const char* const _rowSeparator = DEFAULT_ROW_SEPARATOR
+	virtual returnValue print(	const std::string& _filename,
+								const std::string& _name         = DEFAULT_LABEL,
+								const std::string& _startString  = DEFAULT_START_STRING,
+								const std::string& _endString    = DEFAULT_END_STRING,
+								uint _width                      = DEFAULT_WIDTH,
+								uint _precision                  = DEFAULT_PRECISION,
+								const std::string& _colSeparator = DEFAULT_COL_SEPARATOR,
+								const std::string& _rowSeparator = DEFAULT_ROW_SEPARATOR
 								) const;
 
 	/** Prints object to given file. Various settings can
@@ -399,8 +399,8 @@ public:
 	 *          RET_FILE_CAN_NOT_BE_OPENED, \n
 	 *          RET_UNKNOWN_BUG
 	 */
-	virtual returnValue print(	const char* const _filename,
-								const char* const _name,
+	virtual returnValue print(	const std::string& _filename,
+								const std::string& _name,
 								PrintScheme _printScheme
 								) const;
 
@@ -409,7 +409,7 @@ public:
 								);
 
 	/** Read data from an input file. */
-	virtual returnValue read(	const char* const _filename
+	virtual returnValue read(	const std::string& _filename
 								);
 };
 

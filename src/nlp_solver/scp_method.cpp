@@ -856,8 +856,7 @@ returnValue SCPmethod::printIteration( )
 
 		DMatrix foo;
 
-		// Get cout flags
-		ios::fmtflags f( cout.flags() );
+		IoFormatter iof( cout );
 
 		getLast(LOG_NUM_SQP_ITERATIONS, foo);
 		cout << setw( 6 ) << right << (int) foo(0, 0) << " | ";
@@ -874,7 +873,7 @@ returnValue SCPmethod::printIteration( )
 		cout << endl;
 
 		// Restore cout flags
-		cout.flags( f );
+		iof.reset();
 	}
 
 	replot( PLOT_AT_EACH_ITERATION );

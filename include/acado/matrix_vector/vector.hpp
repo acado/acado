@@ -224,14 +224,14 @@ public:
 	 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 	 *	        RET_UNKNOWN_BUG
 	 */
-	virtual returnValue print(	std::ostream& stream           = std::cout,
-								const char* const name         = DEFAULT_LABEL,
-								const char* const startString  = DEFAULT_START_STRING,
-								const char* const endString    = DEFAULT_END_STRING,
-								uint width                     = DEFAULT_WIDTH,
-								uint precision                 = DEFAULT_PRECISION,
-								const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-								const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
+	virtual returnValue print(	std::ostream& stream            = std::cout,
+								const std::string& name         = DEFAULT_LABEL,
+								const std::string& startString  = DEFAULT_START_STRING,
+								const std::string& endString    = DEFAULT_END_STRING,
+								uint width                      = DEFAULT_WIDTH,
+								uint precision                  = DEFAULT_PRECISION,
+								const std::string& colSeparator = DEFAULT_COL_SEPARATOR,
+								const std::string& rowSeparator = DEFAULT_ROW_SEPARATOR
 								) const;
 
 	/** Prints object to file with given name. Various settings can
@@ -250,14 +250,14 @@ public:
 	 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 	 *	        RET_UNKNOWN_BUG
 	 */
-	virtual returnValue print(	const char* const filename,
-								const char* const name         = DEFAULT_LABEL,
-								const char* const startString  = DEFAULT_START_STRING,
-								const char* const endString    = DEFAULT_END_STRING,
-								uint width                     = DEFAULT_WIDTH,
-								uint precision                 = DEFAULT_PRECISION,
-								const char* const colSeparator = DEFAULT_COL_SEPARATOR,
-								const char* const rowSeparator = DEFAULT_ROW_SEPARATOR
+	virtual returnValue print(	const std::string& filename,
+								const std::string& name         = DEFAULT_LABEL,
+								const std::string& startString  = DEFAULT_START_STRING,
+								const std::string& endString    = DEFAULT_END_STRING,
+								uint width                      = DEFAULT_WIDTH,
+								uint precision                  = DEFAULT_PRECISION,
+								const std::string& colSeparator = DEFAULT_COL_SEPARATOR,
+								const std::string& rowSeparator = DEFAULT_ROW_SEPARATOR
 								) const;
 
 	/** Prints object to given file. Various settings can
@@ -272,7 +272,7 @@ public:
 	 *	        RET_UNKNOWN_BUG
 	 */
 	virtual returnValue print(	std::ostream& stream,
-								const char* const name,
+								const std::string& name,
 								PrintScheme printScheme
 								) const;
 
@@ -287,8 +287,8 @@ public:
 	 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 	 *	        RET_UNKNOWN_BUG
 	 */
-	virtual returnValue print(	const char* const filename,
-								const char* const name,
+	virtual returnValue print(	const std::string& filename,
+								const std::string& name,
 								PrintScheme printScheme
 								) const;
 
@@ -297,7 +297,7 @@ public:
 								);
 
 	/** Read data from an input file. */
-	virtual returnValue read(	const char* const filename
+	virtual returnValue read(	const std::string& filename
 								);
 };
 

@@ -244,51 +244,48 @@ T GenericMatrix< T >::getConditionNumber() const
 
 template<typename T>
 returnValue GenericMatrix< T >::print(	std::ostream& _stream,
-										const char* const _name,
-										const char* const _startString,
-										const char* const _endString,
+										const std::string& _name,
+										const std::string& _startString,
+										const std::string& _endString,
 										uint _width,
 										uint _precision,
-										const char* const _colSeparator,
-										const char* const _rowSeparator
+										const std::string& _colSeparator,
+										const std::string& _rowSeparator
 										) const
 {
-	if (_name != NULL && strlen(_name) > 0)
+	IoFormatter iof( _stream );
+
+	if (_name.size())
 		_stream << _name << " = ";
 
-	if (_startString != NULL && strlen(_startString) > 0)
-		_stream << _startString;
+	_stream << _startString;
 
-	if (_precision > 0)
-		_stream << scientific << setw( _width ) << setprecision( _precision );
-	else
-		_stream << setw( _width );
+	iof.set(_precision > 0 ? _precision : iof.precision, _width, _precision > 0 ? ios::scientific | ios::right : iof.flags);
 
 	for (unsigned r = 0; r < Base::rows(); ++r)
 	{
 		for (unsigned c = 0; c < Base::cols(); ++c)
 		{
-			if (_precision > 0)
-				_stream << Base::operator()(r, c);
-			else
-				_stream << (int)Base::operator()(r, c);
+			_stream << Base::operator()(r, c);
 
-			if (c < (Base::cols() - 1) && _colSeparator != NULL && strlen(_colSeparator) > 0)
+			if (c < (Base::cols() - 1))
 				_stream << _colSeparator;
 		}
 
-		if (r < (Base::rows() - 1) && _rowSeparator != NULL && strlen(_rowSeparator) > 0)
+		if (r < (Base::rows() - 1))
 			_stream << _rowSeparator;
 	}
-	if (_endString != NULL && strlen(_endString) > 0)
-		_stream << _endString;
+
+	_stream << _endString;
+
+	iof.reset();
 
 	return SUCCESSFUL_RETURN;
 }
 
 template<typename T>
 returnValue GenericMatrix< T >::print(	std::ostream& _stream,
-										const char* const _name,
+										const std::string& _name,
 										PrintScheme _printScheme
 										) const
 {
@@ -299,7 +296,7 @@ returnValue GenericMatrix< T >::print(	std::ostream& _stream,
 	case PS_MATLAB_BINARY:
 		matFile = new MatFile<T>();
 
-		matFile->write(_stream, *this, _name);
+		matFile->write(_stream, *this, _name.c_str());
 
 		delete matFile;
 
@@ -331,17 +328,17 @@ returnValue GenericMatrix< T >::print(	std::ostream& _stream,
 }
 
 template<typename T>
-returnValue GenericMatrix<T>::print(	const char* const _filename,
-									const char* const _name,
-									const char* const _startString,
-									const char* const _endString,
-									uint _width,
-									uint _precision,
-									const char* const _colSeparator,
-									const char* const _rowSeparator
-									) const
+returnValue GenericMatrix<T>::print(	const std::string& _filename,
+										const std::string& _name,
+										const std::string& _startString,
+										const std::string& _endString,
+										uint _width,
+										uint _precision,
+										const std::string& _colSeparator,
+										const std::string& _rowSeparator
+										) const
 {
-	ofstream stream( _filename );
+	ofstream stream( _filename.c_str() );
 
 	if ( stream.is_open() )
 		return print(stream, _name, _startString, _endString, _width, _precision,
@@ -355,12 +352,12 @@ returnValue GenericMatrix<T>::print(	const char* const _filename,
 }
 
 template<typename T>
-returnValue GenericMatrix< T >::print(	const char* const _filename,
-							const char* const _name,
-							PrintScheme _printScheme
-							) const
+returnValue GenericMatrix< T >::print(	const std::string& _filename,
+										const std::string& _name,
+										PrintScheme _printScheme
+										) const
 {
-	ofstream stream( _filename );
+	ofstream stream( _filename.c_str() );
 	returnValue status;
 
 	if ( stream.is_open() )
@@ -398,9 +395,9 @@ returnValue GenericMatrix< T >::read( std::istream& _stream )
 }
 
 template<typename T>
-returnValue GenericMatrix< T >::read(const char* _filename)
+returnValue GenericMatrix< T >::read(const std::string& _filename)
 {
-	ifstream stream( _filename );
+	ifstream stream( _filename.c_str() );
 	returnValue status;
 
 	if (stream.is_open())

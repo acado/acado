@@ -212,6 +212,33 @@ string toString(T const& value)
     return ss.str();
 }
 
+/** I/O formatter */
+struct IoFormatter
+{
+	IoFormatter( ostream& _stream )
+		: stream( _stream ), precision( _stream.precision() ), width( _stream.width() ), flags( _stream.flags() )
+	{}
+
+	void set( streamsize _precision, streamsize _width, ios_base::fmtflags _flags)
+	{
+		stream.precision( _precision );
+		stream.width( _width );
+		stream.setf( _flags );
+	}
+
+	void reset()
+	{
+		stream.precision( precision );
+		stream.width( width );
+		stream.setf( flags );
+	}
+
+	ostream& stream;
+	streamsize precision;
+	streamsize width;
+	ios_base::fmtflags flags;
+};
+
 } // namespace std
 
 #endif	// ACADO_TOOLKIT_ACADO_IO_UTILS_HPP
