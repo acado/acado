@@ -359,7 +359,7 @@ returnValue ExportFunction::exportCode(	std::ostream& stream,
 	//
 	// Copy temporary file to main file, and close te temporary file aftwarards
 	//
-	stream << ss;
+	stream << ss.str();
 
 	//
 	// Finish the export of the function
