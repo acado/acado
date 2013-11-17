@@ -31,7 +31,6 @@
  *    \date 2011 - 2012
  */
 
-
 #include <acado/code_generation/export_index.hpp>
 #include <acado/code_generation/export_argument.hpp>
 #include <acado/code_generation/export_index_node.hpp>
@@ -281,7 +280,26 @@ ExportArgument ExportIndex::makeArgument( ) const
 	// To be able to simplify function calls.
 
 	if (isGiven() == true)
-		tmpName = getGivenValue();
+		tmpName = std::toString(getGivenValue());
+	else
+		tmpName = (*this)->getName();
+
+	ExportArgument tmp(tmpName, 1 , 1, (*this)->getType(), ACADO_LOCAL, true, emptyConstExportIndex);
+	tmp.setDoc( getDoc() );
+
+	return tmp;
+}
+
+ExportIndex::operator ExportArgument()
+{
+	std::string tmpName;
+
+	// In principle, this is an ugly hack. In case when an index is given,
+	// We give it a name which is equal to its value. This is done in order
+	// To be able to simplify function calls.
+
+	if (isGiven() == true)
+		tmpName = std::toString(getGivenValue());
 	else
 		tmpName = (*this)->getName();
 

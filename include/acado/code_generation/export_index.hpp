@@ -72,6 +72,8 @@ public:
 
 	const ExportIndexNode* operator->() const;
 
+	operator ExportArgument();
+
 	friend ExportIndex operator+(	const ExportIndex& _arg1,
 									const ExportIndex& _arg2
 									);
