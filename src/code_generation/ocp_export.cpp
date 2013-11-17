@@ -174,7 +174,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	get(GENERATE_TEST_FILE, generateTestFile);
 	string testFileName = dirName + "/test.c";
 	if ((bool) generateTestFile == true)
-		acadoCopyTempateFile(DUMMY_TEST_FILE, testFileName, 0, true);
+		acadoCopyTempateFile(DUMMY_TEST_FILE, testFileName, "", true);
 
 	//
 	// Generate MATLAB MEX interface
@@ -185,7 +185,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	{
 		str = dirName + "/" + getName() + "_solver_mex.c";
 
-		acadoCopyTempateFile(SOLVER_MEX, str, 0, true);
+		acadoCopyTempateFile(SOLVER_MEX, str, "", true);
 
 		str = dirName + "/make_" + getName() + "_solver.m";
 
