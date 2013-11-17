@@ -944,7 +944,7 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 
     if (n > 0)
     {
-    	stream << "/* DVector of auxiliary variables; number of elements: " << n << ". */" << endl;
+    	stream << "/* Vector of auxiliary variables; number of elements: " << n << ". */" << endl;
 
     	if ( allocateMemory )
     	{
@@ -955,8 +955,8 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
     		stream << realString << " a[" << n << "];";
     	}
     	else
-    		stream << realString << " a = " << globalExportVariableName << ";";
-    	cout << endl << endl;
+    		stream << realString << "* a = " << globalExportVariableName << ";";
+    	stream << endl << endl;
 
     	stream << "/* Compute intermediate quantities: */" << endl;
     }
@@ -969,6 +969,13 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 		ss << "a" << "[" << run1 << "]";
 		auxVarIndividualNames[ lhs_comp[ run1 ] ] = ss.str();
 	}
+
+	std::streamsize precision = stream.precision();
+	std::streamsize width = stream.width();
+	std::ios_base::fmtflags flags = stream.flags();
+
+	stream.precision( 16 );
+	stream << scientific;
 
 	// Export intermediate quantities
 	for (run1 = 0; run1 < n; run1++)
@@ -988,6 +995,10 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 
 		stream << "out[" << run1 << "] = " << *f[ run1 ] << ";" << endl;
 	}
+
+	stream.precision(precision);
+	stream.width(width);
+	stream.flags(flags);
 
 	stream << "}" << endl << endl;
 

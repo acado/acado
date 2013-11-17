@@ -31,20 +31,12 @@
  *    \date 2008 - 2013
  */
 
-
 #ifndef ACADO_TOOLKIT_FUNCTION_EVALUATION_TREE_HPP
 #define ACADO_TOOLKIT_FUNCTION_EVALUATION_TREE_HPP
 
-
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 
-
-
 BEGIN_NAMESPACE_ACADO
-
-
-class ExportVariable;
-
 
 /** 
  *	\brief Organizes the evaluation of the function tree.
@@ -433,8 +425,6 @@ public:
 								bool       allocateMemory = true,
 								bool       staticMemory   = false
 								) const;
-
-     ExportVariable getGlobalExportVariable( ) const;
 
      /** Clears the buffer and resets the buffer size \n
       *  to 1.                                        \n
