@@ -341,26 +341,20 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	vector<std::string> lsqExternFunctions;
-	vector<ExportVariable> lsqExternMatrices;
+	LsqExternElements lsqExternElements;
+	_objective.getLSQTerms( lsqExternElements );
 
-//	_objective.getLSQTerms(lsqExternMatrices, lsqExternFunctions);
+	LsqExternElements lsqExternEndTermElements;
+	_objective.getLSQTerms( lsqExternEndTermElements );
 
-	vector<std::string> lsqExternEndTermFunctions;
-	vector<ExportVariable> lsqExternEndTermMatrices;
-
-//	_objective.getLSQEndTerms(lsqExternEndTermMatrices, lsqExternEndTermFunctions);
-
-	if (lsqExternMatrices.size() > 0 || lsqExternEndTermMatrices.size() > 0)
+	if (lsqExternElements.size() > 0 || lsqExternEndTermElements.size() > 0)
 	{
-		if (lsqExternMatrices.size() != lsqExternEndTermMatrices.size())
-			return ACADOERROR( RET_INVALID_ARGUMENTS );
-		if (lsqExternMatrices.size() > 1 || lsqExternEndTermMatrices.size() > 1)
+		if (lsqExternElements.size() != 1 || lsqExternEndTermElements.size() != 1)
 			return ACADOERROR( RET_INVALID_ARGUMENTS );
 
-		objSTemp = lsqExternMatrices[ 0 ];
+		objSTemp = lsqExternElements[ 0 ].W;
 		objSTemp.setDataStruct( ACADO_VARIABLES );
-		objSEndTermTemp = lsqExternEndTermMatrices[ 0 ];
+		objSEndTermTemp = lsqExternEndTermElements[ 0 ].W;
 		objSEndTermTemp.setDataStruct( ACADO_VARIABLES );
 
 		if (objSTemp.getGivenMatrix().isSquare() == false ||
@@ -381,8 +375,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		objSEndTerm = CasADi::deepcopy( objSEndTermTemp );
 		objSEndTerm.setName( "WN" );
 
-		evaluateExternLSQ = lsqExternFunctions[ 0 ];
-		evaluateExternLSQEndTerm = lsqExternEndTermFunctions[ 0 ];
+		evaluateExternLSQ = lsqExternElements[ 0 ].h;
+		evaluateExternLSQEndTerm = lsqExternEndTermElements[ 0 ].h;
 
 		// ExportVariable objEvFx, objEvFu, objEvFxEnd; // aliasing
 
@@ -416,31 +410,27 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	vector<Function> lsqFunctions;
-	vector<ExportVariable> lsqMatrices;
-
-	vector<Function> lsqEndTermFunctions;
-	vector<ExportVariable> lsqEndTermMatrices;
-
 	Function objF, objFEndTerm;
 
-//	_objective.getLSQTerms(lsqMatrices, lsqFunctions);
+	LsqElements lsqElements;
+	LsqElements lsqEndTermElements;
 
-	if(	lsqFunctions.size() == 0 || lsqMatrices.size() == 0 ||
-			lsqFunctions.size() != lsqMatrices.size() )
+	_objective.getLSQTerms( lsqElements );
+
+	if(	lsqElements.size() == 0 )
 		return ACADOERRORTEXT(RET_INITIALIZE_FIRST, "Objective function is not initialized.");
 
-	else if (lsqFunctions.size() > 1 || lsqEndTermFunctions.size() > 1)
+	else if (lsqElements.size() > 1)
 		return ACADOERRORTEXT(RET_INITIALIZE_FIRST,
 				"Current implementation of code generation module\n"
 				"supports only one LSQ term definition per one OCP." );
 
-//	_objective.getLSQEndTerms(lsqEndTermMatrices, lsqEndTermFunctions);
+	_objective.getLSQEndTerms( lsqEndTermElements );
 
-	objF = lsqFunctions[ 0 ];
+	objF = lsqElements[ 0 ].h;
 	setNY( objF.getDim() );
 
-	objSTemp = lsqMatrices[ 0 ];
+	objSTemp = lsqElements[ 0 ].W;
 
 	if (objSTemp.getNumCols() != objSTemp.getNumRows())
 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Weighting matrices must be square.");
@@ -638,13 +628,11 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	if ( lsqEndTermFunctions.size() == 0 )
-		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost must be defined for MHE export");
-	if (lsqEndTermFunctions.size() != lsqEndTermMatrices.size())
-		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "Dimensions of the terminal cost function and the terminal cost weighting matrix must be the same");
+	if ( lsqEndTermElements.size() == 0 )
+		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost must be defined");
 
-	objSEndTermTemp = lsqEndTermMatrices[ 0 ];
-	objFEndTerm = lsqEndTermFunctions[ 0 ];
+	objSEndTermTemp = lsqEndTermElements[ 0 ].W;
+	objFEndTerm = lsqEndTermElements[ 0 ].h;
 
 	if (objFEndTerm.getNU() > 0)
 		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost function must not depend on controls.");
