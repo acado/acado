@@ -98,16 +98,16 @@ ENDFOREACH( SRC ${SOURCES} )
 #
 ################################################################################
 
-ACADO_GENERATE_COMPILE(
-	# Target name
-	code_generation_crane_kul_mhe
-	# Code export folder name
-	crane_kul_mhe_export
-	# Test file source name
-	crane_kul_mhe_test.cpp
-)
+#ACADO_GENERATE_COMPILE(
+#	# Target name
+#	code_generation_crane_kul_mhe
+#	# Code export folder name
+#	crane_kul_mhe_export
+#	# Test file source name
+#	crane_kul_mhe_test.cpp
+#)
 
-ACADO_GENERATE_COMPILE( code_generation_pendulum_dae_nmpc pendulum_dae_nmpc_export pendulum_dae_nmpc_test.cpp )
+#ACADO_GENERATE_COMPILE( code_generation_pendulum_dae_nmpc pendulum_dae_nmpc_export pendulum_dae_nmpc_test.cpp )
 
 ################################################################################
 #
@@ -115,4 +115,4 @@ ACADO_GENERATE_COMPILE( code_generation_pendulum_dae_nmpc pendulum_dae_nmpc_expo
 #
 ################################################################################
 
-ADD_SUBDIRECTORY( crane_closed_loop )
+# ADD_SUBDIRECTORY( crane_closed_loop )

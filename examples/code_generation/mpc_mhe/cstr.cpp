@@ -94,7 +94,7 @@ int main()
 
 	// Define a Right-Hand-Side:
 	DifferentialState cA, cB, theta, thetaK;
-	Control           u( 2 );
+	Control           u("", 2, 1);
 
 	DifferentialEquation f;
 
