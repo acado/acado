@@ -168,7 +168,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	//
 
 	// \todo Move to something like: setupInitialization
-	ExportVariable retInit("ret", 1, 1, INT, ACADO_LOCAL);
+	ExportVariable retInit("ret", 1, 1, INT, ACADO_LOCAL, true);
 	retInit.setDoc("=0: OK, otherwise an error code of a QP solver.");
 	initialize.setup( "initializeSolver" );
 	initialize.doc( "Solver initialization. Must be called once before any other function call." );
@@ -1169,7 +1169,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	strategy.setDoc( string("Shifting strategy: 1. Initialize node ") + toString(N + 1) + " with xEnd." \
 			" 2. Initialize node " + toString(N + 1) + " by forward simulation." );
 	// TODO Think about adding zEnd here at some point...
-	shiftStates.setup("shiftStates", strategy.makeArgument(), xEnd, uEnd);
+	shiftStates.setup("shiftStates", strategy, xEnd, uEnd);
 	shiftStates.addIndex( index );
 	if (NXA == 0)
 		shiftStates.doc( "Shift differential variables vector by one interval." );

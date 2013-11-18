@@ -244,7 +244,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 					if ( rhs2->isZero(i,j) == false )
 						stream << _sign << " " << rhs2->get(i, j) << ";\n";
 					else
-						stream << endl;
+						stream << ";" << endl;
 				}
 				else
 				{
@@ -624,13 +624,12 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 					stream << lhs->get(i, j) << " " << _op << " ";
 					if (rhs1->isGiven() == true)
 					{
-						stream << scientific << rhs1(i, j);
+						stream << scientific << rhs1(i, j) << ";\n";
 					}
 					else
 					{
-						stream << rhs1->get(i, j);
+						stream << rhs1->get(i, j) << ";\n";
 					}
-					stream << ";" << endl;
 				}
 	}
 	else
