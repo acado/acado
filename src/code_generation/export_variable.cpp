@@ -111,15 +111,6 @@ void ExportVariable::simpleForward(const DMatrix& _value)
 	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( _value ))));
 }
 
-//ExportVariable::ExportVariable( const DMatrix& _data )
-//{
-//	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( _data ))));
-//}
-//
-//ExportVariable::ExportVariable( const DVector& _data )
-//{
-//	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( _data ))));
-//}
 
 ExportVariable::ExportVariable( const double _data )
 {
@@ -188,59 +179,36 @@ double ExportVariable::operator()(	uint rowIdx,
 									uint colIdx
 									) const
 {
-	return (*this)->data->operator()(rowIdx, colIdx);
+	return (*this)->getGivenMatrix()(rowIdx, colIdx);
 }
 
 
 double ExportVariable::operator()(	uint totalIdx
 									) const
 {
-	return (*this)->data->operator()(totalIdx / (*this)->data->getNumCols(), totalIdx % (*this)->data->getNumCols());
-}
-
-
-ExportVariable ExportVariable::operator()(	const std::string& _name
-											) const
-{
-	ExportVariable tmp = deepcopy( *this );
-
-	tmp.setName( _name );
-
-	return tmp;
-}
-
-
-returnValue ExportVariable::resetAll( )
-{
-	return (*this)->resetAll();
-}
-
-
-returnValue ExportVariable::resetDiagonal( )
-{
-	return (*this)->resetDiagonal();
+	return (*this)->getGivenMatrix()( totalIdx );
 }
 
 
 bool ExportVariable::isZero(	const ExportIndex& rowIdx,
-									const ExportIndex& colIdx
-									) const
+								const ExportIndex& colIdx
+								) const
 {
 	return (*this)->isZero(rowIdx, colIdx);
 }
 
 
 bool ExportVariable::isOne(	const ExportIndex& rowIdx,
-									const ExportIndex& colIdx
-									) const
+							const ExportIndex& colIdx
+							) const
 {
 	return (*this)->isOne(rowIdx, colIdx);
 }
 
 
 bool ExportVariable::isGiven(	const ExportIndex& rowIdx,
-										const ExportIndex& colIdx
-										) const
+								const ExportIndex& colIdx
+								) const
 {
 	return (*this)->isGiven(rowIdx, colIdx);
 }
@@ -253,8 +221,8 @@ bool ExportVariable::isGiven( ) const
 
 
 const std::string ExportVariable::get(	const ExportIndex& rowIdx,
-									const ExportIndex& colIdx
-									) const
+										const ExportIndex& colIdx
+										) const
 {
 	return (*this)->get(rowIdx, colIdx);
 }
@@ -485,7 +453,7 @@ bool ExportVariable::isVector( ) const
 }
 
 
-DMatrix ExportVariable::getGivenMatrix( ) const
+const DMatrix& ExportVariable::getGivenMatrix( ) const
 {
 	return (*this)->getGivenMatrix();
 }
@@ -494,15 +462,6 @@ DMatrix ExportVariable::getGivenMatrix( ) const
 returnValue ExportVariable::print( ) const
 {
 	return (*this)->print();
-}
-
-ExportVariable diag(	const std::string& _name,
-						unsigned int _n )
-{
-	ExportVariable t(_name, _n, _n);
-	t = eye( _n );
-	t.resetDiagonal( );
-	return t;
 }
 
 bool ExportVariable::isSubMatrix() const

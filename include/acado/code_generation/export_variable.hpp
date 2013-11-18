@@ -228,29 +228,6 @@ class ExportVariable : public ExportArgument
 		double operator()(	uint totalIdx
 							) const;
 
-		/** Returns a copy of the variable with given name.
-		 *
-		 *	@param[in] _name		New name of variable copy.
-		 *
-		 *	\return Copy of the variable with given name
-		 */
-		ExportVariable operator()(	const std::string& _name
-									) const;
-
-
-		/** Resets all components of the variable to be undefined.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue resetAll( );
-
-		/** Resets all diagonal components of the square variable to be undefined.
-		 *
-		 *	\return SUCCESSFUL_RETURN, \n
-		 *	        RET_MATRIX_NOT_SQUARE
-		 */
-		returnValue resetDiagonal( );
-
 		/** Returns whether given component is set to zero.
 		 *
 		 *	@param[in] rowIdx		Variable row index of the component.
@@ -538,7 +515,7 @@ class ExportVariable : public ExportArgument
 		 *
 		 *	\return Internal data matrix
 		 */
-		DMatrix getGivenMatrix( ) const;
+		const DMatrix& getGivenMatrix( ) const;
 
 		/** Check whether the matrix is actually a submatrix. */
 		bool isSubMatrix() const;
@@ -548,12 +525,6 @@ class ExportVariable : public ExportArgument
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue print( ) const;
-
-		/** Create a diagonal matrix variable.
-		 *
-		 *  \return A diagonal variable.
-		 * */
-		friend ExportVariable diag( const std::string& _name, unsigned int _n );
 
     private:
 		void simpleForward(const DMatrix& _value);

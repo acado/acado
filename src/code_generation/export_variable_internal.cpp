@@ -34,13 +34,9 @@
 #include <acado/code_generation/export_variable.hpp>
 #include <acado/code_generation/export_variable_internal.hpp>
 
-#include <sstream>
-#include <iomanip>
-
 BEGIN_NAMESPACE_ACADO
 
 using namespace std;
-
 
 static const double undefinedEntry = 1073741824.03125; // = 2^30 + 2^-5
 
@@ -92,44 +88,24 @@ ExportVariableInternal* ExportVariableInternal::clone() const
 	return new ExportVariableInternal( *this );
 }
 
-// TODO We do not need this any more!
-returnValue ExportVariableInternal::resetAll( )
-{
-	data->setAll( undefinedEntry );
-	return SUCCESSFUL_RETURN;
-}
-
-// TODO We do not need this any more!
-returnValue ExportVariableInternal::resetDiagonal( )
-{
-	if (getNumRows() != getNumCols())
-		return ACADOERROR( RET_MATRIX_NOT_SQUARE );
-
-	for (unsigned i = 0; i < getNumRows(); ++i)
-		data->operator()(i, i) = undefinedEntry;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
 bool ExportVariableInternal::isZero(	const ExportIndex& rowIdx,
-											const ExportIndex& colIdx
-											) const
+										const ExportIndex& colIdx
+										) const
 {
 	return hasValue(rowIdx, colIdx, 0.0);
 }
 
 bool ExportVariableInternal::isOne(	const ExportIndex& rowIdx,
-											const ExportIndex& colIdx
-											) const
+									const ExportIndex& colIdx
+									) const
 {
 	return hasValue(rowIdx, colIdx, 1.0);
 }
 
 
 bool ExportVariableInternal::isGiven(	const ExportIndex& rowIdx,
-												const ExportIndex& colIdx
-												) const
+										const ExportIndex& colIdx
+										) const
 {
 	if (hasValue(rowIdx, colIdx, undefinedEntry) == true)
 		return false;
@@ -398,19 +374,19 @@ ExportVariable ExportVariableInternal::makeColVector( ) const
 
 bool ExportVariableInternal::isVector( ) const
 {
-	if ( ( getNumRows( ) == 1 ) || ( getNumCols( ) == 1 ) )
+	if (getNumRows( ) == 1 || getNumCols( ) == 1)
 		return true;
 
 	return false;
 }
 
 
-DMatrix ExportVariableInternal::getGivenMatrix( ) const
+const DMatrix& ExportVariableInternal::getGivenMatrix( ) const
 {
 	if ( isGiven() == true )
-		return DMatrix( *data.get() );
+		return *data.get();
 
-	return DMatrix();
+	return emptyConstMatrix;
 }
 
 
@@ -479,9 +455,9 @@ returnValue ExportVariableInternal::setSubmatrixOffsets(	const ExportIndex& _row
 
 
 bool ExportVariableInternal::hasValue(	const ExportIndex& rowIdx,
-												const ExportIndex& colIdx,
-												double _value
-												) const
+										const ExportIndex& colIdx,
+										double _value
+										) const
 {
 	ExportIndex ind = getTotalIdx(rowIdx + rowOffset, colIdx + colOffset);
 	if (ind.isGiven() == true)

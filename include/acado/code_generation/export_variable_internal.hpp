@@ -37,7 +37,6 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_argument_internal.hpp>
 #include <acado/code_generation/export_index.hpp>
-#include <acado/code_generation/export_variable.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -63,8 +62,6 @@ class ExportArithmeticStatement;
 
 class ExportVariableInternal : public ExportArgumentInternal
 {
-	friend class ExportVariable;
-
 	//
     // PUBLIC MEMBER FUNCTIONS:
     //
@@ -101,19 +98,6 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	\return Pointer to cloned object.
 		 */
 		virtual ExportVariableInternal* clone() const;
-
-		/** Resets all components of the variable to be undefined.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue resetAll( );
-
-		/** Resets all diagonal components of the square variable to be undefined.
-		 *
-		 *	\return SUCCESSFUL_RETURN, \n
-		 *	        RET_MATRIX_NOT_SQUARE
-		 */
-		returnValue resetDiagonal( );
 
 		/** Returns whether given component is set to zero.
 		 *
@@ -271,7 +255,7 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *
 		 *	\return Internal data matrix
 		 */
-		DMatrix getGivenMatrix( ) const;
+		const DMatrix& getGivenMatrix( ) const;
 
 
 		/** Prints contents of variable to screen.
@@ -280,6 +264,8 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 */
 		returnValue print( ) const;
 
+		/** Check whether the matrix is actually a submatrix. */
+		bool isSubMatrix() const;
 
 	//
     // PROTECTED MEMBER FUNCTIONS:
@@ -336,12 +322,9 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	        false otherwise
 		 */
 		bool hasValue(	const ExportIndex& _rowIdx,
-								const ExportIndex& _colIdx,
-								double _value
-								) const;
-
-		/** Check whether the matrix is actually a submatrix. */
-		bool isSubMatrix() const;
+						const ExportIndex& _colIdx,
+						double _value
+						) const;
 
 	protected:
 
