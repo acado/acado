@@ -88,23 +88,9 @@ public:
 					const ExportArgument& _argument9 = emptyConstExportArgument
 					);
 
-	/** Copy constructor (deep copy).
-	 *
-	 *	@param[in] arg		Right-hand side object.
-	 */
-	ExportFunction(	const ExportFunction& arg
-					);
-
 	/** Destructor.
 	 */
 	virtual ~ExportFunction( );
-
-	/** Assignment operator (deep copy).
-	 *
-	 *	@param[in] arg		Right-hand side object.
-	 */
-	ExportFunction& operator=(	const ExportFunction& arg
-								);
 
 	/** Clone constructor (deep copy).
 	 *
@@ -113,7 +99,6 @@ public:
 	virtual ExportStatement* clone( ) const;
 
 	virtual ExportFunction* cloneFunction( ) const;
-
 
 	/** Initializes function with given name and possible calling arguments.
 	 *
@@ -307,20 +292,18 @@ protected:
 
 	/** List of calling arguments. */
 	ExportArgumentList functionArguments;
-	/** Return value of the function (by default, if pointer is null, return value is void). */
-	std::tr1::shared_ptr< ExportVariable > retVal;
+	/** Return value of the function. */
+	ExportVariable retVal;
 	/** Flag indicating whether value shall be returned as pointer. */
 	bool returnAsPointer;
 	/** Memory allocator */
 	MemoryAllocatorPtr memAllocator;
-	/** DVector of local variables. */
+	/** Array of local variables. */
 	std::vector< ExportVariable > localVariables;
 	/** Private flag. In principle if this guy is true, do not export function declaration. */
 	bool flagPrivate;
 };
 
-
 CLOSE_NAMESPACE_ACADO
-
 
 #endif  // ACADO_TOOLKIT_EXPORT_FUNCTION_HPP

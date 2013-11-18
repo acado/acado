@@ -53,7 +53,7 @@ ExportFunction::ExportFunction(	const std::string& _name,
 								const ExportArgument& _argument7,
 								const ExportArgument& _argument8,
 								const ExportArgument& _argument9
-								) : ExportStatementBlock( ), description()
+								) : ExportStatementBlock( )
 {
 	returnAsPointer = false;
 	flagPrivate = false;
@@ -65,49 +65,8 @@ ExportFunction::ExportFunction(	const std::string& _name,
 				_argument7,_argument8,_argument9 );
 }
 
-
-ExportFunction::ExportFunction( const ExportFunction& arg ) : ExportStatementBlock( arg )
-{
-	name = arg.name;
-	functionArguments = arg.functionArguments;
-	flagPrivate = arg.flagPrivate;
-	returnAsPointer = arg.returnAsPointer;
-	
-	retVal = arg.retVal;
-
-	memAllocator = arg.memAllocator;
-	localVariables = arg.localVariables;
-
-	description = arg.description;
-}
-
-
 ExportFunction::~ExportFunction( )
-{
-	clear( );
-}
-
-
-ExportFunction& ExportFunction::operator=( const ExportFunction& arg )
-{
-	if( this != &arg )
-	{
-		init( arg.name );
-
-		ExportStatementBlock::operator=( arg );
-		functionArguments = arg.functionArguments;
-		retVal = arg.retVal;
-		returnAsPointer = arg.returnAsPointer;
-
-		memAllocator = arg.memAllocator;
-		localVariables = arg.localVariables;
-
-		description = arg.description;
-	}
-
-	return *this;
-}
-
+{}
 
 ExportStatement* ExportFunction::clone( ) const
 {
@@ -191,7 +150,7 @@ ExportFunction& ExportFunction::setReturnValue(	const ExportVariable& _functionR
 												bool _returnAsPointer
 												)
 {
-	retVal = std::tr1::shared_ptr< ExportVariable >(new ExportVariable( _functionReturnValue ));
+	retVal = deepcopy( _functionReturnValue );
 	returnAsPointer = _returnAsPointer;
 
 	return *this;
@@ -263,9 +222,9 @@ returnValue ExportFunction::exportForwardDeclaration(	std::ostream& stream,
 			stream << "\n";
 		}
 
-		if (retVal != 0)
+		if (retVal.getDim())
 		{
-			std::string tmp = retVal->getDoc();
+			std::string tmp = retVal.getDoc();
 			if (tmp.empty() == false)
 				stream << " *\n *  \\return " << tmp << endl;
 		}
@@ -273,9 +232,9 @@ returnValue ExportFunction::exportForwardDeclaration(	std::ostream& stream,
 	}
 
 
-	if (retVal != 0)
+	if (retVal.getDim())
 	{
-		stream << retVal->getTypeString(_realString, _intString);
+		stream << retVal.getTypeString(_realString, _intString);
 		if ( returnAsPointer == true )
 			stream << "*";
 	}
@@ -307,9 +266,9 @@ returnValue ExportFunction::exportCode(	std::ostream& stream,
 	//
 	// Set return value type
 	//
-	if ( retVal != 0 )
+	if (retVal.getDim())
 	{
-		stream << retVal->getTypeString(_realString, _intString);
+		stream << retVal.getTypeString(_realString, _intString);
 		if ( returnAsPointer == true )
 			stream << "*";
 	}
@@ -322,13 +281,8 @@ returnValue ExportFunction::exportCode(	std::ostream& stream,
 	functionArguments.exportCode(stream, _realString, _intString, _precision);
 	stream << " )\n{\n";
 
-	if (retVal && retVal->getDataStruct() == ACADO_LOCAL)
-	{
-		stream << retVal->getTypeString(_realString, _intString) << " ";
-		stream << retVal->getName() << endl;
-	}
-
-	// ExportStatementBlock::exportDataDeclaration( file,_realString,_intString,_precision );
+	if (retVal.getDataStruct() == ACADO_LOCAL)
+		retVal.exportDataDeclaration(stream, _realString, _intString, _precision);
 
 	//
 	// Set parent pointers, and run memory allocation
@@ -364,8 +318,8 @@ returnValue ExportFunction::exportCode(	std::ostream& stream,
 	//
 	// Finish the export of the function
 	//
-	if ( retVal != 0 )
-		stream << "return " <<  retVal->getFullName() << ";\n";
+	if (retVal.getDim())
+		stream << "return " <<  retVal.getFullName() << ";\n";
 	stream << "}\n\n";
 
 	return SUCCESSFUL_RETURN;
@@ -374,11 +328,10 @@ returnValue ExportFunction::exportCode(	std::ostream& stream,
 
 bool ExportFunction::isDefined( ) const
 {
-	if ( ( name.empty() == false ) &&
-		 ( ( getNumStatements( ) > 0 ) || ( retVal != 0 ) ) )
+	if (name.empty() == false && (getNumStatements( ) > 0 || retVal.getDim() > 0))
 		return true;
-	else
-		return false;
+
+	return false;
 }
 
 
