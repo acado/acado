@@ -69,6 +69,11 @@ returnValue ExportFile::exportCode( ) const
 	if (stream.good() == false)
 		return ACADOERROR( RET_DOES_DIRECTORY_EXISTS );
 
+	acadoPrintAutoGenerationNotice(stream, commentString);
+
+	if ( commonHeaderName.size() )
+		stream << "#include \"" << commonHeaderName << "\"\n\n\n";
+
 	returnValue returnvalue = ExportStatementBlock::exportCode(stream, realString, intString, precision);
 
 	stream.close();
