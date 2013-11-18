@@ -428,7 +428,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	ExportVariable stageH;
 	ExportIndex index( "index" );
 	stageH.setup("stageH", NX + NU, NX + NU, REAL, ACADO_LOCAL);
-	setStageH.setup("setStageH", stageH, index.makeArgument());
+	setStageH.setup("setStageH", stageH, index);
 
 	if (Q1.isGiven() == false)
 		setStageH.addStatement(
@@ -457,7 +457,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 		for (unsigned i = 0; i < N; ++i)
 		{
 			initialize.addFunctionCall(
-					setStageH, qpH.getAddress(i * (NX + NU) * (NX + NU)), ExportIndex( i ).makeArgument());
+					setStageH, qpH.getAddress(i * (NX + NU) * (NX + NU)), ExportIndex( i ));
 		}
 		initialize.addLinebreak();
 		initialize.addStatement(
@@ -471,7 +471,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 		for (unsigned i = 0; i < N; ++i)
 		{
 			evaluateObjective.addFunctionCall(
-					setStageH, qpH.getAddress(i * (NX + NU) * (NX + NU)), ExportIndex( i ).makeArgument());
+					setStageH, qpH.getAddress(i * (NX + NU) * (NX + NU)), ExportIndex( i ));
 		}
 		evaluateObjective.addLinebreak();
 		evaluateObjective.addStatement(
@@ -485,7 +485,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 
 	ExportVariable stagef;
 	stagef.setup("stagef", NX + NU, 1, REAL, ACADO_LOCAL);
-	setStagef.setup("setStagef", stagef, index.makeArgument());
+	setStagef.setup("setStagef", stagef, index);
 
 	if (Q2.isGiven() == false)
 		setStagef.addStatement(
@@ -848,7 +848,7 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	tUbAValues.setup("ubAValues", dimPacH, 1, REAL, ACADO_LOCAL);
 	tPacA.setup("tPacA", dimPacH, NX + NU, REAL, ACADO_LOCAL);
 
-	setStagePac.setup("setStagePac", offsetPac.makeArgument(), indPac.makeArgument(), tPacA, tLbAValues, tUbAValues);
+	setStagePac.setup("setStagePac", offsetPac, indPac, tPacA, tLbAValues, tUbAValues);
 
 	if (pacEvHx.isGiven() == true)
 		setStagePac << (tPacA.getSubMatrix(0, dimPacH, 0, NX) == pacEvHx);
@@ -879,7 +879,7 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 		{
 			evaluateConstraints.addFunctionCall(
 					setStagePac,
-					ExportIndex( offsetEval ).makeArgument(), ExportIndex( i ).makeArgument(),
+					ExportIndex( offsetEval ), ExportIndex( i ),
 					qpA.getAddress(offsetEval * (NX + NU)),
 					evLbAValues.getAddress( offsetEval ), evUbAValues.getAddress( offsetEval )
 			);
@@ -985,7 +985,7 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	feedback.addLinebreak();
 
 	for (unsigned i = 0; i < N; ++i)
-		feedback.addFunctionCall(setStagef, qpg.getAddress(i * (NX + NU)), ExportIndex( i ).makeArgument());
+		feedback.addFunctionCall(setStagef, qpg.getAddress(i * (NX + NU)), ExportIndex( i ));
 	feedback.addStatement( qpg.getRows(N * (NX + NU), N * (NX + NU) + NX) == QN2 * DyN );
 	feedback.addLinebreak();
 
@@ -1005,13 +1005,13 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 
 	ExportVariable stageOut("stageOut", 1, NX + NU, REAL, ACADO_LOCAL);
 	ExportIndex index( "index" );
-	acc.setup("accumulate", stageOut, index.makeArgument());
+	acc.setup("accumulate", stageOut, index);
 
 	acc	<< (x.getRow( index ) += stageOut.getCols(0, NX))
 		<< (u.getRow( index ) += stageOut.getCols(NX, NX + NU));
 
 	for (unsigned i = 0; i < N; ++i)
-		feedback.addFunctionCall(acc, qpPrimal.getAddress(i * (NX + NU)), ExportIndex( i ).makeArgument());
+		feedback.addFunctionCall(acc, qpPrimal.getAddress(i * (NX + NU)), ExportIndex( i ));
 	feedback.addLinebreak();
 	feedback.addStatement(
 			x.getRow( N ) += qpPrimal.getTranspose().getCols(N * (NX + NU), N * (NX + NU) + NX)

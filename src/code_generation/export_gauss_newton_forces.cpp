@@ -431,7 +431,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	ExportVariable stageH;
 	ExportIndex index( "index" );
 	stageH.setup("stageH", dimHRows, dimHCols, REAL, ACADO_LOCAL);
-	setStageH.setup("setStageH", stageH, index.makeArgument());
+	setStageH.setup("setStageH", stageH, index);
 
 	if (Q1.isGiven() == false)
 		setStageH.addStatement(
@@ -496,7 +496,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	else
 	{
 		for (unsigned i = 0; i < N; ++i)
-			evaluateObjective.addFunctionCall(setStageH, objHessians[ i ], ExportIndex(i).makeArgument());
+			evaluateObjective.addFunctionCall(setStageH, objHessians[ i ], ExportIndex(i));
 		evaluateObjective.addLinebreak();
 		evaluateObjective.addStatement(
 				objHessians[ N ] == QN1 + evLmX
@@ -509,7 +509,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 
 	ExportVariable stagef;
 	stagef.setup("stagef", NX + NU, 1, REAL, ACADO_LOCAL);
-	setStagef.setup("setStagef", stagef, index.makeArgument());
+	setStagef.setup("setStagef", stagef, index);
 
 	if (Q2.isGiven() == false)
 		setStagef.addStatement(
@@ -687,7 +687,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 
 	ExportIndex index( "index" );
 	conStageC.setup("conStageC", NX + NU, NX, REAL);
-	conSetGxGu.setup("conSetGxGu", conStageC, index.makeArgument());
+	conSetGxGu.setup("conSetGxGu", conStageC, index);
 
 	conSetGxGu.addStatement(
 			conStageC.getSubMatrix(0, NX, 0, NX) == evGx.
@@ -717,7 +717,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 
 	unsigned start = 0; //initialStateFixed() == true ? 1 : 0;
 	for (unsigned i = start; i < N; ++i)
-		evaluateConstraints.addFunctionCall(conSetGxGu, conC[ i ], ExportIndex( i ).makeArgument());
+		evaluateConstraints.addFunctionCall(conSetGxGu, conC[ i ], ExportIndex( i ));
 	evaluateConstraints.addLinebreak();
 
 	cond.clear();
@@ -740,7 +740,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 	{
 		staged.setup("staged", NX, 1, REAL, ACADO_LOCAL);
 		stagedNew.setup("stagedNew", NX, 1, REAL, ACADO_LOCAL);
-		conSetd.setup("conSetd", stagedNew, index.makeArgument());
+		conSetd.setup("conSetd", stagedNew, index);
 
 		ExportVariable dummyZero( zeros(NX, 1) );
 
@@ -759,7 +759,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 		start = initialStateFixed() == true ? 1 : 0;
 		for (unsigned i = start; i < dNum; ++i)
 			evaluateConstraints.addFunctionCall(
-					conSetd, cond[ i ], ExportIndex(i - 1).makeArgument()
+					conSetd, cond[ i ], ExportIndex(i - 1)
 			);
 	}
 
@@ -823,7 +823,7 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	feedback.addLinebreak();
 
 	for (unsigned i = 0; i < N; ++i)
-		feedback.addFunctionCall(setStagef, objGradients[ i ], ExportIndex( i ).makeArgument());
+		feedback.addFunctionCall(setStagef, objGradients[ i ], ExportIndex( i ));
 
 	feedback.addLinebreak();
 	feedback.addStatement( objGradients[ N ] == QN2 * DyN );
@@ -862,7 +862,7 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 
 	ExportVariable stageOut("stageOut", 1, NX + NU, REAL, ACADO_LOCAL);
 	ExportIndex index( "index" );
-	acc.setup("accumulate", stageOut, index.makeArgument());
+	acc.setup("accumulate", stageOut, index);
 
 	if (performsSingleShooting() == true)
 	{
@@ -892,7 +892,7 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	}
 
 	for (unsigned i = 0; i < N; ++i)
-		feedback.addFunctionCall(acc, vecQPVars[ i ], ExportIndex( i ).makeArgument());
+		feedback.addFunctionCall(acc, vecQPVars[ i ], ExportIndex( i ));
 	feedback.addLinebreak();
 
 	if (performsSingleShooting() == false)

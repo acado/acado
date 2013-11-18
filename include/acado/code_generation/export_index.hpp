@@ -23,25 +23,20 @@
  *
  */
 
-
-
 /**
  *    \file include/acado/code_generation/export_index.hpp
  *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
-
 #ifndef ACADO_TOOLKIT_EXPORT_INDEX_HPP
 #define ACADO_TOOLKIT_EXPORT_INDEX_HPP
 
-#include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_data.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
 class ExportIndexNode;
 class ExportArgument;
-
 
 /** 
  *	\brief Defines a scalar-valued index variable to be used for exporting code.
@@ -129,12 +124,6 @@ public:
 	bool isBinary() const;
 
 	bool isVariable() const;
-
-	/** Converts index into a calling argument.
-	 *
-	 *	\return Index converted into a calling argument.
-	 */
-	ExportArgument makeArgument( ) const;
 };
 
 struct ExportIndexComparator
@@ -147,12 +136,9 @@ struct ExportIndexComparator
     }
 };
 
-static const ExportIndex emptyConstExportIndex( int( 0 ) );
-static const ExportIndex constExportIndexValueOne( int( 1 ) );
+const ExportIndex emptyConstExportIndex( int( 0 ) );
+const ExportIndex constExportIndexValueOne( int( 1 ) );
 
 CLOSE_NAMESPACE_ACADO
 
-
 #endif  // ACADO_TOOLKIT_EXPORT_INDEX_HPP
-
-// end of file.

@@ -818,7 +818,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 		tmpE.setup("E", NX, NU, REAL, ACADO_LOCAL);
 		ExportIndex iRow( "row" ), iCol( "col" );
 
-		multHxE.setup("multHxE", tmpHx, tmpE, iRow.makeArgument(), iCol.makeArgument());
+		multHxE.setup("multHxE", tmpHx, tmpE, iRow, iCol);
 		multHxE.addStatement(
 				A.getSubMatrix(	rowOffset + iRow * dimPacH,
 								rowOffset + (iRow + 1) * dimPacH,
@@ -840,16 +840,16 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 								multHxE,
 								pacEvHx,
 								E.getAddress(blk * NX, 0),
-								ExportIndex( row2 ).makeArgument(),
-								ExportIndex( col ).makeArgument()
+								ExportIndex( row2 ),
+								ExportIndex( col )
 						);
 					else
 						condensePrep.addFunctionCall(
 								multHxE,
 								pacEvHx.getAddress((row + 1) * dimPacH, 0),
 								E.getAddress(blk * NX, 0),
-								ExportIndex( row2 ).makeArgument(),
-								ExportIndex( col ).makeArgument()
+								ExportIndex( row2 ),
+								ExportIndex( col )
 						);
 				}
 			}
@@ -874,8 +874,8 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 						multHxE,
 						pacEvHx,
 						E.getAddress(blk * NX, 0),
-						row2.makeArgument(),
-						col.makeArgument()
+						row2,
+						col
 				);
 			}
 			else
@@ -884,8 +884,8 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 						multHxE,
 						pacEvHx.getAddress((row + 1) * dimPacH, 0),
 						E.getAddress(blk * NX, 0),
-						row2.makeArgument(),
-						col.makeArgument()
+						row2,
+						col
 				);
 			}
 
@@ -1455,7 +1455,7 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 			for(jj = ii; jj < N; ++jj)
 			{
 				condensePrep.addFunctionCall(
-						zeroBlockH11, ExportIndex(ii).makeArgument(), ExportIndex(jj).makeArgument()
+						zeroBlockH11, ExportIndex(ii), ExportIndex(jj)
 				);
 
 				for(unsigned kk = jj; kk < N; ++kk)
@@ -1464,7 +1464,7 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 					unsigned indr = (kk + 1) * kk / 2 + jj;
 
 					condensePrep.addFunctionCall(
-							setBlockH11, ExportIndex(ii).makeArgument(), ExportIndex(jj).makeArgument(),
+							setBlockH11, ExportIndex(ii), ExportIndex(jj),
 							E.getAddress(indl * NX), QE.getAddress(indr * NX) );
 				}
 				condensePrep.addLinebreak();
@@ -1497,14 +1497,14 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 		eLoopK.addStatement( eIndl == (eKK + 1) * eKK / 2 + eII );
 		eLoopK.addStatement( eIndr == (eKK + 1) * eKK / 2 + eJJ );
 
-		eLoopK.addFunctionCall( setBlockH11, eII.makeArgument(), eJJ.makeArgument(), E.getAddress(eIndl * NX), QE.getAddress(eIndr * NX) );
+		eLoopK.addFunctionCall( setBlockH11, eII, eJJ, E.getAddress(eIndl * NX), QE.getAddress(eIndr * NX) );
 
-		eLoopJ.addFunctionCall( zeroBlockH11, eII.makeArgument(), eJJ.makeArgument() );
+		eLoopJ.addFunctionCall( zeroBlockH11, eII, eJJ );
 
 		eLoopJ.addStatement( eLoopK );
 		eLoopI.addStatement( eLoopJ );
 
-//		eLoopJ2.addFunctionCall(copyHTH, eII.makeArgument(), eJJ.makeArgument());
+//		eLoopJ2.addFunctionCall(copyHTH, eII, eJJ);
 //		eLoopI.addStatement( eLoopJ2 );
 
 		condensePrep.addStatement( eLoopI );
@@ -1546,7 +1546,7 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 		for (unsigned ii = 0; ii < N; ++ii)
 			for(unsigned jj = 0; jj < ii; ++jj)
 				condensePrep.addFunctionCall(
-						copyHTH, ExportIndex( ii ).makeArgument(), ExportIndex( jj ).makeArgument()
+						copyHTH, ExportIndex( ii ), ExportIndex( jj )
 				);
 	}
 	else
@@ -1559,7 +1559,7 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 		ExportForLoop eLoopI(ii, 0, N);
 		ExportForLoop eLoopJ(jj, 0, ii);
 
-		eLoopJ.addFunctionCall(copyHTH, ii.makeArgument(), jj.makeArgument());
+		eLoopJ.addFunctionCall(copyHTH, ii, jj);
 		eLoopI.addStatement( eLoopJ );
 		condensePrep.addStatement( eLoopI );
 
@@ -2064,13 +2064,13 @@ returnValue ExportGaussNewtonCondensed::setupMultiplicationRoutines( )
 	unsigned offset = (performFullCondensing() == true) ? 0 : NX;
 
 	// setBlockH11
-	setBlockH11.setup("setBlockH11", iRow.makeArgument(), iCol.makeArgument(), Gu1, Gu2);
+	setBlockH11.setup("setBlockH11", iRow, iCol, Gu1, Gu2);
 	setBlockH11.addStatement( H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, offset + iCol * NU, offset + (iCol + 1) * NU) += (Gu1 ^ Gu2) );
 	// zeroBlockH11
-	zeroBlockH11.setup("zeroBlockH11", iRow.makeArgument(), iCol.makeArgument());
+	zeroBlockH11.setup("zeroBlockH11", iRow, iCol);
 	zeroBlockH11.addStatement( H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, offset + iCol * NU, offset + (iCol + 1) * NU) == zeros(NU, NU) );
 	// copyHTH
-	copyHTH.setup("copyHTH", iRow.makeArgument(), iCol.makeArgument());
+	copyHTH.setup("copyHTH", iRow, iCol);
 	copyHTH.addStatement(
 			H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, offset + iCol * NU, offset + (iCol + 1) * NU) ==
 					H.getSubMatrix(offset + iCol * NU, offset + (iCol + 1) * NU, offset + iRow * NU, offset + (iRow + 1) * NU).getTranspose()

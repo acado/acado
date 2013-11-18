@@ -767,7 +767,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 			{
 				condensePrep.addFunctionCall(
 						multBTW1, evGu.getAddress(row * NX), W1,
-						ExportIndex( row ).makeArgument(), ExportIndex( col ).makeArgument()
+						ExportIndex( row ), ExportIndex( col )
 				);
 
 				condensePrep.addFunctionCall(
@@ -787,7 +787,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 			condensePrep.addFunctionCall(
 					multBTW1, evGu.getAddress(col * NX), W1,
-					ExportIndex( col ).makeArgument(), ExportIndex( col ).makeArgument()
+					ExportIndex( col ), ExportIndex( col )
 			);
 
 			// TODO move this addition to multBTW1
@@ -842,8 +842,8 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 		adjLoop.addFunctionCall(
 				multBTW1, evGu.getAddress(row * NX), W1,
-				row.makeArgument(), col.makeArgument()
-//				col.makeArgument(), row.makeArgument()
+				row, col
+//				col, row
 		);
 
 		adjLoop.addFunctionCall(
@@ -864,7 +864,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 		cLoop.addFunctionCall(
 				multBTW1, evGu.getAddress(col * NX), W1,
-				col.makeArgument(), col.makeArgument()
+				col, col
 		);
 
 		if (R1.isGiven() == true)
@@ -896,7 +896,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		for (unsigned ii = 0; ii < N; ++ii)
 			for(unsigned jj = 0; jj < ii; ++jj)
 				condensePrep.addFunctionCall(
-						copyHTH, ExportIndex( jj ).makeArgument(), ExportIndex( ii ).makeArgument());
+						copyHTH, ExportIndex( jj ), ExportIndex( ii ));
 	}
 	else
 	{
@@ -908,8 +908,8 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		ExportForLoop eLoopI(ii, 0, N);
 		ExportForLoop eLoopJ(jj, 0, ii);
 
-		eLoopJ.addFunctionCall(copyHTH, jj.makeArgument(), ii.makeArgument());
-//		eLoopJ.addFunctionCall(copyHTH, ii.makeArgument(), jj.makeArgument());
+		eLoopJ.addFunctionCall(copyHTH, jj, ii);
+//		eLoopJ.addFunctionCall(copyHTH, ii, jj);
 		eLoopI.addStatement( eLoopJ );
 		condensePrep.addStatement( eLoopI );
 
@@ -1219,13 +1219,13 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	unsigned offset = (performFullCondensing() == true) ? 0 : NX;
 
 	// setBlockH11
-	setBlockH11.setup("setBlockH11", iRow.makeArgument(), iCol.makeArgument(), Gu1, Gu2);
+	setBlockH11.setup("setBlockH11", iRow, iCol, Gu1, Gu2);
 	setBlockH11.addStatement( H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, offset + iCol * NU, offset + (iCol + 1) * NU) += (Gu1 ^ Gu2) );
 	// zeroBlockH11
-	zeroBlockH11.setup("zeroBlockH11", iRow.makeArgument(), iCol.makeArgument());
+	zeroBlockH11.setup("zeroBlockH11", iRow, iCol);
 	zeroBlockH11.addStatement( H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, offset + iCol * NU, offset + (iCol + 1) * NU) == zeros(NU, NU) );
 	// copyHTH
-	copyHTH.setup("copyHTH", iRow.makeArgument(), iCol.makeArgument());
+	copyHTH.setup("copyHTH", iRow, iCol);
 	copyHTH.addStatement(
 			H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, offset + iCol * NU, offset + (iCol + 1) * NU) ==
 					H.getSubMatrix(offset + iCol * NU, offset + (iCol + 1) * NU, offset + iRow * NU, offset + (iRow + 1) * NU).getTranspose()
@@ -1302,7 +1302,7 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	//ExportFunction multBTW1, multGxTGu, macQEW2;
 
 	// multBTW1, evGu.getAddress(row * NX), W1, row, col
-	multBTW1.setup("multBTW1", Gu1, Gu2, iRow.makeArgument(), iCol.makeArgument());
+	multBTW1.setup("multBTW1", Gu1, Gu2, iRow, iCol);
 	multBTW1.addStatement(
 			H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iCol * NU, (iCol + 1) * NU) ==
 					(Gu1 ^ Gu2)

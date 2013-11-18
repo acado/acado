@@ -28,7 +28,7 @@
 /**
  *    \file src/code_generation/export_index.cpp
  *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
- *    \date 2011 - 2012
+ *    \date 2011 - 2013
  */
 
 #include <acado/code_generation/export_index.hpp>
@@ -271,32 +271,14 @@ bool ExportIndex::isVariable() const
 }
 
 
-ExportArgument ExportIndex::makeArgument( ) const
-{
-	std::string tmpName;
-
-	// In principle, this is an ugly hack. In case when an index is given,
-	// We give it a name which is equal to its value. This is done in order
-	// To be able to simplify function calls.
-
-	if (isGiven() == true)
-		tmpName = std::toString(getGivenValue());
-	else
-		tmpName = (*this)->getName();
-
-	ExportArgument tmp(tmpName, 1 , 1, (*this)->getType(), ACADO_LOCAL, true, emptyConstExportIndex);
-	tmp.setDoc( getDoc() );
-
-	return tmp;
-}
-
 ExportIndex::operator ExportArgument()
 {
 	std::string tmpName;
 
-	// In principle, this is an ugly hack. In case when an index is given,
+	// XXX In principle, this is an ugly hack. In case when an index is given,
 	// We give it a name which is equal to its value. This is done in order
-	// To be able to simplify function calls.
+	// To be able to simplify function calls. Most probably much more sense
+	// would make that ExportArgument is base class for this guy...
 
 	if (isGiven() == true)
 		tmpName = std::toString(getGivenValue());
