@@ -98,5 +98,6 @@ void MatFile< T >::write(	std::ostream& stream,
 //
 template class MatFile< double >;
 template class MatFile< int >;
+template class MatFile< bool >;
 
 CLOSE_NAMESPACE_ACADO

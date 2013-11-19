@@ -114,8 +114,8 @@ int main()
 	h << cA << cB << theta << thetaK << u;
 	hN << cA << cB << theta << thetaK;
 
-	DMatrix W = eye( h.getDim() );
-	DMatrix WN = eye( hN.getDim() );
+	DMatrix W = eye<double>( h.getDim() );
+	DMatrix WN = eye<double>( hN.getDim() );
 
 	W(0, 0) = WN(0, 0) = 0.2;
 	W(1, 1) = WN(1, 1) = 1.0;

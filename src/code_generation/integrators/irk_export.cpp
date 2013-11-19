@@ -266,7 +266,7 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 	}
 	else {
 		Function tmpFun;
-		tmpFun << zeros(1,1);
+		tmpFun << zeros<double>(1,1);
 		ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
 		declarations.addDeclaration( tmpExport );
 
@@ -284,7 +284,7 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 	else {
 		for( i = 0; i < name_outputs.size(); i++ ) {
 			Function tmpFun;
-			tmpFun << zeros(1,1);
+			tmpFun << zeros<double>(1,1);
 			ExportAcadoFunction tmpExport(tmpFun, getNameOUTPUT(i));
 			declarations.addDeclaration( tmpExport );
 		}
@@ -579,7 +579,7 @@ DMatrix ImplicitRungeKuttaExport::formMatrix( const DMatrix& mass, const DMatrix
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 	uint vars = jacobian.getNumRows();
 	uint i1, j1, i2, j2;
-	DMatrix result = zeros(numStages*vars, numStages*vars);
+	DMatrix result = zeros<double>(numStages*vars, numStages*vars);
 	for( i1 = 0; i1 < numStages; i1++ ){
 		for( j1 = 0; j1 < numStages; j1++ ) {
 			for( i2 = 0; i2 < vars; i2++ ){
@@ -750,7 +750,7 @@ returnValue ImplicitRungeKuttaExport::evaluateStatesOutputSystem( ExportStatemen
 
 returnValue ImplicitRungeKuttaExport::evaluateRhsImplicitSystem( ExportStatementBlock* block, const ExportIndex& stage )
 {
-	DMatrix zeroM = zeros( NX2+NXA,1 );
+	DMatrix zeroM = zeros<double>( NX2+NXA,1 );
 	block->addFunctionCall( getNameRHS(), rk_xxx, rk_rhsTemp.getAddress(0,0) );
 	// matrix rk_b:
 	if( NDX2 == 0 ) {
@@ -793,7 +793,7 @@ returnValue ImplicitRungeKuttaExport::evaluateMatrix( ExportStatementBlock* bloc
 		}
 	}
 	if( NXA > 0 ) {
-		DMatrix zeroM = zeros( 1,NXA );
+		DMatrix zeroM = zeros<double>( 1,NXA );
 		for( i = 0; i < numStages; i++ ) { // algebraic states
 			loop2.addStatement( std::string( "if( " ) + toString(i) + " == " + index1.getName() + " ) {\n" );
 			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,numStages*NX2+i*NXA,numStages*NX2+i*NXA+NXA ) == rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1+NX2,index2*(NVARS2)+NX1+NX2+NXA ) );
@@ -1086,7 +1086,7 @@ returnValue ImplicitRungeKuttaExport::evaluateDerivedPolynomial( ExportStatement
 
 DVector ImplicitRungeKuttaExport::divideMeasurements( uint index )
 {
-	DVector meas = zeros(1,grid.getNumIntervals());
+	DVector meas = zeros<double>(1,grid.getNumIntervals());
 
 	for( uint i = 0; i < outputGrids[index].getNumIntervals(); i++ ) {
 		uint interv = getIntegrationInterval( outputGrids[index].getTime(i) );

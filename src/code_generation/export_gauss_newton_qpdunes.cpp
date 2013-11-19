@@ -208,15 +208,15 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	// LM regularization preparation
 	//
 
-	ExportVariable evLmX = zeros(NX, NX);
-	ExportVariable evLmU = zeros(NU, NU);
+	ExportVariable evLmX = zeros<double>(NX, NX);
+	ExportVariable evLmU = zeros<double>(NU, NU);
 
 	if  (levenbergMarquardt > 0.0)
 	{
-		DMatrix lmX = eye( NX );
+		DMatrix lmX = eye<double>( NX );
 		lmX *= levenbergMarquardt;
 
-		DMatrix lmU = eye( NU );
+		DMatrix lmU = eye<double>( NU );
 		lmU *= levenbergMarquardt;
 
 		evLmX = lmX;

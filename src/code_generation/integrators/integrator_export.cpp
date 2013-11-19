@@ -613,7 +613,7 @@ returnValue IntegratorExport::prepareFullRhs( ) {
 
 
 DMatrix IntegratorExport::expandOutputMatrix( const DMatrix& A3 ) {
-	DMatrix result = zeros(NX3,NX);
+	DMatrix result = zeros<double>(NX3,NX);
 	uint i,j;
 	for( i = 0; i < NX3; i++ ) {
 		for( j = 0; j < NX3; j++ ) {

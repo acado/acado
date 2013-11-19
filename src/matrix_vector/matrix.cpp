@@ -234,10 +234,18 @@ T GenericMatrix< T >::getTrace( ) const
 template<typename T>
 T GenericMatrix< T >::getConditionNumber() const
 {
+	ASSERT(1 == 0);
+
+	return T( 0 );
+}
+
+template<>
+double GenericMatrix< double >::getConditionNumber() const
+{
 	ASSERT(isSquare() == true);
 
 	Eigen::JacobiSVD<Base, Eigen::NoQRPreconditioner> foo( *this );
-	const GenericVector< T > V = foo.singularValues();
+	const GenericVector< double > V = foo.singularValues();
 
 	return (V( 0 ) / V(V.size() - 1));
 }
@@ -410,10 +418,42 @@ returnValue GenericMatrix< T >::read(const std::string& _filename)
 	return status;
 }
 
+//template<typename T>
+//GenericMatrix< T > ones(	unsigned _nRows,
+//							unsigned _nCols
+//							)
+//{
+//	GenericMatrix< T > foo(_nRows, _nCols);
+//	foo.setOnes();
+//	return foo;
+//}
+
+///** Create a square matrix with all T( 0 ) elements. */
+//template<typename T>
+//GenericMatrix< T > zeros(	unsigned _nRows,
+//							unsigned _nCols
+//							)
+//{
+//	GenericMatrix< T > foo(_nRows, _nCols);
+//	foo.setZeros();
+//	return foo;
+//}
+
+///** Create an identity matrix. */
+//template<typename T>
+//GenericMatrix< T > eye(	unsigned _dim
+//						)
+//{
+//	GenericMatrix< T > foo(_dim, _dim);
+//	foo.setIdentity();
+//	return foo;
+//}
+
 //
 // Explicit instantiation of templates.
 //
 template class GenericMatrix<double>;
 template class GenericMatrix<int>;
+template class GenericMatrix<bool>;
 
 CLOSE_NAMESPACE_ACADO

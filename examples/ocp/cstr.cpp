@@ -131,8 +131,8 @@ int main( ){
 	h << u(0);
 	h << u(1);
 
-    DMatrix S = eye(6);
-    DVector r = zeros(6);
+    DMatrix S = eye<double>(6);
+    DVector r = zeros<double>(6);
 
 	S(0,0) = 0.2;
 	S(1,1) = 1.0;

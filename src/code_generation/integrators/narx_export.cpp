@@ -130,18 +130,18 @@ returnValue NARXExport::setup( )
 	integrate.addLinebreak( );
 
 	// Linear input:
-	DMatrix eyeM = eye((delay-1)*NX1);
-	eyeM.appendRows( zeros(NX1,(delay-1)*NX1) );
-	eyeM.appendCols( zeros(delay*NX1,NU) );
+	DMatrix eyeM = eye<double>((delay-1)*NX1);
+	eyeM.appendRows( zeros<double>(NX1,(delay-1)*NX1) );
+	eyeM.appendCols( zeros<double>(delay*NX1,NU) );
 	if( NX1 > 0 ) {
 		integrate.addStatement( rk_diffsPrev1 == eyeM );
 	}
 
 	// Nonlinear part:
 	for( uint i1 = 0; i1 < delay; i1++ ) {
-		eyeM = zeros(NX2,i1*(NX1+NX2)+NX1);
-		eyeM.appendCols( eye(NX2) );
-		eyeM.appendCols( zeros(NX2,(delay-i1-1)*(NX1+NX2)+NU) );
+		eyeM = zeros<double>(NX2,i1*(NX1+NX2)+NX1);
+		eyeM.appendCols( eye<double>(NX2) );
+		eyeM.appendCols( zeros<double>(NX2,(delay-i1-1)*(NX1+NX2)+NU) );
 		integrate.addStatement( rk_diffsPrev2.getRows(i1*NX2,i1*NX2+NX2) == eyeM );
 	}
 	// evaluate sensitivities linear input:
@@ -280,21 +280,21 @@ returnValue NARXExport::setup( )
 
 	// FILL IN ALL THE SENSITIVITIES OF THE DELAYED STATES BASED ON RK_DIFFSPREV + SPARSITY
 	if( NX1 > 0 ) {
-		DMatrix zeroR = zeros(1, NX2);
+		DMatrix zeroR = zeros<double>(1, NX2);
 		ExportForLoop loop1( i,0,NX1 );
 		loop1.addStatement( rk_eta.getCols( i*NX+NX+NX1,i*NX+NX+NX1+NX2 ) == zeroR );
-		zeroR = zeros(1, (delay-1)*(NX1+NX2)+NX3);
+		zeroR = zeros<double>(1, (delay-1)*(NX1+NX2)+NX3);
 		loop1.addStatement( rk_eta.getCols( i*NX+NX+NX1+NX2,i*NX+NX+NX ) == zeroR );
 		integrate.addStatement( loop1 );
 		for( uint s1 = 1; s1 < delay; s1++ ) {
 			ExportForLoop loop2( i,0,NX1 );
 			// STATES
-			zeroR = zeros(1, NX2);
+			zeroR = zeros<double>(1, NX2);
 			for( uint s2 = 0; s2 < s1; s2++ ) {
 				loop2.addStatement( rk_eta.getCols( i*NX+NX+s1*(NX1+NX2)*NX+s2*(NX1+NX2),i*NX+NX+s1*(NX1+NX2)*NX+s2*(NX1+NX2)+NX1 ) == rk_diffsPrev1.getSubMatrix( i+(s1-1)*NX1,i+(s1-1)*NX1+1,s2*NX1,s2*NX1+NX1 ) );
 				loop2.addStatement( rk_eta.getCols( i*NX+NX+s1*(NX1+NX2)*NX+s2*(NX1+NX2)+NX1,i*NX+NX+s1*(NX1+NX2)*NX+s2*(NX1+NX2)+(NX1+NX2) ) == zeroR );
 			}
-			zeroR = zeros(1, (delay-s1)*(NX1+NX2)+NX3);
+			zeroR = zeros<double>(1, (delay-s1)*(NX1+NX2)+NX3);
 			loop2.addStatement( rk_eta.getCols( i*NX+NX+s1*(NX1+NX2)*NX+s1*(NX1+NX2),i*NX+NX+s1*(NX1+NX2)*NX+NX ) == zeroR );
 			// CONTROLS
 			if( NU > 0 ) loop2.addStatement( rk_eta.getCols( i*NU+NX*(1+NX)+s1*(NX1+NX2)*NU,i*NU+NX*(1+NX)+s1*(NX1+NX2)*NU+NU ) == rk_diffsPrev1.getSubMatrix( i+(s1-1)*NX1,i+(s1-1)*NX1+1,(delay-1)*NX1,(delay-1)*NX1+NU ) );
@@ -308,7 +308,7 @@ returnValue NARXExport::setup( )
 			if( s > 0 ) loop3.addStatement( rk_eta.getCols( i*NX+NX+s*(NX1+NX2)*NX+NX1*NX,i*NX+NX+s*(NX1+NX2)*NX+NX1*NX+delay*(NX1+NX2) ) == rk_diffsPrev2.getSubMatrix( i+(s-1)*NX2,i+(s-1)*NX2+1,0,delay*(NX1+NX2) ) );
 			DMatrix zeroR;
 			if( NX3 > 0 ) {
-				zeroR = zeros(1, NX3);
+				zeroR = zeros<double>(1, NX3);
 				loop3.addStatement( rk_eta.getCols( i*NX+NX+s*(NX1+NX2)*NX+NX1*NX+delay*(NX1+NX2),i*NX+NX+s*(NX1+NX2)*NX+NX1*NX+NX ) == zeroR );
 			}
 			// CONTROLS

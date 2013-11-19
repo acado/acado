@@ -140,8 +140,8 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	if( DERIVATIVES ) {
 		// initialize sensitivities:
-		DMatrix idX    = eye( NX );
-		DMatrix zeroXU = zeros( NX,NU );
+		DMatrix idX    = eye<double>( NX );
+		DMatrix zeroXU = zeros<double>( NX,NU );
 		integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
 		integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
 	}
@@ -307,7 +307,7 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 	}
 	else {
 		Function tmpFun;
-		tmpFun << zeros(1,1);
+		tmpFun << zeros<double>(1,1);
 		ExportAcadoFunction tmpExport(tmpFun, getNameDiffsRHS());
 		declarations.addDeclaration( tmpExport );
 	}
@@ -320,7 +320,7 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 		}
 		else {
 			Function tmpFun;
-			tmpFun << zeros(1,1);
+			tmpFun << zeros<double>(1,1);
 			ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
 			declarations.addDeclaration( tmpExport );
 		}

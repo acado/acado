@@ -1181,8 +1181,8 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 	//
 	// Define LM regularization terms
 	//
-	DMatrix mRegH00 = eye( getNX() );
-	DMatrix mRegH11 = eye( getNU() );
+	DMatrix mRegH00 = eye<double>( getNX() );
+	DMatrix mRegH11 = eye<double>( getNU() );
 
 	mRegH00 *= levenbergMarquardt;
 	mRegH11 *= levenbergMarquardt;
@@ -2068,7 +2068,7 @@ returnValue ExportGaussNewtonCondensed::setupMultiplicationRoutines( )
 	setBlockH11.addStatement( H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, offset + iCol * NU, offset + (iCol + 1) * NU) += (Gu1 ^ Gu2) );
 	// zeroBlockH11
 	zeroBlockH11.setup("zeroBlockH11", iRow, iCol);
-	zeroBlockH11.addStatement( H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, offset + iCol * NU, offset + (iCol + 1) * NU) == zeros(NU, NU) );
+	zeroBlockH11.addStatement( H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, offset + iCol * NU, offset + (iCol + 1) * NU) == zeros<double>(NU, NU) );
 	// copyHTH
 	copyHTH.setup("copyHTH", iRow, iCol);
 	copyHTH.addStatement(
@@ -2089,7 +2089,7 @@ returnValue ExportGaussNewtonCondensed::setupMultiplicationRoutines( )
 	multQETGx.addStatement( H101 += (E1 ^ Gx1) );
 	// zerBlockH10
 	zeroBlockH10.setup("zeroBlockH10", H101);
-	zeroBlockH10.addStatement( H101 == zeros(NU, NX) );
+	zeroBlockH10.addStatement( H101 == zeros<double>(NU, NX) );
 
 //	if (performsSingleShooting() == false)
 //	{
@@ -2135,7 +2135,7 @@ returnValue ExportGaussNewtonCondensed::setupMultiplicationRoutines( )
 	{
 		// zeroBlockH00
 		zeroBlockH00.setup( "zeroBlockH00" );
-		zeroBlockH00.addStatement( H00 == zeros(NX, NX) );
+		zeroBlockH00.addStatement( H00 == zeros<double>(NX, NX) );
 
 		// multCTQC
 		multCTQC.setup("multCTQC", Gx1, Gx2);

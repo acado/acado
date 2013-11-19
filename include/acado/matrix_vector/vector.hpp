@@ -327,6 +327,10 @@ std::istream& operator>>(	std::istream& _stream,
 
 /** Type definition of the vector of doubles. */
 typedef GenericVector< double > DVector;
+/** Type definition of the vector of doubles. */
+typedef GenericVector< int > IVector;
+/** Type definition of the vector of doubles. */
+typedef GenericVector< bool > BVector;
 
 static       DVector emptyVector;
 static const DVector emptyConstVector;

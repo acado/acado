@@ -110,7 +110,7 @@ int main( ){
 
     IntermediateState rhs = cstrModel( x, u );
 
-    DMatrix Q = zeros(4,4);
+    DMatrix Q = zeros<double>(4,4);
 
     Q(0,0) = 0.2;
     Q(1,1) = 1.0;
@@ -118,7 +118,7 @@ int main( ){
     Q(3,3) = 0.2;
 
 
-    DMatrix R = zeros(2,2);
+    DMatrix R = zeros<double>(2,2);
 
     R(0,0) = 0.5;
     R(1,1) = 5e-7;

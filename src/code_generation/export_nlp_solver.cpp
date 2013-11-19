@@ -583,8 +583,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		if (useArrivalCost)
 			return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
-		Q1 = zeros(NX, NX);
-		Q2 = zeros(NX, NY);
+		Q1 = zeros<double>(NX, NX);
+		Q2 = zeros<double>(NX, NY);
 	}
 	else
 	{
@@ -613,8 +613,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	}
 	else if (Fu.isOneOrZero() == NE_ZERO)
 	{
-		R1 = zeros(NU, NU);
-		R2 = zeros(NU, NY);
+		R1 = zeros<double>(NU, NU);
+		R2 = zeros<double>(NU, NY);
 	}
 	else
 	{
@@ -725,8 +725,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	}
 	else if (FEndTermX.isOneOrZero() == NE_ZERO)
 	{
-		QN1 = zeros(NX, NX);
-		QN2 = zeros(NX, NYN);
+		QN1 = zeros<double>(NX, NX);
+		QN2 = zeros<double>(NX, NYN);
 	}
 	else
 	{
@@ -1522,8 +1522,8 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 
 	// Clear A and b
 	updateArrivalCost
-		<< (acA == zeros(AM, AN))
-		<< (acb == zeros(AM, 1))
+		<< (acA == zeros<double>(AM, AN))
+		<< (acb == zeros<double>(AM, 1))
 		<< std::string( "\n" );
 
 	// Copy products to the matrices

@@ -83,8 +83,8 @@ int main()
 	h << phi << theta << dphi << dtheta << u1 << u2;
 	hN << phi << theta << dphi << dtheta;
 
-	DMatrix W = eye( h.getDim() );
-	DMatrix WN = eye( hN.getDim() );
+	DMatrix W = eye<double>( h.getDim() );
+	DMatrix WN = eye<double>( hN.getDim() );
 
 	W(0,0) = 5.000;
 	W(1,1) = 1.000;

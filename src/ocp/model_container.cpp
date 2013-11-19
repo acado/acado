@@ -101,7 +101,7 @@ returnValue ModelContainer::setLinearInput( const DMatrix& M1_, const DMatrix& A
 
 returnValue ModelContainer::setLinearInput( const DMatrix& A1_, const DMatrix& B1_ )
 {
-	DMatrix M1_ = eye(A1_.getNumRows());
+	DMatrix M1_ = eye<double>(A1_.getNumRows());
 	return modelData.setLinearInput( M1_, A1_, B1_ );
 }
 
@@ -114,7 +114,7 @@ returnValue ModelContainer::setLinearOutput( const DMatrix& M3_, const DMatrix& 
 
 returnValue ModelContainer::setLinearOutput( const DMatrix& A3_, const OutputFcn& rhs3_ )
 {
-	DMatrix M3_ = eye(A3_.getNumRows());
+	DMatrix M3_ = eye<double>(A3_.getNumRows());
 	return modelData.setLinearOutput( M3_, A3_, rhs3_ );
 }
 
@@ -127,7 +127,7 @@ returnValue ModelContainer::setLinearOutput( const DMatrix& M3_, const DMatrix& 
 
 returnValue ModelContainer::setLinearOutput( const DMatrix& A3_, const std::string& rhs3_, const std::string& diffs_rhs3_ )
 {
-	DMatrix M3_ = eye(A3_.getNumRows());
+	DMatrix M3_ = eye<double>(A3_.getNumRows());
 	return modelData.setLinearOutput( M3_, A3_, rhs3_, diffs_rhs3_ );
 }
 

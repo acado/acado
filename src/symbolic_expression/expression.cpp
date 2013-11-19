@@ -600,7 +600,7 @@ Expression Expression::operator*( const Expression& arg ) const{
 
     uint newNumRows = getNumRows( );
     uint newNumCols = arg.getNumCols( );
-    IntermediateState tmp = zeros( newNumRows, newNumCols );
+    IntermediateState tmp = zeros<double>( newNumRows, newNumCols );
 
     for( i=0; i<newNumRows; ++i ){
         for( j=0; j<newNumCols; ++j ){

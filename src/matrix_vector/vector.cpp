@@ -256,5 +256,6 @@ returnValue GenericVector<T>::read(	const std::string& filename
 //
 template class GenericVector<double>;
 template class GenericVector<int>;
+template class GenericVector<bool>;
 
 CLOSE_NAMESPACE_ACADO

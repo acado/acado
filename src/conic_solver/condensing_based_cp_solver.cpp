@@ -417,7 +417,7 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
     get(LEVENBERG_MARQUARDT, levenbergMarquard );
 
     if( levenbergMarquard > EPS )
-    	denseCP.H += eye( denseCP.H.rows() ) * levenbergMarquard;
+    	denseCP.H += eye<double>( denseCP.H.rows() ) * levenbergMarquard;
 
 	// Check condition number of the condensed Hessian.
     double denseHConditionNumber = denseCP.H.getConditionNumber();

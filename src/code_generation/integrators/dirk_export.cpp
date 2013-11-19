@@ -114,7 +114,7 @@ returnValue DiagonallyImplicitRKExport::prepareInputSystem(	ExportStatementBlock
 		rk_mat1 = ExportVariable( "rk_mat1", numStages*NX1, NX1, STATIC_CONST_REAL, ACADO_LOCAL );
 		double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 
-		DMatrix sens = zeros(NX1*(NX1+NU), numStages);
+		DMatrix sens = zeros<double>(NX1*(NX1+NU), numStages);
 		uint i, j, k, s1, s2;
 		for( i = 0; i < NX1; i++ ) {
 			DVector vec(NX1);
@@ -167,8 +167,8 @@ DMatrix DiagonallyImplicitRKExport::formMatrix( const DMatrix& mass, const DMatr
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 	uint vars = jacobian.getNumRows();
 	uint i1, i2, j2;
-	DMatrix result = zeros(numStages*vars, vars);
-	DMatrix tmp = zeros(vars, vars);
+	DMatrix result = zeros<double>(numStages*vars, vars);
+	DMatrix tmp = zeros<double>(vars, vars);
 	for( i1 = 0; i1 < numStages; i1++ ){
 		for( i2 = 0; i2 < vars; i2++ ){
 			for( j2 = 0; j2 < vars; j2++ ) {
@@ -236,7 +236,7 @@ returnValue DiagonallyImplicitRKExport::solveImplicitSystem( ExportStatementBloc
 returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, const ExportVariable& det, bool STATES, uint number )
 {
 	if( NX2 > 0 ) {
-		DMatrix zeroM = zeros( NX2+NXA,1 );
+		DMatrix zeroM = zeros<double>( NX2+NXA,1 );
 		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ) );
 		uint i;
 
@@ -335,7 +335,7 @@ returnValue DiagonallyImplicitRKExport::evaluateMatrix( ExportStatementBlock* bl
 		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) += rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NVARS2-NX2,index2*(NVARS2)+NVARS2 ) );
 	}
 	if( NXA > 0 ) {
-		DMatrix zeroM = zeros( 1,NXA );
+		DMatrix zeroM = zeros<double>( 1,NXA );
 		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,NX2,NX2+NXA ) == rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1+NX2,index2*(NVARS2)+NX1+NX2+NXA ) );
 	}
 	block->addStatement( loop2 );
@@ -374,7 +374,7 @@ returnValue DiagonallyImplicitRKExport::evaluateStatesImplicitSystem( ExportStat
 
 returnValue DiagonallyImplicitRKExport::evaluateRhsImplicitSystem( ExportStatementBlock* block, const ExportIndex& stage )
 {
-	DMatrix zeroM = zeros( NX2+NXA,1 );
+	DMatrix zeroM = zeros<double>( NX2+NXA,1 );
 	block->addFunctionCall( getNameRHS(), rk_xxx, rk_rhsTemp.getAddress(0,0) );
 	// matrix rk_b:
 	if( NDX2 == 0 ) {
@@ -540,7 +540,7 @@ returnValue DiagonallyImplicitRKExport::prepareOutputSystem(	ExportStatementBloc
 		rk_mat3 = ExportVariable( "rk_mat3", numStages*NX3, NX3, STATIC_CONST_REAL, ACADO_LOCAL );
 		double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 
-		DMatrix sens = zeros(NX3*NX3, numStages);
+		DMatrix sens = zeros<double>(NX3*NX3, numStages);
 		uint i, j, k, s1, s2;
 		for( i = 0; i < NX3; i++ ) {
 			DVector vec(NX3);

@@ -437,10 +437,32 @@ std::istream& operator>>(	std::istream& _stream,
 	return _stream;
 }
 
+/** Create a square matrix with all T( 1 ) elements. */
+template<typename T>
+GenericMatrix< T > ones(	unsigned _nRows,
+							unsigned _nCols = 1
+							)
+{ return GenericMatrix< T >(_nRows, _nCols).setOnes(); }
+
+/** Create a square matrix with all T( 0 ) elements. */
+template<typename T>
+GenericMatrix< T > zeros(	unsigned _nRows,
+							unsigned _nCols = 1
+							)
+{ return GenericMatrix< T >(_nRows, _nCols).setZero(); }
+
+/** Create an identity matrix. */
+template<typename T>
+GenericMatrix< T > eye(	unsigned _dim
+						)
+{ return GenericMatrix< T >(_dim, _dim).setIdentity(); }
+
 /** Type definition of the matrix of doubles. */
 typedef GenericMatrix< double > DMatrix;
 /** Type definition of the matrix of integers. */
-typedef GenericMatrix< double > IMatrix;
+typedef GenericMatrix< int > IMatrix;
+/** Type definition of the matrix of integers. */
+typedef GenericMatrix< bool > BMatrix;
 /** Shared pointer to a matrix of doubles. */
 typedef std::tr1::shared_ptr< GenericMatrix< double > > DMatrixPtr;
 

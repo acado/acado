@@ -87,7 +87,7 @@ int main( )
     h << vW;
 	h << F;
 
-    DMatrix Q = zeros(5,5); // LSQ coefficient matrix
+    DMatrix Q = zeros<double>(5,5); // LSQ coefficient matrix
 	Q(0,0) = 10.0;
 	Q(1,1) = 10.0;
 	Q(2,2) = 1.0;

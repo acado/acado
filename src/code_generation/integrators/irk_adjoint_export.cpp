@@ -153,7 +153,7 @@ returnValue AdjointIRKExport::getFunctionDeclarations(	ExportStatementBlock& dec
 	}
 	else {
 		Function tmpFun;
-		tmpFun << zeros(1,1);
+		tmpFun << zeros<double>(1,1);
 		ExportAcadoFunction tmpExport(tmpFun, getNameDiffsRHS());
 		declarations.addDeclaration( tmpExport );
 
@@ -171,7 +171,7 @@ returnValue AdjointIRKExport::getFunctionDeclarations(	ExportStatementBlock& dec
 	else {
 		for( i = 0; i < name_outputs.size(); i++ ) {
 			Function tmpFun;
-			tmpFun << zeros(1,1);
+			tmpFun << zeros<double>(1,1);
 			ExportAcadoFunction tmpExport(tmpFun, getNameDiffsOUTPUT(i));
 			declarations.addDeclaration( tmpExport );
 		}
@@ -532,13 +532,13 @@ returnValue AdjointIRKExport::getCode(	ExportStatementBlock& code )
     }
     // PART 1
     if( NX1 > 0 ) {
-    	DMatrix zeroR = zeros(1, NX2+NX3);
+    	DMatrix zeroR = zeros<double>(1, NX2+NX3);
     	ExportForLoop loop1( i,0,NX1 );
     	loop1.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1,i*NX+NX+NXA+NX ) == zeroR );
     	integrate.addStatement( loop1 );
     }
     // PART 2
-    DMatrix zeroR = zeros(1, NX3);
+    DMatrix zeroR = zeros<double>(1, NX3);
     if( NX2 > 0 ) {
     	ExportForLoop loop2( i,NX1,NX1+NX2 );
     	loop2.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1+NX2,i*NX+NX+NXA+NX ) == zeroR );
@@ -679,7 +679,7 @@ returnValue AdjointIRKExport::prepareInputSystem(	ExportStatementBlock& code )
 		// TODO: Ask Milan why this does NOT work properly !!
 		rk_mat1 = ExportVariable( "rk_mat1", numStages*NX1, numStages*NX1, STATIC_CONST_REAL, ACADO_LOCAL );
 
-		DMatrix sens = zeros(NX1*(NX1+NU), numStages);
+		DMatrix sens = zeros<double>(NX1*(NX1+NU), numStages);
 		uint i, j, k;
 		for( i = 0; i < NX1; i++ ) {
 			DVector vec(NX1*numStages);
@@ -728,7 +728,7 @@ returnValue AdjointIRKExport::prepareOutputSystem(	ExportStatementBlock& code )
 		// TODO: Ask Milan why this does NOT work properly !!
 		rk_mat3 = ExportVariable( "rk_mat3", numStages*NX3, numStages*NX3, STATIC_CONST_REAL, ACADO_LOCAL );
 
-		DMatrix sens = zeros(NX3*NX3, numStages);
+		DMatrix sens = zeros<double>(NX3*NX3, numStages);
 		uint i, j, k;
 		for( i = 0; i < NX3; i++ ) {
 			DVector vec(NX3*numStages);
@@ -778,7 +778,7 @@ returnValue AdjointIRKExport::sensitivitiesInputSystem( ExportStatementBlock* bl
 returnValue AdjointIRKExport::sensitivitiesImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, const ExportVariable& det, bool STATES, uint number )
 {
 	if( NX2 > 0 ) {
-		DMatrix zeroM = zeros( NX2+NXA,1 );
+		DMatrix zeroM = zeros<double>( NX2+NXA,1 );
 		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ) );
 		uint i;
 

@@ -170,7 +170,7 @@ std::vector<DMatrix> ModelData::getOutputDependencies( ) const {
 			DVector colIndV = colInd_outputs[i];
 			DVector rowPtrV = rowPtr_outputs[i];
 
-			DMatrix dependencyMat = zeros( dim_outputs[i],getNX()+NXA+NU+NDX );
+			DMatrix dependencyMat = zeros<double>( dim_outputs[i],getNX()+NXA+NU+NDX );
 			int index = 1;
 			for( uint j = 0; j < dim_outputs[i]; j++ ) {
 				uint upper = (uint)rowPtrV(j+1);

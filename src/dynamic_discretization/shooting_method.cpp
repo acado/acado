@@ -520,7 +520,7 @@ returnValue ShootingMethod::update( DMatrix &G, const DMatrix &A, const DMatrix 
 
     if( B.getNumCols() == 0 ) return SUCCESSFUL_RETURN;
 
-    DMatrix E = eye(B.getNumCols());
+    DMatrix E = eye<double>(B.getNumCols());
     E *= 1e-10;
 
     DMatrix S = ((A.transpose().eval() * A)+E).inverse();
@@ -573,7 +573,7 @@ returnValue ShootingMethod::evaluateSensitivitiesLifted( ){
                 d = b;
             }
             d += residuum.getMatrix(i);
-            Gx = eye(nx);
+            Gx = eye<double>(nx);
             Gx *= 0.001;
             update( Gx, A, B );
             dForward.setDense( i, 0, Gx );

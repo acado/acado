@@ -143,58 +143,6 @@ Expression laplace           ( const Expression &arg1,
     return forwardDerivative( forwardDerivative(arg1,arg2), arg2 );
 }
 
-
-DMatrix ones( int nRows, int nCols ){
-
-    DMatrix t(nRows,nCols);
-    t.setAll(1);
-    return t;
-}
-
-
-DMatrix zeros( int nRows, int nCols ){
-
-    DMatrix t(nRows,nCols);
-    t.setAll(0);
-    return t;
-}
-
-
-DMatrix eye( int n ){
-
-    DMatrix t(n,n);
-    t.setIdentity();
-    return t;
-}
-
-
-
-DMatrix diag( const DVector& v )
-{
-	int n = v.getDim();
-
-    DMatrix t = zeros( n,n );
-    for( int i=0; i<n; ++i )
-		t(i,i) = v(i);
-
-    return t;
-}
-
-
-DVector diag( const DMatrix& M )
-{
-	ASSERT( M.isSquare() == BT_TRUE );
-
-	int n = M.getNumRows();
-
-    DVector t( n );
-    for( int i=0; i<n; ++i )
-		t(i) = M(i,i);
-
-    return t;
-}
-
-
 Expression getRiccatiODE( const Expression        &rhs,
                           const DifferentialState &x  ,
                           const Control           &u  ,

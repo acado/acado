@@ -100,7 +100,7 @@ int main( void )
 	h << xT << xL << phi << uT << uL << duT << duL;
 
 	// Weighting matrices and measurement functions
-	DMatrix W = eye( 7 );
+	DMatrix W = eye<double>( 7 );
 //	W(0,0) = 16.5;
 //	W(1,1) = 23.9;
 //	W(2,2) = 25.1;
@@ -113,7 +113,7 @@ int main( void )
 	Function hN;
 	hN << xT << xL << phi << uT << uL;
 
-	DMatrix WN = eye( 5 );
+	DMatrix WN = eye<double>( 5 );
 	WN(0, 0) = W(0, 0);
 	WN(1, 1) = W(1, 1);
 	WN(2, 2) = W(2, 2);

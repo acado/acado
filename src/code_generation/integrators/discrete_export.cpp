@@ -139,7 +139,7 @@ returnValue DiscreteTimeExport::getFunctionDeclarations(	ExportStatementBlock& d
 	}
 	else {
 		Function tmpFun;
-		tmpFun << zeros(1,1);
+		tmpFun << zeros<double>(1,1);
 		ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
 		declarations.addDeclaration( tmpExport );
 		tmpExport = ExportAcadoFunction(tmpFun, getNameDiffsRHS());
@@ -332,13 +332,13 @@ returnValue DiscreteTimeExport::setup( )
 	}
 	// PART 1
 	if( NX1 > 0 ) {
-		DMatrix zeroR = zeros(1, NX2+NX3);
+		DMatrix zeroR = zeros<double>(1, NX2+NX3);
 		ExportForLoop loop1( i,0,NX1 );
 		loop1.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1,i*NX+NX+NXA+NX ) == zeroR );
 		integrate.addStatement( loop1 );
 	}
     // PART 2
-    DMatrix zeroR = zeros(1, NX3);
+    DMatrix zeroR = zeros<double>(1, NX3);
     if( NX2 > 0 ) {
     	ExportForLoop loop2( i,NX1,NX1+NX2 );
     	loop2.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1+NX2,i*NX+NX+NXA+NX ) == zeroR );
