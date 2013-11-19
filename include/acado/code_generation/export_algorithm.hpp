@@ -193,17 +193,6 @@ class ExportAlgorithm : public AlgorithmicBase
 		void setNYN( uint NYN_ );
 		uint getNYN( ) const;
 
-		/** Opens given file and prepares it for exporting algorithm.
-		 *
-		 *	@param[in] dirName				Name of directory in which to open the file.
-		 *	@param[in] fileName				Name of file to be opened.
-		 *
-		 *  \return Output stream.
-		 */
-//		std::ofstream& openFile(	const std::string& dirName,
-//									const std::string& fileName
-//									) const;
-
     protected:
 
 		uint NX;							/**< Number of differential states. */

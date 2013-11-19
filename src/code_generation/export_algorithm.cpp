@@ -142,32 +142,6 @@ uint ExportAlgorithm::getNYN( ) const
 	return NYN;
 }
 
-
-
-//std::ofstream& ExportAlgorithm::openFile(	const std::string& dirName,
-//											const std::string& fileName
-//											) const
-//{
-//	// TODO Where is the file closed???
-//
-//	std::stringstream fullFileName;
-//    fullFileName << dirName << "/" << fileName;
-//
-//    std::ofstream stream( fullFileName.str().c_str() );
-//    if (stream.good() == false)
-//    {
-//    	LOG( LVL_DEBUG ) << "Could not open the output stream: " << fullFileName.str() << endl;
-//    	ACADOFATAL( RET_CAN_NOT_WRITE_INTO_FILE );
-//    }
-//
-//	acadoPrintAutoGenerationNotice( stream );
-//
-//	if ( commonHeaderName.empty() == false )
-//		stream << "#include \"" << commonHeaderName << "\"" << endl << endl << endl;
-//
-//	return stream;
-//}
-
 CLOSE_NAMESPACE_ACADO
 
 // end of file.
