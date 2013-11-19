@@ -13,7 +13,7 @@ plot(x_r, y_r, 'gx', 'MarkerSize', 16, 'Linewidth', 2);
 text(H-0.08,H+0.045,['current time: ' num2str(time(end)) 's'],'FontSize',15);
 plot(state_sim(end,1),H,'ks','MarkerSize',30,'Linewidth',3);
 
-alpha = state_sim(end,5);
+alpha = state_sim(end,7);
 xB = state_sim(end,1)+state_sim(end,3)*sin(alpha);
 yB = H-state_sim(end,3)*cos(alpha);
 

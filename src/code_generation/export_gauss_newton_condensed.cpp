@@ -1108,7 +1108,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 				ExportForLoop eLoop(iCol, 0, row);
 
 				// row - 1, col -> blk
-				eLoop.addStatement( iBlk == row * (row - 1) + iCol );
+				eLoop.addStatement( iBlk == row * (row - 1) / 2 + iCol );
 				eLoop.addStatement(
 						A.getSubMatrix(rowOffset + intRowOffset, rowOffset + intRowOffset + dim,
 								colOffset + iCol * NU, colOffset + (iCol + 1) * NU) ==
