@@ -32,11 +32,9 @@
 #include <acado/code_generation/ocp_export.hpp>
 #include <acado/code_generation/export_simulink_interface.hpp>
 #include <acado/code_generation/export_auxiliary_functions.hpp>
+#include <acado/code_generation/export_common_header.hpp>
 
 #include <acado/code_generation/templates/templates.hpp>
-
-#include <sstream>
-#include <string>
 
 using namespace std;
 
@@ -461,131 +459,6 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	int hardcodeConstraintValues;
 	get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
 
-	string fileName;
-	fileName = _dirName + "/" + _fileName;
-	ExportFile acadoHeader(fileName, "", _realString, _intString, _precision);
-
-	// TODO Here we might put it to uppercase...
-	string moduleName = getName();
-
-	acadoHeader
-		<< "#ifndef " << moduleName << "_COMMON_H\n"
-		<< "#define " << moduleName << "_COMMON_H\n\n"
-		<< "#include <math.h>\n";
-
-	if ((QPSolverName)qpSolver == QP_FORCES)
-		acadoHeader.addStatement( "#include <string.h>\n" );
-
-	acadoHeader.addLinebreak( 2 );
-	acadoHeader.addStatement(
-			"#ifndef __MATLAB__\n"
-			"#ifdef __cplusplus\n"
-			"extern \"C\"\n"
-			"{\n"
-			"#endif /* __cplusplus */\n"
-			"#endif /* __MATLAB__ */\n\n"
-	);
-
-	acadoHeader.addStatement(
-			"/** \\defgroup acado_solver ACADO Optimal Control Problem (OCP) solver */\n"
-			"/** @{ */\n\n"
-	);
-
-	switch ( (QPSolverName)qpSolver )
-	{
-	case QP_QPOASES:
-		acadoHeader.addStatement(
-				std::string("#include \"") + getName() + "_qpoases_interface.hpp\"\n"
-		);
-
-		break;
-
-	case QP_FORCES:
-
-		acadoHeader.addStatement( "/** Definition of the floating point data type. */\n" );
-		if ( (bool)useSinglePrecision == true )
-			acadoHeader.addStatement( "typedef float real_t;\n" );
-		else
-			acadoHeader.addStatement( "typedef double real_t;\n" );
-
-		break;
-
-	case QP_QPDUNES:
-		acadoHeader.addStatement(
-				"#include \"qpDUNES.h\"\n"
-		);
-
-		break;
-
-	default:
-		return ACADOERROR( RET_INVALID_OPTION );
-
-	}
-	acadoHeader.addLinebreak( 2 );
-
-	//
-	// Some common defines
-	//
-	acadoHeader.addStatement(
-			"/*\n"
-			" * Common definitions\n"
-			" */\n\n"
-	);
-
-	stringstream s;
-
-	s	<< "/** Number of control/estimation intervals. */" << endl
-		<< "#define ACADO_N   " << ocp.getN() << endl
-		<< "/** Number of differential variables. */" << endl
-		<< "#define ACADO_NX  " << ocp.getNX() << endl
-		<< "/** Number of differential derivative variables. */" << endl
-		<< "#define ACADO_NXD " << ocp.getNDX() << endl
-		<< "/** Number of algebraic variables. */" << endl
-		<< "#define ACADO_NXA " << ocp.getNXA() << endl
-		<< "/** Number of control variables. */" << endl
-		<< "#define ACADO_NU  " << ocp.getNU() << endl
-		<< "/** Number of parameters (which are NOT optimization variables). */" << endl
-		<< "#define ACADO_NP  " << ocp.getNP() << endl
-		<< "/** Number of references/measurements per node on the first N nodes. */" << endl
-		<< "#define ACADO_NY  " << solver->getNY() << endl
-		<< "/** Number of references/measurements on the last (N + 1)st node. */" << endl
-		<< "#define ACADO_NYN " << solver->getNYN() << endl;
-
-	acadoHeader.addStatement( s.str().c_str() );
-	acadoHeader.addLinebreak( 1 );
-
-	s.str( string() );
-	s 	<< "/** qpOASES QP solver indicator. */" << endl
-		<< "#define ACADO_QPOASES 0" << endl
-		<< "/** FORCES QP solver indicator.*/" << endl
-		<< "#define ACADO_FORCES  1" << endl
-		<< "/** qpDUNES QP solver indicator.*/" << endl
-		<< "#define ACADO_QPDUNES 2" << endl
-		<< "/** Indicator for determining the QP solver used by the ACADO solver code. */" << endl;
-
-	acadoHeader.addStatement( s.str().c_str() );
-	switch ( (QPSolverName)qpSolver )
-	{
-	case QP_QPOASES:
-		acadoHeader.addStatement( "#define ACADO_QP_SOLVER ACADO_QPOASES\n" );
-
-		break;
-
-	case QP_FORCES:
-		acadoHeader.addStatement( "#define ACADO_QP_SOLVER ACADO_FORCES\n" );
-
-		break;
-
-	case QP_QPDUNES:
-		acadoHeader.addStatement( "#define ACADO_QP_SOLVER ACADO_QPDUNES\n" );
-
-		break;
-
-	default:
-		return ACADOERROR( RET_INVALID_OPTION );
-
-	}
-
 	int fixInitialState;
 	get(FIX_INITIAL_STATE, fixInitialState);
 	int useAC;
@@ -593,94 +466,59 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	int covCalc;
 	get(CG_COMPUTE_COVARIANCE_MATRIX, covCalc);
 
-	s.str( string() );
-	s	<< "/** Indicator for fixed initial state. */" << endl
-		<< "#define ACADO_INITIAL_STATE_FIXED " << fixInitialState << endl
-		<< "/** Indicator for type of fixed weighting matrices. */" << endl
-		<< "#define ACADO_WEIGHTING_MATRICES_TYPE " << (unsigned)solver->weightingMatricesType() << endl
-		<< "/** Flag indicating whether constraint values are hard-coded or not. */" << endl
-		<< "#define ACADO_HARDCODED_CONSTRAINT_VALUES " << hardcodeConstraintValues << endl
-		<< "/** Providing interface for arrival cost. */" << endl
-		<< "#define ACADO_USE_ARRIVAL_COST " << useAC << endl
-		<< "/** Compute covariance matrix of the last state estimate. */" << endl
-		<< "#define ACADO_COMPUTE_COVARIANCE_MATRIX " << covCalc << endl;
-	acadoHeader.addStatement( s.str().c_str() );
+	string fileName;
+	fileName = _dirName + "/" + _fileName;
 
-	acadoHeader.addLinebreak( 1 );
+	map<string, pair<string, string> > options;
+
+	options[ "ACADO_N" ]   = make_pair(toString( ocp.getN() ),   "Number of control/estimation intervals.");
+	options[ "ACADO_NX" ]  = make_pair(toString( ocp.getNX() ),  "Number of differential variables.");
+	options[ "ACADO_NXD" ] = make_pair(toString( ocp.getNDX() ), "Number of differential derivative variables.");
+	options[ "ACADO_NXA" ] = make_pair(toString( ocp.getNXA() ), "Number of algebraic variables.");
+	options[ "ACADO_NU" ]  = make_pair(toString( ocp.getNU() ),  "Number of control variables.");
+	options[ "ACADO_NP" ]  = make_pair(toString( ocp.getNP() ),  "Number of parameters (which are NOT optimization variables).");
+	options[ "ACADO_NY" ]  = make_pair(toString( solver->getNY() ),  "Number of references/measurements per node on the first N nodes.");
+	options[ "ACADO_NYN" ] = make_pair(toString( solver->getNYN() ), "Number of references/measurements on the last (N + 1)st node.");
+
+	options[ "ACADO_INITIAL_STATE_FIXED" ] =
+			make_pair(toString( fixInitialState ), "Indicator for fixed initial state.");
+	options[ "ACADO_WEIGHTING_MATRICES_TYPE" ] =
+			make_pair(toString( (unsigned)solver->weightingMatricesType() ), "Indicator for type of fixed weighting matrices.");
+	options[ "ACADO_HARDCODED_CONSTRAINT_VALUES" ] =
+			make_pair(toString( hardcodeConstraintValues ), "Flag indicating whether constraint values are hard-coded or not.");
+	options[ "ACADO_USE_ARRIVAL_COST" ] =
+			make_pair(toString( useAC ), "Providing interface for arrival cost.");
+	options[ "ACADO_COMPUTE_COVARIANCE_MATRIX" ] =
+			make_pair(toString( covCalc ), "Compute covariance matrix of the last state estimate.");
 
 	//
 	// ACADO variables and workspace
 	//
-	acadoHeader.addStatement(
-			"/*\n"
-			" * Globally used structure definitions\n"
-			" */\n\n"
-	);
+	ExportStatementBlock variablesBlock;
+	stringstream variables;
 
-	acadoHeader.addStatement(
-			"/** The structure containing the user data.\n"
-			" * \n"
-			" *  Via this structure the user \"communicates\" with the solver code.\n"
-			" */\n"
-	);
-	acadoHeader.addStatement( "typedef struct ACADOvariables_\n{\n" );
-
-	if ( collectDataDeclarations( acadoHeader,ACADO_VARIABLES ) != SUCCESSFUL_RETURN )
+	if (collectDataDeclarations(variablesBlock, ACADO_VARIABLES) != SUCCESSFUL_RETURN)
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+	variablesBlock.exportCode(variables, _realString, _intString, _precision);
 
-	acadoHeader.addStatement( "} ACADOvariables;\n" );
-	acadoHeader.addLinebreak( 2 );
+	ExportStatementBlock workspaceBlock;
+	stringstream workspace;
 
-	acadoHeader.addStatement(
-			"/** Private workspace used by the auto-generated code.\n"
-			" * \n"
-			" *  Data members of this structure are private to the solver.\n"
-			" *  In other words, the user code should not modify values of this \n"
-			" *  structure. \n"
-			" */\n"
-	);
-	acadoHeader.addStatement( "typedef struct ACADOworkspace_\n{\n" );
-
-	if (collectDataDeclarations(acadoHeader, ACADO_WORKSPACE) != SUCCESSFUL_RETURN )
+	if (collectDataDeclarations(workspaceBlock, ACADO_WORKSPACE) != SUCCESSFUL_RETURN)
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+	workspaceBlock.exportCode(workspace, _realString, _intString, _precision);
 
-	acadoHeader.addStatement( "} ACADOworkspace;\n" );
-	acadoHeader.addLinebreak( 2 );
+	ExportStatementBlock functionsBlock;
+	stringstream functions;
 
-	acadoHeader.addStatement(
-			"/* \n"
-			" * Forward function declarations. \n"
-			" */\n\n"
-	);
-
-	if (collectFunctionDeclarations( acadoHeader ) != SUCCESSFUL_RETURN)
+	if (collectFunctionDeclarations( functionsBlock ) != SUCCESSFUL_RETURN)
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
-	acadoHeader.addLinebreak( 2 );
+	functionsBlock.exportCode(functions, _realString);
 
-	acadoHeader.addStatement(
-			"/* \n"
-			" * Extern declarations. \n"
-			" */\n\n"
-			"extern ACADOworkspace acadoWorkspace;\n"
-			"extern ACADOvariables acadoVariables;\n"
-	);
-	acadoHeader.addLinebreak( 2 );
+	ExportCommonHeader ech(fileName, "", _realString, _intString, _precision);
+	ech.configure( getName(), useSinglePrecision, (QPSolverName)qpSolver, options, variables.str(), workspace.str(), functions.str());
 
-	acadoHeader.addStatement(
-			"/** @} */\n\n"
-	);
-
-	acadoHeader.addStatement(
-			"#ifndef __MATLAB__\n"
-			"#ifdef __cplusplus\n"
-			"} /* extern \"C\" */\n"
-			"#endif /* __cplusplus */\n"
-			"#endif /* __MATLAB__ */\n\n"
-			"#endif /* Close the module */\n"
-	);
-
-	return acadoHeader.exportCode( );
+	return ech.exportCode();
 }
-
 
 CLOSE_NAMESPACE_ACADO

@@ -52,6 +52,8 @@ SET( SOLVER_SFUN_HEADER acado_solver_sfunction.h.in)
 
 SET( DUMMY_TEST_FILE dummy_test_file.in)
 
+SET( COMMON_HEADER_TEMPLATE acado_common_header.h.in)
+
 #
 # Configure templates
 #
