@@ -650,6 +650,34 @@ returnValue Objective::addLSQEndTerm(const DMatrix& S, const std::string& h)
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue Objective::addLSQ(const BMatrix& S, const Function& h)
+{
+	cgLsqElements.push_back(LsqData(S.cast<double>(), h, false));
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue Objective::addLSQEndTerm(const BMatrix& S, const Function& h)
+{
+	cgLsqEndTermElements.push_back(LsqData(S.cast<double>(), h, false));
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue Objective::addLSQ(const BMatrix& S, const std::string& h)
+{
+	cgExternLsqElements.push_back(LsqExternData(S.cast<double>(), h, false));
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue Objective::addLSQEndTerm(const BMatrix& S, const std::string& h)
+{
+	cgExternLsqEndTermElements.push_back(LsqExternData(S.cast<double>(), h, false));
+
+	return SUCCESSFUL_RETURN;
+}
+
 returnValue Objective::addLSQLinearTerms(const DVector& Slx, const DVector& Slu)
 {
 	DMatrix evSlx( Slx );

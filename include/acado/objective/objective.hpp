@@ -191,6 +191,14 @@ class Objective : public LagrangeTerm
 
         returnValue addLSQEndTerm(const DMatrix& S, const std::string& h);
 
+        returnValue addLSQ(const BMatrix& S, const Function& h);
+
+        returnValue addLSQEndTerm(const BMatrix& S, const Function& h);
+
+        returnValue addLSQ(const BMatrix& S, const std::string& h);
+
+        returnValue addLSQEndTerm(const BMatrix& S, const std::string& h);
+
         returnValue addLSQLinearTerms(const DVector& Slx, const DVector& Slu);
 
 // =======================================================================================

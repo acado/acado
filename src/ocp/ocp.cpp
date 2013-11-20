@@ -341,12 +341,32 @@ returnValue OCP::minimizeLSQEndTerm(const DMatrix& S, const Function& h)
 	return objective.addLSQEndTerm(S, h);
 }
 
+returnValue OCP::minimizeLSQ(const BMatrix& S, const Function& h)
+{
+	return objective.addLSQ(S, h);
+}
+
+returnValue OCP::minimizeLSQEndTerm(const BMatrix& S, const Function& h)
+{
+	return objective.addLSQEndTerm(S, h);
+}
+
 returnValue OCP::minimizeLSQ(const DMatrix& S, const std::string& h)
 {
 	return objective.addLSQ(S, h);
 }
 
 returnValue OCP::minimizeLSQEndTerm(const DMatrix& S, const std::string& h)
+{
+	return objective.addLSQEndTerm(S, h);
+}
+
+returnValue OCP::minimizeLSQ(const BMatrix& S, const std::string& h)
+{
+	return objective.addLSQ(S, h);
+}
+
+returnValue OCP::minimizeLSQEndTerm(const BMatrix& S, const std::string& h)
 {
 	return objective.addLSQEndTerm(S, h);
 }

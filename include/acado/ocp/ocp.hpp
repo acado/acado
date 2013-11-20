@@ -208,9 +208,20 @@ public:
 	returnValue minimizeLSQ(	const DMatrix& S,	/**< a weighting matrix */
 								const Function& h	/**< the LSQ-Function   */ );
 
+	/** Pass the sparsity pattern of the weighting matrix to the code generator.
+	 *  \note Applicable only for automatic code generation. */
+	returnValue minimizeLSQ(	const BMatrix& S,	/**< a weighting matrix */
+								const Function& h	/**< the LSQ-Function   */ );
+
 	/** \note Applicable only for automatic code generation. */
 	returnValue minimizeLSQ(	const DMatrix& S,		/**< a weighting matrix */
 								const std::string& h	/**< the externally defined LSQ-Function   */ );
+
+	/** Pass the sparsity pattern of the weighting matrix to the code generator.
+	 *  \note Applicable only for automatic code generation. */
+	returnValue minimizeLSQ(	const BMatrix& S,		/**< a weighting matrix */
+								const std::string& h	/**< the externally defined LSQ-Function   */ );
+
 	/** @} */
 
 	/** \name Least Squares end terms.
@@ -242,6 +253,17 @@ public:
 	/** \note Applicable only for automatic code generation. */
 	returnValue minimizeLSQEndTerm(	const DMatrix& S,		/**< a weighting matrix */
 									const std::string& m	/**< the externally defined LSQ-Function   */ );
+
+	/** Pass the sparsity pattern of the weighting matrix to the code generator.
+	 *  \note Applicable only for automatic code generation. */
+	returnValue minimizeLSQEndTerm(	const BMatrix& S,		/**< a weighting matrix */
+									const Function& m		/**< the LSQ-Function   */ );
+
+	/** Pass the sparsity pattern of the weighting matrix to the code generator.
+	 *  \note Applicable only for automatic code generation. */
+	returnValue minimizeLSQEndTerm(	const BMatrix& S,		/**< a weighting matrix */
+									const std::string& m	/**< the externally defined LSQ-Function   */ );
+
 	/** @} */
 
 	/** \name Set linear terms in the LSQ formulation.
