@@ -249,7 +249,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 				else
 				{
 					if (rhs2->isZero(i, j) == false)
-						stream << _sign << " " << rhs2->get(i, j);
+						stream << _sign << " " << rhs2->get(i, j) << ";\n";
 					else
 						stream << "0.0;\n";
 				}

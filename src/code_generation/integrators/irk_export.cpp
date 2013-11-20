@@ -1086,7 +1086,8 @@ returnValue ImplicitRungeKuttaExport::evaluateDerivedPolynomial( ExportStatement
 
 DVector ImplicitRungeKuttaExport::divideMeasurements( uint index )
 {
-	DVector meas = zeros<double>(1,grid.getNumIntervals());
+	DVector meas( grid.getNumIntervals() );
+	meas.setZero();
 
 	for( uint i = 0; i < outputGrids[index].getNumIntervals(); i++ ) {
 		uint interv = getIntegrationInterval( outputGrids[index].getTime(i) );
