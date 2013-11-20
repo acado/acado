@@ -227,7 +227,7 @@ protected:
 	ExportVariable d;
 
 	ExportVariable evGx; // stack of sensitivities w.r.t. x
-	ExportVariable evGu; // -- || --
+	ExportVariable evGu; // stack of sensitivities w.r.t. u
 
 	/** @} */
 

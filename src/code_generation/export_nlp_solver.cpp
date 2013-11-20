@@ -314,9 +314,6 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
 
-	// Temporary variables
-	ExportVariable objSTemp, objSEndTermTemp;
-
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Setup arrival cost calc variables
@@ -351,29 +348,27 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	{
 		if (lsqExternElements.size() != 1 || lsqExternEndTermElements.size() != 1)
 			return ACADOERROR( RET_INVALID_ARGUMENTS );
-
-		objSTemp = lsqExternElements[ 0 ].W;
-		objSTemp.setDataStruct( ACADO_VARIABLES );
-		objSEndTermTemp = lsqExternEndTermElements[ 0 ].W;
-		objSEndTermTemp.setDataStruct( ACADO_VARIABLES );
-
-		if (objSTemp.getGivenMatrix().isSquare() == false ||
-				objSEndTermTemp.getGivenMatrix().isSquare() == false)
+		if (lsqExternElements[ 0 ].W.isSquare() == false || lsqExternElements[ 0 ].W.isSquare() == false)
 			return ACADOERROR( RET_INVALID_ARGUMENTS );
 
-		setNY( objSTemp.getNumRows() );
-		setNYN( objSEndTermTemp.getNumRows() );
+		setNY( lsqExternElements[ 0 ].W.getNumRows() );
+		setNYN( lsqExternEndTermElements[ 0 ].W.getNumRows() );
 
 		if (variableObjS == YES)
 		{
 			objS.setup("W", N * NY, NY, REAL, ACADO_VARIABLES);
 		}
+		else if (lsqExternElements[ 0 ].givenW == false)
+		{
+			objS.setup("W", lsqExternElements[ 0 ].W, REAL, ACADO_VARIABLES, false, "", false);
+		}
 		else
 		{
-			objS.setup("W", NY, NY, REAL, ACADO_VARIABLES);
+			objS.setup("W", lsqExternElements[ 0 ].W, REAL, ACADO_VARIABLES);
 		}
-		objSEndTerm = CasADi::deepcopy( objSEndTermTemp );
-		objSEndTerm.setName( "WN" );
+
+		objSEndTerm.setup("WN", lsqExternEndTermElements[ 0 ].W,
+				REAL, ACADO_VARIABLES, false, "", lsqExternEndTermElements[ 0 ].givenW);
 
 		evaluateExternLSQ = lsqExternElements[ 0 ].h;
 		evaluateExternLSQEndTerm = lsqExternEndTermElements[ 0 ].h;
@@ -416,26 +411,30 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	LsqElements lsqEndTermElements;
 
 	_objective.getLSQTerms( lsqElements );
+	_objective.getLSQEndTerms( lsqEndTermElements );
 
 	if(	lsqElements.size() == 0 )
 		return ACADOERRORTEXT(RET_INITIALIZE_FIRST, "Objective function is not initialized.");
-
-	else if (lsqElements.size() > 1)
+	if (lsqElements.size() > 1 || lsqEndTermElements.size() > 1)
 		return ACADOERRORTEXT(RET_INITIALIZE_FIRST,
 				"Current implementation of code generation module\n"
 				"supports only one LSQ term definition per one OCP." );
 
-	_objective.getLSQEndTerms( lsqEndTermElements );
+	if (lsqElements[ 0 ].W.isSquare() == false)
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Weighting matrices must be square.");
+	if (lsqElements[ 0 ].W.getNumRows() != (unsigned)lsqElements[ 0 ].h.getDim())
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Wrong dimensions of the weighting matrix.");
+
+	if ( lsqEndTermElements.size() == 0 )
+		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost must be defined");
+
+	if (lsqEndTermElements[ 0 ].W.isSquare() == false)
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Weighting matrices must be square.");
+	if (lsqEndTermElements[ 0 ].W.getNumRows() != (unsigned)lsqEndTermElements[ 0 ].h.getDim())
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Wrong dimensions of the weighting matrix.");
 
 	objF = lsqElements[ 0 ].h;
 	setNY( objF.getDim() );
-
-	objSTemp = lsqElements[ 0 ].W;
-
-	if (objSTemp.getNumCols() != objSTemp.getNumRows())
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Weighting matrices must be square.");
-	if (objSTemp.getNumRows() != (unsigned)objF.getDim())
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Wrong dimensions of the weighting matrix.");
 
 	DifferentialState dummy0;
 	Control dummy1;
@@ -454,27 +453,24 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	// TODO FunctionEvaluationTree: add isConstant()
 
 	// Setup the S matrix
-	if ( objSTemp.isGiven() == false || (objSTemp.getDim() != (NY * NY)) )
+	if (lsqElements[ 0 ].givenW == false)
 	{
 		if ( variableObjS == YES )
 		{
 			// We allow user to define different w. matrix on every node
-
-			objS.setup("W", N * NY, NY, REAL, ACADO_VARIABLES);
+			objS.setup("W", N * NY, NY, REAL, ACADO_VARIABLES, false);
 		}
 		else
 		{
-			objS.setup("W", NY, NY, REAL, ACADO_VARIABLES);
+			objS.setup("W", lsqElements[ 0 ].W, REAL, ACADO_VARIABLES, false, "", false);
 		}
 	}
 	else
 	{
-		DMatrix mObjS = objSTemp.getGivenMatrix();
-
-		if (mObjS.isPositiveDefinite() == false)
+		if (lsqElements[ 0 ].W.isPositiveSemiDefinite() == false)
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
 
-		objS.setup("W", mObjS, REAL, ACADO_VARIABLES);
+		objS.setup("W", lsqElements[ 0 ].W, REAL, ACADO_VARIABLES);
 	}
 
 	Expression expF;
@@ -628,10 +624,6 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	if ( lsqEndTermElements.size() == 0 )
-		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost must be defined");
-
-	objSEndTermTemp = lsqEndTermElements[ 0 ].W;
 	objFEndTerm = lsqEndTermElements[ 0 ].h;
 
 	if (objFEndTerm.getNU() > 0)
@@ -639,24 +631,17 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 	setNYN( objFEndTerm.getDim() );
 
-	if (objSEndTermTemp.getNumCols() != objSEndTermTemp.getNumRows())
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Weighting matrices must be square.");
-	if (objSEndTermTemp.getNumRows() != (unsigned)objFEndTerm.getDim())
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Wrong dimensions of the weighting matrix.");
-
 	// Setup the SN matrix
-	if (objSEndTermTemp.isGiven() == false || objSEndTermTemp.getDim() != (NYN * NYN))
+	if (lsqEndTermElements[ 0 ].givenW == false)
 	{
-		objSEndTerm.setup("WN", NYN, NYN, REAL, ACADO_VARIABLES);
+		objSEndTerm.setup("WN", lsqEndTermElements[ 0 ].W, REAL, ACADO_VARIABLES, false, "", false);
 	}
 	else
 	{
-		DMatrix mWN = objSEndTermTemp.getGivenMatrix();
-
-		if (mWN.isPositiveDefinite() == false)
+		if (lsqEndTermElements[ 0 ].W.isPositiveDefinite() == false)
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
 
-		objSEndTerm.setup("WN", mWN, REAL, ACADO_VARIABLES);
+		objSEndTerm.setup("WN", lsqEndTermElements[ 0 ].W, REAL, ACADO_VARIABLES);
 	}
 
 	Expression expFEndTerm;

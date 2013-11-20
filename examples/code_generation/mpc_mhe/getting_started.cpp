@@ -58,13 +58,16 @@ int main( )
 	h << p << v << phi << omega << a;
 	hN << p << v << phi << omega;
 
+	// Provide defined weighting matrices:
 	DMatrix W = eye<double>( h.getDim() );
 	DMatrix WN = eye<double>( hN.getDim() );
 	WN *= 5;
 
-	// Or:
-//	ExportVariable W(h.getDim(), h.getDim());
-//	ExportVariable WN(hN.getDim(), hN.getDim());
+	// Or provide sparsity patterns for the weighting matrices
+//	BMatrix W(h.getDim(), h.getDim());
+//	BMatrix WN(hN.getDim(), hN.getDim());
+//	W.setOnes();
+//	WN.setOnes();
 
 	//
 	// Optimal Control Problem

@@ -105,7 +105,8 @@ class ExportVariable : public ExportArgument
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
 						bool _callItByValue = false,
-						const std::string& _prefix = std::string()
+						const std::string& _prefix = std::string(),
+						bool _isGiven = true
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -205,7 +206,8 @@ class ExportVariable : public ExportArgument
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
 								bool _callItByValue = false,
-								const std::string& _prefix = std::string()
+								const std::string& _prefix = std::string(),
+								bool _isGiven = true
 								);
 
 		/** Returns value of given component.

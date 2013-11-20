@@ -75,10 +75,12 @@ ExportVariable::ExportVariable(	const std::string& _name,
 								ExportType _type,
 								ExportStruct _dataStruct,
 								bool _callItByValue,
-								const std::string& _prefix
+								const std::string& _prefix,
+								bool _isGiven
 								)
 {
-	assignNode(new ExportVariableInternal(_name, DMatrixPtr(new DMatrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name,
+			DMatrixPtr(new DMatrix( _data * (_isGiven == true ? 1.0 : undefinedEntry) )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 ExportVariable::ExportVariable(	unsigned _nRows,
@@ -166,10 +168,12 @@ ExportVariable& ExportVariable::setup(	const std::string& _name,
 										ExportType _type,
 										ExportStruct _dataStruct,
 										bool _callItByValue,
-										const std::string& _prefix
+										const std::string& _prefix,
+										bool _isGiven
 										)
 {
-	assignNode(new ExportVariableInternal(_name, DMatrixPtr(new DMatrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name,
+			DMatrixPtr(new DMatrix(_data * (_isGiven == true ? 1.0 : undefinedEntry))), _type, _dataStruct, _callItByValue, _prefix));
 
 	return *this;
 }
