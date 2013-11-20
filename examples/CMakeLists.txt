@@ -110,7 +110,7 @@ SET( EXAMPLE_DIRS
 	basic_data_structures/matrix_vector
 	basic_data_structures/symbolics
 	basic_data_structures/variables_grid
-##	code_generation/simulation
+	code_generation/simulation
 	controller
 	getting_started
 	integration_algorithm

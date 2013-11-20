@@ -32,9 +32,11 @@
 
 #include <acado_code_generation.hpp>
 
-int main() {
-	USING_NAMESPACE_ACADO
-	
+using namespace std;
+USING_NAMESPACE_ACADO
+
+int main()
+{
 	// Define variables, functions and constants:
 	// ----------------------------------------------------------
     DifferentialState   x;      
@@ -107,7 +109,7 @@ int main() {
     sim1.addOutput( h, 5 );
 	sim1.setTimingSteps( 10000 );
     
-    acadoPrintf( "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (semi-explicit):\n-----------------------------------------------------------\n" );
+    cout << "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (semi-explicit):\n-----------------------------------------------------------\n";
     sim1.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
  
  
@@ -123,7 +125,7 @@ int main() {
     sim2.addOutput( h, 5 );
 	sim2.setTimingSteps( 10000 );
     
-    acadoPrintf( "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (implicit):\n-----------------------------------------------------------\n" );
+    cout << "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (implicit):\n-----------------------------------------------------------\n";
     sim2.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
     
     
@@ -141,7 +143,7 @@ int main() {
     sim3.addOutput( "out", "out_jac", 2, 5 );
 	sim3.setTimingSteps( 10000 );
     
-    acadoPrintf( "-----------------------------------------------------------\n  Using an externally defined Pendulum DAE model:\n-----------------------------------------------------------\n" );
+    cout << "-----------------------------------------------------------\n  Using an externally defined Pendulum DAE model:\n-----------------------------------------------------------\n";
     sim3.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
     
     

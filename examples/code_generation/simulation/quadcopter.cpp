@@ -22,12 +22,14 @@
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+
 #include <acado_toolkit.hpp>
 
+using namespace std;
 USING_NAMESPACE_ACADO
 
-int main( ){
-	
+int main( )
+{
 	// Define variables, functions and constants:
 	// ----------------------------------------------------------
     DifferentialState   dT1;
@@ -127,9 +129,9 @@ int main( ){
 	
 	// LINEAR INPUT SYSTEM (STAGE 1):
 	DMatrix M1, A1, B1;
-	M1 = eye(12);
-	A1 = zeros(12,12);
-	B1 = zeros(12,4);
+	M1 = eye<double>(12);
+	A1 = zeros<double>(12,12);
+	B1 = zeros<double>(12,4);
 	
 	A1(4,0) = 1.0;
 	A1(5,1) = 1.0;
@@ -159,8 +161,8 @@ int main( ){
 	
 	// LINEAR OUTPUT SYSTEM (STAGE 3):
 	DMatrix M3, A3;
-	M3 = eye(6);
-	A3 = zeros(6,6);
+	M3 = eye<double>(6);
+	A3 = zeros<double>(6,6);
 	
 	A3(3,0) = 1.0;
 	A3(4,1) = 1.0;
@@ -186,7 +188,7 @@ int main( ){
 	sim1.set( NUM_INTEGRATOR_STEPS, 50 );
 	sim1.setTimingSteps( 10000 );
 	
-	acadoPrintf( "-----------------------------------------------------------\n  Using a QuadCopter ODE model in fully nonlinear form:\n-----------------------------------------------------------\n" );
+	cout << "-----------------------------------------------------------\n  Using a QuadCopter ODE model in fully nonlinear form:\n-----------------------------------------------------------\n";
 	sim1.exportAndRun( "quadcopter_export", "init_quadcopter.txt", "controls_quadcopter.txt" );
 
 
@@ -202,9 +204,8 @@ int main( ){
 	sim2.set( NUM_INTEGRATOR_STEPS, 50 );
 	sim2.setTimingSteps( 10000 );
 	
-	acadoPrintf( "-----------------------------------------------------------\n  Using a QuadCopter ODE model in 3-stage format:\n-----------------------------------------------------------\n" );
+	cout << "-----------------------------------------------------------\n  Using a QuadCopter ODE model in 3-stage format:\n-----------------------------------------------------------\n";
 	sim2.exportAndRun( "quadcopter_export", "init_quadcopter.txt", "controls_quadcopter.txt" );
-
 
 	return 0;
 }
