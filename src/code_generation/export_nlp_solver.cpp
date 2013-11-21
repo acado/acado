@@ -486,19 +486,20 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	Fx << expFx;
 	Fu << expFu;
 
-	if ( Fx.getNX() == 0 && Fx.getNU() == 0 )
+	if (expFx.isDependingOn( VT_CONTROL ) == true)
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
+				"Jacobian of the objective function w.r.t diff. states depends on controls.");
+	if (expFu.isDependingOn( VT_DIFFERENTIAL_STATE ) == true)
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
+				"Jacobian of the objective function w.r.t diff. controls depends on states.");
+
+	if (Fx.isConstant() == true)
 	{
 		EvaluationPoint epFx( Fx );
 
-		DMatrix mFx(NY, NX);
-
 		DVector vFx = Fx.evaluate( epFx );
 
-		for (unsigned i = 0; i < NY; ++i)
-			for(unsigned j = 0; j < NX; ++j)
-				mFx(i, j) = vFx(i * NX + j);
-
-		objEvFx.setup("evFx", mFx, REAL, ACADO_WORKSPACE);
+		objEvFx.setup("evFx", Eigen::Map<DMatrix>(vFx.data(), NY, NX), REAL, ACADO_WORKSPACE);
 	}
 	else
 	{
@@ -510,19 +511,13 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 //	objF << expFx;
 //	evFx.setup("evFx", NY, NX, REAL, ACADO_WORKSPACE);
 
-	if ( Fu.getNX() == 0 && Fu.getNU() == 0 )
+	if (Fu.isConstant() == true)
 	{
 		EvaluationPoint epFu( Fu );
 
-		DMatrix mFu(NY, NU);
-
 		DVector vFu = Fu.evaluate( epFu );
 
-		for (unsigned i = 0; i < NY; ++i)
-			for(unsigned j = 0; j < NU; ++j)
-				mFu(i, j) = vFu(i * NU + j);
-
-		objEvFu.setup("evFu", mFu, REAL, ACADO_WORKSPACE);
+		objEvFu.setup("evFu", Eigen::Map<DMatrix>(vFu.data(), NY, NU), REAL, ACADO_WORKSPACE);
 	}
 	else
 	{
@@ -588,8 +583,6 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		Q2.setup("Q2", NX * N, NY, REAL, ACADO_WORKSPACE);
 	}
 
-	// TODO ExportVariable, add function isZero()
-	// TODO This if-then-else part should be done in more elegant way
 	if (objS.isGiven() == true && objEvFu.isGiven() == true)
 	{
 		// Precompute R1 and R2
@@ -654,20 +647,13 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	Function FEndTermX;
 	FEndTermX << expFEndTermX;
 
-	if ( FEndTermX.getNX() == 0 )
+	if (FEndTermX.isConstant() == true)
 	{
 		EvaluationPoint epFEndTermX( FEndTermX );
 
-		DMatrix mFEndX(NYN, NX);
-
 		DVector vFx = FEndTermX.evaluate( epFEndTermX );
 
-		// And now reshape vFx and vFu to export variables
-		for (unsigned i = 0; i < NYN; ++i)
-			for(unsigned j = 0; j < NX; ++j)
-				mFEndX(i, j) = vFx(i * NX + j);
-
-		objEvFxEnd.setup("evFxEnd", mFEndX, REAL, ACADO_WORKSPACE);
+		objEvFxEnd.setup("evFxEnd", DMatrix(NYN, NX, vFx.data()), REAL, ACADO_WORKSPACE);
 	}
 	else
 	{
