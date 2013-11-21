@@ -117,7 +117,7 @@ SET( EXAMPLE_DIRS
 	integrator
 	validated_integrator
 	multi_objective
-#	my_examples
+	my_examples
 	nlp
 	ocp
 	parameter_estimation
