@@ -349,6 +349,13 @@ BooleanType Function::isNonincreasing(){
     return BT_FALSE;
 }
 
+BooleanType Function::isConstant()
+{
+	if (evaluationTree.getMonotonicity() == MT_CONSTANT)
+		return BT_TRUE;
+	return BT_FALSE;
+}
+
 
 BooleanType Function::isAffine(){
 

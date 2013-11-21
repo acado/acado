@@ -313,6 +313,8 @@ public:
      */
      BooleanType isNonincreasing();
 
+     /** Checks whether function is a constant. */
+     BooleanType isConstant();
 
     /** Checks whether the function is affine.                    \n
      *  \return BT_FALSE if the expression is not affine          \n
