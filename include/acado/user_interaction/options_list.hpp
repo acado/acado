@@ -111,7 +111,7 @@ class OptionsList
 		 */
 		template< typename T >
 		inline returnValue add(	OptionsName name,
-								T& value );
+								const T& value );
 
 		/** Returns value of an existing option item of integer type.
 		 *
@@ -139,7 +139,7 @@ class OptionsList
 		 */
 		template< typename T >
 		inline returnValue set(	OptionsName name,
-								T& value
+								const T& value
 								);
 
 		/** Returns total number of option items in list.
@@ -200,7 +200,7 @@ class OptionsList
 		template< typename T >
 		struct OptionValue : public OptionValueBase
 		{
-			OptionValue( T& _value )
+			OptionValue( const T& _value )
 				: value( _value )
 			{}
 
@@ -239,7 +239,7 @@ inline OptionsItemType OptionsList::getType< std::string >() const
 
 template< typename T >
 inline returnValue OptionsList::add(	OptionsName name,
-										T& value
+										const T& value
 										)
 {
 	if (getType< T >() == OIT_UNKNOWN)
@@ -273,8 +273,8 @@ inline returnValue OptionsList::get(	OptionsName name,
 
 template< typename T >
 inline returnValue OptionsList::set(	OptionsName name,
-								T& value
-								)
+										const T& value
+										)
 {
 	if (getType< T >() == OIT_UNKNOWN)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );

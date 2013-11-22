@@ -98,6 +98,13 @@ inline returnValue AlgorithmicBase::get(	OptionsName name,
 	return userInteraction->get( name,value );
 }
 
+inline returnValue AlgorithmicBase::get(	OptionsName name,
+											std::string& value
+											) const
+{
+	return userInteraction->get( name,value );
+}
+
 
 inline returnValue AlgorithmicBase::get(	uint idx,
 											OptionsName name,

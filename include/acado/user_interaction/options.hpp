@@ -213,7 +213,7 @@ class Options
 		 *          RET_OPTIONS_LIST_CORRUPTED
 		 */
 		returnValue set(	OptionsName name,
-							std::string& value
+							const std::string& value
 							);
 
 		/** Sets value of an existing option item of integer type 
@@ -264,7 +264,7 @@ class Options
 		 */
 		returnValue set(	uint idx,
 							OptionsName name,
-							std::string& value
+							const std::string& value
 							);
 
 
@@ -406,6 +406,19 @@ class Options
 								double value
 								);
 
+		/** Add an option item with a given double default value to the all option lists.
+		 *
+		 *	@param[in] name		Name of new option item.
+		 *	@param[in] value	Default value of new option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_ALREADY_EXISTS, \n
+		 *          RET_OPTIONS_LIST_CORRUPTED
+		 */
+		returnValue addOption(	OptionsName name,
+								const std::string& value
+								);
+
 		/** Add an option item with a given integer default value to option list with given index.
 		 *
 		 *	@param[in] idx		Index of option list.
@@ -438,7 +451,21 @@ class Options
 								double value
 								);
 
-
+		/** Add an option item with a given double default value to option list with given index.
+		 *
+		 *	@param[in] idx		Index of option list.
+		 *	@param[in] name		Name of new option item.
+		 *	@param[in] value	Default value of new option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_ALREADY_EXISTS, \n
+		 *          RET_OPTIONS_LIST_CORRUPTED, \n
+		 *	        RET_INDEX_OUT_OF_BOUNDS
+		 */
+		returnValue addOption(	uint idx,
+								OptionsName name,
+								const std::string& value
+								);
 
     //
     // DATA MEMBERS:

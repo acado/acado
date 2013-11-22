@@ -146,6 +146,19 @@ class AlgorithmicBase
 							double value
 							);
 
+		/** Sets value of an existing option item of double type to a string value.
+		 *
+		 *	@param[in] name		Name of option item.
+		 *	@param[in] value	New value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS, \n
+		 *          RET_OPTIONS_LIST_CORRUPTED
+		 */
+		returnValue set(	OptionsName name,
+							const std::string& value
+							);
+
 		/** Sets value of an existing option item of integer type 
 		 *	within the option list of given index to a given value.
 		 *
@@ -315,6 +328,18 @@ class AlgorithmicBase
 		 */
 		inline returnValue get(	OptionsName name,
 								double& value
+								) const;
+
+		/** Returns value of an existing option item of string type.
+		 *
+		 *	@param[in]  name	Name of option item.
+		 *	@param[out] value	Value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS
+		 */
+		inline returnValue get(	OptionsName name,
+								std::string& value
 								) const;
 
 		/** Returns value of an existing option item of integer type 

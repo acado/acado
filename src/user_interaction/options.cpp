@@ -26,8 +26,8 @@
 
 /**
  *    \file src/user_interaction/options.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 12.06.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 #include <acado/user_interaction/options.hpp>
@@ -139,7 +139,7 @@ returnValue Options::set(	OptionsName name,
 }
 
 returnValue Options::set(	OptionsName name,
-							std::string& value
+							const std::string& value
 							)
 {
 	return lists[0].set( name,value );
@@ -170,7 +170,7 @@ returnValue Options::set(	uint idx,
 
 returnValue Options::set(	uint idx,
 							OptionsName name,
-							std::string& value
+							const std::string& value
 							)
 {
 	if ( idx >= getNumOptionsLists( ) )
@@ -331,6 +331,22 @@ returnValue Options::addOption(	OptionsName name,
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue Options::addOption(	OptionsName name,
+								const std::string& value
+								)
+{
+	returnValue returnvalue;
+
+	for( uint i=0; i<getNumOptionsLists( ); ++i )
+	{
+		returnvalue = lists[i].add( name,value );
+		if ( returnvalue != SUCCESSFUL_RETURN )
+			return returnvalue;
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
 
 
 returnValue Options::addOption(	uint idx,
@@ -348,6 +364,17 @@ returnValue Options::addOption(	uint idx,
 returnValue Options::addOption(	uint idx,
 								OptionsName name,
 								double value
+								)
+{
+	if ( idx >= getNumOptionsLists( ) )
+		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
+
+	return lists[idx].add( name,value );
+}
+
+returnValue Options::addOption(	uint idx,
+								OptionsName name,
+								const std::string& value
 								)
 {
 	if ( idx >= getNumOptionsLists( ) )

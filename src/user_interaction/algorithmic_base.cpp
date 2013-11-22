@@ -138,6 +138,13 @@ returnValue AlgorithmicBase::set(	OptionsName name,
 	return userInteraction->set( name,value );
 }
 
+returnValue AlgorithmicBase::set(	OptionsName name,
+									const std::string& value
+									)
+{
+	return userInteraction->set( name,value );
+}
+
 
 returnValue AlgorithmicBase::set(	uint idx,
 									OptionsName name,
