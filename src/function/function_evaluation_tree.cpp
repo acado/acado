@@ -914,7 +914,7 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 		stream << "const " << realString << "* xa = in + " << offset << ";" << endl;
 	offset += numXA;
 
-	if (numU > 0)
+	if (getNU() > 0)
 		stream << "const " << realString << "* u = in + " << offset << ";" << endl;
 	offset += numU;
 
@@ -940,7 +940,7 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 
 	if (getNT() > 0)
 		stream << "const " << realString << "* t = in + " << offset << ";" << endl;
-	offset += numXA;
+	offset += numDX;
 
     if (n > 0)
     {
