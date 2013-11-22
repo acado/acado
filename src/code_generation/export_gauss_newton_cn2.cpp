@@ -1445,8 +1445,10 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 {
 	ExportQpOasesInterface* qpInterface;
 
-	std::string folderName = dynamic_cast< ExportModule* >( userInteraction )->getExportFolderName();
-	std::string moduleName = dynamic_cast< ExportModule* >( userInteraction )->getName();
+	string folderName;
+	get(CG_EXPORT_FOLDER_NAME, folderName);
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
 	std::string sourceFile = folderName + "/" + moduleName + "_qpoases_interface.cpp";
 	std::string headerFile = folderName + "/" + moduleName + "_qpoases_interface.hpp";
 

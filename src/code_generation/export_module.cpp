@@ -46,19 +46,11 @@ ExportModule::ExportModule( ) : UserInteraction( )
 	setupOptions( );
 
 	commonHeaderName = "acado.h";
-	name = "acado";
-	exportFolderName = "acado_exported_code";
 }
 
 
 ExportModule::~ExportModule( )
 {}
-
-std::string ExportModule::getCommonHeaderName( ) const
-{
-	return commonHeaderName;
-}
-
 
 //
 // PROTECTED MEMBER FUNCTIONS:
@@ -101,32 +93,10 @@ returnValue ExportModule::setupOptions( )
 	addOption( CG_HARDCODE_CONSTRAINT_VALUES,    YES        );
 	addOption( CG_USE_ARRIVAL_COST,              NO         );
 
-	return SUCCESSFUL_RETURN;
-}
-
-returnValue ExportModule::setName(const std::string& _name)
-{
-	if ( _name.empty() == true )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
-
-	name = _name;
+	addOption( CG_MODULE_NAME, "acado" );
+	addOption( CG_EXPORT_FOLDER_NAME, "acado_export" );
 
 	return SUCCESSFUL_RETURN;
-}
-
-std::string ExportModule::getName() const
-{
-	return name;
-}
-
-const std::string& ExportModule::getExportFolderName() const
-{
-	return exportFolderName;
-}
-
-void ExportModule::setExportFolderName(const std::string& _name)
-{
-	exportFolderName = _name;
 }
 
 CLOSE_NAMESPACE_ACADO

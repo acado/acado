@@ -110,7 +110,8 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 	//
 	// Create the export folders
 	//
-	setExportFolderName( dirName );
+
+	set(CG_EXPORT_FOLDER_NAME, dirName);
 
 	returnValue dirStatus = acadoCreateFolder( dirName );
 	if (dirStatus != SUCCESSFUL_RETURN)

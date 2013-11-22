@@ -131,37 +131,6 @@ class ExportModule : public UserInteraction
 		virtual returnValue collectFunctionDeclarations(	ExportStatementBlock& declarations
 															) const = 0;
 
-		/** Returns the name of common header file.
-		 *
-		 *	\return Name of common header file
-		 */
-		std::string getCommonHeaderName( ) const;
-
-		/** \name Get/set module name.
-		 *
-		 *  \todo Module name is used to prefix the exported files.
-		 *
-		 * @{ */
-
-		/** Get module name. */
-		std::string getName() const;
-
-		/** Set module name. */
-		returnValue setName(const std::string& _name);
-
-		/** @} */
-
-		/** \name Get/set export folder name.
-		 * @{ */
-
-		/** Get export folder name */
-		const std::string& getExportFolderName() const;
-
-		/** Set export folder name */
-		void setExportFolderName(const std::string& _name);
-
-		/** @} */
-
 	protected:
 
 		/** Sets-up default options.
@@ -170,22 +139,10 @@ class ExportModule : public UserInteraction
 		 */
 		returnValue setupOptions( );
 
-
-    protected:
 		/** Name of common header file. */
 		std::string commonHeaderName;
-
-    private:
-		/** Module name. */
-		std::string name;
-		/** Name of a folder where the code is going to be exported. */
-		std::string exportFolderName;
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
 #endif  // ACADO_TOOLKIT_EXPORT_MODULE_HPP
-
-// end of file.

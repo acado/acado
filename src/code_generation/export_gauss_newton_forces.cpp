@@ -958,8 +958,9 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 	// Configure and export QP generator
 	//
 
-	std::string folderName = dynamic_cast< ExportModule* >( userInteraction )->getExportFolderName();
-	std::string outFile = folderName + "/acado_forces_generator.m";
+	string folderName;
+	get(CG_EXPORT_FOLDER_NAME, folderName);
+	string outFile = folderName + "/acado_forces_generator.m";
 
 	qpGenerator = std::tr1::shared_ptr< ExportForcesGenerator >(new ExportForcesGenerator(FORCES_GENERATOR, outFile, "", "real_t", "int", 16, "%"));
 

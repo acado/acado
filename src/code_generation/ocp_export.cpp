@@ -62,6 +62,8 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 {
 	int qpSolver;
 	get(QP_SOLVER, qpSolver);
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
 
 	acadoPrintCopyrightNotice( "Code Generation Tool" );
 
@@ -69,7 +71,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	// Create the export folders
 	//
 
-	setExportFolderName( dirName );
+	set(CG_EXPORT_FOLDER_NAME, dirName);
 
 	returnValue dirStatus = acadoCreateFolder( dirName );
 	if (dirStatus != SUCCESSFUL_RETURN)
@@ -85,7 +87,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	//
 	// Export common header
 	//
-	if (exportAcadoHeader(dirName, getCommonHeaderName(), _realString, _intString, _precision)
+	if (exportAcadoHeader(dirName, commonHeaderName, _realString, _intString, _precision)
 			!= SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
@@ -94,8 +96,8 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	//
 	if (integrator != 0)
 	{
-		ExportFile integratorFile(dirName + "/" + getName() + "_integrator.c",
-				getCommonHeaderName(), _realString, _intString, _precision);
+		ExportFile integratorFile(dirName + "/" + moduleName + "_integrator.c",
+				commonHeaderName, _realString, _intString, _precision);
 
 		integrator->getCode( integratorFile );
 
@@ -110,8 +112,8 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	//
 	if( solver != 0 )
 	{
-		ExportFile solverFile(dirName + "/" + getName() + "_solver.c",
-				getCommonHeaderName(), _realString, _intString, _precision);
+		ExportFile solverFile(dirName + "/" + moduleName + "_solver.c",
+				commonHeaderName, _realString, _intString, _precision);
 
 		solver->getCode( solverFile );
 
@@ -129,9 +131,9 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	std::string str;
 
 	ExportAuxiliaryFunctions eaf(
-			dirName + string("/") + getName() + "_auxiliary_functions.h",
-			dirName + string("/") + getName() + "_auxiliary_functions.c",
-			getName()
+			dirName + string("/") + moduleName + "_auxiliary_functions.h",
+			dirName + string("/") + moduleName + "_auxiliary_functions.c",
+			moduleName
 			);
 	eaf.configure();
 	eaf.exportCode();
@@ -181,11 +183,11 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	get(GENERATE_MATLAB_INTERFACE, generateMexInterface);
 	if ( (bool)generateMexInterface == true )
 	{
-		str = dirName + "/" + getName() + "_solver_mex.c";
+		str = dirName + "/" + moduleName + "_solver_mex.c";
 
 		acadoCopyTempateFile(SOLVER_MEX, str, "", true);
 
-		str = dirName + "/make_" + getName() + "_solver.m";
+		str = dirName + "/make_" + moduleName + "_solver.m";
 
 		switch ( (QPSolverName)qpSolver )
 		{
@@ -217,11 +219,11 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
 					"At the moment, Simulink interface is available only with qpOASES based OCP solver.");
 
-		string makefileName = dirName + "/make_" + getName() + "_solver_sfunction.m";
-		string wrapperHeaderName = dirName + "/" + getName() + "_solver_sfunction.h";
-		string wrapperSourceName = dirName + "/" + getName() + "_solver_sfunction.c";
+		string makefileName = dirName + "/make_" + moduleName + "_solver_sfunction.m";
+		string wrapperHeaderName = dirName + "/" + moduleName + "_solver_sfunction.h";
+		string wrapperSourceName = dirName + "/" + moduleName + "_solver_sfunction.c";
 
-		ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, getName());
+		ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName);
 
 		// Get options
 		int useSinglePrecision;
@@ -283,7 +285,9 @@ returnValue OCPexport::setup( )
  	//
  	// Set common header name
  	//
- 	commonHeaderName = getName() + "_common.h";
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
+ 	commonHeaderName = moduleName + "_common.h";
 
 	//
 	// Prepare integrator export
@@ -295,7 +299,7 @@ returnValue OCPexport::setup( )
 	get(INTEGRATOR_TYPE, integratorType);
 
 	integrator = IntegratorExportPtr(
-			IntegratorExportFactory::instance().createAlgorithm(this, getCommonHeaderName(), static_cast<ExportIntegratorType>(integratorType)));
+			IntegratorExportFactory::instance().createAlgorithm(this, commonHeaderName, static_cast<ExportIntegratorType>(integratorType)));
 	if (integrator == 0)
 		return ACADOERROR( RET_INVALID_OPTION );
 
@@ -324,7 +328,7 @@ returnValue OCPexport::setup( )
 					"For condensed solution only qpOASES QP solver is supported");
 
 		solver = ExportNLPSolverPtr(
-				NLPSolverFactory::instance().createAlgorithm(this, getCommonHeaderName(), GAUSS_NEWTON_CONDENSED));
+				NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_CONDENSED));
 
 		break;
 
@@ -335,7 +339,7 @@ returnValue OCPexport::setup( )
 					"For condensed solution only qpOASES QP solver is supported");
 
 		solver = ExportNLPSolverPtr(
-				NLPSolverFactory::instance().createAlgorithm(this, getCommonHeaderName(), GAUSS_NEWTON_CN2));
+				NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_CN2));
 
 		break;
 
@@ -345,10 +349,10 @@ returnValue OCPexport::setup( )
 					"For sparse solution FORCES and qpDUNES QP solvers are supported");
 		if ( (QPSolverName)qpSolver == QP_FORCES)
 			solver = ExportNLPSolverPtr(
-					NLPSolverFactory::instance().createAlgorithm(this, getCommonHeaderName(), GAUSS_NEWTON_FORCES));
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_FORCES));
 		else if ((QPSolverName)qpSolver == QP_QPDUNES)
 			solver = ExportNLPSolverPtr(
-					NLPSolverFactory::instance().createAlgorithm(this, getCommonHeaderName(), GAUSS_NEWTON_QPDUNES));
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_QPDUNES));
 		break;
 
 	default:
@@ -450,6 +454,9 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 											int _precision
 											) const
 {
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
+
 	int qpSolver;
 	get(QP_SOLVER, qpSolver);
 
@@ -516,7 +523,8 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	functionsBlock.exportCode(functions, _realString);
 
 	ExportCommonHeader ech(fileName, "", _realString, _intString, _precision);
-	ech.configure( getName(), useSinglePrecision, (QPSolverName)qpSolver, options, variables.str(), workspace.str(), functions.str());
+	ech.configure( moduleName, useSinglePrecision, (QPSolverName)qpSolver,
+			options, variables.str(), workspace.str(), functions.str());
 
 	return ech.exportCode();
 }
