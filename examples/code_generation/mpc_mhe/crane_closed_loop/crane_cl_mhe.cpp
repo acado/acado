@@ -57,8 +57,8 @@ int main()
 	h << p << phi << a;
 	hN << p << phi;
 
-	ExportVariable W(h.getDim(), h.getDim());
-	ExportVariable WN(hN.getDim(), hN.getDim());
+	BMatrix W(h.getDim(), h.getDim()); W.setOnes();
+	BMatrix WN(hN.getDim(), hN.getDim()); WN.setOnes();
 
 	//
 	// Optimal Control Problem
@@ -92,8 +92,8 @@ int main()
 
 //	mpc.set( USE_SINGLE_PRECISION, YES );
 
-	// Set custom module name:
-	mhe.setName("mhe");
+	// Optionally set custom module name:
+	mhe.set( CG_MODULE_NAME, "mhe" );
 
 	if (mhe.exportCode( "crane_cl_mhe_export" ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );

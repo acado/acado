@@ -57,9 +57,8 @@ int main( )
 	h << p << v << phi << omega << a;
 	hN << p << v << phi << omega;
 
-	// Or:
-	ExportVariable W(h.getDim(), h.getDim());
-	ExportVariable WN(hN.getDim(), hN.getDim());
+	BMatrix W(h.getDim(), h.getDim()); W.setOnes();
+	BMatrix WN(hN.getDim(), hN.getDim()); WN.setOnes();
 
 	//
 	// Optimal Control Problem
@@ -89,8 +88,8 @@ int main( )
 	mpc.set( GENERATE_MATLAB_INTERFACE, NO );
 	mpc.set( GENERATE_SIMULINK_INTERFACE, YES );
 
-	// Set custom module name:
-	mpc.setName("nmpc");
+	// Optionally set custom module name:
+	mpc.set( CG_MODULE_NAME, "nmpc" );
 
 	if (mpc.exportCode( "crane_cl_nmpc_export" ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
