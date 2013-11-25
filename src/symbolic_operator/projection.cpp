@@ -77,49 +77,53 @@ Projection::Projection( VariableType variableType_, int vIndex_, const std::stri
     operatorName = ON_VARIABLE     ;
 
     stringstream ss;
-    switch(variableType){
+    switch(variableType)
+    {
+    case VT_DIFFERENTIAL_STATE:
+    	ss << "xd" << "[" << vIndex <<"]";
+    	break;
 
-         case VT_DIFFERENTIAL_STATE:
-              ss << "xd" << "[" << vIndex <<"]";
-              break;
+    case VT_ALGEBRAIC_STATE:
+    	ss << "xa" << "[" << vIndex <<"]";
+    	break;
 
-         case VT_ALGEBRAIC_STATE:
-              ss << "xa" << "[" << vIndex <<"]";
-              break;
+    case VT_CONTROL:
+    	ss << "u" << "[" << vIndex <<"]";
+    	break;
 
-         case VT_CONTROL:
-              ss << "u" << "[" << vIndex <<"]";
-              break;
+    case VT_INTEGER_CONTROL:
+    	ss << "v" << "[" << vIndex <<"]";
+    	break;
 
-         case VT_INTEGER_CONTROL:
-              ss << "v" << "[" << vIndex <<"]";
-              break;
+    case VT_PARAMETER:
+    	ss << "p" << "[" << vIndex <<"]";
+    	break;
 
-         case VT_PARAMETER:
-              ss << "p" << "[" << vIndex <<"]";
-              break;
+    case VT_INTEGER_PARAMETER:
+    	ss << "q" << "[" << vIndex <<"]";
+    	break;
 
-         case VT_INTEGER_PARAMETER:
-              ss << "q" << "[" << vIndex <<"]";
-              break;
+    case VT_DISTURBANCE:
+    	ss << "w" << "[" << vIndex <<"]";
+    	break;
 
-         case VT_DISTURBANCE:
-              ss << "w" << "[" << vIndex <<"]";
-              break;
+    case VT_TIME:
+    	ss << "t" << "[" << vIndex <<"]";
+    	break;
 
-         case VT_TIME:
-              ss << "t" << "[" << vIndex <<"]";
-              break;
+    case VT_INTERMEDIATE_STATE:
+    	ss << "a" << "[" << vIndex <<"]";
+    	break;
 
-         case VT_INTERMEDIATE_STATE:
-              ss << "a" << "[" << vIndex <<"]";
-              break;
+    case VT_DDIFFERENTIAL_STATE:
+    	ss << "dx" << "[" << vIndex <<"]";
+    	break;
 
-         case VT_DDIFFERENTIAL_STATE:
-              ss << "dx" << "[" << vIndex <<"]";
-              break;
+    case VT_ONLINE_DATA:
+    	ss << "od" << "[" << vIndex << "]";
+    	break;
 
-         default: break;
+    default: break;
     }
     name = ss.str();
     nCount = 0;

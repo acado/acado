@@ -1095,6 +1095,11 @@ int FunctionEvaluationTree::getNT   () const{
     return indexList->getNT();
 }
 
+int FunctionEvaluationTree::getOD   () const{
+
+    return indexList->getOD();
+}
+
 int FunctionEvaluationTree::index( VariableType variableType_, int index_ ) const{
 
     return indexList->index( variableType_, index_ );

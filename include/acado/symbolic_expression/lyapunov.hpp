@@ -36,10 +36,7 @@
 #define ACADO_TOOLKIT_LYAPUNOV_HPP
 
 
-#include <acado/symbolic_expression/expression.hpp>
-#include <acado/symbolic_expression/control.hpp>
-#include <acado/symbolic_expression/differential_state.hpp>
-#include <acado/symbolic_expression/parameter.hpp>
+#include <acado/symbolic_expression/acado_syntax.hpp>
 #include <acado/symbolic_expression/intermediate_state.hpp>
 
 

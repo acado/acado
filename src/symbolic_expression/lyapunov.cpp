@@ -32,10 +32,6 @@
  */
 
 #include <acado/symbolic_expression/lyapunov.hpp>
-#include <acado/symbolic_expression/control.hpp>
-#include <acado/symbolic_expression/differential_state.hpp>
-#include <acado/symbolic_expression/parameter.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 

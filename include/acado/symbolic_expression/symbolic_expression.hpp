@@ -27,8 +27,8 @@
 
 /**
  *    \file include/acado/symbolic_expression/symbolic_expression.hpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 2008
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 
@@ -36,26 +36,18 @@
 #define ACADO_TOOLKIT_SYMBOLIC_EXPRESSION_HPP
 
 
-    // COLLECTION OF ALL EXPRESSION-HEADER FILES:
-    // -------------------------------------------------------
+// COLLECTION OF ALL EXPRESSION-HEADER FILES:
+// -------------------------------------------------------
 
-    #include <acado/symbolic_expression/expression.hpp>
-    #include <acado/symbolic_expression/acado_syntax.hpp>
+#include <acado/symbolic_expression/expression.hpp>
 
-    #include <acado/symbolic_expression/differential_state.hpp>
-    #include <acado/symbolic_expression/differential_state_derivative.hpp>
-    #include <acado/symbolic_expression/algebraic_state.hpp>
-    #include <acado/symbolic_expression/parameter.hpp>
-    #include <acado/symbolic_expression/control.hpp>
-    #include <acado/symbolic_expression/disturbance.hpp>
-    #include <acado/symbolic_expression/integer_control.hpp>
-    #include <acado/symbolic_expression/integer_parameter.hpp>
-    #include <acado/symbolic_expression/vt_time.hpp>
-    #include <acado/symbolic_expression/intermediate_state.hpp>
-    #include <acado/symbolic_expression/output.hpp>
-    #include <acado/symbolic_expression/lyapunov.hpp>
+#include <acado/symbolic_expression/variable_types.hpp>
+#include <acado/symbolic_expression/intermediate_state.hpp>
+#include <acado/symbolic_expression/lyapunov.hpp>
 
-    #include <acado/symbolic_expression/constraint_component.hpp>
+#include <acado/symbolic_expression/acado_syntax.hpp>
+
+#include <acado/symbolic_expression/constraint_component.hpp>
 
 
 // 	BEGIN_NAMESPACE_ACADO

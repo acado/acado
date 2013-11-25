@@ -191,6 +191,7 @@ int Function::getN   (VariableType &variableType_) const{
 	case VT_CONTROL 		: return getNU(); break;
 	case VT_INTEGER_CONTROL 	: return getNUI(); break;	
 	case VT_PARAMETER 		: return getNP(); break;
+	case VT_ONLINE_DATA 		: return getOD(); break;
 	case VT_INTEGER_PARAMETER 	: return getNPI(); break;
 	case VT_DISTURBANCE 		: return getNW(); break;
 	case VT_TIME 			: return 1; break;
@@ -250,6 +251,12 @@ int Function::getNT   () const{
 
 
     return evaluationTree.getNT();
+}
+
+int Function::getOD   () const{
+
+
+    return evaluationTree.getOD();
 }
 
 

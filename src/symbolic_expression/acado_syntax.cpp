@@ -26,14 +26,11 @@
 
 /**
  *    \file src/symbolic_expression/expression.cpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
 
-
 #include <acado/symbolic_expression/acado_syntax.hpp>
-
-
+#include <acado/symbolic_expression/intermediate_state.hpp>
 
 USING_NAMESPACE_ACADO
 
@@ -92,8 +89,6 @@ Expression entropy        ( const Expression &arg ){ return arg.getEntropy      
 
 Expression dot ( const Expression &arg ){ return arg.getDot (); }
 Expression next( const Expression &arg ){ return arg.getNext(); }
-
-
 
 // ---------------------------------------------------------------------------------------------
 //                              SYMBOLIC DERIVATIVE OPERATORS:

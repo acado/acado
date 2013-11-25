@@ -194,6 +194,9 @@ public:
      */
     inline int getNT  () const;
 
+    /** Return number of "online data" objects. */
+    inline int getOD  () const;
+
 
     inline int makeImplicit( int dim );
 

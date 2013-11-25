@@ -162,6 +162,9 @@ public:
      */
     int getNT  () const;
 
+    /** Return number of "online data" objects. */
+    int getOD() const;
+
 
     /** Returns the index of the variable with specified type and \n
      *  component.                                                \n

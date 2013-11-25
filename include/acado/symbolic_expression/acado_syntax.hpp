@@ -35,26 +35,21 @@
 #define ACADO_TOOLKIT_SYNTAX_HPP
 
 #include <acado/symbolic_expression/expression.hpp>
-#include <acado/symbolic_expression/differential_state.hpp>
-#include <acado/symbolic_expression/intermediate_state.hpp>
-#include <acado/symbolic_expression/control.hpp>
+#include <acado/symbolic_expression/variable_types.hpp>
 
-
-/**
+/** Syntax of the ACADO toolkit symbolic core.
  *
- *    \author Boris Houska, Hans Joachim Ferreau
+ *  \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  *
- *    This list is a forward declaration of functions that operate on Expressions.
- *    (note that this function are not in a namespace.)
- *    It defines the syntax of ACADO Toolkit.
+ *  This list is a forward declaration of functions that operate on Expressions.
+ *  (note that this function are not in a namespace.) It defines the syntax of
+ *  the ACADO Toolkit.
  *
  */
 
-
-// ------------------------------------------------------------------------------------
-//                               STANDARD OPERATORS:
-// ------------------------------------------------------------------------------------
-
+/** \name Standard math operators
+ *  @{
+ */
 
 REFER_NAMESPACE_ACADO Expression sin ( const REFER_NAMESPACE_ACADO Expression &arg   );
 REFER_NAMESPACE_ACADO Expression cos ( const REFER_NAMESPACE_ACADO Expression &arg   );
@@ -68,19 +63,18 @@ REFER_NAMESPACE_ACADO Expression ln  ( const REFER_NAMESPACE_ACADO Expression &a
 REFER_NAMESPACE_ACADO Expression log ( const REFER_NAMESPACE_ACADO Expression &arg   );
 
 
-REFER_NAMESPACE_ACADO Expression pow ( const REFER_NAMESPACE_ACADO Expression &arg1,
-                                       const REFER_NAMESPACE_ACADO Expression &arg2  );
-REFER_NAMESPACE_ACADO Expression pow ( const                       double     &arg1,
-                                       const REFER_NAMESPACE_ACADO Expression &arg2  );
-REFER_NAMESPACE_ACADO Expression pow ( const REFER_NAMESPACE_ACADO Expression &arg1,
-                                       const                       double     &arg2  );
+REFER_NAMESPACE_ACADO Expression pow (	const REFER_NAMESPACE_ACADO Expression &arg1,
+                 	 	 	 	 	 	const REFER_NAMESPACE_ACADO Expression &arg2  );
+REFER_NAMESPACE_ACADO Expression pow (	const double     &arg1,
+                 	 	 	 	 	 	const REFER_NAMESPACE_ACADO Expression &arg2  );
+REFER_NAMESPACE_ACADO Expression pow (	const REFER_NAMESPACE_ACADO Expression &arg1,
+                 	 	 	 	 	 	const double     &arg2  );
 
+/** @} */
 
-
-// ---------------------------------------------------------------------------------------------
-//                     SPECIAL CONVEX DICIPLINED PROGRAMMING FUNCTIONS:
-// ---------------------------------------------------------------------------------------------
-
+/** \name Special convex disciplined programming functions.
+ *  @{
+ */
 
 REFER_NAMESPACE_ACADO Expression square         ( const REFER_NAMESPACE_ACADO Expression &arg );
 REFER_NAMESPACE_ACADO Expression sum_square     ( const REFER_NAMESPACE_ACADO Expression &arg );
@@ -88,22 +82,21 @@ REFER_NAMESPACE_ACADO Expression log_sum_exp    ( const REFER_NAMESPACE_ACADO Ex
 REFER_NAMESPACE_ACADO Expression euclidean_norm ( const REFER_NAMESPACE_ACADO Expression &arg );
 REFER_NAMESPACE_ACADO Expression entropy        ( const REFER_NAMESPACE_ACADO Expression &arg );
 
+/** @} */
 
 
-// ---------------------------------------------------------------------------------------------
-//                    SPECIAL ROUTINES FOR THE SET UP OF DYNAMIC SYSTEMS:
-// ---------------------------------------------------------------------------------------------
-
+/** \name Special routines for the set up of dynamic systems.
+ *  @{
+ */
 
 REFER_NAMESPACE_ACADO Expression dot ( const REFER_NAMESPACE_ACADO Expression& arg );
 REFER_NAMESPACE_ACADO Expression next( const REFER_NAMESPACE_ACADO Expression& arg );
 
+/** @} */
 
-
-// ---------------------------------------------------------------------------------------------
-//                              SYMBOLIC DERIVATIVE OPERATORS:
-// ---------------------------------------------------------------------------------------------
-
+/** \name Symbolic derivative operators.
+ *  @{
+ */
 
 REFER_NAMESPACE_ACADO Expression forwardDerivative ( const REFER_NAMESPACE_ACADO Expression &arg1,
                                                      const REFER_NAMESPACE_ACADO Expression &arg2 );
@@ -136,10 +129,6 @@ REFER_NAMESPACE_ACADO Expression getRiccatiODE( const REFER_NAMESPACE_ACADO Expr
 
 REFER_NAMESPACE_ACADO Expression chol( const REFER_NAMESPACE_ACADO Expression &arg );
 
-
+/** @} */
 
 #endif  // ACADO_TOOLKIT_SYNTAX_HPP
-
-/*
- *   end of file.
- */

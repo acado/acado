@@ -49,7 +49,7 @@ SymbolicIndexList::SymbolicIndexList(){
     expression        = 0;
 
     int run1                             ;
-    const int numberOfVariableTypes = 10 ;
+    const int numberOfVariableTypes = 11 ;
 
     entryExists = new BooleanType*[numberOfVariableTypes];
 
@@ -92,7 +92,7 @@ SymbolicIndexList::~SymbolicIndexList(){
         free(comp);
     }
 
-    const int numberOfVariableTypes = 10 ;
+    const int numberOfVariableTypes = 11 ;
 
     for( run1 = 0; run1 < numberOfVariableTypes; run1++ ){
 
@@ -159,7 +159,7 @@ SymbolicIndexList::SymbolicIndexList( const SymbolicIndexList &arg ){
     }
 
     int run2                       ;
-    const int numberOfVariableTypes = 10 ;
+    const int numberOfVariableTypes = 11 ;
 
     entryExists   = new BooleanType*[numberOfVariableTypes];
     variableIndex = new int*[numberOfVariableTypes];
@@ -233,7 +233,7 @@ SymbolicIndexList& SymbolicIndexList::operator=( const SymbolicIndexList &arg ){
         }
 
         int run2                       ;
-        const int numberOfVariableTypes = 10 ;
+        const int numberOfVariableTypes = 11 ;
 
         for( run1 = 0; run1 < numberOfVariableTypes; run1++ ){
 
@@ -635,6 +635,29 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
              entryExists[9][index_] = BT_TRUE;
              return BT_TRUE;
 
+        case VT_ONLINE_DATA:
+             if( index_ >= maxNumberOfEntries[10] ){
+
+                 entryExists[9]   = (BooleanType*)realloc(entryExists[10],
+                                     (index_+1)*sizeof(BooleanType));
+                 variableIndex[9] = (int*)realloc(variableIndex[10],
+                                     (index_+1)*sizeof(int));
+                 variableScale[9] = (double*)realloc(variableScale[10],
+                                     (index_+1)*sizeof(double));
+
+                 int run1;
+                 for( run1 = maxNumberOfEntries[10]; run1 < index_+1; run1++ ){
+                      entryExists[10]  [run1] = BT_FALSE;
+                      variableIndex[10][run1] = -1      ;
+                      variableScale[10][run1] = 1.0     ;
+                 }
+                 maxNumberOfEntries[10] = index_+1;
+             }
+             if( entryExists[10][index_] == BT_TRUE ){
+                 return BT_FALSE;
+             }
+             entryExists[10][index_] = BT_TRUE;
+             return BT_TRUE;
 
          default: return BT_FALSE;
 
@@ -834,6 +857,20 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              return variableIndex[9][index_];
 
+        case VT_ONLINE_DATA:
+             if( index_ >= maxNumberOfEntries[10] ){
+
+                 ACADOERROR(RET_INDEX_OUT_OF_RANGE);
+                 return -1;
+             }
+             if( variableIndex[10][index_] == -1 ){
+                 variableIndex[10][index_] = variableCounter;
+                 variableScale[10][index_] = scale_;
+                 variableCounter++;
+                 return variableIndex[10][index_];
+             }
+             return variableIndex[10][index_];
+
 
          default: return -1;
     }
@@ -845,7 +882,7 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
 returnValue SymbolicIndexList::clearVariableIndexList(){
 
     int run1, run2                      ;
-    const int numberOfVariableTypes = 10;
+    const int numberOfVariableTypes = 11;
 
     variableCounter = 0;
 

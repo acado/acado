@@ -26,7 +26,7 @@
 
 /**
  *    \file include/acado/symbolic_expression/expression.hpp
- *    \author Boris Houska, Hans Joachim Ferreau
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  *
  */
 
@@ -38,13 +38,10 @@
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/variables_grid/variables_grid.hpp>
 #include <acado/symbolic_operator/symbolic_operator.hpp>
-#include <iostream>
 
 BEGIN_NAMESPACE_ACADO
 
-
 class ConstraintComponent;
-
 
 /**
  *  \brief Base class for all variables within the symbolic expressions family.
@@ -56,7 +53,7 @@ class ConstraintComponent;
  *  Moreover, the Expression class defines all kind of matrix
  *  and vector operations on a symbolic level.
  *
- *  \author Boris Houska, Hans Joachim Ferreau
+ *  \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
 
 
@@ -405,11 +402,77 @@ class Expression{
         std::string             name   ;   /**< The name of the expression */
 };
 
-
 CLOSE_NAMESPACE_ACADO
 
-
 #include <acado/symbolic_expression/expression.ipp>
+
+BEGIN_NAMESPACE_ACADO
+
+/** A helper class implementing the CRTP design pattern.
+ *
+ *  This class gives object counting and clone capability to a derived
+ *  class via static polymorphism.
+ *
+ *  \tparam Derived      The derived class.
+ *  \tparam Type         The expression type. \sa VariableType
+ *  \tparam AllowCounter Allow object instance counting.
+ *
+ *  \note Unfortunately the derived classes have to implement all necessary
+ *        ctors. In C++11, this can be done in a much simpler way. One only
+ *        needs to say: using Base::Base.
+ *
+ */
+template<class Derived, VariableType Type, bool AllowCounter = true>
+class ExpressionType : public Expression
+{
+public:
+
+	/** Default constructor. */
+	ExpressionType()
+		: Expression("", 1, 1, Type, AllowCounter ? count : 0)
+	{
+		if (AllowCounter == true)
+			count++;
+	}
+
+	/** The constructor with arguments. */
+	ExpressionType(const std::string& _name, unsigned _nRows, unsigned _nCols)
+		: Expression(_name, _nRows, _nCols, Type, AllowCounter ? count : 0)
+	{
+		if (AllowCounter == true)
+			count += _nRows * _nCols;
+	}
+
+	/** The constructor from an expression. */
+	ExpressionType(const Expression& _expression)
+		: Expression( _expression )
+	{}
+
+	/** Destructor. */
+	virtual ~ExpressionType() {}
+
+	/** Function for cloning. */
+	virtual Expression* clone() const
+	{ return new Derived( static_cast< Derived const& >( *this ) ); }
+
+	/** A function for resetting of the istance counter. */
+	returnValue clearStaticCounters()
+	{ count = 0; return SUCCESSFUL_RETURN; }
+
+protected:
+
+	/** Increment instance counter. */
+	void incrementCounter()
+	{ ++count; }
+
+private:
+	static unsigned count;
+};
+
+template<class Derived, VariableType Type, bool AllowCounter>
+unsigned ExpressionType<Derived, Type, AllowCounter>::count( 0 );
+
+CLOSE_NAMESPACE_ACADO
 
 #endif  // ACADO_TOOLKIT_EXPRESSION_HPP
 
