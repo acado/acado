@@ -638,11 +638,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
         case VT_ONLINE_DATA:
              if( index_ >= maxNumberOfEntries[10] ){
 
-                 entryExists[9]   = (BooleanType*)realloc(entryExists[10],
+                 entryExists[10]   = (BooleanType*)realloc(entryExists[10],
                                      (index_+1)*sizeof(BooleanType));
-                 variableIndex[9] = (int*)realloc(variableIndex[10],
+                 variableIndex[10] = (int*)realloc(variableIndex[10],
                                      (index_+1)*sizeof(int));
-                 variableScale[9] = (double*)realloc(variableScale[10],
+                 variableScale[10] = (double*)realloc(variableScale[10],
                                      (index_+1)*sizeof(double));
 
                  int run1;
