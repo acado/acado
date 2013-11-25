@@ -885,6 +885,7 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 												uint		_numU,
 												uint		_numP,
 												uint		_numDX,
+												uint		_numOD,
 												bool       allocateMemory,
 												bool       staticMemory
 												) const{
@@ -940,7 +941,11 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 
 	if (getNT() > 0)
 		stream << "const " << realString << "* t = in + " << offset << ";" << endl;
-	offset += numDX;
+	offset += getNT();
+
+	if (getNOD() > 0)
+		stream << "const " << realString << "* od = in + " << offset << ";" << endl;
+	offset += getNOD();
 
     if (n > 0)
     {
@@ -1095,7 +1100,7 @@ int FunctionEvaluationTree::getNT   () const{
     return indexList->getNT();
 }
 
-int FunctionEvaluationTree::getOD   () const{
+int FunctionEvaluationTree::getNOD   () const{
 
     return indexList->getOD();
 }

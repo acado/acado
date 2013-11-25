@@ -81,7 +81,8 @@ returnValue ExportAcadoFunction::init(	const Function& _f,
 										const uint _numXA,
 										const uint _numU,
 										const uint _numP,
-										const uint _numDX
+										const uint _numDX,
+										const uint _numOD
 										)
 {
 	numX = _numX;
@@ -89,6 +90,7 @@ returnValue ExportAcadoFunction::init(	const Function& _f,
 	numU = _numU;
 	numP = _numP;
 	numDX = _numDX;
+	numOD = _numOD;
 
 	f = std::tr1::shared_ptr< Function >(new Function( _f ));
 
@@ -129,7 +131,7 @@ returnValue ExportAcadoFunction::exportCode(	std::ostream& stream,
 												) const
 {
 	return f->exportCode(
-			stream, name.c_str(), _realString.c_str(), numX, numXA, numU, numP, numDX,
+			stream, name.c_str(), _realString.c_str(), numX, numXA, numU, numP, numDX, numOD,
 			// TODO: Here we allocate local memory for the function, this should be extended.
 			false, false);
 }

@@ -138,7 +138,7 @@ class ExportAlgorithm : public AlgorithmicBase
 		 *	@param[in] _NXA		New number of algebraic states.
 		 *	@param[in] _NU		New number of control inputs.
 		 *	@param[in] _NP		New number of parameters.
-		 *	@param[in] _NI		New number of control intervals. (using _N resulted in a strange error when compiling with cygwin!)
+		 *	@param[in] _NI		New number of control intervals.
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
@@ -181,6 +181,12 @@ class ExportAlgorithm : public AlgorithmicBase
 		 */
 		uint getNP( ) const;
 
+		/** Returns number of parameters.
+		 *
+		 *  \return Number of parameters
+		 */
+		uint getNOD( ) const;
+
 		/** Returns number of control intervals.
 		 *
 		 *  \return Number of control intervals
@@ -200,6 +206,7 @@ class ExportAlgorithm : public AlgorithmicBase
 		uint NXA;							/**< Number of algebraic states. */
 		uint NU;							/**< Number of control inputs. */
 		uint NP;							/**< Number of parameters. */
+		uint NOD;							/**< Number of "online data" values. */
 		uint N;								/**< Number of control intervals. */
 
 		uint NY;							/**< Number of references/measurements, nodes 0,..., N - 1. */

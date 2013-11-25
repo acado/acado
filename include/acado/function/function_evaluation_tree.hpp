@@ -133,7 +133,7 @@ public:
     virtual int getNT  () const;
 
     /** Return number of "online data" objects. */
-    virtual int getOD  () const;
+    virtual int getNOD  () const;
 
 
     /** Returns the index of the variable with specified type and \n
@@ -425,6 +425,7 @@ public:
 								uint       _numU = 0,
 								uint       _numP = 0,
 								uint       _numDX = 0,
+								uint       _numOD = 0,
 								bool       allocateMemory = true,
 								bool       staticMemory   = false
 								) const;

@@ -116,6 +116,11 @@ uint ExportAlgorithm::getNP( ) const
 	return NP;
 }
 
+uint ExportAlgorithm::getNOD( ) const
+{
+	return NOD;
+}
+
 
 uint ExportAlgorithm::getN( ) const
 {

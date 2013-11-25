@@ -97,7 +97,8 @@ public:
 						const uint _numXA = 0,
 						const uint _numU = 0,
 						const uint _numP = 0,
-						const uint _numDX = 0
+						const uint _numDX = 0,
+						const uint _numOD = 0
 						);
 
 	/** Exports data declaration of the ODE function into given file. Its appearance can
@@ -180,6 +181,8 @@ protected:
 	/** The number of differential state derivatives given for the evaluation of the
 	 *  system of equations. */
 	unsigned numDX;
+	/** The number of "online data" objects. */
+	unsigned numOD;
 	/** ACADO function to be exported. */
 	std::tr1::shared_ptr< Function > f;
 	/** A variable that holds intermediate values. */

@@ -191,7 +191,7 @@ int Function::getN   (VariableType &variableType_) const{
 	case VT_CONTROL 		: return getNU(); break;
 	case VT_INTEGER_CONTROL 	: return getNUI(); break;	
 	case VT_PARAMETER 		: return getNP(); break;
-	case VT_ONLINE_DATA 		: return getOD(); break;
+	case VT_ONLINE_DATA 		: return getNOD(); break;
 	case VT_INTEGER_PARAMETER 	: return getNPI(); break;
 	case VT_DISTURBANCE 		: return getNW(); break;
 	case VT_TIME 			: return 1; break;
@@ -253,10 +253,10 @@ int Function::getNT   () const{
     return evaluationTree.getNT();
 }
 
-int Function::getOD   () const{
+int Function::getNOD   () const{
 
 
-    return evaluationTree.getOD();
+    return evaluationTree.getNOD();
 }
 
 
@@ -490,13 +490,14 @@ returnValue Function::exportCode(	std::ostream& stream,
 									uint		_numU,
 									uint		_numP,
 									uint		_numDX,
+									uint		_numOD,
 									bool       allocateMemory,
 									bool       staticMemory
 									) const
 {
 	if (getDim() > 0)
 		return evaluationTree.exportCode(stream, fcnName, realString,
-				_numX, _numXA, _numU, _numP, _numDX, allocateMemory, staticMemory);
+				_numX, _numXA, _numU, _numP, _numDX, _numOD, allocateMemory, staticMemory);
 
 	return SUCCESSFUL_RETURN;
 }
