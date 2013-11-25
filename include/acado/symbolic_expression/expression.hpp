@@ -444,9 +444,14 @@ public:
 	}
 
 	/** The constructor from an expression. */
-	ExpressionType(const Expression& _expression)
+	ExpressionType(const Expression& _expression, unsigned _componentIdx = 0)
 		: Expression( _expression )
-	{}
+	{
+		variableType = Type;
+		component += _componentIdx;
+		if (AllowCounter == true)
+			count++;
+	}
 
 	/** Destructor. */
 	virtual ~ExpressionType() {}
@@ -458,12 +463,6 @@ public:
 	/** A function for resetting of the istance counter. */
 	returnValue clearStaticCounters()
 	{ count = 0; return SUCCESSFUL_RETURN; }
-
-protected:
-
-	/** Increment instance counter. */
-	void incrementCounter()
-	{ ++count; }
 
 private:
 	static unsigned count;

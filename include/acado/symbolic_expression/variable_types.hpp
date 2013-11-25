@@ -152,18 +152,10 @@ public:
 		: Base(_name, _nRows, _nCols)
 	{}
 
-	Output(const std::string& _name)
-		: Base(_name, 1, 1)
-	{}
-
 	/** A constructor from an expression. */
-	Output(const Expression& _expression, unsigned componentIdx = 0)
-	    : Base( _expression )
-	{
-		variableType = VT_OUTPUT;
-		component += componentIdx;
-		Base::incrementCounter();
-	}
+	Output(const Expression& _expression, unsigned _componentIdx = 0)
+	    : Base(_expression, _componentIdx)
+	{}
 };
 
 /** Parameter variable. */
