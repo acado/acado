@@ -47,6 +47,8 @@ int main( ){
     DifferentialState x,y,z;
     Function              f;
 
+    OnlineData od;
+
 	IntermediateState a;
 	
 	a = z*z;
@@ -59,12 +61,6 @@ int main( ){
 
 	// Print the function on standard output
 	f.print( std::cout );
-
-    // ... or print it out to a custom file
-
-//    FILE *file = fopen("exported_c_function.c", "w" );
-//    file << f;
-//    fclose(file);
 
     return 0;
 }
