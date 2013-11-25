@@ -30,8 +30,6 @@
  *    \date 29.12.2008
  */
 
-#include <math.h>
-
 #include <acado/utils/acado_types.hpp>
 #include <acado/utils/acado_constants.hpp>
 #include <acado/utils/acado_io_utils.hpp>
