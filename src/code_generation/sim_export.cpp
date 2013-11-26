@@ -845,8 +845,8 @@ returnValue SIMexport::exportAcadoHeader(	const std::string& _dirName,
 	acadoHeader.addStatement( (std::string)"#define ACADO_NXA  " + toString(getNXA()) + "\n" );
 	acadoHeader.addComment( "Number of controls" );
 	acadoHeader.addStatement( (std::string)"#define ACADO_NU  " + toString(getNU()) + "\n" );
-	acadoHeader.addComment( "Number of parameters" );
-	acadoHeader.addStatement( (std::string)"#define ACADO_NP  " + toString(getNP()) + "\n" );
+	acadoHeader.addComment( "Number of online data values" );
+	acadoHeader.addStatement( (std::string)"#define ACADO_NOD  " + toString(getNOD()) + "\n" );
 	acadoHeader.addComment( "Number of output functions" );
 	acadoHeader.addStatement( (std::string)"#define NUM_OUTPUTS  " + toString((uint)nOutV.getDim()) + "\n" );
 	acadoHeader.addLinebreak( 2 );

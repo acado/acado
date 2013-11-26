@@ -234,7 +234,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 
 	loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( runObj ) );
 	loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( runObj ) );
-	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NP) == p );
+	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
@@ -384,7 +384,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	// Evaluate the quadratic Mayer term
 	//
 	evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
-	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NP) == p );
+	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
 	// Evaluate the objective function
 	evaluateObjective.addFunctionCall( "evaluateLSQEndTerm", objValueIn, objValueOut );
@@ -747,7 +747,7 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 
 		loopPac.addStatement( conValueIn.getCols(0, NX) == x.getRow( runPac ) );
 		loopPac.addStatement( conValueIn.getCols(NX, NX + NU) == u.getRow( runPac ) );
-		loopPac.addStatement( conValueIn.getCols(NX + NU, NX + NU + NP) == p );
+		loopPac.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 		loopPac.addFunctionCall( evaluatePathConstraints.getName(), conValueIn, conValueOut );
 
 		loopPac.addStatement( pacEvH.getRows( runPac * dimPacH, (runPac + 1) * dimPacH) ==
@@ -797,10 +797,10 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 		if (i < N)
 		{
 			evaluateConstraints.addStatement( conValueIn.getCols(NX, NX + NU) == u.getRow( i ) );
-			evaluateConstraints.addStatement( conValueIn.getCols(NX + NU, NX + NU + NP) == p );
+			evaluateConstraints.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 		}
 		else
-			evaluateConstraints.addStatement( conValueIn.getCols(NX, NX + NP) == p );
+			evaluateConstraints.addStatement( conValueIn.getCols(NX, NX + NOD) == od );
 
 		evaluateConstraints.addFunctionCall(
 				evaluatePointConstraints[ i ]->getName(), conValueIn, conValueOut );

@@ -243,7 +243,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 
 		// Configure templates
 		esi.configure(
-				ocp.getN(), ocp.getNX(), ocp.getNDX(), ocp.getNXA(), ocp.getNU(), ocp.getNP(),
+				ocp.getN(), ocp.getNX(), ocp.getNDX(), ocp.getNXA(), ocp.getNU(), ocp.getNOD(),
 				solver->getNY(), solver->getNYN(),
 				(bool)fixInitialState,
 				(unsigned)solver->weightingMatricesType(),
@@ -483,7 +483,7 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	options[ "ACADO_NXD" ] = make_pair(toString( ocp.getNDX() ), "Number of differential derivative variables.");
 	options[ "ACADO_NXA" ] = make_pair(toString( ocp.getNXA() ), "Number of algebraic variables.");
 	options[ "ACADO_NU" ]  = make_pair(toString( ocp.getNU() ),  "Number of control variables.");
-	options[ "ACADO_NP" ]  = make_pair(toString( ocp.getNP() ),  "Number of parameters (which are NOT optimization variables).");
+	options[ "ACADO_NOD" ]  = make_pair(toString( ocp.getNOD() ),  "Number of online data values.");
 	options[ "ACADO_NY" ]  = make_pair(toString( solver->getNY() ),  "Number of references/measurements per node on the first N nodes.");
 	options[ "ACADO_NYN" ] = make_pair(toString( solver->getNYN() ), "Number of references/measurements on the last (N + 1)st node.");
 

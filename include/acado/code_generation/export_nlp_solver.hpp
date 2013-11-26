@@ -223,7 +223,7 @@ protected:
 	ExportVariable x;
 	ExportVariable z;
 	ExportVariable u;
-	ExportVariable p;
+	ExportVariable od;
 	ExportVariable d;
 
 	ExportVariable evGx; // stack of sensitivities w.r.t. x
