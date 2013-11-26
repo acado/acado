@@ -53,13 +53,14 @@ ModelData::ModelData() {
 	NU = 0;
 	NP = 0;
 	N  = 0;
+	NOD = 0;
 	model_dimensions_set = BT_FALSE;
 	export_rhs = BT_TRUE;
 	delay = 1;
 }
 
 
-returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP )
+returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP, uint _NOD )
 {
 	NX1 = _NX1;
 	NX2 = _NX2;
@@ -70,6 +71,7 @@ returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX
 	NXA3 = _NXA3;
 	NU = _NU;
 	NP = _NP;
+	NOD = _NOD;
 	model_dimensions_set = BT_TRUE;
 	return SUCCESSFUL_RETURN;
 }
@@ -340,14 +342,16 @@ returnValue ModelData::setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, 
 
 returnValue ModelData::setModel( const std::string& fileName, const std::string& _rhs_ODE, const std::string& _diffs_ODE )
 {
-	if( differentialEquation.getNumDynamicEquations() == 0 ) {
-		externModel = std::string(fileName);
-		rhs_name = std::string(_rhs_ODE);
-		diffs_name = std::string(_diffs_ODE);
+	if( differentialEquation.getNumDynamicEquations() == 0 )
+	{
+		externModel = fileName;
+		rhs_name = _rhs_ODE;
+		diffs_name = _diffs_ODE;
 
 		export_rhs = BT_FALSE;
 	}
-	else {
+	else
+	{
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
@@ -515,6 +519,11 @@ uint ModelData::getNU( ) const
 uint ModelData::getNP( ) const
 {
 	return NP;
+}
+
+uint ModelData::getNOD( ) const
+{
+	return NOD;
 }
 
 

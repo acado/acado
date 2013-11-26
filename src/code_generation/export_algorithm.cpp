@@ -46,7 +46,7 @@ ExportAlgorithm::ExportAlgorithm(	UserInteraction* _userInteraction,
 									const std::string& _commonHeaderName
 									) : AlgorithmicBase( _userInteraction )
 {
-	setDimensions( 0,0,0,0 );
+	setDimensions(0, 0, 0, 0, 0, 0, 0);
 	commonHeaderName = _commonHeaderName;
 }
 
@@ -65,10 +65,11 @@ returnValue ExportAlgorithm::setup( )
 returnValue ExportAlgorithm::setDimensions(	uint _NX,
 											uint _NU,
 											uint _NP,
-											uint _NI
+											uint _NI,
+											uint _NOD
 											)
 {
-	return setDimensions( _NX, 0, 0, _NU, _NP, _NI );
+	return setDimensions(_NX, 0, 0, _NU, _NP, _NI, _NOD);
 }
 
 
@@ -78,7 +79,8 @@ returnValue ExportAlgorithm::setDimensions(	uint _NX,
 											uint _NXA,
 											uint _NU,
 											uint _NP,
-											uint _NI
+											uint _NI,
+											uint _NOD
 											)
 {
 	NX = _NX;
@@ -87,6 +89,7 @@ returnValue ExportAlgorithm::setDimensions(	uint _NX,
 	NU = _NU;
 	NP = _NP;
 	N  = _NI;
+	NOD = _NOD;
 
 	return SUCCESSFUL_RETURN;
 }

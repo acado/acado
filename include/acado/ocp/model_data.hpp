@@ -76,10 +76,11 @@ public:
 	 *	@param[in] _NXA3	Number of algebraic states in the linear output subsystem.
 	 *	@param[in] _NU		Number of control inputs
 	 *	@param[in] _NP		Number of parameters
+	 *	@param[in] _NOD		Number of "online data" values
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP );
+	returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP, uint _NOD );
 
 
 	/** Adds an output function.
@@ -343,6 +344,12 @@ public:
       */
      uint getNP( ) const;
 
+     /** Returns number of parameters.
+      *
+      *  \return Number of parameters
+      */
+     uint getNOD( ) const;
+
      /** Returns number of shooting intervals.
       *
       *  \return Number of shooting intervals
@@ -422,6 +429,7 @@ public:
      uint NXA3;										/**< Number of algebraic states in output system. */
      uint NU;										/**< Number of control inputs. */
      uint NP;										/**< Number of parameters. */
+     uint NOD;										/**< Number of online data values. */
      uint N;										/**< Number of shooting intervals. */
 
      BooleanType export_rhs;						/**< True if the right-hand side and their derivatives should be exported too. */

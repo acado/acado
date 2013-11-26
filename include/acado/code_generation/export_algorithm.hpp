@@ -127,7 +127,8 @@ class ExportAlgorithm : public AlgorithmicBase
 		returnValue setDimensions(	uint _NX = 0,
 									uint _NU = 0,
 									uint _NP = 0,
-									uint _NI = 0
+									uint _NI = 0,
+									uint _NOD = 0
 									);
 
 
@@ -147,7 +148,8 @@ class ExportAlgorithm : public AlgorithmicBase
 									uint _NXA,
 									uint _NU,
 									uint _NP,
-									uint _NI
+									uint _NI,
+									uint _NOD
 									);
 
 

@@ -280,7 +280,7 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 
 returnValue IntegratorExport::setModelData( const ModelData& data ) {
 
-	setDimensions( data.getNX(),data.getNDX(),data.getNXA(),data.getNU(),data.getNP(),data.getN() );
+	setDimensions( data.getNX(),data.getNDX(),data.getNXA(),data.getNU(),data.getNP(),data.getN(), data.getNOD() );
 	NX1 = data.getNX1();
 	NX2 = data.getNX2();
 	NX3 = data.getNX3();

@@ -940,10 +940,11 @@ returnValue SIMexport::exportMakefile(	const std::string& _dirName,
 	Makefile.addStatement( "CFLAGS = -O3\n" );
 	Makefile.addStatement( "CC     = g++\n" );
 	Makefile.addLinebreak( );
-	Makefile.addStatement( "OBJECTS = \\\n" );
-	Makefile.addStatement( "\tintegrator.o \\\n" );
-	if( !modelData.exportRhs() ) {
-		Makefile.addStatement( (std::string)"\t" + modelData.getFileNameModel() + ".o \n" );
+	Makefile.addStatement( "OBJECTS = " );
+	Makefile.addStatement( "integrator.o " );
+	if(modelData.exportRhs() == BT_FALSE)
+	{
+		Makefile.addStatement( modelData.getFileNameModel() + ".o " );
 	}
 	Makefile.addLinebreak( 2 );
 	Makefile.addStatement( ".PHONY: all\n" );

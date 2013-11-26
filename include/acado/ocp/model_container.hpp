@@ -75,28 +75,11 @@ public:
      *	@param[in] _NXA3	Number of algebraic states in the linear output subsystem.
      *	@param[in] _NU		Number of control inputs
      *	@param[in] _NP		Number of parameters
+     *	@param[in] _NOD		Number of "online data" values
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP );
-    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU );
-
-
-    /** Assigns the model dimensions to be used by the integrator.
-     *
-     *	@param[in] _NX1		Number of differential states in linear input subsystem.
-     *	@param[in] _NX2		Number of differential states in nonlinear subsystem.
-     *	@param[in] _NX3		Number of differential states in linear output subsystem.
-     *	@param[in] _NDX		Number of differential states derivatives.
-     *	@param[in] _NXA		Number of algebraic states.
-     *	@param[in] _NU		Number of control inputs
-     *	@param[in] _NP		Number of parameters
-     *
-     *	\return SUCCESSFUL_RETURN
-     */
-    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU, uint _NP );
-    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU );
-
+    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP, uint _NOD );
 
 	/** Assigns the model dimensions to be used by the integrator.
 	 *
@@ -105,24 +88,11 @@ public:
 	 *	@param[in] _NXA		Number of algebraic states.
 	 *	@param[in] _NU		Number of control inputs
      *	@param[in] _NP		Number of parameters
+     *	@param[in] _NOD		Number of "online data" values
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU, uint _NP );
-	returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU );
-
-
-	/** Assigns the model dimensions to be used by the integrator.
-	 *
-	 *	@param[in] _NX		Number of differential states.
-	 *	@param[in] _NU		Number of control inputs
-	 *	@param[in] _NP		Number of parameters
-	 *
-	 *	\return SUCCESSFUL_RETURN
-	 */
-	returnValue setDimensions( uint _NX, uint _NU, uint _NP );
-	returnValue setDimensions( uint _NX, uint _NU );
-
+	returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU, uint _NP, uint _NOD );
 
     /** Assigns Differential Equation to be used by the integrator.
      *
@@ -350,6 +320,9 @@ public:
      *  \return Number of parameters
      */
     uint getNP( ) const;
+
+    /** Returns number of "online data" values. */
+    uint getNOD( ) const;
 
     /** Returns number of control intervals.
      *
