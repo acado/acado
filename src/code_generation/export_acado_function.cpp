@@ -49,6 +49,7 @@ ExportAcadoFunction::ExportAcadoFunction( ) : ExportFunction( )
 	numU = 0;
 	numDX = 0;
 	numP = 0;
+	numOD = 0;
 	f = std::tr1::shared_ptr< Function >(new Function());
 }
 
@@ -65,12 +66,6 @@ ExportAcadoFunction::~ExportAcadoFunction( )
 
 
 ExportStatement* ExportAcadoFunction::clone( ) const
-{
-	return new ExportAcadoFunction(*this);
-}
-
-
-ExportFunction* ExportAcadoFunction::cloneFunction( ) const
 {
 	return new ExportAcadoFunction(*this);
 }

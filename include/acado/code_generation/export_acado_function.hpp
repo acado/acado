@@ -72,13 +72,6 @@ public:
 	 */
 	virtual ExportStatement* clone( ) const;
 
-	/** Clone constructor for ExportFunction (deep copy).
-	 *
-	 *	\return Pointer to cloned object.
-	 */
-	virtual ExportFunction* cloneFunction( ) const;
-
-
 	/** Initializes ODE function export by taking the differential equation
 	 *	to be exported as well as the name of the exported ODE.
 	 *
