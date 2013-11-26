@@ -112,7 +112,7 @@ ImplicitRungeKuttaExport& ImplicitRungeKuttaExport::operator=( const ImplicitRun
 returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression& rhs_ )
 {
 	if( rhs_.getDim() > 0 ) {
-		Parameter         dummy0;
+		OnlineData        dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		AlgebraicState 	  dummy3;
@@ -127,7 +127,7 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		x = DifferentialState("", NX1+NX2, 1);
 		z = AlgebraicState("", NXA, 1);
 		u = Control("", NU, 1);
-		p = Parameter("", NP, 1);
+		od = OnlineData("", NOD, 1);
 
 		DifferentialEquation f;
 		f << rhs_;
@@ -152,7 +152,8 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 
 		if( f.getNT() > 0 ) timeDependant = true;
 
-		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX ) & diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX ) );
+		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX, NOD ) &
+				diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX, NOD ) );
 	}
 	return SUCCESSFUL_RETURN;
 }
@@ -1147,7 +1148,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	NVARS2 = NX1+NX2+NXA+NU+NDX2;
 	NVARS3 = 0;
 	diffsDim = 0;
-	inputDim = NX+NXA + NU + NP;
+	inputDim = NX+NXA + NU + NOD;
 	
 	uint numDX = NDX2;
 	if( NDX3 > numDX ) numDX = NDX3;

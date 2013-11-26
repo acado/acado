@@ -74,8 +74,8 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	// export RK scheme
 	uint rhsDim   = NX*(NX+NU+1);
 	if( !DERIVATIVES ) rhsDim = NX;
-	inputDim = NX*(NX+NU+1) + NU + NP;
-	if( !DERIVATIVES ) inputDim = NX + NU + NP;
+	inputDim = NX*(NX+NU+1) + NU + NOD;
+	if( !DERIVATIVES ) inputDim = NX + NU + NOD;
 	const uint rkOrder  = getNumStages();
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
@@ -192,7 +192,7 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	get( DYNAMIC_SENSITIVITY,sensGen );
 	bool DERIVATIVES = ((ExportSensitivityType)sensGen != NO_SENSITIVITY);
 
-	Parameter         dummy0;
+	OnlineData        dummy0;
 	Control           dummy1;
 	DifferentialState dummy2;
 	AlgebraicState 	  dummy3;
@@ -207,7 +207,7 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	dx = DifferentialStateDerivative("", NDX, 1);
 	z = AlgebraicState("", NXA, 1);
 	u = Control("", NU, 1);
-	p = Parameter("", NP, 1);
+	od = OnlineData("", NOD, 1);
 	
 	if( NDX > 0 && NDX != NX ) {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -251,12 +251,12 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	int matlabInterface;
 	userInteraction->get(GENERATE_MATLAB_INTERFACE, matlabInterface);
 	if( matlabInterface && DERIVATIVES ) {
-		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP)
-				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP);
+		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD)
+				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
 	} else if( DERIVATIVES ) {
-		return diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP);
+		return diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
 	} else {
-		return diffs_rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP);
+		return diffs_rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD);
 	}
 
 	return SUCCESSFUL_RETURN;

@@ -1083,7 +1083,7 @@ returnValue AdjointIRKExport::setup( )
 
 	NVARS3 = NX1+NX2+NXA3+NU+NDX3;
 	diffsDim = (NX+NXA)*(NX+NU);
-	inputDim = (NX+NXA)*(NX+NU+1) + NU + NP;
+	inputDim = (NX+NXA)*(NX+NU+1) + NU + NOD;
 
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);

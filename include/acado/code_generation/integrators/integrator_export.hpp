@@ -485,7 +485,7 @@ class IntegratorExport : public ExportAlgorithm
 		DifferentialStateDerivative dx;		/**< The differential state derivatives in the model. */
 		AlgebraicState	  			z;		/**< The algebraic states in the model. */
 		Control           			u;		/**< The control inputs in the model. */
-		Parameter         			p;		/**< The parameters in the model. */
+		OnlineData         			od;		/**< The "online" data values in the model. */
 
         std::vector<Grid> outputGrids;					/**< A separate grid for each output. */
         std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */

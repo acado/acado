@@ -64,7 +64,7 @@ DiscreteTimeExport::~DiscreteTimeExport( )
 returnValue DiscreteTimeExport::setDifferentialEquation(	const Expression& rhs_ )
 {
 	if( rhs_.getDim() > 0 ) {
-		Parameter         dummy0;
+		OnlineData        dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		AlgebraicState 	  dummy3;
@@ -80,7 +80,7 @@ returnValue DiscreteTimeExport::setDifferentialEquation(	const Expression& rhs_ 
 		z = AlgebraicState("", NXA, 1);
 		dx = DifferentialStateDerivative("", NDX, 1);
 		u = Control("", NU, 1);
-		p = Parameter("", NP, 1);
+		od = OnlineData("", NOD, 1);
 
 		DifferentialEquation f;
 		f << rhs_;
@@ -92,7 +92,8 @@ returnValue DiscreteTimeExport::setDifferentialEquation(	const Expression& rhs_ 
 			// There are not supposed to be algebraic states or differential state derivatives !
 		}
 
-		return (rhs.init( f,"acado_rhs",NX,NXA,NU ) & diffs_rhs.init( g,"acado_diffs",NX,NXA,NU ) );
+		return (rhs.init(f, "acado_rhs", NX, NXA, NU, NP, NDX, NOD) &
+				diffs_rhs.init(g, "acado_diffs", NX, NXA, NU, NP, NDX, NOD));
 	}
 	return SUCCESSFUL_RETURN;
 }
@@ -169,7 +170,7 @@ returnValue DiscreteTimeExport::setup( )
 	ExportIndex k( "k" );
 	ExportIndex tmp_index("tmp_index");
 	diffsDim = NX*(NX+NU);
-	inputDim = NX*(NX+NU+1) + NU + NP;
+	inputDim = NX*(NX+NU+1) + NU + NOD;
 	// setup INTEGRATE function
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );

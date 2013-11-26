@@ -82,7 +82,7 @@ returnValue NARXExport::setup( )
 	ExportIndex k( "k" );
 	ExportIndex tmp_index("tmp_index");
 	diffsDim = NX*(NX+NU);
-	inputDim = NX*(NX+NU+1) + NU + NP;
+	inputDim = NX*(NX+NU+1) + NU + NOD;
 	// setup INTEGRATE function
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
@@ -658,7 +658,7 @@ returnValue NARXExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, c
 
 		OutputFcn f;
 		f << _rhs;
-		Parameter         dummy0;
+		OnlineData        dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		AlgebraicState 	  dummy3;
@@ -669,7 +669,7 @@ returnValue NARXExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, c
 		uint n = delay*(NX1+NX2);
 		x = DifferentialState("", n, 1);
 		u = Control("", NU, 1);
-		p = Parameter("", NP, 1);
+		od = OnlineData("", NOD, 1);
 
 		if( (uint)f.getNDX() > 0 ) {
 			return ACADOERROR( RET_INVALID_OPTION );
@@ -709,7 +709,8 @@ returnValue NARXExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, c
 		DMatrix A3_large = expandOutputMatrix(A3);
 		f_large << _rhs + A3_large*x;
 
-		return (rhs3.init( f_large,"acado_rhs3",NX,NXA,NU,NP ) & diffs_rhs3.init( g,"acado_diffs3",NX,NXA,NU,NP ) );
+		return (rhs3.init(f_large, "acado_rhs3", NX, NXA, NU, NP, NDX, NOD) &
+				diffs_rhs3.init(g, "acado_diffs3", NX, NXA, NU, NP, NDX, NOD));
 	}
 
 	return SUCCESSFUL_RETURN;

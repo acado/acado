@@ -117,7 +117,7 @@ returnValue IntegratorExport::setLinearInput( const DMatrix& M1, const DMatrix& 
 		A11 = A1;
 		B11 = B1;
 
-		Parameter         dummy0;
+		OnlineData         dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		dummy0.clearStaticCounters();
@@ -125,11 +125,11 @@ returnValue IntegratorExport::setLinearInput( const DMatrix& M1, const DMatrix& 
 		dummy2.clearStaticCounters();
 		x = DifferentialState("", NX1, 1);
 		u = Control("", NU, 1);
-		p = Parameter("", NP, 1);
+		od = OnlineData("", NOD, 1);
 
 		DifferentialEquation fun_input;
 		fun_input << A11*x+B11*u;
-		lin_input.init( fun_input,"acado_linear_input",NX,NXA,NU );
+		lin_input.init(fun_input, "acado_linear_input", NX, NXA, NU);
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -148,7 +148,7 @@ returnValue IntegratorExport::setModel(	const std::string& _name_ODE, const std:
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	Parameter         dummy0;
+	OnlineData        dummy0;
 	Control           dummy1;
 	DifferentialState dummy2;
 	AlgebraicState 	  dummy3;
@@ -165,7 +165,7 @@ returnValue IntegratorExport::setModel(	const std::string& _name_ODE, const std:
 	dx = DifferentialStateDerivative("", NDX, 1);
 	z = AlgebraicState("", NXA, 1);
 	u = Control("", NU, 1);
-	p = Parameter("", NP, 1);
+	od = OnlineData("", NOD, 1);
 
 	return SUCCESSFUL_RETURN;
 }
@@ -183,7 +183,7 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 
 		OutputFcn f;
 		f << _rhs;
-		Parameter         dummy0;
+		OnlineData        dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		AlgebraicState 	  dummy3;
@@ -193,7 +193,7 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 		dummy2.clearStaticCounters();
 		x = DifferentialState("", NX1+NX2, 1);
 		u = Control("", NU, 1);
-		p = Parameter("", NP, 1);
+		od = OnlineData("", NOD, 1);
 
 		if( (uint)f.getNDX() > (NX1+NX2) ) {
 			return ACADOERROR( RET_INVALID_OPTION );
@@ -235,7 +235,8 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 		DMatrix A3_large = expandOutputMatrix(A3);
 		f_large << _rhs + A3_large*x;
 
-		return (rhs3.init( f_large,"acado_rhs3",NX,NXA,NU,NP ) & diffs_rhs3.init( g,"acado_diffs3",NX,NXA,NU,NP ) );
+		return (rhs3.init(f_large, "acado_rhs3", NX, NXA, NU, NP, NDX, NOD) &
+				diffs_rhs3.init(g, "acado_diffs3", NX, NXA, NU, NP, NDX, NOD));
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -256,7 +257,7 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 		name_diffs_rhs3 = std::string(_diffs_rhs3);
 		exportRhs = false;
 
-		Parameter         dummy0;
+		OnlineData        dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		AlgebraicState 	  dummy3;
@@ -271,7 +272,7 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 		dx = DifferentialStateDerivative("", NDX, 1);
 		z = AlgebraicState("", NXA, 1);
 		u = Control("", NU, 1);
-		p = Parameter("", NP, 1);
+		od = OnlineData("", NOD, 1);
 	}
 
 	return SUCCESSFUL_RETURN;
