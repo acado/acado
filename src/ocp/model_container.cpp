@@ -52,7 +52,6 @@ returnValue ModelContainer::setDimensions(	uint _NX1, uint _NX2, uint _NX3,
 											uint _NU, uint _NP, uint _NOD
 											)
 {
-	ASSERT( _NP == 0 ); // Temporarily
 	return modelData.setDimensions(_NX1, _NX2, _NX3, _NDX, _NDX3, _NXA, _NXA3, _NU, _NP, _NOD);
 }
 
@@ -60,7 +59,6 @@ returnValue ModelContainer::setDimensions(	uint _NX, uint _NDX, uint _NXA,
 											uint _NU, uint _NP, uint _NOD
 											)
 {
-	ASSERT( _NP == 0 ); // Temporarily
 	return setDimensions(0, _NX, 0, _NDX, 0, _NXA, 0, _NU, _NP, _NOD);
 }
 

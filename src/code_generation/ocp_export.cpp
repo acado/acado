@@ -82,7 +82,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	//
 	returnValue setupStatus = setup( );
 	if ( setupStatus != SUCCESSFUL_RETURN )
-		return ACADOERRORTEXT(setupStatus, "Error in setting up the OCP export");
+		return setupStatus;
 
 	//
 	// Export common header
@@ -280,7 +280,7 @@ returnValue OCPexport::setup( )
 	// Consistency check
 	returnValue returnvalue = checkConsistency( );
  	if ( returnvalue != SUCCESSFUL_RETURN )
- 		return ACADOERROR( returnvalue );
+ 		return returnvalue;
 
  	//
  	// Set common header name
@@ -405,6 +405,10 @@ returnValue OCPexport::checkConsistency( ) const
 
  	if ( f.getNUI( ) > 0 )
  		return ACADOERROR( RET_INVALID_ARGUMENTS );
+
+ 	if ( f.getNP( ) > 0 )
+ 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
+ 				"Free parameters are not supported. For the old functionality use OnlineData class.");
 
  	int hessianApproximation;
  	get( HESSIAN_APPROXIMATION, hessianApproximation );
