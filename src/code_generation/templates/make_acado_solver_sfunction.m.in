@@ -6,7 +6,7 @@
 @MODULE_NAME@_NDX = @NDX@;
 @MODULE_NAME@_NXA = @NXA@;
 @MODULE_NAME@_NU  = @NU@;
-@MODULE_NAME@_NP  = @NP@;
+@MODULE_NAME@_NOD = @NOD@;
 @MODULE_NAME@_NY  = @NY@;
 @MODULE_NAME@_NYN = @NYN@;
 
@@ -35,8 +35,8 @@ if @MODULE_NAME@_NXA > 0
     avCells{ 6 }{ idx } = {'z', [1, @MODULE_NAME@_N * @MODULE_NAME@_NXA], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
-if @MODULE_NAME@_NP > 0
-    avCells{ 6 }{ idx } = {'p', [1, @MODULE_NAME@_NP], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+if @MODULE_NAME@_NOD > 0
+    avCells{ 6 }{ idx } = {'od', [1, @MODULE_NAME@_NOD], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
 avCells{ 6 }{ idx } = {'y', [1, @MODULE_NAME@_N * @MODULE_NAME@_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1; 

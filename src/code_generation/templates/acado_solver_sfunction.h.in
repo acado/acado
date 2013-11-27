@@ -20,8 +20,8 @@ typedef struct
 	real_t z[ACADO_N * ACADO_NXA];
 #endif
 
-#if ACADO_NP
-	real_t p[ ACADO_NP ];
+#if ACADO_NOD
+	real_t od[ ACADO_NOD ];
 #endif
 
 	real_t y[ACADO_N * ACADO_NY];

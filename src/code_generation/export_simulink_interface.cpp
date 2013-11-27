@@ -61,7 +61,7 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 												unsigned NDX,
 												unsigned NXA,
 												unsigned NU,
-												unsigned NP,
+												unsigned NOD,
 												unsigned NY,
 												unsigned NYN,
 												bool _initialStateFixed,
@@ -71,9 +71,6 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 												bool _compCovMatrix
 												)
 {
-	stringstream s;
-
-
 	//
 	// Source file configuration
 	//
@@ -96,33 +93,24 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 	makefile.dictionary[ "@MODULE_NAME@" ] = moduleName;
 	makefile.dictionary[ "@REAL_TYPE@" ] = makefile.realString;
 
-	s.str(std::string()); s << N;
-	makefile.dictionary[ "@N@" ] = s.str();
-	s.str(std::string()); s << NX;
-	makefile.dictionary[ "@NX@" ] = s.str();
-	s.str(std::string()); s << NXA;
-	makefile.dictionary[ "@NXA@" ] = s.str();
-	s.str(std::string()); s << NDX;
-	makefile.dictionary[ "@NDX@" ] = s.str();
-	s.str(std::string()); s << NU;
-	makefile.dictionary[ "@NU@" ] = s.str();
-	s.str(std::string()); s << NP;
-	makefile.dictionary[ "@NP@" ] = s.str();
-	s.str(std::string()); s << NY;
-	makefile.dictionary[ "@NY@" ] = s.str();
-	s.str(std::string()); s << NYN;
-	makefile.dictionary[ "@NYN@" ] = s.str();
+	makefile.dictionary[ "@N@" ] = toString( N );
+	makefile.dictionary[ "@NX@" ] = toString( NX );
+	makefile.dictionary[ "@NXA@" ] = toString( NXA );
+	makefile.dictionary[ "@NDX@" ] = toString( NDX );
+	makefile.dictionary[ "@NU@" ] = toString( NU );
+	makefile.dictionary[ "@NOD@" ] = toString( NOD );
+	makefile.dictionary[ "@NY@" ] = toString( NY );
+	makefile.dictionary[ "@NYN@" ] = toString( NYN );
 
 	makefile.dictionary[ "@INIT_STATE_FIXED@" ] = _initialStateFixed == true ? "1" : "0";
 
-	s.str(std::string()); s << _wMatrixType;
-	makefile.dictionary[ "@WEIGHT_MATRIX_TYPE@" ] = s.str();
+	makefile.dictionary[ "@WEIGHT_MATRIX_TYPE@" ] = toString( _wMatrixType );
 
 	makefile.dictionary[ "@HARCODED_CONSTRAINTS@" ] = _hardcodedConstraints == true ? "1" : "0";
 
 	makefile.dictionary[ "@ARRIVAL_COST@" ] = _useArrivalCost == true ? "1" : "0";
 
-	makefile.dictionary[ "@COV_MATRIX@" ] = _compCovMatrix == true? "1" : "0";
+	makefile.dictionary[ "@COV_MATRIX@" ] = _compCovMatrix == true ? "1" : "0";
 
 	makefile.fillTemplate();
 

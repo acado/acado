@@ -52,8 +52,7 @@ void @MODULE_NAME@_solver_wrapper(@MODULE_NAME@input* inData, @MODULE_NAME@outpu
 			
 			outData->kktValue = getKKT();
 			outData->objValue = getObjective();
-
-
+			
 #if ACADO_QP_SOLVER == ACADO_QPOASES
  			outData->nIterations = getNWSR();
 #endif /* ACADO_QP_SOLVER == ACADO_QPOASES */

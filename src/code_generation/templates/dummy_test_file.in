@@ -22,7 +22,7 @@ www.acadotoolkit.org
 #define NX          ACADO_NX  /* Number of differential state variables.  */
 #define NXA         ACADO_NXA /* Number of algebraic variables. */
 #define NU          ACADO_NU  /* Number of control inputs. */
-#define NP          ACADO_NP  /* Number of parameters. */
+#define NOD         ACADO_NOD  /* Number of online data values. */
 
 #define NY          ACADO_NY  /* Number of measurements/references on nodes 0..N - 1. */
 #define NYN         ACADO_NYN /* Number of measurements/references on node N. */
@@ -59,7 +59,9 @@ int main()
 	for (i = 0; i < NYN; ++i)  acadoVariables.yN[ i ] = 0.0;
 
 	/* MPC: initialize the current state feedback. */
+#if ACADO_INITIAL_STATE_FIXED
 	for (i = 0; i < NX; ++i) acadoVariables.x0[ i ] = 0.1;
+#endif
       
 	if( VERBOSE ) printHeader();
 	
