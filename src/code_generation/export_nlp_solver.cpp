@@ -450,8 +450,6 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	// TODO FunctionEvaluationTree: add isConstant()
-
 	// Setup the S matrix
 	if (lsqElements[ 0 ].givenW == false)
 	{
@@ -491,7 +489,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 				"Jacobian of the objective function w.r.t diff. states depends on controls.");
 	if (expFu.isDependingOn( VT_DIFFERENTIAL_STATE ) == true)
 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-				"Jacobian of the objective function w.r.t diff. controls depends on states.");
+				"Jacobian of the objective function w.r.t controls depends on diff. states.");
 
 	if (Fx.isConstant() == true)
 	{
@@ -653,7 +651,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 		DVector vFx = FEndTermX.evaluate( epFEndTermX );
 
-		objEvFxEnd.setup("evFxEnd", DMatrix(NYN, NX, vFx.data()), REAL, ACADO_WORKSPACE);
+		objEvFxEnd.setup("evFxEnd", Eigen::Map<DMatrix>(vFx.data(), NYN, NX), REAL, ACADO_WORKSPACE);
 	}
 	else
 	{

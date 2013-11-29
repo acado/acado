@@ -201,7 +201,7 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	std::ostream& stream,
 	{
 		if (data->getNumCols() > 1 && data->getNumRows() > 1)
 		{
-			stream << "/** " << "DMatrix of size: " << data->getNumRows() << " x " << data->getNumCols() << " (row major format)";
+			stream << "/** " << "Matrix of size: " << data->getNumRows() << " x " << data->getNumCols() << " (row major format)";
 		}
 		else
 		{
@@ -227,7 +227,7 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	std::ostream& stream,
 	}
 	else
 	{
-		stream << " = ";
+		stream << " = " << endl;
 
 		switch ( getType() )
 		{
