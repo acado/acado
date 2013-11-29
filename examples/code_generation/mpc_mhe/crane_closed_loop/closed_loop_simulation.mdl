@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.257"
+    ComputedModelVersion    "1.281"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -66,9 +66,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "madwolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Nov 29 18:56:17 2013"
-  RTWModifiedTimeStamp	  307652176
-  ModelVersionFormat	  "1.%<AutoIncrement:257>"
+  LastModifiedDate	  "Fri Nov 29 19:17:18 2013"
+  RTWModifiedTimeStamp	  307653431
+  ModelVersionFormat	  "1.%<AutoIncrement:281>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -1707,8 +1707,9 @@ Model {
       ZOrder		      13
       Floating		      off
       Location		      [188, 390, 512, 629]
-      Open		      off
+      Open		      on
       NumInputPorts	      "1"
+      ZoomMode		      "xonly"
       List {
 	ListType		AxesTitles
 	axes1			"%<SignalLabel>"
@@ -2299,7 +2300,10 @@ Stateflow {
     firstTransition	    9
     firstJunction	    8
     viewObj		    2
+    visible		    1
     machine		    1
+    subviewS {
+    }
     ssIdHighWaterMark	    8
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2336,11 +2340,11 @@ Stateflow {
       "ed )\n    nmpcStarted = 0;\nend;\n\nif ready\n    % The estimator started spitting some estimates\n    \n    % H"
       "ere we read the current state estimate\n    input.data.x0 = mheOutput.data.x(N * NX + 1: (N + 1) * NX);\n    \n "
       "   % However, we would like to wait a bit until the estimator converges\n    if (nmpcStarted == 0) && (mheOutput"
-      ".kktValue < 1e-6)\n        nmpcStarted = 1;\n    end;\n    \n    % If it converged, enable controller execution\n"
-      "    if nmpcStarted == 1\n        % Simple running more\n        input.control = int32( 0 );\n    end;\nelse\n   "
-      " % Do nothing\n    input.control = int32( 10 );\nend;\n\npersistent firstRun\nif isempty( firstRun )\n    firstR"
-      "un = 1;\nend;\n\nif firstRun == 1\n    firstRun = 0;\nelse\n    input.data.x = mpcOutput.data.x;\n    input.data"
-      ".u = mpcOutput.data.u;\nend;\n\n%% Output the data structures\nmpcInput = input;"
+      ".kktValue < 1e-6)\n        mheOutput.kktValue\n        nmpcStarted = 1;\n    end;\n    \n    % If it converged, "
+      "enable controller execution\n    if nmpcStarted == 1\n        % Simple running more\n        input.control = int"
+      "32( 0 );\n    end;\nelse\n    % Do nothing\n    input.control = int32( 10 );\nend;\n\npersistent firstRun\nif is"
+      "empty( firstRun )\n    firstRun = 1;\nend;\n\nif firstRun == 1\n    firstRun = 0;\nelse\n    input.data.x = mpcO"
+      "utput.data.x;\n    input.data.u = mpcOutput.data.u;\nend;\n\n%% Output the data structures\nmpcInput = input;"
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
@@ -2516,17 +2520,23 @@ Stateflow {
       "ta.yN = zeros(1, NYN);\n    \n    eyeNY = diag(1e-4 ./ [0.01, 0.01, 0.1].^2);\n    eyeNYN = diag(1e-4 ./ [0.01, "
       "0.01].^2);\n    \n    output.data.W = eyeNY(:)';\n    output.data.WN = eyeNYN(:)';\nend;\n\npersistent runCnt\ni"
       "f isempty( runCnt )\n    runCnt = 1;\nend;\n\npersistent execReady\nif isempty( execReady )\n    execReady = 0;\n"
-      "end;\n\nif runCnt < N + 1\n    output.data.y((runCnt - 1) * NY + 1: runCnt * NY) = meas;\n    \n    output.data."
-      "x((runCnt - 1) * NX + 1) = meas( 1 );\n    output.data.x((runCnt - 1) * NX + 3) = meas( 2 );\n    \n    execRead"
-      "y = 0;\n    runCnt = runCnt + 1;\n    \nelseif runCnt == (N + 1)\n    output.data.yN = meas(1: 2, 1)';\n    outp"
-      "ut.data.y((N - 1) * NY + 3) = meas(3, 1);\n    \n    output.data.x((runCnt - 1) * NX + 1) = meas( 1 );\n    outp"
-      "ut.data.x((runCnt - 1) * NX + 3) = meas( 2 );\n    \n    % Simple running more\n    output.control = int32( 0 );"
-      "\n    \n    execReady = 1;\n    runCnt = runCnt + 1;\n    \nelse\n    % Shift measurements\n    for i = 1: N - 1"
-      "\n        output.data.y((i - 1) * NY + 1: i * NY) = output.data.y(i * NY + 1: (i + 1) * NY);\n    end;\n    outp"
-      "ut.data.y((N - 1) * NY + 1: (N - 1) * NY + 2) = output.data.yN;\n    \n    output.data.yN = meas(1: 2, 1)';\n   "
-      " output.data.y((N - 1) * NY + 3) = meas(3, 1);\n    \n    output.data.x = mheOutput.data.x;\n    output.data.u ="
-      " mheOutput.data.u;\n    \n    output.control = int32( 0 );\n    \n    execReady = 1;\nend;\n\n%% Output data\nmh"
-      "eInput = output;\nready = execReady;"
+      "end;\n\nif runCnt < (N + 1)\n    % Fill in the measurement buffer, entries 1: N\n\n    output.data.y((runCnt - 1"
+      ") * NY + 1: runCnt * NY) = meas;\n    \n    % Initialize solver, measured states, shooting nodes 1: N\n    outpu"
+      "t.data.x((runCnt - 1) * NX + 1) = meas( 1 );\n    output.data.x((runCnt - 1) * NX + 3) = meas( 2 );\n    \n    %"
+      " MHE is not ready, of course.\n    execReady = 0;\n    \n    % Increment counter\n    runCnt = runCnt + 1;\n    "
+      "\nelseif runCnt == (N + 1)\n    % Initialize measurements on node N + 1,\n    output.data.yN = meas(1: 2, 1)';\n"
+      "    % Initialize measured controls on previous node, node N\n    output.data.y((N - 1) * NY + 3) = meas(3, 1);\n"
+      "    \n    % Initialize measured states on node N _ 1\n    output.data.x((runCnt - 1) * NX + 1) = meas( 1 );\n   "
+      " output.data.x((runCnt - 1) * NX + 3) = meas( 2 );\n    \n    % Simple running more\n    output.control = int32("
+      " 0 );\n    \n    % MHE is still not ready, we want to run it once before we use the\n    % state estimate.\n    "
+      "execReady = 0;\n    \n    % Increment the counter.\n    runCnt = runCnt + 1;\n    \nelse\n    % Shift measuremen"
+      "ts\n    for i = 1: N - 1\n        output.data.y((i - 1) * NY + 1: i * NY) = output.data.y(i * NY + 1: (i + 1) * "
+      "NY);\n    end;\n    output.data.y((N - 1) * NY + 1: (N - 1) * NY + 2) = output.data.yN;\n    \n    output.data.y"
+      "N = meas(1: 2, 1)';\n    output.data.y((N - 1) * NY + 3) = meas(3, 1);\n    \n    % Use previous states and cont"
+      "rols (solutions!) for initialization.\n    % NOTE: Those guys are fist gonna be shifted because of the option\n "
+      "   %       at line 17.\n    \n    output.data.x = mheOutput.data.x;\n    output.data.u = mheOutput.data.u;\n    "
+      "\n    output.control = int32( 0 );\n    \n    % Yeah, we are ready now.\n    execReady = 1;\nend;\n\n%% Output d"
+      "ata\nmheInput = output;\nready = execReady;"
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
@@ -2669,7 +2679,10 @@ Stateflow {
     firstTransition	    25
     firstJunction	    24
     viewObj		    20
+    visible		    1
     machine		    1
+    subviewS {
+    }
     ssIdHighWaterMark	    5
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2796,7 +2809,10 @@ Stateflow {
     firstTransition	    35
     firstJunction	    34
     viewObj		    27
+    visible		    1
     machine		    1
+    subviewS {
+    }
     ssIdHighWaterMark	    8
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2823,7 +2839,8 @@ Stateflow {
       isEML		      1
       script		      "function [states,control, status, kkt] = fcn(mheOutput)\n%#codegen\n\n%% Dimensions, MHE\nNX = 4;"
       "\nNU = 1;\nN = 10;\n\nstates = mheOutput.data.x(N * NX + 1: (N + 1) * NX);\ncontrol = mheOutput.data.u(N * NU);\n"
-      "status =  mheOutput.status;\nkkt = mheOutput.kktValue;\n"
+      "status =  mheOutput.status;\n\nif status >= 0\n    % Output KKT only is QP solver status is OK.\n    kkt = mheOu"
+      "tput.kktValue;\nelse\n    % This can be used for debugging purposes.\n    kkt = -1;\nend;\n"
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
@@ -2982,7 +2999,10 @@ Stateflow {
     firstTransition	    46
     firstJunction	    45
     viewObj		    37
+    visible		    1
     machine		    1
+    subviewS {
+    }
     ssIdHighWaterMark	    9
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
