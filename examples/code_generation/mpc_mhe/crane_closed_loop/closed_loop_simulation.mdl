@@ -6,11 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-<<<<<<< HEAD
-    ComputedModelVersion    "1.289"
-=======
-    ComputedModelVersion    "1.281"
->>>>>>> 14ce7d5fc41fa614b858ad1845432b6f485619c6
+    ComputedModelVersion    "1.292"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -70,15 +66,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "madwolf"
   ModifiedDateFormat	  "%<Auto>"
-<<<<<<< HEAD
-  LastModifiedDate	  "Fri Nov 29 19:21:21 2013"
-  RTWModifiedTimeStamp	  307653681
-  ModelVersionFormat	  "1.%<AutoIncrement:289>"
-=======
-  LastModifiedDate	  "Fri Nov 29 19:17:18 2013"
-  RTWModifiedTimeStamp	  307653431
-  ModelVersionFormat	  "1.%<AutoIncrement:281>"
->>>>>>> 14ce7d5fc41fa614b858ad1845432b6f485619c6
+  LastModifiedDate	  "Fri Nov 29 19:47:48 2013"
+  RTWModifiedTimeStamp	  307655266
+  ModelVersionFormat	  "1.%<AutoIncrement:292>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -1717,7 +1707,7 @@ Model {
       ZOrder		      13
       Floating		      off
       Location		      [188, 390, 512, 629]
-      Open		      on
+      Open		      off
       NumInputPorts	      "1"
       ZoomMode		      "xonly"
       List {
@@ -2350,18 +2340,12 @@ Stateflow {
       "ed )\n    nmpcStarted = 0;\nend;\n\nif ready\n    % The estimator started spitting some estimates\n    \n    % H"
       "ere we read the current state estimate\n    input.data.x0 = mheOutput.data.x(N * NX + 1: (N + 1) * NX);\n    \n "
       "   % However, we would like to wait a bit until the estimator converges\n    if (nmpcStarted == 0) && (mheOutput"
-      ".kktValue < 1e-6)\n        mheOutput.kktValue\n        nmpcStarted = 1;\n    end;\n    \n    % If it converged, "
-      "enable controller execution\n    if nmpcStarted == 1\n        % Simple running more\n        input.control = int"
-      "32( 0 );\n    end;\nelse\n    % Do nothing\n    input.control = int32( 10 );\nend;\n\npersistent firstRun\nif is"
-<<<<<<< HEAD
-      "empty( firstRun )\n    firstRun = 1;\nend;\n\nif firstRun == 1\n    % Reset the flag. \n    firstRun = 0;\nelse\n"
-      "    % NOTE: Those guys are first gonna be shifted because of the option\n    %       at line 23.\n    input.data"
-      ".x = mpcOutput.data.x;\n    input.data.u = mpcOutput.data.u;\nend;\n\n%% Output the data structures\nmpcInput = "
-      "input;"
-=======
-      "empty( firstRun )\n    firstRun = 1;\nend;\n\nif firstRun == 1\n    firstRun = 0;\nelse\n    input.data.x = mpcO"
-      "utput.data.x;\n    input.data.u = mpcOutput.data.u;\nend;\n\n%% Output the data structures\nmpcInput = input;"
->>>>>>> 14ce7d5fc41fa614b858ad1845432b6f485619c6
+      ".kktValue < 1e-6)\n        nmpcStarted = 1;\n    end;\n    \n    % If it converged, enable controller execution\n"
+      "    if nmpcStarted == 1\n        % Simple running more\n        input.control = int32( 0 );\n    end;\nelse\n   "
+      " % Do nothing\n    input.control = int32( 10 );\nend;\n\npersistent firstRun\nif isempty( firstRun )\n    firstR"
+      "un = 1;\nend;\n\nif firstRun == 1\n    % Reset the flag. \n    firstRun = 0;\nelse\n    % NOTE: Those guys are f"
+      "irst gonna be shifted because of the option\n    %       at line 23.\n    input.data.x = mpcOutput.data.x;\n    "
+      "input.data.u = mpcOutput.data.u;\nend;\n\n%% Output the data structures\nmpcInput = input;"
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
@@ -2500,10 +2484,7 @@ Stateflow {
     firstTransition	    18
     firstJunction	    17
     viewObj		    11
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    9
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2550,17 +2531,10 @@ Stateflow {
       "ts\n    for i = 1: N - 1\n        output.data.y((i - 1) * NY + 1: i * NY) = output.data.y(i * NY + 1: (i + 1) * "
       "NY);\n    end;\n    output.data.y((N - 1) * NY + 1: (N - 1) * NY + 2) = output.data.yN;\n    \n    output.data.y"
       "N = meas(1: 2, 1)';\n    output.data.y((N - 1) * NY + 3) = meas(3, 1);\n    \n    % Use previous states and cont"
-<<<<<<< HEAD
       "rols (solutions!) for initialization.\n    % NOTE: Those guys are first gonna be shifted because of the option\n"
       "    %       at line 17.\n    \n    output.data.x = mheOutput.data.x;\n    output.data.u = mheOutput.data.u;\n   "
       " \n    output.control = int32( 0 );\n    \n    % Yeah, we are ready now.\n    execReady = 1;\nend;\n\n%% Output "
       "data\nmheInput = output;\nready = execReady;"
-=======
-      "rols (solutions!) for initialization.\n    % NOTE: Those guys are fist gonna be shifted because of the option\n "
-      "   %       at line 17.\n    \n    output.data.x = mheOutput.data.x;\n    output.data.u = mheOutput.data.u;\n    "
-      "\n    output.control = int32( 0 );\n    \n    % Yeah, we are ready now.\n    execReady = 1;\nend;\n\n%% Output d"
-      "ata\nmheInput = output;\nready = execReady;"
->>>>>>> 14ce7d5fc41fa614b858ad1845432b6f485619c6
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
@@ -2703,10 +2677,7 @@ Stateflow {
     firstTransition	    25
     firstJunction	    24
     viewObj		    20
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    5
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2833,10 +2804,7 @@ Stateflow {
     firstTransition	    35
     firstJunction	    34
     viewObj		    27
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    8
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2862,16 +2830,10 @@ Stateflow {
     eml {
       isEML		      1
       script		      "function [states,control, status, kkt] = fcn(mheOutput)\n%#codegen\n\n%% Dimensions, MHE\nNX = 4;"
-<<<<<<< HEAD
       "\nNU = 1;\nN = 10;\n\n% The current state estimate.\nstates = mheOutput.data.x(N * NX + 1: (N + 1) * NX);\n% Las"
       "t estimated controls.\ncontrol = mheOutput.data.u(N * NU);\n% Status of the QP solver.\nstatus =  mheOutput.stat"
       "us;\n\nif status >= 0\n    % Output KKT only is QP solver status is OK.\n    kkt = mheOutput.kktValue;\nelse\n  "
       "  % This can be used for debugging purposes.\n    kkt = -1;\nend;\n"
-=======
-      "\nNU = 1;\nN = 10;\n\nstates = mheOutput.data.x(N * NX + 1: (N + 1) * NX);\ncontrol = mheOutput.data.u(N * NU);\n"
-      "status =  mheOutput.status;\n\nif status >= 0\n    % Output KKT only is QP solver status is OK.\n    kkt = mheOu"
-      "tput.kktValue;\nelse\n    % This can be used for debugging purposes.\n    kkt = -1;\nend;\n"
->>>>>>> 14ce7d5fc41fa614b858ad1845432b6f485619c6
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
@@ -3030,10 +2992,7 @@ Stateflow {
     firstTransition	    46
     firstJunction	    45
     viewObj		    37
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    9
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
