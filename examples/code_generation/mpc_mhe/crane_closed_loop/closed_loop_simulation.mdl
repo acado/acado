@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.256"
+    ComputedModelVersion    "1.257"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -56,7 +56,7 @@ Model {
 	LoadSaveID		"0"
 	Extents			[967.0, 520.0]
 	ZoomFactor		[0.92239685658153237]
-	Offset			[5.8221512247071345, -0.37433439829604964]
+	Offset			[5.8221512247071132, -0.37433439829607096]
       }
     }
   }
@@ -66,9 +66,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "madwolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Sat Oct 05 02:49:22 2013"
-  RTWModifiedTimeStamp	  302841480
-  ModelVersionFormat	  "1.%<AutoIncrement:256>"
+  LastModifiedDate	  "Fri Nov 29 18:56:17 2013"
+  RTWModifiedTimeStamp	  307652176
+  ModelVersionFormat	  "1.%<AutoIncrement:257>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -2118,7 +2118,6 @@ Model {
 	DstPort			1
       }
       Branch {
-	Points			[12, 0]
 	DstBlock		"NMPC post-procesing"
 	DstPort			1
       }
@@ -2249,7 +2248,6 @@ Model {
     Line {
       SrcBlock		      "Delay"
       SrcPort		      1
-      Points		      [-5, 0]
       DstBlock		      "Crane model"
       DstPort		      1
     }
@@ -2301,10 +2299,7 @@ Stateflow {
     firstTransition	    9
     firstJunction	    8
     viewObj		    2
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    8
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2521,17 +2516,17 @@ Stateflow {
       "ta.yN = zeros(1, NYN);\n    \n    eyeNY = diag(1e-4 ./ [0.01, 0.01, 0.1].^2);\n    eyeNYN = diag(1e-4 ./ [0.01, "
       "0.01].^2);\n    \n    output.data.W = eyeNY(:)';\n    output.data.WN = eyeNYN(:)';\nend;\n\npersistent runCnt\ni"
       "f isempty( runCnt )\n    runCnt = 1;\nend;\n\npersistent execReady\nif isempty( execReady )\n    execReady = 0;\n"
-      "end;\n\nif runCnt < N\n    output.data.y((runCnt - 1) * NY + 1: runCnt * NY) = meas;\n    \n    output.data.x((r"
-      "unCnt - 1) * NX + 1) = meas( 1 );\n    output.data.x((runCnt - 1) * NX + 3) = meas( 2 );\n    \n    execReady = "
-      "0;\n    runCnt = runCnt + 1;\n    \nelseif runCnt == (N + 1)\n    output.data.yN = meas(1: 2, 1)';\n    output.d"
-      "ata.y((N - 1) * NY + 3) = meas(3, 1);\n    \n    output.data.x((runCnt - 1) * NX + 1) = meas( 1 );\n    output.d"
-      "ata.x((runCnt - 1) * NX + 3) = meas( 2 );\n    \n    % Simple running more\n    output.control = int32( 0 );\n  "
-      "  \n    execReady = 1;\n    runCnt = runCnt + 1;\n    \nelse\n    % Shift measurements\n    for i = 1: N - 1\n  "
-      "      output.data.y((i - 1) * NY + 1: i * NY) = output.data.y(i * NY + 1: (i + 1) * NY);\n    end;\n    output.d"
-      "ata.y((N - 1) * NY + 1: (N - 1) * NY + 2) = output.data.yN;\n    \n    output.data.yN = meas(1: 2, 1)';\n    out"
-      "put.data.y((N - 1) * NY + 3) = meas(3, 1);\n    \n    output.data.x = mheOutput.data.x;\n    output.data.u = mhe"
-      "Output.data.u;\n    \n    output.control = int32( 0 );\n    \n    execReady = 1;\nend;\n\n%% Output data\nmheInp"
-      "ut = output;\nready = execReady;"
+      "end;\n\nif runCnt < N + 1\n    output.data.y((runCnt - 1) * NY + 1: runCnt * NY) = meas;\n    \n    output.data."
+      "x((runCnt - 1) * NX + 1) = meas( 1 );\n    output.data.x((runCnt - 1) * NX + 3) = meas( 2 );\n    \n    execRead"
+      "y = 0;\n    runCnt = runCnt + 1;\n    \nelseif runCnt == (N + 1)\n    output.data.yN = meas(1: 2, 1)';\n    outp"
+      "ut.data.y((N - 1) * NY + 3) = meas(3, 1);\n    \n    output.data.x((runCnt - 1) * NX + 1) = meas( 1 );\n    outp"
+      "ut.data.x((runCnt - 1) * NX + 3) = meas( 2 );\n    \n    % Simple running more\n    output.control = int32( 0 );"
+      "\n    \n    execReady = 1;\n    runCnt = runCnt + 1;\n    \nelse\n    % Shift measurements\n    for i = 1: N - 1"
+      "\n        output.data.y((i - 1) * NY + 1: i * NY) = output.data.y(i * NY + 1: (i + 1) * NY);\n    end;\n    outp"
+      "ut.data.y((N - 1) * NY + 1: (N - 1) * NY + 2) = output.data.yN;\n    \n    output.data.yN = meas(1: 2, 1)';\n   "
+      " output.data.y((N - 1) * NY + 3) = meas(3, 1);\n    \n    output.data.x = mheOutput.data.x;\n    output.data.u ="
+      " mheOutput.data.u;\n    \n    output.control = int32( 0 );\n    \n    execReady = 1;\nend;\n\n%% Output data\nmh"
+      "eInput = output;\nready = execReady;"
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
@@ -2674,10 +2669,7 @@ Stateflow {
     firstTransition	    25
     firstJunction	    24
     viewObj		    20
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    5
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2804,10 +2796,7 @@ Stateflow {
     firstTransition	    35
     firstJunction	    34
     viewObj		    27
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    8
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2993,10 +2982,7 @@ Stateflow {
     firstTransition	    46
     firstJunction	    45
     viewObj		    37
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    9
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
