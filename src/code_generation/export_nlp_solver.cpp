@@ -761,8 +761,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 returnValue ExportNLPSolver::setupResidualVariables()
 {
 	y.setup("y",  getN() * getNY(), 1, REAL, ACADO_VARIABLES);
-	y.setDoc( string("DMatrix containing ") + toString(N) +
-			" reference/measurement vectors for first " + toString(N) + " nodes." );
+	y.setDoc( string("Matrix containing ") + toString( NY ) +
+			" reference/measurement vectors for first " + toString( N ) + " nodes." );
 	yN.setup("yN", getNYN(), 1, REAL, ACADO_VARIABLES);
 	yN.setDoc( string("Reference/measurement vector for the ") + toString(N + 1) + ". node." );
 	Dy.setup("Dy", getN() * getNY(), 1, REAL,ACADO_WORKSPACE);

@@ -27,9 +27,9 @@ www.acadotoolkit.org
 #define NY          ACADO_NY  /* Number of measurements/references on nodes 0..N - 1. */
 #define NYN         ACADO_NYN /* Number of measurements/references on node N. */
 
-#define N           10        /* Number of intervals in the horizon. */
+#define N           ACADO_N   /* Number of intervals in the horizon. */
 
-#define NUM_STEPS   5         /* Number of real-time iterations. */
+#define NUM_STEPS   10        /* Number of real-time iterations. */
 #define VERBOSE     1         /* Show iterations: 1, silent: 0.  */
 
 /* Global variables used by the solver. */
@@ -82,8 +82,8 @@ int main()
 		if( VERBOSE ) printf("\tReal-Time Iteration %d:  KKT Tolerance = %.3e\n\n", iter, getKKT() );
 
 		/* Optional: shift the initialization (look at acado_common.h). */
-        shiftStates(2, 0, 0);
-		shiftControls( 0 );
+        /* shiftStates(2, 0, 0); */
+		/* shiftControls( 0 ); */
 
 		/* Prepare for the next step. */
 		preparationStep();

@@ -1604,12 +1604,8 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 						multQ1d, Q1.getAddress((i + 1) * NX, 0), d.getAddress(i * NX), Qd.getAddress(i * NX) );
 		}
 
-		if (QN1.isGiven() == true)
-			condensePrep.addFunctionCall(
-					multQN1d, QN1, d.getAddress((N - 1) * NX), Qd.getAddress((N - 1) * NX) );
-		else
-			condensePrep.addFunctionCall(
-					multQ1d, QN1, d.getAddress((N - 1) * NX), Qd.getAddress((N - 1) * NX) );
+		condensePrep.addFunctionCall(
+				multQN1d, QN1, d.getAddress((N - 1) * NX), Qd.getAddress((N - 1) * NX) );
 
 		condensePrep.addLinebreak();
 	}
@@ -2104,25 +2100,13 @@ returnValue ExportGaussNewtonCondensed::setupMultiplicationRoutines( )
 		multQ1Gx.setup("multQ1Gx", Gx1, Gx2);
 		multQ1Gx.addStatement( Gx2 == Q1 * Gx1 );
 
-		// multQN1Gx
-		multQN1Gx.setup("multQN1Gx", Gx1, Gx2);
-		multQN1Gx.addStatement( Gx2 == QN1 * Gx1 );
-
 		// multQ1Gu
 		multQ1Gu.setup("multQ1Gu", Gu1, Gu2);
 		multQ1Gu.addStatement( Gu2 == Q1 * Gu1 );
 
-		// multQN1Gu
-		multQN1Gu.setup("multQN1Gu", Gu1, Gu2);
-		multQN1Gu.addStatement( Gu2 == QN1 * Gu1 );
-
 		// multQ1d
 		multQ1d.setup("multQ1d", Q1, dp, dn);
 		multQ1d.addStatement( dn == Q1 * dp );
-
-		// multQN1d
-		multQN1d.setup("multQN1d", QN1, dp, dn);
-		multQN1d.addStatement( dn == QN1 * dp );
 	}
 	else
 	{
@@ -2131,7 +2115,25 @@ returnValue ExportGaussNewtonCondensed::setupMultiplicationRoutines( )
 		multQ1d.addStatement( dn == Gx1 * dp );
 	}
 
-	if (performFullCondensing() == false)
+	if (QN1.isGiven() == BT_TRUE)
+	{
+		// multQN1Gu
+		multQN1Gu.setup("multQN1Gu", Gu1, Gu2);
+		multQN1Gu.addStatement( Gu2 == QN1 * Gu1 );
+
+		// multQN1Gx
+		multQN1Gx.setup("multQN1Gx", Gx1, Gx2);
+		multQN1Gx.addStatement( Gx2 == QN1 * Gx1 );
+	}
+
+	if (performsSingleShooting() == BT_FALSE)
+	{
+		// multQN1d
+		multQN1d.setup("multQN1d", QN1, dp, dn);
+		multQN1d.addStatement( dn == QN1 * dp );
+	}
+
+	if (performFullCondensing() == BT_FALSE)
 	{
 		// zeroBlockH00
 		zeroBlockH00.setup( "zeroBlockH00" );
