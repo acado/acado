@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.291"
+    ComputedModelVersion    "1.292"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -66,9 +66,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "madwolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Nov 29 19:42:20 2013"
-  RTWModifiedTimeStamp	  307654927
-  ModelVersionFormat	  "1.%<AutoIncrement:291>"
+  LastModifiedDate	  "Fri Nov 29 19:47:48 2013"
+  RTWModifiedTimeStamp	  307655266
+  ModelVersionFormat	  "1.%<AutoIncrement:292>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -2300,7 +2300,10 @@ Stateflow {
     firstTransition	    9
     firstJunction	    8
     viewObj		    2
+    visible		    1
     machine		    1
+    subviewS {
+    }
     ssIdHighWaterMark	    8
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2337,13 +2340,12 @@ Stateflow {
       "ed )\n    nmpcStarted = 0;\nend;\n\nif ready\n    % The estimator started spitting some estimates\n    \n    % H"
       "ere we read the current state estimate\n    input.data.x0 = mheOutput.data.x(N * NX + 1: (N + 1) * NX);\n    \n "
       "   % However, we would like to wait a bit until the estimator converges\n    if (nmpcStarted == 0) && (mheOutput"
-      ".kktValue < 1e-6)\n        mheOutput.kktValue\n        nmpcStarted = 1;\n    end;\n    \n    % If it converged, "
-      "enable controller execution\n    if nmpcStarted == 1\n        % Simple running more\n        input.control = int"
-      "32( 0 );\n    end;\nelse\n    % Do nothing\n    input.control = int32( 10 );\nend;\n\npersistent firstRun\nif is"
-      "empty( firstRun )\n    firstRun = 1;\nend;\n\nif firstRun == 1\n    % Reset the flag. \n    firstRun = 0;\nelse\n"
-      "    % NOTE: Those guys are first gonna be shifted because of the option\n    %       at line 23.\n    input.data"
-      ".x = mpcOutput.data.x;\n    input.data.u = mpcOutput.data.u;\nend;\n\n%% Output the data structures\nmpcInput = "
-      "input;"
+      ".kktValue < 1e-6)\n        nmpcStarted = 1;\n    end;\n    \n    % If it converged, enable controller execution\n"
+      "    if nmpcStarted == 1\n        % Simple running more\n        input.control = int32( 0 );\n    end;\nelse\n   "
+      " % Do nothing\n    input.control = int32( 10 );\nend;\n\npersistent firstRun\nif isempty( firstRun )\n    firstR"
+      "un = 1;\nend;\n\nif firstRun == 1\n    % Reset the flag. \n    firstRun = 0;\nelse\n    % NOTE: Those guys are f"
+      "irst gonna be shifted because of the option\n    %       at line 23.\n    input.data.x = mpcOutput.data.x;\n    "
+      "input.data.u = mpcOutput.data.u;\nend;\n\n%% Output the data structures\nmpcInput = input;"
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
@@ -2482,10 +2484,7 @@ Stateflow {
     firstTransition	    18
     firstJunction	    17
     viewObj		    11
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    9
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
