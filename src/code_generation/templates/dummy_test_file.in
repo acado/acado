@@ -59,7 +59,9 @@ int main()
 	for (i = 0; i < NYN; ++i)  acadoVariables.yN[ i ] = 0.0;
 
 	/* MPC: initialize the current state feedback. */
+#if ACADO_INITIAL_STATE_FIXED
 	for (i = 0; i < NX; ++i) acadoVariables.x0[ i ] = 0.1;
+#endif
       
 	if( VERBOSE ) printHeader();
 	
