@@ -41,76 +41,26 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportFunctionDeclaration::ExportFunctionDeclaration( ) : ExportStatement( )
-{
-	f = 0;
-}
+ExportFunctionDeclaration::ExportFunctionDeclaration( ) : ExportStatement( ), f( ExportFunction() )
+{}
 
 
 ExportFunctionDeclaration::ExportFunctionDeclaration(	const ExportFunction& _f
-														) : ExportStatement( )
-{
-	f = new ExportFunction( _f );
-}
+														) : ExportStatement( ), f( _f )
+{}
 
 
 ExportFunctionDeclaration::ExportFunctionDeclaration(	const ExportAcadoFunction& _f
-														) : ExportStatement( )
-{
-	f = new ExportAcadoFunction( _f );
-}
-
-
-ExportFunctionDeclaration::ExportFunctionDeclaration(	const ExportFunctionDeclaration& arg
-														) : ExportStatement( arg )
-{
-	if ( arg.f != 0 )
-		f = arg.f->cloneFunction( );
-	else
-		f = 0;
-}
-
+														) : ExportStatement( ), f( _f )
+{}
 
 ExportFunctionDeclaration::~ExportFunctionDeclaration( )
-{
-	if ( f != 0 )
-	{
-		delete f;
-		f = 0;
-	}
-}
-
-
-ExportFunctionDeclaration& ExportFunctionDeclaration::operator=(	const ExportFunctionDeclaration& arg
-																	)
-{
-	if( this != &arg )
-	{
-		if ( f != 0 )
-		{
-			delete f;
-			f = 0;
-		}
-
-		ExportStatement::operator= ( arg );
-
-		if ( arg.f != 0 )
-			f = arg.f->cloneFunction( );
-		else
-			f = 0;
-	}
-
-	return *this;
-}
-
-
+{}
 
 ExportStatement* ExportFunctionDeclaration::clone( ) const
 {
 	return new ExportFunctionDeclaration(*this);
 }
-
-
 
 
 returnValue ExportFunctionDeclaration::exportCode(	std::ostream& stream,
@@ -119,20 +69,7 @@ returnValue ExportFunctionDeclaration::exportCode(	std::ostream& stream,
 													int _precision
 													) const
 {
-	if ( f == 0 )
-		return SUCCESSFUL_RETURN;
-	
-	return f->exportForwardDeclaration( stream,_realString,_intString,_precision );
+	return f.exportForwardDeclaration(stream, _realString, _intString, _precision);
 }
 
-
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-
 CLOSE_NAMESPACE_ACADO
-
-// end of file.

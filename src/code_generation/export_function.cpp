@@ -73,14 +73,6 @@ ExportStatement* ExportFunction::clone( ) const
 	return new ExportFunction(*this);
 }
 
-
-ExportFunction* ExportFunction::cloneFunction( ) const
-{
-	return new ExportFunction(*this);
-}
-
-
-
 returnValue ExportFunction::init(	const std::string& _name,
 									const ExportArgument& _argument1,
 									const ExportArgument& _argument2,

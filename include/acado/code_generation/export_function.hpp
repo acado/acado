@@ -98,8 +98,6 @@ public:
 	 */
 	virtual ExportStatement* clone( ) const;
 
-	virtual ExportFunction* cloneFunction( ) const;
-
 	/** Initializes function with given name and possible calling arguments.
 	 *
 	 *	@param[in] _name		Name of the function.

@@ -27,24 +27,19 @@
 
 /**
  *    \file include/acado/code_generation/export_function_declaration.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010 - 2013
  */
 
 
 #ifndef ACADO_TOOLKIT_EXPORT_FUNCTION_DECLARATION_HPP
 #define ACADO_TOOLKIT_EXPORT_FUNCTION_DECLARATION_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_statement.hpp>
 #include <acado/code_generation/export_function.hpp>
 #include <acado/code_generation/export_acado_function.hpp>
 
-
-
 BEGIN_NAMESPACE_ACADO
-
 
 /** 
 *	\brief Allows to export code containing function (forward) declarations.
@@ -54,7 +49,7 @@ BEGIN_NAMESPACE_ACADO
  *	The class ExportDataDeclaration allows to export code containing function 
  *	(forward) declarations.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class ExportFunctionDeclaration : public ExportStatement
 {
@@ -62,10 +57,6 @@ class ExportFunctionDeclaration : public ExportStatement
     // PUBLIC MEMBER FUNCTIONS:
     //
     public:
-
-		/** Default constructor. 
-		 */
-        ExportFunctionDeclaration( );
 
 		/** Constructor taking the function to be declared.
 		 *
@@ -81,30 +72,15 @@ class ExportFunctionDeclaration : public ExportStatement
 		ExportFunctionDeclaration(	const ExportAcadoFunction& _f
 									);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportFunctionDeclaration(	const ExportFunctionDeclaration& arg
-									);
-
         /** Destructor. 
 		 */
         virtual ~ExportFunctionDeclaration( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportFunctionDeclaration& operator=(	const ExportFunctionDeclaration& arg
-												);
 
 		/** Clone constructor (deep copy).
 		 *
 		 *	\return Pointer to cloned object.
 		 */
 		virtual ExportStatement* clone( ) const;
-
 
 		/** Exports source code of the statement into given file. Its appearance can 
 		 *  can be adjusted by various options.
@@ -122,24 +98,12 @@ class ExportFunctionDeclaration : public ExportStatement
 										int _precision = 16
 										) const;
 
+    private:
+		ExportFunctionDeclaration( );
 
-	//
-    // PROTECTED MEMBER FUNCTIONS:
-    //
-    protected:
-
-
-
-    protected:
-		
-		ExportFunction* f;					/**< Function to be declared. */
-
+		const ExportFunction& f;
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
 #endif  // ACADO_TOOLKIT_EXPORT_FUNCTION_DECLARATION_HPP
-
-// end of file.
