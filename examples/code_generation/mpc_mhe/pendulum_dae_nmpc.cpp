@@ -76,7 +76,7 @@ int main(int argc, char * const argv[ ])
 	rfN << x << y << w << dx << dy << dw;
 
 	DMatrix W = eye<double>( rf.getDim() );
-	DMatrix WN = eye<double>( rfN.getDim() );
+	DMatrix WN = eye<double>( rfN.getDim() ) * 10;
 
 	//
 	// Optimal Control Problem
