@@ -173,6 +173,13 @@ returnValue ExportGaussNewtonCondensed::getCode(	ExportStatementBlock& code
 		code.addDeclaration( state );
 	}
 
+	if ( externObjective )
+	{
+		code << string("void ") + evaluateLSQ.getName() << "(real_t*, real_t*);\n";
+		code << string("void ") + evaluateLSQEndTerm.getName() << "(real_t*, real_t*);\n";
+		code.addLinebreak( 2 );
+	}
+
 	code.addFunction( modelSimulation );
 
 	code.addFunction( evaluateLSQ );
@@ -288,10 +295,7 @@ returnValue ExportGaussNewtonCondensed::setupObjectiveEvaluation( void )
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	if (externObjective == false)
-		loopObjective.addFunctionCall( "evaluateLSQ", objValueIn, objValueOut );
-	else
-		loopObjective.addFunctionCall( evaluateExternLSQ, objValueIn, objValueOut );
+	loopObjective.addFunctionCall(evaluateLSQ.getName(), objValueIn, objValueOut);
 
 	// Stack the measurement function value
 	loopObjective.addStatement(
@@ -437,11 +441,8 @@ returnValue ExportGaussNewtonCondensed::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
-	// Evaluate the objective function
-	if (externObjective == false)
-		evaluateObjective.addFunctionCall( "evaluateLSQEndTerm", objValueIn, objValueOut );
-	else
-		evaluateObjective.addFunctionCall( evaluateExternLSQEndTerm, objValueIn, objValueOut );
+	// Evaluate the objective function, last node.
+	evaluateObjective.addFunctionCall(evaluateLSQEndTerm.getName(), objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
 	evaluateObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) );

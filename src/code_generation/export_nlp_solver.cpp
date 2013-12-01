@@ -342,7 +342,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	_objective.getLSQTerms( lsqExternElements );
 
 	LsqExternElements lsqExternEndTermElements;
-	_objective.getLSQTerms( lsqExternEndTermElements );
+	_objective.getLSQEndTerms( lsqExternEndTermElements );
 
 	if (lsqExternElements.size() > 0 || lsqExternEndTermElements.size() > 0)
 	{
@@ -370,9 +370,6 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		objSEndTerm.setup("WN", lsqExternEndTermElements[ 0 ].W,
 				REAL, ACADO_VARIABLES, false, "", lsqExternEndTermElements[ 0 ].givenW);
 
-		evaluateExternLSQ = lsqExternElements[ 0 ].h;
-		evaluateExternLSQEndTerm = lsqExternEndTermElements[ 0 ].h;
-
 		// ExportVariable objEvFx, objEvFu, objEvFxEnd; // aliasing
 
 		objEvFx.setup("evFx", NY, NX, REAL, ACADO_WORKSPACE);
@@ -391,6 +388,9 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		objValueIn.setup("objValueIn", 1, NX + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
 		objValueOut.setup("objValueOut", 1,
 				NY < NYN ? NYN * (1 + NX + NU): NY * (1 + NX + NU), REAL, ACADO_WORKSPACE);
+
+		evaluateLSQ = ExportAcadoFunction(Function(), lsqExternElements[ 0 ].h);
+		evaluateLSQEndTerm = ExportAcadoFunction(Function(), lsqExternEndTermElements[ 0 ].h);
 
 		externObjective = true;
 
@@ -759,8 +759,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 returnValue ExportNLPSolver::setupResidualVariables()
 {
 	y.setup("y",  getN() * getNY(), 1, REAL, ACADO_VARIABLES);
-	y.setDoc( string("Matrix containing ") + toString( NY ) +
-			" reference/measurement vectors for first " + toString( N ) + " nodes." );
+	y.setDoc( string("Matrix containing ") + toString( N ) +
+			" reference/measurement vectors of size " + toString( NYN ) + " for first " + toString( N ) + " nodes." );
 	yN.setup("yN", getNYN(), 1, REAL, ACADO_VARIABLES);
 	yN.setDoc( string("Reference/measurement vector for the ") + toString(N + 1) + ". node." );
 	Dy.setup("Dy", getN() * getNY(), 1, REAL,ACADO_WORKSPACE);
@@ -1262,10 +1262,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	if (externObjective == false)
-		loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
-	else
-		loopObjective.addFunctionCall( evaluateExternLSQ, objValueIn, objValueOut );
+	loopObjective.addFunctionCall(evaluateLSQ.getName(), objValueIn, objValueOut);
 
 	// Stack the measurement function value
 	loopObjective.addStatement(
@@ -1279,10 +1276,8 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	getObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
 	// Evaluate the objective function
-	if (externObjective == false)
-		getObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
-	else
-		getObjective.addFunctionCall( evaluateExternLSQEndTerm, objValueIn, objValueOut );
+	getObjective.addFunctionCall(evaluateLSQEndTerm.getName(), objValueIn, objValueOut);
+
 	getObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) - yN.getTranspose() );
 
 	getObjective.addStatement( objVal == 0 );
@@ -1421,10 +1416,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	updateArrivalCost.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( 0 ) );
 	updateArrivalCost.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 
-	if (externObjective == false)
-		updateArrivalCost.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
-	else
-		updateArrivalCost.addFunctionCall(evaluateExternLSQ, objValueIn, objValueOut);
+	updateArrivalCost.addFunctionCall(evaluateLSQ.getName(), objValueIn, objValueOut);
 	updateArrivalCost.addLinebreak( );
 
 	//

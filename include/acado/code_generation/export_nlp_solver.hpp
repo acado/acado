@@ -245,8 +245,6 @@ protected:
 	ExportVariable objAuxVar, objValueIn, objValueOut;
 	ExportAcadoFunction evaluateLSQ;
 	ExportAcadoFunction evaluateLSQEndTerm;
-	std::string evaluateExternLSQ, evaluateExternLSQEndTerm;
-
 	bool externObjective;
 
 	ExportVariable Q1, Q2;
