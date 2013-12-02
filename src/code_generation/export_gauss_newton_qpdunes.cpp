@@ -44,6 +44,23 @@ ExportGaussNewtonQpDunes::ExportGaussNewtonQpDunes(	UserInteraction* _userIntera
 
 returnValue ExportGaussNewtonQpDunes::setup( )
 {
+	LOG( LVL_DEBUG ) << "Solver: setup initialization... " << endl;
+	setupInitialization();
+
+	//
+	// Add QP initialization call to the initialization
+	//
+	ExportFunction initializeQpDunes( "initializeQpDunes" );
+	initialize
+		<< "ret = (int)initializeQpDunes();\n"
+		<< "if ((return_t)ret != QPDUNES_OK) return ret;\n";
+
+	cleanup.setup( "cleanupSolver" );
+	ExportFunction cleanupQpDunes( "cleanupQpDunes" );
+	cleanup.addFunctionCall( cleanupQpDunes );
+
+	LOG( LVL_DEBUG ) << "done!" << endl;
+
 	setupVariables();
 
 	setupSimulation();
@@ -55,19 +72,6 @@ returnValue ExportGaussNewtonQpDunes::setup( )
 	setupEvaluation();
 
 	setupAuxiliaryFunctions();
-
-	//
-	// Add QP initialization call to the initialization
-	// TODO Return value name is fixed. Make this more flexible ;)
-	//
-	ExportFunction initializeQpDunes( "initializeQpDunes" );
-	initialize
-		<< std::string("ret = (int)initializeQpDunes();\n")
-		<< std::string("if ((return_t)ret != QPDUNES_OK) return ret;\n");
-
-	cleanup.setup( "cleanupSolver" );
-	ExportFunction cleanupQpDunes( "cleanupQpDunes" );
-	cleanup.addFunctionCall( cleanupQpDunes );
 
 	return SUCCESSFUL_RETURN;
 }

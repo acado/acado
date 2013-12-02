@@ -44,6 +44,10 @@ ExportGaussNewtonCondensed::ExportGaussNewtonCondensed(	UserInteraction* _userIn
 
 returnValue ExportGaussNewtonCondensed::setup( )
 {
+	LOG( LVL_DEBUG ) << "Solver: setup initialization... " << endl;
+	setupInitialization();
+	LOG( LVL_DEBUG ) << "done!" << endl;
+
 	LOG( LVL_DEBUG ) << "Solver: setup variables... " << endl;
 	setupVariables();
 	LOG( LVL_DEBUG ) << "done!" << endl;

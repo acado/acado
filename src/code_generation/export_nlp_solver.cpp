@@ -31,8 +31,6 @@
 
 #include <acado/code_generation/export_nlp_solver.hpp>
 
-#include <sstream>
-
 BEGIN_NAMESPACE_ACADO
 
 using namespace std;
@@ -45,7 +43,7 @@ ExportNLPSolver::ExportNLPSolver(	UserInteraction* _userInteraction,
 											acSolver(userInteraction, _commonHeaderName)
 
 {
-	levenbergMarquardt    = 0.0;
+	levenbergMarquardt = 0.0;
 
 	dimPacH = 0;
 	dimPocH = 0;
@@ -79,12 +77,12 @@ returnValue ExportNLPSolver::setLevenbergMarquardt(	double _levenbergMarquardt
 bool ExportNLPSolver::performsSingleShooting( ) const
 {
 	int discretizationType;
-	get( DISCRETIZATION_TYPE,discretizationType );
+	get(DISCRETIZATION_TYPE, discretizationType);
 
 	if ( discretizationType == SINGLE_SHOOTING )
 		return true;
-	else
-		return false;
+
+	return false;
 }
 
 returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarations,
@@ -158,6 +156,31 @@ returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarat
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue ExportNLPSolver::setupInitialization()
+{
+	////////////////////////////////////////////////////////////////////////////
+	//
+	// Setup the main initialization function.
+	//
+	////////////////////////////////////////////////////////////////////////////
+
+	ExportVariable retInit("ret", 1, 1, INT, ACADO_LOCAL, true);
+	retInit.setDoc("=0: OK, otherwise an error code of a QP solver.");
+	initialize.setup( "initializeSolver" );
+	initialize.doc( "Solver initialization. Must be called once before any other function call." );
+	initialize.setReturnValue(retInit);
+
+	initialize.addComment( "This is a function which must be called once before any other function call!" );
+	initialize.addLinebreak( 2 );
+
+	initialize << (retInit == 0);
+	initialize.addLinebreak();
+	initialize	<< "memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));" << "\n"
+				<< "memset(&acadoVariables, 0, sizeof( acadoVariables ));" << "\n";
+
+	return SUCCESSFUL_RETURN;
+}
+
 returnValue ExportNLPSolver::setupSimulation( void )
 {
 	// \todo Implement free parameters and support for DAEs
@@ -166,17 +189,6 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	// By default, here will be defined model simulation suitable for sparse QP solver.
 	// Condensing based QP solvers should redefine/extend model simulation
 	//
-
-	// \todo Move to something like: setupInitialization
-	ExportVariable retInit("ret", 1, 1, INT, ACADO_LOCAL, true);
-	retInit.setDoc("=0: OK, otherwise an error code of a QP solver.");
-	initialize.setup( "initializeSolver" );
-	initialize.doc( "Solver initialization. Must be called once before any other function call." );
-	initialize.setReturnValue(retInit);
-	initialize << retInit.getFullName() << std::string(" = 0;\n");
-
-	initialize.addComment( "This is a function which must be called once before any other function call!" );
-	initialize.addLinebreak( 2 );
 
 	modelSimulation.setup( "modelSimulation" );
 	ExportVariable retSim("ret", 1, 1, INT, ACADO_LOCAL, true);
@@ -1149,7 +1161,6 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 		zLoop.addStatement( z.getRow( index ) == z.getRow(index + 1) );
 		shiftStates.addStatement( zLoop );
 	}
-
 
 	shiftStates.addLinebreak( );
 	shiftStates.addStatement( "if (strategy == 1 && xEnd != 0)\n{\n" );

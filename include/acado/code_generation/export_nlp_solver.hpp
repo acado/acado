@@ -209,6 +209,9 @@ protected:
 	/** Setup of functions and variables for evaluation of arrival cost. */
 	returnValue setupArrivalCostCalculation();
 
+	/** Setup main initialization code for the solver */
+	virtual returnValue setupInitialization();
+
 protected:
 
 	/** \name Evaluation of model dynamics. */

@@ -52,6 +52,10 @@ returnValue ExportGaussNewtonCN2::setup( )
 	if (performsSingleShooting() == true)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
+	LOG( LVL_DEBUG ) << "Solver: setup initialization... " << endl;
+	setupInitialization();
+	LOG( LVL_DEBUG ) << "done!" << endl;
+
 	LOG( LVL_DEBUG ) << "Solver: setup variables... " << endl;
 	setupVariables();
 	LOG( LVL_DEBUG ) << "done!" << endl;

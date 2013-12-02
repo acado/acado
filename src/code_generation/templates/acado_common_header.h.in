@@ -2,6 +2,7 @@
 #define @MODULE_NAME@_COMMON_H
 
 #include <math.h>
+#include <string.h>
 
 #ifndef __MATLAB__
 #ifdef __cplusplus

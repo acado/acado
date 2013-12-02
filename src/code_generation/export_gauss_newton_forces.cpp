@@ -54,15 +54,17 @@ ExportGaussNewtonForces::ExportGaussNewtonForces(	UserInteraction* _userInteract
 
 returnValue ExportGaussNewtonForces::setup( )
 {
+	LOG( LVL_DEBUG ) << "Solver: setup initialization... " << endl;
+	setupInitialization();
+	// Add QP initialization call to the initialization
+	ExportFunction initializeForces( "initializeForces" );
+	initialize.addFunctionCall( initializeForces );
+
+	LOG( LVL_DEBUG ) << "done!" << endl;
+
 	setupVariables();
 
 	setupSimulation();
-
-	//
-	// Add QP initialization call to the initialization
-	//
-	ExportFunction initializeForces( "initializeForces" );
-	initialize.addFunctionCall( initializeForces );
 
 	setupObjectiveEvaluation();
 
