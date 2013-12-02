@@ -1366,8 +1366,12 @@ returnValue ExportGaussNewtonCN2::setupEvaluation( )
 
 	preparation.setup( "preparationStep" );
 	preparation.doc( "Preparation step of the RTI scheme." );
+	ExportVariable retSim("ret", 1, 1, INT, ACADO_LOCAL, true);
+	retSim.setDoc("Status of the integration module. =0: OK, otherwise the error code.");
+	preparation.setReturnValue(retSim, false);
 
-	preparation.addFunctionCall( modelSimulation );
+	preparation	<< retSim.getFullName() << " = " << modelSimulation.getName() << "();\n";
+
 	preparation.addFunctionCall( evaluateObjective );
 	preparation.addFunctionCall( condensePrep );
 

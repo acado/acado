@@ -179,6 +179,9 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	initialize.addLinebreak( 2 );
 
 	modelSimulation.setup( "modelSimulation" );
+	ExportVariable retSim("ret", 1, 1, INT, ACADO_LOCAL, true);
+	modelSimulation.setReturnValue(retSim, false);
+	modelSimulation.addStatement(retSim == 0);
 	ExportIndex run;
 	modelSimulation.acquire( run );
 	ExportForLoop loop(run, 0, getN());
@@ -255,9 +258,10 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	if ( integrator->equidistantControlGrid() )
 	{
 		if (performsSingleShooting() == false)
-			loop << "integrate" << "(" << state.getFullName() << ", 1);\n";
+			loop 	<< retSim.getFullName() << " = "
+				 	 << "integrate" << "(" << state.getFullName() << ", 1);\n";
 		else
-			loop << "integrate"
+			loop 	<< retSim.getFullName() << " = " << "integrate"
 					<< "(" << state.getFullName() << ", "
 					<< run.getFullName() << " == 0"
 					<< ");\n";
@@ -265,15 +269,23 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	else
 	{
 		if (performsSingleShooting() == false)
-			loop << "integrate"
+			loop 	<< retSim.getFullName() << " = "
+					<< "integrate"
 					<< "(" << state.getFullName() << ", 1, " << run.getFullName() << ");\n";
 		else
-			loop << "integrate"
+			loop	<< retSim.getFullName() << " = "
+					<< "integrate"
 					<< "(" << state.getFullName() << ", "
 					<< run.getFullName() << " == 0"
 					<< ", " << run.getFullName() << ");\n";
 	}
 	loop.addLinebreak( );
+	if (useOMP == 0)
+	{
+		// TODO In case we use OpenMP more sophisticated solution has to be found.
+		loop << "if (" << retSim.getFullName() << " != 0) return " << retSim.getFullName() << ";";
+		loop.addLinebreak( );
+	}
 
 	if ( performsSingleShooting() == true )
 	{
@@ -760,7 +772,7 @@ returnValue ExportNLPSolver::setupResidualVariables()
 {
 	y.setup("y",  getN() * getNY(), 1, REAL, ACADO_VARIABLES);
 	y.setDoc( string("Matrix containing ") + toString( N ) +
-			" reference/measurement vectors of size " + toString( NYN ) + " for first " + toString( N ) + " nodes." );
+			" reference/measurement vectors of size " + toString( NY ) + " for first " + toString( N ) + " nodes." );
 	yN.setup("yN", getNYN(), 1, REAL, ACADO_VARIABLES);
 	yN.setDoc( string("Reference/measurement vector for the ") + toString(N + 1) + ". node." );
 	Dy.setup("Dy", getN() * getNY(), 1, REAL,ACADO_WORKSPACE);
