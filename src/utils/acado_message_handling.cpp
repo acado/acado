@@ -432,7 +432,7 @@ returnValue::~returnValue() {
 			if (level == LVL_FATAL)
 #endif
 			{
-				exit( 1 );
+				abort();
 			}
 		}
 	}
