@@ -123,6 +123,9 @@ returnValue ExportGaussNewtonQpDunes::getFunctionDeclarations(	ExportStatementBl
 	declarations.addDeclaration( cleanup );
 	declarations.addDeclaration( shiftQpData );
 
+	declarations.addDeclaration( evaluateLSQ );
+	declarations.addDeclaration( evaluateLSQEndTerm );
+
 	return SUCCESSFUL_RETURN;
 }
 

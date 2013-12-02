@@ -151,6 +151,9 @@ returnValue ExportGaussNewtonCN2::getFunctionDeclarations(	ExportStatementBlock&
 	declarations.addDeclaration( getKKT );
 	declarations.addDeclaration( getObjective );
 
+	declarations.addDeclaration( evaluateLSQ );
+	declarations.addDeclaration( evaluateLSQEndTerm );
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -172,13 +175,6 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 	if ( useOMP )
 	{
 		code.addDeclaration( state );
-	}
-
-	if ( externObjective )
-	{
-		code << string("void ") + evaluateLSQ.getName() << "(real_t*, real_t*);\n";
-		code << string("void ") + evaluateLSQEndTerm.getName() << "(real_t*, real_t*);\n";
-		code.addLinebreak( 2 );
 	}
 
 	code.addFunction( modelSimulation );

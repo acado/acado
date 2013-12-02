@@ -413,8 +413,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		objValueOut.setup("objValueOut", 1,
 				NY < NYN ? NYN * (1 + NX + NU): NY * (1 + NX + NU), REAL, ACADO_WORKSPACE);
 
-		evaluateLSQ = ExportAcadoFunction(Function(), lsqExternElements[ 0 ].h);
-		evaluateLSQEndTerm = ExportAcadoFunction(Function(), lsqExternEndTermElements[ 0 ].h);
+		evaluateLSQ = ExportAcadoFunction(lsqExternElements[ 0 ].h);
+		evaluateLSQEndTerm = ExportAcadoFunction(lsqExternEndTermElements[ 0 ].h);
 
 		externObjective = true;
 
@@ -561,6 +561,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	objAuxVar.setup("objAuxVar", objF.getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
 	evaluateLSQ.init(objF, "evaluateLSQ", NX, 0, NU);
 	evaluateLSQ.setGlobalExportVariable( objAuxVar );
+	evaluateLSQ.setPrivate( true );
 
 	objValueIn.setup("objValueIn", 1, NX + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
 	objValueOut.setup("objValueOut", 1, objF.getDim(), REAL, ACADO_WORKSPACE);
@@ -695,6 +696,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 	evaluateLSQEndTerm.init(objFEndTerm, "evaluateLSQEndTerm", NX, 0, 0);
 	evaluateLSQEndTerm.setGlobalExportVariable( objAuxVar );
+	evaluateLSQEndTerm.setPrivate( true );
 
 	if (objFEndTerm.getDim() > objF.getDim())
 	{

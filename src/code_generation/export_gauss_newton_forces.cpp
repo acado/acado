@@ -104,6 +104,9 @@ returnValue ExportGaussNewtonForces::getFunctionDeclarations(	ExportStatementBlo
 	declarations.addDeclaration( getKKT );
 	declarations.addDeclaration( getObjective );
 
+	declarations.addDeclaration( evaluateLSQ );
+	declarations.addDeclaration( evaluateLSQEndTerm );
+
 	return SUCCESSFUL_RETURN;
 }
 
