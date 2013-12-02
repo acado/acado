@@ -63,6 +63,19 @@ public:
 							const std::string& _name = "acadoFcn"
 							);
 
+	/** Constructor which takes name of a function only.
+	 *
+	 *  This way, we can define an "external symbolic function" with the
+	 *  following prototype:
+	 *  \verbatim
+	 *  void (const real_t* in, real_t* out);
+	 *  \endverbatim
+	 *
+	 *  @param[in] _name		Name of exported ODE function.
+	 */
+	ExportAcadoFunction(	const std::string& _name
+							);
+
 	/** Destructor. */
 	virtual ~ExportAcadoFunction( );
 
@@ -180,6 +193,8 @@ protected:
 	std::tr1::shared_ptr< Function > f;
 	/** A variable that holds intermediate values. */
 	ExportVariable globalVar;
+	/** Flag indicating whether the symbolic function is external or not. */
+	bool external;
 };
 
 CLOSE_NAMESPACE_ACADO

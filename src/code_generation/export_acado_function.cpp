@@ -34,7 +34,7 @@
 #include <acado/code_generation/export_acado_function.hpp>
 #include <acado/function/function_.hpp>
 
-
+using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 
@@ -44,13 +44,7 @@ BEGIN_NAMESPACE_ACADO
 
 ExportAcadoFunction::ExportAcadoFunction( ) : ExportFunction( )
 {
-	numX = 0;
-	numXA = 0;
-	numU = 0;
-	numDX = 0;
-	numP = 0;
-	numOD = 0;
-	f = std::tr1::shared_ptr< Function >(new Function());
+	init( Function() );
 }
 
 
@@ -59,6 +53,13 @@ ExportAcadoFunction::ExportAcadoFunction(	const Function& _f,
 											) : ExportFunction( _name )
 {
 	init(_f, _name);
+}
+
+ExportAcadoFunction::ExportAcadoFunction(	const std::string& _name
+											) : ExportFunction( _name )
+{
+	init(Function(), _name);
+	external = true;
 }
 
 ExportAcadoFunction::~ExportAcadoFunction( )
@@ -92,6 +93,8 @@ returnValue ExportAcadoFunction::init(	const Function& _f,
 	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
 	f->setGlobalExportVariableName( globalVar.getFullName() );
 
+	external = false;
+
 	// Just add two dummy arguments in order to keep addFunctionCall function happy.
 	return ExportFunction::init(_name, ExportArgument("input", 1, 1), ExportArgument("output", 1, 1));
 }
@@ -102,6 +105,8 @@ returnValue ExportAcadoFunction::exportDataDeclaration(	std::ostream& stream,
 														int _precision
 														) const
 {
+	ASSERT( external == false );
+
 	stream	<< _realString << " " << f->getGlobalExportVariableName()
 			<< "[ " << f->getGlobalExportVariableSize( ) << " ];" << std::endl;
 
@@ -115,6 +120,18 @@ returnValue ExportAcadoFunction::exportForwardDeclaration(	std::ostream& stream,
 															int _precision
 															) const
 {
+	if (flagPrivate == true)
+		return SUCCESSFUL_RETURN;
+
+	if (external == true)
+	{
+		stream << endl;
+		stream << "/** An external function for evaluation of symbolic expressions. */" << endl;
+		stream << "void " << name << "(const " << _realString << "* in, " << _realString << "* out);" << endl;
+
+		return SUCCESSFUL_RETURN;
+	}
+
 	return f->exportForwardDeclarations(stream, name.c_str(), _realString.c_str());
 }
 
@@ -125,6 +142,9 @@ returnValue ExportAcadoFunction::exportCode(	std::ostream& stream,
 												int _precision
 												) const
 {
+	if (external == true)
+		return SUCCESSFUL_RETURN;
+
 	return f->exportCode(
 			stream, name.c_str(), _realString.c_str(), numX, numXA, numU, numP, numDX, numOD,
 			// TODO: Here we allocate local memory for the function, this should be extended.
@@ -134,7 +154,7 @@ returnValue ExportAcadoFunction::exportCode(	std::ostream& stream,
 
 bool ExportAcadoFunction::isDefined( ) const
 {
-	if (f->getDim() > 0)
+	if (f->getDim() > 0 || external == true)
 		return true;
 
 	return false;
@@ -143,6 +163,8 @@ bool ExportAcadoFunction::isDefined( ) const
 
 unsigned ExportAcadoFunction::getFunctionDim( void )
 {
+	ASSERT( external == false );
+
 	return f->getDim();
 }
 
@@ -153,6 +175,8 @@ ExportVariable ExportAcadoFunction::getGlobalExportVariable( ) const
 
 returnValue ExportAcadoFunction::setGlobalExportVariable(const ExportVariable& var)
 {
+	ASSERT( external == false );
+
 	if (getFunctionDim() == 0)
 		return SUCCESSFUL_RETURN;
 
