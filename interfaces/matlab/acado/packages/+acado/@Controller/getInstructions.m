@@ -30,7 +30,7 @@ function getInstructions(obj, cppobj, get)
 
 if (get == 'B')
     
-    if (~isempty(obj.reference.name))
+    if ((~isempty(obj.reference)) && (~isempty(obj.reference.name)))
         fprintf(cppobj.fileMEX,sprintf('    Controller %s( %s,%s );\n', obj.name, obj.controllaw.name, obj.reference.name));
     else
         fprintf(cppobj.fileMEX,sprintf('    Controller %s( %s );\n', obj.name, obj.controllaw.name));
