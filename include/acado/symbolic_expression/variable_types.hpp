@@ -178,10 +178,6 @@ class TIME : public ExpressionType<TIME, VT_TIME, false>
 
 public:
 	TIME() : Base() {}
-
-	TIME(const std::string& _name, unsigned _nRows, unsigned _nCols)
-		: Base(_name, _nRows, _nCols)
-	{}
 };
 
 CLOSE_NAMESPACE_ACADO
