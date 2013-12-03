@@ -245,7 +245,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	loopObjective.addFunctionCall( "evaluateLSQ", objValueIn, objValueOut );
+	loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 
 	// Stack the measurement function value
 	loopObjective.addStatement(
@@ -394,7 +394,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
 	// Evaluate the objective function
-	evaluateObjective.addFunctionCall( "evaluateLSQEndTerm", objValueIn, objValueOut );
+	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
 	evaluateObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) );

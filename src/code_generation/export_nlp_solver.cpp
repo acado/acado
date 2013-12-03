@@ -1287,7 +1287,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	loopObjective.addFunctionCall(evaluateLSQ.getName(), objValueIn, objValueOut);
+	loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 
 	// Stack the measurement function value
 	loopObjective.addStatement(
@@ -1301,7 +1301,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	getObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
 	// Evaluate the objective function
-	getObjective.addFunctionCall(evaluateLSQEndTerm.getName(), objValueIn, objValueOut);
+	getObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
 
 	getObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) - yN.getTranspose() );
 
@@ -1441,7 +1441,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	updateArrivalCost.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( 0 ) );
 	updateArrivalCost.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 
-	updateArrivalCost.addFunctionCall(evaluateLSQ.getName(), objValueIn, objValueOut);
+	updateArrivalCost.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 	updateArrivalCost.addLinebreak( );
 
 	//

@@ -44,7 +44,16 @@ BEGIN_NAMESPACE_ACADO
 
 ExportAcadoFunction::ExportAcadoFunction( ) : ExportFunction( )
 {
-	init( Function() );
+	numX = 0;
+	numXA = 0;
+	numU = 0;
+	numP = 0;
+	numDX = 0;
+	numOD = 0;
+
+	f = std::tr1::shared_ptr< Function >(new Function( ));
+
+	external = false;
 }
 
 

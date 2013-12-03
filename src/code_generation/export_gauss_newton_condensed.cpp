@@ -295,7 +295,7 @@ returnValue ExportGaussNewtonCondensed::setupObjectiveEvaluation( void )
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	loopObjective.addFunctionCall(evaluateLSQ.getName(), objValueIn, objValueOut);
+	loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 
 	// Stack the measurement function value
 	loopObjective.addStatement(
@@ -442,7 +442,7 @@ returnValue ExportGaussNewtonCondensed::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
 	// Evaluate the objective function, last node.
-	evaluateObjective.addFunctionCall(evaluateLSQEndTerm.getName(), objValueIn, objValueOut);
+	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
 	evaluateObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) );
