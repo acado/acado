@@ -84,17 +84,21 @@ public:
 							const int ncmax,
 							const int nwsrmax,
 							const std::string& _printLevel,
-							const double _eps,
-							const std::string& _reat_t,
+							bool _useSinglePrecision,
 
 							const std::string& _commonHeader,
-							const std::string& _solverName,
 							const std::string& _namespace,
-							const std::string& _callSolver,
 							const std::string& _primalSolution,
 							const std::string& _dualSolution,
-							const std::string& _ctor,
-							const std::string& _sigma
+							const std::string& _sigma,
+							bool _hotstartQP,
+							const std::string& _qpH,
+							const std::string& _qpg,
+							const std::string& _qpA,
+							const std::string& _qplb,
+							const std::string& _qpub,
+							const std::string& _qplbA,
+							const std::string& _qpubA
 							);
 
 	/** Export the interface. */

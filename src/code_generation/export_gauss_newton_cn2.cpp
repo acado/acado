@@ -1449,16 +1449,12 @@ returnValue ExportGaussNewtonCN2::setupEvaluation( )
 
 returnValue ExportGaussNewtonCN2::setupQPInterface( )
 {
-	ExportQpOasesInterface* qpInterface;
-
 	string folderName;
 	get(CG_EXPORT_FOLDER_NAME, folderName);
 	string moduleName;
 	get(CG_MODULE_NAME, moduleName);
 	std::string sourceFile = folderName + "/" + moduleName + "_qpoases_interface.cpp";
 	std::string headerFile = folderName + "/" + moduleName + "_qpoases_interface.hpp";
-
-	qpInterface = new ExportQpOasesInterface(headerFile, sourceFile, "");
 
 	int useSinglePrecision;
 	get(USE_SINGLE_PRECISION, useSinglePrecision);
@@ -1469,107 +1465,41 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 	int covCalc;
 	get(CG_COMPUTE_COVARIANCE_MATRIX, covCalc);
 
-	double eps;
-	string realT;
-
-	if ( useSinglePrecision )
-	{
-		eps = 1.193e-07;
-		realT = "float";
-	}
-	else
-	{
-		eps = 2.221e-16;
-		realT = "double";
-	}
-
 	int maxNumQPiterations;
-	get( MAX_NUM_QP_ITERATIONS,maxNumQPiterations );
-
-	// if not specified, use default value
-	if ( maxNumQPiterations <= 0 )
-		maxNumQPiterations = 3 * (getNumQPvars() + getNumStateBounds() + getNumComplexConstraints());
+	get(MAX_NUM_QP_ITERATIONS, maxNumQPiterations);
 
 	//
 	// Set up export of the source file
 	//
 
-	string solverName;
-	stringstream s;
-	stringstream ctor;
+	ExportQpOasesInterface qpInterface = ExportQpOasesInterface(headerFile, sourceFile, "");
 
-	if ((getNumStateBounds() + getNumComplexConstraints()) > 0)
-	{
-		solverName = "QProblem";
-
-		s << H.getFullName() << ", "
-				<< g.getFullName() << ", "
-				<< A.getFullName() << ", "
-				<< lb.getFullName() << ", "
-				<< ub.getFullName() << ", "
-				<< lbA.getFullName() << ", "
-				<< ubA.getFullName() << ", "
-				<< "nWSR";
-
-		if ( (bool)hotstartQP == true )
-			s << ", " << yVars.getFullName();
-
-		ctor << solverName << " qp(" << getNumQPvars() << ", "
-				<< getNumStateBounds() + getNumComplexConstraints()
-				<< ")";
-	}
-	else
-	{
-		solverName = "QProblemB";
-
-		s << H.getFullName() << ", "
-				<< g.getFullName() << ", "
-				<< lb.getFullName() << ", "
-				<< ub.getFullName() << ", "
-				<< "nWSR";
-
-		if ( (bool)hotstartQP == true )
-			s << ", " << yVars.getFullName();
-
-		s << "";
-
-		ctor << solverName << " qp( " << getNumQPvars() << " )";
-	}
-
-	string strSigma;
-//	if (covCalc)
-//		strSigma = string( sigma.getFullName().getName() );
-//	else
-		strSigma = "";
-
-	qpInterface->configure(
+	qpInterface.configure(
 			"",
 			"QPOASES_HEADER",
 			getNumQPvars(),
 			getNumStateBounds() + getNumComplexConstraints(),
 			maxNumQPiterations,
 			"PL_NONE",
-			eps,
-			realT,
+			useSinglePrecision,
 
 			commonHeaderName,
-			solverName,
 			"",
-			s.str(),
 			xVars.getFullName(),
 			yVars.getFullName(),
-			ctor.str(),
-			strSigma
+			"", // TODO
+//			sigma.getFullName(),
+			hotstartQP,
+			H.getFullName(),
+			g.getFullName(),
+			A.getFullName(),
+			lb.getFullName(),
+			ub.getFullName(),
+			lbA.getFullName(),
+			ubA.getFullName()
 	);
 
-	returnValue qpStatus = qpInterface->exportCode();
-
-	delete qpInterface;
-
-	if (qpStatus != SUCCESSFUL_RETURN)
-		return qpStatus;
-
-	return SUCCESSFUL_RETURN;
+	return qpInterface.exportCode();
 }
 
 bool ExportGaussNewtonCN2::performFullCondensing() const
