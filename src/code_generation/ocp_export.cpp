@@ -398,8 +398,8 @@ returnValue OCPexport::checkConsistency( ) const
  	DifferentialEquation f;
  	ocp.getModel( f );
 
- 	if ( f.isDiscretized( ) == BT_TRUE )
- 		return ACADOERROR( RET_NO_DISCRETE_ODE_FOR_CODE_EXPORT );
+// 	if ( f.isDiscretized( ) == BT_TRUE )
+// 		return ACADOERROR( RET_NO_DISCRETE_ODE_FOR_CODE_EXPORT );
 
  	if ( f.getNUI( ) > 0 )
  		return ACADOERROR( RET_INVALID_ARGUMENTS );
