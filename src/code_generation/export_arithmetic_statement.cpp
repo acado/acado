@@ -27,8 +27,8 @@
 
 /**
  *    \file src/code_generation/export_arithmetic_statement.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010 - 2013
  */
 
 #include <acado/code_generation/export_arithmetic_statement.hpp>
@@ -36,10 +36,8 @@
 
 #include <iomanip>
 
-
-BEGIN_NAMESPACE_ACADO
-
 using namespace std;
+BEGIN_NAMESPACE_ACADO
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -87,13 +85,11 @@ uint ExportArithmeticStatement::getNumRows( ) const
 {
 	if ( rhs1.isNull() )
 		return 0;
-	else
-	{
-		if ( op1 != ESO_MULTIPLY_TRANSPOSE )
-			return rhs1->getNumRows( );
-		else
-			return rhs1->getNumCols( );
-	}
+
+	if (op1 != ESO_MULTIPLY_TRANSPOSE)
+		return rhs1->getNumRows( );
+
+	return rhs1->getNumCols( );
 }
 
 
@@ -101,13 +97,11 @@ uint ExportArithmeticStatement::getNumCols( ) const
 {
 	if ( rhs1.isNull() )
 		return 0;
-	else
-	{
-		if ( rhs2.isNull() )
-			return rhs1->getNumCols( );
-		else
-			return rhs2->getNumCols( );
-	}
+
+	if ( rhs2.isNull() )
+		return rhs1->getNumCols( );
+
+	return rhs2->getNumCols( );
 }
 
 
@@ -127,6 +121,11 @@ returnValue ExportArithmeticStatement::exportCode(	std::ostream& stream,
 													int _precision
 													) const
 {
+	ASSERT(lhs.isNull() == false);
+
+	if (lhs.getDim() == 0 || rhs1.getDim() == 0 || rhs2.getDim() == 0)
+		return SUCCESSFUL_RETURN;
+
 	if (lhs->isGiven() == true && lhs->getDim() > 0)
 	{
 		LOG( LVL_ERROR ) << "Left hand side ('" << lhs.getFullName() << "') of an arithmetic "
@@ -137,33 +136,38 @@ returnValue ExportArithmeticStatement::exportCode(	std::ostream& stream,
 	if (memAllocator == 0)
 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Memory allocator is not defined.");
 	
-	switch( op1 )
+	IoFormatter iof( stream );
+	iof.set(_precision, iof.width, iof.flags);
+
+	switch ( op1 )
 	{
-		case ESO_ADD:
-			return exportCodeAddSubtract(stream, "+", _realString, _intString, _precision);
+	case ESO_ADD:
+		return exportCodeAddSubtract(stream, "+", _realString, _intString);
 
-		case ESO_SUBTRACT:
-			return exportCodeAddSubtract(stream, "-", _realString, _intString, _precision);
-			
-		case ESO_ADD_ASSIGN:
-			return exportCodeAssign( stream,"+=",_realString,_intString,_precision );
+	case ESO_SUBTRACT:
+		return exportCodeAddSubtract(stream, "-", _realString, _intString);
 
-		case ESO_SUBTRACT_ASSIGN:
-			return exportCodeAssign( stream,"-=",_realString,_intString,_precision );
+	case ESO_ADD_ASSIGN:
+		return exportCodeAssign(stream, "+=", _realString, _intString);
 
-		case ESO_MULTIPLY:
-			return exportCodeMultiply( stream,false,_realString,_intString,_precision );
-			
-		case ESO_MULTIPLY_TRANSPOSE:
-			return exportCodeMultiply( stream,true,_realString,_intString,_precision );
+	case ESO_SUBTRACT_ASSIGN:
+		return exportCodeAssign(stream, "-=", _realString, _intString);
 
-		case ESO_ASSIGN:
-			return exportCodeAssign( stream,"=",_realString,_intString,_precision );
+	case ESO_MULTIPLY:
+		return exportCodeMultiply(stream, false, _realString, _intString);
 
-		default:
-			return ACADOERROR( RET_UNKNOWN_BUG );
+	case ESO_MULTIPLY_TRANSPOSE:
+		return exportCodeMultiply(stream, true, _realString, _intString);
+
+	case ESO_ASSIGN:
+		return exportCodeAssign(stream, "=", _realString, _intString);
+
+	default:
+		return ACADOERROR( RET_UNKNOWN_BUG );
 	}
 	
+	iof.reset();
+
 	return ACADOERROR( RET_UNKNOWN_BUG );
 }
 
@@ -174,38 +178,20 @@ returnValue ExportArithmeticStatement::exportCode(	std::ostream& stream,
 returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stream,
 																const std::string& _sign,
 																const std::string& _realString,
-																const std::string& _intString,
-																int _precision
+																const std::string& _intString
 																) const
 {
-//	if ( ( rhs1.isNull() ) || ( rhs2.isNull() ) || ( !rhs3.isNull() ) )
-//		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
-
-	if (rhs1.getDim() == 0)
-		return SUCCESSFUL_RETURN;
-
-	if ( ( rhs1->getNumRows() != rhs2->getNumRows() ) || 
-		 ( rhs1->getNumCols() != rhs2->getNumCols() ) )
+	if ( ( rhs1->getNumRows() != rhs2->getNumRows() ) || ( rhs1->getNumCols() != rhs2->getNumCols() ) )
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
 	
-	if ( !lhs.isNull() )
+	if (rhs1->getNumRows() != lhs->getNumRows() || rhs1->getNumCols() != lhs->getNumCols())
 	{
-		if ( ( rhs1->getNumRows() != lhs->getNumRows() ) || 
-		     ( rhs1->getNumCols() != lhs->getNumCols() ) )
-		{
-			LOG( LVL_DEBUG )
-					<< "lhs name is " << lhs.getName() <<
-					", size: " << lhs.getNumRows() << " x " << lhs.getNumCols() << endl
-					<< "rhs1 name is " << rhs1.getName() <<
-					", size: " << rhs1.getNumRows() << " x " << rhs1.getNumCols() << endl;
+		LOG( LVL_DEBUG )
+			<< "lhs name is " << lhs.getName() << ", size: " << lhs.getNumRows() << " x " << lhs.getNumCols() << endl
+			<< "rhs1 name is " << rhs1.getName() << ", size: " << rhs1.getNumRows() << " x " << rhs1.getNumCols() << endl;
 
-			return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
-		}
+		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
 	}
-	
-	std::string assignString;
-	if ( getAssignString( assignString ) != SUCCESSFUL_RETURN )
-		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 	
 	//
 	// Rough approximation of flops needed for matrix multiplication
@@ -216,10 +202,9 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 	// Optimization can be performed only if both matrices are not given.
 	// Currently, optimizations cannot be performed on hard-coded matrices.
 	//
-	int optimizationsAllowed =
-			( rhs1->isGiven() == false ) && ( rhs2->isGiven() == false );
+	bool optimizationsAllowed = ( rhs1->isGiven() == false ) && ( rhs2->isGiven() == false );
 
-	if ((numberOfFlops < 4096) || (optimizationsAllowed == 0))
+	if (numberOfFlops < 4096 || optimizationsAllowed == false)
 	{
 		for( uint i=0; i<getNumRows( ); ++i )
 			for( uint j=0; j<getNumCols( ); ++j )
@@ -235,8 +220,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 						continue;
 				}
 
-				if ( !lhs.isNull() )
-					stream << lhs.get(i, j) << " " << assignString << " ";
+				stream << lhs.get(i, j) << " " << getAssignString() << " ";
 
 				if ( rhs1->isZero(i, j) == false )
 				{
@@ -266,7 +250,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 
 		for(unsigned j = 0; j < getNumCols( ); ++j)
 		{
-			stream << lhs->get(ii, j) << " " << assignString;
+			stream << lhs->get(ii, j) << " " << getAssignString();
 			stream << _sign << " " << rhs2->get(ii, j) << ";\n";
 		}
 
@@ -288,7 +272,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 				<< jj.getName() << " < " << getNumCols() <<"; "
 				<< "++" << jj.getName() << ")\n{\n";
 
-		stream	<< lhs->get(ii, jj) << " " <<  assignString
+		stream	<< lhs->get(ii, jj) << " " <<  getAssignString()
 				<< _sign << " " << rhs2->get(ii, jj) << ";\n";
 
 		stream	<< "\n}\n"
@@ -304,20 +288,9 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 															bool transposeRhs1,
 															const std::string& _realString,
-															const std::string& _intString,
-															int _precision
+															const std::string& _intString
 															) const
 {
-//	if ( ( lhs.isNull() ) || ( rhs1.isNull() ) || ( rhs2.isNull() ) )
-//		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
-
-	if (lhs.getDim() == 0 || rhs1.getDim() == 0 || rhs2.getDim() == 0)
-		return SUCCESSFUL_RETURN;
-
-	std::string assignString;
-	if ( getAssignString( assignString ) != SUCCESSFUL_RETURN )
-		return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
-
 	uint nRowsRhs1;
 	uint nColsRhs1;
 
@@ -335,7 +308,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 	if ( ( nColsRhs1 != rhs2->getNumRows( ) ) ||
 			( nRowsRhs1 != lhs->getNumRows( ) ) ||
 			( rhs2->getNumCols( ) != lhs->getNumCols( ) ) )
-	return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
+		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
 
 	char sign[2] = "+";
 
@@ -364,13 +337,15 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 	// Optimization can be performed only if both matrices are not given.
 	// Currently, optimizations cannot be performed on hard-coded matrices.
 	//
-	int optimizationsAllowed =
-			( rhs1->isGiven() == false ) && ( rhs2->isGiven() == false );
+	bool optimizationsAllowed =
+			rhs1->isGiven() == false && rhs2->isGiven() == false;
+	if (rhs3.getDim() > 0)
+		optimizationsAllowed &= rhs3.isGiven() == false;
 
 	//
 	// Depending on the flops count different export strategies are performed
 	//
-	if ( ( numberOfFlops < 4096 ) || ( optimizationsAllowed == 0) )
+	if (numberOfFlops < 4096 || optimizationsAllowed == false)
 	{
 		//
 		// Unroll all loops
@@ -384,7 +359,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 			{
 				allZero = true;
 
-				stream << lhs->get(ii,j) <<  " " << assignString;
+				stream << lhs->get(ii,j) <<  " " << getAssignString() << " ";
 
 				for(uint k = 0; k < nColsRhs1; ++k)
 				{
@@ -435,74 +410,74 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 			}
 		}
 	}
-	else if ( numberOfFlops < 32768 )
-	{
-		//
-		// Unroll two inner loops
-		//
-
-		memAllocator->acquire( ii );
-
-		stream << "for (" << ii.getName() << " = 0; ";
-		stream << ii.getName() << " < " << getNumRows() <<"; ";
-		stream << "++" << ii.getName() << ")\n{\n";
-
-		for(uint j = 0; j < getNumCols( ); ++j)
-		{
-			allZero = true;
-
-			stream << lhs->get(ii,j) << " " << assignString;
-
-			for(uint k = 0; k < nColsRhs1; ++k)
-			{
-				kk = k;
-				if ( transposeRhs1 == false )
-				{
-					iiRhs1 = ii;
-					kkRhs1 = kk;
-				}
-				else
-				{
-					iiRhs1 = kk;
-					kkRhs1 = ii;
-				}
-
-				if ( ( rhs1->isZero(iiRhs1,kkRhs1) == false ) &&
-					( rhs2->isZero(kk,j) == false ) )
-				{
-					allZero = false;
-
-					if ( rhs1->isOne(iiRhs1,kkRhs1) == false )
-					{
-						stream << sign << " " << rhs1->get(iiRhs1,kkRhs1);
-						if ( rhs2->isOne(kk,j) == false )
-							stream << "*" << rhs2->get(kk, j);
-					}
-					else
-					{
-						if ( rhs2->isOne(kk,j) == false )
-							stream << " " <<  sign << " " << rhs2->get(kk,j);
-						else
-							stream << " " << sign << " 1.0";
-					}
-				}
-			}
-
-			if ( ( op2 == ESO_ADD ) || ( op2 == ESO_SUBTRACT ) )
-				stream << " + " << rhs3->get(ii,j) << ";\n";
-
-			if ( op2 == ESO_UNDEFINED )
-			{
-				if ( allZero == true )
-					stream << " 0.0;\n";
-				else
-					stream << ";\n";
-			}
-		}
-		stream << "\n}\n";
-
-		memAllocator->release( ii );
-	}
+//	else if ( numberOfFlops < 32768 )
+//	{
+//		//
+//		// Unroll two inner loops
+//		//
+//
+//		memAllocator->acquire( ii );
+//
+//		stream << "for (" << ii.getName() << " = 0; ";
+//		stream << ii.getName() << " < " << getNumRows() <<"; ";
+//		stream << "++" << ii.getName() << ")\n{\n";
+//
+//		for(uint j = 0; j < getNumCols( ); ++j)
+//		{
+//			allZero = true;
+//
+//			stream << lhs->get(ii,j) << " " << getAssignString();
+//
+//			for(uint k = 0; k < nColsRhs1; ++k)
+//			{
+//				kk = k;
+//				if ( transposeRhs1 == false )
+//				{
+//					iiRhs1 = ii;
+//					kkRhs1 = kk;
+//				}
+//				else
+//				{
+//					iiRhs1 = kk;
+//					kkRhs1 = ii;
+//				}
+//
+//				if ( ( rhs1->isZero(iiRhs1,kkRhs1) == false ) &&
+//					( rhs2->isZero(kk,j) == false ) )
+//				{
+//					allZero = false;
+//
+//					if ( rhs1->isOne(iiRhs1,kkRhs1) == false )
+//					{
+//						stream << sign << " " << rhs1->get(iiRhs1,kkRhs1);
+//						if ( rhs2->isOne(kk,j) == false )
+//							stream << "*" << rhs2->get(kk, j);
+//					}
+//					else
+//					{
+//						if ( rhs2->isOne(kk,j) == false )
+//							stream << " " <<  sign << " " << rhs2->get(kk,j);
+//						else
+//							stream << " " << sign << " 1.0";
+//					}
+//				}
+//			}
+//
+//			if ( ( op2 == ESO_ADD ) || ( op2 == ESO_SUBTRACT ) )
+//				stream << " + " << rhs3->get(ii,j) << ";\n";
+//
+//			if ( op2 == ESO_UNDEFINED )
+//			{
+//				if ( allZero == true )
+//					stream << " 0.0;\n";
+//				else
+//					stream << ";\n";
+//			}
+//		}
+//		stream << "\n}\n";
+//
+//		memAllocator->release( ii );
+//	}
 	else
 	{
 		//
@@ -511,6 +486,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 
 		memAllocator->acquire( ii );
 		memAllocator->acquire( jj );
+		memAllocator->acquire( kk );
 
 		// First loop
 		stream << "for (" << ii.getName() << " = 0; ";
@@ -522,62 +498,49 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 		stream << jj.getName() << " < " << getNumCols() <<"; ";
 		stream << "++" << jj.getName() << ")\n{\n";
 
-		allZero = true;
+		stream << _realString << " t = 0.0;" << endl;
 
-		stream << lhs->get(ii, jj) << " " << assignString;
+		// Third loop
+		stream << "for (" << kk.getName() << " = 0; ";
+		stream << kk.getName() << " < " << nColsRhs1 <<"; ";
+		stream << "++" << kk.getName() << ")\n{\n";
 
-		for(uint k = 0; k < nColsRhs1; ++k)
+		if ( transposeRhs1 == false )
 		{
-			kk = k;
-			if ( transposeRhs1 == false )
-			{
-				iiRhs1 = ii;
-				kkRhs1 = kk;
-			}
-			else
-			{
-				iiRhs1 = kk;
-				kkRhs1 = ii;
-			}
-
-			if ( ( rhs1->isZero(iiRhs1,kkRhs1) == false ) &&
-					( rhs2->isZero(kk,jj) == false ) )
-			{
-				allZero = false;
-
-				if ( rhs1->isOne(iiRhs1,kkRhs1) == false )
-				{
-					stream << " " << sign << " " << rhs1->get(iiRhs1, kkRhs1);
-
-					if ( rhs2->isOne(kk,jj) == false )
-						stream << "*" << rhs2->get(kk, jj);
-				}
-				else
-				{
-					if ( rhs2->isOne(kk,jj) == false )
-						stream << " " << sign << " " << rhs2->get(kk, jj);
-					else
-						stream << " " << sign << " 1.0";
-				}
-			}
+			iiRhs1 = ii;
+			kkRhs1 = kk;
 		}
-
-		if ( ( op2 == ESO_ADD ) || ( op2 == ESO_SUBTRACT ) )
-			stream << " + " << rhs3->get(ii,jj) << ";\n";
-
-		if ( op2 == ESO_UNDEFINED )
+		else
 		{
-			if ( allZero == true )
-				stream << " 0.0;\n";
-			else
-				stream << ";\n";
+			iiRhs1 = kk;
+			kkRhs1 = ii;
 		}
+		stream << "t += " << sign << " " << rhs1->get(iiRhs1, kkRhs1) << "*" << rhs2->get(kk, jj) << ";";
+		stream << "\n}\n";
 
-		stream << "\n}\n";
-		stream << "\n}\n";
+		if (lhs.isCalledByValue() == true)
+			stream << lhs.getFullName();
+		else
+			stream << lhs->get(ii, jj);
+
+		stream << " " << getAssignString() << " t";
+
+		if (op2 == ESO_ADD)
+		{
+			stream << " + " << rhs3->get(ii, jj);
+		}
+		else if (op2 == ESO_SUBTRACT)
+		{
+			stream << " - " << rhs3->get(ii, jj);
+		}
+		stream << ";\n";
+
+		stream << "}\n";
+		stream << "}\n";
 
 		memAllocator->release( ii );
 		memAllocator->release( jj );
+		memAllocator->release( kk );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -587,15 +550,10 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 															const std::string& _op,
 															const std::string& _realString,
-															const std::string& _intString,
-															int _precision
+															const std::string& _intString
 															) const
 {
-	if (lhs.getDim() == 0 || rhs1.getDim() == 0 || rhs2.getDim() == 0)
-		return SUCCESSFUL_RETURN;
-
-	if ( ( rhs1.getNumRows( ) != lhs.getNumRows( ) ) ||
-		 ( rhs1.getNumCols( ) != lhs.getNumCols( ) ) )
+	if ( ( rhs1.getNumRows( ) != lhs.getNumRows( ) ) || ( rhs1.getNumCols( ) != lhs.getNumCols( ) ) )
 	{
 		LOG( LVL_DEBUG ) << "lhs name is " << lhs.getName()
 				<< ", size: " << lhs.getNumRows() << " x " << lhs.getNumCols()
@@ -604,8 +562,6 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
 	}
-
-	stream << setprecision( _precision );
 
 	unsigned numOps = lhs.getNumRows() * lhs.getNumCols();
 
@@ -619,7 +575,7 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 	{
 		for(unsigned i = 0; i < lhs.getNumRows( ); ++i)
 			for(unsigned j = 0; j < lhs.getNumCols( ); ++j)
-				if ( ( _op == (std::string)"=" ) || ( rhs1.isZero(i,j) == false ) )
+				if ( ( _op == "=" ) || ( rhs1.isZero(i,j) == false ) )
 				{
 					stream << lhs->get(i, j) << " " << _op << " ";
 					if (rhs1->isGiven() == true)
@@ -636,7 +592,7 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 	{
 		ExportIndex ii, jj;
 
-		if (lhs.getNumCols() == 1 || lhs.getNumRows() == 1)
+		if (lhs.isVector() && rhs1.isVector())
 		{
 			memAllocator->acquire( ii );
 
@@ -679,25 +635,21 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 }
 
 
-returnValue ExportArithmeticStatement::getAssignString(	std::string& _assignString
-														) const
+std::string ExportArithmeticStatement::getAssignString(	) const
 {
 	switch ( op0 )
 	{
 		case ESO_ASSIGN:
-			_assignString = "=";
-			return SUCCESSFUL_RETURN;
+			return "=";
 		
 		case ESO_ADD_ASSIGN:
-			_assignString = "+=";
-			return SUCCESSFUL_RETURN;
+			return "+=";
 			
 		case ESO_SUBTRACT_ASSIGN:
-			_assignString = "-=";
-			return SUCCESSFUL_RETURN;
+			return "-=";
 			
 		default:
-			return RET_UNABLE_TO_EXPORT_STATEMENT;
+			return "foo";
 	}
 }
 

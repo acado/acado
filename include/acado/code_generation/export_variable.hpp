@@ -23,13 +23,10 @@
  *
  */
 
-
-
 /**
  *    \file include/acado/code_generation/export_variable.hpp
  *    \authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-
 
 #ifndef ACADO_TOOLKIT_EXPORT_VARIABLE_HPP
 #define ACADO_TOOLKIT_EXPORT_VARIABLE_HPP
@@ -38,9 +35,7 @@
 #include <acado/code_generation/export_argument.hpp>
 #include <acado/code_generation/export_index.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
 
 class ExportArithmeticStatement;
 class ExportVariableInternal;
@@ -62,7 +57,6 @@ class ExportVariableInternal;
 
 class ExportVariable : public ExportArgument
 {
-
 	//
     // PUBLIC MEMBER FUNCTIONS:
     //
@@ -532,13 +526,8 @@ class ExportVariable : public ExportArgument
 		void simpleForward(const DMatrix& _value);
 };
 
-
 static const ExportVariable emptyConstExportVariable;
-
 
 CLOSE_NAMESPACE_ACADO
 
-
 #endif  // ACADO_TOOLKIT_EXPORT_VARIABLE_HPP
-
-// end of file.

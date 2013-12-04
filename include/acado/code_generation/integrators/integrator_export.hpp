@@ -35,7 +35,6 @@
 #ifndef ACADO_TOOLKIT_INTEGRATOR_EXPORT_HPP
 #define ACADO_TOOLKIT_INTEGRATOR_EXPORT_HPP
 
-#include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/code_generation/export_algorithm_factory.hpp>
 #include <acado/ocp/model_data.hpp>

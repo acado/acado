@@ -31,18 +31,14 @@
 
 #include <acado/code_generation/export_gauss_newton_cn2.hpp>
 #include <acado/code_generation/export_qpoases_interface.hpp>
-#include <acado/code_generation/export_module.hpp>
-
-#include <sstream>
-#include <string>
 
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
 ExportGaussNewtonCN2::ExportGaussNewtonCN2(	UserInteraction* _userInteraction,
-														const std::string& _commonHeaderName
-														) : ExportNLPSolver( _userInteraction,_commonHeaderName )
+											const std::string& _commonHeaderName
+											) : ExportNLPSolver( _userInteraction,_commonHeaderName )
 {}
 
 returnValue ExportGaussNewtonCN2::setup( )
@@ -88,7 +84,6 @@ returnValue ExportGaussNewtonCN2::setup( )
 	setupAuxiliaryFunctions();
 	LOG( LVL_DEBUG ) << "done!" << endl;
 
-
 	return SUCCESSFUL_RETURN;
 }
 
@@ -96,10 +91,7 @@ returnValue ExportGaussNewtonCN2::getDataDeclarations(	ExportStatementBlock& dec
 															ExportStruct dataStruct
 															) const
 {
-	returnValue status;
-	status = ExportNLPSolver::getDataDeclarations(declarations, dataStruct);
-	if (status != SUCCESSFUL_RETURN)
-		return status;
+	ExportNLPSolver::getDataDeclarations(declarations, dataStruct);
 
 	declarations.addDeclaration(sbar, dataStruct);
 	declarations.addDeclaration(x0, dataStruct);
@@ -139,7 +131,7 @@ returnValue ExportGaussNewtonCN2::getDataDeclarations(	ExportStatementBlock& dec
 }
 
 returnValue ExportGaussNewtonCN2::getFunctionDeclarations(	ExportStatementBlock& declarations
-																	) const
+															) const
 {
 	declarations.addDeclaration( preparation );
 	declarations.addDeclaration( feedback );
@@ -158,7 +150,7 @@ returnValue ExportGaussNewtonCN2::getFunctionDeclarations(	ExportStatementBlock&
 }
 
 returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
-														)
+											)
 {
 	setupQPInterface();
 
@@ -928,9 +920,6 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 	//// NEW CODE START
 
-	if (initialStateFixed() == false)
-		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
-
 	LOG( LVL_DEBUG ) << "Setup condensing: create Dx0, Dy and DyN" << endl;
 
 	{
@@ -938,8 +927,8 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		condenseFdb.addLinebreak();
 	}
 
-	condenseFdb.addStatement( Dy -=  y );
-	condenseFdb.addStatement( DyN -=  yN );
+	condenseFdb.addStatement( Dy -= y );
+	condenseFdb.addStatement( DyN -= yN );
 	condenseFdb.addLinebreak();
 
 	// Compute RDy
@@ -1007,8 +996,6 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 	if( performsSingleShooting() == false )
 		condensePrep.addStatement( sbar.getRows(NX, (N + 1) * NX) == d );
-	else
-		condensePrep.addStatement( sbar.getRows(NX, (N + 1) * NX) == zeros<double>(N, 1) );
 
 	for (unsigned i = 0; i < N; ++i)
 		condenseFdb.addFunctionCall(
@@ -1086,16 +1073,11 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		// TODO
 		expand.addStatement( x.makeColVector().getRows(0, NX) += xVars.getRows(0, NX) );
 		expand.addLinebreak();
-		expand.addStatement( u.makeRowVector() += xVars.getTranspose().getCols(NX, getNumQPvars() ) );
+		expand.addStatement( u.makeColVector() += xVars.getRows(NX, getNumQPvars()) );
 	}
-	expand.addLinebreak();
 
 	expand.addStatement( sbar.getRows(0, NX) == Dx0 );
-	if( performsSingleShooting() == false )
-		expand.addStatement( sbar.getRows(NX, (N + 1) * NX) == d );
-	else
-		expand.addStatement( sbar.getRows(NX, (N + 1) * NX) == zeros<double>(N, 1) );
-
+	expand.addStatement( sbar.getRows(NX, (N + 1) * NX) == d );
 
 	for (unsigned row = 0; row < N; ++row )
 		expand.addFunctionCall(
@@ -1344,11 +1326,6 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	macQSbarW2.setup("macQSbarW2", Q11, w11, w12, w13);
 	macQSbarW2.addStatement( w13 == w12 + Q11 * w11 );
 
-	/*
-	expansionStep, evGx.getAddress(row * NX), evGu.getAddress(row * NX),
-				xVars.getAddress(row * NU), sbar.getAddress(row * NX),
-				sbar.getAddress((row + 1) * NX), x.getAddress(row + 1)
-	 * */
 	expansionStep.setup("expansionStep", Gx1, Gu1, U1, w11, w12);
 	expansionStep.addStatement( w12 += Gx1 * w11 );
 	expansionStep.addStatement( w12 += Gu1 * U1 );

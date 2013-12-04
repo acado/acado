@@ -26,52 +26,30 @@
 
 /**
  *    \file include/code_generation/code_generation.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov, Rien Quirynen
+ *    \date 2010 - 2013
  */
 
 #ifndef ACADO_TOOLKIT_CODE_GENERATION_HPP
 #define ACADO_TOOLKIT_CODE_GENERATION_HPP
 
-
-// List of header files
-
 #include <acado/code_generation/integrators/integrator_export.hpp>
-#include <acado/code_generation/integrators/rk_export.hpp>
-#include <acado/code_generation/integrators/erk_export.hpp>
+
 #include <acado/code_generation/integrators/explicit_euler_export.hpp>
 #include <acado/code_generation/integrators/erk2_export.hpp>
 #include <acado/code_generation/integrators/erk3_export.hpp>
 #include <acado/code_generation/integrators/erk4_export.hpp>
-#include <acado/code_generation/integrators/irk_export.hpp>
+
 #include <acado/code_generation/integrators/gauss_legendre2_export.hpp>
 #include <acado/code_generation/integrators/gauss_legendre4_export.hpp>
 #include <acado/code_generation/integrators/gauss_legendre6_export.hpp>
 #include <acado/code_generation/integrators/gauss_legendre8_export.hpp>
+
 #include <acado/code_generation/integrators/radau_IIA1_export.hpp>
 #include <acado/code_generation/integrators/radau_IIA3_export.hpp>
 #include <acado/code_generation/integrators/radau_IIA5_export.hpp>
-#include <acado/code_generation/linear_solvers/linear_solver_export.hpp>
-#include <acado/code_generation/linear_solvers/gaussian_elimination_export.hpp>
-#include <acado/code_generation/linear_solvers/householder_qr_export.hpp>
-#include <acado/code_generation/export_algorithm.hpp>
-#include <acado/code_generation/export_module.hpp>
-#include <acado/code_generation/export_data.hpp>
-#include <acado/code_generation/export_index.hpp>
-#include <acado/code_generation/export_variable.hpp>
-#include <acado/code_generation/export_function.hpp>
-#include <acado/code_generation/export_acado_function.hpp>
-#include <acado/code_generation/export_statement.hpp>
-#include <acado/code_generation/export_arithmetic_statement.hpp>
-#include <acado/code_generation/export_statement_block.hpp>
-#include <acado/code_generation/export_file.hpp>
-#include <acado/code_generation/export_for_loop.hpp>
-#include <acado/code_generation/export_argument_list.hpp>
-#include <acado/code_generation/export_function_call.hpp>
-#include <acado/code_generation/export_statement_string.hpp>
-#include <acado/code_generation/export_data_declaration.hpp>
-#include <acado/code_generation/export_function_declaration.hpp>
 
+#include <acado/code_generation/export_nlp_solver.hpp>
 #include <acado/code_generation/export_gauss_newton_condensed.hpp>
 #include <acado/code_generation/export_gauss_newton_forces.hpp>
 #include <acado/code_generation/export_gauss_newton_qpdunes.hpp>
