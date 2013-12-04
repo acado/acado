@@ -32,7 +32,7 @@
 
 #include <acado/ocp/ocp.hpp>
 
-
+using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 
@@ -162,40 +162,32 @@ returnValue OCP::subjectTo( const ConstraintComponent& component ){
 }
 
 
-returnValue OCP::subjectTo( const int index_, const ConstraintComponent& component ){
+returnValue OCP::subjectTo( int index_, const ConstraintComponent& component )
+{
+	ASSERT(index_ >= AT_START);
 
-    for( uint i=0; i<component.getDim(); ++i )
-        constraint.add( index_,component(i) );
+	if (index_ == AT_START)
+	{
+		for (unsigned el = 0; el < component.getDim(); ++el)
+			ACADO_TRY( constraint.add( 0,component( el ) ) );
+	}
+	else if (index_ == AT_END)
+	{
+		for (unsigned el = 0; el < component.getDim(); ++el)
+			ACADO_TRY(constraint.add(grid.getLastIndex(), component( el )));
+	}
+	else
+	{
+		for (unsigned el = 0; el < component.getDim(); ++el)
+			constraint.add(index_, component(el));
+	}
 
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue OCP::subjectTo( const TimeHorizonElement index_, const ConstraintComponent& component ){
-
-    uint i;
-
-    switch( index_ ){
-
-        case AT_START:
-             for( i = 0; i < component.getDim(); i++ )
-                 ACADO_TRY( constraint.add( 0,component(i) ) );
-             return SUCCESSFUL_RETURN;
-
-        case AT_END:
-             for( i = 0; i < component.getDim(); i++ )
-                 ACADO_TRY( constraint.add( grid.getLastIndex(),component(i) ) );
-             return SUCCESSFUL_RETURN;
-
-        default:
-             return ACADOERROR(RET_UNKNOWN_BUG);
-    }
     return SUCCESSFUL_RETURN;
 }
 
 
 returnValue OCP::subjectTo( const double lb_, const Expression& arg1,
-                                   const Expression& arg2, const double ub_ ){
+							const Expression& arg2, const double ub_ ){
 
     return constraint.add( lb_, arg1, arg2, ub_ );
 }
@@ -204,6 +196,38 @@ returnValue OCP::subjectTo( const double lb_, const Expression& arg1,
 returnValue OCP::subjectTo( const double lb_, const Expression *arguments, const double ub_ )
 {
     return constraint.add( lb_, arguments, ub_ );
+}
+
+returnValue OCP::subjectTo( const DVector& _lb, const Expression& _expr, const DVector& _ub )
+{
+	ASSERT(_lb.getDim() == _expr.getDim() && _lb.getDim() == _ub.getDim());
+	constraint.add(_lb, _expr, _ub);
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue OCP::subjectTo( int _index, const DVector& _lb, const Expression& _expr, const DVector& _ub )
+{
+	ASSERT(_index >= AT_START);
+	cout << _lb.getDim() << " " << _expr.getDim() << endl;
+	ASSERT(_lb.getDim() == _expr.getDim());
+	ASSERT(_lb.getDim() == _ub.getDim());
+
+	if (_index == AT_START)
+	{
+		for (unsigned el = 0; el < _lb.getDim(); ++el)
+			ACADO_TRY( constraint.add(0, _lb( el ), _expr( el ), _ub( el )) );
+	}
+	else if (_index == AT_END)
+	{
+		for (unsigned el = 0; el < _lb.getDim(); ++el)
+			ACADO_TRY(constraint.add(grid.getLastIndex(), _lb( el ), _expr( el ), _ub( el )) );
+	}
+	else
+		for (unsigned el = 0; el < _lb.getDim(); ++el)
+			constraint.add(_index, _lb( el ), _expr( el ), _ub( el ));
+
+	return SUCCESSFUL_RETURN;
 }
 
 returnValue OCP::minimizeMayerTerm   ( const Expression& arg ){ return objective.addMayerTerm   ( arg ); }

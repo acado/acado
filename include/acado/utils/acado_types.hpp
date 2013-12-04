@@ -702,13 +702,12 @@ enum ClockStatus
 };
 
 
-/** Defines the time horizon start and end. \n
- */
-enum TimeHorizonElement{
-
-    AT_START      ,
-    AT_END        ,
-    AT_TRANSITION
+/** Defines the time horizon start and end. */
+enum TimeHorizonElement
+{
+	AT_TRANSITION = -3,
+    AT_START,
+    AT_END
 };
 
 

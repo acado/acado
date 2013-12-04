@@ -563,7 +563,7 @@ returnValue Objective::init( const int              nStages     ,
             }
         }
 
-        constraint_[0].add( AT_START, 0.0, xAugment, 0.0 );
+		constraint_[0].add(0, 0.0, xAugment, 0.0);
 
         nMayer++;
         mayerTerm = (MayerTerm**)realloc(mayerTerm,nMayer*sizeof(MayerTerm*));

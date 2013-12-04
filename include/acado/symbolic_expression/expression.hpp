@@ -113,6 +113,10 @@ class Expression{
         /** Destructor. */
         virtual ~Expression( );
 
+        /** Function for cloning. */
+        virtual Expression* clone() const
+        { return new Expression( *this ); }
+
         /** Assignment Operator.                                             \n
          *                                                                   \n
          *  \param arg  the double value to be assigned to the expression.   \n

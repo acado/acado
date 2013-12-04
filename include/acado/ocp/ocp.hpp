@@ -292,18 +292,11 @@ public:
 	returnValue subjectTo( const ConstraintComponent& component );
 
 
-	/**< Adds a (discrete) constraint.
+	/**< Adds a discrete, point, constraint.
 	 *  \return SUCCESSFUL_RETURN                     \n
 	 *          RET_INFEASIBLE_CONSTRAINT             \n
 	 */
-	returnValue subjectTo( const int index_, const ConstraintComponent& component );
-
-
-	/**  Adds a (discrete) contraint.
-	 *  \return SUCCESSFUL_RETURN                     \n
-	 *          RET_INFEASIBLE_CONSTRAINT             \n
-	 */
-	returnValue subjectTo( const TimeHorizonElement index_, const ConstraintComponent& component );
+	returnValue subjectTo( int index_, const ConstraintComponent& component );
 
 
 	/** Add a coupled boundary constraint.
@@ -340,8 +333,27 @@ public:
 	 *   \return  SUCCESSFUL_RETURN \n
 	 *            RET_INFEASIBLE_CONSTRAINT
 	 *
+	 * @{
 	 */
 	returnValue subjectTo( const double lb_, const Expression *arguments, const double ub_ );
+
+	/** \name Add a custom constraint to the OCP formulation.
+	 *
+	 *  Adds a constraint of the form
+	 *
+	 *  \f{equation*}{
+	 *    \text{lb} <= h_i(t_i, x(t_i), u(t_i), p, ...) <= \text{ub}
+	 *  \f}
+	 *
+	 *   with constant lower and upper bounds.
+	 *
+	 * @{
+	 */
+	returnValue subjectTo( const DVector& _lb, const Expression& _expr, const DVector& _ub );
+
+	returnValue subjectTo( int _index, const DVector& _lb, const Expression& _expr, const DVector& _ub );
+
+	/** @} */
 
 
 	/** \name Helper functions.
