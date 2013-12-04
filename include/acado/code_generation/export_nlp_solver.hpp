@@ -203,9 +203,6 @@ protected:
 	/** Setup of functions for evaluation of auxiliary functions. */
 	returnValue setupAuxiliaryFunctions();
 
-	/** Setup of residual variables during objective evaluation. */
-	returnValue setupResidualVariables();
-
 	/** Setup of functions and variables for evaluation of arrival cost. */
 	returnValue setupArrivalCostCalculation();
 
@@ -273,7 +270,8 @@ protected:
 	ExportVariable conValueIn;
 	ExportVariable conValueOut;
 
-	DMatrix pacLBMatrix, pacUBMatrix;
+	DVector lbPathConValues, ubPathConValues;
+
 	ExportVariable pacEvH;
 	ExportVariable pacEvHx, pacEvHu, pacEvHxd;
 	/** @} */
@@ -282,7 +280,7 @@ protected:
 	/** @{ */
 	unsigned dimPocH;
 	std::vector< std::tr1::shared_ptr< ExportAcadoFunction > > evaluatePointConstraints;
-	DVector pocLB, pocUB;
+	DVector lbPointConValues, ubPointConValues;
 
 	std::vector< DVector > pocLbStack, pocUbStack;
 
@@ -318,6 +316,9 @@ protected:
 	// Older stuff; TODO make this more unique
 	ExportVariable SAC, xAC, DxAC;
 	/** @} */
+
+private:
+	returnValue setupResidualVariables();
 };
 
 /** Types of NLP/OCP solvers. */

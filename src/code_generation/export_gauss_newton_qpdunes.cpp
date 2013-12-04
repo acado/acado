@@ -727,8 +727,8 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	{
 		if ( dimPacH )
 		{
-			lbAValues.append( pacLBMatrix.getRow( i ) );
-			ubAValues.append( pacUBMatrix.getRow( i ) );
+			lbAValues.append( lbPathConValues.block(i * NX, 0, NX, 1) );
+			ubAValues.append( ubPathConValues.block(i * NX, 0, NX, 1) );
 		}
 		lbAValues.append( pocLbStack[ i ] );
 		ubAValues.append( pocUbStack[ i ] );

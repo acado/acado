@@ -488,35 +488,43 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 
 	////////////////////////////////////////////////////////////////////////////
 	//
-	// Setup the bounds on control variables
+	// Determine dimensions of constraints
 	//
 	////////////////////////////////////////////////////////////////////////////
 
 	unsigned numBounds = initialStateFixed( ) == true ? N * NU : NX + N * NU;
 	unsigned offsetBounds = initialStateFixed( ) == true ? 0 : NX;
+	unsigned numStateBounds = getNumStateBounds();
+	unsigned numPathCon = N * dimPacH;
+	unsigned numPointCon = dimPocH;
 
-	DVector lbValuesMatrix( numBounds );
-	DVector ubValuesMatrix( numBounds );
+	////////////////////////////////////////////////////////////////////////////
+	//
+	// Setup the bounds on independent variables
+	//
+	////////////////////////////////////////////////////////////////////////////
+
+	DVector lbBoundValues( numBounds );
+	DVector ubBoundValues( numBounds );
 
 	if (initialStateFixed( ) == false)
-		for(unsigned run1 = 0; run1 < NX; ++run1)
+		for(unsigned el = 0; el < NX; ++el)
 		{
-			lbValuesMatrix( run1 )= xBounds.getLowerBound(0, run1);
-			ubValuesMatrix( run1) = xBounds.getUpperBound(0, run1);
+			lbBoundValues( el )= xBounds.getLowerBound(0, el);
+			ubBoundValues( el ) = xBounds.getUpperBound(0, el);
 		}
 
-	for(unsigned run1 = 0; run1 < N; ++run1)
-		for(unsigned run2 = 0; run2 < NU; ++run2)
+	for(unsigned node = 0; node < N; ++node)
+		for(unsigned el = 0; el < NU; ++el)
 		{
-			lbValuesMatrix(offsetBounds + run1 * getNU() + run2) = uBounds.getLowerBound(run1, run2);
-			ubValuesMatrix(offsetBounds + run1 * getNU() + run2) = uBounds.getUpperBound(run1, run2);
+			lbBoundValues(offsetBounds + node * NU + el) = uBounds.getLowerBound(node, el);
+			ubBoundValues(offsetBounds + node * NU + el) = uBounds.getUpperBound(node, el);
 		}
 
-	// TODO This might be set with an option to be variable!!!
 	if (hardcodeConstraintValues == YES)
 	{
-		lbValues.setup("lbValues", lbValuesMatrix, REAL, ACADO_VARIABLES);
-		ubValues.setup("ubValues", ubValuesMatrix, REAL, ACADO_VARIABLES);
+		lbValues.setup("lbValues", lbBoundValues, REAL, ACADO_VARIABLES);
+		ubValues.setup("ubValues", ubBoundValues, REAL, ACADO_VARIABLES);
 	}
 	else
 	{
@@ -537,8 +545,9 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 	else
 	{
 		// Partial condensing case
-		if ( initialStateFixed( ) == true )
+		if (initialStateFixed() == true)
 		{
+			// MPC case
 			condenseFdb.addStatement( lb.getRows(0, NX) == Dx0 );
 			condenseFdb.addStatement( ub.getRows(0, NX) == Dx0 );
 
@@ -547,14 +556,62 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 		}
 		else
 		{
+			// MHE case
 			boundSetFcn->addStatement( lb.getRows(0, NX) == lbValues.getRows(0, NX) - x.getRow( 0 ).getTranspose() );
 			boundSetFcn->addStatement( lb.getRows(NX, getNumQPvars()) == lbValues.getRows(NX, getNumQPvars()) - u.makeColVector() );
 			boundSetFcn->addStatement( ub.getRows(0, NX) == ubValues.getRows(0, NX) - x.getRow( 0 ).getTranspose() );
 			boundSetFcn->addStatement( ub.getRows(NX, getNumQPvars()) == ubValues.getRows(NX, getNumQPvars()) - u.makeColVector() );
 		}
 	}
-	condensePrep.addLinebreak( );
-	condenseFdb.addLinebreak( );
+	boundSetFcn->addLinebreak( );
+
+	////////////////////////////////////////////////////////////////////////////
+	//
+	// Determine number of affine constraints and set up structures that
+	// holds constraint values
+	//
+	////////////////////////////////////////////////////////////////////////////
+
+	unsigned sizeA = numStateBounds + getNumComplexConstraints();
+
+	if ( sizeA )
+	{
+		if (hardcodeConstraintValues == true)
+		{
+			DVector lbTmp, ubTmp;
+
+			if ( numStateBounds )
+			{
+				DVector lbStateBoundValues( numStateBounds );
+				DVector ubStateBoundValues( numStateBounds );
+				for (unsigned i = 0; i < numStateBounds; ++i)
+				{
+					lbStateBoundValues( i ) = xBounds.getLowerBound( xBoundsIdx[ i ] / NX, xBoundsIdx[ i ] % NX );
+					ubStateBoundValues( i ) = xBounds.getUpperBound( xBoundsIdx[ i ] / NX, xBoundsIdx[ i ] % NX );
+				}
+
+				lbTmp.append( lbStateBoundValues );
+				ubTmp.append( ubStateBoundValues );
+			}
+
+			lbTmp.append( lbPathConValues );
+			ubTmp.append( ubPathConValues );
+
+			lbTmp.append( lbPointConValues );
+			ubTmp.append( ubPointConValues );
+
+
+			lbAValues.setup("lbAValues", lbTmp, REAL, ACADO_VARIABLES);
+			ubAValues.setup("ubAValues", ubTmp, REAL, ACADO_VARIABLES);
+		}
+		else
+		{
+			lbAValues.setup("lbAValues", sizeA, 1, REAL, ACADO_VARIABLES);
+			lbAValues.setDoc( "Lower bounds values for affine constraints." );
+			ubAValues.setup("ubAValues", sizeA, 1, REAL, ACADO_VARIABLES);
+			ubAValues.setDoc( "Lower bounds values for affine constraints." );
+		}
+	}
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -562,36 +619,16 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	if( getNumStateBounds() )
+	if ( numStateBounds )
 	{
 		condenseFdb.addVariable( tmp );
-
-		DVector xLowerBounds( xBoundsIdx.size() ), xUpperBounds( xBoundsIdx.size() );
-		for(unsigned i = 0; i < xBoundsIdx.size(); ++i)
-		{
-			xLowerBounds( i ) = xBounds.getLowerBound( xBoundsIdx[ i ] / NX, xBoundsIdx[ i ] % NX );
-			xUpperBounds( i ) = xBounds.getUpperBound( xBoundsIdx[ i ] / NX, xBoundsIdx[ i ] % NX );
-		}
-
-		if (hardcodeConstraintValues == YES)
-		{
-			lbAValues.setup("lbAValues", xLowerBounds, REAL, ACADO_VARIABLES);
-			ubAValues.setup("ubAValues", xUpperBounds, REAL, ACADO_VARIABLES);
-		}
-		else
-		{
-			lbAValues.setup("lbAValues", xLowerBounds.getDim(), 1, REAL, ACADO_VARIABLES);
-			lbAValues.setDoc( "Lower bounds values for affine constraints." );
-			ubAValues.setup("ubAValues", xUpperBounds.getDim(), 1, REAL, ACADO_VARIABLES);
-			ubAValues.setDoc( "Lower bounds values for affine constraints." );
-		}
 
 		unsigned offset = (performFullCondensing() == true) ? 0 : NX;
 		unsigned numOps = getNumStateBounds() * N * (N + 1) / 2 * NU;
 
 		if (numOps < 1024)
 		{
-			for(unsigned ii = 0; ii < xBoundsIdx.size(); ++ii)
+			for(unsigned ii = 0; ii < numStateBounds; ++ii)
 			{
 				unsigned row = xBoundsIdx[ ii ] - NX;
 
@@ -613,10 +650,8 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 		}
 		else
 		{
-			unsigned nXBounds = xBoundsIdx.size();
-
-			DMatrix vXBoundIndices(1, nXBounds);
-			for (unsigned i = 0; i < nXBounds; ++i)
+			DMatrix vXBoundIndices(1, numStateBounds);
+			for (unsigned i = 0; i < numStateBounds; ++i)
 				vXBoundIndices(0, i) = xBoundsIdx[ i ];
 			ExportVariable evXBounds("xBoundIndices", vXBoundIndices, STATIC_CONST_INT, ACADO_LOCAL, false);
 
@@ -630,7 +665,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 			condensePrep.acquire( blk );
 			condensePrep.acquire( ind );
 
-			ExportForLoop eLoopI(ii, 0, nXBounds);
+			ExportForLoop eLoopI(ii, 0, numStateBounds);
 
 			eLoopI << row.getFullName() << " = " << evXBounds.getFullName() << "[ " << ii.getFullName() << " ] - " << toString(NX) << ";\n";
 			eLoopI.addStatement( blk == row / NX + 1 );
@@ -656,7 +691,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 		condensePrep.addLinebreak( );
 
 		// shift constraint bounds by first interval
-		for(unsigned run1 = 0; run1 < getNumStateBounds( ); ++run1)
+		for(unsigned run1 = 0; run1 < numStateBounds; ++run1)
 		{
 			unsigned row = xBoundsIdx[ run1 ];
 
@@ -688,19 +723,18 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 		condenseFdb.addLinebreak( );
 	}
 
-	if (getNumComplexConstraints() == 0)
-		return SUCCESSFUL_RETURN;
-
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Setup the evaluation of the path constraints
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	if ( dimPacH )
+	if (getNumComplexConstraints() == 0)
+		return SUCCESSFUL_RETURN;
+
+	if ( numPathCon )
 	{
-		unsigned numPac = N * dimPacH;
-		unsigned rowOffset = getNumStateBounds();
+		unsigned rowOffset = numStateBounds;
 		unsigned colOffset = performFullCondensing() == true ? 0 : NX;
 
 		//
@@ -762,7 +796,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 			multHxC.setup("multHxC", tmpHx, tmpGx, tmpA01);
 			multHxC.addStatement( tmpA01 == tmpHx * tmpGx );
 
-			A10.setup("A01", numPac, NX, REAL, ACADO_WORKSPACE);
+			A10.setup("A01", numPathCon, NX, REAL, ACADO_WORKSPACE);
 		}
 		else
 		{
@@ -929,19 +963,21 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 		//
 		// Set upper and lower bounds
 		//
-		condensePrep.addStatement(lbA.getRows(rowOffset, rowOffset + numPac) == pacLBMatrix.getRows(0, N - 1).makeVector() - pacEvH);
+		condensePrep.addStatement(lbA.getRows(rowOffset, rowOffset + numPathCon) ==
+				lbAValues.getRows(rowOffset, rowOffset + numPathCon) - pacEvH);
 		condensePrep.addLinebreak();
-		condensePrep.addStatement(ubA.getRows(rowOffset, rowOffset + numPac) == pacUBMatrix.getRows(0, N - 1).makeVector() - pacEvH);
+		condensePrep.addStatement(ubA.getRows(rowOffset, rowOffset + numPathCon) ==
+				ubAValues.getRows(rowOffset, rowOffset + numPathCon) - pacEvH);
 		condensePrep.addLinebreak();
 
 		if (performFullCondensing() == true)
 		{
-			pacA01Dx0.setup("pacA01Dx0", numPac, 1, REAL, ACADO_WORKSPACE);
+			pacA01Dx0.setup("pacA01Dx0", numPathCon, 1, REAL, ACADO_WORKSPACE);
 
 			condenseFdb.addStatement( pacA01Dx0 == A10 * Dx0 );
-			condenseFdb.addStatement(lbA.getRows(rowOffset, rowOffset + numPac) -= pacA01Dx0);
+			condenseFdb.addStatement(lbA.getRows(rowOffset, rowOffset + numPathCon) -= pacA01Dx0);
 			condenseFdb.addLinebreak();
-			condenseFdb.addStatement(ubA.getRows(rowOffset, rowOffset + numPac) -= pacA01Dx0);
+			condenseFdb.addStatement(ubA.getRows(rowOffset, rowOffset + numPathCon) -= pacA01Dx0);
 			condenseFdb.addLinebreak();
 		}
 
@@ -990,7 +1026,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	if ( dimPocH )
+	if ( numPointCon )
 	{
 		unsigned rowOffset = getNumStateBounds() + N * dimPacH;
 		unsigned colOffset = performFullCondensing() == true ? 0 : NX;
@@ -1148,9 +1184,11 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 		//
 		// And now setup the lbA and ubA
 		//
-		condensePrep.addStatement( lbA.getRows(rowOffset, rowOffset + dimPocH) == pocLB - pocEvH);
+		condensePrep.addStatement( lbA.getRows(rowOffset, rowOffset + dimPocH) ==
+				lbAValues.getRows(rowOffset, rowOffset + dimPocH) - pocEvH);
 		condensePrep.addLinebreak();
-		condensePrep.addStatement( ubA.getRows(rowOffset, rowOffset + dimPocH) == pocUB - pocEvH);
+		condensePrep.addStatement( ubA.getRows(rowOffset, rowOffset + dimPocH) ==
+				ubAValues.getRows(rowOffset, rowOffset + dimPocH) - pocEvH);
 		condensePrep.addLinebreak();
 
 		if (performFullCondensing() == true)

@@ -337,24 +337,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 {
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
-
-	////////////////////////////////////////////////////////////////////////////
-	//
-	// Setup arrival cost calc variables
-	//
-	////////////////////////////////////////////////////////////////////////////
-
 	int useArrivalCost;
 	get(CG_USE_ARRIVAL_COST, useArrivalCost);
-
-	if ( useArrivalCost )
-	{
-		SAC.setup("SAC", NX, NX, REAL, ACADO_VARIABLES);
-		SAC.setDoc("Arrival cost term: inverse of the covariance matrix.");
-		xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
-		xAC.setDoc("Arrival cost term: a priori state estimate.");
-		DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
-	}
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -771,12 +755,6 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		}
 	}
 
-	////////////////////////////////////////////////////////////////////////////
-	//
-	// Setup the residual variables
-	//
-	////////////////////////////////////////////////////////////////////////////
-
 	setupResidualVariables();
 
 	return SUCCESSFUL_RETURN;
@@ -901,12 +879,16 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 	Function pacH;
 
+	DMatrix pacLBMatrix, pacUBMatrix;
 	constraints.getPathConstraints(pacH, pacLBMatrix, pacUBMatrix);
 
 	dimPacH = pacH.getDim();
 
 	if (dimPacH != 0)
 	{
+		lbPathConValues = pacLBMatrix.getRows(0, N - 1).makeVector();
+		ubPathConValues = pacUBMatrix.getRows(0, N - 1).makeVector();
+
 		Expression expPacH, expPacHx, expPacHu;
 		pacH.getExpression( expPacH );
 
@@ -1042,8 +1024,8 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 			// TODO This is too specific for condensing, thus should be moved to condensing class.
 			// Stack the lower and upper bounds
-			pocLB.append( pocLBMatrix.getRow( 0 ) );
-			pocUB.append( pocUBMatrix.getRow( 0 ) );
+			lbPointConValues.append( pocLBMatrix.getRow( 0 ) );
+			ubPointConValues.append( pocUBMatrix.getRow( 0 ) );
 
 			pocLbStack[ i ] = pocLBMatrix.getRow( 0 );
 			pocUbStack[ i ] = pocUBMatrix.getRow( 0 );
@@ -1053,7 +1035,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 //	std::cout << "lb dim: " << pocLB.getDim() << std::endl;
 //	std::cout << "ub dim: " << pocUB.getDim() << std::endl;
 
-	dimPocH = pocLB.getDim();
+	dimPocH = lbPointConValues.getDim();
 
 	if ( dimPocH != 0 )
 	{
@@ -1362,6 +1344,15 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	get(CG_USE_ARRIVAL_COST, useArrivalCost);
 	if (useArrivalCost == NO)
 		return SUCCESSFUL_RETURN;
+
+	if ( useArrivalCost )
+	{
+		SAC.setup("SAC", NX, NX, REAL, ACADO_VARIABLES);
+		SAC.setDoc("Arrival cost term: inverse of the covariance matrix.");
+		xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
+		xAC.setDoc("Arrival cost term: a priori state estimate.");
+		DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
+	}
 
 	ExportVariable evRet("ret", 1, 1, INT, ACADO_LOCAL, true);
 
