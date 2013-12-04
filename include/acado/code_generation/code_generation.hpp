@@ -49,11 +49,7 @@
 #include <acado/code_generation/integrators/radau_IIA3_export.hpp>
 #include <acado/code_generation/integrators/radau_IIA5_export.hpp>
 
-#include <acado/code_generation/export_nlp_solver.hpp>
-#include <acado/code_generation/export_gauss_newton_condensed.hpp>
-#include <acado/code_generation/export_gauss_newton_forces.hpp>
-#include <acado/code_generation/export_gauss_newton_qpdunes.hpp>
-#include <acado/code_generation/export_gauss_newton_cn2.hpp>
+#include <acado/code_generation/register_nlp_solvers.hpp>
 
 #include <acado/code_generation/sim_export.hpp>
 #include <acado/code_generation/ocp_export.hpp>

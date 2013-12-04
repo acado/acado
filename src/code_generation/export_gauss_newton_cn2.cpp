@@ -1490,20 +1490,4 @@ bool ExportGaussNewtonCN2::performFullCondensing() const
 	return true;
 }
 
-//
-// Solver registration
-//
-
-ExportNLPSolver* createGaussNewtonCN2(	UserInteraction* _userInteraction,
-										const std::string& _commonHeaderName
-										)
-{
-	return new ExportGaussNewtonCN2(_userInteraction, _commonHeaderName);
-}
-
-RegisterGaussNewtonCN2::RegisterGaussNewtonCN2()
-{
-	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2, createGaussNewtonCN2);
-}
-
 CLOSE_NAMESPACE_ACADO

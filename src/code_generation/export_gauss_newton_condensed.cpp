@@ -2342,20 +2342,4 @@ bool ExportGaussNewtonCondensed::performFullCondensing() const
 	return (SparseQPsolutionMethods)sparseQPsolution == CONDENSING ? false : true;
 }
 
-//
-// Solver registration
-//
-
-ExportNLPSolver* createGaussNewtonCondensed(	UserInteraction* _userInteraction,
-												const std::string& _commonHeaderName
-												)
-{
-	return new ExportGaussNewtonCondensed(_userInteraction, _commonHeaderName);
-}
-
-RegisterGaussNewtonCondensed::RegisterGaussNewtonCondensed()
-{
-	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CONDENSED, createGaussNewtonCondensed);
-}
-
 CLOSE_NAMESPACE_ACADO

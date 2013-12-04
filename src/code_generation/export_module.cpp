@@ -32,7 +32,7 @@
  */
 
 #include <acado/code_generation/export_module.hpp>
-
+#include <acado/code_generation/integrators/integrator_export.hpp>
 
 BEGIN_NAMESPACE_ACADO
 

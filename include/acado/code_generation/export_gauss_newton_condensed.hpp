@@ -268,12 +268,6 @@ private:
 	/** @} */
 };
 
-/** \internal */
-static struct RegisterGaussNewtonCondensed
-{
-	RegisterGaussNewtonCondensed();
-} registerGaussNewtonCondensed;
-
 CLOSE_NAMESPACE_ACADO
 
 #endif  // ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_CONDENSED_HPP

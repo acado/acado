@@ -1008,20 +1008,4 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 	return SUCCESSFUL_RETURN;
 }
 
-//
-// Solver registration
-//
-
-ExportNLPSolver* createGaussNewtonForces(	UserInteraction* _userInteraction,
-											const std::string& _commonHeaderName
-											)
-{
-	return new ExportGaussNewtonForces(_userInteraction, _commonHeaderName);
-}
-
-RegisterGaussNewtonForces::RegisterGaussNewtonForces()
-{
-	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_FORCES, createGaussNewtonForces);
-}
-
 CLOSE_NAMESPACE_ACADO

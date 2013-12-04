@@ -1106,20 +1106,4 @@ returnValue ExportGaussNewtonQpDunes::setupQPInterface( )
 	return SUCCESSFUL_RETURN;
 }
 
-//
-// Solver registration
-//
-
-ExportNLPSolver* createGaussNewtonQpDunes(	UserInteraction* _userInteraction,
-										const std::string& _commonHeaderName
-										)
-{
-	return new ExportGaussNewtonQpDunes(_userInteraction, _commonHeaderName);
-}
-
-RegisterGaussNewtonQpDunes::RegisterGaussNewtonQpDunes()
-{
-	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES, createGaussNewtonQpDunes);
-}
-
 CLOSE_NAMESPACE_ACADO

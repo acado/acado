@@ -30,6 +30,7 @@
  */
 
 #include <acado/code_generation/ocp_export.hpp>
+#include <acado/code_generation/export_nlp_solver.hpp>
 #include <acado/code_generation/export_simulink_interface.hpp>
 #include <acado/code_generation/export_auxiliary_functions.hpp>
 #include <acado/code_generation/export_common_header.hpp>

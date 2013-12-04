@@ -250,12 +250,6 @@ protected:
 
 };
 
-/** \internal */
-static struct RegisterGaussNewtonCN2
-{
-	RegisterGaussNewtonCN2();
-} registerGaussNewtonCN2;
-
 CLOSE_NAMESPACE_ACADO
 
 #endif  // ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_CN2_HPP

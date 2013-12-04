@@ -33,9 +33,11 @@
 #define ACADO_TOOLKIT_OCP_EXPORT_HPP
 
 #include <acado/code_generation/export_module.hpp>
-#include <acado/code_generation/export_nlp_solver.hpp>
 
 BEGIN_NAMESPACE_ACADO
+
+class IntegratorExport;
+class ExportNLPSolver;
 
 /** \brief A user class for auto-generation of OCP solvers.
  *
@@ -156,10 +158,10 @@ protected:
 									int _precision = 16) const;
 
 	/** Shared pointer to a tailored integrator. */
-	IntegratorExportPtr integrator;
+	std::tr1::shared_ptr< IntegratorExport > integrator;
 
 	/** Shared pointer to an NLP solver. */
-	ExportNLPSolverPtr solver;
+	std::tr1::shared_ptr< ExportNLPSolver > solver;
 
 	/** Internal copy of the OCP object. */
 	OCP ocp;

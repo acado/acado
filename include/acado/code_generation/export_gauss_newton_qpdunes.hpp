@@ -211,12 +211,6 @@ private:
 	std::tr1::shared_ptr< ExportQpDunesInterface > qpInterface;
 };
 
-/** \internal */
-static struct RegisterGaussNewtonQpDunes
-{
-	RegisterGaussNewtonQpDunes();
-} registerGaussNewtonQpDunes;
-
 CLOSE_NAMESPACE_ACADO
 
 #endif  // ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_QPDUNES_HPP

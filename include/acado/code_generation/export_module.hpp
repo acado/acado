@@ -35,18 +35,14 @@
 #ifndef ACADO_TOOLKIT_EXPORT_MODULE_HPP
 #define ACADO_TOOLKIT_EXPORT_MODULE_HPP
 
-#include <acado/utils/acado_utils.hpp>
-#include <acado/user_interaction/options.hpp>
 #include <acado/user_interaction/user_interaction.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/function/function.hpp>
 #include <acado/ocp/ocp.hpp>
-#include <acado/code_generation/export_file.hpp>
-#include <acado/code_generation/integrators/integrator_export.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 
+class ExportStatementBlock;
 
 /** 
  *	\brief User-interface to automatically generate algorithms for fast model predictive control
