@@ -1,7 +1,16 @@
-LDLIBS = -lm 
-CFLAGS = -O3 -finline-functions -I. -I./forces/include
-CC     = gcc
-CXX    = g++
+UNAME := $(shell uname)
+
+LDLIBS = -lm -lstdc++
+ifeq ($(UNAME), Linux)
+	LDLIBS += -lrt
+endif
+
+CCACHE_APP := $(shell which ccache 2>/dev/null)
+
+CFLAGS = -O3 -finline-functions -I. -I./qpoases
+CXXFLAGS = -O3 -finline-functions -I. -I./qpoases -I./qpoases/INCLUDE -I./qpoases/SRC
+CC     = $(CCACHE_APP) gcc
+CXX    = $(CCACHE_APP) g++
 
 OBJECTS = \
 	./forces/src/forces.o \
