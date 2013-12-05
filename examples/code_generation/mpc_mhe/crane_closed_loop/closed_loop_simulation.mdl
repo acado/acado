@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.292"
+    ComputedModelVersion    "1.295"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -66,9 +66,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "madwolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Nov 29 19:47:48 2013"
-  RTWModifiedTimeStamp	  307655266
-  ModelVersionFormat	  "1.%<AutoIncrement:292>"
+  LastModifiedDate	  "Thu Dec 05 16:28:55 2013"
+  RTWModifiedTimeStamp	  308161734
+  ModelVersionFormat	  "1.%<AutoIncrement:295>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -1707,7 +1707,7 @@ Model {
       ZOrder		      13
       Floating		      off
       Location		      [188, 390, 512, 629]
-      Open		      off
+      Open		      on
       NumInputPorts	      "1"
       ZoomMode		      "xonly"
       List {
@@ -2677,7 +2677,10 @@ Stateflow {
     firstTransition	    25
     firstJunction	    24
     viewObj		    20
+    visible		    1
     machine		    1
+    subviewS {
+    }
     ssIdHighWaterMark	    5
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2706,12 +2709,12 @@ Stateflow {
       "NYN = 2;\n\nTs = 0.3;\nNi = 3;\n\npersistent x0\nif isempty( x0 )\n    x0 = [2.0, 0, 0, 0]';\nend;\n\npersistent"
       " state\nif isempty( state )\n    state = x0;\nend;\n\npersistent execMeas\nif isempty( execMeas )\n    execMeas "
       "= zeros(NY, 1);\nend;\n\n%% Model integration. Here we use a simple RK4 integrator\n\nh = Ts / Ni;\n\nfor i = 1:"
-      " Ni\n    k1 = rhs(input, state           );\n    k2 = rhs(input, state + 0.5 * k1);\n    k3 = rhs(input, state +"
-      " 0.5 * k2);\n    k4 = rhs(input, state + k3      );\n    \n    state = state + 1/6 * h * (k1 + 2 * k2 + 2 * k3 +"
-      " k4);\nend;\n\n%% Set measurements\n\nexecMeas( 1 ) = state( 1 );\nexecMeas( 2 ) = state( 3 );\nexecMeas( 3 ) = "
-      "input( 1 );\n\nmeas = execMeas;\n\nfunction [xdot] = rhs(u, x)\n%#codegen\n\ng = 9.81;\nb = 0.2;\n\nxdot = zeros"
-      "(4, 1);\n\nxdot( 1 ) = x( 2 );\nxdot( 2 ) = u;\nxdot( 3 ) = x( 4 );\nxdot( 4 ) = -g * sin(x( 3 )) - u * cos(x( 3"
-      " )) - b * x( 4 );\n"
+      " Ni\n    k1 = rhs(input, state               );\n    k2 = rhs(input, state + 0.5 * h * k1);\n    k3 = rhs(input,"
+      " state + 0.5 * h * k2);\n    k4 = rhs(input, state + h * k3      );\n    \n    state = state + 1/6 * h * (k1 + 2"
+      " * k2 + 2 * k3 + k4);\nend;\n\n%% Set measurements\n\nexecMeas( 1 ) = state( 1 );\nexecMeas( 2 ) = state( 3 );\n"
+      "execMeas( 3 ) = input( 1 );\n\nmeas = execMeas;\n\nfunction [xdot] = rhs(u, x)\n%#codegen\n\ng = 9.81;\nb = 0.2;"
+      "\n\nxdot = zeros(4, 1);\n\nxdot( 1 ) = x( 2 );\nxdot( 2 ) = u;\nxdot( 3 ) = x( 4 );\nxdot( 4 ) = -g * sin(x( 3 )"
+      ") - u * cos(x( 3 )) - b * x( 4 );\n"
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
