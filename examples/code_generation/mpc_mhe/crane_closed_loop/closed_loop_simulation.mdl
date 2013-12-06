@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.295"
+    ComputedModelVersion    "1.323"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -66,9 +66,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "madwolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Thu Dec 05 16:28:55 2013"
-  RTWModifiedTimeStamp	  308161734
-  ModelVersionFormat	  "1.%<AutoIncrement:295>"
+  LastModifiedDate	  "Fri Dec 06 14:11:42 2013"
+  RTWModifiedTimeStamp	  308239733
+  ModelVersionFormat	  "1.%<AutoIncrement:323>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -1700,37 +1700,7 @@ Model {
     }
     Block {
       BlockType		      Scope
-      Name		      "Scope"
-      SID		      "11"
-      Ports		      [1]
-      Position		      [545, 304, 575, 336]
-      ZOrder		      13
-      Floating		      off
-      Location		      [188, 390, 512, 629]
-      Open		      on
-      NumInputPorts	      "1"
-      ZoomMode		      "xonly"
-      List {
-	ListType		AxesTitles
-	axes1			"%<SignalLabel>"
-      }
-      List {
-	ListType		ScopeGraphics
-	FigureColor		"[0.5 0.5 0.5]"
-	AxesColor		"[0 0 0]"
-	AxesTickColor		"[1 1 1]"
-	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
-	LineStyles		"-|-|-|-|-|-"
-	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
-	MarkerStyles		"none|none|none|none|none|none"
-      }
-      ShowLegends	      off
-      DataFormat	      "StructureWithTime"
-      SampleTime	      "0"
-    }
-    Block {
-      BlockType		      Scope
-      Name		      "Scope1"
+      Name		      "control"
       SID		      "12"
       Ports		      [1]
       Position		      [545, 359, 575, 391]
@@ -1760,37 +1730,7 @@ Model {
     }
     Block {
       BlockType		      Scope
-      Name		      "Scope2"
-      SID		      "14"
-      Ports		      [1]
-      Position		      [545, 414, 575, 446]
-      ZOrder		      16
-      Floating		      off
-      Location		      [188, 390, 512, 629]
-      Open		      off
-      NumInputPorts	      "1"
-      List {
-	ListType		AxesTitles
-	axes1			"%<SignalLabel>"
-      }
-      List {
-	ListType		ScopeGraphics
-	FigureColor		"[0.5 0.5 0.5]"
-	AxesColor		"[0 0 0]"
-	AxesTickColor		"[1 1 1]"
-	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
-	LineStyles		"-|-|-|-|-|-"
-	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
-	MarkerStyles		"none|none|none|none|none|none"
-      }
-      ShowLegends	      off
-      SaveName		      "ScopeData2"
-      DataFormat	      "StructureWithTime"
-      SampleTime	      "0"
-    }
-    Block {
-      BlockType		      Scope
-      Name		      "Scope3"
+      Name		      "measurements"
       SID		      "15"
       Ports		      [1]
       Position		      [90, 259, 120, 291]
@@ -1820,7 +1760,7 @@ Model {
     }
     Block {
       BlockType		      Scope
-      Name		      "Scope4"
+      Name		      "mhe kkt\ntolerance"
       SID		      "21"
       Ports		      [1]
       Position		      [545, 474, 575, 506]
@@ -1851,7 +1791,7 @@ Model {
     }
     Block {
       BlockType		      Scope
-      Name		      "Scope5"
+      Name		      "mhe ready"
       SID		      "23"
       Ports		      [1]
       Position		      [230, 259, 260, 291]
@@ -1876,126 +1816,6 @@ Model {
       }
       ShowLegends	      off
       SaveName		      "ScopeData4"
-      DataFormat	      "StructureWithTime"
-      SampleTime	      "0"
-    }
-    Block {
-      BlockType		      Scope
-      Name		      "Scope6"
-      SID		      "24"
-      Ports		      [1]
-      Position		      [920, 294, 950, 326]
-      ZOrder		      26
-      Floating		      off
-      Location		      [188, 390, 512, 629]
-      Open		      off
-      NumInputPorts	      "1"
-      List {
-	ListType		AxesTitles
-	axes1			"%<SignalLabel>"
-      }
-      List {
-	ListType		ScopeGraphics
-	FigureColor		"[0.5 0.5 0.5]"
-	AxesColor		"[0 0 0]"
-	AxesTickColor		"[1 1 1]"
-	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
-	LineStyles		"-|-|-|-|-|-"
-	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
-	MarkerStyles		"none|none|none|none|none|none"
-      }
-      ShowLegends	      off
-      SaveName		      "ScopeData5"
-      DataFormat	      "StructureWithTime"
-      SampleTime	      "0"
-    }
-    Block {
-      BlockType		      Scope
-      Name		      "Scope7"
-      SID		      "25"
-      Ports		      [1]
-      Position		      [920, 214, 950, 246]
-      ZOrder		      27
-      Floating		      off
-      Location		      [475, 438, 918, 757]
-      Open		      off
-      NumInputPorts	      "1"
-      List {
-	ListType		AxesTitles
-	axes1			"%<SignalLabel>"
-      }
-      List {
-	ListType		ScopeGraphics
-	FigureColor		"[0.5 0.5 0.5]"
-	AxesColor		"[0 0 0]"
-	AxesTickColor		"[1 1 1]"
-	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
-	LineStyles		"-|-|-|-|-|-"
-	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
-	MarkerStyles		"none|none|none|none|none|none"
-      }
-      ShowLegends	      off
-      SaveName		      "ScopeData6"
-      DataFormat	      "StructureWithTime"
-      SampleTime	      "0"
-    }
-    Block {
-      BlockType		      Scope
-      Name		      "Scope8"
-      SID		      "26"
-      Ports		      [1]
-      Position		      [910, 349, 940, 381]
-      ZOrder		      28
-      Floating		      off
-      Location		      [188, 390, 512, 629]
-      Open		      off
-      NumInputPorts	      "1"
-      List {
-	ListType		AxesTitles
-	axes1			"%<SignalLabel>"
-      }
-      List {
-	ListType		ScopeGraphics
-	FigureColor		"[0.5 0.5 0.5]"
-	AxesColor		"[0 0 0]"
-	AxesTickColor		"[1 1 1]"
-	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
-	LineStyles		"-|-|-|-|-|-"
-	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
-	MarkerStyles		"none|none|none|none|none|none"
-      }
-      ShowLegends	      off
-      SaveName		      "ScopeData7"
-      DataFormat	      "StructureWithTime"
-      SampleTime	      "0"
-    }
-    Block {
-      BlockType		      Scope
-      Name		      "Scope9"
-      SID		      "27"
-      Ports		      [1]
-      Position		      [910, 414, 940, 446]
-      ZOrder		      29
-      Floating		      off
-      Location		      [188, 390, 512, 629]
-      Open		      off
-      NumInputPorts	      "1"
-      List {
-	ListType		AxesTitles
-	axes1			"%<SignalLabel>"
-      }
-      List {
-	ListType		ScopeGraphics
-	FigureColor		"[0.5 0.5 0.5]"
-	AxesColor		"[0 0 0]"
-	AxesTickColor		"[1 1 1]"
-	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
-	LineStyles		"-|-|-|-|-|-"
-	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
-	MarkerStyles		"none|none|none|none|none|none"
-      }
-      ShowLegends	      off
-      SaveName		      "ScopeData8"
       DataFormat	      "StructureWithTime"
       SampleTime	      "0"
     }
@@ -2055,6 +1875,96 @@ Model {
       }
     }
     Block {
+      BlockType		      Scope
+      Name		      "mpc control"
+      SID		      "25"
+      Ports		      [1]
+      Position		      [920, 214, 950, 246]
+      ZOrder		      27
+      Floating		      off
+      Location		      [475, 438, 918, 757]
+      Open		      off
+      NumInputPorts	      "1"
+      List {
+	ListType		AxesTitles
+	axes1			"%<SignalLabel>"
+      }
+      List {
+	ListType		ScopeGraphics
+	FigureColor		"[0.5 0.5 0.5]"
+	AxesColor		"[0 0 0]"
+	AxesTickColor		"[1 1 1]"
+	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
+	LineStyles		"-|-|-|-|-|-"
+	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
+	MarkerStyles		"none|none|none|none|none|none"
+      }
+      ShowLegends	      off
+      SaveName		      "ScopeData6"
+      DataFormat	      "StructureWithTime"
+      SampleTime	      "0"
+    }
+    Block {
+      BlockType		      Scope
+      Name		      "mpc kkt\ntolerance"
+      SID		      "27"
+      Ports		      [1]
+      Position		      [920, 414, 950, 446]
+      ZOrder		      29
+      Floating		      off
+      Location		      [188, 390, 512, 629]
+      Open		      off
+      NumInputPorts	      "1"
+      List {
+	ListType		AxesTitles
+	axes1			"%<SignalLabel>"
+      }
+      List {
+	ListType		ScopeGraphics
+	FigureColor		"[0.5 0.5 0.5]"
+	AxesColor		"[0 0 0]"
+	AxesTickColor		"[1 1 1]"
+	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
+	LineStyles		"-|-|-|-|-|-"
+	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
+	MarkerStyles		"none|none|none|none|none|none"
+      }
+      ShowLegends	      off
+      SaveName		      "ScopeData8"
+      DataFormat	      "StructureWithTime"
+      SampleTime	      "0"
+    }
+    Block {
+      BlockType		      Scope
+      Name		      "mpc status"
+      SID		      "26"
+      Ports		      [1]
+      Position		      [920, 349, 950, 381]
+      ZOrder		      28
+      Floating		      off
+      Location		      [188, 390, 512, 629]
+      Open		      off
+      NumInputPorts	      "1"
+      List {
+	ListType		AxesTitles
+	axes1			"%<SignalLabel>"
+      }
+      List {
+	ListType		ScopeGraphics
+	FigureColor		"[0.5 0.5 0.5]"
+	AxesColor		"[0 0 0]"
+	AxesTickColor		"[1 1 1]"
+	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
+	LineStyles		"-|-|-|-|-|-"
+	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
+	MarkerStyles		"none|none|none|none|none|none"
+      }
+      ShowLegends	      off
+      SaveName		      "ScopeData7"
+      DataFormat	      "StructureWithTime"
+      SampleTime	      "0"
+    }
+    Block {
       BlockType		      S-Function
       Name		      "nmpc_solver_sfun"
       SID		      "2"
@@ -2109,6 +2019,96 @@ Model {
 	}
       }
     }
+    Block {
+      BlockType		      Scope
+      Name		      "states"
+      SID		      "24"
+      Ports		      [1]
+      Position		      [920, 284, 950, 316]
+      ZOrder		      26
+      Floating		      off
+      Location		      [188, 390, 512, 629]
+      Open		      off
+      NumInputPorts	      "1"
+      List {
+	ListType		AxesTitles
+	axes1			"%<SignalLabel>"
+      }
+      List {
+	ListType		ScopeGraphics
+	FigureColor		"[0.5 0.5 0.5]"
+	AxesColor		"[0 0 0]"
+	AxesTickColor		"[1 1 1]"
+	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
+	LineStyles		"-|-|-|-|-|-"
+	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
+	MarkerStyles		"none|none|none|none|none|none"
+      }
+      ShowLegends	      off
+      SaveName		      "ScopeData5"
+      DataFormat	      "StructureWithTime"
+      SampleTime	      "0"
+    }
+    Block {
+      BlockType		      Scope
+      Name		      "status"
+      SID		      "14"
+      Ports		      [1]
+      Position		      [545, 414, 575, 446]
+      ZOrder		      16
+      Floating		      off
+      Location		      [188, 390, 512, 629]
+      Open		      off
+      NumInputPorts	      "1"
+      List {
+	ListType		AxesTitles
+	axes1			"%<SignalLabel>"
+      }
+      List {
+	ListType		ScopeGraphics
+	FigureColor		"[0.5 0.5 0.5]"
+	AxesColor		"[0 0 0]"
+	AxesTickColor		"[1 1 1]"
+	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
+	LineStyles		"-|-|-|-|-|-"
+	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
+	MarkerStyles		"none|none|none|none|none|none"
+      }
+      ShowLegends	      off
+      SaveName		      "ScopeData2"
+      DataFormat	      "StructureWithTime"
+      SampleTime	      "0"
+    }
+    Block {
+      BlockType		      Scope
+      Name		      "stetes"
+      SID		      "11"
+      Ports		      [1]
+      Position		      [545, 304, 575, 336]
+      ZOrder		      13
+      Floating		      off
+      Location		      [188, 390, 512, 629]
+      Open		      off
+      NumInputPorts	      "1"
+      ZoomMode		      "xonly"
+      List {
+	ListType		AxesTitles
+	axes1			"%<SignalLabel>"
+      }
+      List {
+	ListType		ScopeGraphics
+	FigureColor		"[0.5 0.5 0.5]"
+	AxesColor		"[0 0 0]"
+	AxesTickColor		"[1 1 1]"
+	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
+	LineStyles		"-|-|-|-|-|-"
+	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
+	MarkerStyles		"none|none|none|none|none|none"
+      }
+      ShowLegends	      off
+      DataFormat	      "StructureWithTime"
+      SampleTime	      "0"
+    }
     Line {
       SrcBlock		      "nmpc_solver_sfun"
       SrcPort		      1
@@ -2160,7 +2160,7 @@ Model {
       Points		      [12, 0; 0, 35; 24, 0]
       Branch {
 	Points			[0, 70]
-	DstBlock		"Scope5"
+	DstBlock		"mhe ready"
 	DstPort			1
       }
       Branch {
@@ -2195,27 +2195,27 @@ Model {
       SrcBlock		      "MHE post-ptocessing"
       SrcPort		      2
       Points		      [34, 0; 0, 45]
-      DstBlock		      "Scope1"
+      DstBlock		      "control"
       DstPort		      1
     }
     Line {
       SrcBlock		      "MHE post-ptocessing"
       SrcPort		      1
-      DstBlock		      "Scope"
+      DstBlock		      "stetes"
       DstPort		      1
     }
     Line {
       SrcBlock		      "MHE post-ptocessing"
       SrcPort		      3
       Points		      [19, 0; 0, 90]
-      DstBlock		      "Scope2"
+      DstBlock		      "status"
       DstPort		      1
     }
     Line {
       SrcBlock		      "MHE post-ptocessing"
       SrcPort		      4
       Points		      [12, 0; 0, 140]
-      DstBlock		      "Scope4"
+      DstBlock		      "mhe kkt\ntolerance"
       DstPort		      1
     }
     Line {
@@ -2224,7 +2224,7 @@ Model {
       Points		      [70, 0]
       Branch {
 	Points			[0, 95]
-	DstBlock		"Scope7"
+	DstBlock		"mpc control"
 	DstPort			1
       }
       Branch {
@@ -2238,7 +2238,7 @@ Model {
       Points		      [9, 0; 0, -92; -1018, 0; 0, 127; 12, 0]
       Branch {
 	Points			[0, 105]
-	DstBlock		"Scope3"
+	DstBlock		"measurements"
 	DstPort			1
       }
       Branch {
@@ -2255,22 +2255,22 @@ Model {
     Line {
       SrcBlock		      "NMPC post-procesing"
       SrcPort		      2
-      Points		      [62, 0; 0, 160]
-      DstBlock		      "Scope6"
+      Points		      [62, 0; 0, 150]
+      DstBlock		      "states"
       DstPort		      1
     }
     Line {
       SrcBlock		      "NMPC post-procesing"
       SrcPort		      3
       Points		      [52, 0; 0, 200]
-      DstBlock		      "Scope8"
+      DstBlock		      "mpc status"
       DstPort		      1
     }
     Line {
       SrcBlock		      "NMPC post-procesing"
       SrcPort		      4
       Points		      [24, 0; 0, 250]
-      DstBlock		      "Scope9"
+      DstBlock		      "mpc kkt\ntolerance"
       DstPort		      1
     }
   }
@@ -2484,7 +2484,10 @@ Stateflow {
     firstTransition	    18
     firstJunction	    17
     viewObj		    11
+    visible		    1
     machine		    1
+    subviewS {
+    }
     ssIdHighWaterMark	    9
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2519,22 +2522,25 @@ Stateflow {
       "0.01].^2);\n    \n    output.data.W = eyeNY(:)';\n    output.data.WN = eyeNYN(:)';\nend;\n\npersistent runCnt\ni"
       "f isempty( runCnt )\n    runCnt = 1;\nend;\n\npersistent execReady\nif isempty( execReady )\n    execReady = 0;\n"
       "end;\n\nif runCnt < (N + 1)\n    % Fill in the measurement buffer, entries 1: N\n\n    output.data.y((runCnt - 1"
-      ") * NY + 1: runCnt * NY) = meas;\n    \n    % Initialize solver, measured states, shooting nodes 1: N\n    outpu"
-      "t.data.x((runCnt - 1) * NX + 1) = meas( 1 );\n    output.data.x((runCnt - 1) * NX + 3) = meas( 2 );\n    \n    %"
-      " MHE is not ready, of course.\n    execReady = 0;\n    \n    % Increment counter\n    runCnt = runCnt + 1;\n    "
-      "\nelseif runCnt == (N + 1)\n    % Initialize measurements on node N + 1,\n    output.data.yN = meas(1: 2, 1)';\n"
-      "    % Initialize measured controls on previous node, node N\n    output.data.y((N - 1) * NY + 3) = meas(3, 1);\n"
-      "    \n    % Initialize measured states on node N _ 1\n    output.data.x((runCnt - 1) * NX + 1) = meas( 1 );\n   "
-      " output.data.x((runCnt - 1) * NX + 3) = meas( 2 );\n    \n    % Simple running more\n    output.control = int32("
-      " 0 );\n    \n    % MHE is still not ready, we want to run it once before we use the\n    % state estimate.\n    "
-      "execReady = 0;\n    \n    % Increment the counter.\n    runCnt = runCnt + 1;\n    \nelse\n    % Shift measuremen"
-      "ts\n    for i = 1: N - 1\n        output.data.y((i - 1) * NY + 1: i * NY) = output.data.y(i * NY + 1: (i + 1) * "
-      "NY);\n    end;\n    output.data.y((N - 1) * NY + 1: (N - 1) * NY + 2) = output.data.yN;\n    \n    output.data.y"
-      "N = meas(1: 2, 1)';\n    output.data.y((N - 1) * NY + 3) = meas(3, 1);\n    \n    % Use previous states and cont"
-      "rols (solutions!) for initialization.\n    % NOTE: Those guys are first gonna be shifted because of the option\n"
-      "    %       at line 17.\n    \n    output.data.x = mheOutput.data.x;\n    output.data.u = mheOutput.data.u;\n   "
-      " \n    output.control = int32( 0 );\n    \n    % Yeah, we are ready now.\n    execReady = 1;\nend;\n\n%% Output "
-      "data\nmheInput = output;\nready = execReady;"
+      ") * NY + 1) = meas( 1 );\n    output.data.y((runCnt - 1) * NY + 2) = meas( 2 );\n    if runCnt > 1\n        outp"
+      "ut.data.y((runCnt - 2) * NY + 3) = meas( 3 );\n    end;\n    \n    % Initialize solver, measured states, shootin"
+      "g nodes 1: N\n    output.data.x((runCnt - 1) * NX + 1) = meas( 1 );\n    output.data.x((runCnt - 1) * NX + 3) = "
+      "meas( 2 );\n    if runCnt > 1\n        output.data.u((runCnt - 2) * NU + 1) = meas( 3 );\n    end;    \n    \n  "
+      "  % MHE is not ready, of course.\n    execReady = 0;\n    \n    % Increment counter\n    runCnt = runCnt + 1;\n "
+      "   \nelseif runCnt == (N + 1)\n    % Initialize measurements on node N + 1,\n    output.data.yN = meas(1: 2, 1)'"
+      ";\n    % Initialize measured controls on previous node, node N\n    output.data.y((N - 1) * NY + 3) = meas(3, 1)"
+      ";\n    \n    % Initialize measured states on node N + 1\n    output.data.x((runCnt - 1) * NX + 1) = meas( 1 );\n"
+      "    output.data.x((runCnt - 1) * NX + 3) = meas( 2 );\n    % Initialize measured control on node N\n    output.d"
+      "ata.u((N - 1) * NU + 1) = meas( 3 );\n    \n    % Simple running more\n    output.control = int32( 0 );\n    \n "
+      "   % MHE is still not ready, we want to run it once before we use the\n    % state estimate.\n    execReady = 0;"
+      "\n    \n    % Increment the counter.\n    runCnt = runCnt + 1;\n    \nelse\n    % Shift measurements\n    for i "
+      "= 1: N - 1\n        output.data.y((i - 1) * NY + 1: i * NY) = output.data.y(i * NY + 1: (i + 1) * NY);\n    end;"
+      "\n    output.data.y((N - 1) * NY + 1: (N - 1) * NY + 2) = output.data.yN;\n    \n    output.data.yN = meas(1: 2,"
+      " 1)';\n    output.data.y((N - 1) * NY + 3) = meas(3, 1);\n    \n    % Use previous states and controls (solution"
+      "s!) for initialization.\n    % NOTE: Those guys are first gonna be shifted because of the option\n    %       at"
+      " line 17.\n    \n    output.data.x = mheOutput.data.x;\n    output.data.u = mheOutput.data.u;\n    \n    output."
+      "control = int32( 0 );\n    \n    % Yeah, we are ready now.\n    execReady = 1;\nend;\n\n%% Output data\nmheInput"
+      " = output;\nready = execReady;"
       editorLayout	      "100 M4x1[10 5 700 500]"
     }
   }
@@ -2677,10 +2683,7 @@ Stateflow {
     firstTransition	    25
     firstJunction	    24
     viewObj		    20
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    5
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2807,7 +2810,10 @@ Stateflow {
     firstTransition	    35
     firstJunction	    34
     viewObj		    27
+    visible		    1
     machine		    1
+    subviewS {
+    }
     ssIdHighWaterMark	    8
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2995,7 +3001,10 @@ Stateflow {
     firstTransition	    46
     firstJunction	    45
     viewObj		    37
+    visible		    1
     machine		    1
+    subviewS {
+    }
     ssIdHighWaterMark	    9
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
