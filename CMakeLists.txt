@@ -376,6 +376,7 @@ INSTALL(
 SET( EXTERNAL_PACKAGES_DIRS
 	external_packages/include
 	external_packages/qpoases
+	external_packages/eigen3
 )	
 INSTALL(
 	DIRECTORY
@@ -392,6 +393,7 @@ SET( ACADO_INSTALL_INCLUDE_DIRS
 	${INSTALL_DATA_DIR}/external_packages
 	${INSTALL_DATA_DIR}/external_packages/csparse/
 	${INSTALL_DATA_DIR}/external_packages/qpOASES-3.0beta/include
+	${INSTALL_DATA_DIR}/external_packages/eigen3
 )
 SET( ACADO_INSTALL_LIBRARY_DIRS
 	${INSTALL_LIB_DIR}
@@ -488,6 +490,7 @@ SET( ACADO_INCLUDE_DIRS
 	${PROJECT_SOURCE_DIR}/external_packages
 	${PROJECT_SOURCE_DIR}/external_packages/csparse/
 	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
+	${PROJECT_SOURCE_DIR}/external_packages/eigen3
 	${PROJECT_BINARY_DIR}/include
 )
 
