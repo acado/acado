@@ -268,7 +268,8 @@ returnValue GenericMatrix< T >::print(	std::ostream& _stream,
 
 	_stream << _startString;
 
-	iof.set(_precision > 0 ? _precision : iof.precision, _width, _precision > 0 ? ios::scientific | ios::right : iof.flags);
+	iof.set(_precision > 0 ? _precision :
+			iof.precision, _width, _precision > 0 ? ios::scientific | ios::right : ios::fixed);
 
 	for (unsigned r = 0; r < Base::rows(); ++r)
 	{
