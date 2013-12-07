@@ -124,8 +124,13 @@ const std::string ExportVariableInternal::get(	const ExportIndex& rowIdx,
 												) const
 {
 	stringstream s;
-	s.precision( 16 );
-	s << scientific;
+
+	IoFormatter iof( s );
+
+	iof.set(	getType() == INT || getType() == STATIC_CONST_INT ? 5 : 16,
+				iof.width,
+				getType() == INT || getType() == STATIC_CONST_INT ? ios::fixed : ios::scientific
+				);
 
 	ExportIndex totalIdx = getTotalIdx(rowIdx + rowOffset, colIdx + colOffset);
 
