@@ -88,7 +88,9 @@ enum OperatorName{
     ON_VARIABLE,
     ON_DOUBLE_CONSTANT,
     ON_DIFFERENTIAL_STATE,
-    ON_CEXPRESSION
+    ON_CEXPRESSION,
+    ON_ABSOLUTE,
+    ON_SIGN
 };
 
 /** Defines the names of all implemented variable types. */
