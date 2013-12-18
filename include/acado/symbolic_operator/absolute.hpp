@@ -32,8 +32,8 @@
 */
 
 
-#ifndef ACADO_TOOLKIT_ACOS_HPP
-#define ACADO_TOOLKIT_ACOS_HPP
+#ifndef ACADO_TOOLKIT_ABSOLUTE_HPP
+#define ACADO_TOOLKIT_ABSOLUTE_HPP
 
 
 #include <acado/symbolic_operator/symbolic_operator_fwd.hpp>

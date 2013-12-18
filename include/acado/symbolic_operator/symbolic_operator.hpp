@@ -44,6 +44,7 @@
     #include <acado/symbolic_operator/unary_operator.hpp>
     #include <acado/symbolic_operator/binary_operator.hpp>
 
+    #include <acado/symbolic_operator/absolute.hpp>
     #include <acado/symbolic_operator/acos.hpp>
     #include <acado/symbolic_operator/addition.hpp>
     #include <acado/symbolic_operator/asin.hpp>
@@ -57,6 +58,7 @@
     #include <acado/symbolic_operator/product.hpp>
     #include <acado/symbolic_operator/quotient.hpp>
     #include <acado/symbolic_operator/sin.hpp>
+    #include <acado/symbolic_operator/sign.hpp>
     #include <acado/symbolic_operator/subtraction.hpp>
     #include <acado/symbolic_operator/symbolic_index_list.hpp>
     #include <acado/symbolic_operator/tan.hpp>

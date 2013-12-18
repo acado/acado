@@ -108,7 +108,7 @@ Operator* Sign::differentiate(int index) {
 	if (dargument->isOneOrZero() == NE_ZERO)
 		return new DoubleConstant(0.0, NE_ZERO);
 	else
-		return DoubleConstant(1.0, NE_ONE);
+		return new DoubleConstant(1.0, NE_ONE);
 }
 
 Operator* Sign::ADforwardProtected(int dim, VariableType *varType,
@@ -123,7 +123,7 @@ Operator* Sign::ADforwardProtected(int dim, VariableType *varType,
 	if (dargument->isOneOrZero() == NE_ZERO)
 		return new DoubleConstant(0.0, NE_ZERO);
 	else
-		return DoubleConstant(1.0, NE_ONE);
+		return new DoubleConstant(1.0, NE_ONE);
 }
 
 returnValue Sign::ADbackwardProtected(int dim, VariableType *varType,

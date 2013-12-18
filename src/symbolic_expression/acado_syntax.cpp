@@ -51,6 +51,12 @@ Expression sqrt( const Expression &arg ){ return arg.getSqrt(); }
 Expression ln  ( const Expression &arg ){ return arg.getLn  (); }
 Expression log ( const Expression &arg ){ return arg.getLn  (); }
 
+double sign(const double &arg) {
+	if (arg >= 0)
+		return 1.;
+	else
+		return -1;
+}
 Expression pow( const Expression &arg1, const Expression &arg2 ){ return arg1.getPow(arg2);               }
 Expression pow( const double     &arg1, const Expression &arg2 ){ return arg2.convert(arg1).getPow(arg2); }
 Expression pow( const Expression &arg1, const double     &arg2 ){

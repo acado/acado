@@ -32,6 +32,7 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/symbolic_operator/symbolic_operator.hpp>
 
+
 BEGIN_NAMESPACE_ACADO
 
 double dAbs(double x) {
@@ -106,7 +107,7 @@ Operator* Absolute::differentiate(int index) {
 	if (dargument->isOneOrZero() == NE_ONE) {
 		return new Sign(argument->clone());
 	}
-	return new Product(new Power(Sign(argument->clone(), dargument->clone())));
+	return new Product(new Sign(argument->clone()), dargument->clone());
 }
 
 Operator* Absolute::ADforwardProtected(int dim, VariableType *varType,
@@ -124,7 +125,7 @@ Operator* Absolute::ADforwardProtected(int dim, VariableType *varType,
 	if (dargument->isOneOrZero() == NE_ONE) {
 		return new Sign(argument->clone());
 	}
-	return new Product(new Power(Sign(argument->clone(), dargument->clone())));
+	return new Product(new Sign(argument->clone()), dargument->clone());
 }
 
 returnValue Absolute::ADbackwardProtected(int dim, VariableType *varType,

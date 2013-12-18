@@ -123,6 +123,10 @@ inline Interval sqrt( const Interval&I ){
   return I2;
 }
 
+//inline Interval abs( const Interval&I ){
+//  return fabs(I);
+//}
+
 inline Interval fabs( const Interval&I ){
   int imid = -1;
   Interval I2( ::fabs(I.mid(I._l,I._u,0.,imid)),
@@ -214,6 +218,11 @@ inline Interval cos( const Interval&I ){
 
 inline Interval sin( const Interval &I ){
   return cos( I - M_PI/2. );
+}
+
+inline Interval sign( const Interval &I ){
+	throw 0;
+  return I;
 }
 
 inline Interval tan( const Interval&I ){

@@ -1215,6 +1215,22 @@ sin
 }
 
 template <typename T> inline TaylorVariable<T>
+sign
+( const TaylorVariable<T> &TV )
+{
+	throw 0;
+  return cos( TV - M_PI/2. );
+}
+
+template <typename T> inline TaylorVariable<T>
+abs
+( const TaylorVariable<T> &TV )
+{
+	throw 0;
+  return cos( TV - M_PI/2. );
+}
+
+template <typename T> inline TaylorVariable<T>
 asin
 ( const TaylorVariable<T> &TV )
 {
