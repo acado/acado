@@ -1218,35 +1218,35 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
                 is(j) = t; j++;
                 
                 if (modelFcnNX > 0){
-                    DifferentialState x(modelFcnNX);
+                    DifferentialState x("",modelFcnNX,1);
                     for( i=0; i<modelFcnNX; ++i ){
                         is(j) = x(i); j++;
                     }
                 }
                 
                 if (modelFcnNXA > 0){
-                    AlgebraicState ax(modelFcnNXA);
+                    AlgebraicState ax("",modelFcnNXA,1);
                     for( i=0; i<modelFcnNXA; ++i ){
                         is(j) = ax(i); j++;
                     }
                 }
                 
                 if (modelFcnNU > 0){
-                    Control u(modelFcnNU);
+                    Control u("",modelFcnNU,1);
                     for( i=0; i<modelFcnNU; ++i ){
                         is(j) = u(i); j++;
                     }
                 }
                 
                 if (modelFcnNP > 0){
-                    Parameter p(modelFcnNP);
+                    Parameter p("",modelFcnNP,1);
                     for( i=0; i<modelFcnNP; ++i ){
                         is(j) = p(i); j++;
                     }
                 }
                 
                 if (modelFcnNW > 0){
-                    Disturbance w(modelFcnNW);
+                    Disturbance w("",modelFcnNW,1);
                     for( i=0; i<modelFcnNW; ++i ){
                         is(j) = w(i); j++;
                     }
@@ -1465,7 +1465,7 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 
 	// assign end value for states
 	//double* xEndFull = new double[nx+nxa];
-    Vector xEnd_, xaEnd_;
+    DVector xEnd_, xaEnd_;
 	integrator->getX ( xEnd_  );
 	integrator->getXA( xaEnd_ );
 
@@ -1495,32 +1495,40 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 			}
 
 			// setup seed and sensitvity matrices
-			Matrix D_x( nx,nfDir );
-			Matrix D_p( np,nfDir );
-			Matrix D_u( nu,nfDir );
-			Matrix D_w( nw,nfDir );
+			DMatrix D_x( nx,nfDir );
+			DMatrix D_p( np,nfDir );
+			DMatrix D_u( nu,nfDir );
+			DMatrix D_w( nw,nfDir );
 
-			if( dx != NULL )
-				D_x ^= dx;
+			if( dx != NULL ) {
+                D_x = Eigen::Map<DMatrix>(dx,nx,nfDir);
+                D_x.transposeInPlace();
+            }
 			else
 				D_x.setZero();
 
-			if( du != NULL )
-				D_u ^= du;
+			if( du != NULL ) {
+                D_u = Eigen::Map<DMatrix>(du,nu,nfDir);
+                D_u.transposeInPlace();
+            }
 			else
 				D_u.setZero();
 
-			if( dp != NULL )
-				D_p ^= dp;
+			if( dp != NULL ) {
+                D_p = Eigen::Map<DMatrix>(dp,np,nfDir);
+                D_p.transposeInPlace();
+            }
 			else
 				D_p.setZero();
 
-			if( dw != NULL )
-				D_w ^= dw;
+			if( dw != NULL ) {
+                D_w = Eigen::Map<DMatrix>(dw,nw,nfDir);
+                D_w.transposeInPlace();
+            }
 			else
 				D_w.setZero();
 
-			Matrix J( nx+nxa,nfDir );
+			DMatrix J( nx+nxa,nfDir );
 
 			// determine forward sensitivities
 
@@ -1528,10 +1536,10 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 
             for( run1 = 0; run1 < nfDir; run1++ ){
 
-                Vector DXX = D_x.getCol( run1 );
-                Vector DPP = D_p.getCol( run1 );
-                Vector DUU = D_u.getCol( run1 );
-                Vector DWW = D_w.getCol( run1 );
+                DVector DXX = D_x.getCol( run1 );
+                DVector DPP = D_p.getCol( run1 );
+                DVector DUU = D_u.getCol( run1 );
+                DVector DWW = D_w.getCol( run1 );
 
 				integrator->setForwardSeed( 1, DXX, DPP, DUU, DWW );
 				returnvalue = integrator->integrateSensitivities( );
@@ -1542,7 +1550,7 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 				}
 				else
 				{
-                    Vector JJ(nx+nxa);
+                    DVector JJ(nx+nxa);
 					integrator->getForwardSensitivities( JJ, 1 );
                     J.setCol( run1, JJ );
                 }
@@ -1553,7 +1561,7 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 			{
 				JJ = mxCreateDoubleMatrix( nx+nxa,nfDir,mxREAL );
 				jj = mxGetPr( JJ );
-				jj ^= J;
+                DMatrix jj_tmp = Eigen::Map<DMatrix>(jj, J.rows(), J.cols());  jj_tmp = J.transpose(); jj = jj_tmp.data();
 				mxSetField( plhs[outputIdx],0,"J",JJ );
 			}
 		}
@@ -1568,19 +1576,20 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 			}
 
 			// setup seed and sensitvity matrices
-			Matrix xSeed( nbDir,nx );
-			xSeed ^= bseed;
+			DMatrix xSeed( nbDir,nx );
+            xSeed = Eigen::Map<DMatrix>(bseed,nbDir,nx);
+            xSeed.transposeInPlace();
 
-			Matrix J_x( nbDir,nx+nxa );
-			Matrix J_u( nbDir,nu );
-			Matrix J_p( nbDir,np );
-			Matrix J_w( nbDir,nw );
+			DMatrix J_x( nbDir,nx+nxa );
+			DMatrix J_u( nbDir,nu );
+			DMatrix J_p( nbDir,np );
+			DMatrix J_w( nbDir,nw );
 
 
             int run1;
             for( run1 = 0; run1 < nbDir; run1++ ){
 
-                Vector XSEED = xSeed.getRow(run1);
+                DVector XSEED = xSeed.getRow(run1);
 
 				// determine backward sensitivities
 				integrator->setBackwardSeed( 1, XSEED );
@@ -1592,7 +1601,7 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 				}
 				else
 				{
-                    Vector JXX(nx+nxa), JPP(np), JUU(nu), JWW(nw);
+                    DVector JXX(nx+nxa), JPP(np), JUU(nu), JWW(nw);
 
 					integrator->getBackwardSensitivities( JXX, JPP, JUU, JWW, 1 );
 
@@ -1610,14 +1619,14 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 				{
 					Jx = mxCreateDoubleMatrix( nbDir,nx+nxa,mxREAL );
 					jx = mxGetPr( Jx );
-					jx ^= J_x;
+                    DMatrix jx_tmp = Eigen::Map<DMatrix>(jx, J_x.rows(), J_x.cols());  jx_tmp = J_x.transpose(); jx = jx_tmp.data();
 					mxSetField( plhs[outputIdx],0,"Jx",Jx );
 
 					if ( nu > 0 )
 					{
 						Ju = mxCreateDoubleMatrix( nbDir,nu,mxREAL );
 						ju = mxGetPr( Ju );
-						ju ^= J_u;
+                        DMatrix ju_tmp = Eigen::Map<DMatrix>(ju, J_u.rows(), J_u.cols());  ju_tmp = J_u.transpose(); ju = ju_tmp.data();
 						mxSetField( plhs[outputIdx],0,"Ju",Ju );
 					}
 
@@ -1625,7 +1634,7 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 					{
 						Jp = mxCreateDoubleMatrix( nbDir,np,mxREAL );
 						jp = mxGetPr( Jp );
-						jp ^= J_p;
+                        DMatrix jp_tmp = Eigen::Map<DMatrix>(jp, J_p.rows(), J_p.cols());  jp_tmp = J_p.transpose(); jp = jp_tmp.data();
 						mxSetField( plhs[outputIdx],0,"Jp",Jp );
 					}
 
@@ -1633,7 +1642,7 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 					{
 						Jw = mxCreateDoubleMatrix( nbDir,nw,mxREAL );
 						jw = mxGetPr( Jw );
-						jw ^= J_w;
+                        DMatrix jw_tmp = Eigen::Map<DMatrix>(jw, J_w.rows(), J_w.cols());  jw_tmp = J_w.transpose(); jw = jw_tmp.data();
 						mxSetField( plhs[outputIdx],0,"Jw",Jw );
 					}
 				}
@@ -1663,70 +1672,86 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 			}
 
 			// setup seed and sensitvity matrices (first order)
-			Matrix D_x( nx,nfDir );
-			Matrix D_p( np,nfDir );
-			Matrix D_u( nu,nfDir );
-			Matrix D_w( nw,nfDir );
+			DMatrix D_x( nx,nfDir );
+			DMatrix D_p( np,nfDir );
+			DMatrix D_u( nu,nfDir );
+			DMatrix D_w( nw,nfDir );
 
-			if( dx != NULL )
-				D_x ^= dx;
+			if( dx != NULL ) {
+                D_x = Eigen::Map<DMatrix>(dx,nx,nfDir);
+                D_x.transposeInPlace();
+            }
 			else
 				D_x.setZero();
 
-			if( du != NULL )
-				D_u ^= du;
+			if( du != NULL ) {
+                D_u = Eigen::Map<DMatrix>(du,nu,nfDir);
+                D_u.transposeInPlace();
+            }
 			else
 				D_u.setZero();
 
-			if( dp != NULL )
-				D_p ^= dp;
+			if( dp != NULL ) {
+                D_p = Eigen::Map<DMatrix>(dp,np,nfDir);
+                D_p.transposeInPlace();
+            }
 			else
 				D_p.setZero();
 
-			if( dw != NULL )
-				D_w ^= dw;
+			if( dw != NULL ) {
+                D_w = Eigen::Map<DMatrix>(dw,nw,nfDir);
+                D_w.transposeInPlace();
+            }
 			else
 				D_w.setZero();
 
-			Matrix J( nx+nxa,nfDir );
+			DMatrix J( nx+nxa,nfDir );
 
 			// setup seed and sensitvity matrices (second order)
-			Matrix D_x2( nx,nfDir2 );
-			Matrix D_p2( np,nfDir2 );
-			Matrix D_u2( nu,nfDir2 );
-			Matrix D_w2( nw,nfDir2 );
+			DMatrix D_x2( nx,nfDir2 );
+			DMatrix D_p2( np,nfDir2 );
+			DMatrix D_u2( nu,nfDir2 );
+			DMatrix D_w2( nw,nfDir2 );
 
-			if( dx != NULL )
-				D_x2 ^= dx2;
+			if( dx != NULL ) {
+                D_x2 = Eigen::Map<DMatrix>(dx2,nx,nfDir2);
+                D_x2.transposeInPlace();
+            }
 			else
 				D_x2.setZero();
 
-			if( du != NULL )
-				D_u2 ^= du2;
+			if( du != NULL ) {
+                D_u2 = Eigen::Map<DMatrix>(du2,nu,nfDir2);
+                D_u2.transposeInPlace();
+            }
 			else
 				D_u2.setZero();
 
-			if( dp2 != NULL )
-				D_p2 ^= dp2;
+			if( dp2 != NULL ) {
+                D_p2 = Eigen::Map<DMatrix>(dp2,np,nfDir2);
+                D_p2.transposeInPlace();
+            }
 			else
 				D_p2.setZero();
 
-			if( dw2 != NULL )
-				D_w2 ^= dw2;
+			if( dw2 != NULL ) {
+                D_w2 = Eigen::Map<DMatrix>(dw2,nw,nfDir2);
+                D_w2.transposeInPlace();
+            }
 			else
 				D_w2.setZero();
 
-			Matrix J2( nx+nxa,nfDir2 );
+			DMatrix J2( nx+nxa,nfDir2 );
 
 
             int run1, run2;
 
             for( run1 = 0; run1 < nfDir; run1++ ){
 
-                Vector DXX = D_x.getCol( run1 );
-                Vector DPP = D_p.getCol( run1 );
-                Vector DUU = D_u.getCol( run1 );
-                Vector DWW = D_w.getCol( run1 );
+                DVector DXX = D_x.getCol( run1 );
+                DVector DPP = D_p.getCol( run1 );
+                DVector DUU = D_u.getCol( run1 );
+                DVector DWW = D_w.getCol( run1 );
 
 				integrator->setForwardSeed( 1, DXX, DPP, DUU, DWW );
 				returnvalue = integrator->integrateSensitivities( );
@@ -1738,17 +1763,17 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 				}
 				else
 				{
-                    Vector JJ(nx+nxa);
+                    DVector JJ(nx+nxa);
 					integrator->getForwardSensitivities( JJ, 1 );
                     J.setCol( run1, JJ );
                 }
 
                 for( run2 = 0; run2 < nfDir2; run2++ ){
 
-                    Vector DXX2 = D_x2.getCol( run2 );
-                    Vector DPP2 = D_p2.getCol( run2 );
-                    Vector DUU2 = D_u2.getCol( run2 );
-                    Vector DWW2 = D_w2.getCol( run2 );
+                    DVector DXX2 = D_x2.getCol( run2 );
+                    DVector DPP2 = D_p2.getCol( run2 );
+                    DVector DUU2 = D_u2.getCol( run2 );
+                    DVector DWW2 = D_w2.getCol( run2 );
 
 					// determine forward sensitivities
 					integrator->setForwardSeed( 2, DXX2, DPP2, DUU2, DWW2 );
@@ -1761,7 +1786,7 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 					}
 					else
 					{
-                        Vector JJ2(nx+nxa);
+                        DVector JJ2(nx+nxa);
 	    				integrator->getForwardSensitivities( JJ2, 2 );
                         J2.setCol( run2, JJ2 );
                     }
@@ -1773,12 +1798,12 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 			{
 				JJ = mxCreateDoubleMatrix( nx+nxa,nfDir,mxREAL );
 				jj = mxGetPr( JJ );
-				jj ^= J;
+                DMatrix jj_tmp = Eigen::Map<DMatrix>(jj, J.rows(), J.cols());  jj_tmp = J.transpose(); jj = jj_tmp.data();
 				mxSetField( plhs[outputIdx],0,"J",JJ );
 
 				JJ2 = mxCreateDoubleMatrix( nx+nxa,nfDir2,mxREAL );
 				jj2 = mxGetPr( JJ2 );
-				jj2 ^= J2;
+                DMatrix jj2_tmp = Eigen::Map<DMatrix>(jj2, J2.rows(), J2.cols());  jj2_tmp = J2.transpose(); jj2 = jj2_tmp.data();
 				mxSetField( plhs[outputIdx],0,"J2",JJ2 );
 			}
 		}
@@ -1806,51 +1831,60 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 			}
 
 			// setup seed and sensitvity matrices (first order)
-			Matrix D_x( nx,nfDir );
-			Matrix D_p( np,nfDir );
-			Matrix D_u( nu,nfDir );
-			Matrix D_w( nw,nfDir );
+			DMatrix D_x( nx,nfDir );
+			DMatrix D_p( np,nfDir );
+			DMatrix D_u( nu,nfDir );
+			DMatrix D_w( nw,nfDir );
 
-			if( dx != NULL )
-				D_x ^= dx;
+			if( dx != NULL ) {
+                D_x = Eigen::Map<DMatrix>(dx,nx,nfDir);
+                D_x.transposeInPlace();
+            }
 			else
 				D_x.setZero();
 
-			if( du != NULL )
-				D_u ^= du;
+			if( du != NULL ) {
+                D_u = Eigen::Map<DMatrix>(du,nu,nfDir);
+                D_u.transposeInPlace();
+            }
 			else
 				D_u.setZero();
 
-			if( dp != NULL )
-				D_p ^= dp;
+			if( dp != NULL ) {
+                D_p = Eigen::Map<DMatrix>(dp,np,nfDir);
+                D_p.transposeInPlace();
+            }
 			else
 				D_p.setZero();
 
-			if( dw != NULL )
-				D_w ^= dw;
+			if( dw != NULL ) {
+                D_w = Eigen::Map<DMatrix>(dw,nw,nfDir);
+                D_w.transposeInPlace();
+            }
 			else
 				D_w.setZero();
 
-			Matrix J( nx+nxa,nfDir );
+			DMatrix J( nx+nxa,nfDir );
 
 			// setup seed and sensitvity matrices
-			Matrix bSeed2( nbDir2,nx );
-			bSeed2 ^= bseed2;
+			DMatrix bSeed2( nbDir2,nx );
+            bSeed2 = Eigen::Map<DMatrix>(bseed2,nbDir2,nx);
+            bSeed2.transposeInPlace();
 
-			Matrix J_x2( nbDir2,nx+nxa );
-			Matrix J_u2( nbDir2,nu );
-			Matrix J_p2( nbDir2,np );
-			Matrix J_w2( nbDir2,nw );
+			DMatrix J_x2( nbDir2,nx+nxa );
+			DMatrix J_u2( nbDir2,nu );
+			DMatrix J_p2( nbDir2,np );
+			DMatrix J_w2( nbDir2,nw );
 
 
             int run1, run2;
 
             for( run1 = 0; run1 < nfDir; run1++ ){
 
-                Vector DXX = D_x.getCol( run1 );
-                Vector DPP = D_p.getCol( run1 );
-                Vector DUU = D_u.getCol( run1 );
-                Vector DWW = D_w.getCol( run1 );
+                DVector DXX = D_x.getCol( run1 );
+                DVector DPP = D_p.getCol( run1 );
+                DVector DUU = D_u.getCol( run1 );
+                DVector DWW = D_w.getCol( run1 );
 
 				integrator->setForwardSeed( 1, DXX, DPP, DUU, DWW );
 				returnvalue = integrator->integrateSensitivities( );
@@ -1862,14 +1896,14 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 				}
 				else
 				{
-                    Vector JJ(nx+nxa);
+                    DVector JJ(nx+nxa);
 					integrator->getForwardSensitivities( JJ, 1 );
                     J.setCol( run1, JJ );
                 }
 
                 for( run2 = 0; run2 < nbDir2; run2++ ){
 
-                    Vector XSEED = bSeed2.getRow(run2);
+                    DVector XSEED = bSeed2.getRow(run2);
 
 					// determine backward sensitivities
 					integrator->setBackwardSeed( 2, XSEED );
@@ -1881,7 +1915,7 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 					}
 					else
 					{
-        	            Vector JXX2(nx+nxa), JPP2(np), JUU2(nu), JWW2(nw);
+        	            DVector JXX2(nx+nxa), JPP2(np), JUU2(nu), JWW2(nw);
 
 						integrator->getBackwardSensitivities( JXX2, JPP2, JUU2, JWW2, 2 );
 
@@ -1899,19 +1933,19 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 			{
 				JJ = mxCreateDoubleMatrix( nx+nxa,nfDir,mxREAL );
 				jj = mxGetPr( JJ );
-				jj ^= J;
+                DMatrix jj_tmp = Eigen::Map<DMatrix>(jj, J.rows(), J.cols());  jj_tmp = J.transpose(); jj = jj_tmp.data();
 				mxSetField( plhs[outputIdx],0,"J",JJ );
 
 				Jx2 = mxCreateDoubleMatrix( nbDir2,nx+nxa,mxREAL );
 				jx2 = mxGetPr( Jx2 );
-				jx2 ^= J_x2;
+                DMatrix jx2_tmp = Eigen::Map<DMatrix>(jx2, J_x2.rows(), J_x2.cols());  jx2_tmp = J_x2.transpose(); jx2 = jx2_tmp.data();
 				mxSetField( plhs[outputIdx],0,"J2x",Jx2 );
 
 				if ( nu > 0 )
 				{
 					Ju2 = mxCreateDoubleMatrix( nbDir2,nu,mxREAL );
 					ju2 = mxGetPr( Ju2 );
-					ju2 ^= J_u2;
+                    DMatrix ju2_tmp = Eigen::Map<DMatrix>(ju2, J_u2.rows(), J_u2.cols());  ju2_tmp = J_u2.transpose(); ju2 = ju2_tmp.data();
 					mxSetField( plhs[outputIdx],0,"J2u",Ju2 );
 				}
 
@@ -1919,7 +1953,7 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 				{
 					Jp2 = mxCreateDoubleMatrix( nbDir2,np,mxREAL );
 					jp2 = mxGetPr( Jp2 );
-					jp2 ^= J_p2;
+                    DMatrix jp2_tmp = Eigen::Map<DMatrix>(jp2, J_p2.rows(), J_p2.cols());  jp2_tmp = J_p2.transpose(); jp2 = jp2_tmp.data();
 					mxSetField( plhs[outputIdx],0,"J2p",Jp2 );
 				}
 
@@ -1927,7 +1961,7 @@ void mexFunction(	int nlhs,       mxArray *plhs[],
 				{
 					Jw2 = mxCreateDoubleMatrix( nbDir2,nw,mxREAL );
 					jw2 = mxGetPr( Jw2 );
-					jw2 ^= J_w2;
+                    DMatrix jw2_tmp = Eigen::Map<DMatrix>(jw2, J_w2.rows(), J_w2.cols());  jw2_tmp = J_w2.transpose(); jw2 = jw2_tmp.data();
 					mxSetField( plhs[outputIdx],0,"J2w",Jw2 );
 				}
 			}

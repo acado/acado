@@ -29,7 +29,7 @@ function getInstructions(obj, cppobj, get)
 
 
 
-if (get == 'B')
+if (get == 'FB')
     
 
     fprintf(cppobj.fileMEX,sprintf('    double *%s_temp = NULL; \n', obj.name));
