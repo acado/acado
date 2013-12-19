@@ -32,8 +32,8 @@ fprintf(obj.fileMEX,'void mexFunction( int nlhs, mxArray *plhs[], int nrhs, cons
 fprintf(obj.fileMEX,'{ \n \n');
 fprintf(obj.fileMEX,'    clearAllStaticCounters( ); \n \n');
 
-fprintf(obj.fileMEX,'    acadoPrintf("\\nACADO Toolkit for Matlab - Developed by David Ariens and Rien Quirynen, 2009-2013 \\n"); \n');
-fprintf(obj.fileMEX,'    acadoPrintf("Support available at http://www.acadotoolkit.org/matlab \\n \\n"); \n\n');
+fprintf(obj.fileMEX,'    mexPrintf("\\nACADO Toolkit for Matlab - Developed by David Ariens and Rien Quirynen, 2009-2013 \\n"); \n');
+fprintf(obj.fileMEX,'    mexPrintf("Support available at http://www.acadotoolkit.org/matlab \\n \\n"); \n\n');
 
 fprintf(obj.fileMEX,sprintf('    if (nrhs != %d){ \n', length(obj.in)));
 fprintf(obj.fileMEX,sprintf('      mexErrMsgTxt("This problem expects %d right hand side argument(s) since you have defined %d MexInput(s)");\n', length(obj.in), length(obj.in)));
