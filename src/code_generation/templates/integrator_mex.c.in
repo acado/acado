@@ -75,15 +75,21 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     if (nrhs != (3+ONLINE_GRID*NUM_OUTPUTS) && !(nrhs == (2+ONLINE_GRID*NUM_OUTPUTS) && (ACADO_NU == 0 || ACADO_NOD == 0)) && !(nrhs == (1+ONLINE_GRID*NUM_OUTPUTS) && ACADO_NU == 0 && ACADO_NOD == 0)) {
         if( ONLINE_GRID ) {
-			mexErrMsgTxt( "Check the number of input arguments: since the ONLINE_GRID option is used, a grid needs to be provided for every output function !" );
+			char errMsg[180];
+			sprintf(errMsg, "Check the number of input arguments: since the ONLINE_GRID option is used, a grid needs to be provided for every output function! (received: %d, expected: %d)", nrhs, 1+(ACADO_NU!=0)+(ACADO_NOD!=0)+ONLINE_GRID*NUM_OUTPUTS);
+			mexErrMsgTxt( errMsg );
         }
         else {
-			mexErrMsgTxt( "Check the number of input arguments !" );
+			char errMsg[80];
+			sprintf(errMsg, "Check the number of input arguments! (received: %d, expected: %d)", nrhs, 1+(ACADO_NU!=0)+(ACADO_NOD!=0)+ONLINE_GRID*NUM_OUTPUTS);
+			mexErrMsgTxt( errMsg );
         }
     }
     
     if (nlhs > (2+NUM_OUTPUTS)) {
-        mexErrMsgTxt( "Check the number of output arguments !" );
+		char errMsg[80];
+		sprintf(errMsg, "Check the number of output arguments! (received: %d, expected: %d)", nlhs, 2+NUM_OUTPUTS);
+        mexErrMsgTxt( errMsg );
     }
     
     Nx = mxGetM(prhs[0])*mxGetN(prhs[0]);
@@ -110,20 +116,28 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
     
     if (Nx != ACADO_NX+ACADO_NXA) {
-        mexErrMsgTxt( "Check the dimension of the state input argument !" );
+		char errMsg[80];
+		sprintf(errMsg, "Check the dimension of the state input argument! (received: %d, expected: %d)", Nx, ACADO_NX+ACADO_NXA);
+        mexErrMsgTxt( errMsg );
     }
     if (Nu != ACADO_NU) {
-        mexErrMsgTxt( "Check the dimension of the control input argument !" );
+		char errMsg[80];
+		sprintf(errMsg, "Check the dimension of the control input argument! (received: %d, expected: %d)", Nu, ACADO_NU);
+        mexErrMsgTxt( errMsg );
     }
     if (Np != ACADO_NOD) {
-        mexErrMsgTxt( "Check the dimension of the parameter input argument !" );
+		char errMsg[80];
+		sprintf(errMsg, "Check the dimension of the online data argument! (received: %d, expected: %d)", Np, ACADO_NOD);
+        mexErrMsgTxt( errMsg );
     }
     #if ONLINE_GRID
 		#if NUM_OUTPUTS > 0
 			Ngrid = mxGetM(prhs[gridI])*mxGetN(prhs[gridI]);
 			grid = mxGetPr(prhs[gridI]);
 			if( Ngrid > NMEAS[0] ) {
-				mexErrMsgTxt( "The first provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+				char errMsg[80];
+				sprintf(errMsg, "The first provided grid contains too many points! (received: %d, current maximum: %d)", Ngrid, NMEAS[0]);
+				mexErrMsgTxt( errMsg );
 			}
 			else {
 				for( j = 0; j < Ngrid; ++j ) {
@@ -138,7 +152,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			Ngrid = mxGetM(prhs[gridI+1])*mxGetN(prhs[gridI+1]);
 			grid = mxGetPr(prhs[gridI+1]);
 			if( Ngrid > NMEAS[1] ) {
-				mexErrMsgTxt( "The second provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+				char errMsg[80];
+				sprintf(errMsg, "The second provided grid contains too many points! (received: %d, current maximum: %d)", Ngrid, NMEAS[1]);
+				mexErrMsgTxt( errMsg );
 			}
 			else {
 				for( j = 0; j < Ngrid; ++j ) {
@@ -153,7 +169,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			Ngrid = mxGetM(prhs[gridI+2])*mxGetN(prhs[gridI+2]);
 			grid = mxGetPr(prhs[gridI+2]);
 			if( Ngrid > NMEAS[2] ) {
-				mexErrMsgTxt( "The third provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+				char errMsg[80];
+				sprintf(errMsg, "The third provided grid contains too many points! (received: %d, current maximum: %d)", Ngrid, NMEAS[2]);
+				mexErrMsgTxt( errMsg );
 			}
 			else {
 				for( j = 0; j < Ngrid; ++j ) {
@@ -168,7 +186,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			Ngrid = mxGetM(prhs[gridI+3])*mxGetN(prhs[gridI+3]);
 			grid = mxGetPr(prhs[gridI+3]);
 			if( Ngrid > NMEAS[3] ) {
-				mexErrMsgTxt( "The fourth provided grid contains too many points, adjust the corresponding maximum number of measurements !" );
+				char errMsg[80];
+				sprintf(errMsg, "The fourth provided grid contains too many points! (received: %d, current maximum: %d)", Ngrid, NMEAS[3]);
+				mexErrMsgTxt( errMsg );
 			}
 			else {
 				for( j = 0; j < Ngrid; ++j ) {

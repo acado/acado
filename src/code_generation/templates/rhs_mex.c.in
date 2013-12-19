@@ -1,4 +1,5 @@
 #include "mex.h"
+#include <stdio.h>
 
 /* GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM: */
 /* --------------------------------------------------- */
@@ -13,10 +14,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     real_t y[ACADO_NX+ACADO_NXA+ACADO_NU+ACADO_NOD+ACADO_NDX];
     
     if (nrhs != 2+(ACADO_NU>0)+(ACADO_NOD>0)) {
-        mexErrMsgTxt( "Check the number of input arguments !!" );
+		char errMsg[80];
+		sprintf(errMsg, "Check the number of input arguments! (received: %d, expected: %d)", nrhs, 2+(ACADO_NU>0)+(ACADO_NOD>0));
+        mexErrMsgTxt( errMsg );
     }
     if (nlhs > 1) {
-        mexErrMsgTxt( "Check the number of output arguments !!" );
+		char errMsg[80];
+		sprintf(errMsg, "Check the number of output arguments! (received: %d, expected: %d)", nlhs, 1);
+        mexErrMsgTxt( errMsg );
     }
     
     Nt = mxGetM(prhs[0])*mxGetN(prhs[0]);
@@ -33,16 +38,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     #endif
     
     if (Nt != 1) {
-        mexErrMsgTxt( "Check the dimension of the first input argument !!" );
+		char errMsg[80];
+		sprintf(errMsg, "Check the dimension of the first input argument! (received: %d, expected: %d)", Nt, 1);
+        mexErrMsgTxt( errMsg );
     }
     if (Nx != ACADO_NX+ACADO_NXA+ACADO_NDX) {
-        mexErrMsgTxt( "Check the dimension of the second input argument !!" );
+		char errMsg[80];
+		sprintf(errMsg, "Check the dimension of the second input argument! (received: %d, expected: %d)", Nx, ACADO_NX+ACADO_NXA+ACADO_NDX);
+        mexErrMsgTxt( errMsg );
     }
     if (Nu != ACADO_NU) {
-        mexErrMsgTxt( "Check the dimension of the control input argument !!" );
+		char errMsg[80];
+		sprintf(errMsg, "Check the dimension of the control input argument! (received: %d, expected: %d)", Nu, ACADO_NU);
+        mexErrMsgTxt( errMsg );
     }
     if (Np != ACADO_NOD) {
-        mexErrMsgTxt( "Check the dimension of the parameter input argument !!" );
+		char errMsg[80];
+		sprintf(errMsg, "Check the dimension of the online data argument! (received: %d, expected: %d)", Np, ACADO_NOD);
+        mexErrMsgTxt( errMsg );
     }
     
     x = mxGetPr(prhs[1]);
