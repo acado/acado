@@ -35,7 +35,7 @@ void sparse_dae( DifferentialEquation *f )
 {
     int n = 100;
 
-    DifferentialState  x(n);
+    DifferentialState  x("x",n,1);
 
     AlgebraicState  z;
     Parameter       p;
