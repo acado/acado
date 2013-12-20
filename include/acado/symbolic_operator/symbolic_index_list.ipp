@@ -48,7 +48,7 @@ inline SymbolicIndexList* SymbolicIndexList::substitute( VariableType variableTy
     SymbolicIndexList tmp(*this);
 
     int       run1, run2                 ;
-    const int numberOfVariableTypes = 10 ;
+    const int numberOfVariableTypes = 11 ;
     int       type                  = -1 ;
 
     if(variableType_ == VT_DIFFERENTIAL_STATE )  type = 0;
