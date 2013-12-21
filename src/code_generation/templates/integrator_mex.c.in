@@ -29,7 +29,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	real_t start, end, time;
 	real_t *result_timing;
     
-    #if NUM_OUTPUTS > 0
+    #if ACADO_NUMOUT > 0
         real_t* out1;
         #if FIRST_ORDER_SENS
 			out1 = (real_t*) malloc(NMEAS[0]*NOUT[0]*(1+ACADO_NX+ACADO_NU)*sizeof(*out1));
@@ -37,7 +37,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			out1 = (real_t*) malloc(NMEAS[0]*NOUT[0]*sizeof(*out1));
         #endif
         
-        #if NUM_OUTPUTS > 1
+        #if ACADO_NUMOUT > 1
             real_t* out2;
             #if FIRST_ORDER_SENS
 				out2 = (real_t*) malloc(NMEAS[1]*NOUT[1]*(1+ACADO_NX+ACADO_NU)*sizeof(*out2));
@@ -45,7 +45,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				out2 = (real_t*) malloc(NMEAS[1]*NOUT[1]*sizeof(*out2));
 			#endif
             
-            #if NUM_OUTPUTS > 2
+            #if ACADO_NUMOUT > 2
                 real_t* out3;
                 #if FIRST_ORDER_SENS
 					out3 = (real_t*) malloc(NMEAS[2]*NOUT[2]*(1+ACADO_NX+ACADO_NU)*sizeof(*out3));
@@ -53,7 +53,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					out3 = (real_t*) malloc(NMEAS[2]*NOUT[2]*sizeof(*out3));
 				#endif
                 
-                #if NUM_OUTPUTS > 3
+                #if ACADO_NUMOUT > 3
                     real_t* out4;
                     #if FIRST_ORDER_SENS
 						out4 = (real_t*) malloc(NMEAS[3]*NOUT[3]*(1+ACADO_NX+ACADO_NU)*sizeof(*out4));
@@ -73,22 +73,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     infonames[1] = "clockTime";  
     infonames[2] = "debugMat"; 
     
-    if (nrhs != (3+ONLINE_GRID*NUM_OUTPUTS) && !(nrhs == (2+ONLINE_GRID*NUM_OUTPUTS) && (ACADO_NU == 0 || ACADO_NOD == 0)) && !(nrhs == (1+ONLINE_GRID*NUM_OUTPUTS) && ACADO_NU == 0 && ACADO_NOD == 0)) {
+    if (nrhs != (3+ONLINE_GRID*ACADO_NUMOUT) && !(nrhs == (2+ONLINE_GRID*ACADO_NUMOUT) && (ACADO_NU == 0 || ACADO_NOD == 0)) && !(nrhs == (1+ONLINE_GRID*ACADO_NUMOUT) && ACADO_NU == 0 && ACADO_NOD == 0)) {
         if( ONLINE_GRID ) {
 			char errMsg[180];
-			sprintf(errMsg, "Check the number of input arguments: since the ONLINE_GRID option is used, a grid needs to be provided for every output function! (received: %d, expected: %d)", nrhs, 1+(ACADO_NU!=0)+(ACADO_NOD!=0)+ONLINE_GRID*NUM_OUTPUTS);
+			sprintf(errMsg, "Check the number of input arguments: since the ONLINE_GRID option is used, a grid needs to be provided for every output function! (received: %d, expected: %d)", nrhs, 1+(ACADO_NU!=0)+(ACADO_NOD!=0)+ONLINE_GRID*ACADO_NUMOUT);
 			mexErrMsgTxt( errMsg );
         }
         else {
 			char errMsg[80];
-			sprintf(errMsg, "Check the number of input arguments! (received: %d, expected: %d)", nrhs, 1+(ACADO_NU!=0)+(ACADO_NOD!=0)+ONLINE_GRID*NUM_OUTPUTS);
+			sprintf(errMsg, "Check the number of input arguments! (received: %d, expected: %d)", nrhs, 1+(ACADO_NU!=0)+(ACADO_NOD!=0)+ONLINE_GRID*ACADO_NUMOUT);
 			mexErrMsgTxt( errMsg );
         }
     }
     
-    if (nlhs > (2+NUM_OUTPUTS)) {
+    if (nlhs > (2+ACADO_NUMOUT)) {
 		char errMsg[80];
-		sprintf(errMsg, "Check the number of output arguments! (received: %d, expected: %d)", nlhs, 2+NUM_OUTPUTS);
+		sprintf(errMsg, "Check the number of output arguments! (received: %d, expected: %d)", nlhs, 2+ACADO_NUMOUT);
         mexErrMsgTxt( errMsg );
     }
     
@@ -131,7 +131,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         mexErrMsgTxt( errMsg );
     }
     #if ONLINE_GRID
-		#if NUM_OUTPUTS > 0
+		#if ACADO_NUMOUT > 0
 			Ngrid = mxGetM(prhs[gridI])*mxGetN(prhs[gridI]);
 			grid = mxGetPr(prhs[gridI]);
 			if( Ngrid > NMEAS[0] ) {
@@ -148,7 +148,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				}
 			}
         
-		#if NUM_OUTPUTS > 1
+		#if ACADO_NUMOUT > 1
 			Ngrid = mxGetM(prhs[gridI+1])*mxGetN(prhs[gridI+1]);
 			grid = mxGetPr(prhs[gridI+1]);
 			if( Ngrid > NMEAS[1] ) {
@@ -165,7 +165,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				}
 			}
             
-		#if NUM_OUTPUTS > 2
+		#if ACADO_NUMOUT > 2
 			Ngrid = mxGetM(prhs[gridI+2])*mxGetN(prhs[gridI+2]);
 			grid = mxGetPr(prhs[gridI+2]);
 			if( Ngrid > NMEAS[2] ) {
@@ -182,7 +182,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				}
 			}
                 
-		#if NUM_OUTPUTS > 3
+		#if ACADO_NUMOUT > 3
 			Ngrid = mxGetM(prhs[gridI+3])*mxGetN(prhs[gridI+3]);
 			grid = mxGetPr(prhs[gridI+3]);
 			if( Ngrid > NMEAS[3] ) {
@@ -244,13 +244,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	        next[i] = x[i];
 	    }
 	    
-	    #if NUM_OUTPUTS > 3
+	    #if ACADO_NUMOUT > 3
 	        error = integrate( next, out1, out2, out3, out4, reset );
-	    #elif NUM_OUTPUTS > 2
+	    #elif ACADO_NUMOUT > 2
 	        error = integrate( next, out1, out2, out3, reset );
-	    #elif NUM_OUTPUTS > 1
+	    #elif ACADO_NUMOUT > 1
 	        error = integrate( next, out1, out2, reset );
-	    #elif NUM_OUTPUTS > 0
+	    #elif ACADO_NUMOUT > 0
 	        error = integrate( next, out1, reset );
 	    #else 
 	        error = integrate( next, reset );
@@ -301,27 +301,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	    }
     #endif
     
-    if (nlhs > 1+NUM_OUTPUTS) {
+    if (nlhs > 1+ACADO_NUMOUT) {
     #if DEBUG_MODE > 0
-		plhs[1+NUM_OUTPUTS] = mxCreateStructMatrix(1, 1, 3, infonames);
-		mxSetField(plhs[1+NUM_OUTPUTS],0,infonames[0],mxCreateDoubleScalar(error));
-	    mxSetField(plhs[1+NUM_OUTPUTS],0,infonames[1],mxCreateDoubleScalar(time));
-	    mxSetField(plhs[1+NUM_OUTPUTS],0,infonames[2],mxCreateDoubleMatrix(NUM_STAGES*(ACADO_NX+ACADO_NXA),NUM_STAGES*(ACADO_NX+ACADO_NXA),mxREAL));
+		plhs[1+ACADO_NUMOUT] = mxCreateStructMatrix(1, 1, 3, infonames);
+		mxSetField(plhs[1+ACADO_NUMOUT],0,infonames[0],mxCreateDoubleScalar(error));
+	    mxSetField(plhs[1+ACADO_NUMOUT],0,infonames[1],mxCreateDoubleScalar(time));
+	    mxSetField(plhs[1+ACADO_NUMOUT],0,infonames[2],mxCreateDoubleMatrix(NUM_STAGES*(ACADO_NX+ACADO_NXA),NUM_STAGES*(ACADO_NX+ACADO_NXA),mxREAL));
 	    
-	    mat = mxGetPr(mxGetField(plhs[1+NUM_OUTPUTS],0,infonames[2]));
+	    mat = mxGetPr(mxGetField(plhs[1+ACADO_NUMOUT],0,infonames[2]));
 		for( i = 0; i < NUM_STAGES*(ACADO_NX+ACADO_NXA); ++i ) {
             for( j = 0; j < NUM_STAGES*(ACADO_NX+ACADO_NXA); ++j ) {
                 mat[j*NUM_STAGES*(ACADO_NX+ACADO_NXA)+i] = acadoVariables.debug_mat[i*NUM_STAGES*(ACADO_NX+ACADO_NXA)+j];
             }
         }
 	#else	
-		plhs[1+NUM_OUTPUTS] = mxCreateStructMatrix(1, 1, 2, infonames);
-		mxSetField(plhs[1+NUM_OUTPUTS],0,infonames[0],mxCreateDoubleScalar(error));
-	    mxSetField(plhs[1+NUM_OUTPUTS],0,infonames[1],mxCreateDoubleScalar(time));
+		plhs[1+ACADO_NUMOUT] = mxCreateStructMatrix(1, 1, 2, infonames);
+		mxSetField(plhs[1+ACADO_NUMOUT],0,infonames[0],mxCreateDoubleScalar(error));
+	    mxSetField(plhs[1+ACADO_NUMOUT],0,infonames[1],mxCreateDoubleScalar(time));
     #endif
     }
     
-    #if NUM_OUTPUTS > 0
+    #if ACADO_NUMOUT > 0
     if (nlhs > 1) {
 		#if FIRST_ORDER_SENS
 	        plhs[1] = mxCreateStructMatrix(1, 1, 3, fieldnames);
@@ -367,7 +367,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	        }
         #endif
         free(out1);
-        #if NUM_OUTPUTS > 1
+        #if ACADO_NUMOUT > 1
         if (nlhs > 2) {
 			#if FIRST_ORDER_SENS
 	            plhs[2] = mxCreateStructMatrix(1, 1, 3, fieldnames);
@@ -413,7 +413,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	            }
             #endif
             free(out2);
-            #if NUM_OUTPUTS > 2
+            #if ACADO_NUMOUT > 2
             if (nlhs > 3) {
 				#if FIRST_ORDER_SENS
 	                plhs[3] = mxCreateStructMatrix(1, 1, 3, fieldnames);
@@ -459,7 +459,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	                }
                 #endif
                 free(out3);
-                #if NUM_OUTPUTS > 3
+                #if ACADO_NUMOUT > 3
                 if (nlhs > 4) {
 					#if FIRST_ORDER_SENS
 	                    plhs[4] = mxCreateStructMatrix(1, 1, 3, fieldnames);
