@@ -155,7 +155,7 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 		get( INTEGRATOR_DEBUG_MODE, debugMode );
 		if ( (bool)generateMatlabInterface == true ) {
 			std::string integrateInterface =  dirName;
-			integrateInterface += "/integrate.c";
+			integrateInterface += "/acado_integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
 			exportMexFun.configure((ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (bool)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
 			exportMexFun.exportCode();
@@ -164,7 +164,7 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 			acadoCopyTempateFile(MAKE_MEX_INTEGRATOR, integrateInterface, "%", true);
 
 			std::string rhsInterface = dirName;
-			rhsInterface += "/rhs.c";
+			rhsInterface += "/acado_rhs.c";
 			ExportMatlabRhs exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
 			exportMexFun2.configure(integrator->getNameFullRHS());
 			exportMexFun2.exportCode();
