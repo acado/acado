@@ -95,6 +95,16 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 
 		break;
 
+	case QP_NONE:
+		ss << "/** Definition of the floating point data type. */\n";
+		if (_useSinglePrecision == true)
+			ss << "typedef float real_t;\n";
+		else
+			ss << "typedef double real_t;\n";
+		ss << "#include \"acado_auxiliary_sim_functions.h\"\n";
+
+		break;
+
 	default:
 		return ACADOERROR( RET_INVALID_OPTION );
 
