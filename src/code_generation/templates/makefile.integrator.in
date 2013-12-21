@@ -17,11 +17,11 @@ OBJECTS = 	\
 			acado_integrator.o 
 
 .PHONY: all
-all: test compare 
+all: acado_test acado_compare 
 
-test: ${OBJECTS} acado_test.o
+acado_test: ${OBJECTS} acado_test.o
 
-compare: ${OBJECTS} acado_compare.o
+acado_compare: ${OBJECTS} acado_compare.o
 
 acado_auxiliary_sim_functions.o          : 	acado_common.h \
 											acado_auxiliary_sim_functions.h

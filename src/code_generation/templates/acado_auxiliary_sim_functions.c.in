@@ -61,9 +61,6 @@ real_t toc(timer* t)
 
 #else
 
-#if __STDC_VERSION__ >= 199901L
-/* C99 mode */
-
 /* read current time */
 void tic(timer* t)
 {
@@ -90,38 +87,5 @@ real_t toc(timer* t)
 	
 	return (real_t)temp.tv_sec + (real_t)temp.tv_usec / 1e6;
 }
-
-#else
-/* ANSI */
-
-/* read current time */
-void tic(timer* t)
-{
-	clock_gettime(CLOCK_MONOTONIC, &t->tic);
-}
-
-
-/* return time passed since last call to tic on this timer */
-real_t toc(timer* t)
-{
-	struct timespec temp;
-    
-	clock_gettime(CLOCK_MONOTONIC, &t->toc);	
-    
-	if ((t->toc.tv_nsec - t->tic.tv_nsec) < 0)
-	{
-		temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec - 1;
-		temp.tv_nsec = 1000000000+t->toc.tv_nsec - t->tic.tv_nsec;
-	}
-	else
-	{
-		temp.tv_sec = t->toc.tv_sec - t->tic.tv_sec;
-		temp.tv_nsec = t->toc.tv_nsec - t->tic.tv_nsec;
-	}
-	
-	return (real_t)temp.tv_sec + (real_t)temp.tv_nsec / 1e9;
-}
-
-#endif /* __STDC_VERSION__ >= 199901L */
 
 #endif /* (defined WIN32 || _WIN64) */

@@ -51,9 +51,6 @@ typedef struct timer
 /* Use POSIX clock_gettime() for timing on non-Windows machines. */
 #include <time.h>
 
-#if __STDC_VERSION__ >= 199901L
-/* C99 mode of operation. */
-
 #include <sys/stat.h>
 #include <sys/time.h>
 
@@ -62,18 +59,6 @@ typedef struct timer
 	struct timeval tic;
 	struct timeval toc;
 } timer;
-
-#else
-/* ANSI C */
-
-/** A structure for keeping internal timer data. */
-typedef struct timer
-{
-	struct timespec tic;
-	struct timespec toc;
-} timer;
-
-#endif /* __STDC_VERSION__ >= 199901L */
 
 #endif /* (defined WIN32 || defined _WIN64) */
 
