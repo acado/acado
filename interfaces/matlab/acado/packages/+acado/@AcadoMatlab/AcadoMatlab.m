@@ -32,6 +32,7 @@ classdef AcadoMatlab < handle
         x = {};     % diff states
         dx = {};    % diff state derivatives
         u = {};     % controls
+        od = {};    % online data
         p = {};     % parameters
         w = {};     % disturbances
         z = {};     % alg states
@@ -171,6 +172,24 @@ classdef AcadoMatlab < handle
             obj.u = {};
         end
         
+        % Add online data
+        function addOD(obj, set)
+            
+            for i=1:length(obj.od)
+                if (strcmp(obj.od{i}.name, set.name))
+                   error('The online data you are trying to add already exists.'); 
+                end
+            end
+            
+            obj.od{length(obj.od)+1} = set;
+        end
+        function clearOD(obj)
+            for i = 1:length(obj.od)
+            	obj.removeInstruction(obj.od{i});
+            end
+            obj.od = {};
+        end
+        
         % Add parameter
         function addP(obj, set)
             
@@ -293,7 +312,7 @@ classdef AcadoMatlab < handle
         getCPPfooter(obj);
         getCPPlefthandout(obj, nameB, name, out);
         
-        function setValues(obj, t, x, z, dx, u, p, w)
+        function setValues(obj, t, x, z, dx, u, od, p, w)
             if ~isempty(t) 
                 obj.t{1}.setValue(t);
             end
@@ -308,6 +327,9 @@ classdef AcadoMatlab < handle
             end
             for i = 1:length(u)
                 obj.u{i}.setValue(u(i));
+            end
+            for i = 1:length(od)
+                obj.od{i}.setValue(od(i));
             end
             for i = 1:length(p)
                 obj.p{i}.setValue(p(i));
@@ -332,6 +354,9 @@ classdef AcadoMatlab < handle
             end
             for i = 1:length(obj.u)
                 obj.u{i}.setValue([]);
+            end
+            for i = 1:length(obj.od)
+                obj.od{i}.setValue([]);
             end
             for i = 1:length(obj.p)
                 obj.p{i}.setValue([]);

@@ -9,7 +9,7 @@ acadoSet('problemname', 'getting_started');
 
 DifferentialState a b
 Control u
-Parameter mu
+OnlineData mu
 
 x = [a; b];
 f = [   x(2) + u*(mu+(1-mu)*x(1)); ...
