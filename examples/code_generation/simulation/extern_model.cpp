@@ -110,7 +110,7 @@ int main()
 	sim1.setTimingSteps( 10000 );
     
     cout << "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (semi-explicit):\n-----------------------------------------------------------\n";
-    sim1.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
+    sim1.exportAndRun( "pendulum_export", "init_externModel.txt", "controls_externModel.txt" );
  
  
 	// ----------------------------------------------------------
@@ -126,40 +126,26 @@ int main()
 	sim2.setTimingSteps( 10000 );
     
     cout << "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (implicit):\n-----------------------------------------------------------\n";
-    sim2.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
+    sim2.exportAndRun( "pendulum_export", "init_externModel.txt", "controls_externModel.txt" );
     
     
 	// ----------------------------------------------------------
 	// ----------------------------------------------------------
-    
-    /*
+    SIMexport sim3( 1, 0.1 );
 
-    There is a design flaw in the export of integrators. "integrator.c" should
-    contain function declaraions:
-    
-    extern void rhs(const real_t*, real_t*);
-    extern void rhs_jac(const real_t*, real_t*);
-    extern void out(const real_t*, real_t*);
-    extern void out_jac(const real_t*, real_t*);
-    
-    Some compilers do not insist on this, but gcc 4.7 certainly is.
+    sim3.set( INTEGRATOR_TYPE, INT_IRK_RIIA3 );
+    sim3.set( NUM_INTEGRATOR_STEPS, 4 );
+    sim3.set( MEASUREMENT_GRID, OFFLINE_GRID );
+    sim3.set( GENERATE_MAKE_FILE, NO );
 
-    */
-    
-//    SIMexport sim3( 1, 0.1 );
-//
-//    sim3.set( INTEGRATOR_TYPE, INT_IRK_RIIA3 );
-//    sim3.set( NUM_INTEGRATOR_STEPS, 4 );
-//    sim3.set( MEASUREMENT_GRID, OFFLINE_GRID );
-//
-//    sim3.setModel( "model", "rhs", "rhs_jac" );
-//	sim3.setDimensions(6, 6, 5, 1, 0, 0);
-//
-//    sim3.addOutput( "out", "out_jac", 2, 5 );
-//	sim3.setTimingSteps( 10000 );
-//
-//    cout << "-----------------------------------------------------------\n  Using an externally defined Pendulum DAE model:\n-----------------------------------------------------------\n";
-//    sim3.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
+    sim3.setModel( "model", "rhs", "rhs_jac" );
+	sim3.setDimensions(6, 6, 5, 1, 0, 0);
+
+    sim3.addOutput( "out", "out_jac", 2, 5 );
+	sim3.setTimingSteps( 10000 );
+
+    cout << "-----------------------------------------------------------\n  Using an externally defined Pendulum DAE model:\n-----------------------------------------------------------\n";
+    sim3.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
     
     
 	return 0;
