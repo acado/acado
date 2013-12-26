@@ -637,6 +637,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 			for(unsigned row = 0; row < numStateBounds; ++row)
 			{
 				unsigned conIdx = xBoundsIdx[ row ];
+				unsigned blkRow = conIdx / NX;
 
 				// TODO
 //				if (performFullCondensing() == false)
@@ -644,9 +645,8 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 
 				for (unsigned col = row; col < N; ++col)
 				{
-					unsigned blkRow = conIdx / NX;
 					// blk = (N - row) * (N - 1 - row) / 2 + (N - 1 - col)
-					unsigned blk = ((N - blkRow) * (N - 1 - blkRow) / 2 + col) * NX + conIdx % NX;
+					unsigned blk = ((N - blkRow) * (N - 1 - blkRow) / 2 + (N - 1 - col)) * NX + conIdx % NX;
 
 					condensePrep.addStatement(
 							A.getSubMatrix(row, row + 1, offset + col * NU, offset + (col + 1) * NU ) == E.getRow( blk ) );
@@ -664,69 +664,41 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 
 			condensePrep.addVariable( evXBounds );
 
-			ExportIndex ii, jj, conIdx, blkRow, blk;
+			ExportIndex row, col, conIdx, blk, blkRow;
 
-			condensePrep.acquire( ii );
-			condensePrep.acquire( jj );
-			condensePrep.acquire( conIdx );
-			condensePrep.acquire( blkRow );
-			condensePrep.acquire( blk );
+			condensePrep.acquire( row ).acquire( col ).acquire( conIdx ).acquire( blk ).acquire( blkRow );
 
-			ExportForLoop eLoopI(ii, 0, numStateBounds);
+			ExportForLoop lRow(row, 0, numStateBounds);
 
-			eLoopI << conIdx.getFullName() << " = " << evXBounds.getFullName() << "[ " << ii.getFullName() << " ];\n";
-			eLoopI.addStatement( blkRow == conIdx / NX + 1 );
+			lRow << conIdx.getFullName() << " = " << evXBounds.getFullName() << "[ " << row.getFullName() << " ];\n";
+			lRow.addStatement( blk == conIdx / NX );
 
 			// TODO
 //			if (performFullCondensing() == false)
 //				eLoopI.addStatement( A.getSubMatrix(ii, ii + 1, 0, NX) == evGx.getRow( conIdx ) );
 
-			ExportForLoop eLoopJ(jj, 0, blkRow);
+			ExportForLoop lCol(col, row, N);
 
-			eLoopJ.addStatement( blk == (blkRow * (blkRow - 1) / 2 + jj ) * NX + conIdx % NX );
-			eLoopJ.addStatement(
-					A.getSubMatrix(ii, ii + 1, offset + jj * NU, offset + (jj + 1) * NU ) == E.getRow( blk ) );
+			lCol.addStatement( blkRow == ((N - blkRow) * (N - 1 - blkRow) / 2 + (N - 1 - col)) * NX + conIdx % NX );
+			lCol.addStatement(
+					A.getSubMatrix(row, row + 1, offset + col * NU, offset + (col + 1) * NU ) == E.getRow( blkRow ) );
 
-			eLoopI.addStatement( eLoopJ );
-			condensePrep.addStatement( eLoopI );
+			lRow.addStatement( lCol );
+			condensePrep.addStatement( lRow );
 
-			condensePrep.release( ii );
-			condensePrep.release( jj );
-			condensePrep.release( conIdx );
-			condensePrep.release( blkRow );
-			condensePrep.release( blk );
+			condensePrep.release( row ).release( col ).release( conIdx ).release( blk ).release( blkRow );
 		}
 		condensePrep.addLinebreak( );
 
-		// shift constraint bounds by first interval
-		for(unsigned run1 = 0; run1 < numStateBounds; ++run1)
+		// Shift constraint bounds by first interval
+		// MPC case, only
+		for(unsigned row = 0; row < getNumStateBounds( ); ++row)
 		{
-			unsigned row = xBoundsIdx[ run1 ];
+			unsigned conIdx = xBoundsIdxRev[ row ];
 
-			if (performFullCondensing() == true)
-			{
-				if (performsSingleShooting() == true)
-				{
-					condenseFdb.addStatement( tmp == x.makeRowVector().getCol( row ) + evGx.getRow(row - NX) * Dx0 );
-				}
-				else
-				{
-					condenseFdb.addStatement( tmp == x.makeRowVector().getCol( row ) + evGx.getRow(row - NX) * Dx0 );
-					condenseFdb.addStatement( tmp += d.getRow(row - NX) );
-				}
-				condenseFdb.addStatement( lbA.getRow( run1 ) == lbAValues.getRow( run1 ) - tmp );
-				condenseFdb.addStatement( ubA.getRow( run1 ) == ubAValues.getRow( run1 ) - tmp );
-			}
-			else
-			{
-				if (performsSingleShooting() == true)
-					condenseFdb.addStatement( tmp == x.makeRowVector().getCol( row ) );
-				else
-					condenseFdb.addStatement( tmp == x.makeRowVector().getCol( row ) + d.getRow(row - NX) );
-
-				condenseFdb.addStatement( lbA.getRow( run1 ) == lbAValues.getRow( run1 ) - tmp );
-				condenseFdb.addStatement( ubA.getRow( run1 ) == ubAValues.getRow( run1 ) - tmp );
-			}
+			condenseFdb.addStatement( tmp == sbar.getRow( conIdx ) + x.makeRowVector().getCol( conIdx ) );
+			condenseFdb.addStatement( lbA.getRow( row ) == lbAValues( row ) - tmp );
+			condenseFdb.addStatement( ubA.getRow( row ) == ubAValues( row ) - tmp );
 		}
 		condenseFdb.addLinebreak( );
 	}
