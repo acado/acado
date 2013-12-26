@@ -635,10 +635,10 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 				if (performFullCondensing() == false)
 					condensePrep.addStatement( A.getSubMatrix(row, row + 1, 0, NX) == evGx.getRow( conIdx ) );
 
-				unsigned blk = conIdx / NX;
-				for (unsigned col = 0; col <= blk; ++col)
+				unsigned blk = conIdx / NX + 1;
+				for (unsigned col = 0; col < blk; ++col)
 				{
-					unsigned blkRow = ((blk + 1) * blk / 2 + col) * NX + conIdx % NX;
+					unsigned blkRow = (blk * (blk - 1) / 2 + col) * NX + conIdx % NX;
 
 					condensePrep.addStatement(
 							A.getSubMatrix(row, row + 1, offset + col * NU, offset + (col + 1) * NU ) == E.getRow( blkRow ) );
@@ -663,12 +663,12 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 			ExportForLoop lRow(row, 0, numStateBounds);
 
 			lRow << conIdx.getFullName() << " = " << evXBounds.getFullName() << "[ " << row.getFullName() << " ] - " << toString(NX) << ";\n";
-			lRow.addStatement( blk == conIdx / NX );
+			lRow.addStatement( blk == conIdx / NX + 1);
 
 			if (performFullCondensing() == false)
 				lRow.addStatement( A.getSubMatrix(row, row + 1, 0, NX) == evGx.getRow( conIdx ) );
 
-			ExportForLoop lCol(col, 0, blk + 1);
+			ExportForLoop lCol(col, 0, blk);
 
 			lCol.addStatement( blkRow == (blk * (blk - 1) / 2 + col ) * NX + conIdx % NX );
 			lCol.addStatement(
