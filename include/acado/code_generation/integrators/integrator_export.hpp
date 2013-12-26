@@ -442,10 +442,6 @@ class IntegratorExport : public ExportAlgorithm
 
         bool exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
         bool crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
-        std::string name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
-        std::string name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
-        std::string name_rhs3;					/**< The name of the nonlinear function in the linear output system, if provided. */
-        std::string name_diffs_rhs3;				/**< The name of the function evaluating the derivatives for the linear output system, if provided. */
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
 		DVector numSteps;					/**< The number of integration steps per shooting interval. */
@@ -455,7 +451,7 @@ class IntegratorExport : public ExportAlgorithm
 		ExportVariable	rhs_out;
 		
 		ExportFunction integrate;			/**< Function that integrates the exported ODE. */
-		ExportAcadoFunction rhs;				/**< Module to export ODE. */
+		ExportAcadoFunction rhs;			/**< Module to export ODE. */
 		ExportAcadoFunction diffs_rhs;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
 
 		ExportAcadoFunction lin_input;
@@ -491,9 +487,7 @@ class IntegratorExport : public ExportAlgorithm
         std::vector<DMatrix> outputDependencies;			/**< A separate dependency matrix for each output. */
         std::vector<ExportAcadoFunction> outputs;			/**< Module to export output functions. */
         std::vector<ExportAcadoFunction> diffs_outputs;	/**< Module to export the evaluation of the derivatives of the output functions. */
-		
-        std::vector<std::string> name_outputs;				/**< A separate function name for each output. */
-        std::vector<std::string> name_diffs_outputs;			/**< A separate function name for evaluating the derivatives of each output. */
+
         std::vector<uint> num_outputs;					/**< A separate dimension for each output. */
 };
 

@@ -302,28 +302,11 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 														) const
 {
 	declarations.addDeclaration( integrate );
-	if( exportRhs ) {
-//		declarations.addDeclaration( diffs_rhs );
-	}
-	else {
-		Function tmpFun;
-		tmpFun << zeros<double>(1,1);
-		ExportAcadoFunction tmpExport(tmpFun, getNameDiffsRHS());
-		declarations.addDeclaration( tmpExport );
-	}
 
 	int matlabInterface;
 	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
 	if (matlabInterface) {
-		if( exportRhs ) {
-			declarations.addDeclaration( rhs );
-		}
-		else {
-			Function tmpFun;
-			tmpFun << zeros<double>(1,1);
-			ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
-			declarations.addDeclaration( tmpExport );
-		}
+		declarations.addDeclaration( rhs );
 	}
 
 	return SUCCESSFUL_RETURN;
