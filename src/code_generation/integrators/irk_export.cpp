@@ -1327,6 +1327,12 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 			numXA_output(i) = NXA;	// worst-case scenario
 			numVARS_output(i) = NX+NXA+NU+NDX;
 
+			ExportAcadoFunction OUTPUT(_outputNames[i]);
+			ExportAcadoFunction diffs_OUTPUT(_diffs_outputNames[i]);
+
+			outputs.push_back( OUTPUT );
+			if( sensGen ) diffs_outputs.push_back( diffs_OUTPUT );
+
 			ExportVariable rk_output( std::string("rk_output")+toString(i), 1, outputDim, REAL );
 			rk_outputs.push_back( rk_output );
 
