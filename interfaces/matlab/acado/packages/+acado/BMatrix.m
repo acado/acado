@@ -75,7 +75,7 @@ classdef BMatrix < acado.Matrix
                 
                 % This is NOT executed for mex inputs
                 
-                dlmwrite(sprintf('%s_data_%s.txt', cppobj.problemname, obj.name), obj.items, 'delimiter', '\t', 'precision', '%.12e');
+                dlmwrite(sprintf('%s_data_%s.txt', cppobj.problemname, obj.name), obj.items, 'delimiter', '\t', 'precision', '%d');
                 
                 fprintf(cppobj.fileMEX,sprintf('    BMatrix %s;\n    %s.read( "%s_data_%s.txt" );\n', obj.name, obj.name, cppobj.problemname, obj.name));
                 
