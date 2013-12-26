@@ -611,9 +611,9 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 			ExportForLoop eLoopI(boundIndex, 0, nXBounds);
 
 			eLoopI << row.getFullName() << " = " << evXBounds.getFullName() << "[ " << boundIndex.getFullName() << " ] - " << toString(NX) << ";\n";
-			eLoopI.addStatement( blkRow == row / NX + 1 );
+			eLoopI.addStatement( blkRow == row / NX);
 
-			ExportForLoop eLoopJ(blkCol, 0, blkRow);
+			ExportForLoop eLoopJ(blkCol, 0, blkRow + 1);
 
 			eLoopJ.addStatement( ind == (blkCol * (2 * N - blkCol - 1) / 2 + blkRow - 1) * NX + row % NX );
 			eLoopJ.addStatement(
@@ -1093,6 +1093,37 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 returnValue ExportGaussNewtonCN2::setupVariables( )
 {
+	////////////////////////////////////////////////////////////////////////////
+	//
+	// Make index vector for state constraints
+	//
+	////////////////////////////////////////////////////////////////////////////
+
+	bool boxConIsFinite = false;
+	xBoundsIdx.clear();
+
+	DVector lbBox, ubBox;
+	for (unsigned i = 0; i < xBounds.getNumPoints(); ++i)
+	{
+		lbBox = xBounds.getLowerBounds( i );
+		ubBox = xBounds.getUpperBounds( i );
+
+		if (isFinite( lbBox ) || isFinite( ubBox ))
+			boxConIsFinite = true;
+
+		// This is maybe not necessary
+		if (boxConIsFinite == false || i == 0)
+			continue;
+
+		for (unsigned j = 0; j < lbBox.getDim(); ++j)
+		{
+			if ( ( acadoIsFinite( ubBox( j ) ) == true ) || ( acadoIsFinite( lbBox( j ) ) == true ) )
+			{
+				xBoundsIdx.push_back(i * lbBox.getDim() + j);
+			}
+		}
+	}
+
 	if (initialStateFixed() == true)
 	{
 		x0.setup("x0",  NX, 1, REAL, ACADO_VARIABLES);

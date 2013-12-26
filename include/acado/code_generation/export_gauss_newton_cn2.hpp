@@ -190,6 +190,7 @@ protected:
 	/** Variable containing the dual QP variables. */
 	ExportVariable yVars;
 
+	std::vector< unsigned > xBoundsIdx;
 	ExportVariable lbValues, ubValues;
 	ExportVariable lbAValues, ubAValues;
 

@@ -186,6 +186,7 @@ private:
 	ExportVariable H00, H10, H11;
 	ExportVariable g0, g1;
 
+	std::vector< unsigned > xBoundsIdx;
 	ExportVariable lbValues, ubValues;
 	ExportVariable lbAValues, ubAValues;
 	/** @} */

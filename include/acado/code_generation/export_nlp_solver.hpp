@@ -259,7 +259,6 @@ protected:
 	/** @{ */
 	VariablesGrid uBounds;
 	VariablesGrid xBounds;
-	std::vector< unsigned > xBoundsIdx; // reconsider, use index structures from GN FORCES class
 	/** @} */
 
 	/** \name Evaluation of path constraints */
