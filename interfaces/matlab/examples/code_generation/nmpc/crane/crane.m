@@ -64,7 +64,12 @@ acadoSet('problemname', 'mpc');
 
 N = 20;
 ocp = acado.OCP( 0.0, N*Ts, N );
-ExportVariable W(n_XD+n_U,n_XD+n_U) WN(n_XD,n_XD)
+
+W_mat = eye(n_XD+n_U,n_XD+n_U);
+WN_mat = eye(n_XD,n_XD);
+W = acado.BMatrix(W_mat);
+WN = acado.BMatrix(WN_mat);
+
 ocp.minimizeLSQ( W, h );
 ocp.minimizeLSQEndTerm( WN, hN );
 
