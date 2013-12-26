@@ -115,9 +115,6 @@ classdef OCPexport < acado.ExportModule
                 
                 % EXPORT
                 if ~isempty(obj.dir)
-                    % SET TIMING CALLS
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setTimingCalls( %s );\n', obj.name, num2str(obj.timingCalls)));
-                    
                     fprintf(cppobj.fileMEX,sprintf('    %s.exportCode( "%s" );\n', obj.name, obj.dir));
                 end
                 
