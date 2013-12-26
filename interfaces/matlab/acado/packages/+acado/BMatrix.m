@@ -1,16 +1,16 @@
-%A matrix built from standard Matlab matrix notations. 
+% A matrix built from standard Matlab matrix notations.
 % Stored both as a Matrix and as a VariablesGrid Object
 %
 %  Usage:
-%    >> Matrix([MATRIX]);
+%    >> BMatrix([MATRIX]);
 %
 %  Parameters:
 %    [MATRIX] a numeric  m x n matrix
 %
 %
 %  Example:
-%    >> m = acado.Matrix([1,2,3;4,5,6;7,8,9]);
-%    >> Q = eye(3,3); m = acado.Matrix(Q);
+%    >> m = acado.BMatrix([1,2,3;4,5,6;7,8,9]);
+%    >> Q = eye(3,3); m = acado.BMatrix(Q);
 %
 %
 %  Licence:
@@ -35,16 +35,15 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: David Ariens, Rien Quirynen
-%    Date: 2012
-% 
-classdef Matrix < acado.VectorspaceElement    
+%    Author: Rien Quirynen
+%    Date: 2013
+%
+classdef BMatrix < acado.Matrix
     properties
-       matrixIsPrinted=0;
     end
     
     methods
-        function obj = Matrix(val)
+        function obj = BMatrix(val)
             if nargin > 0
                 global ACADO_;
                 
@@ -69,24 +68,21 @@ classdef Matrix < acado.VectorspaceElement
                     
                 end
             end
-        end 
+        end
         
-        getInstructions(obj, cppobj, get)
-       
-%        
-%         function printMatrix(obj, cppobj)
-%             % Normal matrices are stored as VariablesGrids. If a matrix
-%             % should be used as a "Matrix" object, call this method
-%             
-%             if (obj.matrixIsPrinted ~= 1) 
-%                 fprintf(cppobj.fileMEX,sprintf('    Matrix %s(%s);\n', obj.nameMatrix, obj.name));
-%                 
-%                 obj.matrixIsPrinted = 1;
-%             end
-% 
-%         end
-       
-       
+        function getInstructions(obj, cppobj, get)
+            if (get == 'FB')
+                
+                % This is NOT executed for mex inputs
+                
+                dlmwrite(sprintf('%s_data_%s.txt', cppobj.problemname, obj.name), obj.items, 'delimiter', '\t', 'precision', '%.12e');
+                
+                fprintf(cppobj.fileMEX,sprintf('    BMatrix %s;\n    %s.read( "%s_data_%s.txt" );\n', obj.name, obj.name, cppobj.problemname, obj.name));
+                
+                
+            end
+        end
+        
     end
     
 end

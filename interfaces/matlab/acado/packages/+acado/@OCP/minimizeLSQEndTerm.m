@@ -53,7 +53,7 @@ if length(varargin) == 1        %ocp.minimizeLSQEndTerm(QT)
     obj.minLSQEndTermQ = obj.checkVectorMatrix(QT);
     
 elseif (length(varargin) == 2)  %ocp.minimizeLSQEndTerm(h, r)
-    if isnumeric(varargin{1}) || isa(varargin{1}, 'acado.ExportVariable')
+    if isnumeric(varargin{1}) || isa(varargin{1}, 'acado.BMatrix')
         Q = varargin{1};
         r = varargin{2};
         
