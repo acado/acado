@@ -192,6 +192,7 @@ protected:
 	/** Variable containing the dual QP variables. */
 	ExportVariable yVars;
 
+	std::vector< unsigned > xBoundsIdxRev, xBoundsIdx;
 	ExportVariable lbValues, ubValues;
 	ExportVariable lbAValues, ubAValues;
 
@@ -243,8 +244,10 @@ protected:
 	ExportFunction getKKT;
 
 	// N2 condensing related
-	ExportVariable W1, W2;
+	ExportVariable W1, W2, W3;
 	ExportVariable sbar, w1, w2;
+
+	ExportFunction mult_H_W2T_W3, mac_H_W2T_W3_R, mac_W3_G_W1T_G;
 
 	ExportFunction multBTW1, multGxTGu, macQEW2;
 	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macASbarD2;
