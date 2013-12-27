@@ -900,7 +900,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	W1.setup("W1", NX, NU, REAL, ACADO_WORKSPACE);
+	W1.setup("W1", NX, NX, REAL, ACADO_WORKSPACE);
 	W2.setup("W2", NX, NU, REAL, ACADO_WORKSPACE);
 	W3.setup("W3", NX, NU, REAL, ACADO_WORKSPACE);
 
@@ -1046,7 +1046,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 
 	// mult_H_W2T_W3
 	ExportVariable HH("H", getNumQPvars(), getNumQPvars(), REAL, ACADO_LOCAL);
-	ExportVariable WW1("W2", NX, NX, REAL, ACADO_LOCAL);
+	ExportVariable WW1("W1", NX, NX, REAL, ACADO_LOCAL);
 	ExportVariable WW2("W2", NX, NU, REAL, ACADO_LOCAL);
 	ExportVariable WW3("W3", NX, NU, REAL, ACADO_LOCAL);
 	ExportVariable GG1("GG1", NX, NU, REAL, ACADO_LOCAL);
@@ -1074,12 +1074,18 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	mac_W3_G_W1T_G.setup("mac_W3_G_W1T_G", WW3, GG1, WW1, GG2);
 	mac_W3_G_W1T_G.addStatement( WW3 == GG1 + (WW1 ^ GG2) );
 
+	///////////////////////
+	////////////////////// CODE IMPLEMENTATION
+	//////////////////////
 	LOG( LVL_DEBUG ) << "---> Setup condensing: H11 evaluation" << endl;
 
 	condensePrep.addFunctionCall(moveGuE, evGu.getAddress((N - 1) * NX), W2);
 
 	unsigned curr, prev;
+
+//	blk = (N - row) * (N - 1 - row) / 2 + (N - 1 - col)
 	curr = (N) * (N - 1) / 2 + (N - 1);
+	cout << "curr: " << curr << endl;
 	if (R1.isGiven() == true)
 		condensePrep.addFunctionCall(mac_H_W2T_W3_R, H, ExportIndex( 0 ), W2, QE.getAddress(curr * NX), R1);
 	else
@@ -1087,17 +1093,20 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	for (unsigned col = 1, row = 0; col < N; ++col)
 	{
 		curr = (N - row) * (N - 1 - row) / 2 + (N - 1 - col);
-		condensePrep.addFunctionCall(mult_H_W2T_W3, H, ExportIndex( 0 ), ExportIndex( col ), W2, QE.getAddress(curr * NX));
+		cout << "curr: " << curr << endl;
+		condensePrep.addFunctionCall(mult_H_W2T_W3, H, ExportIndex( row ), ExportIndex( col ), W2, QE.getAddress(curr * NX));
 	}
 
 	for (unsigned row = 1; row < N; ++row)
 	{
-		condensePrep.addFunctionCall(moveGxT, evGx.getAddress((N - row) * NX), T);
+		condensePrep.addFunctionCall(moveGxT, evGx.getAddress((N - row) * NX), W1);
 		condensePrep.addFunctionCall(moveGuE, evGu.getAddress((N - 1 - row) * NX), W2);
 
-		curr = (N - row) * (N - 1 - row) / 2 + (N - 1);
-		prev = (N - row - 1) * (N - 2 - row) / 2 + (N - 1);
-		condensePrep.addFunctionCall(mac_W3_G_W1T_G, W3, QE.getAddress(curr * NX), T, QE.getAddress(prev * NX));
+		curr = (N - row) * (N - 1 - row) / 2 + (N - 1 - row);
+		cout << "curr: " << curr << endl;
+		prev = (N - row + 1) * (N - row) / 2 + (N - 1 - row);
+		cout << "prev: " << prev << endl;
+		condensePrep.addFunctionCall(mac_W3_G_W1T_G, W3, QE.getAddress(curr * NX), W1, QE.getAddress(prev * NX));
 		if (R1.isGiven() == true)
 			condensePrep.addFunctionCall(mac_H_W2T_W3_R, H, ExportIndex( row ), W2, W3, R1);
 		else
@@ -1106,8 +1115,10 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 		for (unsigned col = row + 1; col < N; ++col)
 		{
 			curr = (N - row) * (N - 1 - row) / 2 + (N - 1 - col);
-			prev = (N - row - 1) * (N - 2 - row) / 2 + (N - 1 - col);
-			condensePrep.addFunctionCall(mac_W3_G_W1T_G, W3, QE.getAddress(curr * NX), T, QE.getAddress(prev * NX));
+			cout << "curr: " << curr << endl;
+			prev = (N - row + 1) * (N - row) / 2 + (N - 1 - col);
+			cout << "prev: " << prev << endl;
+			condensePrep.addFunctionCall(mac_W3_G_W1T_G, W3, QE.getAddress(curr * NX), W1, QE.getAddress(prev * NX));
 			condensePrep.addFunctionCall(mult_H_W2T_W3, H, ExportIndex( row ), ExportIndex( col ), W2, W3);
 		}
 	}
