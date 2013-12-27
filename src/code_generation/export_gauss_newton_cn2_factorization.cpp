@@ -629,9 +629,6 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	for (unsigned el = 0; el < numStateBounds; ++el)
-		cout << xBoundsIdx[ el ] << "\t" << xBoundsIdx[ el ] / NX << "\t" << xBoundsIdxRev[ el ] << "\t" << xBoundsIdxRev[ el ] / NX << endl;
-
 	if ( numStateBounds )
 	{
 		condenseFdb.addVariable( tmp );
@@ -650,7 +647,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 //				if (performFullCondensing() == false)
 //					condensePrep.addStatement( A.getSubMatrix(ii, ii + 1, 0, NX) == evGx.getRow( conIdx ) );
 
-				for (unsigned col = row; col < N; ++col)
+				for (unsigned col = blk; col < N; ++col)
 				{
 					// blk = (N - row) * (N - 1 - row) / 2 + (N - 1 - col)
 					unsigned blkRow = ((N - blk) * (N - 1 - blk) / 2 + (N - 1 - col)) * NX + conIdx % NX;
@@ -671,9 +668,9 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 
 			condensePrep.addVariable( evXBounds );
 
-			ExportIndex row, col, conIdx, blk, blkRow;
+			ExportIndex row, col, conIdx, blk, blkRow, blkIdx;
 
-			condensePrep.acquire( row ).acquire( col ).acquire( conIdx ).acquire( blk ).acquire( blkRow );
+			condensePrep.acquire( row ).acquire( col ).acquire( conIdx ).acquire( blk ).acquire( blkRow ).acquire( blkIdx );
 
 			ExportForLoop lRow(row, 0, numStateBounds);
 
@@ -684,26 +681,28 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 //			if (performFullCondensing() == false)
 //				eLoopI.addStatement( A.getSubMatrix(ii, ii + 1, 0, NX) == evGx.getRow( conIdx ) );
 
-			ExportForLoop lCol(col, row, N);
+			ExportForLoop lCol(col, blk, N);
 
-			lCol.addStatement( blkRow == ((N - blk) * (N - 1 - blk) / 2 + (N - 1 - col)) * NX + conIdx % NX );
+			lCol.addStatement( blkIdx == (N - blk) * (N - 1 - blk) / 2 + (N - 1 - col) );
+			lCol.addStatement( blkRow == blkIdx * NX + conIdx % NX );
 			lCol.addStatement(
 					A.getSubMatrix(row, row + 1, offset + col * NU, offset + (col + 1) * NU ) == E.getRow( blkRow ) );
 
 			lRow.addStatement( lCol );
 			condensePrep.addStatement( lRow );
 
-			condensePrep.release( row ).release( col ).release( conIdx ).release( blk ).release( blkRow );
+			condensePrep.release( row ).release( col ).release( conIdx ).release( blk ).release( blkRow ).release( blkIdx );
 		}
 		condensePrep.addLinebreak( );
 
 		// Shift constraint bounds by first interval
 		// MPC case, only
+		ExportVariable xVec = x.makeRowVector();
 		for(unsigned row = 0; row < getNumStateBounds( ); ++row)
 		{
 			unsigned conIdx = xBoundsIdxRev[ row ];
 
-			condenseFdb.addStatement( tmp == sbar.getRow( conIdx ) + x.makeRowVector().getCol( conIdx ) );
+			condenseFdb.addStatement( tmp == sbar.getRow( conIdx ) + xVec.getCol( conIdx ) );
 			condenseFdb.addStatement( lbA.getRow( row ) == lbAValues( row ) - tmp );
 			condenseFdb.addStatement( ubA.getRow( row ) == ubAValues( row ) - tmp );
 		}
@@ -808,7 +807,6 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	{
 		// row = 0
 		unsigned curr = (N) * (N - 1) / 2 + (N - 1 - col);
-		cout << "blk " << curr << endl;
 		if (QN1.isGiven() == true)
 			condensePrep.addFunctionCall(
 					multQN1Gu, E.getAddress(curr * NX), W1
@@ -829,7 +827,6 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 			);
 
 			unsigned next = (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col);
-			cout << "blk " << next << endl;
 			if (Q1.isGiven() == true)
 				condensePrep.addFunctionCall(
 						macQEW2, Q1, E.getAddress(next * NX), W2, W1
@@ -837,7 +834,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 			else
 				condensePrep.addFunctionCall(
 						macQEW2,
-						Q1.getAddress((N - (row + 1)) * NX), E.getAddress((next - 1) * NX), W2, W1
+						Q1.getAddress((N - (row + 1)) * NX), E.getAddress(next * NX), W2, W1
 				);
 		}
 
