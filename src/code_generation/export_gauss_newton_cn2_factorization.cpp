@@ -637,7 +637,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 			for(unsigned row = 0; row < numStateBounds; ++row)
 			{
 				unsigned conIdx = xBoundsIdx[ row ];
-				unsigned blkRow = conIdx / NX;
+				unsigned blk = conIdx / NX;
 
 				// TODO
 //				if (performFullCondensing() == false)
@@ -646,10 +646,10 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 				for (unsigned col = row; col < N; ++col)
 				{
 					// blk = (N - row) * (N - 1 - row) / 2 + (N - 1 - col)
-					unsigned blk = ((N - blkRow) * (N - 1 - blkRow) / 2 + (N - 1 - col)) * NX + conIdx % NX;
+					unsigned blkRow = ((N - blk) * (N - 1 - blk) / 2 + (N - 1 - col)) * NX + conIdx % NX;
 
 					condensePrep.addStatement(
-							A.getSubMatrix(row, row + 1, offset + col * NU, offset + (col + 1) * NU ) == E.getRow( blk ) );
+							A.getSubMatrix(row, row + 1, offset + col * NU, offset + (col + 1) * NU ) == E.getRow( blkRow ) );
 				}
 
 				condensePrep.addLinebreak();
@@ -679,7 +679,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 
 			ExportForLoop lCol(col, row, N);
 
-			lCol.addStatement( blkRow == ((N - blkRow) * (N - 1 - blkRow) / 2 + (N - 1 - col)) * NX + conIdx % NX );
+			lCol.addStatement( blkRow == ((N - blk) * (N - 1 - blk) / 2 + (N - 1 - col)) * NX + conIdx % NX );
 			lCol.addStatement(
 					A.getSubMatrix(row, row + 1, offset + col * NU, offset + (col + 1) * NU ) == E.getRow( blkRow ) );
 
