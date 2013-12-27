@@ -542,9 +542,15 @@ returnValue ExportGaussNewtonCn2Factorization::setupConstraintsEvaluation( void 
 
 	if (performFullCondensing() == true)
 	{
+		ExportVariable uCol = u.makeColVector();
 		// Full condensing case
-		boundSetFcn->addStatement( lb == lbValues - u.makeColVector() );
-		boundSetFcn->addStatement( ub == ubValues - u.makeColVector() );
+		for (unsigned blk = 0; blk < N; ++blk)
+		{
+			boundSetFcn->addStatement( lb.getRows(blk * NU, (blk + 1) * NU) ==
+					lbValues.getRows(blk * NU, (blk + 1) * NU) - uCol.getRows((N - 1 - blk) * NU, (N - blk) * NU));
+			boundSetFcn->addStatement( ub.getRows(blk * NU, (blk + 1) * NU) ==
+					ubValues.getRows(blk * NU, (blk + 1) * NU) - uCol.getRows((N - 1 - blk) * NU, (N - blk) * NU));
+		}
 	}
 	else
 	{
@@ -1248,7 +1254,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	if (performFullCondensing() == true)
 	{
 		ExportVariable xVarsTranspose = xVars.getTranspose();
-		for (unsigned row = 0; row < N - 1; ++row)
+		for (unsigned row = 0; row < N; ++row)
 			expand.addStatement( u.getRow( row ) += xVarsTranspose.getCols((N - 1 - row) * NU, (N - row) * NU) );
 	}
 	else
