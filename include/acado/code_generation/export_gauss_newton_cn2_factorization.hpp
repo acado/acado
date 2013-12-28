@@ -249,7 +249,7 @@ protected:
 
 	ExportFunction mult_H_W2T_W3, mac_H_W2T_W3_R, mac_W3_G_W1T_G;
 
-	ExportFunction multBTW1, multGxTGu, macQEW2;
+	ExportFunction multBTW1, macBTW1_R1, multGxTGu, macQEW2;
 	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macASbarD2;
 	ExportFunction expansionStep;
 };
