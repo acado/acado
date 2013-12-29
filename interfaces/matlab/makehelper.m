@@ -206,7 +206,7 @@ PARALLEL = 0;
                 if (force_compilation)
                     cmd = sprintf ('mex -O -c %s -outdir %s %s %s', ...
                         DEBUGFLAGS, [BIN_FOLDER BINFOLDER{i}], CPPFLAGS, SRC{i}) ;
-                    execute_command (cmd, DEBUG, SRC{i}) ;
+                    execute_command (cmd, DEBUG, SRC{i}, ~PARALLEL) ;
                     counter = counter + 1 ;
                 end
             end
@@ -216,7 +216,7 @@ PARALLEL = 0;
                 if (force_compilation)
                     cmd = sprintf ('mex -O -c %s -outdir %s %s %s', ...
                         DEBUGFLAGS, [BIN_FOLDER BINFOLDER{i}], CPPFLAGS, SRC{i}) ;
-                    execute_command (cmd, DEBUG, SRC{i}) ;
+                    execute_command (cmd, DEBUG, SRC{i}, ~PARALLEL) ;
                     counter = counter + 1 ;
                 else
                     fprintf (1, '*') ;
@@ -239,7 +239,7 @@ PARALLEL = 0;
             if (force_compilation || counter > 0 || strcmp(BINMEX{i}, 'ACADOintegrators'))  
                 cmd = sprintf ('mex -O %s %s %s %s -outdir %s -output %s', ...
                     DEBUGFLAGS, CPPFLAGS, SRCMEX{i}, CBINFILES, BINFOLDERMEX{i}, [BINMEX{i}, extmex]) ;
-                execute_command (cmd, DEBUG, SRCMEX{i}) ;
+                execute_command (cmd, DEBUG, SRCMEX{i}, ~PARALLEL) ;
                 counter = counter + 1 ;
             end
         end
@@ -249,7 +249,7 @@ PARALLEL = 0;
         if (~isempty(optmake) && ~isempty(optmake.mexfile) && ~isempty(optmake.outputname))
             cmd = sprintf ('mex -O %s %s %s %s -outdir %s -output %s', ...
                 DEBUGFLAGS, CPPFLAGS, optmake.mexfile, CBINFILES, optmake.outputdir, [optmake.outputname, extmex]) ;
-            execute_command (cmd, DEBUG, optmake.mexfile) ;
+            execute_command (cmd, DEBUG, optmake.mexfile, ~PARALLEL) ;
             counter = counter + 1 ;
         end
  
@@ -298,11 +298,11 @@ PARALLEL = 0;
 end
 
 
-function [] = execute_command (s, full_logging, shorthand)
+function [] = execute_command (s, full_logging, shorthand, progress)
     s = strrep (s, '/', filesep) ;
     if (full_logging)
         fprintf (1, '%s  -->  %s\n', shorthand, s);
-    else
+    elseif (progress)
         %if (mod (counter, 20) == 0)
         %    fprintf (1, '\n') ;
         %end
