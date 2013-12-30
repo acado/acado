@@ -139,8 +139,8 @@ returnValue IntegratorExport::setLinearInput( const DMatrix& M1, const DMatrix& 
 returnValue IntegratorExport::setModel(	const std::string& _name_ODE, const std::string& _name_diffs_ODE ) {
 
 	if( rhs.getFunctionDim() == 0 ) {
-		name_rhs = std::string(_name_ODE);
-		name_diffs_rhs = std::string(_name_diffs_ODE);
+		rhs = ExportAcadoFunction(_name_ODE);
+		diffs_rhs = ExportAcadoFunction(_name_diffs_ODE);
 
 		exportRhs = false;
 	}
@@ -253,8 +253,8 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 		M33 = M3;
 		A33 = A3;
 
-		name_rhs3 = std::string(_rhs3);
-		name_diffs_rhs3 = std::string(_diffs_rhs3);
+		rhs3 = ExportAcadoFunction(_rhs3);
+		diffs_rhs3 = ExportAcadoFunction(_diffs_rhs3);
 		exportRhs = false;
 
 		OnlineData        dummy0;
@@ -690,12 +690,7 @@ bool IntegratorExport::equidistantControlGrid( ) const{
 }
 
 const std::string IntegratorExport::getNameRHS() const{
-	if( exportRhs ) {
-		return rhs.getName();
-	}
-	else {
-		return name_rhs;
-	}
+	return rhs.getName();
 }
 
 const std::string IntegratorExport::getNameFullRHS() const{
@@ -708,30 +703,15 @@ const std::string IntegratorExport::getNameFullRHS() const{
 }
 
 const std::string IntegratorExport::getNameOutputRHS() const{
-	if( exportRhs ) {
-		return rhs3.getName();
-	}
-	else {
-		return name_rhs3;
-	}
+	return rhs3.getName();
 }
 
 const std::string IntegratorExport::getNameOutputDiffs() const{
-	if( exportRhs ) {
-		return diffs_rhs3.getName();
-	}
-	else {
-		return name_diffs_rhs3;
-	}
+	return diffs_rhs3.getName();
 }
 
 const std::string IntegratorExport::getNameOUTPUT( uint index ) const{
-	if( exportRhs ) {
-		return outputs[index].getName();
-	}
-	else {
-		return name_outputs[index];
-	}
+	return outputs[index].getName();
 }
 
 uint IntegratorExport::getDimOUTPUT( uint index ) const{
@@ -745,21 +725,11 @@ uint IntegratorExport::getDimOUTPUT( uint index ) const{
 
 
 const std::string IntegratorExport::getNameDiffsRHS() const{
-	if( exportRhs ) {
-		return diffs_rhs.getName();
-	}
-	else {
-		return name_diffs_rhs;
-	}
+	return diffs_rhs.getName();
 }
 
 const std::string IntegratorExport::getNameDiffsOUTPUT( uint index ) const{
-	if( exportRhs ) {
-		return diffs_outputs[index].getName();
-	}
-	else {
-		return name_diffs_outputs[index];
-	}
+	return diffs_outputs[index].getName();
 }
 
 

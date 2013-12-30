@@ -46,20 +46,35 @@ ModelContainer::ModelContainer() {
 }
 
 
-returnValue ModelContainer::setDimensions(	uint _NX1, uint _NX2, uint _NX3,
-											uint _NDX, uint _NDX3,
-											uint _NXA, uint _NXA3,
-											uint _NU, uint _NP, uint _NOD
-											)
-{
-	return modelData.setDimensions(_NX1, _NX2, _NX3, _NDX, _NDX3, _NXA, _NXA3, _NU, _NP, _NOD);
+returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP, uint _NOD ) {
+	return modelData.setDimensions( _NX1, _NX2, _NX3, _NDX, _NDX3, _NXA, _NXA3, _NU, _NP, _NOD );
+}
+returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU ) {
+	return setDimensions( _NX1, _NX2, _NX3, _NDX, _NDX3, _NXA, _NXA3, _NU, 0, 0 );
 }
 
-returnValue ModelContainer::setDimensions(	uint _NX, uint _NDX, uint _NXA,
-											uint _NU, uint _NP, uint _NOD
-											)
-{
-	return setDimensions(0, _NX, 0, _NDX, 0, _NXA, 0, _NU, _NP, _NOD);
+
+returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU, uint _NOD ) {
+	return setDimensions( _NX1, _NX2, _NX3, _NDX, 0, _NXA, 0, _NU, 0, _NOD );
+}
+returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU ) {
+	return setDimensions( _NX1, _NX2, _NX3, _NDX, _NXA, _NU, 0 );
+}
+
+
+returnValue ModelContainer::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU, uint _NOD ) {
+	return setDimensions( 0, _NX, 0, _NDX, _NXA, _NU, _NOD );
+}
+returnValue ModelContainer::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU ) {
+	return setDimensions( _NX, _NDX, _NXA, _NU, 0 );
+}
+
+
+returnValue ModelContainer::setDimensions( uint _NX, uint _NU, uint _NOD ) {
+	return setDimensions( _NX, 0, 0, _NU, _NOD );
+}
+returnValue ModelContainer::setDimensions( uint _NX, uint _NU ) {
+	return setDimensions( _NX, _NU, 0 );
 }
 
 returnValue ModelContainer::setModel( const DifferentialEquation& _f ) {

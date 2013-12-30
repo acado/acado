@@ -146,37 +146,6 @@ returnValue AdjointIRKExport::getFunctionDeclarations(	ExportStatementBlock& dec
 {
 	ImplicitRungeKuttaExport::getFunctionDeclarations( declarations );
 
-	if( exportRhs ) {
-//		if( NX3 > 0 ) {
-//			declarations.addDeclaration( diffs_rhs3 );
-//		}
-	}
-	else {
-		Function tmpFun;
-		tmpFun << zeros<double>(1,1);
-		ExportAcadoFunction tmpExport(tmpFun, getNameDiffsRHS());
-		declarations.addDeclaration( tmpExport );
-
-		if( NX3 > 0 ) {
-			tmpExport = ExportAcadoFunction(tmpFun, getNameOutputDiffs());
-			declarations.addDeclaration( tmpExport );
-		}
-	}
-	uint i;
-	if( exportRhs && CONTINUOUS_OUTPUT ) {
-//		for( i = 0; i < outputs.size(); i++ ) {
-//			declarations.addDeclaration( diffs_outputs[i] );
-//		}
-	}
-	else {
-		for( i = 0; i < name_outputs.size(); i++ ) {
-			Function tmpFun;
-			tmpFun << zeros<double>(1,1);
-			ExportAcadoFunction tmpExport(tmpFun, getNameDiffsOUTPUT(i));
-			declarations.addDeclaration( tmpExport );
-		}
-	}
-
     return SUCCESSFUL_RETURN;
 }
 

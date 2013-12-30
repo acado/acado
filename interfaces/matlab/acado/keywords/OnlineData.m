@@ -1,5 +1,8 @@
-function getInstructions(obj, cppobj, get)
-%Used to generate CPP file
+%Shorthand for acado.OnlineData
+%
+%  Example:
+%    >> OnlineData p;
+%    >> OnlineData p1 p2 p3 p4;
 %
 %  Licence:
 %    This file is part of ACADO Toolkit  - (http://www.acadotoolkit.org/)
@@ -25,18 +28,40 @@ function getInstructions(obj, cppobj, get)
 %
 %    Author: David Ariens
 %    Date: 2010
-% 
+%
+function  OnlineData( varargin )
 
+checkActiveModel;
 
-
-if (get == 'FB')
+if ~iscellstr( varargin ),
+    error( 'Syntax is: OnlineData x' );
     
-    % This is NOT executed for mex inputs
+else
     
-    dlmwrite(sprintf('%s_data_%s.txt', cppobj.problemname, obj.name), obj.items, 'delimiter', '\t', 'precision', '%.12e');
+    for k = 1 : nargin,
+        [name N M] = readVariable(varargin{k});
+        
+        for i = 1:N
+            for j = 1:M
+                if N > 1
+                    VAR_NAME = strcat(name,num2str(i));
+                else
+                    VAR_NAME = name;
+                end
+                if M > 1
+                    VAR_NAME = strcat(VAR_NAME,num2str(j));
+                end
+                VAR_ASSIGN = acado.OnlineData(VAR_NAME);
+                var(i,j) = VAR_ASSIGN;
+                
+                assignin( 'caller', VAR_NAME, VAR_ASSIGN );
+            end
+        end
+        assignin( 'caller', name, var );
+        var = VAR_ASSIGN;
+    end
     
-    fprintf(cppobj.fileMEX,sprintf('    DMatrix %s;\n    %s.read( "%s_data_%s.txt" );\n', obj.name, obj.name, cppobj.problemname, obj.name));
-
-
-end 
 end
+
+end
+

@@ -248,48 +248,9 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 													) const
 {
 	declarations.addDeclaration( integrate );
-//	if( NX2 > 0) solver->getFunctionDeclarations( declarations );
 
-	if( NX2 != NX ) 		declarations.addDeclaration( fullRhs );
-	else if( exportRhs )	declarations.addDeclaration( rhs );
-
-//	if( NX1 > 0 ) {
-//		declarations.addDeclaration( lin_input );
-//	}
-	if( exportRhs ) {
-//		if( NX2 > 0 || NXA > 0 ) {
-//			declarations.addDeclaration( rhs );
-//			declarations.addDeclaration( diffs_rhs );
-//		}
-//		if( NX3 > 0 ) {
-//			declarations.addDeclaration( rhs3 );
-//		}
-	}
-	else {
-		Function tmpFun;
-		tmpFun << zeros<double>(1,1);
-		ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
-		declarations.addDeclaration( tmpExport );
-
-		if( NX3 > 0 ) {
-			tmpExport = ExportAcadoFunction(tmpFun, getNameOutputRHS());
-			declarations.addDeclaration( tmpExport );
-		}
-	}
-	uint i;
-	if( exportRhs && CONTINUOUS_OUTPUT ) {
-//		for( i = 0; i < outputs.size(); i++ ) {
-//			declarations.addDeclaration( outputs[i] );
-//		}
-	}
-	else {
-		for( i = 0; i < name_outputs.size(); i++ ) {
-			Function tmpFun;
-			tmpFun << zeros<double>(1,1);
-			ExportAcadoFunction tmpExport(tmpFun, getNameOUTPUT(i));
-			declarations.addDeclaration( tmpExport );
-		}
-	}
+	if( NX2 != NX ) 	declarations.addDeclaration( fullRhs );
+	else				declarations.addDeclaration( rhs );
 
     return SUCCESSFUL_RETURN;
 }
@@ -1341,8 +1302,6 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 			return ACADOERROR( RET_INVALID_ARGUMENTS );
 		}
 		outputGrids = outputGrids_;
-		name_outputs = _outputNames;
-		name_diffs_outputs = _diffs_outputNames;
 		num_outputs = _dims_output;
 
 		int measGrid;
@@ -1367,6 +1326,12 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 			numDX_output(i) = NDX;	// worst-case scenario
 			numXA_output(i) = NXA;	// worst-case scenario
 			numVARS_output(i) = NX+NXA+NU+NDX;
+
+			ExportAcadoFunction OUTPUT(_outputNames[i]);
+			ExportAcadoFunction diffs_OUTPUT(_diffs_outputNames[i]);
+
+			outputs.push_back( OUTPUT );
+			if( sensGen ) diffs_outputs.push_back( diffs_OUTPUT );
 
 			ExportVariable rk_output( std::string("rk_output")+toString(i), 1, outputDim, REAL );
 			rk_outputs.push_back( rk_output );
@@ -1522,11 +1487,7 @@ returnValue ImplicitRungeKuttaExport::copy(	const ImplicitRungeKuttaExport& arg
 	outputs = arg.outputs;
 	diffs_rhs = arg.diffs_rhs;
 	diffs_outputs = arg.diffs_outputs;
-	name_rhs = arg.name_rhs;
-	name_outputs = arg.name_outputs;
 	num_outputs = arg.num_outputs;
-	name_diffs_rhs = arg.name_diffs_rhs;
-	name_diffs_outputs = arg.name_diffs_outputs;
 	grid = arg.grid;
 	outputGrids = arg.outputGrids;
 	solver = arg.solver;

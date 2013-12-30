@@ -65,6 +65,7 @@ The best way for getting started with the ACADO Toolkit is to work through the o
 
 <ul>
 	<li>\subpage cgt_getting_started</li>
+	<li>\subpage sim_getting_started</li>
 </ul>
 
 */

@@ -249,6 +249,7 @@ returnValue ModelData::setModel( const DifferentialEquation& _f )
 		NXA = differentialEquation.getNXA();
 		if( NU == 0 ) NU = differentialEquation.getNU();
 		if( NP == 0 ) NP = differentialEquation.getNP();
+		if( NOD == 0 ) NOD = differentialEquation.getNOD();
 
 		model_dimensions_set = BT_TRUE;
 		export_rhs = BT_TRUE;

@@ -236,7 +236,7 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
                     
                 elseif (~isempty(obj.dir))
                     % SET TIMING CALLS
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setTimingCalls( %s );\n', obj.name, num2str(obj.timingCalls)));
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setTimingSteps( %s );\n', obj.name, num2str(obj.timingCalls)));
                     
                     fprintf(cppobj.fileMEX,sprintf('    %s.exportCode( "%s" );\n', obj.name, obj.dir));
                     

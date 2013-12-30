@@ -208,9 +208,9 @@ for k = 1:length(time)
     R(3,3) =q1*q1 - q2*q2 - q3*q3 + q4*q4; 
     
     widths = [1.8 1.8 1];
-    ls = 0.3.*[1 1 0.3];
+    lengths = 0.3.*[1 1 0.3];
     for vec = 1:3
-        L2 = ls(vec)*L;
+        L2 = lengths(vec)*L;
         line([x-L2*R(vec,1) x+L2*R(vec,1)],[y-L2*R(vec,2) y+L2*R(vec,2)],[z-L2*R(vec,3) z+L2*R(vec,3)],'color','b','linewidth',widths(vec));hold on
     end
     plot3(x,y,z,'ks','MarkerFaceColor','k','MarkerSize',8)

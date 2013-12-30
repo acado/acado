@@ -126,26 +126,8 @@ returnValue DiscreteTimeExport::getFunctionDeclarations(	ExportStatementBlock& d
 {
 	declarations.addDeclaration( integrate );
 
-	if( NX2 != NX ) 		declarations.addDeclaration( fullRhs );
-	else if( exportRhs )	declarations.addDeclaration( rhs );
-
-	if( exportRhs ) {
-//		if( NX1 > 0 ) {
-//			declarations.addDeclaration( lin_input );
-//		}
-//		if( NX2 > 0 ) {
-//			declarations.addDeclaration( rhs );
-//			declarations.addDeclaration( diffs_rhs );
-//		}
-	}
-	else {
-		Function tmpFun;
-		tmpFun << zeros<double>(1,1);
-		ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
-		declarations.addDeclaration( tmpExport );
-		tmpExport = ExportAcadoFunction(tmpFun, getNameDiffsRHS());
-		declarations.addDeclaration( tmpExport );
-	}
+	if( NX2 != NX ) 	declarations.addDeclaration( fullRhs );
+	else				declarations.addDeclaration( rhs );
 
 	return SUCCESSFUL_RETURN;
 }
