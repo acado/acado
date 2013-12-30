@@ -726,7 +726,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	W1.setup("W1", NX, NU, REAL, ACADO_WORKSPACE);
 	W2.setup("W2", NX, NU, REAL, ACADO_WORKSPACE);
 
-	LOG( LVL_DEBUG ) << "Setup condensing: E" << endl;
+	LOG( LVL_DEBUG ) << "---> Setup condensing: E" << endl;
 	/// Setup E matrix as in the N^3 implementation
 
 	// Special case, row = col = 0
@@ -776,7 +776,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 		condensePrep.release( row ).release( col ).release( curr ).release( prev );
 	}
 
-	LOG( LVL_DEBUG ) << "Setup condensing: H11" << endl;
+	LOG( LVL_DEBUG ) << "---> Setup condensing: H11" << endl;
 
 	/*
 
@@ -850,224 +850,6 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 		condensePrep.addLinebreak();
 	}
 
-
-
-/*
-	LOG( LVL_DEBUG ) << "OLD CN2 IMPLEMENTATION" << endl;
-
-	LOG( LVL_DEBUG ) << "Setup condensing: H11 and E" << endl;
-
-	This one is only for the case where we have input constraints only
-
-	// Create E and H
-
-	for i = 0: N - 1
-	{
-		// Storage for E: (N x nx) x nu
-
-		E_0 = B_i;
-		for k = 1: N - i - 1
-			E_k = A_{i + k} * E_{k - 1};
-
-		// Two temporary matrices W1, W2 of size nx x nu
-
-		W1 = Q_N^T * E_{N - i - 1};
-
-		for k = N - 1: i + 1
-		{
-			H_{k, i} = B_k^T * W1;
-
-			W2 = A_k^T * W1;
-			W1 = Q_k^T * E_{k - i - 1} + W2;
-		}
-		H_{i, i} = B_i^T * W1 + R_i^T
-	}
-
-	Else, in general case:
-
-	for i = 0: N - 1
-	{
-		// Storage for E: (N * (N + 1) / 2 x nx) x nu
-
-		j = 1 / 2 * i * (2 * N - i + 1);
-
-		E_j = B_i;
-		for k = 1: N - i - 1
-			E_{j + k} = A_{i + k} * E_{j + k - 1};
-
-		// Two temporary matrices W1, W2 of size nx x nu
-
-		W1 = Q_N^T * E_{j + N - i - 1};
-
-		for k = N - 1: i + 1
-		{
-			H_{k, i} = B_k^T * W1;
-
-			W2 = A_k^T * W1;
-			W1 = Q_k^T * E_{j + k - i - 1} + W2;
-		}
-		H_{i, i} = B_i^T * W1 + R_i^T
-	}
-
-	 */
-
-
-	/// NEW CODE START
-/*
-	if (N <= 15)
-	{
-		for (unsigned col = 0; col < N; ++col)
-		{
-			int offset = col * (2 * N - col + 1) / 2;
-
-			condensePrep.addComment( "Column: " + toString( col ) );
-			condensePrep.addFunctionCall(
-					moveGuE, evGu.getAddress(col * NX), E.getAddress(offset * NX)
-			);
-			for (unsigned row = 1; row < N - col; ++row)
-				condensePrep.addFunctionCall(
-						multGxGu,
-						evGx.getAddress((col + row) * NX),
-						E.getAddress((offset + row - 1) * NX), E.getAddress((offset + row) * NX)
-				);
-			condensePrep.addLinebreak();
-
-			if (QN1.isGiven() == true)
-				condensePrep.addFunctionCall(
-						multQN1Gu, E.getAddress((offset + N - col - 1) * NX), W1
-				);
-			else
-				condensePrep.addFunctionCall(
-						multGxGu, QN1, E.getAddress((offset + N - col - 1) * NX), W1
-				);
-
-			for (unsigned row = N - 1; col < row; --row)
-			{
-				condensePrep.addFunctionCall(
-						multBTW1, evGu.getAddress(row * NX), W1,
-						ExportIndex( row ), ExportIndex( col )
-				);
-
-				condensePrep.addFunctionCall(
-						multGxTGu, evGx.getAddress(row * NX), W1, W2
-				);
-
-				if (Q1.isGiven() == true)
-					condensePrep.addFunctionCall(
-							macQEW2, Q1, E.getAddress((offset + row - col - 1) * NX), W2, W1
-					);
-				else
-					condensePrep.addFunctionCall(
-							macQEW2,
-							Q1.getAddress(row * NX), E.getAddress((offset + row - col - 1) * NX), W2, W1
-					);
-			}
-
-			condensePrep.addFunctionCall(
-					multBTW1, evGu.getAddress(col * NX), W1,
-					ExportIndex( col ), ExportIndex( col )
-			);
-
-			// TODO move this addition to multBTW1
-			if (R1.isGiven() == true)
-				condensePrep.addStatement(
-						H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-						+= R1 + mRegH11
-				);
-			else
-				condensePrep.addStatement(
-						H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-						+= R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU) + mRegH11
-				);
-
-			condensePrep.addLinebreak();
-		}
-	}
-	else
-	{
-		// Long horizons
-
-		ExportIndex row, col, offset;
-		condensePrep.acquire( row );
-		condensePrep.acquire( col );
-		condensePrep.acquire( offset );
-
-		ExportForLoop cLoop(col, 0, N);
-		ExportForLoop fwdLoop(row, 1, N - col);
-		ExportForLoop adjLoop(row, N - 1, col, -1);
-
-		cLoop.addStatement( offset == col * (2 * N + 1 - col) / 2 );
-		cLoop.addFunctionCall(
-				moveGuE, evGu.getAddress(col * NX), E.getAddress(offset * NX)
-		);
-
-		fwdLoop.addFunctionCall(
-				multGxGu,
-				evGx.getAddress((col + row) * NX),
-				E.getAddress((offset + row - 1) * NX), E.getAddress((offset + row) * NX)
-		);
-		cLoop.addStatement( fwdLoop );
-		cLoop.addLinebreak();
-
-		if (QN1.isGiven() == true)
-			cLoop.addFunctionCall(
-					multQN1Gu, E.getAddress((offset - col + N - 1) * NX), W1
-			);
-		else
-			cLoop.addFunctionCall(
-					multGxGu, QN1, E.getAddress((offset - col + N - 1) * NX), W1
-			);
-
-		adjLoop.addFunctionCall(
-				multBTW1, evGu.getAddress(row * NX), W1,
-				row, col
-//				col, row
-		);
-
-		adjLoop.addFunctionCall(
-				multGxTGu, evGx.getAddress(row * NX), W1, W2
-		);
-
-		if (Q1.isGiven() == true)
-			adjLoop.addFunctionCall(
-					macQEW2, Q1, E.getAddress((offset + row - col - 1) * NX), W2, W1
-			);
-		else
-			adjLoop.addFunctionCall(
-					macQEW2,
-					Q1.getAddress(row * NX), E.getAddress((offset + row - col - 1) * NX), W2, W1
-			);
-
-		cLoop.addStatement( adjLoop );
-
-		cLoop.addFunctionCall(
-				multBTW1, evGu.getAddress(col * NX), W1,
-				col, col
-		);
-
-		if (R1.isGiven() == true)
-			cLoop.addStatement(
-					H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-					+= R1 + mRegH11
-			);
-		else
-			cLoop.addStatement(
-					H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-					+= R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU) + mRegH11
-			);
-
-		condensePrep.addStatement( cLoop );
-		condensePrep.addLinebreak();
-
-		condensePrep.release( row );
-		condensePrep.release( col );
-		condensePrep.release( offset );
-	}
-
-	/// NEW CODE END
-
-*/
-
 	LOG( LVL_DEBUG ) << "---> Copy H11 upper to lower triangular part" << endl;
 
 	// Copy to H11 upper triangular part to lower triangular part
@@ -1092,6 +874,50 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 		condensePrep.release( row ).release( col );
 	}
 	condensePrep.addLinebreak();
+
+	LOG( LVL_DEBUG ) << "---> Factorization of the condensed Hessian" << endl;
+
+	/*
+
+	T = Q( N )
+	for blk = N - 1: 1
+		W1 = B( blk )^T * T
+		D = R( blk ) + W1 * B( blk )
+		L = W1 * A( blk )
+
+		chol( D )
+		L = chol_solve(D, L) // L <- D^(-T) * L
+		T = Q( blk ) - L^T * L
+
+		row = N - 1 - blk
+
+		U(row, row) = D
+		for col = row + 1: N - 1
+			U(row, col) = L * E(row + 1, col)
+
+	W1 = B( 0 )^T * T
+	D = R( 0 ) + W1 * B( 0 )
+	chol( D )
+	U(N - 1, N - 1) = D
+
+	 */
+
+	ExportVariable U, D, L;
+	U.setup("U", getNumQPvars(), getNumQPvars(), REAL, ACADO_WORKSPACE);
+	D.setup("D", NU, NU, REAL, ACADO_WORKSPACE);
+	L.setup("L", NU, NX, REAL, ACADO_WORKSPACE);
+
+	ExportFunction mac_R_BT_Q_B_D;
+
+//	condensePrep.addStatement( T== QN1 );
+	for (unsigned blk = N - 1; blk > 0; --blk)
+	{
+		unsigned row = N - 1 - blk;
+		for (unsigned col = row + 1; col < N; ++col)
+		{
+
+		}
+	}
 
 	////////////////////////////////////////////////////////////////////////////
 	//
