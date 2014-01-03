@@ -33,6 +33,7 @@
 #define ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_CN2_FACTORIZATION_HPP
 
 #include <acado/code_generation/export_nlp_solver.hpp>
+#include <acado/code_generation/linear_solvers/export_cholesky_solver.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -167,7 +168,7 @@ protected:
 	/** Variable containing the QP Hessian matrix. */
 	ExportVariable H, H00, H10, H11;
 	/** Variable containing factorization of the QP Hessian matrix; R' * R = H. */
-	ExportVariable R;
+	ExportVariable U;
 	/** Variable containing the QP constraint matrix. */
 	ExportVariable A;
 
@@ -244,7 +245,7 @@ protected:
 	ExportFunction getKKT;
 
 	// N2 condensing related
-	ExportVariable W1, W2, W3;
+	ExportVariable W1, W2;
 	ExportVariable sbar, w1, w2;
 
 	ExportFunction mult_H_W2T_W3, mac_H_W2T_W3_R, mac_W3_G_W1T_G;
@@ -252,6 +253,20 @@ protected:
 	ExportFunction multBTW1, macBTW1_R1, multGxTGu, macQEW2;
 	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macASbarD2;
 	ExportFunction expansionStep;
+
+	ExportCholeskySolver cholSolver;
+
+	ExportFunction mac_R_T2_B_D;
+	ExportFunction move_D_U;
+	ExportFunction mult_L_E_U;
+	ExportFunction updateQ;
+	ExportFunction mul_T2_A_L;
+	ExportFunction mult_BT_T1_T2;
+
+	ExportVariable D, L;
+
+	ExportVariable T1, T2;
+
 };
 
 CLOSE_NAMESPACE_ACADO

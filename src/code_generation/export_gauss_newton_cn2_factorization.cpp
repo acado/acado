@@ -98,9 +98,19 @@ returnValue ExportGaussNewtonCn2Factorization::getDataDeclarations(	ExportStatem
 	declarations.addDeclaration(Dx0, dataStruct);
 
 	declarations.addDeclaration(T, dataStruct);
+
 	declarations.addDeclaration(W1, dataStruct);
 	declarations.addDeclaration(W2, dataStruct);
+
+	declarations.addDeclaration(D, dataStruct);
+	declarations.addDeclaration(L, dataStruct);
+
+	declarations.addDeclaration(T1, dataStruct);
+	declarations.addDeclaration(T2, dataStruct);
+
 //	declarations.addDeclaration(W3, dataStruct);
+
+
 	declarations.addDeclaration(E, dataStruct);
 //	declarations.addDeclaration(QE, dataStruct);
 
@@ -121,6 +131,7 @@ returnValue ExportGaussNewtonCn2Factorization::getDataDeclarations(	ExportStatem
 	declarations.addDeclaration(pocA02Dx0, dataStruct);
 
 	declarations.addDeclaration(H, dataStruct);
+	declarations.addDeclaration(U, dataStruct);
 	declarations.addDeclaration(A, dataStruct);
 	declarations.addDeclaration(g, dataStruct);
 	declarations.addDeclaration(lb, dataStruct);
@@ -196,6 +207,15 @@ returnValue ExportGaussNewtonCn2Factorization::getCode(	ExportStatementBlock& co
 	code.addFunction( mult_H_W2T_W3 );
 	code.addFunction( mac_H_W2T_W3_R );
 	code.addFunction( mac_W3_G_W1T_G );
+
+	code.addFunction( mac_R_T2_B_D );
+	code.addFunction( move_D_U );
+	code.addFunction( mult_L_E_U );
+	code.addFunction( updateQ );
+	code.addFunction( mul_T2_A_L );
+	code.addFunction( mult_BT_T1_T2 );
+
+	cholSolver.getCode( code );
 
 //	ExportFunction multATw1Q, macBTw1, macQSbarW2, macASbarD;
 
@@ -879,15 +899,15 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 
 	/*
 
-	T = Q( N )
+	T1 = Q( N )
 	for blk = N - 1: 1
-		W1 = B( blk )^T * T
-		D = R( blk ) + W1 * B( blk )
-		L = W1 * A( blk )
+		T2 = B( blk )^T * T1
+		D = R( blk ) + T2 * B( blk )
+		L = T2 * A( blk )
 
 		chol( D )
 		L = chol_solve(D, L) // L <- D^(-T) * L
-		T = Q( blk ) - L^T * L
+		T1 = Q( blk ) - L^T * L
 
 		row = N - 1 - blk
 
@@ -895,29 +915,66 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 		for col = row + 1: N - 1
 			U(row, col) = L * E(row + 1, col)
 
-	W1 = B( 0 )^T * T
-	D = R( 0 ) + W1 * B( 0 )
+	T2 = B( 0 )^T * T1
+	D = R( 0 ) + T2 * B( 0 )
 	chol( D )
 	U(N - 1, N - 1) = D
 
 	 */
 
-	ExportVariable U, D, L;
 	U.setup("U", getNumQPvars(), getNumQPvars(), REAL, ACADO_WORKSPACE);
+
 	D.setup("D", NU, NU, REAL, ACADO_WORKSPACE);
 	L.setup("L", NU, NX, REAL, ACADO_WORKSPACE);
 
-	ExportFunction mac_R_BT_Q_B_D;
+	T1.setup("T1", NX, NX, REAL, ACADO_WORKSPACE);
+	T2.setup("T2", NU, NX, REAL, ACADO_WORKSPACE);
 
-//	condensePrep.addStatement( T== QN1 );
+	cholSolver.init(NU, NX, "condensing");
+	cholSolver.setup();
+
+//	condensePrep.addStatement( U == H );
+//	condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), U);
+//	condensePrep.addFunctionCall(cholSolver.getSolveFunction(), U, Id);
+
+	condensePrep.addStatement( T1 == QN1 );
 	for (unsigned blk = N - 1; blk > 0; --blk)
 	{
+		condensePrep.addFunctionCall(mult_BT_T1_T2, evGu.getAddress(blk * NX), T1, T2);
+		if (R1.isGiven() == true)
+			condensePrep.addFunctionCall(mac_R_T2_B_D, R1, T2, evGu.getAddress(blk * NX), D);
+		else
+			condensePrep.addFunctionCall(mac_R_T2_B_D, R1.getAddress(blk * NX), T2, evGu.getAddress(blk * NX), D);
+		condensePrep.addFunctionCall(mul_T2_A_L, T2, evGx.getAddress(blk * NX), L);
+
+		condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), D);
+		condensePrep.addFunctionCall(cholSolver.getSolveFunction(), D, L);
+
+		if (Q1.isGiven() == true)
+			condensePrep.addFunctionCall(updateQ, Q1, L, T1);
+		else
+			condensePrep.addFunctionCall(updateQ, Q1.getAddress(blk * NX), L, T1);
+
 		unsigned row = N - 1 - blk;
+
+		condensePrep.addFunctionCall(move_D_U, D, U, ExportIndex( row ));
 		for (unsigned col = row + 1; col < N; ++col)
 		{
+			// U(row, col) = L * E(row + 1, col)
 
+			// blk = (N - row) * (N - 1 - row) / 2 + (N - 1 - col)
+
+			unsigned blkE = (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col);
+			cout << "blkE " << blkE << endl;
+
+			condensePrep.addFunctionCall(mult_L_E_U, L, E.getAddress(blkE * NX), U, ExportIndex( row ), ExportIndex( col ));
 		}
 	}
+	condensePrep.addFunctionCall(mult_BT_T1_T2, evGu.getAddress( 0 ), T1, T2);
+	condensePrep.addFunctionCall(mac_R_T2_B_D, R1.getAddress( 0 ), T2, evGu.getAddress( 0 ), D);
+	condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), D);
+	condensePrep.addFunctionCall(move_D_U, D, U, ExportIndex( N - 1 ));
+
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -1405,6 +1462,44 @@ returnValue ExportGaussNewtonCn2Factorization::setupMultiplicationRoutines( )
 	expansionStep.setup("expansionStep", Gx1, Gu1, U1, w11, w12);
 	expansionStep.addStatement( w12 += Gx1 * w11 );
 	expansionStep.addStatement( w12 += Gu1 * U1 );
+
+	//
+	// Hessian factorization helper routines
+	//
+
+	ExportVariable D1("D", NU, NU, REAL, ACADO_LOCAL);
+	ExportVariable L1("L", NU, NX, REAL, ACADO_LOCAL);
+	ExportVariable H1("H", getNumQPvars(), getNumQPvars(), REAL, ACADO_LOCAL);
+
+	ExportVariable T11("T11", NX, NX, REAL, ACADO_LOCAL);
+	ExportVariable T22("T22", NU, NX, REAL, ACADO_LOCAL);
+
+//	ExportFunction mult_BT_T1_T2;
+	mult_BT_T1_T2.setup("mult_BT_T1_T2", Gu1, T11, T22);
+	mult_BT_T1_T2.addStatement( T22 == (Gu1 ^ T11) );
+
+//	ExportFunction mul_T2_A_L;
+	mul_T2_A_L.setup("mul_T2_A_L", T22, Gx1, L1);
+	mul_T2_A_L.addStatement( L1 == T22 * Gx1 );
+
+//	ExportFunction mac_R_T2_B_D;
+	mac_R_T2_B_D.setup("mac_R_T2_B_D", R11, T22, Gu1, D1);
+	mac_R_T2_B_D.addStatement( D1 == R11 + T22 * Gu1 );
+
+//	ExportFunction move_D_H;
+	move_D_U.setup("move_D_H", D1, H1, iRow);
+	move_D_U.addStatement( H1.getSubMatrix(iRow * NU, (iRow + 1) * NU, iRow * NU, (iRow + 1) * NU) == D1 );
+
+//	ExportFunction mult_L_E_H;
+	mult_L_E_U.setup("mult_L_E_H", L1, Gu1, H1, iRow, iCol);
+	mult_L_E_U.addStatement(
+			H1.getSubMatrix(iRow * NU, (iRow + 1) * NU, iCol * NU, (iCol + 1) * NU) == L1 * Gu1
+	);
+
+//	ExportFunction updateQ; T1 = Q( blk ) - L^T * L
+	updateQ.setup("updateQ", Q11, L1, T11);
+	updateQ.addStatement( T11 == Q11 );
+	updateQ.addStatement( T11 -= (L1 ^ L1) );
 
 	return SUCCESSFUL_RETURN;
 }
