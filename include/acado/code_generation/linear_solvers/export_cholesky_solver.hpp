@@ -130,6 +130,9 @@ public:
 	/** Get the reference to the Cholesky decomposition routine. */
 	const ExportFunction& getCholeskyFunction() const;
 
+	/** Get the reference to the solve function. */
+	const ExportFunction& getSolveFunction() const;
+
 private:
 
 	ExportFunction chol;

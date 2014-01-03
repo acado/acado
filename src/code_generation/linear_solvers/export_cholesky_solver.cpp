@@ -124,6 +124,32 @@ returnValue ExportCholeskySolver::setup()
 		}
 	}
 
+	/* Setup evaluation of the solve function. */
+	/* Implements R' X = B -> X = R^{-T} * B. B is replaced by the solution. */
+
+	/* solve R^T*a = b */
+
+	solve.addVariable( sum );
+
+	for (unsigned col = 0; col < nColsB; ++col)
+		for(int i = 0; i < int(nRows); ++i)
+		{
+//			sum = b[i];
+			solve.addStatement( sum == B.getElement(i, col) );
+
+			for(int j = 0; j < i; ++j)
+//				sum -= R[j*NVMAX + i] * a[j];
+				solve.addStatement( sum-= A.getElement(j, i) * B.getElement(j, col) );
+
+//			if ( getAbs( R[i*NVMAX + i] ) > ZERO )
+//				a[i] = sum / R[i*NVMAX + i];
+//			else
+//				return THROWERROR( RET_DIV_BY_ZERO );
+
+			solve << B.getElement(i, col).get(0, 0) << " = " << sum.getFullName() << " / " << A.getElement(i, i).get(0, 0) << ";\n";
+		}
+
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -154,6 +180,11 @@ returnValue ExportCholeskySolver::getFunctionDeclarations(	ExportStatementBlock&
 const ExportFunction& ExportCholeskySolver::getCholeskyFunction() const
 {
 	return chol;
+}
+
+const ExportFunction& ExportCholeskySolver::getSolveFunction() const
+{
+	return solve;
 }
 
 returnValue ExportCholeskySolver::appendVariableNames( std::stringstream& string )
