@@ -265,7 +265,7 @@ protected:
 
 	ExportVariable D, L;
 
-	ExportVariable T1, T2;
+	ExportVariable T1, T2, T3;
 
 };
 

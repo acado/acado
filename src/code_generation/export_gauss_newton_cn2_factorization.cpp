@@ -107,6 +107,7 @@ returnValue ExportGaussNewtonCn2Factorization::getDataDeclarations(	ExportStatem
 
 	declarations.addDeclaration(T1, dataStruct);
 	declarations.addDeclaration(T2, dataStruct);
+	declarations.addDeclaration(T3, dataStruct);
 
 //	declarations.addDeclaration(W3, dataStruct);
 
@@ -902,12 +903,16 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	T1 = Q( N )
 	for blk = N - 1: 1
 		T2 = B( blk )^T * T1
+
 		D = R( blk ) + T2 * B( blk )
 		L = T2 * A( blk )
 
 		chol( D )
 		L = chol_solve(D, L) // L <- D^(-T) * L
-		T1 = Q( blk ) - L^T * L
+
+		T3 = T1 * A( blk )
+		T1 = Q( blk ) + A( blk )^T * T3
+		T1 -= L^T * L
 
 		row = N - 1 - blk
 
@@ -929,6 +934,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 
 	T1.setup("T1", NX, NX, REAL, ACADO_WORKSPACE);
 	T2.setup("T2", NU, NX, REAL, ACADO_WORKSPACE);
+	T3.setup("T3", NX, NX, REAL, ACADO_WORKSPACE);
 
 	cholSolver.init(NU, NX, "condensing");
 	cholSolver.setup();
@@ -951,9 +957,9 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 		condensePrep.addFunctionCall(cholSolver.getSolveFunction(), D, L);
 
 		if (Q1.isGiven() == true)
-			condensePrep.addFunctionCall(updateQ, Q1, L, T1);
+			condensePrep.addFunctionCall(updateQ, Q1, T3, evGx.getAddress(blk * NX), L, T1);
 		else
-			condensePrep.addFunctionCall(updateQ, Q1.getAddress(blk * NX), L, T1);
+			condensePrep.addFunctionCall(updateQ, Q1.getAddress(blk * NX), T3, evGx.getAddress(blk * NX), L, T1);
 
 		unsigned row = N - 1 - blk;
 
@@ -1473,6 +1479,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupMultiplicationRoutines( )
 
 	ExportVariable T11("T11", NX, NX, REAL, ACADO_LOCAL);
 	ExportVariable T22("T22", NU, NX, REAL, ACADO_LOCAL);
+	ExportVariable T33("T33", NX, NX, REAL, ACADO_LOCAL);
 
 //	ExportFunction mult_BT_T1_T2;
 	mult_BT_T1_T2.setup("mult_BT_T1_T2", Gu1, T11, T22);
@@ -1496,9 +1503,11 @@ returnValue ExportGaussNewtonCn2Factorization::setupMultiplicationRoutines( )
 			H1.getSubMatrix(iRow * NU, (iRow + 1) * NU, iCol * NU, (iCol + 1) * NU) == L1 * Gu1
 	);
 
-//	ExportFunction updateQ; T1 = Q( blk ) - L^T * L
-	updateQ.setup("updateQ", Q11, L1, T11);
-	updateQ.addStatement( T11 == Q11 );
+//	ExportFunction updateQ; T1 = Q( blk ) + A^T * T1 * A - L^T * L
+	// Q1, T3, evGx.getAddress(blk * NX), L, T1);
+	updateQ.setup("updateQ", Q11, T33, Gx1, L1, T11);
+	updateQ.addStatement( T33 == (Gx1 ^ T11) );
+	updateQ.addStatement( T11 == Q11 + T33 * Gx1 );
 	updateQ.addStatement( T11 -= (L1 ^ L1) );
 
 	return SUCCESSFUL_RETURN;
