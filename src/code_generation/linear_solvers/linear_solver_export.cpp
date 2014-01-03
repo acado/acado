@@ -145,6 +145,12 @@ const std::string ExportLinearSolver::getNameSolveReuseFunction() {
 	return string( "solve_" ) + identifier + "system_reuse";
 }
 
+ExportVariable ExportLinearSolver::getGlobalExportVariable( const uint factor ) const
+{
+	ASSERT(1 == 0);
+	return ExportVariable();
+}
+
 
 //
 // PROTECTED MEMBER FUNCTIONS:

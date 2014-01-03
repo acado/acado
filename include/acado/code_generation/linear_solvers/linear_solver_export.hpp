@@ -180,7 +180,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *
 		 *  \return The dimension of the auxiliary variables for the linear solver.
 		 */
-		virtual ExportVariable getGlobalExportVariable( const uint factor ) const = 0;
+		virtual ExportVariable getGlobalExportVariable( const uint factor ) const;
 		
 		
 		/** Returns a boolean that is true when an extra algorithm will be exported for reuse.
