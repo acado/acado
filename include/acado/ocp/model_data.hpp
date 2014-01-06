@@ -75,12 +75,12 @@ public:
 	 *	@param[in] _NXA		Number of algebraic states.
 	 *	@param[in] _NXA3	Number of algebraic states in the linear output subsystem.
 	 *	@param[in] _NU		Number of control inputs
-	 *	@param[in] _NP		Number of parameters
 	 *	@param[in] _NOD		Number of "online data" values
+	 *	@param[in] _NP		Number of parameters
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP, uint _NOD );
+	returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NOD, uint _NP );
 
 
 	/** Adds an output function.

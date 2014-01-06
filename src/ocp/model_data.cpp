@@ -60,7 +60,7 @@ ModelData::ModelData() {
 }
 
 
-returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP, uint _NOD )
+returnValue ModelData::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NOD, uint _NP )
 {
 	NX1 = _NX1;
 	NX2 = _NX2;

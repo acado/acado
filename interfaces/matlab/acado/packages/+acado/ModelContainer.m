@@ -54,10 +54,14 @@ classdef ModelContainer < handle
         fileName;
         modelName;
         modelDiffsName;
-        NX;
+        NX1;
+        NX2;
+        NX3;
         NDX;
         NXA;
         NU;
+        NOD;
+        NP;
         
         % NARX
         delay;
@@ -174,19 +178,38 @@ classdef ModelContainer < handle
         
         function setDimensions(obj, varargin)
             
-            if (nargin == 3 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric'))
-                % SIMexport.setDimensions( NX, NU );
-                obj.NX = varargin{1};
+            if (nargin == 5 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric') && isa(varargin{3}, 'numeric') && isa(varargin{4}, 'numeric'))
+                % SIMexport.setDimensions( NX, NU, NOD, NP );
+                obj.NX1 = 0;
+                obj.NX2 = varargin{1};
+                obj.NX3 = 0;
                 obj.NDX = 0;
                 obj.NXA = 0;
                 obj.NU = varargin{2};
+                obj.NOD = varargin{3};
+                obj.NP = varargin{4};
                 
-            elseif (nargin == 5 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric') && isa(varargin{3}, 'numeric') && isa(varargin{4}, 'numeric'))
-                % SIMexport.setDimensions( NX, NDX, NXA, NU );
-                obj.NX = varargin{1};
+            elseif (nargin == 7 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric') && isa(varargin{3}, 'numeric') && isa(varargin{4}, 'numeric') && isa(varargin{5}, 'numeric') && isa(varargin{6}, 'numeric'))
+                % SIMexport.setDimensions( NX, NDX, NXA, NU, NOD, NP );
+                obj.NX1 = 0;
+                obj.NX2 = varargin{1};
+                obj.NX3 = 0;
                 obj.NDX = varargin{2};
                 obj.NXA = varargin{3};
                 obj.NU = varargin{4};
+                obj.NOD = varargin{5};
+                obj.NP = varargin{6};
+                
+            elseif (nargin == 9 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'numeric') && isa(varargin{3}, 'numeric') && isa(varargin{4}, 'numeric') && isa(varargin{5}, 'numeric') && isa(varargin{6}, 'numeric') && isa(varargin{7}, 'numeric') && isa(varargin{8}, 'numeric'))
+                % SIMexport.setDimensions( NX1, NX2, NX3, NDX, NXA, NU, NOD, NP );
+                obj.NX1 = varargin{1};
+                obj.NX2 = varargin{2};
+                obj.NX3 = varargin{3};
+                obj.NDX = varargin{4};
+                obj.NXA = varargin{5};
+                obj.NU = varargin{6};
+                obj.NOD = varargin{7};
+                obj.NP = varargin{8};
                 
             else
                 error('ERROR: Invalid call to setDimensions.');
@@ -214,39 +237,39 @@ classdef ModelContainer < handle
                 if (~isempty(obj.model) && ~acadoDefined(obj.model))
                     obj.model.getInstructions(cppobj, get);
                 end
-                if (~isempty(obj.model) || obj.linearInput || obj.linearOutput)
-                    if obj.linearInput
-                        if ~isempty(obj.M1)
-                            fprintf(cppobj.fileMEX,sprintf('    %s.setLinearInput( %s, %s, %s );\n', obj.name, obj.M1.name, obj.A1.name, obj.B1.name));
-                        else
-                            fprintf(cppobj.fileMEX,sprintf('    %s.setLinearInput( %s, %s );\n', obj.name, obj.A1.name, obj.B1.name));
-                        end
+                if obj.linearInput
+                    if ~isempty(obj.M1)
+                        fprintf(cppobj.fileMEX,sprintf('    %s.setLinearInput( %s, %s, %s );\n', obj.name, obj.M1.name, obj.A1.name, obj.B1.name));
+                    else
+                        fprintf(cppobj.fileMEX,sprintf('    %s.setLinearInput( %s, %s );\n', obj.name, obj.A1.name, obj.B1.name));
                     end
+                end
+                if (~isempty(obj.model))
                     if (~isempty(obj.model))
                         fprintf(cppobj.fileMEX,sprintf('    %s.setModel( %s );\n', obj.name, obj.model.name));
                     elseif (~isempty(obj.params))
                         fprintf(cppobj.fileMEX,sprintf('    %s.setNARXmodel( %d, %s );\n', obj.name, round(obj.delay), obj.params.name));
                     end
-                    if obj.linearOutput
-                        obj.fun3.getInstructions(cppobj, get);
-                        if ~isempty(obj.M3)
-                            fprintf(cppobj.fileMEX,sprintf('    %s.setLinearOutput( %s, %s, %s );\n', obj.name, obj.M3.name, obj.A3.name, obj.fun3.name));
-                        else
-                            fprintf(cppobj.fileMEX,sprintf('    %s.setLinearOutput( %s, %s );\n', obj.name, obj.A3.name, obj.fun3.name));
-                        end
-                    end
                     
                 elseif (~isempty(obj.fileName) && ~isempty(obj.modelName) && ~isempty(obj.modelDiffsName))
                     fprintf(cppobj.fileMEX,sprintf('    %s.setModel( "%s", "%s", "%s" );\n', obj.name, obj.fileName, obj.modelName, obj.modelDiffsName));
-                    if (isempty(obj.NX) || isempty(obj.NDX) || isempty(obj.NXA) || isempty(obj.NU))
+                    if (isempty(obj.NX1) || isempty(obj.NX2) || isempty(obj.NX3) || isempty(obj.NDX) || isempty(obj.NXA) || isempty(obj.NU) || isempty(obj.NOD) || isempty(obj.NP))
                         error('ERROR: You need to provide the dimensions of the external model !\n');
                     else
-                        fprintf(cppobj.fileMEX,sprintf('    %s.setDimensions( %s, %s, %s, %s );\n', obj.name, num2str(obj.NX), num2str(obj.NDX), num2str(obj.NXA), num2str(obj.NU)));
+                        fprintf(cppobj.fileMEX,sprintf('    %s.setDimensions( %s, %s, %s, %s, %s, %s, %s, %s );\n', obj.name, num2str(obj.NX1), num2str(obj.NX2), num2str(obj.NX3), num2str(obj.NDX), num2str(obj.NXA), num2str(obj.NU), num2str(obj.NOD), num2str(obj.NP)));
                     end
                 else
                     % The model should then be defined elsewhere, e.g. with
                     % subjectTo in OCP
 %                     error('ERROR: Invalid ModelContainer object in getInstructions !\n');
+                end
+                if obj.linearOutput
+                    obj.fun3.getInstructions(cppobj, get);
+                    if ~isempty(obj.M3)
+                        fprintf(cppobj.fileMEX,sprintf('    %s.setLinearOutput( %s, %s, %s );\n', obj.name, obj.M3.name, obj.A3.name, obj.fun3.name));
+                    else
+                        fprintf(cppobj.fileMEX,sprintf('    %s.setLinearOutput( %s, %s );\n', obj.name, obj.A3.name, obj.fun3.name));
+                    end
                 end
                 
                 fprintf(cppobj.fileMEX,'\n');
