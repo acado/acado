@@ -480,9 +480,11 @@ returnValue acadoCreateFolder(const char* name)
 {
 #if defined( __WIN32__ ) || defined( WIN32 )
 
-	if ( _mkdir( name) )
+	int status = _mkdir( name );
+	errno_t err;
+	_get_errno( &err );
+	if (status && err != EEXIST)
 	{
-		// TODO give here an error code
 		LOG( LVL_ERROR ) << "Problem creating directory " << name << endl;
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 	}
