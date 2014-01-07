@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -180,7 +180,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *
 		 *  \return The dimension of the auxiliary variables for the linear solver.
 		 */
-		virtual ExportVariable getGlobalExportVariable( const uint factor ) const = 0;
+		virtual ExportVariable getGlobalExportVariable( const uint factor ) const;
 		
 		
 		/** Returns a boolean that is true when an extra algorithm will be exported for reuse.

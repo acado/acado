@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -132,6 +132,7 @@ returnValue ExportArgumentList::exportCode(	std::ostream& stream,
 											int _precision
 											) const
 {
+	bool started = false;
 	for (unsigned i = 0; i < arguments.size(); ++i)
 	{
 		// Allow only undefined arguments and defined integer scalars
@@ -141,6 +142,9 @@ returnValue ExportArgumentList::exportCode(	std::ostream& stream,
 				arguments[ i ].getType() != STATIC_CONST_REAL
 				)
 			continue;
+
+		if (i > 0 && started == true)
+			stream << ", ";
 
 		if ( includeType == true )
 		{
@@ -155,8 +159,7 @@ returnValue ExportArgumentList::exportCode(	std::ostream& stream,
 		else
 			stream << arguments[ i ].getAddressString( false );
 
-		if (i < arguments.size() - 1)
-			stream << ", ";
+		started = true;
 	}
 
 	return SUCCESSFUL_RETURN;

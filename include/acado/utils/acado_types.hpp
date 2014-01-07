@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -734,7 +734,8 @@ enum SparseQPsolutionMethods
 	SPARSE_SOLVER,
 	CONDENSING,
 	FULL_CONDENSING,
-	FULL_CONDENSING_N2
+	FULL_CONDENSING_N2,
+	FULL_CONDENSING_N2_FACTORIZATION
 };
 
 

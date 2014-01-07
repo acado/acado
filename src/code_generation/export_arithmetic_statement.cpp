@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -339,7 +339,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 	//
 	bool optimizationsAllowed =
 			rhs1->isGiven() == false && rhs2->isGiven() == false;
-	if (rhs3.getDim() > 0)
+	if (op2 == ESO_ADD || op2 == ESO_SUBTRACT)
 		optimizationsAllowed &= rhs3.isGiven() == false;
 
 	//
@@ -397,16 +397,14 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 					}
 				}
 
-				if ( ( op2 == ESO_ADD ) || ( op2 == ESO_SUBTRACT ) )
-					stream << " + " << rhs3->get(ii, j) << ";\n";
+				if (op2 == ESO_ADD)
+					stream << " + " << rhs3->get(ii, j);
+				if (op2 == ESO_SUBTRACT)
+					stream << " - " << rhs3->get(ii, j);
+				if (op2 == ESO_UNDEFINED && allZero == true)
+					stream << " 0.0;\n";
 
-				if ( op2 == ESO_UNDEFINED )
-				{
-					if ( allZero == true )
-						stream << " 0.0;\n";
-					else
-						stream << ";\n";
-				}
+				stream << ";\n";
 			}
 		}
 	}

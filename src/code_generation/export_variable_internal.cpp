@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -124,8 +124,13 @@ const std::string ExportVariableInternal::get(	const ExportIndex& rowIdx,
 												) const
 {
 	stringstream s;
-	s.precision( 16 );
-	s << scientific;
+
+	IoFormatter iof( s );
+
+	iof.set(	getType() == INT || getType() == STATIC_CONST_INT ? 5 : 16,
+				iof.width,
+				getType() == INT || getType() == STATIC_CONST_INT ? ios::fixed : ios::scientific
+				);
 
 	ExportIndex totalIdx = getTotalIdx(rowIdx + rowOffset, colIdx + colOffset);
 

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -268,7 +268,8 @@ returnValue GenericMatrix< T >::print(	std::ostream& _stream,
 
 	_stream << _startString;
 
-	iof.set(_precision > 0 ? _precision : iof.precision, _width, _precision > 0 ? ios::scientific | ios::right : iof.flags);
+	iof.set(_precision > 0 ? _precision :
+			iof.precision, _width, _precision > 0 ? ios::scientific | ios::right : ios::fixed);
 
 	for (unsigned r = 0; r < Base::rows(); ++r)
 	{

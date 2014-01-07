@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -823,8 +823,6 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	// Extract box constraints on states
 	//
 	boxConIsFinite = false;
-	xBoundsIdx.clear();
-
 	for (unsigned i = 0; i < tmp.x->getNumPoints(); ++i)
 	{
 		lbTmp = tmp.x->getLowerBounds( i );
@@ -835,18 +833,6 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 		if (isFinite( lbTmp ) || isFinite( ubTmp ))
 			boxConIsFinite = true;
-
-		// This is maybe not necessary
-		if (boxConIsFinite == false || i == 0)
-			continue;
-
-		for (unsigned j = 0; j < lbTmp.getDim(); ++j)
-		{
-			if ( ( acadoIsFinite( ubTmp( j ) ) == true ) || ( acadoIsFinite( lbTmp( j ) ) == true ) )
-			{
-				xBoundsIdx.push_back(i * lbTmp.getDim() + j);
-			}
-		}
 	}
 
 	if ( boxConIsFinite == true )

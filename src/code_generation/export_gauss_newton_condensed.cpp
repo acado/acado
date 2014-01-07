@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -628,21 +628,20 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 
 		if (numOps < 1024)
 		{
-			for(unsigned ii = 0; ii < numStateBounds; ++ii)
+			for(unsigned row = 0; row < numStateBounds; ++row)
 			{
-				unsigned row = xBoundsIdx[ ii ] - NX;
+				unsigned conIdx = xBoundsIdx[ row ] - NX;
 
 				if (performFullCondensing() == false)
-					condensePrep.addStatement( A.getSubMatrix(ii, ii + 1, 0, NX) == evGx.getRow( row ) );
+					condensePrep.addStatement( A.getSubMatrix(row, row + 1, 0, NX) == evGx.getRow( conIdx ) );
 
-				unsigned jj;
-				unsigned blockRow = row / NX;
-				for (jj = 0; jj <= blockRow; ++jj)
+				unsigned blk = conIdx / NX + 1;
+				for (unsigned col = 0; col < blk; ++col)
 				{
-					unsigned ind = ((blockRow + 1) * blockRow / 2 + jj) * NX + row % NX;
+					unsigned blkRow = (blk * (blk - 1) / 2 + col) * NX + conIdx % NX;
 
 					condensePrep.addStatement(
-							A.getSubMatrix(ii, ii + 1, offset + jj * NU, offset + (jj + 1) * NU ) == E.getRow( ind ) );
+							A.getSubMatrix(row, row + 1, offset + col * NU, offset + (col + 1) * NU ) == E.getRow( blkRow ) );
 				}
 
 				condensePrep.addLinebreak();
@@ -657,36 +656,28 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 
 			condensePrep.addVariable( evXBounds );
 
-			ExportIndex ii, jj, row, blk, ind;
+			ExportIndex row, col, conIdx, blk, blkRow;
 
-			condensePrep.acquire( ii );
-			condensePrep.acquire( jj );
-			condensePrep.acquire( row );
-			condensePrep.acquire( blk );
-			condensePrep.acquire( ind );
+			condensePrep.acquire( row ).acquire( col ).acquire( conIdx ).acquire( blk ).acquire( blkRow );
 
-			ExportForLoop eLoopI(ii, 0, numStateBounds);
+			ExportForLoop lRow(row, 0, numStateBounds);
 
-			eLoopI << row.getFullName() << " = " << evXBounds.getFullName() << "[ " << ii.getFullName() << " ] - " << toString(NX) << ";\n";
-			eLoopI.addStatement( blk == row / NX + 1 );
+			lRow << conIdx.getFullName() << " = " << evXBounds.getFullName() << "[ " << row.getFullName() << " ] - " << toString(NX) << ";\n";
+			lRow.addStatement( blk == conIdx / NX + 1);
 
 			if (performFullCondensing() == false)
-				eLoopI.addStatement( A.getSubMatrix(ii, ii + 1, 0, NX) == evGx.getRow( row ) );
+				lRow.addStatement( A.getSubMatrix(row, row + 1, 0, NX) == evGx.getRow( conIdx ) );
 
-			ExportForLoop eLoopJ(jj, 0, blk);
+			ExportForLoop lCol(col, 0, blk);
 
-			eLoopJ.addStatement( ind == (blk * (blk - 1) / 2 + jj ) * NX + row % NX );
-			eLoopJ.addStatement(
-					A.getSubMatrix(ii, ii + 1, offset + jj * NU, offset + (jj + 1) * NU ) == E.getRow( ind ) );
+			lCol.addStatement( blkRow == (blk * (blk - 1) / 2 + col ) * NX + conIdx % NX );
+			lCol.addStatement(
+					A.getSubMatrix(row, row + 1, offset + col * NU, offset + (col + 1) * NU ) == E.getRow( blkRow ) );
 
-			eLoopI.addStatement( eLoopJ );
-			condensePrep.addStatement( eLoopI );
+			lRow.addStatement( lCol );
+			condensePrep.addStatement( lRow );
 
-			condensePrep.release( ii );
-			condensePrep.release( jj );
-			condensePrep.release( row );
-			condensePrep.release( blk );
-			condensePrep.release( ind );
+			condensePrep.release( row ).release( col ).release( conIdx ).release( blk ).release( blkRow );
 		}
 		condensePrep.addLinebreak( );
 
@@ -1993,6 +1984,37 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 
 returnValue ExportGaussNewtonCondensed::setupVariables( )
 {
+	////////////////////////////////////////////////////////////////////////////
+	//
+	// Make index vector for state constraints
+	//
+	////////////////////////////////////////////////////////////////////////////
+
+	bool boxConIsFinite = false;
+	xBoundsIdx.clear();
+
+	DVector lbBox, ubBox;
+	for (unsigned i = 0; i < xBounds.getNumPoints(); ++i)
+	{
+		lbBox = xBounds.getLowerBounds( i );
+		ubBox = xBounds.getUpperBounds( i );
+
+		if (isFinite( lbBox ) || isFinite( ubBox ))
+			boxConIsFinite = true;
+
+		// This is maybe not necessary
+		if (boxConIsFinite == false || i == 0)
+			continue;
+
+		for (unsigned j = 0; j < lbBox.getDim(); ++j)
+		{
+			if ( ( acadoIsFinite( ubBox( j ) ) == true ) || ( acadoIsFinite( lbBox( j ) ) == true ) )
+			{
+				xBoundsIdx.push_back(i * lbBox.getDim() + j);
+			}
+		}
+	}
+
 	if (initialStateFixed() == true)
 	{
 		x0.setup("x0",  NX, 1, REAL, ACADO_VARIABLES);
