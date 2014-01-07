@@ -1,6 +1,4 @@
-clc;
-clear all;
-close all;
+function [] = generate_code
 
 Ts = 1e-3;   % 1 ms
 EXPORT = 1;
@@ -103,3 +101,4 @@ if EXPORT
     cd ..
 end
 
+end

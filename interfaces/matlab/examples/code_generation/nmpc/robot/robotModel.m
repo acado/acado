@@ -95,7 +95,7 @@ end
 %
 function sys=mdlOutputs(t,x,u)
 
-states = integrate(u(1:5),u(6:7));
+states = integrate_robot(u(1:5),u(6:7));
 
 sys = states.value;
     

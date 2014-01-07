@@ -2,7 +2,7 @@ clear all;
 close all;
 clc;
 
-RECOMPILE = 0;
+RECOMPILE = 1;
 
 % generate and compile the ACADO NMPC controller
 if RECOMPILE
