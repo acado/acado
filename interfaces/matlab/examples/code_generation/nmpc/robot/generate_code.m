@@ -32,7 +32,6 @@ if EXPORT
     
     cd export_sim
     make_acado_integrator('../integrate_robot')
-    make_acado_model('../rhs_robot')
     cd ..
 end
 
@@ -47,13 +46,6 @@ for i = 1:N
     t1 = t1+toc;
     xs(:,i+1) = states.value;
 end
-
-options = odeset('RelTol',1e-12,'AbsTol',1e-12);
-[tout exact] = ode45(@(t, y) rhs_robot(t, y, u),[0:Ts:N*Ts],x,options);
-exact = exact';
-
-format long e
-mean_error = mean(mean(abs(xs(:,2:end)-exact(:,2:end))./abs(exact(:,2:end))))
 
 %% MPCexport
 fprintf('----------------------------\n         MPCexport         \n----------------------------\n');

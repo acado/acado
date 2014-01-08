@@ -55,7 +55,6 @@ if EXPORT
     
     cd export_SIM
     make_acado_integrator('../integrate_crane')
-    make_acado_model('../rhs_crane')
     cd ..
 end
 

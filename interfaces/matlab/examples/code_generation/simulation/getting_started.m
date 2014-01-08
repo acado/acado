@@ -28,24 +28,28 @@ sim.exportCode('getting_started_export');
 
 cd getting_started_export
 make_acado_integrator('../integrate_getting_started')
-make_acado_model('../rhs_getting_started')
+cd ..
+
+%% SIMexport: a more accurate integrator as a reference
+sim.set( 'NUM_INTEGRATOR_STEPS',        20              );
+sim.exportCode('getting_started_export');
+
+cd getting_started_export
+make_acado_integrator('../integrate_getting_started2')
 cd ..
 
 %% simulation (test results):
 mu = 0.5;
-x = [-0.683; -0.864]; xs = x;
+x = [-0.683; -0.864]; xs = x; xs2 = x;
 u = 2;
 for i = 1:N
-    states = integrate_getting_started(xs(:,end),u,mu);
+    states = integrate_getting_started(xs2(:,end),u,mu);
     xs(:,i+1) = states.value;
+    
+    states = integrate_getting_started2(xs2(:,end),u,mu);
+    xs2(:,end+1) = states.value;
 end
-
-options = odeset('RelTol',1e-12,'AbsTol',1e-12);
-[tout exact] = ode45(@(t, y) rhs_getting_started(t, y, u, mu),[0:h:N*h],x,options);
-exact = exact';
-
-format long e
-mean_error = mean(mean(abs(xs(:,2:end)-exact(:,2:end))./abs(exact(:,2:end))))
+mean_error = mean(abs(xs(:,2:end)-xs2(:,2:end))./abs(xs2(:,2:end)))
 
 figure(1);
 subplot(2,1,1);

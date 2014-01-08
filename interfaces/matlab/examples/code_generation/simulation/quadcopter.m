@@ -66,7 +66,6 @@ if EXPORT
     
     cd quadcopter_export
     make_acado_integrator('../integrate_quadcopter')
-    make_acado_model('../rhs_quadcopter')
     cd ..
 end
 
@@ -126,7 +125,6 @@ if EXPORT
     
     cd quadcopter_export
     make_acado_integrator('../integrate_quadcopter2')
-    make_acado_model('../rhs_quadcopter2')
     cd ..
 end
 
@@ -146,16 +144,13 @@ end
 time2 = toc/T;
 
 states = integrate_quadcopter(X0', U);
-f = rhs_quadcopter(0, X0', U);
 
 states2 = integrate_quadcopter2(X0', U);
-f2 = rhs_quadcopter2(0, X0', U);
 
 err_int = max(abs(states.value-states2.value)) + max(max(abs(states.sensX-states2.sensX))) + ...
     max(max(abs(states.sensU-states2.sensU)));
-err_rhs = max(abs(f-f2));
 
-if( (err_int+err_rhs) > 1e-6 )
+if( err_int > 1e-6 )
     error('Unusual mismatch between nonlinear and 3-stage model !')
 else
     disp('Small, numerically justifiable mismatch between nonlinear and 3-stage model !')
