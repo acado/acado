@@ -576,39 +576,6 @@ returnValue IntegratorExport::propagateOutputSystem(	ExportStatementBlock* block
 }
 
 
-returnValue IntegratorExport::prepareFullRhs( ) {
-
-	uint i, j;
-	// PART 1:
-	for( i = 0; i < NX1; i++ ) {
-		fullRhs.addStatement( rhs_out.getRow(i) == A11(i,0)*rhs_in.getRow(0) );
-		for( j = 1; j < NX1; j++ ) {
-			if( acadoRoundAway(A11(i,j)) != 0 ) {
-				fullRhs.addStatement( rhs_out.getRow(i) += A11(i,j)*rhs_in.getRow(j) );
-			}
-		}
-		for( j = 0; j < NU; j++ ) {
-			if( acadoRoundAway(B11(i,j)) != 0 ) {
-				fullRhs.addStatement( rhs_out.getRow(i) += B11(i,j)*rhs_in.getRow(NX+NXA+j) );
-			}
-		}
-	}
-
-	// PART 2:
-	if( NX2 > 0 ) {
-		fullRhs.addFunctionCall( getNameRHS(), rhs_in, rhs_out.getAddress(NX1,0) );
-	}
-
-	// PART 3:
-	if( NX3 > 0 ) {
-		fullRhs.addFunctionCall( getNameOutputRHS(), rhs_in, rhs_out.getAddress(NX1+NX2,0) );
-	}
-
-
-	return SUCCESSFUL_RETURN;
-}
-
-
 
 // PROTECTED:
 

@@ -404,11 +404,6 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 
 	code.addFunction( integrate );
 
-	if( NX2 != NX ) {
-		prepareFullRhs();
-		code.addFunction( fullRhs );
-	}
-
 	return SUCCESSFUL_RETURN;
 }
 

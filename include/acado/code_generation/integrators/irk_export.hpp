@@ -458,13 +458,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		returnValue prepareOutputEvaluation( 	ExportStatementBlock& code );
 
 
-		/** Prepares a function that evaluates the complete right-hand side.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue prepareFullRhs( );
-
-
 		/** Exports the necessary code for the computation of the continuous output.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.

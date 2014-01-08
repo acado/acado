@@ -401,13 +401,6 @@ class IntegratorExport : public ExportAlgorithm
 		virtual returnValue clear( );
 
 
-		/** Prepares a function that evaluates the complete right-hand side.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue prepareFullRhs( );
-
-
 		/**	Get the index of the integration interval, corresponding a certain time.
 		 *
 		 * 	@param[in] time		The time.

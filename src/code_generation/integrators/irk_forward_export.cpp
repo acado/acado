@@ -526,11 +526,6 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	code.addFunction( integrate );
     code.addLinebreak( 2 );
 
-	if( NX2 != NX ) {
-		prepareFullRhs();
-		code.addFunction( fullRhs );
-	}
-
     return SUCCESSFUL_RETURN;
 }
 

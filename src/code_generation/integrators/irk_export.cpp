@@ -497,11 +497,6 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	code.addFunction( integrate );
     code.addLinebreak( 2 );
 
-	if( NX2 != NX ) {
-		prepareFullRhs();
-		code.addFunction( fullRhs );
-	}
-
     return SUCCESSFUL_RETURN;
 }
 
@@ -1416,62 +1411,6 @@ returnValue ImplicitRungeKuttaExport::prepareOutputEvaluation( ExportStatementBl
 			numMeasVariables.push_back( numMeasVariable );
 		}
 	}
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue ImplicitRungeKuttaExport::prepareFullRhs( ) {
-
-	uint i, j;
-	// PART 1:
-	for( i = 0; i < NX1; i++ ) {
-		fullRhs.addStatement( rhs_out.getRow(i) == A11(i,0)*rhs_in.getRow(0) );
-		for( j = 1; j < NX1; j++ ) {
-			if( acadoRoundAway(A11(i,j)) != 0 ) {
-				fullRhs.addStatement( rhs_out.getRow(i) += A11(i,j)*rhs_in.getRow(j) );
-			}
-		}
-		for( j = 0; j < NU; j++ ) {
-			if( acadoRoundAway(B11(i,j)) != 0 ) {
-				fullRhs.addStatement( rhs_out.getRow(i) += B11(i,j)*rhs_in.getRow(NX+NXA+j) );
-			}
-		}
-		// TODO: what if M11 is not an identity matrix?
-/*		for( j = 0; j < NX1; j++ ) {
-			if( acadoRoundAway(M11(i,j)) != 0 ) {
-				fullRhs.addStatement( rhs_out.getRow(i) -= M11(i,j)*rhs_in.getRow(NX+NXA+NU+j) );
-			}
-		}*/
-	}
-
-	// PART 2:
-	if( NX2 > 0 ) {
-		fullRhs.addFunctionCall( getNameRHS(), rhs_in, rhs_out.getAddress(NX1,0) );
-		// TODO: what if the nonlinear system part is implicit?
-/*		if( NDX2 > 0 ) {
-			fullRhs.addStatement( rhs_out.getRows(NX1,NX1+NX2) -= rhs_in.getRows(NX+NXA+NU+NX1,NX+NXA+NU+NX1+NX2) );
-		}*/
-		if( NX3 > 0 ) {
-			for( i = 0; i < NXA; i++ ) {
-				fullRhs.addStatement( rhs_out.getRow(NX+i) == rhs_out.getRow(NX1+NX2+i) );
-			}
-		}
-	}
-
-	// PART 3:
-	if( NX3 > 0 ) {
-		fullRhs.addFunctionCall( getNameOutputRHS(), rhs_in, rhs_out.getAddress(NX1+NX2,0) );
-		// TODO: what if M33 is not an identity matrix?
-/*		for( i = 0; i < NX3; i++ ) {
-			for( j = 0; j < NX3; j++ ) {
-				if( acadoRoundAway(M33(i,j)) != 0 ) {
-					fullRhs.addStatement( rhs_out.getRow(NX1+NX2+i) -= M33(i,j)*rhs_in.getRow(NX+NXA+NU+NX1+NX2+j) );
-				}
-			}
-		}*/
-	}
-
 
 	return SUCCESSFUL_RETURN;
 }

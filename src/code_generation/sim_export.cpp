@@ -163,14 +163,15 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 			integrateInterface = dirName + std::string("/make_acado_integrator.m");
 			acadoCopyTempateFile(MAKE_MEX_INTEGRATOR, integrateInterface, "%", true);
 
-			std::string rhsInterface = dirName;
-			rhsInterface += "/acado_rhs.c";
-			ExportMatlabRhs exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun2.configure(integrator->getNameFullRHS());
-			exportMexFun2.exportCode();
-
-			rhsInterface = dirName + std::string("/make_acado_model.m");
-			acadoCopyTempateFile(MAKE_MEX_MODEL, rhsInterface, "%", true);
+			// NOT SUPPORTED ANYMORE:
+//			std::string rhsInterface = dirName;
+//			rhsInterface += "/acado_rhs.c";
+//			ExportMatlabRhs exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
+//			exportMexFun2.configure(integrator->getNameFullRHS());
+//			exportMexFun2.exportCode();
+//
+//			rhsInterface = dirName + std::string("/make_acado_model.m");
+//			acadoCopyTempateFile(MAKE_MEX_MODEL, rhsInterface, "%", true);
 		}
 	}
 
