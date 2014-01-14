@@ -195,8 +195,11 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 		u = Control("", NU, 1);
 		od = OnlineData("", NOD, 1);
 
+		if( (uint)f.getNX() > (NX1+NX2) ) {
+			return ACADOERROR( RET_INVALID_LINEAR_OUTPUT_FUNCTION );
+		}
 		if( (uint)f.getNDX() > (NX1+NX2) ) {
-			return ACADOERROR( RET_INVALID_OPTION );
+			return ACADOERROR( RET_INVALID_LINEAR_OUTPUT_FUNCTION );
 		}
 		if( f.getNDX() > 0 ) NDX3 = NX1+NX2;
 		else NDX3 = 0;
@@ -204,7 +207,7 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 		dx = DifferentialStateDerivative("", NDX3, 1);
 
 		if( f.getNXA() > 0 && NXA == 0 ) {
-			return ACADOERROR( RET_INVALID_OPTION );
+			return ACADOERROR( RET_INVALID_LINEAR_OUTPUT_FUNCTION );
 		}
 		if( f.getNXA() > 0 ) NXA3 = NXA;
 		else NXA3 = 0;
