@@ -807,11 +807,13 @@ returnValue SIMexport::exportAcadoHeader(	const std::string& _dirName,
 	options[ "ACADO_NOD" ]  = make_pair(toString( getNOD() ),  "Number of online data values.");
 	options[ "ACADO_NUMOUT" ]  = make_pair(toString( nOutV.getDim() ),  "Number of output functions.");
 
-	std::ostringstream acado_nout;
-	ExportVariable( "ACADO_NOUT",nOutV,STATIC_CONST_INT ).exportDataDeclaration(acado_nout);
-	std::ostringstream acado_nmeas;
-	ExportVariable( "ACADO_NMEAS",nMeasV,STATIC_CONST_INT ).exportDataDeclaration(acado_nmeas);
-	options[ "ACADO_OUTPUTS_DEFINED" ]  = make_pair("\n" + acado_nout.str() + acado_nmeas.str(),  "Dimension and measurements of the output functions per shooting interval.");
+	if( !nMeasV.isEmpty() && !nOutV.isEmpty() ) {
+		std::ostringstream acado_nout;
+		ExportVariable( "ACADO_NOUT",nOutV,STATIC_CONST_INT ).exportDataDeclaration(acado_nout);
+		std::ostringstream acado_nmeas;
+		ExportVariable( "ACADO_NMEAS",nMeasV,STATIC_CONST_INT ).exportDataDeclaration(acado_nmeas);
+		options[ "ACADO_OUTPUTS_DEFINED" ]  = make_pair("\n" + acado_nout.str() + acado_nmeas.str(),  "Dimension and measurements of the output functions per shooting interval.");
+	}
 
 	//
 	// ACADO variables and workspace
