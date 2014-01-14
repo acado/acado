@@ -331,7 +331,11 @@ RET_ONLY_EQUIDISTANT_GRID_FOR_CODE_EXPORT,		/**< Only equidistant evaluation gri
 RET_ONLY_BOUNDS_FOR_CODE_EXPORT,				/**< Only state and control bounds supported for code generation. */
 RET_QPOASES_EMBEDDED_NOT_FOUND,					/**< Embedded qpOASES code not found. */
 RET_UNABLE_TO_EXPORT_STATEMENT,					/**< Unable to export statement due to incomplete definition. */
-RET_INVALID_CALL_TO_EXPORTED_FUNCTION			/**< Invalid call to export functions (check number of calling arguments). */
+RET_INVALID_CALL_TO_EXPORTED_FUNCTION,			/**< Invalid call to export functions (check number of calling arguments). */
+
+
+/* EXPORTED INTEGRATORS */
+RET_INVALID_LINEAR_OUTPUT_FUNCTION				/**< Invalid definition of the nonlinear function in a linear output system. */
 };
 
 
