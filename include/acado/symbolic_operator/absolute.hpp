@@ -26,9 +26,9 @@
 
 
 /**
-*    \file include/acado/symbolic_expression/acos.hpp
-*    \author Boris Houska, Hans Joachim Ferreau
-*    \date 2008
+*    \file include/acado/symbolic_expression/absolute.hpp
+*    \author Torstein Ingebrigtsen Bø
+*    \date 2014
 */
 
 
@@ -43,14 +43,14 @@ BEGIN_NAMESPACE_ACADO
 
 
 /**
- *	\brief Implements the scalar inverse cosine operator (arccos) within the symbolic operators family.
+ *	\brief Implements the scalar absolute function within the symbolic operators family.
  *
  *	\ingroup BasicDataStructures
  *
- *	The class Absolute implements the scalar inverse cosine operator (arccos) within the
+ *	The class Absolute implements the absolute function within the
  *	symbolic operators family.
  *
- *	\author Boris Houska, Hans Joachim Ferreau
+ *	\author Torstein Ingebrigtsen Bø
  */
 class Absolute : public UnaryOperator{
 

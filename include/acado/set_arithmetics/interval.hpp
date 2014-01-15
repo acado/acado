@@ -95,7 +95,6 @@ class Interval{
   friend double mid ( const Interval& );
   friend double mid ( const double, const double, const double, int& );
 
-  //friend Interval abs ( const Interval& );
   friend Interval sign( const Interval& );
   friend Interval inv ( const Interval& );
   friend Interval sqr ( const Interval& );

@@ -24,9 +24,9 @@
  */
 
 /**
- *    \file src/symbolic_operator/asin.cpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 2008
+ *    \file src/symbolic_operator/sign.cpp
+ *    \author Torstein Ingebrigtsen Bø
+ *    \date 2014
  */
 
 #include <acado/utils/acado_utils.hpp>

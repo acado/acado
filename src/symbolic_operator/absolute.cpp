@@ -24,9 +24,9 @@
  */
 
 /**
- *    \file src/symbolic_operator/asin.cpp
+ *    \file src/symbolic_operator/absolute.cpp
  *    \author Torstein Ingebrigtsen Bø
- *    \date 2013
+ *    \date 2014
  */
 
 #include <acado/utils/acado_utils.hpp>

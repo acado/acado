@@ -961,10 +961,10 @@ returnValue QProblemB::getDualSolution( real_t* const yOpt ) const
  */
 returnValue QProblemB::setPrintLevel( PrintLevel _printLevel )
 {
-//	#ifndef __MATLAB__
-//	if ( ( options.printLevel == PL_HIGH ) && ( options.printLevel != _printLevel ) )
-//		THROWINFO( RET_PRINTLEVEL_CHANGED );
-//	#endif
+	#ifndef __MATLAB__
+	if ( ( options.printLevel == PL_HIGH ) && ( options.printLevel != _printLevel ) )
+		THROWINFO( RET_PRINTLEVEL_CHANGED );
+	#endif
 
 	options.printLevel = _printLevel;
 
