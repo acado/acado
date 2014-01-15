@@ -64,7 +64,7 @@ static const char* autogenerationNotice[ AUTOGEN_NOTICE_LENGTH ] =
 		"\n",
 		"ACADO Code Generation tool is a sub-package of ACADO toolkit --\n",
 		"A Toolkit for Automatic Control and Dynamic Optimization.\n",
-		"Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,\n",
+		"Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,\n",
 		"Milan Vukov, Rien Quirynen, KU Leuven.\n",
 		"Developed within the Optimization in Engineering Center (OPTEC)\n",
 		"under supervision of Moritz Diehl. All rights reserved.\n",
@@ -305,7 +305,7 @@ returnValue acadoPrintCopyrightNotice(	const std::string& subpackage
 {
 	if (subpackage.empty())
 		cout << "\nACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.\n" \
-				"Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,\n" \
+				"Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,\n" \
 				"Milan Vukov, Rien Quirynen, KU Leuven.\n" \
 				"Developed within the Optimization in Engineering Center (OPTEC)\n" \
 				"under supervision of Moritz Diehl. All rights reserved.\n\n" \
@@ -316,7 +316,7 @@ returnValue acadoPrintCopyrightNotice(	const std::string& subpackage
 				"GNU Lesser General Public License for more details.\n\n";
 	else
 		cout << "\nACADO Toolkit::" << subpackage << endl
-			 << "Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,\n" \
+			 << "Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,\n" \
 				"Milan Vukov, Rien Quirynen, KU Leuven.\n" \
 				"Developed within the Optimization in Engineering Center (OPTEC)\n" \
 				"under supervision of Moritz Diehl. All rights reserved.\n\n" \

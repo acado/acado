@@ -176,7 +176,7 @@ returnValue ExportNLPSolver::setupInitialization()
 	initialize << (retInit == 0);
 	initialize.addLinebreak();
 	initialize	<< "memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));" << "\n"
-				<< "memset(&acadoVariables, 0, sizeof( acadoVariables ));" << "\n";
+//	initialize	<< "memset(&acadoVariables, 0, sizeof( acadoVariables ));" << "\n";
 
 	return SUCCESSFUL_RETURN;
 }
