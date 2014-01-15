@@ -52,7 +52,7 @@
  */
 
 REFER_NAMESPACE_ACADO Expression sign( const REFER_NAMESPACE_ACADO Expression &arg   );
-REFER_NAMESPACE_ACADO Expression abs ( const REFER_NAMESPACE_ACADO Expression &arg   );
+inline REFER_NAMESPACE_ACADO Expression abs ( const REFER_NAMESPACE_ACADO Expression &arg   );
 double abs( const double &arg   );
 double sign( const double &arg   );
 REFER_NAMESPACE_ACADO Expression sin ( const REFER_NAMESPACE_ACADO Expression &arg   );

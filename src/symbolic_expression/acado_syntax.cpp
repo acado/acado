@@ -40,6 +40,8 @@ USING_NAMESPACE_ACADO
 // ------------------------------------------------------------------------------------
 
 
+Expression sign( const Expression &arg ){ return arg.getSign(); }
+Expression abs ( const Expression &arg ){ return arg.getAbs(); }
 Expression sin ( const Expression &arg ){ return arg.getSin (); }
 Expression cos ( const Expression &arg ){ return arg.getCos (); }
 Expression tan ( const Expression &arg ){ return arg.getTan (); }
