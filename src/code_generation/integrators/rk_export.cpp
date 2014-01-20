@@ -80,11 +80,26 @@ returnValue RungeKuttaExport::initializeButcherTableau( const DMatrix& _AA, cons
 	if( _cc.isEmpty() || !_AA.isSquare() || _AA.getNumRows() != _bb.getDim() || _bb.getDim() != _cc.getDim() ) return RET_INVALID_OPTION;
 
 	numStages = _cc.getDim();
+	is_symmetric = checkSymmetry( _cc );
+//	std::cout << "Symmetry of the chosen method: " << is_symmetric << "\n";
 	AA = _AA;
 	bb = _bb;
 	cc = _cc;
 
 	return SUCCESSFUL_RETURN;
+}
+
+
+BooleanType RungeKuttaExport::checkSymmetry( const DVector& _cc ) {
+
+	if( _cc.getDim() <= 1 ) return BT_FALSE;
+	BooleanType symmetry = BT_TRUE;
+	uint i;
+	for( i = 0; i < _cc.getDim(); i++ ) {
+		int tmp = acadoRoundAway(1.0 - _cc(i) - _cc(_cc.getDim()-1-i));
+		if( symmetry ) symmetry = (tmp == 0);
+	}
+	return symmetry;
 }
 
 

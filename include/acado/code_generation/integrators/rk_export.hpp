@@ -99,6 +99,10 @@ class RungeKuttaExport : public IntegratorExport
 		returnValue initializeButcherTableau( const DMatrix& _AA, const DVector& _bb, const DVector& _cc );
 
 
+		/** This routine checks the symmetry of the cc vector from the Butcher Tableau. */
+		BooleanType checkSymmetry( const DVector& _cc );
+
+
 		/** Assigns Differential Equation to be used by the integrator.
 		 *
 		 *	@param[in] rhs		Right-hand side expression.
@@ -187,6 +191,8 @@ class RungeKuttaExport : public IntegratorExport
 		DMatrix AA;							/**< This matrix defines the Runge-Kutta method to be exported. */
 		DVector bb, cc;						/**< These vectors define the Runge-Kutta method to be exported. */
 		
+		BooleanType is_symmetric;			/**< Boolean defining whether a certain RK method is symmetric or not, which is important for backward sensitivity propagation. */
+
 		uint numStages;						/**< This is the number of stages for the Runge-Kutta method. */
 };
 
