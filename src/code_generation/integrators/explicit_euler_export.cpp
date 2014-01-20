@@ -46,14 +46,12 @@ ExplicitEulerExport::ExplicitEulerExport(	UserInteraction* _userInteraction,
 									const std::string& _commonHeaderName
 									) : ExplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
-	numStages = 1;
 }
 
 
 ExplicitEulerExport::ExplicitEulerExport(	const ExplicitEulerExport& arg
 									) : ExplicitRungeKuttaExport( arg )
 {
-	numStages = 1;
 	copy( arg );
 }
 

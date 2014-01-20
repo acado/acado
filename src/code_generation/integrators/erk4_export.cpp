@@ -46,14 +46,12 @@ ExplicitRungeKutta4Export::ExplicitRungeKutta4Export(	UserInteraction* _userInte
 									const std::string& _commonHeaderName
 									) : ExplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
-	numStages = 4;
 }
 
 
 ExplicitRungeKutta4Export::ExplicitRungeKutta4Export(	const ExplicitRungeKutta4Export& arg
 									) : ExplicitRungeKuttaExport( arg )
 {
-	numStages = 4;
 	copy( arg );
 }
 

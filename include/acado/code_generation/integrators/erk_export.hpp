@@ -26,7 +26,7 @@
 
 
 /**
- *    \file include/acado/integrator/erk_export.hpp
+ *    \file include/acado/integrators/erk_export.hpp
  *    \author Rien Quirynen
  *    \date 2012
  */
@@ -211,20 +211,15 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 
     protected:
 
+		ExportVariable rk_forward_sweep;				/**< Variable containing intermediate results of a forward sweep of the RK integrator. */
+
 };
 
-
-//
-// Create the integrator
-//
-inline ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction* _userInteraction,
-																	const std::string &_commonHeaderName	)
-{
-	return new ExplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
-}
-
-
 CLOSE_NAMESPACE_ACADO
+
+
+#include <acado/code_generation/integrators/erk_adjoint_export.hpp>
+#include <acado/code_generation/integrators/erk_export.ipp>
 
 
 #endif  // ACADO_TOOLKIT_ERK_EXPORT_HPP

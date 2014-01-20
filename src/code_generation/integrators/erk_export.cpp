@@ -45,6 +45,7 @@ ExplicitRungeKuttaExport::ExplicitRungeKuttaExport(	UserInteraction* _userIntera
 									const std::string& _commonHeaderName
 									) : RungeKuttaExport( _userInteraction,_commonHeaderName )
 {
+	is_symmetric = BT_FALSE;
 }
 
 
@@ -190,7 +191,6 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 {
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY,sensGen );
-	bool DERIVATIVES = ((ExportSensitivityType)sensGen != NO_SENSITIVITY);
 
 	OnlineData        dummy0;
 	Control           dummy1;
@@ -223,7 +223,7 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	if( DERIVATIVES ) {
+	if( (ExportSensitivityType)sensGen == FORWARD ) {
 		DifferentialState Gx("", NX,NX), Gu("", NX,NU);
 		// no free parameters yet!
 		// DifferentialState Gp(NX,NP);
@@ -245,17 +245,29 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		// no free parameters yet!
 		// f << forwardDerivative( rhs_, x ) * Gp + forwardDerivative( rhs_, p );
 
-		if( f.getNT() > 0 ) timeDependant = true;
 	}
+	else if( (ExportSensitivityType)sensGen == BACKWARD ) {
+		DifferentialState lx("", NX,1), lu("", NU,1);
+
+		f << -backwardDerivative(rhs_, x, lx);
+		f << -backwardDerivative(rhs_, u, lx);
+	}
+	if( f.getNT() > 0 ) timeDependant = true;
 
 	int matlabInterface;
 	userInteraction->get(GENERATE_MATLAB_INTERFACE, matlabInterface);
-	if( matlabInterface && DERIVATIVES ) {
+	if( matlabInterface && (ExportSensitivityType)sensGen == FORWARD ) {
 		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD)
 				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
-	} else if( DERIVATIVES ) {
-		return diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
-	} else {
+	}
+	else if( (ExportSensitivityType)sensGen == FORWARD ) {
+		return diffs_rhs.init(f, "acado_rhs_forw", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
+	}
+	else if( (ExportSensitivityType)sensGen == BACKWARD ) {
+		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD)
+				& diffs_rhs.init(f, "acado_rhs_back", 2*NX + NU, 0, NU, NP, NDX, NOD);
+	}
+	else {
 		return diffs_rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD);
 	}
 
@@ -336,17 +348,22 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 				<< " )\n\n";
 	}
 
-	if( exportRhs ) code.addFunction( diffs_rhs );
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
+	if( exportRhs ) {
+
+		int matlabInterface;
+		userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
+		if ( (ExportSensitivityType)sensGen == BACKWARD || matlabInterface ) {
+			code.addFunction( rhs );
+		}
+		code.addFunction( diffs_rhs );
+	}
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 	code.addComment(std::string("Fixed step size:") + toString(h));
 	code.addFunction( integrate );
 
-	int matlabInterface;
-	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
-	if (matlabInterface) {
-		if( exportRhs ) code.addFunction( rhs );
-	}
 
 // 	if ( (PrintLevel)printLevel >= HIGH ) 
 // 		acadoPrintf( "done.\n" );
