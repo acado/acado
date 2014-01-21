@@ -218,6 +218,7 @@ CLOSE_NAMESPACE_ACADO
 
 
 #include <acado/code_generation/integrators/erk_adjoint_export.hpp>
+#include <acado/code_generation/integrators/erk_fob_export.hpp>
 #include <acado/code_generation/integrators/erk_export.ipp>
 
 
