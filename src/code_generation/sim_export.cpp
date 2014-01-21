@@ -157,7 +157,7 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 			std::string integrateInterface =  dirName;
 			integrateInterface += "/acado_integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure((ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (bool)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
+			exportMexFun.configure((ExportSensitivityType)sensGen, (MeasurementGrid)measGrid == ONLINE_GRID, (bool)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
 			exportMexFun.exportCode();
 
 			integrateInterface = dirName + std::string("/make_acado_integrator.m");
