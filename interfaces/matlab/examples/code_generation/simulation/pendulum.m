@@ -51,8 +51,10 @@ x(2) = 1;
 x(3) = pi;
 xs = x;
 u = 0.01;
+input.u = u;
 for i = 1:N
-    [states out] = integrate_pendulum(xs(:,end),u);
+    input.x = xs(:,end);
+    [states out] = integrate_pendulum(input);
     xs(:,end+1) = states.value;
 end
 
@@ -89,8 +91,9 @@ cd pendulum_export
 make_acado_integrator('../integrate_pendulum2', 'model.c')
 cd ..
 
-[states out] = integrate_pendulum(xs(:,end),u);
-[states2 out2] = integrate_pendulum2(xs(:,end),u);
+input.x = xs(:,end);
+[states out] = integrate_pendulum(input);
+[states2 out2] = integrate_pendulum2(input);
 
 err = max(abs(states.value-states2.value)) + max(max(abs(states.sensX-states2.sensX))) + ...
     max(max(abs(states.sensU-states2.sensU))) + max(max(abs(out.value-out2.value))) + ...

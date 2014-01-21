@@ -65,11 +65,15 @@ grid = [1/3 2/3 3/3];
 x = [0.5; 0.1; 0.7; -0.1; 0.5; -0.07; 0.2; -0.3];
 u = zeros(2,1);
 xs = x; xs2 = x; N = 5;
+input.u = u;
+input.grid1 = grid;
 for i = 1:N
-    [states out] = integrate_crane(xs2(:,end),u,grid);
+    input.x = xs2(:,end);
+    [states out] = integrate_crane(input);
     xs(:,end+1) = states.value;
     
-    [states out] = integrate_crane2(xs2(:,end),u,grid);
+    input.x = xs2(:,end);
+    [states out] = integrate_crane2(input);
     xs2(:,end+1) = states.value;
 end
 mean_error = mean(abs(xs(:,2:end)-xs2(:,2:end))./abs(xs2(:,2:end)))
@@ -78,7 +82,8 @@ mean_error = mean(abs(xs(:,2:end)-xs2(:,2:end))./abs(xs2(:,2:end)))
 Nt = 50000;
 tic
 for i = 1:Nt
-    [statesOr outOr] = integrate_crane(x,u,grid);
+    input.x = x;
+    [statesOr outOr] = integrate_crane(input);
 end
 time = toc/Nt;
 disp(['average time per integration: ' num2str(round(time*10^6)) ' μs'])

@@ -42,11 +42,15 @@ cd ..
 mu = 0.5;
 x = [-0.683; -0.864]; xs = x; xs2 = x;
 u = 2;
+input.u = u;
+input.od = mu;
 for i = 1:N
-    states = integrate_getting_started(xs2(:,end),u,mu);
+    input.x = xs2(:,end);
+    states = integrate_getting_started(input);
     xs(:,i+1) = states.value;
     
-    states = integrate_getting_started2(xs2(:,end),u,mu);
+    input.x = xs2(:,end);
+    states = integrate_getting_started2(input);
     xs2(:,end+1) = states.value;
 end
 mean_error = mean(abs(xs(:,2:end)-xs2(:,2:end))./abs(xs2(:,2:end)))
@@ -68,7 +72,8 @@ title('State 2')
 Nt = 500000;
 tic
 for i = 1:Nt
-    statesOr = integrate_getting_started(x,u,mu);
+    input.x = x;
+    statesOr = integrate_getting_started(input);
 end
 time = toc/Nt;
 disp(['average time per integration: ' num2str(round(time*10^6)) ' μs'])

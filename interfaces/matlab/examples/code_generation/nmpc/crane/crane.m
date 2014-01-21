@@ -139,7 +139,9 @@ while time(end) < Tf
     input.u = output.u;
     
     % Simulate system
-    states = integrate_crane(state_sim(end,:), output.u(1,:));
+    sim_input.x = state_sim(end,:).';
+    sim_input.u = output.u(1,:).';
+    states = integrate_crane(sim_input);
     state_sim = [state_sim; states.value'];
     
     iter = iter+1;

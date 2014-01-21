@@ -132,20 +132,22 @@ end
 %% Timing results:
 load controller_quadcopter.mat P X0
 T = 500; U = -P.K*(X0 - P.Xref);
+input.u = U;
+input.x = X0;
 tic
 for i = 1:T
-    states = integrate_quadcopter(X0', U);
+    states = integrate_quadcopter(input);
 end
 time = toc/T;
 tic
 for i = 1:T
-    states2 = integrate_quadcopter2(X0', U);
+    states2 = integrate_quadcopter2(input);
 end
 time2 = toc/T;
 
-states = integrate_quadcopter(X0', U);
+states = integrate_quadcopter(input);
 
-states2 = integrate_quadcopter2(X0', U);
+states2 = integrate_quadcopter2(input);
 
 err_int = max(abs(states.value-states2.value)) + max(max(abs(states.sensX-states2.sensX))) + ...
     max(max(abs(states.sensU-states2.sensU)));
@@ -168,7 +170,9 @@ for i = 1:N
     state = xs(end,:)';
     U = -P.K*(state - P.Xref);
     
-    states = integrate_quadcopter(state, U);
+    input.x = state;
+    input.u = U;
+    states = integrate_quadcopter(input);
     
     xs = [xs; states.value'];
     controls = [controls; U'];

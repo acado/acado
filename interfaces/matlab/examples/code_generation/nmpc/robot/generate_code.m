@@ -40,9 +40,11 @@ xs = x; xs2 = x;
 u = [10; -30]; 
 N = 80;
 t1 = 0; t2 = 0;
+sim_input.u = u;
 for i = 1:N
+    sim_input.x = xs(:,end);
     tic
-    states = integrate_robot(xs(:,end),u);
+    states = integrate_robot(sim_input);
     t1 = t1+toc;
     xs(:,i+1) = states.value;
 end
