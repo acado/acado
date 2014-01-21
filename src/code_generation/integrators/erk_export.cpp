@@ -249,8 +249,8 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	else if( (ExportSensitivityType)sensGen == BACKWARD ) {
 		DifferentialState lx("", NX,1), lu("", NU,1);
 
-		f << -backwardDerivative(rhs_, x, lx);
-		f << -backwardDerivative(rhs_, u, lx);
+		f << backwardDerivative(rhs_, x, lx);
+		f << backwardDerivative(rhs_, u, lx);
 	}
 	if( f.getNT() > 0 ) timeDependant = true;
 

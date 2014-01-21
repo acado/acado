@@ -97,6 +97,7 @@ returnValue AdjointERKExport::setup( )
 	rk_xxx.setup("rk_xxx", 1, inputDim+timeDep, REAL, structWspace);
 	rk_kkk.setup("rk_kkk", rkOrder, NX+NU, REAL, structWspace);
 	rk_forward_sweep.setup("rk_sweep1", 1, grid.getNumIntervals()*rkOrder*NX, REAL, structWspace);
+	seed_backward.setup("seed", 1, NX, REAL, ACADO_VARIABLES);
 
 	if ( useOMP )
 	{
@@ -123,6 +124,8 @@ returnValue AdjointERKExport::setup( )
 	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 
 	if( inputDim > rhsDim ) {
+		integrate.addStatement( rk_eta.getCols( NX,2*NX ) == seed_backward );
+		integrate.addStatement( rk_eta.getCols( 2*NX,2*NX+NU ) == zeros<double>( 1,NU ) );
 		// FORWARD SWEEP FIRST
 		integrate.addStatement( rk_xxx.getCols( NX,NX+NU+NOD ) == rk_eta.getCols( rhsDim,inputDim ) );
 	}
@@ -146,7 +149,10 @@ returnValue AdjointERKExport::setup( )
 	if( !is_symmetric ) {
 		integrate.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
 	}
-	
+	if( inputDim > rhsDim ) {
+		// BACKWARD SWEEP NEXT
+		integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
+	}
     // integrator loop: BACKWARD SWEEP
 	ExportForLoop loop2 = ExportForLoop( run, 0, grid.getNumIntervals() );
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
@@ -172,6 +178,19 @@ returnValue AdjointERKExport::setup( )
 	LOG( LVL_DEBUG ) << "done" << endl;
 
 	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue AdjointERKExport::getDataDeclarations(	ExportStatementBlock& declarations,
+													ExportStruct dataStruct
+													) const
+{
+	ExplicitRungeKuttaExport::getDataDeclarations( declarations, dataStruct );
+
+	declarations.addDeclaration( rk_forward_sweep,dataStruct );
+	declarations.addDeclaration( seed_backward,dataStruct );
+
+    return SUCCESSFUL_RETURN;
 }
 
 

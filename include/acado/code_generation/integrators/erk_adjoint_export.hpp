@@ -87,10 +87,24 @@ class AdjointERKExport : public ExplicitRungeKuttaExport
 		virtual returnValue setup( );
 
 
+		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
+		 *
+		 *	@param[in] declarations		List of declarations.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue getDataDeclarations(	ExportStatementBlock& declarations,
+													ExportStruct dataStruct = ACADO_ANY
+													) const;
+
+
 	protected:
 
 
     protected:
+
+		ExportVariable rk_forward_sweep;				/**< Variable containing intermediate results of a forward sweep of the RK integrator. */
+		ExportVariable seed_backward;					/**< Variable containing the seed for a backward propagation of the RK integrator. */
 
 };
 

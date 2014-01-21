@@ -211,7 +211,6 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 
     protected:
 
-		ExportVariable rk_forward_sweep;				/**< Variable containing intermediate results of a forward sweep of the RK integrator. */
 
 };
 
