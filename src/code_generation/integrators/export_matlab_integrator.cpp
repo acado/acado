@@ -74,10 +74,10 @@ ExportMatlabIntegrator& ExportMatlabIntegrator::operator=(	const ExportMatlabInt
 	return *this;
 }
 
-returnValue ExportMatlabIntegrator::configure(	const uint firstOrder, const uint online, const uint debugMode, const uint timingCalls, const uint numStages )
+returnValue ExportMatlabIntegrator::configure(	const uint sensProp, const uint online, const uint debugMode, const uint timingCalls, const uint numStages )
 {	
 	// Configure the dictionary
-	dictionary[ "@FIRST_ORDER_SENS@" ] =  toString(firstOrder);
+	dictionary[ "@SENS_PROP@" ] =  toString(sensProp);
 	dictionary[ "@ONLINE_GRID@" ] =  toString(online);
 	dictionary[ "@DEBUG_MODE@" ] =  toString(debugMode);
 	if( timingCalls > 1 ) 	dictionary[ "@CALLS_TIMING@" ] =  toString(timingCalls);
