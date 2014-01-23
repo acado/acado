@@ -37,11 +37,12 @@
 #include <windows.h>
 
 #define round( value ) floor( value + 0.5 )
+#else
+#include <unistd.h>
 #endif
 
 #include <cstdlib>
 #include <string>
-#include <unistd.h>
 
 BEGIN_NAMESPACE_ACADO
 
