@@ -186,7 +186,6 @@ returnValue ExplicitRungeKuttaExport::setup( )
 }
 
 
-
 returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression& rhs_ )
 {
 	int sensGen;
@@ -246,11 +245,8 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		// f << forwardDerivative( rhs_, x ) * Gp + forwardDerivative( rhs_, p );
 
 	}
-	else if( (ExportSensitivityType)sensGen == BACKWARD ) {
-		DifferentialState lx("", NX,1), lu("", NU,1);
-
-		f << backwardDerivative(rhs_, x, lx);
-		f << backwardDerivative(rhs_, u, lx);
+	else if( (ExportSensitivityType)sensGen != NO_SENSITIVITY ) {
+		return ACADOERROR( RET_INVALID_OPTION );
 	}
 	if( f.getNT() > 0 ) timeDependant = true;
 
@@ -262,10 +258,6 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	}
 	else if( (ExportSensitivityType)sensGen == FORWARD ) {
 		return diffs_rhs.init(f, "acado_rhs_forw", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
-	}
-	else if( (ExportSensitivityType)sensGen == BACKWARD ) {
-		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD)
-				& diffs_rhs.init(f, "acado_rhs_back", 2*NX + NU, 0, NU, NP, NDX, NOD);
 	}
 	else {
 		return diffs_rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD);
@@ -351,12 +343,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY,sensGen );
 	if( exportRhs ) {
-
-		int matlabInterface;
-		userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
-		if ( (ExportSensitivityType)sensGen == BACKWARD || matlabInterface ) {
-			code.addFunction( rhs );
-		}
+		code.addFunction( rhs );
 		code.addFunction( diffs_rhs );
 	}
 
@@ -399,8 +386,12 @@ returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 
 ExportVariable ExplicitRungeKuttaExport::getAuxVariable() const
 {
-
-	return diffs_rhs.getGlobalExportVariable();
+	ExportVariable max;
+	max = rhs.getGlobalExportVariable();
+	if( diffs_rhs.getGlobalExportVariable().getDim() > max.getDim() ) {
+		max = diffs_rhs.getGlobalExportVariable();
+	}
+	return max;
 }
 
 

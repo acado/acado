@@ -80,6 +80,16 @@ class AdjointERKExport : public ExplicitRungeKuttaExport
         virtual ~AdjointERKExport( );
 
 
+		/** Assigns Differential Equation to be used by the integrator.
+		 *
+		 *	@param[in] rhs		Right-hand side expression.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+
+		virtual returnValue setDifferentialEquation( const Expression& rhs );
+
+
 		/** Initializes export of a tailored integrator.
 		 *
 		 *	\return SUCCESSFUL_RETURN

@@ -61,6 +61,87 @@ ForwardOverBackwardERKExport::~ForwardOverBackwardERKExport( )
 }
 
 
+
+returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Expression& rhs_ )
+{
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
+
+	OnlineData        dummy0;
+	Control           dummy1;
+	DifferentialState dummy2;
+	AlgebraicState 	  dummy3;
+	DifferentialStateDerivative dummy4;
+	dummy0.clearStaticCounters();
+	dummy1.clearStaticCounters();
+	dummy2.clearStaticCounters();
+	dummy3.clearStaticCounters();
+	dummy4.clearStaticCounters();
+
+	x = DifferentialState("", NX, 1);
+	dx = DifferentialStateDerivative("", NDX, 1);
+	z = AlgebraicState("", NXA, 1);
+	u = Control("", NU, 1);
+	od = OnlineData("", NOD, 1);
+
+	if( NDX > 0 && NDX != NX ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	if( rhs_.getNumRows() != (NX+NXA) ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+
+	DifferentialEquation f, g, f_ODE;
+	// add usual ODE
+	f_ODE << rhs_;
+	if( f_ODE.getNDX() > 0 ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+
+	if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+		DifferentialState Gx("", NX,NX), Gu("", NX,NU);
+		// no free parameters yet!
+		// DifferentialState Gp(NX,NP);
+
+		f << rhs_;
+		/*	if ( f.getDim() != f.getNX() )
+		return ACADOERROR( RET_ILLFORMED_ODE );*/
+
+		// add VDE for differential states
+		f << forwardDerivative( rhs_, x ) * Gx;
+		/*	if ( f.getDim() != f.getNX() )
+		return ACADOERROR( RET_ILLFORMED_ODE );*/
+
+		// add VDE for control inputs
+		f << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
+		// 	if ( f.getDim() != f.getNX() )
+		// 		return ACADOERROR( RET_ILLFORMED_ODE );
+
+		// no free parameters yet!
+		// f << forwardDerivative( rhs_, x ) * Gp + forwardDerivative( rhs_, p );
+
+
+		DifferentialState lx("", NX,1);
+
+		Expression tmp = backwardDerivative(rhs_, x, lx);
+		g << tmp;
+
+		DifferentialState Sxx("", NX,NX), Sux("", NU,NX), Suu("", NU,NU);
+
+		g << forwardDerivative(tmp, x)*Gx + forwardDerivative(rhs_,x).transpose()*Sxx;
+		g << Gu.transpose()*forwardDerivative(tmp, x) + forwardDerivative(tmp, u) + Sux*forwardDerivative(rhs_,x);
+		g << forwardDerivative(backwardDerivative(rhs_, u, lx), u) + forwardDerivative(tmp, u)*Gu + forwardDerivative(rhs_,u).transpose()*Sux.transpose();
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	if( f.getNT() > 0 ) timeDependant = true;
+
+	return rhs.init(f, "acado_forward", NX*(NX+NU+1), 0, NU, NP, NDX, NOD)
+				& diffs_rhs.init(g, "acado_backward", NX*(NX+NU+1) + NX + NX*NX + NX*NU + NU*NU, 0, NU, NP, NDX, NOD);
+}
+
+
 returnValue ForwardOverBackwardERKExport::setup( )
 {
 	int sensGen;
@@ -70,11 +151,14 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	// NOT SUPPORTED: since the forward sweep needs to be saved
 	if( !equidistantControlGrid() ) 	ACADOERROR( RET_INVALID_OPTION );
 
+	// NOT SUPPORTED: since the adjoint derivatives could be 'arbitrarily bad'
+	if( !is_symmetric ) 				ACADOERROR( RET_INVALID_OPTION );
+
 	LOG( LVL_DEBUG ) << "Preparing to export ForwardOverBackwardERKExport... " << endl;
 
 	// export RK scheme
-	uint rhsDim   = 2*NX+NU;
-	inputDim = 2*NX+NU + NU + NOD;
+	uint rhsDim   = NX*(NX+NU+1) + NX + NX*NX + NX*NU + NU*NU;
+	inputDim = rhsDim + NU + NOD;
 	const uint rkOrder  = getNumStages();
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
@@ -95,8 +179,8 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	if( timeDependant ) timeDep = 1;
 	
 	rk_xxx.setup("rk_xxx", 1, inputDim+timeDep, REAL, structWspace);
-	rk_kkk.setup("rk_kkk", rkOrder, NX+NU, REAL, structWspace);
-	rk_forward_sweep.setup("rk_sweep1", 1, grid.getNumIntervals()*rkOrder*NX, REAL, structWspace);
+	rk_kkk.setup("rk_kkk", rkOrder, NX+NX*NX+NX*NU+NU*NU, REAL, structWspace);
+	rk_forward_sweep.setup("rk_sweep1", 1, grid.getNumIntervals()*rkOrder*NX*(NX+NU+1), REAL, structWspace);
 	seed_backward.setup("seed", 1, NX, REAL, ACADO_VARIABLES);
 
 	if ( useOMP )
@@ -124,10 +208,16 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 
 	if( inputDim > rhsDim ) {
-		integrate.addStatement( rk_eta.getCols( NX,2*NX ) == seed_backward );
-		integrate.addStatement( rk_eta.getCols( 2*NX,2*NX+NU ) == zeros<double>( 1,NU ) );
+		// initialize sensitivities:
+		DMatrix idX    = eye<double>( NX );
+		DMatrix zeroXU = zeros<double>( NX,NU );
+		integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
+		integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
+
+		integrate.addStatement( rk_eta.getCols( NX*(1+NX+NU),NX*(2+NX+NU) ) == seed_backward );
+		integrate.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) == zeros<double>( 1,NX*NX+NX*NU+NU*NU ) );
 		// FORWARD SWEEP FIRST
-		integrate.addStatement( rk_xxx.getCols( NX,NX+NU+NOD ) == rk_eta.getCols( rhsDim,inputDim ) );
+		integrate.addStatement( rk_xxx.getCols( NX*(1+NX+NU),NX*(1+NX+NU)+NU+NOD ) == rk_eta.getCols( rhsDim,inputDim ) );
 	}
 	integrate.addLinebreak( );
 
@@ -135,20 +225,17 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	ExportForLoop loop = ExportForLoop( run, 0, grid.getNumIntervals() );
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
-		loop.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
+		loop.addStatement( rk_xxx.getCols( 0,NX*(1+NX+NU) ) == rk_eta.getCols( 0,NX*(1+NX+NU) ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX*(1+NX+NU) ) );
 		// save forward trajectory
-		loop.addStatement( rk_forward_sweep.getCols( run*rkOrder*NX+run1*NX,run*rkOrder*NX+run1*NX+NX ) == rk_xxx.getCols( 0,NX ) );
-		if( timeDependant ) loop.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt + ((double)cc(run1))/grid.getNumIntervals() );
+		loop.addStatement( rk_forward_sweep.getCols( run*rkOrder*NX*(1+NX+NU)+run1*NX*(1+NX+NU),run*rkOrder*NX*(1+NX+NU)+(run1+1)*NX*(1+NX+NU) ) == rk_xxx.getCols( 0,NX*(1+NX+NU) ) );
+		if( timeDependant ) loop.addStatement( rk_xxx.getCol( NX*(NX+NU+1)+NU+NOD ) == rk_ttt + ((double)cc(run1))/grid.getNumIntervals() );
 		loop.addFunctionCall( getNameRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
-	loop.addStatement( rk_eta.getCols( 0,NX ) += b4h^rk_kkk.getCols( 0,NX ) );
+	loop.addStatement( rk_eta.getCols( 0,NX*(1+NX+NU) ) += b4h^rk_kkk.getCols( 0,NX*(1+NX+NU) ) );
 	loop.addStatement( rk_ttt += DMatrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop: FORWARD SWEEP
 	integrate.addStatement( loop );
 
-	if( !is_symmetric ) {
-		integrate.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
-	}
 	if( inputDim > rhsDim ) {
 		// BACKWARD SWEEP NEXT
 		integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
@@ -158,17 +245,12 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
 		// load forward trajectory
-		if( is_symmetric ) {
-			loop2.addStatement( rk_xxx.getCols( 0,NX ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX-run1*NX-NX,(grid.getNumIntervals()-run)*rkOrder*NX-run1*NX ) );
-		}
-		loop2.addStatement( rk_xxx.getCols( NX,2*NX+NU ) == rk_eta.getCols( NX,2*NX+NU ) + Ah.getRow(run1)*rk_kkk );
+		loop2.addStatement( rk_xxx.getCols( 0,NX*(1+NX+NU) ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX*(1+NX+NU)-(run1+1)*NX*(1+NX+NU),(grid.getNumIntervals()-run)*rkOrder*NX*(1+NX+NU)-run1*NX*(1+NX+NU) ) );
+		loop2.addStatement( rk_xxx.getCols( NX*(1+NX+NU),rhsDim ) == rk_eta.getCols( NX*(1+NX+NU),rhsDim ) + Ah.getRow(run1)*rk_kkk );
 		if( timeDependant ) loop2.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt - ((double)cc(run1))/grid.getNumIntervals() );
 		loop2.addFunctionCall( getNameDiffsRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
-		if( !is_symmetric ) {
-			loop2.addStatement( rk_xxx.getCols( 0,NX ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX-run1*NX-NX,(grid.getNumIntervals()-run)*rkOrder*NX-run1*NX ) );
-		}
 	}
-	loop2.addStatement( rk_eta.getCols( NX,2*NX+NU ) += b4h^rk_kkk );
+	loop2.addStatement( rk_eta.getCols( NX*(1+NX+NU),rhsDim ) += b4h^rk_kkk );
 	loop2.addStatement( rk_ttt -= DMatrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop: BACKWARD SWEEP
 	integrate.addStatement( loop2 );

@@ -61,6 +61,59 @@ AdjointERKExport::~AdjointERKExport( )
 }
 
 
+
+returnValue AdjointERKExport::setDifferentialEquation(	const Expression& rhs_ )
+{
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
+
+	OnlineData        dummy0;
+	Control           dummy1;
+	DifferentialState dummy2;
+	AlgebraicState 	  dummy3;
+	DifferentialStateDerivative dummy4;
+	dummy0.clearStaticCounters();
+	dummy1.clearStaticCounters();
+	dummy2.clearStaticCounters();
+	dummy3.clearStaticCounters();
+	dummy4.clearStaticCounters();
+
+	x = DifferentialState("", NX, 1);
+	dx = DifferentialStateDerivative("", NDX, 1);
+	z = AlgebraicState("", NXA, 1);
+	u = Control("", NU, 1);
+	od = OnlineData("", NOD, 1);
+
+	if( NDX > 0 && NDX != NX ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	if( rhs_.getNumRows() != (NX+NXA) ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+
+	DifferentialEquation f, f_ODE;
+	// add usual ODE
+	f_ODE << rhs_;
+	if( f_ODE.getNDX() > 0 ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+
+	if( (ExportSensitivityType)sensGen == BACKWARD ) {
+		DifferentialState lx("", NX,1), lu("", NU,1);
+
+		f << backwardDerivative(rhs_, x, lx);
+		f << backwardDerivative(rhs_, u, lx);
+	}
+	else {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	if( f.getNT() > 0 ) timeDependant = true;
+
+	return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD)
+			& diffs_rhs.init(f, "acado_rhs_back", 2*NX + NU, 0, NU, NP, NDX, NOD);
+}
+
+
 returnValue AdjointERKExport::setup( )
 {
 	int sensGen;
@@ -69,6 +122,9 @@ returnValue AdjointERKExport::setup( )
 
 	// NOT SUPPORTED: since the forward sweep needs to be saved
 	if( !equidistantControlGrid() ) 	ACADOERROR( RET_INVALID_OPTION );
+
+	// NOT SUPPORTED: since the adjoint derivatives could be 'arbitrarily bad'
+	if( !is_symmetric ) 				ACADOERROR( RET_INVALID_OPTION );
 
 	LOG( LVL_DEBUG ) << "Preparing to export AdjointERKExport... " << endl;
 
@@ -138,7 +194,7 @@ returnValue AdjointERKExport::setup( )
 		loop.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
 		// save forward trajectory
 		loop.addStatement( rk_forward_sweep.getCols( run*rkOrder*NX+run1*NX,run*rkOrder*NX+run1*NX+NX ) == rk_xxx.getCols( 0,NX ) );
-		if( timeDependant ) loop.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt + ((double)cc(run1))/grid.getNumIntervals() );
+		if( timeDependant ) loop.addStatement( rk_xxx.getCol( NX+NU+NOD ) == rk_ttt + ((double)cc(run1))/grid.getNumIntervals() );
 		loop.addFunctionCall( getNameRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,NX ) += b4h^rk_kkk.getCols( 0,NX ) );
@@ -146,9 +202,9 @@ returnValue AdjointERKExport::setup( )
     // end of integrator loop: FORWARD SWEEP
 	integrate.addStatement( loop );
 
-	if( !is_symmetric ) {
-		integrate.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
-	}
+//	if( !is_symmetric ) {
+//		integrate.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
+//	}
 	if( inputDim > rhsDim ) {
 		// BACKWARD SWEEP NEXT
 		integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
@@ -158,15 +214,15 @@ returnValue AdjointERKExport::setup( )
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
 		// load forward trajectory
-		if( is_symmetric ) {
+//		if( is_symmetric ) {
 			loop2.addStatement( rk_xxx.getCols( 0,NX ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX-run1*NX-NX,(grid.getNumIntervals()-run)*rkOrder*NX-run1*NX ) );
-		}
+//		}
 		loop2.addStatement( rk_xxx.getCols( NX,2*NX+NU ) == rk_eta.getCols( NX,2*NX+NU ) + Ah.getRow(run1)*rk_kkk );
 		if( timeDependant ) loop2.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt - ((double)cc(run1))/grid.getNumIntervals() );
 		loop2.addFunctionCall( getNameDiffsRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
-		if( !is_symmetric ) {
-			loop2.addStatement( rk_xxx.getCols( 0,NX ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX-run1*NX-NX,(grid.getNumIntervals()-run)*rkOrder*NX-run1*NX ) );
-		}
+//		if( !is_symmetric ) {
+//			loop2.addStatement( rk_xxx.getCols( 0,NX ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX-run1*NX-NX,(grid.getNumIntervals()-run)*rkOrder*NX-run1*NX ) );
+//		}
 	}
 	loop2.addStatement( rk_eta.getCols( NX,2*NX+NU ) += b4h^rk_kkk );
 	loop2.addStatement( rk_ttt -= DMatrix(1.0/grid.getNumIntervals()) );
