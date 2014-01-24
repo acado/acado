@@ -103,9 +103,10 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	{
 		ExportVariable auxVar;
 
-		auxVar = diffs_rhs.getGlobalExportVariable();
+		auxVar = getAuxVariable();
 		auxVar.setName( "odeAuxVar" );
 		auxVar.setDataStruct( ACADO_LOCAL );
+		rhs.setGlobalExportVariable( auxVar );
 		diffs_rhs.setGlobalExportVariable( auxVar );
 	}
 
@@ -333,7 +334,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		getDataDeclarations( code, ACADO_LOCAL );
 
 		code << "#pragma omp threadprivate( "
-				<< diffs_rhs.getGlobalExportVariable().getFullName()  << ", "
+				<< getAuxVariable().getFullName()  << ", "
 				<< rk_xxx.getFullName() << ", "
 				<< rk_ttt.getFullName() << ", "
 				<< rk_kkk.getFullName()

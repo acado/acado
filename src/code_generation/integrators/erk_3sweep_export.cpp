@@ -26,13 +26,13 @@
 
 
 /**
- *    \file src/code_generation/integrators/erk_adjoint_export.cpp
+ *    \file src/code_generation/integrators/erk_3sweep_export.cpp
  *    \author Rien Quirynen
  *    \date 2014
  */
 
 #include <acado/code_generation/integrators/erk_export.hpp>
-#include <acado/code_generation/integrators/erk_adjoint_export.hpp>
+#include <acado/code_generation/integrators/erk_3sweep_export.hpp>
 
 using namespace std;
 
@@ -42,27 +42,27 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-AdjointERKExport::AdjointERKExport(	UserInteraction* _userInteraction,
+ThreeSweepsERKExport::ThreeSweepsERKExport(	UserInteraction* _userInteraction,
 									const std::string& _commonHeaderName
-									) : ExplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
+									) : AdjointERKExport( _userInteraction,_commonHeaderName )
 {
 }
 
 
-AdjointERKExport::AdjointERKExport(	const AdjointERKExport& arg
-									) : ExplicitRungeKuttaExport( arg )
+ThreeSweepsERKExport::ThreeSweepsERKExport(	const ThreeSweepsERKExport& arg
+									) : AdjointERKExport( arg )
 {
 }
 
 
-AdjointERKExport::~AdjointERKExport( )
+ThreeSweepsERKExport::~ThreeSweepsERKExport( )
 {
 	clear( );
 }
 
 
 
-returnValue AdjointERKExport::setDifferentialEquation(	const Expression& rhs_ )
+returnValue ThreeSweepsERKExport::setDifferentialEquation(	const Expression& rhs_ )
 {
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY,sensGen );
@@ -91,34 +91,67 @@ returnValue AdjointERKExport::setDifferentialEquation(	const Expression& rhs_ )
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	DifferentialEquation f, f_ODE;
+	DifferentialEquation f, g, h, f_ODE;
 	// add usual ODE
 	f_ODE << rhs_;
 	if( f_ODE.getNDX() > 0 ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	if( (ExportSensitivityType)sensGen == BACKWARD ) {
-		DifferentialState lx("", NX,1), lu("", NU,1);
+	uint numX = NX*(NX+1)/2.0;
+	uint numU = NU*(NU+1)/2.0;
+	if( (ExportSensitivityType)sensGen == THREE_SWEEPS ) {
+		// SWEEP 1:
+		// ---------
+		f << rhs_;
 
-		f << backwardDerivative(rhs_, x, lx);
-		f << backwardDerivative(rhs_, u, lx);
+
+		// SWEEP 2:
+		// ---------
+		DifferentialState lx("", NX,1);
+
+		Expression tmp = backwardDerivative(rhs_, x, lx);
+		g << tmp;
+
+
+		// SWEEP 3:
+		// ---------
+		DifferentialState Gx("", NX,NX), Gu("", NX,NU);
+		DifferentialState Sxx("", numX,1), Sux("", NU,NX), Suu("", numU,1);
+
+		// add VDE for differential states
+		h << forwardDerivative( rhs_, x ) * Gx;
+
+		// add VDE for control inputs
+		h << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
+
+		Expression tmp2 = forwardDerivative(tmp, x);
+		Expression tmp3 = backwardDerivative(rhs_, u, lx);
+		Expression tmp4 = forwardDerivative(tmp3, x);
+		Expression tmp5 = tmp4*Gu;
+
+		Expression tmp6 = Gx.transpose()*tmp2*Gx;
+		h << returnLowerTriangular(tmp6, NX);
+		h << Gu.transpose()*tmp2*Gx + tmp4*Gx;
+		Expression tmp7 = Gu.transpose()*tmp2*Gu + tmp5 + tmp5.transpose() + forwardDerivative(tmp3, u);
+		h << returnLowerTriangular(tmp7, NU);
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 	if( f.getNT() > 0 ) timeDependant = true;
 
-	return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD)
-			& diffs_rhs.init(f, "acado_rhs_back", 2*NX + NU, 0, NU, NP, NDX, NOD);
+	return rhs.init(f, "acado_forward", NX, 0, NU, NP, NDX, NOD)
+			& diffs_rhs.init(g, "acado_backward", 2*NX, 0, NU, NP, NDX, NOD)
+			& diffs_sweep3.init(h, "acado_forward_sweep3", 2*NX + NX*(NX+NU) + numX + NX*NU + numU, 0, NU, NP, NDX, NOD);
 }
 
 
-returnValue AdjointERKExport::setup( )
+returnValue ThreeSweepsERKExport::setup( )
 {
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY,sensGen );
-	if ( (ExportSensitivityType)sensGen != BACKWARD ) ACADOERROR( RET_INVALID_OPTION );
+	if ( (ExportSensitivityType)sensGen != THREE_SWEEPS ) ACADOERROR( RET_INVALID_OPTION );
 
 	// NOT SUPPORTED: since the forward sweep needs to be saved
 	if( !equidistantControlGrid() ) 	ACADOERROR( RET_INVALID_OPTION );
@@ -126,11 +159,13 @@ returnValue AdjointERKExport::setup( )
 	// NOT SUPPORTED: since the adjoint derivatives could be 'arbitrarily bad'
 	if( !is_symmetric ) 				ACADOERROR( RET_INVALID_OPTION );
 
-	LOG( LVL_DEBUG ) << "Preparing to export AdjointERKExport... " << endl;
+	LOG( LVL_DEBUG ) << "Preparing to export ThreeSweepsERKExport... " << endl;
 
 	// export RK scheme
-	uint rhsDim   = 2*NX+NU;
-	inputDim = 2*NX+NU + NU + NOD;
+	uint numX = NX*(NX+1)/2.0;
+	uint numU = NU*(NU+1)/2.0;
+	uint rhsDim   = NX + NX + NX*(NX+NU) + numX + NX*NU + numU;
+	inputDim = rhsDim + NU + NOD;
 	const uint rkOrder  = getNumStages();
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
@@ -152,17 +187,18 @@ returnValue AdjointERKExport::setup( )
 	if( timeDependant ) timeDep = 1;
 	
 	rk_xxx.setup("rk_xxx", 1, inputDim+timeDep, REAL, structWspace);
-	rk_kkk.setup("rk_kkk", rkOrder, NX+NU, REAL, structWspace);
+	uint numK = NX*(NX+NU)+numX+NX*NU+numU;
+	rk_kkk.setup("rk_kkk", rkOrder, numK, REAL, structWspace);
 	rk_forward_sweep.setup("rk_sweep1", 1, grid.getNumIntervals()*rkOrder*NX, REAL, structWspace);
+	rk_backward_sweep.setup("rk_sweep2", 1, grid.getNumIntervals()*rkOrder*NX, REAL, structWspace);
 
 	if ( useOMP )
 	{
 		ExportVariable auxVar;
 
-		auxVar = getAuxVariable();
+		auxVar = diffs_rhs.getGlobalExportVariable();
 		auxVar.setName( "odeAuxVar" );
 		auxVar.setDataStruct( ACADO_LOCAL );
-		rhs.setGlobalExportVariable( auxVar );
 		diffs_rhs.setGlobalExportVariable( auxVar );
 	}
 
@@ -181,8 +217,14 @@ returnValue AdjointERKExport::setup( )
 	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 
 	if( inputDim > rhsDim ) {
+		// initialize sensitivities:
 		integrate.addStatement( rk_eta.getCols( NX,2*NX ) == seed_backward );
-		integrate.addStatement( rk_eta.getCols( 2*NX,2*NX+NU ) == zeros<double>( 1,NU ) );
+		DMatrix idX    = eye<double>( NX );
+		DMatrix zeroXU = zeros<double>( NX,NU );
+		integrate.addStatement( rk_eta.getCols( 2*NX,NX*(2+NX) ) == idX.makeVector().transpose() );
+		integrate.addStatement( rk_eta.getCols( NX*(2+NX),NX*(2+NX+NU) ) == zeroXU.makeVector().transpose() );
+
+		integrate.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) == zeros<double>( 1,numX+NX*NU+numU ) );
 		// FORWARD SWEEP FIRST
 		integrate.addStatement( rk_xxx.getCols( NX,NX+NU+NOD ) == rk_eta.getCols( rhsDim,inputDim ) );
 	}
@@ -194,7 +236,7 @@ returnValue AdjointERKExport::setup( )
 	{
 		loop.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
 		// save forward trajectory
-		loop.addStatement( rk_forward_sweep.getCols( run*rkOrder*NX+run1*NX,run*rkOrder*NX+run1*NX+NX ) == rk_xxx.getCols( 0,NX ) );
+		loop.addStatement( rk_forward_sweep.getCols( run*rkOrder*NX+run1*NX,run*rkOrder*NX+(run1+1)*NX ) == rk_xxx.getCols( 0,NX ) );
 		if( timeDependant ) loop.addStatement( rk_xxx.getCol( NX+NU+NOD ) == rk_ttt + ((double)cc(run1))/grid.getNumIntervals() );
 		loop.addFunctionCall( getNameRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
@@ -203,32 +245,47 @@ returnValue AdjointERKExport::setup( )
     // end of integrator loop: FORWARD SWEEP
 	integrate.addStatement( loop );
 
-//	if( !is_symmetric ) {
-//		integrate.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
-//	}
 	if( inputDim > rhsDim ) {
 		// BACKWARD SWEEP NEXT
-		integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
+		integrate.addStatement( rk_xxx.getCols( 2*NX,2*NX+NU+NOD ) == rk_eta.getCols( rhsDim,inputDim ) );
 	}
     // integrator loop: BACKWARD SWEEP
 	ExportForLoop loop2 = ExportForLoop( run, 0, grid.getNumIntervals() );
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
 		// load forward trajectory
-//		if( is_symmetric ) {
-			loop2.addStatement( rk_xxx.getCols( 0,NX ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX-run1*NX-NX,(grid.getNumIntervals()-run)*rkOrder*NX-run1*NX ) );
-//		}
-		loop2.addStatement( rk_xxx.getCols( NX,2*NX+NU ) == rk_eta.getCols( NX,2*NX+NU ) + Ah.getRow(run1)*rk_kkk );
-		if( timeDependant ) loop2.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt - ((double)cc(run1))/grid.getNumIntervals() );
+		loop2.addStatement( rk_xxx.getCols( 0,NX ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX-(run1+1)*NX,(grid.getNumIntervals()-run)*rkOrder*NX-run1*NX ) );
+		loop2.addStatement( rk_xxx.getCols( NX,2*NX ) == rk_eta.getCols( NX,2*NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
+		// save backward trajectory
+		loop2.addStatement( rk_backward_sweep.getCols( run*rkOrder*NX+run1*NX,run*rkOrder*NX+(run1+1)*NX ) == rk_xxx.getCols( NX,2*NX ) );
+		if( timeDependant ) loop2.addStatement( rk_xxx.getCol( 2*NX+NU+NOD ) == rk_ttt - ((double)cc(run1))/grid.getNumIntervals() );
 		loop2.addFunctionCall( getNameDiffsRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
-//		if( !is_symmetric ) {
-//			loop2.addStatement( rk_xxx.getCols( 0,NX ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX-run1*NX-NX,(grid.getNumIntervals()-run)*rkOrder*NX-run1*NX ) );
-//		}
 	}
-	loop2.addStatement( rk_eta.getCols( NX,2*NX+NU ) += b4h^rk_kkk );
+	loop2.addStatement( rk_eta.getCols( NX,2*NX ) += b4h^rk_kkk.getCols( 0,NX ) );
 	loop2.addStatement( rk_ttt -= DMatrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop: BACKWARD SWEEP
 	integrate.addStatement( loop2 );
+
+	if( inputDim > rhsDim ) {
+		// THIRD SWEEP NEXT
+		integrate.addStatement( rk_xxx.getCols( rhsDim,inputDim ) == rk_eta.getCols( rhsDim,inputDim ) );
+	}
+    // integrator loop: THIRD SWEEP
+	ExportForLoop loop3 = ExportForLoop( run, 0, grid.getNumIntervals() );
+	for( uint run1 = 0; run1 < rkOrder; run1++ )
+	{
+		// load forward trajectory
+		loop3.addStatement( rk_xxx.getCols( 0,NX ) == rk_forward_sweep.getCols( run*rkOrder*NX+run1*NX,run*rkOrder*NX+(run1+1)*NX ) );
+		// load backward trajectory
+		loop3.addStatement( rk_xxx.getCols( NX,2*NX ) == rk_backward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX-(run1+1)*NX,(grid.getNumIntervals()-run)*rkOrder*NX-run1*NX ) );
+		loop3.addStatement( rk_xxx.getCols( 2*NX,rhsDim ) == rk_eta.getCols( 2*NX,rhsDim ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX*(NX+NU)+numX+NX*NU+numU ) );
+		if( timeDependant ) loop3.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt + ((double)cc(run1))/grid.getNumIntervals() );
+		loop3.addFunctionCall( diffs_sweep3.getName(),rk_xxx,rk_kkk.getAddress(run1,0) );
+	}
+	loop3.addStatement( rk_eta.getCols( 2*NX,rhsDim ) += b4h^rk_kkk.getCols( 0,NX*(NX+NU)+numX+NX*NU+numU ) );
+	loop3.addStatement( rk_ttt += DMatrix(1.0/grid.getNumIntervals()) );
+    // end of integrator loop: THIRD SWEEP
+	integrate.addStatement( loop3 );
 
 	integrate.addStatement( error_code == 0 );
 
@@ -238,20 +295,20 @@ returnValue AdjointERKExport::setup( )
 }
 
 
-returnValue AdjointERKExport::getDataDeclarations(	ExportStatementBlock& declarations,
-													ExportStruct dataStruct
-													) const
+returnValue ThreeSweepsERKExport::getDataDeclarations(	ExportStatementBlock& declarations,
+														ExportStruct dataStruct
+														) const
 {
-	ExplicitRungeKuttaExport::getDataDeclarations( declarations, dataStruct );
+	AdjointERKExport::getDataDeclarations( declarations, dataStruct );
 
-	declarations.addDeclaration( rk_forward_sweep,dataStruct );
+	declarations.addDeclaration( rk_backward_sweep,dataStruct );
 
     return SUCCESSFUL_RETURN;
 }
 
 
-returnValue AdjointERKExport::getCode(	ExportStatementBlock& code
-										)
+returnValue ThreeSweepsERKExport::getCode(	ExportStatementBlock& code
+											)
 {
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
@@ -264,7 +321,8 @@ returnValue AdjointERKExport::getCode(	ExportStatementBlock& code
 				<< rk_xxx.getFullName() << ", "
 				<< rk_ttt.getFullName() << ", "
 				<< rk_kkk.getFullName() << ", "
-				<< rk_forward_sweep.getFullName()
+				<< rk_forward_sweep.getFullName() << ", "
+				<< rk_backward_sweep.getFullName()
 				<< " )\n\n";
 	}
 
@@ -273,6 +331,7 @@ returnValue AdjointERKExport::getCode(	ExportStatementBlock& code
 	if( exportRhs ) {
 		code.addFunction( rhs );
 		code.addFunction( diffs_rhs );
+		code.addFunction( diffs_sweep3 );
 	}
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
@@ -282,6 +341,31 @@ returnValue AdjointERKExport::getCode(	ExportStatementBlock& code
 	return SUCCESSFUL_RETURN;
 }
 
+
+Expression ThreeSweepsERKExport::returnLowerTriangular( const Expression& expr, uint dim ) {
+//	std::cout << "returnLowerTriangular with " << expr.getNumRows() << " rows and " << expr.getNumCols() << " columns\n";
+	Expression new_expr;
+	for( uint i = 0; i < dim; i++ ) {
+		for( uint j = 0; j <= i; j++ ) {
+			new_expr << expr(i,j);
+		}
+	}
+	return new_expr;
+}
+
+
+ExportVariable ThreeSweepsERKExport::getAuxVariable() const
+{
+	ExportVariable max;
+	max = rhs.getGlobalExportVariable();
+	if( diffs_rhs.getGlobalExportVariable().getDim() > max.getDim() ) {
+		max = diffs_rhs.getGlobalExportVariable();
+	}
+	if( diffs_sweep3.getGlobalExportVariable().getDim() > max.getDim() ) {
+		max = diffs_sweep3.getGlobalExportVariable();
+	}
+	return max;
+}
 
 // PROTECTED:
 

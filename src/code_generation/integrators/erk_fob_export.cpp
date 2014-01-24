@@ -168,6 +168,7 @@ returnValue ForwardOverBackwardERKExport::setup( )
 
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
+	seed_backward.setup( "seed", 1, NX );
 
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
@@ -181,22 +182,22 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	rk_xxx.setup("rk_xxx", 1, inputDim+timeDep, REAL, structWspace);
 	rk_kkk.setup("rk_kkk", rkOrder, NX+NX*NX+NX*NU+NU*NU, REAL, structWspace);
 	rk_forward_sweep.setup("rk_sweep1", 1, grid.getNumIntervals()*rkOrder*NX*(NX+NU+1), REAL, structWspace);
-	seed_backward.setup("seed", 1, NX, REAL, ACADO_VARIABLES);
 
 	if ( useOMP )
 	{
 		ExportVariable auxVar;
 
-		auxVar = diffs_rhs.getGlobalExportVariable();
+		auxVar = getAuxVariable();
 		auxVar.setName( "odeAuxVar" );
 		auxVar.setDataStruct( ACADO_LOCAL );
+		rhs.setGlobalExportVariable( auxVar );
 		diffs_rhs.setGlobalExportVariable( auxVar );
 	}
 
 	ExportIndex run( "run1" );
 
 	// setup INTEGRATE function
-	integrate = ExportFunction( "integrate", rk_eta, reset_int );
+	integrate = ExportFunction( "integrate", rk_eta, reset_int, seed_backward );
 	integrate.setReturnValue( error_code );
 	rk_eta.setDoc( "Working array to pass the input values and return the results." );
 	reset_int.setDoc( "The internal memory of the integrator can be reset." );

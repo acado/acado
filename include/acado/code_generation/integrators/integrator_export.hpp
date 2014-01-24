@@ -516,7 +516,8 @@ enum ExportSensitivityType{
 	NO_SENSITIVITY, 				/**< No sensitivities are computed, if possible. 		  					 */
     FORWARD,    					/**< Sensitivities are computed in forward mode.                             */
     BACKWARD,    					/**< Sensitivities are computed in backward mode.                            */
-    FORWARD_OVER_BACKWARD         	/**< Sensitivities (first and second order) are computed.					 */
+    FORWARD_OVER_BACKWARD,         	/**< Sensitivities (first and second order) are computed.					 */
+    THREE_SWEEPS         			/**< Sensitivities (first and second order) are computed.					 */
 };
 
 /** Factory for creation of exported integrators.*/

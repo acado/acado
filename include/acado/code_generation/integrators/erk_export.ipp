@@ -52,6 +52,9 @@ inline ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction
 	else if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
 		return new ForwardOverBackwardERKExport(_userInteraction, _commonHeaderName);
 	}
+	else if( (ExportSensitivityType)sensGen == THREE_SWEEPS ) {
+		return new ThreeSweepsERKExport(_userInteraction, _commonHeaderName);
+	}
 	else {
 		ACADOERROR( RET_INVALID_OPTION );
 		return new ExplicitRungeKuttaExport(_userInteraction, _commonHeaderName);

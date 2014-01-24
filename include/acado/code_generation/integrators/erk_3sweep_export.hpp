@@ -26,32 +26,32 @@
 
 
 /**
- *    \file include/acado/integrators/erk_adjoint_export.hpp
+ *    \file include/acado/integrators/erk_3sweep_export.hpp
  *    \author Rien Quirynen
  *    \date 2014
  */
 
 
-#ifndef ACADO_TOOLKIT_ERK_ADJOINT_EXPORT_HPP
-#define ACADO_TOOLKIT_ERK_ADJOINT_EXPORT_HPP
+#ifndef ACADO_TOOLKIT_ERK_3SWP_EXPORT_HPP
+#define ACADO_TOOLKIT_ERK_3SWP_EXPORT_HPP
 
-#include <acado/code_generation/integrators/erk_export.hpp>
+#include <acado/code_generation/integrators/erk_adjoint_export.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
 
 
 /** 
- *	\brief Allows to export a tailored explicit Runge-Kutta integrator with adjoint first order sensitivity propagation for fast model predictive control.
+ *	\brief Allows to export a tailored explicit Runge-Kutta integrator with three-sweeps second order sensitivity propagation for fast model predictive control.
  *
  *	\ingroup NumericalAlgorithms
  *
- *	The class AdjointERKExport allows to export a tailored explicit Runge-Kutta integrator with adjoint first order sensitivity propagation
+ *	The class ThreeSweepsERKExport allows to export a tailored explicit Runge-Kutta integrator with three-sweeps second order sensitivity propagation
  *	for fast model predictive control.
  *
  *	\author Rien Quirynen
  */
-class AdjointERKExport : public ExplicitRungeKuttaExport
+class ThreeSweepsERKExport : public AdjointERKExport
 {
     //
     // PUBLIC MEMBER FUNCTIONS:
@@ -64,7 +64,7 @@ class AdjointERKExport : public ExplicitRungeKuttaExport
 		 *	@param[in] _userInteraction		Pointer to corresponding user interface.
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
-        AdjointERKExport(	UserInteraction* _userInteraction = 0,
+        ThreeSweepsERKExport(	UserInteraction* _userInteraction = 0,
 							const std::string& _commonHeaderName = ""
 							);
 
@@ -72,12 +72,12 @@ class AdjointERKExport : public ExplicitRungeKuttaExport
 		 *
 		 *	@param[in] arg		Right-hand side object.
 		 */
-        AdjointERKExport(	const AdjointERKExport& arg
+        ThreeSweepsERKExport(	const ThreeSweepsERKExport& arg
 							);
 
         /** Destructor. 
 		 */
-        virtual ~AdjointERKExport( );
+        virtual ~ThreeSweepsERKExport( );
 
 
 		/** Assigns Differential Equation to be used by the integrator.
@@ -120,18 +120,25 @@ class AdjointERKExport : public ExplicitRungeKuttaExport
 
 	protected:
 
+		Expression returnLowerTriangular( const Expression& expr, uint dim );
+
+
+		/** Returns the largest global export variable.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		ExportVariable getAuxVariable() const;
 
     protected:
 
-		ExportVariable rk_forward_sweep;				/**< Variable containing intermediate results of a forward sweep of the RK integrator. */
-		ExportVariable seed_backward;					/**< Variable containing the seed for a backward propagation of the RK integrator. */
-
+		ExportAcadoFunction diffs_sweep3;			/**< Module to export ODE. */
+		ExportVariable rk_backward_sweep;			/**< Variable containing intermediate results of a backward sweep of the RK integrator. */
 };
 
 
 CLOSE_NAMESPACE_ACADO
 
 
-#endif  // ACADO_TOOLKIT_ERK_ADJOINT_EXPORT_HPP
+#endif  // ACADO_TOOLKIT_ERK_3SWP_EXPORT_HPP
 
 // end of file.
