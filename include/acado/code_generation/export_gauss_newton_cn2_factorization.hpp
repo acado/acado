@@ -265,8 +265,11 @@ protected:
 
 	ExportVariable D, L;
 
-	ExportVariable T1, T2, T3;
+	ExportVariable T1, T2, T3, F;
 
+	ExportFunction mac_R_BT_F_D, mult_FT_A_L;
+	ExportFunction updateQ2;
+	ExportFunction mac_W1_T1_E_F;
 };
 
 CLOSE_NAMESPACE_ACADO

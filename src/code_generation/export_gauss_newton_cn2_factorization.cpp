@@ -108,6 +108,7 @@ returnValue ExportGaussNewtonCn2Factorization::getDataDeclarations(	ExportStatem
 	declarations.addDeclaration(T1, dataStruct);
 	declarations.addDeclaration(T2, dataStruct);
 	declarations.addDeclaration(T3, dataStruct);
+	declarations.addDeclaration(F, dataStruct);
 
 //	declarations.addDeclaration(W3, dataStruct);
 
@@ -215,6 +216,15 @@ returnValue ExportGaussNewtonCn2Factorization::getCode(	ExportStatementBlock& co
 	code.addFunction( updateQ );
 	code.addFunction( mul_T2_A_L );
 	code.addFunction( mult_BT_T1_T2 );
+
+//	ExportFunction mac_R_BT_F_D, mult_FT_A_L;
+//		ExportFunction updateQ2;
+//		ExportFunction mac_W1_T1_E_F;
+
+	code.addFunction( mac_R_BT_F_D );
+	code.addFunction( mult_FT_A_L );
+	code.addFunction( updateQ2 );
+	code.addFunction( mac_W1_T1_E_F );
 
 	cholSolver.getCode( code );
 
@@ -925,6 +935,37 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	chol( D )
 	U(N - 1, N - 1) = D
 
+	************************************************
+	************************************************
+	OR, an alternative, n_x^3 free version would be:
+
+	T1 = Q( N )
+	for col = 0: N - 1
+		F( col ) = T1 * E(0, col)
+
+	for blk = N - 1: 1
+		row = N - 1 - blk
+
+		D = R( blk ) + B( blk )^T * F( row )
+		L = F( row )^T * A( blk )
+
+		chol( D )
+		L = chol_solve(D, L) // L <- D^(-T) * L
+
+		T1 = Q( blk ) - L^T * L
+
+		for col = row + 1: N - 1
+			W1 = A( blk )^T * F( col )
+			F( col ) = T1 * E(row + 1, col) + W1
+
+		U(row, row) = D
+		for col = row + 1: N - 1
+			U(row, col) = L * E(row + 1, col)
+
+	D = R( 0 ) + B( 0 )^T * F(N - 1)
+	chol( D )
+	U(N - 1, N - 1) = D
+
 	 */
 
 	U.setup("U", getNumQPvars(), getNumQPvars(), REAL, ACADO_WORKSPACE);
@@ -936,12 +977,18 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	T2.setup("T2", NU, NX, REAL, ACADO_WORKSPACE);
 	T3.setup("T3", NX, NX, REAL, ACADO_WORKSPACE);
 
+	F.setup("F", N * NX, NU, REAL, ACADO_WORKSPACE);
+
 	cholSolver.init(NU, NX, "condensing");
 	cholSolver.setup();
 
+	// Just for testing...
 //	condensePrep.addStatement( U == H );
 //	condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), U);
 //	condensePrep.addFunctionCall(cholSolver.getSolveFunction(), U, Id);
+
+#if 0
+	// N^2 factorization with n_x^3 terms
 
 	condensePrep.addStatement( T1 == QN1 );
 	for (unsigned blk = N - 1; blk > 0; --blk)
@@ -980,7 +1027,83 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	condensePrep.addFunctionCall(mac_R_T2_B_D, R1.getAddress( 0 ), T2, evGu.getAddress( 0 ), D);
 	condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), D);
 	condensePrep.addFunctionCall(move_D_U, D, U, ExportIndex( N - 1 ));
+#else
+	// N^2 factorization, n_x^3 free
 
+	// (N - row) * (N - 1 - row) / 2 + (N - 1 - col)
+
+	condensePrep.addStatement( T1 == QN1 );
+
+	LOG( LVL_DEBUG ) << "Init F" << endl;
+	for (unsigned col = 0; col < N; ++col)
+	{
+		unsigned blkE = (N - 0) * (N - 1 - 0) / 2 + (N - 1 - col);
+		condensePrep.addFunctionCall(
+				multGxGu, T1, E.getAddress(blkE * NX), F.getAddress(col * NX));
+	}
+
+	LOG( LVL_DEBUG ) << "Main fact loop" << endl;
+	for (unsigned blk = N - 1; blk > 0; --blk)
+	{
+		unsigned row = N - 1 - blk;
+		LOG( LVL_DEBUG ) << "blk: " << blk << endl;
+
+		// D = R( blk ) + B( blk )^T * F( row )
+		// L = F( row )^T * A( blk )
+		if (R1.isGiven() == true)
+			condensePrep.addFunctionCall(
+					mac_R_BT_F_D, R1, evGu.getAddress(blk * NX), F.getAddress(row * NX), D);
+		else
+			condensePrep.addFunctionCall(
+					mac_R_BT_F_D, R1.getAddress(blk * NX), evGu.getAddress(blk * NX), F.getAddress(row * NX), D);
+		condensePrep.addFunctionCall(mult_FT_A_L, F.getAddress(row * NX), evGx.getAddress(blk * NX), L);
+
+		// Chol and system solve
+		condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), D);
+		condensePrep.addFunctionCall(cholSolver.getSolveFunction(), D, L);
+
+		// Update Q
+
+		if (Q1.isGiven() == true)
+			condensePrep.addFunctionCall(updateQ2, Q1, L, T1);
+		else
+			condensePrep.addFunctionCall(updateQ2, Q1.getAddress(blk * NX), L, T1);
+
+		// for col = row + 1: N - 1
+		//	 W1 = A( blk )^T * F( col )
+		//	 F( col ) = W1 + T1 * E(row + 1, col)
+
+		LOG( LVL_DEBUG ) << "Update F" << endl;
+		for (unsigned col = row + 1; col < N; ++col)
+		{
+			LOG( LVL_DEBUG ) << "Update F col: " << col << endl;
+			condensePrep.addFunctionCall(multGxTGu, evGx.getAddress(blk * NX), F.getAddress(col * NX), W1);
+
+			unsigned blkE = (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col);
+			condensePrep.addFunctionCall(mac_W1_T1_E_F, W1, T1, E.getAddress(blkE * NX), F.getAddress(col * NX));
+		}
+
+		LOG( LVL_DEBUG ) << "Calc a U row" << endl;
+		// Caclulate one block-row of the factorized matrix
+		condensePrep.addFunctionCall(move_D_U, D, U, ExportIndex( row ));
+		for (unsigned col = row + 1; col < N; ++col)
+		{
+			// U(row, col) = L * E(row + 1, col)
+
+			// blk = (N - row) * (N - 1 - row) / 2 + (N - 1 - col)
+
+			unsigned blkE = (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col);
+			cout << "blkE " << blkE << endl;
+
+			condensePrep.addFunctionCall(mult_L_E_U, L, E.getAddress(blkE * NX), U, ExportIndex( row ), ExportIndex( col ));
+		}
+	}
+	condensePrep.addFunctionCall(
+			mac_R_BT_F_D, R1.getAddress(0 * NX), evGu.getAddress(0 * NX), F.getAddress((N - 1) * NX), D);
+	condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), D);
+	condensePrep.addFunctionCall(move_D_U, D, U, ExportIndex( N - 1 ));
+
+#endif
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -1509,6 +1632,25 @@ returnValue ExportGaussNewtonCn2Factorization::setupMultiplicationRoutines( )
 	updateQ.addStatement( T33 == (Gx1 ^ T11) );
 	updateQ.addStatement( T11 == Q11 + T33 * Gx1 );
 	updateQ.addStatement( T11 -= (L1 ^ L1) );
+
+//	ExportFunction mac_R_BT_F_D, mult_FT_A_L;
+//	ExportFunction updateQ2;
+//	ExportFunction mac_W1_T1_E_F;
+
+	mac_R_BT_F_D.setup("mac_R_BT_F_D", R11, Gu1, Gu2, D1);
+	mac_R_BT_F_D.addStatement( D1 == R11 + (Gu1 ^ Gu2) );
+
+	mult_FT_A_L.setup("mult_FT_A_L", Gu1, Gx1, L1);
+	mult_FT_A_L.addStatement( L1 == (Gu1 ^ Gx1) );
+
+	updateQ2.setup("updateQ2", Q11, L1, T11);
+	// TODO T11 == Q11 - (L1^L1) does not work properly
+	//      Revisit this...
+	updateQ2.addStatement( T11 == Q11 );
+	updateQ2.addStatement( T11 -= (L1 ^ L1) );
+
+	mac_W1_T1_E_F.setup("mac_W1_T1_E_F", Gu1, Gx1, Gu2, Gu3);
+	mac_W1_T1_E_F.addStatement( Gu3 == Gu1 + Gx1 * Gu2 );
 
 	return SUCCESSFUL_RETURN;
 }
