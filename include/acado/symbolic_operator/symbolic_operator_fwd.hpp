@@ -58,6 +58,8 @@ BEGIN_NAMESPACE_ACADO
    class Power_Int                   ;
 
    class UnaryOperator               ;
+   class Absolute					 ;
+   class Sign						 ;
    class Sin                         ;
    class Cos                         ;
    class Tan                         ;

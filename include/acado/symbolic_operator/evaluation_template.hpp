@@ -67,6 +67,8 @@ public:
 
 	virtual void project    ( int      &idx );
 	virtual void set        ( double   &arg );
+	virtual void Absolute   ( Operator &arg );
+	virtual void Sign       ( Operator &arg );
 	virtual void Acos       ( Operator &arg );
 	virtual void Asin       ( Operator &arg );
 	virtual void Atan       ( Operator &arg );
@@ -152,6 +154,18 @@ template <typename T> void EvaluationTemplate<T>::project( int &idx ){
 template <typename T> void EvaluationTemplate<T>::set( double &arg ){
 
 	res = arg;
+}
+
+template <typename T> void EvaluationTemplate<T>::Sign( Operator &arg ){
+
+	arg.evaluate( this );
+	res = sign( res );
+}
+
+template <typename T> void EvaluationTemplate<T>::Absolute( Operator &arg ){
+
+	arg.evaluate( this );
+	res = abs( res );
 }
 
 

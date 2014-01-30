@@ -741,6 +741,29 @@ DMatrix Expression::getDependencyPattern( const Expression& arg ) const{
     return tmp;
 }
 
+Expression Expression::getAbs( ) const{
+
+    Expression tmp(nRows,nCols);
+    uint run1;
+
+    for( run1 = 0; run1 < dim; run1++ ){
+        delete tmp.element[run1];
+        tmp.element[run1] = new Absolute( element[run1]->clone() );
+    }
+    return tmp;
+}
+
+Expression Expression::getSign( ) const{
+
+    Expression tmp(nRows,nCols);
+    uint run1;
+
+    for( run1 = 0; run1 < dim; run1++ ){
+        delete tmp.element[run1];
+        tmp.element[run1] = new Sign( element[run1]->clone() );
+    }
+    return tmp;
+}
 
 
 Expression Expression::getSin( ) const{

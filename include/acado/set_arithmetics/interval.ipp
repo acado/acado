@@ -216,6 +216,15 @@ inline Interval sin( const Interval &I ){
   return cos( I - M_PI/2. );
 }
 
+inline Interval sign(const Interval &I) {
+	if (I.u() < 0)
+		return Interval(-1., -1);
+	else if (I.l() >= 0)
+		return Interval(1., 1);
+	else
+		return Interval(-1., 1);
+}
+
 inline Interval tan( const Interval&I ){
   const double k = ::ceil(-0.5-I._l/M_PI);
   const double l = I._l+M_PI*k, u = I._u+M_PI*k;

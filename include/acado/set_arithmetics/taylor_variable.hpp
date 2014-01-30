@@ -127,6 +127,10 @@ class TaylorVariable
     ( const TaylorVariable<U>& );
   template <typename U> friend TaylorVariable<U> acos
     ( const TaylorVariable<U>& );
+  template <typename U> friend TaylorVariable<U> abs
+    ( const TaylorVariable<U>& );
+  template <typename U> friend TaylorVariable<U> sign
+    ( const TaylorVariable<U>& );
   template <typename U> friend TaylorVariable<U> asin
     ( const TaylorVariable<U>& );
   template <typename U> friend TaylorVariable<U> atan
