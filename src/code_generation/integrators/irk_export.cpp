@@ -1287,7 +1287,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output ) {
 
-	if( (rhs.getFunctionDim()) == 0 && (rk_outputs.size() + outputs.size() + diffs_outputs.size()) == 0) {
+	if(rhs.isExternal() == true && (rk_outputs.size() + outputs.size() + diffs_outputs.size()) == 0) {
 		int sensGen;
 		get( DYNAMIC_SENSITIVITY, sensGen );
 		sensGen = ( (ExportSensitivityType)sensGen != NO_SENSITIVITY );

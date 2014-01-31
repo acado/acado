@@ -200,4 +200,9 @@ returnValue ExportAcadoFunction::setGlobalExportVariable(const ExportVariable& v
 	return SUCCESSFUL_RETURN;
 }
 
+bool ExportAcadoFunction::isExternal() const
+{
+	return external;
+}
+
 CLOSE_NAMESPACE_ACADO
