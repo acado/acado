@@ -248,6 +248,20 @@ returnValue QProblem::init(	const real_t* const _H, const real_t* const _g, cons
 	return solveInitialQP( 0,yOpt,0,0, nWSR,cputime );
 }
 
+returnValue QProblem::init(	const real_t* const _H, const real_t* const _R, const real_t* const _g, const real_t* const _A,
+							const real_t* const _lb, const real_t* const _ub,
+							const real_t* const _lbA, const real_t* const _ubA,
+							int& nWSR, const real_t* const yOpt, real_t* const cputime
+							)
+{
+	/* 1) Setup QP data. */
+	if (setupQPdata(_H, _R, _g, _A, _lb, _ub, _lbA, _ubA) != SUCCESSFUL_RETURN)
+		return THROWERROR( RET_INVALID_ARGUMENTS );
+
+	/* 2) Call to main initialisation routine (without any additional information). */
+	return solveInitialQP( 0,yOpt,0,0, nWSR,cputime );
+}
+
 
 /*
  *	h o t s t a r t
