@@ -1767,6 +1767,9 @@ returnValue ExportGaussNewtonCn2Factorization::setupQPInterface( )
 	int maxNumQPiterations;
 	get(MAX_NUM_QP_ITERATIONS, maxNumQPiterations);
 
+	int externalCholesky;
+	get(CG_CONDENSED_HESSIAN_CHOLESKY, externalCholesky);
+
 	//
 	// Set up export of the source file
 	//
@@ -1789,7 +1792,9 @@ returnValue ExportGaussNewtonCn2Factorization::setupQPInterface( )
 			"", // TODO
 //			sigma.getFullName(),
 			hotstartQP,
+			(CondensedHessianCholeskyDecomposition)externalCholesky == EXTERNAL,
 			H.getFullName(),
+			U.getFullName(),
 			g.getFullName(),
 			A.getFullName(),
 			lb.getFullName(),

@@ -1488,7 +1488,9 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 			"", // TODO
 //			sigma.getFullName(),
 			hotstartQP,
+			true,
 			H.getFullName(),
+			string(),
 			g.getFullName(),
 			A.getFullName(),
 			lb.getFullName(),

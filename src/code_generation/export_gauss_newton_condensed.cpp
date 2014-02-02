@@ -2344,7 +2344,9 @@ returnValue ExportGaussNewtonCondensed::setupQPInterface( )
 			yVars.getFullName(),
 			sigma.getFullName(),
 			hotstartQP,
+			true,
 			H.getFullName(),
+			string(), // U
 			g.getFullName(),
 			A.getFullName(),
 			lb.getFullName(),

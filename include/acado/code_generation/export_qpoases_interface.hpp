@@ -26,7 +26,7 @@
 /**
  *    \file include/acado/code_generation/export_qpoases_interface.hpp
  *    \author Milan Vukov
- *    \date 2012 - 2013
+ *    \date 2012 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_EXPORT_QPOASES_INTERFACE_HPP
@@ -92,7 +92,9 @@ public:
 							const std::string& _dualSolution,
 							const std::string& _sigma,
 							bool _hotstartQP,
+							bool _externalCholesky,
 							const std::string& _qpH,
+							const std::string& _qpR,
 							const std::string& _qpg,
 							const std::string& _qpA,
 							const std::string& _qplb,
