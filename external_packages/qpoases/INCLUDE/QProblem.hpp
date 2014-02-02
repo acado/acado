@@ -521,6 +521,7 @@ class QProblem : public QProblemB
 		 *	\return SUCCESSFUL_RETURN \n
 					RET_INVALID_ARGUMENTS */
 		returnValue setupQPdata(	const real_t* const _H, 	/**< Hessian matrix. */
+									const real_t* const _R, 	/**< Cholesky factorization of the Hessian matrix. */
 									const real_t* const _g, 	/**< Gradient vector. */
 									const real_t* const _A,  	/**< Constraint matrix. */
 									const real_t* const _lb,	/**< Lower bound vector (on variables). \n

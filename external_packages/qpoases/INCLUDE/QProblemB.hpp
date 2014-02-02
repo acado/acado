@@ -420,6 +420,7 @@ class QProblemB
 		 *	\return SUCCESSFUL_RETURN \n
 					RET_INVALID_ARGUMENTS */
 		returnValue setupQPdata(	const real_t* const _H, 	/**< Hessian matrix. */
+									const real_t* const _R, 	/**< Cholesky factorization of the Hessian matrix. */
 									const real_t* const _g,		/**< Gradient vector. */
 									const real_t* const _lb,	/**< Lower bounds (on variables). \n
 																	 If no lower bounds exist, a NULL pointer can be passed. */
@@ -569,6 +570,7 @@ class QProblemB
 		Bounds bounds;				/**< Data structure for problem's bounds. */
 
 		real_t R[NVMAX*NVMAX];		/**< Cholesky decomposition of H (i.e. H = R^T*R). */
+		BooleanType hasCholesky;	/**< Flag indicating whether Cholesky decomposition has already been setup. */
 
 		real_t x[NVMAX];			/**< Primal solution vector. */
 		real_t y[NVMAX+NCMAX];		/**< Dual solution vector. */
