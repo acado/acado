@@ -282,7 +282,7 @@ returnValue QProblemB::init(	const real_t* const _H, const real_t* const _g,
 		return THROWERROR( RET_INVALID_ARGUMENTS );
 
 	/* 2) Call to main initialisation routine (without any additional information). */
-	return solveInitialQP( 0,yOpt,0, nWSR,cputime );
+	return solveInitialQP(0, yOpt, 0, nWSR, cputime);
 }
 
 
@@ -800,7 +800,7 @@ returnValue QProblemB::solveInitialQP(	const real_t* const xOpt, const real_t* c
 										int& nWSR, real_t* const cputime
 										)
 {
-	int i;
+	int i, nFR;
 	int nV = getNV( );
 
 
@@ -846,8 +846,12 @@ returnValue QProblemB::solveInitialQP(	const real_t* const xOpt, const real_t* c
 	if ( setupAuxiliaryWorkingSet( &auxiliaryBounds,BT_TRUE ) != SUCCESSFUL_RETURN )
 		return THROWERROR( RET_INIT_FAILED );
 
-	if ( setupCholeskyDecomposition( ) != SUCCESSFUL_RETURN )
-		return THROWERROR( RET_INIT_FAILED_CHOLESKY );
+	nFR = getNFR();
+	/* At the moment we can only provide a Cholesky of the Hessian if
+	 * the solver is cold-started. */
+	if (hasCholesky == BT_FALSE || nFR != nV)
+		if (setupCholeskyDecomposition() != SUCCESSFUL_RETURN)
+			return THROWERROR( RET_INIT_FAILED_CHOLESKY );
 
 	/* 5) Store original QP formulation... */
 	real_t g_original[NVMAX];

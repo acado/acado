@@ -781,14 +781,18 @@ returnValue QProblem::solveInitialQP(	const real_t* const xOpt, const real_t* co
 	if ( ( getNAC( ) + getNFX( ) ) == 0 )
 	{
 		/* Factorise full Hessian if no bounds/constraints are active. */
-		if ( setupCholeskyDecomposition( ) != SUCCESSFUL_RETURN )
-			return THROWERROR( RET_INIT_FAILED_CHOLESKY );
+		if (hasCholesky == BT_FALSE)
+			if ( setupCholeskyDecomposition( ) != SUCCESSFUL_RETURN )
+				return THROWERROR( RET_INIT_FAILED_CHOLESKY );
+		/* ... else we use user provided Cholesky factorization. At the moment
+		 * we can do that only for cold-started solver. */
 	}
 	else
 	{
 		/* Factorise projected Hessian if there active bounds/constraints. */
 		if ( setupCholeskyDecompositionProjected( ) != SUCCESSFUL_RETURN )
 			return THROWERROR( RET_INIT_FAILED_CHOLESKY );
+		/* TODO: use user-supplied Hessian decomposition. R_Z = R * Z. */
 	}
 
 	/* 5) Store original QP formulation... */
