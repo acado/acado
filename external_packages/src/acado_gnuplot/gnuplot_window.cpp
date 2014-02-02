@@ -37,9 +37,12 @@
 #include <windows.h>
 
 #define round( value ) floor( value + 0.5 )
+#else
+#include <unistd.h>
 #endif
 
-#include <unistd.h>
+#include <cstdlib>
+#include <string>
 
 using namespace std;
 
