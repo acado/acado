@@ -325,6 +325,7 @@ enum LogPrintMode
 
 enum OptionsName
 {
+	CG_CONDENSED_HESSIAN_CHOLESKY,				/**< Type of the Cholesky decomposition of the condensed Hessian. \sa CondensedHessianCholeskyDecomposition */
 	CG_MODULE_NAME,								/**< Name of the module, used as a prefix for the file-names and data structures. */
 	CG_EXPORT_FOLDER_NAME,						/**< Export folder name. */
 	CG_USE_ARRIVAL_COST,						/**< Enable interface for arival cost calculation. */
@@ -784,6 +785,13 @@ enum ExportStruct
 	FORCES_PARAMS,
 	FORCES_OUTPUT,
 	FORCES_INFO
+};
+
+enum CondensedHessianCholeskyDecomposition
+{
+	EXTERNAL,		/**< External, performed within a QP solver. */
+	INTERNAL_N3,	/**< n-cube version, performed within the exported code and passed to a QP solver. */
+	INTERNAL_N2		/**< n-square version, performed within the exported code, and passed to a QP solver. */
 };
 
 CLOSE_NAMESPACE_ACADO
