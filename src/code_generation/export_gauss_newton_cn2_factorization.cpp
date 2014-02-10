@@ -763,7 +763,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	// Special case, row = col = 0
 	condensePrep.addFunctionCall(moveGuE, evGu.getAddress(0, 0), E.getAddress(0, 0) );
 
-	if (N <= 20)
+	if (N <= 15)
 	{
 		unsigned row, col, prev, curr;
 		for (row = 1; row < N; ++row)
@@ -806,6 +806,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 
 		condensePrep.release( row ).release( col ).release( curr ).release( prev );
 	}
+	condensePrep.addLinebreak( 2 );
 
 	LOG( LVL_DEBUG ) << "---> Setup condensing: H11" << endl;
 
