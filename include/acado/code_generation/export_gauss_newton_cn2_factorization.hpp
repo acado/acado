@@ -203,7 +203,7 @@ protected:
 	ExportFunction condenseFdb;
 	ExportFunction expand;
 
-	ExportVariable T, E, QE, QGx, QDy;
+	ExportVariable E, QE, QGx, QDy;
 
 	ExportFunction multGxd;
 	ExportFunction moveGxT;
@@ -270,6 +270,7 @@ protected:
 	ExportFunction mac_R_BT_F_D, mult_FT_A_L;
 	ExportFunction updateQ2;
 	ExportFunction mac_W1_T1_E_F;
+	ExportFunction move_GxT_T3;
 };
 
 CLOSE_NAMESPACE_ACADO
