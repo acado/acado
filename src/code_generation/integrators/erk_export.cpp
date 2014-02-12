@@ -233,22 +233,12 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
 		// add VDE for differential states
-		Expression tmp_x;
-		for( uint i = 0; i < NX; i++ ) {
-			Expression intermediate_x = forwardDerivative( rhs_, x, Gx.getCol(i) );
-			tmp_x.appendCols( intermediate_x );
-		}
-		f << tmp_x;
+		f << multipleForwardDerivative( rhs_, x, Gx );
 		/*	if ( f.getDim() != f.getNX() )
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
 		// add VDE for control inputs
-		Expression tmp_u;
-		for( uint i = 0; i < NU; i++ ) {
-			Expression intermediate_u = forwardDerivative( rhs_, x, Gu.getCol(i) );
-			tmp_u.appendCols( intermediate_u );
-		}
-		f << tmp_u + forwardDerivative( rhs_, u );
+		f << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
 		// 	if ( f.getDim() != f.getNX() )
 		// 		return ACADOERROR( RET_ILLFORMED_ODE );
 
