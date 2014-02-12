@@ -122,6 +122,8 @@ class ThreeSweepsERKExport : public AdjointERKExport
 
 		Expression returnLowerTriangular( const Expression& expr, uint dim );
 
+		Expression symmetricDoubleProduct( const Expression& expr, const Expression& arg );
+
 
 		/** Returns the largest global export variable.
 		 *

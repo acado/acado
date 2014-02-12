@@ -120,21 +120,21 @@ returnValue ThreeSweepsERKExport::setDifferentialEquation(	const Expression& rhs
 		DifferentialState Sxx("", numX,1), Sux("", NU,NX), Suu("", numU,1);
 
 		// add VDE for differential states
-		h << forwardDerivative( rhs_, x ) * Gx;
+		h << multipleForwardDerivative( rhs_, x, Gx );
 
 		// add VDE for control inputs
-		h << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
+		h << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
 
-		Expression tmp2 = forwardDerivative(tmp, x);
+		IntermediateState tmp2 = forwardDerivative(tmp, x);
 		Expression tmp3 = backwardDerivative(rhs_, u, lx);
-		Expression tmp4 = forwardDerivative(tmp3, x);
-		Expression tmp5 = tmp4*Gu;
+		Expression tmp4 = multipleForwardDerivative(tmp3, x, Gu);
 
-		Expression tmp6 = Gx.transpose()*tmp2*Gx;
-		h << returnLowerTriangular(tmp6, NX);
-		h << Gu.transpose()*tmp2*Gx + tmp4*Gx;
-		Expression tmp7 = Gu.transpose()*tmp2*Gu + tmp5 + tmp5.transpose() + forwardDerivative(tmp3, u);
-		h << returnLowerTriangular(tmp7, NU);
+		// TODO: include a symmetric_AD_operator to strongly improve the symmetric left-right multiplied second order derivative computations !!
+//		Expression tmp6 = Gx.transpose()*tmp2*Gx;
+		h << symmetricDoubleProduct(tmp2, Gx);
+		h << Gu.transpose()*tmp2*Gx + multipleForwardDerivative(tmp3, x, Gx);
+		Expression tmp7 = tmp4 + tmp4.transpose() + forwardDerivative(tmp3, u);
+		h << symmetricDoubleProduct(tmp2, Gu) + returnLowerTriangular(tmp7, NU);
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -351,6 +351,40 @@ Expression ThreeSweepsERKExport::returnLowerTriangular( const Expression& expr, 
 		}
 	}
 	return new_expr;
+}
+
+
+Expression ThreeSweepsERKExport::symmetricDoubleProduct( const Expression& expr, const Expression& arg ) {
+
+	// NOTE: the speedup of the three-sweeps-propagation approach is strongly dependent on the support for this specific operator which shows many symmetries
+	uint dim = arg.getNumCols();
+	uint dim2 = arg.getNumRows();
+
+	IntermediateState inter_res = zeros<double>(dim2,dim);
+	for( uint i = 0; i < dim; i++ ) {
+		for( uint k1 = 0; k1 < dim2; k1++ ) {
+			for( uint k2 = 0; k2 <= k1; k2++ ) {
+				inter_res(k1,i) += expr(k1,k2)*arg(k2,i);
+			}
+			for( uint k2 = k1+1; k2 < dim2; k2++ ) {
+				inter_res(k1,i) += expr(k2,k1)*arg(k2,i);
+			}
+		}
+	}
+
+	Expression new_expr;
+	for( uint i = 0; i < dim; i++ ) {
+		for( uint j = 0; j <= i; j++ ) {
+			uint dim2 = arg.getNumRows();
+			Expression new_tmp = 0;
+			for( uint k1 = 0; k1 < dim2; k1++ ) {
+				new_tmp = new_tmp+arg(k1,i)*inter_res(k1,j);
+			}
+			new_expr << new_tmp;
+		}
+	}
+	return new_expr;
+//	return returnLowerTriangular(arg.transpose()*expr*arg, dim);
 }
 
 
