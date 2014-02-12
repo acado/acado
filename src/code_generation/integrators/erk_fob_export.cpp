@@ -108,12 +108,12 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
 		// add VDE for differential states
-		f << forwardDerivative( rhs_, x ) * Gx;
+		f << multipleForwardDerivative( rhs_, x, Gx );
 		/*	if ( f.getDim() != f.getNX() )
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
 		// add VDE for control inputs
-		f << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
+		f << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
 		// 	if ( f.getDim() != f.getNX() )
 		// 		return ACADOERROR( RET_ILLFORMED_ODE );
 
@@ -128,9 +128,9 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 
 		DifferentialState Sxx("", NX,NX), Sux("", NU,NX), Suu("", NU,NU);
 
-		g << forwardDerivative(tmp, x)*Gx + forwardDerivative(rhs_,x).transpose()*Sxx;
-		g << Gu.transpose()*forwardDerivative(tmp, x) + forwardDerivative(tmp, u) + Sux*forwardDerivative(rhs_,x);
-		g << forwardDerivative(backwardDerivative(rhs_, u, lx), u) + forwardDerivative(tmp, u)*Gu + forwardDerivative(rhs_,u).transpose()*Sux.transpose();
+		g << multipleForwardDerivative(tmp, x, Gx) + multipleBackwardDerivative(rhs_, x, Sxx);
+		g << multipleBackwardDerivative(tmp, x, Gu).transpose() + forwardDerivative(tmp, u) + multipleBackwardDerivative(rhs_, x, Sux.transpose()).transpose();
+		g << forwardDerivative(backwardDerivative(rhs_, u, lx), u) + multipleForwardDerivative(tmp, u, Gu) + multipleBackwardDerivative(rhs_, u, Sux.transpose());
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
