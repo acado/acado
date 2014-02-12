@@ -117,11 +117,35 @@ Expression forwardDerivative( const Expression &arg1,
 }
 
 
+Expression multipleForwardDerivative( const Expression &arg1,
+                              const Expression &arg2,
+                              const Expression &seed  ){
+
+	Expression tmp;
+	for( uint i = 0; i < seed.getNumCols(); i++ ) {
+		tmp.appendCols( forwardDerivative( arg1, arg2, seed.getCol(i) ) );
+	}
+    return tmp;
+}
+
+
 Expression backwardDerivative( const Expression &arg1,
                                const Expression &arg2,
                                const Expression &seed  ){
 
     return arg1.ADbackward(arg2,seed);
+}
+
+
+Expression multipleBackwardDerivative( const Expression &arg1,
+                              const Expression &arg2,
+                              const Expression &seed  ){
+
+	Expression tmp;
+	for( uint i = 0; i < seed.getNumCols(); i++ ) {
+		tmp.appendCols( backwardDerivative( arg1, arg2, seed.getCol(i) ) );
+	}
+    return tmp;
 }
 
 

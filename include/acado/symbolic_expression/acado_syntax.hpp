@@ -108,6 +108,14 @@ REFER_NAMESPACE_ACADO Expression forwardDerivative ( const REFER_NAMESPACE_ACADO
                                                      const REFER_NAMESPACE_ACADO Expression &arg2,
                                                      const REFER_NAMESPACE_ACADO Expression &seed );
 
+REFER_NAMESPACE_ACADO Expression multipleForwardDerivative ( const REFER_NAMESPACE_ACADO Expression &arg1,
+                                                     	 	 	 const REFER_NAMESPACE_ACADO Expression &arg2,
+                                                     	 	 	 const REFER_NAMESPACE_ACADO Expression &seed );
+
+REFER_NAMESPACE_ACADO Expression multipleBackwardDerivative ( const REFER_NAMESPACE_ACADO Expression &arg1,
+                                                     	 	 	 const REFER_NAMESPACE_ACADO Expression &arg2,
+                                                     	 	 	 const REFER_NAMESPACE_ACADO Expression &seed );
+
 REFER_NAMESPACE_ACADO Expression backwardDerivative( const REFER_NAMESPACE_ACADO Expression &arg1,
                                                      const REFER_NAMESPACE_ACADO Expression &arg2,
                                                      const REFER_NAMESPACE_ACADO Expression &seed );
