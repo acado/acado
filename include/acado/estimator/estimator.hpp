@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -80,42 +80,42 @@ class Estimator : public SimulationBlock
 
         /** Initialization. */
         virtual returnValue init(	double startTime = 0.0,
-									const Vector &x0_ = emptyConstVector,
-									const Vector &p_  = emptyConstVector
+									const DVector &x0_ = emptyConstVector,
+									const DVector &p_  = emptyConstVector
 									);
 
         /** Executes next single step. */
         virtual returnValue step(	double currentTime,
-									const Vector& _y
+									const DVector& _y
 									) = 0;
 
 
 		/** Returns all estimator outputs. */
-        inline returnValue getOutputs(	Vector& _x,			/**< Estimated differential states. */
-										Vector& _xa,		/**< Estimated algebraic states. */
-										Vector& _u,			/**< Estimated previous controls. */
-										Vector& _p,			/**< Estimated parameters. */
-										Vector& _w			/**< Estimated disturbances. */
+        inline returnValue getOutputs(	DVector& _x,			/**< Estimated differential states. */
+										DVector& _xa,		/**< Estimated algebraic states. */
+										DVector& _u,			/**< Estimated previous controls. */
+										DVector& _p,			/**< Estimated parameters. */
+										DVector& _w			/**< Estimated disturbances. */
 										) const;
 
 		/** Returns estimated differential states. */
-        inline returnValue getX(	Vector& _x	/**< OUTPUT: estimated differential states. */
+        inline returnValue getX(	DVector& _x	/**< OUTPUT: estimated differential states. */
 									) const;
 
 		/** Returns estimated algebraic states. */
-        inline returnValue getXA(	Vector& _xa	/**< OUTPUT: estimated algebraic states. */
+        inline returnValue getXA(	DVector& _xa	/**< OUTPUT: estimated algebraic states. */
 									) const;
 
 		/** Returns estimated previous controls. */
-        inline returnValue getU(	Vector& _u	/**< OUTPUT: estimated previous controls. */
+        inline returnValue getU(	DVector& _u	/**< OUTPUT: estimated previous controls. */
 									) const;
 
 		/** Returns estimated parameters. */
-        inline returnValue getP(	Vector& _p	/**< OUTPUT: estimated parameters. */
+        inline returnValue getP(	DVector& _p	/**< OUTPUT: estimated parameters. */
 									) const;
 
 		/** Returns estimated disturbances. */
-        inline returnValue getW(	Vector& _w	/**< OUTPUT: estimated disturbances. */
+        inline returnValue getW(	DVector& _w	/**< OUTPUT: estimated disturbances. */
 									) const;
 
 
@@ -155,11 +155,11 @@ class Estimator : public SimulationBlock
     // DATA MEMBERS:
     //
     protected:
-		Vector x;			/**< Estimated differential state. */
-		Vector xa;			/**< Estimated algebraic state. */
-		Vector u;			/**< Estimated previous controls. */
-		Vector p;			/**< Estimated parameters. */
-		Vector w;			/**< Estimated disturbances. */
+		DVector x;			/**< Estimated differential state. */
+		DVector xa;			/**< Estimated algebraic state. */
+		DVector u;			/**< Estimated previous controls. */
+		DVector p;			/**< Estimated parameters. */
+		DVector w;			/**< Estimated disturbances. */
 };
 
 

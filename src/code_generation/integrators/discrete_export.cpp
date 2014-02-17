@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,20 +33,16 @@
 
 #include <acado/code_generation/integrators/discrete_export.hpp>
 
-#include <sstream>
 using namespace std;
 
-
-
 BEGIN_NAMESPACE_ACADO
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
 DiscreteTimeExport::DiscreteTimeExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : IntegratorExport( _userInteraction,_commonHeaderName )
 {
 }
@@ -68,7 +64,7 @@ DiscreteTimeExport::~DiscreteTimeExport( )
 returnValue DiscreteTimeExport::setDifferentialEquation(	const Expression& rhs_ )
 {
 	if( rhs_.getDim() > 0 ) {
-		Parameter         dummy0;
+		OnlineData        dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		AlgebraicState 	  dummy3;
@@ -80,11 +76,11 @@ returnValue DiscreteTimeExport::setDifferentialEquation(	const Expression& rhs_ 
 		dummy4.clearStaticCounters();
 
 		NX2 = rhs_.getDim() - NXA;
-		x = DifferentialState(NX1+NX2);
-		z = AlgebraicState(NXA);
-		dx = DifferentialStateDerivative(NDX);
-		u = Control(NU);
-		p = Parameter(NP);
+		x = DifferentialState("", NX1+NX2, 1);
+		z = AlgebraicState("", NXA, 1);
+		dx = DifferentialStateDerivative("", NDX, 1);
+		u = Control("", NU, 1);
+		od = OnlineData("", NOD, 1);
 
 		DifferentialEquation f;
 		f << rhs_;
@@ -96,7 +92,8 @@ returnValue DiscreteTimeExport::setDifferentialEquation(	const Expression& rhs_ 
 			// There are not supposed to be algebraic states or differential state derivatives !
 		}
 
-		return (rhs.init( f,"acado_rhs",NX,NXA,NU ) & diffs_rhs.init( g,"acado_diffs",NX,NXA,NU ) );
+		return (rhs.init(f, "acado_rhs", NX, NXA, NU, NP, NDX, NOD) &
+				diffs_rhs.init(g, "acado_diffs", NX, NXA, NU, NP, NDX, NOD));
 	}
 	return SUCCESSFUL_RETURN;
 }
@@ -129,26 +126,8 @@ returnValue DiscreteTimeExport::getFunctionDeclarations(	ExportStatementBlock& d
 {
 	declarations.addDeclaration( integrate );
 
-	if( NX2 != NX ) 		declarations.addDeclaration( fullRhs );
-	else if( exportRhs )	declarations.addDeclaration( rhs );
-
-	if( exportRhs ) {
-//		if( NX1 > 0 ) {
-//			declarations.addDeclaration( lin_input );
-//		}
-//		if( NX2 > 0 ) {
-//			declarations.addDeclaration( rhs );
-//			declarations.addDeclaration( diffs_rhs );
-//		}
-	}
-	else {
-		Function tmpFun;
-		tmpFun << zeros(1,1);
-		ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
-		declarations.addDeclaration( tmpExport );
-		tmpExport = ExportAcadoFunction(tmpFun, getNameDiffsRHS());
-		declarations.addDeclaration( tmpExport );
-	}
+	if( NX2 != NX ) 	declarations.addDeclaration( fullRhs );
+	else				declarations.addDeclaration( rhs );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -173,9 +152,9 @@ returnValue DiscreteTimeExport::setup( )
 	ExportIndex k( "k" );
 	ExportIndex tmp_index("tmp_index");
 	diffsDim = NX*(NX+NU);
-	inputDim = NX*(NX+NU+1) + NU + NP;
+	inputDim = NX*(NX+NU+1) + NU + NOD;
 	// setup INTEGRATE function
-	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
+	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
 	if( equidistantControlGrid() ) {
 		integrate = ExportFunction( "integrate", rk_eta, reset_int );
@@ -214,7 +193,7 @@ returnValue DiscreteTimeExport::setup( )
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
 		ExportVariable numStepsV( "numSteps", numSteps, STATIC_CONST_INT );
-		integrate.addStatement( String( "int " ) << numInt.getName() << " = " << numStepsV.getName() << "[" << rk_index.getName() << "];\n" );
+		integrate.addStatement( std::string( "int " ) + numInt.getName() + " = " + numStepsV.getName() + "[" + rk_index.getName() + "];\n" );
 	}
 
 	integrate.addStatement( rk_xxx.getCols( NX,inputDim-diffsDim ) == rk_eta.getCols( NX+diffsDim,inputDim ) );
@@ -248,14 +227,14 @@ returnValue DiscreteTimeExport::setup( )
 	}
 	else {
 		loop = &integrate;
-		loop->addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+		loop->addStatement( std::string("for(") + run.getName() + " = 0; " + run.getName() + " < " + numInt.getName() + "; " + run.getName() + "++ ) {\n" );
 	}
 
 	loop->addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
 		// Set rk_diffsPrev:
-		loop->addStatement( String("if( run > 0 ) {\n") );
+		loop->addStatement( std::string("if( run > 0 ) {\n") );
 		if( NX1 > 0 ) {
 			ExportForLoop loopTemp1( i,0,NX1 );
 			loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,0,NX1 ) == rk_eta.getCols( i*NX+NX+NXA,i*NX+NX+NXA+NX1 ) );
@@ -274,7 +253,7 @@ returnValue DiscreteTimeExport::setup( )
 			if( NU > 0 ) loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,NX,NX+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU,i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU+NU ) );
 			loop->addStatement( loopTemp3 );
 		}
-		loop->addStatement( String("}\n") );
+		loop->addStatement( std::string("}\n") );
 	}
 
 	// evaluate states:
@@ -306,7 +285,7 @@ returnValue DiscreteTimeExport::setup( )
 
 	// computation of the sensitivities using chain rule:
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( String( "if( run == 0 ) {\n" ) );
+		loop->addStatement( std::string( "if( run == 0 ) {\n" ) );
 	}
 	// PART 1
 	updateInputSystem(loop, i, j, tmp_index);
@@ -316,15 +295,15 @@ returnValue DiscreteTimeExport::setup( )
 	updateOutputSystem(loop, i, j, tmp_index);
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( String( "}\n" ) );
-		loop->addStatement( String( "else {\n" ) );
+		loop->addStatement( std::string( "}\n" ) );
+		loop->addStatement( std::string( "else {\n" ) );
 		// PART 1
 		propagateInputSystem(loop, i, j, k, tmp_index);
 		// PART 2
 		propagateImplicitSystem(loop, i, j, k, tmp_index);
 		// PART 3
 		propagateOutputSystem(loop, i, j, k, tmp_index);
-		loop->addStatement( String( "}\n" ) );
+		loop->addStatement( std::string( "}\n" ) );
 	}
 
 	// end of the integrator loop.
@@ -336,13 +315,13 @@ returnValue DiscreteTimeExport::setup( )
 	}
 	// PART 1
 	if( NX1 > 0 ) {
-		Matrix zeroR = zeros(1, NX2+NX3);
+		DMatrix zeroR = zeros<double>(1, NX2+NX3);
 		ExportForLoop loop1( i,0,NX1 );
 		loop1.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1,i*NX+NX+NXA+NX ) == zeroR );
 		integrate.addStatement( loop1 );
 	}
     // PART 2
-    Matrix zeroR = zeros(1, NX3);
+    DMatrix zeroR = zeros<double>(1, NX3);
     if( NX2 > 0 ) {
     	ExportForLoop loop2( i,NX1,NX1+NX2 );
     	loop2.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1+NX2,i*NX+NX+NXA+NX ) == zeroR );
@@ -377,20 +356,20 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 
 		stringstream s;
 		s << "#pragma omp threadprivate( "
-				<< max.getFullName().getName() << ", "
-				<< rk_xxx.getFullName().getName();
+				<< max.getFullName() << ", "
+				<< rk_xxx.getFullName();
 		if( NX1 > 0 ) {
-			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev1.getFullName().getName();
-			s << ", " << rk_diffsNew1.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev1.getFullName();
+			s << ", " << rk_diffsNew1.getFullName();
 		}
 		if( NX2 > 0 || NXA > 0 ) {
-			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev2.getFullName().getName();
-			s << ", " << rk_diffsNew2.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev2.getFullName();
+			s << ", " << rk_diffsNew2.getFullName();
 		}
 		if( NX3 > 0 ) {
-			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev3.getFullName().getName();
-			s << ", " << rk_diffsNew3.getFullName().getName();
-			s << ", " << rk_diffsTemp3.getFullName().getName();
+			if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) s << ", " << rk_diffsPrev3.getFullName();
+			s << ", " << rk_diffsNew3.getFullName();
+			s << ", " << rk_diffsTemp3.getFullName();
 		}
 		s << " )" << endl << endl;
 		code.addStatement( s.str().c_str() );
@@ -421,20 +400,15 @@ returnValue DiscreteTimeExport::getCode(	ExportStatementBlock& code
 		code.addLinebreak( 2 );
 	}
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-	code.addComment(String("Fixed step size:") << String(h));
+	code.addComment(std::string("Fixed step size:") + toString(h));
 
 	code.addFunction( integrate );
-
-	if( NX2 != NX ) {
-		prepareFullRhs();
-		code.addFunction( fullRhs );
-	}
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue DiscreteTimeExport::setNARXmodel( const uint delay, const Matrix& parms ) {
+returnValue DiscreteTimeExport::setNARXmodel( const uint delay, const DMatrix& parms ) {
 
 	return RET_INVALID_OPTION;
 }
@@ -447,8 +421,8 @@ returnValue DiscreteTimeExport::setupOutput( const std::vector<Grid> outputGrids
 
 
 returnValue DiscreteTimeExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  	  	  	const std::vector<String> _outputNames,
-									  	  	  	  	const std::vector<String> _diffs_outputNames,
+									  	  	  	  	const std::vector<std::string> _outputNames,
+									  	  	  	  	const std::vector<std::string> _diffs_outputNames,
 									  	  	  	  	const std::vector<uint> _dims_output ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
@@ -456,10 +430,10 @@ returnValue DiscreteTimeExport::setupOutput(  const std::vector<Grid> outputGrid
 
 
 returnValue DiscreteTimeExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  	  	  	const std::vector<String> _outputNames,
-									  	  	  	  	const std::vector<String> _diffs_outputNames,
+									  	  	  	  	const std::vector<std::string> _outputNames,
+									  	  	  	  	const std::vector<std::string> _diffs_outputNames,
 									  	  	  	  	const std::vector<uint> _dims_output,
-									  	  	  	  	const std::vector<Matrix> _outputDependencies ) {
+									  	  	  	  	const std::vector<DMatrix> _outputDependencies ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }
@@ -486,7 +460,7 @@ DiscreteTimeExport& DiscreteTimeExport::operator=( const DiscreteTimeExport& arg
 //
 
 IntegratorExport* createDiscreteTimeExport(	UserInteraction* _userInteraction,
-											const String &_commonHeaderName )
+											const std::string &_commonHeaderName )
 {
 	return new DiscreteTimeExport(_userInteraction, _commonHeaderName);
 }

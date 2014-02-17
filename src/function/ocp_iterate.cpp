@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -275,8 +275,8 @@ BooleanType OCPiterate::areGridsConsistent( )
 
 
 
-returnValue OCPiterate::getInitialData( Vector &x_, Vector &xa_, Vector &p_,
-                                        Vector &u_, Vector &w_               ) const{
+returnValue OCPiterate::getInitialData( DVector &x_, DVector &xa_, DVector &p_,
+                                        DVector &u_, DVector &w_               ) const{
 
     if( x  != 0 ){ x_  = x ->getVector(0); } else { x_  = emptyVector; }
     if( xa != 0 ){ xa_ = xa->getVector(0); } else { xa_ = emptyVector; }
@@ -288,7 +288,7 @@ returnValue OCPiterate::getInitialData( Vector &x_, Vector &xa_, Vector &p_,
 }
 
 
-void OCPiterate::update( double t, VariablesGrid &z1, Vector &z2 ) const{
+void OCPiterate::update( double t, VariablesGrid &z1, DVector &z2 ) const{
 
     if( z1.hasTime( t ) == BT_TRUE ){
 
@@ -296,14 +296,14 @@ void OCPiterate::update( double t, VariablesGrid &z1, Vector &z2 ) const{
         if( z1.getAutoInit(idx) == BT_FALSE ){ z2 = z1.getVector(idx); }
         else{
 
-            Vector safeGuard = z2;
+            DVector safeGuard = z2;
             safeGuard.setAll( BOUNDTOL );
 
             if( z1.hasUpperBounds() == BT_TRUE )
-                if( z2 >= z1.getUpperBounds(idx) ) z2 = (Vector)z1.getUpperBounds(idx) - safeGuard;
+                if( z2 >= z1.getUpperBounds(idx) ) z2 = (DVector)z1.getUpperBounds(idx) - safeGuard;
 
             if( z1.hasLowerBounds() == BT_TRUE )
-                if( z2 <= z1.getLowerBounds(idx) ) z2 = (Vector)z1.getLowerBounds(idx) + safeGuard;
+                if( z2 <= z1.getLowerBounds(idx) ) z2 = (DVector)z1.getLowerBounds(idx) + safeGuard;
 
             z1.setVector( idx, z2 );
         }
@@ -311,8 +311,8 @@ void OCPiterate::update( double t, VariablesGrid &z1, Vector &z2 ) const{
 }
 
 
-returnValue OCPiterate::updateData(  double t  , Vector &x_, Vector &xa_,
-                                     Vector &p_, Vector &u_, Vector &w_   ){
+returnValue OCPiterate::updateData(  double t  , DVector &x_, DVector &xa_,
+                                     DVector &p_, DVector &u_, DVector &w_   ){
 
     if( x  != 0 ) update( t, *x , x_  );
     if( xa != 0 ) update( t, *xa, xa_ );
@@ -330,7 +330,7 @@ returnValue OCPiterate::applyStep(	const BlockMatrix& bm,
 									)
 {
     uint run1, run2;
-    Matrix tmp;
+    DMatrix tmp;
 
     if( getNX() > 0 ){
         for( run1 = 0; run1 < getNumPoints(); run1++ ){
@@ -394,11 +394,11 @@ returnValue OCPiterate::enableSimulationMode(){
 
 
 returnValue OCPiterate::shift(	double timeShift,
-							    Vector  lastX,
-							    Vector  lastXA,
-								Vector  lastP,
-								Vector  lastU,
-								Vector  lastW ){
+							    DVector  lastX,
+							    DVector  lastXA,
+								DVector  lastP,
+								DVector  lastU,
+								DVector  lastW ){
 								
 	if ( acadoIsNegative( timeShift ) == BT_TRUE )
 		ACADOERROR( RET_INVALID_ARGUMENTS );

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 RadauIIA5Export::RadauIIA5Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ImplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 3;
@@ -71,11 +71,11 @@ RadauIIA5Export::~RadauIIA5Export( )
 //
 
 IntegratorExport* createRadauIIA5Export(	UserInteraction* _userInteraction,
-											const String &_commonHeaderName)
+											const std::string &_commonHeaderName)
 {
-	Matrix AA(3,3);
-	Vector bb(3);
-	Vector cc(3);
+	DMatrix AA(3,3);
+	DVector bb(3);
+	DVector cc(3);
 
 	AA(0,0) = -(double)(1/(double)360)*(double)sqrt((double)6)*(double)(-(double)4+(double)(double)sqrt((double)6))*(double)(67+(double)(double)37*(double)sqrt((double)6))/(double)(6+(double)(double)sqrt((double)6));
 	AA(0,1) = (1/(double)720)*(double)(-(double)4+(double)(double)sqrt((double)6))*(double)(-(double)4+(double)(double)sqrt((double)6))*(double)sqrt((double)6)*(double)(26+(double)(double)sqrt((double)6))/(double)(-(double)6+(double)(double)sqrt((double)6));

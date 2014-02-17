@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -23,25 +23,20 @@
  *
  */
 
-
-
 /**
  *    \file include/acado/code_generation/export_index.hpp
  *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
-
 #ifndef ACADO_TOOLKIT_EXPORT_INDEX_HPP
 #define ACADO_TOOLKIT_EXPORT_INDEX_HPP
 
-#include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_data.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
 class ExportIndexNode;
 class ExportArgument;
-
 
 /** 
  *	\brief Defines a scalar-valued index variable to be used for exporting code.
@@ -64,13 +59,15 @@ public:
 
 	ExportIndex(	const int _value );
 
-	explicit ExportIndex(	const String& _name,
-							const String& _prefix = emptyConstString
+	explicit ExportIndex(	const std::string& _name,
+							const std::string& _prefix = std::string()
 							);
 
 	ExportIndexNode* operator->();
 
 	const ExportIndexNode* operator->() const;
+
+	operator ExportArgument();
 
 	friend ExportIndex operator+(	const ExportIndex& _arg1,
 									const ExportIndex& _arg2
@@ -95,21 +92,21 @@ public:
 									const ExportIndex& _arg2
 									);
 
-	friend String operator==(	const ExportIndex& _arg1,
-								const ExportIndex& _arg2
-								);
+	friend std::string operator==(	const ExportIndex& _arg1,
+									const ExportIndex& _arg2
+									);
 
-	virtual returnValue exportDataDeclaration(	FILE* file,
-												const String& _realString = "real_t",
-												const String& _intString = "int",
+	virtual returnValue exportDataDeclaration(	std::ostream& stream,
+												const std::string& _realString = "real_t",
+												const std::string& _intString = "int",
 												int _precision = 16
 												) const;
 
 	/** Returns a string containing the value of the index.
 	 *
-	 *	\return String containing the value of the index.
+	 *	\return std::string containing the value of the index.
 	 */
-	const String get( ) const;
+	const std::string get( ) const;
 
 	/** Returns the given value of the index (if defined).
 	 *
@@ -119,38 +116,29 @@ public:
 
 	/** Returns whether the index is set to a given value.
 	 *
-	 *	\return BT_TRUE  iff index is set to a given value, \n
-	 *	        BT_FALSE otherwise
+	 *	\return true  iff index is set to a given value, \n
+	 *	        false otherwise
 	 */
-	BooleanType isGiven( ) const;
+	bool isGiven( ) const;
 
-	BooleanType isBinary() const;
+	bool isBinary() const;
 
-	BooleanType isVariable() const;
-
-	/** Converts index into a calling argument.
-	 *
-	 *	\return Index converted into a calling argument.
-	 */
-	ExportArgument makeArgument( ) const;
+	bool isVariable() const;
 };
 
 struct ExportIndexComparator
 {
     bool operator() (const ExportIndex& val1, const ExportIndex& val2) const
     {
-    	int tmp = std::string( val1.getName().getName() ).compare( std::string( val2.getName().getName() ) );
+    	int tmp = std::string( val1.getName() ).compare( std::string( val2.getName() ) );
 
     	return (tmp < 0) ? true : false;
     }
 };
 
-static const ExportIndex emptyConstExportIndex( int( 0 ) );
-static const ExportIndex constExportIndexValueOne( int( 1 ) );
+const ExportIndex emptyConstExportIndex( int( 0 ) );
+const ExportIndex constExportIndexValueOne( int( 1 ) );
 
 CLOSE_NAMESPACE_ACADO
 
-
 #endif  // ACADO_TOOLKIT_EXPORT_INDEX_HPP
-
-// end of file.

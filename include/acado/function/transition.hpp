@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -82,15 +82,15 @@ public:
     /** Loading Expressions (deep copy). */
     Transition& operator==( const double &arg );
 
-    /** Loading Symbolic Vector (deep copy). */
-    Transition& operator==( const Vector& arg );
+    /** Loading Symbolic DVector (deep copy). */
+    Transition& operator==( const DVector& arg );
 
-    /** Loading Symbolic Matrix (deep copy). */
-    Transition& operator==( const Matrix& arg );
+    /** Loading Symbolic DMatrix (deep copy). */
+    Transition& operator==( const DMatrix& arg );
 
 
 
-    inline Vector getDifferentialStateComponents() const;
+    inline DVector getDifferentialStateComponents() const;
 
 
 

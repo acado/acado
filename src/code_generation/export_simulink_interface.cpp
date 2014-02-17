@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -39,15 +39,15 @@ using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 
-ExportSimulinkInterface::ExportSimulinkInterface(	const String& _makefileName,
-													const String& _wrapperHeaderFileName,
-													const String& _wrapperSourceFileName,
-													const String& _moduleName,
-													const String& _commonHeaderName,
-													const String& _realString,
-													const String& _intString,
+ExportSimulinkInterface::ExportSimulinkInterface(	const std::string& _makefileName,
+													const std::string& _wrapperHeaderFileName,
+													const std::string& _wrapperSourceFileName,
+													const std::string& _moduleName,
+													const std::string& _commonHeaderName,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision,
-													const String& _commentString
+													const std::string& _commentString
 													)
 	: makefile(MAKEFILE_SFUN_QPOASES, _makefileName, "", _realString, _intString, _precision, "%"),
 	  wrapperSource(SOLVER_SFUN_SOURCE, _wrapperSourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
@@ -61,31 +61,28 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 												unsigned NDX,
 												unsigned NXA,
 												unsigned NU,
-												unsigned NP,
+												unsigned NOD,
 												unsigned NY,
 												unsigned NYN,
-												BooleanType _initialStateFixed,
+												bool _initialStateFixed,
 												unsigned _wMatrixType,
-												BooleanType _hardcodedConstraints,
-												BooleanType _useArrivalCost,
-												BooleanType _compCovMatrix
+												bool _hardcodedConstraints,
+												bool _useArrivalCost,
+												bool _compCovMatrix
 												)
 {
-	stringstream s;
-
-
 	//
 	// Source file configuration
 	//
 
-	wrapperSource.dictionary[ "@MODULE_NAME@" ] = string( moduleName.getName() );
+	wrapperSource.dictionary[ "@MODULE_NAME@" ] = moduleName;
 
 	wrapperSource.fillTemplate();
 
 	//
 	// Header file configuration
 	//
-	wrapperHeader.dictionary[ "@MODULE_NAME@" ] = string( moduleName.getName() );
+	wrapperHeader.dictionary[ "@MODULE_NAME@" ] = moduleName;
 
 	wrapperHeader.fillTemplate();
 
@@ -93,36 +90,27 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 	// Makefile configuration
 	//
 
-	makefile.dictionary[ "@MODULE_NAME@" ] = string( moduleName.getName() );
-	makefile.dictionary[ "@REAL_TYPE@" ] = string( makefile.realString.getName() );
+	makefile.dictionary[ "@MODULE_NAME@" ] = moduleName;
+	makefile.dictionary[ "@REAL_TYPE@" ] = makefile.realString;
 
-	s.str(std::string()); s << N;
-	makefile.dictionary[ "@N@" ] = s.str();
-	s.str(std::string()); s << NX;
-	makefile.dictionary[ "@NX@" ] = s.str();
-	s.str(std::string()); s << NXA;
-	makefile.dictionary[ "@NXA@" ] = s.str();
-	s.str(std::string()); s << NDX;
-	makefile.dictionary[ "@NDX@" ] = s.str();
-	s.str(std::string()); s << NU;
-	makefile.dictionary[ "@NU@" ] = s.str();
-	s.str(std::string()); s << NP;
-	makefile.dictionary[ "@NP@" ] = s.str();
-	s.str(std::string()); s << NY;
-	makefile.dictionary[ "@NY@" ] = s.str();
-	s.str(std::string()); s << NYN;
-	makefile.dictionary[ "@NYN@" ] = s.str();
+	makefile.dictionary[ "@N@" ] = toString( N );
+	makefile.dictionary[ "@NX@" ] = toString( NX );
+	makefile.dictionary[ "@NXA@" ] = toString( NXA );
+	makefile.dictionary[ "@NDX@" ] = toString( NDX );
+	makefile.dictionary[ "@NU@" ] = toString( NU );
+	makefile.dictionary[ "@NOD@" ] = toString( NOD );
+	makefile.dictionary[ "@NY@" ] = toString( NY );
+	makefile.dictionary[ "@NYN@" ] = toString( NYN );
 
-	makefile.dictionary[ "@INIT_STATE_FIXED@" ] = _initialStateFixed == BT_TRUE ? "1" : "0";
+	makefile.dictionary[ "@INIT_STATE_FIXED@" ] = _initialStateFixed == true ? "1" : "0";
 
-	s.str(std::string()); s << _wMatrixType;
-	makefile.dictionary[ "@WEIGHT_MATRIX_TYPE@" ] = s.str();
+	makefile.dictionary[ "@WEIGHT_MATRIX_TYPE@" ] = toString( _wMatrixType );
 
-	makefile.dictionary[ "@HARCODED_CONSTRAINTS@" ] = _hardcodedConstraints == BT_TRUE ? "1" : "0";
+	makefile.dictionary[ "@HARCODED_CONSTRAINTS@" ] = _hardcodedConstraints == true ? "1" : "0";
 
-	makefile.dictionary[ "@ARRIVAL_COST@" ] = _useArrivalCost == BT_TRUE ? "1" : "0";
+	makefile.dictionary[ "@ARRIVAL_COST@" ] = _useArrivalCost == true ? "1" : "0";
 
-	makefile.dictionary[ "@COV_MATRIX@" ] = _compCovMatrix == BT_TRUE? "1" : "0";
+	makefile.dictionary[ "@COV_MATRIX@" ] = _compCovMatrix == true ? "1" : "0";
 
 	makefile.fillTemplate();
 

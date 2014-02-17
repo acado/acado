@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,20 +26,31 @@
 
 /**
  *    \file include/acado/user_interaction/options_list.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-
 
 #ifndef ACADO_TOOLKIT_OPTIONS_LIST_HPP
 #define ACADO_TOOLKIT_OPTIONS_LIST_HPP
 
-
 #include <acado/utils/acado_utils.hpp>
-#include <acado/user_interaction/options_item.hpp>
 
+#include <map>
+#ifdef _WIN32
+    #include <memory>
+#else
+    #include <tr1/memory>
+#endif
 
 BEGIN_NAMESPACE_ACADO
 
+/** Summarises all possible types of OptionItems. */
+enum OptionsItemType
+{
+	OIT_UNKNOWN	= -1,	/**< Option item comprising a value of unknown type. */
+	OIT_INT,			/**< Option item comprising a value of integer type. */
+	OIT_DOUBLE,			/**< Option item comprising a value of double type.  */
+	OIT_STRING			/**< Option item comprising a value of std::string type.  */
+};
 
 /**
  *	\brief Provides a generic list of options (for internal use).
@@ -50,25 +61,21 @@ BEGIN_NAMESPACE_ACADO
  *  setup and extend option lists. It is intended for internal use only, as all 
  *	user-functionality is encapsulated within the class Options.
  *
- *  For each option, an object of type OptionsItem is appended to a basic 
- *  singly-linked list. For each possible variable type of an option value, a
- *  special variant of OptionsItem needs to be derived from the base class.
- *
  *	\note Parts of the public functionality of the OptionsList class are tunnelled 
  *	via the Options class into the AlgorithmicBase class to be used in derived classes. 
  *	In case public functionality is modified or added to this class, the Options class
  *	as well as the AlgorithmicBase class have to be adapted accordingly.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class OptionsList
 {
-	friend class Options;
-
 	//
 	// PUBLIC MEMBER FUNCTIONS:
 	//
 	public:
+
+
 
 		/** Default constructor.
 		 */
@@ -92,9 +99,9 @@ class OptionsList
 		OptionsList& operator=(	const OptionsList& rhs
 								);
 
-
-		/** Add an option item with a given integer default value to the list.
+		/** Add an option item with a given value.
 		 *
+		 *  @tparam    T		Option data type.
 		 *	@param[in] name		Name of new option item.
 		 *	@param[in] value	Default value of new option.
 		 *
@@ -102,51 +109,27 @@ class OptionsList
 		 *          RET_OPTION_ALREADY_EXISTS, \n
 		 *          RET_OPTIONS_LIST_CORRUPTED
 		 */
-		returnValue add(	OptionsName name,
-							int value
-							);
-
-		/** Add an option item with a given double default value to the list.
-		 *
-		 *	@param[in] name		Name of new option item.
-		 *	@param[in] value	Default value of new option.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *          RET_OPTION_ALREADY_EXISTS, \n
-		 *          RET_OPTIONS_LIST_CORRUPTED
-		 */
-		returnValue add(	OptionsName name,
-							double value
-							);
-
+		template< typename T >
+		inline returnValue add(	OptionsName name,
+								const T& value );
 
 		/** Returns value of an existing option item of integer type.
 		 *
+		 *  @tparam     T		Option data type.
 		 *	@param[in]  name	Name of option item.
 		 *	@param[out] value	Value of option.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *          RET_OPTION_DOESNT_EXISTS
 		 */
-		returnValue get(	OptionsName name,
-							int& value
-							) const;
-
-		/** Returns value of an existing option item of double type.
-		 *
-		 *	@param[in]  name	Name of option item.
-		 *	@param[out] value	Value of option.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *          RET_OPTION_DOESNT_EXISTS
-		 */
-		returnValue get(	OptionsName name,
-							double& value
-							) const;
-
+		template< typename T >
+		inline returnValue get(	OptionsName name,
+								T& value
+								) const;
 
 		/** Sets value of an existing option item of integer type to a given value.
 		 *
+		 * @tparam     T		Option data type.
 		 *	@param[in] name		Name of option item.
 		 *	@param[in] value	New value of option.
 		 *
@@ -154,36 +137,10 @@ class OptionsList
 		 *          RET_OPTION_DOESNT_EXISTS, \n
 		 *          RET_OPTIONS_LIST_CORRUPTED
 		 */
-		returnValue set(	OptionsName name,
-							int value
-							);
-
-		/** Sets value of an existing option item of integer type to a given value.
-		 *
-		 *	@param[in] name		Name of option item.
-		 *	@param[in] value	New value of option.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *          RET_OPTION_DOESNT_EXISTS, \n
-		 *          RET_OPTIONS_LIST_CORRUPTED
-		 */
-		returnValue set(	OptionsName name,
-							double value
-							);
-
-
-        /** Assigns a given OptionsList to this object.
-		 *
-		 *	@param[in] arg		New OptionsList object to be assigned.
-		 *
-		 *	\note This routine is introduced only for convenience and
-         *	      is equivalent to the assignment operator.
-		 *
-         *  \return SUCCESSFUL_RETURN
-         */
-        returnValue setOptions(	const OptionsList& arg
+		template< typename T >
+		inline returnValue set(	OptionsName name,
+								const T& value
 								);
-
 
 		/** Returns total number of option items in list.
 		 *
@@ -225,47 +182,122 @@ class OptionsList
 		 */
 		returnValue printOptionsList( ) const;
 
-
-
-    //
-    // PROTECTED MEMBER FUNCTIONS:
-    //
-    protected:
-
-		/** Returns a pointer to an OptionsItem with given name and internal type.
-		 *
-		 *	@param[in] name		Name of option item.
-		 *	@param[in] type		Internal type of option item.
-		 *
-		 *  \return Pointer to item or \n
-		 *	        NULL if item does not exist
-		 */
-		OptionsItem* find(	OptionsName name,
-							OptionsItemType type
-							) const;
-
-
     //
     // DATA MEMBERS:
     //
-	protected:
-		OptionsItem* first;							/**< Pointer to first item of the singly-linked list. */
-		OptionsItem* last;							/**< Pointer to first item of the singly-linked list. */
+	private:
 
-		uint number;								/**< Total number of item within the singly-linked list of the list. */
+		/** Flag indicating whether the value of at least one option item has been changed. */
+		BooleanType optionsHaveChanged;
 
-		BooleanType optionsHaveChanged;				/**< Flag indicating whether the value of at least one option item has been changed. */
+		/** Value base type */
+		struct OptionValueBase
+		{
+			virtual void print( std::ostream& stream ) = 0;
+		};
+
+		/** Value type */
+		template< typename T >
+		struct OptionValue : public OptionValueBase
+		{
+			OptionValue( const T& _value )
+				: value( _value )
+			{}
+
+			virtual void print( std::ostream& stream )
+			{
+				stream << value;
+			}
+
+			T value;
+		};
+
+		/** Type for options items. */
+		typedef std::map<std::pair<OptionsName, OptionsItemType>, std::tr1::shared_ptr< OptionValueBase > > OptionItems;
+		/** Option items. */
+		OptionItems items;
+		/** A helper function to determine type of an option. */
+		template< typename T >
+		inline OptionsItemType getType() const;
 };
 
+template< typename T >
+inline OptionsItemType OptionsList::getType() const
+{ return OIT_UNKNOWN; }
+
+template<>
+inline OptionsItemType OptionsList::getType< int >() const
+{ return OIT_INT; }
+
+template<>
+inline OptionsItemType OptionsList::getType< double >() const
+{ return OIT_DOUBLE; }
+
+template<>
+inline OptionsItemType OptionsList::getType< std::string >() const
+{ return OIT_STRING; }
+
+template< typename T >
+inline returnValue OptionsList::add(	OptionsName name,
+										const T& value
+										)
+{
+	if (getType< T >() == OIT_UNKNOWN)
+		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+
+	items[ std::make_pair(name, getType< T >()) ] =
+			std::tr1::shared_ptr< OptionValue< T > > (new OptionValue< T >( value ));
+
+	return SUCCESSFUL_RETURN;
+}
+
+template< typename T >
+inline returnValue OptionsList::get(	OptionsName name,
+										T& value
+										) const
+{
+	if (getType< T >() == OIT_UNKNOWN)
+		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+
+	OptionItems::const_iterator it = items.find(std::make_pair(name, getType< T >()));
+	if (it != items.end())
+	{
+		std::tr1::shared_ptr< OptionValue< T > > ptr;
+		ptr = std::tr1::static_pointer_cast< OptionValue< T > >(it->second);
+		value = ptr->value;
+		return SUCCESSFUL_RETURN;
+	}
+
+	return ACADOERROR( RET_OPTION_DOESNT_EXIST );
+}
+
+template< typename T >
+inline returnValue OptionsList::set(	OptionsName name,
+										const T& value
+										)
+{
+	if (getType< T >() == OIT_UNKNOWN)
+		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+
+	OptionItems::const_iterator it = items.find(std::make_pair(name, getType< T >()));
+	if (it != items.end())
+	{
+		items[ std::make_pair(name, getType< T >()) ] =
+				std::tr1::shared_ptr< OptionValue< T > > (new OptionValue< T >( value ));
+
+		optionsHaveChanged = BT_TRUE;
+
+		return SUCCESSFUL_RETURN;
+	}
+
+	return ACADOERROR( RET_OPTION_DOESNT_EXIST );
+}
 
 CLOSE_NAMESPACE_ACADO
 
-
 #include <acado/user_interaction/options_list.ipp>
 
-
 #endif	// ACADO_TOOLKIT_OPTIONS_LIST_HPP
-
 
 /*
  *	end of file

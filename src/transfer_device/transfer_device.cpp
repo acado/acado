@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -156,7 +156,7 @@ TransferDevice& TransferDevice::operator=( const TransferDevice& rhs )
 
 
 returnValue TransferDevice::init(	double _startTime,
-									const Vector& _startValue
+									const DVector& _startValue
 									)
 {
 	// initialise lastSignal
@@ -170,7 +170,7 @@ returnValue TransferDevice::init(	double _startTime,
 	}
 	else
 	{
-		Vector tmp( getDim( ) );
+		DVector tmp( getDim( ) );
 		tmp.setAll( 0.0 );
 		lastSignal.setVector( 0,tmp );
 	}
@@ -219,7 +219,7 @@ returnValue TransferDevice::generateNoise(	double startTime,
 	}
 
 	// generate current noise
-	Vector noiseVector( 1 );
+	DVector noiseVector( 1 );
 
 	currentNoise.init( getDim( ),noiseGrid );
 	currentNoise.setZero( );

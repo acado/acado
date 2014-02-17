@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,38 +43,16 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExportAlgorithm::ExportAlgorithm(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : AlgorithmicBase( _userInteraction )
 {
-	setDimensions( 0,0,0,0 );
+	setDimensions(0, 0, 0, 0, 0, 0, 0);
 	commonHeaderName = _commonHeaderName;
 }
 
 
-ExportAlgorithm::ExportAlgorithm(	const ExportAlgorithm& arg
-									) : AlgorithmicBase( arg )
-{
-	copy( arg );
-}
-
-
 ExportAlgorithm::~ExportAlgorithm( )
-{
-}
-
-
-ExportAlgorithm& ExportAlgorithm::operator=(	const ExportAlgorithm& arg
-												)
-{
-	if( this != &arg )
-	{
-		AlgorithmicBase::operator=( arg );
-		copy( arg );
-	}
-	
-	return *this;
-}
-
+{}
 
 
 returnValue ExportAlgorithm::setup( )
@@ -87,10 +65,11 @@ returnValue ExportAlgorithm::setup( )
 returnValue ExportAlgorithm::setDimensions(	uint _NX,
 											uint _NU,
 											uint _NP,
-											uint _NI
+											uint _NI,
+											uint _NOD
 											)
 {
-	return setDimensions( _NX, 0, 0, _NU, _NP, _NI );
+	return setDimensions(_NX, 0, 0, _NU, _NP, _NI, _NOD);
 }
 
 
@@ -100,7 +79,8 @@ returnValue ExportAlgorithm::setDimensions(	uint _NX,
 											uint _NXA,
 											uint _NU,
 											uint _NP,
-											uint _NI
+											uint _NI,
+											uint _NOD
 											)
 {
 	NX = _NX;
@@ -109,6 +89,7 @@ returnValue ExportAlgorithm::setDimensions(	uint _NX,
 	NU = _NU;
 	NP = _NP;
 	N  = _NI;
+	NOD = _NOD;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -138,6 +119,11 @@ uint ExportAlgorithm::getNP( ) const
 	return NP;
 }
 
+uint ExportAlgorithm::getNOD( ) const
+{
+	return NOD;
+}
+
 
 uint ExportAlgorithm::getN( ) const
 {
@@ -163,51 +149,6 @@ uint ExportAlgorithm::getNYN( ) const
 {
 	return NYN;
 }
-
-
-
-FILE* ExportAlgorithm::openFile(	const String& dirName,
-									const String& fileName
-									) const
-{
-	String fullFileName( dirName );
-    fullFileName << "/" << fileName;
-
-    FILE* file = acadoFOpen( fullFileName.getName(), "w" );
-	if ( file == 0 )
-		return 0;
-
-	acadoPrintAutoGenerationNotice( file );
-
-	if ( commonHeaderName.isEmpty() == BT_FALSE )
-		acadoFPrintf( file, "#include \"%s\"\n\n\n",commonHeaderName.getName() );
-	
-	return file;
-}
-
-
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-returnValue ExportAlgorithm::copy(	const ExportAlgorithm& arg
-									)
-{
-	NX = arg.NX;
-	NXA = arg.NXA;
-	NU = arg.NU;
-	NP = arg.NP;
-	N  = arg.N;
-	
-	NY = arg.NY;
-
-	commonHeaderName = arg.commonHeaderName;
-
-	return SUCCESSFUL_RETURN;
-}
-
 
 CLOSE_NAMESPACE_ACADO
 

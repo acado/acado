@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,9 +32,11 @@
 
 #include <acado_code_generation.hpp>
 
-int main() {
-	USING_NAMESPACE_ACADO
-	
+using namespace std;
+USING_NAMESPACE_ACADO
+
+int main()
+{
 	// Define variables, functions and constants:
 	// ----------------------------------------------------------
     DifferentialState   x;      
@@ -107,8 +109,8 @@ int main() {
     sim1.addOutput( h, 5 );
 	sim1.setTimingSteps( 10000 );
     
-    acadoPrintf( "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (semi-explicit):\n-----------------------------------------------------------\n" );
-    sim1.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
+    cout << "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (semi-explicit):\n-----------------------------------------------------------\n";
+    sim1.exportAndRun( "pendulum_export", "init_externModel.txt", "controls_externModel.txt" );
  
  
 	// ----------------------------------------------------------
@@ -123,25 +125,26 @@ int main() {
     sim2.addOutput( h, 5 );
 	sim2.setTimingSteps( 10000 );
     
-    acadoPrintf( "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (implicit):\n-----------------------------------------------------------\n" );
-    sim2.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
+    cout << "-----------------------------------------------------------\n  Using a Pendulum DAE model in ACADO syntax (implicit):\n-----------------------------------------------------------\n";
+    sim2.exportAndRun( "pendulum_export", "init_externModel.txt", "controls_externModel.txt" );
     
     
 	// ----------------------------------------------------------
 	// ----------------------------------------------------------
     SIMexport sim3( 1, 0.1 );
-    
+
     sim3.set( INTEGRATOR_TYPE, INT_IRK_RIIA3 );
     sim3.set( NUM_INTEGRATOR_STEPS, 4 );
     sim3.set( MEASUREMENT_GRID, OFFLINE_GRID );
-    
+    sim3.set( GENERATE_MAKE_FILE, NO );
+
     sim3.setModel( "model", "rhs", "rhs_jac" );
-    sim3.setDimensions( 6, 6, 5, 1 );
-    
+	sim3.setDimensions(6, 6, 5, 1, 0, 0);
+
     sim3.addOutput( "out", "out_jac", 2, 5 );
 	sim3.setTimingSteps( 10000 );
-    
-    acadoPrintf( "-----------------------------------------------------------\n  Using an externally defined Pendulum DAE model:\n-----------------------------------------------------------\n" );
+
+    cout << "-----------------------------------------------------------\n  Using an externally defined Pendulum DAE model:\n-----------------------------------------------------------\n";
     sim3.exportAndRun( "externModel_export", "init_externModel.txt", "controls_externModel.txt" );
     
     

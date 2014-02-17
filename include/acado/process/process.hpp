@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -195,8 +195,8 @@ class Process : public SimulationBlock
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue initializeStartValues(	const Vector& _xStart,
-											const Vector& _xaStart = emptyConstVector
+		returnValue initializeStartValues(	const DVector& _xStart,
+											const DVector& _xaStart = emptyConstVector
 											);
 
 		/** Initializes simulation with given start value for algebraic states.
@@ -205,7 +205,7 @@ class Process : public SimulationBlock
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue initializeAlgebraicStates(	const Vector& _xaStart
+		returnValue initializeAlgebraicStates(	const DVector& _xaStart
 												);
 
 
@@ -230,9 +230,9 @@ class Process : public SimulationBlock
 		 *	        RET_INCOMPATIBLE_SENSOR_SAMPLING_TIME
 		 */
         virtual returnValue init(	double _startTime = 0.0,
-									const Vector& _xStart = emptyConstVector,
-									const Vector& _uStart = emptyConstVector,
-									const Vector& _pStart = emptyConstVector
+									const DVector& _xStart = emptyConstVector,
+									const DVector& _uStart = emptyConstVector,
+									const DVector& _pStart = emptyConstVector
 									);
 
 
@@ -263,7 +263,7 @@ class Process : public SimulationBlock
 		 *	        RET_INVALID_ARGUMENTS
 		 */
         virtual returnValue step(	const VariablesGrid& _u,
-									const Vector& _p
+									const DVector& _p
 									);
 
 		/** Performs one step of the simulation based on given inputs.
@@ -281,8 +281,8 @@ class Process : public SimulationBlock
 		 */
         virtual returnValue step(	double startTime,
 									double endTime,
-									const Vector& _u,
-									const Vector& _p = emptyConstVector
+									const DVector& _u,
+									const DVector& _p = emptyConstVector
 									);
 
 
@@ -313,7 +313,7 @@ class Process : public SimulationBlock
 		 *	        RET_INVALID_ARGUMENTS
 		 */
         virtual returnValue run(	const VariablesGrid& _u,
-									const Vector& _p
+									const DVector& _p
 									);
 
 		/** Initializes simulation and performs one step based on given inputs.
@@ -331,8 +331,8 @@ class Process : public SimulationBlock
 		 */
         virtual returnValue run(	double startTime,
 									double endTime,
-									const Vector& _u,
-									const Vector& _p = emptyConstVector
+									const DVector& _u,
+									const DVector& _p = emptyConstVector
 									);
 
 
@@ -572,7 +572,7 @@ class Process : public SimulationBlock
 		 */
 		returnValue calculateOutput(	OutputFcn& _outputFcn,
 										const VariablesGrid* _x,
-										const Vector& _xComponents,
+										const DVector& _xComponents,
 										const VariablesGrid* _xa,
 										const VariablesGrid* _p,
 										const VariablesGrid* _u,
@@ -589,7 +589,7 @@ class Process : public SimulationBlock
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		returnValue projectToComponents(	const VariablesGrid& _x,
-											const Vector& _xComponents,
+											const DVector& _xComponents,
 											VariablesGrid& _output
 											) const;
 
@@ -599,8 +599,8 @@ class Process : public SimulationBlock
 	//
 	protected:
 
-		Vector x;
-		Vector xa;
+		DVector x;
+		DVector xa;
 
 		uint nDynSys;								/**< Number of dynamic systems. */
 		DynamicSystem** dynamicSystems;				/**< Dynamic system to be used for simulation. */

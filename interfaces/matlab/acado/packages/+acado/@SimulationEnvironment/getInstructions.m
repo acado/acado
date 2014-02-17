@@ -65,11 +65,11 @@ if (get == 'B')
 
     if (ACADO_.results_to_file == true)
         % Write output to files
-        fprintf(cppobj.fileMEX,sprintf('    out_processout.printToFile( "%s_OUT_states_sampled.m","STATES_SAMPLED",PS_MATLAB ); \n', cppobj.problemname));
-        fprintf(cppobj.fileMEX,sprintf('    out_feedbackcontrol.printToFile( "%s_OUT_controls.m","CONTROLS",PS_MATLAB ); \n', cppobj.problemname));
-        fprintf(cppobj.fileMEX,sprintf('    out_feedbackparameter.printToFile( "%s_OUT_parameters.m","PARAMETERS",PS_MATLAB ); \n', cppobj.problemname));
-        fprintf(cppobj.fileMEX,sprintf('    out_states.printToFile( "%s_OUT_states.m","STATES",PS_MATLAB ); \n', cppobj.problemname));
-        fprintf(cppobj.fileMEX,sprintf('    out_algstates.printToFile( "%s_OUT_algebraicstates.m","ALGEBRAICSTATES",PS_MATLAB ); \n', cppobj.problemname));
+        fprintf(cppobj.fileMEX,sprintf('    out_processout.print( "%s_OUT_states_sampled.m","STATES_SAMPLED",PS_MATLAB ); \n', cppobj.problemname));
+        fprintf(cppobj.fileMEX,sprintf('    out_feedbackcontrol.print( "%s_OUT_controls.m","CONTROLS",PS_MATLAB ); \n', cppobj.problemname));
+        fprintf(cppobj.fileMEX,sprintf('    out_feedbackparameter.print( "%s_OUT_parameters.m","PARAMETERS",PS_MATLAB ); \n', cppobj.problemname));
+        fprintf(cppobj.fileMEX,sprintf('    out_states.print( "%s_OUT_states.m","STATES",PS_MATLAB ); \n', cppobj.problemname));
+        fprintf(cppobj.fileMEX,sprintf('    out_algstates.print( "%s_OUT_algebraicstates.m","ALGEBRAICSTATES",PS_MATLAB ); \n', cppobj.problemname));
     end
     
 

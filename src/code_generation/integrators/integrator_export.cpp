@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ExportAlgorithm( _userInteraction,_commonHeaderName )
 {
 	NX1 = 0;
@@ -53,13 +53,13 @@ IntegratorExport::IntegratorExport(	UserInteraction* _userInteraction,
 	NDX3 = 0;
 	NXA3 = 0;
 
-	timeDependant = BT_FALSE;
+	timeDependant = false;
 
-	exportRhs = BT_TRUE;
-	crsFormat = BT_FALSE;
+	exportRhs = true;
+	crsFormat = false;
 
-	reset_int = ExportVariable( "resetIntegrator", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
-	error_code = ExportVariable( "error", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
+	reset_int = ExportVariable( "resetIntegrator", 1, 1, INT, ACADO_LOCAL, true );
+	error_code = ExportVariable( "error", 1, 1, INT, ACADO_LOCAL, true );
 }
 
 
@@ -73,10 +73,10 @@ IntegratorExport::IntegratorExport(	const IntegratorExport& arg
 	NDX3 = arg.NDX3;
 	NXA3 = arg.NXA3;
 
-	timeDependant = BT_FALSE;
+	timeDependant = false;
 
-	exportRhs = BT_TRUE;
-	crsFormat = BT_FALSE;
+	exportRhs = true;
+	crsFormat = false;
 }
 
 
@@ -106,7 +106,7 @@ returnValue IntegratorExport::setGrid(	const Grid& _grid )
 }
 
 
-returnValue IntegratorExport::setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 )
+returnValue IntegratorExport::setLinearInput( const DMatrix& M1, const DMatrix& A1, const DMatrix& B1 )
 {
 	if( !A1.isEmpty() ) {
 		if( A1.getNumRows() != M1.getNumRows() || A1.getNumRows() != B1.getNumRows() || A1.getNumRows() != A1.getNumCols() || M1.getNumRows() != M1.getNumCols() || B1.getNumCols() != NU) {
@@ -117,38 +117,38 @@ returnValue IntegratorExport::setLinearInput( const Matrix& M1, const Matrix& A1
 		A11 = A1;
 		B11 = B1;
 
-		Parameter         dummy0;
+		OnlineData         dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		dummy0.clearStaticCounters();
 		dummy1.clearStaticCounters();
 		dummy2.clearStaticCounters();
-		x = DifferentialState(NX1);
-		u = Control(NU);
-		p = Parameter(NP);
+		x = DifferentialState("", NX1, 1);
+		u = Control("", NU, 1);
+		od = OnlineData("", NOD, 1);
 
 		DifferentialEquation fun_input;
 		fun_input << A11*x+B11*u;
-		lin_input.init( fun_input,"acado_linear_input",NX,NXA,NU );
+		lin_input.init(fun_input, "acado_linear_input", NX, NXA, NU);
 	}
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _name_diffs_ODE ) {
+returnValue IntegratorExport::setModel(	const std::string& _name_ODE, const std::string& _name_diffs_ODE ) {
 
 	if( rhs.getFunctionDim() == 0 ) {
-		name_rhs = String(_name_ODE);
-		name_diffs_rhs = String(_name_diffs_ODE);
+		rhs = ExportAcadoFunction(_name_ODE);
+		diffs_rhs = ExportAcadoFunction(_name_diffs_ODE);
 
-		exportRhs = BT_FALSE;
+		exportRhs = false;
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	Parameter         dummy0;
+	OnlineData        dummy0;
 	Control           dummy1;
 	DifferentialState dummy2;
 	AlgebraicState 	  dummy3;
@@ -161,17 +161,17 @@ returnValue IntegratorExport::setModel(	const String& _name_ODE, const String& _
 
 	NX2 = NX-NX1-NX3;
 
-	x = DifferentialState(NX);
-	dx = DifferentialStateDerivative(NDX);
-	z = AlgebraicState(NXA);
-	u = Control(NU);
-	p = Parameter(NP);
+	x = DifferentialState("", NX, 1);
+	dx = DifferentialStateDerivative("", NDX, 1);
+	z = AlgebraicState("", NXA, 1);
+	u = Control("", NU, 1);
+	od = OnlineData("", NOD, 1);
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs )
+returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& _rhs )
 {
 	if( !A3.isEmpty() ) {
 		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() || A3.getNumRows() != _rhs.getDim() ) {
@@ -183,7 +183,7 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 
 		OutputFcn f;
 		f << _rhs;
-		Parameter         dummy0;
+		OnlineData        dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		AlgebraicState 	  dummy3;
@@ -191,25 +191,28 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		dummy0.clearStaticCounters();
 		dummy1.clearStaticCounters();
 		dummy2.clearStaticCounters();
-		x = DifferentialState(NX1+NX2);
-		u = Control(NU);
-		p = Parameter(NP);
+		x = DifferentialState("", NX1+NX2, 1);
+		u = Control("", NU, 1);
+		od = OnlineData("", NOD, 1);
 
+		if( (uint)f.getNX() > (NX1+NX2) ) {
+			return ACADOERROR( RET_INVALID_LINEAR_OUTPUT_FUNCTION );
+		}
 		if( (uint)f.getNDX() > (NX1+NX2) ) {
-			return ACADOERROR( RET_INVALID_OPTION );
+			return ACADOERROR( RET_INVALID_LINEAR_OUTPUT_FUNCTION );
 		}
 		if( f.getNDX() > 0 ) NDX3 = NX1+NX2;
 		else NDX3 = 0;
 		dummy4.clearStaticCounters();
-		dx = DifferentialStateDerivative(NDX3);
+		dx = DifferentialStateDerivative("", NDX3, 1);
 
 		if( f.getNXA() > 0 && NXA == 0 ) {
-			return ACADOERROR( RET_INVALID_OPTION );
+			return ACADOERROR( RET_INVALID_LINEAR_OUTPUT_FUNCTION );
 		}
 		if( f.getNXA() > 0 ) NXA3 = NXA;
 		else NXA3 = 0;
 		dummy3.clearStaticCounters();
-		z = AlgebraicState(NXA3);
+		z = AlgebraicState("", NXA3, 1);
 
 		uint i;
 		OutputFcn g;
@@ -221,10 +224,10 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		}
 
 		dummy2.clearStaticCounters();
-		x = DifferentialState(NX);
+		x = DifferentialState("", NX, 1);
 
-		Matrix dependencyMat = _rhs.getDependencyPattern( x );
-		Vector dependency = sumRow( dependencyMat );
+		DMatrix dependencyMat = _rhs.getDependencyPattern( x );
+		DVector dependency = dependencyMat.sumRow(  );
 		for( i = NX1+NX2; i < NX; i++ ) {
 			if( acadoRoundAway(dependency(i)) != 0 ) { // This expression should not depend on these differential states
 				return RET_UNABLE_TO_EXPORT_CODE;
@@ -232,17 +235,18 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		}
 
 		OutputFcn f_large;
-		Matrix A3_large = expandOutputMatrix(A3);
+		DMatrix A3_large = expandOutputMatrix(A3);
 		f_large << _rhs + A3_large*x;
 
-		return (rhs3.init( f_large,"acado_rhs3",NX,NXA,NU,NP ) & diffs_rhs3.init( g,"acado_diffs3",NX,NXA,NU,NP ) );
+		return (rhs3.init(f_large, "acado_rhs3", NX, NXA, NU, NP, NDX, NOD) &
+				diffs_rhs3.init(g, "acado_diffs3", NX, NXA, NU, NP, NDX, NOD));
 	}
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 )
+returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
 {
 	if( !A3.isEmpty() ) {
 		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() ) {
@@ -252,11 +256,11 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		M33 = M3;
 		A33 = A3;
 
-		name_rhs3 = String(_rhs3);
-		name_diffs_rhs3 = String(_diffs_rhs3);
-		exportRhs = BT_FALSE;
+		rhs3 = ExportAcadoFunction(_rhs3);
+		diffs_rhs3 = ExportAcadoFunction(_diffs_rhs3);
+		exportRhs = false;
 
-		Parameter         dummy0;
+		OnlineData        dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		AlgebraicState 	  dummy3;
@@ -267,11 +271,11 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 		dummy3.clearStaticCounters();
 		dummy4.clearStaticCounters();
 
-		x = DifferentialState(NX);
-		dx = DifferentialStateDerivative(NDX);
-		z = AlgebraicState(NXA);
-		u = Control(NU);
-		p = Parameter(NP);
+		x = DifferentialState("", NX, 1);
+		dx = DifferentialStateDerivative("", NDX, 1);
+		z = AlgebraicState("", NXA, 1);
+		u = Control("", NU, 1);
+		od = OnlineData("", NOD, 1);
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -280,7 +284,7 @@ returnValue IntegratorExport::setLinearOutput( const Matrix& M3, const Matrix& A
 
 returnValue IntegratorExport::setModelData( const ModelData& data ) {
 
-	setDimensions( data.getNX(),data.getNDX(),data.getNXA(),data.getNU(),data.getNP(),data.getN() );
+	setDimensions( data.getNX(),data.getNDX(),data.getNXA(),data.getNU(),data.getNP(),data.getN(), data.getNOD() );
 	NX1 = data.getNX1();
 	NX2 = data.getNX2();
 	NX3 = data.getNX3();
@@ -288,12 +292,12 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	NXA3 = data.getNXA3();
 	exportRhs = data.exportRhs();
 
-	Matrix M1, A1, B1;
+	DMatrix M1, A1, B1;
 	data.getLinearInput( M1, A1, B1 );
 	if ( M1.getNumRows() > 0 && setLinearInput( M1, A1, B1 ) != SUCCESSFUL_RETURN )
 		return RET_UNABLE_TO_EXPORT_CODE;
 
-	Matrix M3, A3;
+	DMatrix M3, A3;
 	data.getLinearOutput( M3, A3 );
 
 	if( exportRhs ) {
@@ -301,7 +305,7 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 		data.getModel(f);
 		OutputFcn f3;
 		data.getLinearOutput( M3, A3, f3 );
-		Matrix parms;
+		DMatrix parms;
 		uint delay;
 		data.getNARXmodel( delay, parms );
 
@@ -339,10 +343,10 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 			setupOutput( outputGrids_, outputExpressions_ );
 		}
 		else {
-			std::vector<String> outputNames;
-			std::vector<String> diffs_outputNames;
+			std::vector<std::string> outputNames;
+			std::vector<std::string> diffs_outputNames;
 			std::vector<uint> dim_outputs;
-			std::vector<Matrix> outputDependencies_ = data.getOutputDependencies();
+			std::vector<DMatrix> outputDependencies_ = data.getOutputDependencies();
 			data.getNameOutputs(outputNames);
 			data.getNameDiffsOutputs(diffs_outputNames);
 			data.getDimOutputs(dim_outputs);
@@ -575,45 +579,12 @@ returnValue IntegratorExport::propagateOutputSystem(	ExportStatementBlock* block
 }
 
 
-returnValue IntegratorExport::prepareFullRhs( ) {
-
-	uint i, j;
-	// PART 1:
-	for( i = 0; i < NX1; i++ ) {
-		fullRhs.addStatement( rhs_out.getRow(i) == A11(i,0)*rhs_in.getRow(0) );
-		for( j = 1; j < NX1; j++ ) {
-			if( acadoRoundAway(A11(i,j)) != 0 ) {
-				fullRhs.addStatement( rhs_out.getRow(i) += A11(i,j)*rhs_in.getRow(j) );
-			}
-		}
-		for( j = 0; j < NU; j++ ) {
-			if( acadoRoundAway(B11(i,j)) != 0 ) {
-				fullRhs.addStatement( rhs_out.getRow(i) += B11(i,j)*rhs_in.getRow(NX+NXA+j) );
-			}
-		}
-	}
-
-	// PART 2:
-	if( NX2 > 0 ) {
-		fullRhs.addFunctionCall( getNameRHS(), rhs_in, rhs_out.getAddress(NX1,0) );
-	}
-
-	// PART 3:
-	if( NX3 > 0 ) {
-		fullRhs.addFunctionCall( getNameOutputRHS(), rhs_in, rhs_out.getAddress(NX1+NX2,0) );
-	}
-
-
-	return SUCCESSFUL_RETURN;
-}
-
-
 
 // PROTECTED:
 
 
-Matrix IntegratorExport::expandOutputMatrix( const Matrix& A3 ) {
-	Matrix result = zeros(NX3,NX);
+DMatrix IntegratorExport::expandOutputMatrix( const DMatrix& A3 ) {
+	DMatrix result = zeros<double>(NX3,NX);
 	uint i,j;
 	for( i = 0; i < NX3; i++ ) {
 		for( j = 0; j < NX3; j++ ) {
@@ -663,7 +634,7 @@ returnValue IntegratorExport::getGrid( Grid& grid_ ) const{
 }
 
 
-returnValue IntegratorExport::getNumSteps( Vector& _numSteps ) const{
+returnValue IntegratorExport::getNumSteps( DVector& _numSteps ) const{
 
     _numSteps = numSteps;
     return SUCCESSFUL_RETURN;
@@ -683,21 +654,16 @@ returnValue IntegratorExport::getOutputGrids( std::vector<Grid>& outputGrids_ ) 
     return SUCCESSFUL_RETURN;
 }
 
-BooleanType IntegratorExport::equidistantControlGrid( ) const{
+bool IntegratorExport::equidistantControlGrid( ) const{
 	
 	return numSteps.isEmpty();
 }
 
-const String IntegratorExport::getNameRHS() const{
-	if( exportRhs ) {
-		return rhs.getName();
-	}
-	else {
-		return name_rhs;
-	}
+const std::string IntegratorExport::getNameRHS() const{
+	return rhs.getName();
 }
 
-const String IntegratorExport::getNameFullRHS() const{
+const std::string IntegratorExport::getNameFullRHS() const{
 	if( NX2 == NX ) {
 		return getNameRHS();
 	}
@@ -706,31 +672,16 @@ const String IntegratorExport::getNameFullRHS() const{
 	}
 }
 
-const String IntegratorExport::getNameOutputRHS() const{
-	if( exportRhs ) {
-		return rhs3.getName();
-	}
-	else {
-		return name_rhs3;
-	}
+const std::string IntegratorExport::getNameOutputRHS() const{
+	return rhs3.getName();
 }
 
-const String IntegratorExport::getNameOutputDiffs() const{
-	if( exportRhs ) {
-		return diffs_rhs3.getName();
-	}
-	else {
-		return name_diffs_rhs3;
-	}
+const std::string IntegratorExport::getNameOutputDiffs() const{
+	return diffs_rhs3.getName();
 }
 
-const String IntegratorExport::getNameOUTPUT( uint index ) const{
-	if( exportRhs ) {
-		return outputs[index].getName();
-	}
-	else {
-		return name_outputs[index];
-	}
+const std::string IntegratorExport::getNameOUTPUT( uint index ) const{
+	return outputs[index].getName();
 }
 
 uint IntegratorExport::getDimOUTPUT( uint index ) const{
@@ -743,22 +694,12 @@ uint IntegratorExport::getDimOUTPUT( uint index ) const{
 }
 
 
-const String IntegratorExport::getNameDiffsRHS() const{
-	if( exportRhs ) {
-		return diffs_rhs.getName();
-	}
-	else {
-		return name_diffs_rhs;
-	}
+const std::string IntegratorExport::getNameDiffsRHS() const{
+	return diffs_rhs.getName();
 }
 
-const String IntegratorExport::getNameDiffsOUTPUT( uint index ) const{
-	if( exportRhs ) {
-		return diffs_outputs[index].getName();
-	}
-	else {
-		return name_diffs_outputs[index];
-	}
+const std::string IntegratorExport::getNameDiffsOUTPUT( uint index ) const{
+	return diffs_outputs[index].getName();
 }
 
 

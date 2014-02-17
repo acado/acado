@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 RungeKuttaExport::RungeKuttaExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : IntegratorExport( _userInteraction,_commonHeaderName )
 {
 }
@@ -75,16 +75,31 @@ RungeKuttaExport& RungeKuttaExport::operator=( const RungeKuttaExport& arg
 }
 
 
-returnValue RungeKuttaExport::initializeButcherTableau( const Matrix& _AA, const Vector& _bb, const Vector& _cc ) {
+returnValue RungeKuttaExport::initializeButcherTableau( const DMatrix& _AA, const DVector& _bb, const DVector& _cc ) {
 
 	if( _cc.isEmpty() || !_AA.isSquare() || _AA.getNumRows() != _bb.getDim() || _bb.getDim() != _cc.getDim() ) return RET_INVALID_OPTION;
 
 	numStages = _cc.getDim();
+	is_symmetric = checkSymmetry( _cc );
+//	std::cout << "Symmetry of the chosen method: " << is_symmetric << "\n";
 	AA = _AA;
 	bb = _bb;
 	cc = _cc;
 
 	return SUCCESSFUL_RETURN;
+}
+
+
+BooleanType RungeKuttaExport::checkSymmetry( const DVector& _cc ) {
+
+	if( _cc.getDim() <= 1 ) return BT_FALSE;
+	BooleanType symmetry = BT_TRUE;
+	uint i;
+	for( i = 0; i < _cc.getDim(); i++ ) {
+		int tmp = acadoRoundAway(1.0 - _cc(i) - _cc(_cc.getDim()-1-i));
+		if( symmetry ) symmetry = (tmp == 0);
+	}
+	return symmetry;
 }
 
 
@@ -94,7 +109,7 @@ uint RungeKuttaExport::getNumStages() {
 }
 
 
-returnValue RungeKuttaExport::setNARXmodel( const uint delay, const Matrix& parms ) {
+returnValue RungeKuttaExport::setNARXmodel( const uint delay, const DMatrix& parms ) {
 
 	return RET_INVALID_OPTION;
 }
@@ -114,8 +129,6 @@ returnValue RungeKuttaExport::copy(	const RungeKuttaExport& arg
 
 	rhs = arg.rhs;
 	diffs_rhs = arg.diffs_rhs;
-	name_rhs = arg.name_rhs;
-	name_diffs_rhs = arg.name_diffs_rhs;
 	grid = arg.grid;
 
 	// ExportVariables

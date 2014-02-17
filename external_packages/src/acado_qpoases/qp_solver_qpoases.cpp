@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,7 +32,7 @@
 
 
 #include <include/acado_qpoases/qp_solver_qpoases.hpp>
-
+#include <qpOASES-3.0beta/include/qpOASES.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -128,7 +128,7 @@ returnValue QPsolver_qpOASES::solve(	double* H,
 
 	//printf( "nV: %d,  nC: %d \n",qp->getNV(),qp->getNC() );
 
-	if ( qp->isInitialised( ) == qpOASES::BT_FALSE )
+	if ( (bool)qp->isInitialised( ) == false )
 	{
 		returnvalue = qp->init( H,g,A,lb,ub,lbA,ubA,numberOfSteps,0 );
 	}
@@ -137,7 +137,7 @@ returnValue QPsolver_qpOASES::solve(	double* H,
 		int performHotstart = 0;
 		get( HOTSTART_QP,performHotstart );
 
-		if ( (BooleanType)performHotstart == BT_TRUE )
+		if ( (bool)performHotstart == true )
 		{
 			 returnvalue = qp->hotstart( H,g,A,lb,ub,lbA,ubA,numberOfSteps,0 );
 		}
@@ -150,29 +150,27 @@ returnValue QPsolver_qpOASES::solve(	double* H,
 	}
 	setLast( LOG_NUM_QP_ITERATIONS, numberOfSteps );
 
-//	acadoPrintf( "nEC: %d\n", qp->getNEC( ) );
-
 	/* update QP status and determine return value */
 	return updateQPstatus( returnvalue );
 }
 
 
-returnValue QPsolver_qpOASES::solve( Matrix *H,
-                                     Matrix *A,
-                                     Vector *g,
-                                     Vector *lb,
-                                     Vector *ub,
-                                     Vector *lbA,
-                                     Vector *ubA,
+returnValue QPsolver_qpOASES::solve( DMatrix *H,
+                                     DMatrix *A,
+                                     DVector *g,
+                                     DVector *lb,
+                                     DVector *ub,
+                                     DVector *lbA,
+                                     DVector *ubA,
                                      uint maxIter       )
 {
-	return solve(	H->getDoublePointer( ),
-					A->getDoublePointer( ),
-					g->getDoublePointer( ),
-					lb->getDoublePointer( ),
-					ub->getDoublePointer( ),
-					lbA->getDoublePointer( ),
-					ubA->getDoublePointer( ),
+	return solve(	H->data(),
+					A->data(),
+					g->data(),
+					lb->data(),
+					ub->data(),
+					lbA->data(),
+					ubA->data(),
 					maxIter
 					);
 }
@@ -193,13 +191,13 @@ returnValue QPsolver_qpOASES::step(	double* H,
 }
 
 
-returnValue QPsolver_qpOASES::step(	Matrix *H,
-									Matrix *A,
-									Vector *g,
-									Vector *lb,
-									Vector *ub,
-									Vector *lbA,
-									Vector *ubA
+returnValue QPsolver_qpOASES::step(	DMatrix *H,
+									DMatrix *A,
+									DVector *g,
+									DVector *lb,
+									DVector *ub,
+									DVector *lbA,
+									DVector *ubA
 									)
 {
 	/* perform a single QP iteration */
@@ -207,7 +205,7 @@ returnValue QPsolver_qpOASES::step(	Matrix *H,
 }
 
 
-returnValue QPsolver_qpOASES::getPrimalSolution( Vector& xOpt ) const
+returnValue QPsolver_qpOASES::getPrimalSolution( DVector& xOpt ) const
 {
 	if ( qp == 0 )
 		return ACADOERROR( RET_INITIALIZE_FIRST );
@@ -217,7 +215,7 @@ returnValue QPsolver_qpOASES::getPrimalSolution( Vector& xOpt ) const
 
 	if ( qp->getPrimalSolution( xOptTmp ) == qpOASES::SUCCESSFUL_RETURN )
 	{
-		xOpt.init( dim,xOptTmp );
+		xOpt = DVector(dim, xOptTmp);
 		delete[] xOptTmp;
 		return SUCCESSFUL_RETURN;
 	}
@@ -229,7 +227,7 @@ returnValue QPsolver_qpOASES::getPrimalSolution( Vector& xOpt ) const
 }
 
 
-returnValue QPsolver_qpOASES::getDualSolution( Vector& yOpt ) const
+returnValue QPsolver_qpOASES::getDualSolution( DVector& yOpt ) const
 {
 	if ( qp == 0 )
 		return ACADOERROR( RET_INITIALIZE_FIRST );
@@ -239,7 +237,7 @@ returnValue QPsolver_qpOASES::getDualSolution( Vector& yOpt ) const
 
 	if ( qp->getDualSolution( yOptTmp ) == qpOASES::SUCCESSFUL_RETURN )
 	{
-		yOpt.init( dim,yOptTmp );
+		yOpt = DVector(dim, yOptTmp);
 		delete[] yOptTmp;
 		return SUCCESSFUL_RETURN;
 	}
@@ -253,17 +251,17 @@ returnValue QPsolver_qpOASES::getDualSolution( Vector& yOpt ) const
 
 double QPsolver_qpOASES::getObjVal( ) const
 {
-	if ( isUnbounded( ) == BT_TRUE )
+	if ( isUnbounded( ) == true )
 		return -INFTY;
 
-	if ( ( isSolved( ) == BT_FALSE ) || ( qp == 0 ) )
+	if ( ( isSolved( ) == false ) || ( qp == 0 ) )
 		return INFTY;
 
 	return qp->getObjVal( );
 }
 
 
-returnValue QPsolver_qpOASES::getVarianceCovariance( Matrix &var ){
+returnValue QPsolver_qpOASES::getVarianceCovariance( DMatrix &var ){
 
     return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 }
@@ -286,12 +284,12 @@ uint QPsolver_qpOASES::getNumberOfConstraints( ) const
 }
 
 
-returnValue QPsolver_qpOASES::getVarianceCovariance( Matrix &H, Matrix &var ){
+returnValue QPsolver_qpOASES::getVarianceCovariance( DMatrix &H, DMatrix &var ){
 
     if ( qp == 0 )
         return ACADOERROR( RET_INITIALIZE_FIRST );
 
-    if ( isSolved( ) == BT_FALSE ) return ACADOERROR( RET_QP_NOT_SOLVED );
+    if ( (bool)isSolved( ) == false ) return ACADOERROR( RET_QP_NOT_SOLVED );
 
     qpOASES::returnValue      returnvalue;
     qpOASES::SolutionAnalysis analyser   ;
@@ -359,9 +357,11 @@ returnValue QPsolver_qpOASES::setupQPobject( uint nV, uint nC )
 	{
 		case HIGH:
 			qp->setPrintLevel( qpOASES::PL_MEDIUM );
+			break;
 
 		case DEBUG:
 			qp->setPrintLevel( qpOASES::PL_HIGH );
+			break;
 
 		// PL_NONE, PL_LOW, PL_MEDIUM
 		default:
@@ -374,11 +374,9 @@ returnValue QPsolver_qpOASES::setupQPobject( uint nV, uint nC )
 }
 
 
-returnValue QPsolver_qpOASES::updateQPstatus( qpOASES::returnValue returnvalue )
+returnValue QPsolver_qpOASES::updateQPstatus( int ret )
 {
-// 	printf( "QP return value: %d\n\n", returnvalue );
-
-	switch ( returnvalue )
+	switch ( (qpOASES::returnValue)ret )
 	{
 		case qpOASES::SUCCESSFUL_RETURN:
 			qpStatus = QPS_SOLVED;
@@ -392,14 +390,14 @@ returnValue QPsolver_qpOASES::updateQPstatus( qpOASES::returnValue returnvalue )
 			qpStatus = QPS_NOTSOLVED;
 
 			/* check for infeasibility */
-			if ( qp->isInfeasible( ) == qpOASES::BT_TRUE )
+			if ( (bool)qp->isInfeasible( ) == true )
 			{
 				qpStatus = QPS_INFEASIBLE;
 				return RET_QP_INFEASIBLE;
 			}
 
 			/* check for unboundedness */
-			if ( qp->isUnbounded( ) == qpOASES::BT_TRUE )
+			if ( (bool)qp->isUnbounded( ) == true )
 			{
 				qpStatus = QPS_UNBOUNDED;
 				return RET_QP_UNBOUNDED;

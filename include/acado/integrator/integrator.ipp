@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -42,7 +42,7 @@ BEGIN_NAMESPACE_ACADO
 
 // ======================================================================================
 
-inline returnValue Integrator::getX( Vector &xEnd_ ) const{
+inline returnValue Integrator::getX( DVector &xEnd_ ) const{
 
     int run1;
     const int N = rhs->getDim()-ma;
@@ -55,7 +55,7 @@ inline returnValue Integrator::getX( Vector &xEnd_ ) const{
 }
 
 
-inline returnValue Integrator::getXA( Vector &xaEnd_ ) const{
+inline returnValue Integrator::getXA( DVector &xaEnd_ ) const{
 
     int run1;
     const int N = rhs->getDim()-ma;
@@ -74,7 +74,7 @@ inline returnValue Integrator::getX( VariablesGrid &X ) const{
     ASSERT( rhs != 0 );
     uint run1,run2;
 
-    Vector components = rhs->getDifferentialStateComponents();
+    DVector components = rhs->getDifferentialStateComponents();
     X.init( m-ma, xStore.getTimePoints() );
 
     for( run1 = 0; run1 < X.getNumPoints(); run1++ )

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -750,7 +750,7 @@ returnValue ConstraintElement::initializeEvaluationPoints( const OCPiterate& ite
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ConstraintElement::get(Function& function_, Matrix& lb_, Matrix& ub_)
+returnValue ConstraintElement::get(Function& function_, DMatrix& lb_, DMatrix& ub_)
 {
 	if ( fcn == NULL )
 		return RET_INITIALIZE_FIRST;

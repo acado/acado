@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -35,7 +35,6 @@
 #ifndef ACADO_TOOLKIT_INTEGRATOR_EXPORT_HPP
 #define ACADO_TOOLKIT_INTEGRATOR_EXPORT_HPP
 
-#include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/code_generation/export_algorithm_factory.hpp>
 #include <acado/ocp/model_data.hpp>
@@ -68,7 +67,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         IntegratorExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -113,7 +112,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
+		virtual returnValue setLinearInput( const DMatrix& M1, const DMatrix& A1, const DMatrix& B1 );
 
 
 		/** .
@@ -122,7 +121,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& rhs );
 
 
 		/** .
@@ -131,7 +130,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
 		/** Assigns the model to be used by the integrator.
@@ -142,8 +141,8 @@ class IntegratorExport : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		virtual returnValue setModel( 	const String& _name_ODE,
-										const String& _name_diffs_ODE );
+		virtual returnValue setModel( 	const std::string& _name_ODE,
+										const std::string& _name_diffs_ODE );
 
 
 		/** Sets a polynomial NARX model to be used by the integrator.
@@ -154,7 +153,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		virtual returnValue setNARXmodel( const uint delay, const Matrix& parms ) = 0;
+		virtual returnValue setNARXmodel( const uint delay, const DMatrix& parms ) = 0;
 
 
 		/** Passes all the necessary model data to the integrator.
@@ -303,8 +302,8 @@ class IntegratorExport : public ExportAlgorithm
 		*  \return SUCCESSFUL_RETURN
 		*/
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output ) = 0;
 
 
@@ -319,10 +318,10 @@ class IntegratorExport : public ExportAlgorithm
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
-										  const std::vector<Matrix> _outputDependencies ) = 0;
+										  const std::vector<DMatrix> _outputDependencies ) = 0;
 
 
 		/** Returns the grid of the integrator. 	\n
@@ -336,7 +335,7 @@ class IntegratorExport : public ExportAlgorithm
 		* 
 		*  \return SUCCESSFUL_RETURN          		\n
 		*/
-		virtual returnValue getNumSteps( Vector& _numSteps ) const;
+		virtual returnValue getNumSteps( DVector& _numSteps ) const;
 		
 		
 		/** Returns the output expressions. 	\n
@@ -355,20 +354,20 @@ class IntegratorExport : public ExportAlgorithm
 
 		/** Returns whether the grid is equidistant.	\n
 		 *  
-		 * \return BT_TRUE  iff the grid is equidistant, BT_FALSE otherwise. \n
+		 * \return true  iff the grid is equidistant, false otherwise. \n
 		 */
-		virtual BooleanType equidistantControlGrid( ) const;
+		virtual bool equidistantControlGrid( ) const;
 
 
-		const String getNameRHS() const;
-		const String getNameDiffsRHS() const;
-		virtual const String getNameFullRHS() const;
+		const std::string getNameRHS() const;
+		const std::string getNameDiffsRHS() const;
+		virtual const std::string getNameFullRHS() const;
 
-		const String getNameOutputRHS() const;
-		const String getNameOutputDiffs() const;
+		const std::string getNameOutputRHS() const;
+		const std::string getNameOutputDiffs() const;
 
-		const String getNameOUTPUT( uint index ) const;
-		const String getNameDiffsOUTPUT( uint index ) const;
+		const std::string getNameOUTPUT( uint index ) const;
+		const std::string getNameDiffsOUTPUT( uint index ) const;
 		uint getDimOUTPUT( uint index ) const;
 
 
@@ -382,7 +381,7 @@ class IntegratorExport : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		Matrix expandOutputMatrix( const Matrix& A3 );
+		DMatrix expandOutputMatrix( const DMatrix& A3 );
 
 
 		/** Copies all class members from given object.
@@ -400,13 +399,6 @@ class IntegratorExport : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue clear( );
-
-
-		/** Prepares a function that evaluates the complete right-hand side.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue prepareFullRhs( );
 
 
 		/**	Get the index of the integration interval, corresponding a certain time.
@@ -436,27 +428,23 @@ class IntegratorExport : public ExportAlgorithm
 		uint diffsDim;							/**< This is the total number of sensitivities needed. */
 		uint inputDim;							/**< This is the dimension of the input to the integrator. */
 
-		BooleanType timeDependant;
+		bool timeDependant;
 
-		Matrix M11, A11, B11;
-		Matrix A33, M33;
+		DMatrix M11, A11, B11;
+		DMatrix A33, M33;
 
-        BooleanType exportRhs;				/**< True if the right-hand side and their derivatives should be exported too. */
-        BooleanType crsFormat;				/**< True if the CRS format is used for the jacobian of output functions. */
-        String name_rhs;					/**< The name of the function evaluating the ODE right-hand side, if provided. */
-        String name_diffs_rhs;				/**< The name of the function evaluating the derivatives of the ODE right-hand side, if provided. */
-        String name_rhs3;					/**< The name of the nonlinear function in the linear output system, if provided. */
-        String name_diffs_rhs3;				/**< The name of the function evaluating the derivatives for the linear output system, if provided. */
+        bool exportRhs;						/**< True if the right-hand side and their derivatives should be exported too. */
+        bool crsFormat;						/**< True if the CRS format is used for the jacobian of output functions. */
 
 		Grid grid;							/**< Evaluation grid along the prediction horizon. */
-		Vector numSteps;					/**< The number of integration steps per shooting interval. */
+		DVector numSteps;					/**< The number of integration steps per shooting interval. */
 
 		ExportFunction fullRhs;				/**< Function that evaluates the full right-hand side. */
 		ExportVariable	rhs_in;
 		ExportVariable	rhs_out;
 		
 		ExportFunction integrate;			/**< Function that integrates the exported ODE. */
-		ExportAcadoFunction rhs;				/**< Module to export ODE. */
+		ExportAcadoFunction rhs;			/**< Module to export ODE. */
 		ExportAcadoFunction diffs_rhs;		/**< Module to export the evaluation of the derivatives of the ordinary differential equations. */
 
 		ExportAcadoFunction lin_input;
@@ -485,16 +473,14 @@ class IntegratorExport : public ExportAlgorithm
 		DifferentialStateDerivative dx;		/**< The differential state derivatives in the model. */
 		AlgebraicState	  			z;		/**< The algebraic states in the model. */
 		Control           			u;		/**< The control inputs in the model. */
-		Parameter         			p;		/**< The parameters in the model. */
+		OnlineData         			od;		/**< The "online" data values in the model. */
 
-        std::vector<Grid> outputGrids;					/**< A separate grid for each output. */
-        std::vector<Expression> outputExpressions;		/**< A separate expression for each output. */
-        std::vector<Matrix> outputDependencies;			/**< A separate dependency matrix for each output. */
+        std::vector<Grid> outputGrids;						/**< A separate grid for each output. */
+        std::vector<Expression> outputExpressions;			/**< A separate expression for each output. */
+        std::vector<DMatrix> outputDependencies;			/**< A separate dependency matrix for each output. */
         std::vector<ExportAcadoFunction> outputs;			/**< Module to export output functions. */
-        std::vector<ExportAcadoFunction> diffs_outputs;	/**< Module to export the evaluation of the derivatives of the output functions. */
-		
-        std::vector<String> name_outputs;				/**< A separate function name for each output. */
-        std::vector<String> name_diffs_outputs;			/**< A separate function name for evaluating the derivatives of each output. */
+        std::vector<ExportAcadoFunction> diffs_outputs;		/**< Module to export the evaluation of the derivatives of the output functions. */
+
         std::vector<uint> num_outputs;					/**< A separate dimension for each output. */
 };
 
@@ -530,7 +516,8 @@ enum ExportSensitivityType{
 	NO_SENSITIVITY, 				/**< No sensitivities are computed, if possible. 		  					 */
     FORWARD,    					/**< Sensitivities are computed in forward mode.                             */
     BACKWARD,    					/**< Sensitivities are computed in backward mode.                            */
-    FORWARD_OVER_BACKWARD         	/**< Sensitivities (first and second order) are computed.					 */
+    FORWARD_OVER_BACKWARD,         	/**< Sensitivities (first and second order) are computed.					 */
+    THREE_SWEEPS         			/**< Sensitivities (first and second order) are computed.					 */
 };
 
 /** Factory for creation of exported integrators.*/

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,6 +32,7 @@
 
 #include <acado/conic_program/dense_cp.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -102,9 +103,9 @@ void DenseCP::copy( const DenseCP& rhs ){
 
 
     if( rhs.B != 0 ){
-        B = (Matrix**)calloc(nS,sizeof(Matrix*));
+        B = (DMatrix**)calloc(nS,sizeof(DMatrix*));
         for( run1 = 0; run1 < nS; run1++ ){
-            B[run1] = new Matrix[ getNV() ];
+            B[run1] = new DMatrix[ getNV() ];
             for( run2 = 0; run2 < getNV(); run2++ )
                 B[run1][run2] = rhs.B[run1][run2];
         }
@@ -113,45 +114,45 @@ void DenseCP::copy( const DenseCP& rhs ){
 
 
     if( rhs.lbB != 0 ){
-        lbB = (Vector*)calloc(nS,sizeof(Vector));
+        lbB = (DVector*)calloc(nS,sizeof(DVector));
         for( run1 = 0; run1 < nS; run1++ )
             lbB[run1] = rhs.lbB[run1];
     }
     else lbB = 0;
 
     if( rhs.ubB != 0 ){
-        ubB = (Vector*)calloc(nS,sizeof(Vector));
+        ubB = (DVector*)calloc(nS,sizeof(DVector));
         for( run1 = 0; run1 < nS; run1++ )
             ubB[run1] = rhs.ubB[run1];
     }
     else ubB = 0;
 
 
-    if( rhs.x != 0 ) x = new Vector(*rhs.x);
+    if( rhs.x != 0 ) x = new DVector(*rhs.x);
     else             x = 0                 ;
 
-    if( rhs.ylb != 0 ) ylb = new Vector(*rhs.ylb);
+    if( rhs.ylb != 0 ) ylb = new DVector(*rhs.ylb);
     else               ylb = 0                   ;
 
-    if( rhs.yub != 0 ) yub = new Vector(*rhs.yub);
+    if( rhs.yub != 0 ) yub = new DVector(*rhs.yub);
     else               yub = 0                   ;
 
-    if( rhs.ylbA != 0 ) ylbA = new Vector(*rhs.ylbA);
+    if( rhs.ylbA != 0 ) ylbA = new DVector(*rhs.ylbA);
     else                ylbA = 0                    ;
 
-    if( rhs.yubA != 0 ) yubA = new Vector(*rhs.yubA);
+    if( rhs.yubA != 0 ) yubA = new DVector(*rhs.yubA);
     else                yubA = 0                    ;
 
     if( nS > 0 ){
 
-        ylbB = (Vector**)calloc(nS,sizeof(Vector*));
-        yubB = (Vector**)calloc(nS,sizeof(Vector*));
+        ylbB = (DVector**)calloc(nS,sizeof(DVector*));
+        yubB = (DVector**)calloc(nS,sizeof(DVector*));
 
         for( run1 = 0; run1 < nS; run1++ ){
-            if( rhs.ylbB[run1] != 0 ) ylbB[run1] = new Vector(*rhs.ylbB[run1]);
+            if( rhs.ylbB[run1] != 0 ) ylbB[run1] = new DVector(*rhs.ylbB[run1]);
             else                      ylbB[run1] = 0                          ;
 
-            if( rhs.yubB[run1] != 0 ) yubB[run1] = new Vector(*rhs.yubB[run1]);
+            if( rhs.yubB[run1] != 0 ) yubB[run1] = new DVector(*rhs.yubB[run1]);
             else                      yubB[run1] = 0                          ;
         }
     }
@@ -200,7 +201,7 @@ returnValue DenseCP::init( uint nV_, uint nC_ ){
 }
 
 
-returnValue DenseCP::setQPsolution( const Vector &x_, const Vector &y_ ){
+returnValue DenseCP::setQPsolution( const DVector &x_, const DVector &y_ ){
 
     uint run1;
     clean();
@@ -211,13 +212,13 @@ returnValue DenseCP::setQPsolution( const Vector &x_, const Vector &y_ ){
 
     // SET THE PRIMAL SOLUTION:
     // ------------------------
-    x = new Vector(x_);
+    x = new DVector(x_);
 
 
     // SET THE DUAL SOLUTION FOR THE BOUNDS:
     // -------------------------------------
-    ylb = new Vector( getNV() );
-    yub = new Vector( getNV() );
+    ylb = new DVector( getNV() );
+    yub = new DVector( getNV() );
 
     for( run1 = 0; run1 < getNV(); run1++ ){
         if( fabs(x_(run1)-lb(run1)) <= BOUNDTOL ){
@@ -233,9 +234,9 @@ returnValue DenseCP::setQPsolution( const Vector &x_, const Vector &y_ ){
 
     // SET THE DUAL SOLUTION FOR THE CONSTRAINTS:
     // ------------------------------------------
-    Vector tmp = A*x_;
-    ylbA = new Vector( getNC() );
-    yubA = new Vector( getNC() );
+    DVector tmp = A*x_;
+    ylbA = new DVector( getNC() );
+    yubA = new DVector( getNC() );
 
     for( run1 = 0; run1 < getNC(); run1++ ){
         if( fabs(tmp(run1)-lbA(run1)) <= BOUNDTOL ){
@@ -253,9 +254,9 @@ returnValue DenseCP::setQPsolution( const Vector &x_, const Vector &y_ ){
 }
 
 
-Vector DenseCP::getMergedDualSolution( ) const
+DVector DenseCP::getMergedDualSolution( ) const
 {
-	Vector dualSolution( getNV()+getNC() );
+	DVector dualSolution( getNV()+getNC() );
 
 	uint i;
 	for( i=0; i<getNV(); ++i )
@@ -288,13 +289,13 @@ returnValue DenseCP::print(	const char* const name,
 							const char* const rowSeparator
 							) const
 {
-	H.print  ( "H",  startString,endString,width,precision,colSeparator,rowSeparator );
-	g.print  ( "g",  startString,endString,width,precision,colSeparator,rowSeparator );
-	lb.print ( "lb", startString,endString,width,precision,colSeparator,rowSeparator );
-	ub.print ( "ub", startString,endString,width,precision,colSeparator,rowSeparator );
-	A.print  ( "A",  startString,endString,width,precision,colSeparator,rowSeparator );
-	lbA.print( "lbA",startString,endString,width,precision,colSeparator,rowSeparator );
-	ubA.print( "ubA",startString,endString,width,precision,colSeparator,rowSeparator );
+	H.print  (cout, "H",  startString,endString,width,precision,colSeparator,rowSeparator );
+	g.print  (cout, "g",  startString,endString,width,precision,colSeparator,rowSeparator );
+	lb.print (cout, "lb", startString,endString,width,precision,colSeparator,rowSeparator );
+	ub.print (cout, "ub", startString,endString,width,precision,colSeparator,rowSeparator );
+	A.print  (cout, "A",  startString,endString,width,precision,colSeparator,rowSeparator );
+	lbA.print(cout, "lbA",startString,endString,width,precision,colSeparator,rowSeparator );
+	ubA.print(cout, "ubA",startString,endString,width,precision,colSeparator,rowSeparator );
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -304,13 +305,13 @@ returnValue DenseCP::print(	const char* const name,
 							PrintScheme printScheme
 							) const
 {
-	H.print  ( "H",  printScheme );
-	g.print  ( "g",  printScheme );
-	lb.print ( "lb", printScheme );
-	ub.print ( "ub", printScheme );
-	A.print  ( "A",  printScheme );
-	lbA.print( "lbA",printScheme );
-	ubA.print( "ubA",printScheme );
+	H.print  (cout, "H",  printScheme );
+	g.print  (cout, "g",  printScheme );
+	lb.print (cout, "lb", printScheme );
+	ub.print (cout, "ub", printScheme );
+	A.print  (cout, "A",  printScheme );
+	lbA.print(cout, "lbA",printScheme );
+	ubA.print(cout, "ubA",printScheme );
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -326,19 +327,19 @@ returnValue DenseCP::printToFile(	const char* const filename,
 									const char* const rowSeparator
 									) const
 {
-	H.printToFile  ( filename,"H",  startString,endString,width,precision,colSeparator,rowSeparator );
-	g.printToFile  ( filename,"g",  startString,endString,width,precision,colSeparator,rowSeparator );
-	lb.printToFile ( filename,"lb", startString,endString,width,precision,colSeparator,rowSeparator );
-	ub.printToFile ( filename,"ub", startString,endString,width,precision,colSeparator,rowSeparator );
-	A.printToFile  ( filename,"A",  startString,endString,width,precision,colSeparator,rowSeparator );
-	lbA.printToFile( filename,"lbA",startString,endString,width,precision,colSeparator,rowSeparator );
-	ubA.printToFile( filename,"ubA",startString,endString,width,precision,colSeparator,rowSeparator );
+	H.print  ( filename,"H",  startString,endString,width,precision,colSeparator,rowSeparator );
+	g.print  ( filename,"g",  startString,endString,width,precision,colSeparator,rowSeparator );
+	lb.print ( filename,"lb", startString,endString,width,precision,colSeparator,rowSeparator );
+	ub.print ( filename,"ub", startString,endString,width,precision,colSeparator,rowSeparator );
+	A.print  ( filename,"A",  startString,endString,width,precision,colSeparator,rowSeparator );
+	lbA.print( filename,"lbA",startString,endString,width,precision,colSeparator,rowSeparator );
+	ubA.print( filename,"ubA",startString,endString,width,precision,colSeparator,rowSeparator );
 	
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue DenseCP::printToFile(	FILE* file,
+returnValue DenseCP::printToFile(	std::ostream& stream,
 									const char* const name,
 									const char* const startString,
 									const char* const endString,
@@ -348,13 +349,13 @@ returnValue DenseCP::printToFile(	FILE* file,
 									const char* const rowSeparator
 									) const
 {
-	H.printToFile  ( file,"H",  startString,endString,width,precision,colSeparator,rowSeparator );
-	g.printToFile  ( file,"g",  startString,endString,width,precision,colSeparator,rowSeparator );
-	lb.printToFile ( file,"lb", startString,endString,width,precision,colSeparator,rowSeparator );
-	ub.printToFile ( file,"ub", startString,endString,width,precision,colSeparator,rowSeparator );
-	A.printToFile  ( file,"A",  startString,endString,width,precision,colSeparator,rowSeparator );
-	lbA.printToFile( file,"lbA",startString,endString,width,precision,colSeparator,rowSeparator );
-	ubA.printToFile( file,"ubA",startString,endString,width,precision,colSeparator,rowSeparator );
+	H.print  ( stream,"H",  startString,endString,width,precision,colSeparator,rowSeparator );
+	g.print  ( stream,"g",  startString,endString,width,precision,colSeparator,rowSeparator );
+	lb.print ( stream,"lb", startString,endString,width,precision,colSeparator,rowSeparator );
+	ub.print ( stream,"ub", startString,endString,width,precision,colSeparator,rowSeparator );
+	A.print  ( stream,"A",  startString,endString,width,precision,colSeparator,rowSeparator );
+	lbA.print( stream,"lbA",startString,endString,width,precision,colSeparator,rowSeparator );
+	ubA.print( stream,"ubA",startString,endString,width,precision,colSeparator,rowSeparator );
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -365,30 +366,30 @@ returnValue DenseCP::printToFile(	const char* const filename,
 									PrintScheme printScheme
 									) const
 {
-	H.printToFile  ( filename,"H",  printScheme );
-	g.printToFile  ( filename,"g",  printScheme );
-	lb.printToFile ( filename,"lb", printScheme );
-	ub.printToFile ( filename,"ub", printScheme );
-	A.printToFile  ( filename,"A",  printScheme );
-	lbA.printToFile( filename,"lbA",printScheme );
-	ubA.printToFile( filename,"ubA",printScheme );
+	H.print  ( filename,"H",  printScheme );
+	g.print  ( filename,"g",  printScheme );
+	lb.print ( filename,"lb", printScheme );
+	ub.print ( filename,"ub", printScheme );
+	A.print  ( filename,"A",  printScheme );
+	lbA.print( filename,"lbA",printScheme );
+	ubA.print( filename,"ubA",printScheme );
 	
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue DenseCP::printToFile(	FILE* file,
+returnValue DenseCP::printToFile(	std::ostream& stream,
 									const char* const name,
 									PrintScheme printScheme
 									) const
 {
-	H.printToFile  ( file,"H",  printScheme );
-	g.printToFile  ( file,"g",  printScheme );
-	lb.printToFile ( file,"lb", printScheme );
-	ub.printToFile ( file,"ub", printScheme );
-	A.printToFile  ( file,"A",  printScheme );
-	lbA.printToFile( file,"lbA",printScheme );
-	ubA.printToFile( file,"ubA",printScheme );
+	H.print  ( stream,"H",  printScheme );
+	g.print  ( stream,"g",  printScheme );
+	lb.print ( stream,"lb", printScheme );
+	ub.print ( stream,"ub", printScheme );
+	A.print  ( stream,"A",  printScheme );
+	lbA.print( stream,"lbA",printScheme );
+	ubA.print( stream,"ubA",printScheme );
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -405,19 +406,19 @@ returnValue DenseCP::printSolution(	const char* const name,
 									) const
 {
 	if ( x != 0 )
-		x->print( "x", startString,endString,width,precision,colSeparator,rowSeparator );
+		x->print(cout, "x", startString,endString,width,precision,colSeparator,rowSeparator );
 
 	if ( ylb != 0 )
-		ylb->print( "ylb",startString,endString,width,precision,colSeparator,rowSeparator );
+		ylb->print(cout,  "ylb",startString,endString,width,precision,colSeparator,rowSeparator );
 
 	if ( yub != 0 )
-		yub->print( "yub", startString,endString,width,precision,colSeparator,rowSeparator );
+		yub->print(cout,  "yub", startString,endString,width,precision,colSeparator,rowSeparator );
 	
 	if ( ylbA != 0 )
-		ylbA->print( "ylbA", startString,endString,width,precision,colSeparator,rowSeparator );
+		ylbA->print(cout,  "ylbA", startString,endString,width,precision,colSeparator,rowSeparator );
 
 	if ( yubA != 0 )
-		yubA->print( "yubA", startString,endString,width,precision,colSeparator,rowSeparator );
+		yubA->print(cout,  "yubA", startString,endString,width,precision,colSeparator,rowSeparator );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -428,19 +429,19 @@ returnValue DenseCP::printSolution(	const char* const name,
 									) const
 {
 	if ( x != 0 )
-		x->print( "x", printScheme );
+		x->print(cout,  "x", printScheme );
 
 	if ( ylb != 0 )
-		ylb->print( "ylb",printScheme );
+		ylb->print(cout,  "ylb",printScheme );
 
 	if ( yub != 0 )
-		yub->print( "yub", printScheme );
+		yub->print(cout,  "yub", printScheme );
 	
 	if ( ylbA != 0 )
-		ylbA->print( "ylbA", printScheme );
+		ylbA->print(cout,  "ylbA", printScheme );
 
 	if ( yubA != 0 )
-		yubA->print( "yubA", printScheme );
+		yubA->print(cout,  "yubA", printScheme );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -457,25 +458,25 @@ returnValue DenseCP::printSolutionToFile(	const char* const filename,
 											) const
 {
 	if ( x != 0 )
-		x->printToFile( filename, "x", startString,endString,width,precision,colSeparator,rowSeparator );
+		x->print( filename, "x", startString,endString,width,precision,colSeparator,rowSeparator );
 
 	if ( ylb != 0 )
-		ylb->printToFile( filename, "ylb",startString,endString,width,precision,colSeparator,rowSeparator );
+		ylb->print( filename, "ylb",startString,endString,width,precision,colSeparator,rowSeparator );
 
 	if ( yub != 0 )
-		yub->printToFile( filename, "yub", startString,endString,width,precision,colSeparator,rowSeparator );
+		yub->print( filename, "yub", startString,endString,width,precision,colSeparator,rowSeparator );
 	
 	if ( ylbA != 0 )
-		ylbA->printToFile( filename, "ylbA", startString,endString,width,precision,colSeparator,rowSeparator );
+		ylbA->print( filename, "ylbA", startString,endString,width,precision,colSeparator,rowSeparator );
 
 	if ( yubA != 0 )
-		yubA->printToFile( filename, "yubA", startString,endString,width,precision,colSeparator,rowSeparator );
+		yubA->print( filename, "yubA", startString,endString,width,precision,colSeparator,rowSeparator );
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue DenseCP::printSolutionToFile(	FILE* file,
+returnValue DenseCP::printSolutionToFile(	std::ostream& stream,
 											const char* const name,
 											const char* const startString,
 											const char* const endString,
@@ -486,19 +487,19 @@ returnValue DenseCP::printSolutionToFile(	FILE* file,
 											) const
 {
 	if ( x != 0 )
-		x->printToFile( file, "x", startString,endString,width,precision,colSeparator,rowSeparator );
+		x->print( stream, "x", startString,endString,width,precision,colSeparator,rowSeparator );
 
 	if ( ylb != 0 )
-		ylb->printToFile( file, "ylb",startString,endString,width,precision,colSeparator,rowSeparator );
+		ylb->print( stream, "ylb",startString,endString,width,precision,colSeparator,rowSeparator );
 
 	if ( yub != 0 )
-		yub->printToFile( file, "yub", startString,endString,width,precision,colSeparator,rowSeparator );
+		yub->print( stream, "yub", startString,endString,width,precision,colSeparator,rowSeparator );
 	
 	if ( ylbA != 0 )
-		ylbA->printToFile( file, "ylbA", startString,endString,width,precision,colSeparator,rowSeparator );
+		ylbA->print( stream, "ylbA", startString,endString,width,precision,colSeparator,rowSeparator );
 
 	if ( yubA != 0 )
-		yubA->printToFile( file, "yubA", startString,endString,width,precision,colSeparator,rowSeparator );
+		yubA->print( stream, "yubA", startString,endString,width,precision,colSeparator,rowSeparator );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -510,43 +511,43 @@ returnValue DenseCP::printSolutionToFile(	const char* const filename,
 											) const
 {
 	if ( x != 0 )
-		x->printToFile( filename, "x", printScheme );
+		x->print( filename, "x", printScheme );
 
 	if ( ylb != 0 )
-		ylb->printToFile( filename, "ylb",printScheme );
+		ylb->print( filename, "ylb",printScheme );
 
 	if ( yub != 0 )
-		yub->printToFile( filename, "yub", printScheme );
+		yub->print( filename, "yub", printScheme );
 	
 	if ( ylbA != 0 )
-		ylbA->printToFile( filename, "ylbA", printScheme );
+		ylbA->print( filename, "ylbA", printScheme );
 
 	if ( yubA != 0 )
-		yubA->printToFile( filename, "yubA", printScheme );
+		yubA->print( filename, "yubA", printScheme );
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue DenseCP::printSolutionToFile(	FILE* file,
+returnValue DenseCP::printSolutionToFile(	std::ostream& stream,
 											const char* const name,
 											PrintScheme printScheme
 											) const
 {
 	if ( x != 0 )
-		x->printToFile( file, "x", printScheme );
+		x->print( stream, "x", printScheme );
 
 	if ( ylb != 0 )
-		ylb->printToFile( file, "ylb",printScheme );
+		ylb->print( stream, "ylb",printScheme );
 
 	if ( yub != 0 )
-		yub->printToFile( file, "yub", printScheme );
+		yub->print( stream, "yub", printScheme );
 	
 	if ( ylbA != 0 )
-		ylbA->printToFile( file, "ylbA", printScheme );
+		ylbA->print( stream, "ylbA", printScheme );
 
 	if ( yubA != 0 )
-		yubA->printToFile( file, "yubA", printScheme );
+		yubA->print( stream, "yubA", printScheme );
 
 	return SUCCESSFUL_RETURN;
 }

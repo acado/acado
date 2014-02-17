@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,8 +26,8 @@
 
 /**
  *    \file src/variables_grid/variables_grid.cpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 20.08.2008
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2008 - 2013
  */
 
 
@@ -52,9 +52,9 @@ VariablesGrid::VariablesGrid(	uint _dim,
 								VariableType _type,
 								const char** const _names,
 								const char** const _units,
-								const VectorspaceElement* const _scaling,
-								const VectorspaceElement* const _lb,
-								const VectorspaceElement* const _ub,
+								const DVector* const _scaling,
+								const DVector* const _lb,
+								const DVector* const _ub,
 								const BooleanType* const  _autoInit
 								) : MatrixVariablesGrid( _dim,1,_grid,_type,_names,_units,_scaling,_lb,_ub,_autoInit )
 {
@@ -66,9 +66,9 @@ VariablesGrid::VariablesGrid(	uint _dim,
 								VariableType _type,
 								const char** const _names,
 								const char** const _units,
-								const VectorspaceElement* const _scaling,
-								const VectorspaceElement* const _lb,
-								const VectorspaceElement* const _ub,
+								const DVector* const _scaling,
+								const DVector* const _lb,
+								const DVector* const _ub,
 								const BooleanType* const  _autoInit
 								) : MatrixVariablesGrid( _dim,1,_nPoints,_type,_names,_units,_scaling,_lb,_ub,_autoInit )
 {
@@ -82,24 +82,24 @@ VariablesGrid::VariablesGrid(	uint _dim,
 								VariableType _type,
 								const char** const _names,
 								const char** const _units,
-								const VectorspaceElement* const _scaling,
-								const VectorspaceElement* const _lb,
-								const VectorspaceElement* const _ub,
+								const DVector* const _scaling,
+								const DVector* const _lb,
+								const DVector* const _ub,
 								const BooleanType* const  _autoInit
 								) : MatrixVariablesGrid( _dim,1,_firstTime,_lastTime,_nPoints,_type,_names,_units,_scaling,_lb,_ub,_autoInit )
 {
 }
 
 
-VariablesGrid::VariablesGrid(	const Vector& arg,
+VariablesGrid::VariablesGrid(	const DVector& arg,
 								const Grid& _grid,
 								VariableType _type
-								) : MatrixVariablesGrid( Matrix(arg),_grid,_type )
+								) : MatrixVariablesGrid( DMatrix(arg),_grid,_type )
 {
 }
 
 
-VariablesGrid::VariablesGrid(	const Matrix& arg,
+VariablesGrid::VariablesGrid(	const DMatrix& arg,
 								VariableType _type
 								) : MatrixVariablesGrid( arg.getNumCols()-1,1,arg.getNumRows(),_type )
 {
@@ -112,12 +112,6 @@ VariablesGrid::VariablesGrid(	const Matrix& arg,
 		for( j=1; j<arg.getNumCols(); ++j )
 			operator()( i,j-1 ) = arg( i,j );
 	}
-}
-
-
-VariablesGrid::VariablesGrid(	FILE *file	
-								) : MatrixVariablesGrid( file )
-{
 }
 
 
@@ -164,14 +158,7 @@ VariablesGrid& VariablesGrid::operator=( const MatrixVariablesGrid& rhs )
 }
 
 
-VariablesGrid& VariablesGrid::operator=( FILE *rhs )
-{
-	MatrixVariablesGrid::operator=( rhs );
-	return *this;
-}
-
-
-VariablesGrid& VariablesGrid::operator=( const Matrix& rhs )
+VariablesGrid& VariablesGrid::operator=( const DMatrix& rhs )
 {
 	MatrixVariablesGrid::operator=( rhs );
 	return *this;
@@ -228,9 +215,9 @@ returnValue VariablesGrid::init(	uint _dim,
 									VariableType _type,
 									const char** const _names,
 									const char** const _units,
-									const VectorspaceElement* const _scaling,
-									const VectorspaceElement* const _lb,
-									const VectorspaceElement* const _ub,
+									const DVector* const _scaling,
+									const DVector* const _lb,
+									const DVector* const _ub,
 									const BooleanType* const  _autoInit
 									)
 {
@@ -243,9 +230,9 @@ returnValue VariablesGrid::init(	uint _dim,
 									VariableType _type,
 									const char** const _names,
 									const char** const _units,
-									const VectorspaceElement* const _scaling,
-									const VectorspaceElement* const _lb,
-									const VectorspaceElement* const _ub,
+									const DVector* const _scaling,
+									const DVector* const _lb,
+									const DVector* const _ub,
 									const BooleanType* const _autoInit
 									)
 {
@@ -260,9 +247,9 @@ returnValue VariablesGrid::init(	uint _dim,
 									VariableType _type,
 									const char** const _names,
 									const char** const _units,
-									const VectorspaceElement* const _scaling,
-									const VectorspaceElement* const _lb,
-									const VectorspaceElement* const _ub,
+									const DVector* const _scaling,
+									const DVector* const _lb,
+									const DVector* const _ub,
 									const BooleanType* const  _autoInit
 									)
 {
@@ -270,26 +257,26 @@ returnValue VariablesGrid::init(	uint _dim,
 }
 
 
-returnValue VariablesGrid::init(	const Vector& arg,
+returnValue VariablesGrid::init(	const DVector& arg,
 									const Grid& _grid,
 									VariableType _type
 									)
 {
-	return MatrixVariablesGrid::init( Matrix(arg),_grid,_type );
+	return MatrixVariablesGrid::init( DMatrix(arg),_grid,_type );
 }
 
 
 
-returnValue VariablesGrid::addVector(	const Vector& newVector,
+returnValue VariablesGrid::addVector(	const DVector& newVector,
 										double newTime
 										)
 {
-	return MatrixVariablesGrid::addMatrix( Matrix(newVector),newTime );
+	return MatrixVariablesGrid::addMatrix( DMatrix(newVector),newTime );
 }
 
 
 returnValue VariablesGrid::setVector(	uint pointIdx,
-										const Vector& _values
+										const DVector& _values
 										)
 {
 	if ( pointIdx >= getNumPoints( ) )
@@ -305,7 +292,7 @@ returnValue VariablesGrid::setVector(	uint pointIdx,
 }
 
 
-returnValue VariablesGrid::setAllVectors(	const Vector& _values
+returnValue VariablesGrid::setAllVectors(	const DVector& _values
 											)
 {
 	for( uint i = 0; i < getNumPoints(); i++ )
@@ -315,7 +302,7 @@ returnValue VariablesGrid::setAllVectors(	const Vector& _values
 }
 
 
-Vector VariablesGrid::getVector(	uint pointIdx
+DVector VariablesGrid::getVector(	uint pointIdx
 									) const
 {
 	if ( ( values == 0 ) || ( pointIdx >= getNumPoints() ) )
@@ -325,7 +312,7 @@ Vector VariablesGrid::getVector(	uint pointIdx
 }
 
 
-Vector VariablesGrid::getFirstVector( ) const
+DVector VariablesGrid::getFirstVector( ) const
 {
 	if ( getNumPoints( ) <= 0 )
 		return emptyVector;
@@ -334,7 +321,7 @@ Vector VariablesGrid::getFirstVector( ) const
 }
 
 
-Vector VariablesGrid::getLastVector( ) const
+DVector VariablesGrid::getLastVector( ) const
 {
 	if ( getNumPoints( ) <= 0 )
 		return emptyVector;
@@ -352,12 +339,12 @@ VariablesGrid& VariablesGrid::shiftTimes(	double timeShift
 }
 
 
-VariablesGrid& VariablesGrid::shiftBackwards( Vector lastValue )
+VariablesGrid& VariablesGrid::shiftBackwards( DVector lastValue )
 {
 
     if( lastValue.isEmpty() == BT_FALSE ){
     
-        Matrix aux( lastValue.getDim(), 1 );
+        DMatrix aux( lastValue.getDim(), 1 );
         aux.setCol( 0, lastValue );
     
      	MatrixVariablesGrid::shiftBackwards( aux );
@@ -421,7 +408,7 @@ returnValue VariablesGrid::appendTimes(	const VariablesGrid& arg,
 }
 
 
-returnValue VariablesGrid::appendTimes(	const Matrix& arg,
+returnValue VariablesGrid::appendTimes(	const DMatrix& arg,
 										MergeMethod _mergeMethod
 										)
 {
@@ -442,7 +429,7 @@ returnValue VariablesGrid::appendValues( const VariablesGrid& arg )
 	if ( getNumPoints( ) != arg.getNumPoints( ) )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
-	Vector tmp1,tmp2;
+	DVector tmp1,tmp2;
 
 	for( uint i=0; i<getNumPoints(); ++i )
 	{
@@ -622,7 +609,7 @@ VariablesGrid VariablesGrid::getValuesSubGrid(	uint startIdx,
 
 
 
-returnValue VariablesGrid::getSum(	Vector& sum
+returnValue VariablesGrid::getSum(	DVector& sum
 									) const
 {
 	sum.setZero();
@@ -635,7 +622,7 @@ returnValue VariablesGrid::getSum(	Vector& sum
 
 
 returnValue VariablesGrid::getIntegral(	InterpolationMode mode,
-										Vector& value
+										DVector& value
 										) const
 {
 	value.setZero();
@@ -671,20 +658,9 @@ returnValue VariablesGrid::getIntegral(	InterpolationMode mode,
 	return SUCCESSFUL_RETURN;
 }
 
-
-returnValue operator<<(	FILE *file,
-						VariablesGrid &arg
-						)
-{
-    return arg.printToFile(file);
-}
-
-
-
 //
 // PROTECTED MEMBER FUNCTIONS:
 //
-
 
 returnValue VariablesGrid::initializeFromBounds( )
 {
@@ -723,7 +699,20 @@ returnValue VariablesGrid::initializeFromBounds( )
 	return SUCCESSFUL_RETURN;
 }
 
+VariablesGrid::operator DMatrix() const
+{
+	DMatrix tmp(getNumPoints( ), getNumValues( ) + 1);
 
+	for (uint run1 = 0; run1 < getNumPoints(); ++run1)
+	{
+		tmp(run1, 0) = getTime(run1);
+
+		for (uint run2 = 0; run2 < getNumValues(); ++run2)
+			tmp(run1, 1 + run2) = operator()(run1, run2);
+	}
+
+	return tmp;
+}
 
 
 CLOSE_NAMESPACE_ACADO

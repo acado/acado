@@ -77,7 +77,7 @@ if (get == 'B')
         fprintf(cppobj.fileMEX,sprintf('    OutU = mxCreateDoubleMatrix( 1,%s.getNU(),mxREAL ); \n', obj.name));
         fprintf(cppobj.fileMEX,'    outU = mxGetPr( OutU );\n');
         
-        fprintf(cppobj.fileMEX,'    Vector vec_outU; \n');
+        fprintf(cppobj.fileMEX,'    DVector vec_outU; \n');
         fprintf(cppobj.fileMEX,sprintf('    %s.getU(vec_outU); \n', obj.name));
         
         fprintf(cppobj.fileMEX,'    for( int i=0; i<vec_outU.getDim(); ++i ){ \n');
@@ -90,7 +90,7 @@ if (get == 'B')
         fprintf(cppobj.fileMEX,sprintf('    OutP = mxCreateDoubleMatrix( 1,%s.getNP(),mxREAL ); \n', obj.name));
 		fprintf(cppobj.fileMEX,'    outP = mxGetPr( OutP );\n');
         
-        fprintf(cppobj.fileMEX,'    Vector vec_outP; \n');
+        fprintf(cppobj.fileMEX,'    DVector vec_outP; \n');
         fprintf(cppobj.fileMEX,sprintf('    %s.getP(vec_outP); \n', obj.name));
         
         fprintf(cppobj.fileMEX,'    for( int i=0; i<vec_outP.getDim(); ++i ){ \n');

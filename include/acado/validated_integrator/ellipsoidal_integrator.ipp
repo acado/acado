@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -64,9 +64,9 @@ template <typename T> returnValue EllipsoidalIntegrator::integrate( double t0, d
 		if( count == Nmax ) setInfinity();
 		
 		if( PrintLevel == HIGH ){
-			acadoPrintf("\n\nSTEP %d:\n---------------------------------------------------\n",count);
-			acadoPrintf("\ntime = %.6e \t h = %.6e \n", t, h );
-			acadoPrintf("\nSTATE ENCLOSURE: \n\n" );
+			std::cout << "\n\nSTEP" << count << ":\n---------------------------------------------------\n";
+			std::cout << std::scientific << "\ntime = " << t << "\t h = " << h << "\n";
+			std::cout << "\nSTATE ENCLOSURE: \n\n";
 			Tmatrix<Interval> result = getStateBound(*x);
 			for( int i=0; i<nx; i++ )
 				std::cout << "x[" << i <<"]:  " << result(i)
@@ -75,8 +75,8 @@ template <typename T> returnValue EllipsoidalIntegrator::integrate( double t0, d
 	}
 	
 	if( PrintLevel == MEDIUM ){
-		acadoPrintf("\ntime = %.6e \n", t );
-		acadoPrintf("\nSTATE ENCLOSURE: \n\n" );
+		std::cout << "\ntime = " << t << std::endl;
+		std::cout << "\nSTATE ENCLOSURE: \n\n";
 		Tmatrix<Interval> result = getStateBound(*x);
 		for( int i=0; i<nx; i++ )
 			std::cout << "x[" << i <<"]:  " << result(i) << "\n";
@@ -89,7 +89,7 @@ template <typename T> returnValue EllipsoidalIntegrator::integrate( double t0, d
 	
 	if ( (BooleanType)profile == BT_TRUE ){
 	  
-		acadoPrintf("\nCOMPUTATION TIME: \n\n");
+		std::cout << "\nCOMPUTATION TIME: \n\n";
 		
 		std::cout << "Total  :  " << std::setprecision(3) << std::fixed << totalTime.getTime() << " sec        \n";
 		std::cout << "Phase 0:  " << std::setprecision(3) << std::fixed << Phase0Time.getTime() << " sec"
@@ -99,7 +99,7 @@ template <typename T> returnValue EllipsoidalIntegrator::integrate( double t0, d
 		          << "   ( "     << std::setprecision(1) << std::fixed << 100.0*(Phase1Time.getTime()/totalTime.getTime())
 				  << " % )\n\n" ;
 				  
-		if( PrintLevel == MEDIUM ) acadoPrintf("Number of Steps:  %d \n\n", count );
+		if( PrintLevel == MEDIUM ) std::cout << "Number of Steps:  " << count << "\n\n";
 	}
 	
 	return SUCCESSFUL_RETURN;

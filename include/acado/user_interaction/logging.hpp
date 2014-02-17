@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,25 +26,19 @@
 
 /**
  *    \file include/acado/user_interaction/logging.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
 #ifndef ACADO_TOOLKIT_LOGGING_HPP
 #define ACADO_TOOLKIT_LOGGING_HPP
 
-
 #include <acado/utils/acado_utils.hpp>
-#include <acado/user_interaction/log_collection.hpp>
 #include <acado/user_interaction/log_record.hpp>
-
-
 
 BEGIN_NAMESPACE_ACADO
 
-
 static LogRecord emptyLogRecord;
-
 
 /**
  *	\brief Provides a generic way to store algorithmic information during runtime.
@@ -56,7 +50,7 @@ static LogRecord emptyLogRecord;
  *	that are intended to interact with the user inherit the public functionality 
  *	of the Logging class.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class Logging
 {
@@ -70,23 +64,8 @@ class Logging
 		/** Default constructor. */
 		Logging( );
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 */
-		Logging(	const Logging& rhs
-					);
-
 		/** Destructor. */
 		virtual ~Logging( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 */
-		Logging& operator=(	const Logging& rhs
-							);
-
 
 		/** Adds a record to the log collection.
 		 *
@@ -111,19 +90,6 @@ class Logging
 		int addLogRecord(	LogRecord& record
 							);
 
-
-		/** Returns the record with given index from the log collection.
-		 *
-		 *	@param[in]  idx			Index of desired record.
-		 *	@param[out] _record		Desired record.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_INDEX_OUT_OF_BOUNDS 
-		 */
-		returnValue getLogRecord(	uint idx,
-									LogRecord& _record
-									) const;
-
 		/** Returns the record with certain index from the log collection. 
 		 *	This index is not provided when calling the function, but 
 		 *	rather obtained by using the alias index of the record. If the
@@ -137,9 +103,8 @@ class Logging
 		returnValue getLogRecord(	LogRecord& _record
 									) const;
 
-
 		/** Updates all items with the record given as argument. In doing so,
-		 *	it is checked for each item whether it is contained within one of 
+		 *	it is checked for each item whether it is contained within one of
 		 *	of the records of the collection; and if so, the numerical values
 		 *	are copied into the argument record.
 		 *
@@ -149,7 +114,6 @@ class Logging
 		 */
 		returnValue updateLogRecord(	LogRecord& _record
 										) const;
-
 
 		/** Gets all numerical values at all time instants of the item
 		 *	with given name. If this item exists in more than one record,
@@ -166,7 +130,6 @@ class Logging
 									MatrixVariablesGrid& values
 									) const;
 
-
 		/** Gets numerical value at first time instant of the item
 		 *	with given name. If this item exists in more than one record,
 		 *	the first one is choosen as they are expected to have identical
@@ -179,11 +142,11 @@ class Logging
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getFirst(	LogName _name,
-										Matrix& firstValue
+										DMatrix& firstValue
 										) const;
 
 		/** Gets numerical value at first time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid). 
+		 *	with given name (converts internally used DMatrix into VariablesGrid). 
 		 *	If this item exists in more than one record, the first one is choosen 
 		 *	as they are expected to have identical values anyhow.
 		 *
@@ -197,7 +160,6 @@ class Logging
 										VariablesGrid& firstValue
 										) const;
 
-
 		/** Gets numerical value at last time instant of the item
 		 *	with given name. If this item exists in more than one record,
 		 *	the first one is choosen as they are expected to have identical
@@ -210,11 +172,11 @@ class Logging
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getLast(	LogName _name,
-									Matrix& lastValue
+									DMatrix& lastValue
 									) const;
 
 		/** Gets numerical value at last time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid). 
+		 *	with given name (converts internally used DMatrix into VariablesGrid). 
 		 *	If this item exists in more than one record, the first one is choosen 
 		 *	as they are expected to have identical values anyhow.
 		 *
@@ -228,6 +190,55 @@ class Logging
 									VariablesGrid& lastValue
 									) const;
 
+		/** Sets all numerical values at all time instants of the item
+		 *	with given name.
+		 *
+		 *	@param[in]  _name	Internal name of item.
+		 *	@param[in]  values	All numerical values at all time instants of given item.
+		 *
+		 *	\note All public setAll member functions make use of the <em>protected</em> setAll function.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *	        RET_LOG_RECORD_CORRUPTED
+		 */
+		inline returnValue setAll(	LogName _name,
+									const MatrixVariablesGrid& values
+									);
+
+
+		/** Sets numerical value at last time instant of the item
+		 *	with given name.
+		 *
+		 *	@param[in]  _name		Internal name of item.
+		 *	@param[in]  lastValue	Numerical value at last time instant of given item.
+		 *	@param[in]  time		Time label of the instant.
+		 *
+		 *	\note All public setLast member functions make use of the <em>protected</em> setLast function.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
+		 */
+		inline returnValue setLast(	LogName _name,
+									const DMatrix& value,
+									double time = -INFTY
+									);
+
+		/** Sets numerical value at last time instant of the item
+		 *	with given name.
+		 *
+		 *	@param[in]  _name		Internal name of item.
+		 *	@param[in]  lastValue	Numerical value at last time instant of given item.
+		 *	@param[in]  time		Time label of the instant.
+		 *
+		 *	\note All public setLast member functions make use of the <em>protected</em> setLast function.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
+		 */
+		inline returnValue setLast(	LogName _name,
+									VariablesGrid& value,
+									double time = -INFTY
+									);
 
 		/** Returns number of records contained in the log collection.
 		 *
@@ -256,25 +267,21 @@ class Logging
 		 */
 		virtual returnValue setupLogging( );
 
-
     //
     // DATA MEMBERS:
     //
 	protected:
-
-		LogCollection logCollection;				/**< Log collection containing a singly-linked list of log records. */
-		int logIdx;									/**< Index of a certain log record to be optionally used within derived classes. */
+		/** Log collection containing a singly-linked list of log records. */
+		std::vector< LogRecord > logCollection;
+		/** Index of a certain log record to be optionally used within derived classes. */
+		int logIdx;
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
 #include <acado/user_interaction/logging.ipp>
 
-
 #endif	// ACADO_TOOLKIT_LOGGING_HPP
-
 
 /*
  *	end of file

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,21 +26,17 @@
 
 /**
  *    \file include/acado/user_interaction/options.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
 #ifndef ACADO_TOOLKIT_OPTIONS_HPP
 #define ACADO_TOOLKIT_OPTIONS_HPP
 
-
 #include <acado/utils/acado_utils.hpp>
 #include <acado/user_interaction/options_list.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
-
 
 /**
  *	\brief Provides a generic way to set and pass user-specified options.
@@ -64,7 +60,7 @@ BEGIN_NAMESPACE_ACADO
  *	functionality is modified or new functionality is added to this class, the 
  *	AlgorithmicBase class has to be adapted accordingly.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class Options
 {
@@ -86,24 +82,9 @@ class Options
 		Options(	const OptionsList& _optionsList
 					);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 */
-		Options(	const Options& rhs
-					);
-
 		/** Destructor.
 		 */
 		virtual ~Options( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 */
-		Options& operator=(	const Options& rhs
-							);
-
 
 		/** Adds an additional OptionsList to internal array.
 		 *
@@ -134,6 +115,18 @@ class Options
 		 */
 		returnValue get(	OptionsName name,
 							double& value
+							) const;
+
+		/** Returns value of an existing option item of string type.
+		 *
+		 *	@param[in]  name	Name of option item.
+		 *	@param[out] value	Value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS
+		 */
+		returnValue get(	OptionsName name,
+							std::string& value
 							) const;
 
 		/** Returns value of an existing option item of integer type 
@@ -168,6 +161,21 @@ class Options
 							double& value
 							) const;
 
+		/** Returns value of an existing option item of string type
+		 *	within the option list of given index.
+		 *
+		 *	@param[in]  idx		Index of option list.
+		 *	@param[in]  name	Name of option item.
+		 *	@param[out] value	Value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS, \n
+		 *	        RET_INDEX_OUT_OF_BOUNDS
+		 */
+		returnValue get(	uint idx,
+							OptionsName name,
+							std::string& value
+							) const;
 
 		/** Sets value of an existing option item of integer type to a given value.
 		 *
@@ -193,6 +201,19 @@ class Options
 		 */
 		returnValue set(	OptionsName name,
 							double value
+							);
+
+		/** Sets value of an existing option item of string type to a given value.
+		 *
+		 *	@param[in] name		Name of option item.
+		 *	@param[in] value	New value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS, \n
+		 *          RET_OPTIONS_LIST_CORRUPTED
+		 */
+		returnValue set(	OptionsName name,
+							const std::string& value
 							);
 
 		/** Sets value of an existing option item of integer type 
@@ -227,6 +248,23 @@ class Options
 		returnValue set(	uint idx,
 							OptionsName name,
 							double value
+							);
+
+		/** Sets value of an existing option item of string type
+		 *	within the option list of given index to a given value.
+		 *
+		 *	@param[in]  idx		Index of option list.
+		 *	@param[in] name		Name of option item.
+		 *	@param[in] value	New value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS, \n
+		 *          RET_OPTIONS_LIST_CORRUPTED, \n
+		 *	        RET_INDEX_OUT_OF_BOUNDS
+		 */
+		returnValue set(	uint idx,
+							OptionsName name,
+							const std::string& value
 							);
 
 
@@ -268,7 +306,7 @@ class Options
 		 *
 		 *  \return Total number of option lists
 		 */
-		inline uint getNumOptionsLists( ) const;
+		uint getNumOptionsLists( ) const;
 
 
 		/** Prints a list of all available options of all option lists.
@@ -368,6 +406,19 @@ class Options
 								double value
 								);
 
+		/** Add an option item with a given double default value to the all option lists.
+		 *
+		 *	@param[in] name		Name of new option item.
+		 *	@param[in] value	Default value of new option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_ALREADY_EXISTS, \n
+		 *          RET_OPTIONS_LIST_CORRUPTED
+		 */
+		returnValue addOption(	OptionsName name,
+								const std::string& value
+								);
+
 		/** Add an option item with a given integer default value to option list with given index.
 		 *
 		 *	@param[in] idx		Index of option list.
@@ -400,28 +451,34 @@ class Options
 								double value
 								);
 
-
+		/** Add an option item with a given double default value to option list with given index.
+		 *
+		 *	@param[in] idx		Index of option list.
+		 *	@param[in] name		Name of new option item.
+		 *	@param[in] value	Default value of new option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_ALREADY_EXISTS, \n
+		 *          RET_OPTIONS_LIST_CORRUPTED, \n
+		 *	        RET_INDEX_OUT_OF_BOUNDS
+		 */
+		returnValue addOption(	uint idx,
+								OptionsName name,
+								const std::string& value
+								);
 
     //
     // DATA MEMBERS:
     //
 	protected:
 
-		OptionsList** optionsList;			/**< Array consisting of OptionsLists. */
-		uint nOptionsList;					/**< Total number of OptionsLists. */
+		/** A list consisting of OptionsLists. */
+		std::vector< OptionsList > lists;
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
-
-#include <acado/user_interaction/options.ipp>
-
-
-
 #endif	// ACADO_TOOLKIT_OPTIONS_HPP
-
 
 /*
  *	end of file

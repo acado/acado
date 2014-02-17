@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,182 +26,315 @@
 
 /**
  *    \file include/acado/matrix_vector/vector.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date 2008 - 2013
+ *    \note The code in the class GenericVector is compatible with the original
+ *          code developed by B. Houska and H.J. Ferreau.
  */
-
 
 #ifndef ACADO_TOOLKIT_VECTOR_HPP
 #define ACADO_TOOLKIT_VECTOR_HPP
 
+#include <acado/utils/acado_utils.hpp>
+#include <acado/matrix_vector/matrix_vector_tools.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
-
-class Function;
-class Matrix;
-
-
-/**
- *	\brief Implements a rudimentary dense vector class.
- *
- *	\ingroup BasicDataStructures
- *
- *  The class Vector is a rudimentary dense vector class. It is only 
- *  intended to provide a convenient way to deal with linear algebra objects 
- *  and to provide a wrapper for more efficient implementations. It should 
- *  not be used for efficiency-critical operations, in particular not for 
- *  large-scale or sparse (matrix) objects.
- *
- *	 \author Hans Joachim Ferreau, Boris Houska
- */
-class Vector : public VectorspaceElement{
-
-    //
-    // PUBLIC MEMBER FUNCTIONS:
-    //
-    public:
-        /** Default constructor. */
-        Vector( );
-
-		/** Constructor which takes dimension of the vector. */
-        Vector(	uint _dim	/**< Vector dimension. */
-				);
-
-		/** Constructor which takes dimension of the vector and a double array 
-		 *  of appropriate size containing the (initial) values of the vector. */
-        Vector(	uint _dim,		/**< Vector dimension. */
-				const double* const _values	/**< Double array. */
-				);
-
-
-		/** Constructor which takes a file. */
-        Vector(	FILE *file	/**< Vector dimension. */
-				);
-
-//	/** Constructor which takes a filename */
-//        Vector( const char * filename	/**< Vector dimension. */
-//				);
-
-        /** Copy constructor (deep copy). */
-        Vector(	const Vector& rhs	/**< Right-hand side object. */
-				);
-
-        /** Copy constructor (deep copy). */
-        Vector(	const VectorspaceElement& rhs	/**< Right-hand side object. */
-				);
-
-        /** Destructor. */
-        virtual ~Vector( );
-
-
-        /** Assignment operator (deep copy). */
-		Vector& operator=(	const Vector& rhs	/**< Right-hand side object. */
-							);
-
-		Vector& operator=(	FILE *rhs	/**< Right-hand side object. */
-							);
-
-
-
-		/** Adds (element-wise) two vectors to a temporary object.
-		 *  \return Temporary object containing the sum of the vectors. */
-		inline Vector operator+(	const Vector& arg	/**< Second summand. */
-									) const;
-
-		/** Adds (element-wise) a vector to object.
-		 *  \return Reference to object after addition. */
-		inline Vector& operator+=(	const Vector& arg	/**< Second summand. */
-									);
-
-		/** Subtracts (element-wise) a vector from the object and and stores 
-		 *  the result to a temporary object.
-		 *  \return Temporary object containing the difference of the vectors. */
-		inline Vector operator-(	const Vector& arg	/**< Subtrahend. */
-									) const;
-
-		/** Subtracts (element-wise) a vector from the object.
-		 *  \return Reference to object after subtraction. */
-		inline Vector operator-=(	const Vector& arg	/**< Subtrahend. */
-									);
-
-		/** Multiplies each component of the object with a given scalar.
-		 *  \return Reference to object after multiplication. */
-		inline Vector& operator*=(	double scalar	/**< Scalar factor. */
-									);
-
-		/** Divides each component of the object by a given non-zero scalar. 
-		 *  \return Reference to object after division. */
-		inline Vector& operator/=(	double scalar	/**< Scalar divisor. If it is zero, nothing is done. */
-									);
-
-		/** Multiplies the transposed object to a given matrix from the left and
-		 *  stores the result to a temporary object.
-		 *  \return Temporary object containing result of multiplication. */
-		inline Vector operator*(	const Matrix& arg	/**< Matrix factor. */
-									) const;
-
-		/** Multiplies the transposed object to a given vector (scalar product).
-		 *  \return Scalar product of the two vectors. */
-		inline double operator^(	const Vector& arg	/**< Vector factor. */
-									) const;
-
-		/** Calculated the dyadic product of the object and a given vector.
-		 *  \return Dyadic product of the two vectors. */
-		inline Matrix operator%(	const Vector& arg	/**< Vector factor. */
-									) const;
-
-
-		returnValue append( const Vector& arg );
-
-
-        /** Returns a vector whose components are the absolute
-         *  values of the components of this object.
-		 *  DOES THE SAME AS GETABSOLUTE AND SHOULD BE ABANDONED SOON! 
-         */
-        inline Vector absolute();
-
-        /** Returns a vector whose components are the absolute
-         *  values of the components of this object. 
-         */
-        inline Vector getAbsolute() const;
-
-
-		/** Sets vector to the <idx>th unit vector.
-		 *  \return SUCCESSFUL_RETURN */
-		inline returnValue setUnitVector(	uint idx	/**< Index. */
-											);
-
-
-    //
-    // PROTECTED MEMBER FUNCTIONS:
-    //
-    protected:
-
-
-
-    //
-    // DATA MEMBERS:
-    //
-    protected:
+/** Defines flags for different vector norms. */
+enum VectorNorm
+{
+    VN_L1,
+    VN_L2,
+    VN_LINF
 };
 
+/** A generic vector class based on Eigen's matrix class. */
+template<typename T>
+class GenericVector : public Eigen::Matrix<T, Eigen::Dynamic, 1>
+{
+public:
+
+	/** \internal
+	 *  \name Eigen compatibility layer
+	 *  @{
+	 */
+
+	/** Handy typedef for the base vector class. */
+	typedef Eigen::Matrix<T, Eigen::Dynamic, 1> Base;
+	using Base::operator=;
+
+	/** Constructor from any other Eigen::MatrixBase derived class. */
+	template<typename OtherDerived>
+	inline GenericVector(const Eigen::MatrixBase<OtherDerived>& other) : Base( other ) {}
+
+	/** Constructor from any other Eigen::ReturnByValue derived class. */
+	template<typename OtherDerived>
+	inline GenericVector(const Eigen::ReturnByValue<OtherDerived>& other) : Base( other ) {}
+
+	/** Constructor from any other Eigen::EigenBase derived class. */
+	template<typename OtherDerived>
+	inline GenericVector(const Eigen::EigenBase<OtherDerived>& other) : Base( other ) {}
+
+	/** @}
+	 *  \endinternal
+	 */
+
+	/** \name Constructors. */
+	/** @{ */
+
+	/** Default ctor */
+	GenericVector() : Base() {}
+
+	/** Ctor which accepts size of the vector. */
+	GenericVector(	unsigned _dim ) : Base( _dim ) { Base::setZero(); }
+
+	/** Ctor with an initializing C-like array. */
+	GenericVector(	unsigned _dim,
+					const T* const _values
+					)
+		: Base( _dim )
+	{ std::copy(_values, _values + _dim, Base::data()); }
+
+	/** Ctor with an STL vector. */
+	GenericVector(	std::vector< T > _values
+					)
+		: Base( _values.size() )
+	{ std::copy(_values.begin(), _values.end(), Base::data()); }
+
+	/** @} */
+
+	/** Destructor. */
+	virtual ~GenericVector()
+	{}
+
+	/** Equality operator. */
+	bool operator==(const GenericVector& _arg) const
+	{
+		if (Base::rows() != _arg.rows())
+			return false;
+		return Base::isApprox(_arg, EQUALITY_EPS);
+	}
+
+	/** Inequality operator. */
+	bool operator!=(const GenericVector& _arg) const
+	{
+		return (operator==( _arg ) == false);
+	}
+
+	bool operator<=(const GenericVector& _arg) const
+	{
+		if (Base::rows() != _arg.rows())
+			return false;
+		for (unsigned el = 0; el < Base::rows(); ++el)
+			if (Base::data()[ el ] > _arg.data()[ el ])
+				return false;
+		return true;
+	}
+
+	bool operator>=(const GenericVector& _arg) const
+	{
+		if (Base::rows() != _arg.rows())
+			return false;
+		for (unsigned el = 0; el < Base::rows(); ++el)
+			if (Base::data()[ el ] < _arg.data()[ el ])
+				return false;
+		return true;
+	}
+
+	bool operator>(const GenericVector& _arg) const
+	{
+		return operator<=( _arg ) == false;
+	}
+
+	bool operator<(const GenericVector& _arg) const
+	{
+		return operator>=( _arg ) == false;
+	}
+
+	/** Initialization routine. */
+	void init(	unsigned _dim = 0
+				)
+	{ Base::_set(GenericVector< T >( _dim )); }
+
+	/** Set all elements constant. */
+	void setAll( const T& _value)
+	{ Base::setConstant( _value ); }
+
+	/** Append elements to the vector. */
+	GenericVector& append(	const GenericVector& _arg
+							);
+
+	/** Sets vector to the _idx-th unit vector. */
+	GenericVector& setUnitVector(	unsigned _idx
+									);
+
+	/** Returns dimension of vector space. */
+	unsigned getDim( ) const
+	{ return Base::rows(); }
+
+	/** Returns whether the vector is empty. */
+	bool isEmpty( ) const
+	{ return Base::rows() == 0; }
+
+	/** Returns maximum element. */
+	T getMax( ) const
+	{ return Base::maxCoeff(); }
+
+	/** Returns minimum element. */
+	T getMin( ) const
+	{ return Base::minCoeff(); }
+
+	/** Returns mean value of all elements. */
+	T getMean( ) const
+	{ return Base::mean(); }
+
+	/** Return a new vector with absolute elements. */
+	GenericVector getAbsolute() const
+	{ return Base::cwiseAbs(); }
+
+	/** Returns specified norm interpreted as a vector.
+	 *
+	 *  \param norm   the type of norm to be computed.
+	 */
+	T getNorm(	VectorNorm _norm
+				) const;
+
+	/** Returns specified norm interpreted as a vector (with scaling).
+	 *
+	 *  \param norm   the type of norm to be computed.
+	 *  \param scale  the element-wise scale.
+	 */
+	T getNorm(	VectorNorm _norm,
+				const GenericVector& _scale
+				) const;
+
+	/** Prints object to given file. Various settings can
+	 *	be specified defining its output format.
+	 *
+	 *	@param[in] stream			Output stream for printing.
+	 *	@param[in] name				Name label to be printed before the numerical values.
+	 *	@param[in] startString		Prefix before printing the numerical values.
+	 *	@param[in] endString		Suffix after printing the numerical values.
+	 *	@param[in] width			Total number of digits per single numerical value.
+	 *	@param[in] precision		Number of decimals per single numerical value.
+	 *	@param[in] colSeparator		Separator between the columns of the numerical values.
+	 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
+	 *
+	 *  \return SUCCESSFUL_RETURN, \n
+	 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
+	 *	        RET_UNKNOWN_BUG
+	 */
+	virtual returnValue print(	std::ostream& stream            = std::cout,
+								const std::string& name         = DEFAULT_LABEL,
+								const std::string& startString  = DEFAULT_START_STRING,
+								const std::string& endString    = DEFAULT_END_STRING,
+								uint width                      = DEFAULT_WIDTH,
+								uint precision                  = DEFAULT_PRECISION,
+								const std::string& colSeparator = DEFAULT_COL_SEPARATOR,
+								const std::string& rowSeparator = DEFAULT_ROW_SEPARATOR
+								) const;
+
+	/** Prints object to file with given name. Various settings can
+	 *	be specified defining its output format.
+	 *
+	 *	@param[in] filename			Filename for printing.
+	 *	@param[in] name				Name label to be printed before the numerical values.
+	 *	@param[in] startString		Prefix before printing the numerical values.
+	 *	@param[in] endString		Suffix after printing the numerical values.
+	 *	@param[in] width			Total number of digits per single numerical value.
+	 *	@param[in] precision		Number of decimals per single numerical value.
+	 *	@param[in] colSeparator		Separator between the columns of the numerical values.
+	 *	@param[in] rowSeparator		Separator between the rows of the numerical values.
+	 *
+	 *  \return SUCCESSFUL_RETURN, \n
+	 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
+	 *	        RET_UNKNOWN_BUG
+	 */
+	virtual returnValue print(	const std::string& filename,
+								const std::string& name         = DEFAULT_LABEL,
+								const std::string& startString  = DEFAULT_START_STRING,
+								const std::string& endString    = DEFAULT_END_STRING,
+								uint width                      = DEFAULT_WIDTH,
+								uint precision                  = DEFAULT_PRECISION,
+								const std::string& colSeparator = DEFAULT_COL_SEPARATOR,
+								const std::string& rowSeparator = DEFAULT_ROW_SEPARATOR
+								) const;
+
+	/** Prints object to given file. Various settings can
+	 *	be specified defining its output format.
+	 *
+	 *	@param[in] stream			Output stream for printing.
+	 *	@param[in] name				Name label to be printed before the numerical values.
+	 *	@param[in] printScheme		Print scheme defining the output format of the information.
+	 *
+	 *  \return SUCCESSFUL_RETURN, \n
+	 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
+	 *	        RET_UNKNOWN_BUG
+	 */
+	virtual returnValue print(	std::ostream& stream,
+								const std::string& name,
+								PrintScheme printScheme
+								) const;
+
+	/** Prints object to given file. Various settings can
+	 *	be specified defining its output format.
+	 *
+	 *	@param[in] filename			Filename for printing.
+	 *	@param[in] name				Name label to be printed before the numerical values.
+	 *	@param[in] printScheme		Print scheme defining the output format of the information.
+	 *
+	 *  \return SUCCESSFUL_RETURN, \n
+	 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
+	 *	        RET_UNKNOWN_BUG
+	 */
+	virtual returnValue print(	const std::string& filename,
+								const std::string& name,
+								PrintScheme printScheme
+								) const;
+
+	/** Read data from an input file. */
+	virtual returnValue read(	std::istream& stream
+								);
+
+	/** Read data from an input file. */
+	virtual returnValue read(	const std::string& filename
+								);
+};
+
+/** Prints the matrix into a stream. */
+template<typename T>
+std::ostream& operator<<(	std::ostream& _stream,
+							const GenericVector< T >& _arg
+							)
+{
+	if (_arg.print( _stream ) != SUCCESSFUL_RETURN)
+		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Cannot write to output stream.");
+
+	return _stream;
+}
+
+/** Read a matrix from an input stream. */
+template<typename T>
+std::istream& operator>>(	std::istream& _stream,
+							GenericVector< T >& _arg
+)
+{
+	if (_arg.read( _stream ) != SUCCESSFUL_RETURN )
+		ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Cannot read from input stream.");
+
+	return _stream;
+}
+
+/** Type definition of the vector of doubles. */
+typedef GenericVector< double > DVector;
+/** Type definition of the vector of doubles. */
+typedef GenericVector< int > IVector;
+/** Type definition of the vector of doubles. */
+typedef GenericVector< bool > BVector;
+
+static       DVector emptyVector;
+static const DVector emptyConstVector;
 
 CLOSE_NAMESPACE_ACADO
 
-
-
-// UNARY MINUS OPERATOR:
-// ---------------------
-
-REFER_NAMESPACE_ACADO Vector operator-(const REFER_NAMESPACE_ACADO Vector &arg);
-
-
-
-
-
 #endif  // ACADO_TOOLKIT_VECTOR_HPP
-
-/*
- *	end of file
- */
-

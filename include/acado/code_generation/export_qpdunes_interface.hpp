@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -51,19 +51,19 @@ public:
 	 *
 	 *	@param[in] _fileName			Name of exported file.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
-	 *	@param[in] _realString			String to be used to declare real variables.
-	 *	@param[in] _intString			String to be used to declare integer variables.
+	 *	@param[in] _realString			std::string to be used to declare real variables.
+	 *	@param[in] _intString			std::string to be used to declare integer variables.
 	 *	@param[in] _precision			Number of digits to be used for exporting real values.
-	 *	@param[in] _commentString		String to be used for exporting comments.
+	 *	@param[in] _commentstd::string		std::string to be used for exporting comments.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	ExportQpDunesInterface(	const String& _fileName,
-							const String& _commonHeaderName = "",
-							const String& _realString = "real_t",
-							const String& _intString = "int",
+	ExportQpDunesInterface(	const std::string& _fileName,
+							const std::string& _commonHeaderName = "",
+							const std::string& _realString = "real_t",
+							const std::string& _intString = "int",
 							int _precision = 16,
-							const String& _commentString = emptyConstString
+							const std::string& _commentString = std::string()
 							);
 
 	/** Destructor. */

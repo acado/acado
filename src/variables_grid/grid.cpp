@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,8 +32,9 @@
 
 
 #include <acado/variables_grid/grid.hpp>
+#include <iomanip>
 
-
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -59,7 +60,7 @@ Grid::Grid(	uint nPoints_,
 }
 
 
-Grid::Grid(	const Vector& times_
+Grid::Grid(	const DVector& times_
 			)
 {
 	times = 0;
@@ -132,7 +133,7 @@ returnValue Grid::init( uint _nPoints,
 }
 
 
-returnValue Grid::init(	const Vector& times_
+returnValue Grid::init(	const DVector& times_
 						)
 {
 	nPoints = times_.getDim();
@@ -698,10 +699,9 @@ returnValue Grid::getSubGrid(	double tStart,
 
 returnValue Grid::print( ) const
 {
-    uint run1;
-    for( run1 = 0; run1 < getNumPoints(); run1++ )
-        acadoPrintf( "%.8e  ", getTime(run1) );
-    acadoPrintf( "\n" );
+	for (unsigned t = 0; t < getNumPoints(); t++)
+		cout << setprecision( 8 ) << getTime( t ) << "  ";
+	cout << endl;
 	
 	return SUCCESSFUL_RETURN;
 }

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -149,7 +149,7 @@ returnValue DynamicDiscretization::getResiduum( BlockMatrix &residuum_ ) const{
     residuum_.init( N, 1 );
 
     for( run1 = 0; run1 < N; run1++ ){
-        Matrix tmp( residuum.getNumValues(), 1 );
+        DMatrix tmp( residuum.getNumValues(), 1 );
         for( run2 = 0; run2 < residuum.getNumValues(); run2++ )
                 tmp( run2, 0 ) = residuum(run1,run2);
         residuum_.setDense(run1,0,tmp);

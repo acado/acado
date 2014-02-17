@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -102,11 +102,11 @@ class DifferentialEquation : public Function{
 		/** Loading Expressions (deep copy). */
 		DifferentialEquation& operator==( const double &arg );
 
-		/** Loading Symbolic Vector (deep copy). */
-		DifferentialEquation& operator==( const Vector& arg );
+		/** Loading Symbolic DVector (deep copy). */
+		DifferentialEquation& operator==( const DVector& arg );
 
-		/** Loading Symbolic Matrix (deep copy). */
-		DifferentialEquation& operator==( const Matrix& arg );
+		/** Loading Symbolic DMatrix (deep copy). */
+		DifferentialEquation& operator==( const DMatrix& arg );
 
 
 		/** Ask whether the differential equation is a DAE. */
@@ -186,7 +186,7 @@ class DifferentialEquation : public Function{
 		inline int getStateEnumerationIndex( int index_ );
 
 
-		inline Vector getDifferentialStateComponents() const;
+		inline DVector getDifferentialStateComponents() const;
 
 
 
@@ -202,17 +202,17 @@ class DifferentialEquation : public Function{
 		/** Loading Expressions (deep copy). */
 		DifferentialEquation& addAlgebraic( const double &arg );
 
-		/** Loading Symbolic Vector (deep copy). */
-		DifferentialEquation& addDifferential( const Vector& arg );
+		/** Loading Symbolic DVector (deep copy). */
+		DifferentialEquation& addDifferential( const DVector& arg );
 
-		/** Loading Symbolic Vector (deep copy). */
-		DifferentialEquation& addAlgebraic( const Vector& arg );
+		/** Loading Symbolic DVector (deep copy). */
+		DifferentialEquation& addAlgebraic( const DVector& arg );
 
-		/** Loading Symbolic Matrix (deep copy). */
-		DifferentialEquation& addDifferential( const Matrix& arg );
+		/** Loading Symbolic DMatrix (deep copy). */
+		DifferentialEquation& addDifferential( const DMatrix& arg );
 
-		/** Loading Symbolic Matrix (deep copy). */
-		DifferentialEquation& addAlgebraic( const Matrix& arg );
+		/** Loading Symbolic DMatrix (deep copy). */
+		DifferentialEquation& addAlgebraic( const DMatrix& arg );
 
                 DifferentialEquation& operator==(const Lyapunov& arg );
 

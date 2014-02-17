@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -95,15 +95,15 @@ returnValue BandedCPsolver::finalizeSolve(	BandedCP& cp
 
 
 
-returnValue BandedCPsolver::getVarianceCovariance( Matrix &var )
+returnValue BandedCPsolver::getVarianceCovariance( DMatrix &var )
 {
 	return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 }
 
 
 
-returnValue BandedCPsolver::setRealTimeParameters(	const Vector& DeltaX,
-													const Vector& DeltaP
+returnValue BandedCPsolver::setRealTimeParameters(	const DVector& DeltaX,
+													const DVector& DeltaP
 													)
 {
 	return ACADOERROR( RET_NOT_IMPLEMENTED_IN_BASE_CLASS );

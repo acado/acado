@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -314,7 +314,7 @@ returnValue SCPevaluation::evaluateLagrangeGradient(	uint N,
         												)
 {
     uint run1;
-    Matrix tmp1, tmp2;
+    DMatrix tmp1, tmp2;
     BlockMatrix aux( 5*N, 1 );
 
     for( run1 = 0; run1 < N-1; run1++ ){
@@ -323,24 +323,24 @@ returnValue SCPevaluation::evaluateLagrangeGradient(	uint N,
 
         if( iter.getNX() != 0 ){
             cp.dynGradient.getSubBlock( run1, 0, tmp2, iter.getNX(), iter.getNX() );
-            aux.addDense( run1  , 0, tmp2^tmp1             );
-            aux.setDense( run1+1, 0, tmp1.minus()          );
+            aux.addDense( run1  , 0, tmp2.transpose() * tmp1             );
+            aux.setDense( run1+1, 0, -tmp1          );
         }
         if( iter.getNXA() != 0 ){
             cp.dynGradient.getSubBlock( run1, 1, tmp2, iter.getNX(), iter.getNXA() );
-            aux.setDense( N+run1, 0, tmp2^tmp1 );
+            aux.setDense( N+run1, 0, tmp2.transpose() * tmp1 );
         }
         if( iter.getNP() != 0 ){
             cp.dynGradient.getSubBlock( run1, 2, tmp2, iter.getNX(), iter.getNP() );
-            aux.setDense( 2*N+run1, 0, tmp2^tmp1 );
+            aux.setDense( 2*N+run1, 0, tmp2.transpose() * tmp1 );
         }
         if( iter.getNU() != 0 ){
             cp.dynGradient.getSubBlock( run1, 3, tmp2, iter.getNX(), iter.getNU() );
-            aux.setDense( 3*N+run1, 0, tmp2^tmp1 );
+            aux.setDense( 3*N+run1, 0, tmp2.transpose() * tmp1 );
         }
         if( iter.getNW() != 0 ){
             cp.dynGradient.getSubBlock( run1, 4, tmp2, iter.getNX(), iter.getNW() );
-            aux.setDense( 4*N+run1, 0, tmp2^tmp1 );
+            aux.setDense( 4*N+run1, 0, tmp2.transpose() * tmp1 );
         }
     }
 
@@ -404,7 +404,7 @@ double SCPevaluation::getKKTtolerance(	const OCPiterate& iter,
     double KKTtol = 0.0;
 	double eps = 0.0;
 
-    Matrix tmp;
+    DMatrix tmp;
 
 //     printf("obj Gradient \n");
 //     cp.objectiveGradient.print();

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,14 +26,11 @@
 
 /**
  *    \file src/symbolic_expression/expression.cpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
 
-
 #include <acado/symbolic_expression/acado_syntax.hpp>
-
-
+#include <acado/symbolic_expression/intermediate_state.hpp>
 
 USING_NAMESPACE_ACADO
 
@@ -93,8 +90,6 @@ Expression entropy        ( const Expression &arg ){ return arg.getEntropy      
 Expression dot ( const Expression &arg ){ return arg.getDot (); }
 Expression next( const Expression &arg ){ return arg.getNext(); }
 
-
-
 // ---------------------------------------------------------------------------------------------
 //                              SYMBOLIC DERIVATIVE OPERATORS:
 // ---------------------------------------------------------------------------------------------
@@ -122,11 +117,35 @@ Expression forwardDerivative( const Expression &arg1,
 }
 
 
+Expression multipleForwardDerivative( const Expression &arg1,
+                              const Expression &arg2,
+                              const Expression &seed  ){
+
+	Expression tmp;
+	for( uint i = 0; i < seed.getNumCols(); i++ ) {
+		tmp.appendCols( forwardDerivative( arg1, arg2, seed.getCol(i) ) );
+	}
+    return tmp;
+}
+
+
 Expression backwardDerivative( const Expression &arg1,
                                const Expression &arg2,
                                const Expression &seed  ){
 
     return arg1.ADbackward(arg2,seed);
+}
+
+
+Expression multipleBackwardDerivative( const Expression &arg1,
+                              const Expression &arg2,
+                              const Expression &seed  ){
+
+	Expression tmp;
+	for( uint i = 0; i < seed.getNumCols(); i++ ) {
+		tmp.appendCols( backwardDerivative( arg1, arg2, seed.getCol(i) ) );
+	}
+    return tmp;
 }
 
 
@@ -143,71 +162,19 @@ Expression laplace           ( const Expression &arg1,
     return forwardDerivative( forwardDerivative(arg1,arg2), arg2 );
 }
 
-
-Matrix ones( int nRows, int nCols ){
-
-    Matrix t(nRows,nCols);
-    t.setAll(1);
-    return t;
-}
-
-
-Matrix zeros( int nRows, int nCols ){
-
-    Matrix t(nRows,nCols);
-    t.setAll(0);
-    return t;
-}
-
-
-Matrix eye( int n ){
-
-    Matrix t(n,n);
-    t.setIdentity();
-    return t;
-}
-
-
-
-Matrix diag( const Vector& v )
-{
-	int n = v.getDim();
-
-    Matrix t = zeros( n,n );
-    for( int i=0; i<n; ++i )
-		t(i,i) = v(i);
-
-    return t;
-}
-
-
-Vector diag( const Matrix& M )
-{
-	ASSERT( M.isSquare() == BT_TRUE );
-
-	int n = M.getNumRows();
-
-    Vector t( n );
-    for( int i=0; i<n; ++i )
-		t(i) = M(i,i);
-
-    return t;
-}
-
-
 Expression getRiccatiODE( const Expression        &rhs,
                           const DifferentialState &x  ,
                           const Control           &u  ,
                           const DifferentialState &P  ,
-                          const Matrix            &Q  ,
-                          const Matrix            &R  ){
+                          const DMatrix            &Q  ,
+                          const DMatrix            &R  ){
 
-    IntermediateState RHS(x.getDim(),x.getDim());
+	IntermediateState RHS("", x.getDim(), x.getDim());
 
     IntermediateState A = forwardDerivative( rhs, x );
     IntermediateState B = forwardDerivative( rhs, u );
 
-    return A.transpose()*P + P*A + Q - P*B*(R.getInverse())*B.transpose()*P;
+    return A.transpose()*P + P*A + Q - P*B*(DMatrix(R.inverse()))*B.transpose()*P;
 }
 
 
@@ -235,7 +202,7 @@ Expression chol( const Expression &arg ){
     ASSERT( arg.getNumRows() == arg.getNumCols() );
 
     int dim = arg.getNumRows();
-    IntermediateState L(dim,dim);
+    IntermediateState L("", dim,dim);
 
     // COMPUTE THE LOWER TRIANGLE RECURSIVELY:
     // ---------------------------------------

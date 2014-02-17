@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -126,37 +126,40 @@ uint ExportArgumentList::getNumArguments( ) const
 
 
 
-returnValue ExportArgumentList::exportCode(	FILE* file,
-											const String& _realString,
-											const String& _intString,
+returnValue ExportArgumentList::exportCode(	std::ostream& stream,
+											const std::string& _realString,
+											const std::string& _intString,
 											int _precision
 											) const
 {
+	bool started = false;
 	for (unsigned i = 0; i < arguments.size(); ++i)
 	{
 		// Allow only undefined arguments and defined integer scalars
-		if (	arguments[ i ].isGiven( ) == BT_TRUE &&
+		if (	arguments[ i ].isGiven( ) == true &&
 				(arguments[ i ].getDim() > 1 || arguments[ i ].getType() != INT) &&
 				arguments[ i ].getType() != STATIC_CONST_INT &&
 				arguments[ i ].getType() != STATIC_CONST_REAL
 				)
 			continue;
 
-		if ( includeType == BT_TRUE )
+		if (i > 0 && started == true)
+			stream << ", ";
+
+		if ( includeType == true )
 		{
-			if ( arguments[ i ].isCalledByValue( ) == BT_TRUE )
-				acadoFPrintf(file, "%s ", arguments[ i ].getTypeString(_realString, _intString).getName());
+			if ( arguments[ i ].isCalledByValue( ) == true )
+				stream << arguments[ i ].getTypeString(_realString, _intString) << " ";
 			else
-				acadoFPrintf(file, "%s* const ", arguments[ i ].getTypeString(_realString, _intString).getName());
+				stream << arguments[ i ].getTypeString(_realString, _intString) << "* const ";
 		}
 
-		if ( includeType == BT_FALSE )
-			acadoFPrintf(file, "%s", arguments[ i ].getAddressString( ).getName());
+		if ( includeType == false )
+			stream << arguments[ i ].getAddressString( );
 		else
-			acadoFPrintf(file, "%s", arguments[ i ].getAddressString( BT_FALSE ).getName());
+			stream << arguments[ i ].getAddressString( false );
 
-		if (i < arguments.size() - 1)
-			acadoFPrintf(file, ", ");
+		started = true;
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -175,14 +178,14 @@ returnValue ExportArgumentList::clear( )
 
 returnValue ExportArgumentList::doIncludeType( )
 {
-	includeType = BT_TRUE;
+	includeType = true;
 	return SUCCESSFUL_RETURN;
 }
 
 
 returnValue ExportArgumentList::doNotIncludeType( )
 {
-	includeType = BT_FALSE;
+	includeType = false;
 	return SUCCESSFUL_RETURN;
 }
 

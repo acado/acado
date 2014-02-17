@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -149,8 +149,8 @@ returnValue BFGSupdate::applyUpdate(	BlockMatrix &B,
     // --------------             -------------------------------------------------------
     BlockMatrix Bx  ;             // the vector  B*x.
     BlockMatrix BxxB;             // the matrix  B*x*x^T*B
-    Matrix      xBx ;             // the scalar  x^T B x
-    Matrix      xy  ;             // the scalar  x^T y
+    DMatrix      xBx ;             // the scalar  x^T B x
+    DMatrix      xy  ;             // the scalar  x^T y
     BlockMatrix z   ;             // the modified "gradient" y (needed for Powell's strategy)
     double      xz = 0.0;         // the scalar  x^T z
     BlockMatrix zz  ;             // the matrix  z*z^T
@@ -261,7 +261,7 @@ returnValue BFGSupdate::getSubBlockLine( const int         &N     ,
                                          const BlockMatrix &M     ,
                                                BlockMatrix &O      )
 {
-	Matrix tmp;
+	DMatrix tmp;
 
 	M.getSubBlock(     offset, line1, tmp );
 	if( tmp.getDim() != 0 ) O.setDense(0,line2,tmp);
@@ -289,7 +289,7 @@ returnValue BFGSupdate::setSubBlockLine( const int         &N     ,
                                                BlockMatrix &M     ,
                                          const BlockMatrix &O      )
 {
-	Matrix tmp;
+	DMatrix tmp;
 
 	O.getSubBlock( 0, line2, tmp );
 

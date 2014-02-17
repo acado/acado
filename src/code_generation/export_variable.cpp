@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -49,72 +49,74 @@ static const double undefinedEntry = 1073741824.03125; // = 2^30 + 2^-5
 // PUBLIC MEMBER FUNCTIONS:
 //
 
+ExportVariable::ExportVariable()
+{
+	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( ))));
+}
 
-ExportVariable::ExportVariable(	const String& _name,
+ExportVariable::ExportVariable(	const std::string& _name,
 								uint _nRows,
 								uint _nCols,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
-								const String& _prefix
+								bool _callItByValue,
+								const std::string& _prefix
 								)
 {
-	Matrix m(_nRows, _nCols);
+	DMatrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, DMatrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 
-ExportVariable::ExportVariable(	const String& _name,
-								const Matrix& _data,
+ExportVariable::ExportVariable(	const std::string& _name,
+								const DMatrix& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
-								const String& _prefix
+								bool _callItByValue,
+								const std::string& _prefix,
+								bool _isGiven
 								)
 {
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name,
+			DMatrixPtr(new DMatrix( _data * (_isGiven == true ? 1.0 : undefinedEntry) )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
 ExportVariable::ExportVariable(	unsigned _nRows,
 								unsigned _nCols,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
-								const String& _prefix
+								bool _callItByValue,
+								const std::string& _prefix
 								)
 {
-	Matrix m(_nRows, _nCols);
+	DMatrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 }
 
-ExportVariable::ExportVariable(	const String& _name,
-								const matrixPtr& _data,
+ExportVariable::ExportVariable(	const std::string& _name,
+								const DMatrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
-								const String& _prefix
+								bool _callItByValue,
+								const std::string& _prefix
 								)
 {
 	assignNode(new ExportVariableInternal(_name, _data, _type, _dataStruct, _callItByValue, _prefix));
 }
 
-ExportVariable::ExportVariable( const Matrix& _data )
+void ExportVariable::simpleForward(const DMatrix& _value)
 {
-	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( _data ))));
+	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( _value ))));
 }
 
-ExportVariable::ExportVariable( const Vector& _data )
-{
-	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( _data ))));
-}
 
 ExportVariable::ExportVariable( const double _data )
 {
-	assignNode(new ExportVariableInternal("var", matrixPtr(new Matrix( _data ))));
+	assignNode(new ExportVariableInternal("var", DMatrixPtr(new DMatrix( _data ))));
 }
 
 
@@ -143,33 +145,35 @@ const ExportVariableInternal* ExportVariable::operator->() const
 }
 
 
-ExportVariable& ExportVariable::setup(	const String& _name,
+ExportVariable& ExportVariable::setup(	const std::string& _name,
 										uint _nRows,
 										uint _nCols,
 										ExportType _type,
 										ExportStruct _dataStruct,
-										BooleanType _callItByValue,
-										const String& _prefix
+										bool _callItByValue,
+										const std::string& _prefix
 										)
 {
-	Matrix m(_nRows, _nCols);
+	DMatrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name, DMatrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _prefix));
 
 	return *this;
 }
 
 
-ExportVariable& ExportVariable::setup(	const String& _name,
-										const Matrix& _data,
+ExportVariable& ExportVariable::setup(	const std::string& _name,
+										const DMatrix& _data,
 										ExportType _type,
 										ExportStruct _dataStruct,
-										BooleanType _callItByValue,
-										const String& _prefix
+										bool _callItByValue,
+										const std::string& _prefix,
+										bool _isGiven
 										)
 {
-	assignNode(new ExportVariableInternal(_name, matrixPtr(new Matrix( _data )), _type, _dataStruct, _callItByValue, _prefix));
+	assignNode(new ExportVariableInternal(_name,
+			DMatrixPtr(new DMatrix(_data * (_isGiven == true ? 1.0 : undefinedEntry))), _type, _dataStruct, _callItByValue, _prefix));
 
 	return *this;
 }
@@ -179,73 +183,50 @@ double ExportVariable::operator()(	uint rowIdx,
 									uint colIdx
 									) const
 {
-	return (*this)->data->operator()(rowIdx, colIdx);
+	return (*this)->getGivenMatrix()(rowIdx, colIdx);
 }
 
 
 double ExportVariable::operator()(	uint totalIdx
 									) const
 {
-	return (*this)->data->operator()(totalIdx / (*this)->data->getNumCols(), totalIdx % (*this)->data->getNumCols());
+	return (*this)->getGivenMatrix()( totalIdx );
 }
 
 
-ExportVariable ExportVariable::operator()(	const String& _name
-											) const
-{
-	ExportVariable tmp = deepcopy( *this );
-
-	tmp.setName( _name );
-
-	return tmp;
-}
-
-
-returnValue ExportVariable::resetAll( )
-{
-	return (*this)->resetAll();
-}
-
-
-returnValue ExportVariable::resetDiagonal( )
-{
-	return (*this)->resetDiagonal();
-}
-
-
-BooleanType ExportVariable::isZero(	const ExportIndex& rowIdx,
-									const ExportIndex& colIdx
-									) const
+bool ExportVariable::isZero(	const ExportIndex& rowIdx,
+								const ExportIndex& colIdx
+								) const
 {
 	return (*this)->isZero(rowIdx, colIdx);
 }
 
 
-BooleanType ExportVariable::isOne(	const ExportIndex& rowIdx,
-									const ExportIndex& colIdx
-									) const
+bool ExportVariable::isOne(	const ExportIndex& rowIdx,
+							const ExportIndex& colIdx
+							) const
 {
 	return (*this)->isOne(rowIdx, colIdx);
 }
 
 
-BooleanType ExportVariable::isGiven(	const ExportIndex& rowIdx,
-										const ExportIndex& colIdx
-										) const
+bool ExportVariable::isGiven(	const ExportIndex& rowIdx,
+								const ExportIndex& colIdx
+								) const
 {
 	return (*this)->isGiven(rowIdx, colIdx);
 }
 
 
-BooleanType ExportVariable::isGiven( ) const
+bool ExportVariable::isGiven( ) const
 {
 	return (*this)->isGiven();
 }
 
 
-const String ExportVariable::get(	const ExportIndex& rowIdx,
-									const ExportIndex& colIdx
-									) const
+const std::string ExportVariable::get(	const ExportIndex& rowIdx,
+										const ExportIndex& colIdx
+										) const
 {
 	return (*this)->get(rowIdx, colIdx);
 }
@@ -470,13 +451,13 @@ ExportVariable ExportVariable::makeColVector( ) const
 }
 
 
-BooleanType ExportVariable::isVector( ) const
+bool ExportVariable::isVector( ) const
 {
 	return (*this)->isVector();
 }
 
 
-Matrix ExportVariable::getGivenMatrix( ) const
+const DMatrix& ExportVariable::getGivenMatrix( ) const
 {
 	return (*this)->getGivenMatrix();
 }
@@ -487,16 +468,7 @@ returnValue ExportVariable::print( ) const
 	return (*this)->print();
 }
 
-ExportVariable diag(	const String& _name,
-						unsigned int _n )
-{
-	ExportVariable t(_name, _n, _n);
-	t = eye( _n );
-	t.resetDiagonal( );
-	return t;
-}
-
-BooleanType ExportVariable::isSubMatrix() const
+bool ExportVariable::isSubMatrix() const
 {
 	return (*this)->isSubMatrix();
 }

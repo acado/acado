@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -77,7 +77,7 @@ public:
 
 
     /** Initializes the constraint component. */
-    returnValue initialize( const Vector& lb, Expression arg, const Vector& ub );
+    returnValue initialize( const DVector& lb, Expression arg, const DVector& ub );
 
 
     /** Initializes the constraint component. */
@@ -92,8 +92,8 @@ public:
     friend ConstraintComponent operator<=( double lb_, const ConstraintComponent &arg );
     friend ConstraintComponent operator>=( double ub_, const ConstraintComponent &arg );
 
-    friend ConstraintComponent operator<=( Vector lb_, const ConstraintComponent &arg );
-    friend ConstraintComponent operator>=( Vector ub_, const ConstraintComponent &arg );
+    friend ConstraintComponent operator<=( DVector lb_, const ConstraintComponent &arg );
+    friend ConstraintComponent operator>=( DVector ub_, const ConstraintComponent &arg );
 
     friend ConstraintComponent operator<=( VariablesGrid lb_, const ConstraintComponent &arg );
     friend ConstraintComponent operator>=( VariablesGrid ub_, const ConstraintComponent &arg );
@@ -108,9 +108,9 @@ public:
     inline ConstraintComponent operator>=( const double& lb ) const;
     inline ConstraintComponent operator==( const double&  b ) const;
 
-    inline ConstraintComponent operator<=( const Vector& ub ) const;
-    inline ConstraintComponent operator>=( const Vector& lb ) const;
-    inline ConstraintComponent operator==( const Vector&  b ) const;
+    inline ConstraintComponent operator<=( const DVector& ub ) const;
+    inline ConstraintComponent operator>=( const DVector& lb ) const;
+    inline ConstraintComponent operator==( const DVector&  b ) const;
 
     inline ConstraintComponent operator<=( const VariablesGrid& ub ) const;
     inline ConstraintComponent operator>=( const VariablesGrid& lb ) const;
@@ -119,15 +119,15 @@ public:
 
     // --------------------------------------------------------------------------------------------
 
-    inline const Vector& getLB() const;
-    inline const Vector& getUB() const;
+    inline const DVector& getLB() const;
+    inline const DVector& getUB() const;
 
     inline returnValue setLB( const double&        lb_ );
-    inline returnValue setLB( const Vector&        lb_ );
+    inline returnValue setLB( const DVector&        lb_ );
     inline returnValue setLB( const VariablesGrid& lb_ );
 
     inline returnValue setUB( const double&        lb_ );
-    inline returnValue setUB( const Vector&        lb_ );
+    inline returnValue setUB( const DVector&        lb_ );
     inline returnValue setUB( const VariablesGrid& lb_ );
 
     inline Expression getExpression( ) const;
@@ -149,8 +149,8 @@ protected:
 
     Expression     expression  ;
 
-    Vector         lb          ;
-    Vector         ub          ;
+    DVector         lb          ;
+    DVector         ub          ;
 
     VariablesGrid  lbGrid      ;
     VariablesGrid  ubGrid      ;

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -47,7 +47,7 @@ inline returnValue AlgorithmicBase::getAll(	LogName _name,
 
 
 inline returnValue AlgorithmicBase::getFirst(	LogName _name,
-												Matrix& firstValue
+												DMatrix& firstValue
 												) const
 {
 	return userInteraction->getFirst( _name,firstValue );
@@ -63,7 +63,7 @@ inline returnValue AlgorithmicBase::getFirst(	LogName _name,
 
 
 inline returnValue AlgorithmicBase::getLast(	LogName _name,
-												Matrix& lastValue
+												DMatrix& lastValue
 												) const
 {
 	return userInteraction->getLast( _name,lastValue );
@@ -93,6 +93,13 @@ inline returnValue AlgorithmicBase::get(	OptionsName name,
 
 inline returnValue AlgorithmicBase::get(	OptionsName name,
 											double& value
+											) const
+{
+	return userInteraction->get( name,value );
+}
+
+inline returnValue AlgorithmicBase::get(	OptionsName name,
+											std::string& value
 											) const
 {
 	return userInteraction->get( name,value );
@@ -171,7 +178,7 @@ inline returnValue AlgorithmicBase::setAll(	LogName _name,
 											const MatrixVariablesGrid& values
 											)
 {
-	return userInteraction->logCollection.setAll( _name,values );
+	return userInteraction->setAll(_name, values);
 }
 
 
@@ -181,7 +188,7 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 												double time
 												)
 {
-	return userInteraction->logCollection.setLast( _name,value,time );
+	return userInteraction->setLast( _name,DMatrix((double)value),time );
 }
 
 
@@ -190,25 +197,25 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 												double time
 												)
 {
-	return userInteraction->logCollection.setLast( _name,value,time );
+	return userInteraction->setLast( _name, DMatrix(value), time );
 }
 
 
 inline returnValue AlgorithmicBase::setLast(	LogName _name,
-												const Vector& value,
+												const DVector& value,
 												double time
 												)
 {
-	return userInteraction->logCollection.setLast( _name,value,time );
+	return userInteraction->setLast( _name, value,time );
 }
 
 
 inline returnValue AlgorithmicBase::setLast(	LogName _name,
-												const Matrix& value,
+												const DMatrix& value,
 												double time
 												)
 {
-	return userInteraction->logCollection.setLast( _name,value,time );
+	return userInteraction->setLast( _name, value,time );	
 }
 
 
@@ -217,7 +224,7 @@ inline returnValue AlgorithmicBase::setLast(	LogName _name,
 												double time
 												)
 {
-	return userInteraction->logCollection.setLast( _name,value,time );
+	return userInteraction->setLast( _name, value,time );
 }
 
 
@@ -229,15 +236,16 @@ inline int AlgorithmicBase::addLogRecord(	LogRecord& _record
 }
 
 
-inline returnValue AlgorithmicBase::printLogRecord(	int idx,
+inline returnValue AlgorithmicBase::printLogRecord(	std::ostream& _stream,
+													int idx,
 													LogPrintMode _mode
 													) const
 {
-	if ( ( idx < 0 ) || ( idx >= (int)userInteraction->logCollection.getNumLogRecords( ) ) )
+	if ( ( idx < 0 ) || ( idx >= (int)userInteraction->logCollection.size( ) ) )
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 		
-	return userInteraction->logCollection( idx ).print( _mode );
-}	
+	return userInteraction->logCollection[ idx ].print(_stream, _mode);
+}
 
 
 inline returnValue AlgorithmicBase::plot(	PlotFrequency _frequency

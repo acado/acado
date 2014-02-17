@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,9 +31,13 @@
  *    \date 2012
  */
 
+#include <string>
+#include <sstream>
 #include <acado/code_generation/sim_export.hpp>
 
 #include <acado/code_generation/templates/templates.hpp>
+#include <acado/code_generation/export_common_header.hpp>
+#include <acado/code_generation/integrators/export_auxiliary_sim_functions.hpp>
 
 #include <acado/code_generation/export_algorithm_factory.hpp>
 
@@ -41,6 +45,7 @@
 #include <windows.h>
 #endif
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -56,12 +61,14 @@ SIMexport::SIMexport( const uint simIntervals, const double totalTime ) : Export
 	integrator  = 0;
 	timingSteps = 100;
 	
-	_initStates = String( "initStates.txt" );
-	_controls = String( "controls.txt" );
-	_results = String( "results.txt" );
-	_ref = String( "ref.txt" );
-	referenceProvided = BT_FALSE;
-	PRINT_DETAILS = BT_TRUE;
+	_initStates = "initStates.txt";
+	_controls = "controls.txt";
+	_results = "results.txt";
+	_ref = "ref.txt";
+	referenceProvided = false;
+	PRINT_DETAILS = true;
+
+	timingCalls = 0;
 
 	setStatus( BS_NOT_INITIALIZED );
 }
@@ -95,21 +102,25 @@ SIMexport& SIMexport::operator=(	const SIMexport& arg
 
 
 
-returnValue SIMexport::exportCode(	const String& dirName,
-									const String& _realString,
-									const String& _intString,
+returnValue SIMexport::exportCode(	const std::string& dirName,
+									const std::string& _realString,
+									const std::string& _intString,
 									int _precision
 									)
 {
 	if (!modelDimensionsSet()) return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 	set( QP_SOLVER, QP_NONE );
 
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
+
 	//
 	// Create the export folders
 	//
-	setExportFolderName( dirName );
 
-	returnValue dirStatus = acadoCreateFolder( dirName.getName() );
+	set(CG_EXPORT_FOLDER_NAME, dirName);
+
+	returnValue dirStatus = acadoCreateFolder( dirName );
 	if (dirStatus != SUCCESSFUL_RETURN)
 		return dirStatus;
 
@@ -125,8 +136,8 @@ returnValue SIMexport::exportCode(	const String& dirName,
 
 	if( integrator != 0 )
 	{
-		String fileName( dirName );
-		fileName << "/integrator.c";
+		std::string fileName( dirName );
+		fileName += "/acado_integrator.c";
 
 		ExportFile integratorFile( fileName,commonHeaderName,_realString,_intString,_precision );
 		integrator->getCode( integratorFile );
@@ -142,47 +153,57 @@ returnValue SIMexport::exportCode(	const String& dirName,
 		get( GENERATE_MATLAB_INTERFACE, generateMatlabInterface );
 		int debugMode;
 		get( INTEGRATOR_DEBUG_MODE, debugMode );
-		if ( (BooleanType)generateMatlabInterface == BT_TRUE ) {
-			String integrateInterface( dirName );
-			integrateInterface << "/integrate.c";
+		if ( (bool)generateMatlabInterface == true ) {
+			std::string integrateInterface =  dirName;
+			integrateInterface += "/acado_integrate.c";
 			ExportMatlabIntegrator exportMexFun( INTEGRATOR_MEX_TEMPLATE, integrateInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun.configure((ExportSensitivityType)sensGen != NO_SENSITIVITY, (MeasurementGrid)measGrid == ONLINE_GRID, (BooleanType)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
+			exportMexFun.configure((ExportSensitivityType)sensGen, (MeasurementGrid)measGrid == ONLINE_GRID, (bool)debugMode, timingCalls, ((RungeKuttaExport*)integrator)->getNumStages());
 			exportMexFun.exportCode();
 
-			integrateInterface = dirName + String("/make_acado_integrator.m");
-			acadoCopyTempateFile(MAKE_MEX_INTEGRATOR, integrateInterface.getName(), "%", BT_TRUE);
+			integrateInterface = dirName + std::string("/make_acado_integrator.m");
+			acadoCopyTempateFile(MAKE_MEX_INTEGRATOR, integrateInterface, "%", true);
 
-			String rhsInterface( dirName );
-			rhsInterface << "/rhs.c";
-			ExportMatlabRhs exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
-			exportMexFun2.configure(integrator->getNameFullRHS());
-			exportMexFun2.exportCode();
-
-			rhsInterface = dirName + String("/make_acado_model.m");
-			acadoCopyTempateFile(MAKE_MEX_MODEL, rhsInterface.getName(), "%", BT_TRUE);
+			// NOT SUPPORTED ANYMORE:
+//			std::string rhsInterface = dirName;
+//			rhsInterface += "/acado_rhs.c";
+//			ExportMatlabRhs exportMexFun2( RHS_MEX_TEMPLATE, rhsInterface, commonHeaderName,_realString,_intString,_precision );
+//			exportMexFun2.configure(integrator->getNameFullRHS());
+//			exportMexFun2.exportCode();
+//
+//			rhsInterface = dirName + std::string("/make_acado_model.m");
+//			acadoCopyTempateFile(MAKE_MEX_MODEL, rhsInterface, "%", true);
 		}
 	}
 
 
 	// export template for main file, if desired
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Exporting remaining files... " );
+		cout <<  "--> Exporting remaining files... ";
+
+	// Export auxiliary functions, always
+	//
+	ExportAuxiliarySimFunctions eaf(
+			dirName + string("/") + moduleName + "_auxiliary_sim_functions.h",
+			dirName + string("/") + moduleName + "_auxiliary_sim_functions.c",
+			moduleName );
+	eaf.configure();
+	eaf.exportCode();
 
 	// export a basic Makefile, if desired
 	int generateMakeFile;
 	get( GENERATE_MAKE_FILE,generateMakeFile );
-	if ( (BooleanType)generateMakeFile == BT_TRUE )
+	if ( (bool)generateMakeFile == true )
 		if ( exportMakefile( dirName,"Makefile",_realString,_intString,_precision ) != SUCCESSFUL_RETURN )
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 			
 	// export the evaluation file
 	int exportTestFile;
 	get( GENERATE_TEST_FILE, exportTestFile );
-	if ( exportTestFile && exportEvaluation( dirName, String( "compare.c" ) ) != SUCCESSFUL_RETURN )
+	if ( exportTestFile && exportEvaluation( dirName, std::string( "acado_compare.c" ) ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "done.\n" );
+		cout <<  "done.\n";
 
 	if ( (PrintLevel)printLevel > NONE )
 		ACADOINFO( RET_CODE_EXPORT_SUCCESSFUL );
@@ -230,6 +251,13 @@ returnValue SIMexport::setup( )
 	if ( returnvalue != SUCCESSFUL_RETURN )
 		return ACADOERROR( returnvalue );
 
+ 	//
+ 	// Set common header name
+ 	//
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
+ 	commonHeaderName = moduleName + "_common.h";
+
 	int numSteps;
     get( NUM_INTEGRATOR_STEPS, numSteps );
 
@@ -258,8 +286,8 @@ returnValue SIMexport::setup( )
 		if( !referenceProvided ) _refOutputFiles.clear();
 		_outputFiles.clear();
 		for( i = 0; i < modelData.getNumOutputs(); i++ ) {
-			if( !referenceProvided ) _refOutputFiles.push_back( (String)"refOutput" << i << ".txt" );
-			_outputFiles.push_back( (String)"output" << i << ".txt" );
+			if( !referenceProvided ) _refOutputFiles.push_back( (std::string)"refOutput" + toString(i) +  ".txt" );
+			_outputFiles.push_back( (std::string)"output" + toString(i) +  ".txt" );
 		}
 	}
 
@@ -282,7 +310,7 @@ returnValue SIMexport::checkConsistency( ) const
 	// only time-continuous DAEs without parameter and disturbances supported!
 	DifferentialEquation f;
 	modelData.getModel(f);
-	if ( f.isDiscretized( ) == BT_TRUE )
+	if ( f.isDiscretized( ) == true )
 		return ACADOERROR( RET_NO_DISCRETE_ODE_FOR_CODE_EXPORT );
 	
 	if ( ( f.getNUI( ) > 0 ) || 
@@ -317,11 +345,11 @@ returnValue SIMexport::collectFunctionDeclarations(	ExportStatementBlock& declar
 }
 
 
-returnValue SIMexport::exportTest(	const String& _dirName,
-									const String& _fileName,
-									const String& _resultsFile,
-									const std::vector<String>& outputFiles,
-									const BooleanType& TIMING,
+returnValue SIMexport::exportTest(	const std::string& _dirName,
+									const std::string& _fileName,
+									const std::string& _resultsFile,
+									const std::vector<std::string>& outputFiles,
+									const bool& TIMING,
 									const uint jumpReference
 											) const
 {
@@ -332,7 +360,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 	
 	std::vector<Grid> outputGrids;
 	std::vector<Expression> outputExpressions;
-	std::vector<String> outputNames;
+	std::vector<std::string> outputNames;
 	modelData.getOutputGrids(outputGrids);
 	modelData.getOutputExpressions(outputExpressions);
 	modelData.getNameOutputs(outputNames);
@@ -340,24 +368,25 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-    String fileName( _dirName );
-    fileName << "/" << _fileName;
+    std::string fileName( _dirName );
+    fileName += "/" + _fileName;
 
-	ExportFile main( fileName,"acado.h" );
-	main.addLinebreak( 2 );
+	ExportFile main( fileName,commonHeaderName );
 
+	main.addStatement( "#include <stdio.h>\n" );
+	main.addLinebreak( 1 );
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
 	main.addComment( "---------------------------------------------------------------" );
-	main.addStatement( (String)"   #define JUMP           " << jumpReference  << "      /* jump for the output reference    */\n" );
-	main.addStatement( (String)"   #define h           " << T/modelData.getN()  << "      /* length of one simulation interval    */\n" );
-	if( TIMING == BT_TRUE ) main.addStatement( (String)"   #define STEPS_TIMING   " << timingSteps << "      /* number of steps for the timing */\n" );
-	if( TIMING == BT_TRUE ) main.addStatement( (String)"   #define CALLS_TIMING   " << timingCalls << "      /* number of calls for the timing */\n" );
-	main.addStatement( (String)"   #define RESULTS_NAME	  \"" << _resultsFile << "\"\n" );
+	main.addStatement( (std::string)"   #define JUMP           " + toString(jumpReference)  + "      /* jump for the output reference    */\n" );
+	main.addStatement( (std::string)"   #define h           " + toString(T/modelData.getN())  + "      /* length of one simulation interval    */\n" );
+	if( TIMING == true ) main.addStatement( (std::string)"   #define STEPS_TIMING   " + toString(timingSteps) + "      /* number of steps for the timing */\n" );
+	if( TIMING == true ) main.addStatement( (std::string)"   #define CALLS_TIMING   " + toString(timingCalls) + "      /* number of calls for the timing */\n" );
+	main.addStatement( (std::string)"   #define RESULTS_NAME	  \"" + _resultsFile + "\"\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"   #define OUTPUT" << i << "_NAME	  \"" << outputFiles[i] << "\"\n" );
+		main.addStatement( (std::string)"   #define OUTPUT" + toString(i) +  "_NAME	  \"" + outputFiles[i] + "\"\n" );
 	}
-	main.addStatement( (String)"   #define CONTROLS_NAME  \"" << _controls << "\"\n" );
-	main.addStatement( (String)"   #define INIT_NAME	  \"" << _initStates << "\"\n" );
+	main.addStatement( (std::string)"   #define CONTROLS_NAME  \"" + _controls + "\"\n" );
+	main.addStatement( (std::string)"   #define INIT_NAME	  \"" + _initStates + "\"\n" );
 	main.addComment( "---------------------------------------------------------------" );
 	main.addLinebreak( 2 );
 	main.addComment( "GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM:" );
@@ -375,31 +404,31 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     main.addComment( 3,"------------------------------" );
     main.addStatement( "      FILE *file, *controls, *initStates;\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      FILE *output" << i << ";\n" );
+		main.addStatement( (std::string)"      FILE *output" + toString(i) +  ";\n" );
 	}
     main.addStatement( "      int i,j,k,nil,reset;\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-    	if( !DERIVATIVES )  main.addStatement( (String)"      const int dimOut" << i << " = NOUT[" << i << "];\n" );
-    	else  main.addStatement( (String)"      const int dimOut" << i << " = NOUT[" << i << "]*(1+ACADO_NX+ACADO_NU);\n" );
+    	if( !DERIVATIVES )  main.addStatement( (std::string)"      const int dimOut" + toString(i) +  " = ACADO_NOUT[" + toString(i) +  "];\n" );
+    	else  main.addStatement( (std::string)"      const int dimOut" + toString(i) +  " = ACADO_NOUT[" + toString(i) +  "]*(1+ACADO_NX+ACADO_NU);\n" );
 	}
     if( !DERIVATIVES )  main.addStatement( "      real_t x[ACADO_NX+ACADO_NXA+ACADO_NU];\n" );
     else  main.addStatement( "      real_t x[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU];\n" );
 
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      real_t out" << i << "[NMEAS[" << i << "]*dimOut" << i << "];\n" );
+		main.addStatement( (std::string)"      real_t out" + toString(i) +  "[ACADO_NMEAS[" + toString(i) +  "]*dimOut" + toString(i) +  "];\n" );
 	}
     main.addStatement( "      real_t u[ACADO_NU];\n" );
     if( modelData.getNXA() > 0 ) main.addStatement( "      real_t norm;\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      real_t step" << i << " = h/NMEAS[" << i << "];\n" );
+		main.addStatement( (std::string)"      real_t step" + toString(i) +  " = h/ACADO_NMEAS[" + toString(i) +  "];\n" );
 	}
-    if( TIMING == BT_TRUE ) {
+    if( TIMING == true ) {
 		main.addStatement( "      struct timeval theclock;\n" );
 		main.addStatement( "      real_t start, end, time;\n" );
 		if( !DERIVATIVES )  main.addStatement( "      real_t xT[ACADO_NX+ACADO_NXA+ACADO_NU];\n" );
 		else  main.addStatement( "      real_t xT[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU];\n" );
 	}
-    main.addStatement( "      const ACADOworkspace_ nullWork2 = {0};\n" );
+    main.addStatement( "      const ACADOworkspace nullWork2 = {0};\n" );
     main.addStatement( " 	  acadoWorkspace = nullWork2;\n" );
     main.addLinebreak( 2 );
 
@@ -434,7 +463,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     main.addComment( 3,"----------------------------------------" );
     main.addStatement( "      file = fopen(RESULTS_NAME,\"w\");\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      output" << i << " = fopen(OUTPUT" << i << "_NAME,\"w\");\n" );
+		main.addStatement( (std::string)"      output" + toString(i) +  " = fopen(OUTPUT" + toString(i) +  "_NAME,\"w\");\n" );
 	}
     main.addStatement( "      controls = fopen(CONTROLS_NAME,\"r\");\n" );
     main.addStatement( "      for( i = 0; i < ACADO_N; i++ ) {\n" );
@@ -452,7 +481,7 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     else  main.addStatement( "      			nil = fscanf( controls, \"%lf\", &x[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+j] );\n" );
     main.addStatement( "      		}\n" );
     main.addLinebreak( );
-    if( TIMING == BT_TRUE ) {
+    if( TIMING == true ) {
 		main.addStatement( "      		if( i == 0 ) {\n" );
 		if( !DERIVATIVES )  main.addStatement( "      			for( j=0; j < ACADO_NX+ACADO_NXA+ACADO_NU; j++ ) {\n" );
 		else  main.addStatement( "      			for( j=0; j < (ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU; j++ ) {\n" );
@@ -461,21 +490,21 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( "      		}\n" );
 	}
     main.addLinebreak( );
-    String integrate( "      		integrate( x" );
+    std::string integrate( "      		integrate( x" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		integrate << ", out" << i;
+		integrate += string(", out") + toString(i);
 	}
-    integrate << ", reset";
-    main.addStatement( integrate << " );\n" );
+    integrate += ", reset";
+    main.addStatement( integrate + " );\n" );
     main.addStatement( "      		reset = 0;\n" );
     main.addLinebreak( );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      		for( j = 0; j < NMEAS[" << i << "]; j=j+JUMP ) {\n" );
-		main.addStatement( (String)"      			fprintf(output" << i << ", \"%.16f \", i*h+(j+1)*step" << i << ");\n" );
-		main.addStatement( (String)"      			for( k = 0; k < dimOut" << i << "; k++ ) {\n" );
-		main.addStatement( (String)"      				fprintf(output" << i << ", \"%.16f \", out" << i << "[j*dimOut" << i << "+k]);\n" );
+		main.addStatement( (std::string)"      		for( j = 0; j < ACADO_NMEAS[" + toString(i) +  "]; j=j+JUMP ) {\n" );
+		main.addStatement( (std::string)"      			fprintf(output" + toString(i) +  ", \"%.16f \", i*h+(j+1)*step" + toString(i) +  ");\n" );
+		main.addStatement( (std::string)"      			for( k = 0; k < dimOut" + toString(i) +  "; k++ ) {\n" );
+		main.addStatement( (std::string)"      				fprintf(output" + toString(i) +  ", \"%.16f \", out" + toString(i) +  "[j*dimOut" + toString(i) +  "+k]);\n" );
 		main.addStatement( "      			}\n" );
-		main.addStatement( (String)"      			fprintf(output" << i << ", \"%s\", \"\\n\");\n" );
+		main.addStatement( (std::string)"      			fprintf(output" + toString(i) +  ", \"%s\", \"\\n\");\n" );
 		main.addStatement( "      		}\n" );
 	}
     main.addStatement( "      }\n" );
@@ -488,10 +517,10 @@ returnValue SIMexport::exportTest(	const String& _dirName,
     main.addLinebreak( );
     main.addStatement( "      fclose(file);\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      fclose(output" << i << ");\n" );
+		main.addStatement( (std::string)"      fclose(output" + toString(i) +  ");\n" );
 	}
     main.addStatement( "      fclose(controls);\n" );
-    if( TIMING == BT_TRUE ) {
+    if( TIMING == true ) {
 		main.addStatement( "      gettimeofday( &theclock,0 );\n" );
 		main.addStatement( "      start = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;\n" );
 	    main.addStatement( "      reset = 1;\n" );
@@ -499,12 +528,12 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 		main.addStatement( "      		for( j=0; j < (ACADO_NX+ACADO_NXA); j++ ) {\n" );
 		main.addStatement( "      			x[j] = xT[j];\n" );
 		main.addStatement( "      		}\n" );
-		integrate = String( "      		integrate( x" );
+		integrate = std::string( "      		integrate( x" );
 		for( i = 0; i < (int)outputGrids.size(); i++ ) {
-			integrate << ", out" << i;
+			integrate += string(", out") + toString(i);
 		}
-		integrate << ", reset";
-		main.addStatement( integrate << " );\n" );
+		integrate += ", reset";
+		main.addStatement( integrate + " );\n" );
 	    main.addStatement( "      		reset = 0;\n" );
 		main.addStatement( "      }\n" );
 		main.addStatement( "      gettimeofday( &theclock,0 );\n" );
@@ -522,8 +551,8 @@ returnValue SIMexport::exportTest(	const String& _dirName,
 }
 
 
-returnValue SIMexport::exportEvaluation(	const String& _dirName,
-											const String& _fileName
+returnValue SIMexport::exportEvaluation(	const std::string& _dirName,
+											const std::string& _fileName
 											) const
 {
 	int i;
@@ -531,27 +560,28 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 	get( DYNAMIC_SENSITIVITY, sensGen );
 	bool DERIVATIVES = ((ExportSensitivityType) sensGen != NO_SENSITIVITY);
 	
-	Vector nMeasV = modelData.getNumMeas();
-	Vector nOutV = modelData.getDimOutputs();
+	DVector nMeasV = modelData.getNumMeas();
+	DVector nOutV = modelData.getDimOutputs();
 
 	std::vector<Grid> outputGrids;
 	modelData.getOutputGrids(outputGrids);
 
-    String fileName( _dirName );
-    fileName << "/" << _fileName;
+    std::string fileName =  _dirName;
+    fileName += string("/") + _fileName;
 
-	ExportFile main( fileName,"acado.h" );
-	
-    main.addLinebreak( 2 );
+	ExportFile main( fileName,commonHeaderName );
+
+	main.addStatement( "#include <stdio.h>\n" );
+	main.addLinebreak( 1 );
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
 	main.addComment( "---------------------------------------------------------------" );
-	main.addStatement( (String)"   #define h           " << T/modelData.getN()  << "      /* length of one simulation interval   */\n" );
-	main.addStatement( (String)"   #define RESULTS_NAME	  \"" << _results << "\"\n" );
+	main.addStatement( (std::string)"   #define h           " + toString(T/modelData.getN())  + "      /* length of one simulation interval   */\n" );
+	main.addStatement( (std::string)"   #define RESULTS_NAME	  \"" + _results + "\"\n" );
 	for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"   #define OUTPUT" << i << "_NAME	  \"" << _outputFiles[i] << "\"\n" );
-		main.addStatement( (String)"   #define REF_OUTPUT" << i << "_NAME	  \"" << _refOutputFiles[i] << "\"\n" );
+		main.addStatement( (std::string)"   #define OUTPUT" + toString(i) +  "_NAME	  \"" + _outputFiles[i] + "\"\n" );
+		main.addStatement( (std::string)"   #define REF_OUTPUT" + toString(i) +  "_NAME	  \"" + _refOutputFiles[i] + "\"\n" );
 	}
-	main.addStatement( (String)"   #define REF_NAME  \"" << _ref << "\"\n" );
+	main.addStatement( (std::string)"   #define REF_NAME  \"" + _ref + "\"\n" );
 	main.addComment( "---------------------------------------------------------------" );
 	main.addLinebreak( 2 );
 	main.addComment( "GLOBAL VARIABLES FOR THE ACADO REAL-TIME ALGORITHM:" );
@@ -569,19 +599,19 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addComment( 3,"------------------------------" );
     main.addStatement( "      FILE *file, *ref;\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      FILE *output" << i << ";\n" );
-		main.addStatement( (String)"      FILE *refOutput" << i << ";\n" );
+		main.addStatement( (std::string)"      FILE *output" + toString(i) +  ";\n" );
+		main.addStatement( (std::string)"      FILE *refOutput" + toString(i) +  ";\n" );
 	}
     main.addStatement( "      int i, j, nil;\n" );
     main.addStatement( "      real_t x[ACADO_NX+ACADO_NXA];\n" );
     main.addStatement( "      real_t xRef[ACADO_NX+ACADO_NXA];\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
-		main.addStatement( (String)"      real_t step" << i << " = h/NMEAS[" << i << "];\n" );
-		main.addStatement( (String)"      real_t out" << i << "[NMEAS[" << i << "]*NOUT[" << i << "]];\n" );
-		main.addStatement( (String)"      real_t refOut" << i << "[NMEAS[" << i << "]*NOUT[" << i << "]];\n" );
+		main.addStatement( (std::string)"      real_t step" + toString(i) +  " = h/ACADO_NMEAS[" + toString(i) +  "];\n" );
+		main.addStatement( (std::string)"      real_t out" + toString(i) +  "[ACADO_NMEAS[" + toString(i) +  "]*ACADO_NOUT[" + toString(i) +  "]];\n" );
+		main.addStatement( (std::string)"      real_t refOut" + toString(i) +  "[ACADO_NMEAS[" + toString(i) +  "]*ACADO_NOUT[" + toString(i) +  "]];\n" );
 	}
     main.addStatement( "      real_t maxErr, meanErr, maxErrX, meanErrX, maxErrXA, meanErrXA, temp;\n" );
-    main.addStatement( "      const ACADOworkspace_ nullWork2 = {0};\n" );
+    main.addStatement( "      const ACADOworkspace nullWork2 = {0};\n" );
     main.addStatement( " 	  acadoWorkspace = nullWork2;\n" );
     main.addLinebreak( 2 );
 
@@ -648,35 +678,35 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
     main.addStatement( "      printf( \"\\n\\n\" );\n" );
     for( i = 0; i < (int)outputGrids.size(); i++ ) {
 		main.addLinebreak( );
-		main.addStatement( (String)"      printf( \" OUTPUT FUNCTION " << (i+1) << ":\\n\" );\n" );
-		main.addStatement( (String)"      meanErr = 0;\n" );
-		main.addStatement( (String)"      output" << i << " = fopen(OUTPUT" << i << "_NAME,\"r\");\n" );
-		main.addStatement( (String)"      refOutput" << i << " = fopen(REF_OUTPUT" << i << "_NAME,\"r\");\n" );
+		main.addStatement( (std::string)"      printf( \" OUTPUT FUNCTION " + toString(i+1) + ":\\n\" );\n" );
+		main.addStatement( (std::string)"      meanErr = 0;\n" );
+		main.addStatement( (std::string)"      output" + toString(i) +  " = fopen(OUTPUT" + toString(i) +  "_NAME,\"r\");\n" );
+		main.addStatement( (std::string)"      refOutput" + toString(i) +  " = fopen(REF_OUTPUT" + toString(i) +  "_NAME,\"r\");\n" );
 		main.addLinebreak( );
-		main.addStatement( (String)"      for( i = 1; i <= ACADO_N*NMEAS[" << i << "]; i++ ) {\n" );
-		main.addStatement( (String)"      		nil = fscanf( output" << i << ", \"%lf\", &temp );\n" );
-		main.addStatement( (String)"      		nil = fscanf( refOutput" << i << ", \"%lf\", &temp );\n" );
+		main.addStatement( (std::string)"      for( i = 1; i <= ACADO_N*ACADO_NMEAS[" + toString(i) +  "]; i++ ) {\n" );
+		main.addStatement( (std::string)"      		nil = fscanf( output" + toString(i) +  ", \"%lf\", &temp );\n" );
+		main.addStatement( (std::string)"      		nil = fscanf( refOutput" + toString(i) +  ", \"%lf\", &temp );\n" );
 		main.addLinebreak( );
 		main.addStatement( "      		maxErr = 0;\n" );
-		main.addStatement( (String)"      		for( j = 0; j < NOUT[" << i << "]; j++ ) {\n" );
-		main.addStatement( (String)"      			nil = fscanf( output" << i << ", \"%lf\", &out" << i << "[j] );\n" );
-		main.addStatement( (String)"      			nil = fscanf( refOutput" << i << ", \"%lf\", &refOut" << i << "[j] );\n" );
-		main.addStatement( (String)"      			temp = fabs(out" << i << "[j] - refOut" << i << "[j])/fabs(refOut" << i << "[j]);\n" );
+		main.addStatement( (std::string)"      		for( j = 0; j < ACADO_NOUT[" + toString(i) +  "]; j++ ) {\n" );
+		main.addStatement( (std::string)"      			nil = fscanf( output" + toString(i) +  ", \"%lf\", &out" + toString(i) +  "[j] );\n" );
+		main.addStatement( (std::string)"      			nil = fscanf( refOutput" + toString(i) +  ", \"%lf\", &refOut" + toString(i) +  "[j] );\n" );
+		main.addStatement( (std::string)"      			temp = fabs(out" + toString(i) +  "[j] - refOut" + toString(i) +  "[j])/fabs(refOut" + toString(i) +  "[j]);\n" );
 		main.addStatement( "      			if( temp > maxErr ) maxErr = temp;\n" );
-		main.addStatement( (String)"      			if( isnan(out" << i << "[j]) ) maxErr = sqrt(-1);\n" );
+		main.addStatement( (std::string)"      			if( isnan(out" + toString(i) +  "[j]) ) maxErr = sqrt(-1);\n" );
 		main.addStatement( "      		}\n" );
 		main.addLinebreak( );
-		if( PRINT_DETAILS ) main.addStatement( (String)"      		printf( \"MAX ERROR AT %.3f s:   %.4e \\n\", (i-1)*step" << i << ", maxErr );\n" );
+		if( PRINT_DETAILS ) main.addStatement( (std::string)"      		printf( \"MAX ERROR AT %.3f s:   %.4e \\n\", (i-1)*step" + toString(i) + ", maxErr );\n" );
 		main.addStatement( "      		meanErr += maxErr;\n" );
 		main.addLinebreak( );
 		if( DERIVATIVES ) {
-			main.addStatement( (String)"      		for( j = 0; j < NOUT[" << i << "]*(ACADO_NX+ACADO_NU); j++ ) {\n" );
-			main.addStatement( (String)"      			nil = fscanf( output" << i << ", \"%lf\", &temp );\n" );
-			main.addStatement( (String)"      			nil = fscanf( refOutput" << i << ", \"%lf\", &temp );\n" );
+			main.addStatement( (std::string)"      		for( j = 0; j < ACADO_NOUT[" + toString(i) + "]*(ACADO_NX+ACADO_NU); j++ ) {\n" );
+			main.addStatement( (std::string)"      			nil = fscanf( output" + toString(i) + ", \"%lf\", &temp );\n" );
+			main.addStatement( (std::string)"      			nil = fscanf( refOutput" + toString(i) + ", \"%lf\", &temp );\n" );
 			main.addStatement( "      		}\n" );
 		}
 		main.addStatement( "      }\n" );
-		main.addStatement( (String)"	  meanErr = meanErr/(ACADO_N*NMEAS[" << i << "]);\n" );
+		main.addStatement( (std::string)"	  meanErr = meanErr/(ACADO_N*ACADO_NMEAS[" + toString(i) + "]);\n" );
 		if( PRINT_DETAILS ) main.addStatement( "      printf( \"\\n\" );\n" );
 		main.addStatement( "      printf( \"TOTAL MEAN ERROR:   %.4e \\n\", meanErr );\n" );
 		main.addStatement( "      printf( \"\\n\\n\" );\n" );
@@ -690,14 +720,14 @@ returnValue SIMexport::exportEvaluation(	const String& _dirName,
 
 
 
-returnValue SIMexport::exportAndRun(	const String& dirName,
-							const String& initStates,
-							const String& controls,
-							const String& results,
-							const String& ref
+returnValue SIMexport::exportAndRun(	const std::string& dirName,
+										const std::string& initStates,
+										const std::string& controls,
+										const std::string& results,
+										const std::string& ref
 										)
 {
-	String test( "test.c" );
+	std::string test( "acado_test.c" );
 	set( GENERATE_TEST_FILE, 1 );
 
 	Grid integrationGrid;
@@ -723,7 +753,7 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
 	    // REFERENCE:
     	set( NUM_INTEGRATOR_STEPS,  (int)factorRef*numSteps );
     	exportCode(	dirName );
-    	exportTest(	dirName, test, _ref, _refOutputFiles, BT_FALSE, 1 );
+    	exportTest(	dirName, test, _ref, _refOutputFiles, false, 1 );
     	executeTest( dirName );
 	}
     modelData.clearIntegrationGrid();
@@ -731,248 +761,114 @@ returnValue SIMexport::exportAndRun(	const String& dirName,
     // THE INTEGRATOR:
 	set( NUM_INTEGRATOR_STEPS,  numSteps );
 	exportCode(	dirName );
-	if(timingSteps > 0 && timingCalls > 0) 	exportTest(	dirName, test, _results, _outputFiles, BT_TRUE, 1 );
-	else 									exportTest(	dirName, test, _results, _outputFiles, BT_FALSE, 1 );
+	if(timingSteps > 0 && timingCalls > 0) 	exportTest(	dirName, test, _results, _outputFiles, true, 1 );
+	else 									exportTest(	dirName, test, _results, _outputFiles, false, 1 );
 	executeTest( dirName );
 
 	// THE EVALUATION:
 	int nil;
-	nil = system( (String(dirName) << "/./compare").getName() );
+	nil = system( (dirName + "/./acado_compare").c_str() );
 	nil = nil+1;
 	
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue SIMexport::exportAcadoHeader(	const String& _dirName,
-											const String& _fileName,
-											const String& _realString,
-											const String& _intString,
+returnValue SIMexport::exportAcadoHeader(	const std::string& _dirName,
+											const std::string& _fileName,
+											const std::string& _realString,
+											const std::string& _intString,
 											int _precision
 											) const
 {
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
+
 	int qpSolver;
-	get( QP_SOLVER,qpSolver );
+	get(QP_SOLVER, qpSolver);
 
 	int useSinglePrecision;
-	get( USE_SINGLE_PRECISION,useSinglePrecision );
+	get(USE_SINGLE_PRECISION, useSinglePrecision);
 
-	int fixInitialState;
-	get( FIX_INITIAL_STATE,fixInitialState );
+	string fileName;
+	fileName = _dirName + "/" + _fileName;
 
 
-	String fileName( _dirName );
-	fileName << "/" << _fileName;
-	ExportFile acadoHeader( fileName,"", _realString,_intString,_precision );
+	map<string, pair<string, string> > options;
 
-	acadoHeader.addStatement( "#include <stdio.h>\n" );
-	acadoHeader.addStatement( "#include <math.h>\n" );
+	DVector nMeasV = getNumMeas();
+	DVector nOutV = getDimOutputs();
 
-	acadoHeader.addStatement( "#if (defined WIN32 || defined _WIN64)\n" );
-	acadoHeader.addStatement( "#include <windows.h>\n" );
-	acadoHeader.addStatement( "#else\n" );
-	// OS_UNIX
-	acadoHeader.addStatement( "#include <time.h>\n" );
-	acadoHeader.addStatement( "#include <sys/stat.h>\n" );
-	acadoHeader.addStatement( "#include <sys/time.h>\n" );
-	acadoHeader.addStatement( "#endif\n" );
+	options[ "ACADO_N" ]   = make_pair(toString( getN() ),   "Number of control/estimation intervals.");
+	options[ "ACADO_NX" ]  = make_pair(toString( getNX() ),  "Number of differential variables.");
+	options[ "ACADO_NXD" ] = make_pair(toString( getNDX() ), "Number of differential derivative variables.");
+	options[ "ACADO_NXA" ] = make_pair(toString( getNXA() ), "Number of algebraic variables.");
+	options[ "ACADO_NU" ]  = make_pair(toString( getNU() ),  "Number of control variables.");
+	options[ "ACADO_NOD" ]  = make_pair(toString( getNOD() ),  "Number of online data values.");
+	options[ "ACADO_NUMOUT" ]  = make_pair(toString( nOutV.getDim() ),  "Number of output functions.");
 
-	acadoHeader.addLinebreak( );
-
-	acadoHeader.addStatement( "#ifndef ACADO_H\n" );
-	acadoHeader.addStatement( "#define ACADO_H\n" );
-	acadoHeader.addLinebreak( );
-
-	switch ( (QPSolverName)qpSolver )
-	{
-		case QP_QPOASES:
-			acadoHeader.addStatement( "#ifndef __MATLAB__\n" );
-			acadoHeader.addStatement( "#ifdef __cplusplus\n" );
-			acadoHeader.addStatement( "extern \"C\"\n" );
-			acadoHeader.addStatement( "{\n" );
-			acadoHeader.addStatement( "#endif\n" );
-			acadoHeader.addStatement( "#endif\n" );
-			acadoHeader.addStatement( "#include \"qpoases/solver.hpp\"\n" );
-			acadoHeader.addLinebreak( 2 );
-			break;
-
-		case QP_QPOASES3:
-			acadoHeader.addStatement( "#include \"qpoases3/solver.h\"\n" );
-			acadoHeader.addLinebreak( 2 );
-			break;
-
-		case QP_NONE:
-			if ( (BooleanType)useSinglePrecision == BT_TRUE )
-				acadoHeader.addStatement( "typedef float real_t;\n" );
-			else
-				acadoHeader.addStatement( "typedef double real_t;\n" );
-			acadoHeader.addLinebreak( 2 );
-			break;
-
-		default:
-			return ACADOERROR( RET_INVALID_OPTION );
+	if( !nMeasV.isEmpty() && !nOutV.isEmpty() ) {
+		std::ostringstream acado_nout;
+		ExportVariable( "ACADO_NOUT",nOutV,STATIC_CONST_INT ).exportDataDeclaration(acado_nout);
+		std::ostringstream acado_nmeas;
+		ExportVariable( "ACADO_NMEAS",nMeasV,STATIC_CONST_INT ).exportDataDeclaration(acado_nmeas);
+		options[ "ACADO_OUTPUTS_DEFINED" ]  = make_pair("\n" + acado_nout.str() + acado_nmeas.str(),  "Dimension and measurements of the output functions per shooting interval.");
 	}
-
-	Vector nMeasV = getNumMeas();
-	Vector nOutV = getDimOutputs();
-	if( nMeasV.getDim() != nOutV.getDim() ) return ACADOERROR( RET_INVALID_OPTION );
 
 	//
-	// Some common defines
+	// ACADO variables and workspace
 	//
-	acadoHeader.addComment( "COMMON DEFINITIONS:             " );
-	acadoHeader.addComment( "--------------------------------" );
-	acadoHeader.addLinebreak( 2 );
-	if( (uint)nOutV.getDim() > 0 ) {
-		acadoHeader.addComment( "Dimension of the output functions" );
-		acadoHeader.addDeclaration( ExportVariable( "NOUT",nOutV,STATIC_CONST_INT ) );
-		acadoHeader.addComment( "Measurements of the output functions per shooting interval" );
-		acadoHeader.addDeclaration( ExportVariable( "NMEAS",nMeasV,STATIC_CONST_INT ) );
-	}
-	acadoHeader.addLinebreak( 2 );
+	ExportStatementBlock variablesBlock;
+	stringstream variables;
 
-	acadoHeader.addComment( "Number of control intervals" );
-	acadoHeader.addStatement( (String)"#define ACADO_N   " << getN() << "\n");
-	acadoHeader.addComment( "Number of differential states" );
-	acadoHeader.addStatement( (String)"#define ACADO_NX  " << getNX() << "\n" );
-	acadoHeader.addComment( "Number of differential state derivatives" );
-	acadoHeader.addStatement( (String)"#define ACADO_NDX  " << getNDX() << "\n" );
-	acadoHeader.addComment( "Number of algebraic states" );
-	acadoHeader.addStatement( (String)"#define ACADO_NXA  " << getNXA() << "\n" );
-	acadoHeader.addComment( "Number of controls" );
-	acadoHeader.addStatement( (String)"#define ACADO_NU  " << getNU() << "\n" );
-	acadoHeader.addComment( "Number of parameters" );
-	acadoHeader.addStatement( (String)"#define ACADO_NP  " << getNP() << "\n" );
-	acadoHeader.addComment( "Number of output functions" );
-	acadoHeader.addStatement( (String)"#define NUM_OUTPUTS  " << (uint)nOutV.getDim() << "\n" );
-	acadoHeader.addLinebreak( 2 );
-
-	acadoHeader.addComment( "GLOBAL VARIABLES:               " );
-	acadoHeader.addComment( "--------------------------------" );
-	ExportStatementBlock tempHeader;
-	if ( collectDataDeclarations( tempHeader,ACADO_VARIABLES ) != SUCCESSFUL_RETURN )
+	if (collectDataDeclarations(variablesBlock, ACADO_VARIABLES) != SUCCESSFUL_RETURN)
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
-		acadoHeader.addStatement( "typedef struct ACADOvariables_ {\n" );
-		acadoHeader.addStatement( tempHeader );
-#ifdef WIN32
-		if( tempHeader.getNumStatements() == 0 ) {
-			acadoHeader.addStatement( "int dummy; \n" );
-		}
-#endif
-		acadoHeader.addLinebreak( );
-		acadoHeader.addStatement( "} ACADOvariables;\n" );
-	acadoHeader.addLinebreak( 2 );
+	variablesBlock.exportCode(variables, _realString, _intString, _precision);
 
-	acadoHeader.addComment( "GLOBAL WORKSPACE:               " );
-	acadoHeader.addComment( "--------------------------------" );
-	acadoHeader.addStatement( "typedef struct ACADOworkspace_ {\n" );
+	ExportStatementBlock workspaceBlock;
+	stringstream workspace;
 
-	if ( collectDataDeclarations( acadoHeader,ACADO_WORKSPACE ) != SUCCESSFUL_RETURN )
+	if (collectDataDeclarations(workspaceBlock, ACADO_WORKSPACE) != SUCCESSFUL_RETURN)
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+	workspaceBlock.exportCode(workspace, _realString, _intString, _precision);
 
-	acadoHeader.addLinebreak( );
-	acadoHeader.addStatement( "} ACADOworkspace;\n" );
-	acadoHeader.addLinebreak( 2 );
+	ExportStatementBlock functionsBlock;
+	stringstream functions;
 
-	acadoHeader.addComment( "GLOBAL FORWARD DECLARATIONS:         " );
-	acadoHeader.addComment( "-------------------------------------" );
-
-	if ( collectFunctionDeclarations( acadoHeader ) != SUCCESSFUL_RETURN )
+	if (collectFunctionDeclarations( functionsBlock ) != SUCCESSFUL_RETURN)
 		return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+	functionsBlock.exportCode(functions, _realString);
 
-	acadoHeader.addComment( "-------------------------------------" );
-	acadoHeader.addLinebreak( 2 );
+	ExportCommonHeader ech(fileName, "", _realString, _intString, _precision);
+	ech.configure( moduleName, useSinglePrecision, (QPSolverName)qpSolver,
+			options, variables.str(), workspace.str(), functions.str());
 
-	acadoHeader.addComment( "EXTERN DECLARATIONS:                 " );
-	acadoHeader.addComment( "-------------------------------------" );
-	acadoHeader.addStatement( "extern ACADOworkspace acadoWorkspace;\n" );
-	acadoHeader.addStatement( "extern ACADOvariables acadoVariables;\n" );
-	acadoHeader.addComment( "-------------------------------------" );
-
-	switch ( (QPSolverName) qpSolver )
-	{
-		case QP_QPOASES:
-			acadoHeader.addStatement( "#ifndef __MATLAB__\n");
-			acadoHeader.addStatement( "#ifdef __cplusplus\n" );
-			acadoHeader.addLinebreak( );
-			acadoHeader.addStatement( "} /* extern \"C\" */\n" );
-			acadoHeader.addStatement( "#endif\n" );
-			acadoHeader.addStatement( "#endif\n" );
-			break;
-
-		case QP_QPOASES3:
-			break;
-
-		case QP_NONE:
-			break;
-
-		default:
-			return ACADOERROR( RET_INVALID_OPTION );
-	}
-
-	acadoHeader.addStatement( "#endif\n" );
-	acadoHeader.addLinebreak( );
-    acadoHeader.addComment( "END OF FILE." );
-	acadoHeader.addLinebreak( );
-
-	return acadoHeader.exportCode( );
+	return ech.exportCode();
 }
 
 
-returnValue SIMexport::exportMakefile(	const String& _dirName,
-										const String& _fileName,
-										const String& _realString,
-										const String& _intString,
+returnValue SIMexport::exportMakefile(	const std::string& _dirName,
+										const std::string& _fileName,
+										const std::string& _realString,
+										const std::string& _intString,
 										int _precision
 										) const
 {
-	String fileName( _dirName );
-	fileName << "/" << _fileName;
+	std::string fileName( _dirName );
+	fileName += "/" + _fileName;
 
-	ExportFile Makefile( fileName,"", _realString,_intString,_precision,"##" );
+	acadoCopyTempateFile(MAKEFILE_INTEGRATOR, fileName, "#", true);
 
-	Makefile.addStatement( "LDLIBS = -lm \n" );
-	Makefile.addStatement( "CXXFLAGS = -O3 -finline-functions -I. \n" );
-	Makefile.addStatement( "CFLAGS = -O3\n" );
-	Makefile.addStatement( "CC     = g++\n" );
-	Makefile.addLinebreak( );
-	Makefile.addStatement( "OBJECTS = \\\n" );
-	Makefile.addStatement( "\tintegrator.o \\\n" );
-	if( !modelData.exportRhs() ) {
-		Makefile.addStatement( (String)"\t" << modelData.getFileNameModel() << ".o \n" );
-	}
-	Makefile.addLinebreak( 2 );
-	Makefile.addStatement( ".PHONY: all\n" );
-	Makefile.addStatement( "all: test compare \n" );
-	Makefile.addLinebreak( );
-	Makefile.addStatement( "test: ${OBJECTS} test.o\n" );
-	Makefile.addLinebreak( );
-	Makefile.addStatement( "compare: ${OBJECTS} compare.o\n" );
-	Makefile.addLinebreak( );
-	Makefile.addStatement( "integrator.o          : acado.h\n" );
-	Makefile.addStatement( "test.o                : acado.h\n" );
-	Makefile.addStatement( "compare.o             : acado.h\n" );
-	if( !modelData.exportRhs() ) {
-		Makefile.addStatement( (String)modelData.getFileNameModel() << ".o             : acado.h\n" );
-	}
-	Makefile.addLinebreak( );
-	Makefile.addStatement( "${OBJECTS} : \n" );
-	Makefile.addLinebreak( );
-	Makefile.addStatement( ".PHONY : clean\n" );
-	Makefile.addStatement( "clean :\n" );
-	Makefile.addStatement( "\t-rm -f *.o *.a test\n" );
-	Makefile.addLinebreak( );
-
-	return Makefile.exportCode( );
+	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue SIMexport::setReference( const String& reference, const std::vector<String>& outputReference ) {
+returnValue SIMexport::setReference( const std::string& reference, const std::vector<std::string>& outputReference ) {
 	if( hasOutputs() && outputReference.size() == 0 ) {
-		referenceProvided = BT_FALSE;
+		referenceProvided = false;
 		return RET_UNABLE_TO_EXPORT_CODE;
 	}
-	referenceProvided = BT_TRUE;
+	referenceProvided = true;
 	_ref = reference;
 	if( outputReference.size() > 0 ) _refOutputFiles = outputReference;
 	
@@ -987,21 +883,27 @@ returnValue SIMexport::setTimingSteps( uint _timingSteps ) {
 }
 
 
-returnValue SIMexport::printDetails( BooleanType details ) {
+returnValue SIMexport::printDetails( bool details ) {
 	PRINT_DETAILS = details;
 	
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue SIMexport::executeTest( const String& _dirName ) {
+returnValue SIMexport::executeTest( const std::string& _dirName ) {
 	//sleep(2); does not compile on windows!!
 	int nil;
-	nil = system( ((String) String("make clean -s -C ") << _dirName).getName() );
-	nil = system( ((String) String("make -s -C ") << _dirName).getName() );
-	nil = system( (String(_dirName) << "/./test").getName() );
+	nil = system((string("make clean -s -C ") + _dirName).c_str());
+	nil = system((string("make -s -C ") + _dirName).c_str());
+	nil = system((_dirName + "/./acado_test").c_str());
 	nil = nil+1;
 	
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue SIMexport::setTimingCalls( uint _timingCalls ) {
+	timingCalls = _timingCalls;
+
 	return SUCCESSFUL_RETURN;
 }
 

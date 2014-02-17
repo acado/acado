@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,27 +26,23 @@
 
 /**
  *    \file include/acado/user_interaction/log_record.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-
 
 #ifndef ACADO_TOOLKIT_LOG_RECORD_HPP
 #define ACADO_TOOLKIT_LOG_RECORD_HPP
-
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/variables_grid/variables_grid.hpp>
 
-#include <acado/user_interaction/log_record_item.hpp>
-
+#include <map>
+#include <iterator>
 
 BEGIN_NAMESPACE_ACADO
 
-
-//class LogRecordItem;
-
+class Logging;
 
 /**
  *	\brief Allows to setup and store user-specified log records of algorithmic information.
@@ -71,149 +67,29 @@ BEGIN_NAMESPACE_ACADO
  *	flushed to UserInterface classes. Internally, LogRecords are stored as basic 
  *	singly-linked within a LogCollection.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class LogRecord
 {
-	friend class LogCollection;
+	friend class Logging;
 
 	//
 	// PUBLIC MEMBER FUNCTIONS:
 	//
 	public:
-		/** Default constructor. */
-		LogRecord( );
 
 		/** Constructor which takes information in the log frequency and 
 		 *	the general output file. 
 		 *
 		 *	@param[in] _frequency	Frequency determining at which time instants the numerical values are to be stored.
-		 *	@param[in] _outputFile	Output file to which the log record can be printed.
 		 *	@param[in] _printScheme	Print scheme defining the output format of the information.
 		 */
-		LogRecord(	LogFrequency _frequency,
-					FILE* _outputFile        = stdout,
+		LogRecord(	LogFrequency _frequency = LOG_AT_EACH_ITERATION,
 					PrintScheme _printScheme = PS_DEFAULT
-					);
-
-		/** Constructor which takes information in the log frequency and 
-		 *	the name of the output file.
-		 *
-		 *	@param[in] _frequency		Frequency determining at which time instants the numerical values are to be stored.
-		 *	@param[in] _outputFileName	Output file given by its file name to which the log record can be printed.
-		 *	@param[in] _printScheme		Print scheme defining the output format of the information.
-		 */
-		LogRecord(	LogFrequency _frequency,
-					const char* _outputFileName,
-					PrintScheme _printScheme = PS_PLAIN
-					);
-
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 */
-		LogRecord(	const LogRecord& rhs
 					);
 
 		/** Destructor. */
 		~LogRecord( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 */
-		LogRecord& operator=(	const LogRecord& rhs
-								);
-
-
-		/** Returns whether two records are equal.
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 *
-		 *  \return BT_TRUE  iff they are equal, \n
-		 *			BT_FALSE otherwise
-		 */
-		BooleanType operator==(	const LogRecord& rhs
-								) const;
-
-		/** Returns whether two records are not equal.
-		 *
-		 *	@param[in] rhs	Right-hand side object.
-		 *
-		 *  \return BT_TRUE  iff they are not equal, \n
-		 *			BT_FALSE otherwise 
-		 */
-		BooleanType operator!=(	const LogRecord& rhs
-								);
-
-
-		/** Returns an item of the singly-linked list with given index.
-		 *
-		 *	@param[in] idx	Index of desired item.
-		 *
-		 *  \return Item with given index. 
-		 */
-		inline LogRecordItem& operator()(	uint idx
-											);
-
-		/** Returns an item of the singly-linked list with given index (const version).
-		 *
-		 *	@param[in] idx	Index of desired item.
-		 *
-		 *  \return Item with given index. 
-		 */
-		inline LogRecordItem operator()(	uint idx
-											) const;
-
-		/** Returns first item of the singly-linked list with given internal name.
-		 *
-		 *	@param[in] _name	Internal name desired item should contain.
-		 *
-		 *  \return Item with given internal name. 
-		 */
-		inline LogRecordItem& operator()(	LogName _name
-											);
-
-		/** Returns first item of the singly-linked list with given internal name (const version).
-		 *
-		 *	@param[in] _name	Internal name desired item should contain.
-		 *
-		 *  \return Item with given internal name. 
-		 */
-		inline LogRecordItem operator()(	LogName _name
-											) const;
-
-		/** Returns first item of the singly-linked list with given internal name.
-		 *
-		 *	@param[in] _name	Internal name desired item should contain.
-		 *
-		 *  \return Item with given internal name. 
-		 */
-		inline LogRecordItem& operator()(	const Expression& _name
-											);
-
-		/** Returns first item of the singly-linked list with given internal name (const version).
-		 *
-		 *	@param[in] _name	Internal name desired item should contain.
-		 *
-		 *  \return Item with given internal name. 
-		 */
-		inline LogRecordItem operator()(	const Expression& _name
-											) const;
-
-
-		/** Adds an item to the singly-linked list.
-		 *
-		 *	@param[in] _item	Item to be added.
-		 *
-		 *	\note This function is doing the same as the corresponding 
-		 *	      addItem member function and is introduced for syntax reasons only.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_RECORD_CORRUPTED 
-		 */
-		returnValue operator<<(	LogRecordItem& _item
-								);
 
 		/** Adds an item of given name to the singly-linked list.
 		 *
@@ -239,18 +115,6 @@ class LogRecord
 		returnValue operator<<(	const Expression& _name
 								);
 
-
-		/** Adds an item to the singly-linked list.
-		 *
-		 *	@param[in] _item	Item to be added.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_RECORD_CORRUPTED 
-		 */
-		returnValue addItem(	LogRecordItem& _item
-								);
-
-
 		/** Adds an item of given internal name to the singly-linked list.
 		 *	In addition, label of the item can be specified.
 		 *
@@ -265,47 +129,6 @@ class LogRecord
 								);
 
 		/** Adds an item of given internal name to the singly-linked list.
-		 *	In addition, label and the print scheme of the item can be specified.
-		 *
-		 *	@param[in] _name		Internal name of item to be added.
-		 *	@param[in] _printScheme	PrintScheme defining the output format of the item to be added.
-		 *	@param[in] _label		Label of item to be added.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_RECORD_CORRUPTED 
-		 */
-		returnValue addItem(	LogName _name,
-								PrintScheme _printScheme,
-								const char* const _label = DEFAULT_LABEL
-								);
-
-		/** Adds an item of given internal name to the singly-linked list.
-		 *	In addition, label and other output settings of the item can be specified.
-		 *
-		 *	@param[in] _name			Internal name of item to be added.
-		 *	@param[in] _label			Label of item to be added.
-		 *	@param[in] _startString		Prefix before printing the numerical values of the item.
-		 *	@param[in] _endString		Suffix after printing the numerical values of the item.
-		 *	@param[in] _width			Total number of digits per single numerical value of the item.
-		 *	@param[in] _precision		Number of decimals per single numerical value of the item.
-		 *	@param[in] _colSeparator	Separator between the columns of the numerical values of the item.
-		 *	@param[in] _rowSeparator	Separator between the rows of the numerical values of the item.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_RECORD_CORRUPTED 
-		 */
-		returnValue addItem(	LogName _name,
-								const char* const _label,
-								const char* const _startString,
-								const char* const _endString    = DEFAULT_END_STRING,
-								uint _width                     = DEFAULT_WIDTH,
-								uint _precision                 = DEFAULT_PRECISION,
-								const char* const _colSeparator = DEFAULT_COL_SEPARATOR,
-								const char* const _rowSeparator = DEFAULT_ROW_SEPARATOR
-								);
-
-
-		/** Adds an item of given internal name to the singly-linked list.
 		 *	In addition, label of the item can be specified.
 		 *
 		 *	@param[in] _name	Internal name of item to be added.
@@ -317,54 +140,6 @@ class LogRecord
 		returnValue addItem(	const Expression& _name,
 								const char* const _label = DEFAULT_LABEL
 								);
-
-		/** Adds an item of given internal name to the singly-linked list.
-		 *	In addition, label and print scheme of the item can be specified.
-		 *
-		 *	@param[in] _name		Internal name of item to be added.
-		 *	@param[in] _printScheme	PrintScheme defining the output format of the item to be added.
-		 *	@param[in] _label		Label of item to be added.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_RECORD_CORRUPTED 
-		 */
-		returnValue addItem(	const Expression& _name,
-								PrintScheme _printScheme,
-								const char* const _label = DEFAULT_LABEL
-								);
-
-		/** Adds an item of given internal name to the singly-linked list.
-		 *	In addition, label and other output settings of the item can be specified.
-		 *
-		 *	@param[in] _name			Internal name of item to be added.
-		 *	@param[in] _label			Label of item to be added.
-		 *	@param[in] _startString		Prefix before printing the numerical values of the item.
-		 *	@param[in] _endString		Suffix after printing the numerical values of the item.
-		 *	@param[in] _width			Total number of digits per single numerical value of the item.
-		 *	@param[in] _precision		Number of decimals per single numerical value of the item.
-		 *	@param[in] _colSeparator	Separator between the columns of the numerical values of the item.
-		 *	@param[in] _rowSeparator	Separator between the rows of the numerical values of the item.
-		 *
-		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_RECORD_CORRUPTED 
-		 */
-		returnValue addItem(	const Expression& _name,
-								const char* const _label,
-								const char* const _startString,
-								const char* const _endString    = DEFAULT_END_STRING,
-								uint _width                     = DEFAULT_WIDTH,
-								uint _precision                 = DEFAULT_PRECISION,
-								const char* const _colSeparator = DEFAULT_COL_SEPARATOR,
-								const char* const _rowSeparator = DEFAULT_ROW_SEPARATOR
-								);
-
-
-		/** Clears all items from the singly-linked list.
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		returnValue clearAllItems( );
-
 
 		/** Gets all numerical values at all time instants of the item
 		 *	with given name.
@@ -409,7 +184,7 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getFirst(	LogName _name,
-										Matrix& firstValue
+										DMatrix& firstValue
 										) const;
 
 		/** Gets numerical value at first time instant of the item
@@ -424,11 +199,11 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getFirst(	const Expression& _name,
-										Matrix& firstValue
+										DMatrix& firstValue
 										) const;
 
 		/** Gets numerical value at first time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid).
+		 *	with given name (converts internally used DMatrix into VariablesGrid).
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] firstValue	Numerical value at first time instant of given item.
@@ -443,7 +218,7 @@ class LogRecord
 										) const;
 
 		/** Gets numerical value at first time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid).
+		 *	with given name (converts internally used DMatrix into VariablesGrid).
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] firstValue	Numerical value at first time instant of given item.
@@ -470,7 +245,7 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getLast(	LogName _name,
-									Matrix& lastValue
+									DMatrix& lastValue
 									) const;
 
 		/** Gets numerical value at last time instant of the item
@@ -485,11 +260,11 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue getLast(	const Expression& _name,
-									Matrix& lastValue
+									DMatrix& lastValue
 									) const;
 
 		/** Gets numerical value at last time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid).
+		 *	with given name (converts internally used DMatrix into VariablesGrid).
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] lastValue	Numerical value at last time instant of given item.
@@ -504,7 +279,7 @@ class LogRecord
 									) const;
 
 		/** Gets numerical value at last time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid).
+		 *	with given name (converts internally used DMatrix into VariablesGrid).
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] lastValue	Numerical value at last time instant of given item.
@@ -563,7 +338,7 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue setLast(	LogName _name,
-									Matrix& value,
+									const DMatrix& value,
 									double time = -INFTY
 									);
 
@@ -580,7 +355,7 @@ class LogRecord
 		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
 		 */
 		inline returnValue setLast(	const Expression& _name,
-									Matrix& value,
+									const DMatrix& value,
 									double time = -INFTY
 									);
 
@@ -618,67 +393,25 @@ class LogRecord
 									double time = -INFTY
 									);
 
-
-		/** Enables write protection of item with given name. As long as  
-		 *	write protection is enabled, numerical values of this item cannot be modified.
-		 *
-		 *	@param[in]  _name		Internal name of item.
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		inline returnValue enableWriteProtection(	LogName _name
-													);
-
-		/** Enables write protection of item with given name. As long as  
-		 *	write protection is enabled, numerical values of this item cannot be modified.
-		 *
-		 *	@param[in]  _name		Internal name of item.
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		inline returnValue enableWriteProtection(	const Expression& _name
-													);
-
-		/** Disables write protection of item with given name. As long as  
-		 *	write protection is enabled, numerical values of this item cannot be modified.
-		 *
-		 *	@param[in]  _name		Internal name of item.
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		inline returnValue disableWriteProtection(	LogName _name
-													);
-
-		/** Disables write protection of item with given name. As long as  
-		 *	write protection is enabled, numerical values of this item cannot be modified.
-		 *
-		 *	@param[in]  _name		Internal name of item.
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		inline returnValue disableWriteProtection(	const Expression& _name
-													);
-
-
-		/** Prints whole record into internally specified file;
+		/** Prints whole record into a stream;
 		 *	all items are printed according to the output format settings.
 		 *
-		 *	@param[in]  _mode		Print mode: see documentation of LogPrintMode of details.
+		 *	@param[in] _stream      Stream to print the record.
+		 *	@param[in] _mode		Print mode: see documentation of LogPrintMode of details.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INVALID_ARGUMENTS, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue print(	LogPrintMode _mode = PRINT_ITEM_BY_ITEM
+		returnValue print(	std::ostream& _stream = std::cout,
+							LogPrintMode _mode = PRINT_ITEM_BY_ITEM
 							) const;
-
 
 		/** Prints information on the record and its items on screen.
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		returnValue printInfo( ) const;
-
 
 		/** Returns maximum number of matrices per item. Remember that the
 		 *	numerical values of each item is stored in a MatrixVariablesGrid
@@ -688,7 +421,6 @@ class LogRecord
 		 *  \return Maximum number of matrices per item
 		 */
 		uint getMaxNumMatrices( ) const;
-
 
 		/** Returns number of items contained in the record.
 		 *
@@ -703,7 +435,6 @@ class LogRecord
 		 */
 		inline BooleanType isEmpty( ) const;
 
-
 		/** Returns current log frequency determining at which time instants the 
 		 *	numerical values are to be stored.
 		 *
@@ -716,7 +447,6 @@ class LogRecord
 		 *  \return Current print scheme
 		 */
 		inline PrintScheme getPrintScheme( ) const;
-
 
 		/** Sets the log frequency determining at which time instants the 
 		 *	numerical values are to be stored.
@@ -736,7 +466,6 @@ class LogRecord
 		 */
 		inline returnValue setPrintScheme(	PrintScheme _printScheme
 											);
-
 
 		/** Returns whether an (possibly empty) item with given internal name 
 		 *	exists or not.
@@ -781,44 +510,7 @@ class LogRecord
 											) const;
 
 
-		/** Returns whether record is an alias of another one.
-		 *
-		 *  \return BT_TRUE  iff record is an alias, \n
-		 *	        BT_FALSE otherwise
-		 */
-		inline BooleanType isAlias( ) const;
-
-		/** Returns alias index of record.
-		 *
-		 *  \return >= 0: alias index of record, \n
-		 *	        -1:   record is not an alias record
-		 */
-		inline int getAliasIdx( ) const;
-
-
 		inline uint getNumDoubles( ) const;
-
-
-    //
-    // PROTECTED MEMBER FUNCTIONS:
-    //
-    protected:
-
-		/** Assigns pointer to next LogRecord within a LogCollection.
-		 *
-		 *	@param[in]  _next	New pointer to next record.
-		 *
-		 *  \return SUCCESSFUL_RETURN 
-		 */
-		inline returnValue setNext(	LogRecord* const _next
-									);
-
-		/** Returns pointer to next LogRecord within a LogCollection.
-		 *
-		 *  \return Pointer to next record (or NULL iff record is terminal element). 
-		 */
-		inline LogRecord* getNext( ) const;
-
 
 		/** Gets all numerical values at all time instants of the item
 		 *	with given internal name and internal type.
@@ -851,7 +543,7 @@ class LogRecord
 		 */
 		returnValue getFirst(	uint _name,
 								LogRecordItemType _type,
-								Matrix& lastValue
+								DMatrix& firstValue
 								) const;
 
 		/** Gets numerical value at last time instant of the item
@@ -868,9 +560,8 @@ class LogRecord
 		 */
 		returnValue getLast(	uint _name,
 								LogRecordItemType _type,
-								Matrix& lastValue
+								DMatrix& lastValue
 								) const;
-
 
 		/** Sets all numerical values at all time instants of the item
 		 *	with given internal name and internal type.
@@ -904,7 +595,7 @@ class LogRecord
 		 */
 		returnValue setLast(	uint _name,
 								LogRecordItemType _type,
-								const Matrix& value,
+								const DMatrix& value,
 								double time = -INFTY
 								);
 
@@ -922,99 +613,92 @@ class LogRecord
 									LogRecordItemType _type
 									) const;
 
-
-		/** Assigns alias index of record.
+		/** Enables write protection of item with given name. As long as
+		 *  write protection is enabled, numerical values of this item cannot be modified.
 		 *
-		 *	@param[in] _aliasIdx	New alias index (-1 = no alias record)
+		 *  @param[in]  _name                Internal name of item.
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue setAliasIdx(	int _aliasIdx
-										);
+		inline returnValue enableWriteProtection(LogName _name);
 
+		/** Enables write protection of item with given name. As long as
+		 *  write protection is enabled, numerical values of this item cannot be modified.
+	 	 *
+	 	 *  @param[in]  _name                Internal name of item.
+	 	 *
+	 	 *  \return SUCCESSFUL_RETURN
+	 	 */
+		inline returnValue enableWriteProtection(const Expression& _name);
 
-		/** Returns pointer to item with given internal name.
-		 *	
-		 *	@param[in] _name	Internal name of item.
-		 *	
-		 *  \return Pointer to item or \n
-		 *	        NULL if item does not exist
-		 */
-		LogRecordItem* find(	LogName _name
-								) const;
-
-		/** Returns pointer to item with given internal name.
-		 *	
-		 *	@param[in] _name	Internal name of item.
-		 *	
-		 *  \return Pointer to item or \n
-		 *	        NULL if item does not exist
-		 */
-		LogRecordItem* find(	const Expression& _name
-								) const;
-
-		/** Returns pointer to item with given internal name and 
-		 *	given internal type.
-		 *	
-		 *	@param[in] _name	Internal name of item.
-		 *	@param[in] _type	Internal type of item.
-		 *	
-		 *  \return Pointer to item or \n
-		 *	        NULL if item does not exist
-		 */
-		LogRecordItem* find(	uint _name,
-								LogRecordItemType _type
-								) const;
-
-		/** Returns pointer to non-empty item with given internal name and 
-		 *	given internal type.
-		 *	
-		 *	@param[in] _name	Internal name of item.
-		 *	@param[in] _type	Internal type of item.
-		 *	
-		 *  \return Pointer to non-empty item or \n
-		 *	        NULL if item does not exist
-		 */
-		LogRecordItem* findNonEmpty(	uint _name,
-										LogRecordItemType _type
-										) const;
-
-
-		/** Returns the length of the string containing all numerical values of all 
-		 *	items of the record in the pre-defined output format.
+		/** Disables write protection of item with given name. As long as
+		 *  write protection is enabled, numerical values of this item cannot be modified.
 		 *
-		 *  \return String length
+		 *  @param[in]  _name                Internal name of item.
+		 *
+		 *  \return SUCCESSFUL_RETURN
 		 */
-		uint determineRecordStringLength( ) const;
+		inline returnValue disableWriteProtection(LogName _name);
 
+		/** Disables write protection of item with given name. As long as
+		 *  write protection is enabled, numerical values of this item cannot be modified.
+		 *
+		 *  @param[in]  _name                Internal name of item.
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		inline returnValue disableWriteProtection(const Expression& _name);
+
+		/** Update an existing record. */
+		returnValue updateLogRecord(	LogRecord& _record
+										) const;
 
     //
     // DATA MEMBERS:
     //
 	protected:
-		LogRecord* next;				/**< Pointer to next record within a LogCollection. */
-		int aliasIdx;					/**< Alias index of record (-1 = no alias record). */
+		/** Alias index of record (-1 = no alias record). */
+		int aliasIdx;
+		/** Frequency determining at which time instants the numerical values are to be stored. */
+		LogFrequency frequency;
+		/** Print scheme defining the output format of the information. */
+		PrintScheme printScheme;
 
-		LogFrequency frequency;			/**< Frequency determining at which time instants the numerical values are to be stored. */
-		FILE* outputFile;				/**< Output file to which the log record can be printed. */
-		char* outputFileName;			/**< Output file given by its file name to which the log record can be printed. */
-		PrintScheme printScheme;		/**< Print scheme defining the output format of the information. */
+		/** Log record item data. */
+		struct LogRecordData
+		{
+			LogRecordData()
+				: label( DEFAULT_LABEL ), writeProtection( false )
+			{}
 
-		LogRecordItem* first;			/**< Pointer to first item of the singly-linked list. */
-		LogRecordItem* last;			/**< Pointer to last item of the singly-linked list. */
+			LogRecordData(	const std::string& _label
+							)
+				: label( _label ), writeProtection( false )
+			{}
 
-		uint number;					/**< Total number of item within the singly-linked list of the record. */
+			LogRecordData(	const MatrixVariablesGrid& _values,
+							const std::string& _label,
+							bool _writeProtection
+							)
+				: values( _values ), label( _label ), writeProtection( _writeProtection )
+			{}
+
+			MatrixVariablesGrid values;
+			std::string label;
+			bool writeProtection;
+		};
+
+		/** Type definition for Log record items. */
+		typedef std::map<std::pair<int, LogRecordItemType>, LogRecordData> LogRecordItems;
+		/** Log record items. */
+		LogRecordItems items;
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
 #include <acado/user_interaction/log_record.ipp>
 
-
 #endif	// ACADO_TOOLKIT_LOG_RECORD_HPP
-
 
 /*
  *	end of file

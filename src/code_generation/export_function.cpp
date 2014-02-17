@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -34,8 +34,6 @@
 #include <acado/code_generation/export_function.hpp>
 #include <acado/code_generation/export_function_call.hpp>
 
-#include <vector>
-
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
@@ -45,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportFunction::ExportFunction(	const String& _name,
+ExportFunction::ExportFunction(	const std::string& _name,
 								const ExportArgument& _argument1,
 								const ExportArgument& _argument2,
 								const ExportArgument& _argument3,
@@ -55,10 +53,10 @@ ExportFunction::ExportFunction(	const String& _name,
 								const ExportArgument& _argument7,
 								const ExportArgument& _argument8,
 								const ExportArgument& _argument9
-								) : ExportStatementBlock( ), description()
+								) : ExportStatementBlock( )
 {
-	returnAsPointer = BT_FALSE;
-	flagPrivate = BT_FALSE;
+	returnAsPointer = false;
+	flagPrivate = false;
 
 	memAllocator = MemoryAllocatorPtr( new MemoryAllocator );
 
@@ -67,64 +65,15 @@ ExportFunction::ExportFunction(	const String& _name,
 				_argument7,_argument8,_argument9 );
 }
 
-
-ExportFunction::ExportFunction( const ExportFunction& arg ) : ExportStatementBlock( arg )
-{
-	name = arg.name;
-	functionArguments = arg.functionArguments;
-	flagPrivate = arg.flagPrivate;
-	returnAsPointer = arg.returnAsPointer;
-	
-	retVal = arg.retVal;
-
-	memAllocator = arg.memAllocator;
-	localVariables = arg.localVariables;
-
-	description = arg.description;
-}
-
-
 ExportFunction::~ExportFunction( )
-{
-	clear( );
-}
-
-
-ExportFunction& ExportFunction::operator=( const ExportFunction& arg )
-{
-	if( this != &arg )
-	{
-		init( arg.name );
-
-		ExportStatementBlock::operator=( arg );
-		functionArguments = arg.functionArguments;
-		retVal = arg.retVal;
-		returnAsPointer = arg.returnAsPointer;
-
-		memAllocator = arg.memAllocator;
-		localVariables = arg.localVariables;
-
-		description = arg.description;
-	}
-
-	return *this;
-}
-
+{}
 
 ExportStatement* ExportFunction::clone( ) const
 {
 	return new ExportFunction(*this);
 }
 
-
-ExportFunction* ExportFunction::cloneFunction( ) const
-{
-	return new ExportFunction(*this);
-}
-
-
-
-returnValue ExportFunction::init(	const String& _name,
+returnValue ExportFunction::init(	const std::string& _name,
 									const ExportArgument& _argument1,
 									const ExportArgument& _argument2,
 									const ExportArgument& _argument3,
@@ -149,7 +98,7 @@ returnValue ExportFunction::init(	const String& _name,
 }
 
 
-ExportFunction& ExportFunction::setup(	const String& _name,
+ExportFunction& ExportFunction::setup(	const std::string& _name,
 										const ExportArgument& _argument1,
 										const ExportArgument& _argument2,
 										const ExportArgument& _argument3,
@@ -190,20 +139,20 @@ returnValue ExportFunction::addArgument(	const ExportArgument& _argument1,
 
 
 ExportFunction& ExportFunction::setReturnValue(	const ExportVariable& _functionReturnValue,
-												BooleanType _returnAsPointer
+												bool _returnAsPointer
 												)
 {
-	retVal = std::tr1::shared_ptr< ExportVariable >(new ExportVariable( _functionReturnValue ));
+	retVal = deepcopy( _functionReturnValue );
 	returnAsPointer = _returnAsPointer;
 
 	return *this;
 }
 
 
-ExportFunction&	ExportFunction::setName(	const String& _name
+ExportFunction&	ExportFunction::setName(	const std::string& _name
 											)
 {
-	if ( _name.isEmpty() == BT_TRUE )
+	if ( _name.empty() == true )
 		ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	name = _name;
@@ -212,16 +161,16 @@ ExportFunction&	ExportFunction::setName(	const String& _name
 }
 
 
-String ExportFunction::getName( ) const
+std::string ExportFunction::getName( ) const
 {
 	return name;
 }
 
 
 
-returnValue ExportFunction::exportDataDeclaration(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+returnValue ExportFunction::exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision
 													) const
 {
@@ -229,108 +178,103 @@ returnValue ExportFunction::exportDataDeclaration(	FILE* file,
 }
 
 
-returnValue ExportFunction::exportForwardDeclaration(	FILE *file,
-														const String& _realString,
-														const String& _intString,
+returnValue ExportFunction::exportForwardDeclaration(	std::ostream& stream,
+														const std::string& _realString,
+														const std::string& _intString,
 														int _precision
 														) const
 {
 	// do not export undefined (empty) functions
-	if (isDefined() == BT_FALSE)
+	if (isDefined() == false)
 		return SUCCESSFUL_RETURN;
 
-	if (flagPrivate == BT_TRUE)
+	if (flagPrivate == true)
 		return SUCCESSFUL_RETURN;
 
-	if (description.isEmpty() == BT_FALSE)
+	if (description.empty() == false)
 	{
-		acadoFPrintf(file, "\n/** %s", description.getName());
+		stream <<  "\n/** " << description;
 
 		if (functionArguments.getNumArguments() > 0)
 		{
 			vector< ExportArgument > args = functionArguments.get();
 
-			acadoFPrintf(file, "\n *\n");
+			stream << "\n *\n";
 
 			for (unsigned i = 0; i < args.size(); ++i)
 			{
-				if (args[ i ].isGiven() == BT_TRUE || args[ i ].getDoc().isEmpty() == BT_TRUE)
+				if (args[ i ].isGiven() == true || args[ i ].getDoc().empty() == true)
 					continue;
 
-				acadoFPrintf(file, " *  \\param %s %s\n", args[ i ].getName().getName(), args[ i ].getDoc().getName());
+				stream << " *  \\param " << args[ i ].getName() << " " << args[ i ].getDoc() << endl;
 			}
 		}
 		else
 		{
-			acadoFPrintf(file, "\n");
+			stream << "\n";
 		}
 
-		if (retVal != 0)
+		if (retVal.getDim())
 		{
-			String tmp = retVal->getDoc();
-			if (tmp.isEmpty() == BT_FALSE)
-				acadoFPrintf(file, " *\n *  \\return %s\n", tmp.getName());
+			std::string tmp = retVal.getDoc();
+			if (tmp.empty() == false)
+				stream << " *\n *  \\return " << tmp << endl;
 		}
-		acadoFPrintf(file, " */\n");
+		stream << " */\n";
 	}
 
 
-	if (retVal != 0)
+	if (retVal.getDim())
 	{
-		acadoFPrintf( file,"%s", retVal->getTypeString( _realString,_intString ).getName() );
-		if ( returnAsPointer == BT_TRUE )
-			acadoFPrintf( file,"*" );
+		stream << retVal.getTypeString(_realString, _intString);
+		if ( returnAsPointer == true )
+			stream << "*";
 	}
 	else
 	{
-		acadoFPrintf( file,"void" );
+		stream << "void";
 	}
 
-	acadoFPrintf( file," %s( ", name.getName() );
-	functionArguments.exportCode( file,_realString,_intString,_precision );
-	acadoFPrintf( file," );\n" );
+	stream << " " << name << "( ";
+	functionArguments.exportCode(stream, _realString, _intString, _precision);
+	stream << " );\n";
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ExportFunction::exportCode(	FILE *file,
-										const String& _realString,
-										const String& _intString,
+returnValue ExportFunction::exportCode(	std::ostream& stream,
+										const std::string& _realString,
+										const std::string& _intString,
 										int _precision
 										) const
 {
 	//
 	// Do not export undefined (empty) functions
 	//
-	if ( isDefined() == BT_FALSE )
+	if ( isDefined() == false )
 		return SUCCESSFUL_RETURN;
 
 	//
 	// Set return value type
 	//
-	if ( retVal != 0 )
+	if (retVal.getDim())
 	{
-		acadoFPrintf( file,"%s", retVal->getTypeString( _realString,_intString ).getName() );
-		if ( returnAsPointer == BT_TRUE )
-			acadoFPrintf( file,"*" );
+		stream << retVal.getTypeString(_realString, _intString);
+		if ( returnAsPointer == true )
+			stream << "*";
 	}
 	else
 	{
-		acadoFPrintf( file,"void" );
+		stream << "void";
 	}
 	
-	acadoFPrintf( file," %s( ", name.getName() );
-	functionArguments.exportCode(file, _realString, _intString, _precision);
-	acadoFPrintf( file," )\n{\n");
+	stream << " " << name << "( ";
+	functionArguments.exportCode(stream, _realString, _intString, _precision);
+	stream << " )\n{\n";
 
-	if (retVal && retVal->getDataStruct() == ACADO_LOCAL)
-	{
-		acadoFPrintf(file, "%s ", retVal->getTypeString( _realString,_intString ).getName());
-		acadoFPrintf(file, "%s;\n", retVal->getName().getName());
-	}
-
-	// ExportStatementBlock::exportDataDeclaration( file,_realString,_intString,_precision );
+	if (retVal.getDataStruct() == ACADO_LOCAL)
+		retVal.exportDataDeclaration(stream, _realString, _intString, _precision);
 
 	//
 	// Set parent pointers, and run memory allocation
@@ -342,54 +286,44 @@ returnValue ExportFunction::exportCode(	FILE *file,
 	//
 	// Open a temporary file and export statements to the temporary file
 	//
-	FILE* tmpFile;
-	tmpFile = tmpfile();
-	ExportStatementBlock::exportCode(tmpFile, _realString, _intString, _precision);
+	stringstream ss;
+	ExportStatementBlock::exportCode(ss, _realString, _intString, _precision);
 
 	//
 	// Export local indices (allocated previously)
 	//
 	const std::vector< ExportIndex > indices = memAllocator->getPool();
 	for (unsigned i = 0; i < indices.size(); ++i)
-		indices[ i ].exportDataDeclaration(file, _realString, _intString, _precision);
+		indices[ i ].exportDataDeclaration(stream, _realString, _intString, _precision);
 
 	//
 	// Export local variables -- still done in a very primitive way
 	//
 	for(unsigned i = 0; i < localVariables.size(); ++i)
-		localVariables[ i ].exportDataDeclaration(file, _realString, _intString, _precision);
+		localVariables[ i ].exportDataDeclaration(stream, _realString, _intString, _precision);
 
 	//
 	// Copy temporary file to main file, and close te temporary file aftwarards
 	//
-
-	rewind( tmpFile );
-	char buffer[ 256 ];
-	while ( !feof( tmpFile ) )
-	{
-		if ( fgets(buffer, 256, tmpFile) )
-			fputs(buffer, file);
-	}
-	fclose( tmpFile );
+	stream << ss.str();
 
 	//
 	// Finish the export of the function
 	//
-	if ( retVal != 0 )
-		acadoFPrintf( file,"return %s;\n", retVal->getFullName().getName() );
-	acadoFPrintf( file,"}\n\n");
+	if (retVal.getDim())
+		stream << "return " <<  retVal.getFullName() << ";\n";
+	stream << "}\n\n";
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-BooleanType ExportFunction::isDefined( ) const
+bool ExportFunction::isDefined( ) const
 {
-	if ( ( name.isEmpty() == BT_FALSE ) && 
-		 ( ( getNumStatements( ) > 0 ) || ( retVal != 0 ) ) )
-		return BT_TRUE;
-	else
-		return BT_FALSE;
+	if (name.empty() == false && (getNumStatements( ) > 0 || retVal.getDim() > 0))
+		return true;
+
+	return false;
 }
 
 
@@ -405,7 +339,7 @@ unsigned ExportFunction::getNumArguments( ) const
 
 returnValue ExportFunction::clear( )
 {
-	returnAsPointer = BT_FALSE;
+	returnAsPointer = false;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -438,21 +372,21 @@ ExportFunction& ExportFunction::addVariable(const ExportVariable& _var)
 	return *this;
 }
 
-ExportFunction& ExportFunction::doc(const String& _doc)
+ExportFunction& ExportFunction::doc(const std::string& _doc)
 {
 	description = _doc;
 
 	return *this;
 }
 
-ExportFunction& ExportFunction::setPrivate(BooleanType _set)
+ExportFunction& ExportFunction::setPrivate(bool _set)
 {
 	flagPrivate = _set;
 
 	return *this;
 }
 
-BooleanType ExportFunction::isPrivate() const
+bool ExportFunction::isPrivate() const
 {
 	return flagPrivate;
 }

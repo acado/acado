@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -72,27 +72,11 @@ class ExportAlgorithm : public AlgorithmicBase
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ExportAlgorithm(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = std::string()
 							);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportAlgorithm(	const ExportAlgorithm& arg
-							);
-
-        /** Destructor. 
-		 */
+        /** Destructor. */
         virtual ~ExportAlgorithm( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportAlgorithm& operator=(	const ExportAlgorithm& arg
-									);
-
 
 		/** Initializes code export into given file.
 		 *
@@ -143,7 +127,8 @@ class ExportAlgorithm : public AlgorithmicBase
 		returnValue setDimensions(	uint _NX = 0,
 									uint _NU = 0,
 									uint _NP = 0,
-									uint _NI = 0
+									uint _NI = 0,
+									uint _NOD = 0
 									);
 
 
@@ -154,7 +139,7 @@ class ExportAlgorithm : public AlgorithmicBase
 		 *	@param[in] _NXA		New number of algebraic states.
 		 *	@param[in] _NU		New number of control inputs.
 		 *	@param[in] _NP		New number of parameters.
-		 *	@param[in] _NI		New number of control intervals. (using _N resulted in a strange error when compiling with cygwin!)
+		 *	@param[in] _NI		New number of control intervals.
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
@@ -163,7 +148,8 @@ class ExportAlgorithm : public AlgorithmicBase
 									uint _NXA,
 									uint _NU,
 									uint _NP,
-									uint _NI
+									uint _NI,
+									uint _NOD
 									);
 
 
@@ -197,6 +183,12 @@ class ExportAlgorithm : public AlgorithmicBase
 		 */
 		uint getNP( ) const;
 
+		/** Returns number of parameters.
+		 *
+		 *  \return Number of parameters
+		 */
+		uint getNOD( ) const;
+
 		/** Returns number of control intervals.
 		 *
 		 *  \return Number of control intervals
@@ -209,32 +201,6 @@ class ExportAlgorithm : public AlgorithmicBase
 		void setNYN( uint NYN_ );
 		uint getNYN( ) const;
 
-		/** Opens given file and prepares it for exporting algorithm.
-		 *
-		 *	@param[in] dirName				Name of directory in which to open the file.
-		 *	@param[in] fileName				Name of file to be opened.
-		 *	@param[in] includeCommonHeader	Flag indicating whether common header shall be included.
-		 *
-		 *  \return Pointer to prepared file with given name, \n
-		 *	        NULL iff file could not be opened
-		 */
-		FILE* openFile(	const String& dirName,
-						const String& fileName
-						) const;
-
-
-	protected:
-
-		/** Copies all class members from given object.
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue copy(	const ExportAlgorithm& arg
-							);
-
-
     protected:
 
 		uint NX;							/**< Number of differential states. */
@@ -242,12 +208,13 @@ class ExportAlgorithm : public AlgorithmicBase
 		uint NXA;							/**< Number of algebraic states. */
 		uint NU;							/**< Number of control inputs. */
 		uint NP;							/**< Number of parameters. */
+		uint NOD;							/**< Number of "online data" values. */
 		uint N;								/**< Number of control intervals. */
 
-		uint NY;							/**< Number of measurements, k = 0,..., N - 1. */
-		uint NYN;							/**< Number of measurements, k = N. */
+		uint NY;							/**< Number of references/measurements, nodes 0,..., N - 1. */
+		uint NYN;							/**< Number of references/measurements, node N. */
 
-		String commonHeaderName;			/**< Name of common header file. */
+		std::string commonHeaderName;		/**< Name of common header file. */
 };
 
 

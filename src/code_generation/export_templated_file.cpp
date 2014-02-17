@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -34,20 +34,17 @@
 #include <acado/code_generation/export_templated_file.hpp>
 #include <acado/code_generation/templates/templates.hpp>
 
-#include <iostream>
-#include <fstream>
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
-using namespace std;
-
-ExportTemplatedFile::ExportTemplatedFile(	const String& _templateName,
-											const String& _fileName,
-											const String& _commonHeaderName,
-											const String& _realString,
-											const String& _intString,
+ExportTemplatedFile::ExportTemplatedFile(	const std::string& _templateName,
+											const std::string& _fileName,
+											const std::string& _commonHeaderName,
+											const std::string& _realString,
+											const std::string& _intString,
 											int _precision,
-											const String& _commentString
+											const std::string& _commentString
 						) : ExportFile(_fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
 {
 	folders = TEMPLATE_PATHS;
@@ -64,7 +61,7 @@ returnValue ExportTemplatedFile::fillTemplate( )
 		string tmp;
 
 		pos = folders.find(";", oldPos);
-		tmp = folders.substr(oldPos, pos) + "/" + templateName.getName();
+		tmp = folders.substr(oldPos, pos) + "/" + templateName;
 
 		inputFile.open(tmp.c_str());
 
@@ -93,31 +90,8 @@ returnValue ExportTemplatedFile::fillTemplate( )
 			}
 		}
 
-		// This is some extremely stupid hack we had to do. Namely, String() class
-		// cannot handle long strings, so we have to cut them in smaller pieces.
-		if ( str.size() )
-		{
-			size_t pos = 0;
-			while ( 1 )
-			{
-				if ((str.size() - pos) < 256)
-				{
-					string tmp = str.substr( pos );
-
-					if ( tmp.size() )
-						addStatement( static_cast< String >( tmp.c_str() ) );
-
-					break;
-				}
-				else
-				{
-					addStatement( static_cast< String >( str.substr(pos, 256).c_str() ) );
-
-					pos += 256;
-				}
-			}
-		}
-		addStatement( (String)"\n" );
+		addStatement( str );
+		addStatement( "\n" );
 	}
 
 	inputFile.close();

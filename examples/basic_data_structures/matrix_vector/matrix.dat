@@ -3,8 +3,8 @@
 // MATRIX READING EXAMPLE:
 // 
 
-1.0, 2.0 -3e3   this line defines already the number of columns
-                all following lines should also contain three entries
+1.0 2.0 -3e3   this line defines already the number of columns
+               all following lines should also contain three entries
 .1 .2 .3
 
 0.123456789012345e+6 123456789012345e-67 -4e-4

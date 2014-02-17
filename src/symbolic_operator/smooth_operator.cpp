@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -57,14 +57,14 @@ TreeProjection& SmoothOperator::operator=( const double &arg ){
     return emptyTreeProjection;
 }
 
-TreeProjection& SmoothOperator::operator=( const Vector &arg ){
+TreeProjection& SmoothOperator::operator=( const DVector &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& SmoothOperator::operator=( const Matrix &arg ){
+TreeProjection& SmoothOperator::operator=( const DMatrix &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
@@ -100,18 +100,18 @@ TreeProjection* SmoothOperator::cloneTreeProjection() const{
 
 
 TreeProjection& SmoothOperator::operator+=( const double    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& SmoothOperator::operator+=( const Vector    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& SmoothOperator::operator+=( const Matrix    & arg ){ return operator=( this->operator+(arg) ); }
+TreeProjection& SmoothOperator::operator+=( const DVector    & arg ){ return operator=( this->operator+(arg) ); }
+TreeProjection& SmoothOperator::operator+=( const DMatrix    & arg ){ return operator=( this->operator+(arg) ); }
 TreeProjection& SmoothOperator::operator+=( const Expression& arg ){ return operator=( this->operator+(arg) ); }
 
 TreeProjection& SmoothOperator::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& SmoothOperator::operator-=( const Vector      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& SmoothOperator::operator-=( const Matrix      & arg ){ return operator=( this->operator-(arg) ); }
+TreeProjection& SmoothOperator::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
+TreeProjection& SmoothOperator::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
 TreeProjection& SmoothOperator::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
 
 TreeProjection& SmoothOperator::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& SmoothOperator::operator*=( const Vector      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& SmoothOperator::operator*=( const Matrix      & arg ){ return operator=( this->operator*(arg) ); }
+TreeProjection& SmoothOperator::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
+TreeProjection& SmoothOperator::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
 TreeProjection& SmoothOperator::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
 
 TreeProjection& SmoothOperator::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
@@ -121,22 +121,22 @@ TreeProjection& SmoothOperator::operator/=( const Expression  & arg ){ return op
 
 
 Expression SmoothOperator::operator+( const double        & arg ) const{ return Expression(*this)+arg; }
-Expression SmoothOperator::operator+( const Vector        & arg ) const{ return Expression(*this)+arg; }
-Expression SmoothOperator::operator+( const Matrix        & arg ) const{ return Expression(*this)+arg; }
+Expression SmoothOperator::operator+( const DVector        & arg ) const{ return Expression(*this)+arg; }
+Expression SmoothOperator::operator+( const DMatrix        & arg ) const{ return Expression(*this)+arg; }
 Expression SmoothOperator::operator+( const Operator& arg ) const{ return Expression(*this)+arg; }
 Expression SmoothOperator::operator+( const Expression    & arg ) const{ return Expression(*this)+arg; }
 
 Expression SmoothOperator::operator-( const double        & arg ) const{ return Expression(*this)-arg; }
-Expression SmoothOperator::operator-( const Vector        & arg ) const{ return Expression(*this)-arg; }
-Expression SmoothOperator::operator-( const Matrix        & arg ) const{ return Expression(*this)-arg; }
+Expression SmoothOperator::operator-( const DVector        & arg ) const{ return Expression(*this)-arg; }
+Expression SmoothOperator::operator-( const DMatrix        & arg ) const{ return Expression(*this)-arg; }
 Expression SmoothOperator::operator-( const Operator& arg ) const{ return Expression(*this)-arg; }
 Expression SmoothOperator::operator-( const Expression    & arg ) const{ return Expression(*this)-arg; }
 
 Expression SmoothOperator::operator-( ) const{ return -Expression(*this); }
 
 Expression SmoothOperator::operator*( const double        & arg ) const{ return Expression(*this)*arg; }
-Expression SmoothOperator::operator*( const Vector        & arg ) const{ return Expression(*this)*arg; }
-Expression SmoothOperator::operator*( const Matrix        & arg ) const{ return Expression(*this)*arg; }
+Expression SmoothOperator::operator*( const DVector        & arg ) const{ return Expression(*this)*arg; }
+Expression SmoothOperator::operator*( const DMatrix        & arg ) const{ return Expression(*this)*arg; }
 
 
 Expression SmoothOperator::operator*( const Operator& arg ) const{
@@ -161,9 +161,9 @@ ConstraintComponent SmoothOperator::operator<=( const double& ub ) const{ return
 ConstraintComponent SmoothOperator::operator>=( const double& lb ) const{ return Expression(*this) >= lb; }
 ConstraintComponent SmoothOperator::operator==( const double&  b ) const{ return Expression(*this) ==  b; }
 
-ConstraintComponent SmoothOperator::operator<=( const Vector& ub ) const{ return Expression(*this) <= ub; }
-ConstraintComponent SmoothOperator::operator>=( const Vector& lb ) const{ return Expression(*this) >= lb; }
-ConstraintComponent SmoothOperator::operator==( const Vector&  b ) const{ return Expression(*this) ==  b; }
+ConstraintComponent SmoothOperator::operator<=( const DVector& ub ) const{ return Expression(*this) <= ub; }
+ConstraintComponent SmoothOperator::operator>=( const DVector& lb ) const{ return Expression(*this) >= lb; }
+ConstraintComponent SmoothOperator::operator==( const DVector&  b ) const{ return Expression(*this) ==  b; }
 
 ConstraintComponent SmoothOperator::operator<=( const VariablesGrid& ub ) const{ return Expression(*this) <= ub; }
 ConstraintComponent SmoothOperator::operator>=( const VariablesGrid& lb ) const{ return Expression(*this) >= lb; }
@@ -177,13 +177,6 @@ BooleanType SmoothOperator::isSmooth( ) const
 
 
 double SmoothOperator::getValue() const{ return INFTY; }
-
-
-Stream SmoothOperator::operator<<( Stream &stream ){
-
-    return print( stream );
-}
-
 
 int SmoothOperator::getGlobalIndex( ) const{
 

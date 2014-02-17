@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,26 +31,24 @@
 
 #include <acado/code_generation/export_nlp_solver.hpp>
 
-#include <sstream>
-
 BEGIN_NAMESPACE_ACADO
 
 using namespace std;
 
 ExportNLPSolver::ExportNLPSolver(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ExportAlgorithm(_userInteraction, _commonHeaderName),
 											cholObjS(_userInteraction, _commonHeaderName),
 											cholSAC(_userInteraction, _commonHeaderName),
 											acSolver(userInteraction, _commonHeaderName)
 
 {
-	levenbergMarquardt    = 0.0;
+	levenbergMarquardt = 0.0;
 
 	dimPacH = 0;
 	dimPocH = 0;
 
-	externObjective = BT_FALSE;
+	externObjective = false;
 }
 
 returnValue ExportNLPSolver::setIntegratorExport(	IntegratorExportPtr const _integrator
@@ -76,15 +74,15 @@ returnValue ExportNLPSolver::setLevenbergMarquardt(	double _levenbergMarquardt
 	return SUCCESSFUL_RETURN;
 }
 
-BooleanType ExportNLPSolver::performsSingleShooting( ) const
+bool ExportNLPSolver::performsSingleShooting( ) const
 {
 	int discretizationType;
-	get( DISCRETIZATION_TYPE,discretizationType );
+	get(DISCRETIZATION_TYPE, discretizationType);
 
 	if ( discretizationType == SINGLE_SHOOTING )
-		return BT_TRUE;
-	else
-		return BT_FALSE;
+		return true;
+
+	return false;
 }
 
 returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarations,
@@ -95,7 +93,7 @@ returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarat
 	declarations.addDeclaration(x, dataStruct);
 	declarations.addDeclaration(z, dataStruct);
 	declarations.addDeclaration(u, dataStruct);
-	declarations.addDeclaration(p, dataStruct);
+	declarations.addDeclaration(od, dataStruct);
 	declarations.addDeclaration(d, dataStruct);
 
 	declarations.addDeclaration(y, dataStruct);
@@ -158,6 +156,31 @@ returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarat
 	return SUCCESSFUL_RETURN;
 }
 
+returnValue ExportNLPSolver::setupInitialization()
+{
+	////////////////////////////////////////////////////////////////////////////
+	//
+	// Setup the main initialization function.
+	//
+	////////////////////////////////////////////////////////////////////////////
+
+	ExportVariable retInit("ret", 1, 1, INT, ACADO_LOCAL, true);
+	retInit.setDoc("=0: OK, otherwise an error code of a QP solver.");
+	initialize.setup( "initializeSolver" );
+	initialize.doc( "Solver initialization. Must be called once before any other function call." );
+	initialize.setReturnValue(retInit);
+
+	initialize.addComment( "This is a function which must be called once before any other function call!" );
+	initialize.addLinebreak( 2 );
+
+	initialize << (retInit == 0);
+	initialize.addLinebreak();
+	initialize	<< "memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));" << "\n";
+//	initialize	<< "memset(&acadoVariables, 0, sizeof( acadoVariables ));" << "\n";
+
+	return SUCCESSFUL_RETURN;
+}
+
 returnValue ExportNLPSolver::setupSimulation( void )
 {
 	// \todo Implement free parameters and support for DAEs
@@ -167,18 +190,10 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	// Condensing based QP solvers should redefine/extend model simulation
 	//
 
-	// \todo Move to something like: setupInitialization
-	ExportVariable retInit("ret", 1, 1, INT, ACADO_LOCAL);
-	retInit.setDoc("=0: OK, otherwise an error code of a QP solver.");
-	initialize.setup( "initializeSolver" );
-	initialize.doc( "Solver initialization. Must be called once before any other function call." );
-	initialize.setReturnValue(retInit);
-	initialize << retInit.getFullName() << String(" = 0;\n");
-
-	initialize.addComment( "This is a function which must be called once before any other function call!" );
-	initialize.addLinebreak( 2 );
-
 	modelSimulation.setup( "modelSimulation" );
+	ExportVariable retSim("ret", 1, 1, INT, ACADO_LOCAL, true);
+	modelSimulation.setReturnValue(retSim, false);
+	modelSimulation.addStatement(retSim == 0);
 	ExportIndex run;
 	modelSimulation.acquire( run );
 	ExportForLoop loop(run, 0, getN());
@@ -187,15 +202,15 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	get(CG_USE_OPENMP, useOMP);
 
 	x.setup("x", (getN() + 1), getNX(), REAL, ACADO_VARIABLES);
-	x.setDoc( (String)"Matrix containing " << (getN() + 1) << " differential variable vectors." );
+	x.setDoc( string("Matrix containing ") + toString(getN() + 1) + " differential variable vectors." );
 	z.setup("z", getN(), getNXA(), REAL, ACADO_VARIABLES);
-	z.setDoc( (String)"Matrix containing " << N << " algebraic variable vectors." );
+	z.setDoc( string("Matrix containing ") + toString( N ) + " algebraic variable vectors." );
 	u.setup("u", getN(), getNU(), REAL, ACADO_VARIABLES);
-	u.setDoc( (String)"Matrix containing " << N << " control variable vectors." );
-	p.setup("p", 1, getNP(), REAL, ACADO_VARIABLES);
-	p.setDoc( (String)"Vector of parameters." );
+	u.setDoc( string("Matrix containing ") + toString( N ) + " control variable vectors." );
+	od.setup("od", 1, getNOD(), REAL, ACADO_VARIABLES);
+	od.setDoc( "Vector of online data values." );
 
-	if (performsSingleShooting() == BT_FALSE)
+	if (performsSingleShooting() == false)
 	{
 		d.setup("d", getN() * getNX(), 1, REAL, ACADO_WORKSPACE);
 	}
@@ -204,8 +219,8 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	evGu.setup("evGu", N * NX, NU, REAL, ACADO_WORKSPACE);
 
 	ExportStruct dataStructWspace;
-	dataStructWspace = (useOMP && performsSingleShooting() == BT_FALSE) ? ACADO_LOCAL : ACADO_WORKSPACE;
-	state.setup("state", 1, (getNX() + getNXA()) * (getNX() + getNU() + 1) + getNU() + getNP(), REAL, dataStructWspace);
+	dataStructWspace = (useOMP && performsSingleShooting() == false) ? ACADO_LOCAL : ACADO_WORKSPACE;
+	state.setup("state", 1, (getNX() + getNXA()) * (getNX() + getNU() + 1) + getNU() + getNOD(), REAL, dataStructWspace);
 
 	unsigned indexZ   = NX + NXA;
 	unsigned indexGxx = indexZ + NX * NX;
@@ -213,35 +228,32 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	unsigned indexGxu = indexGzx + NX * NU;
 	unsigned indexGzu = indexGxu + NXA * NU;
 	unsigned indexU   = indexGzu + NU;
-	unsigned indexP   = indexU + NP;
+	unsigned indexOD   = indexU + NOD;
 
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Code for model simulation
 	//
 	////////////////////////////////////////////////////////////////////////////
-	if (performsSingleShooting() == BT_TRUE)
+	if (performsSingleShooting() == true)
 	{
 		modelSimulation.addStatement( state.getCols(0, NX)				== x.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(NX, NX + NXA)		== z.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( 0 ) );
-		modelSimulation.addStatement( state.getCols(indexU, indexP)		== p );
+		modelSimulation.addStatement( state.getCols(indexU, indexOD)		== od );
 		modelSimulation.addLinebreak( );
 	}
 
 	if ( useOMP )
 	{
-		stringstream s;
-		s << "#pragma omp parallel for private(" << run.getName().getName() << ", " << state.getFullName().getName()
-				<< ") shared("
-				<< evGx.getDataStructString().getName() << ", "
-				<< x.getDataStructString().getName()
-				<< ")" << endl;
 
-		modelSimulation.addStatement( s.str().c_str() );
+		modelSimulation
+			<< "#pragma omp parallel for private(" << run.getName() << ", " << state.getFullName()
+				<< ") shared(" << evGx.getDataStructString() << ", "
+				<< x.getDataStructString() << ")\n";
 	}
 
-	if (performsSingleShooting() == BT_FALSE)
+	if (performsSingleShooting() == false)
 	{
 		loop.addStatement( state.getCols(0, NX)			== x.getRow( run ) );
 		loop.addStatement( state.getCols(NX, NX + NXA)	== z.getRow( run ) );
@@ -250,36 +262,44 @@ returnValue ExportNLPSolver::setupSimulation( void )
 
 	// Fill in the input vector
 	loop.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( run ) );
-	loop.addStatement( state.getCols(indexU, indexP)	== p );
+	loop.addStatement( state.getCols(indexU, indexOD)	== od );
 	loop.addLinebreak( );
 
 	// Integrate the model
 	// TODO make that function calls can accept constant defined scalars
 	if ( integrator->equidistantControlGrid() )
 	{
-		if (performsSingleShooting() == BT_FALSE)
-			loop.addStatement( (String)"integrate"
-					<< "(" << state.getFullName() << ", 1);\n"  );
+		if (performsSingleShooting() == false)
+			loop 	<< retSim.getFullName() << " = "
+				 	 << "integrate" << "(" << state.getFullName() << ", 1);\n";
 		else
-			loop.addStatement( (String)"integrate"
+			loop 	<< retSim.getFullName() << " = " << "integrate"
 					<< "(" << state.getFullName() << ", "
 					<< run.getFullName() << " == 0"
-					<< ");\n"  );
+					<< ");\n";
 	}
 	else
 	{
-		if (performsSingleShooting() == BT_FALSE)
-			loop.addStatement( (String)"integrate"
-					<< "(" << state.getFullName() << ", 1, " << run.getFullName() << ");\n" );
+		if (performsSingleShooting() == false)
+			loop 	<< retSim.getFullName() << " = "
+					<< "integrate"
+					<< "(" << state.getFullName() << ", 1, " << run.getFullName() << ");\n";
 		else
-			loop.addStatement( (String)"integrate"
+			loop	<< retSim.getFullName() << " = "
+					<< "integrate"
 					<< "(" << state.getFullName() << ", "
 					<< run.getFullName() << " == 0"
-					<< ", " << run.getFullName() << ");\n" );
+					<< ", " << run.getFullName() << ");\n";
 	}
 	loop.addLinebreak( );
+	if (useOMP == 0)
+	{
+		// TODO In case we use OpenMP more sophisticated solution has to be found.
+		loop << "if (" << retSim.getFullName() << " != 0) return " << retSim.getFullName() << ";";
+		loop.addLinebreak( );
+	}
 
-	if ( performsSingleShooting() == BT_TRUE )
+	if ( performsSingleShooting() == true )
 	{
 		// Single shooting case: prepare for the next iteration
 		loop.addStatement( x.getRow(run + 1) == state.getCols(0, NX) );
@@ -317,27 +337,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 {
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
-
-	// Temporary variables
-	ExportVariable objSTemp, objSEndTermTemp;
-
-	////////////////////////////////////////////////////////////////////////////
-	//
-	// Setup arrival cost calc variables
-	//
-	////////////////////////////////////////////////////////////////////////////
-
 	int useArrivalCost;
 	get(CG_USE_ARRIVAL_COST, useArrivalCost);
-
-	if ( useArrivalCost )
-	{
-		SAC.setup("SAC", NX, NX, REAL, ACADO_VARIABLES);
-		SAC.setDoc("Arrival cost term: inverse of the covariance matrix.");
-		xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
-		xAC.setDoc("Arrival cost term: a priori state estimate.");
-		DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
-	}
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -345,48 +346,37 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	vector<String> lsqExternFunctions;
-	vector<ExportVariable> lsqExternMatrices;
+	LsqExternElements lsqExternElements;
+	_objective.getLSQTerms( lsqExternElements );
 
-	_objective.getLSQTerms(lsqExternMatrices, lsqExternFunctions);
+	LsqExternElements lsqExternEndTermElements;
+	_objective.getLSQEndTerms( lsqExternEndTermElements );
 
-	vector<String> lsqExternEndTermFunctions;
-	vector<ExportVariable> lsqExternEndTermMatrices;
-
-	_objective.getLSQEndTerms(lsqExternEndTermMatrices, lsqExternEndTermFunctions);
-
-	if (lsqExternMatrices.size() > 0 || lsqExternEndTermMatrices.size() > 0)
+	if (lsqExternElements.size() > 0 || lsqExternEndTermElements.size() > 0)
 	{
-		if (lsqExternMatrices.size() != lsqExternEndTermMatrices.size())
+		if (lsqExternElements.size() != 1 || lsqExternEndTermElements.size() != 1)
 			return ACADOERROR( RET_INVALID_ARGUMENTS );
-		if (lsqExternMatrices.size() > 1 || lsqExternEndTermMatrices.size() > 1)
-			return ACADOERROR( RET_INVALID_ARGUMENTS );
-
-		objSTemp = lsqExternMatrices[ 0 ];
-		objSTemp.setDataStruct( ACADO_VARIABLES );
-		objSEndTermTemp = lsqExternEndTermMatrices[ 0 ];
-		objSEndTermTemp.setDataStruct( ACADO_VARIABLES );
-
-		if (objSTemp.getGivenMatrix().isSquare() == BT_FALSE ||
-				objSEndTermTemp.getGivenMatrix().isSquare() == BT_FALSE)
+		if (lsqExternElements[ 0 ].W.isSquare() == false || lsqExternElements[ 0 ].W.isSquare() == false)
 			return ACADOERROR( RET_INVALID_ARGUMENTS );
 
-		setNY( objSTemp.getNumRows() );
-		setNYN( objSEndTermTemp.getNumRows() );
+		setNY( lsqExternElements[ 0 ].W.getNumRows() );
+		setNYN( lsqExternEndTermElements[ 0 ].W.getNumRows() );
 
 		if (variableObjS == YES)
 		{
 			objS.setup("W", N * NY, NY, REAL, ACADO_VARIABLES);
 		}
+		else if (lsqExternElements[ 0 ].givenW == false)
+		{
+			objS.setup("W", lsqExternElements[ 0 ].W, REAL, ACADO_VARIABLES, false, "", false);
+		}
 		else
 		{
-			objS.setup("W", NY, NY, REAL, ACADO_VARIABLES);
+			objS.setup("W", lsqExternElements[ 0 ].W, REAL, ACADO_VARIABLES);
 		}
-		objSEndTerm = CasADi::deepcopy( objSEndTermTemp );
-		objSEndTerm.setName( "WN" );
 
-		evaluateExternLSQ = lsqExternFunctions[ 0 ];
-		evaluateExternLSQEndTerm = lsqExternEndTermFunctions[ 0 ];
+		objSEndTerm.setup("WN", lsqExternEndTermElements[ 0 ].W,
+				REAL, ACADO_VARIABLES, false, "", lsqExternEndTermElements[ 0 ].givenW);
 
 		// ExportVariable objEvFx, objEvFu, objEvFxEnd; // aliasing
 
@@ -403,11 +393,14 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		QN1.setup("QN1", NX, NX, REAL, ACADO_WORKSPACE);
 		QN2.setup("QN2", NX, NYN, REAL, ACADO_WORKSPACE);
 
-		objValueIn.setup("objValueIn", 1, NX + 0 + NU + NP, REAL, ACADO_WORKSPACE);
+		objValueIn.setup("objValueIn", 1, NX + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
 		objValueOut.setup("objValueOut", 1,
 				NY < NYN ? NYN * (1 + NX + NU): NY * (1 + NX + NU), REAL, ACADO_WORKSPACE);
 
-		externObjective = BT_TRUE;
+		evaluateLSQ = ExportAcadoFunction(lsqExternElements[ 0 ].h);
+		evaluateLSQEndTerm = ExportAcadoFunction(lsqExternEndTermElements[ 0 ].h);
+
+		externObjective = true;
 
 		setupResidualVariables();
 
@@ -420,44 +413,44 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	vector<Function> lsqFunctions;
-	vector<ExportVariable> lsqMatrices;
-
-	vector<Function> lsqEndTermFunctions;
-	vector<ExportVariable> lsqEndTermMatrices;
-
 	Function objF, objFEndTerm;
 
-	_objective.getLSQTerms(lsqMatrices, lsqFunctions);
+	LsqElements lsqElements;
+	LsqElements lsqEndTermElements;
 
-	if(	lsqFunctions.size() == 0 || lsqMatrices.size() == 0 ||
-			lsqFunctions.size() != lsqMatrices.size() )
+	_objective.getLSQTerms( lsqElements );
+	_objective.getLSQEndTerms( lsqEndTermElements );
+
+	if(	lsqElements.size() == 0 )
 		return ACADOERRORTEXT(RET_INITIALIZE_FIRST, "Objective function is not initialized.");
-
-	else if (lsqFunctions.size() > 1 || lsqEndTermFunctions.size() > 1)
+	if (lsqElements.size() > 1 || lsqEndTermElements.size() > 1)
 		return ACADOERRORTEXT(RET_INITIALIZE_FIRST,
 				"Current implementation of code generation module\n"
 				"supports only one LSQ term definition per one OCP." );
 
-	_objective.getLSQEndTerms(lsqEndTermMatrices, lsqEndTermFunctions);
-
-	objF = lsqFunctions[ 0 ];
-	setNY( objF.getDim() );
-
-	objSTemp = lsqMatrices[ 0 ];
-
-	if (objSTemp.getNumCols() != objSTemp.getNumRows())
+	if (lsqElements[ 0 ].W.isSquare() == false)
 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Weighting matrices must be square.");
-	if (objSTemp.getNumRows() != (unsigned)objF.getDim())
+	if (lsqElements[ 0 ].W.getNumRows() != (unsigned)lsqElements[ 0 ].h.getDim())
 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Wrong dimensions of the weighting matrix.");
+
+	if ( lsqEndTermElements.size() == 0 )
+		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost must be defined");
+
+	if (lsqEndTermElements[ 0 ].W.isSquare() == false)
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Weighting matrices must be square.");
+	if (lsqEndTermElements[ 0 ].W.getNumRows() != (unsigned)lsqEndTermElements[ 0 ].h.getDim())
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Wrong dimensions of the weighting matrix.");
+
+	objF = lsqElements[ 0 ].h;
+	setNY( objF.getDim() );
 
 	DifferentialState dummy0;
 	Control dummy1;
 	dummy0.clearStaticCounters();
 	dummy1.clearStaticCounters();
 
-	DifferentialState vX( NX );
-	Control vU( NU );
+	DifferentialState vX("", NX, 1);
+	Control vU("", NU, 1);
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -465,30 +458,25 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	// TODO FunctionEvaluationTree: add isConstant()
-
 	// Setup the S matrix
-	if ( objSTemp.isGiven() == BT_FALSE || (objSTemp.getDim() != (NY * NY)) )
+	if (lsqElements[ 0 ].givenW == false)
 	{
 		if ( variableObjS == YES )
 		{
 			// We allow user to define different w. matrix on every node
-
-			objS.setup("W", N * NY, NY, REAL, ACADO_VARIABLES);
+			objS.setup("W", N * NY, NY, REAL, ACADO_VARIABLES, false);
 		}
 		else
 		{
-			objS.setup("W", NY, NY, REAL, ACADO_VARIABLES);
+			objS.setup("W", lsqElements[ 0 ].W, REAL, ACADO_VARIABLES, false, "", false);
 		}
 	}
 	else
 	{
-		Matrix mObjS = objSTemp.getGivenMatrix();
-
-		if (mObjS.isPositiveDefinite() == BT_FALSE)
+		if (lsqElements[ 0 ].W.isPositiveSemiDefinite() == false)
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
 
-		objS.setup("W", mObjS, REAL, ACADO_VARIABLES);
+		objS.setup("W", lsqElements[ 0 ].W, REAL, ACADO_VARIABLES);
 	}
 
 	Expression expF;
@@ -504,19 +492,20 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	Fx << expFx;
 	Fu << expFu;
 
-	if ( Fx.getNX() == 0 && Fx.getNU() == 0 )
+	if (expFx.isDependingOn( VT_CONTROL ) == true)
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
+				"Jacobian of the objective function w.r.t diff. states depends on controls.");
+	if (expFu.isDependingOn( VT_DIFFERENTIAL_STATE ) == true)
+		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
+				"Jacobian of the objective function w.r.t controls depends on diff. states.");
+
+	if (Fx.isConstant() == true)
 	{
 		EvaluationPoint epFx( Fx );
 
-		Matrix mFx(NY, NX);
+		DVector vFx = Fx.evaluate( epFx );
 
-		Vector vFx = Fx.evaluate( epFx );
-
-		for (unsigned i = 0; i < NY; ++i)
-			for(unsigned j = 0; j < NX; ++j)
-				mFx(i, j) = vFx(i * NX + j);
-
-		objEvFx.setup("evFx", mFx, REAL, ACADO_WORKSPACE);
+		objEvFx.setup("evFx", Eigen::Map<DMatrix>(vFx.data(), NY, NX), REAL, ACADO_WORKSPACE);
 	}
 	else
 	{
@@ -528,19 +517,13 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 //	objF << expFx;
 //	evFx.setup("evFx", NY, NX, REAL, ACADO_WORKSPACE);
 
-	if ( Fu.getNX() == 0 && Fu.getNU() == 0 )
+	if (Fu.isConstant() == true)
 	{
 		EvaluationPoint epFu( Fu );
 
-		Matrix mFu(NY, NU);
+		DVector vFu = Fu.evaluate( epFu );
 
-		Vector vFu = Fu.evaluate( epFu );
-
-		for (unsigned i = 0; i < NY; ++i)
-			for(unsigned j = 0; j < NU; ++j)
-				mFu(i, j) = vFu(i * NU + j);
-
-		objEvFu.setup("evFu", mFu, REAL, ACADO_WORKSPACE);
+		objEvFu.setup("evFu", Eigen::Map<DMatrix>(vFu.data(), NY, NU), REAL, ACADO_WORKSPACE);
 	}
 	else
 	{
@@ -562,22 +545,23 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	objAuxVar.setup("objAuxVar", objF.getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
 	evaluateLSQ.init(objF, "evaluateLSQ", NX, 0, NU);
 	evaluateLSQ.setGlobalExportVariable( objAuxVar );
+	evaluateLSQ.setPrivate( true );
 
-	objValueIn.setup("objValueIn", 1, NX + 0 + NU + NP, REAL, ACADO_WORKSPACE);
+	objValueIn.setup("objValueIn", 1, NX + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
 	objValueOut.setup("objValueOut", 1, objF.getDim(), REAL, ACADO_WORKSPACE);
 
 	//
 	// Optional pre-computing of Q1, Q2, R1, R2 matrices
 	//
 
-	if (objS.isGiven() == BT_TRUE && objEvFx.isGiven() == BT_TRUE)
+	if (objS.isGiven() == true && objEvFx.isGiven() == true)
 	{
 		if (useArrivalCost)
 			return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 		// Precompute Q1 and Q2;
 
-		Matrix m1(NX,NX), m2(NX, NY);
+		DMatrix m1(NX,NX), m2(NX, NY);
 
 		m2 = objEvFx.getGivenMatrix().transpose() * objS.getGivenMatrix();
 		m1 = m2 * objEvFx.getGivenMatrix();
@@ -597,8 +581,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		if (useArrivalCost)
 			return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
-		Q1 = zeros(NX, NX);
-		Q2 = zeros(NX, NY);
+		Q1 = zeros<double>(NX, NX);
+		Q2 = zeros<double>(NX, NY);
 	}
 	else
 	{
@@ -606,14 +590,12 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		Q2.setup("Q2", NX * N, NY, REAL, ACADO_WORKSPACE);
 	}
 
-	// TODO ExportVariable, add function isZero()
-	// TODO This if-then-else part should be done in more elegant way
-	if (objS.isGiven() == BT_TRUE && objEvFu.isGiven() == BT_TRUE)
+	if (objS.isGiven() == true && objEvFu.isGiven() == true)
 	{
 		// Precompute R1 and R2
 
-		Matrix m2 = objEvFu.getGivenMatrix().transpose() * objS.getGivenMatrix();
-		Matrix m1 = m2 * objEvFu.getGivenMatrix();
+		DMatrix m2 = objEvFu.getGivenMatrix().transpose() * objS.getGivenMatrix();
+		DMatrix m1 = m2 * objEvFu.getGivenMatrix();
 
 		R1 = m1;
 		if (m1 == m2)
@@ -627,8 +609,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	}
 	else if (Fu.isOneOrZero() == NE_ZERO)
 	{
-		R1 = zeros(NU, NU);
-		R2 = zeros(NU, NY);
+		R1 = zeros<double>(NU, NU);
+		R2 = zeros<double>(NU, NY);
 	}
 	else
 	{
@@ -642,37 +624,24 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	if ( lsqEndTermFunctions.size() == 0 )
-		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost must be defined for MHE export");
-	if (lsqEndTermFunctions.size() != lsqEndTermMatrices.size())
-		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "Dimensions of the terminal cost function and the terminal cost weighting matrix must be the same");
-
-	objSEndTermTemp = lsqEndTermMatrices[ 0 ];
-	objFEndTerm = lsqEndTermFunctions[ 0 ];
+	objFEndTerm = lsqEndTermElements[ 0 ].h;
 
 	if (objFEndTerm.getNU() > 0)
 		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost function must not depend on controls.");
 
 	setNYN( objFEndTerm.getDim() );
 
-	if (objSEndTermTemp.getNumCols() != objSEndTermTemp.getNumRows())
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Weighting matrices must be square.");
-	if (objSEndTermTemp.getNumRows() != (unsigned)objFEndTerm.getDim())
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Wrong dimensions of the weighting matrix.");
-
 	// Setup the SN matrix
-	if (objSEndTermTemp.isGiven() == BT_FALSE || objSEndTermTemp.getDim() != (NYN * NYN))
+	if (lsqEndTermElements[ 0 ].givenW == false)
 	{
-		objSEndTerm.setup("WN", NYN, NYN, REAL, ACADO_VARIABLES);
+		objSEndTerm.setup("WN", lsqEndTermElements[ 0 ].W, REAL, ACADO_VARIABLES, false, "", false);
 	}
 	else
 	{
-		Matrix mWN = objSEndTermTemp.getGivenMatrix();
-
-		if (mWN.isPositiveDefinite() == BT_FALSE)
+		if (lsqEndTermElements[ 0 ].W.isPositiveDefinite() == false)
 			return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
 
-		objSEndTerm.setup("WN", mWN, REAL, ACADO_VARIABLES);
+		objSEndTerm.setup("WN", lsqEndTermElements[ 0 ].W, REAL, ACADO_VARIABLES);
 	}
 
 	Expression expFEndTerm;
@@ -685,20 +654,13 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	Function FEndTermX;
 	FEndTermX << expFEndTermX;
 
-	if ( FEndTermX.getNX() == 0 )
+	if (FEndTermX.isConstant() == true)
 	{
 		EvaluationPoint epFEndTermX( FEndTermX );
 
-		Matrix mFEndX(NYN, NX);
+		DVector vFx = FEndTermX.evaluate( epFEndTermX );
 
-		Vector vFx = FEndTermX.evaluate( epFEndTermX );
-
-		// And now reshape vFx and vFu to export variables
-		for (unsigned i = 0; i < NYN; ++i)
-			for(unsigned j = 0; j < NX; ++j)
-				mFEndX(i, j) = vFx(i * NX + j);
-
-		objEvFxEnd.setup("evFxEnd", mFEndX, REAL, ACADO_WORKSPACE);
+		objEvFxEnd.setup("evFxEnd", Eigen::Map<DMatrix>(vFx.data(), NYN, NX), REAL, ACADO_WORKSPACE);
 	}
 	else
 	{
@@ -718,17 +680,18 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 	evaluateLSQEndTerm.init(objFEndTerm, "evaluateLSQEndTerm", NX, 0, 0);
 	evaluateLSQEndTerm.setGlobalExportVariable( objAuxVar );
+	evaluateLSQEndTerm.setPrivate( true );
 
 	if (objFEndTerm.getDim() > objF.getDim())
 	{
 		objValueOut.setup("objValueOut", 1, objFEndTerm.getDim(), REAL, ACADO_WORKSPACE);
 	}
 
-	if (objSEndTerm.isGiven() == BT_TRUE && objEvFxEnd.isGiven() == BT_TRUE)
+	if (objSEndTerm.isGiven() == true && objEvFxEnd.isGiven() == true)
 	{
 		// Precompute
 
-		Matrix m2, m1;
+		DMatrix m2, m1;
 
 		m2 = objEvFxEnd.getTranspose().getGivenMatrix() * objSEndTerm.getGivenMatrix();
 		m1 = m2 * objEvFxEnd.getGivenMatrix();
@@ -741,8 +704,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	}
 	else if (FEndTermX.isOneOrZero() == NE_ZERO)
 	{
-		QN1 = zeros(NX, NX);
-		QN2 = zeros(NX, NYN);
+		QN1 = zeros<double>(NX, NX);
+		QN2 = zeros<double>(NX, NYN);
 	}
 	else
 	{
@@ -762,7 +725,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 	std::vector<ExportVariable> vSlx, vSlu;
 
-	_objective.getLSQLinearTerms(vSlx, vSlu);
+//	_objective.getLSQLinearTerms(vSlx, vSlu);
 
 	if (vSlx.size() > 0 && vSlu.size() > 0)
 	{
@@ -774,7 +737,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 			if (vSlx[ 0 ].isGiven() && vSlx[ 0 ].getDim() != NX && vSlx[ 0 ].getNumCols() == 1)
 				return ACADOERROR(RET_INVALID_ARGUMENTS);
 
-			if (vSlx[ 0 ].isGiven() == BT_TRUE)
+			if (vSlx[ 0 ].isGiven() == true)
 				objSlx.setup("Wlx", vSlx[ 0 ].getGivenMatrix(), REAL, ACADO_VARIABLES);
 			else
 				objSlx.setup("Wlx", NX, 1, REAL, ACADO_VARIABLES);
@@ -785,18 +748,12 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 			if (vSlu[ 0 ].isGiven() && vSlu[ 0 ].getDim() != NU && vSlu[ 0 ].getNumCols() == 1)
 				return ACADOERROR(RET_INVALID_ARGUMENTS);
 
-			if (vSlu[ 0 ].isGiven() == BT_TRUE)
+			if (vSlu[ 0 ].isGiven() == true)
 				objSlu.setup("Wlu", vSlu[ 0 ].getGivenMatrix(), REAL, ACADO_VARIABLES);
 			else
 				objSlu.setup("Wlu", NU, 1, REAL, ACADO_VARIABLES);
 		}
 	}
-
-	////////////////////////////////////////////////////////////////////////////
-	//
-	// Setup the residual variables
-	//
-	////////////////////////////////////////////////////////////////////////////
 
 	setupResidualVariables();
 
@@ -806,10 +763,10 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 returnValue ExportNLPSolver::setupResidualVariables()
 {
 	y.setup("y",  getN() * getNY(), 1, REAL, ACADO_VARIABLES);
-	y.setDoc( (String)"Matrix containing " << getNY() <<
-			" reference/measurement vectors for first " << N <<" nodes." );
+	y.setDoc( string("Matrix containing ") + toString( N ) +
+			" reference/measurement vectors of size " + toString( NY ) + " for first " + toString( N ) + " nodes." );
 	yN.setup("yN", getNYN(), 1, REAL, ACADO_VARIABLES);
-	yN.setDoc( (String)"Reference/measurement vector for the " << N + 1 << ". node." );
+	yN.setDoc( string("Reference/measurement vector for the ") + toString(N + 1) + ". node." );
 	Dy.setup("Dy", getN() * getNY(), 1, REAL,ACADO_WORKSPACE);
 	DyN.setup("DyN", getNYN(), 1, REAL, ACADO_WORKSPACE);
 
@@ -838,9 +795,9 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 	constraints.getBounds( tmp );
 
-	BooleanType isFinite = BT_FALSE;
-	Vector lbTmp;
-	Vector ubTmp;
+	bool boxConIsFinite = false;
+	DVector lbTmp;
+	DVector ubTmp;
 
 	//
 	// Extract box constraints on inputs
@@ -850,14 +807,14 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		lbTmp = tmp.u->getLowerBounds( i );
 		ubTmp = tmp.u->getUpperBounds( i );
 
-		if ( (ubTmp - lbTmp).isPositive() == BT_FALSE )
+		if ((ubTmp >= lbTmp) == false)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Some lower bounds are bigger than upper bounds?");
 
-		if ( (lbTmp.isFinite( ) == BT_TRUE) || (ubTmp.isFinite( ) == BT_TRUE) )
-			isFinite = BT_TRUE;
+		if (isFinite( lbTmp ) || isFinite( ubTmp ))
+			boxConIsFinite = true;
 	}
 
-	if (isFinite == BT_TRUE)
+	if (boxConIsFinite == true)
 		uBounds = *(tmp.u);
 	else
 		uBounds.init();
@@ -865,34 +822,20 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	//
 	// Extract box constraints on states
 	//
-	isFinite = BT_FALSE;
-	xBoundsIdx.clear();
-
+	boxConIsFinite = false;
 	for (unsigned i = 0; i < tmp.x->getNumPoints(); ++i)
 	{
 		lbTmp = tmp.x->getLowerBounds( i );
 		ubTmp = tmp.x->getUpperBounds( i );
 
-		if ( (ubTmp - lbTmp).isPositive() == BT_FALSE )
+		if ((ubTmp >= lbTmp) == false)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Some lower bounds are bigger than upper bounds?");
 
-		if ( (lbTmp.isFinite( ) == BT_TRUE) || (ubTmp.isFinite( ) == BT_TRUE) )
-			isFinite = BT_TRUE;
-
-		// This is maybe not necessary
-		if (isFinite == BT_FALSE || i == 0)
-			continue;
-
-		for (unsigned j = 0; j < lbTmp.getDim(); ++j)
-		{
-			if ( ( acadoIsFinite( ubTmp( j ) ) == BT_TRUE ) || ( acadoIsFinite( lbTmp( j ) ) == BT_TRUE ) )
-			{
-				xBoundsIdx.push_back(i * lbTmp.getDim() + j);
-			}
-		}
+		if (isFinite( lbTmp ) || isFinite( ubTmp ))
+			boxConIsFinite = true;
 	}
 
-	if ( isFinite == BT_TRUE )
+	if ( boxConIsFinite == true )
 		xBounds = *(tmp.x);
 	else
 		xBounds.init();
@@ -908,8 +851,8 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	dummy0.clearStaticCounters();
 	dummy1.clearStaticCounters();
 
-	DifferentialState vX( NX );
-	Control vU( NU );
+	DifferentialState vX("", NX, 1);
+	Control vU("", NU, 1);
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -922,12 +865,16 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 	Function pacH;
 
+	DMatrix pacLBMatrix, pacUBMatrix;
 	constraints.getPathConstraints(pacH, pacLBMatrix, pacUBMatrix);
 
 	dimPacH = pacH.getDim();
 
 	if (dimPacH != 0)
 	{
+		lbPathConValues = pacLBMatrix.getRows(0, N - 1).makeVector();
+		ubPathConValues = pacUBMatrix.getRows(0, N - 1).makeVector();
+
 		Expression expPacH, expPacHx, expPacHu;
 		pacH.getExpression( expPacH );
 
@@ -942,23 +889,14 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		pacEvH.setup("evH", N * dimPacH, 1, REAL, ACADO_WORKSPACE);
 
 		// Check derivative of path constraints w.r.t. x
-		if (pacHx.getNX() == 0 && pacHx.getNU() == 0 && pacHx.getNP() == 0)
+		if (pacHx.isConstant())
 		{
 			EvaluationPoint epPacHx( pacHx );
-			Vector v = pacHx.evaluate( epPacHx );
+			DVector v = pacHx.evaluate( epPacHx );
 
-			if (v.isZero() == BT_FALSE)
+			if (v.isZero() == false)
 			{
-				// Hard-code derivative evaluation
-
-				Matrix m;
-				m.init(dimPacH, NX);
-
-				for (unsigned j = 0; j < dimPacH; ++j)
-					for (unsigned k = 0; k < NX; ++k)
-						m(j, k) = v(j * NX + k);
-
-				pacEvHx.setup("evHx", m, REAL, ACADO_WORKSPACE);
+				pacEvHx.setup("evHx", Eigen::Map<DMatrix>(v.data(), dimPacH, NX), REAL, ACADO_WORKSPACE);
 			}
 		}
 		else
@@ -969,23 +907,14 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		}
 
 		// Check derivative of path constraints w.r.t. u
-		if (pacHu.getNX() == 0 && pacHu.getNU() == 0 && pacHu.getNP() == 0)
+		if (pacHu.isConstant())
 		{
 			EvaluationPoint epPacHu( pacHu );
-			Vector v = pacHu.evaluate( epPacHu );
+			DVector v = pacHu.evaluate( epPacHu );
 
-			if (v.isZero() == BT_FALSE)
+			if (v.isZero() == false)
 			{
-				// Hard-code derivative evaluation
-
-				Matrix m;
-				m.init(dimPacH, NU);
-
-				for (unsigned j = 0; j < dimPacH; ++j)
-					for (unsigned k = 0; k < NU; ++k)
-						m(j, k) = v(j * NU + k);
-
-				pacEvHu.setup("evHu", m, REAL, ACADO_WORKSPACE);
+				pacEvHu.setup("evHu", Eigen::Map<DMatrix>(v.data(), dimPacH, NU), REAL, ACADO_WORKSPACE);
 			}
 		}
 		else
@@ -995,16 +924,16 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 			pacEvHu.setup("evHu", N * dimPacH, NU, REAL, ACADO_WORKSPACE);
 		}
 
-		if (performsSingleShooting() == BT_FALSE)
+		if (performsSingleShooting() == false)
 		{
 			pacEvHxd.setup("evHxd", dimPacH, 1, REAL, ACADO_WORKSPACE);
 		}
 
 		conAuxVar.setup("conAuxVar", pacH.getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
-		conValueIn.setup("conValueIn", 1, NX + 0 + NU + NP, REAL, ACADO_WORKSPACE);
+		conValueIn.setup("conValueIn", 1, NX + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
 		conValueOut.setup("conValueOut", 1, pacH.getDim(), REAL, ACADO_WORKSPACE);
 
-		evaluatePathConstraints.init(pacH, "evaluatePathConstraints", NX, 0, NU);
+		evaluatePathConstraints.init(pacH, "evaluatePathConstraints", NX, 0, NU, NP, 0, NOD);
 		evaluatePathConstraints.setGlobalExportVariable( conAuxVar );
 	}
 
@@ -1016,7 +945,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 	Function pocH;
 	Expression expPocH, expPocHx, expPocHu;
-	Matrix pocLBMatrix, pocUBMatrix;
+	DMatrix pocLBMatrix, pocUBMatrix;
 
 	evaluatePointConstraints.resize(N + 1);
 
@@ -1060,18 +989,17 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 			// Stack the new function
 			evaluatePointConstraints[ i ] = std::tr1::shared_ptr< ExportAcadoFunction >(new ExportAcadoFunction);
 
-			String pocFName;
+			std::string pocFName;
 
-			pocFName = "evaluatePointConstraint";
-			pocFName << String( i );
+			pocFName = "evaluatePointConstraint" + toString( i );
 
 			if (i < N)
 			{
-				evaluatePointConstraints[ i ]->init(pocH, pocFName, NX, 0, NU);
+				evaluatePointConstraints[ i ]->init(pocH, pocFName, NX, 0, NU, NP, 0, NOD);
 			}
 			else
 			{
-				evaluatePointConstraints[ i ]->init(pocH, pocFName, NX, 0, 0);
+				evaluatePointConstraints[ i ]->init(pocH, pocFName, NX, 0, 0, NP, 0, NOD);
 			}
 
 			// Determine the maximum function dimension
@@ -1082,8 +1010,8 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 			// TODO This is too specific for condensing, thus should be moved to condensing class.
 			// Stack the lower and upper bounds
-			pocLB.append( pocLBMatrix.getRow( 0 ) );
-			pocUB.append( pocUBMatrix.getRow( 0 ) );
+			lbPointConValues.append( pocLBMatrix.getRow( 0 ) );
+			ubPointConValues.append( pocUBMatrix.getRow( 0 ) );
 
 			pocLbStack[ i ] = pocLBMatrix.getRow( 0 );
 			pocUbStack[ i ] = pocUBMatrix.getRow( 0 );
@@ -1093,7 +1021,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 //	std::cout << "lb dim: " << pocLB.getDim() << std::endl;
 //	std::cout << "ub dim: " << pocUB.getDim() << std::endl;
 
-	dimPocH = pocLB.getDim();
+	dimPocH = lbPointConValues.getDim();
 
 	if ( dimPocH != 0 )
 	{
@@ -1117,7 +1045,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 				(conAuxVar.getDim() < pocAuxVarDim) ? pocAuxVarDim : conAuxVar.getDim();
 		conAuxVar.setup("conAuxVar", conAuxVarDim, 1, REAL, ACADO_WORKSPACE);
 
-		conValueIn.setup("conValueIn", 1, NX + 0 + NU + NP, REAL, ACADO_WORKSPACE);
+		conValueIn.setup("conValueIn", 1, NX + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
 
 		unsigned conValueOutDim =
 				(dimPocHMax < conValueOut.getDim()) ? conValueOut.getDim() : dimPocHMax;
@@ -1130,7 +1058,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 		pocEvHu.setup("pocEvHu", dimPocH, NU, REAL, ACADO_WORKSPACE);
 
 		// Setup one more variable for MS:
-		if (performsSingleShooting() == BT_FALSE)
+		if (performsSingleShooting() == false)
 		{
 			pocEvHxd.setup("pocEvHxd", dimPocH, 1, REAL, ACADO_WORKSPACE);
 		}
@@ -1144,12 +1072,12 @@ unsigned ExportNLPSolver::getNumComplexConstraints( void )
 	return N * dimPacH + dimPocH;
 }
 
-BooleanType ExportNLPSolver::initialStateFixed() const
+bool ExportNLPSolver::initialStateFixed() const
 {
 	int fixInitialState;
 	get(FIX_INITIAL_STATE, fixInitialState);
 
-	return (BooleanType)fixInitialState;
+	return (bool)fixInitialState;
 }
 
 returnValue ExportNLPSolver::setupAuxiliaryFunctions()
@@ -1183,10 +1111,10 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	ExportVariable xEnd("xEnd", NX, 1, REAL, ACADO_LOCAL);
 	xEnd.setDoc( "Value for the x vector on the last node. If =0 the old value is used." );
 	ExportIndex strategy( "strategy" );
-	strategy.setDoc( (String)"Shifting strategy: 1. Initialize node "<< N + 1 << " with xEnd." \
-			" 2. Initialize node " << N + 1 << " by forward simulation." );
+	strategy.setDoc( string("Shifting strategy: 1. Initialize node ") + toString(N + 1) + " with xEnd." \
+			" 2. Initialize node " + toString(N + 1) + " by forward simulation." );
 	// TODO Think about adding zEnd here at some point...
-	shiftStates.setup("shiftStates", strategy.makeArgument(), xEnd, uEnd);
+	shiftStates.setup("shiftStates", strategy, xEnd, uEnd);
 	shiftStates.addIndex( index );
 	if (NXA == 0)
 		shiftStates.doc( "Shift differential variables vector by one interval." );
@@ -1204,7 +1132,6 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 		shiftStates.addStatement( zLoop );
 	}
 
-
 	shiftStates.addLinebreak( );
 	shiftStates.addStatement( "if (strategy == 1 && xEnd != 0)\n{\n" );
 	shiftStates.addStatement( x.getRow( N ) == xEnd.getTranspose() );
@@ -1217,7 +1144,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	unsigned indexGxu = indexGzx + NX * NU;
 	unsigned indexGzu = indexGxu + NXA * NU;
 	unsigned indexU   = indexGzu + NU;
-	unsigned indexP   = indexU + NP;
+	unsigned indexOD   = indexU + NOD;
 
 	shiftStates.addStatement( state.getCols(0, NX) == x.getRow( N ) );
 	shiftStates.addStatement( state.getCols(NX, NX + NXA) == z.getRow(N - 1) );
@@ -1227,18 +1154,16 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	shiftStates.addStatement( "else\n{\n" );
 	shiftStates.addStatement( state.getCols(indexGzu, indexU) == u.getRow(N - 1) );
 	shiftStates.addStatement( "}\n" );
-	shiftStates.addStatement( state.getCols(indexU, indexP) == p );
+	shiftStates.addStatement( state.getCols(indexU, indexOD) == od );
 	shiftStates.addLinebreak( );
 
 	if ( integrator->equidistantControlGrid() )
 	{
-		shiftStates.addStatement( (String)"integrate"
-				<< "(" << state.getFullName() << ", 1);\n"  );
+		shiftStates << "integrate" << "(" << state.getFullName() << ", 1);\n";
 	}
 	else
 	{
-		shiftStates.addStatement( (String)"integrate"
-				<< "(" << state.getFullName() << ", 1, " << N - 1 << ");\n" );
+		shiftStates << "integrate" << "(" << state.getFullName() << ", 1, " << toString(N - 1) << ");\n";
 	}
 
 	shiftStates.addLinebreak( );
@@ -1267,27 +1192,27 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	iLoop.addStatement( state.getCols(0, NX)		== x.getRow( index ) );
 	if ( NXA )
 	{
-		iLoop << String("if (") << index.getFullName() << String(" > 0){");
+		iLoop << std::string("if (") << index.getFullName() << std::string(" > 0){");
 		iLoop.addStatement( state.getCols(NX, NX + NXA)	== z.getRow(index - 1) );
-		iLoop << String("}\n");
+		iLoop << std::string("}\n");
 	}
 	iLoop.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( index ) );
-	iLoop.addStatement( state.getCols(indexU, indexP)	== p );
+	iLoop.addStatement( state.getCols(indexU, indexOD)	== od );
 	iLoop.addLinebreak( );
 
 	if ( integrator->equidistantControlGrid() )
 	{
-		iLoop.addStatement( (String)"integrate"
+		iLoop << "integrate"
 				<< "(" << state.getFullName() << ", "
 				<< index.getFullName() << " == 0"
-				<< ");\n"  );
+				<< ");\n";
 	}
 	else
 	{
-		iLoop.addStatement( (String)"integrate"
+		iLoop << "integrate"
 				<< "(" << state.getFullName() << ", "
 				<< index.getFullName() << " == 0"
-				<< ", " << index.getFullName() << ");\n" );
+				<< ", " << index.getFullName() << ");\n";
 	}
 
 	iLoop.addLinebreak();
@@ -1306,7 +1231,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	getObjective.setup( "getObjective" );
 	getObjective.doc( "Calculate the objective value." );
-	ExportVariable objVal("objVal", 1, 1, REAL, ACADO_LOCAL, BT_TRUE);
+	ExportVariable objVal("objVal", 1, 1, REAL, ACADO_LOCAL, true);
 	objVal.setDoc( "Value of the objective function." );
 	getObjective.setReturnValue( objVal );
 
@@ -1326,14 +1251,11 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( oInd ) );
 	loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( oInd ) );
-	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NP) == p );
+	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	if (externObjective == BT_FALSE)
-		loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
-	else
-		loopObjective.addFunctionCall( evaluateExternLSQ, objValueIn, objValueOut );
+	loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 
 	// Stack the measurement function value
 	loopObjective.addStatement(
@@ -1344,13 +1266,11 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	getObjective.addStatement( loopObjective );
 
 	getObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
-	getObjective.addStatement( objValueIn.getCols(NX, NX + NP) == p );
+	getObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
 	// Evaluate the objective function
-	if (externObjective == BT_FALSE)
-		getObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
-	else
-		getObjective.addFunctionCall( evaluateExternLSQEndTerm, objValueIn, objValueOut );
+	getObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
+
 	getObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) - yN.getTranspose() );
 
 	getObjective.addStatement( objVal == 0 );
@@ -1392,7 +1312,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 unsigned ExportNLPSolver::weightingMatricesType( void ) const
 {
-	if (objS.isGiven() == BT_TRUE && objSEndTerm.isGiven() == BT_TRUE)
+	if (objS.isGiven() == true && objSEndTerm.isGiven() == true)
 		return 0;
 
 	// get the option for variable objS matrix.
@@ -1411,9 +1331,18 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	if (useArrivalCost == NO)
 		return SUCCESSFUL_RETURN;
 
-	ExportVariable evRet("ret", 1, 1, INT, ACADO_LOCAL, BT_TRUE);
+	if ( useArrivalCost )
+	{
+		SAC.setup("SAC", NX, NX, REAL, ACADO_VARIABLES);
+		SAC.setDoc("Arrival cost term: inverse of the covariance matrix.");
+		xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
+		xAC.setDoc("Arrival cost term: a priori state estimate.");
+		DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
+	}
 
-	ExportVariable evReset("reset", 1, 1, INT, ACADO_LOCAL, BT_TRUE);
+	ExportVariable evRet("ret", 1, 1, INT, ACADO_LOCAL, true);
+
+	ExportVariable evReset("reset", 1, 1, INT, ACADO_LOCAL, true);
 	evReset.setDoc("Reset S_{AC}. Set it to 1 to initialize arrival cost calculation, "
 				   "and later should set it to 0.");
 
@@ -1452,13 +1381,11 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	cholSAC.init("cholSAC", NX);
 	cholSAC.setup();
 
-	updateArrivalCost.addStatement(
-			String( "\nif ( " ) << evReset.getName() << " )\n{\n"
-	);
+	updateArrivalCost << "\nif ( " << evReset.getName() << " )\n{\n";
 	updateArrivalCost.addStatement( acXx == SAC );
 	updateArrivalCost.addFunctionCall(cholSAC.getName(), acXx);
 	updateArrivalCost << (acP == acXx.getTranspose());
-	updateArrivalCost << String( "return 0;\n}\n\n" );
+	updateArrivalCost << std::string( "return 0;\n}\n\n" );
 
 	//
 	// Evaluate model @ the first node
@@ -1470,19 +1397,17 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	unsigned indexGxu = indexGzx + NX * NU;
 	unsigned indexGzu = indexGxu + NXA * NU;
 	unsigned indexU   = indexGzu + NU;
-	unsigned indexP   = indexU + NP;
+	unsigned indexNOD   = indexU + NOD;
 
 	updateArrivalCost.addStatement( state.getCols(0, NX) == x.getRow( 0 ) );
 	updateArrivalCost.addStatement( state.getCols(NX, NX + NXA) == z.getRow( 0 ) );
 	updateArrivalCost.addStatement( state.getCols(indexGzu, indexU) == u.getRow( 0 ) );
-	updateArrivalCost.addStatement( state.getCols(indexU, indexP) == p );
+	updateArrivalCost.addStatement( state.getCols(indexU, indexNOD) == od );
 
 	if (integrator->equidistantControlGrid())
-		updateArrivalCost.addStatement(
-				(String) "integrate" << "(" << state.getFullName() << ", 1);\n");
+		updateArrivalCost << "integrate" << "(" << state.getFullName() << ", 1);\n";
 	else
-		updateArrivalCost.addStatement(
-				(String) "integrate" << "(" << state.getFullName() << ", 1, " << 0 << ");\n");
+		updateArrivalCost << "integrate" << "(" << state.getFullName() << ", 1, " << toString(0) << ");\n";
 	updateArrivalCost.addLinebreak( );
 
 	//
@@ -1491,21 +1416,18 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 
 	updateArrivalCost.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( 0 ) );
 	updateArrivalCost.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( 0 ) );
-	updateArrivalCost.addStatement( objValueIn.getCols(NX + NU, NX + NU + NP) == p );
+	updateArrivalCost.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 
-	if (externObjective == BT_FALSE)
-		updateArrivalCost.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
-	else
-		updateArrivalCost.addFunctionCall(evaluateExternLSQ, objValueIn, objValueOut);
+	updateArrivalCost.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 	updateArrivalCost.addLinebreak( );
 
 	//
 	// Cholesky decomposition of the term objS
 	//
-	if (objS.isGiven() == BT_TRUE)
+	if (objS.isGiven() == true)
 	{
-		Matrix m = objS.getGivenMatrix();
-		Matrix mChol = m.getCholeskyDecomposition();
+		DMatrix m = objS.getGivenMatrix();
+		DMatrix mChol = m.llt().matrixL();
 
 		initialize << (acVL == mChol);
 	}
@@ -1545,9 +1467,9 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 
 	// Clear A and b
 	updateArrivalCost
-		<< (acA == zeros(AM, AN))
-		<< (acb == zeros(AM, 1))
-		<< String( "\n" );
+		<< (acA == zeros<double>(AM, AN))
+		<< (acb == zeros<double>(AM, 1))
+		<< std::string( "\n" );
 
 	// Copy products to the matrices
 	updateArrivalCost
@@ -1555,7 +1477,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 		<< (acXu.makeRowVector() == state.getCols(indexGzx, indexGxu));
 
 	unsigned ind = NY;
-	if (objEvFx.isGiven() == BT_TRUE)
+	if (objEvFx.isGiven() == true)
 	{
 		initialize << (acHx == objEvFx);
 	}
@@ -1565,7 +1487,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 		ind += NY * NX;
 	}
 
-	if (objEvFu.isGiven() == BT_TRUE)
+	if (objEvFu.isGiven() == true)
 	{
 		initialize << (acHu == objEvFu);
 	}
@@ -1622,7 +1544,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	// Solver the linear system
 	// We need first NX back-solves to get solution of this linear system...
 	//
-	acSolver.init(AM, AN, NX, BT_FALSE, BT_FALSE, String("ac"));
+	acSolver.init(AM, AN, NX, false, false, std::string("ac"));
 	acTmp = acSolver.getGlobalExportVariable( 1 );
 	updateArrivalCost.addFunctionCall(acSolver.getNameSolveFunction(), acA, acb, acTmp);
 

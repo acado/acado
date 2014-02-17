@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -46,9 +46,9 @@ int main( ){
 
     // DEFINE VALRIABLES:
     // ---------------------------
-    Matrix                 A(3,3);
-    Vector                 b(3)  ;
-    DifferentialState      x(3)  ;
+    DMatrix                 A(3,3);
+    DVector                 b(3)  ;
+    DifferentialState      x("", 3, 1);
     Function               f     ;
 
 
@@ -69,16 +69,16 @@ int main( ){
     // --------------------
     EvaluationPoint zz(f);
 
-    Vector xx(3);
+    DVector xx(3);
     xx(0) = 1.0;
     xx(1) = 2.0;
     xx(2) = 3.0;
 
     zz.setX( xx );
 
-    Vector result = f.evaluate( zz );
+    DVector result = f.evaluate( zz );
 
-    result.print("result: \n");
+    result.print(std::cout, "result");
 
     return 0;
 }

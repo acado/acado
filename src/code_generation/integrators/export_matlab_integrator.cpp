@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,13 +43,13 @@ using namespace std;
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportMatlabIntegrator::ExportMatlabIntegrator(	const String& _templateName,
-												const String& _fileName,
-												const String& _commonHeaderName,
-												const String& _realString,
-												const String& _intString,
+ExportMatlabIntegrator::ExportMatlabIntegrator(	const std::string& _templateName,
+												const std::string& _fileName,
+												const std::string& _commonHeaderName,
+												const std::string& _realString,
+												const std::string& _intString,
 												int _precision,
-												const String& _commentString
+												const std::string& _commentString
 						) : ExportTemplatedFile(_templateName, _fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
 {}
 
@@ -74,15 +74,15 @@ ExportMatlabIntegrator& ExportMatlabIntegrator::operator=(	const ExportMatlabInt
 	return *this;
 }
 
-returnValue ExportMatlabIntegrator::configure(	const uint firstOrder, const uint online, const uint debugMode, const uint timingCalls, const uint numStages )
+returnValue ExportMatlabIntegrator::configure(	const uint sensProp, const uint online, const uint debugMode, const uint timingCalls, const uint numStages )
 {	
 	// Configure the dictionary
-	dictionary[ "@FIRST_ORDER_SENS@" ] =  std::string(String(firstOrder).getName());
-	dictionary[ "@ONLINE_GRID@" ] =  std::string(String(online).getName());
-	dictionary[ "@DEBUG_MODE@" ] =  std::string(String(debugMode).getName());
-	if( timingCalls > 1 ) 	dictionary[ "@CALLS_TIMING@" ] =  std::string(String(timingCalls).getName());
-	else 					dictionary[ "@CALLS_TIMING@" ] =  std::string(String(1).getName());
-	dictionary[ "@NUM_STAGES@" ] =  std::string(String(numStages).getName());
+	dictionary[ "@SENS_PROP@" ] =  toString(sensProp);
+	dictionary[ "@ONLINE_GRID@" ] =  toString(online);
+	dictionary[ "@DEBUG_MODE@" ] =  toString(debugMode);
+	if( timingCalls > 1 ) 	dictionary[ "@CALLS_TIMING@" ] =  toString(timingCalls);
+	else 					dictionary[ "@CALLS_TIMING@" ] =  toString(1);
+	dictionary[ "@NUM_STAGES@" ] =  toString(numStages);
 	
 	// And then fill a template file
 	fillTemplate();

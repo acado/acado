@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -84,42 +84,42 @@ class ParameterEstimationAlgorithm : public OptimizationAlgorithm {
          *  (with respect to the parameters)                                         \n
          *  \return SUCCESSFUL_RETURN
          */
-        returnValue getParameterVarianceCovariance( Matrix &pVar );
+        returnValue getParameterVarianceCovariance( DMatrix &pVar );
 
 
         /** Method to obtain the variance-coveriance matrix in the optimal solution  \n
          *  (with respect to the parameters)                                         \n
          *  \return SUCCESSFUL_RETURN
          */
-        returnValue getDifferentialStateVarianceCovariance( Matrix &xVar );
+        returnValue getDifferentialStateVarianceCovariance( DMatrix &xVar );
 
 
         /** Method to obtain the variance-coveriance matrix in the optimal solution  \n
          *  (with respect to the parameters)                                         \n
          *  \return SUCCESSFUL_RETURN
          */
-        returnValue getAlgebraicStateVarianceCovariance( Matrix &xaVar );
+        returnValue getAlgebraicStateVarianceCovariance( DMatrix &xaVar );
 
 
         /** Method to obtain the variance-coveriance matrix in the optimal solution  \n
          *  (with respect to the parameters)                                         \n
          *  \return SUCCESSFUL_RETURN
          */
-        returnValue getControlCovariance( Matrix &uVar );
+        returnValue getControlCovariance( DMatrix &uVar );
 
 
         /** Method to obtain the variance-coveriance matrix in the optimal solution  \n
          *  (with respect to the parameters)                                         \n
          *  \return SUCCESSFUL_RETURN
          */
-        returnValue getDistubanceVarianceCovariance( Matrix &wVar );
+        returnValue getDistubanceVarianceCovariance( DMatrix &wVar );
 
 
         /** Method to obtain the variance-coveriance matrix in the optimal solution  \n
          *                                                                           \n
          *  \return SUCCESSFUL_RETURN
          */
-        returnValue getVarianceCovariance( Matrix &var );
+        returnValue getVarianceCovariance( DMatrix &var );
 
 
 

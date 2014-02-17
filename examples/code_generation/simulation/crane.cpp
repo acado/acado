@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,9 +32,12 @@
 
 #include <acado_code_generation.hpp>
 
-int main() {
-	USING_NAMESPACE_ACADO
 
+using namespace std;
+USING_NAMESPACE_ACADO
+
+int main()
+{
 	//
 	// DEFINE THE VARIABLES:
     //
@@ -93,7 +96,7 @@ int main() {
 	// SET UP THE SIMULATION EXPORT MODULE:
 	//
 	
-	acadoPrintf( "-----------------------------------------\n  Using an equidistant grid:\n-----------------------------------------\n" );
+	cout << "-----------------------------------------\n  Using an equidistant grid:\n-----------------------------------------\n";
 	
 	SIMexport sim( 1, 0.1 );
 	
@@ -107,9 +110,9 @@ int main() {
 	sim.exportAndRun( "crane_export", "init_crane.txt", "controls_crane.txt" );
 	
 	
-	acadoPrintf( "-----------------------------------------\n  Using a provided grid:\n-----------------------------------------\n" );
+	cout << "-----------------------------------------\n  Using a provided grid:\n-----------------------------------------\n";
 	
-	Vector Meas(5);
+	DVector Meas(5);
 	Meas(0) = 0.0;
 	Meas(1) = 0.2;
 	Meas(2) = 0.4;

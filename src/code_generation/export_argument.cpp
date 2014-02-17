@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -46,48 +46,48 @@ static const double undefinedEntry = 1073741824.03125; // = 2^30 + 2^-5
 
 ExportArgument::ExportArgument( )
 {
-	Matrix m(0, 0);
+	DMatrix m(0, 0);
 	assignNode(new ExportArgumentInternal(
-				"defaultArgumentName", matrixPtr(new Matrix( m )), REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConstString));
+				"defaultArgumentName", DMatrixPtr(new DMatrix( m )), REAL, ACADO_LOCAL, false, 0, ""));
 }
 
 
-ExportArgument::ExportArgument(	const String& _name,
+ExportArgument::ExportArgument(	const std::string& _name,
 								uint _nRows,
 								uint _nCols,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
+								bool _callItByValue,
 								const ExportIndex& _addressIdx,
-								const String& _prefix
+								const std::string& _prefix
 								)
 {
-	Matrix m(_nRows, _nCols);
+	DMatrix m(_nRows, _nCols);
 	m.setAll( undefinedEntry );
 
 	assignNode(new ExportArgumentInternal(
-			_name, matrixPtr(new Matrix( m )), _type, _dataStruct, _callItByValue, _addressIdx, _prefix));
+			_name, DMatrixPtr(new DMatrix( m )), _type, _dataStruct, _callItByValue, _addressIdx, _prefix));
 }
 
 
-ExportArgument::ExportArgument(	const String& _name,
-								const matrixPtr& _data,
+ExportArgument::ExportArgument(	const std::string& _name,
+								const DMatrixPtr& _data,
 								ExportType _type,
 								ExportStruct _dataStruct,
-								BooleanType _callItByValue,
+								bool _callItByValue,
 								const ExportIndex& _addressIdx,
-								const String& _prefix
+								const std::string& _prefix
 								)
 {
 	assignNode(new ExportArgumentInternal(
 			_name, _data, _type, _dataStruct, _callItByValue, _addressIdx, _prefix));
 }
 
-ExportArgument::ExportArgument( const Matrix& _data
+ExportArgument::ExportArgument( const DMatrix& _data
 								)
 {
 	assignNode(new ExportArgumentInternal(
-			"defaultArgumentName", matrixPtr(new Matrix( _data )), REAL, ACADO_LOCAL, BT_FALSE, 0, emptyConstString));
+			"defaultArgumentName", DMatrixPtr(new DMatrix( _data )), REAL, ACADO_LOCAL, false, 0, ""));
 }
 
 ExportArgumentInternal* ExportArgument::operator->()
@@ -107,8 +107,8 @@ ExportArgument ExportArgument::getAddress(	const ExportIndex& _rowIdx,
 	return (*this)->getAddress(_rowIdx, _colIdx);
 }
 
-const String ExportArgument::getAddressString(	BooleanType withDataStruct
-												) const
+const std::string ExportArgument::getAddressString(	bool withDataStruct
+													) const
 {
 	return (*this)->getAddressString( withDataStruct );
 }
@@ -133,14 +133,14 @@ uint ExportArgument::getDim( ) const
 
 
 
-BooleanType ExportArgument::isGiven( ) const
+bool ExportArgument::isGiven( ) const
 {
 	return (*this)->isGiven();
 }
 
 
 
-BooleanType ExportArgument::isCalledByValue( ) const
+bool ExportArgument::isCalledByValue( ) const
 {
 	return (*this)->isCalledByValue();
 }
@@ -153,13 +153,13 @@ returnValue ExportArgument::callByValue( )
 
 
 
-returnValue ExportArgument::exportDataDeclaration(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+returnValue ExportArgument::exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision
 													) const
 {
-	return (*this)->exportDataDeclaration(file, _realString, _intString, _precision);
+	return (*this)->exportDataDeclaration(stream, _realString, _intString, _precision);
 }
 
 CLOSE_NAMESPACE_ACADO

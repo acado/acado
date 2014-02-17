@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -40,7 +40,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 
-inline returnValue Controller::getU(	Vector& _u
+inline returnValue Controller::getU(	DVector& _u
 										) const
 {
 	if ( controlLaw != 0 )
@@ -50,7 +50,7 @@ inline returnValue Controller::getU(	Vector& _u
 }
 
 
-inline returnValue Controller::getP(	Vector& _p
+inline returnValue Controller::getP(	DVector& _p
 										) const
 {
 	if ( controlLaw != 0 )

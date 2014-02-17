@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -57,9 +57,8 @@ int main( )
 	h << p << v << phi << omega << a;
 	hN << p << v << phi << omega;
 
-	// Or:
-	ExportVariable W(h.getDim(), h.getDim());
-	ExportVariable WN(hN.getDim(), hN.getDim());
+	BMatrix W(h.getDim(), h.getDim()); W.setOnes();
+	BMatrix WN(hN.getDim(), hN.getDim()); WN.setOnes();
 
 	//
 	// Optimal Control Problem
@@ -89,8 +88,8 @@ int main( )
 	mpc.set( GENERATE_MATLAB_INTERFACE, NO );
 	mpc.set( GENERATE_SIMULINK_INTERFACE, YES );
 
-	// Set custom module name:
-	mpc.setName("nmpc");
+	// Optionally set custom module name:
+	mpc.set( CG_MODULE_NAME, "nmpc" );
 
 	if (mpc.exportCode( "crane_cl_nmpc_export" ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );

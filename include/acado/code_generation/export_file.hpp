@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -35,17 +35,9 @@
 #ifndef ACADO_TOOLKIT_EXPORT_FILE_HPP
 #define ACADO_TOOLKIT_EXPORT_FILE_HPP
 
-#include <acado/utils/acado_utils.hpp>
-#include <acado/user_interaction/algorithmic_base.hpp>
-#include <acado/matrix_vector/matrix_vector.hpp>
-
-#include <acado/code_generation/export_variable.hpp>
 #include <acado/code_generation/export_statement_block.hpp>
 
-
-
 BEGIN_NAMESPACE_ACADO
-
 
 /** 
  *	\brief Allows to export files containing automatically generated algorithms for fast model predictive control
@@ -69,39 +61,23 @@ class ExportFile : public ExportStatementBlock
 		 *
 		 *	@param[in] _fileName			Name of exported file.
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
-		 *	@param[in] _realString			String to be used to declare real variables.
-		 *	@param[in] _intString			String to be used to declare integer variables.
+		 *	@param[in] _realString			std::string to be used to declare real variables.
+		 *	@param[in] _intString			std::string to be used to declare integer variables.
 		 *	@param[in] _precision			Number of digits to be used for exporting real values.
-		 *	@param[in] _commentString		String to be used for exporting comments.
+		 *	@param[in] _commentString		std::string to be used for exporting comments.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		ExportFile(	const String& _fileName,
-					const String& _commonHeaderName = "",
-					const String& _realString = "real_t",
-					const String& _intString = "int",
+		ExportFile(	const std::string& _fileName,
+					const std::string& _commonHeaderName = "",
+					const std::string& _realString = "real_t",
+					const std::string& _intString = "int",
 					int _precision = 16,
-					const String& _commentString = emptyConstString
+					const std::string& _commentString = std::string()
 					);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportFile(	const ExportFile& arg
-					);
-
-        /** Destructor. 
-		 */
+        /** Destructor. */
         virtual ~ExportFile( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportFile& operator=(	const ExportFile& arg
-								);
-
 
 		/** Exports the file containing the auto-generated code.
 		 *
@@ -109,42 +85,18 @@ class ExportFile : public ExportStatementBlock
 		 */
 		virtual returnValue exportCode( ) const;
 
-
-
-	protected:
-
-		/** Copies all class members from given object.
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue copy(	const ExportFile& arg
-							);
-
-		/** Opens given file and prepares it for exporting code.
-		 *
-		 *  \return Pointer to prepared file with given name, \n
-		 *	        NULL iff file could not be opened
-		 */
-		FILE* openFile( ) const;
-
-
-
     protected:
 
-		String fileName;					/**< Name of exported file. */
-		String commonHeaderName;			/**< Name of common header file. */
+		std::string fileName;					/**< Name of exported file. */
+		std::string commonHeaderName;			/**< Name of common header file. */
 		
-		String realString;					/**< String to be used to declare real variables. */
-		String intString;					/**< String to be used to declare integer variables. */
-		int precision;						/**< Number of digits to be used for exporting real values. */
-		String commentString;				/**< String to be used for exporting comments. */
+		std::string realString;					/**< std::string to be used to declare real variables. */
+		std::string intString;					/**< std::string to be used to declare integer variables. */
+		int precision;							/**< Number of digits to be used for exporting real values. */
+		std::string commentString;				/**< std::string to be used for exporting comments. */
 };
 
-
 CLOSE_NAMESPACE_ACADO
-
 
 #endif  // ACADO_TOOLKIT_EXPORT_FILE_HPP
 

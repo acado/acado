@@ -90,6 +90,13 @@ INCLUDE( CompilerOptionsSSE )
 SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D__DEBUG__")
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D__DEBUG__")
 
+#
+# Define a testing flag
+#
+IF ( ACADO_WITH_TESTING )
+	ADD_DEFINITIONS( -DACADO_WITH_TESTING )
+ENDIF()
+
 ################################################################################
 #
 # Compiler settings - GCC/G++; Linux, Apple

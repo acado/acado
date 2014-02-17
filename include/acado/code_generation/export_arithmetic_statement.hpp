@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -27,20 +27,16 @@
 
 /**
  *    \file include/acado/code_generation/export_arithmetic_statement.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010 - 2013
  */
-
 
 #ifndef ACADO_TOOLKIT_EXPORT_ARITHMETIC_STATEMENT_HPP
 #define ACADO_TOOLKIT_EXPORT_ARITHMETIC_STATEMENT_HPP
 
-#include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_statement.hpp>
 #include <acado/code_generation/export_variable.hpp>
-#include <acado/code_generation/export_function.hpp>
-
-
+#include <acado/code_generation/memory_allocator.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -58,7 +54,7 @@ BEGIN_NAMESPACE_ACADO
  *	<op1> can be "+", "-" or "*" and
  *	<op2> can be "+" or "-".
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class ExportArithmeticStatement : public ExportStatement
 {
@@ -92,23 +88,8 @@ class ExportArithmeticStatement : public ExportStatement
 									const ExportVariable& _rhs3 = 0
 									);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportArithmeticStatement(	const ExportArithmeticStatement& arg
-									);
-
-		/** Destructor.
-		 */
+		/** Destructor. */
 		virtual ~ExportArithmeticStatement( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportArithmeticStatement& operator=(	const ExportArithmeticStatement& arg
-												);
 
 		/** Clone constructor (deep copy).
 		 *
@@ -116,49 +97,35 @@ class ExportArithmeticStatement : public ExportStatement
 		 */
 		virtual ExportStatement* clone( ) const;
 
-
-		/** Returns number of rows of arithmetic statement.
-		 *
-		 *	\return Number of rows of arithmetic statement
-		 */
-		uint getNumRows( ) const;
-
-		/** Returns number of columns of arithmetic statement.
-		 *
-		 *	\return Number of columns of arithmetic statement
-		 */
-		uint getNumCols( ) const;
-
-
 		/** Exports data declaration of the statement into given file. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] stream			Name of file to be used to export statement.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportDataDeclaration(	FILE *file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+		virtual returnValue exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString = "real_t",
+													const std::string& _intString = "int",
 													int _precision = 16
 													) const;
 
 		/** Exports source code of the statement into given file. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] stream			Name of file to be used to export statement.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportCode(	FILE* file,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+		virtual returnValue exportCode(	std::ostream& stream,
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										) const;
 
@@ -172,65 +139,52 @@ class ExportArithmeticStatement : public ExportStatement
 		/** Exports source code for an addition or subtraction to given file. 
 		 *  Its appearance can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _sign			String of the operation ("+" or "-").
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] stream			Name of file to be used to export statement.
+		 *	@param[in] _sign			std::string of the operation ("+" or "-").
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportCodeAddSubtract(	FILE* file,
-											const String& _sign = "+",
-											const String& _realString = "real_t",
-											const String& _intString = "int",
-											int _precision = 16
+		returnValue exportCodeAddSubtract(	std::ostream& stream,
+											const std::string& _sign = "+",
+											const std::string& _realString = "real_t",
+											const std::string& _intString = "int"
 											) const;
 
 		/** Exports source code for a multiplication to given file.
 		 *  Its appearance can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
+		 *	@param[in] stream			Name of file to be used to export statement.
 		 *	@param[in] transposeRhs1	Flag indicating whether rhs1 shall be transposed.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportCodeMultiply(	FILE* file,
-										BooleanType transposeRhs1 = BT_FALSE,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
-										int _precision = 16
+		returnValue exportCodeMultiply(	std::ostream& stream,
+										bool transposeRhs1 = false,
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int"
 										) const;
 
 		/** Exports source code for an assignment to given file. 
 		 *  Its appearance can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _op				String of the assignment operation ("=", "+=" or "-=").
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] stream			Name of file to be used to export statement.
+		 *	@param[in] _op				std::string of the assignment operation ("=", "+=" or "-=").
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportCodeAssign(	FILE* file,
-										const String& _op = "=",
-										const String& _realString = "real_t",
-										const String& _intString = "int",
-										int _precision = 16
-										) const;
-
-		/** Returns string containing the assignment operation.
-		 *
-		 *	@param[out] _assignString	String containing the assignment operation.
-		 *
-		 *	\return SUCCESSFUL_RETURN, \n
-		 *	        RET_UNABLE_TO_EXPORT_STATEMENT
-		 */
-		returnValue getAssignString(	String& _assignString
+		returnValue exportCodeAssign(	std::ostream& stream,
+										const std::string& _op = "=",
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int"
 										) const;
 
 
@@ -247,6 +201,12 @@ class ExportArithmeticStatement : public ExportStatement
 		ExportStatementOperator op2;			/**< Operator between second and third right-hand side expression of arithmetic statement. */
 
 		MemoryAllocatorPtr memAllocator;
+
+    private:
+		std::string getAssignString( ) const;
+
+		uint getNumRows( ) const;
+		uint getNumCols( ) const;
 };
 
 

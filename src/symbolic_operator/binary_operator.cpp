@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -246,12 +246,14 @@ void BinaryOperator::deleteAll(){
     free( dargument2_result );
 }
 
-returnValue BinaryOperator::setVariableExportName( const VariableType &type, const Stream *name )
+returnValue BinaryOperator::setVariableExportName(	const VariableType &_type,
+													const std::vector< std::string >& _name
+													)
 {
-	argument1->setVariableExportName(type, name);
-	argument2->setVariableExportName(type, name);
+	argument1->setVariableExportName(_type, _name);
+	argument2->setVariableExportName(_type, _name);
 
-	return Operator::setVariableExportName(type, name);
+	return Operator::setVariableExportName(_type, _name);
 }
 
 CLOSE_NAMESPACE_ACADO

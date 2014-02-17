@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -110,8 +110,8 @@ class FeedforwardLaw : public ControlLaw
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue init(	double startTime = 0.0,
-									const Vector &x0_ = emptyConstVector,
-									const Vector &p_ = emptyConstVector,
+									const DVector &x0_ = emptyConstVector,
+									const DVector &p_ = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									);
 
@@ -129,8 +129,8 @@ class FeedforwardLaw : public ControlLaw
 		 *	        RET_CONTROLLAW_STEP_FAILED
 		 */
 		virtual returnValue step(	double currentTime,
-									const Vector& _x,
-									const Vector& _p = emptyConstVector,
+									const DVector& _x,
+									const DVector& _p = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									);
 

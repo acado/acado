@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -173,7 +173,7 @@ returnValue Actuator::setParameterNoise(	uint idx,
 
 
 
-returnValue Actuator::setControlDeadTimes(	const Vector& _deadTimes
+returnValue Actuator::setControlDeadTimes(	const DVector& _deadTimes
 											)
 {
 	if ( _deadTimes.getDim( ) != getNU( ) )
@@ -228,7 +228,7 @@ returnValue Actuator::setControlDeadTime(	uint idx,
 
 
 
-returnValue Actuator::setParameterDeadTimes(	const Vector& _deadTimes
+returnValue Actuator::setParameterDeadTimes(	const DVector& _deadTimes
 												)
 {
 	if ( _deadTimes.getDim( ) != getNP( ) )
@@ -284,11 +284,11 @@ returnValue Actuator::setParameterDeadTime(	uint idx,
 
 
 returnValue Actuator::init(	double _startTime,
-							const Vector& _startValueU,
-							const Vector& _startValueP
+							const DVector& _startValueU,
+							const DVector& _startValueP
 							)
 {
-	Vector tmp;
+	DVector tmp;
 
 	if ( _startValueU.isEmpty( ) == BT_FALSE )
 		tmp.append( _startValueU );
@@ -379,7 +379,7 @@ returnValue Actuator::delayActuatorInput(	VariablesGrid& _u,
 	if ( hasDeadTime( ) == BT_FALSE )
 	{
 		// store last signal
-		Vector tmp = _u.getLastVector( );
+		DVector tmp = _u.getLastVector( );
 		if ( _p.isEmpty( ) == BT_FALSE )
 			tmp.append( _p.getLastVector( ) );
 

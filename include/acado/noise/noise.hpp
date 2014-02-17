@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -120,7 +120,7 @@ class Noise
 		 *	        RET_BLOCK_NOT_READY, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		virtual returnValue step(	Vector& _w
+		virtual returnValue step(	DVector& _w
 									) = 0;
 
 		/** Generates a noise vector sequence based on current internal settings.

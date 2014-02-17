@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -81,14 +81,14 @@ class ExportArgument : public ExportData
 		 *	@param[in] _addressIdx		If an address index is specified, not the argument itself but 
 		 *								a pointer to this address within the memory of the argument is passed.
 		 */
-		ExportArgument(	const String& _name,
+		ExportArgument(	const std::string& _name,
 						uint _nRows = 1,
 						uint _nCols = 1,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callByValue = BT_FALSE,
+						bool _callByValue = false,
 						const ExportIndex& _addressIdx = emptyConstExportIndex,
-						const String& _prefix = emptyConstString
+						const std::string& _prefix = std::string()
 						);
 
 		/** Constructor which takes the name and type of the argument.
@@ -96,23 +96,23 @@ class ExportArgument : public ExportData
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Matrix used for initialization.
+		 *	@param[in] _data			DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 *	@param[in] _addressIdx		If an address index is specified, not the argument itself but 
 		 *								a pointer to this address within the memory of the argument is passed.
 		 */
-		ExportArgument(	const String& _name,
-						const matrixPtr& _data,
+		ExportArgument(	const std::string& _name,
+						const DMatrixPtr& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callByValue = BT_FALSE,
+						bool _callByValue = false,
 						const ExportIndex& _addressIdx = emptyConstExportIndex,
-						const String& _prefix = emptyConstString
+						const std::string& _prefix = std::string()
 						);
 
-		ExportArgument(	const Matrix& _data
+		ExportArgument(	const DMatrix& _data
 						);
 
 		ExportArgumentInternal* operator->();
@@ -137,8 +137,8 @@ class ExportArgument : public ExportData
 		 *
 		 *	\return String containing the address of the argument
 		 */
-		const String getAddressString(	BooleanType withDataStruct = BT_TRUE
-										) const;
+		const std::string getAddressString(	bool withDataStruct = true
+											) const;
 
 
 		/** Returns number of rows of the argument.
@@ -162,17 +162,17 @@ class ExportArgument : public ExportData
 
 		/** Returns whether all components of the argument are given.
 		 *
-		 *	\return BT_TRUE  iff all components of the argument have given values, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff all components of the argument have given values, \n
+		 *	        false otherwise
 		 */
-		virtual BooleanType isGiven( ) const;
+		virtual bool isGiven( ) const;
 
 		/** Returns whether argument is to be called by value.
 		 *
-		 *	\return BT_TRUE  iff argument is to be called by value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff argument is to be called by value, \n
+		 *	        false otherwise
 		 */
-		BooleanType isCalledByValue( ) const;
+		bool isCalledByValue( ) const;
 
 		/** Specifies to call argument by value.
 		 *
@@ -186,15 +186,15 @@ class ExportArgument : public ExportData
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export declaration.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportDataDeclaration(	FILE *file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+		virtual returnValue exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString = "real_t",
+													const std::string& _intString = "int",
 													int _precision = 16
 													) const;
 };

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -36,10 +36,13 @@
 
 
 #include <acado/conic_solver/dense_qp_solver.hpp>
-#include <qpOASES-3.0beta/include/qpOASES.hpp>
+
+namespace qpOASES
+{
+	class SQProblem;
+}
 
 BEGIN_NAMESPACE_ACADO
-
 
 /**
  *	\brief (not yet documented)
@@ -98,13 +101,13 @@ class QPsolver_qpOASES : public DenseQPsolver
 									);
 
         /** Solves QP using at most <maxIter> iterations. */
-        virtual returnValue solve(  Matrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
-                                    Matrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
-                                    Vector *g,    /**< Gradient of neighbouring QP to be solved. */
-                                    Vector *lb,   /**< Lower bounds of neighbouring QP to be solved. */
-                                    Vector *ub,   /**< Upper bounds of neighbouring QP to be solved. */
-                                    Vector *lbA,  /**< Lower constraints' bounds of neighbouring QP to be solved. */
-                                    Vector *ubA,  /**< Upper constraints' bounds of neighbouring QP to be solved. */
+        virtual returnValue solve(  DMatrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
+                                    DMatrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
+                                    DVector *g,    /**< Gradient of neighbouring QP to be solved. */
+                                    DVector *lb,   /**< Lower bounds of neighbouring QP to be solved. */
+                                    DVector *ub,   /**< Upper bounds of neighbouring QP to be solved. */
+                                    DVector *lbA,  /**< Lower constraints' bounds of neighbouring QP to be solved. */
+                                    DVector *ubA,  /**< Upper constraints' bounds of neighbouring QP to be solved. */
                                     uint maxIter        /**< Maximum number of iterations. */  
 									);
 
@@ -128,26 +131,26 @@ class QPsolver_qpOASES : public DenseQPsolver
 		 *         RET_QP_SOLUTION_REACHED_LIMIT \n
 		 *         RET_QP_SOLUTION_FAILED \n
 		 *         RET_INITIALIZE_FIRST */
-        virtual returnValue step(	Matrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
-                                    Matrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
-                                    Vector *g,    /**< Gradient of neighbouring QP to be solved. */
-                                    Vector *lb,   /**< Lower bounds of neighbouring QP to be solved. */
-                                    Vector *ub,   /**< Upper bounds of neighbouring QP to be solved. */
-                                    Vector *lbA,  /**< Lower constraints' bounds of neighbouring QP to be solved. */
-                                    Vector *ubA   /**< Upper constraints' bounds of neighbouring QP to be solved. */
+        virtual returnValue step(	DMatrix *H,    /**< Hessian matrix of neighbouring QP to be solved. */
+                                    DMatrix *A,    /**< Constraint matrix of neighbouring QP to be solved. */
+                                    DVector *g,    /**< Gradient of neighbouring QP to be solved. */
+                                    DVector *lb,   /**< Lower bounds of neighbouring QP to be solved. */
+                                    DVector *ub,   /**< Upper bounds of neighbouring QP to be solved. */
+                                    DVector *lbA,  /**< Lower constraints' bounds of neighbouring QP to be solved. */
+                                    DVector *ubA   /**< Upper constraints' bounds of neighbouring QP to be solved. */
 									);
 
 
 		/** Returns primal solution vector if QP has been solved.
 		 * \return SUCCESSFUL_RETURN \n
 		 *         RET_QP_NOT_SOLVED */
-		virtual returnValue getPrimalSolution(	Vector& xOpt	/**< OUTPUT: primal solution vector. */
+		virtual returnValue getPrimalSolution(	DVector& xOpt	/**< OUTPUT: primal solution vector. */
 												) const;
 
 		/** Returns dual solution vector if QP has been solved.
 		 * \return SUCCESSFUL_RETURN \n
 		 *         RET_QP_NOT_SOLVED */
-		virtual returnValue getDualSolution(	Vector& yOpt	/**< OUTPUT: dual solution vector. */
+		virtual returnValue getDualSolution(	DVector& yOpt	/**< OUTPUT: dual solution vector. */
 												) const;
 
 		/** Returns optimal objective function value.
@@ -166,7 +169,7 @@ class QPsolver_qpOASES : public DenseQPsolver
          *  \return SUCCESSFUL_RETURN
          *          RET_MEMBER_NOT_INITIALISED
          */
-        virtual returnValue getVarianceCovariance( Matrix &var );
+        virtual returnValue getVarianceCovariance( DMatrix &var );
 
 
         /** Returns a variance-covariance estimate if possible or an error message otherwise.
@@ -174,7 +177,7 @@ class QPsolver_qpOASES : public DenseQPsolver
          *  \return SUCCESSFUL_RETURN
          *          RET_MEMBER_NOT_INITIALISED
          */
-        virtual returnValue getVarianceCovariance( Matrix &H, Matrix &var );
+        virtual returnValue getVarianceCovariance( DMatrix &H, DMatrix &var );
 
 
 
@@ -189,7 +192,7 @@ class QPsolver_qpOASES : public DenseQPsolver
 											uint nC		/**< Number of QP constraints (without bounds). */
 											);
 
-		returnValue updateQPstatus(	qpOASES::returnValue returnvalue
+		returnValue updateQPstatus(	int ret
 									);
 
 

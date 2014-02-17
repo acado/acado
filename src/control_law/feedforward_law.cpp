@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -99,8 +99,8 @@ ControlLaw* FeedforwardLaw::clone( ) const
 
 
 returnValue FeedforwardLaw::init(	double startTime,
-									const Vector &x0_,
-									const Vector &p_,
+									const DVector &x0_,
+									const DVector &p_,
 									const VariablesGrid& _yRef
 									)
 {
@@ -117,8 +117,8 @@ returnValue FeedforwardLaw::init(	double startTime,
 
 
 returnValue FeedforwardLaw::step(	double currentTime,
-									const Vector& _x,
-									const Vector& _p,
+									const DVector& _x,
+									const DVector& _p,
 									const VariablesGrid& _yRef
 									)
 {
@@ -130,7 +130,7 @@ returnValue FeedforwardLaw::step(	double currentTime,
 
 
 	// use reference control as control
-	Vector uEv;
+	DVector uEv;
 	uRef.evaluate(currentTime,uEv);
 	//printf("FeedforwardLaw controllor outputs %d #.\n",uRef.getDim());
 	//printf(" -- yref: %d samples of size (%d,%d) -- \n",_yRef.getNumPoints(),_yRef.getNumRows(),_yRef.getNumCols());

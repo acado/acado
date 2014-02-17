@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -125,11 +125,11 @@ class IntegrationAlgorithm : public UserInteraction
 		*/
 		returnValue integrate(	double       t0                  /**< the start time              */,
 								double       tend                /**< the end time                */,
-								const Vector &x0                 /**< the initial state           */,
-								const Vector &xa  = emptyVector  /**< the initial algebraic state */,
-								const Vector &p   = emptyVector  /**< the parameters              */,
-								const Vector &u   = emptyVector  /**< the controls                */,
-								const Vector &w   = emptyVector  /**< the disturbance             */
+								const DVector &x0                 /**< the initial state           */,
+								const DVector &xa  = emptyVector  /**< the initial algebraic state */,
+								const DVector &p   = emptyVector  /**< the parameters              */,
+								const DVector &u   = emptyVector  /**< the controls                */,
+								const DVector &w   = emptyVector  /**< the disturbance             */
 								);
 
 		/** Starts the integration of the right hand side at time t0.    \n
@@ -146,11 +146,11 @@ class IntegrationAlgorithm : public UserInteraction
 		*          file that implements the integration routine)        \n
 		*/
 		returnValue integrate(	const Grid   &t                  /**< the grid [t0,tend]          */,
-								const Vector &x0                 /**< the initial state           */,
-								const Vector &xa  = emptyVector  /**< the initial algebraic state */,
-								const Vector &p   = emptyVector  /**< the parameters              */,
-								const Vector &u   = emptyVector  /**< the controls                */,
-								const Vector &w   = emptyVector  /**< the disturbance             */
+								const DVector &x0                 /**< the initial state           */,
+								const DVector &xa  = emptyVector  /**< the initial algebraic state */,
+								const DVector &p   = emptyVector  /**< the parameters              */,
+								const DVector &u   = emptyVector  /**< the controls                */,
+								const DVector &w   = emptyVector  /**< the disturbance             */
 								);
 
 
@@ -174,10 +174,10 @@ class IntegrationAlgorithm : public UserInteraction
 		*  \return SUCCESFUL RETURN         \n
 		*          RET_INPUT_OUT_OF_RANGE   \n
 		*/
-		returnValue setForwardSeed(	const Vector &xSeed                /**< the seed w.r.t states       */,
-									const Vector &pSeed = emptyVector  /**< the seed w.r.t parameters   */,
-									const Vector &uSeed = emptyVector  /**< the seed w.r.t controls     */,
-									const Vector &wSeed = emptyVector  /**< the seed w.r.t disturbances */  );
+		returnValue setForwardSeed(	const DVector &xSeed                /**< the seed w.r.t states       */,
+									const DVector &pSeed = emptyVector  /**< the seed w.r.t parameters   */,
+									const DVector &uSeed = emptyVector  /**< the seed w.r.t controls     */,
+									const DVector &wSeed = emptyVector  /**< the seed w.r.t disturbances */  );
 
 
 		/**  Defines the first order forward seed to be         \n
@@ -207,7 +207,7 @@ class IntegrationAlgorithm : public UserInteraction
 		*   \return SUCCESFUL_RETURN         \n
 		*           RET_INPUT_OUT_OF_RANGE   \n
 		*/
-		returnValue setBackwardSeed(	const Vector &seed  /**< the backward seed      */  );
+		returnValue setBackwardSeed(	const DVector &seed  /**< the backward seed      */  );
 
 		/**  Defines the first order backward seed to be        \n
 		*   a unit matrix.                                     \n
@@ -273,7 +273,7 @@ class IntegrationAlgorithm : public UserInteraction
 		*                                                     
 		*  \return SUCCESSFUL_RETURN
 		*/
-		returnValue getX(	Vector& xEnd
+		returnValue getX(	DVector& xEnd
 							) const;
 
 		/** Returns the result for the algebraic states at 
@@ -283,7 +283,7 @@ class IntegrationAlgorithm : public UserInteraction
 		*
 		*  \return SUCCESSFUL_RETURN
 		*/
-		returnValue getXA(	Vector& xaEnd
+		returnValue getXA(	DVector& xaEnd
 							) const;
 
 		/** Returns the requested output on the specified grid. Note     \n
@@ -329,7 +329,7 @@ class IntegrationAlgorithm : public UserInteraction
 		*  \return SUCCESSFUL_RETURN                                          \n
 		*          RET_INPUT_OUT_OF_RANGE                                     \n
 		*/
-		 returnValue getForwardSensitivities(	Vector &Dx
+		 returnValue getForwardSensitivities(	DVector &Dx
 												) const;
 
 
@@ -353,10 +353,10 @@ class IntegrationAlgorithm : public UserInteraction
 		*  \return SUCCESSFUL_RETURN                                           \n
 		*          RET_INPUT_OUT_OF_RANGE                                      \n
 		*/
-		returnValue getBackwardSensitivities(	Vector &Dx_x0,
-												Vector &Dx_p = emptyVector,
-												Vector &Dx_u = emptyVector,
-												Vector &Dx_w = emptyVector
+		returnValue getBackwardSensitivities(	DVector &Dx_x0,
+												DVector &Dx_p = emptyVector,
+												DVector &Dx_u = emptyVector,
+												DVector &Dx_w = emptyVector
 												) const;
 
 

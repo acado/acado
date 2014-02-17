@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,17 +43,15 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExplicitRungeKutta4Export::ExplicitRungeKutta4Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ExplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
-	numStages = 4;
 }
 
 
 ExplicitRungeKutta4Export::ExplicitRungeKutta4Export(	const ExplicitRungeKutta4Export& arg
 									) : ExplicitRungeKuttaExport( arg )
 {
-	numStages = 4;
 	copy( arg );
 }
 
@@ -72,11 +70,11 @@ ExplicitRungeKutta4Export::~ExplicitRungeKutta4Export( )
 
 
 IntegratorExport* createExplicitRungeKutta4Export(	UserInteraction* _userInteraction,
-													const String &_commonHeaderName)
+													const std::string &_commonHeaderName)
 {
-	Matrix AA(4,4);
-	Vector bb(4);
-	Vector cc(4);
+	DMatrix AA(4,4);
+	DVector bb(4);
+	DVector cc(4);
 
 	AA(0,0) = 0.0;		AA(0,1) = 0.0;		AA(0,2) = 0.0;		AA(0,3) = 0.0;
 	AA(1,0) = 1.0/2.0;	AA(1,1) = 0.0;		AA(1,2) = 0.0;		AA(1,3) = 0.0;

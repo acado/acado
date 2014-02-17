@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -89,18 +89,18 @@ class NLPsolver : public AlgorithmicBase
 
 
         /** Solves current real-time optimization problem. */
-        virtual returnValue solve(	const Vector &x0_ = emptyConstVector,
-									const Vector &p_ = emptyConstVector
+        virtual returnValue solve(	const DVector &x0_ = emptyConstVector,
+									const DVector &p_ = emptyConstVector
 									);
 
         /** Executes a complete real-time step. */
-        virtual returnValue step(	const Vector &x0_ = emptyConstVector,
-									const Vector &p_ = emptyConstVector
+        virtual returnValue step(	const DVector &x0_ = emptyConstVector,
+									const DVector &p_ = emptyConstVector
 									);
 
         /** Executes a real-time feedback step */
-        virtual returnValue feedbackStep(	const Vector &x0_,
-											const Vector &p_ = emptyConstVector
+        virtual returnValue feedbackStep(	const DVector &x0_,
+											const DVector &p_ = emptyConstVector
 											);
 
         /** Executes a real-time preparation step */
@@ -111,11 +111,11 @@ class NLPsolver : public AlgorithmicBase
 
         /** Applies a shift of the SQP data (for moving horizons) */
         virtual returnValue shiftVariables(	double timeShift,
-									Vector  lastX    =  emptyVector,
-									Vector lastXA    =  emptyVector,
-									Vector lastP     =  emptyVector,
-									Vector lastU     =  emptyVector,
-									Vector lastW     =  emptyVector  );
+									DVector  lastX    =  emptyVector,
+									DVector lastXA    =  emptyVector,
+									DVector lastP     =  emptyVector,
+									DVector lastU     =  emptyVector,
+									DVector lastW     =  emptyVector  );
 
 
         /** Returns a variance-covariance estimate if possible or an error message otherwise.
@@ -123,7 +123,7 @@ class NLPsolver : public AlgorithmicBase
          *  \return SUCCESSFUL_RETURN
          *          RET_MEMBER_NOT_INITIALISED
          */
-        virtual returnValue getVarianceCovariance( Matrix &var ) = 0;
+        virtual returnValue getVarianceCovariance( DMatrix &var ) = 0;
 
 
         /** Sets the reference to be used in the LSQ tracking terms. If the objective     \n
@@ -147,9 +147,9 @@ class NLPsolver : public AlgorithmicBase
         virtual returnValue getDifferentialStates( VariablesGrid &xd_ ) const;
         virtual returnValue getAlgebraicStates   ( VariablesGrid &xa_ ) const;
         virtual returnValue getParameters        ( VariablesGrid &p_  ) const;
-		virtual returnValue getParameters        ( Vector        &p_  ) const;
+		virtual returnValue getParameters        ( DVector        &p_  ) const;
         virtual returnValue getControls          ( VariablesGrid &u_  ) const;
-		virtual returnValue getFirstControl      ( Vector        &u0_ ) const;
+		virtual returnValue getFirstControl      ( DVector        &u0_ ) const;
         virtual returnValue getDisturbances      ( VariablesGrid &w_  ) const;
         virtual double      getObjectiveValue    (                    ) const;
 

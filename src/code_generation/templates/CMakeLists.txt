@@ -38,6 +38,8 @@ SET( QPDUNES_TEMPLATE qpdunes_interface.in)
 
 SET( AUXILIARY_FUNCTIONS_HEADER acado_auxiliary_functions.h.in)
 SET( AUXILIARY_FUNCTIONS_SOURCE acado_auxiliary_functions.c.in)
+SET( AUXILIARY_SIM_FUNCTIONS_HEADER acado_auxiliary_sim_functions.h.in)
+SET( AUXILIARY_SIM_FUNCTIONS_SOURCE acado_auxiliary_sim_functions.c.in)
 SET( SOLVER_MEX acado_solver_mex.c.in)
 SET( MAKE_MEX_FORCES make_acado_solver_forces.m.in)
 SET( MAKE_MEX_QPOASES make_acado_solver_qpoases.m.in)
@@ -45,12 +47,15 @@ SET( MAKE_MEX_INTEGRATOR make_acado_integrator.m.in)
 SET( MAKE_MEX_MODEL make_acado_model.m.in)
 SET( MAKEFILE_FORCES makefile.forces.in)
 SET( MAKEFILE_QPOASES makefile.qpoases.in)
+SET( MAKEFILE_INTEGRATOR makefile.integrator.in)
 
 SET( MAKEFILE_SFUN_QPOASES make_acado_solver_sfunction.m.in)
 SET( SOLVER_SFUN_SOURCE acado_solver_sfunction.c.in)
 SET( SOLVER_SFUN_HEADER acado_solver_sfunction.h.in)
 
 SET( DUMMY_TEST_FILE dummy_test_file.in)
+
+SET( COMMON_HEADER_TEMPLATE acado_common_header.h.in)
 
 #
 # Configure templates

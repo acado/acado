@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -140,7 +140,7 @@ Curve Curve::operator()(	uint idx
 }
 
 
-returnValue Curve::add( double tStart, double tEnd, const Vector constant ){
+returnValue Curve::add( double tStart, double tEnd, const DVector constant ){
 
     uint     run1;
     Function tmp ;
@@ -354,7 +354,7 @@ returnValue Curve::evaluate( double t, double *result ) const{
 }
 
 
-returnValue Curve::evaluate( double t, Vector &result ) const{
+returnValue Curve::evaluate( double t, DVector &result ) const{
 
     uint        run1       ;
     returnValue returnvalue;
@@ -393,7 +393,7 @@ returnValue Curve::discretize( const Grid &discretizationGrid, VariablesGrid &re
 
     uint        run1       ;
     returnValue returnvalue;
-    Vector      tmp        ;
+    DVector      tmp        ;
 
     result.init( dim, discretizationGrid );
 

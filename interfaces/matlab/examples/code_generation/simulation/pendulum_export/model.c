@@ -1,5 +1,5 @@
 
-#include "acado.h"
+#include "acado_common.h"
 
 
 void rhs( const real_t *x, real_t *f ){

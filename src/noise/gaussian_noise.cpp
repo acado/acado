@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -47,8 +47,8 @@ GaussianNoise::GaussianNoise( ) : Noise( )
 }
 
 
-GaussianNoise::GaussianNoise(	const Vector& _mean,
-								const Vector& _variance
+GaussianNoise::GaussianNoise(	const DVector& _mean,
+								const DVector& _variance
 								) : Noise( )
 {
 	if ( _mean.getDim( ) == _variance.getDim( ) )
@@ -118,7 +118,7 @@ GaussianNoise* GaussianNoise::clone(	uint idx
 	if ( idx >= getDim( ) )
 		return 0;
 
-	GaussianNoise tmp( Vector(1),Vector(1) );
+	GaussianNoise tmp( DVector(1),DVector(1) );
 	tmp.Noise::operator=( *this );
 	tmp.w.init( 1,1 );
 	tmp.mean(0)     = mean(idx);
@@ -150,7 +150,7 @@ returnValue GaussianNoise::init(	uint seed
 }
 
 
-returnValue GaussianNoise::step(	Vector& _w
+returnValue GaussianNoise::step(	DVector& _w
 									)
 {
 	if ( getStatus( ) != BS_READY )

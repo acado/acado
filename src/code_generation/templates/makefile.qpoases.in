@@ -4,10 +4,13 @@ LDLIBS = -lm -lstdc++
 ifeq ($(UNAME), Linux)
 	LDLIBS += -lrt
 endif
+
+CCACHE_APP := $(shell which ccache 2>/dev/null)
+
 CFLAGS = -O3 -finline-functions -I. -I./qpoases
 CXXFLAGS = -O3 -finline-functions -I. -I./qpoases -I./qpoases/INCLUDE -I./qpoases/SRC
-CC     = gcc
-CXX    = g++
+CC     = $(CCACHE_APP) gcc
+CXX    = $(CCACHE_APP) g++
 
 OBJECTS = \
 	./qpoases/SRC/Bounds.o \

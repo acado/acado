@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -97,7 +97,7 @@ returnValue ExportStatementBlock::addStatement(	const ExportStatement& _statemen
 }
 
 
-returnValue ExportStatementBlock::addStatement(	const String& _statementString
+returnValue ExportStatementBlock::addStatement(	const std::string& _statementString
 												)
 {
 	ExportStatementString tmp( _statementString );
@@ -112,7 +112,7 @@ returnValue ExportStatementBlock::addFunction(	const ExportFunction& _function
 }
 
 
-returnValue ExportStatementBlock::addFunctionCall(	const String& _fName,
+returnValue ExportStatementBlock::addFunctionCall(	const std::string& _fName,
 													const ExportArgument& _argument1,
 													const ExportArgument& _argument2,
 													const ExportArgument& _argument3,
@@ -215,39 +215,34 @@ returnValue ExportStatementBlock::addLinebreak(	uint num
 	if ( num > 10 )
 		num = 10;
 
-	String tmp = "\n";
+	std::stringstream ss;
+	ss << std::endl;
 
-	for( uint i=1; i<num; ++i )
-		tmp << "\n";
+	for (uint i = 1; i < num; ++i)
+		ss << std::endl;
 
-	return addStatement( tmp );
+	return addStatement( ss.str() );
 }
 
 
-returnValue ExportStatementBlock::addComment(	const String& _comment
+returnValue ExportStatementBlock::addComment(	const std::string& _comment
 												)
 {
-	String tmp = "/* ";
-	tmp << _comment << " */\n";
-	return addStatement( tmp );
+	std::stringstream ss; ss << "/* " << _comment << " */\n";
+	return addStatement( ss.str() );
 }
 
 
 returnValue ExportStatementBlock::addComment(	uint _nBlanks,
-												const String& _comment
+												const std::string& _comment
 												)
 {
-	char* blanks = new char[_nBlanks+1];
-	for( uint i=0; i<_nBlanks; ++i )
-		blanks[i] = ' ';
-	blanks[_nBlanks] = '\0';
-	
-	String tmp = blanks;
-	tmp << "/* " << _comment << " */\n";
-	
-	delete[] blanks;
+	std::stringstream ss;
+	for(unsigned i = 0; i < _nBlanks; ++i)
+		ss << " ";
+	ss << "/* " << _comment << " */\n";
 
-	return addStatement( tmp );
+	return addStatement( ss.str() );
 }
 
 
@@ -259,15 +254,15 @@ uint ExportStatementBlock::getNumStatements( ) const
 
 
 
-returnValue ExportStatementBlock::exportDataDeclaration(	FILE *file,
-															const String& _realString,
-															const String& _intString,
+returnValue ExportStatementBlock::exportDataDeclaration(	std::ostream& stream,
+															const std::string& _realString,
+															const std::string& _intString,
 															int _precision
 															) const
 {
 	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
-		if ((*it)->exportDataDeclaration(file, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
+		if ((*it)->exportDataDeclaration(stream, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 
 	return SUCCESSFUL_RETURN;
@@ -275,15 +270,15 @@ returnValue ExportStatementBlock::exportDataDeclaration(	FILE *file,
 
 
 
-returnValue ExportStatementBlock::exportCode(	FILE* file,
-												const String& _realString,
-												const String& _intString,
+returnValue ExportStatementBlock::exportCode(	std::ostream& stream,
+												const std::string& _realString,
+												const std::string& _intString,
 												int _precision
 												) const
 {
 	StatementPtrArray::const_iterator it = statements.begin();
 	for(; it != statements.end(); ++it)
-		if ((*it)->exportCode(file, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
+		if ((*it)->exportCode(stream, _realString, _intString, _precision) != SUCCESSFUL_RETURN)
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_STATEMENT );
 
 	return SUCCESSFUL_RETURN;
@@ -305,18 +300,9 @@ ExportStatementBlock& operator<<(ExportStatementBlock& _block, const ExportState
 	return _block;
 }
 
-ExportStatementBlock& operator<<(ExportStatementBlock& _block, const String& _statement)
-{
-	returnValue status = _block.addStatement( _statement );
-	if (status != SUCCESSFUL_RETURN)
-		ACADOERROR( status );
-
-	return _block;
-}
-
 ExportStatementBlock& operator<<(ExportStatementBlock& _block, const std::string& _statement)
 {
-	returnValue status = _block.addStatement( String(_statement.c_str()) );
+	returnValue status = _block.addStatement( _statement );
 	if (status != SUCCESSFUL_RETURN)
 		ACADOERROR( status );
 

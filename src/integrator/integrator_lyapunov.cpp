@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -40,7 +40,7 @@
 #include <acado/integrator/integrator_runge_kutta.hpp>
 #include <acado/integrator/integrator_lyapunov.hpp>
 
-
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -709,11 +709,11 @@ returnValue IntegratorLYAPUNOV::unfreeze(){
 }
 
 
-returnValue IntegratorLYAPUNOV::evaluate( const Vector &x0  ,
-                                    const Vector &xa  ,
-                                    const Vector &p   ,
-                                    const Vector &u   ,
-                                    const Vector &w   ,
+returnValue IntegratorLYAPUNOV::evaluate( const DVector &x0  ,
+                                    const DVector &xa  ,
+                                    const DVector &p   ,
+                                    const DVector &u   ,
+                                    const DVector &w   ,
                                     const Grid   &t_    ){
 
     int         run1;
@@ -821,11 +821,12 @@ returnValue IntegratorLYAPUNOV::evaluate( const Vector &x0  ,
             acadoPrintCopyrightNotice( "IntegratorLYAPUNOV -- A Runge Kutta integrator." );
         }
         if( PrintLevel == HIGH ){
-            acadoPrintf("RK: t = %.16e                          ", t );
+        	cout << "RK: t = " << t << "\t";
+
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("x[%d] = %.16e  ", run1, eta4[run1] );
+            	cout << "x[" << run1 << "] = " << scientific << eta4[run1] << "  ";
             }
-            acadoPrintf("\n");
+            cout << endl;
         }
 
 
@@ -874,11 +875,12 @@ returnValue IntegratorLYAPUNOV::evaluate( const Vector &x0  ,
         if( PrintLevel == MEDIUM ){
 
             if( soa == SOA_EVERYTHING_FROZEN ){
-                acadoPrintf("\n Results at  t =  %.16e   : \n\n", t );
+            	cout << "\n Results at  t = " << t << "\t";
+
                 for( run1 = 0; run1 < m; run1++ ){
-                    acadoPrintf("x[%d] = %.16e  ", run1, eta4[run1] );
+                	cout << "x[" << run1 << "] = " << scientific << eta4[ run1 ];
                 }
-                acadoPrintf("\n");
+                cout << endl;
             }
             printIntermediateResults();
         }
@@ -893,7 +895,7 @@ returnValue IntegratorLYAPUNOV::evaluate( const Vector &x0  ,
 	else
 	{
 		if( PrintLevel == MEDIUM  || PrintLevel == HIGH )
-			acadoPrintf("RK: number of steps:  %d\n", count-1 );
+			cout << "RK: number of steps:  " << count - 1 << endl;
 	}
 
     return returnvalue;
@@ -901,10 +903,10 @@ returnValue IntegratorLYAPUNOV::evaluate( const Vector &x0  ,
 
 
 
-returnValue IntegratorLYAPUNOV::setProtectedForwardSeed( const Vector &xSeed,
-                                                   const Vector &pSeed,
-                                                   const Vector &uSeed,
-                                                   const Vector &wSeed,
+returnValue IntegratorLYAPUNOV::setProtectedForwardSeed( const DVector &xSeed,
+                                                   const DVector &pSeed,
+                                                   const DVector &uSeed,
+                                                   const DVector &wSeed,
                                                    const int    &order  ){
 
     //float aa;
@@ -981,10 +983,10 @@ returnValue IntegratorLYAPUNOV::setProtectedForwardSeed( const Vector &xSeed,
 }
 
 
-returnValue IntegratorLYAPUNOV::setForwardSeed2( const Vector &xSeed ,
-                                           const Vector &pSeed ,
-                                           const Vector &uSeed ,
-                                           const Vector &wSeed   ){
+returnValue IntegratorLYAPUNOV::setForwardSeed2( const DVector &xSeed ,
+                                           const DVector &pSeed ,
+                                           const DVector &uSeed ,
+                                           const DVector &wSeed   ){
 
     int run2;
 
@@ -1053,7 +1055,7 @@ returnValue IntegratorLYAPUNOV::setForwardSeed2( const Vector &xSeed ,
 }
 
 
-returnValue IntegratorLYAPUNOV::setProtectedBackwardSeed( const Vector &seed, const int &order ){
+returnValue IntegratorLYAPUNOV::setProtectedBackwardSeed( const DVector &seed, const int &order ){
 
     if( order == 2 ){
         return setBackwardSeed2(seed);
@@ -1101,7 +1103,7 @@ returnValue IntegratorLYAPUNOV::setProtectedBackwardSeed( const Vector &seed, co
 
 
 
-returnValue IntegratorLYAPUNOV::setBackwardSeed2( const Vector &seed ){
+returnValue IntegratorLYAPUNOV::setBackwardSeed2( const DVector &seed ){
 
     int run2;
 
@@ -1358,8 +1360,8 @@ returnValue IntegratorLYAPUNOV::step(int number_){
         while( E >= TOL*h[0] ){
 
             if( PrintLevel == HIGH ){
-                acadoPrintf("STEP REJECTED: error estimate           = %.16e \n", E        );
-                acadoPrintf("               required local tolerance = %.16e \n", TOL*h[0] );
+                cout << "STEP REJECTED: error estimate           = " << scientific << E << endl
+                	 << "               required local tolerance = " << TOL * h[0] << endl;
             }
 
             number_of_rejected_steps++;
@@ -1475,7 +1477,7 @@ returnValue IntegratorLYAPUNOV::step(int number_){
      // PRINTING:
      // ---------
      if( PrintLevel == HIGH ){
-         acadoPrintf("RK: t = %.16e  h = %.16e  ", t, h[0] );
+         cout << "RK: t = " << scientific << t << "  h = " << h[ 0 ] << "  ";
          printIntermediateResults();
      }
 
@@ -1582,7 +1584,7 @@ returnValue IntegratorLYAPUNOV::stop(){
 }
 
 
-returnValue IntegratorLYAPUNOV::getProtectedX( Vector *xEnd ) const{
+returnValue IntegratorLYAPUNOV::getProtectedX( DVector *xEnd ) const{
 
     int run1;
 
@@ -1596,7 +1598,7 @@ returnValue IntegratorLYAPUNOV::getProtectedX( Vector *xEnd ) const{
 }
 
 
-returnValue IntegratorLYAPUNOV::getProtectedForwardSensitivities( Matrix *Dx, int order ) const{
+returnValue IntegratorLYAPUNOV::getProtectedForwardSensitivities( DMatrix *Dx, int order ) const{
 
     int run1;
     //double aa;
@@ -1633,10 +1635,10 @@ returnValue IntegratorLYAPUNOV::getProtectedForwardSensitivities( Matrix *Dx, in
 }
 
 
-returnValue IntegratorLYAPUNOV::getProtectedBackwardSensitivities( Vector &Dx_x0,
-                                                             Vector &Dx_p ,
-                                                             Vector &Dx_u ,
-                                                             Vector &Dx_w ,
+returnValue IntegratorLYAPUNOV::getProtectedBackwardSensitivities( DVector &Dx_x0,
+                                                             DVector &Dx_p ,
+                                                             DVector &Dx_u ,
+                                                             DVector &Dx_w ,
                                                              int order      ) const{
 
     int run2;
@@ -2021,24 +2023,24 @@ void IntegratorLYAPUNOV::printIntermediateResults(){
 
         if( soa != SOA_EVERYTHING_FROZEN ){
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("x[%d] = %.16e  ", run1, eta4[run1] );
+            	cout << "x[" << run1 << "] = " << eta4[run1] << "  ";
             }
-            acadoPrintf("\n");
+            cout << endl;
         }
         else{
 
-            acadoPrintf("\n");
+            cout << endl;
         }
 
         // Forward Sensitivities:
         // ----------------------
 
         if( nFDirs > 0 && nBDirs2 == 0 && nFDirs2 == 0 ){
-            acadoPrintf("RK: Forward Sensitivities:\n");
+            cout << "RK: Forward Sensitivities:\n";
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("%.16e  ", etaG[run1] );
+                cout << scientific << etaG[run1] << "  ";
             }
-            acadoPrintf("\n");
+            cout << endl;
         }
 
 
@@ -2047,17 +2049,17 @@ void IntegratorLYAPUNOV::printIntermediateResults(){
 
         if( nFDirs2 > 0 ){
 
-            acadoPrintf("RK: First Order Forward Sensitivities:\n");
+            cout << "RK: First Order Forward Sensitivities:\n";
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("%.16e  ", etaG2[run1] );
+            	cout << scientific << etaG2[run1] << "  ";
             }
-            acadoPrintf("\n");
+            cout << endl;
 
-            acadoPrintf("RK: Second Order Forward Sensitivities:\n");
+            cout << "RK: Second Order Forward Sensitivities:\n";
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("%.16e  ", etaG3[run1] );
+            	cout << scientific << etaG3[run1] << "  ";
             }
-            acadoPrintf("\n");
+            cout << "\n";
         }
 
         // Backward Sensitivities:
@@ -2065,34 +2067,32 @@ void IntegratorLYAPUNOV::printIntermediateResults(){
 
         if( nBDirs > 0 ){
 
-            acadoPrintf("RK: Backward Sensitivities:\n");
-
-            acadoPrintf("w.r.t. the states:\n");
+            cout << "RK: Backward Sensitivities:\n" << "w.r.t. the states:\n";
             for( run2 = 0; run2 < m; run2++ ){
-                acadoPrintf("%.16e  ", etaH[diff_index[run2]] );
+            	cout << scientific << etaH[diff_index[run2]] << "  ";
             }
-            acadoPrintf("\n");
+            cout << endl;
 
             if( mu > 0 ){
-                acadoPrintf("w.r.t. the controls:\n");
+                cout << "w.r.t. the controls:\n";
                 for( run2 = 0; run2 < mu; run2++ ){
-                    acadoPrintf("%.16e  ", etaH[control_index[run2]] );
+                	cout << scientific << etaH[control_index[run2]] << "  ";
                 }
-                acadoPrintf("\n");
+                cout << endl;
             }
             if( mp > 0 ){
-                acadoPrintf("w.r.t. the parameters:\n");
+                cout << "w.r.t. the parameters:\n";
                 for( run2 = 0; run2 < mp; run2++ ){
-                    acadoPrintf("%.16e  ", etaH[parameter_index[run2]] );
+                	cout << scientific << etaH[parameter_index[run2]] << "  ";
                 }
-                acadoPrintf("\n");
+                cout << endl;
             }
             if( mw > 0 ){
-                acadoPrintf("w.r.t. the disturbances:\n");
+                cout << "w.r.t. the disturbances:\n";
                 for( run2 = 0; run2 < mw; run2++ ){
-                    acadoPrintf("%.16e  ", etaH[disturbance_index[run2]] );
+                	cout << scientific << etaH[disturbance_index[run2]] << "  ";
                 }
-                acadoPrintf("\n");
+                cout << endl;
             }
         }
 
@@ -2102,66 +2102,66 @@ void IntegratorLYAPUNOV::printIntermediateResults(){
 
         if( nBDirs2 > 0 ){
 
-            acadoPrintf("RK: First order Backward Sensitivities:\n");
+            cout << "RK: First order Backward Sensitivities:\n";
 
-            acadoPrintf("w.r.t. the states:\n");
+            cout << "w.r.t. the states:\n";
             for( run2 = 0; run2 < m; run2++ ){
-                acadoPrintf("%.16e  ", etaH2[diff_index[run2]] );
+                cout << scientific << etaH2[diff_index[run2]] << "  ";
             }
-            acadoPrintf("\n");
+            cout << endl;
 
             if( mu > 0 ){
-                acadoPrintf("w.r.t. the controls:\n");
+                cout  << "w.r.t. the controls:\n";
                 for( run2 = 0; run2 < mu; run2++ ){
-                    acadoPrintf("%.16e  ", etaH2[control_index[run2]] );
+                	cout << scientific << etaH2[control_index[run2]] << "  ";
                 }
-                acadoPrintf("\n");
+                cout << endl;
             }
             if( mp > 0 ){
-                acadoPrintf("w.r.t. the parameters:\n");
+                cout  << "w.r.t. the parameters:\n";
                 for( run2 = 0; run2 < mp; run2++ ){
-                    acadoPrintf("%.16e  ", etaH2[parameter_index[run2]] );
+                	cout << scientific << etaH2[parameter_index[run2]] << "  ";
                 }
-                acadoPrintf("\n");
+                cout << "\n";
             }
             if( mw > 0 ){
-                acadoPrintf("w.r.t. the disturbances:\n");
+                cout << "w.r.t. the disturbances:\n" << scientific;
                 for( run2 = 0; run2 < mw; run2++ ){
-                    acadoPrintf("%.16e  ", etaH2[disturbance_index[run2]] );
+                	cout << etaH2[disturbance_index[run2]] << "  ";
                 }
-                acadoPrintf("\n");
+                cout << endl;
             }
 
-            acadoPrintf("RK: Second order Backward Sensitivities:\n");
+            cout << "RK: Second order Backward Sensitivities:\n";
 
-            acadoPrintf("w.r.t. the states:\n");
+            cout << "w.r.t. the states:\n" << scientific;;
             for( run2 = 0; run2 < m; run2++ ){
-                acadoPrintf("%.16e  ", etaH3[diff_index[run2]] );
+                cout << etaH3[diff_index[run2]] << "  ";
             }
-            acadoPrintf("\n");
+            cout << endl;
 
             if( mu > 0 ){
-                acadoPrintf("w.r.t. the controls:\n");
+                cout << "w.r.t. the controls:\n" << scientific;
                 for( run2 = 0; run2 < mu; run2++ ){
-                    acadoPrintf("%.16e  ", etaH3[control_index[run2]] );
+                    cout << etaH3[control_index[run2]] << "  ";
                 }
-                acadoPrintf("\n");
+                cout << endl;
             }
 
             if( mp > 0 ){
-                acadoPrintf("w.r.t. the parameters:\n");
+                cout << "w.r.t. the parameters:\n";
                 for( run2 = 0; run2 < mp; run2++ ){
-                    acadoPrintf("%.16e  ", etaH3[parameter_index[run2]] );
+                    cout << etaH3[parameter_index[run2]] << endl;
                 }
-                acadoPrintf("\n");
+                cout << endl;
             }
 
             if( mw > 0 ){
-                acadoPrintf("w.r.t. the disturbances:\n");
+                cout << "w.r.t. the disturbances:\n";
                 for( run2 = 0; run2 < mw; run2++ ){
-                    acadoPrintf("%.16e  ", etaH3[disturbance_index[run2]] );
+                    cout << etaH3[disturbance_index[run2]] << "  ";
                 }
-                acadoPrintf("\n");
+                cout << endl;
             }
      }
 }

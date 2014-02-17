@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,17 +43,15 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExplicitEulerExport::ExplicitEulerExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ExplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
-	numStages = 1;
 }
 
 
 ExplicitEulerExport::ExplicitEulerExport(	const ExplicitEulerExport& arg
 									) : ExplicitRungeKuttaExport( arg )
 {
-	numStages = 1;
 	copy( arg );
 }
 
@@ -71,11 +69,11 @@ ExplicitEulerExport::~ExplicitEulerExport( )
 //
 
 IntegratorExport* createExplicitEulerExport(	UserInteraction* _userInteraction,
-												const String &_commonHeaderName)
+												const std::string &_commonHeaderName)
 {
-	Matrix AA(1,1);
-	Vector bb(1);
-	Vector cc(1);
+	DMatrix AA(1,1);
+	DVector bb(1);
+	DVector cc(1);
 
 	AA(0,0) = 0.0;
 

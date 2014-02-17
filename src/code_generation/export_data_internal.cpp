@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,10 +33,10 @@ using namespace CasADi;
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportDataInternal::ExportDataInternal(	const String& _name,
+ExportDataInternal::ExportDataInternal(	const std::string& _name,
 										ExportType _type,
 										ExportStruct _dataStruct,
-										const String& _prefix
+										const std::string& _prefix
 										)
 	: SharedObjectNode(), name( _name ), type( _type ), prefix( _prefix ), dataStruct( _dataStruct ),
 	  description()
@@ -48,10 +48,10 @@ ExportDataInternal::~ExportDataInternal( )
 {
 }
 
-returnValue	ExportDataInternal::setName(	const String& _name
+returnValue	ExportDataInternal::setName(	const std::string& _name
 											)
 {
-	if ( _name.isEmpty() == BT_TRUE )
+	if ( _name.empty() == true )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	name = _name;
@@ -72,7 +72,7 @@ returnValue	ExportDataInternal::setType(	ExportType _type
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportDataInternal::setPrefix(	const String& _prefix
+returnValue ExportDataInternal::setPrefix(	const std::string& _prefix
 											)
 {
 	prefix = _prefix;
@@ -94,7 +94,7 @@ returnValue	ExportDataInternal::setDataStruct(	ExportStruct _dataStruct
 
 
 
-String ExportDataInternal::getName( ) const
+std::string ExportDataInternal::getName( ) const
 {
 	return name;
 }
@@ -104,14 +104,14 @@ ExportType ExportDataInternal::getType( ) const
 	return type;
 }
 
-String ExportDataInternal::getPrefix() const
+std::string ExportDataInternal::getPrefix() const
 {
 	return prefix;
 }
 
-String ExportDataInternal::getTypeString(	const String& _realString,
-									const String& _intString
-									) const
+std::string ExportDataInternal::getTypeString(	const std::string& _realString,
+												const std::string& _intString
+												) const
 {
 	switch ( type )
 	{
@@ -122,13 +122,13 @@ String ExportDataInternal::getTypeString(	const String& _realString,
 		return _realString;
 
 	case STATIC_CONST_INT:
-		return String("static const ") << _intString;
+		return std::string("static const ") + _intString;
 
 	case STATIC_CONST_REAL:
-		return String("static const ") << _realString;
+		return std::string("static const ") + _realString;
 	}
 
-	return (String)"unknownType";
+	return std::string("unknownType");
 }
 
 
@@ -138,11 +138,13 @@ ExportStruct ExportDataInternal::getDataStruct( ) const
 }
 
 
-String ExportDataInternal::getDataStructString( ) const
+std::string ExportDataInternal::getDataStructString( ) const
 {
-	String tmp = prefix;
+	std::stringstream tmp;
 
-	if (tmp.isEmpty() == BT_FALSE)
+	tmp << prefix;
+
+	if (prefix.empty() == false)
 		tmp << "_";
 
 	switch ( dataStruct )
@@ -180,16 +182,16 @@ String ExportDataInternal::getDataStructString( ) const
 			break;
 	}
 
-	return tmp;
+	return tmp.str();
 }
 
 
-String ExportDataInternal::getFullName( ) const
+std::string ExportDataInternal::getFullName( ) const
 {
-	if ( fullName.isEmpty() == BT_TRUE )
+	if ( fullName.empty() == true )
 		return name;
-	else
-		return fullName;
+
+	return fullName;
 }
 
 
@@ -203,17 +205,14 @@ String ExportDataInternal::getFullName( ) const
 // PRIVATE MEMBER FUNCTIONS:
 //
 
-//ExportDataInternal::ExportDataInternal()
-//{}
-
 returnValue ExportDataInternal::setFullName()
 {
 	if ( dataStruct == ACADO_LOCAL )
 	{
-		if ( prefix.isEmpty() == BT_FALSE )
+		if ( prefix.empty() == false )
 		{
 			fullName = prefix;
-			fullName << "_" << name;
+			fullName += std::string("_") + name;
 		}
 		else
 		{
@@ -222,30 +221,30 @@ returnValue ExportDataInternal::setFullName()
 	}
 	else
 	{
-//		if ( prefix.isEmpty() == BT_FALSE )
+//		if ( prefix.isEmpty() == false )
 //		{
 //			fullName = prefix;
-//			fullName << "_" << getDataStructString();
+//			fullName << "_" << getDataStructstd::string();
 //		}
 //		else
 //		{
 			fullName = getDataStructString();
 //		}
 
-		fullName << "." << name;
+		fullName += std::string(".") + name;
 	}
 
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportDataInternal::setDoc( const String& _doc )
+returnValue ExportDataInternal::setDoc( const std::string& _doc )
 {
 	description = _doc;
 
 	return SUCCESSFUL_RETURN;
 }
 
-String ExportDataInternal::getDoc() const
+std::string ExportDataInternal::getDoc() const
 {
 	return description;
 }

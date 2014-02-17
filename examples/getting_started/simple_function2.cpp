@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -38,9 +38,9 @@ int main( ){
 
     USING_NAMESPACE_ACADO
 
-    Matrix             A(3,3);
-    Vector             b(3);
-    DifferentialState  x(3);
+    DMatrix             A(3,3);
+    DVector             b(3);
+    DifferentialState  x("", 3, 1);
     Function           f;
 
     A.setZero() ;
@@ -49,7 +49,7 @@ int main( ){
 
     f << A*x + b;
 
-	Vector x0(3), dummy(3);
+	DVector x0(3), dummy(3);
 	x0.setAll( 1.0 );
 	dummy.setZero( );
 	//f.evaluate( 0.0,&x0,&dummy,MEDIUM ); DOES NOT COMPILE

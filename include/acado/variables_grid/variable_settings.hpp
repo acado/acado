@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -58,7 +58,7 @@ const BooleanType defaultAutoInit = BT_TRUE;
  *	\ingroup BasicDataStructures
  *
  *  The class VariableSettings provides variable-specific settings for 
- *	enhancing a Vector or a Matrix to vector- or matrix-valued 
+ *	enhancing a DVector or a DMatrix to vector- or matrix-valued 
  *	optimization variables. It is intended for internal use only.
  *
  *	\author Hans Joachim Ferreau, Boris Houska
@@ -89,9 +89,9 @@ class VariableSettings
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							const VectorspaceElement& _scaling = emptyConstVectorspaceElement,
-							const VectorspaceElement& _lb = emptyConstVectorspaceElement,
-							const VectorspaceElement& _ub = emptyConstVectorspaceElement,
+							const DVector& _scaling = emptyConstVector,
+							const DVector& _lb = emptyConstVector,
+							const DVector& _ub = emptyConstVector,
 							BooleanType _autoInit = defaultAutoInit
 							);
 
@@ -137,9 +137,9 @@ class VariableSettings
 							VariableType _type,
 							const char** const _names,
 							const char** const _units,
-							const VectorspaceElement& _scaling = emptyConstVectorspaceElement,
-							const VectorspaceElement& _lb = emptyConstVectorspaceElement,
-							const VectorspaceElement& _ub = emptyConstVectorspaceElement,
+							const DVector& _scaling = emptyConstVector,
+							const DVector& _lb = emptyConstVector,
+							const DVector& _ub = emptyConstVector,
 							BooleanType _autoInit = defaultAutoInit
 							);
 
@@ -169,9 +169,9 @@ class VariableSettings
 		returnValue appendSettings(	uint _dim,
 									const char** const _names,
 									const char** const _units,
-									const VectorspaceElement& _scaling = emptyConstVectorspaceElement,
-									const VectorspaceElement& _lb = emptyConstVectorspaceElement,
-									const VectorspaceElement& _ub = emptyConstVectorspaceElement
+									const DVector& _scaling = emptyConstVector,
+									const DVector& _lb = emptyConstVector,
+									const DVector& _ub = emptyConstVector
 									);
 
 
@@ -249,7 +249,7 @@ class VariableSettings
 		 *
 		 *  \return Current scaling
 		 */
-		inline VectorspaceElement getScaling( ) const;
+		inline DVector getScaling( ) const;
 
 		/** Assigns new scaling.
 		 *
@@ -261,7 +261,7 @@ class VariableSettings
 		 *	        RET_VECTOR_DIMENSION_MISMATCH, \n
 		 *	        RET_INVALID_ARGUMENTS
 		 */
-		inline returnValue setScaling(	const VectorspaceElement& _scaling
+		inline returnValue setScaling(	const DVector& _scaling
 										);
 
 		/** Returns current scaling of given component.
@@ -293,7 +293,7 @@ class VariableSettings
 		 *
 		 *  \return Current lower bounds
 		 */
-		inline VectorspaceElement getLowerBounds( ) const;
+		inline DVector getLowerBounds( ) const;
 
 		/** Assigns new lower bounds.
 		 *
@@ -302,7 +302,7 @@ class VariableSettings
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		inline returnValue setLowerBounds(	const VectorspaceElement& _lb
+		inline returnValue setLowerBounds(	const DVector& _lb
 											);
 
 		/** Returns current lower bound of given component.
@@ -331,7 +331,7 @@ class VariableSettings
 		 *
 		 *  \return Current upper bounds
 		 */
-		inline VectorspaceElement getUpperBounds( ) const;
+		inline DVector getUpperBounds( ) const;
 
 		/** Assigns new upper bounds.
 		 *
@@ -340,7 +340,7 @@ class VariableSettings
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		inline returnValue setUpperBounds(	const VectorspaceElement& _ub
+		inline returnValue setUpperBounds(	const DVector& _ub
 											);
 
 		/** Returns current upper bound of given component.
@@ -447,10 +447,10 @@ class VariableSettings
 		char** names;						/**< Array containing name labels for each component of the variable.. */
 		char** units;						/**< Array containing unit labels for each component of the variable.. */
 
-		VectorspaceElement scaling;			/**< Scaling for each component of the variable. */
+		DVector scaling;			/**< Scaling for each component of the variable. */
 
-		VectorspaceElement lb;				/**< Lower bounds for each component of the variable. */
-		VectorspaceElement ub;				/**< Upper bounds for each component of the variable. */
+		DVector lb;				/**< Lower bounds for each component of the variable. */
+		DVector ub;				/**< Upper bounds for each component of the variable. */
 
         BooleanType autoInit;				/**< Flag indicating whether variable is to be automatically initialized. */
 };

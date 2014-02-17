@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,33 +31,33 @@
  *
  */
 
- 
-#include <acado_optimal_control.hpp>
+#include <acado_integrators.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
 int main( )
 {
-	USING_NAMESPACE_ACADO
-
 	// Setup an equidistant Grid with 5 grid points
 	double tStart =  0.0;
 	double tEnd   =  2.0;
 
 	Grid firstGrid( tStart,tEnd,5 );
 
-	printf( "The grid consists of the following grid points:\n" );
+	cout << "The grid consists of the following grid points:\n";
 	firstGrid.print();
-	printf( "Its third grid point has time:  %f\n",firstGrid.getTime( 2 ) );
+	cout << "Its third grid point has time:  " << firstGrid.getTime( 2 ) << endl;
 
 
 	// Add additional grid point at time 7
 	// (time must be greater than time at last grid point)
 	firstGrid.addTime( 7.0 );
 
-	printf( "\nNow, the grid consists of the following grid points:\n" );
+	cout << "\nNow, the grid consists of the following grid points:\n";
 	firstGrid.print();
-	printf( "Its interval length is:  %f\n",firstGrid.getIntervalLength() );
+	cout << "Its interval length is:  " <<  firstGrid.getIntervalLength() << endl;
 
 
 	// Setup an arbitrary grid with 3 grid points
@@ -67,17 +67,16 @@ int main( )
 	secondGrid.setTime( 1,1.0 );
 	secondGrid.setTime( 2,5.0 );
 
-	printf( "\nThe second grid consists of the following grid points:\n" );
+	cout << "\nThe second grid consists of the following grid points:\n";
 	secondGrid.print();
-
 
 	// Add grid points of first grid to that of the second one
-	secondGrid & firstGrid;
+	secondGrid& firstGrid;
 
-	printf( "\nNow, the second grid consists of the following grid points:\n" );
+	cout << "\nNow, the second grid consists of the following grid points:\n";
 	secondGrid.print();
-	printf( "Its interval length is:  %f\n",secondGrid.getIntervalLength() );
-	printf( "Its third grid point has time:  %f\n",secondGrid.getTime( 2 ) );
+	cout << "Its interval length is:         " << secondGrid.getIntervalLength() << endl
+		 << "Its third grid point has time:  " << secondGrid.getTime( 2 ) << endl;
 
     return 0;
 }

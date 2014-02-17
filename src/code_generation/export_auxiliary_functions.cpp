@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,21 +32,19 @@
 #include <acado/code_generation/export_auxiliary_functions.hpp>
 #include <acado/code_generation/templates/templates.hpp>
 
-#include <sstream>
-
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
 
-ExportAuxiliaryFunctions::ExportAuxiliaryFunctions(	const String& _headerFileName,
-													const String& _sourceFileName,
-													const String& _moduleName,
-													const String& _commonHeaderName,
-													const String& _realString,
-													const String& _intString,
+ExportAuxiliaryFunctions::ExportAuxiliaryFunctions(	const std::string& _headerFileName,
+													const std::string& _sourceFileName,
+													const std::string& _moduleName,
+													const std::string& _commonHeaderName,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision,
-													const String& _commentString
+													const std::string& _commentString
 													)
 	: source(AUXILIARY_FUNCTIONS_SOURCE, _sourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
 	  header(AUXILIARY_FUNCTIONS_HEADER, _headerFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
@@ -60,14 +58,14 @@ returnValue ExportAuxiliaryFunctions::configure( )
 	// Source file configuration
 	//
 
-	source.dictionary[ "@MODULE_NAME@" ] = string( moduleName.getName() );
+	source.dictionary[ "@MODULE_NAME@" ] = moduleName;
 
 	source.fillTemplate();
 
 	//
 	// Header file configuration
 	//
-	header.dictionary[ "@MODULE_NAME@" ] = string( moduleName.getName() );
+	header.dictionary[ "@MODULE_NAME@" ] = moduleName;
 
 	header.fillTemplate();
 

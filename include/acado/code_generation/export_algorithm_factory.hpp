@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -57,7 +57,7 @@ class ExportAlgorithmFactory
 {
 public:
 	/** Helper type. */
-	typedef AlgorithmBase* (*exportAlgorithmCreator)(UserInteraction* _userInteraction, const String &_commonHeaderName);
+	typedef AlgorithmBase* (*exportAlgorithmCreator)(UserInteraction* _userInteraction, const std::string &_commonHeaderName);
 
 	/** Static creator function. */
 	static ExportAlgorithmFactory& instance()
@@ -67,32 +67,32 @@ public:
 	}
 
 	/** Function for algorithm registration. */
-	BooleanType registerAlgorithm(	const AlgorithmType& id,
+	bool registerAlgorithm(	const AlgorithmType& id,
 									exportAlgorithmCreator creator)
 	{
 		bool status = associations_.insert(
 				typename idToProductMap::value_type(id, creator)).second;
 
 		if ( status == true )
-			return BT_TRUE;
+			return true;
 
-		return BT_FALSE;
+		return false;
 	}
 
 	/** Function to unregister an algorithm. */
-	BooleanType unregisterAlgorithm(	const AlgorithmType& id)
+	bool unregisterAlgorithm(	const AlgorithmType& id)
 	{
 		bool status = associations_.erase( id ) == 1;
 
 		if ( status == true )
-			return BT_TRUE;
+			return true;
 
-		return BT_FALSE;
+		return false;
 	}
 
 	/** Function to create an instance of an algorithm. */
 	AlgorithmBase* createAlgorithm(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName,
+									const std::string& _commonHeaderName,
 									const AlgorithmType& id)
 	{
 		typename idToProductMap::const_iterator it = associations_.find( id );

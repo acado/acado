@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -57,7 +57,7 @@ public:
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
 	ExportCholeskyDecomposition(	UserInteraction* _userInteraction = 0,
-									const String& _commonHeaderName = ""
+									const std::string& _commonHeaderName = ""
 									);
 
 	/** Destructor. */
@@ -68,9 +68,9 @@ public:
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	returnValue init(	const String& _name,
+	returnValue init(	const std::string& _name,
 						unsigned _dim,
-						BooleanType _unrolling = BT_FALSE
+						bool _unrolling = false
 						);
 
 	/** Initializes code export into given file.
@@ -108,13 +108,13 @@ public:
 									);
 
 	/** Get name of the function that perform the decomposition. */
-	const String getName();
+	const std::string getName();
 
 private:
 
 	ExportVariable A;
 	ExportFunction fcn;
-	BooleanType unrolling;
+	bool unrolling;
 };
 
 CLOSE_NAMESPACE_ACADO

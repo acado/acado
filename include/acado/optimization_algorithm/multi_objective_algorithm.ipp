@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -50,7 +50,7 @@ inline returnValue MultiObjectiveAlgorithm::getParetoFront( VariablesGrid &paret
     if( result.getDim() == 0 )
         return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
 
-    Vector firstColumn(count);
+    DVector firstColumn(count);
     for( run1 = 0; run1 < count; run1++ )
         firstColumn(run1) = result(run1,0);
 
@@ -92,7 +92,7 @@ inline returnValue MultiObjectiveAlgorithm::getParetoFrontWithFilter( VariablesG
         }
     }
 
-    Vector firstColumn(nP);
+    DVector firstColumn(nP);
     for( run1 = 0; run1 < nP; run1++ )
         firstColumn(run1) = result(Pp[run1],0);
 
@@ -109,10 +109,10 @@ inline returnValue MultiObjectiveAlgorithm::getParetoFrontWithFilter( VariablesG
 }
 
 
-inline Matrix MultiObjectiveAlgorithm::getPayOffMatrix( ) const{
+inline DMatrix MultiObjectiveAlgorithm::getPayOffMatrix( ) const{
 
     int run1, run2;
-    Matrix tmp(m,m);
+    DMatrix tmp(m,m);
 
     for( run1 = 0; run1 < m; run1++ )
         for( run2 = 0; run2 < m; run2++ )
@@ -122,11 +122,11 @@ inline Matrix MultiObjectiveAlgorithm::getPayOffMatrix( ) const{
 }
 
 
-inline Matrix MultiObjectiveAlgorithm::getNormalizedPayOffMatrix( ) const{
+inline DMatrix MultiObjectiveAlgorithm::getNormalizedPayOffMatrix( ) const{
 
     int run1, run2;
-    Matrix tmp = getPayOffMatrix();
-    Vector L   = getNormalizationVector();
+    DMatrix tmp = getPayOffMatrix();
+    DVector L   = getNormalizationVector();
 
     for( run1 = 0; run1 < m; run1++ )
         for( run2 = 0; run2 < m; run2++ )
@@ -136,10 +136,10 @@ inline Matrix MultiObjectiveAlgorithm::getNormalizedPayOffMatrix( ) const{
 }
 
 
-inline Vector MultiObjectiveAlgorithm::getUtopiaVector( ) const{
+inline DVector MultiObjectiveAlgorithm::getUtopiaVector( ) const{
 
     int run1;
-    Vector tmp(m);
+    DVector tmp(m);
 
     for( run1 = 0; run1 < m; run1++ )
         tmp(run1) = vertices(run1,run1);
@@ -148,10 +148,10 @@ inline Vector MultiObjectiveAlgorithm::getUtopiaVector( ) const{
 }
 
 
-inline Vector MultiObjectiveAlgorithm::getNadirVector( ) const{
+inline DVector MultiObjectiveAlgorithm::getNadirVector( ) const{
 
     int run1,run2;
-    Vector tmp(m);
+    DVector tmp(m);
     double max;
 
     for( run1 = 0; run1 < m; run1++ ){
@@ -164,16 +164,16 @@ inline Vector MultiObjectiveAlgorithm::getNadirVector( ) const{
 }
 
 
-inline Vector MultiObjectiveAlgorithm::getNormalizationVector( ) const{
+inline DVector MultiObjectiveAlgorithm::getNormalizationVector( ) const{
 
     return (getNadirVector()-getUtopiaVector());
 }
 
 
-inline Matrix MultiObjectiveAlgorithm::getUtopiaPlaneVectors( ) const{
+inline DMatrix MultiObjectiveAlgorithm::getUtopiaPlaneVectors( ) const{
 
     int run1,run2;
-    Matrix tmp = getNormalizedPayOffMatrix();
+    DMatrix tmp = getNormalizedPayOffMatrix();
 
     for( run1 = 0; run1 < m; run1++ )
         for( run2 = 0; run2 < m; run2++ )
@@ -184,17 +184,17 @@ inline Matrix MultiObjectiveAlgorithm::getUtopiaPlaneVectors( ) const{
 
 
 
-inline Matrix MultiObjectiveAlgorithm::getWeights() const{
+inline DMatrix MultiObjectiveAlgorithm::getWeights() const{
 
    int tmp = N;
     if( tmp == 0 )
         get( PARETO_FRONT_DISCRETIZATION, tmp );
 
     WeightGeneration generator;
-    Matrix Weights;
-    Vector formers;
-    Vector  lb(m);
-    Vector  ub(m);
+    DMatrix Weights;
+    DVector formers;
+    DVector  lb(m);
+    DVector  ub(m);
     lb.setZero();
     ub.setAll(1.0);
     generator.getWeights( m, tmp, lb, ub, Weights, formers );
@@ -206,12 +206,10 @@ inline Matrix MultiObjectiveAlgorithm::getWeights() const{
 
 inline returnValue MultiObjectiveAlgorithm::getWeights( const char*fileName ) const{
 
-    Matrix Weights;
+    DMatrix Weights;
     Weights = getWeights();
-
-    FILE *tmpFile = fopen( fileName, "w" );
-    tmpFile << Weights;
-    fclose( tmpFile );
+    
+    Weights.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
@@ -244,18 +242,16 @@ inline returnValue MultiObjectiveAlgorithm::getWeightsWithFilter( const char*fil
         }
     }
 
-    Matrix Weights;
+    DMatrix Weights;
     Weights = getWeights();
 
-    Matrix FilteredWeights( Weights.getNumRows(), nP );
+    DMatrix FilteredWeights( Weights.getNumRows(), nP );
 
     for( run1 = 0; run1 < nP; run1++ )
         for( run2 = 0; run2 < (int) Weights.getNumRows(); run2++ )
             FilteredWeights( run2, run1 ) = Weights( run2, Pp[run1] );
 
-    FILE *tmpFile = fopen( fileName, "w" );
-    tmpFile << FilteredWeights;
-    fclose( tmpFile );
+	FilteredWeights.print( fileName );
 
     delete[] Pp;
 
@@ -267,16 +263,14 @@ inline returnValue MultiObjectiveAlgorithm::printAuxiliaryRoutine( const char*fi
 
     int run1;
 
-    Matrix Weights;
+    DMatrix Weights;
     Weights = getWeights();
 
     for( run1 = 0; run1 < (int) Weights.getNumCols(); run1++ ){
         char *tmp = new char[MAX_LENGTH_STRING];
         sprintf( tmp, "MO%d%s", run1, fileName );
         if( x_[run1].getNumPoints() != 0 ){
-            FILE *file = fopen(tmp,"w");
-            file << x_[run1];
-            fclose(file);
+        	x_[run1].print( tmp );
         }
         else{
             FILE *file = fopen(tmp,"w");
@@ -320,12 +314,12 @@ inline returnValue MultiObjectiveAlgorithm::getAllDisturbances( const char*fileN
 
 
 
-inline returnValue MultiObjectiveAlgorithm::printInfo(){
-
-    acadoPrintf("\n\n--------------- INFO: ------------------------\n");
-    acadoPrintf("\n    Total number of SQP iterations:  %d \n", totalNumberOfSQPiterations );
-    acadoPrintf("    Total CPU time                :  %.3e sec \n", totalCPUtime );
-    acadoPrintf("\n\n----------------------------------------------\n\n");
+inline returnValue MultiObjectiveAlgorithm::printInfo()
+{
+    std::cout << "\n\n--------------- INFO: ------------------------\n";
+    std::cout << "\n    Total number of SQP iterations:  " <<  totalNumberOfSQPiterations << std::endl;
+    std::cout << "    Total CPU time                :    " << totalCPUtime << " sec" << std::endl;
+    std::cout << "\n\n----------------------------------------------\n\n";
 
     return SUCCESSFUL_RETURN;
 }

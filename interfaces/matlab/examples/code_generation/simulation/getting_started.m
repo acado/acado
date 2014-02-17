@@ -9,7 +9,7 @@ acadoSet('problemname', 'getting_started');
 
 DifferentialState a b
 Control u
-Parameter mu
+OnlineData mu
 
 x = [a; b];
 f = [   x(2) + u*(mu+(1-mu)*x(1)); ...
@@ -28,24 +28,32 @@ sim.exportCode('getting_started_export');
 
 cd getting_started_export
 make_acado_integrator('../integrate_getting_started')
-make_acado_model('../rhs_getting_started')
+cd ..
+
+%% SIMexport: a more accurate integrator as a reference
+sim.set( 'NUM_INTEGRATOR_STEPS',        20              );
+sim.exportCode('getting_started_export');
+
+cd getting_started_export
+make_acado_integrator('../integrate_getting_started2')
 cd ..
 
 %% simulation (test results):
 mu = 0.5;
-x = [-0.683; -0.864]; xs = x;
+x = [-0.683; -0.864]; xs = x; xs2 = x;
 u = 2;
+input.u = u;
+input.od = mu;
 for i = 1:N
-    states = integrate_getting_started(xs(:,end),u,mu);
+    input.x = xs2(:,end);
+    states = integrate_getting_started(input);
     xs(:,i+1) = states.value;
+    
+    input.x = xs2(:,end);
+    states = integrate_getting_started2(input);
+    xs2(:,end+1) = states.value;
 end
-
-options = odeset('RelTol',1e-12,'AbsTol',1e-12);
-[tout exact] = ode45(@(t, y) rhs_getting_started(t, y, u, mu),[0:h:N*h],x,options);
-exact = exact';
-
-format long e
-mean_error = mean(mean(abs(xs(:,2:end)-exact(:,2:end))./abs(exact(:,2:end))))
+mean_error = mean(abs(xs(:,2:end)-xs2(:,2:end))./abs(xs2(:,2:end)))
 
 figure(1);
 subplot(2,1,1);
@@ -64,7 +72,8 @@ title('State 2')
 Nt = 500000;
 tic
 for i = 1:Nt
-    statesOr = integrate_getting_started(x,u,mu);
+    input.x = x;
+    statesOr = integrate_getting_started(input);
 end
 time = toc/Nt;
 disp(['average time per integration: ' num2str(round(time*10^6)) ' μs'])

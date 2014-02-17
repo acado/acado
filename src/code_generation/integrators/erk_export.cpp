@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,20 +33,19 @@
 
 #include <acado/code_generation/integrators/erk_export.hpp>
 
-#include <sstream>
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
 ExplicitRungeKuttaExport::ExplicitRungeKuttaExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : RungeKuttaExport( _userInteraction,_commonHeaderName )
 {
+	is_symmetric = BT_FALSE;
 }
 
 
@@ -76,16 +75,16 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	// export RK scheme
 	uint rhsDim   = NX*(NX+NU+1);
 	if( !DERIVATIVES ) rhsDim = NX;
-	inputDim = NX*(NX+NU+1) + NU + NP;
-	if( !DERIVATIVES ) inputDim = NX + NU + NP;
+	inputDim = NX*(NX+NU+1) + NU + NOD;
+	if( !DERIVATIVES ) inputDim = NX + NU + NOD;
 	const uint rkOrder  = getNumStages();
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();    
 
-	ExportVariable Ah ( "A*h",  Matrix( AA )*=h );
-	ExportVariable b4h( "b4*h", Matrix( bb )*=h );
+	ExportVariable Ah ( "A*h",  DMatrix( AA )*=h );
+	ExportVariable b4h( "b4*h", DMatrix( bb )*=h );
 
-	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
+	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
 
 	int useOMP;
@@ -93,7 +92,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	rk_ttt.setup( "rk_ttt", 1, 1, REAL, structWspace, BT_TRUE );
+	rk_ttt.setup( "rk_ttt", 1, 1, REAL, structWspace, true );
 	uint timeDep = 0;
 	if( timeDependant ) timeDep = 1;
 	
@@ -104,9 +103,10 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	{
 		ExportVariable auxVar;
 
-		auxVar = diffs_rhs.getGlobalExportVariable();
+		auxVar = getAuxVariable();
 		auxVar.setName( "odeAuxVar" );
 		auxVar.setDataStruct( ACADO_LOCAL );
+		rhs.setGlobalExportVariable( auxVar );
 		diffs_rhs.setGlobalExportVariable( auxVar );
 	}
 
@@ -129,21 +129,21 @@ returnValue ExplicitRungeKuttaExport::setup( )
 
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
-		integrate.addStatement( String( "int numSteps[" ) << String( numSteps.getDim() ) << "] = {" << String( numSteps(0) ) );
+		integrate.addStatement( std::string( "int numSteps[" ) + toString( numSteps.getDim() ) + "] = {" + toString( numSteps(0) ) );
 		uint i;
 		for( i = 1; i < numSteps.getDim(); i++ ) {
-			integrate.addStatement( String( ", " ) << String( numSteps(i) ) );
+			integrate.addStatement( std::string( ", " ) + toString( numSteps(i) ) );
 		}
-		integrate.addStatement( String( "};\n" ) );
-		integrate.addStatement( String( "int " ) << numInt.getName() << " = numSteps[" << rk_index.getName() << "];\n" );
+		integrate.addStatement( std::string( "};\n" ) );
+		integrate.addStatement( std::string( "int " ) + numInt.getName() + " = numSteps[" + rk_index.getName() + "];\n" );
 	}
 	
-	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
+	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 
 	if( DERIVATIVES ) {
 		// initialize sensitivities:
-		Matrix idX    = eye( NX );
-		Matrix zeroXU = zeros( NX,NU );
+		DMatrix idX    = eye<double>( NX );
+		DMatrix zeroXU = zeros<double>( NX,NU );
 		integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
 		integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
 	}
@@ -160,7 +160,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	}
 	else {
 		loop = ExportForLoop( run, 0, 1 );
-		loop.addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+		loop.addStatement( std::string("for(") + run.getName() + " = 0; " + run.getName() + " < " + numInt.getName() + "; " + run.getName() + "++ ) {\n" );
 	}
 
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
@@ -170,7 +170,7 @@ returnValue ExplicitRungeKuttaExport::setup( )
 		loop.addFunctionCall( getNameDiffsRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop.addStatement( rk_eta.getCols( 0,rhsDim ) += b4h^rk_kkk );
-	loop.addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
+	loop.addStatement( rk_ttt += DMatrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop
 
 	if( !equidistantControlGrid() ) {
@@ -187,14 +187,12 @@ returnValue ExplicitRungeKuttaExport::setup( )
 }
 
 
-
 returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression& rhs_ )
 {
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY,sensGen );
-	bool DERIVATIVES = ((ExportSensitivityType)sensGen != NO_SENSITIVITY);
 
-	Parameter         dummy0;
+	OnlineData        dummy0;
 	Control           dummy1;
 	DifferentialState dummy2;
 	AlgebraicState 	  dummy3;
@@ -205,11 +203,11 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	dummy3.clearStaticCounters();
 	dummy4.clearStaticCounters();
 
-	x = DifferentialState(NX);
-	dx = DifferentialStateDerivative(NDX);
-	z = AlgebraicState(NXA);
-	u = Control(NU);
-	p = Parameter(NP);
+	x = DifferentialState("", NX, 1);
+	dx = DifferentialStateDerivative("", NDX, 1);
+	z = AlgebraicState("", NXA, 1);
+	u = Control("", NU, 1);
+	od = OnlineData("", NOD, 1);
 	
 	if( NDX > 0 && NDX != NX ) {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -225,8 +223,8 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	if( DERIVATIVES ) {
-		DifferentialState Gx(NX,NX), Gu(NX,NU);
+	if( (ExportSensitivityType)sensGen == FORWARD ) {
+		DifferentialState Gx("", NX,NX), Gu("", NX,NU);
 		// no free parameters yet!
 		// DifferentialState Gp(NX,NP);
 
@@ -235,50 +233,55 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
 		// add VDE for differential states
-		f << forwardDerivative( rhs_, x ) * Gx;
+		f << multipleForwardDerivative( rhs_, x, Gx );
 		/*	if ( f.getDim() != f.getNX() )
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 		
 		
 		// add VDE for control inputs
-		f << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
+		f << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
 		// 	if ( f.getDim() != f.getNX() )
 		// 		return ACADOERROR( RET_ILLFORMED_ODE );
 
 		// no free parameters yet!
 		// f << forwardDerivative( rhs_, x ) * Gp + forwardDerivative( rhs_, p );
 
-		if( f.getNT() > 0 ) timeDependant = BT_TRUE;
 	}
+	else if( (ExportSensitivityType)sensGen != NO_SENSITIVITY ) {
+		return ACADOERROR( RET_INVALID_OPTION );
+	}
+	if( f.getNT() > 0 ) timeDependant = true;
 
 	int matlabInterface;
 	userInteraction->get(GENERATE_MATLAB_INTERFACE, matlabInterface);
-	if( matlabInterface && DERIVATIVES ) {
-		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP)
-				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP);
-	} else if( DERIVATIVES ) {
-		return diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP);
-	} else {
-		return diffs_rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP);
+	if( matlabInterface && (ExportSensitivityType)sensGen == FORWARD ) {
+		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD)
+				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
+	}
+	else if( (ExportSensitivityType)sensGen == FORWARD ) {
+		return diffs_rhs.init(f, "acado_rhs_forw", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
+	}
+	else {
+		return diffs_rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD);
 	}
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ExplicitRungeKuttaExport::setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 ) {
+returnValue ExplicitRungeKuttaExport::setLinearInput( const DMatrix& M1, const DMatrix& A1, const DMatrix& B1 ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }
 
 
-returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs ) {
+returnValue ExplicitRungeKuttaExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& _rhs ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }
 
 
-returnValue ExplicitRungeKuttaExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 )
+returnValue ExplicitRungeKuttaExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
 {
 	return RET_INVALID_OPTION;
 }
@@ -305,28 +308,11 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 														) const
 {
 	declarations.addDeclaration( integrate );
-	if( exportRhs ) {
-//		declarations.addDeclaration( diffs_rhs );
-	}
-	else {
-		Function tmpFun;
-		tmpFun << zeros(1,1);
-		ExportAcadoFunction tmpExport(tmpFun, getNameDiffsRHS());
-		declarations.addDeclaration( tmpExport );
-	}
 
 	int matlabInterface;
 	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
 	if (matlabInterface) {
-		if( exportRhs ) {
-			declarations.addDeclaration( rhs );
-		}
-		else {
-			Function tmpFun;
-			tmpFun << zeros(1,1);
-			ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
-			declarations.addDeclaration( tmpExport );
-		}
+		declarations.addDeclaration( rhs );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -348,28 +334,25 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 	{
 		getDataDeclarations( code, ACADO_LOCAL );
 
-		stringstream s;
-		s << "#pragma omp threadprivate( "
-				<< diffs_rhs.getGlobalExportVariable().getFullName().getName()  << ", "
-				<< rk_xxx.getFullName().getName() << ", "
-				<< rk_ttt.getFullName().getName() << ", "
-				<< rk_kkk.getFullName().getName()
-				<< " )" << endl << endl;
-
-		code.addStatement( s.str().c_str() );
+		code << "#pragma omp threadprivate( "
+				<< getAuxVariable().getFullName()  << ", "
+				<< rk_xxx.getFullName() << ", "
+				<< rk_ttt.getFullName() << ", "
+				<< rk_kkk.getFullName()
+				<< " )\n\n";
 	}
 
-	if( exportRhs ) code.addFunction( diffs_rhs );
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
+	if( exportRhs ) {
+		code.addFunction( rhs );
+		code.addFunction( diffs_rhs );
+	}
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-	code.addComment(String("Fixed step size:") << String(h));
+	code.addComment(std::string("Fixed step size:") + toString(h));
 	code.addFunction( integrate );
 
-	int matlabInterface;
-	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
-	if (matlabInterface) {
-		if( exportRhs ) code.addFunction( rhs );
-	}
 
 // 	if ( (PrintLevel)printLevel >= HIGH ) 
 // 		acadoPrintf( "done.\n" );
@@ -385,8 +368,8 @@ returnValue ExplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 
 
 returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  	  	  	const std::vector<String> _outputNames,
-									  	  	  	  	const std::vector<String> _diffs_outputNames,
+									  	  	  	  	const std::vector<std::string> _outputNames,
+									  	  	  	  	const std::vector<std::string> _diffs_outputNames,
 									  	  	  	  	const std::vector<uint> _dims_output ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
@@ -394,10 +377,10 @@ returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 
 
 returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  	  	  	const std::vector<String> _outputNames,
-									  	  	  	  	const std::vector<String> _diffs_outputNames,
+									  	  	  	  	const std::vector<std::string> _outputNames,
+									  	  	  	  	const std::vector<std::string> _diffs_outputNames,
 									  	  	  	  	const std::vector<uint> _dims_output,
-									  	  	  	  	const std::vector<Matrix> _outputDependencies ) {
+									  	  	  	  	const std::vector<DMatrix> _outputDependencies ) {
 
 	return ACADOERROR( RET_INVALID_OPTION );
 }
@@ -405,8 +388,12 @@ returnValue ExplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 
 ExportVariable ExplicitRungeKuttaExport::getAuxVariable() const
 {
-
-	return diffs_rhs.getGlobalExportVariable();
+	ExportVariable max;
+	max = rhs.getGlobalExportVariable();
+	if( diffs_rhs.getGlobalExportVariable().getDim() > max.getDim() ) {
+		max = diffs_rhs.getGlobalExportVariable();
+	}
+	return max;
 }
 
 

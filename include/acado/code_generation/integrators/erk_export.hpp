@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,7 +26,7 @@
 
 
 /**
- *    \file include/acado/integrator/erk_export.hpp
+ *    \file include/acado/integrators/erk_export.hpp
  *    \author Rien Quirynen
  *    \date 2012
  */
@@ -65,7 +65,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ExplicitRungeKuttaExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -103,7 +103,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearInput( const Matrix& M1, const Matrix& A1, const Matrix& B1 );
+		virtual returnValue setLinearInput( const DMatrix& M1, const DMatrix& A1, const DMatrix& B1 );
 
 
 		/** .
@@ -112,7 +112,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& rhs );
 
 
 		/** .
@@ -121,7 +121,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -177,8 +177,8 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output );
 
 
@@ -193,10 +193,10 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
-										  const std::vector<Matrix> _outputDependencies );
+										  const std::vector<DMatrix> _outputDependencies );
 
 
 	protected:
@@ -211,20 +211,16 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 
     protected:
 
+
 };
 
-
-//
-// Create the integrator
-//
-inline ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction* _userInteraction,
-																	const String &_commonHeaderName	)
-{
-	return new ExplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
-}
-
-
 CLOSE_NAMESPACE_ACADO
+
+
+#include <acado/code_generation/integrators/erk_adjoint_export.hpp>
+#include <acado/code_generation/integrators/erk_fob_export.hpp>
+#include <acado/code_generation/integrators/erk_3sweep_export.hpp>
+#include <acado/code_generation/integrators/erk_export.ipp>
 
 
 #endif  // ACADO_TOOLKIT_ERK_EXPORT_HPP

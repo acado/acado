@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -109,8 +109,8 @@ int main( ){
 
     // DEFINE A SEED MATRIX:
     // ---------------------
-    Vector seed1(2);
-    Vector seed2(2);
+    DVector seed1(2);
+    DVector seed2(2);
 
     seed1(0) = 1.0;
     seed1(1) = 0.0;
@@ -135,7 +135,7 @@ int main( ){
 	VariablesGrid differentialStates;
 	integrator.getX( differentialStates );
 	
-	Vector Dx( 2 ), DDx( 2 );
+	DVector Dx( 2 ), DDx( 2 );
 	integrator.getForwardSensitivities( Dx,1 );
 	integrator.getForwardSensitivities( DDx,2 );
 	

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -107,11 +107,11 @@ class SimulatedReferenceTrajectory : public AdaptiveReferenceTrajectory
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue init(	double startTime = 0.0,
-									const Vector& _x  = emptyConstVector,
-									const Vector& _xa = emptyConstVector,
-									const Vector& _u  = emptyConstVector,
-									const Vector& _p  = emptyConstVector,
-									const Vector& _w  = emptyConstVector
+									const DVector& _x  = emptyConstVector,
+									const DVector& _xa = emptyConstVector,
+									const DVector& _u  = emptyConstVector,
+									const DVector& _p  = emptyConstVector,
+									const DVector& _w  = emptyConstVector
 									);
 
 
@@ -128,12 +128,12 @@ class SimulatedReferenceTrajectory : public AdaptiveReferenceTrajectory
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue step(	double _currentTime,
-									const Vector& _y,
-									const Vector& _x  = emptyConstVector,
-									const Vector& _xa = emptyConstVector,
-									const Vector& _u  = emptyConstVector,
-									const Vector& _p  = emptyConstVector,
-									const Vector& _w  = emptyConstVector
+									const DVector& _y,
+									const DVector& _x  = emptyConstVector,
+									const DVector& _xa = emptyConstVector,
+									const DVector& _u  = emptyConstVector,
+									const DVector& _p  = emptyConstVector,
+									const DVector& _w  = emptyConstVector
 									);
 
 		/** Updates the reference trajectory evaluation based on the given inputs.
@@ -145,7 +145,7 @@ class SimulatedReferenceTrajectory : public AdaptiveReferenceTrajectory
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue step(	const Vector& _x,
+		virtual returnValue step(	const DVector& _x,
 									const VariablesGrid& _u = emptyConstVariablesGrid,
 									const VariablesGrid& _p = emptyConstVariablesGrid,
 									const VariablesGrid& _w = emptyConstVariablesGrid

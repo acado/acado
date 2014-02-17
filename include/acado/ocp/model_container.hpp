@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -74,12 +74,12 @@ public:
      *	@param[in] _NXA		Number of algebraic states.
      *	@param[in] _NXA3	Number of algebraic states in the linear output subsystem.
      *	@param[in] _NU		Number of control inputs
+     *	@param[in] _NOD		Number of online data
      *	@param[in] _NP		Number of parameters
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP );
-    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU );
+    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NOD, uint _NP );
 
 
     /** Assigns the model dimensions to be used by the integrator.
@@ -90,39 +90,38 @@ public:
      *	@param[in] _NDX		Number of differential states derivatives.
      *	@param[in] _NXA		Number of algebraic states.
      *	@param[in] _NU		Number of control inputs
+     *	@param[in] _NOD		Number of online data
      *	@param[in] _NP		Number of parameters
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU, uint _NP );
-    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU );
+    returnValue setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU, uint _NOD, uint _NP );
 
 
-	/** Assigns the model dimensions to be used by the integrator.
-	 *
-	 *	@param[in] _NX		Number of differential states.
-	 *	@param[in] _NDX		Number of differential states derivatives.
-	 *	@param[in] _NXA		Number of algebraic states.
-	 *	@param[in] _NU		Number of control inputs
+    /** Assigns the model dimensions to be used by the integrator.
+     *
+     *	@param[in] _NX		Number of differential states.
+     *	@param[in] _NDX		Number of differential states derivatives.
+     *	@param[in] _NXA		Number of algebraic states.
+     *	@param[in] _NU		Number of control inputs
+     *	@param[in] _NOD		Number of online data
      *	@param[in] _NP		Number of parameters
-	 *
-	 *	\return SUCCESSFUL_RETURN
-	 */
-	returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU, uint _NP );
-	returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU );
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU, uint _NOD, uint _NP );
 
 
-	/** Assigns the model dimensions to be used by the integrator.
-	 *
-	 *	@param[in] _NX		Number of differential states.
-	 *	@param[in] _NU		Number of control inputs
-	 *	@param[in] _NP		Number of parameters
-	 *
-	 *	\return SUCCESSFUL_RETURN
-	 */
-	returnValue setDimensions( uint _NX, uint _NU, uint _NP );
-	returnValue setDimensions( uint _NX, uint _NU );
-
+    /** Assigns the model dimensions to be used by the integrator.
+     *
+     *	@param[in] _NX		Number of differential states.
+     *	@param[in] _NU		Number of control inputs
+     *	@param[in] _NOD		Number of online data
+     *	@param[in] _NP		Number of parameters
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setDimensions( uint _NX, uint _NU, uint _NOD, uint _NP );
 
     /** Assigns Differential Equation to be used by the integrator.
      *
@@ -141,7 +140,7 @@ public:
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	returnValue setNARXmodel( const uint _delay, const Matrix& _parms );
+	returnValue setNARXmodel( const uint _delay, const DMatrix& _parms );
 
 
     /** .
@@ -150,7 +149,7 @@ public:
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setLinearInput( const Matrix& A1_, const Matrix& B1_ );
+    returnValue setLinearInput( const DMatrix& A1_, const DMatrix& B1_ );
 
 
     /** .
@@ -159,7 +158,7 @@ public:
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setLinearInput( const Matrix& M1_, const Matrix& A1_, const Matrix& B1_ );
+    returnValue setLinearInput( const DMatrix& M1_, const DMatrix& A1_, const DMatrix& B1_ );
 
 
     /** .
@@ -168,7 +167,7 @@ public:
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setLinearOutput( const Matrix& A3_, const OutputFcn& rhs_ );
+    returnValue setLinearOutput( const DMatrix& A3_, const OutputFcn& rhs_ );
 
 
     /** .
@@ -177,7 +176,7 @@ public:
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setLinearOutput( const Matrix& M3_, const Matrix& A3_, const OutputFcn& rhs_ );
+    returnValue setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, const OutputFcn& rhs_ );
 
 
     /** .
@@ -186,7 +185,7 @@ public:
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setLinearOutput( const Matrix& A3_, const String& _rhs3, const String& _diffs_rhs3 );
+    returnValue setLinearOutput( const DMatrix& A3_, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
     /** .
@@ -195,7 +194,7 @@ public:
      *
      *	\return SUCCESSFUL_RETURN
      */
-    returnValue setLinearOutput( const Matrix& M3_, const Matrix& A3_, const String& _rhs3, const String& _diffs_rhs3 );
+    returnValue setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
     /** Assigns the model to be used by the integrator.
@@ -206,9 +205,9 @@ public:
      *	\return SUCCESSFUL_RETURN
      */
 
-    returnValue setModel( 	const String& fileName,
-   		 	 	 	 		const String& _rhs_ODE,
-   		 	 	 	 		const String& _diffs_rhs_ODE );
+    returnValue setModel( 	const std::string& fileName,
+   		 	 	 	 		const std::string& _rhs_ODE,
+   		 	 	 	 		const std::string& _diffs_rhs_ODE );
 
 
 	/** Adds an output function.
@@ -218,7 +217,7 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( const OutputFcn& outputEquation_, const Vector& measurements );
+	uint addOutput( const OutputFcn& outputEquation_, const DVector& measurements );
 
 
 	/** Adds an output function.
@@ -240,7 +239,7 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( const String& output, const String& diffs_output, const uint dim, const Vector& measurements );
+	uint addOutput( const std::string& output, const std::string& diffs_output, const uint dim, const DVector& measurements );
 
 
 	/** Adds an output function.
@@ -252,7 +251,7 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( const String& output, const String& diffs_output, const uint dim, const uint numberMeasurements );
+	uint addOutput( const std::string& output, const std::string& diffs_output, const uint dim, const uint numberMeasurements );
 
 
 	/** Adds an output function.
@@ -261,13 +260,13 @@ public:
 	 *  \param diffs_output 	  	The derivatives of the output function to be added.
 	 *  \param dim					The dimension of the output function.
      *  \param measurements	  		The measurement points per interval
-	 *  \param colInd				Vector stores the column indices of the elements for Compressed Row Storage (CRS).
-	 *  \param rowPtr				Vector stores the locations that start a row for Compressed Row Storage (CRS).
+	 *  \param colInd				DVector stores the column indices of the elements for Compressed Row Storage (CRS).
+	 *  \param rowPtr				DVector stores the locations that start a row for Compressed Row Storage (CRS).
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( 	const String& output, const String& diffs_output, const uint dim,
-						const Vector& measurements, const String& colInd, const String& rowPtr	);
+	uint addOutput( 	const std::string& output, const std::string& diffs_output, const uint dim,
+						const DVector& measurements, const std::string& colInd, const std::string& rowPtr	);
 
 
 	/** Adds an output function.
@@ -276,13 +275,13 @@ public:
 	 *  \param diffs_output 	  	The derivatives of the output function to be added.
 	 *  \param dim					The dimension of the output function.
      *  \param numberMeasurements	The number of measurements per interval
-	 *  \param colInd				Vector stores the column indices of the elements for Compressed Row Storage (CRS).
-	 *  \param rowPtr				Vector stores the locations that start a row for Compressed Row Storage (CRS).
+	 *  \param colInd				DVector stores the column indices of the elements for Compressed Row Storage (CRS).
+	 *  \param rowPtr				DVector stores the locations that start a row for Compressed Row Storage (CRS).
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	uint addOutput( 	const String& output, const String& diffs_output, const uint dim,
-						const uint numberMeasurements, const String& colInd, const String& rowPtr	);
+	uint addOutput( 	const std::string& output, const std::string& diffs_output, const uint dim,
+						const uint numberMeasurements, const std::string& colInd, const std::string& rowPtr	);
 
 
     /** Sets integration grid.
@@ -302,7 +301,7 @@ public:
      *                                                                      									\n
      *  \return SUCCESSFUL_RETURN
      */
-    returnValue setupOutput( const Vector& numberMeasurements );
+    returnValue setupOutput( const DVector& numberMeasurements );
 
 
     /** Returns the differential equations in the model.
@@ -351,6 +350,9 @@ public:
      */
     uint getNP( ) const;
 
+    /** Returns number of "online data" values. */
+    uint getNOD( ) const;
+
     /** Returns number of control intervals.
      *
      *  \return Number of control intervals
@@ -370,14 +372,14 @@ public:
      *
      *  \return dimensions of the different output functions.
      */
-    Vector getDimOutputs( ) const;
+    DVector getDimOutputs( ) const;
 
 
     /** Returns the number of measurements for the different output functions.
      *
      *  \return number of measurements for the different output functions.
      */
-    Vector getNumMeas( ) const;
+    DVector getNumMeas( ) const;
 
 
     /** Returns the model data object.
@@ -396,7 +398,7 @@ public:
     returnValue setModelData( const ModelData& data );
 
 
-    const String getFileNameModel() const;
+    const std::string getFileNameModel() const;
 
 
     //

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -256,7 +256,8 @@ returnValue Controller::initializeAlgebraicStates(	const VariablesGrid& _xa_init
 returnValue Controller::initializeAlgebraicStates( 	const char* fileName
 													)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 
 	if ( tmp.isEmpty( ) == BT_TRUE )
 		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
@@ -267,8 +268,8 @@ returnValue Controller::initializeAlgebraicStates( 	const char* fileName
 
 
 returnValue Controller::init(	double startTime,
-								const Vector& _x0,
-								const Vector& _p,
+								const DVector& _x0,
+								const DVector& _p,
 								const VariablesGrid& _yRef
 								)
 {
@@ -277,9 +278,9 @@ returnValue Controller::init(	double startTime,
 
 	/* 1) Initialize all sub-blocks. */
 	/* a) Estimator */
-	Vector xEst( _x0 );
-	Vector pEst( _p );
-	Vector xaEst, uEst, wEst;
+	DVector xEst( _x0 );
+	DVector pEst( _p );
+	DVector xaEst, uEst, wEst;
 
 	if ( estimator != 0 )
 	{
@@ -335,7 +336,7 @@ returnValue Controller::init(	double startTime,
 
 
 returnValue Controller::step(	double currentTime,
-								const Vector& _y,
+								const DVector& _y,
 								const VariablesGrid& _yRef
 								)
 {
@@ -349,9 +350,9 @@ returnValue Controller::step(	double currentTime,
 	/* Do nothing if controller is disabled */
 	if ( isEnabled == BT_FALSE )
 	{
-		logCollection.setLast( LOG_TIME_CONTROLLER,0.0 );
-		logCollection.setLast( LOG_TIME_CONTROL_LAW,0.0 );
-		logCollection.setLast( LOG_TIME_ESTIMATOR,0.0 );
+		setLast( LOG_TIME_CONTROLLER,0.0 );
+		setLast( LOG_TIME_CONTROL_LAW,0.0 );
+		setLast( LOG_TIME_ESTIMATOR,0.0 );
 		return SUCCESSFUL_RETURN;
 	}
 
@@ -374,20 +375,20 @@ returnValue Controller::step(	double currentTime,
 								)
 {
 	/* Convert double array to vector and call standard step routine. */
-	Vector tmp( dim,_y );
+	DVector tmp( dim,_y );
 	return step( currentTime,tmp,_yRef );
 }
 
 
 returnValue Controller::obtainEstimates(	double currentTime,
-											const Vector& _y,
-											Vector& xEst,
-											Vector& pEst
+											const DVector& _y,
+											DVector& xEst,
+											DVector& pEst
 											)
 {
 	/* 1) Call Estimator */
 	RealClock clock;
-	Vector xaEst, uEst, wEst;
+	DVector xaEst, uEst, wEst;
 
 	clock.reset();
 	clock.start();
@@ -407,7 +408,7 @@ returnValue Controller::obtainEstimates(	double currentTime,
 	}
 
 	clock.stop();
-	logCollection.setLast( LOG_TIME_ESTIMATOR,clock.getTime() );
+	setLast(LOG_TIME_ESTIMATOR, clock.getTime());
 
 	// step internal reference trajectory
 	if ( referenceTrajectory != 0 )
@@ -421,7 +422,7 @@ returnValue Controller::obtainEstimates(	double currentTime,
 
 
 returnValue Controller::feedbackStep(	double currentTime,
-										const Vector& _y,
+										const DVector& _y,
 										const VariablesGrid& _yRef
 										)
 {
@@ -437,7 +438,7 @@ returnValue Controller::feedbackStep(	double currentTime,
 	// start real runtime measurement
 	realClock.start( );
 	
-	Vector xEst, pEst;
+	DVector xEst, pEst;
 
 	/* 1) Call Estimator */
 	if ( obtainEstimates( currentTime,_y,xEst,pEst ) != SUCCESSFUL_RETURN )
@@ -461,7 +462,7 @@ returnValue Controller::feedbackStep(	double currentTime,
 	realClock.stop( );
 
 	#ifdef SIM_DEBUG
-	Vector uTmp;
+	DVector uTmp;
 	getU( uTmp );
 	uTmp.print("u(0) after feedbackStep");
 	#endif
@@ -496,15 +497,15 @@ returnValue Controller::preparationStep(	double nextTime,
 		return ACADOERROR( RET_CONTROLLER_STEP_FAILED );
 
 	controlLawClock.stop();
-	logCollection.setLast( LOG_TIME_CONTROL_LAW,controlLawClock.getTime() );
+	setLast(LOG_TIME_CONTROL_LAW, controlLawClock.getTime());
 	
 	// stop real runtime measurement
 	realClock.stop();
-	logCollection.setLast( LOG_TIME_CONTROLLER,realClock.getTime() );
+	setLast(LOG_TIME_CONTROLLER, realClock.getTime());
 
 
 	#ifdef SIM_DEBUG
-	Vector uTmp;
+	DVector uTmp;
 	getU( uTmp );
 	uTmp.print("u(0) after preparationStep");
 	#endif
@@ -556,7 +557,7 @@ returnValue Controller::setupOptions( )
 
 returnValue Controller::setupLogging( )
 {
-	LogRecord tmp( LOG_AT_EACH_ITERATION,stdout,PS_DEFAULT );
+	LogRecord tmp(LOG_AT_EACH_ITERATION, PS_DEFAULT);
 
 	tmp.addItem( LOG_FEEDBACK_CONTROL );
 	tmp.addItem( LOG_TIME_CONTROLLER );
@@ -588,7 +589,7 @@ returnValue Controller::getCurrentReference(	double tStart,
 	
 	if ( (BooleanType)useReferencePrediction == BT_FALSE )
 	{
-		Vector firstVector = _yRef.getFirstVector( );
+		DVector firstVector = _yRef.getFirstVector( );
 		Grid predictionGrid( tStart,tEnd );
 		_yRef.init( firstVector,predictionGrid );
 	}

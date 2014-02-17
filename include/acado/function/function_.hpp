@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -83,11 +83,11 @@ public:
     /** Loading Expressions (deep copy). */
     Function& operator<<( const double &arg );
 
-    /** Loading Symbolic Vector (deep copy). */
-    Function& operator<<( const Vector& arg );
+    /** Loading Symbolic DVector (deep copy). */
+    Function& operator<<( const DVector& arg );
 
-    /** Loading Symbolic Matrix (deep copy). */
-    Function& operator<<( const Matrix& arg );
+    /** Loading Symbolic DMatrix (deep copy). */
+    Function& operator<<( const DMatrix& arg );
 
 	Function operator()(	uint idx
 							) const;
@@ -162,6 +162,9 @@ public:
      */
     int getNT  () const;
 
+    /** Return number of "online data" objects. */
+    int getNOD() const;
+
 
     /** Returns the index of the variable with specified type and \n
      *  component.                                                \n
@@ -196,7 +199,7 @@ public:
      *                                         \n
      *  \return The result of the evaluation.  \n
      */
-    Vector evaluate( const EvaluationPoint &x         ,
+    DVector evaluate( const EvaluationPoint &x         ,
                      const int             &number = 0  );
 
 
@@ -208,7 +211,7 @@ public:
      *                                                      \n
      *  \return The result of the evaluation.               \n
      */
-    inline Vector operator()( const EvaluationPoint &x         ,
+    inline DVector operator()( const EvaluationPoint &x         ,
                               const int             &number = 0  );
 
 
@@ -313,6 +316,8 @@ public:
      */
      BooleanType isNonincreasing();
 
+     /** Checks whether function is a constant. */
+     BooleanType isConstant();
 
     /** Checks whether the function is affine.                    \n
      *  \return BT_FALSE if the expression is not affine          \n
@@ -346,7 +351,7 @@ public:
      *                                             \n
      *  \return The result of the evaluation.      \n
      */
-    Vector AD_forward( const EvaluationPoint &x         ,
+    DVector AD_forward( const EvaluationPoint &x         ,
                        const int             &number = 0  );
 
 
@@ -372,7 +377,7 @@ public:
      *                                                             \n
      *  \return the result for the derivative.                     \n
      */
-     returnValue AD_backward( const    Vector &seed      ,
+     returnValue AD_backward( const    DVector &seed      ,
                               EvaluationPoint &df        ,
                               const    int    &number = 0  );
 
@@ -432,17 +437,11 @@ public:
     *
     * \param x will be assigned jacobian(fun,differential states)
     */
-    returnValue jacobian(Matrix &x);
-    //returnValue jacobian(Matrix &x,Matrix &p=emptyMatrix,Matrix &u=emptyMatrix,Matrix &w=emptyMatrix);
+    returnValue jacobian(DMatrix &x);
+    //returnValue jacobian(DMatrix &x,DMatrix &p=emptyMatrix,DMatrix &u=emptyMatrix,DMatrix &w=emptyMatrix);
 
-
-
-    /** Prints the function into a file. \n
-     *  \return SUCCESSFUL_RETURN        \n
-     */
-    friend returnValue operator<<( FILE *file, Function &arg );
-
-
+    /** Prints the function into a stream. */
+    friend std::ostream& operator<<( std::ostream& stream, const Function &arg);
 
     /** Prints the function in form of plain C-code into a file. The integer             \n
      *  "precision" must be in [1,16] and defines the number of internal decimal places  \n
@@ -454,33 +453,27 @@ public:
      *                                                                                   \n
      *  \return SUCCESFUL_RETURN                                                         \n
      */
-     returnValue print(	FILE       *file,
+     returnValue print(	std::ostream& stream,
 						const char *fcnName = "ACADOfcn",
-						const char *realString = "double",
-						int         precision = 16
+						const char *realString = "double"
 						) const;
 
-
-     returnValue exportHeader(	FILE       *file,
-								const char *fcnName = "ACADOfcn",
-								const char *realString = "double"
-								) const;
-
-     returnValue exportForwardDeclarations(	FILE       *file,
+     returnValue exportForwardDeclarations(	std::ostream& stream,
 											const char *fcnName = "ACADOfcn",
 											const char *realString = "double"
 											) const;
 
-
-     returnValue exportCode(	FILE       *file,
+     returnValue exportCode(	std::ostream& stream,
 								const char *fcnName = "ACADOfcn",
 								const char *realString = "double",
-								int         precision = 16,
 								uint        _numX = 0,     
 								uint        _numXA = 0,
 								uint		_numU = 0,
 								uint		_numP = 0,
-								uint		_numDX = 0
+								uint		_numDX = 0,
+								uint		_numOD = 0,
+								bool       allocateMemory = true,
+								bool       staticMemory   = false
 								) const;
 
      /** Clears the buffer and resets the buffer size \n
@@ -510,10 +503,10 @@ public:
      inline returnValue setMemoryOffset( int memoryOffset_ );
 
      /** Set name of the variable that holds intermediate values. */
-     returnValue setGlobalExportVariableName(const String& var);
+     returnValue setGlobalExportVariableName(const std::string& var);
 
      /** Get name of the variable that holds intermediate values. */
-     String getGlobalExportVariableName( ) const;
+     std::string getGlobalExportVariableName( ) const;
 
      /** Get size of the variable that holds intermediate values. */
      unsigned getGlobalExportVariableSize( ) const;

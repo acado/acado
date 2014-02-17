@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -92,8 +92,8 @@ returnValue BoundaryConstraint::evaluate( const OCPiterate& iter ){
 
     if( nc == 0 )  return ACADOERROR(RET_MEMBER_NOT_INITIALISED);
 
-    Matrix resL( nc, 1 );
-    Matrix resU( nc, 1 );
+    DMatrix resL( nc, 1 );
+    DMatrix resU( nc, 1 );
 
 
     // EVALUATION AT THE START POINT:
@@ -102,7 +102,7 @@ returnValue BoundaryConstraint::evaluate( const OCPiterate& iter ){
 	z[0].setZ( 0, iter );
 	z[1].setZ( T, iter );
 	
-	Vector result = fcn[0].evaluate( z[0] );
+	DVector result = fcn[0].evaluate( z[0] );
 
     for( run1 = 0; run1 < nc; run1++ ){
         resL( run1, 0 ) = lb[0][run1] - result(run1);
@@ -153,16 +153,16 @@ returnValue BoundaryConstraint::evaluateSensitivities( ){
 
         int nBDirs = bSeed->getNumRows( 0, 0 );
 
-        Matrix bseed_;
+        DMatrix bseed_;
         bSeed->getSubBlock( 0, 0, bseed_);
 
         dBackward.init( 1, 5*N );
 
-        Matrix Dx ( nBDirs, nx );
-        Matrix Dxa( nBDirs, na );
-        Matrix Dp ( nBDirs, np );
-        Matrix Du ( nBDirs, nu );
-        Matrix Dw ( nBDirs, nw );
+        DMatrix Dx ( nBDirs, nx );
+        DMatrix Dxa( nBDirs, na );
+        DMatrix Dp ( nBDirs, np );
+        DMatrix Du ( nBDirs, nu );
+        DMatrix Dw ( nBDirs, nw );
 
 		// evaluate at start
         for( run1 = 0; run1 < nBDirs; run1++ )
@@ -231,7 +231,7 @@ returnValue BoundaryConstraint::evaluateSensitivities( ){
 }
 
 
-returnValue BoundaryConstraint::evaluateSensitivities( const Matrix &seed, BlockMatrix &hessian ){
+returnValue BoundaryConstraint::evaluateSensitivities( const DMatrix &seed, BlockMatrix &hessian ){
 
     // EVALUATION OF THE SENSITIVITIES:
     // --------------------------------
@@ -268,17 +268,17 @@ returnValue BoundaryConstraint::evaluateSensitivities( const Matrix &seed, Block
 
     dBackward.init( 1, 5*N );
 
-    Matrix Dx ( nc, nx );
-    Matrix Dxa( nc, na );
-    Matrix Dp ( nc, np );
-    Matrix Du ( nc, nu );
-    Matrix Dw ( nc, nw );
+    DMatrix Dx ( nc, nx );
+    DMatrix Dxa( nc, na );
+    DMatrix Dp ( nc, np );
+    DMatrix Du ( nc, nu );
+    DMatrix Dw ( nc, nw );
 
-    Matrix Hx ( nx, nx );
-    Matrix Hxa( nx, na );
-    Matrix Hp ( nx, np );
-    Matrix Hu ( nx, nu );
-    Matrix Hw ( nx, nw );
+    DMatrix Hx ( nx, nx );
+    DMatrix Hxa( nx, na );
+    DMatrix Hp ( nx, np );
+    DMatrix Hu ( nx, nu );
+    DMatrix Hw ( nx, nw );
 
     for( run2 = 0; run2 < nx; run2++ ){
 

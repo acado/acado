@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 DiagonallyIRK5Export::DiagonallyIRK5Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : DiagonallyImplicitRKExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 5;
@@ -71,11 +71,11 @@ DiagonallyIRK5Export::~DiagonallyIRK5Export( )
 //
 
 IntegratorExport* createDiagonallyIRK5Export(	UserInteraction* _userInteraction,
-												const String &_commonHeaderName)
+												const std::string &_commonHeaderName)
 {
-	Matrix AA(5,5);
-	Vector bb(5);
-	Vector cc(5);
+	DMatrix AA(5,5);
+	DVector bb(5);
+	DVector cc(5);
 
 	AA(0,0) = (6.0-sqrt(6.0))/10.0;					AA(0,1) = 0.0;									AA(0,2) = 0.0;								AA(0,3) = 0.0;								AA(0,4) = 0.0;
 	AA(1,0) = (5.0*sqrt(6.0)-6.0)/14.0;				AA(1,1) = (6.0-sqrt(6.0))/10.0;					AA(1,2) = 0.0;								AA(1,3) = 0.0;								AA(1,4) = 0.0;

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,77 +31,73 @@
  *
  */
 
- 
-#include <acado_optimal_control.hpp>
+#include <acado_integrators.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
 int main( )
 {
-	USING_NAMESPACE_ACADO
-
 	// Setup an equidistant VariablesGrid with 5 grid points
 	// and vectors of dimension 2 at each grid point and assign values
 	double tStart =  0.0;
 	double tEnd   =  2.0;
 
-	VariablesGrid equidistantGrid( 2,tStart,tEnd,5 );
+	VariablesGrid equidistantGrid(2, tStart, tEnd, 5);
 
 	equidistantGrid.setZero();
 
-	Vector v( 2 );
+	DVector v(2);
 	v(0) = 1.0;
 	v(1) = 2.0;
-	equidistantGrid.setVector( 1,v );
-	equidistantGrid.setVector( 2,v );
-	
-	v.setAll( 5.0 );
-	equidistantGrid.setVector( 3,v );
-	equidistantGrid.setVector( 4,v );
+	equidistantGrid.setVector(1, v);
+	equidistantGrid.setVector(2, v);
 
-	printf( "The grid consists of the following grid points:\n" );
-	equidistantGrid.print();
-	printf( "Its number of grid points is:  %d\n",equidistantGrid.getNumPoints() );
-	printf( "Each vector has dimension:     %d\n",equidistantGrid.getNumValues() );
+	v.setAll(5.0);
+	equidistantGrid.setVector(3, v);
+	equidistantGrid.setVector(4, v);
+
+	cout << "The grid consists of the following grid points:\n"
+		 << equidistantGrid
+		 << "Its number of grid points is:  " <<  equidistantGrid.getNumPoints() << endl
+		 << "Each vector has dimension:     " <<  equidistantGrid.getNumValues() << endl;
 
 	// Construct another VariablesGrid from file
-	VariablesGrid gridFromFile( "./data.txt" );
+	VariablesGrid gridFromFile;
+	gridFromFile.read( "./data.txt" );
 
-	printf( "\nThe second grid consists of the following grid points:\n" );
-	gridFromFile.print();
-
+	cout << "\nThe second grid consists of the following grid points:\n"
+		 << gridFromFile;
 
 	// Append (in time) grid points of second VariablesGrid to first one
-	equidistantGrid.appendTimes( gridFromFile );
+	equidistantGrid.appendTimes(gridFromFile);
 
-	printf( "\nNow, the grid consists of the following grid points:\n" );
-	equidistantGrid.print();
-	printf( "Its number of grid points is:  %d\n",equidistantGrid.getNumPoints() );
-	printf( "Each vector has dimension:     %d\n",equidistantGrid.getNumValues() );
-
+	cout << "\nNow, the grid consists of the following grid points:\n"
+		 << equidistantGrid
+		 << "Its number of grid points is:  " << equidistantGrid.getNumPoints() << endl
+		 << "Each vector has dimension:     " << equidistantGrid.getNumValues() << endl;
 
 	// Setup a third grid with identical grid points as modified first one,
 	// and comprising Vectors of dimension 1...
-	VariablesGrid thirdGrid( 1,equidistantGrid );
+	VariablesGrid thirdGrid(1, equidistantGrid);
 
 	// ... and initialise these vectors
-	for( unsigned int i=0; i<thirdGrid.getNumPoints( ); ++i )
-		thirdGrid( i,0 ) = (double)i;
-	
-	printf( "\nThe third grid consists of the following grid points:\n" );
-	thirdGrid.print();
+	for (unsigned int i = 0; i < thirdGrid.getNumPoints(); ++i)
+		thirdGrid(i, 0) = (double) i;
 
+	cout << "\nThe third grid consists of the following grid points:\n" << thirdGrid;
 
 	// Append values of all grid points of third VariablesGrid to ones of first VariablesGrid
-	equidistantGrid.appendValues( thirdGrid );
+	equidistantGrid.appendValues(thirdGrid);
 
-	printf( "\nNow, the grid consists of the following grid points:\n" );
+	cout << "\nNow, the grid consists of the following grid points:\n";
 	equidistantGrid.print();
-	printf( "Its number of grid points is:  %d\n",equidistantGrid.getNumPoints() );
-	printf( "Each vector has dimension:     %d\n",equidistantGrid.getNumValues() );
+	cout << "Its number of grid points is:  " << equidistantGrid.getNumPoints() << endl;
+	cout << "Each vector has dimension:     " << equidistantGrid.getNumValues() << endl;
 
-
-    return 0;
+	return 0;
 }
 /* <<< end tutorial code <<< */
 

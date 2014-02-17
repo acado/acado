@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -118,7 +118,7 @@ Function& Function::operator<<( const double &arg ){
 }
 
 
-Function& Function::operator<<( const Vector& arg ){
+Function& Function::operator<<( const DVector& arg ){
 
     Expression tmp;
     tmp = arg;
@@ -127,7 +127,7 @@ Function& Function::operator<<( const Vector& arg ){
 }
 
 
-Function& Function::operator<<( const Matrix& arg ){
+Function& Function::operator<<( const DMatrix& arg ){
 
     Expression tmp;
     tmp = arg;
@@ -191,6 +191,7 @@ int Function::getN   (VariableType &variableType_) const{
 	case VT_CONTROL 		: return getNU(); break;
 	case VT_INTEGER_CONTROL 	: return getNUI(); break;	
 	case VT_PARAMETER 		: return getNP(); break;
+	case VT_ONLINE_DATA 		: return getNOD(); break;
 	case VT_INTEGER_PARAMETER 	: return getNPI(); break;
 	case VT_DISTURBANCE 		: return getNW(); break;
 	case VT_TIME 			: return 1; break;
@@ -250,6 +251,12 @@ int Function::getNT   () const{
 
 
     return evaluationTree.getNT();
+}
+
+int Function::getNOD   () const{
+
+
+    return evaluationTree.getNOD();
 }
 
 
@@ -349,6 +356,13 @@ BooleanType Function::isNonincreasing(){
     return BT_FALSE;
 }
 
+BooleanType Function::isConstant()
+{
+	if (evaluationTree.getMonotonicity() == MT_CONSTANT)
+		return BT_TRUE;
+	return BT_FALSE;
+}
+
 
 BooleanType Function::isAffine(){
 
@@ -385,15 +399,15 @@ BooleanType Function::isConcave(){
     return BT_FALSE;
 }
 
-returnValue Function::jacobian(Matrix &x) {
+returnValue Function::jacobian(DMatrix &x) {
     int n=getDim();
     int N=getNumberOfVariables();
     returnValue ret;
 
-    x=Matrix(getNX(),n);x.setAll(0);
-    //u=Matrix(getNU(),n);u.setAll(0);
-    //p=Matrix(getNP(),n);p.setAll(0);
-    //w=Matrix(getNW(),n);w.setAll(0);
+    x=DMatrix(getNX(),n);x.setAll(0);
+    //u=DMatrix(getNU(),n);u.setAll(0);
+    //p=DMatrix(getNP(),n);p.setAll(0);
+    //w=DMatrix(getNW(),n);w.setAll(0);
     double *Jr=new double[N];
     double *seed=new double[n];
     for (int i=0;i<n;i++) seed[i]=0;
@@ -438,63 +452,52 @@ returnValue Function::AD_backward2( int number, double *seed1, double *seed2,
 
 
 
-returnValue operator<<( FILE *file, Function &arg ){
+std::ostream& operator<<(std::ostream& stream, const Function& arg)
+{
+    arg.print( stream );
 
-    return arg.print(file);
+    return stream;
 }
 
-
-returnValue Function::print(	FILE       *file     ,
-								const char *fcnName  ,
-								const char *realString,
-								int         precision
+returnValue Function::print(	std::ostream& stream,
+								const char *fcnName ,
+								const char *realString
 								) const
 {
 	if (getDim() > 0)
-		return evaluationTree.C_print(file, fcnName, realString, precision);
+		return evaluationTree.C_print(stream, fcnName, realString);
 
 	return SUCCESSFUL_RETURN;
 }
 
-
-returnValue Function::exportHeader(	FILE       *file     ,
-									const char *fcnName  ,
-									const char *realString
-									) const
-{
-	if (getDim() > 0)
-		return evaluationTree.exportHeader(file, fcnName, realString);
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue Function::exportForwardDeclarations(	FILE       *file     ,
+returnValue Function::exportForwardDeclarations(	std::ostream& stream,
 													const char *fcnName  ,
 													const char *realString
 													) const
 {
 	if (getDim() > 0)
-		return evaluationTree.exportForwardDeclarations(file, fcnName, realString);
+		return evaluationTree.exportForwardDeclarations(stream, fcnName, realString);
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue Function::exportCode(	FILE       *file,
+returnValue Function::exportCode(	std::ostream& stream,
 									const char *fcnName,
 									const char *realString,
-									int         precision,
 									uint        _numX,
 									uint		_numXA,
 									uint		_numU,
 									uint		_numP,
-									uint		_numDX
+									uint		_numDX,
+									uint		_numOD,
+									bool       allocateMemory,
+									bool       staticMemory
 									) const
 {
 	if (getDim() > 0)
-		return evaluationTree.exportCode(file, fcnName, realString, precision,
-				_numX, _numXA, _numU, _numP, _numDX);
+		return evaluationTree.exportCode(stream, fcnName, realString,
+				_numX, _numXA, _numU, _numP, _numDX, _numOD, allocateMemory, staticMemory);
 
 	return SUCCESSFUL_RETURN;
 }
@@ -513,33 +516,33 @@ returnValue Function::setScale( double *scale_ ){
 }
 
 
-Vector Function::evaluate( const EvaluationPoint &x,
+DVector Function::evaluate( const EvaluationPoint &x,
                            const int        &number  ){
 
     //double *result = new double[getDim()];
 
     evaluate( number, x.getEvaluationPointer(), result );
-    Vector res( getDim(), result );
+    DVector res( getDim(), result );
 
     //delete[] result;
     return   res;
 }
 
 
-Vector Function::AD_forward( const EvaluationPoint &x,
+DVector Function::AD_forward( const EvaluationPoint &x,
                              const int        &number  ){
 
     //double *result = new double[getDim()];
 
     AD_forward( number, x.getEvaluationPointer(), result );
-    Vector res( getDim(), result );
+    DVector res( getDim(), result );
 
     //delete[] result;
     return   res;
 }
 
 
-returnValue Function::AD_backward( const    Vector &seed  ,
+returnValue Function::AD_backward( const    DVector &seed  ,
                                    EvaluationPoint &df    ,
                                    const int       &number  ){
 
@@ -583,12 +586,12 @@ returnValue Function::AD_backward( const    Vector &seed  ,
     return SUCCESSFUL_RETURN;
 }
 
-String Function::getGlobalExportVariableName( ) const
+std::string Function::getGlobalExportVariableName( ) const
 {
 	return evaluationTree.getGlobalExportVariableName( );
 }
 
-returnValue Function::setGlobalExportVariableName(const String& var)
+returnValue Function::setGlobalExportVariableName(const std::string& var)
 {
 	return evaluationTree.setGlobalExportVariableName( var );
 }

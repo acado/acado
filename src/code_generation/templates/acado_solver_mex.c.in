@@ -9,14 +9,14 @@ input
 		4: shift
 	x
 	u
-	p
+	od
 	y
 	yN
-	S
-	SN
+	W
+	WN
 	x0: depends on the type of an OCP
 	xAC: optional
-	QAC: optional
+	SAC: optional
 	shifting: optional
 	{
 		strategy:
@@ -35,7 +35,7 @@ output
 	x
 	u
 	xAC: optional
-	QAC: optional
+	SAC: optional
 	info
 	{
 		status
@@ -261,9 +261,8 @@ void mexFunction(	int nlhs,
 	getArray(1, src, 0, "z", acadoVariables.z, ACADO_N, ACADO_NXA);
 #endif	
 	
-#if ACADO_NP
-	/* TODO Change to ACADO_N, ACADO_NP later. */
-	getArray(1, src, 0, "p", acadoVariables.p, ACADO_NP, 1);
+#if ACADO_NOD
+	getArray(1, src, 0, "od", acadoVariables.od, ACADO_NOD, 1);
 #endif
 	
 	getArray(1, src, 0, "y", acadoVariables.y, ACADO_N, ACADO_NY);

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,21 +43,23 @@ inline returnValue Logging::getAll(	LogName _name,
 									MatrixVariablesGrid& _values
 									) const
 {
-	if ( logCollection.hasNonEmptyItem( _name ) == BT_TRUE )
-		return logCollection.getAll( _name,_values );
-	else
-		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasNonEmptyItem( _name ) == true)
+			return logCollection[ it ].getAll(_name, _values); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
 inline returnValue Logging::getFirst(	LogName _name,
-										Matrix& _firstValue
+										DMatrix& _firstValue
 										) const
 {
-	if ( logCollection.hasNonEmptyItem( _name ) == BT_TRUE )
-		return logCollection.getFirst( _name,_firstValue );
-	else
-		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasNonEmptyItem( _name ) == true)
+			return logCollection[ it ].getFirst(_name, _firstValue); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -65,21 +67,23 @@ inline returnValue Logging::getFirst(	LogName _name,
 										VariablesGrid& _firstValue
 										) const
 {
-	if ( logCollection.hasNonEmptyItem( _name ) == BT_TRUE )
-		return logCollection.getFirst( _name,_firstValue );
-	else
-		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasNonEmptyItem( _name ) == BT_TRUE)
+			return logCollection[ it ].getFirst(_name, _firstValue); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
 inline returnValue Logging::getLast(	LogName _name,
-										Matrix& _lastValue
+										DMatrix& _lastValue
 										) const
 {
-	if ( logCollection.hasNonEmptyItem( _name ) == BT_TRUE )
-		return logCollection.getLast( _name,_lastValue );
-	else
-		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasNonEmptyItem( _name ) == BT_TRUE)
+			return logCollection[ it ].getLast(_name, _lastValue); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
 }
 
 
@@ -87,15 +91,52 @@ inline returnValue Logging::getLast(	LogName _name,
 										VariablesGrid& _lastValue
 										) const
 {
-	if ( logCollection.hasNonEmptyItem( _name ) == BT_TRUE )
-		return logCollection.getLast( _name,_lastValue );
-	else
-		return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasNonEmptyItem( _name ) == BT_TRUE)
+			return logCollection[ it ].getLast(_name, _lastValue); 
+
+	return ACADOERROR( RET_LOG_ENTRY_DOESNT_EXIST );
+}
+
+		
+inline returnValue Logging::setAll(	LogName _name,
+									const MatrixVariablesGrid& values
+									)
+{
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasItem( _name ) == true)
+			return logCollection[ it ].setAll(_name, values); 
+
+	return SUCCESSFUL_RETURN;
 }
 
 
-CLOSE_NAMESPACE_ACADO
+		
+inline returnValue Logging::setLast(	LogName _name,
+										const DMatrix& value,
+										double time
+										)
+{
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasItem( _name ) == true)
+			return logCollection[ it ].setLast(_name, value, time); 
 
+	return SUCCESSFUL_RETURN;
+}
+
+inline returnValue Logging::setLast(	LogName _name,
+										VariablesGrid& value,
+										double time
+										)
+{
+	for (unsigned it = 0; it < logCollection.size(); ++it)
+		if (logCollection[ it ].hasItem( _name ) == true)
+			return logCollection[ it ].setLast(_name, value, time);
+
+	return SUCCESSFUL_RETURN;
+}
+
+CLOSE_NAMESPACE_ACADO
 
 /*
  *	end of file

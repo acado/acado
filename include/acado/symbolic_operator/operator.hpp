@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -70,25 +70,25 @@ public:
     /** Sets the argument (note that arg should have dimension 1). */
 
     virtual TreeProjection& operator=( const double      & arg );
-    virtual TreeProjection& operator=( const Vector      & arg );
-    virtual TreeProjection& operator=( const Matrix      & arg );
+    virtual TreeProjection& operator=( const DVector      & arg );
+    virtual TreeProjection& operator=( const DMatrix      & arg );
     virtual TreeProjection& operator=( const Expression  & arg );
     virtual TreeProjection& operator=( const Operator    & arg );
 
 
     TreeProjection& operator+=( const double      & arg );
-    TreeProjection& operator+=( const Vector      & arg );
-    TreeProjection& operator+=( const Matrix      & arg );
+    TreeProjection& operator+=( const DVector      & arg );
+    TreeProjection& operator+=( const DMatrix      & arg );
     TreeProjection& operator+=( const Expression  & arg );
 
     TreeProjection& operator-=( const double      & arg );
-    TreeProjection& operator-=( const Vector      & arg );
-    TreeProjection& operator-=( const Matrix      & arg );
+    TreeProjection& operator-=( const DVector      & arg );
+    TreeProjection& operator-=( const DMatrix      & arg );
     TreeProjection& operator-=( const Expression  & arg );
 
     TreeProjection& operator*=( const double      & arg );
-    TreeProjection& operator*=( const Vector      & arg );
-    TreeProjection& operator*=( const Matrix      & arg );
+    TreeProjection& operator*=( const DVector      & arg );
+    TreeProjection& operator*=( const DMatrix      & arg );
     TreeProjection& operator*=( const Expression  & arg );
 
     TreeProjection& operator/=( const double      & arg );
@@ -96,36 +96,36 @@ public:
 
 
     Expression operator+( const double        & arg ) const;
-    Expression operator+( const Vector        & arg ) const;
-    Expression operator+( const Matrix        & arg ) const;
+    Expression operator+( const DVector        & arg ) const;
+    Expression operator+( const DMatrix        & arg ) const;
     Expression operator+( const Operator& arg ) const;
     Expression operator+( const Expression    & arg ) const;
 
     friend Expression operator+( const double & arg1, const Operator& arg2 );
-    friend Expression operator+( const Vector & arg1, const Operator& arg2 );
-    friend Expression operator+( const Matrix & arg1, const Operator& arg2 );
+    friend Expression operator+( const DVector & arg1, const Operator& arg2 );
+    friend Expression operator+( const DMatrix & arg1, const Operator& arg2 );
 
     Expression operator-( const double          & arg ) const;
-    Expression operator-( const Vector          & arg ) const;
-    Expression operator-( const Matrix          & arg ) const;
+    Expression operator-( const DVector          & arg ) const;
+    Expression operator-( const DMatrix          & arg ) const;
     Expression operator-( const Operator  & arg ) const;
     Expression operator-( const Expression      & arg ) const;
 
     Expression operator-( ) const;
 
     friend Expression operator-( const double & arg1, const Operator& arg2 );
-    friend Expression operator-( const Vector & arg1, const Operator& arg2 );
-    friend Expression operator-( const Matrix & arg1, const Operator& arg2 );
+    friend Expression operator-( const DVector & arg1, const Operator& arg2 );
+    friend Expression operator-( const DMatrix & arg1, const Operator& arg2 );
 
     Expression operator*( const double         & arg ) const;
-    Expression operator*( const Vector         & arg ) const;
-    Expression operator*( const Matrix         & arg ) const;
+    Expression operator*( const DVector         & arg ) const;
+    Expression operator*( const DMatrix         & arg ) const;
     Expression operator*( const Operator & arg ) const;
     Expression operator*( const Expression     & arg ) const;
 
     friend Expression operator*( const double& arg1, const Operator& arg2 );
-    friend Expression operator*( const Vector& arg1, const Operator& arg2 );
-    friend Expression operator*( const Matrix& arg1, const Operator& arg2 );
+    friend Expression operator*( const DVector& arg1, const Operator& arg2 );
+    friend Expression operator*( const DMatrix& arg1, const Operator& arg2 );
 
     Expression operator/( const double         & arg ) const;
     Expression operator/( const Operator & arg ) const;
@@ -133,16 +133,16 @@ public:
 
 
     friend Expression operator/( const double& arg1, const Operator& arg2 );
-    friend Expression operator/( const Vector& arg1, const Operator& arg2 );
-    friend Expression operator/( const Matrix& arg1, const Operator& arg2 );
+    friend Expression operator/( const DVector& arg1, const Operator& arg2 );
+    friend Expression operator/( const DMatrix& arg1, const Operator& arg2 );
 
     ConstraintComponent operator<=( const double& ub ) const;
     ConstraintComponent operator>=( const double& lb ) const;
     ConstraintComponent operator==( const double&  b ) const;
 
-    ConstraintComponent operator<=( const Vector& ub ) const;
-    ConstraintComponent operator>=( const Vector& lb ) const;
-    ConstraintComponent operator==( const Vector&  b ) const;
+    ConstraintComponent operator<=( const DVector& ub ) const;
+    ConstraintComponent operator>=( const DVector& lb ) const;
+    ConstraintComponent operator==( const DVector&  b ) const;
 
     ConstraintComponent operator<=( const VariablesGrid& ub ) const;
     ConstraintComponent operator>=( const VariablesGrid& lb ) const;
@@ -152,9 +152,9 @@ public:
     friend ConstraintComponent operator==( double  b, const Operator &arg );
     friend ConstraintComponent operator>=( double ub, const Operator &arg );
 
-    friend ConstraintComponent operator<=( Vector lb, const Operator &arg );
-    friend ConstraintComponent operator==( Vector  b, const Operator &arg );
-    friend ConstraintComponent operator>=( Vector ub, const Operator &arg );
+    friend ConstraintComponent operator<=( DVector lb, const Operator &arg );
+    friend ConstraintComponent operator==( DVector  b, const Operator &arg );
+    friend ConstraintComponent operator>=( DVector ub, const Operator &arg );
 
     friend ConstraintComponent operator<=( VariablesGrid lb, const Operator &arg );
     friend ConstraintComponent operator==( VariablesGrid  b, const Operator &arg );
@@ -447,34 +447,16 @@ public:
                                        double  *ddf  /**< the 2nd derivative
                                                           of the expression  */   ) = 0;
 
+     /** Prints the expression into a stream. \n
+      *  \return SUCCESFUL_RETURN             \n
+      */
+     virtual std::ostream& print(std::ostream& stream) const = 0;
 
 
-
-    /** Prints the expression into a stream. \n
-     *  \return SUCCESFUL_RETURN             \n
-     */
-     virtual Stream& print( Stream &stream ) const = 0;
-
-
-    /** Prints the expression into a stream ("flush" version). \n
-     *  \return SUCCESFUL_RETURN                               \n
-     */
-     friend Stream& operator<<( Stream &stream, const Operator &arg );
-
-
-    /** Prints the expression into a stream ("flush" version). \n
-     *  \return SUCCESFUL_RETURN                               \n
-     */
-     friend returnValue operator<<( FILE* file, const Operator &arg );
-
-
-
-    /** Prints the expression into a stream ("flush" version). \n
-     *  \return SUCCESFUL_RETURN                               \n
-     */
-     Stream& operator<<( Stream &stream ) const;
-
-
+     /** Prints the expression into a stream ("flush" version). \n
+      *  \return SUCCESFUL_RETURN                               \n
+      */
+     friend std::ostream& operator<<(std::ostream& stream, const Operator& arg);
 
      /** Provides a deep copy of the expression. \n
       *  \return a clone of the expression.      \n
@@ -577,7 +559,9 @@ public:
 	/** Sets the name of the variable that is used for code export.   \n
 	 *  \return SUCCESSFUL_RETURN                                     \n
 	 */
-    virtual returnValue setVariableExportName( const VariableType &_type, const Stream *_name );
+    virtual returnValue setVariableExportName(	const VariableType &_type,
+    											const std::vector< std::string >& _name
+    											);
 
 
 //

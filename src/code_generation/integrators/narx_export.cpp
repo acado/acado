@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,18 +33,16 @@
 
 #include <acado/code_generation/integrators/narx_export.hpp>
 
-#include <sstream>
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
 NARXExport::NARXExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : DiscreteTimeExport( _userInteraction,_commonHeaderName )
 {
 	delay = 1;
@@ -84,9 +82,9 @@ returnValue NARXExport::setup( )
 	ExportIndex k( "k" );
 	ExportIndex tmp_index("tmp_index");
 	diffsDim = NX*(NX+NU);
-	inputDim = NX*(NX+NU+1) + NU + NP;
+	inputDim = NX*(NX+NU+1) + NU + NOD;
 	// setup INTEGRATE function
-	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
+	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
 	if( equidistantControlGrid() ) {
 		integrate = ExportFunction( "integrate", rk_eta, reset_int );
@@ -125,25 +123,25 @@ returnValue NARXExport::setup( )
 	ExportVariable numInt( "numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
 		ExportVariable numStepsV( "numSteps", numSteps, STATIC_CONST_INT );
-		integrate.addStatement( String( "int " ) << numInt.getName() << " = " << numStepsV.getName() << "[" << rk_index.getName() << "];\n" );
+		integrate.addStatement( std::string( "int " ) + numInt.getName() + " = " + numStepsV.getName() + "[" + rk_index.getName() + "];\n" );
 	}
 
 	integrate.addStatement( rk_xxx.getCols( NX,inputDim-diffsDim ) == rk_eta.getCols( NX+diffsDim,inputDim ) );
 	integrate.addLinebreak( );
 
 	// Linear input:
-	Matrix eyeM = eye((delay-1)*NX1);
-	eyeM.appendRows( zeros(NX1,(delay-1)*NX1) );
-	eyeM.appendCols( zeros(delay*NX1,NU) );
+	DMatrix eyeM = eye<double>((delay-1)*NX1);
+	eyeM.appendRows( zeros<double>(NX1,(delay-1)*NX1) );
+	eyeM.appendCols( zeros<double>(delay*NX1,NU) );
 	if( NX1 > 0 ) {
 		integrate.addStatement( rk_diffsPrev1 == eyeM );
 	}
 
 	// Nonlinear part:
 	for( uint i1 = 0; i1 < delay; i1++ ) {
-		eyeM = zeros(NX2,i1*(NX1+NX2)+NX1);
-		eyeM.appendCols( eye(NX2) );
-		eyeM.appendCols( zeros(NX2,(delay-i1-1)*(NX1+NX2)+NU) );
+		eyeM = zeros<double>(NX2,i1*(NX1+NX2)+NX1);
+		eyeM.appendCols( eye<double>(NX2) );
+		eyeM.appendCols( zeros<double>(NX2,(delay-i1-1)*(NX1+NX2)+NU) );
 		integrate.addStatement( rk_diffsPrev2.getRows(i1*NX2,i1*NX2+NX2) == eyeM );
 	}
 	// evaluate sensitivities linear input:
@@ -175,13 +173,13 @@ returnValue NARXExport::setup( )
 	}
 	else {
 		loop = &integrate;
-		loop->addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+		loop->addStatement( std::string("for(") + run.getName() + " = 0; " + run.getName() + " < " + numInt.getName() + "; " + run.getName() + "++ ) {\n" );
 	}
 
 	loop->addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) );
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( String("if( run > 0 ) {\n") );
+		loop->addStatement( std::string("if( run > 0 ) {\n") );
 		// SHIFT rk_diffsPrev:
 		// TODO: write using exportforloop
 		if( NX1 > 0 ) {
@@ -214,7 +212,7 @@ returnValue NARXExport::setup( )
 			if( NU > 0 ) loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,NX,NX+NU ) == rk_eta.getCols( i*NU+NX*(NX+1)+delay*(NX1+NX2)*NU,i*NU+NX*(NX+1)+delay*(NX1+NX2)*NU+NU ) );
 			loop->addStatement( loopTemp3 );
 		}
-		loop->addStatement( String("}\n") );
+		loop->addStatement( std::string("}\n") );
 	}
 
 	// evaluate states:
@@ -251,7 +249,7 @@ returnValue NARXExport::setup( )
 
 	// computation of the sensitivities using chain rule:
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( String( "if( run == 0 ) {\n" ) );
+		loop->addStatement( std::string( "if( run == 0 ) {\n" ) );
 	}
 	// PART 1
 	updateInputSystem(loop, i, j, tmp_index);
@@ -261,15 +259,15 @@ returnValue NARXExport::setup( )
 	updateOutputSystem(loop, i, j, tmp_index);
 
 	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( String( "}\n" ) );
-		loop->addStatement( String( "else {\n" ) );
+		loop->addStatement( std::string( "}\n" ) );
+		loop->addStatement( std::string( "else {\n" ) );
 		// PART 1
 		propagateInputSystem(loop, i, j, k, tmp_index);
 		// PART 2
 		propagateImplicitSystem(loop, i, j, k, tmp_index);
 		// PART 3
 		propagateOutputSystem(loop, i, j, k, tmp_index);
-		loop->addStatement( String( "}\n" ) );
+		loop->addStatement( std::string( "}\n" ) );
 	}
 
 	// end of the integrator loop.
@@ -282,21 +280,21 @@ returnValue NARXExport::setup( )
 
 	// FILL IN ALL THE SENSITIVITIES OF THE DELAYED STATES BASED ON RK_DIFFSPREV + SPARSITY
 	if( NX1 > 0 ) {
-		Matrix zeroR = zeros(1, NX2);
+		DMatrix zeroR = zeros<double>(1, NX2);
 		ExportForLoop loop1( i,0,NX1 );
 		loop1.addStatement( rk_eta.getCols( i*NX+NX+NX1,i*NX+NX+NX1+NX2 ) == zeroR );
-		zeroR = zeros(1, (delay-1)*(NX1+NX2)+NX3);
+		zeroR = zeros<double>(1, (delay-1)*(NX1+NX2)+NX3);
 		loop1.addStatement( rk_eta.getCols( i*NX+NX+NX1+NX2,i*NX+NX+NX ) == zeroR );
 		integrate.addStatement( loop1 );
 		for( uint s1 = 1; s1 < delay; s1++ ) {
 			ExportForLoop loop2( i,0,NX1 );
 			// STATES
-			zeroR = zeros(1, NX2);
+			zeroR = zeros<double>(1, NX2);
 			for( uint s2 = 0; s2 < s1; s2++ ) {
 				loop2.addStatement( rk_eta.getCols( i*NX+NX+s1*(NX1+NX2)*NX+s2*(NX1+NX2),i*NX+NX+s1*(NX1+NX2)*NX+s2*(NX1+NX2)+NX1 ) == rk_diffsPrev1.getSubMatrix( i+(s1-1)*NX1,i+(s1-1)*NX1+1,s2*NX1,s2*NX1+NX1 ) );
 				loop2.addStatement( rk_eta.getCols( i*NX+NX+s1*(NX1+NX2)*NX+s2*(NX1+NX2)+NX1,i*NX+NX+s1*(NX1+NX2)*NX+s2*(NX1+NX2)+(NX1+NX2) ) == zeroR );
 			}
-			zeroR = zeros(1, (delay-s1)*(NX1+NX2)+NX3);
+			zeroR = zeros<double>(1, (delay-s1)*(NX1+NX2)+NX3);
 			loop2.addStatement( rk_eta.getCols( i*NX+NX+s1*(NX1+NX2)*NX+s1*(NX1+NX2),i*NX+NX+s1*(NX1+NX2)*NX+NX ) == zeroR );
 			// CONTROLS
 			if( NU > 0 ) loop2.addStatement( rk_eta.getCols( i*NU+NX*(1+NX)+s1*(NX1+NX2)*NU,i*NU+NX*(1+NX)+s1*(NX1+NX2)*NU+NU ) == rk_diffsPrev1.getSubMatrix( i+(s1-1)*NX1,i+(s1-1)*NX1+1,(delay-1)*NX1,(delay-1)*NX1+NU ) );
@@ -308,9 +306,9 @@ returnValue NARXExport::setup( )
 			ExportForLoop loop3( i,0,NX2 );
 			// STATES
 			if( s > 0 ) loop3.addStatement( rk_eta.getCols( i*NX+NX+s*(NX1+NX2)*NX+NX1*NX,i*NX+NX+s*(NX1+NX2)*NX+NX1*NX+delay*(NX1+NX2) ) == rk_diffsPrev2.getSubMatrix( i+(s-1)*NX2,i+(s-1)*NX2+1,0,delay*(NX1+NX2) ) );
-			Matrix zeroR;
+			DMatrix zeroR;
 			if( NX3 > 0 ) {
-				zeroR = zeros(1, NX3);
+				zeroR = zeros<double>(1, NX3);
 				loop3.addStatement( rk_eta.getCols( i*NX+NX+s*(NX1+NX2)*NX+NX1*NX+delay*(NX1+NX2),i*NX+NX+s*(NX1+NX2)*NX+NX1*NX+NX ) == zeroR );
 			}
 			// CONTROLS
@@ -589,7 +587,7 @@ returnValue NARXExport::setDifferentialEquation(	const Expression& rhs_ )
 }
 
 
-returnValue NARXExport::setModel(	const String& _rhs, const String& _diffs_rhs ) {
+returnValue NARXExport::setModel(	const std::string& _rhs, const std::string& _diffs_rhs ) {
 
 	// You can't use this feature yet with NARX integrators !
 	return ACADOERROR( RET_INVALID_OPTION );
@@ -605,7 +603,7 @@ returnValue NARXExport::getDataDeclarations(	ExportStatementBlock& declarations,
 }
 
 
-returnValue NARXExport::setNARXmodel( const uint _delay, const Matrix& _parms ) {
+returnValue NARXExport::setNARXmodel( const uint _delay, const DMatrix& _parms ) {
 
 	NX2 = _parms.getNumRows();
 	delay = _delay;
@@ -614,7 +612,7 @@ returnValue NARXExport::setNARXmodel( const uint _delay, const Matrix& _parms ) 
 	DifferentialState dummy;
 	dummy.clearStaticCounters();
 	uint n = _delay*(NX1+NX2);				// IMPORTANT for NARX models where the state space is increased because of the delay
-	x = DifferentialState(n);
+	x = DifferentialState("", n, 1);
 
 	OutputFcn narxFun;
 	OutputFcn narxDiff;
@@ -642,13 +640,13 @@ returnValue NARXExport::setNARXmodel( const uint _delay, const Matrix& _parms ) 
 	diffs_rhs.init( narxDiff,"acado_NARX_diff",NX,NXA,NU );
 
 	dummy.clearStaticCounters();
-	x = DifferentialState(NX);
+	x = DifferentialState("", NX, 1);
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& _rhs )
+returnValue NARXExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& _rhs )
 {
 	if( !A3.isEmpty() ) {
 		if( A3.getNumRows() != M3.getNumRows() || M3.getNumRows() != M3.getNumCols() || A3.getNumRows() != A3.getNumCols() || A3.getNumRows() != _rhs.getDim() ) {
@@ -660,7 +658,7 @@ returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, con
 
 		OutputFcn f;
 		f << _rhs;
-		Parameter         dummy0;
+		OnlineData        dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		AlgebraicState 	  dummy3;
@@ -669,23 +667,23 @@ returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, con
 		dummy1.clearStaticCounters();
 		dummy2.clearStaticCounters();
 		uint n = delay*(NX1+NX2);
-		x = DifferentialState(n);
-		u = Control(NU);
-		p = Parameter(NP);
+		x = DifferentialState("", n, 1);
+		u = Control("", NU, 1);
+		od = OnlineData("", NOD, 1);
 
 		if( (uint)f.getNDX() > 0 ) {
 			return ACADOERROR( RET_INVALID_OPTION );
 		}
 		NDX3 = 0;
 		dummy4.clearStaticCounters();
-		dx = DifferentialStateDerivative(NDX3);
+		dx = DifferentialStateDerivative("", NDX3, 1);
 
 		if( f.getNXA() > 0 ) {
 			return ACADOERROR( RET_INVALID_OPTION );
 		}
 		NXA3 = 0;
 		dummy3.clearStaticCounters();
-		z = AlgebraicState(NXA3);
+		z = AlgebraicState("", NXA3, 1);
 
 		uint i;
 		OutputFcn g;
@@ -697,10 +695,10 @@ returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, con
 		}
 
 		dummy2.clearStaticCounters();
-		x = DifferentialState(NX);
+		x = DifferentialState("", NX, 1);
 
-		Matrix dependencyMat = _rhs.getDependencyPattern( x );
-		Vector dependency = sumRow( dependencyMat );
+		DMatrix dependencyMat = _rhs.getDependencyPattern( x );
+		DVector dependency = dependencyMat.sumRow();
 		for( i = n; i < NX; i++ ) {
 			if( acadoRoundAway(dependency(i)) != 0 ) { // This expression should not depend on these differential states
 				return RET_UNABLE_TO_EXPORT_CODE;
@@ -708,17 +706,18 @@ returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, con
 		}
 
 		OutputFcn f_large;
-		Matrix A3_large = expandOutputMatrix(A3);
+		DMatrix A3_large = expandOutputMatrix(A3);
 		f_large << _rhs + A3_large*x;
 
-		return (rhs3.init( f_large,"acado_rhs3",NX,NXA,NU,NP ) & diffs_rhs3.init( g,"acado_diffs3",NX,NXA,NU,NP ) );
+		return (rhs3.init(f_large, "acado_rhs3", NX, NXA, NU, NP, NDX, NOD) &
+				diffs_rhs3.init(g, "acado_diffs3", NX, NXA, NU, NP, NDX, NOD));
 	}
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue NARXExport::setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 )
+returnValue NARXExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
 {
 	// You can't use this feature yet with NARX integrators !
 	return ACADOERROR( RET_INVALID_OPTION );
@@ -751,7 +750,7 @@ returnValue NARXExport::formNARXpolynomial( const uint num, const uint order, ui
 //
 
 IntegratorExport* createNARXExport(	UserInteraction* _userInteraction,
-													const String &_commonHeaderName)
+													const std::string &_commonHeaderName)
 {
 	return new NARXExport(_userInteraction, _commonHeaderName);
 }

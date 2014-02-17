@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -35,8 +35,6 @@
 #include <acado/code_generation/export_argument_internal.hpp>
 #include <acado/code_generation/export_argument.hpp>
 
-#include <sstream>
-
 
 BEGIN_NAMESPACE_ACADO
 
@@ -54,16 +52,16 @@ ExportArgumentInternal::ExportArgumentInternal( ) : ExportDataInternal()
 {
 	data->init(0, 0);
 
-	callItByValue = BT_FALSE;
+	callItByValue = false;
 }
 
-ExportArgumentInternal::ExportArgumentInternal(	const String& _name,
-												const matrixPtr& _data,
+ExportArgumentInternal::ExportArgumentInternal(	const std::string& _name,
+												const DMatrixPtr& _data,
 												ExportType _type,
 												ExportStruct _dataStruct,
-												BooleanType _callItByValue,
+												bool _callItByValue,
 												const ExportIndex& _addressIdx,
-												const String& _prefix
+												const std::string& _prefix
 												)
 	: ExportDataInternal(_name, _type, _dataStruct, _prefix)
 {
@@ -83,7 +81,7 @@ ExportArgumentInternal* ExportArgumentInternal::clone() const
 void ExportArgumentInternal::deepCopyMembers(	std::map<CasADi::SharedObjectNode*, CasADi::SharedObject>& already_copied
 												)
 {
-	data.reset(new Matrix( *data ));
+	data.reset(new DMatrix( *data ));
 }
 
 ExportArgument ExportArgumentInternal::getAddress(	const ExportIndex& rowIdx,
@@ -101,39 +99,37 @@ ExportArgument ExportArgumentInternal::getAddress(	const ExportIndex& rowIdx,
 
 	ExportIndex ind = getTotalIdx(rowIdx, colIdx);
 
-	ExportArgument tmp(name, data, type, dataStruct, BT_FALSE, ind, prefix);
+	ExportArgument tmp(name, data, type, dataStruct, false, ind, prefix);
 
 	return tmp;
 }
 
 
-const String ExportArgumentInternal::getAddressString(	BooleanType withDataStruct
-														) const
+const std::string ExportArgumentInternal::getAddressString(	bool withDataStruct
+															) const
 {
-	stringstream s;
+	stringstream ss;
 
-	String nameStr;
+	std::string nameStr;
 
-	if (withDataStruct == BT_TRUE)
+	if (withDataStruct == true)
 		nameStr = getFullName();
 	else
 		nameStr = getName();
 
-	if ( addressIdx.isGiven() == BT_TRUE )
+	if ( addressIdx.isGiven() == true )
 	{
 		if ( addressIdx.getGivenValue() == 0 )
-			s << nameStr.getName();
+			ss << nameStr;
 		else
-			s << "&(" << nameStr.getName() << "[ " << addressIdx.getGivenValue() << " ])";
+			ss << "&(" << nameStr << "[ " << addressIdx.getGivenValue() << " ])";
 	}
 	else
 	{
-		s << "&(" << nameStr.getName() << "[ " << addressIdx.get().getName()  << " ])";
+		ss << "&(" << nameStr << "[ " << addressIdx.get()  << " ])";
 	}
 
-	String str( s.str().c_str() );
-
-	return str;
+	return ss.str();
 }
 
 
@@ -155,22 +151,22 @@ uint ExportArgumentInternal::getDim( ) const
 }
 
 
-BooleanType ExportArgumentInternal::isGiven( ) const
+bool ExportArgumentInternal::isGiven( ) const
 {
 	if ( getDim() == 0 )
-		return BT_TRUE;
+		return true;
 
 	for (uint i = 0; i < getNumRows(); ++i)
 		for (uint j = 0; j < getNumCols(); ++j)
-			if (acadoIsEqual(data->operator()(i, j), undefinedEntry) == BT_TRUE)
-				return BT_FALSE;
+			if (acadoIsEqual(data->operator()(i, j), undefinedEntry) == true)
+				return false;
 
-	return BT_TRUE;
+	return true;
 }
 
 
 
-BooleanType ExportArgumentInternal::isCalledByValue( ) const
+bool ExportArgumentInternal::isCalledByValue( ) const
 {
 	return callItByValue;
 }
@@ -178,14 +174,14 @@ BooleanType ExportArgumentInternal::isCalledByValue( ) const
 
 returnValue ExportArgumentInternal::callByValue( )
 {
-	callItByValue = BT_TRUE;
+	callItByValue = true;
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
-															const String& _realString,
-															const String& _intString,
+returnValue ExportArgumentInternal::exportDataDeclaration(	std::ostream& stream,
+															const std::string& _realString,
+															const std::string& _intString,
 															int _precision
 															) const
 {
@@ -194,56 +190,55 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	FILE* file,
 		return SUCCESSFUL_RETURN;
 
 	// Variable will be hard-coded
-	if (isGiven() == BT_TRUE && getDataStruct() != ACADO_LOCAL)
+	if (isGiven() == true && getDataStruct() != ACADO_LOCAL)
 		return SUCCESSFUL_RETURN;
 
-	if ( ( isCalledByValue() == BT_TRUE ) && ( getDim() == 1 ) )
+	if ( ( isCalledByValue() == true ) && ( getDim() == 1 ) )
 	{
-		acadoFPrintf( file,"%s %s", getTypeString( _realString,_intString ).getName(),name.getName() );
+		stream <<  getTypeString(_realString, _intString) << " " << name;
 	}
 	else
 	{
 		if (data->getNumCols() > 1 && data->getNumRows() > 1)
 		{
-			acadoFPrintf(file,
-					"/** %s %d %s %d %s", "Matrix of size:", data->getNumRows(), "x", data->getNumCols(), "(row major format)");
+			stream << "/** " << "Matrix of size: " << data->getNumRows() << " x " << data->getNumCols() << " (row major format)";
 		}
 		else
 		{
 			if (data->getNumCols() == 1)
-				acadoFPrintf(file,"/** %s %d",      "Column vector of size:", data->getNumRows());
+				stream << "/** " << "Column vector of size: " << data->getNumRows();
 			else
-				acadoFPrintf(file,"/** %s %d",      "Row vector of size:", data->getNumCols());
+				stream << "/** " << "Row vector of size: " << data->getNumCols();
 		}
 
-		if (description.isEmpty() == BT_FALSE)
+		if (description.empty() == false)
 		{
-			acadoFPrintf(file, "\n * \n *  %s\n", description.getName());
+			stream << "\n * \n *  " << description << endl;
 		}
 
-		acadoFPrintf(file," */\n");
+		stream << " */\n";
 
-		acadoFPrintf( file,"%s %s[ %d ]", getTypeString( _realString,_intString ).getName(),name.getName(),getDim() );
+		stream << getTypeString(_realString, _intString) << " " << name << "[ " << getDim() << " ]";
 	}
 
-	if ( isGiven() == BT_FALSE )
+	if ( isGiven() == false )
 	{
-		acadoFPrintf( file,";\n\n" );
+		stream << ";\n\n";
 	}
 	else
 	{
-		acadoFPrintf( file," = " );
+		stream << " = " << endl;
 
 		switch ( getType() )
 		{
 		case INT:
 		case STATIC_CONST_INT:
-			data->printToFile( file, "", "{ "," };\n", 5, 0, ", ",", \n" );
+			data->print(stream, "", "{ ", " };\n", 5, 0, ", ", ", \n");
 			break;
 
 		case REAL:
 		case STATIC_CONST_REAL:
-			data->printToFile( file, "", "{ "," };\n", 1, 16, ", ",", \n" );
+			data->print(stream, "", "{ ", " };\n", 1, 16, ", ", ", \n");
 			break;
 
 		default:

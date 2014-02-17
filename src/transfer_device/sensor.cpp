@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -122,7 +122,7 @@ returnValue Sensor::setOutputNoise(	uint idx,
 
 
 
-returnValue Sensor::setOutputDeadTimes(	const Vector& _deadTimes
+returnValue Sensor::setOutputDeadTimes(	const DVector& _deadTimes
 										)
 {
 	if ( _deadTimes.getDim( ) != getNY( ) )
@@ -178,7 +178,7 @@ returnValue Sensor::setOutputDeadTime(	uint idx,
 
 
 returnValue Sensor::init(	double _startTime,
-							const Vector& _startValue
+							const DVector& _startValue
 							)
 {
 	if ( TransferDevice::init( _startTime,_startValue ) != SUCCESSFUL_RETURN )
@@ -227,7 +227,7 @@ returnValue Sensor::delaySensorOutput(	VariablesGrid& _y
 	if ( hasDeadTime( ) == BT_FALSE )
 	{
 		// store last signal
-		Vector tmp = _y.getLastVector( );
+		DVector tmp = _y.getLastVector( );
 
 		lastSignal.init( tmp );
 		lastSignal.setTime( 0,_y.getLastTime( ) );

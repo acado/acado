@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -100,7 +100,7 @@ inline returnValue AlgebraicConsistencyConstraint::add( const uint& endOfStage_ 
 // --------------------
 
 inline returnValue AlgebraicConsistencyConstraint::computeForwardSensitivityBlock( int offset1, int offset2, int offset3,
-                                                                                   int stageIdx, Matrix *seed ){
+                                                                                   int stageIdx, DMatrix *seed ){
 
     int run1,run2;
     returnValue returnvalue;
@@ -112,7 +112,7 @@ inline returnValue AlgebraicConsistencyConstraint::computeForwardSensitivityBloc
 
     if( seed != 0 ){
         int nFDirs = seed->getNumCols();
-        Matrix tmp( nc, nFDirs );
+        DMatrix tmp( nc, nFDirs );
         for( run1 = 0; run1 < nFDirs; run1++ ){
 
             for( run2 = 0; run2 < fcn[stageIdx].getNumberOfVariables()+1; run2++ )

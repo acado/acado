@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -27,24 +27,19 @@
 
 /**
  *    \file include/acado/code_generation/export_function_declaration.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 2010-2011
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2010 - 2013
  */
 
 
 #ifndef ACADO_TOOLKIT_EXPORT_FUNCTION_DECLARATION_HPP
 #define ACADO_TOOLKIT_EXPORT_FUNCTION_DECLARATION_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_statement.hpp>
 #include <acado/code_generation/export_function.hpp>
 #include <acado/code_generation/export_acado_function.hpp>
 
-
-
 BEGIN_NAMESPACE_ACADO
-
 
 /** 
 *	\brief Allows to export code containing function (forward) declarations.
@@ -54,7 +49,7 @@ BEGIN_NAMESPACE_ACADO
  *	The class ExportDataDeclaration allows to export code containing function 
  *	(forward) declarations.
  *
- *	\author Hans Joachim Ferreau, Boris Houska
+ *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 class ExportFunctionDeclaration : public ExportStatement
 {
@@ -62,10 +57,6 @@ class ExportFunctionDeclaration : public ExportStatement
     // PUBLIC MEMBER FUNCTIONS:
     //
     public:
-
-		/** Default constructor. 
-		 */
-        ExportFunctionDeclaration( );
 
 		/** Constructor taking the function to be declared.
 		 *
@@ -81,23 +72,9 @@ class ExportFunctionDeclaration : public ExportStatement
 		ExportFunctionDeclaration(	const ExportAcadoFunction& _f
 									);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportFunctionDeclaration(	const ExportFunctionDeclaration& arg
-									);
-
         /** Destructor. 
 		 */
         virtual ~ExportFunctionDeclaration( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportFunctionDeclaration& operator=(	const ExportFunctionDeclaration& arg
-												);
 
 		/** Clone constructor (deep copy).
 		 *
@@ -105,41 +82,28 @@ class ExportFunctionDeclaration : public ExportStatement
 		 */
 		virtual ExportStatement* clone( ) const;
 
-
 		/** Exports source code of the statement into given file. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] stream			Name of file to be used to export statement.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportCode(	FILE* file,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+		virtual returnValue exportCode(	std::ostream& stream,
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										) const;
 
+    private:
+		ExportFunctionDeclaration( );
 
-	//
-    // PROTECTED MEMBER FUNCTIONS:
-    //
-    protected:
-
-
-
-    protected:
-		
-		ExportFunction* f;					/**< Function to be declared. */
-
+		const ExportFunction& f;
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
 #endif  // ACADO_TOOLKIT_EXPORT_FUNCTION_DECLARATION_HPP
-
-// end of file.

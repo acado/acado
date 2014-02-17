@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,55 +43,54 @@ int IntermediateState::count = 0;
 
 
 IntermediateState::IntermediateState()
-                  :Expression( 1, 1, VT_INTERMEDIATE_STATE, count ){
-
+	: Expression("", 1, 1, VT_INTERMEDIATE_STATE, count)
+{
     count++;
 }
 
 
-IntermediateState::IntermediateState( uint nRows_, uint nCols_, String name_ )
-                  :Expression( nRows_, nCols_, VT_INTERMEDIATE_STATE, (uint) count, name_ ){
-
+IntermediateState::IntermediateState(const std::string& name_, uint nRows_, uint nCols_)
+	: Expression(name_, nRows_, nCols_, VT_INTERMEDIATE_STATE, count)
+{
     count += nRows_*nCols_;
 }
 
-IntermediateState::IntermediateState( uint nRows_, String name_ )
-                  :Expression( nRows_,(uint) 1, VT_INTERMEDIATE_STATE, (uint) count, name_ ){
-    count += nRows_;
-}
-
-IntermediateState::IntermediateState(String name_ )
-                  :Expression((uint) 1,(uint) 1, VT_INTERMEDIATE_STATE, (uint) count, name_ ){
-
+IntermediateState::IntermediateState(const std::string& name_)
+	: Expression(name_, 1, 1, VT_INTERMEDIATE_STATE, count)
+{
     count ++;
 }
 
-
-
-IntermediateState::IntermediateState( int nRows_, int nCols_, String name_ )
-                  :Expression( nRows_, nCols_, VT_INTERMEDIATE_STATE, count, name_ ){
-
-    count += nRows_*nCols_;
+IntermediateState::IntermediateState( unsigned nRows_, unsigned nCols_)
+	: Expression("", nRows_, nCols_, VT_INTERMEDIATE_STATE, count)
+{
+	count++;
 }
 
+IntermediateState::IntermediateState( int nRows_, int nCols_)
+	: Expression("", nRows_, nCols_, VT_INTERMEDIATE_STATE, count)
+{
 
-IntermediateState::IntermediateState( const double& arg ):Expression(){
+	count++;
+}
 
+IntermediateState::IntermediateState( const double& arg ):Expression()
+{
     nRows = 1;
     nCols = 1;
     operator=(arg);
 }
 
 
-IntermediateState::IntermediateState( const Vector& arg ):Expression(){
-
+IntermediateState::IntermediateState( const DVector& arg ):Expression()
+{
     nRows = arg.getDim();
     nCols = 1;
     operator=(arg);
 }
 
 
-IntermediateState::IntermediateState( const Matrix& arg ):Expression(){
+IntermediateState::IntermediateState( const DMatrix& arg ):Expression(){
 
     nRows = arg.getNumRows();
     nCols = arg.getNumCols();
@@ -126,26 +125,26 @@ Expression& IntermediateState::operator= ( const double & arg ){
 
 
 
-Expression& IntermediateState::operator= ( const Vector & arg ){ return operator= ( convert(arg)  ); }
-Expression& IntermediateState::operator= ( const Matrix & arg ){ return operator= ( convert(arg)  ); }
+Expression& IntermediateState::operator= ( const DVector & arg ){ return operator= ( convert(arg)  ); }
+Expression& IntermediateState::operator= ( const DMatrix & arg ){ return operator= ( convert(arg)  ); }
 
 Expression& IntermediateState::operator=( const Expression &arg ){     nRows = arg.getNumRows();nCols = arg.getNumCols();return assignmentSetup( arg ); }
 
 
 
 Expression& IntermediateState::operator+=( const double      & arg ){ return operator=( this->operator+(arg) ); }
-Expression& IntermediateState::operator+=( const Vector      & arg ){ return operator=( this->operator+(arg) ); }
-Expression& IntermediateState::operator+=( const Matrix      & arg ){ return operator=( this->operator+(arg) ); }
+Expression& IntermediateState::operator+=( const DVector      & arg ){ return operator=( this->operator+(arg) ); }
+Expression& IntermediateState::operator+=( const DMatrix      & arg ){ return operator=( this->operator+(arg) ); }
 Expression& IntermediateState::operator+=( const Expression  & arg ){ return operator=( this->operator+(arg) ); }
 
 Expression& IntermediateState::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
-Expression& IntermediateState::operator-=( const Vector      & arg ){ return operator=( this->operator-(arg) ); }
-Expression& IntermediateState::operator-=( const Matrix      & arg ){ return operator=( this->operator-(arg) ); }
+Expression& IntermediateState::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
+Expression& IntermediateState::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
 Expression& IntermediateState::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
 
 Expression& IntermediateState::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
-Expression& IntermediateState::operator*=( const Vector      & arg ){ return operator=( this->operator*(arg) ); }
-Expression& IntermediateState::operator*=( const Matrix      & arg ){ return operator=( this->operator*(arg) ); }
+Expression& IntermediateState::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
+Expression& IntermediateState::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
 Expression& IntermediateState::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
 
 Expression& IntermediateState::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }

@@ -48,7 +48,15 @@ sim.exportCode('crane_export')
 
 cd crane_export
 make_acado_integrator('../integrate_crane')
-make_acado_model('../rhs_crane')
+cd ..
+
+
+%% SIMexport: a more accurate integrator as a reference
+sim.set( 'NUM_INTEGRATOR_STEPS',        2*numSteps       );
+sim.exportCode('crane_export')
+
+cd crane_export
+make_acado_integrator('../integrate_crane2')
 cd ..
 
 %% accuracy states wrt ode45:
@@ -56,23 +64,26 @@ grid = [1/3 2/3 3/3];
 
 x = [0.5; 0.1; 0.7; -0.1; 0.5; -0.07; 0.2; -0.3];
 u = zeros(2,1);
-xs = x; N = 5;
+xs = x; xs2 = x; N = 5;
+input.u = u;
+input.grid1 = grid;
 for i = 1:N
-    [states out] = integrate_crane(xs(:,end),u,grid);
+    input.x = xs2(:,end);
+    [states out] = integrate_crane(input);
     xs(:,end+1) = states.value;
+    
+    input.x = xs2(:,end);
+    [states out] = integrate_crane2(input);
+    xs2(:,end+1) = states.value;
 end
-
-options = odeset('RelTol',1e-12,'AbsTol',1e-12);
-[tout exact] = ode45(@(t, y) rhs_crane(t, y, u),[0:h:N*h],x,options);
-exact = exact';
-format long e
-mean_error = mean(abs(xs(:,2:end)-exact(:,2:end))./abs(exact(:,2:end)))
+mean_error = mean(abs(xs(:,2:end)-xs2(:,2:end))./abs(xs2(:,2:end)))
 
 %% some timing results:
 Nt = 50000;
 tic
 for i = 1:Nt
-    [statesOr outOr] = integrate_crane(x,u,grid);
+    input.x = x;
+    [statesOr outOr] = integrate_crane(input);
 end
 time = toc/Nt;
 disp(['average time per integration: ' num2str(round(time*10^6)) ' μs'])

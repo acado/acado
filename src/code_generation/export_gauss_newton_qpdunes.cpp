@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -38,12 +38,29 @@ BEGIN_NAMESPACE_ACADO
 using namespace std;
 
 ExportGaussNewtonQpDunes::ExportGaussNewtonQpDunes(	UserInteraction* _userInteraction,
-													const String& _commonHeaderName
+													const std::string& _commonHeaderName
 													) : ExportNLPSolver( _userInteraction,_commonHeaderName )
 {}
 
 returnValue ExportGaussNewtonQpDunes::setup( )
 {
+	LOG( LVL_DEBUG ) << "Solver: setup initialization... " << endl;
+	setupInitialization();
+
+	//
+	// Add QP initialization call to the initialization
+	//
+	ExportFunction initializeQpDunes( "initializeQpDunes" );
+	initialize
+		<< "ret = (int)initializeQpDunes();\n"
+		<< "if ((return_t)ret != QPDUNES_OK) return ret;\n";
+
+	cleanup.setup( "cleanupSolver" );
+	ExportFunction cleanupQpDunes( "cleanupQpDunes" );
+	cleanup.addFunctionCall( cleanupQpDunes );
+
+	LOG( LVL_DEBUG ) << "done!" << endl;
+
 	setupVariables();
 
 	setupSimulation();
@@ -55,19 +72,6 @@ returnValue ExportGaussNewtonQpDunes::setup( )
 	setupEvaluation();
 
 	setupAuxiliaryFunctions();
-
-	//
-	// Add QP initialization call to the initialization
-	// TODO Return value name is fixed. Make this more flexible ;)
-	//
-	ExportFunction initializeQpDunes( "initializeQpDunes" );
-	initialize
-		<< String("ret = (int)initializeQpDunes();\n")
-		<< String("if ((return_t)ret != QPDUNES_OK) return ret;\n");
-
-	cleanup.setup( "cleanupSolver" );
-	ExportFunction cleanupQpDunes( "cleanupQpDunes" );
-	cleanup.addFunctionCall( cleanupQpDunes );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -118,6 +122,9 @@ returnValue ExportGaussNewtonQpDunes::getFunctionDeclarations(	ExportStatementBl
 
 	declarations.addDeclaration( cleanup );
 	declarations.addDeclaration( shiftQpData );
+
+	declarations.addDeclaration( evaluateLSQ );
+	declarations.addDeclaration( evaluateLSQEndTerm );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -208,15 +215,15 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	// LM regularization preparation
 	//
 
-	ExportVariable evLmX = zeros(NX, NX);
-	ExportVariable evLmU = zeros(NU, NU);
+	ExportVariable evLmX = zeros<double>(NX, NX);
+	ExportVariable evLmU = zeros<double>(NU, NU);
 
 	if  (levenbergMarquardt > 0.0)
 	{
-		Matrix lmX = eye( NX );
+		DMatrix lmX = eye<double>( NX );
 		lmX *= levenbergMarquardt;
 
-		Matrix lmU = eye( NU );
+		DMatrix lmU = eye<double>( NU );
 		lmU *= levenbergMarquardt;
 
 		evLmX = lmX;
@@ -234,11 +241,11 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 
 	loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( runObj ) );
 	loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( runObj ) );
-	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NP) == p );
+	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	loopObjective.addFunctionCall( "evaluateLSQ", objValueIn, objValueOut );
+	loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 
 	// Stack the measurement function value
 	loopObjective.addStatement(
@@ -253,25 +260,25 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	ExportVariable tmpObjS, tmpFx, tmpFu;
 	ExportVariable tmpFxEnd, tmpObjSEndTerm;
 	tmpObjS.setup("tmpObjS", NY, NY, REAL, ACADO_LOCAL);
-	if (objS.isGiven() == BT_TRUE)
+	if (objS.isGiven() == true)
 		tmpObjS = objS;
 	tmpFx.setup("tmpFx", NY, NX, REAL, ACADO_LOCAL);
-	if (objEvFx.isGiven() == BT_TRUE)
+	if (objEvFx.isGiven() == true)
 		tmpFx = objEvFx;
 	tmpFu.setup("tmpFu", NY, NU, REAL, ACADO_LOCAL);
-	if (objEvFu.isGiven() == BT_TRUE)
+	if (objEvFu.isGiven() == true)
 		tmpFu = objEvFu;
 	tmpFxEnd.setup("tmpFx", NYN, NX, REAL, ACADO_LOCAL);
-	if (objEvFxEnd.isGiven() == BT_TRUE)
+	if (objEvFxEnd.isGiven() == true)
 		tmpFxEnd = objEvFxEnd;
 	tmpObjSEndTerm.setup("tmpObjSEndTerm", NYN, NYN, REAL, ACADO_LOCAL);
-	if (objSEndTerm.isGiven() == BT_TRUE)
+	if (objSEndTerm.isGiven() == true)
 		tmpObjSEndTerm = objSEndTerm;
 
 	//
 	// Optional computation of Q1, Q2
 	//
-	if (Q1.isGiven() == BT_FALSE)
+	if (Q1.isGiven() == false)
 	{
 		ExportVariable tmpQ1, tmpQ2;
 		tmpQ1.setup("tmpQ1", NX, NX, REAL, ACADO_LOCAL);
@@ -281,7 +288,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 		setObjQ1Q2.addStatement( tmpQ2 == (tmpFx ^ tmpObjS) );
 		setObjQ1Q2.addStatement( tmpQ1 == tmpQ2 * tmpFx );
 
-		if (tmpFx.isGiven() == BT_TRUE)
+		if (tmpFx.isGiven() == true)
 		{
 			if (variableObjS == YES)
 			{
@@ -304,7 +311,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 		{
 			if (variableObjS == YES)
 			{
-				if (objEvFx.isGiven() == BT_TRUE)
+				if (objEvFx.isGiven() == true)
 
 					loopObjective.addFunctionCall(
 							setObjQ1Q2,
@@ -326,7 +333,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 		loopObjective.addLinebreak( );
 	}
 
-	if (R1.isGiven() == BT_FALSE)
+	if (R1.isGiven() == false)
 	{
 		ExportVariable tmpR1, tmpR2;
 		tmpR1.setup("tmpR1", NU, NU, REAL, ACADO_LOCAL);
@@ -336,7 +343,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 		setObjR1R2.addStatement( tmpR2 == (tmpFu ^ tmpObjS) );
 		setObjR1R2.addStatement( tmpR1 == tmpR2 * tmpFu );
 
-		if (tmpFu.isGiven() == BT_TRUE)
+		if (tmpFu.isGiven() == true)
 		{
 			if (variableObjS == YES)
 			{
@@ -384,16 +391,16 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	// Evaluate the quadratic Mayer term
 	//
 	evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
-	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NP) == p );
+	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
 	// Evaluate the objective function
-	evaluateObjective.addFunctionCall( "evaluateLSQEndTerm", objValueIn, objValueOut );
+	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
 	evaluateObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) );
 	evaluateObjective.addLinebreak();
 
-	if (QN1.isGiven() == BT_FALSE)
+	if (QN1.isGiven() == false)
 	{
 		indexX = getNYN();
 
@@ -405,7 +412,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 		setObjQN1QN2.addStatement( tmpQN2 == (tmpFxEnd ^ tmpObjSEndTerm) );
 		setObjQN1QN2.addStatement( tmpQN1 == tmpQN2 * tmpFxEnd );
 
-		if (tmpFxEnd.isGiven() == BT_TRUE)
+		if (tmpFxEnd.isGiven() == true)
 			evaluateObjective.addFunctionCall(
 					setObjQN1QN2,
 					tmpFxEnd, objSEndTerm,
@@ -428,9 +435,9 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	ExportVariable stageH;
 	ExportIndex index( "index" );
 	stageH.setup("stageH", NX + NU, NX + NU, REAL, ACADO_LOCAL);
-	setStageH.setup("setStageH", stageH, index.makeArgument());
+	setStageH.setup("setStageH", stageH, index);
 
-	if (Q1.isGiven() == BT_FALSE)
+	if (Q1.isGiven() == false)
 		setStageH.addStatement(
 				stageH.getSubMatrix(0, NX, 0, NX) == Q1.getSubMatrix(index * NX, (index + 1) * NX, 0, NX) + evLmX
 		);
@@ -443,7 +450,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	}
 	setStageH.addLinebreak();
 
-	if (R1.isGiven() == BT_FALSE)
+	if (R1.isGiven() == false)
 		setStageH.addStatement(
 				stageH.getSubMatrix(NX, NX + NU, NX, NX + NU) == R1.getSubMatrix(index * NU, (index + 1) * NU, 0, NU) + evLmU
 		);
@@ -452,12 +459,12 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 				stageH.getSubMatrix(NX, NX + NU, NX, NX + NU) == R1 + evLmU
 		);
 
-	if (Q1.isGiven() == BT_TRUE && R1.isGiven() == BT_TRUE)
+	if (Q1.isGiven() == true && R1.isGiven() == true)
 	{
 		for (unsigned i = 0; i < N; ++i)
 		{
 			initialize.addFunctionCall(
-					setStageH, qpH.getAddress(i * (NX + NU) * (NX + NU)), ExportIndex( i ).makeArgument());
+					setStageH, qpH.getAddress(i * (NX + NU) * (NX + NU)), ExportIndex( i ));
 		}
 		initialize.addLinebreak();
 		initialize.addStatement(
@@ -471,7 +478,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 		for (unsigned i = 0; i < N; ++i)
 		{
 			evaluateObjective.addFunctionCall(
-					setStageH, qpH.getAddress(i * (NX + NU) * (NX + NU)), ExportIndex( i ).makeArgument());
+					setStageH, qpH.getAddress(i * (NX + NU) * (NX + NU)), ExportIndex( i ));
 		}
 		evaluateObjective.addLinebreak();
 		evaluateObjective.addStatement(
@@ -485,9 +492,9 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 
 	ExportVariable stagef;
 	stagef.setup("stagef", NX + NU, 1, REAL, ACADO_LOCAL);
-	setStagef.setup("setStagef", stagef, index.makeArgument());
+	setStagef.setup("setStagef", stagef, index);
 
-	if (Q2.isGiven() == BT_FALSE)
+	if (Q2.isGiven() == false)
 		setStagef.addStatement(
 				stagef.getRows(0, NX) == Q2.getSubMatrix(index * NX, (index + 1) * NX, 0, NY) *
 				Dy.getRows(index * NY, (index + 1) * NY)
@@ -502,7 +509,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	}
 	setStagef.addLinebreak();
 
-	if (R2.isGiven() == BT_FALSE)
+	if (R2.isGiven() == false)
 		setStagef.addStatement(
 				stagef.getRows(NX, NX + NU) == R2.getSubMatrix(index * NU, (index + 1) * NU, 0, NY) *
 				Dy.getRows(index * NY, (index + 1) * NY)
@@ -532,14 +539,14 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	qpLb.setup("qpLb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
 	qpUb.setup("qpUb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
 
-	Vector lbTmp, ubTmp;
-	Vector lbXValues, ubXValues;
-	Vector lbUValues, ubUValues;
+	DVector lbTmp, ubTmp;
+	DVector lbXValues, ubXValues;
+	DVector lbUValues, ubUValues;
 
-	Vector lbXInf( NX );
+	DVector lbXInf( NX );
 	lbXInf.setAll( -INFTY );
 
-	Vector ubXInf( NX );
+	DVector ubXInf( NX );
 	ubXInf.setAll( INFTY );
 
 	//
@@ -713,15 +720,15 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	//
 	// Setup constraint values for the whole horizon.
 	//
-	Vector lbAValues;
-	Vector ubAValues;
+	DVector lbAValues;
+	DVector ubAValues;
 
 	for (unsigned i = 0; i < N; ++i)
 	{
 		if ( dimPacH )
 		{
-			lbAValues.append( pacLBMatrix.getRow( i ) );
-			ubAValues.append( pacUBMatrix.getRow( i ) );
+			lbAValues.append( lbPathConValues.block(i * NX, 0, NX, 1) );
+			ubAValues.append( ubPathConValues.block(i * NX, 0, NX, 1) );
 		}
 		lbAValues.append( pocLbStack[ i ] );
 		ubAValues.append( pocUbStack[ i ] );
@@ -747,7 +754,7 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 
 		loopPac.addStatement( conValueIn.getCols(0, NX) == x.getRow( runPac ) );
 		loopPac.addStatement( conValueIn.getCols(NX, NX + NU) == u.getRow( runPac ) );
-		loopPac.addStatement( conValueIn.getCols(NX + NU, NX + NU + NP) == p );
+		loopPac.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 		loopPac.addFunctionCall( evaluatePathConstraints.getName(), conValueIn, conValueOut );
 
 		loopPac.addStatement( pacEvH.getRows( runPac * dimPacH, (runPac + 1) * dimPacH) ==
@@ -757,7 +764,7 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 		unsigned derOffset = dimPacH;
 
 		// Optionally store derivatives
-		if (pacEvHx.isGiven() == BT_FALSE)
+		if (pacEvHx.isGiven() == false)
 		{
 			loopPac.addStatement(
 					pacEvHx.makeRowVector().getCols(runPac * dimPacH * NX, (runPac + 1) * dimPacH * NX) ==
@@ -766,7 +773,7 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 
 			derOffset = derOffset + dimPacH * NX;
 		}
-		if (pacEvHu.isGiven() == BT_FALSE )
+		if (pacEvHu.isGiven() == false )
 		{
 			loopPac.addStatement(
 					pacEvHu.makeRowVector().getCols(runPac * dimPacH * NU, (runPac + 1) * dimPacH * NU) ==
@@ -790,17 +797,17 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 			continue;
 
 		evaluateConstraints.addComment(
-				String( "Evaluating constraint on node: #" ) << String( i ) << "\n\n"
+				string( "Evaluating constraint on node: #" ) + toString( i )
 		);
 
 		evaluateConstraints.addStatement(conValueIn.getCols(0, getNX()) == x.getRow( i ) );
 		if (i < N)
 		{
 			evaluateConstraints.addStatement( conValueIn.getCols(NX, NX + NU) == u.getRow( i ) );
-			evaluateConstraints.addStatement( conValueIn.getCols(NX + NU, NX + NU + NP) == p );
+			evaluateConstraints.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 		}
 		else
-			evaluateConstraints.addStatement( conValueIn.getCols(NX, NX + NP) == p );
+			evaluateConstraints.addStatement( conValueIn.getCols(NX, NX + NOD) == od );
 
 		evaluateConstraints.addFunctionCall(
 				evaluatePointConstraints[ i ]->getName(), conValueIn, conValueOut );
@@ -848,15 +855,15 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	tUbAValues.setup("ubAValues", dimPacH, 1, REAL, ACADO_LOCAL);
 	tPacA.setup("tPacA", dimPacH, NX + NU, REAL, ACADO_LOCAL);
 
-	setStagePac.setup("setStagePac", offsetPac.makeArgument(), indPac.makeArgument(), tPacA, tLbAValues, tUbAValues);
+	setStagePac.setup("setStagePac", offsetPac, indPac, tPacA, tLbAValues, tUbAValues);
 
-	if (pacEvHx.isGiven() == BT_TRUE)
+	if (pacEvHx.isGiven() == true)
 		setStagePac << (tPacA.getSubMatrix(0, dimPacH, 0, NX) == pacEvHx);
 	else
 		setStagePac << (tPacA.getSubMatrix(0, dimPacH, 0, NX) ==
 				pacEvHx.getSubMatrix(indPac * dimPacH, indPac * dimPacH + dimPacH, 0 , NX));
 
-	if (pacEvHu.isGiven() == BT_TRUE)
+	if (pacEvHu.isGiven() == true)
 		setStagePac << (tPacA.getSubMatrix(0, dimPacH, NX, NX + NU) == pacEvHu);
 	else
 		setStagePac << (tPacA.getSubMatrix(0, dimPacH, NX, NX + NU) ==
@@ -879,7 +886,7 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 		{
 			evaluateConstraints.addFunctionCall(
 					setStagePac,
-					ExportIndex( offsetEval ).makeArgument(), ExportIndex( i ).makeArgument(),
+					ExportIndex( offsetEval ), ExportIndex( i ),
 					qpA.getAddress(offsetEval * (NX + NU)),
 					evLbAValues.getAddress( offsetEval ), evUbAValues.getAddress( offsetEval )
 			);
@@ -925,10 +932,10 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 
 returnValue ExportGaussNewtonQpDunes::setupVariables( )
 {
-	if (initialStateFixed() == BT_TRUE)
+	if (initialStateFixed() == true)
 	{
 		x0.setup("x0",  NX, 1, REAL, ACADO_VARIABLES);
-		x0.setDoc( (String)"Current state feedback vector." );
+		x0.setDoc( (std::string)"Current state feedback vector." );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -951,7 +958,12 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	preparation.setup("preparationStep");
 	preparation.doc( "Preparation step of the RTI scheme." );
 
-	preparation.addFunctionCall( modelSimulation );
+	ExportVariable retSim("ret", 1, 1, INT, ACADO_LOCAL, true);
+	retSim.setDoc("Status of the integration module. =0: OK, otherwise the error code.");
+	preparation.setReturnValue(retSim, false);
+
+	preparation	<< retSim.getFullName() << " = " << modelSimulation.getName() << "();\n";
+
 	preparation.addFunctionCall( evaluateObjective );
 	preparation.addFunctionCall( evaluateConstraints );
 
@@ -961,7 +973,7 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	//
 	////////////////////////////////////////////////////////////////////////////
 	ExportVariable stateFeedback("stateFeedback", NX, 1, REAL, ACADO_LOCAL);
-	ExportVariable returnValueFeedbackPhase("retVal", 1, 1, INT, ACADO_LOCAL, BT_TRUE);
+	ExportVariable returnValueFeedbackPhase("retVal", 1, 1, INT, ACADO_LOCAL, true);
 	returnValueFeedbackPhase.setDoc( "Status code of the FORCES QP solver." );
 	feedback.setup("feedbackStep" );
 	feedback.doc( "Feedback/estimation step of the RTI scheme." );
@@ -985,13 +997,11 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	feedback.addLinebreak();
 
 	for (unsigned i = 0; i < N; ++i)
-		feedback.addFunctionCall(setStagef, qpg.getAddress(i * (NX + NU)), ExportIndex( i ).makeArgument());
+		feedback.addFunctionCall(setStagef, qpg.getAddress(i * (NX + NU)), ExportIndex( i ));
 	feedback.addStatement( qpg.getRows(N * (NX + NU), N * (NX + NU) + NX) == QN2 * DyN );
 	feedback.addLinebreak();
 
-	feedback.addStatement(
-			returnValueFeedbackPhase.getFullName() << " = solveQpDunes();\n"
-	);
+	feedback << returnValueFeedbackPhase.getFullName() << " = solveQpDunes();\n";
 
 	//
 	// Here we have to add the differences....
@@ -1007,13 +1017,13 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 
 	ExportVariable stageOut("stageOut", 1, NX + NU, REAL, ACADO_LOCAL);
 	ExportIndex index( "index" );
-	acc.setup("accumulate", stageOut, index.makeArgument());
+	acc.setup("accumulate", stageOut, index);
 
 	acc	<< (x.getRow( index ) += stageOut.getCols(0, NX))
 		<< (u.getRow( index ) += stageOut.getCols(NX, NX + NU));
 
 	for (unsigned i = 0; i < N; ++i)
-		feedback.addFunctionCall(acc, qpPrimal.getAddress(i * (NX + NU)), ExportIndex( i ).makeArgument());
+		feedback.addFunctionCall(acc, qpPrimal.getAddress(i * (NX + NU)), ExportIndex( i ));
 	feedback.addLinebreak();
 	feedback.addStatement(
 			x.getRow( N ) += qpPrimal.getTranspose().getCols(N * (NX + NU), N * (NX + NU) + NX)
@@ -1037,7 +1047,7 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	// TODO Setup evaluation of KKT
 	//
 	////////////////////////////////////////////////////////////////////////////
-	ExportVariable kkt("kkt", 1, 1, REAL, ACADO_LOCAL, BT_TRUE);
+	ExportVariable kkt("kkt", 1, 1, REAL, ACADO_LOCAL, true);
 
 	getKKT.setup( "getKKT" );
 	getKKT.doc( "Get the KKT tolerance of the current iterate. Under development." );
@@ -1076,40 +1086,24 @@ returnValue ExportGaussNewtonQpDunes::setupQPInterface( )
 	qpInterface->configure(
 			maxNumQPiterations,
 			printLevel,
-			string( qpH.getFullName().getName() ),
-			string( qpg.getFullName().getName() ),
-			string( qpC.getFullName().getName() ),
-			string( qpc.getFullName().getName() ),
-			string( qpA.getFullName().getName() ),
-			string( qpLb0.getFullName().getName() ),
-			string( qpUb0.getFullName().getName() ),
-			string( qpLb.getFullName().getName() ),
-			string( qpUb.getFullName().getName() ),
-			string( qpLbA.getFullName().getName() ),
-			string( qpUbA.getFullName().getName() ),
-			string( qpPrimal.getFullName().getName() ),
-			string( qpLambda.getFullName().getName() ),
-			string( qpMu.getFullName().getName() ),
+			qpH.getFullName(),
+			qpg.getFullName(),
+			qpC.getFullName(),
+			qpc.getFullName(),
+			qpA.getFullName(),
+			qpLb0.getFullName(),
+			qpUb0.getFullName(),
+			qpLb.getFullName(),
+			qpUb.getFullName(),
+			qpLbA.getFullName(),
+			qpUbA.getFullName(),
+			qpPrimal.getFullName(),
+			qpLambda.getFullName(),
+			qpMu.getFullName(),
 			qpConDim
 	);
 
 	return SUCCESSFUL_RETURN;
-}
-
-//
-// Solver registration
-//
-
-ExportNLPSolver* createGaussNewtonQpDunes(	UserInteraction* _userInteraction,
-										const String& _commonHeaderName
-										)
-{
-	return new ExportGaussNewtonQpDunes(_userInteraction, _commonHeaderName);
-}
-
-RegisterGaussNewtonQpDunes::RegisterGaussNewtonQpDunes()
-{
-	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES, createGaussNewtonQpDunes);
 }
 
 CLOSE_NAMESPACE_ACADO

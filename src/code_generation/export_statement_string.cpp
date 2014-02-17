@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -41,34 +41,15 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportStatementString::ExportStatementString(	const String& _statementString
+ExportStatementString::ExportStatementString(	const std::string& _statementString
 												) : ExportStatement( )
 {
 	statementString = _statementString;
 }
 
 
-ExportStatementString::ExportStatementString( const ExportStatementString& arg ) : ExportStatement( arg )
-{
-	statementString = arg.statementString;
-}
-
-
 ExportStatementString::~ExportStatementString( )
 {
-}
-
-
-ExportStatementString& ExportStatementString::operator=( const ExportStatementString& arg )
-{
-	if( this != &arg )
-	{
-		// empty
-		ExportStatement::operator=( arg );
-		statementString = arg.statementString;
-	}
-
-	return *this;
 }
 
 
@@ -78,13 +59,13 @@ ExportStatement* ExportStatementString::clone( ) const
 }
 
 
-returnValue ExportStatementString::exportCode(	FILE *file,
-												const String& _realString,
-												const String& _intString,
+returnValue ExportStatementString::exportCode(	std::ostream& stream,
+												const std::string& _realString,
+												const std::string& _intString,
 												int _precision
 												) const
 {
-	acadoFPrintf( file,"%s", statementString.getName() );
+	stream << statementString;
 
 	return SUCCESSFUL_RETURN;
 }

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -89,7 +89,7 @@ returnValue EllipsoidalIntegrator::init( const DifferentialEquation &rhs_, const
   gr << derivatives.getCol(N+1)/acadoFactorial(N+1);
   dg << gg.ADforward( VT_DIFFERENTIAL_STATE, rhs_.getComponents(), nx );
   
-  DifferentialState r(nx);
+  DifferentialState r("", nx, 1);
   
   IntermediateState dgg = gg.ADforward( VT_DIFFERENTIAL_STATE, rhs_.getComponents(), r );
   ddg << 0.5*dgg.ADforward( VT_DIFFERENTIAL_STATE, rhs_.getComponents(), r );
@@ -241,7 +241,7 @@ void EllipsoidalIntegrator::updateQ( Tmatrix<double> C, Tmatrix<Interval> R ){
 	for( int i=0; i<nx; i++ ) trQ += Q(i,i)/(Q(i,i)+1e-8);
 	trQ = ::sqrt(trQ);
 	
-	Vector sqrR(nx);
+	DVector sqrR(nx);
 	for( int i=0; i<nx; i++ ) sqrR(i) = acadoMax(::fabs(R(i).l()),::fabs(R(i).u()))/::sqrt(Q(i,i)+1e-8);
 	
 	double kappa = trQ;

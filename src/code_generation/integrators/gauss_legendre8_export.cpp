@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 GaussLegendre8Export::GaussLegendre8Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ImplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 4;
@@ -71,11 +71,11 @@ GaussLegendre8Export::~GaussLegendre8Export( )
 //
 
 IntegratorExport* createGaussLegendre8Export(	UserInteraction* _userInteraction,
-												const String &_commonHeaderName)
+												const std::string &_commonHeaderName)
 {
-	Matrix AA(4,4);
-	Vector bb(4);
-	Vector cc(4);
+	DMatrix AA(4,4);
+	DVector bb(4);
+	DVector cc(4);
 
 	AA(0,0) = (1/(double)144)*(double)sqrt((double)(double)30)+(double)1/(double)8;
 	AA(0,1) = -(double)(1/(double)840)*(double)sqrt((double)(double)525-(double)70*(double)sqrt((double)(double)30))*(double)sqrt((double)(double)30)+(double)(1/(double)144)*(double)sqrt((double)(double)30)-(double)(1/(double)105)*(double)sqrt((double)(double)525-(double)70*(double)sqrt((double)(double)30))+(double)1/(double)8;		

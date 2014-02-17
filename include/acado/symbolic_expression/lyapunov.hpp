@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -36,10 +36,7 @@
 #define ACADO_TOOLKIT_LYAPUNOV_HPP
 
 
-#include <acado/symbolic_expression/expression.hpp>
-#include <acado/symbolic_expression/control.hpp>
-#include <acado/symbolic_expression/differential_state.hpp>
-#include <acado/symbolic_expression/parameter.hpp>
+#include <acado/symbolic_expression/acado_syntax.hpp>
 #include <acado/symbolic_expression/intermediate_state.hpp>
 
 
@@ -65,17 +62,38 @@ public:
 
     /** Default constructor */
 
-  Lyapunov(const Expression &rhs1,                                                         const Expression &A_,                                                           const Expression &B_,                                                           const Expression &P_,                                                           const Expression &x1_,                                                          const Expression &u_,                                                           const Expression &p_);
+	Lyapunov(const Expression &rhs1, const Expression &A_, const Expression &B_,
+			const Expression &P_, const Expression &x1_, const Expression &u_,
+			const Expression &p_);
 
-  Lyapunov(const Expression &rhs1,                                                         const Expression &rhs2,                                                         const Expression &A_,                                                           const Expression &B_,                                                           const Expression &P_,                                                           const Expression &x1_,                                                          const Expression &x2_,                                                          const Expression &u_,                                                           const Expression &p_);
+	Lyapunov(const Expression &rhs1, const Expression &rhs2,
+			const Expression &A_, const Expression &B_, const Expression &P_,
+			const Expression &x1_, const Expression &x2_, const Expression &u_,
+			const Expression &p_);
 
-  Lyapunov(const Expression &rhs1,                                                         const Expression &rhs2,                                                         const Expression &A_,                                                           const Expression &B_,                                                           const Expression &P_,                                                           const Expression &x1_,                                                          const Expression &x2_,                                                          const Expression &u_,                                                           const Expression &p_,                                                           const Expression &useed_,                                                       const Expression &pseed_,                                                       const Expression &Yx1_,                                                         const Expression &Yx2_,                                                         const Expression &YP_);
+	Lyapunov(const Expression &rhs1, const Expression &rhs2,
+			const Expression &A_, const Expression &B_, const Expression &P_,
+			const Expression &x1_, const Expression &x2_, const Expression &u_,
+			const Expression &p_, const Expression &useed_,
+			const Expression &pseed_, const Expression &Yx1_,
+			const Expression &Yx2_, const Expression &YP_);
 
-  Lyapunov(const Expression &rhs1,                                                         const Expression &A_,                                                           const Expression &B_,                                                           const Expression &P_,                                                           const Expression &x1_,                                                          const Expression &u_,                                                           const Expression &p_,                                                           const Expression &w_);
+	Lyapunov(const Expression &rhs1, const Expression &A_, const Expression &B_,
+			const Expression &P_, const Expression &x1_, const Expression &u_,
+			const Expression &p_, const Expression &w_);
 
-  Lyapunov(const Expression &rhs1,                                                         const Expression &rhs2,                                                         const Expression &A_,                                                           const Expression &B_,                                                           const Expression &P_,                                                           const Expression &x1_,                                                          const Expression &x2_,                                                          const Expression &u_,                                                           const Expression &p_,                                                           const Expression &w_);
+	Lyapunov(const Expression &rhs1, const Expression &rhs2,
+			const Expression &A_, const Expression &B_, const Expression &P_,
+			const Expression &x1_, const Expression &x2_, const Expression &u_,
+			const Expression &p_, const Expression &w_);
 
-  Lyapunov(const Expression &rhs1,                                                         const Expression &rhs2,                                                         const Expression &A_,                                                           const Expression &B_,                                                           const Expression &P_,                                                           const Expression &x1_,                                                          const Expression &x2_,                                                          const Expression &u_,                                                           const Expression &p_,                                                           const Expression &w_,                                                           const Expression &useed_,                                                       const Expression &pseed_,                                                       const Expression &Yx1_,                                                         const Expression &Yx2_,                                                         const Expression &YP_);
+	Lyapunov(const Expression &rhs1, const Expression &rhs2,
+			const Expression &A_, const Expression &B_, const Expression &P_,
+			const Expression &x1_, const Expression &x2_, const Expression &u_,
+			const Expression &p_, const Expression &w_,
+			const Expression &useed_, const Expression &pseed_,
+			const Expression &Yx1_, const Expression &Yx2_,
+			const Expression &YP_);
 
     /** Default constructor */
     Lyapunov( const Lyapunov &arg );

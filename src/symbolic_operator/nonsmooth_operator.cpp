@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -57,14 +57,14 @@ TreeProjection& NonsmoothOperator::operator=( const double &arg ){
     return emptyTreeProjection;
 }
 
-TreeProjection& NonsmoothOperator::operator=( const Vector &arg ){
+TreeProjection& NonsmoothOperator::operator=( const DVector &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& NonsmoothOperator::operator=( const Matrix &arg ){
+TreeProjection& NonsmoothOperator::operator=( const DMatrix &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
@@ -98,18 +98,18 @@ TreeProjection* NonsmoothOperator::cloneTreeProjection() const{
 
 
 TreeProjection& NonsmoothOperator::operator+=( const double    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& NonsmoothOperator::operator+=( const Vector    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& NonsmoothOperator::operator+=( const Matrix    & arg ){ return operator=( this->operator+(arg) ); }
+TreeProjection& NonsmoothOperator::operator+=( const DVector    & arg ){ return operator=( this->operator+(arg) ); }
+TreeProjection& NonsmoothOperator::operator+=( const DMatrix    & arg ){ return operator=( this->operator+(arg) ); }
 TreeProjection& NonsmoothOperator::operator+=( const Expression& arg ){ return operator=( this->operator+(arg) ); }
 
 TreeProjection& NonsmoothOperator::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& NonsmoothOperator::operator-=( const Vector      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& NonsmoothOperator::operator-=( const Matrix      & arg ){ return operator=( this->operator-(arg) ); }
+TreeProjection& NonsmoothOperator::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
+TreeProjection& NonsmoothOperator::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
 TreeProjection& NonsmoothOperator::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
 
 TreeProjection& NonsmoothOperator::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& NonsmoothOperator::operator*=( const Vector      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& NonsmoothOperator::operator*=( const Matrix      & arg ){ return operator=( this->operator*(arg) ); }
+TreeProjection& NonsmoothOperator::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
+TreeProjection& NonsmoothOperator::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
 TreeProjection& NonsmoothOperator::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
 
 TreeProjection& NonsmoothOperator::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
@@ -119,22 +119,22 @@ TreeProjection& NonsmoothOperator::operator/=( const Expression  & arg ){ return
 
 
 Expression NonsmoothOperator::operator+( const double        & arg ) const{ return Expression(*this)+arg; }
-Expression NonsmoothOperator::operator+( const Vector        & arg ) const{ return Expression(*this)+arg; }
-Expression NonsmoothOperator::operator+( const Matrix        & arg ) const{ return Expression(*this)+arg; }
+Expression NonsmoothOperator::operator+( const DVector        & arg ) const{ return Expression(*this)+arg; }
+Expression NonsmoothOperator::operator+( const DMatrix        & arg ) const{ return Expression(*this)+arg; }
 Expression NonsmoothOperator::operator+( const Operator& arg ) const{ return Expression(*this)+arg; }
 Expression NonsmoothOperator::operator+( const Expression    & arg ) const{ return Expression(*this)+arg; }
 
 Expression NonsmoothOperator::operator-( const double        & arg ) const{ return Expression(*this)-arg; }
-Expression NonsmoothOperator::operator-( const Vector        & arg ) const{ return Expression(*this)-arg; }
-Expression NonsmoothOperator::operator-( const Matrix        & arg ) const{ return Expression(*this)-arg; }
+Expression NonsmoothOperator::operator-( const DVector        & arg ) const{ return Expression(*this)-arg; }
+Expression NonsmoothOperator::operator-( const DMatrix        & arg ) const{ return Expression(*this)-arg; }
 Expression NonsmoothOperator::operator-( const Operator& arg ) const{ return Expression(*this)-arg; }
 Expression NonsmoothOperator::operator-( const Expression    & arg ) const{ return Expression(*this)-arg; }
 
 Expression NonsmoothOperator::operator-( ) const{ return -Expression(*this); }
 
 Expression NonsmoothOperator::operator*( const double        & arg ) const{ return Expression(*this)*arg; }
-Expression NonsmoothOperator::operator*( const Vector        & arg ) const{ return Expression(*this)*arg; }
-Expression NonsmoothOperator::operator*( const Matrix        & arg ) const{ return Expression(*this)*arg; }
+Expression NonsmoothOperator::operator*( const DVector        & arg ) const{ return Expression(*this)*arg; }
+Expression NonsmoothOperator::operator*( const DMatrix        & arg ) const{ return Expression(*this)*arg; }
 
 
 Expression NonsmoothOperator::operator*( const Operator& arg ) const{
@@ -160,9 +160,9 @@ ConstraintComponent NonsmoothOperator::operator<=( const double& ub ) const{ ret
 ConstraintComponent NonsmoothOperator::operator>=( const double& lb ) const{ return Expression(*this) >= lb; }
 ConstraintComponent NonsmoothOperator::operator==( const double&  b ) const{ return Expression(*this) ==  b; }
 
-ConstraintComponent NonsmoothOperator::operator<=( const Vector& ub ) const{ return Expression(*this) <= ub; }
-ConstraintComponent NonsmoothOperator::operator>=( const Vector& lb ) const{ return Expression(*this) >= lb; }
-ConstraintComponent NonsmoothOperator::operator==( const Vector&  b ) const{ return Expression(*this) ==  b; }
+ConstraintComponent NonsmoothOperator::operator<=( const DVector& ub ) const{ return Expression(*this) <= ub; }
+ConstraintComponent NonsmoothOperator::operator>=( const DVector& lb ) const{ return Expression(*this) >= lb; }
+ConstraintComponent NonsmoothOperator::operator==( const DVector&  b ) const{ return Expression(*this) ==  b; }
 
 ConstraintComponent NonsmoothOperator::operator<=( const VariablesGrid& ub ) const{ return Expression(*this) <= ub; }
 ConstraintComponent NonsmoothOperator::operator>=( const VariablesGrid& lb ) const{ return Expression(*this) >= lb; }
@@ -365,9 +365,9 @@ returnValue NonsmoothOperator::AD_backward2( int number, double seed1, double se
 }
 
 
-Stream& NonsmoothOperator::print( Stream &stream ) const{
-
-    return stream;// << value;
+std::ostream& NonsmoothOperator::print( std::ostream &stream ) const
+{
+    return stream; // << value;
 }
 
 
@@ -417,13 +417,6 @@ BooleanType NonsmoothOperator::isSymbolic() const{
 
 
 double NonsmoothOperator::getValue() const{ return INFTY; }
-
-
-Stream NonsmoothOperator::operator<<( Stream &stream ){
-
-    return print( stream );
-}
-
 
 int NonsmoothOperator::getGlobalIndex( ) const{
 

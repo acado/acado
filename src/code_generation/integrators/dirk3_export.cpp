@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 DiagonallyIRK3Export::DiagonallyIRK3Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : DiagonallyImplicitRKExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 2;
@@ -71,11 +71,11 @@ DiagonallyIRK3Export::~DiagonallyIRK3Export( )
 //
 
 IntegratorExport* createDiagonallyIRK3Export(	UserInteraction* _userInteraction,
-												const String &_commonHeaderName)
+												const std::string &_commonHeaderName)
 {
-	Matrix AA(2,2);
-	Vector bb(2);
-	Vector cc(2);
+	DMatrix AA(2,2);
+	DVector bb(2);
+	DVector cc(2);
 
 	AA(0,0) = 1.0/2.0+1.0/(2.0*sqrt(3.0));		AA(0,1) = 0.0;
 	AA(1,0) = -1.0/sqrt(3.0);					AA(1,1) = 1.0/2.0+1.0/(2.0*sqrt(3.0));

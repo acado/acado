@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -82,7 +82,7 @@ ConstraintComponent& ConstraintComponent::operator=( const ConstraintComponent &
 }
 
 
-returnValue ConstraintComponent::initialize( const Vector& lb_, Expression arg, const Vector& ub_ ){
+returnValue ConstraintComponent::initialize( const DVector& lb_, Expression arg, const DVector& ub_ ){
 
     expression = arg;
     ub         = ub_;
@@ -137,14 +137,14 @@ ConstraintComponent operator>=( double ub_, const ConstraintComponent &arg ){
     return tmp;
 }
 
-ConstraintComponent operator<=( Vector lb_, const ConstraintComponent &arg ){
+ConstraintComponent operator<=( DVector lb_, const ConstraintComponent &arg ){
 
     ConstraintComponent tmp(arg);
     tmp.setLB( lb_ );
     return tmp;
 }
 
-ConstraintComponent operator>=( Vector ub_, const ConstraintComponent &arg ){
+ConstraintComponent operator>=( DVector ub_, const ConstraintComponent &arg ){
 
     ConstraintComponent tmp(arg);
     tmp.setUB( ub_ );

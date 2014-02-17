@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -34,6 +34,7 @@
 
 #include <acado/function/function.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -149,22 +150,22 @@ returnValue EvaluationPoint::print() const{
 
     uint run1;
 
-    acadoPrintf( "time = %.16e \n", z[idx[0][0]] );
+    cout << "Time = " << scientific << z[idx[0][0]] << endl;
 
-    for( run1 = 0; run1 < nx; run1++ )
-        acadoPrintf( "x [%d] = %.16e \n", run1,z[idx[1][run1]] );
+	for (run1 = 0; run1 < nx; run1++)
+		cout << "x[" << run1 << "] = " << scientific << z[idx[1][run1]] << endl;
 
-    for( run1 = 0; run1 < na; run1++ )
-        acadoPrintf( "xa[%d] = %.16e \n", run1,z[idx[2][run1]] );
+	for (run1 = 0; run1 < na; run1++)
+		cout << "x[" << run1 << "] = " << scientific << z[idx[2][run1]] << endl;
 
-    for( run1 = 0; run1 < np; run1++ )
-        acadoPrintf( "p [%d] = %.16e \n", run1,z[idx[3][run1]] );
+	for (run1 = 0; run1 < np; run1++)
+		cout << "x[" << run1 << "] = " << scientific << z[idx[3][run1]] << endl;
 
-    for( run1 = 0; run1 < nu; run1++ )
-        acadoPrintf( "u [%d] = %.16e \n", run1,z[idx[4][run1]] );
+	for (run1 = 0; run1 < nu; run1++)
+		cout << "x[" << run1 << "] = " << scientific << z[idx[4][run1]] << endl;
 
-    for( run1 = 0; run1 < nw; run1++ )
-        acadoPrintf( "w [%d] = %.16e \n", run1,z[idx[5][run1]] );
+	for (run1 = 0; run1 < nw; run1++)
+		cout << "x[" << run1 << "] = " << scientific << z[idx[5][run1]] << endl;
 
     return SUCCESSFUL_RETURN;
 }

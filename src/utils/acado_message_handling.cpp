@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -99,7 +99,7 @@ ReturnValueList returnValueList[] =
 { RET_FILE_HAS_NO_VALID_ENTRIES,				"The file has no valid entries", VS_VISIBLE },
 { RET_DOES_DIRECTORY_EXISTS,					"Could not open file, check if given directory exists", VS_VISIBLE },
 
-/* Matrix/Vector */
+/* DMatrix/DVector */
 { RET_VECTOR_DIMENSION_MISMATCH,				"Incompatible vector dimensions", VS_VISIBLE },
 { RET_DIFFERENTIAL_STATE_DIMENSION_MISMATCH,	"Incompatible differential state vector dimensions", VS_VISIBLE },
 { RET_ALGEBRAIC_STATE_DIMENSION_MISMATCH,		"Incompatible algebraic state vector dimensions", VS_VISIBLE },
@@ -333,7 +333,7 @@ ReturnValueList returnValueList[] =
 { RET_STEPLENGTH_DETERMINATION_FAILED,			"Determination of step direction failed", VS_VISIBLE },
 { RET_OPTIMAL_SOLUTION_FOUND,					"Optimal solution of neighbouring QP found", VS_VISIBLE },
 { RET_MAX_NWSR_REACHED,							"Maximum number of working set recalculations performed", VS_VISIBLE },
-{ RET_MATRIX_NOT_SPD,							"Matrix not positive definite", VS_VISIBLE },
+{ RET_MATRIX_NOT_SPD,							"DMatrix not positive definite", VS_VISIBLE },
 
 /* CODE EXPORT */
 { RET_CODE_EXPORT_SUCCESSFUL,					"Code generation successful", VS_VISIBLE },
@@ -426,9 +426,13 @@ returnValue::~returnValue() {
 				delete data;
 			}
 
+#ifdef ACADO_WITH_TESTING
+			if (level == LVL_FATAL or level == LVL_ERROR)
+#else
 			if (level == LVL_FATAL)
+#endif
 			{
-				exit( 1 );
+				abort();
 			}
 		}
 	}

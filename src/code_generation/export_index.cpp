@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -28,9 +28,8 @@
 /**
  *    \file src/code_generation/export_index.cpp
  *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
- *    \date 2011 - 2012
+ *    \date 2011 - 2013
  */
-
 
 #include <acado/code_generation/export_index.hpp>
 #include <acado/code_generation/export_argument.hpp>
@@ -51,8 +50,8 @@ ExportIndex::ExportIndex(	const int _value )
 	assignNode(new ExportIndexNode( _value ));
 }
 
-ExportIndex::ExportIndex(	const String& _name,
-							const String& _prefix )
+ExportIndex::ExportIndex(	const std::string& _name,
+							const std::string& _prefix )
 {
 	assignNode(new ExportIndexNode(_name, _prefix));
 }
@@ -70,13 +69,13 @@ const ExportIndexNode* ExportIndex::operator->() const
 }
 
 
-returnValue ExportIndex::exportDataDeclaration(	FILE* file,
-												const String& _realString ,
-												const String& _intString,
+returnValue ExportIndex::exportDataDeclaration(	std::ostream& stream,
+												const std::string& _realString ,
+												const std::string& _intString,
 												int _precision
 												) const
 {
-	return (*this)->exportDataDeclaration(file, _realString, _intString, _precision);
+	return (*this)->exportDataDeclaration(stream, _realString, _intString, _precision);
 }
 
 
@@ -86,28 +85,28 @@ ExportIndex operator+(	const ExportIndex& _arg1,
 {
 	ExportIndex tmp;
 
-	if (_arg1.isGiven() == BT_TRUE && _arg2.isGiven() == BT_TRUE)
+	if (_arg1.isGiven() == true && _arg2.isGiven() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg1.getGivenValue() + _arg2.getGivenValue()));
 
 		return tmp;
 	}
 
-	if (_arg1.isVariable() == BT_TRUE && _arg2.isGiven() == BT_TRUE)
+	if (_arg1.isVariable() == true && _arg2.isGiven() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg1.getName(), _arg1.getPrefix(), _arg1->getFactor(), _arg1->getOffset() + _arg2.getGivenValue()));
 
 		return tmp;
 	}
 
-	if (_arg1.isGiven() == BT_TRUE && _arg2.isVariable() == BT_TRUE)
+	if (_arg1.isGiven() == true && _arg2.isVariable() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg2.getName(), _arg2.getPrefix(),  _arg2->getFactor(), _arg2->getOffset() + _arg1.getGivenValue()));
 
 		return tmp;
 	}
 
-	if(_arg1.isVariable() == BT_TRUE && _arg2.isVariable() == BT_TRUE && _arg1.getFullName() == _arg2.getFullName())
+	if(_arg1.isVariable() == true && _arg2.isVariable() == true && _arg1.getFullName() == _arg2.getFullName())
 	{
 		if ((_arg1->getFactor() + _arg2->getFactor()) == 0)
 			tmp.assignNode(new ExportIndexNode(_arg1->getOffset() + _arg2->getOffset()));
@@ -129,28 +128,28 @@ ExportIndex operator-(	const ExportIndex& _arg1,
 {
 	ExportIndex tmp;
 
-	if (_arg1.isGiven() == BT_TRUE && _arg2.isGiven() == BT_TRUE)
+	if (_arg1.isGiven() == true && _arg2.isGiven() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg1.getGivenValue() - _arg2.getGivenValue()));
 
 		return tmp;
 	}
 
-	if (_arg1.isVariable() == BT_TRUE && _arg2.isGiven() == BT_TRUE)
+	if (_arg1.isVariable() == true && _arg2.isGiven() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg1.getName(), _arg1.getPrefix(), _arg1->getFactor(), _arg1->getOffset() - _arg2.getGivenValue()));
 
 		return tmp;
 	}
 
-	if (_arg1.isGiven() == BT_TRUE && _arg2.isVariable() == BT_TRUE)
+	if (_arg1.isGiven() == true && _arg2.isVariable() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg2.getName(), _arg2.getPrefix(), -1 * _arg2->getFactor(), _arg1->getGivenValue() - _arg2->getOffset()));
 
 		return tmp;
 	}
 
-	if(_arg1.isVariable() == BT_TRUE && _arg2.isVariable() == BT_TRUE && _arg1.getFullName() == _arg2.getFullName())
+	if(_arg1.isVariable() == true && _arg2.isVariable() == true && _arg1.getFullName() == _arg2.getFullName())
 	{
 		if ((_arg1->getFactor() - _arg2->getFactor()) == 0)
 			tmp.assignNode(new ExportIndexNode(_arg1->getOffset() - _arg2->getOffset()));
@@ -170,21 +169,21 @@ ExportIndex operator*(	const ExportIndex& _arg1,
 {
 	ExportIndex tmp;
 
-	if (_arg1.isGiven() == BT_TRUE && _arg2.isGiven() == BT_TRUE)
+	if (_arg1.isGiven() == true && _arg2.isGiven() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg1.getGivenValue() * _arg2.getGivenValue()));
 
 		return tmp;
 	}
 
-	if (_arg1.isVariable() == BT_TRUE && _arg2.isGiven() == BT_TRUE)
+	if (_arg1.isVariable() == true && _arg2.isGiven() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg1.getName(), _arg1.getPrefix(), _arg1->getFactor() * _arg2.getGivenValue(), _arg1->getOffset() * _arg2.getGivenValue()));
 
 		return tmp;
 	}
 
-	if (_arg1.isGiven() == BT_TRUE && _arg2.isVariable() == BT_TRUE)
+	if (_arg1.isGiven() == true && _arg2.isVariable() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg2.getName(), _arg2.getPrefix(), _arg2->getFactor() * _arg1.getGivenValue(), _arg2->getOffset() * _arg1.getGivenValue()));
 
@@ -203,7 +202,7 @@ ExportIndex operator/(	const ExportIndex& _arg1,
 {
 	ExportIndex tmp;
 
-	if (_arg1.isGiven() == BT_TRUE && _arg2.isGiven() == BT_TRUE)
+	if (_arg1.isGiven() == true && _arg2.isGiven() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg1.getGivenValue() / _arg2.getGivenValue()));
 
@@ -221,7 +220,7 @@ ExportIndex operator%(	const ExportIndex& _arg1,
 {
 	ExportIndex tmp;
 
-	if (_arg1.isGiven() == BT_TRUE && _arg2.isGiven() == BT_TRUE)
+	if (_arg1.isGiven() == true && _arg2.isGiven() == true)
 	{
 		tmp.assignNode(new ExportIndexNode(_arg1.getGivenValue() % _arg2.getGivenValue()));
 
@@ -233,18 +232,18 @@ ExportIndex operator%(	const ExportIndex& _arg1,
 	return tmp;
 }
 
-String operator==(	const ExportIndex& _arg1,
-					const ExportIndex& _arg2
-					)
+std::string operator==(	const ExportIndex& _arg1,
+						const ExportIndex& _arg2
+						)
 {
-	String ret;
+	std::stringstream ret;
 	ret << _arg1.get() << " = " << _arg2.get() << ";\n";
 
-	return ret;
+	return ret.str();
 }
 
 
-const String ExportIndex::get( ) const
+const std::string ExportIndex::get( ) const
 {
 	return (*this)->get();
 }
@@ -256,36 +255,37 @@ int ExportIndex::getGivenValue( ) const
 }
 
 
-BooleanType ExportIndex::isGiven( ) const
+bool ExportIndex::isGiven( ) const
 {
 	return (*this)->isGiven();
 }
 
-BooleanType ExportIndex::isBinary( ) const
+bool ExportIndex::isBinary( ) const
 {
 	return (*this)->isBinary();
 }
 
-BooleanType ExportIndex::isVariable() const
+bool ExportIndex::isVariable() const
 {
 	return (*this)->isVariable();
 }
 
 
-ExportArgument ExportIndex::makeArgument( ) const
+ExportIndex::operator ExportArgument()
 {
-	String tmpName;
+	std::string tmpName;
 
-	// In principle, this is an ugly hack. In case when an index is given,
+	// XXX In principle, this is an ugly hack. In case when an index is given,
 	// We give it a name which is equal to its value. This is done in order
-	// To be able to simplify function calls.
+	// To be able to simplify function calls. Most probably much more sense
+	// would make that ExportArgument is base class for this guy...
 
-	if (isGiven() == BT_TRUE)
-		tmpName = getGivenValue();
+	if (isGiven() == true)
+		tmpName = std::toString(getGivenValue());
 	else
 		tmpName = (*this)->getName();
 
-	ExportArgument tmp(tmpName, 1 , 1, (*this)->getType(), ACADO_LOCAL, BT_TRUE, emptyConstExportIndex);
+	ExportArgument tmp(tmpName, 1 , 1, (*this)->getType(), ACADO_LOCAL, true, emptyConstExportIndex);
 	tmp.setDoc( getDoc() );
 
 	return tmp;

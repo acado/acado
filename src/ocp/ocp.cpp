@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,9 +31,8 @@
  */
 
 #include <acado/ocp/ocp.hpp>
-#include <acado/code_generation/export_variable.hpp>
 
-
+using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 
@@ -51,12 +50,12 @@ OCP::OCP( const double &tStart_, const double &tEnd_, const int &N_ )
 }
 
 
-OCP::OCP( const double &tStart_, const double &tEnd_, const Vector& _numSteps )
+OCP::OCP( const double &tStart_, const double &tEnd_, const DVector& _numSteps )
     :MultiObjectiveFunctionality(){
 
         if( _numSteps.getDim() <= 0 ) ACADOERROR( RET_INVALID_ARGUMENTS );
       
-	Vector times( _numSteps.getDim()+1 );
+	DVector times( _numSteps.getDim()+1 );
 	times(0) = tStart_;
 	
 	double totalSteps = 0;
@@ -94,37 +93,8 @@ OCP::OCP( const double    &tStart_,
     setupGrid( tStart_, tStart_ + 1.0, N_+1);
 }
 
-
-void OCP::copy( const OCP &rhs )
-{
-    grid                 = rhs.grid                ;
-    modelData			 = rhs.modelData		   ;
-    objective            = rhs.objective           ;
-    constraint           = rhs.constraint          ;
-}
-
-OCP::OCP( const OCP& rhs )
-    :MultiObjectiveFunctionality( rhs ){
-
-    copy( rhs );
-}
-
-
-OCP::~OCP( ){ 
-}
-
-
-OCP& OCP::operator=( const OCP& rhs ){
-
-    if ( this != &rhs ){
-
-        MultiObjectiveFunctionality::operator=(rhs);
-        copy(rhs);
-    }
-    return *this;
-}
-
-
+OCP::~OCP( )
+{}
 
 returnValue OCP::minimizeMayerTerm( const int &multiObjectiveIdx,  const Expression& arg ){
 
@@ -134,9 +104,11 @@ returnValue OCP::minimizeMayerTerm( const int &multiObjectiveIdx,  const Express
 
 returnValue OCP::minimizeLSQ( const MatrixVariablesGrid &S,
                               const Function            &h,
-                              const char*        rFilename ){
+                              const char*        rFilename )
+{
 
-    VariablesGrid r = readFromFile( rFilename );
+    VariablesGrid r;
+    r.read( rFilename );
 
     if( r.isEmpty() == BT_TRUE )
         return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
@@ -145,11 +117,12 @@ returnValue OCP::minimizeLSQ( const MatrixVariablesGrid &S,
 }
 
 
-returnValue OCP::minimizeLSQ( const Matrix        &S,
+returnValue OCP::minimizeLSQ( const DMatrix        &S,
                               const Function      &h,
                               const char*  rFilename  ){
 
-    VariablesGrid r = readFromFile( rFilename );
+    VariablesGrid r;
+    r.read( rFilename );
 
     if( r.isEmpty() == BT_TRUE )
         return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
@@ -161,7 +134,8 @@ returnValue OCP::minimizeLSQ( const Matrix        &S,
 returnValue OCP::minimizeLSQ( const Function      &h,
                               const char*  rFilename  ){
 
-    VariablesGrid r = readFromFile( rFilename );
+    VariablesGrid r;
+    r.read( rFilename );
 
     if( r.isEmpty() == BT_TRUE )
         return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
@@ -188,40 +162,32 @@ returnValue OCP::subjectTo( const ConstraintComponent& component ){
 }
 
 
-returnValue OCP::subjectTo( const int index_, const ConstraintComponent& component ){
+returnValue OCP::subjectTo( int index_, const ConstraintComponent& component )
+{
+	ASSERT(index_ >= AT_START);
 
-    for( uint i=0; i<component.getDim(); ++i )
-        constraint.add( index_,component(i) );
+	if (index_ == AT_START)
+	{
+		for (unsigned el = 0; el < component.getDim(); ++el)
+			ACADO_TRY( constraint.add( 0,component( el ) ) );
+	}
+	else if (index_ == AT_END)
+	{
+		for (unsigned el = 0; el < component.getDim(); ++el)
+			ACADO_TRY(constraint.add(grid.getLastIndex(), component( el )));
+	}
+	else
+	{
+		for (unsigned el = 0; el < component.getDim(); ++el)
+			constraint.add(index_, component(el));
+	}
 
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue OCP::subjectTo( const TimeHorizonElement index_, const ConstraintComponent& component ){
-
-    uint i;
-
-    switch( index_ ){
-
-        case AT_START:
-             for( i = 0; i < component.getDim(); i++ )
-                 ACADO_TRY( constraint.add( 0,component(i) ) );
-             return SUCCESSFUL_RETURN;
-
-        case AT_END:
-             for( i = 0; i < component.getDim(); i++ )
-                 ACADO_TRY( constraint.add( grid.getLastIndex(),component(i) ) );
-             return SUCCESSFUL_RETURN;
-
-        default:
-             return ACADOERROR(RET_UNKNOWN_BUG);
-    }
     return SUCCESSFUL_RETURN;
 }
 
 
 returnValue OCP::subjectTo( const double lb_, const Expression& arg1,
-                                   const Expression& arg2, const double ub_ ){
+							const Expression& arg2, const double ub_ ){
 
     return constraint.add( lb_, arg1, arg2, ub_ );
 }
@@ -232,26 +198,55 @@ returnValue OCP::subjectTo( const double lb_, const Expression *arguments, const
     return constraint.add( lb_, arguments, ub_ );
 }
 
+returnValue OCP::subjectTo( const DVector& _lb, const Expression& _expr, const DVector& _ub )
+{
+	ASSERT(_lb.getDim() == _expr.getDim() && _lb.getDim() == _ub.getDim());
+	constraint.add(_lb, _expr, _ub);
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue OCP::subjectTo( int _index, const DVector& _lb, const Expression& _expr, const DVector& _ub )
+{
+	ASSERT(_index >= AT_START);
+	cout << _lb.getDim() << " " << _expr.getDim() << endl;
+	ASSERT(_lb.getDim() == _expr.getDim());
+	ASSERT(_lb.getDim() == _ub.getDim());
+
+	if (_index == AT_START)
+	{
+		for (unsigned el = 0; el < _lb.getDim(); ++el)
+			ACADO_TRY( constraint.add(0, _lb( el ), _expr( el ), _ub( el )) );
+	}
+	else if (_index == AT_END)
+	{
+		for (unsigned el = 0; el < _lb.getDim(); ++el)
+			ACADO_TRY(constraint.add(grid.getLastIndex(), _lb( el ), _expr( el ), _ub( el )) );
+	}
+	else
+		for (unsigned el = 0; el < _lb.getDim(); ++el)
+			constraint.add(_index, _lb( el ), _expr( el ), _ub( el ));
+
+	return SUCCESSFUL_RETURN;
+}
+
 returnValue OCP::minimizeMayerTerm   ( const Expression& arg ){ return objective.addMayerTerm   ( arg ); }
 returnValue OCP::maximizeMayerTerm   ( const Expression& arg ){ return objective.addMayerTerm   (-arg ); }
 returnValue OCP::minimizeLagrangeTerm( const Expression& arg ){ return objective.addLagrangeTerm( arg ); }
 returnValue OCP::maximizeLagrangeTerm( const Expression& arg ){ return objective.addLagrangeTerm(-arg ); }
 
 
-returnValue OCP::minimizeLSQ( const Matrix&S, const Function &h, const Vector &r ){
-
-	if ( S.isPositiveSemiDefinite() == BT_FALSE )
-		return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
-
+returnValue OCP::minimizeLSQ( const DMatrix&S, const Function &h, const DVector &r )
+{
     MatrixVariablesGrid tmpS(S);
     VariablesGrid       tmpR(r);
 
     return objective.addLSQ( &tmpS, h, &tmpR );
 }
 
-returnValue OCP::minimizeLSQ( const Function &h, const Vector &r ){
+returnValue OCP::minimizeLSQ( const Function &h, const DVector &r ){
 
-    Matrix S( h.getDim( ),h.getDim( ) );
+    DMatrix S( h.getDim( ),h.getDim( ) );
     S.setIdentity( );
 
     return minimizeLSQ( S, h, r );
@@ -259,10 +254,10 @@ returnValue OCP::minimizeLSQ( const Function &h, const Vector &r ){
 
 returnValue OCP::minimizeLSQ( const Function &h ){
 
-    Matrix S( h.getDim( ),h.getDim( ) );
+    DMatrix S( h.getDim( ),h.getDim( ) );
     S.setIdentity( );
 
-    Vector r(h.getDim());
+    DVector r(h.getDim());
     r.setZero();
 
     return minimizeLSQ( S, h, r );
@@ -276,7 +271,7 @@ returnValue OCP::minimizeLSQ( const MatrixVariablesGrid &S,
     return objective.addLSQ( &S, h, &r );
 }
 
-returnValue OCP::minimizeLSQ( const Matrix        &S,
+returnValue OCP::minimizeLSQ( const DMatrix        &S,
                               const Function      &h,
                               const VariablesGrid &r ){
 
@@ -294,9 +289,9 @@ returnValue OCP::minimizeLSQ( const Function      &h,
 }
 
 
-returnValue OCP::minimizeLSQEndTerm( const Matrix   & S,
+returnValue OCP::minimizeLSQEndTerm( const DMatrix   & S,
                                      const Function & m,
-                                     const Vector   & r  ){
+                                     const DVector   & r  ){
 
 	if ( S.isPositiveSemiDefinite() == BT_FALSE )
 		return ACADOERROR( RET_NONPOSITIVE_WEIGHT );
@@ -305,9 +300,9 @@ returnValue OCP::minimizeLSQEndTerm( const Matrix   & S,
 }
 
 returnValue OCP::minimizeLSQEndTerm( const Function & m,
-                                     const Vector   & r  ){
+                                     const DVector   & r  ){
 
-    Matrix S( m.getDim( ),m.getDim( ) );
+    DMatrix S( m.getDim( ),m.getDim( ) );
     S.setIdentity( );
     return minimizeLSQEndTerm( S, m, r );
 }
@@ -355,42 +350,55 @@ double OCP::getEndTime   ( ) const{ return grid.getLastTime (); }
 
 BooleanType OCP::hasEquidistantGrid( ) const{
 	
-	Vector numSteps;
+	DVector numSteps;
 	modelData.getNumSteps(numSteps);
 	return numSteps.isEmpty();
 }
 
-returnValue OCP::minimizeLSQ(const ExportVariable& S, const Function& h)
+returnValue OCP::minimizeLSQ(const DMatrix& S, const Function& h)
 {
 	return objective.addLSQ(S, h);
 }
 
-returnValue OCP::minimizeLSQEndTerm(const ExportVariable& S, const Function& h)
+returnValue OCP::minimizeLSQEndTerm(const DMatrix& S, const Function& h)
 {
 	return objective.addLSQEndTerm(S, h);
 }
 
-returnValue OCP::minimizeLSQ(const ExportVariable& S, const String& h)
+returnValue OCP::minimizeLSQ(const BMatrix& S, const Function& h)
 {
 	return objective.addLSQ(S, h);
 }
 
-returnValue OCP::minimizeLSQEndTerm(const ExportVariable& S, const String& h)
+returnValue OCP::minimizeLSQEndTerm(const BMatrix& S, const Function& h)
 {
 	return objective.addLSQEndTerm(S, h);
 }
 
-returnValue OCP::minimizeLSQLinearTerms(const Vector& Slx, const Vector& Slu)
+returnValue OCP::minimizeLSQ(const DMatrix& S, const std::string& h)
+{
+	return objective.addLSQ(S, h);
+}
+
+returnValue OCP::minimizeLSQEndTerm(const DMatrix& S, const std::string& h)
+{
+	return objective.addLSQEndTerm(S, h);
+}
+
+returnValue OCP::minimizeLSQ(const BMatrix& S, const std::string& h)
+{
+	return objective.addLSQ(S, h);
+}
+
+returnValue OCP::minimizeLSQEndTerm(const BMatrix& S, const std::string& h)
+{
+	return objective.addLSQEndTerm(S, h);
+}
+
+returnValue OCP::minimizeLSQLinearTerms(const DVector& Slx, const DVector& Slu)
 {
 	return objective.addLSQLinearTerms(Slx, Slu);
 }
-
-returnValue OCP::minimizeLSQLinearTerms(const ExportVariable& Slx, const ExportVariable& Slu)
-{
-	return objective.addLSQLinearTerms(Slx, Slu);
-}
-
-
 
 // PROTECTED FUNCTIONS:
 // --------------------
@@ -403,7 +411,7 @@ void OCP::setupGrid( double tStart, double tEnd, int N ){
 }
 
 
-void OCP::setupGrid( const Vector& times ){
+void OCP::setupGrid( const DVector& times ){
 
     grid.init( times );
     objective.init ( grid );

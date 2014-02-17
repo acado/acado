@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,7 +32,7 @@
  */
 
 #include <acado/code_generation/export_module.hpp>
-
+#include <acado/code_generation/integrators/integrator_export.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -45,68 +45,16 @@ ExportModule::ExportModule( ) : UserInteraction( )
 { 
 	setupOptions( );
 
-	timingCalls = 0;
-
 	commonHeaderName = "acado.h";
-	name = "acado";
-	exportFolderName = "acado_exported_code";
-}
-
-
-ExportModule::ExportModule(	const ExportModule& arg
-							) : UserInteraction( arg )
-{
-	copy( arg );
 }
 
 
 ExportModule::~ExportModule( )
-{
-}
-
-
-ExportModule& ExportModule::operator=(	const ExportModule& arg
-										)
-{
-	if( this != &arg )
-	{
-		UserInteraction::operator=( arg );
-		copy( arg );
-	}
-
-	return *this;
-}
-
-
-returnValue ExportModule::setTimingCalls( uint _timingCalls ) {
-	timingCalls = _timingCalls;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-String ExportModule::getCommonHeaderName( ) const
-{
-	return commonHeaderName;
-}
-
+{}
 
 //
 // PROTECTED MEMBER FUNCTIONS:
 //
-
-
-returnValue ExportModule::copy(	const ExportModule& arg
-								)
-{
-	commonHeaderName = arg.commonHeaderName;
-	timingCalls = arg.timingCalls;
-	name = arg.name;
-	exportFolderName = arg.exportFolderName;
-
-	return SUCCESSFUL_RETURN;
-}
-
 
 returnValue ExportModule::setupOptions( )
 {
@@ -115,7 +63,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( INTEGRATOR_TYPE,             INT_RK4         );
 	addOption( DYNAMIC_SENSITIVITY,         FORWARD         );
 	addOption( LINEAR_ALGEBRA_SOLVER,       GAUSS_LU        );
-	addOption( UNROLL_LINEAR_SOLVER,       	BT_FALSE	    );
+	addOption( UNROLL_LINEAR_SOLVER,       	false	    );
 	addOption( NUM_INTEGRATOR_STEPS,        30              );
 	addOption( MEASUREMENT_GRID, 			OFFLINE_GRID);
 	addOption( INTEGRATOR_DEBUG_MODE, 		0				);
@@ -123,19 +71,19 @@ returnValue ExportModule::setupOptions( )
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	5				);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS_INIT, 0			);
 	addOption( SPARSE_QP_SOLUTION,          FULL_CONDENSING );
-	addOption( FIX_INITIAL_STATE,           BT_TRUE         );
+	addOption( FIX_INITIAL_STATE,           true         );
 	addOption( QP_SOLVER,                   QP_QPOASES      );
 	addOption( MAX_NUM_QP_ITERATIONS,       -1              );
-	addOption( HOTSTART_QP,                 BT_FALSE        );
+	addOption( HOTSTART_QP,                 false        );
 	addOption( LEVENBERG_MARQUARDT,         0.0             );
-	addOption( GENERATE_TEST_FILE,          BT_TRUE         );
-	addOption( GENERATE_MAKE_FILE,          BT_TRUE         );
-	addOption( GENERATE_SIMULINK_INTERFACE, BT_FALSE        );
-	addOption( GENERATE_MATLAB_INTERFACE, 	BT_FALSE        );
+	addOption( GENERATE_TEST_FILE,          true         );
+	addOption( GENERATE_MAKE_FILE,          true         );
+	addOption( GENERATE_SIMULINK_INTERFACE, false        );
+	addOption( GENERATE_MATLAB_INTERFACE, 	false        );
 	addOption( MEX_ITERATION_STEPS, 		1        		);
 	addOption( MEX_VERBOSE, 				0       		);
 	addOption( OPERATING_SYSTEM,            OS_DEFAULT      );
-	addOption( USE_SINGLE_PRECISION,        BT_FALSE        );
+	addOption( USE_SINGLE_PRECISION,        false        );
 	addOption( PRINTLEVEL,                  MEDIUM          );
 
 	addOption( CG_USE_C99,                       NO         );
@@ -145,32 +93,10 @@ returnValue ExportModule::setupOptions( )
 	addOption( CG_HARDCODE_CONSTRAINT_VALUES,    YES        );
 	addOption( CG_USE_ARRIVAL_COST,              NO         );
 
-	return SUCCESSFUL_RETURN;
-}
-
-returnValue ExportModule::setName(const String& _name)
-{
-	if ( _name.isEmpty() == BT_TRUE )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
-
-	name = _name;
+	addOption( CG_MODULE_NAME, "acado" );
+	addOption( CG_EXPORT_FOLDER_NAME, "acado_export" );
 
 	return SUCCESSFUL_RETURN;
-}
-
-String ExportModule::getName() const
-{
-	return name;
-}
-
-const String& ExportModule::getExportFolderName() const
-{
-	return exportFolderName;
-}
-
-void ExportModule::setExportFolderName(const String& _name)
-{
-	exportFolderName = _name;
 }
 
 CLOSE_NAMESPACE_ACADO

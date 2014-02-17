@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -28,7 +28,7 @@
 /**
  *    \file src/integrator/integrator_bdf.cpp
  *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 31.12.2008
+ *    \date 2008 - 2013
  */
 
 #include <acado/utils/acado_utils.hpp>
@@ -37,6 +37,7 @@
 #include <acado/function/function_.hpp>
 #include <acado/integrator/integrator.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -246,7 +247,7 @@ void IntegratorBDF::allocateMemory( ){
     }
 
     maxNM = 1;
-    M     = (Matrix**)calloc(maxNM,sizeof(Matrix*));
+    M     = (DMatrix**)calloc(maxNM,sizeof(DMatrix*));
     M_index   = (int*)calloc(maxNM,sizeof(int));
 
     M_index[0] = 0;
@@ -578,7 +579,7 @@ void IntegratorBDF::constructAll( const IntegratorBDF& arg ){
 
 
     maxNM = 1;
-    M     = (Matrix**)calloc(maxNM,sizeof(Matrix*));
+    M     = (DMatrix**)calloc(maxNM,sizeof(DMatrix*));
     M_index   = (int*)calloc(maxNM,sizeof(int));
 
     M_index[0] = 0;
@@ -1096,7 +1097,7 @@ returnValue IntegratorBDF::unfreeze(){
 
     maxNM = 1;
     nOfM  = 0;
-    M       = (Matrix**)realloc(M,maxNM*sizeof(Matrix*));
+    M       = (DMatrix**)realloc(M,maxNM*sizeof(DMatrix*));
     M_index = (int*)realloc(M_index,maxAlloc*sizeof(int));
 
     h = (double*)realloc(h,maxAlloc*sizeof(double));
@@ -1107,11 +1108,11 @@ returnValue IntegratorBDF::unfreeze(){
 }
 
 
-returnValue IntegratorBDF::evaluate( const Vector &x0  ,
-                                     const Vector &xa  ,
-                                     const Vector &p   ,
-                                     const Vector &u   ,
-                                     const Vector &w   ,
+returnValue IntegratorBDF::evaluate( const DVector &x0  ,
+                                     const DVector &xa  ,
+                                     const DVector &p   ,
+                                     const DVector &u   ,
+                                     const DVector &w   ,
                                      const Grid   &t_    ){
 
     int         run1;
@@ -1238,14 +1239,14 @@ returnValue IntegratorBDF::evaluate( const Vector &x0  ,
             acadoPrintCopyrightNotice( "IntegratorBDF -- A BDF integrator (order 4)." );
         }
         if( PrintLevel == HIGH ){
-            acadoPrintf("BDF: t = %.16e                          ", t );
+            cout << "BDF: t = " << t << "\t";
             for( run1 = 0; run1 < md; run1++ ){
-                acadoPrintf("x[%d] = %.16e  ", run1, eta4[run1] );
+                cout << "x[" << run1 << "] = " << scientific << eta4[run1] << "  ";
             }
             for( run1 = 0; run1 < ma; run1++ ){
-                acadoPrintf("xa[%d] = %.16e  ", run1, eta4[md+run1] );
+            	cout << "xq[" << run1 << "] = " << eta4[md+run1] << "  ";
             }
-            acadoPrintf("\n");
+            cout << endl;
         }
 
 
@@ -1295,7 +1296,7 @@ returnValue IntegratorBDF::evaluate( const Vector &x0  ,
        totalTime.stop();
 
 	   
-// 	   acadoPrintf("numIntSteps = %d\n",count-1);
+// 	   cout <<"numIntSteps = %d\n",count-1);
 	   
 
     // SET THE LOGGING INFORMATION:
@@ -1326,14 +1327,14 @@ returnValue IntegratorBDF::evaluate( const Vector &x0  ,
      // ---------
         if( PrintLevel == MEDIUM ){
 
-            acadoPrintf("\n Results at  t =  %.16e   : \n\n", t );
+            cout << "\n Results at  t =  " << t << "   : \n\n";
             for( run1 = 0; run1 < md; run1++ ){
-                acadoPrintf("x[%d] = %.16e  ", run1, nablaY(0,run1) );
+            	cout << "x[" << run1 << "] = " << scientific << nablaY(0,run1) << "  ";
             }
             for( run1 = 0; run1 < ma; run1++ ){
-                acadoPrintf("xa[%d] = %.16e  ", run1, nablaY(0,md+run1) );
+            	cout << "x[" << run1 << "] = " << scientific << nablaY(0,md+run1) << "  ";
             }
-            acadoPrintf("\n");
+            cout << endl;
             printBDFfinalResults();
         }
 		
@@ -1347,17 +1348,17 @@ returnValue IntegratorBDF::evaluate( const Vector &x0  ,
 	else
 	{
 		if( PrintLevel == MEDIUM  || PrintLevel == HIGH )
-			acadoPrintf("BDF: number of steps:  %d\n", count-1 );
+			cout << "BDF: number of steps:  " << count - 1 << endl;
 	}
 
     return returnvalue;
 }
 
 
-returnValue IntegratorBDF::setProtectedForwardSeed( const Vector &xSeed ,
-                                                    const Vector &pSeed ,
-                                                    const Vector &uSeed ,
-                                                    const Vector &wSeed ,
+returnValue IntegratorBDF::setProtectedForwardSeed( const DVector &xSeed ,
+                                                    const DVector &pSeed ,
+                                                    const DVector &uSeed ,
+                                                    const DVector &wSeed ,
                                                     const int    &order   ){
 
     if( order == 2 ){
@@ -1424,10 +1425,10 @@ returnValue IntegratorBDF::setProtectedForwardSeed( const Vector &xSeed ,
 }
 
 
-returnValue IntegratorBDF::setForwardSeed2( const Vector &xSeed ,
-                                            const Vector &pSeed ,
-                                            const Vector &uSeed ,
-                                            const Vector &wSeed   ){
+returnValue IntegratorBDF::setForwardSeed2( const DVector &xSeed ,
+                                            const DVector &pSeed ,
+                                            const DVector &uSeed ,
+                                            const DVector &wSeed   ){
 
     int run2;
 
@@ -1498,7 +1499,7 @@ returnValue IntegratorBDF::setForwardSeed2( const Vector &xSeed ,
 }
 
 
-returnValue IntegratorBDF::setProtectedBackwardSeed( const Vector &seed, const int &order ){
+returnValue IntegratorBDF::setProtectedBackwardSeed( const DVector &seed, const int &order ){
 
     if( order == 2 ){
         return setBackwardSeed2(seed);
@@ -1561,7 +1562,7 @@ returnValue IntegratorBDF::setProtectedBackwardSeed( const Vector &seed, const i
 }
 
 
-returnValue IntegratorBDF::setBackwardSeed2( const Vector &seed ){
+returnValue IntegratorBDF::setBackwardSeed2( const DVector &seed ){
 
     int run1, run2, run3;
 
@@ -1853,8 +1854,8 @@ returnValue IntegratorBDF::step(int number_){
 
             if( PrintLevel == HIGH ){
 
-                acadoPrintf("STEP REJECTED: error estimate           = %.16e \n", E   );
-                acadoPrintf("               required local tolerance = %.16e \n", TOL );
+                cout << "STEP REJECTED: error estimate           = " << scientific << E
+                	 << "               required local tolerance = " <<  TOL << endl;
             }
 
             number_of_rejected_steps++;
@@ -2087,7 +2088,7 @@ returnValue IntegratorBDF::stop(){
 
 
 
-returnValue IntegratorBDF::getProtectedX( Vector *xEnd ) const{
+returnValue IntegratorBDF::getProtectedX( DVector *xEnd ) const{
 
     int run1;
 
@@ -2101,7 +2102,7 @@ returnValue IntegratorBDF::getProtectedX( Vector *xEnd ) const{
 }
 
 
-returnValue IntegratorBDF::getProtectedForwardSensitivities( Matrix *Dx, int order ) const{
+returnValue IntegratorBDF::getProtectedForwardSensitivities( DMatrix *Dx, int order ) const{
 
     int run1;
 
@@ -2153,10 +2154,10 @@ returnValue IntegratorBDF::getProtectedForwardSensitivities( Matrix *Dx, int ord
 }
 
 
-returnValue IntegratorBDF::getProtectedBackwardSensitivities(Vector &Dx_x0,
-                                                             Vector &Dx_p ,
-                                                             Vector &Dx_u ,
-                                                             Vector &Dx_w ,
+returnValue IntegratorBDF::getProtectedBackwardSensitivities(DVector &Dx_x0,
+                                                             DVector &Dx_p ,
+                                                             DVector &Dx_u ,
+                                                             DVector &Dx_w ,
                                                              int order      ) const{
 
     if( order == 1 && nBDirs2 == 0 )
@@ -2392,7 +2393,7 @@ returnValue IntegratorBDF::determineCorrector( int stepnumber, BooleanType ini )
            jacComputation.start();
 
            if( PrintLevel == HIGH ){
-               acadoPrintf("(RE-) COMPUTE-JACOBIAN... \n");
+               cout  << "(RE-) COMPUTE-JACOBIAN... \n";
            }
 
            if( soa == SOA_FREEZING_MESH || soa == SOA_FREEZING_ALL ){
@@ -2400,16 +2401,16 @@ returnValue IntegratorBDF::determineCorrector( int stepnumber, BooleanType ini )
                if( nOfM >= maxNM ){
                    int oldMN = maxNM;
                    maxNM += maxNM;
-                   M = (Matrix**)realloc(M, maxNM*sizeof(Matrix*));
+                   M = (DMatrix**)realloc(M, maxNM*sizeof(DMatrix*));
                    for( run1 = oldMN; run1 < maxNM; run1++ )
                        M[run1] = 0;
                }
                M_index[stepnumber] = nOfM;
-               M[nOfM] = new Matrix(m,m);
+               M[nOfM] = new DMatrix(m,m);
                nOfM++;
            }
            else{
-               if( M[0] == 0 ) M[0] = new Matrix(m,m);
+               if( M[0] == 0 ) M[0] = new DMatrix(m,m);
                M_index[stepnumber] = 0;
                M[0]->init(m,m);
            }
@@ -2580,9 +2581,9 @@ returnValue IntegratorBDF::rk_start(){
         if( returnvalue != SUCCESSFUL_RETURN ){
 
             if( PrintLevel == HIGH ){
-                acadoPrintf("RUNGE-KUTTA STARTER: \n");
-                acadoPrintf("STEP REJECTED: error estimate           = %.16e \n", E        );
-                acadoPrintf("               required local tolerance = %.16e \n", TOL      );
+                cout << "RUNGE-KUTTA STARTER: \n" << scientific
+                	 << "STEP REJECTED: error estimate           = " << E << endl
+                	 << "               required local tolerance = " << TOL << endl;
                 count3++;
             }
 
@@ -2644,9 +2645,9 @@ returnValue IntegratorBDF::rk_start(){
        else{
 
             if( PrintLevel == HIGH ){
-                acadoPrintf("RUNGE-KUTTA STARTER: \n");
-                acadoPrintf("STEP REJECTED: error estimate           = %.16e \n", E        );
-                acadoPrintf("               required local tolerance = %.16e \n", TOL*h[0] );
+                cout << "RUNGE-KUTTA STARTER: \n" << scientific
+                	 << "STEP REJECTED: error estimate           = " << E << endl
+                	 << "               required local tolerance = " << TOL*h[0] << endl;
                 count3++;
             }
 
@@ -2897,7 +2898,7 @@ returnValue IntegratorBDF::rk_start_solve( int stepnumber ){
            jacComputation.start();
 
            if( PrintLevel == HIGH ){
-               acadoPrintf("(RE-) COMPUTE-JACOBIAN... \n");
+               cout << "(RE-) COMPUTE-JACOBIAN... \n";
            }
 
            const double ise = h[0]*A[stepnumber][stepnumber];
@@ -2907,16 +2908,16 @@ returnValue IntegratorBDF::rk_start_solve( int stepnumber ){
                if( nOfM >= maxNM ){
                    int oldMN = maxNM;
                    maxNM += maxNM;
-                   M = (Matrix**)realloc(M, maxNM*sizeof(Matrix*));
+                   M = (DMatrix**)realloc(M, maxNM*sizeof(DMatrix*));
                    for( run1 = oldMN; run1 < maxNM; run1++ )
                        M[run1] = 0;
                }
                M_index[stepnumber] = nOfM;
-               M[nOfM] = new Matrix(m,m);
+               M[nOfM] = new DMatrix(m,m);
                nOfM++;
            }
            else{
-               if( M[0] == 0 ) M[0] = new Matrix(m,m);
+               if( M[0] == 0 ) M[0] = new DMatrix(m,m);
                M_index[stepnumber] = 0;
                M[0]->init(m,m);
            }
@@ -4881,36 +4882,36 @@ void IntegratorBDF::initializeButcherTableau(){
 
 
 
-void IntegratorBDF::printBDFfinalResults2( Matrix &div ){
+void IntegratorBDF::printBDFfinalResults2( DMatrix &div ){
 
     int run2;
 
-    acadoPrintf("w.r.t. the states:\n");
+    cout <<"w.r.t. the states:\n" << scientific;
     for( run2 = 0; run2 < md; run2++ ){
-        acadoPrintf("%.16e  ", div(0,diff_index[run2]) );
+        cout << div(0,diff_index[run2]) << "  ";
     }
-    acadoPrintf("\n");
+    cout <<"\n";
 
     if( mu > 0 ){
-        acadoPrintf("w.r.t. the controls:\n");
+        cout <<"w.r.t. the controls:\n" << scientific;
         for( run2 = 0; run2 < mu; run2++ ){
-            acadoPrintf("%.16e  ", div(0,control_index[run2]) );
+        	cout << div(0,control_index[run2]) << "  ";
         }
-        acadoPrintf("\n");
+        cout <<"\n";
     }
     if( mp > 0 ){
-        acadoPrintf("w.r.t. the parameters:\n");
+        cout <<"w.r.t. the parameters:\n" << scientific;
         for( run2 = 0; run2 < mp; run2++ ){
-            acadoPrintf("%.16e  ", div(0,parameter_index[run2]) );
+        	cout << div(0,parameter_index[run2]) << "  ";
         }
-        acadoPrintf("\n");
+        cout <<"\n";
     }
     if( mw > 0 ){
-        acadoPrintf("w.r.t. the diturbances:\n");
+        cout <<"w.r.t. the diturbances:\n" << scientific;
         for( run2 = 0; run2 < mw; run2++ ){
-            acadoPrintf("%.16e  ", div(0,disturbance_index[run2]) );
+        	cout << div(0,disturbance_index[run2]) << "  ";
         }
-        acadoPrintf("\n");
+        cout <<"\n";
     }
 }
 
@@ -4918,40 +4919,43 @@ void IntegratorBDF::printBDFfinalResults2( Matrix &div ){
 
 void IntegratorBDF::printBDFfinalResults(){
 
+	cout << scientific;
+
     int run1;
 
         // Forward Sensitivities:
         // ----------------------
 
         if( nFDirs > 0 && nBDirs2 == 0 && nFDirs2 == 0 ){
-            acadoPrintf("BDF: Forward Sensitivities:\n");
+            cout <<"BDF: Forward Sensitivities:\n";
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("%.16e  ", nablaG(0,run1) );
+
+			cout << nablaG(0, run1);
             }
-            acadoPrintf("\n");
+            cout <<"\n";
         }
 
         if( nFDirs2 > 0 ){
 
-            acadoPrintf("BDF: First Order Forward Sensitivities:\n");
+            cout <<"BDF: First Order Forward Sensitivities:\n";
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("%.16e  ", nablaG2(0,run1) );
+            	cout << nablaG2(0, run1);
             }
-            acadoPrintf("\n");
+            cout <<"\n";
 
-            acadoPrintf("BDF: Second Order Forward Sensitivities:\n");
+            cout <<"BDF: Second Order Forward Sensitivities:\n";
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("%.16e  ", nablaG3(0,run1) );
+            	cout << nablaG3(0, run1);
             }
-            acadoPrintf("\n");
+            cout <<"\n";
         }
 
         // Backward Sensitivities:
         // -----------------------
 
         if( nBDirs > 0 ){
-            acadoPrintf("BDF: t = %.16e  h = %.16e\n", t-c[6]*h[0], h[0] );
-            acadoPrintf("BDF: Backward Sensitivities:\n");
+            cout <<"BDF: t = " << t-c[6]*h[0] << "  h = " <<  h[0] << endl;
+            cout <<"BDF: Backward Sensitivities:\n";
             printBDFfinalResults2( nablaH );
         }
 
@@ -4959,10 +4963,11 @@ void IntegratorBDF::printBDFfinalResults(){
         // ---------------------------------
 
         if( nBDirs2 > 0 ){
-            acadoPrintf("BDF: t = %.16e  h = %.16e\n", t-c[6]*h[0], h[0] );
-            acadoPrintf("BDF: Backward Sensitivities:\n");
+        	cout <<"BDF: t = " << t-c[6]*h[0] << "  h = " <<  h[0] << endl;
+
+            cout << "BDF: Backward Sensitivities:\n";
             printBDFfinalResults2( nablaH2 );
-            acadoPrintf("BDF: 2nd order Backward Sensitivities:\n");
+            cout <<"BDF: 2nd order Backward Sensitivities:\n";
             printBDFfinalResults2( nablaH3 );
         }
 }
@@ -4971,52 +4976,54 @@ void IntegratorBDF::printBDFfinalResults(){
 
 void IntegratorBDF::printBDFIntermediateResults(){
 
+	cout << scientific;
+
     int run1;
 
      if( PrintLevel == HIGH ){
 
        if( nBDirs == 0 && nBDirs2 == 0 )
-         acadoPrintf("BDF: t = %.16e  h = %.16e  ", t, h[0] );
+    	   cout <<"BDF: t = " << t-c[6]*h[0] << "  h = " <<  h[0] << endl;
 
        if( soa != SOA_EVERYTHING_FROZEN ){
 
          for( run1 = 0; run1 < md; run1++ ){
-             acadoPrintf("x[%d] = %.16e  ", run1, nablaY(0,run1) );
+        	 cout << "x[" << run1 << "] = " << nablaY(0,run1) << "  ";
          }
          for( run1 = 0; run1 < ma; run1++ ){
-             acadoPrintf("xa[%d] = %.16e  ", run1, nablaY(0,md+run1) );
+        	 cout << "xa[" << run1 << "] = " << nablaY(0,md + run1) << "  ";
          }
-         acadoPrintf("\n");
+         cout <<"\n";
        }
        else{
          if( nBDirs == 0 && nBDirs2 == 0 )
-            acadoPrintf("\n");
+            cout <<"\n";
        }
 
         // Forward Sensitivities:
         // ----------------------
 
         if( nFDirs > 0 && nBDirs2 == 0 && nFDirs2 == 0 ){
-            acadoPrintf("BDF: Forward Sensitivities:\n");
+            cout <<"BDF: Forward Sensitivities:\n";
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("%.16e  ", nablaG(0,run1) );
+            	cout << nablaG(0,run1) << "  ";
             }
-            acadoPrintf("\n");
+            cout <<"\n";
         }
 
         if( nFDirs2 > 0 ){
 
-            acadoPrintf("BDF: First Order Forward Sensitivities:\n");
+            cout <<"BDF: First Order Forward Sensitivities:\n";
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("%.16e  ", nablaG2(0,run1) );
+            	cout << nablaG2(0,run1) << "  ";
             }
-            acadoPrintf("\n");
+            cout <<"\n";
 
-            acadoPrintf("BDF: Second Order Forward Sensitivities:\n");
+            cout <<"BDF: Second Order Forward Sensitivities:\n";
             for( run1 = 0; run1 < m; run1++ ){
-                acadoPrintf("%.16e  ", nablaG3(0,run1) );
+            	cout << nablaG3(0,run1) << "  ";
             }
-            acadoPrintf("\n");
+            cout <<"\n";
         }
 
      }
@@ -5027,49 +5034,51 @@ void IntegratorBDF::printRKIntermediateResults(){
 
     int run1, run3;
 
+    cout << scientific;
+
     if( PrintLevel == HIGH ){
 
         for( run3 = 0; run3 < 4; run3++ ){
             if( nBDirs == 0 && nBDirs2 == 0 )
-            acadoPrintf("BDF: t = %.16e  h = %.16e  ", t+h[0]*c[3+run3], h[0]*c[3] );
+            cout <<"BDF: t = " << t+h[0]*c[3+run3] << "  h = " << h[0]*c[3];
             if( soa != SOA_EVERYTHING_FROZEN ){
                 for( run1 = 0; run1 < md; run1++ ){
-                    acadoPrintf("x[%d] = %.16e  ", run1, nablaY(3-run3,run1) );
+					cout << "x[" << run1 << "] = " << nablaY(3 - run3, run1) << "  ";
                 }
                 for( run1 = 0; run1 < ma; run1++ ){
-                    acadoPrintf("xa[%d] = %.16e  ", run1, nablaY(3-run3,run1+md) );
+                	cout << "xa[" << run1 << "] = " << nablaY(3-run3,run1+md) << "  ";
                 }
-                acadoPrintf("\n");
+                cout <<"\n";
             }
             else{
                 if( nBDirs == 0 && nBDirs2 == 0 )
-                    acadoPrintf("\n");
+                    cout <<"\n";
             }
 
             // Forward Sensitivities:
             // ----------------------
 
             if( nFDirs > 0 && nBDirs2 == 0 && nFDirs2 == 0 ){
-                acadoPrintf("BDF: Forward Sensitivities:\n");
+                cout <<"BDF: Forward Sensitivities:\n";
                 for( run1 = 0; run1 < m; run1++ ){
-                    acadoPrintf("%.16e  ", nablaG(3-run3,run1) );
+                	cout << nablaG(3-run3,run1) << "  ";
                 }
-                acadoPrintf("\n");
+                cout <<"\n";
             }
 
             if( nFDirs2 > 0 ){
 
-                acadoPrintf("BDF: First Order Forward Sensitivities:\n");
+                cout <<"BDF: First Order Forward Sensitivities:\n";
                 for( run1 = 0; run1 < m; run1++ ){
-                    acadoPrintf("%.16e  ", nablaG2(3-run3,run1) );
+                    cout << nablaG2(3-run3,run1) << "  ";
                 }
-                acadoPrintf("\n");
+                cout <<"\n";
 
-                acadoPrintf("BDF: Second Order Forward Sensitivities:\n");
+                cout <<"BDF: Second Order Forward Sensitivities:\n";
                 for( run1 = 0; run1 < m; run1++ ){
-                    acadoPrintf("%.16e  ", nablaG3(3-run3,run1) );
+                    cout << nablaG3(3-run3,run1) << "  ";
                 }
-                acadoPrintf("\n");
+                cout <<"\n";
             }
         }
 
@@ -5077,8 +5086,9 @@ void IntegratorBDF::printRKIntermediateResults(){
         // -----------------------
 
         if( nBDirs > 0 ){
-            acadoPrintf("BDF: t = %.16e  h_RK = %.16e\n", t-c[6]*h[0], h[0] );
-            acadoPrintf("BDF: Backward Sensitivities:\n");
+            cout << scientific
+            	 << "BDF: t = " << t-c[6]*h[0] << "  h_RK = " << h[0] << endl
+            	 << "BDF: Backward Sensitivities:\n";
             printBDFfinalResults2( nablaH );
         }
 
@@ -5086,25 +5096,28 @@ void IntegratorBDF::printRKIntermediateResults(){
         // ---------------------------------
 
         if( nBDirs2 > 0 ){
-            acadoPrintf("BDF: t = %.16e  h_RK = %.16e\n", t-c[6]*h[0], h[0] );
-            acadoPrintf("BDF: Backward Sensitivities:\n");
+            cout << scientific
+            	 << "BDF: t = " << t-c[6]*h[0] << "  " << "h_RK = " << h[0] << endl
+            	 << "BDF: Backward Sensitivities:\n";
             printBDFfinalResults2( nablaH2 );
-            acadoPrintf("BDF: 2nd order Backward Sensitivities:\n");
+            cout << "BDF: 2nd order Backward Sensitivities:\n";
             printBDFfinalResults2( nablaH3 );
         }
     }
 }
 
 
-returnValue IntegratorBDF::decomposeJacobian( Matrix &J ) const{
+returnValue IntegratorBDF::decomposeJacobian( DMatrix &J ) const{
+
+	ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
 
     switch( las ){
 
         case HOUSEHOLDER_METHOD:
-             return J.computeQRdecomposition();
+//             return J.computeQRdecomposition();
 
         case SPARSE_LU:
-             return J.computeSparseLUdecomposition();
+//             return J.computeSparseLUdecomposition();
 
         default:
              return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -5114,16 +5127,18 @@ returnValue IntegratorBDF::decomposeJacobian( Matrix &J ) const{
 }
 
 
-double IntegratorBDF::applyNewtonStep( double *etakplus1, const double *etak, const Matrix &J, const double *FFF ){
+double IntegratorBDF::applyNewtonStep( double *etakplus1, const double *etak, const DMatrix &J, const double *FFF ){
 
     int run1;
-    Vector bb(m,FFF);
-    Vector deltaX;
+    DVector bb(m,FFF);
+    DVector deltaX;
+
+    ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
 
     switch( las ){
 
-        case      HOUSEHOLDER_METHOD:  deltaX = J.solveQR      ( bb ); break;
-        case      SPARSE_LU:           deltaX = J.solveSparseLU( bb ); break;
+//        case      HOUSEHOLDER_METHOD:  deltaX = J.solveQR      ( bb ); break;
+//        case      SPARSE_LU:           deltaX = J.solveSparseLU( bb ); break;
         default:                       deltaX.setZero          (    ); break;        
     }
 
@@ -5134,20 +5149,22 @@ double IntegratorBDF::applyNewtonStep( double *etakplus1, const double *etak, co
 }
 
 
-void IntegratorBDF::applyMTranspose( double *seed1, Matrix &J, double *seed2 ){
+void IntegratorBDF::applyMTranspose( double *seed1, DMatrix &J, double *seed2 ){
 
     int run1;
-    Vector bb(m);
+    DVector bb(m);
 
     for( run1 = 0; run1 < m; run1++ )
         bb(run1) = seed1[diff_index[run1]];
 
-    Vector deltaX;
+    DVector deltaX;
+
+    ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
 
     switch( las ){
 
-        case      HOUSEHOLDER_METHOD:  deltaX = J.solveTransposeQR      ( bb ); break;
-        case      SPARSE_LU:           deltaX = J.solveTransposeSparseLU( bb ); break;
+//        case      HOUSEHOLDER_METHOD:  deltaX = J.solveTransposeQR      ( bb ); break;
+//        case      SPARSE_LU:           deltaX = J.solveTransposeSparseLU( bb ); break;
         default:                       deltaX.setZero                   (    ); break;
     }
 
@@ -5215,7 +5232,7 @@ int IntegratorBDF::getDimX() const{
 }
 
 
-void IntegratorBDF::prepareDividedDifferences( Matrix &div ){
+void IntegratorBDF::prepareDividedDifferences( DMatrix &div ){
 
     int run1;
 
@@ -5236,11 +5253,11 @@ void IntegratorBDF::prepareDividedDifferences( Matrix &div ){
 }
 
 
-void IntegratorBDF::copyBackward( Vector       &Dx_x0,
-                                  Vector       &Dx_p ,
-                                  Vector       &Dx_u ,
-                                  Vector       &Dx_w ,
-                                  const Matrix &div    ) const{
+void IntegratorBDF::copyBackward( DVector       &Dx_x0,
+                                  DVector       &Dx_p ,
+                                  DVector       &Dx_u ,
+                                  DVector       &Dx_w ,
+                                  const DMatrix &div    ) const{
 
     int run1;
 
@@ -5264,7 +5281,7 @@ void IntegratorBDF::copyBackward( Vector       &Dx_x0,
 }
 
 
-void IntegratorBDF::interpolate( int number_, Matrix &div, VariablesGrid &poly ){
+void IntegratorBDF::interpolate( int number_, DMatrix &div, VariablesGrid &poly ){
 
     int i1 = timeInterval.getFloorIndex( t-h[0] );
     int i2 = timeInterval.getFloorIndex( t      );
@@ -5295,8 +5312,8 @@ void IntegratorBDF::interpolate( int number_, Matrix &div, VariablesGrid &poly )
 }
 
 
-void IntegratorBDF::logCurrentIntegratorStep(	const Vector& currentX,
-												const Vector& currentXA
+void IntegratorBDF::logCurrentIntegratorStep(	const DVector& currentX,
+												const DVector& currentXA
 												)
 {
 	return;
@@ -5306,7 +5323,7 @@ void IntegratorBDF::logCurrentIntegratorStep(	const Vector& currentX,
 	// log differential states
 	if ( currentX.isEmpty( ) == BT_TRUE )
 	{
-		Vector currentDiffStates(md);
+		DVector currentDiffStates(md);
 		for( run1 = 0; run1 < md; run1++ )
 			currentDiffStates( run1 ) = nablaY( 0,run1 );
 		setLast( LOG_DIFFERENTIAL_STATES,currentDiffStates,t );
@@ -5319,7 +5336,7 @@ void IntegratorBDF::logCurrentIntegratorStep(	const Vector& currentX,
 	// log algebraic states
 	if ( currentX.isEmpty( ) == BT_TRUE )
 	{
-		Vector currentAlgStates(ma);
+		DVector currentAlgStates(ma);
 		for( run1 = 0; run1 < ma; run1++ )
 			currentAlgStates( run1 ) = nablaY( 0,md+run1 );
 		setLast( LOG_ALGEBRAIC_STATES,currentAlgStates,t );

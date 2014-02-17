@@ -2,6 +2,7 @@
 !.git*
 !*.m
 *_RUN.m
+*_OUT*
 
 !code_generation
 !code_generation/nmpc

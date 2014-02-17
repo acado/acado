@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -81,7 +81,7 @@ class Grid
 		 *
 		 *	@param[in] times		Initialization of times.
 		 */
-		Grid(	const Vector& times_
+		Grid(	const DVector& times_
 				);
 
 		/** Constructor that takes the number of grid points as well as
@@ -135,7 +135,7 @@ class Grid
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue init(	const Vector& times_
+		returnValue init(	const DVector& times_
 							);
 
 		/** Initializes grid with given number of grid points and an 

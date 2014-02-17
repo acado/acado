@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,230 +26,54 @@
 
 /**
  *    \file src/matrix_vector/block_matrix.cpp
- *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 19.01.2009
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
+ *    \date 2009 - 2013
  */
-
 
 #include <acado/matrix_vector/matrix_vector.hpp>
 
-
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-BlockMatrix::BlockMatrix( ){
-
-	nRows    = 0;
-	nCols    = 0;
-    elements = 0;
-    types    = 0;
+BlockMatrix::BlockMatrix( )
+{
+	nRows = nCols = 0;
 }
-
 
 BlockMatrix::BlockMatrix( uint _nRows, uint _nCols )
 {
-    uint run1, run2;
+	init(_nRows, _nCols);
+}
 
+
+BlockMatrix::BlockMatrix(	const DMatrix& value
+							)
+{
+	init(1, 1);
+
+	setDense(0, 0, value);
+}
+
+BlockMatrix::~BlockMatrix( )
+{}
+
+returnValue BlockMatrix::init( uint _nRows, uint _nCols )
+{
 	nRows = _nRows;
 	nCols = _nCols;
 
-    elements = new Matrix            *[nRows];
-    types    = new SubBlockMatrixType*[nRows];
-
-    for( run1 = 0; run1 < nRows; run1++ ){
-
-        elements[run1] = new Matrix            [nCols];
-        types   [run1] = new SubBlockMatrixType[nCols];
-
-        for( run2 = 0; run2 < nCols; run2++ ){
-
-            types[run1][run2] = SBMT_ZERO;
-        }
-    }
-}
-
-
-BlockMatrix::BlockMatrix(	const Matrix& value
-							)
-{
-	nRows = 1;
-	nCols = 1;
-
-	elements = new Matrix            *[nRows];
-	types    = new SubBlockMatrixType*[nRows];
-
-	elements[0] = new Matrix            [nCols];
-	types   [0] = new SubBlockMatrixType[nCols];
-
-	setDense( 0,0,value );
-}
-
-
-BlockMatrix::BlockMatrix( const BlockMatrix& rhs ){
-
-    uint run1, run2;
-
-	nRows = rhs.nRows;
-	nCols = rhs.nCols;
-
-    if( rhs.elements != 0 ){
-
-        elements = new Matrix            *[nRows];
-        types    = new SubBlockMatrixType*[nRows];
-
-        for( run1 = 0; run1 < nRows; run1++ ){
-
-            elements[run1] = new Matrix            [nCols];
-            types   [run1] = new SubBlockMatrixType[nCols];
-
-            for( run2 = 0; run2 < nCols; run2++ ){
-
-                elements[run1][run2] = rhs.elements[run1][run2];
-                types   [run1][run2] = rhs.types   [run1][run2];
-            }
-        }
-    }
-    else{
-        elements = 0;
-        types    = 0;
-    }
-}
-
-
-BlockMatrix::~BlockMatrix( ){
-
-    uint run1;
-
-    if( elements != 0 ){
-
-        for( run1 = 0; run1 < nRows; run1++ ){
-
-            if( elements[run1] != 0 )
-                delete[] elements[run1];
-        }
-
-        delete[] elements;
-    }
-
-    if( types != 0 ){
-
-        for( run1 = 0; run1 < nRows; run1++ ){
-
-            if( types[run1] != 0 )
-                delete[] types[run1];
-        }
-
-        delete[] types;
-    }
-}
-
-
-BlockMatrix& BlockMatrix::operator=( const BlockMatrix& rhs ){
-
-    uint run1, run2;
-
-    if ( this != &rhs ){
-
-        if( elements != 0 ){
-
-            for( run1 = 0; run1 < nRows; run1++ ){
-
-                if( elements[run1] != 0 )
-                    delete[] elements[run1];
-            }
-
-            delete[] elements;
-        }
-
-        if( types != 0 ){
-
-            for( run1 = 0; run1 < nRows; run1++ ){
-
-                if( types[run1] != 0 )
-                    delete[] types[run1];
-            }
-
-            delete[] types;
-        }
-
-        nRows = rhs.nRows;
-        nCols = rhs.nCols;
-
-        if( rhs.elements != 0 ){
-
-            elements = new Matrix            *[nRows];
-            types    = new SubBlockMatrixType*[nRows];
-
-            for( run1 = 0; run1 < nRows; run1++ ){
-
-                elements[run1] = new Matrix            [nCols];
-                types   [run1] = new SubBlockMatrixType[nCols];
-
-                for( run2 = 0; run2 < nCols; run2++ ){
-                    elements[run1][run2] = rhs.elements[run1][run2];
-                    types   [run1][run2] = rhs.types   [run1][run2];
-                }
-            }
-        }
-        else{
-            elements = 0;
-            types    = 0;
-        }
-    }
-
-    return *this;
-}
-
-
-returnValue BlockMatrix::init( uint _nRows, uint _nCols ){
-
-
-    uint run1, run2;
-
-    if( elements != 0 ){
-
-        for( run1 = 0; run1 < nRows; run1++ ){
-
-            if( elements[run1] != 0 )
-                delete[] elements[run1];
-        }
-
-        delete[] elements;
-    }
-
-    if( types != 0 ){
-
-        for( run1 = 0; run1 < nRows; run1++ ){
-
-            if( types[run1] != 0 )
-                delete[] types[run1];
-        }
-
-        delete[] types; 
-    }
-
-    nRows = _nRows;
-    nCols = _nCols;
-
-    elements = new Matrix            *[nRows];
-    types    = new SubBlockMatrixType*[nRows];
-
-    for( run1 = 0; run1 < nRows; run1++ ){
-
-        elements[run1] = new Matrix            [nCols];
-        types   [run1] = new SubBlockMatrixType[nCols];
-
-        for( run2 = 0; run2 < nCols; run2++ ){
-
-            types[run1][run2] = SBMT_ZERO;
-        }
-    }
+	vector< DMatrix > foo(nCols, DMatrix());
+	for (unsigned row = 0; row < nRows; ++row)
+		elements.push_back( foo );
+
+	vector< SubBlockMatrixType > bar(nCols, SBMT_ZERO);
+	for (unsigned row = 0; row < nRows; ++row)
+		types.push_back( bar );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -336,7 +160,7 @@ BlockMatrix BlockMatrix::operator-( const BlockMatrix& arg ) const{
                 }
                 else{
 
-                   Matrix nn(arg.elements[i][j].getNumRows(),arg.elements[i][j].getNumCols());
+                   DMatrix nn(arg.elements[i][j].getNumRows(),arg.elements[i][j].getNumCols());
                    nn.setZero();
 
                    tmp.types    [i][j]  = SBMT_DENSE;
@@ -348,20 +172,6 @@ BlockMatrix BlockMatrix::operator-( const BlockMatrix& arg ) const{
 
     return tmp;
 }
-
-
-
-// 
-// 
-// BlockMatrix BlockMatrix::operator-=(	const BlockMatrix& arg ){
-// 
-// 	ASSERT( ( getNumRows( ) == arg.getNumRows( ) ) && ( getNumCols( ) == arg.getNumCols( ) ) );
-// 
-// 
-// 
-// 	return *this;
-// }
-
 
 BlockMatrix BlockMatrix::operator*=( double scalar ){
 
@@ -480,8 +290,8 @@ BlockMatrix BlockMatrix::operator^( const BlockMatrix& arg ) const{
 
                         if( arg.types[k][j] == SBMT_DENSE ){
                             if( result.types[i][j] != SBMT_ZERO )
-                                  result.elements[i][j] += elements[k][i]^arg.elements[k][j];
-                            else  result.elements[i][j]  = elements[k][i]^arg.elements[k][j];
+                                  result.elements[i][j] += elements[k][i].transpose() * arg.elements[k][j];
+                            else  result.elements[i][j]  = elements[k][i].transpose() * arg.elements[k][j];
                         }
 
                         if( arg.types[k][j] == SBMT_ONE ){
@@ -607,34 +417,33 @@ BlockMatrix BlockMatrix::getNegative() const{
 }
 
 
-returnValue BlockMatrix::print( ) const{
+returnValue BlockMatrix::print( std::ostream& stream) const
+{
+	stream << "Printing Block DMatrix:" << endl << endl;
 
-	uint i,j;
-
-    acadoPrintf("Printing Block Matrix: \n\n");
-
-	for( i=0; i<getNumRows( ); ++i ){
-
-		acadoPrintf( "Row %d \n", i );
-
-		for( j=0; j<getNumCols( ); ++j ){
-
-            if( elements != 0 ){
-                if( types[i][j] == SBMT_DENSE ) elements[i][j].print();
-                if( types[i][j] == SBMT_ONE   ) acadoPrintf("ONE \n");
-                if( types[i][j] == SBMT_ZERO  ) acadoPrintf("ZERO \n");
+	for (unsigned i = 0; i < getNumRows(); ++i)
+	{
+		stream << "Row " << i << endl;
+		for (unsigned j = 0; j < getNumCols(); ++j)
+		{
+            if(nRows * nCols)
+            {
+                if( types[i][j] == SBMT_DENSE ) stream << elements[i][j] << endl;
+                if( types[i][j] == SBMT_ONE   ) stream << "ONE " << endl;
+                if( types[i][j] == SBMT_ZERO  ) stream << "ZERO " <<  endl;
             }
-            else acadoPrintf("ZERO \n");
-		    acadoPrintf( "\n" );
+            else
+            	stream << "ZERO " << endl;
+            stream << endl;
 		}
-		acadoPrintf( "\n\n" );
+		stream << endl << endl;
 	}
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue BlockMatrix::setDense( uint rowIdx, uint colIdx, const Matrix& value ){
+returnValue BlockMatrix::setDense( uint rowIdx, uint colIdx, const DMatrix& value ){
 
 	ASSERT( rowIdx < getNumRows( ) );
 	ASSERT( colIdx < getNumCols( ) );
@@ -646,7 +455,7 @@ returnValue BlockMatrix::setDense( uint rowIdx, uint colIdx, const Matrix& value
 }
 
 
-returnValue BlockMatrix::addDense( uint rowIdx, uint colIdx, const Matrix& value ){
+returnValue BlockMatrix::addDense( uint rowIdx, uint colIdx, const DMatrix& value ){
 
 	ASSERT( rowIdx < getNumRows( ) );
 	ASSERT( colIdx < getNumCols( ) );
@@ -662,7 +471,7 @@ returnValue BlockMatrix::addDense( uint rowIdx, uint colIdx, const Matrix& value
 
 
 returnValue BlockMatrix::getSubBlock( uint rowIdx, uint colIdx,
-                                      Matrix &value, uint nR, uint nC )  const{
+                                      DMatrix &value, uint nR, uint nC )  const{
 
 
     ASSERT( rowIdx < getNumRows( ) );
@@ -677,20 +486,12 @@ returnValue BlockMatrix::getSubBlock( uint rowIdx, uint colIdx,
         value = elements[rowIdx][colIdx];
     }
     else{
-        value.init( nR, nC );
+        value.resize(nR, nC);
         value.setZero();
     }
 
     return SUCCESSFUL_RETURN;
 }
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-
-
 
 CLOSE_NAMESPACE_ACADO
 

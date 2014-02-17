@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -81,8 +81,8 @@ class MHEalgorithm : public OptimizationAlgorithm {
          *                                                                    \n
          *  \return SUCCESSFUL_RETURN                                         \n
          */
-        virtual returnValue init( const Vector &eta,
-                                  const Matrix &S    );
+        virtual returnValue init( const DVector &eta,
+                                  const DMatrix &S    );
 
 
         /** Executes next single step                                         \n
@@ -92,8 +92,8 @@ class MHEalgorithm : public OptimizationAlgorithm {
          *                                                                    \n
          *  \return SUCCESSFUL_RETURN                                         \n
          */
-        virtual returnValue step( const Vector &eta,
-                                  const Matrix &S    );
+        virtual returnValue step( const DVector &eta,
+                                  const DMatrix &S    );
 
 
         /** Shifts the data for the preparation of the next step.
@@ -108,8 +108,8 @@ class MHEalgorithm : public OptimizationAlgorithm {
          *                                                                    \n
          *  \return SUCCESSFUL_RETURN                                         \n
          */
-        virtual returnValue solve( const Vector &eta,
-                                   const Matrix &S    );
+        virtual returnValue solve( const DVector &eta,
+                                   const DMatrix &S    );
 
 
     //
@@ -130,8 +130,8 @@ class MHEalgorithm : public OptimizationAlgorithm {
     //
     protected:
 
-        Vector *eta;  // deep copy of the latest initial value.
-        Matrix *S  ;  // deep copy of the latest parameter.
+        DVector *eta;  // deep copy of the latest initial value.
+        DMatrix *S  ;  // deep copy of the latest parameter.
 };
 
 

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -38,7 +38,6 @@
 
 #include <acado/code_generation/export_module.hpp>
 #include <acado/code_generation/integrators/export_matlab_integrator.hpp>
-#include <acado/code_generation/integrators/export_matlab_rhs.hpp>
 #include <acado/code_generation/integrators/integrator_generation.hpp>
 #include <acado/code_generation/export_file.hpp>
 #include <acado/ocp/model_container.hpp>
@@ -100,15 +99,15 @@ class SIMexport : public ExportModule, public ModelContainer
 		/** Exports all files of the auto-generated code into the given directory.
 		 *
 		 *	@param[in] dirName			Name of directory to be used to export files.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-        virtual returnValue exportCode(	const String& dirName,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+        virtual returnValue exportCode(	const std::string& dirName,
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										);
 
@@ -117,16 +116,16 @@ class SIMexport : public ExportModule, public ModelContainer
 		 *
 		 *	@param[in] _dirName			Name of directory to be used to export file.
 		 *	@param[in] _fileName		Name of file to be exported.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportAcadoHeader(	const String& _dirName,
-										const String& _fileName,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+		returnValue exportAcadoHeader(	const std::string& _dirName,
+										const std::string& _fileName,
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										) const;
 
@@ -143,13 +142,13 @@ class SIMexport : public ExportModule, public ModelContainer
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-        virtual returnValue exportAndRun(	const String& dirName,
-//											const String& initStates = String( "initStates.txt" ),
-											const String& initStates,
-//											const String& controls = String( "controls.txt" ),
-											const String& controls,
-											const String& results = String( "results.txt" ),
-											const String& ref = String( "ref.txt" )
+        virtual returnValue exportAndRun(	const std::string& dirName,
+//											const std::string& initStates = std::string( "initStates.txt" ),
+											const std::string& initStates,
+//											const std::string& controls = std::string( "controls.txt" ),
+											const std::string& controls,
+											const std::string& results = std::string( "results.txt" ),
+											const std::string& ref = std::string( "ref.txt" )
 										);
 			
 			
@@ -161,7 +160,7 @@ class SIMexport : public ExportModule, public ModelContainer
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */							
-		virtual returnValue setReference(	const String& reference, const std::vector<String>& outputReference = *(new std::vector<String>())
+		virtual returnValue setReference(	const std::string& reference, const std::vector<std::string>& outputReference = *(new std::vector<std::string>())
 										);
 			
 			
@@ -182,7 +181,7 @@ class SIMexport : public ExportModule, public ModelContainer
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */								
-		virtual returnValue printDetails( BooleanType details );
+		virtual returnValue printDetails( bool details );
 
 
 
@@ -268,11 +267,11 @@ class SIMexport : public ExportModule, public ModelContainer
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportTest(	const String& _dirName,
-								const String& _fileName,
-								const String& _resultsFile,
-								const std::vector<String>& _outputFiles,
-								const BooleanType& TIMING = BT_FALSE,
+		returnValue exportTest(	const std::string& _dirName,
+								const std::string& _fileName,
+								const std::string& _resultsFile,
+								const std::vector<std::string>& _outputFiles,
+								const bool& TIMING = false,
 								const uint jumpReference = 1
 										) const;
 
@@ -284,25 +283,25 @@ class SIMexport : public ExportModule, public ModelContainer
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportEvaluation(	const String& _dirName,
-										const String& _fileName
+		returnValue exportEvaluation(	const std::string& _dirName,
+										const std::string& _fileName
 										) const;
 
 		/** Exports GNU Makefile for compiling the exported MPC algorithm.
 		 *
 		 *	@param[in] _dirName			Name of directory to be used to export file.
 		 *	@param[in] _fileName		Name of file to be exported.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue exportMakefile(	const String& _dirName,
-									const String& _fileName,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
-										int _precision = 16
+		returnValue exportMakefile(	const std::string& _dirName,
+									const std::string& _fileName,
+									const std::string& _realString = "real_t",
+									const std::string& _intString = "int",
+									int _precision = 16
 									) const;
 
 		/** Compiles the exported source files and runs the corresponding test.
@@ -311,28 +310,37 @@ class SIMexport : public ExportModule, public ModelContainer
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-        returnValue executeTest( const String& _dirName );
+        returnValue executeTest( const std::string& _dirName );
 
-
+        /** This function sets the number of calls performed for the timing results.
+         *
+         *	@param[in] _timingCalls		The new number of calls performed for the timing results.
+         *
+         *	\return SUCCESSFUL_RETURN
+         */
+        virtual returnValue setTimingCalls( uint _timingCalls
+        									);
 
     protected:
+
+        uint timingCalls;						/**< The number of calls to the exported function for the timing results. */
 
         double T;								/**< The total simulation time. */
 		IntegratorExport*  integrator;			/**< Module for exporting a tailored integrator. */
 		
-		BooleanType referenceProvided;			/**< True if the user provided a file with the reference solution. */
-		BooleanType PRINT_DETAILS;				/**< True if the user wants all the details about the results being printed. */
+		bool referenceProvided;			/**< True if the user provided a file with the reference solution. */
+		bool PRINT_DETAILS;				/**< True if the user wants all the details about the results being printed. */
 		
 		static const uint factorRef = 10;		/**< The used factor in the number of integration steps to get the reference. */
 		uint timingSteps;						/**< The number of integration steps performed for the timing results. */
 		
-		String _initStates;						/**< Name of the file containing the initial values of all the states. */
-		String _controls;						/**< Name of the file containing the control values over the OCP grid. */
-		String _results;						/**< Name of the file in which the integration results will be written. */
-		String _ref;							/**< Name of the file in which the reference will be written, 
+		std::string _initStates;						/**< Name of the file containing the initial values of all the states. */
+		std::string _controls;						/**< Name of the file containing the control values over the OCP grid. */
+		std::string _results;						/**< Name of the file in which the integration results will be written. */
+		std::string _ref;							/**< Name of the file in which the reference will be written, 
 													 to which the results of the integrator will be compared. */
-		std::vector<String> _refOutputFiles;	/**< Names of the files in which the outputs will be written for the reference. */
-		std::vector<String> _outputFiles;		/**< Names of the files in which the outputs will be written for the integrator. */
+		std::vector<std::string> _refOutputFiles;	/**< Names of the files in which the outputs will be written for the reference. */
+		std::vector<std::string> _outputFiles;		/**< Names of the files in which the outputs will be written for the integrator. */
 		
 };
 

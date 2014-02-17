@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -40,7 +40,7 @@ BEGIN_NAMESPACE_ACADO
 
 
 
-inline returnValue BlockMatrix::getSubBlock( uint rowIdx, uint colIdx, Matrix &value )  const{
+inline returnValue BlockMatrix::getSubBlock( uint rowIdx, uint colIdx, DMatrix &value )  const{
 
 	ASSERT( rowIdx < getNumRows( ) );
 	ASSERT( colIdx < getNumCols( ) );
@@ -85,8 +85,10 @@ inline returnValue BlockMatrix::setIdentity( uint rowIdx, uint colIdx, uint dim 
     ASSERT( colIdx < getNumCols( ) );
 
            types   [rowIdx][colIdx] = SBMT_ONE   ;
-           elements[rowIdx][colIdx].init(dim,dim);     
-    return elements[rowIdx][colIdx].setIdentity();
+           elements[rowIdx][colIdx] = DMatrix(dim, dim);     
+    elements[rowIdx][colIdx].setIdentity();
+    
+    return SUCCESSFUL_RETURN;
 }
 
 
@@ -96,7 +98,8 @@ inline returnValue BlockMatrix::setZero( uint rowIdx, uint colIdx ){
     ASSERT( colIdx < getNumCols( ) );
 
            types   [rowIdx][colIdx] = SBMT_ZERO;
-    return elements[rowIdx][colIdx].setZero()  ;
+           elements[rowIdx][colIdx].setZero()  ;
+    return SUCCESSFUL_RETURN; 
 }
 
 
@@ -106,8 +109,8 @@ inline returnValue BlockMatrix::addRegularisation( uint rowIdx, uint colIdx, dou
     ASSERT( colIdx < getNumCols( ) );
 
     if( types[rowIdx][colIdx] != SBMT_ZERO ){
-        Matrix tmp( elements[rowIdx][colIdx].getNumRows(), elements[rowIdx][colIdx].getNumCols() );
-        tmp.setAll( eps );
+        DMatrix tmp( elements[rowIdx][colIdx].getNumRows(), elements[rowIdx][colIdx].getNumCols() );
+        tmp.setConstant( eps );
         elements[rowIdx][colIdx] += tmp;
     }
 

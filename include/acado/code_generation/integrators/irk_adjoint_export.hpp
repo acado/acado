@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -66,7 +66,7 @@ class AdjointIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         AdjointIRKExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -172,7 +172,7 @@ class AdjointIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 														const ExportIndex& index1,
 														const ExportIndex& index2,
 														const ExportVariable& Bh,
-														BooleanType STATES  	);
+														bool STATES  	);
 
 
 		/** Exports the code needed to compute the sensitivities of the states defined by the nonlinear, fully implicit system.
@@ -195,7 +195,7 @@ class AdjointIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 													const ExportVariable& Ah,
 													const ExportVariable& Bh,
 													const ExportVariable& det,
-													BooleanType STATES,
+													bool STATES,
 													uint number 		);
 
 
@@ -218,7 +218,7 @@ class AdjointIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 												const ExportIndex& tmp_index2,
 												const ExportVariable& Ah,
 												const ExportVariable& Bh,
-												BooleanType STATES,
+												bool STATES,
 												uint number 		);
 
 
@@ -242,7 +242,7 @@ class AdjointIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 											const ExportIndex& tmp_index3,
 											const ExportVariable& tmp_meas,
 											const ExportVariable& time_tmp,
-											BooleanType STATES,
+											bool STATES,
 											uint base			);
 
 

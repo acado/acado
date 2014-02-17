@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -124,7 +124,7 @@ returnValue DenseQPsolver::solve( DenseCP *cp )
     // GET THE PRIMAL AND DUAL SOLUTION FROM THE QP SOLVER AND
     // STORE THEM IN THE RIGHT FORMAT:
     // -------------------------------------------------------
-    Vector xOpt, yOpt;
+    DVector xOpt, yOpt;
 
     getPrimalSolution( xOpt );
     getDualSolution  ( yOpt );
@@ -153,8 +153,7 @@ uint DenseQPsolver::getNumberOfIterations( ) const
 
 returnValue DenseQPsolver::setupLogging( )
 {
-  	//printf( "DenseQPsolver::setupLogging( ) called!\n" );
-	LogRecord tmp( LOG_AT_EACH_ITERATION,stdout,PS_DEFAULT );
+	LogRecord tmp(LOG_AT_EACH_ITERATION, PS_DEFAULT);
 
 	tmp.addItem( LOG_NUM_QP_ITERATIONS );
 	tmp.addItem( LOG_IS_QP_RELAXED );

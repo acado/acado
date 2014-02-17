@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -146,6 +146,19 @@ class AlgorithmicBase
 							double value
 							);
 
+		/** Sets value of an existing option item of double type to a string value.
+		 *
+		 *	@param[in] name		Name of option item.
+		 *	@param[in] value	New value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS, \n
+		 *          RET_OPTIONS_LIST_CORRUPTED
+		 */
+		returnValue set(	OptionsName name,
+							const std::string& value
+							);
+
 		/** Sets value of an existing option item of integer type 
 		 *	within the option list of given index to a given value.
 		 *
@@ -224,7 +237,7 @@ class AlgorithmicBase
 		 *	@param[out] values	All numerical values at all time instants of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue getAll(	LogName _name,
 									MatrixVariablesGrid& values
@@ -240,22 +253,22 @@ class AlgorithmicBase
 		 *	@param[out] firstValue	Numerical value at first time instant of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue getFirst(	LogName _name,
-										Matrix& firstValue
+										DMatrix& firstValue
 										) const;
 
 		/** Gets numerical value at first time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid). 
-		 *	If this item exists in more than one record, the first one is choosen 
+		 *	with given name (converts internally used DMatrix into VariablesGrid).
+		 *	If this item exists in more than one record, the first one is choosen
 		 *	as they are expected to have identical values anyhow.
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] firstValue	Numerical value at first time instant of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue getFirst(	LogName _name,
 										VariablesGrid& firstValue
@@ -271,22 +284,22 @@ class AlgorithmicBase
 		 *	@param[out] lastValue	Numerical value at last time instant of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue getLast(	LogName _name,
-									Matrix& lastValue
+									DMatrix& lastValue
 									) const;
 
 		/** Gets numerical value at last time instant of the item
-		 *	with given name (converts internally used Matrix into VariablesGrid). 
-		 *	If this item exists in more than one record, the first one is choosen 
+		 *	with given name (converts internally used DMatrix into VariablesGrid).
+		 *	If this item exists in more than one record, the first one is choosen
 		 *	as they are expected to have identical values anyhow.
 		 *
 		 *	@param[in]  _name		Internal name of item.
 		 *	@param[out] lastValue	Numerical value at last time instant of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue getLast(	LogName _name,
 									VariablesGrid& lastValue
@@ -315,6 +328,18 @@ class AlgorithmicBase
 		 */
 		inline returnValue get(	OptionsName name,
 								double& value
+								) const;
+
+		/** Returns value of an existing option item of string type.
+		 *
+		 *	@param[in]  name	Name of option item.
+		 *	@param[out] value	Value of option.
+		 *
+		 *  \return SUCCESSFUL_RETURN, \n
+		 *          RET_OPTION_DOESNT_EXISTS
+		 */
+		inline returnValue get(	OptionsName name,
+								std::string& value
 								) const;
 
 		/** Returns value of an existing option item of integer type 
@@ -434,7 +459,7 @@ class AlgorithmicBase
 		 *	@param[in]  values	All numerical values at all time instants of given item.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_COLLECTION_CORRUPTED 
+		 *	        RET_LOG_COLLECTION_CORRUPTED
 		 */
 		inline returnValue setAll(	LogName _name,
 									const MatrixVariablesGrid& values
@@ -449,7 +474,7 @@ class AlgorithmicBase
 		 *	@param[in]  time		Time label of the instant.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
 									int lastValue,
@@ -464,7 +489,7 @@ class AlgorithmicBase
 		 *	@param[in]  time		Time label of the instant.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
 									double lastValue,
@@ -479,10 +504,10 @@ class AlgorithmicBase
 		 *	@param[in]  time		Time label of the instant.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
-									const Vector& lastValue,
+									const DVector& lastValue,
 									double time = -INFTY
 									);
 
@@ -494,10 +519,10 @@ class AlgorithmicBase
 		 *	@param[in]  time		Time label of the instant.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
-									const Matrix& lastValue,
+									const DMatrix& lastValue,
 									double time = -INFTY
 									);
 
@@ -509,7 +534,7 @@ class AlgorithmicBase
 		 *	@param[in]  time		Time label of the instant.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
-		 *	        RET_LOG_ENTRY_DOESNT_EXIST 
+		 *	        RET_LOG_ENTRY_DOESNT_EXIST
 		 */
 		inline returnValue setLast(	LogName _name,
 									const VariablesGrid& lastValue,
@@ -522,13 +547,13 @@ class AlgorithmicBase
 		 *	@param[in] record	Record to be added.
 		 *
 		 *  \return >= 0: index of added record, \n
-		 *	        -RET_LOG_COLLECTION_CORRUPTED 
+		 *	        -RET_LOG_COLLECTION_CORRUPTED
 		 */
 		inline int addLogRecord(	LogRecord& _record
 									);
 
 
-		/** Prints whole record with specified index into internally specified file;
+		/** Prints whole record with specified index;
 		 *	all items are printed according to the output format settings.
 		 *
 		 *	@param[in]  idx			Index of record to be printed.
@@ -539,7 +564,8 @@ class AlgorithmicBase
 		 *	        RET_INVALID_ARGUMENTS, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		inline returnValue printLogRecord(	int idx,
+		inline returnValue printLogRecord(	std::ostream& _stream,
+											int idx,
 											LogPrintMode _mode = PRINT_ITEM_BY_ITEM
 											) const;
 

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -69,8 +69,8 @@ class GaussianNoise : public Noise
 		 *	@param[in] _mean			Mean value for each component.
 		 *	@param[in] _variance		Variance for each component.
 		 */
-        GaussianNoise(	const Vector& _mean,
-						const Vector& _variance
+        GaussianNoise(	const DVector& _mean,
+						const DVector& _variance
 						);
 
 		/** Constructor which takes the dimension of the random variable as well as
@@ -126,7 +126,7 @@ class GaussianNoise : public Noise
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		inline returnValue setMeans(	const Vector& _mean
+		inline returnValue setMeans(	const DVector& _mean
 										);
 
 		/** Assigns new mean values to the random variable.
@@ -160,7 +160,7 @@ class GaussianNoise : public Noise
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		inline returnValue setVariances(	const Vector& _variance
+		inline returnValue setVariances(	const DVector& _variance
 											);
 
 		/** Assigns new variances to the random variable.
@@ -210,7 +210,7 @@ class GaussianNoise : public Noise
 		 *	        RET_BLOCK_NOT_READY, \n
 		 *	        RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		virtual returnValue step(	Vector& _w
+		virtual returnValue step(	DVector& _w
 									);
 
 		/** Generates a noise vector sequence based on current internal settings.
@@ -230,13 +230,13 @@ class GaussianNoise : public Noise
 		 *
 		 *	\return Mean values of the random variable
 		 */
-		inline const Vector& getMean( ) const;
+		inline const DVector& getMean( ) const;
 
 		/** Returns variances of the random variable.
 		 *
 		 *	\return Variances of the random variable
 		 */
-		inline const Vector& getVariance( ) const;
+		inline const DVector& getVariance( ) const;
 
 
 	
@@ -263,8 +263,8 @@ class GaussianNoise : public Noise
 	//
 	protected:
 
-		Vector mean;					/**< Mean value for each component. */
-		Vector variance;				/**< Variance for each component. */
+		DVector mean;					/**< Mean value for each component. */
+		DVector variance;				/**< Variance for each component. */
 };
 
 

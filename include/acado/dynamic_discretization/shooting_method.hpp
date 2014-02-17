@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -161,34 +161,34 @@ class ShootingMethod : public DynamicDiscretization
 
 
             returnValue differentiateBackward( const int    &idx ,
-                                               const Matrix &seed,
-                                                     Matrix &Gx  ,
-                                                     Matrix &Gp  ,
-                                                     Matrix &Gu  ,
-                                                     Matrix &Gw    );
+                                               const DMatrix &seed,
+                                                     DMatrix &Gx  ,
+                                                     DMatrix &Gp  ,
+                                                     DMatrix &Gu  ,
+                                                     DMatrix &Gw    );
 
             returnValue differentiateForward(  const int     &idx,
-                                               const Matrix  &dX ,
-                                               const Matrix  &dP ,
-                                               const Matrix  &dU ,
-                                               const Matrix  &dW ,
-                                                     Matrix  &D    );
+                                               const DMatrix  &dX ,
+                                               const DMatrix  &dP ,
+                                               const DMatrix  &dU ,
+                                               const DMatrix  &dW ,
+                                                     DMatrix  &D    );
 
 
             returnValue differentiateForwardBackward( const int     &idx ,
-                                                      const Matrix  &dX  ,
-                                                      const Matrix  &dP  ,
-                                                      const Matrix  &dU  ,
-                                                      const Matrix  &dW  ,
-                                                      const Matrix  &seed,
-                                                            Matrix  &D   ,
-                                                            Matrix  &ddX ,
-                                                            Matrix  &ddP ,
-                                                            Matrix  &ddU ,
-                                                            Matrix  &ddW   );
+                                                      const DMatrix  &dX  ,
+                                                      const DMatrix  &dP  ,
+                                                      const DMatrix  &dU  ,
+                                                      const DMatrix  &dW  ,
+                                                      const DMatrix  &seed,
+                                                            DMatrix  &D   ,
+                                                            DMatrix  &ddX ,
+                                                            DMatrix  &ddP ,
+                                                            DMatrix  &ddU ,
+                                                            DMatrix  &ddW   );
 
 
-            returnValue update( Matrix &G, const Matrix &A, const Matrix &B );
+            returnValue update( DMatrix &G, const DMatrix &A, const DMatrix &B );
 
 
 			/**< Writes the continous integrator output to the logging object, if this     \n
@@ -212,7 +212,7 @@ class ShootingMethod : public DynamicDiscretization
         protected:
 
             Integrator **integrator;
-            Matrix       breakPoints;
+            DMatrix       breakPoints;
 };
 
 

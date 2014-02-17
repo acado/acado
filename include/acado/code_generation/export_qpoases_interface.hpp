@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -54,20 +54,20 @@ public:
 	 *	@param[in] _headerFileName		Name of exported file for header file.
 	 *	@param[in] _sourceFileName		Name of exported file for source file.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
-	 *	@param[in] _realString			String to be used to declare real variables.
-	 *	@param[in] _intString			String to be used to declare integer variables.
+	 *	@param[in] _realString			std::string to be used to declare real variables.
+	 *	@param[in] _intString			std::string to be used to declare integer variables.
 	 *	@param[in] _precision			Number of digits to be used for exporting real values.
-	 *	@param[in] _commentString		String to be used for exporting comments.
+	 *	@param[in] _commentString		std::string to be used for exporting comments.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	ExportQpOasesInterface(	const String& _headerFileName,
-							const String& _sourceFileName,
-							const String& _commonHeaderName = "",
-							const String& _realString = "real_t",
-							const String& _intString = "int",
+	ExportQpOasesInterface(	const std::string& _headerFileName,
+							const std::string& _sourceFileName,
+							const std::string& _commonHeaderName = "",
+							const std::string& _realString = "real_t",
+							const std::string& _intString = "int",
 							int _precision = 16,
-							const String& _commentString = emptyConstString
+							const std::string& _commentString = std::string()
 							);
 
 	/** Destructor. */
@@ -84,17 +84,21 @@ public:
 							const int ncmax,
 							const int nwsrmax,
 							const std::string& _printLevel,
-							const double _eps,
-							const std::string& _reat_t,
+							bool _useSinglePrecision,
 
 							const std::string& _commonHeader,
-							const std::string& _solverName,
 							const std::string& _namespace,
-							const std::string& _callSolver,
 							const std::string& _primalSolution,
 							const std::string& _dualSolution,
-							const std::string& _ctor,
-							const std::string& _sigma
+							const std::string& _sigma,
+							bool _hotstartQP,
+							const std::string& _qpH,
+							const std::string& _qpg,
+							const std::string& _qpA,
+							const std::string& _qplb,
+							const std::string& _qpub,
+							const std::string& _qplbA,
+							const std::string& _qpubA
 							);
 
 	/** Export the interface. */

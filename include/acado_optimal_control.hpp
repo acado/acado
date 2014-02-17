@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -34,13 +34,13 @@
 
 #include <acado_integrators.hpp>
 
-#include <acado/code_generation/code_generation.hpp>
 #include <acado/dynamic_system/dynamic_system.hpp>
 #include <acado/dynamic_discretization/dynamic_discretization.hpp>
 #include <acado/dynamic_discretization/integration_algorithm.hpp>
 #include <acado/nlp_solver/nlp_solver.hpp>
 #include <acado/nlp_solver/scp_method.hpp>
 #include <acado/ocp/ocp.hpp>
+#include <acado/ocp/nlp.hpp>
 #include <acado/optimization_algorithm/optimization_algorithm.hpp>
 #include <acado/optimization_algorithm/real_time_algorithm.hpp>
 #include <acado/optimization_algorithm/parameter_estimation_algorithm.hpp>

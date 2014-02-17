@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -46,94 +46,81 @@ ModelContainer::ModelContainer() {
 }
 
 
-returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NP ) {
-	return modelData.setDimensions( _NX1, _NX2, _NX3, _NDX, _NDX3, _NXA, _NXA3, _NU, _NP );
-}
-returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU ) {
-	return setDimensions( _NX1, _NX2, _NX3, _NDX, _NDX3, _NXA, _NXA3, _NU, 0 );
+returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NDX3, uint _NXA, uint _NXA3, uint _NU, uint _NOD, uint _NP ) {
+	return modelData.setDimensions( _NX1, _NX2, _NX3, _NDX, _NDX3, _NXA, _NXA3, _NU, _NOD, _NP );
 }
 
 
-returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU, uint _NP ) {
-	return setDimensions( _NX1, _NX2, _NX3, _NDX, 0, _NXA, 0, _NU, _NP );
-}
-returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU ) {
-	return setDimensions( _NX1, _NX2, _NX3, _NDX, _NXA, _NU, 0 );
+returnValue ModelContainer::setDimensions( uint _NX1, uint _NX2, uint _NX3, uint _NDX, uint _NXA, uint _NU, uint _NOD, uint _NP ) {
+	return setDimensions( _NX1, _NX2, _NX3, _NDX, 0, _NXA, 0, _NU, _NOD, _NP );
 }
 
 
-returnValue ModelContainer::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU, uint _NP ) {
-	return setDimensions( 0, _NX, 0, _NDX, _NXA, _NU, _NP );
-}
-returnValue ModelContainer::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU ) {
-	return setDimensions( _NX, _NDX, _NXA, _NU, 0 );
+returnValue ModelContainer::setDimensions( uint _NX, uint _NDX, uint _NXA, uint _NU, uint _NOD, uint _NP ) {
+	return setDimensions( 0, _NX, 0, _NDX, _NXA, _NU, _NOD, _NP );
 }
 
 
-returnValue ModelContainer::setDimensions( uint _NX, uint _NU, uint _NP ) {
-	return setDimensions( _NX, 0, 0, _NU, _NP );
+returnValue ModelContainer::setDimensions( uint _NX, uint _NU, uint _NOD, uint _NP ) {
+	return setDimensions( _NX, 0, 0, _NU, _NOD, _NP );
 }
-returnValue ModelContainer::setDimensions( uint _NX, uint _NU ) {
-	return setDimensions( _NX, _NU, 0 );
-}
-
 
 returnValue ModelContainer::setModel( const DifferentialEquation& _f ) {
 	return modelData.setModel( _f );
 }
 
 
-returnValue ModelContainer::setNARXmodel( const uint _delay, const Matrix& _parms ) {
+returnValue ModelContainer::setNARXmodel( const uint _delay, const DMatrix& _parms ) {
 	return modelData.setNARXmodel( _delay, _parms );
 }
 
 
-returnValue ModelContainer::setModel( 	const String& fileName, const String& _rhs_ODE, const String& _diffs_rhs_ODE ) {
+returnValue ModelContainer::setModel( 	const std::string& fileName, const std::string& _rhs_ODE, const std::string& _diffs_rhs_ODE ) {
 	return modelData.setModel( fileName, _rhs_ODE, _diffs_rhs_ODE );
 }
 
 
-returnValue ModelContainer::setLinearInput( const Matrix& M1_, const Matrix& A1_, const Matrix& B1_ )
+returnValue ModelContainer::setLinearInput( const DMatrix& M1_, const DMatrix& A1_, const DMatrix& B1_ )
 {
 	return modelData.setLinearInput( M1_, A1_, B1_ );
 }
 
 
-returnValue ModelContainer::setLinearInput( const Matrix& A1_, const Matrix& B1_ )
+returnValue ModelContainer::setLinearInput( const DMatrix& A1_, const DMatrix& B1_ )
 {
-	Matrix M1_ = eye(A1_.getNumRows());
+	DMatrix M1_ = eye<double>(A1_.getNumRows());
 	return modelData.setLinearInput( M1_, A1_, B1_ );
 }
 
 
-returnValue ModelContainer::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const OutputFcn& rhs3_ )
+returnValue ModelContainer::setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, const OutputFcn& rhs3_ )
 {
 	return modelData.setLinearOutput( M3_, A3_, rhs3_ );
 }
 
 
-returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const OutputFcn& rhs3_ )
+returnValue ModelContainer::setLinearOutput( const DMatrix& A3_, const OutputFcn& rhs3_ )
 {
-	Matrix M3_ = eye(A3_.getNumRows());
+	DMatrix M3_ = eye<double>(A3_.getNumRows());
 	return modelData.setLinearOutput( M3_, A3_, rhs3_ );
 }
 
 
-returnValue ModelContainer::setLinearOutput( const Matrix& M3_, const Matrix& A3_, const String& rhs3_, const String& diffs_rhs3_ )
+returnValue ModelContainer::setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, const std::string& rhs3_, const std::string& diffs_rhs3_ )
 {
 	return modelData.setLinearOutput( M3_, A3_, rhs3_, diffs_rhs3_ );
 }
 
 
-returnValue ModelContainer::setLinearOutput( const Matrix& A3_, const String& rhs3_, const String& diffs_rhs3_ )
+returnValue ModelContainer::setLinearOutput( const DMatrix& A3_, const std::string& rhs3_, const std::string& diffs_rhs3_ )
 {
-	Matrix M3_ = eye(A3_.getNumRows());
+	DMatrix M3_ = eye<double>(A3_.getNumRows());
 	return modelData.setLinearOutput( M3_, A3_, rhs3_, diffs_rhs3_ );
 }
 
 
-uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const Vector& measurements ) {
-	Vector newMeas(measurements);
+uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const DVector& measurements ) {
+	DVector newMeas(measurements);
 	newMeas.append( 1.0 );
 	Grid grid( newMeas );
 	return modelData.addOutput( outputEquation_, grid );
@@ -146,31 +133,31 @@ uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const uint num
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim, const Vector& measurements ) {
-	Vector newMeas(measurements);
+uint ModelContainer::addOutput( const std::string& output, const std::string& diffs_output, const uint dim, const DVector& measurements ) {
+	DVector newMeas(measurements);
 	newMeas.append( 1.0 );
 	Grid grid( newMeas );
 	return modelData.addOutput( output, diffs_output, dim, grid );
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim, const uint numberMeasurements ) {
+uint ModelContainer::addOutput( const std::string& output, const std::string& diffs_output, const uint dim, const uint numberMeasurements ) {
 	Grid grid( 0.0, 1.0, (int)numberMeasurements + 1 );
 	return modelData.addOutput( output, diffs_output, dim, grid );
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
-								const Vector& measurements, const String& colInd, const String& rowPtr	) {
-	Vector newMeas(measurements);
+uint ModelContainer::addOutput( const std::string& output, const std::string& diffs_output, const uint dim,
+								const DVector& measurements, const std::string& colInd, const std::string& rowPtr	) {
+	DVector newMeas(measurements);
 	newMeas.append( 1.0 );
 	Grid grid( newMeas );
 	return modelData.addOutput( output, diffs_output, dim, grid, colInd, rowPtr );
 }
 
 
-uint ModelContainer::addOutput( const String& output, const String& diffs_output, const uint dim,
-								const uint numberMeasurements, const String& colInd, const String& rowPtr	) {
+uint ModelContainer::addOutput( const std::string& output, const std::string& diffs_output, const uint dim,
+								const uint numberMeasurements, const std::string& colInd, const std::string& rowPtr	) {
 	Grid grid( 0.0, 1.0, (int)numberMeasurements + 1 );
 	return modelData.addOutput( output, diffs_output, dim, grid, colInd, rowPtr );
 }
@@ -253,6 +240,11 @@ uint ModelContainer::getNP( ) const
 	return modelData.getNP();
 }
 
+uint ModelContainer::getNOD( ) const
+{
+	return modelData.getNOD();
+}
+
 
 uint ModelContainer::getN( ) const
 {
@@ -267,19 +259,19 @@ returnValue ModelContainer::setN( const uint N_ )
 }
 
 
-Vector ModelContainer::getDimOutputs( ) const
+DVector ModelContainer::getDimOutputs( ) const
 {
 	return modelData.getDimOutputs();
 }
 
 
-Vector ModelContainer::getNumMeas( ) const
+DVector ModelContainer::getNumMeas( ) const
 {
 	return modelData.getNumMeas();
 }
 
 
-const String ModelContainer::getFileNameModel( ) const
+const std::string ModelContainer::getFileNameModel( ) const
 {
 	return modelData.getFileNameModel();
 }

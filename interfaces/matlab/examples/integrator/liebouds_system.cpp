@@ -33,26 +33,26 @@
 
 void liebouds_system( DifferentialEquation *f ){
 
-    DifferentialState x(10);
+    DifferentialState x("x",10,1);
 
     Control         u1, u2;
 
-    Matrix A0(10,10);
+    DMatrix A0(10,10);
     A0.setZero();
 
-    Matrix A1(10,10);
+    DMatrix A1(10,10);
     A1.setZero();
 
-    Matrix A2(10,10);
+    DMatrix A2(10,10);
     A2.setZero();
 
-    Matrix A3(10,10);
+    DMatrix A3(10,10);
     A3.setZero();
 
-    Matrix A4(10,10);
+    DMatrix A4(10,10);
     A4.setZero();
 
-    Vector b1(10), b2(10);
+    DVector b1(10), b2(10);
     b1.setZero();
     b2.setZero();
 

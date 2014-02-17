@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -29,21 +29,17 @@
  *	\author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
-
 #ifndef ACADO_TOOLKIT_ACADO_MESSAGE_HANDLING_HPP
 #define ACADO_TOOLKIT_ACADO_MESSAGE_HANDLING_HPP
 
-
 #include <acado/utils/acado_namespace_macros.hpp>
-#include <stdio.h>
-#include <stdlib.h>
 
+#include <cstdlib>
 #include <iostream>
 #include <vector>
-
+#include <string>
 
 BEGIN_NAMESPACE_ACADO
-
 
 /**
  *	\brief Defines all symbols for global return values.
@@ -88,7 +84,7 @@ RET_FILE_CAN_NOT_BE_CLOSED,						/**< The file could not be closed. */
 RET_FILE_HAS_NO_VALID_ENTRIES,					/**< The file has no valid entries. */
 RET_DOES_DIRECTORY_EXISTS,						/**< Could not open file, check if given directory exists. */
 
-/* Matrix/Vector */
+/* DMatrix/DVector */
 RET_VECTOR_DIMENSION_MISMATCH,					/**< Incompatible vector dimensions. */
 RET_DIFFERENTIAL_STATE_DIMENSION_MISMATCH,		/**< Incompatible differential state vector dimensions. */
 RET_ALGEBRAIC_STATE_DIMENSION_MISMATCH,			/**< Incompatible algebraic state vector dimensions. */
@@ -322,7 +318,7 @@ RET_STEPDIRECTION_FAILED_CHOLESKY,				/**< Abnormal termination due to Cholesky 
 RET_STEPLENGTH_DETERMINATION_FAILED,			/**< Determination of step direction failed. */
 RET_OPTIMAL_SOLUTION_FOUND,						/**< Optimal solution of neighbouring QP found. */
 RET_MAX_NWSR_REACHED,							/**< Maximum number of working set recalculations performed. */
-RET_MATRIX_NOT_SPD,								/**< Matrix is not positive definite. */
+RET_MATRIX_NOT_SPD,								/**< DMatrix is not positive definite. */
 
 /* CODE EXPORT */
 RET_CODE_EXPORT_SUCCESSFUL,						/**< Code generation successful. */
@@ -335,7 +331,11 @@ RET_ONLY_EQUIDISTANT_GRID_FOR_CODE_EXPORT,		/**< Only equidistant evaluation gri
 RET_ONLY_BOUNDS_FOR_CODE_EXPORT,				/**< Only state and control bounds supported for code generation. */
 RET_QPOASES_EMBEDDED_NOT_FOUND,					/**< Embedded qpOASES code not found. */
 RET_UNABLE_TO_EXPORT_STATEMENT,					/**< Unable to export statement due to incomplete definition. */
-RET_INVALID_CALL_TO_EXPORTED_FUNCTION			/**< Invalid call to export functions (check number of calling arguments). */
+RET_INVALID_CALL_TO_EXPORTED_FUNCTION,			/**< Invalid call to export functions (check number of calling arguments). */
+
+
+/* EXPORTED INTEGRATORS */
+RET_INVALID_LINEAR_OUTPUT_FUNCTION				/**< Invalid definition of the nonlinear function in a linear output system. */
 };
 
 
@@ -522,15 +522,9 @@ public:
 	#define __LINE__ 0
 #endif
 
-// define SNPRINTF if necessary
-#ifdef _snprintf
-	#define snprintf _snprintf
-#endif
-
-// Macro to quote macro values as strings, e.g. __LINE__ number to string, used in other macros
+/** Macro to quote macro values as strings, e.g. __LINE__ number to string, used in other macros */
 #define QUOTE_(x) #x
 #define QUOTE(x) QUOTE_(x)
-
 
 /** Macro to return a error */
 #define ACADOERROR(retval) \

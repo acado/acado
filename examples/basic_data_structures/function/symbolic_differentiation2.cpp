@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -45,27 +45,27 @@ int main( ){
 
     // DEFINE VALRIABLES:
     // ---------------------------
-    DifferentialState x(3);
+    DifferentialState x("", 3, 1);
 
     // DEFINE A TEST FUNCTION:
     // -----------------------
     Function f;
 
     f << backwardDerivative( x, x );
-
-    ( x.getDependencyPattern( x ) ).print();
-
-
-    // TEST THE FUNCTION f:
-    // --------------------
-//    double xx[3] = { 1.0, 1.0, 1.0 };
-    double *result = new double[ f.getDim() ];
-
-    // EVALUATE f AT THE POINT  (tt,xx):
-    // ---------------------------------
-    f.evaluate( 0.0, 0, result );
-
-    delete[] result;
+//
+//    x.getDependencyPattern( x ).print();
+//
+//
+//    // TEST THE FUNCTION f:
+//    // --------------------
+////    double xx[3] = { 1.0, 1.0, 1.0 };
+//    double *result = new double[ f.getDim() ];
+//
+//    // EVALUATE f AT THE POINT  (tt,xx):
+//    // ---------------------------------
+//    f.evaluate( 0.0, 0, result );
+//
+//    delete[] result;
 
     return 0;
 }

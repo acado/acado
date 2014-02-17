@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -39,7 +39,7 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-inline returnValue GaussianNoise::setMeans( const Vector& _mean )
+inline returnValue GaussianNoise::setMeans( const DVector& _mean )
 {
 	if ( mean.getDim( ) != _mean.getDim( ) )
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
@@ -71,12 +71,14 @@ inline returnValue GaussianNoise::setMean(	uint idx,
 
 
 
-inline returnValue GaussianNoise::setVariances( const Vector& _variance )
+inline returnValue GaussianNoise::setVariances( const DVector& _variance )
 {
 	if ( variance.getDim( ) != _variance.getDim( ) )
 		return ACADOERROR( RET_VECTOR_DIMENSION_MISMATCH );
 
-	ASSERT( _variance.isGreaterThan( 0.0 ) );
+	
+
+	ASSERT( _variance > DVector( _variance.size() ) );
 
 	variance = _variance;
 	return SUCCESSFUL_RETURN;
@@ -105,13 +107,13 @@ inline returnValue GaussianNoise::setVariance(	uint idx,
 
 
 
-inline const Vector& GaussianNoise::getMean( ) const
+inline const DVector& GaussianNoise::getMean( ) const
 {
 	return mean;
 }
 
 
-inline const Vector& GaussianNoise::getVariance( ) const
+inline const DVector& GaussianNoise::getVariance( ) const
 {
 	return variance;
 }

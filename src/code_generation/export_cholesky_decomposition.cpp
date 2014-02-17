@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -39,15 +39,15 @@ using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 ExportCholeskyDecomposition::ExportCholeskyDecomposition(	UserInteraction* _userInteraction,
-															const String& _commonHeaderName
+															const std::string& _commonHeaderName
 															) : ExportAlgorithm(_userInteraction, _commonHeaderName)
 {
-	init("choleskyDecomposition", 0, BT_FALSE);
+	init("choleskyDecomposition", 0, false);
 }
 
-returnValue ExportCholeskyDecomposition::init(	const String& _name,
+returnValue ExportCholeskyDecomposition::init(	const std::string& _name,
 												unsigned _dim,
-												BooleanType _unrolling
+												bool _unrolling
 												)
 {
 	unrolling = _unrolling;
@@ -67,7 +67,7 @@ returnValue ExportCholeskyDecomposition::setup()
 	ExportVariable ret("ret", 1, 1, INT, ACADO_LOCAL);
 	fcn.setReturnValue( ret );
 
-	string name( A.getName().getName() );
+	string name( A.getName() );
 	unsigned n = A.getNumRows();
 
 	s 		<< "register unsigned i, j, k;" << endl
@@ -95,7 +95,7 @@ returnValue ExportCholeskyDecomposition::setup()
 			<< name << "[i * " << n << " + j] = 0.0;" << endl
 			<< ret.getName() << " = 0;" << endl;
 
-	fcn.addStatement( s.str().c_str() );
+	fcn.addStatement( s.str() );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -125,7 +125,7 @@ returnValue ExportCholeskyDecomposition::getCode(	ExportStatementBlock& code
 	return SUCCESSFUL_RETURN;
 }
 
-const String ExportCholeskyDecomposition::getName()
+const std::string ExportCholeskyDecomposition::getName()
 {
 	return fcn.getName();
 }

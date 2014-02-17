@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -65,7 +65,7 @@ class NARXExport : public DiscreteTimeExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         NARXExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -105,7 +105,7 @@ class NARXExport : public DiscreteTimeExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		returnValue setModel( const String& _rhs, const String& _diffs_rhs );
+		returnValue setModel( const std::string& _rhs, const std::string& _diffs_rhs );
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -202,7 +202,7 @@ class NARXExport : public DiscreteTimeExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		returnValue setNARXmodel( const uint _delay, const Matrix& _parms );
+		returnValue setNARXmodel( const uint _delay, const DMatrix& _parms );
 
 
 		/** .
@@ -211,7 +211,7 @@ class NARXExport : public DiscreteTimeExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const Expression& rhs );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const Expression& rhs );
 
 
 		/** .
@@ -220,7 +220,7 @@ class NARXExport : public DiscreteTimeExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue setLinearOutput( const Matrix& M3, const Matrix& A3, const String& _rhs3, const String& _diffs_rhs3 );
+		virtual returnValue setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
 	protected:
@@ -242,7 +242,7 @@ class NARXExport : public DiscreteTimeExport
     protected:
 
 		uint delay;
-		Matrix parms;
+		DMatrix parms;
 
 };
 

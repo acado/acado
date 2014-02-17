@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,20 +32,18 @@
 #include <acado/code_generation/export_qpoases_interface.hpp>
 #include <acado/code_generation/templates/templates.hpp>
 
-#include <sstream>
-
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
 
-ExportQpOasesInterface::ExportQpOasesInterface(		const String& _headerFileName,
-													const String& _sourceFileName,
-													const String& _commonHeaderName,
-													const String& _realString,
-													const String& _intString,
+ExportQpOasesInterface::ExportQpOasesInterface(		const std::string& _headerFileName,
+													const std::string& _sourceFileName,
+													const std::string& _commonHeaderName,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision,
-													const String& _commentString
+													const std::string& _commentString
 													)
 	: qpoHeader(QPOASES_HEADER, _headerFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
 	  qpoSource(QPOASES_SOURCE, _sourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
@@ -58,31 +56,61 @@ returnValue ExportQpOasesInterface::configure(	const std::string& _prefix,
 												const int ncmax,
 												const int nwsrmax,
 												const std::string& _printLevel,
-												const double _eps,
-												const std::string& _reat_t,
+												bool _useSinglePrecision,
 
 												const std::string& _commonHeader,
-												const std::string& _solverName,
 												const std::string& _namespace,
-												const std::string& _callSolver,
 												const std::string& _primalSolution,
 												const std::string& _dualSolution,
-												const std::string& _ctor,
-												const std::string& _sigma
+												const std::string& _sigma,
+												bool _hotstartQP,
+												const std::string& _qpH,
+												const std::string& _qpg,
+												const std::string& _qpA,
+												const std::string& _qplb,
+												const std::string& _qpub,
+												const std::string& _qplbA,
+												const std::string& _qpubA
 												)
 {
 	//
 	// Source file configuration
 	//
 
+	stringstream s, ctor;
+	string solverName;
+	if (ncmax > 0)
+	{
+		solverName = "QProblem";
+
+		s	<< _qpH << ", " << _qpg << ", " << _qpA << ", " << _qplb << ", " << _qpub << ", "
+			<< _qplbA << ", " << _qpubA << ", " << "nWSR";
+
+		if ( (bool)_hotstartQP == true )
+			s << ", " << _dualSolution;
+
+		ctor << solverName << " qp(" << nvmax << ", " << ncmax << ")";
+	}
+	else
+	{
+		solverName = "QProblemB";
+
+		s << _qpH << ", " << _qpg << ", " << _qplb << ", " << _qpub << ", " << "nWSR";
+
+		if ( (bool)_hotstartQP == true )
+			s << ", " << _dualSolution;
+
+		ctor << solverName << " qp( " << nvmax << " )";
+	}
+
 	qpoSource.dictionary[ "@ACADO_COMMON_HEADER@" ] =  _commonHeader;
-	qpoSource.dictionary[ "@SOLVER_NAME@" ] =  _solverName;
+	qpoSource.dictionary[ "@SOLVER_NAME@" ] =  solverName;
 	qpoSource.dictionary[ "@PREFIX@" ] =  _prefix;
 	qpoSource.dictionary[ "@USE_NAMESPACE@" ] =  _namespace;
-	qpoSource.dictionary[ "@CALL_SOLVER@" ] =  _callSolver;
+	qpoSource.dictionary[ "@CALL_SOLVER@" ] =  s.str();
 	qpoSource.dictionary[ "@PRIMAL_SOLUTION@" ] =  _primalSolution;
 	qpoSource.dictionary[ "@DUAL_SOLUTION@" ] =  _dualSolution;
-	qpoSource.dictionary[ "@CTOR@" ] =  _ctor;
+	qpoSource.dictionary[ "@CTOR@" ] =  ctor.str();
 	qpoSource.dictionary[ "@SIGMA@" ] =  _sigma;
 
 	// And then fill a template file
@@ -92,29 +120,32 @@ returnValue ExportQpOasesInterface::configure(	const std::string& _prefix,
 	// Header file configuration
 	//
 
-	stringstream s;
-
 	// Configure the dictionary
 	qpoHeader.dictionary[ "@PREFIX@" ] =  _prefix;
 	qpoHeader.dictionary[ "@SOLVER_DEFINE@" ] =  _solverDefine;
 
-	s.str(std::string());
-	s << nvmax;
-	qpoHeader.dictionary[ "@NVMAX@" ] = s.str();
+	qpoHeader.dictionary[ "@NVMAX@" ] = toString( nvmax );
 
-	s.str(std::string());
-	s << ncmax;
-	qpoHeader.dictionary[ "@NCMAX@" ] =  s.str();
+	qpoHeader.dictionary[ "@NCMAX@" ] = toString( ncmax );
 
-	s.str(std::string());
-	s << nwsrmax;
-	qpoHeader.dictionary[ "@NWSRMAX@" ] =  s.str();
+	qpoHeader.dictionary[ "@NWSRMAX@" ] =  toString(nwsrmax > 0 ? nwsrmax : 3 * (nvmax + ncmax));
+
 	qpoHeader.dictionary[ "@PRINT_LEVEL@" ] =  _printLevel;
 
-	s.str(std::string());
-	s << _eps;
-	qpoHeader.dictionary[ "@EPS@" ] =  s.str();
-	qpoHeader.dictionary[ "@REAL_T@" ] =  _reat_t;
+	double eps;
+	string realT;
+	if ( _useSinglePrecision )
+	{
+		eps = 1.193e-07;
+		realT = "float";
+	}
+	else
+	{
+		eps = 2.221e-16;
+		realT = "double";
+	}
+	qpoHeader.dictionary[ "@EPS@" ] =  toString( eps );
+	qpoHeader.dictionary[ "@REAL_T@" ] =  toString( realT );
 
 	// And then fill a template file
 	qpoHeader.fillTemplate();

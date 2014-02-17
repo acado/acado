@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,7 +33,8 @@
 #include <acado/conic_solver/condensing_based_cp_solver.hpp>
 #include <include/acado_qpoases/qp_solver_qpoases.hpp>
 
-
+using namespace Eigen;
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -56,7 +57,7 @@ CondensingBasedCPsolver::CondensingBasedCPsolver( ) : BandedCPsolver( )
 
 CondensingBasedCPsolver::CondensingBasedCPsolver(	UserInteraction* _userInteraction,
 													uint nConstraints_,
-        											const Vector& blockDims_
+        											const DVector& blockDims_
         											) : BandedCPsolver( _userInteraction )
 {
 	nConstraints = nConstraints_;
@@ -170,7 +171,7 @@ returnValue CondensingBasedCPsolver::prepareSolve(	BandedCP& cp
 	get( PRINTLEVEL,printLevel );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Condesing banded QP ...\n" );
+		cout << "--> Condesing banded QP ...\n";
 
 	clock.reset( );
 	clock.start( );
@@ -182,7 +183,7 @@ returnValue CondensingBasedCPsolver::prepareSolve(	BandedCP& cp
 	setLast( LOG_TIME_CONDENSING,clock.getTime() );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "<-- Condesing banded QP done.\n" );
+		cout << "<-- Condesing banded QP done.\n";
 
 	return SUCCESSFUL_RETURN;
 }
@@ -224,7 +225,7 @@ returnValue CondensingBasedCPsolver::solve(	BandedCP& cp
 	get( PRINTLEVEL,printLevel );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Solving condesed QP ...\n" );
+		cout << "--> Solving condesed QP ...\n";
 	
 	
 	
@@ -232,7 +233,7 @@ returnValue CondensingBasedCPsolver::solve(	BandedCP& cp
     if( returnvalue != SUCCESSFUL_RETURN ) return ACADOERROR( RET_BANDED_CP_SOLUTION_FAILED );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "<-- Solving condesed QP done.\n" );
+		cout << "<-- Solving condesed QP done.\n";
 
     // Expand the KKT-System if neccessary:
     // ------------------------------------
@@ -253,7 +254,7 @@ returnValue CondensingBasedCPsolver::finalizeSolve(	BandedCP& cp
 	get( PRINTLEVEL,printLevel );
 
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "--> Expanding condensed QP solution ...\n" );
+		cout << "--> Expanding condensed QP solution ...\n";
 
     // Expand the KKT-System if neccessary:
     // ------------------------------------
@@ -267,14 +268,14 @@ returnValue CondensingBasedCPsolver::finalizeSolve(	BandedCP& cp
 	setLast( LOG_TIME_EXPAND,clock.getTime() );
 	
 	if ( (PrintLevel)printLevel >= HIGH ) 
-		acadoPrintf( "<-- Expanding condensed QP solution done.\n" );
+		cout << "<-- Expanding condensed QP solution done.\n";
 
     return returnvalue;
 }
 
 
 
-returnValue CondensingBasedCPsolver::getParameters( Vector &p_  ) const
+returnValue CondensingBasedCPsolver::getParameters( DVector &p_  ) const
 {
 	if ( p_.getDim( ) != getNP( ) )
 		return ACADOERROR( RET_INCOMPATIBLE_DIMENSIONS );
@@ -288,7 +289,7 @@ returnValue CondensingBasedCPsolver::getParameters( Vector &p_  ) const
 }
 
 
-returnValue CondensingBasedCPsolver::getFirstControl( Vector &u0_ ) const
+returnValue CondensingBasedCPsolver::getFirstControl( DVector &u0_ ) const
 {
 	if ( u0_.getDim( ) != getNU( ) )
 		return ACADOERROR( RET_INCOMPATIBLE_DIMENSIONS );
@@ -303,7 +304,7 @@ returnValue CondensingBasedCPsolver::getFirstControl( Vector &u0_ ) const
 
 
 
-returnValue CondensingBasedCPsolver::getVarianceCovariance( Matrix &var )
+returnValue CondensingBasedCPsolver::getVarianceCovariance( DMatrix &var )
 {
 	if ( cpSolver == 0 )
 		return ACADOERROR( RET_MEMBER_NOT_INITIALISED );
@@ -313,8 +314,8 @@ returnValue CondensingBasedCPsolver::getVarianceCovariance( Matrix &var )
 
 
 
-returnValue CondensingBasedCPsolver::setRealTimeParameters(	const Vector& DeltaX,
-															const Vector& DeltaP
+returnValue CondensingBasedCPsolver::setRealTimeParameters(	const DVector& DeltaX,
+															const DVector& DeltaP
 															)
 {
 	deltaX = DeltaX;
@@ -350,42 +351,33 @@ returnValue CondensingBasedCPsolver::unfreezeCondensing( )
 // PROTECTED MEMBER FUNCTIONS:
 //
 
-returnValue CondensingBasedCPsolver::projectHessian( Matrix &H_, double dampingFactor ){
+returnValue CondensingBasedCPsolver::projectHessian( DMatrix &H_, double dampingFactor ){
 
     if( dampingFactor < 0.0 ) return SUCCESSFUL_RETURN;
-
-    int run1,run2;
-
 
     // COMPUTE THE EIGENVALUES OF THE HESSIAN:
     // ---------------------------------------
 
-    Matrix Q;
-    Vector D = H_.getEigenvalues( Q );
-    const int n = D.getDim();
-
+    SelfAdjointEigenSolver< MatrixXd > es( H_ );
+    MatrixXd V = es.eigenvectors();
+    VectorXd D = es.eigenvalues();
 
     // OVER-PROJECT THE EIGENVALUES BASED ON THE DAMPING TECHNIQUE:
     // ------------------------------------------------------------
 
-    for( run1 = 0; run1 < n; run1++ ){
-        if( D(run1) <= 0.1 * dampingFactor ){
-            if( fabs(D(run1)) >= dampingFactor ) D(run1) = fabs(D(run1));
-            else                                 D(run1) = dampingFactor;
-        }
-    }
-
+	for (unsigned el = 0; el < D.size(); el++)
+		if (D( el ) <= 0.1 * dampingFactor)
+		{
+			if (fabs(D( el )) >= dampingFactor)
+				D( el ) = fabs(D( el ));
+			else
+				D( el ) = dampingFactor;
+		}
 
     // RECONSTRUCT THE PROJECTED HESSIAN MATRIX:
     // -----------------------------------------
 
-    Matrix tmp(n,n);
-
-    for( run1 = 0; run1 < n; run1++ )
-        for( run2 = 0; run2 < n; run2++ )
-            tmp(run1,run2) = D(run1)*Q(run2,run1);
-
-    H_ = Q*tmp;
+    H_ = V * D.asDiagonal() * V.inverse();
 
     return SUCCESSFUL_RETURN;
 }
@@ -397,8 +389,6 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
 	if( denseCP.isQP() == BT_FALSE )
 		return ACADOERROR( RET_QP_SOLVER_CAN_ONLY_SOLVE_QP );
 
-
-    uint run1;
     returnValue returnvalue;
 
 	// ensure that Hessian matrix is symmetric
@@ -419,7 +409,6 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
 		double hessianProjectionFactor;
 		get( HESSIAN_PROJECTION_FACTOR, hessianProjectionFactor );
 		projectHessian( denseCP.H, hessianProjectionFactor );
-// 		denseCP.H.symmetrize();
 	}
 
     // APPLY LEVENBERG-MARQUARD REGULARISATION IF DESIRED:
@@ -428,13 +417,23 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
     get(LEVENBERG_MARQUARDT, levenbergMarquard );
 
     if( levenbergMarquard > EPS )
-        for( run1 = 0; run1 < denseCP.H.getNumRows(); run1++ )
-            denseCP.H(run1,run1) += levenbergMarquard;
+    	denseCP.H += eye<double>( denseCP.H.rows() ) * levenbergMarquard;
 
-	// consistency check of Hessian matrix
-	if ( ( denseCP.H.getMax( ) > 1.0e16 ) || ( denseCP.H.getMin( ) < -1.0e16 ) )
-		return ACADOERROR( RET_ILLFORMED_HESSIAN_MATRIX );
-
+	// Check condition number of the condensed Hessian.
+    double denseHConditionNumber = denseCP.H.getConditionNumber();
+    if (denseHConditionNumber > 1.0e16)
+    {
+    	LOG( LVL_WARNING )
+    			<< "Condition number of the condensed Hessian is quite high: log_10(kappa( H )) = "
+    			<< log10( denseHConditionNumber ) << endl;
+    	ACADOWARNING( RET_ILLFORMED_HESSIAN_MATRIX );
+    }
+    // Check for max and min entry in the condensed Hessian:
+    if (denseCP.H.getMin() < -1.0e16 || denseCP.H.getMax() > 1.0e16)
+    {
+    	LOG( LVL_WARNING ) << "Ill formed condensed Hessian: min(.) < -1e16 or max(.) > 1e16" << endl;
+    	ACADOWARNING( RET_ILLFORMED_HESSIAN_MATRIX );
+    }
 
     // SOLVE QP ALLOWING THE GIVEN NUMBER OF ITERATIONS:
     // -------------------------------------------------------
@@ -583,7 +582,7 @@ returnValue CondensingBasedCPsolver::condense(	BandedCP& cp
 
 		// generate lb, ub
         BlockMatrix dCut(4*N+1,1);
-        Matrix tmp;
+        DMatrix tmp;
         for( run1 = 0; run1 < N; run1++ ){
             d.getSubBlock(run1,0,tmp);
             if( tmp.getDim() != 0 )
@@ -649,7 +648,7 @@ returnValue CondensingBasedCPsolver::condense(	BandedCP& cp
         denseCP.lb.init( nF );
         denseCP.ub.init( nF );
 
-        Matrix tmp;
+        DMatrix tmp;
 
         cp.hessian           .getSubBlock( 2, 2, denseCP.H  , getNP(), getNP() );
         cp.objectiveGradient .getSubBlock( 0, 2, tmp, 1 , getNP() );
@@ -701,7 +700,7 @@ returnValue CondensingBasedCPsolver::generateHessianBlockLine( uint nn, uint row
 
     uint N = getNumPoints();
 
-    Matrix tmp;
+    DMatrix tmp;
 
     if( getNX() != 0 ){
         HDense.getSubBlock( rowOffset, 0, tmp, nn, getNX() );
@@ -770,7 +769,7 @@ returnValue CondensingBasedCPsolver::generateConstraintBlockLine( uint nn, uint 
 
     uint N = getNumPoints();
 
-    Matrix tmp;
+    DMatrix tmp;
 
     if( getNX() != 0 ){
         ADense.getSubBlock( rowOffset, 0, tmp, nn, getNX() );
@@ -838,7 +837,7 @@ returnValue CondensingBasedCPsolver::generateStateBoundBlockLine( uint nn, uint 
 
     uint N = getNumPoints();
 
-    Matrix tmp;
+    DMatrix tmp;
 
     if( getNX() != 0 ){
         T.getSubBlock( rowOffset, 0, tmp, nn, getNX() );
@@ -900,7 +899,7 @@ returnValue CondensingBasedCPsolver::generateConstraintVectors( uint nn, uint ro
 
     uint run1;
 
-    Matrix tmp;
+    DMatrix tmp;
 
     lbADense.getSubBlock( rowOffset, 0, tmp, nn, 1 );
     for( run1 = 0; run1 < nn; run1++ )
@@ -920,7 +919,7 @@ returnValue CondensingBasedCPsolver::generateStateBoundVectors( uint nn, uint ro
 
     uint run1;
 
-    Matrix tmp;
+    DMatrix tmp;
 
     lbDense.getSubBlock( rowOffset, 0, tmp, nn, 1 );
     for( run1 = 0; run1 < nn; run1++ )
@@ -945,7 +944,7 @@ returnValue CondensingBasedCPsolver::generateBoundVectors( ){
     uint  rowOffset  = N;
     uint  rowOffset1 = 0;
 
-    Matrix tmp;
+    DMatrix tmp;
 
     if( getNX() != 0 ){
         lbDense.getSubBlock( 0, 0, tmp, getNX(), 1 );
@@ -1021,7 +1020,7 @@ returnValue CondensingBasedCPsolver::generateObjectiveGradient( ){
 
     uint N = getNumPoints();
 
-    Matrix tmp;
+    DMatrix tmp;
 
     if( getNX() != 0 ){
         gDense.getSubBlock( 0, 0, tmp, 1, getNX() );
@@ -1094,14 +1093,14 @@ returnValue CondensingBasedCPsolver::expand(	BandedCP& cp
     uint N = getNumPoints();
 
 
-	Vector denseDualSolution( denseCP.getMergedDualSolution( ) );
+	DVector denseDualSolution( denseCP.getMergedDualSolution( ) );
 
     if( getNX() != 0 ){
 
         BlockMatrix primalDense;
         primalDense.init( 3*N, 1 );
 
-        Matrix tmp;
+        DMatrix tmp;
 
         rowCount  = 0;
         rowCount1 = 0;
@@ -1161,7 +1160,7 @@ returnValue CondensingBasedCPsolver::expand(	BandedCP& cp
 
         aux = (cp.deltaX^cp.hessian) + cp.objectiveGradient;
 
-        Vector aux2(N*getNX());
+        DVector aux2(N*getNX());
         aux2.setZero();
 
         int run = 0;
@@ -1179,7 +1178,7 @@ returnValue CondensingBasedCPsolver::expand(	BandedCP& cp
             }
         }
 
-        Vector aux3(N*getNX());
+        DVector aux3(N*getNX());
 
         for( run2 = 0; run2 < getNX(); run2++ )
             aux3(run2) = denseDualSolution(run2);
@@ -1191,11 +1190,11 @@ returnValue CondensingBasedCPsolver::expand(	BandedCP& cp
             for( run2 = 0; run2 < getNX(); run2++ )
                 aux3((run1+1)*getNX()+run2) = denseDualSolution(run+run1*getNX()+run2);
 
-        Vector *aux4 = new Vector[N-1];
+        DVector *aux4 = new DVector[N-1];
 
         // aux  = x^T denseCP.H + denseCP.g      (BlockMatrix)
-        // aux2 = lambda^T denseCP.A     (Vector     )
-        // aux3 = lambda_bound   (Vector     )
+        // aux2 = lambda^T denseCP.A     (DVector     )
+        // aux3 = lambda_bound   (DVector     )
 
         for( run1 = 0; run1 < N-1; run1++ ){
             aux4[run1].init(getNX());
@@ -1208,14 +1207,14 @@ returnValue CondensingBasedCPsolver::expand(	BandedCP& cp
 
         // aux4[...] = x^T denseCP.H + denseCP.g - lambda^T denseCP.A - lambda_bound
 
-        Matrix Gx;
-        Vector *lambdaDyn;
-        lambdaDyn = new Vector[N-1];
+        DMatrix Gx;
+        DVector *lambdaDyn;
+        lambdaDyn = new DVector[N-1];
         lambdaDyn[N-2] = aux4[N-2];
 
         for( run1 = N-2; run1 >= 1; run1-- ){
             cp.dynGradient.getSubBlock( run1, 0,  Gx );
-            lambdaDyn[run1-1] = (Gx^lambdaDyn[run1]) + aux4[run1-1];
+            lambdaDyn[run1-1] = (Gx.transpose() * lambdaDyn[run1]) + aux4[run1-1];
         }
 
         cp.lambdaDynamic.init( N-1, 1 );
@@ -1243,7 +1242,7 @@ returnValue CondensingBasedCPsolver::expand(	BandedCP& cp
         delete[] aux4;
     }
     else{
-        Matrix tmp ( getNP(),1 );
+        DMatrix tmp ( getNP(),1 );
         cp.deltaX.init( 5, 1 );
 
         for( run1 = 0; run1 < getNP(); run1++ )
@@ -1253,7 +1252,7 @@ returnValue CondensingBasedCPsolver::expand(	BandedCP& cp
     }
 
 
-    Matrix tmp;
+    DMatrix tmp;
 
     cp.lambdaConstraint.init( blockDims.getDim(), 1 );
 
@@ -1379,9 +1378,9 @@ returnValue CondensingBasedCPsolver::computeCondensingOperator(	BandedCP& cp
 	uint run1, run2;
 	uint N = getNumPoints();
 
-	Matrix  Gx;
-	Matrix   G;
-	Matrix tmp;
+	DMatrix  Gx;
+	DMatrix   G;
+	DMatrix tmp;
 
 	for( run1 = 0; run1 < N-1; run1++ )
 	{
@@ -1674,11 +1673,11 @@ returnValue CondensingBasedCPsolver::solveQP(	uint maxIter,
 	const uint nV = denseCP.getNV();
 	const uint nC = denseCP.getNC();
 
-	Vector deltaDenseTmp;
-	Vector lambdaDenseTmp;
+	DVector deltaDenseTmp;
+	DVector lambdaDenseTmp;
 
-	Vector deltaDense (nV);
-	Vector lambdaDense(nV+nC);
+	DVector deltaDense (nV);
+	DVector lambdaDense(nV+nC);
 
 	cpSolverRelaxed->getPrimalSolution( deltaDenseTmp  );
 	cpSolverRelaxed->getDualSolution  ( lambdaDenseTmp );

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -316,7 +316,8 @@ returnValue Process::setProcessDisturbance(	const VariablesGrid& _processDisturb
 returnValue Process::setProcessDisturbance(	const char* _processDisturbance
 											)
 {
-    VariablesGrid _processDisturbanceFromFile = fopen( _processDisturbance, "r" );
+    VariablesGrid _processDisturbanceFromFile;
+    _processDisturbanceFromFile.read( _processDisturbance );
 
 	if ( _processDisturbanceFromFile.isEmpty( ) == BT_TRUE )
 		return ACADOERROR( RET_FILE_CAN_NOT_BE_OPENED );
@@ -326,8 +327,8 @@ returnValue Process::setProcessDisturbance(	const char* _processDisturbance
 
 
 
-returnValue Process::initializeStartValues(	const Vector& _xStart,
-											const Vector& _xaStart
+returnValue Process::initializeStartValues(	const DVector& _xStart,
+											const DVector& _xaStart
 											)
 {
 	x = _xStart;
@@ -341,7 +342,7 @@ returnValue Process::initializeStartValues(	const Vector& _xStart,
 }
 
 
-returnValue Process::initializeAlgebraicStates(	const Vector& _xaStart
+returnValue Process::initializeAlgebraicStates(	const DVector& _xaStart
 												)
 {
 	return initializeStartValues( x,_xaStart );
@@ -350,13 +351,13 @@ returnValue Process::initializeAlgebraicStates(	const Vector& _xaStart
 
 
 returnValue Process::init(	double _startTime,
-							const Vector& _xStart,
-							const Vector& _uStart,
-							const Vector& _pStart
+							const DVector& _xStart,
+							const DVector& _uStart,
+							const DVector& _pStart
 							)
 {
-	Vector uStart;
-	Vector pStart;
+	DVector uStart;
+	DVector pStart;
 
 	/* 1) Assign values */
 	lastTime = _startTime;
@@ -471,7 +472,7 @@ returnValue Process::init(	double _startTime,
 	currentGrid.setTime( _startTime );
 
 	// get process disturbances
-	Vector _wStart;
+	DVector _wStart;
 
 	if ( hasProcessDisturbance( ) == BT_TRUE )
 	{
@@ -484,7 +485,7 @@ returnValue Process::init(	double _startTime,
 		// y = outputFcn(x,xa,p,u,w)
 		y.init( dynSys->getNumOutputs( ),currentGrid,VT_OUTPUT );
 
-		Vector yTmp( dynSys->getNumOutputs( ) );
+		DVector yTmp( dynSys->getNumOutputs( ) );
  //     yTmp = outputFcn.evaluate( 0, _startTime, x, xa, _pStart, _uStart, _wStart );
 
 		y.setVector( 0,yTmp );
@@ -521,10 +522,10 @@ returnValue Process::step(	const VariablesGrid& _u,
 
 	/* 0) Log original process inputs */
 	if ( _u.isEmpty( ) == BT_FALSE )
-		logCollection.setLast( LOG_NOMINAL_CONTROLS,_u );
+		setLast( LOG_NOMINAL_CONTROLS,_u );
 
 	if ( _p.isEmpty( ) == BT_FALSE )
-		logCollection.setLast( LOG_NOMINAL_PARAMETERS,_p );
+		setLast( LOG_NOMINAL_PARAMETERS,_p );
 
 
 	/* 1) Get actuator outputs. */
@@ -584,7 +585,7 @@ returnValue Process::step(	const VariablesGrid& _u,
 	}
 
 // 	y.print("ySens");
-	logCollection.setLast( LOG_PROCESS_OUTPUT,y );
+	setLast( LOG_PROCESS_OUTPUT,y );
 	//logCollection.setLast( LOG_SAMPLED_PROCESS_OUTPUT,y );
 
 	/* 5) Update lastTime. */
@@ -598,7 +599,7 @@ returnValue Process::step(	const VariablesGrid& _u,
 
 
 returnValue Process::step(	const VariablesGrid& _u,
-							const Vector& _p
+							const DVector& _p
 							)
 {
 	VariablesGrid pTmp( _p.getDim( ),_u.getFirstTime( ),_u.getLastTime( ),_u.getNumPoints(),VT_PARAMETER );
@@ -611,8 +612,8 @@ returnValue Process::step(	const VariablesGrid& _u,
 
 returnValue Process::step(	double startTime,
 							double endTime,
-							const Vector& _u,
-							const Vector& _p
+							const DVector& _u,
+							const DVector& _p
 							)
 {
 	VariablesGrid uTmp( _u.getDim( ),startTime,endTime,2,VT_CONTROL );
@@ -644,7 +645,7 @@ returnValue Process::run(	const VariablesGrid& _u,
 
 
 returnValue Process::run(	const VariablesGrid& _u,
-							const Vector& _p
+							const DVector& _p
 							)
 {
 	VariablesGrid pTmp( _p.getDim( ),_u.getFirstTime( ),_u.getLastTime( ),_u.getNumPoints(),VT_PARAMETER );
@@ -657,8 +658,8 @@ returnValue Process::run(	const VariablesGrid& _u,
 
 returnValue Process::run(	double startTime,
 							double endTime,
-							const Vector& _u,
-							const Vector& _p
+							const DVector& _u,
+							const DVector& _p
 							)
 {
 	VariablesGrid uTmp( _u.getDim( ),startTime,endTime,2,VT_CONTROL );
@@ -743,7 +744,7 @@ returnValue Process::setupOptions( )
 
 returnValue Process::setupLogging( )
 {
-	LogRecord tmp( LOG_AT_EACH_ITERATION,stdout,PS_DEFAULT );
+	LogRecord tmp(LOG_AT_EACH_ITERATION, PS_DEFAULT);
 
 	tmp.addItem( LOG_DIFFERENTIAL_STATES      );
 	tmp.addItem( LOG_ALGEBRAIC_STATES         );
@@ -839,13 +840,13 @@ returnValue Process::simulate(	const VariablesGrid& _u,
 
 	// allocate memory for call to simulation algorithm
 	// and initialise states with start value
-	Vector xComponents = diffEqn.getDifferentialStateComponents( );
+	DVector xComponents = diffEqn.getDifferentialStateComponents( );
 
 	iter.x = new VariablesGrid( (int)round( xComponents.getMax( )+1.0 ),currentGrid,VT_DIFFERENTIAL_STATE );
 	for( uint i=0; i<xComponents.getDim( ); ++i )
 		iter.x->operator()( 0,(int)xComponents(i) ) = x(i);
 
-//	Vector xaComponents;
+//	DVector xaComponents;
 	if ( getNXA() > 0 )
 	{
 		iter.xa = new VariablesGrid( getNXA(),currentGrid,VT_ALGEBRAIC_STATE );
@@ -902,31 +903,34 @@ returnValue Process::simulate(	const VariablesGrid& _u,
 
 		xCont.init( getNX( ),xContFull.getTimePoints( ) );
 		projectToComponents( xContFull,xComponents, xCont );
-		logCollection.setLast( LOG_SIMULATED_DIFFERENTIAL_STATES,xCont );
+		setLast( LOG_SIMULATED_DIFFERENTIAL_STATES,xCont );
 	}
 
 	if ( iter.xa != 0 )
 	{
 		integrationMethod->getLast( LOG_ALGEBRAIC_STATES,xaCont );
-		logCollection.setLast( LOG_SIMULATED_ALGEBRAIC_STATES,xaCont );
+		setLast( LOG_SIMULATED_ALGEBRAIC_STATES,xaCont );
 	}
 
 	if ( iter.p != 0 )
 	{
 		integrationMethod->getLast( LOG_PARAMETERS,pCont );
-		logCollection.setLast( LOG_SIMULATED_PARAMETERS,pCont.getCoarsenedGrid( _p.getTimePoints() ) );
+		setLast(LOG_SIMULATED_PARAMETERS,
+				VariablesGrid(pCont.getCoarsenedGrid(_p.getTimePoints())));
 	}
 
 	if ( iter.u != 0 )
 	{
 		integrationMethod->getLast( LOG_CONTROLS,uCont );
-		logCollection.setLast( LOG_SIMULATED_CONTROLS,uCont.getCoarsenedGrid( _u.getTimePoints() ) );
+		setLast(LOG_SIMULATED_CONTROLS,
+				VariablesGrid(uCont.getCoarsenedGrid(_u.getTimePoints())));
 	}
 
 	if ( iter.w != 0 )
 	{
 		integrationMethod->getLast( LOG_DISTURBANCES,wCont );
-		logCollection.setLast( LOG_SIMULATED_DISTURBANCES,wCont.getCoarsenedGrid( _w.getTimePoints() ) );
+		setLast(LOG_SIMULATED_DISTURBANCES,
+				VariablesGrid(wCont.getCoarsenedGrid(_w.getTimePoints())));
 	}
 
 
@@ -935,7 +939,7 @@ returnValue Process::simulate(	const VariablesGrid& _u,
 
 	if ( calculateOutput( outputFcn,&xContFull,xComponents,&xaCont,&pCont,&uCont,&wCont, &y ) != SUCCESSFUL_RETURN )
 		return ACADOERROR( RET_PROCESS_STEP_FAILED );
-	logCollection.setLast( LOG_SIMULATED_OUTPUT,y );
+	setLast( LOG_SIMULATED_OUTPUT,y );
 
 
 	for( uint i=0; i<xComponents.getDim( ); ++i )
@@ -987,7 +991,7 @@ returnValue Process::checkInputConsistency(	const VariablesGrid& _u,
 
 returnValue Process::calculateOutput(	OutputFcn& _outputFcn,
 										const VariablesGrid* _x,
-										const Vector& _xComponents,
+										const DVector& _xComponents,
 										const VariablesGrid* _xa,
 										const VariablesGrid* _p,
 										const VariablesGrid* _u,
@@ -1022,7 +1026,7 @@ returnValue Process::calculateOutput(	OutputFcn& _outputFcn,
 
 
 returnValue Process::projectToComponents(	const VariablesGrid& _x,
-											const Vector& _xComponents,
+											const DVector& _xComponents,
 											VariablesGrid& _output
 											) const
 {

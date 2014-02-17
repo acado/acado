@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,6 +33,7 @@
 
 #include <acado/code_generation/linear_solvers/linear_solver_export.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -42,20 +43,14 @@ BEGIN_NAMESPACE_ACADO
 //
 
 ExportLinearSolver::ExportLinearSolver(	UserInteraction* _userInteraction,
-										const String& _commonHeaderName
+										const std::string& _commonHeaderName
 										) : ExportAlgorithm(_userInteraction, _commonHeaderName)
 {
-	REUSE = BT_TRUE;
-	UNROLLING = BT_FALSE;
+	REUSE = true;
+	UNROLLING = false;
 	dim = nRows = nCols = nBacksolves = 0;
 
-	determinant = ExportVariable("det", 1, 1, REAL, ACADO_LOCAL, BT_TRUE);
-}
-
-
-ExportLinearSolver::ExportLinearSolver( const ExportLinearSolver& arg ) : ExportAlgorithm( arg )
-{
-	init(arg.nRows, arg.nCols, arg.nBacksolves, arg.REUSE, arg.UNROLLING, arg.identifier);
+	determinant = ExportVariable("det", 1, 1, REAL, ACADO_LOCAL, true);
 }
 
 
@@ -63,31 +58,19 @@ ExportLinearSolver::~ExportLinearSolver( )
 {}
 
 
-ExportLinearSolver& ExportLinearSolver::operator=( const ExportLinearSolver& arg )
-{
-	if( this != &arg )
-	{
-		ExportAlgorithm::operator=( arg );
-		init(arg.nRows, arg.nCols, arg.nBacksolves, arg.REUSE, arg.UNROLLING, arg.identifier);
-	}
-
-	return *this;
-}
-
-
 returnValue ExportLinearSolver::init(	const uint newDim,
-										const BooleanType& reuse,
-										const BooleanType& unrolling
+										const bool& reuse,
+										const bool& unrolling
 										)
 {
-	return init(newDim, newDim, newDim, reuse, unrolling, String( "dim" ) << String( newDim ) << "_");
+	return init(newDim, newDim, newDim, reuse, unrolling, std::string( "dim" ) + toString( newDim ) + "_");
 }
 
 
 returnValue ExportLinearSolver::init(	const uint newDim,
-										const BooleanType& reuse,
-										const BooleanType& unrolling,
-										const String& newId
+										const bool& reuse,
+										const bool& unrolling,
+										const std::string& newId
 										)
 {
 	return init(newDim, newDim, newDim, reuse, unrolling, newId);
@@ -96,9 +79,9 @@ returnValue ExportLinearSolver::init(	const uint newDim,
 returnValue ExportLinearSolver::init(	unsigned _nRows,
 										unsigned _nCols,
 										unsigned _nBacksolves,
-										BooleanType _reuse,
-										BooleanType _unroll,
-										const String& _id
+										bool _reuse,
+										bool _unroll,
+										const std::string& _id
 										)
 {
 	ASSERT_RETURN(_nRows >= _nCols);
@@ -123,13 +106,13 @@ uint ExportLinearSolver::getDim() const {
 }
 
 
-BooleanType ExportLinearSolver::getReuse() const {
+bool ExportLinearSolver::getReuse() const {
 	
 	return REUSE;
 }
 
 
-returnValue ExportLinearSolver::setReuse( const BooleanType& reuse ) {
+returnValue ExportLinearSolver::setReuse( const bool& reuse ) {
 	
 	REUSE = reuse;
 	
@@ -137,13 +120,13 @@ returnValue ExportLinearSolver::setReuse( const BooleanType& reuse ) {
 } 
 
 
-BooleanType ExportLinearSolver::getUnrolling() const {
+bool ExportLinearSolver::getUnrolling() const {
 	
 	return UNROLLING;
 }
 
 
-returnValue ExportLinearSolver::setUnrolling( const BooleanType& unrolling ) {
+returnValue ExportLinearSolver::setUnrolling( const bool& unrolling ) {
 	
 	UNROLLING = unrolling;
 	
@@ -151,15 +134,21 @@ returnValue ExportLinearSolver::setUnrolling( const BooleanType& unrolling ) {
 } 
 
 
-const String ExportLinearSolver::getNameSolveFunction() {
+const std::string ExportLinearSolver::getNameSolveFunction() {
 	
-	return String( "solve_" ) << identifier << "system";
+	return string( "solve_" ) + identifier + "system";
 }
 
 
-const String ExportLinearSolver::getNameSolveReuseFunction() {
+const std::string ExportLinearSolver::getNameSolveReuseFunction() {
 	
-	return String( "solve_" ) << identifier << "system_reuse";
+	return string( "solve_" ) + identifier + "system_reuse";
+}
+
+ExportVariable ExportLinearSolver::getGlobalExportVariable( const uint factor ) const
+{
+	ASSERT(1 == 0);
+	return ExportVariable();
 }
 
 

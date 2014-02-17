@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -23,13 +23,10 @@
  *
  */
 
-
-
 /**
  *    \file include/acado/code_generation/export_variable.hpp
  *    \authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
-
 
 #ifndef ACADO_TOOLKIT_EXPORT_VARIABLE_HPP
 #define ACADO_TOOLKIT_EXPORT_VARIABLE_HPP
@@ -38,9 +35,7 @@
 #include <acado/code_generation/export_argument.hpp>
 #include <acado/code_generation/export_index.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
 
 class ExportArithmeticStatement;
 class ExportVariableInternal;
@@ -51,7 +46,7 @@ class ExportVariableInternal;
  *	\ingroup UserDataStructures
  *
  *	The class ExportVariable defines a matrix-valued variable to be used for exporting
- *	code. Instances of this class can be used similar to usual Matrix objects
+ *	code. Instances of this class can be used similar to usual DMatrix objects
  *	but offer additional functionality, e.g. they allow to export arithmetic 
  *	expressions and they can be passed as argument to exported functions. By 
  *	default, all entries of a ExportVariable are undefined, but each of its 
@@ -62,11 +57,13 @@ class ExportVariableInternal;
 
 class ExportVariable : public ExportArgument
 {
-
 	//
     // PUBLIC MEMBER FUNCTIONS:
     //
     public:
+
+		/** Default constructor. */
+		ExportVariable();
 
 		/** Constructor which takes the name, type string
 		 *	and dimensions of the variable.
@@ -78,13 +75,13 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
-		ExportVariable(	const String& _name,
+		ExportVariable(	const std::string& _name,
 						uint _nRows,
 						uint _nCols,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callItByValue = BT_FALSE,
-						const String& _prefix = emptyConstString
+						bool _callItByValue = false,
+						const std::string& _prefix = std::string()
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -92,17 +89,18 @@ class ExportVariable : public ExportArgument
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Matrix used for initialization.
+		 *	@param[in] _data			DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
-		ExportVariable(	const String& _name,
-						const Matrix& _data,
+		ExportVariable(	const std::string& _name,
+						const DMatrix& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callItByValue = BT_FALSE,
-						const String& _prefix = emptyConstString
+						bool _callItByValue = false,
+						const std::string& _prefix = std::string(),
+						bool _isGiven = true
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -110,17 +108,17 @@ class ExportVariable : public ExportArgument
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Shared pointer to Matrix used for initialization.
+		 *	@param[in] _data			Shared pointer to DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
-		ExportVariable(	const String& _name,
-						const matrixPtr& _data,
+		ExportVariable(	const std::string& _name,
+						const DMatrixPtr& _data,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callItByValue = BT_FALSE,
-						const String& _prefix = emptyConstString
+						bool _callItByValue = false,
+						const std::string& _prefix = std::string()
 						);
 
 		/** Constructor which takes the name and type string of the variable.
@@ -136,17 +134,19 @@ class ExportVariable : public ExportArgument
 						unsigned _nCols,
 						ExportType _type = REAL,
 						ExportStruct _dataStruct = ACADO_LOCAL,
-						BooleanType _callItByValue = BT_FALSE,
-						const String& _prefix = emptyConstString
+						bool _callItByValue = false,
+						const std::string& _prefix = std::string()
 						);
 
 		/** \name Constructor which converts a given matrix/vector/scalar into an ExportVariable.
 		  * @{ */
-		ExportVariable(	const Matrix& _data = emptyConstMatrix	/**< Matrix used for initialization */
-						);
 
-		ExportVariable(	const Vector& _data	/**< Vector used for initialization */
-						);
+		template<typename Derived>
+		ExportVariable(	const Eigen::MatrixBase<Derived>& _data
+						)
+		{
+			simpleForward(DMatrix( _data ));
+		}
 
 		ExportVariable(	const double _data	/**< Scalar used for initialization */
 						);
@@ -174,13 +174,13 @@ class ExportVariable : public ExportArgument
 		 *
 		 *	\return Reference to initialized object
 		 */
-		ExportVariable& setup(	const String& _name,
+		ExportVariable& setup(	const std::string& _name,
 								uint _nRows = 1,
 								uint _nCols = 1,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
-								BooleanType _callItByValue = BT_FALSE,
-								const String& _prefix = emptyConstString
+								bool _callItByValue = false,
+								const std::string& _prefix = std::string()
 								);
 
 		/** Initializes variable with given name and type string of the variable.
@@ -188,19 +188,20 @@ class ExportVariable : public ExportArgument
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Matrix used for initialization.
+		 *	@param[in] _data			DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 *
 		 *	\return Reference to initialized object
 		 */
-		ExportVariable& setup(	const String& _name,
-								const Matrix& _data,
+		ExportVariable& setup(	const std::string& _name,
+								const DMatrix& _data,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
-								BooleanType _callItByValue = BT_FALSE,
-								const String& _prefix = emptyConstString
+								bool _callItByValue = false,
+								const std::string& _prefix = std::string(),
+								bool _isGiven = true
 								);
 
 		/** Returns value of given component.
@@ -223,38 +224,15 @@ class ExportVariable : public ExportArgument
 		double operator()(	uint totalIdx
 							) const;
 
-		/** Returns a copy of the variable with given name.
-		 *
-		 *	@param[in] _name		New name of variable copy.
-		 *
-		 *	\return Copy of the variable with given name
-		 */
-		ExportVariable operator()(	const String& _name
-									) const;
-
-
-		/** Resets all components of the variable to be undefined.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue resetAll( );
-
-		/** Resets all diagonal components of the square variable to be undefined.
-		 *
-		 *	\return SUCCESSFUL_RETURN, \n
-		 *	        RET_MATRIX_NOT_SQUARE
-		 */
-		returnValue resetDiagonal( );
-
 		/** Returns whether given component is set to zero.
 		 *
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to zero, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to zero, \n
+		 *	        false otherwise
 		 */
-		BooleanType isZero( const ExportIndex& rowIdx,
+		bool isZero( const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 
@@ -263,10 +241,10 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to one, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to one, \n
+		 *	        false otherwise
 		 */
-		BooleanType isOne(	const ExportIndex& rowIdx,
+		bool isOne(	const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 
@@ -275,19 +253,19 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to a given value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to a given value, \n
+		 *	        false otherwise
 		 */
-		BooleanType isGiven(	const ExportIndex& rowIdx,
+		bool isGiven(	const ExportIndex& rowIdx,
 								const ExportIndex& colIdx
 								) const;
 
 		/** Returns whether all components of the variable are set to a given value.
 		 *
-		 *	\return BT_TRUE  iff all components of the variable are set to a given value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff all components of the variable are set to a given value, \n
+		 *	        false otherwise
 		 */
-		BooleanType isGiven( ) const;
+		bool isGiven( ) const;
 
 
 		/** Returns string containing the value of a given component. If its 
@@ -296,11 +274,11 @@ class ExportVariable : public ExportArgument
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return String containing the value of a given component
+		 *	\return std::string containing the value of a given component
 		 */
-		const String get(	const ExportIndex& rowIdx,
-							const ExportIndex& colIdx
-							) const;
+		const std::string get(	const ExportIndex& rowIdx,
+								const ExportIndex& colIdx
+								) const;
 
 		/** Returns number of rows of the variable.
 		 *
@@ -523,20 +501,20 @@ class ExportVariable : public ExportArgument
 
 		/** Returns whether variable is a vector.
 		 *
-		 *	\return BT_TRUE  iff variable is a vector, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff variable is a vector, \n
+		 *	        false otherwise
 		 */
-		BooleanType isVector( ) const;
+		bool isVector( ) const;
 
 
 		/** Returns the internal data matrix.
 		 *
 		 *	\return Internal data matrix
 		 */
-		Matrix getGivenMatrix( ) const;
+		const DMatrix& getGivenMatrix( ) const;
 
 		/** Check whether the matrix is actually a submatrix. */
-		BooleanType isSubMatrix() const;
+		bool isSubMatrix() const;
 
 		/** Prints contents of variable to screen.
 		 *
@@ -544,20 +522,12 @@ class ExportVariable : public ExportArgument
 		 */
 		returnValue print( ) const;
 
-		/** Create a diagonal matrix variable.
-		 *
-		 *  \return A diagonal variable.
-		 * */
-		friend ExportVariable diag( const String& _name, unsigned int _n );
+    private:
+		void simpleForward(const DMatrix& _value);
 };
-
 
 static const ExportVariable emptyConstExportVariable;
 
-
 CLOSE_NAMESPACE_ACADO
 
-
 #endif  // ACADO_TOOLKIT_EXPORT_VARIABLE_HPP
-
-// end of file.

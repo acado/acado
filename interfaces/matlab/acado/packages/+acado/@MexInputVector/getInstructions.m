@@ -28,7 +28,7 @@ function getInstructions(obj, cppobj, get)
 % 
 
 
-if (get == 'B')
+if (get == 'FB')
     
     fprintf(cppobj.fileMEX,sprintf('    int %s_count = 0;\n', obj.name));
     fprintf(cppobj.fileMEX,sprintf('    if (mxGetM(prhs[%d]) == 1 && mxGetN(prhs[%d]) >= 1) \n', obj.counter, obj.counter));
@@ -44,7 +44,7 @@ if (get == 'B')
     fprintf(cppobj.fileMEX,sprintf('    } \n'));
     fprintf(cppobj.fileMEX,sprintf('    %s_temp = mxGetPr(prhs[%d]); \n', obj.name, obj.counter));
 
-    fprintf(cppobj.fileMEX,sprintf('    Vector %s(%s_count);\n', obj.name, obj.name));
+    fprintf(cppobj.fileMEX,sprintf('    DVector %s(%s_count);\n', obj.name, obj.name));
 
     fprintf(cppobj.fileMEX,sprintf('    for( int i=0; i<%s_count; ++i ){ \n', obj.name));
     fprintf(cppobj.fileMEX,sprintf('        %s(i) = %s_temp[i];\n', obj.name, obj.name));

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -65,7 +65,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         DiagonallyImplicitRKExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -128,7 +128,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 										const ExportIndex& index3,
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
-										BooleanType DERIVATIVES = BT_FALSE );
+										bool DERIVATIVES = false );
 
 
 		/** Exports the code needed to compute the sensitivities of the states, defined by the linear output system.
@@ -150,7 +150,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 												const ExportIndex& tmp_index2,
 												const ExportVariable& Ah,
 												const ExportVariable& Bh,
-												BooleanType STATES,
+												bool STATES,
 												uint number 		);
 
 
@@ -170,7 +170,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
+		virtual DMatrix formMatrix( const DMatrix& mass, const DMatrix& jacobian );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the nonlinear, fully implicit system.
@@ -189,7 +189,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 											const ExportVariable& Ah,
 											const ExportVariable& C,
 											const ExportVariable& det,
-											BooleanType DERIVATIVES = BT_FALSE  	);
+											bool DERIVATIVES = false  	);
 
 
 		/** Exports the code needed to compute the sensitivities of the states defined by the nonlinear, fully implicit system.
@@ -212,7 +212,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 													const ExportVariable& Ah,
 													const ExportVariable& Bh,
 													const ExportVariable& det,
-													BooleanType STATES,
+													bool STATES,
 													uint number 		);
 
 
@@ -233,8 +233,8 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
 										const ExportVariable& C,
-										BooleanType evaluateB,
-										BooleanType DERIVATIVES );
+										bool evaluateB,
+										bool DERIVATIVES );
 
 
 		/** Exports the evaluation of the states at a specific stage.
@@ -285,7 +285,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 // Create the integrator
 //
 inline DiagonallyImplicitRKExport* createDiagonallyImplicitRKExport(	UserInteraction* _userInteraction,
-		const String &_commonHeaderName	)
+		const std::string &_commonHeaderName	)
 {
 	int sensGen;
 	_userInteraction->get( DYNAMIC_SENSITIVITY, sensGen );

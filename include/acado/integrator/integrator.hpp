@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -210,11 +210,11 @@ class Integrator : public AlgorithmicBase
 		*/
 		returnValue integrate(	double       t0                  /**< the start time              */,
 								double       tend                /**< the end time                */,
-								const Vector &x0                 /**< the initial state           */,
-								const Vector &xa  = emptyVector  /**< the initial algebraic state */,
-								const Vector &p   = emptyVector  /**< the parameters              */,
-								const Vector &u   = emptyVector  /**< the controls                */,
-								const Vector &w   = emptyVector  /**< the disturbance             */  );
+								const DVector &x0                 /**< the initial state           */,
+								const DVector &xa  = emptyVector  /**< the initial algebraic state */,
+								const DVector &p   = emptyVector  /**< the parameters              */,
+								const DVector &u   = emptyVector  /**< the controls                */,
+								const DVector &w   = emptyVector  /**< the disturbance             */  );
 
 
 
@@ -232,11 +232,11 @@ class Integrator : public AlgorithmicBase
 		*          file that implements the integration routine)        \n
 		*/
 		returnValue integrate(	const Grid   &t                  /**< the grid [t0,tend]          */,
-								const Vector &x0                 /**< the initial state           */,
-								const Vector &xa  = emptyVector  /**< the initial algebraic state */,
-								const Vector &p   = emptyVector  /**< the parameters              */,
-								const Vector &u   = emptyVector  /**< the controls                */,
-								const Vector &w   = emptyVector  /**< the disturbance             */  );
+								const DVector &x0                 /**< the initial state           */,
+								const DVector &xa  = emptyVector  /**< the initial algebraic state */,
+								const DVector &p   = emptyVector  /**< the parameters              */,
+								const DVector &u   = emptyVector  /**< the controls                */,
+								const DVector &w   = emptyVector  /**< the disturbance             */  );
 
 
 
@@ -248,10 +248,10 @@ class Integrator : public AlgorithmicBase
 		*          RET_INPUT_OUT_OF_RANGE   \n
 		*/
 		returnValue setForwardSeed(	const int    &order                /**< the order of the seed.      */,
-									const Vector &xSeed                /**< the seed w.r.t states       */,
-									const Vector &pSeed = emptyVector  /**< the seed w.r.t parameters   */,
-									const Vector &uSeed = emptyVector  /**< the seed w.r.t controls     */,
-									const Vector &wSeed = emptyVector  /**< the seed w.r.t disturbances */  );
+									const DVector &xSeed                /**< the seed w.r.t states       */,
+									const DVector &pSeed = emptyVector  /**< the seed w.r.t parameters   */,
+									const DVector &uSeed = emptyVector  /**< the seed w.r.t controls     */,
+									const DVector &wSeed = emptyVector  /**< the seed w.r.t disturbances */  );
 
 
 
@@ -263,7 +263,7 @@ class Integrator : public AlgorithmicBase
 		*           RET_INPUT_OUT_OF_RANGE   \n
 		*/
 		returnValue setBackwardSeed(	const int    &order /**< the order of the seed. */,
-										const Vector &seed  /**< the backward seed      */  );
+										const DVector &seed  /**< the backward seed      */  );
 
 
 
@@ -309,7 +309,7 @@ class Integrator : public AlgorithmicBase
 		*                                                          \n
 		*  \return SUCCESSFUL_RETURN                               \n
 		*/
-		inline  returnValue getX( Vector &xEnd ) const;
+		inline  returnValue getX( DVector &xEnd ) const;
 
 
 		/** Returns the result for the algebraic states at the                 \n
@@ -319,7 +319,7 @@ class Integrator : public AlgorithmicBase
 		*                                                                     \n
 		*  \return SUCCESSFUL_RETURN                                          \n
 		*/
-		inline  returnValue getXA( Vector &xaEnd ) const;
+		inline  returnValue getXA( DVector &xaEnd ) const;
 
 
 
@@ -368,7 +368,7 @@ class Integrator : public AlgorithmicBase
 		*  \return SUCCESSFUL_RETURN                                          \n
 		*          RET_INPUT_OUT_OF_RANGE                                     \n
 		*/
-		 returnValue getForwardSensitivities(	Vector &Dx,
+		 returnValue getForwardSensitivities(	DVector &Dx,
 												int order ) const;
 
 
@@ -394,10 +394,10 @@ class Integrator : public AlgorithmicBase
 		*  \return SUCCESSFUL_RETURN                                           \n
 		*          RET_INPUT_OUT_OF_RANGE                                      \n
 		*/
-		returnValue getBackwardSensitivities(	Vector &Dx_x0,
-												Vector &Dx_p ,
-												Vector &Dx_u ,
-												Vector &Dx_w ,
+		returnValue getBackwardSensitivities(	DVector &Dx_x0,
+												DVector &Dx_p ,
+												DVector &Dx_u ,
+												DVector &Dx_w ,
 												int order      ) const;
 
 		// ================================================================================
@@ -475,34 +475,34 @@ class Integrator : public AlgorithmicBase
 		/** Starts integration: cf. integrate(...) for  \n
 		* more details.                                                \n
 		*/
-		virtual returnValue evaluate( const Vector &x0    /**< the initial state           */,
-									const Vector &xa    /**< the initial algebraic state */,
-									const Vector &p     /**< the parameters              */,
-									const Vector &u     /**< the controls                */,
-									const Vector &w     /**< the disturbance             */,
+		virtual returnValue evaluate( const DVector &x0    /**< the initial state           */,
+									const DVector &xa    /**< the initial algebraic state */,
+									const DVector &p     /**< the parameters              */,
+									const DVector &u     /**< the controls                */,
+									const DVector &w     /**< the disturbance             */,
 									const Grid   &t_    /**< the time interval           */  ) = 0;
 
 		/** Evaluates the transtion (protected, only for internal use).
 		*/
 		virtual returnValue evaluateTransition( const double time   /**< the time            */,
-													Vector &xd    /**< the state           */,
-												const Vector &xa    /**< the algebraic state */,
-												const Vector &p     /**< the parameters      */,
-												const Vector &u     /**< the controls        */,
-												const Vector &w     /**< the disturbance     */  );
+													DVector &xd    /**< the state           */,
+												const DVector &xa    /**< the algebraic state */,
+												const DVector &p     /**< the parameters      */,
+												const DVector &u     /**< the controls        */,
+												const DVector &w     /**< the disturbance     */  );
 
 
-		virtual returnValue diffTransitionForward(       Vector &DX,
-												const Vector &DP,
-												const Vector &DU,
-												const Vector &DW,
+		virtual returnValue diffTransitionForward(       DVector &DX,
+												const DVector &DP,
+												const DVector &DU,
+												const DVector &DW,
 												const int    &order );
 
 
-		virtual returnValue diffTransitionBackward( Vector &DX,
-													Vector &DP,
-													Vector &DU,
-													Vector &DW,
+		virtual returnValue diffTransitionBackward( DVector &DX,
+													DVector &DP,
+													DVector &DU,
+													DVector &DW,
 													int    &order );
 
 
@@ -513,13 +513,13 @@ class Integrator : public AlgorithmicBase
 		*  \return SUCCESFUL RETURN         \n
 		*          RET_INPUT_OUT_OF_RANGE   \n
 		*/
-		virtual returnValue setProtectedForwardSeed( const Vector &xSeed     /**< the seed w.r.t the
+		virtual returnValue setProtectedForwardSeed( const DVector &xSeed     /**< the seed w.r.t the
 																			*  initial states     */,
-													const Vector &pSeed     /**< the seed w.r.t the
+													const DVector &pSeed     /**< the seed w.r.t the
 																			*  parameters         */,
-													const Vector &uSeed     /**< the seed w.r.t the
+													const DVector &uSeed     /**< the seed w.r.t the
 																			*  controls           */,
-													const Vector &wSeed     /**< the seed w.r.t the
+													const DVector &wSeed     /**< the seed w.r.t the
 																			*  disturbances       */,
 													const int    &order     /**< the order of the
 																			*  seed.              */ ) = 0;
@@ -531,7 +531,7 @@ class Integrator : public AlgorithmicBase
 		*   \return SUCCESFUL_RETURN         \n
 		*           RET_INPUT_OUT_OF_RANGE   \n
 		*/
-		virtual returnValue setProtectedBackwardSeed(  const Vector &seed    /**< the seed
+		virtual returnValue setProtectedBackwardSeed(  const DVector &seed    /**< the seed
 																			*   matrix     */,
 													const int    &order   /**< the order of the
 																			*  seed.              */  ) = 0;
@@ -544,7 +544,7 @@ class Integrator : public AlgorithmicBase
 		/** Returns the result for the state at the time tend.                           \n
 		*  \return SUCCESSFUL_RETURN                                                    \n
 		*/
-		virtual returnValue getProtectedX( Vector *xEnd /**< the result for the
+		virtual returnValue getProtectedX( DVector *xEnd /**< the result for the
 														*  states at the time
 														*  tend.              */ ) const = 0;
 
@@ -553,7 +553,7 @@ class Integrator : public AlgorithmicBase
 		*  \return SUCCESSFUL_RETURN                                                    \n
 		*          RET_INPUT_OUT_OF_RANGE                                               \n
 		*/
-		virtual returnValue getProtectedForwardSensitivities( Matrix *Dx  /**< the result for the
+		virtual returnValue getProtectedForwardSensitivities( DMatrix *Dx  /**< the result for the
 																		*   forward sensitivi-
 																		*   ties               */,
 															int order   /**< the order          */ ) const = 0;
@@ -570,10 +570,10 @@ class Integrator : public AlgorithmicBase
 		*  \return SUCCESSFUL_RETURN                                           \n
 		*          RET_INPUT_OUT_OF_RANGE                                      \n
 		*/
-		virtual returnValue getProtectedBackwardSensitivities( Vector &Dx_x0,
-															Vector &Dx_p ,
-															Vector &Dx_u ,
-															Vector &Dx_w ,
+		virtual returnValue getProtectedBackwardSensitivities( DVector &Dx_x0,
+															DVector &Dx_p ,
+															DVector &Dx_u ,
+															DVector &Dx_w ,
 															int order      ) const = 0;
 
 
@@ -667,7 +667,7 @@ class Integrator : public AlgorithmicBase
 		int     count              ;  /**< a counter of the (accepted) steps                  */
 		int     count2             ;  /**< number of steps after integration                  */
 		int     count3             ;  /**< number of steps after integration                  */
-		Vector  diff_scale         ;  /**< the scale of the differential states               */
+		DVector  diff_scale         ;  /**< the scale of the differential states               */
 
 
 		// PRINT-LEVEL:
@@ -696,17 +696,17 @@ class Integrator : public AlgorithmicBase
 		int       nFcnEvaluations   ;
 
 
-		Vector                    xE;
+		DVector                    xE;
 
-		Vector                    dX;
-		Vector                    dP;
-		Vector                    dU;
-		Vector                    dW;
+		DVector                    dX;
+		DVector                    dP;
+		DVector                    dU;
+		DVector                    dW;
 
-		Vector                   dXb;
-		Vector                   dPb;
-		Vector                   dUb;
-		Vector                   dWb;
+		DVector                   dXb;
+		DVector                   dPb;
+		DVector                   dUb;
+		DVector                   dWb;
 
 		VariablesGrid         xStore;
 		VariablesGrid        dxStore;

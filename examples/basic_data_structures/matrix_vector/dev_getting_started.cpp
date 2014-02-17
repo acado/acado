@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,7 +43,7 @@ int main( ){
 
     // DEFINE SOME VECTORS:
     // --------------------
-    Vector a(3), b(3), c;
+    DVector a(3), b(3), c;
 
     a(0) = 1.0; a(1) = 3.0; a(2) = 2.0;
     b(0) = 4.0; b(1) = 2.0; b(2) = 3.0;
@@ -62,7 +62,7 @@ int main( ){
 
     // DEFINE SOME MATRICES:
     // ---------------------
-    Matrix A(2,2), B(2,2);
+    DMatrix A(2,2), B(2,2);
 
     A(0,0) = 1.0;  A(0,1) = 1.0;
     A(1,0) = 0.0;  A(1,1) = 2.0;

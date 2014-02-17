@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -47,7 +47,7 @@ ExportForLoop::ExportForLoop(	const ExportIndex& _loopVariable,
 								const ExportIndex& _startValue,
 								const ExportIndex& _finalValue,
 								const ExportIndex& _increment,
-								BooleanType _doLoopUnrolling
+								bool _doLoopUnrolling
 							) : ExportStatementBlock( ),
 									loopVariable( _loopVariable ),
 									startValue( _startValue ),
@@ -97,7 +97,7 @@ returnValue ExportForLoop::init(	const ExportIndex& _loopVariable,
 									const ExportIndex& _startValue,
 									const ExportIndex& _finalValue,
 									const ExportIndex&  _increment,
-									BooleanType _doLoopUnrolling
+									bool _doLoopUnrolling
 									)
 {
 	clear();
@@ -114,9 +114,9 @@ returnValue ExportForLoop::init(	const ExportIndex& _loopVariable,
 
 
 
-returnValue ExportForLoop::exportDataDeclaration(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+returnValue ExportForLoop::exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision
 													) const
 {
@@ -124,9 +124,9 @@ returnValue ExportForLoop::exportDataDeclaration(	FILE* file,
 }
 
 
-returnValue ExportForLoop::exportCode(	FILE* file,
-										const String& _realString,
-										const String& _intString,
+returnValue ExportForLoop::exportCode(	std::ostream& stream,
+										const std::string& _realString,
+										const std::string& _intString,
 										int _precision
 										) const
 {
@@ -134,50 +134,46 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 	if (status != SUCCESSFUL_RETURN)
 		return status;
 
-	if (startValue.isGiven() == BT_TRUE && finalValue.isGiven() == BT_TRUE)
+	if (startValue.isGiven() == true && finalValue.isGiven() == true)
 		if (startValue.getGivenValue() == finalValue.getGivenValue())
 			return SUCCESSFUL_RETURN;
 
-	if ( doLoopUnrolling == BT_FALSE )
+	if ( doLoopUnrolling == false )
 	{
-		stringstream s;
+		stream << "for (" << loopVariable.get() << " = " << startValue.get() << "; ";
 
-		s << "for (" << loopVariable.get().getName() << " = " << startValue.get().getName() << "; ";
-
-		if (increment.isGiven() ==  BT_TRUE && increment.getGivenValue() == -1)
-			s << finalValue.get().getName() << " < " << loopVariable.get().getName() << "; ";
+		if (increment.isGiven() ==  true && increment.getGivenValue() == -1)
+			stream << finalValue.get() << " < " << loopVariable.get() << "; ";
 		else
-			s << loopVariable.get().getName() << " < " << finalValue.get().getName() << "; ";
+			stream << loopVariable.get() << " < " << finalValue.get() << "; ";
 		
-		if (increment.isGiven() == BT_TRUE)
+		if (increment.isGiven() == true)
 		{
 			switch ( increment.getGivenValue() )
 			{
 				case 1:
-					s << "++" << loopVariable.get().getName();
+					stream << "++" << loopVariable.get();
 					break;
 
 				case -1:
-					s << "--" << loopVariable.get().getName();
+					stream << "--" << loopVariable.get();
 					break;
 
 				default:
-					s << loopVariable.get().getName() << " += " << increment.getGivenValue();
+					stream << loopVariable.get() << " += " << increment.getGivenValue();
 					break;
 			}
 		}
 		else
 		{
-			s << loopVariable.get().getName() << " += " << increment.get().getName();
+			stream << loopVariable.get() << " += " << increment.get();
 		}
 
-		s << ")" << endl << "{" << endl;
+		stream << ")" << endl << "{" << endl;
 
-		acadoFPrintf(file, "%s", s.str().c_str());
+		ExportStatementBlock::exportCode(stream, _realString, _intString, _precision);
 
-		ExportStatementBlock::exportCode(file, _realString, _intString, _precision);
-
-		acadoFPrintf( file,"}\n");
+		stream << "}\n";
 	}
 	
 	return SUCCESSFUL_RETURN;
@@ -187,14 +183,14 @@ returnValue ExportForLoop::exportCode(	FILE* file,
 
 ExportForLoop& ExportForLoop::unrollLoop( )
 {
-	doLoopUnrolling = BT_TRUE;
+	doLoopUnrolling = true;
 	return *this;
 }
 
 
 ExportForLoop& ExportForLoop::keepLoop( )
 {
-	doLoopUnrolling = BT_FALSE;
+	doLoopUnrolling = false;
 	return *this;
 }
 
@@ -226,10 +222,10 @@ returnValue ExportForLoop::clear( )
 //
 returnValue ExportForLoop::sanityCheck() const
 {
-	if (doLoopUnrolling == BT_TRUE)
+	if (doLoopUnrolling == true)
 		return ACADOERRORTEXT(RET_NOT_IMPLEMENTED_YET, "Loop unrolling is not yet implemented");
 
-	if (startValue.isGiven() == BT_TRUE && finalValue.isGiven() == BT_TRUE && increment.isGiven() == BT_TRUE)
+	if (startValue.isGiven() == true && finalValue.isGiven() == true && increment.isGiven() == true)
 	{
 		if ( ( startValue.getGivenValue() > finalValue.getGivenValue() ) && ( increment.getGivenValue() >= 0 ) )
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Export for loop arguments are invalid");

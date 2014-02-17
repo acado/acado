@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,39 +33,23 @@
 
 #include <acado/code_generation/linear_solvers/householder_qr_export.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
 ExportHouseholderQR::ExportHouseholderQR( UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ExportLinearSolver( _userInteraction,_commonHeaderName )
-{
-}
-
-
-ExportHouseholderQR::ExportHouseholderQR( const ExportHouseholderQR& arg ) : ExportLinearSolver( arg )
 {
 }
 
 
 ExportHouseholderQR::~ExportHouseholderQR( )
 {
-}
-
-
-ExportHouseholderQR& ExportHouseholderQR::operator=( const ExportHouseholderQR& arg )
-{
-	if( this != &arg )
-	{
-		ExportLinearSolver::operator=( arg );
-	}
-
-	return *this;
 }
 
 
@@ -105,10 +89,10 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 			solveTriangular.addStatement(
 					b.getRow(run1 - 1) -= A.getSubMatrix((run1 - 1), run1, run2, run2 + 1) * b.getRow(run2));
 		}
-		solveTriangular.addStatement(
-				String("b[") << String((run1 - 1)) << "] = b["
-				<< String((run1 - 1)) << "]/A["
-				<< String((run1 - 1) * nCols + (run1 - 1)) << "];\n");
+		solveTriangular <<
+				"b[" << toString((run1 - 1)) << "] = b["
+				<< toString((run1 - 1)) << "]/A["
+				<< toString((run1 - 1) * nCols + (run1 - 1)) << "];\n";
 	}
 	code.addFunction(solveTriangular);
 	
@@ -132,34 +116,30 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 			// calculate norm:
 			solve.addStatement(rk_temp.getCol(nRows) ==
 					rk_temp.getCols(run1, nRows) * rk_temp.getTranspose().getRows(run1, nRows));
-			solve.addStatement(
-					rk_temp.getFullName() << "[" << String(nRows) << "] = sqrt("
-							<< rk_temp.getFullName() << "[" << String(nRows)
-							<< "]);\n");
+			solve << rk_temp.getFullName() << "[" << toString(nRows) << "] = sqrt("
+					<< rk_temp.getFullName() << "[" << toString(nRows)
+					<< "]);\n";
 
 			// update first element:
-			solve.addStatement(
-					rk_temp.getFullName() << "[" << String(run1) << "] += ("
-							<< rk_temp.getFullName() << "[" << String(run1)
-							<< "] < 0 ? -1 : 1)*" << rk_temp.getFullName()
-							<< "[" << String(nRows) << "];\n");
+			solve << rk_temp.getFullName() << "[" << toString(run1) << "] += ("
+					<< rk_temp.getFullName() << "[" << toString(run1)
+					<< "] < 0 ? -1 : 1)*" << rk_temp.getFullName()
+					<< "[" << toString(nRows) << "];\n";
 
 			// calculate norm:
 			solve.addStatement(rk_temp.getCol(nRows) ==
 					rk_temp.getCols(run1, nRows) * rk_temp.getTranspose().getRows(run1, nRows));
-			solve.addStatement(
-					rk_temp.getFullName() << "[" << String(nRows) << "] = sqrt("
-							<< rk_temp.getFullName() << "[" << String(nRows)
-							<< "]);\n");
+			solve << rk_temp.getFullName() << "[" << toString(nRows) << "] = sqrt("
+					<< rk_temp.getFullName() << "[" << toString(nRows)
+					<< "]);\n";
 
 			// normalization:
 			for (run2 = run1; run2 < nRows; run2++)
 			{
-				solve.addStatement(
-						rk_temp.getFullName() << "[" << String(run2) << "] = "
-								<< rk_temp.getFullName() << "[" << String(run2)
-								<< "]/" << rk_temp.getFullName() << "["
-								<< String(nRows) << "];\n");
+				solve << rk_temp.getFullName() << "[" << toString(run2) << "] = "
+						<< rk_temp.getFullName() << "[" << toString(run2)
+						<< "]/" << rk_temp.getFullName() << "["
+						<< toString(nRows) << "];\n";
 			}
 
 			// update current column:
@@ -168,8 +148,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 							== rk_temp.getCols(run1, nRows)
 									* A.getSubMatrix(run1, nRows, run1,
 											run1 + 1));
-			solve.addStatement(
-					rk_temp.getFullName() << "[" << String(nRows) << "] *= 2;\n");
+			solve << rk_temp.getFullName() << "[" << toString(nRows) << "] *= 2;\n";
 			solve.addStatement(
 					A.getSubMatrix(run1, run1 + 1, run1, run1 + 1) -=
 							rk_temp.getCol(run1) * rk_temp.getCol(nRows));
@@ -195,9 +174,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 								== rk_temp.getCols(run1, nRows)
 										* A.getSubMatrix(run1, nRows, run2,
 												run2 + 1));
-				solve.addStatement(
-						rk_temp.getFullName() << "[" << String(nRows)
-								<< "] *= 2;\n");
+				solve <<  rk_temp.getFullName() << "[" << toString(nRows) << "] *= 2;\n";
 				for (run3 = run1; run3 < nRows; run3++)
 				{
 					solve.addStatement(
@@ -210,8 +187,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 					rk_temp.getCol(nRows)
 							== rk_temp.getCols(run1, nRows)
 									* b.getRows(run1, nRows));
-			solve.addStatement(
-					rk_temp.getFullName() << "[" << String(nRows) << "] *= 2;\n");
+			solve << rk_temp.getFullName() << "[" << toString(nRows) << "] *= 2;\n";
 			for (run3 = run1; run3 < nRows; run3++)
 			{
 				solve.addStatement( b.getRow(run3) -= rk_temp.getCol(run3) * rk_temp.getCol(nRows));
@@ -235,61 +211,61 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 		solve.addIndex( j );
 		solve.addIndex( k );
 
-		solve.addStatement( String( "for( i=0; i < " ) << String( nCols ) << "; i++ ) {\n" );
-		solve.addStatement( String( "	for( j=i; j < " ) << String( nRows ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[j] = A[j*" << String( nCols ) << "+i];\n" );
-		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] = " << rk_temp.getFullName() << "[i]*" << rk_temp.getFullName() << "[i];\n" );
-		solve.addStatement( String( "	for( j=i+1; j < " ) << String( nRows ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] += " << rk_temp.getFullName() << "[j]*" << rk_temp.getFullName() << "[j];\n" );
-		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] = sqrt(" << rk_temp.getFullName() << "[" << String( nRows ) << "]);\n" );
+		solve << "for( i=0; i < " << toString( nCols ) << "; i++ ) {\n";
+		solve << "	for( j=i; j < " << toString( nRows ) << "; j++ ) {\n";
+		solve << "		" << rk_temp.getFullName() << "[j] = A[j*" << toString( nCols ) << "+i];\n";
+		solve << "	}\n";
+		solve << "	" << rk_temp.getFullName() << "[" << toString( nRows ) << "] = " << rk_temp.getFullName() << "[i]*" << rk_temp.getFullName() << "[i];\n";
+		solve << "	for( j=i+1; j < " << toString( nRows ) << "; j++ ) {\n";
+		solve << "		" << rk_temp.getFullName() << "[" << toString( nRows ) << "] += " << rk_temp.getFullName() << "[j]*" << rk_temp.getFullName() << "[j];\n";
+		solve << "	}\n";
+		solve << "	" << rk_temp.getFullName() << "[" << toString( nRows ) << "] = sqrt(" << rk_temp.getFullName() << "[" << toString( nRows ) << "]);\n";
 		// update first element:
-		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[i] += (" << rk_temp.getFullName() << "[i] < 0 ? -1 : 1)*" << rk_temp.getFullName() << "[" << String( nRows ) << "];\n" );
-		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] = " << rk_temp.getFullName() << "[i]*" << rk_temp.getFullName() << "[i];\n" );
-		solve.addStatement( String( "	for( j=i+1; j < " ) << String( nRows ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] += " << rk_temp.getFullName() << "[j]*" << rk_temp.getFullName() << "[j];\n" );
-		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] = sqrt(" << rk_temp.getFullName() << "[" << String( nRows ) << "]);\n" );
-		solve.addStatement( String( "	for( j=i; j < " ) << String( nRows ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[j] = " << rk_temp.getFullName() << "[j]/" << rk_temp.getFullName() << "[" << String( nRows ) << "];\n" );
-		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] = " << rk_temp.getFullName() << "[i]*A[i*" << String( nCols ) << "+i];\n" );
-		solve.addStatement( String( "	for( j=i+1; j < " ) << String( nRows ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] += " << rk_temp.getFullName() << "[j]*A[j*" << String( nCols ) << "+i];\n" );
-		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] *= 2;\n" );
-		solve.addStatement( String( "	A[i*" ) << String( nCols ) << "+i] -= " << rk_temp.getFullName() << "[i]*" << rk_temp.getFullName() << "[" << String( nRows ) << "];\n" );
+		solve << "	" << rk_temp.getFullName() << "[i] += (" << rk_temp.getFullName() << "[i] < 0 ? -1 : 1)*" << rk_temp.getFullName() << "[" << toString( nRows ) << "];\n";
+		solve << "	" << rk_temp.getFullName() << "[" << toString( nRows ) << "] = " << rk_temp.getFullName() << "[i]*" << rk_temp.getFullName() << "[i];\n";
+		solve << "	for( j=i+1; j < " << toString( nRows ) << "; j++ ) {\n";
+		solve << "		" << rk_temp.getFullName() << "[" << toString( nRows ) << "] += " << rk_temp.getFullName() << "[j]*" << rk_temp.getFullName() << "[j];\n";
+		solve << "	}\n";
+		solve << "	" << rk_temp.getFullName() << "[" << toString( nRows ) << "] = sqrt(" << rk_temp.getFullName() << "[" << toString( nRows ) << "]);\n";
+		solve << "	for( j=i; j < " << toString( nRows ) << "; j++ ) {\n";
+		solve << "		" << rk_temp.getFullName() << "[j] = " << rk_temp.getFullName() << "[j]/" << rk_temp.getFullName() << "[" << toString( nRows ) << "];\n";
+		solve << "	}\n";
+		solve << "	" << rk_temp.getFullName() << "[" << toString( nRows ) << "] = " << rk_temp.getFullName() << "[i]*A[i*" << toString( nCols ) << "+i];\n";
+		solve << "	for( j=i+1; j < " << toString( nRows ) << "; j++ ) {\n";
+		solve << "		" << rk_temp.getFullName() << "[" << toString( nRows ) << "] += " << rk_temp.getFullName() << "[j]*A[j*" << toString( nCols ) << "+i];\n";
+		solve << "	}\n";
+		solve << "	" << rk_temp.getFullName() << "[" << toString( nRows ) << "] *= 2;\n";
+		solve << "	A[i*" << toString( nCols ) << "+i] -= " << rk_temp.getFullName() << "[i]*" << rk_temp.getFullName() << "[" << toString( nRows ) << "];\n";
 
-		solve.addStatement( String( "	" ) << determinant.getFullName() << " *= " << "	A[i * " << String( nCols ) << " + i];\n" );
+		solve << "	" << determinant.getFullName() << " *= " << "	A[i * " << toString( nCols ) << " + i];\n";
 
 		if( REUSE ) {
-			solve.addStatement( String( "	for( j=i; j < (" ) << String( nRows ) << "-1); j++ ) {\n" );
-			solve.addStatement( String( "		A[(j+1)*" ) << String( nCols ) << "+i] = " << rk_temp.getFullName() << "[j];\n" );
-			solve.addStatement( String( "	}\n" ) );
+			solve << "	for( j=i; j < (" << toString( nRows ) << "-1); j++ ) {\n";
+			solve << "		A[(j+1)*" << toString( nCols ) << "+i] = " << rk_temp.getFullName() << "[j];\n";
+			solve << "	}\n";
 		}
-		solve.addStatement( String( "	for( j=i+1; j < " ) << String( nCols ) << "; j++ ) {\n" );
-		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] = " << rk_temp.getFullName() << "[i]*A[i*" << String( nCols ) << "+j];\n" );
-		solve.addStatement( String( "		for( k=i+1; k < " ) << String( nRows ) << "; k++ ) {\n" );
-		solve.addStatement( String( "			" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] += " << rk_temp.getFullName() << "[k]*A[k*" << String( nCols ) << "+j];\n" );
-		solve.addStatement( String( "		}\n" ) );
-		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] *= 2;\n" );
-		solve.addStatement( String( "		for( k=i; k < " ) << String( nRows ) << "; k++ ) {\n" );
-		solve.addStatement( String( "			A[k*" ) << String( nCols ) << "+j] -= " << rk_temp.getFullName() << "[k]*" << rk_temp.getFullName() << "[" << String( nRows ) << "];\n" );
-		solve.addStatement( String( "		}\n" ) );
-		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] = " << rk_temp.getFullName() << "[i]*b[i];\n" );
-		solve.addStatement( String( "	for( k=i+1; k < " ) << String( nRows ) << "; k++ ) {\n" );
-		solve.addStatement( String( "		" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] += " << rk_temp.getFullName() << "[k]*b[k];\n" );
-		solve.addStatement( String( "	}\n" ) );
-		solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] *= 2;\n" );
-		solve.addStatement( String( "	for( k=i; k < " ) << String( nRows ) << "; k++ ) {\n" );
-		solve.addStatement( String( "		b[k] -= " ) << rk_temp.getFullName() << "[k]*" << rk_temp.getFullName() << "[" << String( nRows ) << "];\n" );
-		solve.addStatement( String( "	}\n" ) );
+		solve << "	for( j=i+1; j < " << toString( nCols ) << "; j++ ) {\n";
+		solve << "		" << rk_temp.getFullName() << "[" << toString( nRows ) << "] = " << rk_temp.getFullName() << "[i]*A[i*" << toString( nCols ) << "+j];\n";
+		solve << "		for( k=i+1; k < " << toString( nRows ) << "; k++ ) {\n";
+		solve << "			" << rk_temp.getFullName() << "[" << toString( nRows ) << "] += " << rk_temp.getFullName() << "[k]*A[k*" << toString( nCols ) << "+j];\n";
+		solve << "		}\n";
+		solve << "		" << rk_temp.getFullName() << "[" << toString( nRows ) << "] *= 2;\n";
+		solve << "		for( k=i; k < " << toString( nRows ) << "; k++ ) {\n";
+		solve << "			A[k*" << toString( nCols ) << "+j] -= " << rk_temp.getFullName() << "[k]*" << rk_temp.getFullName() << "[" << toString( nRows ) << "];\n";
+		solve << "		}\n";
+		solve << "	}\n";
+		solve << "	" << rk_temp.getFullName() << "[" << toString( nRows ) << "] = " << rk_temp.getFullName() << "[i]*b[i];\n";
+		solve << "	for( k=i+1; k < " << toString( nRows ) << "; k++ ) {\n";
+		solve << "		" << rk_temp.getFullName() << "[" << toString( nRows ) << "] += " << rk_temp.getFullName() << "[k]*b[k];\n";
+		solve << "	}\n";
+		solve << "	" << rk_temp.getFullName() << "[" << toString( nRows ) << "] *= 2;\n";
+		solve << "	for( k=i; k < " << toString( nRows ) << "; k++ ) {\n";
+		solve << "		b[k] -= " << rk_temp.getFullName() << "[k]*" << rk_temp.getFullName() << "[" << toString( nRows ) << "];\n";
+		solve << "	}\n";
 		if( REUSE ) {
-			solve.addStatement( String( "	" ) << rk_temp.getFullName() << "[i] = " << rk_temp.getFullName() << "[" << String( nRows-1 ) << "];\n" );
+			solve << "	" << rk_temp.getFullName() << "[i] = " << rk_temp.getFullName() << "[" << toString( nRows-1 ) << "];\n";
 		}
-		solve.addStatement( String( "}\n" ) );
+		solve << "}\n";
 	}
 	solve.addLinebreak();
 
@@ -305,7 +281,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 				solveReuse.addStatement( rk_temp.getCol( nRows ) += A.getSubMatrix( run2+1,run2+2,run1,run1+1 )*b.getRow( run2 ) );
 			}
 			solveReuse.addStatement( rk_temp.getCol( nRows ) += rk_temp.getCol( run1 )*b.getRow( nRows-1 ) );
-			solveReuse.addStatement( String( "" ) << rk_temp.getFullName() << "[" << String( nRows ) << "] *= 2;\n" );
+			solveReuse << rk_temp.getFullName() << "[" << toString( nRows ) << "] *= 2;\n" ;
 			for( run3 = run1; run3 < (nRows-1); run3++ ) {
 				solveReuse.addStatement( b.getRow( run3 ) -= A.getSubMatrix( run3+1,run3+2,run1,run1+1 )*rk_temp.getCol( nRows ) );
 			}
@@ -336,9 +312,9 @@ returnValue ExportHouseholderQR::setup( )
 	b = ExportVariable("b", nRows, 1, REAL);
 	rk_temp = ExportVariable("rk_temp", 1, nRows + 1, REAL);
 	solve = ExportFunction(getNameSolveFunction(), A, b, rk_temp);
-	solve.setReturnValue(determinant, BT_FALSE);
+	solve.setReturnValue(determinant, false);
 	solve.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
-	solveTriangular = ExportFunction( String( "solve_" ) << identifier << "triangular", A, b);
+	solveTriangular = ExportFunction( std::string( "solve_" ) + identifier + "triangular", A, b);
 	solveTriangular.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	
 	if (REUSE)
@@ -349,7 +325,7 @@ returnValue ExportHouseholderQR::setup( )
 	
 	int unrollOpt;
 	userInteraction->get(UNROLL_LINEAR_SOLVER, unrollOpt);
-	UNROLLING = (BooleanType) unrollOpt;
+	UNROLLING = (bool) unrollOpt;
 
     return SUCCESSFUL_RETURN;
 }
@@ -362,7 +338,7 @@ ExportVariable ExportHouseholderQR::getGlobalExportVariable( const uint factor )
 	ExportStruct structWspace;
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
-	return ExportVariable( String( "rk_" ) << identifier << "temp", factor, nRows+1, REAL, structWspace );
+	return ExportVariable( std::string( "rk_" ) + identifier + "temp", factor, nRows+1, REAL, structWspace );
 }
 
 

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -76,16 +76,16 @@ returnValue BoxConstraint::init( const Grid& grid_ ){
     blb   = 0;
     bub   = 0;
 
-    residuumXL  = new Matrix[grid.getNumPoints()];
-    residuumXU  = new Matrix[grid.getNumPoints()];
-    residuumXAL = new Matrix[grid.getNumPoints()];
-    residuumXAU = new Matrix[grid.getNumPoints()];
-    residuumPL  = new Matrix[1                  ];
-    residuumPU  = new Matrix[1                  ];
-    residuumUL  = new Matrix[grid.getNumPoints()];
-    residuumUU  = new Matrix[grid.getNumPoints()];
-    residuumWL  = new Matrix[grid.getNumPoints()];
-    residuumWU  = new Matrix[grid.getNumPoints()];
+    residuumXL  = new DMatrix[grid.getNumPoints()];
+    residuumXU  = new DMatrix[grid.getNumPoints()];
+    residuumXAL = new DMatrix[grid.getNumPoints()];
+    residuumXAU = new DMatrix[grid.getNumPoints()];
+    residuumPL  = new DMatrix[1                  ];
+    residuumPU  = new DMatrix[1                  ];
+    residuumUL  = new DMatrix[grid.getNumPoints()];
+    residuumUU  = new DMatrix[grid.getNumPoints()];
+    residuumWL  = new DMatrix[grid.getNumPoints()];
+    residuumWU  = new DMatrix[grid.getNumPoints()];
 
     return SUCCESSFUL_RETURN;
 }
@@ -101,15 +101,15 @@ BoxConstraint::BoxConstraint( const BoxConstraint& rhs ){
     if( nb > 0 ){
         var   = (VariableType*)calloc(nb,sizeof(VariableType));
         index = (int*)calloc(nb,sizeof(int));
-        blb   = (Vector**)calloc(nb,sizeof(Vector*));
-        bub   = (Vector**)calloc(nb,sizeof(Vector*));
+        blb   = (DVector**)calloc(nb,sizeof(DVector*));
+        bub   = (DVector**)calloc(nb,sizeof(DVector*));
 
         for( run1 = 0; run1 < nb; run1++ ){
 
             var  [run1] = rhs.var  [run1];
             index[run1] = rhs.index[run1];
-            blb  [run1] = new Vector(*rhs.blb[run1]);
-            bub  [run1] = new Vector(*rhs.bub[run1]);
+            blb  [run1] = new DVector(*rhs.blb[run1]);
+            bub  [run1] = new DVector(*rhs.bub[run1]);
         }
     }
     else{
@@ -119,16 +119,16 @@ BoxConstraint::BoxConstraint( const BoxConstraint& rhs ){
         bub   = 0;
     }
 
-    residuumXL  = new Matrix[grid.getNumPoints()];
-    residuumXU  = new Matrix[grid.getNumPoints()];
-    residuumXAL = new Matrix[grid.getNumPoints()];
-    residuumXAU = new Matrix[grid.getNumPoints()];
-    residuumPL  = new Matrix[1                  ];
-    residuumPU  = new Matrix[1                  ];
-    residuumUL  = new Matrix[grid.getNumPoints()];
-    residuumUU  = new Matrix[grid.getNumPoints()];
-    residuumWL  = new Matrix[grid.getNumPoints()];
-    residuumWU  = new Matrix[grid.getNumPoints()];
+    residuumXL  = new DMatrix[grid.getNumPoints()];
+    residuumXU  = new DMatrix[grid.getNumPoints()];
+    residuumXAL = new DMatrix[grid.getNumPoints()];
+    residuumXAU = new DMatrix[grid.getNumPoints()];
+    residuumPL  = new DMatrix[1                  ];
+    residuumPU  = new DMatrix[1                  ];
+    residuumUL  = new DMatrix[grid.getNumPoints()];
+    residuumUU  = new DMatrix[grid.getNumPoints()];
+    residuumWL  = new DMatrix[grid.getNumPoints()];
+    residuumWU  = new DMatrix[grid.getNumPoints()];
 }
 
 BoxConstraint::~BoxConstraint( ){
@@ -179,15 +179,15 @@ BoxConstraint& BoxConstraint::operator=( const BoxConstraint& rhs ){
         if( nb > 0 ){
             var   = (VariableType*)calloc(nb,sizeof(VariableType));
             index = (int*)calloc(nb,sizeof(int));
-            blb   = (Vector**)calloc(nb,sizeof(Vector*));
-            bub   = (Vector**)calloc(nb,sizeof(Vector*));
+            blb   = (DVector**)calloc(nb,sizeof(DVector*));
+            bub   = (DVector**)calloc(nb,sizeof(DVector*));
 
             for( run1 = 0; run1 < nb; run1++ ){
 
                 var  [run1] = rhs.var  [run1];
                 index[run1] = rhs.index[run1];
-                blb  [run1] = new Vector(*rhs.blb[run1]);
-                bub  [run1] = new Vector(*rhs.bub[run1]);
+                blb  [run1] = new DVector(*rhs.blb[run1]);
+                bub  [run1] = new DVector(*rhs.bub[run1]);
             }
         }
         else{
@@ -197,16 +197,16 @@ BoxConstraint& BoxConstraint::operator=( const BoxConstraint& rhs ){
             bub   = 0;
         }
 
-        residuumXL  = new Matrix[grid.getNumPoints()];
-        residuumXU  = new Matrix[grid.getNumPoints()];
-        residuumXAL = new Matrix[grid.getNumPoints()];
-        residuumXAU = new Matrix[grid.getNumPoints()];
-        residuumPL  = new Matrix[1                  ];
-        residuumPU  = new Matrix[1                  ];
-        residuumUL  = new Matrix[grid.getNumPoints()];
-        residuumUU  = new Matrix[grid.getNumPoints()];
-        residuumWL  = new Matrix[grid.getNumPoints()];
-        residuumWU  = new Matrix[grid.getNumPoints()];
+        residuumXL  = new DMatrix[grid.getNumPoints()];
+        residuumXU  = new DMatrix[grid.getNumPoints()];
+        residuumXAL = new DMatrix[grid.getNumPoints()];
+        residuumXAU = new DMatrix[grid.getNumPoints()];
+        residuumPL  = new DMatrix[1                  ];
+        residuumPU  = new DMatrix[1                  ];
+        residuumUL  = new DMatrix[grid.getNumPoints()];
+        residuumUU  = new DMatrix[grid.getNumPoints()];
+        residuumWL  = new DMatrix[grid.getNumPoints()];
+        residuumWU  = new DMatrix[grid.getNumPoints()];
     }
     return *this;
 }

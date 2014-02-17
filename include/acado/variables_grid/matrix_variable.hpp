@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -48,11 +48,11 @@ BEGIN_NAMESPACE_ACADO
  *	\ingroup BasicDataStructures
  *
  *  The class MatrixVariable provides matrix-valued optimization variables by
- *	enhancing the Matrix class with variable-specific settings.
+ *	enhancing the DMatrix class with variable-specific settings.
  *
  *	\author Hans Joachim Ferreau, Boris Houska
  */
-class MatrixVariable : public Matrix, public VariableSettings
+class MatrixVariable : public DMatrix, public VariableSettings
 {
     //
     // PUBLIC MEMBER FUNCTIONS:
@@ -80,9 +80,9 @@ class MatrixVariable : public Matrix, public VariableSettings
 						VariableType _type = VT_UNKNOWN,
 						const char** const _names = 0,
 						const char** const _units = 0,
-						VectorspaceElement _scaling = emptyVectorspaceElement,
-						VectorspaceElement _lb = emptyVectorspaceElement,
-						VectorspaceElement _ub = emptyVectorspaceElement,
+						DVector _scaling = emptyVector,
+						DVector _lb = emptyVector,
+						DVector _ub = emptyVector,
 						BooleanType _autoInit = defaultAutoInit
 						);
 
@@ -95,10 +95,10 @@ class MatrixVariable : public Matrix, public VariableSettings
 
 		/** Copy constructor converting a matrix to a MatrixVariable (of given type).
 		 *
-		 *	@param[in] _matrix	Matrix to be converted.
+		 *	@param[in] _matrix	DMatrix to be converted.
 		 *	@param[in] _type	Type of the variable.
 		 */
-        MatrixVariable( const Matrix& _matrix,
+        MatrixVariable( const DMatrix& _matrix,
 						VariableType _type = VT_UNKNOWN
 						);
 
@@ -117,7 +117,7 @@ class MatrixVariable : public Matrix, public VariableSettings
 		 *
 		 *	@param[in] rhs	Right-hand side object.
 		 */
-        MatrixVariable& operator=(	const Matrix& rhs
+        MatrixVariable& operator=(	const DMatrix& rhs
 									);
 
 
@@ -142,18 +142,18 @@ class MatrixVariable : public Matrix, public VariableSettings
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							VectorspaceElement _scaling = emptyVectorspaceElement,
-							VectorspaceElement _lb = emptyVectorspaceElement,
-							VectorspaceElement _ub = emptyVectorspaceElement,
+							DVector _scaling = emptyVector,
+							DVector _lb = emptyVector,
+							DVector _ub = emptyVector,
 							BooleanType _autoInit = defaultAutoInit
 							);
 
 
 		/** Returns matrix containing the numerical values of the MatrixVariable.
 		 *
-		 *	\return Matrix containing the numerical values
+		 *	\return DMatrix containing the numerical values
 		 */
-		inline Matrix getMatrix( ) const;
+		inline DMatrix getMatrix( ) const;
 
 
 		/** Returns a MatrixVariable containing only the rows between given
@@ -164,7 +164,7 @@ class MatrixVariable : public Matrix, public VariableSettings
 		 *
 		 *	\note Is not fully implemented yet!
 		 *
-		 *	\return Matrix containing desired rows
+		 *	\return DMatrix containing desired rows
 		 */
 		MatrixVariable getRows(	uint startIdx,
 								uint endIdx
@@ -178,7 +178,7 @@ class MatrixVariable : public Matrix, public VariableSettings
 		 *
 		 *	\note Is not fully implemented yet!
 		 *
-		 *	\return Matrix containing desired columns
+		 *	\return DMatrix containing desired columns
 		 */
 		MatrixVariable getCols(	uint startIdx,
 								uint endIdx

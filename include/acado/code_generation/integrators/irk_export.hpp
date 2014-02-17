@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -66,7 +66,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ImplicitRungeKuttaExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -113,7 +113,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 
-		returnValue setModel( const String& _rhs, const String& _diffs_rhs );
+		returnValue setModel( const std::string& _rhs, const std::string& _diffs_rhs );
 							
         
         /** Sets up the output with the grids for the different output functions.									\n
@@ -137,8 +137,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output );
 
 
@@ -153,10 +153,10 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
-										  const std::vector<Matrix> _outputDependencies );
+										  const std::vector<DMatrix> _outputDependencies );
         
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -231,7 +231,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 * 
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		Vector computeCombinations( const Vector& cVec, uint index, uint numEls );
+		DVector computeCombinations( const DVector& cVec, uint index, uint numEls );
 		
 		
 		/** Returns the coefficients of the polynomial, representing the continuous output of the integrator.
@@ -240,7 +240,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return Coefficients of the polynomial, corresponding the given grid point
 		 */
-		Vector evaluatePolynomial( double time );
+		DVector evaluatePolynomial( double time );
 		
 		
 		/** Returns the coefficients of the derived polynomial, representing the derivative of the continuous output with respect to time.
@@ -249,7 +249,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return Coefficients of the polynomial, corresponding the given grid point
 		 */
-		Vector evaluateDerivedPolynomial( double time );
+		DVector evaluateDerivedPolynomial( double time );
 
 
 		/** Exports the evaluation of the coefficients of the polynomial, representing the continuous output of the integrator.
@@ -264,7 +264,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		returnValue evaluatePolynomial( ExportStatementBlock& block, 
 										const ExportVariable& variable, 
 										const ExportVariable& grid, 
-										const String& h );
+										const std::string& h );
 
 
 		/** Exports the evaluation of the coefficients of the derived polynomial, representing the derivative of the continuous output with respect to time.
@@ -286,7 +286,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return Coefficients of the polynomial, corresponding the given continuous output
 		 */
-		Matrix evaluatePolynomial( uint index );
+		DMatrix evaluatePolynomial( uint index );
 
 
 		/** Returns the coefficients of the derived polynomial for the complete grid of the output, corresponding a certain index.
@@ -295,7 +295,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return Coefficients of the derived polynomial, corresponding the given continuous output
 		 */
-		Matrix evaluateDerivedPolynomial( uint index );
+		DMatrix evaluateDerivedPolynomial( uint index );
 
 
 		/** Divide the total number of measurements over the different integration steps.
@@ -304,7 +304,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return The division of measurements over the integration steps, corresponding the given continuous output.
 		 */
-		Vector divideMeasurements( uint index );
+		DVector divideMeasurements( uint index );
 
 
 		/** Precompute as much as possible for the linear input system and export the resulting definitions.
@@ -332,7 +332,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual Matrix formMatrix( const Matrix& mass, const Matrix& jacobian );
+		virtual DMatrix formMatrix( const DMatrix& mass, const DMatrix& jacobian );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the linear input system.
@@ -368,7 +368,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportVariable& Ah,
 											const ExportVariable& C,
 											const ExportVariable& det,
-											BooleanType DERIVATIVES = BT_FALSE );
+											bool DERIVATIVES = false );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the linear output system.
@@ -385,7 +385,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& index3,
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
-										BooleanType DERIVATIVES = BT_FALSE );
+										bool DERIVATIVES = false );
 
 
 		/** Exports the evaluation of the states at a specific stage.
@@ -445,8 +445,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& tmp_index,
 										const ExportVariable& Ah,
 										const ExportVariable& C,
-										BooleanType evaluateB,
-										BooleanType DERIVATIVES );
+										bool evaluateB,
+										bool DERIVATIVES );
 
 
 		/** Prepares the structures to evaluate the continuous output and exports the resulting definitions.
@@ -456,13 +456,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue prepareOutputEvaluation( 	ExportStatementBlock& code );
-
-
-		/** Prepares a function that evaluates the complete right-hand side.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue prepareFullRhs( );
 
 
 		/** Exports the necessary code for the computation of the continuous output.
@@ -517,8 +510,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
     protected:
     
-		BooleanType REUSE;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
-		BooleanType CONTINUOUS_OUTPUT;			/**< This boolean is true when continuous output needs to be provided. */
+		bool REUSE;						/**< This boolean is true when the IFTR method is used instead of the IFT method. */
+		bool CONTINUOUS_OUTPUT;			/**< This boolean is true when continuous output needs to be provided. */
 
 		uint numIts;							/**< This is the performed number of Newton iterations. */
 		uint numItsInit;						/**< This is the performed number of Newton iterations for the initialization of the first step. */
@@ -530,12 +523,12 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 		ExportLinearSolver* solver;				/**< This is the exported linear solver that is used by the implicit Runge-Kutta method. */
 
-		Matrix DD;								/**< This matrix is used for the initialization of the variables for the next integration step. */
-		Matrix coeffs;							/**< This matrix contains coefficients of polynomials that are used to evaluate the continuous output (see evaluatePolynomial). */
+		DMatrix DD;								/**< This matrix is used for the initialization of the variables for the next integration step. */
+		DMatrix coeffs;							/**< This matrix contains coefficients of polynomials that are used to evaluate the continuous output (see evaluatePolynomial). */
 
-		Vector numDX_output;
-		Vector numXA_output;
-		Vector numVARS_output;
+		DVector numDX_output;
+		DVector numXA_output;
+		DVector numVARS_output;
 
         
         // DEFINITION OF THE EXPORTVARIABLES

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -27,64 +27,28 @@
 /**
  *    \file src/ocp/nlp.cpp
  *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 2008
+ *    \date 2008 - 2013
  */
 
 #include <acado/ocp/nlp.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
 
-
-
-//
-// PUBLIC MEMBER FUNCTIONS:
-//
-
-
 NLP::NLP()
-    :OCP( 0.0, 0.0, 0 ){
+    : OCP(0.0, 0.0, 0)
+{}
 
-}
+NLP::~NLP( )
+{}
 
-NLP::NLP( const NLP& rhs )
-    :OCP( rhs ){
-
-}
-
-
-NLP::~NLP( ){
-
-}
-
-
-NLP& NLP::operator=( const NLP& rhs ){
-
-    if ( this != &rhs ){
-
-        OCP::operator=(rhs);
-    }
-    return *this;
-}
-
-
-returnValue NLP::minimize( const Expression& arg ){
-
+returnValue NLP::minimize( const Expression& arg )
+{
     return minimizeMayerTerm( arg );
 }
 
-
-returnValue NLP::minimize( const int &multiObjectiveIdx,  const Expression& arg ){
-
+returnValue NLP::minimize( const int &multiObjectiveIdx,  const Expression& arg )
+{
     return MultiObjectiveFunctionality::minimizeMayerTerm( multiObjectiveIdx, arg );
 }
 
-
-
-
-
-
-
 CLOSE_NAMESPACE_ACADO
-
-// end of file.

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -68,7 +68,7 @@ public:
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
 	ExportNLPSolver(	UserInteraction* _userInteraction = 0,
-						const String& _commonHeaderName = ""
+						const std::string& _commonHeaderName = ""
 						);
 
 	/** Destructor. */
@@ -142,10 +142,10 @@ public:
 
 	/** Returns whether a single shooting state discretization is used.
 	 *
-	 *	\return BT_TRUE  iff single shooting state discretization is used, \n
-	 *	        BT_FALSE otherwise
+	 *	\return true  iff single shooting state discretization is used, \n
+	 *	        false otherwise
 	 */
-	BooleanType performsSingleShooting( ) const;
+	bool performsSingleShooting( ) const;
 
 	/** Set objective function
 	 *  \return SUCCESSFUL_RETURN, \n
@@ -170,7 +170,7 @@ public:
 	unsigned weightingMatricesType( void ) const;
 
 	/** Indicates whether initial state is fixed. */
-	BooleanType initialStateFixed( ) const;
+	bool initialStateFixed( ) const;
 
 protected:
 
@@ -203,11 +203,11 @@ protected:
 	/** Setup of functions for evaluation of auxiliary functions. */
 	returnValue setupAuxiliaryFunctions();
 
-	/** Setup of residual variables during objective evaluation. */
-	returnValue setupResidualVariables();
-
 	/** Setup of functions and variables for evaluation of arrival cost. */
 	returnValue setupArrivalCostCalculation();
+
+	/** Setup main initialization code for the solver */
+	virtual returnValue setupInitialization();
 
 protected:
 
@@ -223,11 +223,11 @@ protected:
 	ExportVariable x;
 	ExportVariable z;
 	ExportVariable u;
-	ExportVariable p;
+	ExportVariable od;
 	ExportVariable d;
 
 	ExportVariable evGx; // stack of sensitivities w.r.t. x
-	ExportVariable evGu; // -- || --
+	ExportVariable evGu; // stack of sensitivities w.r.t. u
 
 	/** @} */
 
@@ -245,9 +245,7 @@ protected:
 	ExportVariable objAuxVar, objValueIn, objValueOut;
 	ExportAcadoFunction evaluateLSQ;
 	ExportAcadoFunction evaluateLSQEndTerm;
-	String evaluateExternLSQ, evaluateExternLSQEndTerm;
-
-	BooleanType externObjective;
+	bool externObjective;
 
 	ExportVariable Q1, Q2;
 	ExportVariable R1, R2;
@@ -261,7 +259,6 @@ protected:
 	/** @{ */
 	VariablesGrid uBounds;
 	VariablesGrid xBounds;
-	std::vector< unsigned > xBoundsIdx; // reconsider, use index structures from GN FORCES class
 	/** @} */
 
 	/** \name Evaluation of path constraints */
@@ -272,7 +269,8 @@ protected:
 	ExportVariable conValueIn;
 	ExportVariable conValueOut;
 
-	Matrix pacLBMatrix, pacUBMatrix;
+	DVector lbPathConValues, ubPathConValues;
+
 	ExportVariable pacEvH;
 	ExportVariable pacEvHx, pacEvHu, pacEvHxd;
 	/** @} */
@@ -281,9 +279,9 @@ protected:
 	/** @{ */
 	unsigned dimPocH;
 	std::vector< std::tr1::shared_ptr< ExportAcadoFunction > > evaluatePointConstraints;
-	Vector pocLB, pocUB;
+	DVector lbPointConValues, ubPointConValues;
 
-	std::vector< Vector > pocLbStack, pocUbStack;
+	std::vector< DVector > pocLbStack, pocUbStack;
 
 	ExportVariable pocEvH;
 	ExportVariable pocEvHx, pocEvHu, pocEvHxd;
@@ -317,6 +315,9 @@ protected:
 	// Older stuff; TODO make this more unique
 	ExportVariable SAC, xAC, DxAC;
 	/** @} */
+
+private:
+	returnValue setupResidualVariables();
 };
 
 /** Types of NLP/OCP solvers. */
@@ -324,6 +325,7 @@ enum ExportNLPType
 {
 	GAUSS_NEWTON_CONDENSED,
 	GAUSS_NEWTON_CN2,
+	GAUSS_NEWTON_CN2_FACTORIZATION,
 	GAUSS_NEWTON_FORCES,
 	GAUSS_NEWTON_QPDUNES
 };

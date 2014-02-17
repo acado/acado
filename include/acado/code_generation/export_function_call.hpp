@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -75,7 +75,7 @@ class ExportFunctionCall : public ExportStatement
 		 *	@param[in] _argument8	Calling argument no. 8.
 		 *	@param[in] _argument9	Calling argument no. 9.
 		 */
-		ExportFunctionCall(	const String& _name = "acadoFcn",
+		ExportFunctionCall(	const std::string& _name = "acadoFcn",
 							const ExportArgument& _argument1 = emptyConstExportArgument,
 							const ExportArgument& _argument2 = emptyConstExportArgument,
 							const ExportArgument& _argument3 = emptyConstExportArgument,
@@ -153,7 +153,7 @@ class ExportFunctionCall : public ExportStatement
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue init(	const String& _name = "defaultFunctionName",
+		returnValue init(	const std::string& _name = "defaultFunctionName",
 							const ExportArgument& _argument1 = emptyConstExportArgument,
 							const ExportArgument& _argument2 = emptyConstExportArgument,
 							const ExportArgument& _argument3 = emptyConstExportArgument,
@@ -197,17 +197,17 @@ class ExportFunctionCall : public ExportStatement
 		/** Exports source code of the function call into given file. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export function call.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] stream			Name of file to be used to export function call.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
-		virtual returnValue exportCode(	FILE* file,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+		virtual returnValue exportCode(	std::ostream& stream,
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										) const;
 
@@ -230,13 +230,13 @@ class ExportFunctionCall : public ExportStatement
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue	setName(	const String& _name
+		returnValue	setName(	const std::string& _name
 								);
 
 
     protected:
 
-		String name;								/**< Name of function to be called. */
+		std::string name;								/**< Name of function to be called. */
 		ExportArgumentList functionArguments;		/**< List of calling arguments. */
 };
 

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -60,36 +60,30 @@ public:
 	 *	@param[in] _name		Name of exported ODE function.
 	 */
 	ExportAcadoFunction(	const Function& _f,
-							const String& _name = "acadoFcn"
+							const std::string& _name = "acadoFcn"
 							);
 
-	/** Copy constructor (deep copy).
+	/** Constructor which takes name of a function only.
 	 *
-	 *	@param[in] arg		Right-hand side object.
+	 *  This way, we can define an "external symbolic function" with the
+	 *  following prototype:
+	 *  \verbatim
+	 *  void (const real_t* in, real_t* out);
+	 *  \endverbatim
+	 *
+	 *  @param[in] _name		Name of exported ODE function.
 	 */
-	ExportAcadoFunction(const ExportAcadoFunction& arg);
+	ExportAcadoFunction(	const std::string& _name
+							);
 
 	/** Destructor. */
 	virtual ~ExportAcadoFunction( );
-
-	/** Assignment operator (deep copy).
-	 *
-	 *	@param[in] arg		Right-hand side object.
-	 */
-	ExportAcadoFunction& operator=(const ExportAcadoFunction& arg);
 
 	/** Clone constructor (deep copy).
 	 *
 	 *	\return Pointer to cloned object.
 	 */
 	virtual ExportStatement* clone( ) const;
-
-	/** Clone constructor for ExportFunction (deep copy).
-	 *
-	 *	\return Pointer to cloned object.
-	 */
-	virtual ExportFunction* cloneFunction( ) const;
-
 
 	/** Initializes ODE function export by taking the differential equation
 	 *	to be exported as well as the name of the exported ODE.
@@ -104,27 +98,28 @@ public:
 	 * 	@param[in] _numDX		The number of differential state derivatives given for the evaluation of the system of equations.
 	 */
 	returnValue init(	const Function& _f,
-						const String& _name = "acadoFcn",
+						const std::string& _name = "acadoFcn",
 						const uint _numX = 0,
 						const uint _numXA = 0,
 						const uint _numU = 0,
 						const uint _numP = 0,
-						const uint _numDX = 0
+						const uint _numDX = 0,
+						const uint _numOD = 0
 						);
 
 	/** Exports data declaration of the ODE function into given file. Its appearance can
 	 *  can be adjusted by various options.
 	 *
-	 *	@param[in] file				Name of file to be used to export function.
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] stream			Name of file to be used to export function.
+	 *	@param[in] _realString		std::string to be used to declare real variables.
+	 *	@param[in] _intString		std::string to be used to declare integer variables.
 	 *	@param[in] _precision		Number of digits to be used for exporting real values.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	virtual returnValue exportDataDeclaration(	FILE* file,
-												const String& _realString = "real_t",
-												const String& _intString = "int",
+	virtual returnValue exportDataDeclaration(	std::ostream& stream,
+												const std::string& _realString = "real_t",
+												const std::string& _intString = "int",
 												int _precision = 16
 												) const;
 
@@ -132,40 +127,40 @@ public:
 	 *  can be adjusted by various options.
 	 *
 	 *	@param[in] file				Name of file to be used to export statement.
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] _realString		std::string to be used to declare real variables.
+	 *	@param[in] _intString		std::string to be used to declare integer variables.
 	 *	@param[in] _precision		Number of digits to be used for exporting real values.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	virtual returnValue exportForwardDeclaration(	FILE* file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+	virtual returnValue exportForwardDeclaration(	std::ostream& stream,
+													const std::string& _realString = "real_t",
+													const std::string& _intString = "int",
 													int _precision = 16
 													) const;
 
 	/** Exports source code of the ODE function into given file. Its appearance can
 	 *  can be adjusted by various options.
 	 *
-	 *	@param[in] file				Name of file to be used to export function.
-	 *	@param[in] _realString		String to be used to declare real variables.
-	 *	@param[in] _intString		String to be used to declare integer variables.
+	 *	@param[in] string			Name of file to be used to export function.
+	 *	@param[in] _realString		std::string to be used to declare real variables.
+	 *	@param[in] _intString		std::string to be used to declare integer variables.
 	 *	@param[in] _precision		Number of digits to be used for exporting real values.
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	virtual returnValue exportCode(	FILE* file,
-									const String& _realString = "real_t",
-									const String& _intString = "int",
+	virtual returnValue exportCode(	std::ostream& stream,
+									const std::string& _realString = "real_t",
+									const std::string& _intString = "int",
 									int _precision = 16
 									) const;
 
 	/** Returns whether function has been defined.
 	 *
-	 *	\return BT_TRUE  iff function has been defined, \n
-	 *	        BT_FALSE otherwise
+	 *	\return true  iff function has been defined, \n
+	 *	        false otherwise
 	 */
-	virtual BooleanType isDefined( ) const;
+	virtual bool isDefined( ) const;
 
 	/** Get output dimension of the ACADO function. */
 	unsigned getFunctionDim( void );
@@ -192,10 +187,14 @@ protected:
 	/** The number of differential state derivatives given for the evaluation of the
 	 *  system of equations. */
 	unsigned numDX;
+	/** The number of "online data" objects. */
+	unsigned numOD;
 	/** ACADO function to be exported. */
 	std::tr1::shared_ptr< Function > f;
 	/** A variable that holds intermediate values. */
 	ExportVariable globalVar;
+	/** Flag indicating whether the symbolic function is external or not. */
+	bool external;
 };
 
 CLOSE_NAMESPACE_ACADO

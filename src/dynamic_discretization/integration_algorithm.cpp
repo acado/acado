@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -150,11 +150,11 @@ returnValue IntegrationAlgorithm::integrate(	VariablesGrid  *x ,
 
 returnValue IntegrationAlgorithm::integrate(	double       t0,
 												double       tend,
-												const Vector &x0,
-												const Vector &xa,
-												const Vector &p,
-												const Vector &u,
-												const Vector &w
+												const DVector &x0,
+												const DVector &xa,
+												const DVector &p,
+												const DVector &u,
+												const DVector &w
 												)
 {
 	Grid grid( t0,tend,2 );
@@ -170,11 +170,11 @@ returnValue IntegrationAlgorithm::integrate(	double       t0,
 
 
 returnValue IntegrationAlgorithm::integrate(	const Grid& t,
-												const Vector &x0,
-												const Vector &xa,
-												const Vector &p,
-												const Vector &u,
-												const Vector &w
+												const DVector &x0,
+												const DVector &xa,
+												const DVector &p,
+												const DVector &u,
+												const DVector &w
 												)
 {
 	//Grid grid( t.getFirstTime(),t.getLastTime(),2 );
@@ -200,16 +200,16 @@ returnValue IntegrationAlgorithm::setForwardSeed(	const BlockMatrix &xSeed_,
 }
 
 
-returnValue IntegrationAlgorithm::setForwardSeed(	const Vector &xSeed,
-													const Vector &pSeed,
-													const Vector &uSeed,
-													const Vector &wSeed
+returnValue IntegrationAlgorithm::setForwardSeed(	const DVector &xSeed,
+													const DVector &pSeed,
+													const DVector &uSeed,
+													const DVector &wSeed
 													)
 {
-	BlockMatrix xSeedTmp( (Matrix)xSeed );
-	BlockMatrix pSeedTmp( (Matrix)pSeed );
-	BlockMatrix uSeedTmp( (Matrix)uSeed );
-	BlockMatrix wSeedTmp( (Matrix)wSeed );
+	BlockMatrix xSeedTmp( (DMatrix)xSeed );
+	BlockMatrix pSeedTmp( (DMatrix)pSeed );
+	BlockMatrix uSeedTmp( (DMatrix)uSeed );
+	BlockMatrix wSeedTmp( (DMatrix)wSeed );
 
 	return integrationMethod->setForwardSeed( xSeedTmp,pSeedTmp,uSeedTmp,wSeedTmp );
 }
@@ -228,10 +228,11 @@ returnValue IntegrationAlgorithm::setBackwardSeed(	const BlockMatrix &seed
 }
 
 
-returnValue IntegrationAlgorithm::setBackwardSeed(	const Vector &seed
+returnValue IntegrationAlgorithm::setBackwardSeed(	const DVector &seed
 													)
 {
-	Matrix seedTmpMatrix( seed,BT_TRUE );
+	DMatrix seedTmpMatrix( seed );
+	seedTmpMatrix.transposeInPlace();
 	BlockMatrix seedTmp( seedTmpMatrix );
 
 	return integrationMethod->setBackwardSeed( seedTmp );
@@ -289,7 +290,7 @@ BooleanType IntegrationAlgorithm::isAffine( ) const
 }
 
 
-returnValue IntegrationAlgorithm::getX(	Vector& xEnd
+returnValue IntegrationAlgorithm::getX(	DVector& xEnd
 										) const
 {
 	if ( iter.x != 0 )
@@ -299,7 +300,7 @@ returnValue IntegrationAlgorithm::getX(	Vector& xEnd
 }
 
 
-returnValue IntegrationAlgorithm::getXA(	Vector& xaEnd
+returnValue IntegrationAlgorithm::getXA(	DVector& xaEnd
 											) const
 {
 	if ( iter.xa != 0 )
@@ -338,7 +339,7 @@ returnValue IntegrationAlgorithm::getForwardSensitivities(	BlockMatrix &D
 }
 
 
-returnValue IntegrationAlgorithm::getForwardSensitivities(	Vector &Dx
+returnValue IntegrationAlgorithm::getForwardSensitivities(	DVector &Dx
 															) const
 {
 	BlockMatrix DxTmp;
@@ -349,7 +350,7 @@ returnValue IntegrationAlgorithm::getForwardSensitivities(	Vector &Dx
 
 	if ( DxTmp.isEmpty( ) == BT_FALSE )
 	{
-		Matrix DxTmpMatrix;
+		DMatrix DxTmpMatrix;
 		DxTmp.getSubBlock( 0,0,DxTmpMatrix );
 		
 		if ( DxTmpMatrix.getNumCols( ) > 0 )
@@ -368,10 +369,10 @@ returnValue IntegrationAlgorithm::getBackwardSensitivities(	BlockMatrix &D
 }
 
 
-returnValue IntegrationAlgorithm::getBackwardSensitivities(	Vector &Dx_x0,
-															Vector &Dx_p ,
-															Vector &Dx_u ,
-															Vector &Dx_w
+returnValue IntegrationAlgorithm::getBackwardSensitivities(	DVector &Dx_x0,
+															DVector &Dx_p ,
+															DVector &Dx_u ,
+															DVector &Dx_w
 															) const
 {
 	BlockMatrix DxTmp;
@@ -382,7 +383,7 @@ returnValue IntegrationAlgorithm::getBackwardSensitivities(	Vector &Dx_x0,
 
 	if ( DxTmp.isEmpty( ) == BT_FALSE )
 	{
-		Matrix DxTmpMatrix;
+		DMatrix DxTmpMatrix;
 		
 		DxTmp.getSubBlock( 0,0,DxTmpMatrix );
 		if ( DxTmpMatrix.getNumRows( ) > 0 )

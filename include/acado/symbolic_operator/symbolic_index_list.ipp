@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -48,7 +48,7 @@ inline SymbolicIndexList* SymbolicIndexList::substitute( VariableType variableTy
     SymbolicIndexList tmp(*this);
 
     int       run1, run2                 ;
-    const int numberOfVariableTypes = 10 ;
+    const int numberOfVariableTypes = 11 ;
     int       type                  = -1 ;
 
     if(variableType_ == VT_DIFFERENTIAL_STATE )  type = 0;
@@ -61,6 +61,7 @@ inline SymbolicIndexList* SymbolicIndexList::substitute( VariableType variableTy
     if(variableType_ == VT_TIME               )  type = 7;
     if(variableType_ == VT_INTERMEDIATE_STATE )  type = 8;
     if(variableType_ == VT_DDIFFERENTIAL_STATE)  type = 9;
+    if(variableType_ == VT_ONLINE_DATA        )  type = 10;
 
     if( type == -1 ) return this;
 
@@ -224,6 +225,14 @@ inline int SymbolicIndexList::index( VariableType variableType_, int index_ ) co
                  }
              }
              return variableCounter;
+             
+        case VT_ONLINE_DATA:
+             if( index_ < maxNumberOfEntries[10] ){
+                 if(  entryExists[10][index_] == BT_TRUE ){
+                      return variableIndex[10][index_];
+                 }
+             }
+             return variableCounter;
 
         default:
 			return -1;
@@ -284,6 +293,11 @@ inline double SymbolicIndexList::scale( VariableType variableType_, int index_ )
         case VT_DDIFFERENTIAL_STATE:
              if( index_ < maxNumberOfEntries[9] )
                  return variableScale[9][index_];
+             return 1.0;
+             
+        case VT_ONLINE_DATA:
+             if( index_ < maxNumberOfEntries[10] )
+                 return variableScale[10][index_];
              return 1.0;
 
         default:
@@ -367,6 +381,11 @@ inline int SymbolicIndexList::getNW   () const{
 inline int SymbolicIndexList::getNT   () const{
 
     return maxNumberOfEntries[7];
+}
+
+inline int SymbolicIndexList::getOD   () const{
+
+    return maxNumberOfEntries[10];
 }
 
 

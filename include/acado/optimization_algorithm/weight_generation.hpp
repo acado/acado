@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,14 +33,7 @@
 #ifndef ACADO_TOOLKIT_WEIGHT_GENERATION_HPP
 #define ACADO_TOOLKIT_WEIGHT_GENERATION_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
-#include <acado/variables_grid/variables_grid.hpp>
-#include <acado/ocp/ocp.hpp>
-#include <acado/nlp_solver/nlp_solver.hpp>
-#include <acado/optimization_algorithm/optimization_algorithm.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 
@@ -88,10 +81,10 @@ class WeightGeneration{
          */
         returnValue getWeights( const int    &m        ,
                                 const int    &pnts     ,
-                                const Vector &weightsLB,
-                                const Vector &weightsUB,
-                                Matrix       &Weights  ,
-                                Vector       &formers    ) const;
+                                const DVector &weightsLB,
+                                const DVector &weightsUB,
+                                DMatrix       &Weights  ,
+                                DVector       &formers    ) const;
 
 
 
@@ -113,11 +106,11 @@ class WeightGeneration{
           *
           */
         returnValue generateWeights( const  int    &n         ,
-                                     Vector        &weight    ,
-                                     Matrix        &Weights   ,
-                                     const  Vector &weightsLB ,
-                                     const  Vector &weightsUB ,
-                                     Vector        &formers   ,
+                                     DVector        &weight    ,
+                                     DMatrix        &Weights   ,
+                                     const  DVector &weightsLB ,
+                                     const  DVector &weightsUB ,
+                                     DVector        &formers   ,
                                      const int     &layer     ,
                                      int           &lastOne   ,
                                      int           &currentOne,

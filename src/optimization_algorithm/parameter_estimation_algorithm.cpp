@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -81,9 +81,9 @@ ParameterEstimationAlgorithm& ParameterEstimationAlgorithm::operator=( const Par
 }
 
 
-returnValue ParameterEstimationAlgorithm::getParameterVarianceCovariance( Matrix &pVar ){
+returnValue ParameterEstimationAlgorithm::getParameterVarianceCovariance( DMatrix &pVar ){
 
-    Matrix              tmp;
+    DMatrix              tmp;
     returnValue returnvalue;
     int              offset;
     int                  np;
@@ -113,31 +113,31 @@ returnValue ParameterEstimationAlgorithm::getParameterVarianceCovariance( Matrix
 }
 
 
-returnValue ParameterEstimationAlgorithm::getDifferentialStateVarianceCovariance( Matrix &xVar ){
+returnValue ParameterEstimationAlgorithm::getDifferentialStateVarianceCovariance( DMatrix &xVar ){
 
     return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
 }
 
 
-returnValue ParameterEstimationAlgorithm::getAlgebraicStateVarianceCovariance( Matrix &xaVar ){
+returnValue ParameterEstimationAlgorithm::getAlgebraicStateVarianceCovariance( DMatrix &xaVar ){
 
     return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
 }
 
 
-returnValue ParameterEstimationAlgorithm::getControlCovariance( Matrix &uVar ){
+returnValue ParameterEstimationAlgorithm::getControlCovariance( DMatrix &uVar ){
 
     return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
 }
 
 
-returnValue ParameterEstimationAlgorithm::getDistubanceVarianceCovariance( Matrix &wVar ){
+returnValue ParameterEstimationAlgorithm::getDistubanceVarianceCovariance( DMatrix &wVar ){
 
     return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
 }
 
 
-returnValue ParameterEstimationAlgorithm::getVarianceCovariance( Matrix &var ){
+returnValue ParameterEstimationAlgorithm::getVarianceCovariance( DMatrix &var ){
 
     if( nlpSolver == 0 ) return ACADOERROR( RET_MEMBER_NOT_INITIALISED );
     return nlpSolver->getVarianceCovariance( var );

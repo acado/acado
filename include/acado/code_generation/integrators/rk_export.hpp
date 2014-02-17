@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -65,7 +65,7 @@ class RungeKuttaExport : public IntegratorExport
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         RungeKuttaExport(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
 		/** Copy constructor (deep copy).
@@ -96,7 +96,11 @@ class RungeKuttaExport : public IntegratorExport
 
 		/** This routine initializes the matrices AA, bb and cc which
 		 * 	form the Butcher Tableau. */
-		returnValue initializeButcherTableau( const Matrix& _AA, const Vector& _bb, const Vector& _cc );
+		returnValue initializeButcherTableau( const DMatrix& _AA, const DVector& _bb, const DVector& _cc );
+
+
+		/** This routine checks the symmetry of the cc vector from the Butcher Tableau. */
+		BooleanType checkSymmetry( const DVector& _cc );
 
 
 		/** Assigns Differential Equation to be used by the integrator.
@@ -116,7 +120,7 @@ class RungeKuttaExport : public IntegratorExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue setNARXmodel( const uint delay, const Matrix& parms );
+		returnValue setNARXmodel( const uint delay, const DMatrix& parms );
 
 
 		/** Adds all data declarations of the auto-generated integrator to given list of declarations.
@@ -184,9 +188,11 @@ class RungeKuttaExport : public IntegratorExport
         
 		ExportVariable rk_kkk;				/**< Variable containing intermediate results of the RK integrator. */
 
-		Matrix AA;							/**< This matrix defines the Runge-Kutta method to be exported. */
-		Vector bb, cc;						/**< These vectors define the Runge-Kutta method to be exported. */
+		DMatrix AA;							/**< This matrix defines the Runge-Kutta method to be exported. */
+		DVector bb, cc;						/**< These vectors define the Runge-Kutta method to be exported. */
 		
+		BooleanType is_symmetric;			/**< Boolean defining whether a certain RK method is symmetric or not, which is important for backward sensitivity propagation. */
+
 		uint numStages;						/**< This is the number of stages for the Runge-Kutta method. */
 };
 

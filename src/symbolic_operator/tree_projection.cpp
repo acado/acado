@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -55,7 +55,7 @@ TreeProjection::TreeProjection( )
 }
 
 
-TreeProjection::TreeProjection( const String &name_ )
+TreeProjection::TreeProjection( const std::string &name_ )
                :Projection( name_ ){
 
     variableType   = VT_INTERMEDIATE_STATE ;
@@ -459,8 +459,11 @@ returnValue TreeProjection::loadIndices( SymbolicIndexList *indexList ){
         indexList->addOperatorPointer( argument, vIndex );
     }
 
-    if( name.isEmpty() == BT_TRUE ){
-        name << "a" << "[" << vIndex << "]";
+    if (name.empty())
+    {
+    	std::stringstream ss;
+        ss << "a" << "[" << vIndex << "]";
+        name = ss.str();
     }
 
     return returnvalue;
@@ -536,7 +539,9 @@ Operator* TreeProjection::passArgument() const{
 }
 
 
-returnValue TreeProjection::setVariableExportName( const VariableType &_type, const Stream *_name )
+returnValue TreeProjection::setVariableExportName(	const VariableType &_type,
+													const std::vector< std::string >& _name
+													)
 {
 	if (argument->getName() == ON_POWER_INT)
 		argument->setVariableExportName(_type, _name);

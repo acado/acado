@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -62,8 +62,6 @@ class Constraint : public BoxConstraint{
 	friend class OptimizationAlgorithmBase;
 	friend class OptimizationAlgorithm;
 	friend class RealTimeAlgorithm;
-	friend class MPCexport;
-	friend class MHEexport;
 	friend class TESTExport;
 	friend class ExportNLPSolver;
 
@@ -123,7 +121,7 @@ class Constraint : public BoxConstraint{
          *            RET_INFEASIBLE_CONSTRAINT
          *
          */
-        returnValue add( const Vector lb_, const Expression& arg, const double ub_  );
+        returnValue add( const DVector lb_, const Expression& arg, const double ub_  );
 
 
         /**< adds a constraint of the form  lb_ <= arg <= ub where the   \n
@@ -133,7 +131,7 @@ class Constraint : public BoxConstraint{
          *            RET_INFEASIBLE_CONSTRAINT
          *
          */
-        returnValue add( const double lb_, const Expression& arg, const Vector ub_  );
+        returnValue add( const double lb_, const Expression& arg, const DVector ub_  );
 
 
         /**< adds a constraint of the form  lb_ <= arg <= ub where the   \n
@@ -143,7 +141,7 @@ class Constraint : public BoxConstraint{
          *            RET_INFEASIBLE_CONSTRAINT
          *
          */
-        returnValue add( const Vector lb_, const Expression& arg, const Vector ub_  );
+        returnValue add( const DVector lb_, const Expression& arg, const DVector ub_  );
 
 
         // ===========================================================================
@@ -434,7 +432,7 @@ class Constraint : public BoxConstraint{
         inline int getBlockDim( int idx ) const;
 
         /** returns the dimension of the requested sub-block */
-        inline Vector getBlockDims( ) const;
+        inline DVector getBlockDims( ) const;
 
 
 
@@ -451,9 +449,9 @@ class Constraint : public BoxConstraint{
          */
         BooleanType isEmpty() const;
 
-        returnValue getPathConstraints(Function& function_, Matrix& lb_, Matrix& ub_) const;
+        returnValue getPathConstraints(Function& function_, DMatrix& lb_, DMatrix& ub_) const;
 
-        returnValue getPointConstraint(const unsigned index, Function& function_, Matrix& lb_, Matrix& ub_) const;
+        returnValue getPointConstraint(const unsigned index, Function& function_, DMatrix& lb_, DMatrix& ub_) const;
 
     //
     // DATA MEMBERS:
@@ -481,7 +479,7 @@ class Constraint : public BoxConstraint{
         /** CAUTION: This function is protected and strictly for internal use.
          *  Note that e.g. the expression pointer will be deleted when using this function.
          */
-        returnValue add( const Vector lb_, Expression* arg, const Vector ub_  );
+        returnValue add( const DVector lb_, Expression* arg, const DVector ub_  );
 
 
         /** Writes a special copy of the bounds that is needed within the

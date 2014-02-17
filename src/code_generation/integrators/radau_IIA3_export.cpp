@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 //
 
 RadauIIA3Export::RadauIIA3Export(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : ImplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
 {
 	numStages = 2;
@@ -71,11 +71,11 @@ RadauIIA3Export::~RadauIIA3Export( )
 //
 
 IntegratorExport* createRadauIIA3Export(	UserInteraction* _userInteraction,
-											const String &_commonHeaderName)
+											const std::string &_commonHeaderName)
 {
-	Matrix AA(2,2);
-	Vector bb(2);
-	Vector cc(2);
+	DMatrix AA(2,2);
+	DVector bb(2);
+	DVector cc(2);
 
 	AA(0,0) = 5/(double)12;
 	AA(0,1) = -1/(double)12;

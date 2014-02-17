@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,7 +33,7 @@
 
 #include <acado/code_generation/export_file.hpp>
 
-
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -42,12 +42,12 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportFile::ExportFile(	const String& _fileName,
-						const String& _commonHeaderName,
-						const String& _realString,
-						const String& _intString,
+ExportFile::ExportFile(	const std::string& _fileName,
+						const std::string& _commonHeaderName,
+						const std::string& _realString,
+						const std::string& _intString,
 						int _precision,
-						const String& _commentString
+						const std::string& _commentString
 						) : ExportStatementBlock( )
 {
 	fileName         = _fileName;
@@ -59,88 +59,27 @@ ExportFile::ExportFile(	const String& _fileName,
 	commentString = _commentString;
 }
 
-
-ExportFile::ExportFile(	const ExportFile& arg
-						) : ExportStatementBlock( arg )
-{
-	copy( arg );
-}
-
-
 ExportFile::~ExportFile( )
-{
-}
-
-
-ExportFile& ExportFile::operator=(	const ExportFile& arg
-									)
-{
-	if( this != &arg )
-	{
-		ExportStatementBlock::operator=( arg );
-		copy( arg );
-	}
-	
-	return *this;
-}
-
-
+{}
 
 returnValue ExportFile::exportCode( ) const
 {
-	FILE* file = openFile( );
+	ofstream stream( fileName.c_str() );
 
-	if ( file == 0 )
+	if (stream.good() == false)
 		return ACADOERROR( RET_DOES_DIRECTORY_EXISTS );
 
-	returnValue returnvalue = ExportStatementBlock::exportCode( file,realString,intString,precision );
+	acadoPrintAutoGenerationNotice(stream, commentString);
 
-	if ( file != 0 )
-		fclose( file );
+	if ( commonHeaderName.size() )
+		stream << "#include \"" << commonHeaderName << "\"\n\n\n";
+
+	returnValue returnvalue = ExportStatementBlock::exportCode(stream, realString, intString, precision);
+
+	stream.close();
 
 	return returnvalue;
 }
-
-
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-returnValue ExportFile::copy(	const ExportFile& arg
-								)
-{
-	fileName         = arg.fileName;
-	commonHeaderName = arg.commonHeaderName;
-
-	realString    = arg.realString;
-	intString     = arg.intString;
-	precision     = arg.precision;
-	commentString = arg.commentString;
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-
-FILE* ExportFile::openFile( ) const
-{
-	FILE* file = acadoFOpen( fileName.getName(), "w" );
-	if ( file == 0 )
-		return 0;
-
-	if ( commentString.isEmpty() == BT_TRUE )
-		acadoPrintAutoGenerationNotice( file );
-	else
-		acadoPrintAutoGenerationNotice( file,commentString.getName() );
-
-	if ( commonHeaderName.isEmpty() == BT_FALSE )
-		acadoFPrintf( file, "#include \"%s\"\n\n\n",commonHeaderName.getName() );
-	
-	return file;
-}
-
 
 CLOSE_NAMESPACE_ACADO
 

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -44,43 +44,51 @@ BEGIN_NAMESPACE_ACADO
 //                                 IMPLEMENTATION OF THE CONSTRUCTORS:
 // ---------------------------------------------------------------------------------------------------
 
-   Expression::Expression(){ construct( VT_UNKNOWN, 0, 0, 0, "" ); }
+Expression::Expression()
+{
+	construct(VT_UNKNOWN, 0, 0, 0, "");
+}
 
-   Expression::Expression( uint nRows_, uint nCols_, VariableType variableType_, uint globalTypeID, String name_ ){
+Expression::Expression(	const std::string& name_,
+						uint nRows_,
+						uint nCols_,
+						VariableType variableType_,
+						uint globalTypeID)
+{
+	construct(variableType_, globalTypeID, nRows_, nCols_, name_);
+}
 
-       construct( variableType_, globalTypeID, nRows_, nCols_, name_ );
+Expression::Expression( const std::string &name_ )
+{
+	construct(VT_UNKNOWN, 0, 0, 0, name_);
+}
+
+Expression::Expression( uint nRows_, uint nCols_, VariableType variableType_, uint globalTypeID){
+
+       construct( variableType_, globalTypeID, nRows_, nCols_, "" );
    }
 
+Expression::Expression( int nRows_, int nCols_, VariableType variableType_, int globalTypeID){
 
-   Expression::Expression( const String &name_ ){
-
-       construct( VT_UNKNOWN, 0, 0, 0, name_ );
+       construct( variableType_, globalTypeID, nRows_, nCols_, "" );
    }
 
-   Expression::Expression( int nRows_, int nCols_, VariableType variableType_, int globalTypeID, String name_ ){
+Expression::Expression(const Operator &tree_)
+{
+	VariableType tmpType;
+	int tmpComp;
 
-       construct( variableType_, globalTypeID, nRows_, nCols_, name_ );
-   }
+	if (tree_.isVariable(tmpType, tmpComp) == BT_TRUE) {
 
+		construct(tmpType, tmpComp, 1, 1, "");
+	} else {
 
-   Expression::Expression( const Operator &tree_ ){
+		construct(VT_UNKNOWN, 0, 1, 1, "");
+	}
 
-
-       VariableType tmpType;
-       int          tmpComp;
-
-       if( tree_.isVariable( tmpType, tmpComp ) == BT_TRUE ){
-
-           construct( tmpType, tmpComp, 1, 1, "" );
-       }
-       else{
-
-           construct( VT_UNKNOWN, 0, 1, 1, "" );
-       }
-
-       delete element[0];
-       element[0] = tree_.clone();
-   }
+	delete element[0];
+	element[0] = tree_.clone();
+}
 
 
 
@@ -98,7 +106,7 @@ BEGIN_NAMESPACE_ACADO
        assignmentSetup( convert(rhs) );
    }
 
-   Expression::Expression( const Vector& rhs ){
+   Expression::Expression( const DVector& rhs ){
 
        nRows   = rhs.getDim();
        nCols   = 1;
@@ -107,7 +115,7 @@ BEGIN_NAMESPACE_ACADO
        assignmentSetup( convert(rhs) );
    }
 
-   Expression::Expression( const Matrix& rhs ){
+   Expression::Expression( const DMatrix& rhs ){
 
        nRows   = rhs.getNumRows();
        nCols   = rhs.getNumCols();
@@ -127,24 +135,24 @@ BEGIN_NAMESPACE_ACADO
 
 
 Expression&  Expression::operator= ( const double & arg )      { return operator= ( convert(arg)  ); }
-Expression&  Expression::operator= ( const Vector & arg )      { return operator= ( convert(arg)  ); }
-Expression&  Expression::operator= ( const Matrix & arg )      { return operator= ( convert(arg)  ); }
+Expression&  Expression::operator= ( const DVector & arg )      { return operator= ( convert(arg)  ); }
+Expression&  Expression::operator= ( const DMatrix & arg )      { return operator= ( convert(arg)  ); }
 
 Expression&  Expression::operator<<( const double & arg )      { return operator<<( convert(arg)  ); }
-Expression&  Expression::operator<<( const Vector & arg )      { return operator<<( convert(arg)  ); }
-Expression&  Expression::operator<<( const Matrix & arg )      { return operator<<( convert(arg)  ); }
+Expression&  Expression::operator<<( const DVector & arg )      { return operator<<( convert(arg)  ); }
+Expression&  Expression::operator<<( const DMatrix & arg )      { return operator<<( convert(arg)  ); }
 
 Expression   Expression::operator+ ( const double & arg ) const{ return operator+ ( convert(arg)  ); }
-Expression   Expression::operator+ ( const Vector & arg ) const{ return operator+ ( convert(arg)  ); }
-Expression   Expression::operator+ ( const Matrix & arg ) const{ return operator+ ( convert(arg)  ); }
+Expression   Expression::operator+ ( const DVector & arg ) const{ return operator+ ( convert(arg)  ); }
+Expression   Expression::operator+ ( const DMatrix & arg ) const{ return operator+ ( convert(arg)  ); }
 
 Expression   Expression::operator- ( const double & arg ) const{ return operator- ( convert(arg)  ); }
-Expression   Expression::operator- ( const Vector & arg ) const{ return operator- ( convert(arg)  ); }
-Expression   Expression::operator- ( const Matrix & arg ) const{ return operator- ( convert(arg)  ); }
+Expression   Expression::operator- ( const DVector & arg ) const{ return operator- ( convert(arg)  ); }
+Expression   Expression::operator- ( const DMatrix & arg ) const{ return operator- ( convert(arg)  ); }
 
 Expression   Expression::operator* ( const double & arg ) const{ return operator* ( convert(arg)  ); }
-Expression   Expression::operator* ( const Vector & arg ) const{ return operator* ( convert(arg)  ); }
-Expression   Expression::operator* ( const Matrix & arg ) const{ return operator* ( convert(arg)  ); }
+Expression   Expression::operator* ( const DVector & arg ) const{ return operator* ( convert(arg)  ); }
+Expression   Expression::operator* ( const DMatrix & arg ) const{ return operator* ( convert(arg)  ); }
 
 Expression   Expression::operator/ ( const double & arg ) const{ return operator/ ( convert(arg)  ); }
 
@@ -154,26 +162,26 @@ Expression   Expression::operator/ ( const double & arg ) const{ return operator
 // -------------------------------------------------------------------------------------------------------------
 
 Expression operator+( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
-Expression operator+( const Vector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
-Expression operator+( const Matrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
+Expression operator+( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
+Expression operator+( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
 
 Expression operator-( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
-Expression operator-( const Vector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
-Expression operator-( const Matrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
+Expression operator-( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
+Expression operator-( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
 
 Expression operator*( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
-Expression operator*( const Vector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
-Expression operator*( const Matrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
+Expression operator*( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
+Expression operator*( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
 
 Expression operator/( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
-Expression operator/( const Vector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
-Expression operator/( const Matrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
+Expression operator/( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
+Expression operator/( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
 
 
 
 ConstraintComponent Expression::operator<=( const double& ub ) const{
 
-    Vector ub_(getDim());
+    DVector ub_(getDim());
     ub_.setAll(ub);
 
     return operator<=(ub_);
@@ -181,7 +189,7 @@ ConstraintComponent Expression::operator<=( const double& ub ) const{
 
 ConstraintComponent Expression::operator>=( const double& lb ) const{
 
-    Vector lb_(getDim());
+    DVector lb_(getDim());
     lb_.setAll(lb);
 
     return operator>=(lb_);
@@ -189,7 +197,7 @@ ConstraintComponent Expression::operator>=( const double& lb ) const{
 
 ConstraintComponent Expression::operator==( const double& b ) const{
 
-    Vector b_(getDim());
+    DVector b_(getDim());
     b_.setAll(b);
 
     return operator==(b_);
@@ -197,11 +205,11 @@ ConstraintComponent Expression::operator==( const double& b ) const{
 
 
 
-ConstraintComponent Expression::operator<=( const Vector& ub ) const{
+ConstraintComponent Expression::operator<=( const DVector& ub ) const{
 
     ConstraintComponent tmp;
 
-    Vector lb = ub;
+    DVector lb = ub;
     lb.setAll(-INFTY);
 
     tmp.initialize( lb, *this, ub );
@@ -210,11 +218,11 @@ ConstraintComponent Expression::operator<=( const Vector& ub ) const{
 }
 
 
-ConstraintComponent Expression::operator>=( const Vector& lb ) const{
+ConstraintComponent Expression::operator>=( const DVector& lb ) const{
 
     ConstraintComponent tmp;
 
-    Vector ub = lb;
+    DVector ub = lb;
     ub.setAll(INFTY);
 
     tmp.initialize( lb, *this, ub );
@@ -223,7 +231,7 @@ ConstraintComponent Expression::operator>=( const Vector& lb ) const{
 }
 
 
-ConstraintComponent Expression::operator==( const Vector& b ) const{
+ConstraintComponent Expression::operator==( const DVector& b ) const{
 
     ConstraintComponent tmp;
 
@@ -272,9 +280,9 @@ ConstraintComponent operator<=( double lb, const Expression &arg ){ return ( arg
 ConstraintComponent operator>=( double ub, const Expression &arg ){ return ( arg <= ub ); }
 ConstraintComponent operator==( double  b, const Expression &arg ){ return ( arg == b  ); }
 
-ConstraintComponent operator<=( Vector lb, const Expression &arg ){ return ( arg >= lb ); }
-ConstraintComponent operator>=( Vector ub, const Expression &arg ){ return ( arg <= ub ); }
-ConstraintComponent operator==( Vector  b, const Expression &arg ){ return ( arg == b  ); }
+ConstraintComponent operator<=( DVector lb, const Expression &arg ){ return ( arg >= lb ); }
+ConstraintComponent operator>=( DVector ub, const Expression &arg ){ return ( arg <= ub ); }
+ConstraintComponent operator==( DVector  b, const Expression &arg ){ return ( arg == b  ); }
 
 ConstraintComponent operator<=( VariablesGrid lb, const Expression &arg ){ return ( arg >= lb ); }
 ConstraintComponent operator>=( VariablesGrid ub, const Expression &arg ){ return ( arg <= ub ); }
@@ -355,24 +363,23 @@ Expression& Expression::operator<<( const Expression& arg ){
 }
 
 
-Stream Expression::print( Stream &stream ) const{
+std::ostream& Expression::print(std::ostream& stream) const
+{
+	uint run1;
+	stream << "[ ";
+	if (dim) {
+		for (run1 = 0; run1 < dim - 1; run1++)
+			stream << *element[run1] << " , ";
+		stream << *element[dim - 1];
+	}
+	stream << "]";
 
-    uint run1;
-    stream << "[ ";
-    if(dim)
-      {
-        for( run1 = 0; run1 < dim-1; run1++ )
-          stream << *element[run1] << " , ";
-        stream << *element[dim-1];
-      }
-    stream << "]";
-
-    return stream;
+	return stream;
 }
 
 
-Stream operator<<( Stream &stream, const Expression &arg ){
-
+std::ostream& operator<<( std::ostream& stream, const Expression &arg )
+{
     return arg.print(stream);
 }
 
@@ -466,7 +473,7 @@ Expression Expression::operator+( const Expression& arg ) const{
 
     uint i,j;
 
-    Expression tmp( getNumRows(), getNumCols() );
+    Expression tmp("", getNumRows(), getNumCols() );
 
     for( i=0; i<getNumRows(); ++i ){
         for( j=0; j<getNumCols(); ++j ){
@@ -497,7 +504,7 @@ Expression Expression::operator-( const Expression& arg ) const{
 
     uint i,j;
 
-    Expression tmp( getNumRows(), getNumCols() );
+    Expression tmp("", getNumRows(), getNumCols() );
 
     for( i=0; i<getNumRows(); ++i ){
         for( j=0; j<getNumCols(); ++j ){
@@ -560,7 +567,7 @@ Expression Expression::operator*( const Expression& arg ) const{
 
     if( getNumRows() == 1 && getNumCols( ) == 1 ){
 
-        Expression tmp( arg.getNumRows(), arg.getNumCols() );
+        Expression tmp("", arg.getNumRows(), arg.getNumCols() );
 
         for( i = 0; i< arg.getDim(); i++ ){
 
@@ -576,7 +583,7 @@ Expression Expression::operator*( const Expression& arg ) const{
 
     if( arg.getNumRows() == 1 && arg.getNumCols( ) == 1 ){
 
-        Expression tmp( getNumRows(), getNumCols() );
+        Expression tmp("", getNumRows(), getNumCols() );
 
         for( i = 0; i< getDim(); i++ ){
 
@@ -594,7 +601,7 @@ Expression Expression::operator*( const Expression& arg ) const{
 
     uint newNumRows = getNumRows( );
     uint newNumCols = arg.getNumCols( );
-    IntermediateState tmp = zeros( newNumRows, newNumCols );
+    IntermediateState tmp = zeros<double>( newNumRows, newNumCols );
 
     for( i=0; i<newNumRows; ++i ){
         for( j=0; j<newNumCols; ++j ){
@@ -621,7 +628,7 @@ Expression Expression::operator/( const Expression& arg ) const{
 
     uint i;
 
-    Expression tmp( getNumRows(), getNumCols() );
+    Expression tmp("", getNumRows(), getNumCols() );
 
     for( i = 0; i< getDim(); i++ ){
          delete tmp.element[i];
@@ -639,7 +646,7 @@ Expression Expression::getInverse() const{
     int i,j,k;                 // must really be int, never use uint here.
     int M = getNumRows();      // must really be int, never use uint here.
 
-    IntermediateState tmp(M,2*M);
+	IntermediateState tmp("", M, 2 * M);
 
     for( i = 0; i < M; i++ ){
         for( j = 0; j < 2*M; j++ ){
@@ -663,7 +670,7 @@ Expression Expression::getInverse() const{
         for( j = 2*M-1; j >= 0; j-- )
              tmp(i,j) = tmp(i,j)/tmp(i,i);
 
-    Expression I(M,M);
+    Expression I("", M,M);
     for( i = 0; i < M; i++ ){
         for( j = 0; j < M; j++ ){
             delete I.element[i*M+j];
@@ -680,7 +687,7 @@ Expression Expression::getRow( const uint& rowIdx ) const{
     uint run1;
     ASSERT( rowIdx < getNumRows() );
 
-    Expression tmp( 1, (int) getNumCols() );
+    Expression tmp("", 1, (int) getNumCols() );
 
     for( run1 = 0; run1 < getNumCols(); run1++ ){
         delete tmp.element[run1];
@@ -695,7 +702,7 @@ Expression Expression::getCol( const uint& colIdx ) const{
     uint run1;
     ASSERT( colIdx < getNumCols() );
 
-    Expression tmp( (int) getNumRows(), 1 );
+    Expression tmp("", (int) getNumRows(), 1 );
 
     for( run1 = 0; run1 < getNumRows(); run1++ ){
         delete tmp.element[run1];
@@ -705,7 +712,7 @@ Expression Expression::getCol( const uint& colIdx ) const{
 }
 
 
-Matrix Expression::getDependencyPattern( const Expression& arg ) const{
+DMatrix Expression::getDependencyPattern( const Expression& arg ) const{
 
     Function f;
     f << backwardDerivative( *this, arg );
@@ -727,7 +734,7 @@ Matrix Expression::getDependencyPattern( const Expression& arg ) const{
     // ---------------------------------
     f.evaluate( 0, x, result );
 
-    Matrix tmp( getDim(), arg.getDim(), result );
+    DMatrix tmp( getDim(), arg.getDim(), result );
 
     delete[] result;
     delete[] x;
@@ -739,7 +746,7 @@ Matrix Expression::getDependencyPattern( const Expression& arg ) const{
 
 Expression Expression::getSin( ) const{
 
-    Expression tmp(nRows,nCols);
+	Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -751,7 +758,7 @@ Expression Expression::getSin( ) const{
 
 Expression Expression::getCos( ) const{
 
-    Expression tmp(nRows,nCols);
+	Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -763,7 +770,7 @@ Expression Expression::getCos( ) const{
 
 Expression Expression::getTan( ) const{
 
-    Expression tmp(nRows,nCols);
+	Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -775,7 +782,7 @@ Expression Expression::getTan( ) const{
 
 Expression Expression::getAsin( ) const{
 
-    Expression tmp(nRows,nCols);
+	Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -787,7 +794,7 @@ Expression Expression::getAsin( ) const{
 
 Expression Expression::getAcos( ) const{
 
-    Expression tmp(nRows,nCols);
+	Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -799,7 +806,7 @@ Expression Expression::getAcos( ) const{
 
 Expression Expression::getAtan( ) const{
 
-    Expression tmp(nRows,nCols);
+	Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -811,7 +818,7 @@ Expression Expression::getAtan( ) const{
 
 Expression Expression::getExp( ) const{
 
-    Expression tmp(nRows,nCols);
+	Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -823,7 +830,7 @@ Expression Expression::getExp( ) const{
 
 Expression Expression::getSqrt( ) const{
 
-    Expression tmp(nRows,nCols);
+	Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -835,7 +842,7 @@ Expression Expression::getSqrt( ) const{
 
 Expression Expression::getLn( ) const{
 
-    Expression tmp(nRows,nCols);
+	Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -850,7 +857,7 @@ Expression Expression::getPow( const Expression& arg ) const{
 
     ASSERT( arg.getDim() == 1 );
 
-    Expression tmp(nRows,nCols);
+    Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -863,7 +870,7 @@ Expression Expression::getPow( const Expression& arg ) const{
 
 Expression Expression::getPowInt( const int &arg ) const{
 
-    Expression tmp(nRows,nCols);
+	Expression tmp("", nRows, nCols);
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
@@ -877,7 +884,7 @@ Expression Expression::getPowInt( const int &arg ) const{
 
 Expression Expression::transpose( ) const{
 
-    Expression tmp(getNumCols(),getNumRows());
+	Expression tmp("", getNumCols(), getNumRows());
 
     uint run1, run2;
 
@@ -1024,7 +1031,7 @@ Expression Expression::getDot( ) const{
         ASSERT( 1 == 0 );
     }
 
-    Expression tmp( getNumRows(), getNumCols(), VT_DDIFFERENTIAL_STATE, component );
+    Expression tmp("", getNumRows(), getNumCols(), VT_DDIFFERENTIAL_STATE, component );
     return tmp;
 }
 
@@ -1040,7 +1047,7 @@ Expression Expression::ADforward ( const Expression &arg ) const{
     ASSERT(     getNumCols() == 1 );
     ASSERT( arg.getNumCols() == 1 );
 
-    Expression result( getNumRows(), arg.getNumRows() );
+	Expression result("", getNumRows(), arg.getNumRows());
 
     uint run1, run2;
 
@@ -1070,7 +1077,7 @@ Expression Expression::ADforward ( const VariableType &varType_, const int *arg,
  
     ASSERT( getNumCols() == 1 );
 
-    Expression result( (int) getNumRows(), nV );
+	Expression result("", (int) getNumRows(), nV);
 
     int run1, run2;
 
@@ -1101,7 +1108,7 @@ Expression Expression::ADbackward ( const Expression &arg ) const{
     ASSERT(     getNumCols() == 1 );
     ASSERT( arg.getNumCols() == 1 );
 
-    Expression result( getNumRows(), arg.getNumRows() );
+	Expression result("", getNumRows(), arg.getNumRows());
 
     uint run1, run2;
 
@@ -1165,7 +1172,7 @@ Expression Expression::ADforward ( const VariableType *varType_,
     unsigned int run1, run2;
     const unsigned int n = seed.getDim();
 
-    Expression result( getNumRows(), getNumCols() );
+	Expression result("", getNumRows(), getNumCols());
 
     VariableType  *varType   = new VariableType[n];
     int           *Component = new int         [n];
@@ -1210,7 +1217,7 @@ Expression Expression::ADforward ( const VariableType *varType_,
 
 Expression Expression::getODEexpansion( const int &order, const int *arg ) const{
  
-	IntermediateState coeff( (int) dim, order+2 );
+	IntermediateState coeff("", (int) dim, order+2 );
 	
     VariableType  *vType = new VariableType[dim*(order+1)+1];
     int           *Comp  = new int         [dim*(order+1)+1];
@@ -1223,7 +1230,7 @@ Expression Expression::getODEexpansion( const int &order, const int *arg ) const
 	seed [0] = new DoubleConstant( 1.0 , NE_ONE );
 	
 	for( uint i=0; i<dim; i++ ){
-		coeff(i,0)   = Expression(1,1,VT_DIFFERENTIAL_STATE,arg[i]);
+		coeff(i,0)   = Expression("",1,1,VT_DIFFERENTIAL_STATE,arg[i]);
 		coeff(i,1)   = operator()(i);
 		vType[i+1]   = VT_DIFFERENTIAL_STATE;
 		Comp [i+1]   = arg[i];
@@ -1272,7 +1279,7 @@ Expression Expression::ADbackward( const Expression &arg, const Expression &seed
     ASSERT( arg .isVariable() == BT_TRUE  );
     ASSERT( seed.getDim    () == getDim() );
 
-    Expression result( arg.getNumRows(), arg.getNumCols() );
+	Expression result("", arg.getNumRows(), arg.getNumCols());
 
     VariableType *varType   = new VariableType[Dim];
     int          *Component = new int         [Dim];
@@ -1448,7 +1455,7 @@ returnValue Expression::substitute( int idx, const Expression &arg ) const{
 Expression Expression::operator-() const{
 
     uint run1, run2;
-    Expression tmp(getNumRows(),getNumCols());
+	Expression tmp("", getNumRows(), getNumCols());
 
     for( run1 = 0; run1 < getNumRows(); run1++ ){
         for( run2 = 0; run2 < getNumCols(); run2++ ){
@@ -1468,7 +1475,7 @@ Expression Expression::operator-() const{
 // PROTECTED MEMBER FUNCTIONS:
 //
 
-void Expression::construct( VariableType variableType_, uint globalTypeID, uint nRows_, uint nCols_, const String &name_ ){
+void Expression::construct( VariableType variableType_, uint globalTypeID, uint nRows_, uint nCols_, const std::string &name_ ){
 
     nRows        = nRows_       ;
     nCols        = nCols_       ;
@@ -1482,14 +1489,12 @@ void Expression::construct( VariableType variableType_, uint globalTypeID, uint 
 
     for( i = 0; i < dim; i++ ){
 
-        Stream tmpName;
-
         switch( variableType ){
             case VT_UNKNOWN           : element[i] = new DoubleConstant( 0.0, NE_ZERO ); break;
             case VT_INTERMEDIATE_STATE:
-                                        element[i] = new TreeProjection( tmpName );
+                                        element[i] = new TreeProjection( "" );
                                         break;
-            default                   : element[i] = new Projection( variableType_, globalTypeID+i, tmpName ); break;
+            default                   : element[i] = new Projection( variableType_, globalTypeID+i, "" ); break;
         }
     }
 }
@@ -1511,7 +1516,7 @@ void Expression::copy( const Expression &rhs ){
          else                       element[i] = 0;
     }
 	
-	// name not copied!?
+	// Name not copied?
 }
 
 
@@ -1543,15 +1548,20 @@ Expression& Expression::assignmentSetup( const Expression &arg ){
 
     for( uint i = 0; i < dim; i++ ){
 
-        arg.element[i]->isVariable(tt,comp);
-        if( tt == VT_INTERMEDIATE_STATE ) element[i] = arg.element[i]->clone();
-		else{
-			Stream tmpName;
-			if( name.isEmpty() == BT_FALSE ){
-				if( dim > 1 ) tmpName = tmpName << name << "[" << i << "]";
-				else          tmpName = tmpName << name;
-			 }
-			 element[i] = (arg.getTreeProjection(i,tmpName)).clone();
+		arg.element[i]->isVariable(tt, comp);
+		if (tt == VT_INTERMEDIATE_STATE)
+			element[i] = arg.element[i]->clone();
+		else
+		{
+			std::stringstream tmpName;
+			if (name.empty() == false)
+			{
+				if (dim > 1)
+					tmpName << name << "[" << i << "]";
+				else
+					tmpName << name;
+			}
+			element[i] = (arg.getTreeProjection(i, tmpName.str())).clone();
 		}
     }
     return *this;
@@ -1560,7 +1570,7 @@ Expression& Expression::assignmentSetup( const Expression &arg ){
 
 Expression Expression::convert( const double& arg ) const{
 
-     Expression tmp(1);
+     Expression tmp("", 1, 1);
      delete tmp.element[0];
 
      tmp.element[0] = new DoubleConstant( arg, NE_NEITHER_ONE_NOR_ZERO );
@@ -1568,10 +1578,10 @@ Expression Expression::convert( const double& arg ) const{
 }
 
 
-Expression Expression::convert( const Vector& arg ) const{
+Expression Expression::convert( const DVector& arg ) const{
 
      uint run1;
-     Expression tmp(arg.getDim());
+     Expression tmp("", arg.getDim(), 1);
 
      for( run1 = 0; run1 < arg.getDim(); run1++ ){
          delete tmp.element[run1];
@@ -1581,10 +1591,10 @@ Expression Expression::convert( const Vector& arg ) const{
 }
 
 
-Expression Expression::convert( const Matrix& arg ) const{
+Expression Expression::convert( const DMatrix& arg ) const{
 
      uint run1,run2;
-     Expression tmp(arg.getNumRows(),arg.getNumCols());
+	Expression tmp("", arg.getNumRows(), arg.getNumCols());
 
      for( run1 = 0; run1 < arg.getNumRows(); run1++ ){
          for( run2 = 0; run2 < arg.getNumCols(); run2++ ){
@@ -1611,7 +1621,7 @@ BooleanType Expression::isDependingOn( VariableType type ) const{
 
 BooleanType Expression::isDependingOn( const Expression &e ) const{
     ASSERT( e.getDim() ==1 );
-    Vector sum=sumRow(getDependencyPattern(e));
+    DVector sum=getDependencyPattern(e).sumRow();
 
     if( fabs(sum(0) - EPS) > 0 ) return BT_TRUE;
     return BT_FALSE;

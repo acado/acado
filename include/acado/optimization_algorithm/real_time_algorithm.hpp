@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -157,8 +157,8 @@ class RealTimeAlgorithm : public OptimizationAlgorithmBase, public ControlLaw
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue init(	double startTime,
-									const Vector &_x = emptyConstVector,
-									const Vector &_p = emptyConstVector,
+									const DVector &_x = emptyConstVector,
+									const DVector &_p = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									);
 
@@ -173,8 +173,8 @@ class RealTimeAlgorithm : public OptimizationAlgorithmBase, public ControlLaw
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue step(	double currentTime,
-									const Vector& _x,
-									const Vector& _p = emptyConstVector,
+									const DVector& _x,
+									const DVector& _p = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									);
 
@@ -191,8 +191,8 @@ class RealTimeAlgorithm : public OptimizationAlgorithmBase, public ControlLaw
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue feedbackStep(	double currentTime,
-											const Vector &_x,
-											const Vector &_p = emptyConstVector,
+											const DVector &_x,
+											const DVector &_p = emptyConstVector,
 											const VariablesGrid& _yRef = emptyConstVariablesGrid
 											);
 
@@ -215,8 +215,8 @@ class RealTimeAlgorithm : public OptimizationAlgorithmBase, public ControlLaw
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue solve(	double startTime,
-									const Vector &_x,
-									const Vector &_p = emptyConstVector,
+									const DVector &_x,
+									const DVector &_p = emptyConstVector,
 									const VariablesGrid& _yRef = emptyConstVariablesGrid
 									);
 
@@ -374,8 +374,8 @@ class RealTimeAlgorithm : public OptimizationAlgorithmBase, public ControlLaw
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		returnValue performFeedbackStep(	double currentTime,
-											const Vector &_x,
-											const Vector &_p = emptyConstVector
+											const DVector &_x,
+											const DVector &_p = emptyConstVector
 											);
 
 		/** (not yet documented).
@@ -394,8 +394,8 @@ class RealTimeAlgorithm : public OptimizationAlgorithmBase, public ControlLaw
 	//
 	protected:
 
-		Vector* x0;						/**< Deep copy of the most recent initial value of differential states. */
-		Vector* p0;						/**< Deep copy of the most recent parameter. */
+		DVector* x0;						/**< Deep copy of the most recent initial value of differential states. */
+		DVector* p0;						/**< Deep copy of the most recent parameter. */
 
 		VariablesGrid* reference;		/**< Deep copy of the most recent reference. */
 

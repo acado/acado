@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -39,23 +39,28 @@
 BEGIN_NAMESPACE_ACADO
 
 
-inline returnValue PlotWindowSubplot::setTitle(	const char* const _title
+inline returnValue PlotWindowSubplot::setTitle(	const std::string& _title
 												)
 {
-	return acadoAssignString( &title,_title," " );
+	title = _title;
+	return SUCCESSFUL_RETURN;
 }
 
-inline returnValue PlotWindowSubplot::setXLabel(	const char* const _xLabel
+inline returnValue PlotWindowSubplot::setXLabel(	const std::string& _xLabel
 													)
 {
-	return acadoAssignString( &xLabel,_xLabel," " );
+	xLabel = _xLabel;
+
+	return SUCCESSFUL_RETURN;
 }
 
 
-inline returnValue PlotWindowSubplot::setYLabel(	const char* const _yLabel
+inline returnValue PlotWindowSubplot::setYLabel(	const std::string& _yLabel
 													)
 {
-	return acadoAssignString( &yLabel,_yLabel," " );
+	yLabel = _yLabel;
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -96,23 +101,26 @@ inline returnValue PlotWindowSubplot::setRanges(	double _xRangeLowerLimit,
 }
 
 
-inline returnValue PlotWindowSubplot::getTitle(	char** _title
+inline returnValue PlotWindowSubplot::getTitle(	std::string& _title
 												)
 {
-	return acadoAssignString( _title,title,"" );
+	_title = title;
+	return SUCCESSFUL_RETURN; 
 }
 
-inline returnValue PlotWindowSubplot::getXLabel(	char** _xLabel
+inline returnValue PlotWindowSubplot::getXLabel(	std::string& _xLabel
 													)
 {
-	return acadoAssignString( _xLabel,xLabel,"" );
+	_xLabel = xLabel;
+	return SUCCESSFUL_RETURN;
 }
 
 
-inline returnValue PlotWindowSubplot::getYLabel(	char** _yLabel
+inline returnValue PlotWindowSubplot::getYLabel(	std::string& _yLabel
 													)
 {
-	return acadoAssignString( _yLabel,yLabel,"" );
+	_yLabel = yLabel;
+	return SUCCESSFUL_RETURN;
 }
 
 

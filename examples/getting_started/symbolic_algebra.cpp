@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,16 +32,19 @@
  */
 
 #include <acado_toolkit.hpp>
-#include <string>
 
-    USING_NAMESPACE_ACADO
+using namespace std;
 
-void output(const char* name, const Expression& e) {
+USING_NAMESPACE_ACADO
+
+void output(const char* name, const Expression& e)
+{
     Function f;
     f << e;
-    FILE *file = fopen(name, "w" );
-    file << f;
-    fclose(file);
+
+    ofstream stream( name );
+    stream << f;
+    stream.close();
 }
 
 int main( ){
@@ -60,7 +63,8 @@ int main( ){
     // Thus doesn't work with DifferentialState e1(3);
     E.appendRows(e1);
     printf("Shape %d x %d\n",E.getNumRows(),E.getNumCols());
-    E.appendRows(e2); 
+    E.appendRows(e2);
+
     output("sym4.txt",E);
 
     return 0;

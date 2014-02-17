@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,8 +32,9 @@
 
 
 #include <acado/optimization_algorithm/optimization_algorithm_base.hpp>
-#include <assert.h>
+#include <acado/ocp/ocp.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -104,7 +105,8 @@ OptimizationAlgorithmBase& OptimizationAlgorithmBase::operator=( const Optimizat
 
 returnValue OptimizationAlgorithmBase::initializeDifferentialStates( const char* fileName , BooleanType autoinit)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty() == BT_TRUE )
 		return RET_FILE_CAN_NOT_BE_OPENED;
@@ -115,7 +117,8 @@ returnValue OptimizationAlgorithmBase::initializeDifferentialStates( const char*
 
 returnValue OptimizationAlgorithmBase::initializeAlgebraicStates( const char* fileName , BooleanType autoinit)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty() == BT_TRUE )
 		return RET_FILE_CAN_NOT_BE_OPENED;
@@ -126,7 +129,8 @@ returnValue OptimizationAlgorithmBase::initializeAlgebraicStates( const char* fi
 
 returnValue OptimizationAlgorithmBase::initializeParameters( const char* fileName)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty() == BT_TRUE )
 		return RET_FILE_CAN_NOT_BE_OPENED;
@@ -137,7 +141,8 @@ returnValue OptimizationAlgorithmBase::initializeParameters( const char* fileNam
 
 returnValue OptimizationAlgorithmBase::initializeControls( const char* fileName)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty() == BT_TRUE )
 		return RET_FILE_CAN_NOT_BE_OPENED;
@@ -148,7 +153,8 @@ returnValue OptimizationAlgorithmBase::initializeControls( const char* fileName)
 
 returnValue OptimizationAlgorithmBase::initializeDisturbances( const char* fileName)
 {
-	VariablesGrid tmp = fopen( fileName,"r" );
+	VariablesGrid tmp;
+	tmp.read( fileName );
 	
 	if ( tmp.isEmpty() == BT_TRUE )
 		return RET_FILE_CAN_NOT_BE_OPENED;
@@ -237,7 +243,7 @@ returnValue OptimizationAlgorithmBase::getParameters( VariablesGrid &p_  ) const
 }
 
 
-returnValue OptimizationAlgorithmBase::getParameters( Vector &p_  ) const
+returnValue OptimizationAlgorithmBase::getParameters( DVector &p_  ) const
 {
 	if( nlpSolver == 0 ) return ACADOWARNING( RET_MEMBER_NOT_INITIALISED );
 
@@ -276,9 +282,7 @@ returnValue OptimizationAlgorithmBase::getDifferentialStates( const char* fileNa
     returnvalue = nlpSolver->getDifferentialStates( xx );
     if( returnvalue != SUCCESSFUL_RETURN ) return returnvalue;
 
-    FILE *file = fopen(fileName,"w");
-    file << xx;
-    fclose(file);
+    xx.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
@@ -293,9 +297,7 @@ returnValue OptimizationAlgorithmBase::getAlgebraicStates( const char* fileName 
     returnvalue = nlpSolver->getAlgebraicStates( xx );
     if( returnvalue != SUCCESSFUL_RETURN ) return returnvalue;
 
-    FILE *file = fopen(fileName,"w");
-    file << xx;
-    fclose(file);
+    xx.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
@@ -310,9 +312,7 @@ returnValue OptimizationAlgorithmBase::getParameters( const char* fileName ) con
     returnvalue = nlpSolver->getParameters( xx );
     if( returnvalue != SUCCESSFUL_RETURN ) return returnvalue;
 
-    FILE *file = fopen(fileName,"w");
-    file << xx;
-    fclose(file);
+    xx.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
@@ -327,9 +327,7 @@ returnValue OptimizationAlgorithmBase::getControls( const char* fileName ) const
     returnvalue = nlpSolver->getControls( xx );
     if( returnvalue != SUCCESSFUL_RETURN ) return returnvalue;
 
-    FILE *file = fopen(fileName,"w");
-    file << xx;
-    fclose(file);
+    xx.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
@@ -344,19 +342,17 @@ returnValue OptimizationAlgorithmBase::getDisturbances( const char* fileName ) c
     returnvalue = nlpSolver->getDisturbances( xx );
     if( returnvalue != SUCCESSFUL_RETURN ) return returnvalue;
 
-    FILE *file = fopen(fileName,"w");
-    file << xx;
-    fclose(file);
+    xx.print( fileName );
 
     return SUCCESSFUL_RETURN;
 }
 
 
-double OptimizationAlgorithmBase::getObjectiveValue( const char* fileName ) const{
-
-    FILE *file = fopen(fileName,"w");
-    acadoFPrintf( file , "%.16e \n", getObjectiveValue() );
-    fclose(file);
+double OptimizationAlgorithmBase::getObjectiveValue( const char* fileName ) const
+{
+	ofstream stream( fileName );
+	stream << scientific << getObjectiveValue();
+	stream.close();
 
     return SUCCESSFUL_RETURN;
 }
@@ -884,7 +880,7 @@ returnValue OptimizationAlgorithmBase::initializeOCPiterate(	Constraint* const _
     if( nx > 0 && userInit.x->getNumPoints() > 0 ){
         ai=userInit.x->getAutoInit(0);
         for( run1 = 0; run1 < _unionGrid.getNumPoints(); run1++ ){
-            Vector tmp = userInit.x->linearInterpolation( _unionGrid.getTime(run1) );
+            DVector tmp = userInit.x->linearInterpolation( _unionGrid.getTime(run1) );
             uint nxx = tmp.getDim();
             if( nxx > nx ) nxx = nx;
             for( run2 = 0; run2 < nxx; run2++ )
@@ -896,7 +892,7 @@ returnValue OptimizationAlgorithmBase::initializeOCPiterate(	Constraint* const _
     if( nxa > 0 && userInit.xa->getNumPoints() > 0 ){
         ai=userInit.xa->getAutoInit(0);
         for( run1 = 0; run1 < _unionGrid.getNumPoints(); run1++ ){
-            Vector tmp = userInit.xa->linearInterpolation( _unionGrid.getTime(run1) );
+            DVector tmp = userInit.xa->linearInterpolation( _unionGrid.getTime(run1) );
 			uint nxx = tmp.getDim();
             if( nxx > nxa ) nxx = nxa;
             for( run2 = 0; run2 < nxx; run2++ )
@@ -907,7 +903,7 @@ returnValue OptimizationAlgorithmBase::initializeOCPiterate(	Constraint* const _
 	
     if( nu > 0 && userInit.u->getNumPoints() > 0 ){
         for( run1 = 0; run1 < _unionGrid.getNumPoints(); run1++ ){
-            Vector tmp = userInit.u->linearInterpolation( _unionGrid.getTime(run1) );
+            DVector tmp = userInit.u->linearInterpolation( _unionGrid.getTime(run1) );
             uint nxx = tmp.getDim();
             if( nxx > nu ) nxx = nu;
             for( run2 = 0; run2 < nxx; run2++ )
@@ -925,7 +921,7 @@ returnValue OptimizationAlgorithmBase::initializeOCPiterate(	Constraint* const _
 
 //     if( np > 0 && userInit.p->getNumPoints() > 0 ){
 //         for( run1 = 0; run1 < _unionGrid.getNumPoints(); run1++ ){
-//             Vector tmp = userInit.p->getFirstVector( );
+//             DVector tmp = userInit.p->getFirstVector( );
 //             uint nxx = tmp.getDim();
 //             if( nxx > np ) nxx = np;
 //             for( run2 = 0; run2 < nxx; run2++ )
@@ -935,7 +931,7 @@ returnValue OptimizationAlgorithmBase::initializeOCPiterate(	Constraint* const _
 
     if( nw > 0 && userInit.w->getNumPoints() > 0 ){
         for( run1 = 0; run1 < _unionGrid.getNumPoints(); run1++ ){
-            Vector tmp = userInit.w->linearInterpolation( _unionGrid.getTime(run1) );
+            DVector tmp = userInit.w->linearInterpolation( _unionGrid.getTime(run1) );
             uint nxx = tmp.getDim();
             if( nxx > nw ) nxx = nw;
             for( run2 = 0; run2 < nxx; run2++ )

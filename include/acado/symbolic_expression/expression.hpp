@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,7 +26,7 @@
 
 /**
  *    \file include/acado/symbolic_expression/expression.hpp
- *    \author Boris Houska, Hans Joachim Ferreau
+ *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  *
  */
 
@@ -38,13 +38,10 @@
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/variables_grid/variables_grid.hpp>
 #include <acado/symbolic_operator/symbolic_operator.hpp>
-#include <iostream>
 
 BEGIN_NAMESPACE_ACADO
 
-
 class ConstraintComponent;
-
 
 /**
  *  \brief Base class for all variables within the symbolic expressions family.
@@ -56,7 +53,7 @@ class ConstraintComponent;
  *  Moreover, the Expression class defines all kind of matrix
  *  and vector operations on a symbolic level.
  *
- *  \author Boris Houska, Hans Joachim Ferreau
+ *  \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
 
 
@@ -80,28 +77,35 @@ class Expression{
         Expression( const Operator &tree_ );
 
         /** Casting constructor. */
-        Expression( const String &name_ );
-
-
-        /** Constructor which takes the arguments. */
-        explicit Expression( int          nRows_                     ,  /**< number of rows          */
-                             int          nCols_         = 1         ,  /**< number of columns       */
-                             VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
-                             int          globalTypeID   = 0         ,  /**< the global type ID      */
-                             String       name_          = ""           /**< the name                */  );
+        explicit Expression(	const std::string& name_
+        						);
 
         /** Constructor which takes the arguments. */
-        explicit Expression( uint         nRows_                     ,  /**< number of rows          */
-                             uint         nCols_         = 1         ,  /**< number of columns       */
-                             VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
-                             uint         globalTypeID   = 0         ,  /**< the global type ID      */
-                             String       name_          = ""           /**< the name                */  );
+        explicit Expression(	const std::string&  name_,							/**< the name                */
+        						uint          		nRows_,							/**< number of rows          */
+        						uint          		nCols_,							/**< number of columns       */
+        						VariableType  		variableType_  = VT_UNKNOWN,	/**< the variable type       */
+        						uint          		globalTypeID   = 0				/**< the global type ID      */
+        						);
 
+        /** Constructor which takes the arguments. */
+        explicit Expression(	int          nRows_                     ,  /**< number of rows          */
+        						int          nCols_         = 1         ,  /**< number of columns       */
+        						VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
+        						int          globalTypeID   = 0            /**< the global type ID      */
+        						);
+
+        /** Constructor which takes the arguments. */
+        explicit Expression(	uint         nRows_                     ,  /**< number of rows          */
+        						uint         nCols_         = 1         ,  /**< number of columns       */
+        						VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
+        						uint         globalTypeID   = 0            /**< the global type ID      */
+        						);
 
         /** Copy constructor (deep copy). */
         Expression( const double      & rhs );
-        Expression( const Vector      & rhs );
-        Expression( const Matrix      & rhs );
+        Expression( const DVector      & rhs );
+        Expression( const DMatrix      & rhs );
 
         Expression( const Expression  & rhs );
 
@@ -109,6 +113,9 @@ class Expression{
         /** Destructor. */
         virtual ~Expression( );
 
+        /** Function for cloning. */
+        virtual Expression* clone() const
+        { return new Expression( *this ); }
 
         /** Assignment Operator.                                             \n
          *                                                                   \n
@@ -121,14 +128,14 @@ class Expression{
          *                                                             \n
          *  \param arg  the vector to be assigned to the expression.   \n
          */
-        Expression& operator=( const Vector& arg );
+        Expression& operator=( const DVector& arg );
 
 
         /** Assignment Operator.                                       \n
          *                                                             \n
          *  \param arg  the matrix to be assigned to the expression.   \n
          */
-        Expression& operator=( const Matrix& arg );
+        Expression& operator=( const DMatrix& arg );
 
 
         /** Assignment Operator.                         \n
@@ -137,10 +144,9 @@ class Expression{
          */
         Expression& operator=( const Expression& arg );
 
-
         Expression& operator<<( const double      & arg );
-        Expression& operator<<( const Vector      & arg );
-        Expression& operator<<( const Matrix      & arg );
+        Expression& operator<<( const DVector      & arg );
+        Expression& operator<<( const DMatrix      & arg );
         Expression& operator<<( const Expression  & arg );
 
 	/**
@@ -174,48 +180,48 @@ class Expression{
 
 
         Expression operator+( const double      & arg ) const;
-        Expression operator+( const Vector      & arg ) const;
-        Expression operator+( const Matrix      & arg ) const;
+        Expression operator+( const DVector      & arg ) const;
+        Expression operator+( const DMatrix      & arg ) const;
         Expression operator+( const Expression  & arg ) const;
 
         friend Expression operator+( const double       & arg1, const Expression& arg2 );
-        friend Expression operator+( const Vector       & arg1, const Expression& arg2 );
-        friend Expression operator+( const Matrix       & arg1, const Expression& arg2 );
+        friend Expression operator+( const DVector       & arg1, const Expression& arg2 );
+        friend Expression operator+( const DMatrix       & arg1, const Expression& arg2 );
 
 
         Expression operator-( const double      & arg ) const;
-        Expression operator-( const Vector      & arg ) const;
-        Expression operator-( const Matrix      & arg ) const;
+        Expression operator-( const DVector      & arg ) const;
+        Expression operator-( const DMatrix      & arg ) const;
         Expression operator-( const Expression  & arg ) const;
 
         Expression operator-( ) const;
 
         friend Expression operator-( const double       & arg1, const Expression& arg2 );
-        friend Expression operator-( const Vector       & arg1, const Expression& arg2 );
-        friend Expression operator-( const Matrix       & arg1, const Expression& arg2 );
+        friend Expression operator-( const DVector       & arg1, const Expression& arg2 );
+        friend Expression operator-( const DMatrix       & arg1, const Expression& arg2 );
 
 
 
         Expression operator*( const double      & arg ) const;
-        Expression operator*( const Vector      & arg ) const;
-        Expression operator*( const Matrix      & arg ) const;
+        Expression operator*( const DVector      & arg ) const;
+        Expression operator*( const DMatrix      & arg ) const;
         Expression operator*( const Expression  & arg ) const;
 
         friend Expression operator*( const double       & arg1, const Expression& arg2 );
-        friend Expression operator*( const Vector       & arg1, const Expression& arg2 );
-        friend Expression operator*( const Matrix       & arg1, const Expression& arg2 );
+        friend Expression operator*( const DVector       & arg1, const Expression& arg2 );
+        friend Expression operator*( const DMatrix       & arg1, const Expression& arg2 );
 
 
         Expression operator/( const double      & arg ) const;
         Expression operator/( const Expression  & arg ) const;
 
         friend Expression operator/( const double       & arg1, const Expression& arg2 );
-        friend Expression operator/( const Vector       & arg1, const Expression& arg2 );
-        friend Expression operator/( const Matrix       & arg1, const Expression& arg2 );
+        friend Expression operator/( const DVector       & arg1, const Expression& arg2 );
+        friend Expression operator/( const DMatrix       & arg1, const Expression& arg2 );
 
 
-        Stream print( Stream &stream ) const;
-        friend Stream operator<<( Stream &stream, const Expression &arg );
+        std::ostream& print( std::ostream &stream ) const;
+        friend std::ostream& operator<<( std::ostream& stream, const Expression &arg );
 
 
         /** Returns the symbolic inverse of a matrix (only for square matrices) */
@@ -226,11 +232,11 @@ class Expression{
 	
 	
         /**
-	* When operated on an n x 1 Expression, returns an m x n Matrix.
+	* When operated on an n x 1 Expression, returns an m x n DMatrix.
 	* The element (i,j) of this matrix is zero when this(i) does not depend on arg(j)
 	* \param arg m x 1 Expression
 	*/
-        Matrix getDependencyPattern( const Expression& arg ) const;
+        DMatrix getDependencyPattern( const Expression& arg ) const;
 
         Expression getSin    ( ) const;
         Expression getCos    ( ) const;
@@ -295,9 +301,9 @@ class Expression{
         ConstraintComponent operator>=( const double& lb ) const;
         ConstraintComponent operator==( const double&  b ) const;
 
-        ConstraintComponent operator<=( const Vector& ub ) const;
-        ConstraintComponent operator>=( const Vector& lb ) const;
-        ConstraintComponent operator==( const Vector&  b ) const;
+        ConstraintComponent operator<=( const DVector& ub ) const;
+        ConstraintComponent operator>=( const DVector& lb ) const;
+        ConstraintComponent operator==( const DVector&  b ) const;
 
         ConstraintComponent operator<=( const VariablesGrid& ub ) const;
         ConstraintComponent operator>=( const VariablesGrid& lb ) const;
@@ -307,9 +313,9 @@ class Expression{
         friend ConstraintComponent operator==( double  b, const Expression &arg );
         friend ConstraintComponent operator>=( double ub, const Expression &arg );
 
-        friend ConstraintComponent operator<=( Vector lb, const Expression &arg );
-        friend ConstraintComponent operator==( Vector  b, const Expression &arg );
-        friend ConstraintComponent operator>=( Vector ub, const Expression &arg );
+        friend ConstraintComponent operator<=( DVector lb, const Expression &arg );
+        friend ConstraintComponent operator==( DVector  b, const Expression &arg );
+        friend ConstraintComponent operator>=( DVector ub, const Expression &arg );
 
         friend ConstraintComponent operator<=( VariablesGrid lb, const Expression &arg );
         friend ConstraintComponent operator==( VariablesGrid  b, const Expression &arg );
@@ -370,14 +376,13 @@ class Expression{
 
 
         Expression convert( const double      & arg ) const;
-        Expression convert( const Vector      & arg ) const;
-        Expression convert( const Matrix      & arg ) const;
+        Expression convert( const DVector      & arg ) const;
+        Expression convert( const DMatrix      & arg ) const;
 
 
 
-        /** Returns a tree projection with respect to the specified index.
-         */
-        inline TreeProjection getTreeProjection( const uint &idx, String name_="" ) const;
+        /** Returns a tree projection with respect to the specified index. */
+        inline TreeProjection getTreeProjection( const uint &idx, const std::string& name_ ) const;
 
 
 
@@ -392,7 +397,7 @@ class Expression{
                         uint          globalTypeID_,  /**< the global type ID     */
                         uint                 nRows_,  /**< The number of rows.    */
                         uint                 nCols_,  /**< The number of columns. */
-                        const String         &name_   /**< The name               */ );
+                        const std::string&   name_    /**< The name               */ );
 
 
         /** Generic copy routine (protected, only for internal use).
@@ -419,18 +424,83 @@ class Expression{
     protected:
 
         Operator**         element     ;   /**< Element of vector space.   */
-        uint               dim         ;   /**< Vector space dimension.    */
-        uint               nRows, nCols;   /**< Matrix dimension.          */
+        uint               dim         ;   /**< DVector space dimension.    */
+        uint               nRows, nCols;   /**< DMatrix dimension.          */
         VariableType       variableType;   /**< Variable type.             */
         uint               component   ;   /**< The expression component   */
-        String             name        ;   /**< The name of the expression */
+        std::string             name   ;   /**< The name of the expression */
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
 #include <acado/symbolic_expression/expression.ipp>
+
+BEGIN_NAMESPACE_ACADO
+
+/** A helper class implementing the CRTP design pattern.
+ *
+ *  This class gives object counting and clone capability to a derived
+ *  class via static polymorphism.
+ *
+ *  \tparam Derived      The derived class.
+ *  \tparam Type         The expression type. \sa VariableType
+ *  \tparam AllowCounter Allow object instance counting.
+ *
+ *  \note Unfortunately the derived classes have to implement all necessary
+ *        ctors. In C++11, this can be done in a much simpler way. One only
+ *        needs to say: using Base::Base.
+ *
+ */
+template<class Derived, VariableType Type, bool AllowCounter = true>
+class ExpressionType : public Expression
+{
+public:
+
+	/** Default constructor. */
+	ExpressionType()
+		: Expression("", 1, 1, Type, AllowCounter ? count : 0)
+	{
+		if (AllowCounter == true)
+			count++;
+	}
+
+	/** The constructor with arguments. */
+	ExpressionType(const std::string& _name, unsigned _nRows, unsigned _nCols)
+		: Expression(_name, _nRows, _nCols, Type, AllowCounter ? count : 0)
+	{
+		if (AllowCounter == true)
+			count += _nRows * _nCols;
+	}
+
+	/** The constructor from an expression. */
+	ExpressionType(const Expression& _expression, unsigned _componentIdx = 0)
+		: Expression( _expression )
+	{
+		variableType = Type;
+		component += _componentIdx;
+		if (AllowCounter == true)
+			count++;
+	}
+
+	/** Destructor. */
+	virtual ~ExpressionType() {}
+
+	/** Function for cloning. */
+	virtual Expression* clone() const
+	{ return new Derived( static_cast< Derived const& >( *this ) ); }
+
+	/** A function for resetting of the istance counter. */
+	returnValue clearStaticCounters()
+	{ count = 0; return SUCCESSFUL_RETURN; }
+
+private:
+	static unsigned count;
+};
+
+template<class Derived, VariableType Type, bool AllowCounter>
+unsigned ExpressionType<Derived, Type, AllowCounter>::count( 0 );
+
+CLOSE_NAMESPACE_ACADO
 
 #endif  // ACADO_TOOLKIT_EXPRESSION_HPP
 

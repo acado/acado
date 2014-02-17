@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,20 +33,16 @@
 
 #include <acado/code_generation/integrators/irk_export.hpp>
 
-#include <sstream>
 using namespace std;
 
-
-
 BEGIN_NAMESPACE_ACADO
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
 ImplicitRungeKuttaExport::ImplicitRungeKuttaExport(	UserInteraction* _userInteraction,
-									const String& _commonHeaderName
+									const std::string& _commonHeaderName
 									) : RungeKuttaExport( _userInteraction,_commonHeaderName )
 {
 	NX1 = 0;
@@ -62,8 +58,8 @@ ImplicitRungeKuttaExport::ImplicitRungeKuttaExport(	UserInteraction* _userIntera
 	inputDim = 0;
 	numIts = 3; 		// DEFAULT value
 	numItsInit = 0; 	// DEFAULT value
-	REUSE = BT_TRUE;
-	CONTINUOUS_OUTPUT = BT_FALSE;
+	REUSE = true;
+	CONTINUOUS_OUTPUT = false;
 
 	solver = 0;
 }
@@ -116,7 +112,7 @@ ImplicitRungeKuttaExport& ImplicitRungeKuttaExport::operator=( const ImplicitRun
 returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression& rhs_ )
 {
 	if( rhs_.getDim() > 0 ) {
-		Parameter         dummy0;
+		OnlineData        dummy0;
 		Control           dummy1;
 		DifferentialState dummy2;
 		AlgebraicState 	  dummy3;
@@ -128,10 +124,10 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		dummy4.clearStaticCounters();
 
 		NX2 = rhs_.getDim() - NXA;
-		x = DifferentialState(NX1+NX2);
-		z = AlgebraicState(NXA);
-		u = Control(NU);
-		p = Parameter(NP);
+		x = DifferentialState("", NX1+NX2, 1);
+		z = AlgebraicState("", NXA, 1);
+		u = Control("", NU, 1);
+		od = OnlineData("", NOD, 1);
 
 		DifferentialEquation f;
 		f << rhs_;
@@ -143,7 +139,7 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		else if( NDX2 > 0 ) {
 			NDX2 = NX1+NX2;
 		}
-		dx = DifferentialStateDerivative(NDX2);
+		dx = DifferentialStateDerivative("", NDX2, 1);
 		NDX = NX;
 
 		DifferentialEquation g;
@@ -154,15 +150,16 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 			g << forwardDerivative( rhs_(i), dx );
 		}
 
-		if( f.getNT() > 0 ) timeDependant = BT_TRUE;
+		if( f.getNT() > 0 ) timeDependant = true;
 
-		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX ) & diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX ) );
+		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX, NOD ) &
+				diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX, NOD ) );
 	}
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ImplicitRungeKuttaExport::setModel(	const String& _rhs, const String& _diffs_rhs ) {
+returnValue ImplicitRungeKuttaExport::setModel(	const std::string& _rhs, const std::string& _diffs_rhs ) {
 
 	IntegratorExport::setModel( _rhs, _diffs_rhs );
 
@@ -216,7 +213,7 @@ returnValue ImplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 
 	int debugMode;
 	get( INTEGRATOR_DEBUG_MODE, debugMode );
-	if ( (BooleanType)debugMode == BT_TRUE ) {
+	if ( (bool)debugMode == true ) {
 		declarations.addDeclaration( debug_mat,dataStruct );
 	}
 	declarations.addDeclaration( rk_ttt,dataStruct );
@@ -251,48 +248,9 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 													) const
 {
 	declarations.addDeclaration( integrate );
-//	if( NX2 > 0) solver->getFunctionDeclarations( declarations );
 
-	if( NX2 != NX ) 		declarations.addDeclaration( fullRhs );
-	else if( exportRhs )	declarations.addDeclaration( rhs );
-
-//	if( NX1 > 0 ) {
-//		declarations.addDeclaration( lin_input );
-//	}
-	if( exportRhs ) {
-//		if( NX2 > 0 || NXA > 0 ) {
-//			declarations.addDeclaration( rhs );
-//			declarations.addDeclaration( diffs_rhs );
-//		}
-//		if( NX3 > 0 ) {
-//			declarations.addDeclaration( rhs3 );
-//		}
-	}
-	else {
-		Function tmpFun;
-		tmpFun << zeros(1,1);
-		ExportAcadoFunction tmpExport(tmpFun, getNameRHS());
-		declarations.addDeclaration( tmpExport );
-
-		if( NX3 > 0 ) {
-			tmpExport = ExportAcadoFunction(tmpFun, getNameOutputRHS());
-			declarations.addDeclaration( tmpExport );
-		}
-	}
-	uint i;
-	if( exportRhs && CONTINUOUS_OUTPUT ) {
-//		for( i = 0; i < outputs.size(); i++ ) {
-//			declarations.addDeclaration( outputs[i] );
-//		}
-	}
-	else {
-		for( i = 0; i < name_outputs.size(); i++ ) {
-			Function tmpFun;
-			tmpFun << zeros(1,1);
-			ExportAcadoFunction tmpExport(tmpFun, getNameOUTPUT(i));
-			declarations.addDeclaration( tmpExport );
-		}
-	}
+	if( NX2 != NX ) 	declarations.addDeclaration( fullRhs );
+	else				declarations.addDeclaration( rhs );
 
     return SUCCESSFUL_RETURN;
 }
@@ -325,16 +283,16 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 
 		stringstream s;
 		s << "#pragma omp threadprivate( "
-				<< max.getFullName().getName() << ", "
-				<< rk_ttt.getFullName().getName() << ", "
-				<< rk_xxx.getFullName().getName() << ", "
-				<< rk_kkk.getFullName().getName() << ", "
-				<< rk_rhsTemp.getFullName().getName() << ", "
-				<< rk_auxSolver.getFullName().getName();
+				<< max.getFullName() << ", "
+				<< rk_ttt.getFullName() << ", "
+				<< rk_xxx.getFullName() << ", "
+				<< rk_kkk.getFullName() << ", "
+				<< rk_rhsTemp.getFullName() << ", "
+				<< rk_auxSolver.getFullName();
 		if( NX2 > 0 || NXA > 0 ) {
-			s << ", " << rk_A.getFullName().getName();
-			s << ", " << rk_b.getFullName().getName();
-			s << ", " << rk_diffsTemp2.getFullName().getName();
+			s << ", " << rk_A.getFullName();
+			s << ", " << rk_b.getFullName();
+			s << ", " << rk_diffsTemp2.getFullName();
 			solver->appendVariableNames( s );
 		}
 		s << " )" << endl << endl;
@@ -374,34 +332,34 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 
 	// export RK scheme
 	uint run5;
-	String tempString;
+	std::string tempString;
 	
 	initializeDDMatrix();
 	initializeCoefficients();
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-	Matrix tmp = AA;
+	DMatrix tmp = AA;
 	ExportVariable Ah( "Ah_mat", tmp*=h, STATIC_CONST_REAL );
 	code.addDeclaration( Ah );
 	code.addLinebreak( 2 );
 	// TODO: Ask Milan why this does NOT work properly !!
 	Ah = ExportVariable( "Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 
-	Vector BB( bb );
-	ExportVariable Bh( "Bh_mat", Matrix( BB*=h, BT_FALSE ) );
+	DVector BB( bb );
+	ExportVariable Bh( "Bh_mat", DMatrix( BB*=h ) );
 
-	Vector CC( cc );
+	DVector CC( cc );
 	ExportVariable C;
 	if( timeDependant ) {
-		C = ExportVariable( "C_mat", Matrix( CC*=(1.0/grid.getNumIntervals()), BT_FALSE ), STATIC_CONST_REAL );
+		C = ExportVariable( "C_mat", DMatrix( CC*=(1.0/grid.getNumIntervals()) ), STATIC_CONST_REAL );
 		code.addDeclaration( C );
 		code.addLinebreak( 2 );
 		C = ExportVariable( "C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 	}
 
-	code.addComment(String("Fixed step size:") << String(h));
+	code.addComment(std::string("Fixed step size:") + toString(h));
 
-	ExportVariable determinant( "det", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
+	ExportVariable determinant( "det", 1, 1, REAL, ACADO_LOCAL, true );
 	integrate.addDeclaration( determinant );
 
 	ExportIndex i( "i" );
@@ -420,7 +378,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		ExportVariable numStepsV( "numSteps", numSteps, STATIC_CONST_INT );
 		code.addDeclaration( numStepsV );
 		code.addLinebreak( 2 );
-		integrate.addStatement( String( "int " ) << numInt.getName() << " = " << numStepsV.getName() << "[" << rk_index.getName() << "];\n" );
+		integrate.addStatement( std::string( "int " ) + numInt.getName() + " = " + numStepsV.getName() + "[" + rk_index.getName() + "];\n" );
 	}
 
 	prepareOutputEvaluation( code );
@@ -436,10 +394,10 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	if( rk_outputs.size() > 0 && (grid.getNumIntervals() > 1 || !equidistantControlGrid()) ) {
 		integrate.addIndex( tmp_index4 );
 	}
-	ExportVariable time_tmp( "time_tmp", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
+	ExportVariable time_tmp( "time_tmp", 1, 1, REAL, ACADO_LOCAL, true );
 	if( CONTINUOUS_OUTPUT ) {
 		for( run5 = 0; run5 < outputGrids.size(); run5++ ) {
-			ExportIndex numMeasTmp( (String)"numMeasTmp" << run5 );
+			ExportIndex numMeasTmp( (std::string)"numMeasTmp" + toString(run5) );
 			numMeas.push_back( numMeasTmp );
 			integrate.addIndex( numMeas[run5] );
 		}
@@ -454,7 +412,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 			integrate.addStatement( numMeas[run5] == 0 );
 		}
 	}
-	integrate.addStatement( rk_ttt == Matrix(grid.getFirstTime()) );
+	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 	if( inputDim > NX+NXA ) {
 		integrate.addStatement( rk_xxx.getCols( NX+NXA,inputDim ) == rk_eta.getCols( NX+NXA,inputDim ) );
 	}
@@ -468,16 +426,16 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	}
 	else {
 	    loop = &integrate;
-		loop->addStatement( String("for(") << run.getName() << " = 0; " << run.getName() << " < " << numInt.getName() << "; " << run.getName() << "++ ) {\n" );
+		loop->addStatement( std::string("for(") + run.getName() + " = 0; " + run.getName() + " < " + numInt.getName() + "; " + run.getName() + "++ ) {\n" );
 	}
 
 	if( CONTINUOUS_OUTPUT && (MeasurementGrid)measGrid == ONLINE_GRID ) {
 		for( run5 = 0; run5 < outputGrids.size(); run5++ ) {
 			loop->addStatement( tmp_index1 == numMeas[run5] );
-			loop->addStatement( String("while( ") << tmp_index1.getName() << " < " << String(totalMeas[run5]) << " && " << gridVariables[run5].get(0,tmp_index1) << " <= (" << rk_ttt.getFullName() << "+" << String(1.0/grid.getNumIntervals()) << ") ) {\n" );
+			loop->addStatement( std::string("while( ") + tmp_index1.getName() + " < " + toString(totalMeas[run5]) + " && " + gridVariables[run5].get(0,tmp_index1) + " <= (" + rk_ttt.getFullName() + "+" + toString(1.0/grid.getNumIntervals()) + ") ) {\n" );
 			loop->addStatement( tmp_index1 == tmp_index1+1 );
-			loop->addStatement( String("}\n") );
-			loop->addStatement( String(tmp_meas.get( 0,run5 )) << " = " << tmp_index1.getName() << " - " << numMeas[run5].getName() << ";\n" );
+			loop->addStatement( std::string("}\n") );
+			loop->addStatement( std::string(tmp_meas.get( 0,run5 )) + " = " + tmp_index1.getName() + " - " + numMeas[run5].getName() + ";\n" );
 		}
 	}
 
@@ -500,25 +458,25 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( rk_eta.getCol( run5 ) += rk_kkk.getRow( run5 )*Bh );
 	}
 	if( NXA > 0) {
-		Matrix tempCoefs( evaluateDerivedPolynomial( 0.0 ), BT_FALSE );
-		loop->addStatement( String("if( run == 0 ) {\n") );
+		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ) );
+		loop->addStatement( std::string("if( run == 0 ) {\n") );
 		for( run5 = 0; run5 < NXA; run5++ ) {
 			loop->addStatement( rk_eta.getCol( NX+run5 ) == rk_kkk.getRow( NX+run5 )*tempCoefs );
 		}
-		loop->addStatement( String("}\n") );
+		loop->addStatement( std::string("}\n") );
 	}
 
-	loop->addStatement( String( reset_int.get(0,0) ) << " = 0;\n" );
+	loop->addStatement( std::string( reset_int.get(0,0) ) + " = 0;\n" );
 
 	for( run5 = 0; run5 < rk_outputs.size(); run5++ ) {
 		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
-			loop->addStatement( numMeas[run5].getName() << " += " << numMeasVariables[run5].get(0,run) << ";\n" );
+			loop->addStatement( numMeas[run5].getName() + " += " + numMeasVariables[run5].get(0,run) + ";\n" );
 		}
 		else { // ONLINE_GRID
-			loop->addStatement( numMeas[run5].getName() << " += " << tmp_meas.get(0,run5) << ";\n" );
+			loop->addStatement( numMeas[run5].getName() + " += " + tmp_meas.get(0,run5) + ";\n" );
 		}
 	}
-	loop->addStatement( rk_ttt += Matrix(1.0/grid.getNumIntervals()) );
+	loop->addStatement( rk_ttt += DMatrix(1.0/grid.getNumIntervals()) );
 
     // end of the integrator loop.
     if( !equidistantControlGrid() ) {
@@ -528,21 +486,16 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
     	integrate.addStatement( *loop );
     }
 
-    integrate.addStatement( String( "if( " ) << determinant.getFullName() << " < 1e-12 ) {\n" );
+    integrate.addStatement( std::string( "if( " ) + determinant.getFullName() + " < 1e-12 ) {\n" );
     integrate.addStatement( error_code == 2 );
-    integrate.addStatement( String( "} else if( " ) << determinant.getFullName() << " < 1e-6 ) {\n" );
+    integrate.addStatement( std::string( "} else if( " ) + determinant.getFullName() + " < 1e-6 ) {\n" );
     integrate.addStatement( error_code == 1 );
-    integrate.addStatement( String( "} else {\n" ) );
+    integrate.addStatement( std::string( "} else {\n" ) );
     integrate.addStatement( error_code == 0 );
-    integrate.addStatement( String( "}\n" ) );
+    integrate.addStatement( std::string( "}\n" ) );
 
 	code.addFunction( integrate );
     code.addLinebreak( 2 );
-
-	if( NX2 != NX ) {
-		prepareFullRhs();
-		code.addFunction( fullRhs );
-	}
 
     return SUCCESSFUL_RETURN;
 }
@@ -551,7 +504,7 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 returnValue ImplicitRungeKuttaExport::prepareInputSystem(	ExportStatementBlock& code )
 {
 	if( NX1 > 0 ) {
-		Matrix mat1 = formMatrix( M11, A11 );
+		DMatrix mat1 = formMatrix( M11, A11 );
 		rk_mat1 = ExportVariable( "rk_mat1", mat1, STATIC_CONST_REAL );
 		code.addDeclaration( rk_mat1 );
 		// TODO: Ask Milan why this does NOT work properly !!
@@ -565,7 +518,7 @@ returnValue ImplicitRungeKuttaExport::prepareInputSystem(	ExportStatementBlock& 
 returnValue ImplicitRungeKuttaExport::prepareOutputSystem(	ExportStatementBlock& code )
 {
 	if( NX3 > 0 ) {
-		Matrix mat3 = formMatrix( M33, A33 );
+		DMatrix mat3 = formMatrix( M33, A33 );
 		rk_mat3 = ExportVariable( "rk_mat3", mat3, STATIC_CONST_REAL );
 		code.addDeclaration( rk_mat3 );
 		// TODO: Ask Milan why this does NOT work properly !!
@@ -576,14 +529,14 @@ returnValue ImplicitRungeKuttaExport::prepareOutputSystem(	ExportStatementBlock&
 }
 
 
-Matrix ImplicitRungeKuttaExport::formMatrix( const Matrix& mass, const Matrix& jacobian ) {
+DMatrix ImplicitRungeKuttaExport::formMatrix( const DMatrix& mass, const DMatrix& jacobian ) {
 	if( jacobian.getNumRows() != jacobian.getNumCols() ) {
 		return RET_UNABLE_TO_EXPORT_CODE;
 	}
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 	uint vars = jacobian.getNumRows();
 	uint i1, j1, i2, j2;
-	Matrix result = zeros(numStages*vars, numStages*vars);
+	DMatrix result = zeros<double>(numStages*vars, numStages*vars);
 	for( i1 = 0; i1 < numStages; i1++ ){
 		for( j1 = 0; j1 < numStages; j1++ ) {
 			for( i2 = 0; i2 < vars; i2++ ){
@@ -599,7 +552,7 @@ Matrix ImplicitRungeKuttaExport::formMatrix( const Matrix& mass, const Matrix& j
 		}
 	}
 
-	return result.getInverse();
+	return result.inverse();
 }
 
 
@@ -630,23 +583,23 @@ returnValue ImplicitRungeKuttaExport::solveInputSystem( ExportStatementBlock* bl
 }
 
 
-returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, const ExportVariable& det, BooleanType DERIVATIVES )
+returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, const ExportVariable& det, bool DERIVATIVES )
 {
 	if( NX2 > 0 || NXA > 0 ) {
 
-		if( DERIVATIVES && REUSE ) block->addStatement( String( "if( " ) << reset_int.getFullName() << " ) {\n" );
+		if( DERIVATIVES && REUSE ) block->addStatement( std::string( "if( " ) + reset_int.getFullName() + " ) {\n" );
 		// Initialization iterations:
 		ExportForLoop loop1( index1,0,numItsInit+1 ); // NOTE: +1 because 0 will lead to NaNs, so the minimum number of iterations is 1 at the initialization
 		ExportForLoop loop11( index2,0,numStages );
-		evaluateMatrix( &loop11, index2, index3, tmp_index, Ah, C, BT_TRUE, DERIVATIVES );
+		evaluateMatrix( &loop11, index2, index3, tmp_index, Ah, C, true, DERIVATIVES );
 		loop1.addStatement( loop11 );
-		loop1.addStatement( det.getFullName() << " = " << solver->getNameSolveFunction() << "( " << rk_A.getFullName() << ", " << rk_b.getFullName() << ", " << rk_auxSolver.getFullName() << " );\n" );
+		loop1.addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_b.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 		ExportForLoop loopTemp( index3,0,numStages );
 		loopTemp.addStatement( rk_kkk.getSubMatrix( NX1,NX1+NX2,index3,index3+1 ) += rk_b.getRows( index3*NX2,index3*NX2+NX2 ) );											// differential states
 		if(NXA > 0) loopTemp.addStatement( rk_kkk.getSubMatrix( NX,NX+NXA,index3,index3+1 ) += rk_b.getRows( index3*NXA+numStages*NX2,index3*NXA+numStages*NX2+NXA ) );		// algebraic states
 		loop1.addStatement( loopTemp );
 		block->addStatement( loop1 );
-		if( DERIVATIVES && REUSE ) block->addStatement( String( "}\n" ) );
+		if( DERIVATIVES && REUSE ) block->addStatement( std::string( "}\n" ) );
 
 		// the rest (numIts) of the Newton iterations with reuse of the Jacobian (no evaluation or factorization needed)
 		ExportForLoop loop2( index1,0,numIts );
@@ -664,14 +617,14 @@ returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock*
 		if( DERIVATIVES ) {
 			// solution calculated --> evaluate and save the necessary derivatives in rk_diffsTemp and update the matrix rk_A:
 			ExportForLoop loop3( index2,0,numStages );
-			evaluateMatrix( &loop3, index2, index3, tmp_index, Ah, C, BT_FALSE, DERIVATIVES );
+			evaluateMatrix( &loop3, index2, index3, tmp_index, Ah, C, false, DERIVATIVES );
 			block->addStatement( loop3 );
 		}
 
 		// IF DEBUG MODE:
 		int debugMode;
 		get( INTEGRATOR_DEBUG_MODE, debugMode );
-		if ( (BooleanType)debugMode == BT_TRUE ) {
+		if ( (bool)debugMode == true ) {
 			block->addStatement( debug_mat == rk_A );
 		}
 	}
@@ -680,7 +633,7 @@ returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock*
 }
 
 
-returnValue ImplicitRungeKuttaExport::solveOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, BooleanType DERIVATIVES )
+returnValue ImplicitRungeKuttaExport::solveOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index, const ExportVariable& Ah, bool DERIVATIVES )
 {
 	if( NX3 > 0 ) {
 		ExportForLoop loop( index1,0,numStages );
@@ -754,7 +707,7 @@ returnValue ImplicitRungeKuttaExport::evaluateStatesOutputSystem( ExportStatemen
 
 returnValue ImplicitRungeKuttaExport::evaluateRhsImplicitSystem( ExportStatementBlock* block, const ExportIndex& stage )
 {
-	Matrix zeroM = zeros( NX2+NXA,1 );
+	DMatrix zeroM = zeros<double>( NX2+NXA,1 );
 	block->addFunctionCall( getNameRHS(), rk_xxx, rk_rhsTemp.getAddress(0,0) );
 	// matrix rk_b:
 	if( NDX2 == 0 ) {
@@ -771,7 +724,7 @@ returnValue ImplicitRungeKuttaExport::evaluateRhsImplicitSystem( ExportStatement
 }
 
 
-returnValue ImplicitRungeKuttaExport::evaluateMatrix( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, BooleanType evaluateB, BooleanType DERIVATIVES )
+returnValue ImplicitRungeKuttaExport::evaluateMatrix( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index, const ExportVariable& Ah, const ExportVariable& C, bool evaluateB, bool DERIVATIVES )
 {
 	uint i;
 
@@ -786,24 +739,24 @@ returnValue ImplicitRungeKuttaExport::evaluateMatrix( ExportStatementBlock* bloc
 	for( i = 0; i < numStages; i++ ) { // differential states
 		if( NDX2 == 0 ) {
 			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,i*NX2,i*NX2+NX2 ) == Ah.getSubMatrix( index1,index1+1,i,i+1 )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
-			loop2.addStatement( String( "if( " ) << i << " == " << index1.getName() << " ) " );
+			loop2.addStatement( std::string( "if( " ) + toString(i) + " == " + index1.getName() + " ) " );
 			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,index2+i*NX2,index2+i*NX2+1 ) -= 1 );
 		}
 		else {
 			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,i*NX2,i*NX2+NX2 ) == Ah.getSubMatrix( index1,index1+1,i,i+1 )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
-			loop2.addStatement( String( "if( " ) << i << " == " << index1.getName() << " ) {\n" );
+			loop2.addStatement( std::string( "if( " ) + toString(i) + " == " + index1.getName() + " ) {\n" );
 			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,i*NX2,i*NX2+NX2 ) += rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NVARS2-NX2,index2*(NVARS2)+NVARS2 ) );
-			loop2.addStatement( String( "}\n" ) );
+			loop2.addStatement( std::string( "}\n" ) );
 		}
 	}
 	if( NXA > 0 ) {
-		Matrix zeroM = zeros( 1,NXA );
+		DMatrix zeroM = zeros<double>( 1,NXA );
 		for( i = 0; i < numStages; i++ ) { // algebraic states
-			loop2.addStatement( String( "if( " ) << i << " == " << index1.getName() << " ) {\n" );
+			loop2.addStatement( std::string( "if( " ) + toString(i) + " == " + index1.getName() + " ) {\n" );
 			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,numStages*NX2+i*NXA,numStages*NX2+i*NXA+NXA ) == rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1+NX2,index2*(NVARS2)+NX1+NX2+NXA ) );
-			loop2.addStatement( String( "}\n else {\n" ) );
+			loop2.addStatement( std::string( "}\n else {\n" ) );
 			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,numStages*NX2+i*NXA,numStages*NX2+i*NXA+NXA ) == zeroM );
-			loop2.addStatement( String( "}\n" ) );
+			loop2.addStatement( std::string( "}\n" ) );
 		}
 	}
 	block->addStatement( loop2 );
@@ -827,7 +780,7 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 		ExportStatementBlock *loop1;
 		if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 			loop1 = block;
-			loop1->addStatement( String("for(") << index1.getName() << " = 0; " << index1.getName() << " < (int)" << numMeasVariables[i].get(0,index0) << "; " << index1.getName() << "++) {\n" );
+			loop1->addStatement( std::string("for(") + index1.getName() + " = 0; " + index1.getName() + " < (int)" + numMeasVariables[i].get(0,index0) + "; " + index1.getName() + "++) {\n" );
 			loop1->addStatement( tmp_index1 == numMeas[i]+index1 );
 			for( j = 0; j < numStages; j++ ) {
 				loop1->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( tmp_index1,tmp_index1+1,j,j+1 ) );
@@ -840,24 +793,24 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 		}
 		else { // ONLINE_GRID
 			loop1 = block;
-			loop1->addStatement( String(tmp_index2.getName()) << " = " << tmp_meas.get( 0,i ) << ";\n" );
-			loop1->addStatement( String("for(") << index1.getName() << " = 0; " << index1.getName() << " < (int)" << tmp_index2.getName() << "; " << index1.getName() << "++) {\n" );
+			loop1->addStatement( std::string(tmp_index2.getName()) + " = " + tmp_meas.get( 0,i ) + ";\n" );
+			loop1->addStatement( std::string("for(") + index1.getName() + " = 0; " + index1.getName() + " < (int)" + tmp_index2.getName() + "; " + index1.getName() + "++) {\n" );
 			loop1->addStatement( tmp_index1 == numMeas[i]+index1 );
 
 			uint scale = grid.getNumIntervals();
 			double scale2 = 1.0/grid.getNumIntervals();
-			loop1->addStatement( time_tmp.getName() << " = " << String(scale) << "*(" << gridVariables[i].get(0,tmp_index1) << "-" << String(scale2) << "*" << index0.getName() << ");\n" );
+			loop1->addStatement( time_tmp.getName() + " = " + toString(scale) + "*(" + gridVariables[i].get(0,tmp_index1) + "-" + toString(scale2) + "*" + index0.getName() + ");\n" );
 
-			String h((grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals());
+			std::string h = toString((grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals());
 			evaluatePolynomial( *loop1, rk_outH, time_tmp, h );
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) evaluateDerivedPolynomial( *loop1, rk_out, time_tmp );
 		}
 
-		Vector dependencyX, dependencyZ, dependencyDX;
+		DVector dependencyX, dependencyZ, dependencyDX;
 		if( exportRhs || crsFormat ) {
-			dependencyX = sumRow( outputDependencies[i].getCols( 0,NX-1 ) );
-			if( numXA_output(i) > 0 ) dependencyZ = sumRow( outputDependencies[i].getCols( NX,NX+NXA-1 ) );
-			if( numDX_output(i) > 0 ) dependencyDX = sumRow( outputDependencies[i].getCols( NX+NXA+NU,NX+NXA+NU+NDX-1 ) );
+			dependencyX = outputDependencies[i].getCols( 0,NX-1 ).sumRow();
+			if( numXA_output(i) > 0 ) dependencyZ = outputDependencies[i].getCols( NX,NX+NXA-1 ).sumRow();
+			if( numDX_output(i) > 0 ) dependencyDX = outputDependencies[i].getCols( NX+NXA+NU,NX+NXA+NU+NDX-1 ).sumRow();
 		}
 		for( j = 0; j < NX; j++ ) {
 			if( (!exportRhs && !crsFormat) || acadoRoundAway(dependencyX(j)) != 0 ) {
@@ -891,7 +844,7 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 returnValue ImplicitRungeKuttaExport::initializeDDMatrix( )
 {
 	uint i, j, k;
-	DD = Matrix( numStages, numStages );
+	DD = DMatrix( numStages, numStages );
 	
 	for( i = 0; i < numStages; i++ ) {
 		for( j = 0; j < numStages; j++ ) {
@@ -911,9 +864,9 @@ returnValue ImplicitRungeKuttaExport::initializeCoefficients( )
 {
 	uint i, j, k, index;
 	double sum;
-	Vector cVec( numStages-1 );
-	Vector products;
-	coeffs = Matrix( numStages, numStages );
+	DVector cVec( numStages-1 );
+	DVector products;
+	coeffs = DMatrix( numStages, numStages );
 	
 	for( i = 0; i < numStages; i++ ) {
 		for( j = 0; j < numStages; j++ ) {
@@ -947,18 +900,18 @@ returnValue ImplicitRungeKuttaExport::initializeCoefficients( )
 }
 
 
-Vector ImplicitRungeKuttaExport::computeCombinations( const Vector& cVec, uint index, uint numEls ) {
+DVector ImplicitRungeKuttaExport::computeCombinations( const DVector& cVec, uint index, uint numEls ) {
 	uint k, l;
-	Vector products;
+	DVector products;
 	
 	if( numEls == 0 ) {
-		products = Vector(1);
+		products = DVector(1);
 		products(0) = 1;
 		return products;
 	}
-	products = Vector();
+	products = DVector();
 	for( k = index; k < cVec.getDim()-numEls+1; k++ ) {
-		Vector temp = computeCombinations( cVec, k+1, numEls-1 );
+		DVector temp = computeCombinations( cVec, k+1, numEls-1 );
 		for( l = 0; l < temp.getDim(); l++ ) {
 			temp(l) *= cVec(k);
 		}
@@ -969,11 +922,11 @@ Vector ImplicitRungeKuttaExport::computeCombinations( const Vector& cVec, uint i
 }
 
 
-Matrix ImplicitRungeKuttaExport::evaluatePolynomial( uint index )
+DMatrix ImplicitRungeKuttaExport::evaluatePolynomial( uint index )
 {
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
-	Matrix polynV(totalMeas[index],numStages);
+	DMatrix polynV(totalMeas[index],numStages);
 
 	double scale2 = 1.0/(grid.getLastTime() - grid.getFirstTime());
 	for( uint i = 0; i < totalMeas[index]; i++ ) {
@@ -989,10 +942,10 @@ Matrix ImplicitRungeKuttaExport::evaluatePolynomial( uint index )
 }
 
 
-Vector ImplicitRungeKuttaExport::evaluatePolynomial( double time )
+DVector ImplicitRungeKuttaExport::evaluatePolynomial( double time )
 {
 	uint i, j;
-	Vector coeffsPolyn( numStages );
+	DVector coeffsPolyn( numStages );
 	
 	for( j = 0; j < numStages; j++ ) {
 		coeffsPolyn( j ) = 0.0;
@@ -1005,7 +958,7 @@ Vector ImplicitRungeKuttaExport::evaluatePolynomial( double time )
 }
 
 
-returnValue ImplicitRungeKuttaExport::evaluatePolynomial( ExportStatementBlock& block, const ExportVariable& variable, const ExportVariable& gridVariable, const String& h )
+returnValue ImplicitRungeKuttaExport::evaluatePolynomial( ExportStatementBlock& block, const ExportVariable& variable, const ExportVariable& gridVariable, const std::string& h )
 {
 	uint i, j;
 
@@ -1022,18 +975,18 @@ returnValue ImplicitRungeKuttaExport::evaluatePolynomial( ExportStatementBlock& 
 		if( i < (numStages-1) ) block.addStatement( polynEvalVar == polynEvalVar*gridVariable );
 	}
 	for( j = 0; j < numStages; j++ ) {
-		block.addStatement( (String)variable.getFullName() << "[" << j << "] *= " << h << ";\n" );
+		block.addStatement( (std::string)variable.getFullName() + "[" + toString(j) + "] *= " + toString(h) + ";\n" );
 	}
 
     return SUCCESSFUL_RETURN;
 }
 
 
-Matrix ImplicitRungeKuttaExport::evaluateDerivedPolynomial( uint index )
+DMatrix ImplicitRungeKuttaExport::evaluateDerivedPolynomial( uint index )
 {
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
-	Matrix polynDerV(totalMeas[index],numStages);
+	DMatrix polynDerV(totalMeas[index],numStages);
 
 	double scale2 = 1.0/(grid.getLastTime() - grid.getFirstTime());
 	for( uint i = 0; i < totalMeas[index]; i++ ) {
@@ -1049,10 +1002,10 @@ Matrix ImplicitRungeKuttaExport::evaluateDerivedPolynomial( uint index )
 }
 
 
-Vector ImplicitRungeKuttaExport::evaluateDerivedPolynomial( double time )
+DVector ImplicitRungeKuttaExport::evaluateDerivedPolynomial( double time )
 {
 	uint i, j;
-	Vector coeffsPolyn( numStages );
+	DVector coeffsPolyn( numStages );
 
 	// construct the Lagrange interpolating polynomials:
 	for( i = 0; i < numStages; i++ ) {
@@ -1076,10 +1029,10 @@ returnValue ImplicitRungeKuttaExport::evaluateDerivedPolynomial( ExportStatement
 	for( i = 0; i < numStages; i++ ) {
 		for( j = 0; j < numStages; j++ ) {
 			if( (i == 0 && j == 1) || (i != j && j == 0) ) {
-				block.addStatement( (String)variable.getFullName() << "[" << i << "] = (" << gridVariable.getName() << " - " << cc(j) << ")*" << 1/(cc(i)-cc(j)) << ";\n" );
+				block.addStatement( (std::string)variable.getFullName() + "[" + toString(i) + "] = (" + gridVariable.getName() + " - " + toString(cc(j)) + ")*" + toString(1/(cc(i)-cc(j))) + ";\n" );
 			}
 			else if( i != j ) {
-				block.addStatement( (String)variable.getFullName() << "[" << i << "] *= (" << gridVariable.getName() << " - " << cc(j) << ")*" << 1/(cc(i)-cc(j)) << ";\n" );
+				block.addStatement( (std::string)variable.getFullName() + "[" + toString(i) + "] *= (" + gridVariable.getName() + " - " + toString(cc(j)) + ")*" + toString(1/(cc(i)-cc(j))) + ";\n" );
 			}
 		}
 	}
@@ -1088,9 +1041,10 @@ returnValue ImplicitRungeKuttaExport::evaluateDerivedPolynomial( ExportStatement
 }
 
 
-Vector ImplicitRungeKuttaExport::divideMeasurements( uint index )
+DVector ImplicitRungeKuttaExport::divideMeasurements( uint index )
 {
-	Vector meas = zeros(1,grid.getNumIntervals());
+	DVector meas( grid.getNumIntervals() );
+	meas.setZero();
 
 	for( uint i = 0; i < outputGrids[index].getNumIntervals(); i++ ) {
 		uint interv = getIntegrationInterval( outputGrids[index].getTime(i) );
@@ -1112,10 +1066,10 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	userInteraction->get( IMPLICIT_INTEGRATOR_MODE,intMode ); 
 	switch( (ImplicitIntegratorMode) intMode ) {
 		case IFTR:
-			REUSE = BT_TRUE;
+			REUSE = true;
 			break;
 		case IFT:
-			REUSE = BT_FALSE;
+			REUSE = false;
 			break;
 		default:
 			return ACADOERROR( RET_INVALID_OPTION );
@@ -1138,11 +1092,11 @@ returnValue ImplicitRungeKuttaExport::setup( )
 
 	DifferentialStateDerivative dummy4;
 	dummy4.clearStaticCounters();
-	dx = DifferentialStateDerivative(NDX);
+	dx = DifferentialStateDerivative("", NDX, 1);
 
 	AlgebraicState 	  dummy3;
 	dummy3.clearStaticCounters();
-	z = AlgebraicState(NXA);
+	z = AlgebraicState("", NXA, 1);
 
 	uint Xmax = NX1;
 	if( NX2 > Xmax ) Xmax = NX2;
@@ -1150,7 +1104,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	NVARS2 = NX1+NX2+NXA+NU+NDX2;
 	NVARS3 = 0;
 	diffsDim = 0;
-	inputDim = NX+NXA + NU + NP;
+	inputDim = NX+NXA + NU + NOD;
 	
 	uint numDX = NDX2;
 	if( NDX3 > numDX ) numDX = NDX3;
@@ -1164,11 +1118,11 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	uint timeDep = 0;
 	if( timeDependant ) timeDep = 1;
 
-	rk_ttt = ExportVariable( "rk_ttt", 1, 1, REAL, structWspace, BT_TRUE );
+	rk_ttt = ExportVariable( "rk_ttt", 1, 1, REAL, structWspace, true );
 	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim+numDX+timeDep, REAL, structWspace );
 	rk_kkk = ExportVariable( "rk_kkk", NX+NXA, numStages, REAL, structWspace );
 	rk_A = ExportVariable( "rk_A", numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, structWspace );
-	if ( (BooleanType)debugMode == BT_TRUE && useOMP ) {
+	if ( (bool)debugMode == true && useOMP ) {
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 	else {
@@ -1177,7 +1131,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	rk_b = ExportVariable( "rk_b", numStages*(Xmax+NXA), 1, REAL, structWspace );
 	rk_rhsTemp = ExportVariable( "rk_rhsTemp", NX+NXA+numDX, 1, REAL, structWspace );
 	rk_diffsTemp2 = ExportVariable( "rk_diffsTemp2", 1, (NX2+NXA)*(NVARS2), REAL, structWspace );
-	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, BT_TRUE );
+	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
 	integrate = ExportFunction( "integrate", rk_eta );
 	uint i;
@@ -1225,7 +1179,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 		default:
 			return ACADOERROR( RET_INVALID_OPTION );
 		}
-		solver->setReuse( BT_TRUE ); 	// IFTR method
+		solver->setReuse( true ); 	// IFTR method
 		solver->init( (NX2+NXA)*numStages );
 		solver->setup();
 		rk_auxSolver = solver->getGlobalExportVariable( 1 );
@@ -1242,7 +1196,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 	sensGen = ( (ExportSensitivityType)sensGen != NO_SENSITIVITY );
 
 	returnValue val = SUCCESSFUL_RETURN;
-	CONTINUOUS_OUTPUT = BT_TRUE;
+	CONTINUOUS_OUTPUT = true;
 	if( outputGrids_.size() != outputExpressions_.size() ) return ACADOERROR( RET_INVALID_ARGUMENTS ); 
 	outputGrids = outputGrids_;
 	outputExpressions = outputExpressions_;
@@ -1250,9 +1204,9 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 	int measGrid;
 	get( MEASUREMENT_GRID, measGrid );
 
-	numDX_output = Vector(outputGrids.size());
-	numXA_output = Vector(outputGrids.size());
-	numVARS_output = Vector(outputGrids.size());
+	numDX_output = DVector(outputGrids.size());
+	numXA_output = DVector(outputGrids.size());
+	numVARS_output = DVector(outputGrids.size());
 
 	uint i;
 	uint maxOutputs = 0;
@@ -1291,15 +1245,15 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		if( numVARS_output(i) > maxVARS ) maxVARS = numVARS_output(i);
 	
 		ExportAcadoFunction OUTPUT, diffs_OUTPUT;
-		val = val & OUTPUT.init( f_Output,String("acado_output")<<String(i)<<"_rhs",NX,NXA,NU ) & diffs_OUTPUT.init( g_Output,String("acado_output")<<String(i)<<"_diffs",NX,NXA,NU );
+		val = val & OUTPUT.init( f_Output,std::string("acado_output")+toString(i)+"_rhs",NX,NXA,NU ) & diffs_OUTPUT.init( g_Output,std::string("acado_output")+toString(i)+"_diffs",NX,NXA,NU );
 		
-		ExportVariable rk_output( String("rk_output")<<String(i), 1, outputDim, REAL );
+		ExportVariable rk_output( std::string("rk_output")+toString(i), 1, outputDim, REAL );
 		rk_outputs.push_back( rk_output );
 		
 		outputs.push_back( OUTPUT );
 		if( sensGen ) diffs_outputs.push_back( diffs_OUTPUT );
 
-		Matrix dependencyMat = outputExpressions[i].getDependencyPattern( x );
+		DMatrix dependencyMat = outputExpressions[i].getDependencyPattern( x );
 		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( z ) );
 		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( u ) );
 		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( dx ) );
@@ -1308,7 +1262,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		totalMeas.push_back( outputGrids[i].getNumIntervals() );
 
 		// Export output grids
-		ExportVariable gridVariable( (String)"gridOutput" << i, 1, totalMeas[i], REAL, ACADO_VARIABLES );
+		ExportVariable gridVariable( (std::string)"gridOutput" + toString( i ), 1, totalMeas[i], REAL, ACADO_VARIABLES );
 		gridVariables.push_back( gridVariable );
 	}
 	
@@ -1322,15 +1276,15 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 	if( sensGen ) rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(maxVARS), REAL, structWspace );
 	rk_outH = ExportVariable( "rk_outH", numStages, 1, REAL, structWspace );
 	rk_out = ExportVariable( "rk_out2", numStages, 1, REAL, structWspace );
-	polynEvalVar = ExportVariable( "tmp_polyn", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
+	polynEvalVar = ExportVariable( "tmp_polyn", 1, 1, REAL, ACADO_LOCAL, true );
 
 	return ( val );
 }
 
 
 returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output ) {
 
 	if( (rhs.getFunctionDim()) == 0 && (rk_outputs.size() + outputs.size() + diffs_outputs.size()) == 0) {
@@ -1338,21 +1292,19 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 		get( DYNAMIC_SENSITIVITY, sensGen );
 		sensGen = ( (ExportSensitivityType)sensGen != NO_SENSITIVITY );
 
-		CONTINUOUS_OUTPUT = BT_TRUE;
+		CONTINUOUS_OUTPUT = true;
 		if( outputGrids_.size() != _outputNames.size() || outputGrids_.size() != _diffs_outputNames.size() || outputGrids_.size() != _dims_output.size() ) {
 			return ACADOERROR( RET_INVALID_ARGUMENTS );
 		}
 		outputGrids = outputGrids_;
-		name_outputs = _outputNames;
-		name_diffs_outputs = _diffs_outputNames;
 		num_outputs = _dims_output;
 
 		int measGrid;
 		get( MEASUREMENT_GRID, measGrid );
 
-		numDX_output = Vector(outputGrids.size());
-		numXA_output = Vector(outputGrids.size());
-		numVARS_output = Vector(outputGrids.size());
+		numDX_output = DVector(outputGrids.size());
+		numXA_output = DVector(outputGrids.size());
+		numVARS_output = DVector(outputGrids.size());
 
 		uint i;
 		uint maxOutputs = 0;
@@ -1370,13 +1322,19 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 			numXA_output(i) = NXA;	// worst-case scenario
 			numVARS_output(i) = NX+NXA+NU+NDX;
 
-			ExportVariable rk_output( String("rk_output")<<String(i), 1, outputDim, REAL );
+			ExportAcadoFunction OUTPUT(_outputNames[i]);
+			ExportAcadoFunction diffs_OUTPUT(_diffs_outputNames[i]);
+
+			outputs.push_back( OUTPUT );
+			if( sensGen ) diffs_outputs.push_back( diffs_OUTPUT );
+
+			ExportVariable rk_output( std::string("rk_output")+toString(i), 1, outputDim, REAL );
 			rk_outputs.push_back( rk_output );
 
 			totalMeas.push_back( outputGrids[i].getNumIntervals() );
 
 			// Export output grids
-			ExportVariable gridVariable( (String)"gridOutput" << i, 1, totalMeas[i], REAL, ACADO_VARIABLES );
+			ExportVariable gridVariable( (std::string)"gridOutput" + toString(i), 1, totalMeas[i], REAL, ACADO_VARIABLES );
 			gridVariables.push_back( gridVariable );
 		}
 		uint maxVARS = NX+NXA+NU+NDX;
@@ -1391,9 +1349,9 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 		if( sensGen ) rk_diffsOutputTemp = ExportVariable( "rk_diffsOutputTemp", 1, maxOutputs*(maxVARS), REAL, structWspace );
 		rk_outH = ExportVariable( "rk_outH", numStages, 1, REAL, structWspace );
 		rk_out = ExportVariable( "rk_out2", numStages, 1, REAL, structWspace );
-		polynEvalVar = ExportVariable( "tmp_polyn", 1, 1, REAL, ACADO_LOCAL, BT_TRUE );
+		polynEvalVar = ExportVariable( "tmp_polyn", 1, 1, REAL, ACADO_LOCAL, true );
 
-		exportRhs = BT_FALSE;
+		exportRhs = false;
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -1405,13 +1363,13 @@ returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outp
 
 
 returnValue ImplicitRungeKuttaExport::setupOutput(  const std::vector<Grid> outputGrids_,
-									  	  const std::vector<String> _outputNames,
-									  	  const std::vector<String> _diffs_outputNames,
+									  	  const std::vector<std::string> _outputNames,
+									  	  const std::vector<std::string> _diffs_outputNames,
 										  const std::vector<uint> _dims_output,
-										  const std::vector<Matrix> _outputDependencies ) {
+										  const std::vector<DMatrix> _outputDependencies ) {
 
 	outputDependencies = _outputDependencies;
-	crsFormat = BT_TRUE;
+	crsFormat = true;
 
 	return setupOutput( outputGrids_, _outputNames, _diffs_outputNames, _dims_output );
 }
@@ -1429,83 +1387,30 @@ returnValue ImplicitRungeKuttaExport::prepareOutputEvaluation( ExportStatementBl
 
 	for( i = 0; i < outputGrids.size(); i++ ) {
 		if( (MeasurementGrid)measGrid != ONLINE_GRID ) {
-			Matrix polynV = evaluatePolynomial( i );
-			Matrix polynDerV = evaluateDerivedPolynomial( i );
-			Vector measurements = divideMeasurements( i );
+			DMatrix polynV = evaluatePolynomial( i );
+			DMatrix polynDerV = evaluateDerivedPolynomial( i );
+			DVector measurements = divideMeasurements( i );
 
 			double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-			ExportVariable polynVariable = ExportVariable( (String)"polynOutput" << i, polynV*=h, STATIC_CONST_REAL );
+			ExportVariable polynVariable = ExportVariable( (std::string)"polynOutput" + toString( i ), polynV*=h, STATIC_CONST_REAL );
 			code.addDeclaration( polynVariable );
-			polynVariable = ExportVariable( (String)"polynOutput" << i, totalMeas[i], numStages, STATIC_CONST_REAL );
+			polynVariable = ExportVariable( (std::string)"polynOutput" + toString( i ), totalMeas[i], numStages, STATIC_CONST_REAL );
 			polynVariables.push_back( polynVariable );
 
 			if( NXA > 0 || NDX > 0 ) {
-				ExportVariable polynDerVariable( (String)"polynDerOutput" << i, polynDerV, STATIC_CONST_REAL );
+				ExportVariable polynDerVariable( (std::string)"polynDerOutput" + toString( i ), polynDerV, STATIC_CONST_REAL );
 				code.addDeclaration( polynDerVariable );
-				polynDerVariable = ExportVariable( (String)"polynDerOutput" << i, totalMeas[i], numStages, STATIC_CONST_REAL );
+				polynDerVariable = ExportVariable( (std::string)"polynDerOutput" + toString( i ), totalMeas[i], numStages, STATIC_CONST_REAL );
 				polynDerVariables.push_back( polynDerVariable );
 			}
 
-			ExportVariable numMeasVariable( (String)"numMeas" << i, measurements, STATIC_CONST_INT );
+			ExportVariable numMeasVariable( (std::string)"numMeas" + toString( i ), measurements, STATIC_CONST_INT );
 			if( (MeasurementGrid)measGrid == OFFLINE_GRID ) {
 				code.addDeclaration( numMeasVariable );
 			}
 			numMeasVariables.push_back( numMeasVariable );
 		}
 	}
-
-	return SUCCESSFUL_RETURN;
-}
-
-
-returnValue ImplicitRungeKuttaExport::prepareFullRhs( ) {
-
-	uint i, j;
-	// PART 1:
-	for( i = 0; i < NX1; i++ ) {
-		fullRhs.addStatement( rhs_out.getRow(i) == A11(i,0)*rhs_in.getRow(0) );
-		for( j = 1; j < NX1; j++ ) {
-			if( acadoRoundAway(A11(i,j)) != 0 ) {
-				fullRhs.addStatement( rhs_out.getRow(i) += A11(i,j)*rhs_in.getRow(j) );
-			}
-		}
-		for( j = 0; j < NU; j++ ) {
-			if( acadoRoundAway(B11(i,j)) != 0 ) {
-				fullRhs.addStatement( rhs_out.getRow(i) += B11(i,j)*rhs_in.getRow(NX+NXA+j) );
-			}
-		}
-		for( j = 0; j < NX1; j++ ) {
-			if( acadoRoundAway(M11(i,j)) != 0 ) {
-				fullRhs.addStatement( rhs_out.getRow(i) -= M11(i,j)*rhs_in.getRow(NX+NXA+NU+j) );
-			}
-		}
-	}
-
-	// PART 2:
-	if( NX2 > 0 ) {
-		fullRhs.addFunctionCall( getNameRHS(), rhs_in, rhs_out.getAddress(NX1,0) );
-		if( NDX2 == 0 ) {
-			fullRhs.addStatement( rhs_out.getRows(NX1,NX1+NX2) -= rhs_in.getRows(NX+NXA+NU+NX1,NX+NXA+NU+NX1+NX2) );
-		}
-		if( NX3 > 0 ) {
-			for( i = 0; i < NXA; i++ ) {
-				fullRhs.addStatement( rhs_out.getRow(NX+i) == rhs_out.getRow(NX1+NX2+i) );
-			}
-		}
-	}
-
-	// PART 3:
-	if( NX3 > 0 ) {
-		fullRhs.addFunctionCall( getNameOutputRHS(), rhs_in, rhs_out.getAddress(NX1+NX2,0) );
-		for( i = 0; i < NX3; i++ ) {
-			for( j = 0; j < NX3; j++ ) {
-				if( acadoRoundAway(M33(i,j)) != 0 ) {
-					fullRhs.addStatement( rhs_out.getRow(NX1+NX2+i) -= M33(i,j)*rhs_in.getRow(NX+NXA+NU+NX1+NX2+j) );
-				}
-			}
-		}
-	}
-
 
 	return SUCCESSFUL_RETURN;
 }
@@ -1524,11 +1429,7 @@ returnValue ImplicitRungeKuttaExport::copy(	const ImplicitRungeKuttaExport& arg
 	outputs = arg.outputs;
 	diffs_rhs = arg.diffs_rhs;
 	diffs_outputs = arg.diffs_outputs;
-	name_rhs = arg.name_rhs;
-	name_outputs = arg.name_outputs;
 	num_outputs = arg.num_outputs;
-	name_diffs_rhs = arg.name_diffs_rhs;
-	name_diffs_outputs = arg.name_diffs_outputs;
 	grid = arg.grid;
 	outputGrids = arg.outputGrids;
 	solver = arg.solver;

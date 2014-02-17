@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -28,7 +28,7 @@
 /**
  *    \file src/integrator/integrator.cpp
  *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 31.12.2008
+ *    \date 2008 - 2013
  */
 
 #include <acado/utils/acado_utils.hpp>
@@ -43,6 +43,7 @@
 #include <acado/integrator/integrator_runge_kutta78.hpp>
 #include <acado/integrator/integrator_bdf.hpp>
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
@@ -224,13 +225,13 @@ returnValue Integrator::integrate(	const Grid  &t_,
 									double      *w  ){
 
     if( rhs == 0 ) return ACADOERROR( RET_TRIVIAL_RHS );
-    Vector components = rhs->getDifferentialStateComponents();
+    DVector components = rhs->getDifferentialStateComponents();
 
-    Vector tmpX ( components.getDim(), x0 );
-    Vector tmpXA( rhs->getNXA()      , xa );
-    Vector tmpP ( rhs->getNP ()      , p  );
-    Vector tmpU ( rhs->getNU ()      , u  );
-    Vector tmpW ( rhs->getNW ()      , w  );
+    DVector tmpX ( components.getDim(), x0 );
+    DVector tmpXA( rhs->getNXA()      , xa );
+    DVector tmpP ( rhs->getNP ()      , p  );
+    DVector tmpU ( rhs->getNU ()      , u  );
+    DVector tmpW ( rhs->getNW ()      , w  );
 
     return integrate( t_, tmpX, tmpXA, tmpP, tmpU, tmpW );
 }
@@ -239,11 +240,11 @@ returnValue Integrator::integrate(	const Grid  &t_,
 
 returnValue Integrator::integrate(	double       t0_  ,
 									double       tend_,
-									const Vector &x0  ,
-									const Vector &xa  ,
-									const Vector &p   ,
-									const Vector &u   ,
-									const Vector &w    ){
+									const DVector &x0  ,
+									const DVector &xa  ,
+									const DVector &p   ,
+									const DVector &u   ,
+									const DVector &w    ){
 
     Grid t_( t0_, tend_, 2 );
     return integrate( t_, x0, xa, p, u, w );
@@ -252,19 +253,19 @@ returnValue Integrator::integrate(	double       t0_  ,
 
 
 returnValue Integrator::integrate(	const Grid   &t_  ,
-									const Vector &x0  ,
-									const Vector &xa  ,
-									const Vector &p   ,
-									const Vector &u   ,
-									const Vector &w    ){
+									const DVector &x0  ,
+									const DVector &xa  ,
+									const DVector &p   ,
+									const DVector &u   ,
+									const DVector &w    ){
 
     int run1;
     returnValue returnvalue;
     if( rhs == 0 ) return ACADOERROR( RET_TRIVIAL_RHS );
 
-    Vector tmpX;
+    DVector tmpX;
 
-    Vector components = rhs->getDifferentialStateComponents();
+    DVector components = rhs->getDifferentialStateComponents();
 
     const int N = components.getDim();
 
@@ -286,7 +287,7 @@ returnValue Integrator::integrate(	const Grid   &t_  ,
     xE.init(rhs->getDim());
     xE.setZero();
 
-    Vector tmp(rhs->getDim());
+    DVector tmp(rhs->getDim());
     getProtectedX(&tmp);
 
     for( run1 = 0; run1 < N; run1++ )
@@ -305,17 +306,17 @@ returnValue Integrator::integrate(	const Grid   &t_  ,
 // ======================================================================================
 
 returnValue Integrator::setForwardSeed(	const int    &order,
-										const Vector &xSeed,
-										const Vector &pSeed,
-										const Vector &uSeed,
-										const Vector &wSeed  ){
+										const DVector &xSeed,
+										const DVector &pSeed,
+										const DVector &uSeed,
+										const DVector &wSeed  ){
 
 
     int run1;
     if( rhs == 0 ) return ACADOERROR( RET_TRIVIAL_RHS );
 
-    Vector tmpX;
-    Vector components = rhs->getDifferentialStateComponents();
+    DVector tmpX;
+    DVector components = rhs->getDifferentialStateComponents();
 
     dP = pSeed;
     dU = uSeed;
@@ -335,13 +336,13 @@ returnValue Integrator::setForwardSeed(	const int    &order,
 // ======================================================================================
 
 returnValue Integrator::setBackwardSeed(	const int    &order,
-											const Vector &seed   ){
+											const DVector &seed   ){
 
     dXb = seed;
 
     uint run1;
-    Vector tmp( seed.getDim() );
-    Vector components = rhs->getDifferentialStateComponents();
+    DVector tmp( seed.getDim() );
+    DVector components = rhs->getDifferentialStateComponents();
 
     if( seed.getDim() != 0 ){
         tmp.init( components.getDim() );
@@ -382,10 +383,10 @@ returnValue Integrator::integrateSensitivities( ){
     int order = 1;
     if( nFDirs2 > 0 ) order = 2;
 
-    Matrix tmp( rhs->getDim(), 1 );
+    DMatrix tmp( rhs->getDim(), 1 );
     returnvalue = getProtectedForwardSensitivities(&tmp,order);
 
-    Vector components = rhs->getDifferentialStateComponents();
+    DVector components = rhs->getDifferentialStateComponents();
 
     dX.init(rhs->getDim()-ma);
     dX.setZero();
@@ -402,7 +403,7 @@ returnValue Integrator::integrateSensitivities( ){
 }
 
 
-returnValue Integrator::getForwardSensitivities(	Vector &Dx,
+returnValue Integrator::getForwardSensitivities(	DVector &Dx,
 													int order ) const{
 
     Dx = dX;
@@ -420,16 +421,16 @@ returnValue Integrator::getForwardSensitivities(	VariablesGrid &Dx,
 }
 
 
-returnValue Integrator::getBackwardSensitivities(	Vector &DX,
-													Vector &DP ,
-													Vector &DU ,
-													Vector &DW ,
+returnValue Integrator::getBackwardSensitivities(	DVector &DX,
+													DVector &DP ,
+													DVector &DU ,
+													DVector &DW ,
 													int    order   ) const{
 
     int run2;
     returnValue returnvalue;
 
-    Vector tmpX ( rhs->getDim() );
+    DVector tmpX ( rhs->getDim() );
 
     DX.setZero();
     DP.setZero();
@@ -437,7 +438,7 @@ returnValue Integrator::getBackwardSensitivities(	Vector &DX,
     DW.setZero();
 
     returnvalue = getProtectedBackwardSensitivities( tmpX, DP, DU, DW, order );
-    Vector components = rhs->getDifferentialStateComponents();
+    DVector components = rhs->getDifferentialStateComponents();
 
     for( run2 = 0; run2 < (int) components.getDim(); run2++ )
         DX((int) components(run2)) = tmpX(run2);
@@ -501,8 +502,8 @@ returnValue Integrator::deleteAllSeeds(){
 // PROTECTED MEMBER FUNCTIONS:
 //
 
-returnValue Integrator::evaluateTransition( const double time, Vector &xd, const Vector &xa,
-                                            const Vector &p, const Vector &u, const Vector &w ){
+returnValue Integrator::evaluateTransition( const double time, DVector &xd, const DVector &xa,
+                                            const DVector &p, const DVector &u, const DVector &w ){
 
     ASSERT( transition != 0 );
     EvaluationPoint z( *transition, xd.getDim(), xa.getDim(), p.getDim(), u.getDim(), w.getDim() );
@@ -517,10 +518,10 @@ returnValue Integrator::evaluateTransition( const double time, Vector &xd, const
 }
 
 
-returnValue Integrator::diffTransitionForward(       Vector &DX,
-                                               const Vector &DP,
-                                               const Vector &DU,
-                                               const Vector &DW,
+returnValue Integrator::diffTransitionForward(       DVector &DX,
+                                               const DVector &DP,
+                                               const DVector &DU,
+                                               const DVector &DW,
                                                const int    &order ){
 
     ASSERT( transition != 0 );
@@ -538,10 +539,10 @@ returnValue Integrator::diffTransitionForward(       Vector &DX,
 }
 
 
-returnValue Integrator::diffTransitionBackward( Vector &DX,
-                                                Vector &DP,
-                                                Vector &DU,
-                                                Vector &DW,
+returnValue Integrator::diffTransitionBackward( DVector &DX,
+                                                DVector &DP,
+                                                DVector &DU,
+                                                DVector &DW,
                                                 int    &order ){
 
     ASSERT( transition != 0 );
@@ -597,16 +598,16 @@ void Integrator::initializeOptions(){
 
 returnValue Integrator::setupLogging( ){
 
-    LogRecord tmp( LOG_AT_EACH_ITERATION,stdout,PS_DEFAULT );
+    LogRecord tmp(LOG_AT_EACH_ITERATION, PS_DEFAULT);
 
-    tmp.addItem( LOG_TIME_INTEGRATOR,                              "", "\n\nINTEGRATION TIME                 :  "," sec.\n", 9, 3 );
-    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_STEPS,                   "",   "\nNUMBER OF STEPS                  :  ","\n"     , 3, 0 );
-    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_REJECTED_STEPS,          "",   "\nNUMBER OF REJECTED STEPS         :  ","\n"     , 3, 0 );
-    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_FUNCTION_EVALUATIONS,    "",     "NUMBER OF RHS EVALUATIONS        :  ","\n"     , 3, 0 );
-    tmp.addItem( LOG_NUMBER_OF_BDF_INTEGRATOR_JACOBIAN_EVALUATIONS,"",     "NUMBER OF JACOBIAN EVALUATIONS   :  ","\n"     , 3, 0 );
-    tmp.addItem( LOG_TIME_INTEGRATOR_FUNCTION_EVALUATIONS,         "",   "\nTIME FOR RHS EVALUATIONS         :  "," sec.\n", 9, 3 );
-    tmp.addItem( LOG_TIME_BDF_INTEGRATOR_JACOBIAN_EVALUATION,      "",     "TIME FOR JACOBIAN EVALUATIONS    :  "," sec.\n", 9, 3 );
-    tmp.addItem( LOG_TIME_BDF_INTEGRATOR_JACOBIAN_DECOMPOSITION,   "",     "TIME FOR JACOBIAN DECOMPOSITIONS :  "," sec.\n", 9, 3 );
+    tmp.addItem( LOG_TIME_INTEGRATOR,                              "INTEGRATION TIME                 [sec]:  ");
+    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_STEPS,                   "NUMBER OF STEPS                       :  ");
+    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_REJECTED_STEPS,          "NUMBER OF REJECTED STEPS              :  ");
+    tmp.addItem( LOG_NUMBER_OF_INTEGRATOR_FUNCTION_EVALUATIONS,    "NUMBER OF RHS EVALUATIONS             :  ");
+    tmp.addItem( LOG_NUMBER_OF_BDF_INTEGRATOR_JACOBIAN_EVALUATIONS,"NUMBER OF JACOBIAN EVALUATIONS        :  ");
+    tmp.addItem( LOG_TIME_INTEGRATOR_FUNCTION_EVALUATIONS,         "TIME FOR RHS EVALUATIONS         [sec]:  ");
+    tmp.addItem( LOG_TIME_BDF_INTEGRATOR_JACOBIAN_EVALUATION,      "TIME FOR JACOBIAN EVALUATIONS    [sec]:  ");
+    tmp.addItem( LOG_TIME_BDF_INTEGRATOR_JACOBIAN_DECOMPOSITION,   "TIME FOR JACOBIAN DECOMPOSITIONS [sec]:  ");
 
     outputLoggingIdx = addLogRecord( tmp );
 
@@ -622,7 +623,7 @@ int Integrator::getDimX() const{
 
 returnValue Integrator::printRunTimeProfile() const{
 
-    return printLogRecord( outputLoggingIdx, PRINT_LAST_ITER );
+	return printLogRecord(cout, outputLoggingIdx, PRINT_LAST_ITER);
 }
 
 

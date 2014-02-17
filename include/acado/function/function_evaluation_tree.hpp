@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,20 +31,12 @@
  *    \date 2008 - 2013
  */
 
-
 #ifndef ACADO_TOOLKIT_FUNCTION_EVALUATION_TREE_HPP
 #define ACADO_TOOLKIT_FUNCTION_EVALUATION_TREE_HPP
 
-
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 
-
-
 BEGIN_NAMESPACE_ACADO
-
-
-class ExportVariable;
-
 
 /** 
  *	\brief Organizes the evaluation of the function tree.
@@ -139,6 +131,9 @@ public:
      *  \return The requested number of time variables.             \n
      */
     virtual int getNT  () const;
+
+    /** Return number of "online data" objects. */
+    virtual int getNOD  () const;
 
 
     /** Returns the index of the variable with specified type and \n
@@ -404,48 +399,36 @@ public:
                                                           of the expression  */   );
 
 
-    /** Prints the expression as C-code into a file. The integer                          \n
-     *  "precision" must be in [1,16].                                                    \n
+    /** Prints the expression as C-code into a file.
      *                                                                                    \n
      *  \param file       The file to which the expression should be printed.             \n
      *  \param fcnName    The name of the generated function (default: "ACADOfcn").       \n
-	 *  \param realString         \n
-     *  \param precision  The number of internal dec. places to be printed (default: 16). \n
+	 *  \param realString                                                                 \n
      *                                                                                    \n
      *  \return SUCCESFUL_RETURN                                                          \n
      */
-     returnValue C_print(	FILE       *file,
+     returnValue C_print(	std::ostream& stream = std::cout,
 							const char *fcnName = "ACADOfcn",
-							const char *realString = "double",
-							int         precision = 16
+							const char *realString = "double"
 							) const;
 
-
-     returnValue exportHeader(	FILE       *file,
-								const char *fcnName = "ACADOfcn",
-								const char *realString = "double"
-								) const;
-
-     returnValue exportForwardDeclarations(	FILE       *file,
+     returnValue exportForwardDeclarations(	std::ostream& stream = std::cout,
 											const char *fcnName = "ACADOfcn",
 											const char *realString = "double"
 											) const;
 
-
-     returnValue exportCode(	FILE       *file,
+     returnValue exportCode(	std::ostream& stream = std::cout,
 								const char *fcnName = "ACADOfcn",
 								const char *realString = "double",
-								int         precision = 16,
-								uint        _numX = 0,
-								uint		_numXA = 0,
-								uint		_numU = 0,
-								uint		_numP = 0,
-								uint		_numDX = 0
+								uint       _numX = 0,
+								uint	   _numXA = 0,
+								uint       _numU = 0,
+								uint       _numP = 0,
+								uint       _numDX = 0,
+								uint       _numOD = 0,
+								bool       allocateMemory = true,
+								bool       staticMemory   = false
 								) const;
-
-		ExportVariable getGlobalExportVariable( ) const;
-
-
 
      /** Clears the buffer and resets the buffer size \n
       *  to 1.                                        \n
@@ -475,9 +458,9 @@ public:
 
      virtual returnValue getExpression( Expression& expression ) const;
 
-     returnValue setGlobalExportVariableName(const String& _name);
+     returnValue setGlobalExportVariableName(const std::string& _name);
 
-     String getGlobalExportVariableName() const;
+     std::string getGlobalExportVariableName() const;
 
      unsigned getGlobalExportVariableSize() const;
 
@@ -496,7 +479,7 @@ protected:
      Expression           safeCopy ;
 
      /** Name of the variable that holds intermediate expressions. */
-     String				globalExportVariableName;
+     std::string		globalExportVariableName;
 };
 
 

@@ -86,7 +86,7 @@ IF ( MSVC OR CYGWIN )
 ELSE()
 	# Linux or OS X
 	OPTION( ACADO_BUILD_SHARED "Build shared libraries" ON )
-	OPTION( ACADO_BUILD_STATIC "Build static libraries" OFF )	
+	OPTION( ACADO_BUILD_STATIC "Build static libraries" OFF )
 ENDIF()
 
 IF((NOT ACADO_BUILD_SHARED) AND (NOT ACADO_BUILD_STATIC))
@@ -211,10 +211,8 @@ SET( ACADO_SOURCE_DIRS
 	./external_packages/src/acado_csparse
 	./external_packages/src/acado_gnuplot
 	
-	# Optimal Control source folders
-	./src/code_generation
-	./src/code_generation/integrators
-	./src/code_generation/linear_solvers
+	# Optimal Control and Simulation source folders.
+	## Optimal Control
 	./src/dynamic_system
 	./src/dynamic_discretization
 	./src/objective
@@ -226,8 +224,7 @@ SET( ACADO_SOURCE_DIRS
 	./src/nlp_derivative_approximation
 	./src/optimization_algorithm
 	./external_packages/src/acado_qpoases
-	
-	# Simulation source folders
+	## Simulation
 	./src/process
 	./src/noise
 	./src/transfer_device
@@ -236,6 +233,11 @@ SET( ACADO_SOURCE_DIRS
 	./src/estimator
 	./src/reference_trajectory
 	./src/simulation_environment
+
+	# Code Generation Tool
+	./src/code_generation
+	./src/code_generation/linear_solvers	
+	./src/code_generation/integrators
 )
 
 ################################################################################
@@ -249,6 +251,7 @@ INCLUDE_DIRECTORIES(
 	${PROJECT_SOURCE_DIR}/external_packages
 	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
 	${PROJECT_BINARY_DIR}/include
+	${PROJECT_SOURCE_DIR}/external_packages/eigen3
 )
 
 ################################################################################
@@ -373,6 +376,7 @@ INSTALL(
 SET( EXTERNAL_PACKAGES_DIRS
 	external_packages/include
 	external_packages/qpoases
+	external_packages/eigen3
 )	
 INSTALL(
 	DIRECTORY
@@ -389,6 +393,7 @@ SET( ACADO_INSTALL_INCLUDE_DIRS
 	${INSTALL_DATA_DIR}/external_packages
 	${INSTALL_DATA_DIR}/external_packages/csparse/
 	${INSTALL_DATA_DIR}/external_packages/qpOASES-3.0beta/include
+	${INSTALL_DATA_DIR}/external_packages/eigen3
 )
 SET( ACADO_INSTALL_LIBRARY_DIRS
 	${INSTALL_LIB_DIR}
@@ -485,6 +490,7 @@ SET( ACADO_INCLUDE_DIRS
 	${PROJECT_SOURCE_DIR}/external_packages
 	${PROJECT_SOURCE_DIR}/external_packages/csparse/
 	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
+	${PROJECT_SOURCE_DIR}/external_packages/eigen3
 	${PROJECT_BINARY_DIR}/include
 )
 

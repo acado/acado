@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -80,7 +80,7 @@ class ExportData : public CasADi::SharedObject
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		returnValue	setName(	const String& _name
+		returnValue	setName(	const std::string& _name
 								);
 
 		/** Sets the data type of the data object.
@@ -106,13 +106,13 @@ class ExportData : public CasADi::SharedObject
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue setPrefix(	const String& _prefix
+		returnValue setPrefix(	const std::string& _prefix
 								);
 		/** Returns the name of the data object.
 		 *
 		 *	\return Name of the data object
 		 */
-		String getName( ) const;
+		std::string getName( ) const;
 
 		/** Returns the data type of the data object.
 		 *
@@ -122,14 +122,14 @@ class ExportData : public CasADi::SharedObject
 
 		/** Returns a string containing the data type of the data object.
 		 *
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *
-		 *	\return String containing the data type of the data object.
+		 *	\return std::string containing the data type of the data object.
 		 */
-		String getTypeString(	const String& _realString = "real_t",
-								const String& _intString = "int"
-								) const;
+		std::string getTypeString(	const std::string& _realString = "real_t",
+									const std::string& _intString = "int"
+									) const;
 
 		/** Returns the global data struct to which the data object belongs to.
 		 *
@@ -139,51 +139,51 @@ class ExportData : public CasADi::SharedObject
 
 		/** Returns a string containing the global data struct to which the data object belongs to.
 		 *
-		 *	\return String containing the global data struct to which the data object belongs to.
+		 *	\return std::string containing the global data struct to which the data object belongs to.
 		 */
-		String getDataStructString( ) const;
+		std::string getDataStructString( ) const;
 		
 		/** Returns a string which contains a prefix name.
 		 *
 		 *  \return Prefix name
 		 */
-		String getPrefix( ) const;
+		std::string getPrefix( ) const;
 
 		/** Returns the full name of the data object including the possible prefix 
 		 *	of the global data struct.
 		 *
 		 *	\return Full name of the data object
 		 */
-		String getFullName( ) const;
+		std::string getFullName( ) const;
 
 
 		/** Exports declaration of the index variable. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export function.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] stream				Name of file to be used to export function.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportDataDeclaration(	FILE* file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+		virtual returnValue exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString = "real_t",
+													const std::string& _intString = "int",
 													int _precision = 16
 													) const;
 
 
 		/** Returns whether the index is set to a given value.
 		 *
-		 *	\return BT_TRUE  iff index is set to a given value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff index is set to a given value, \n
+		 *	        false otherwise
 		 */
-		virtual BooleanType isGiven( );
+		virtual bool isGiven( );
 
-		virtual returnValue setDoc(const String& _doc);
+		virtual returnValue setDoc(const std::string& _doc);
 
-		virtual String getDoc() const;
+		virtual std::string getDoc() const;
 };
 
 CLOSE_NAMESPACE_ACADO

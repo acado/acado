@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -95,11 +95,11 @@ ReferenceTrajectory* SimulatedReferenceTrajectory::clone( ) const
 
 
 returnValue SimulatedReferenceTrajectory::init(	double startTime,
-												const Vector& _x,
-												const Vector& _xa,
-												const Vector& _u,
-												const Vector& _p,
-												const Vector& _w
+												const DVector& _x,
+												const DVector& _xa,
+												const DVector& _u,
+												const DVector& _p,
+												const DVector& _w
 												)
 {
     return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
@@ -107,19 +107,19 @@ returnValue SimulatedReferenceTrajectory::init(	double startTime,
 
 
 returnValue SimulatedReferenceTrajectory::step(	double _currentTime,
-												const Vector& _y,
-												const Vector& _x,
-												const Vector& _xa,
-												const Vector& _u,
-												const Vector& _p,
-												const Vector& _w
+												const DVector& _y,
+												const DVector& _x,
+												const DVector& _xa,
+												const DVector& _u,
+												const DVector& _p,
+												const DVector& _w
 												)
 {
 	return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 }
 
 
-returnValue SimulatedReferenceTrajectory::step(	const Vector& _x,
+returnValue SimulatedReferenceTrajectory::step(	const DVector& _x,
 												const VariablesGrid& _u,
 												const VariablesGrid& _p,
 												const VariablesGrid& _w

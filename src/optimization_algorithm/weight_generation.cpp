@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -67,12 +67,12 @@ WeightGeneration& WeightGeneration::operator=( const WeightGeneration& arg ){
 
 returnValue WeightGeneration::getWeights( const int    &m        ,
                                           const int    &pnts     ,
-                                          const Vector &weightsLB,
-                                          const Vector &weightsUB,
-                                          Matrix       &Weights  ,
-                                          Vector       &formers    ) const{
+                                          const DVector &weightsLB,
+                                          const DVector &weightsUB,
+                                          DMatrix       &Weights  ,
+                                          DVector       &formers    ) const{
 
-    Vector weight(m);
+    DVector weight(m);
     weight.setZero();
 
     const int layer = m-1;
@@ -96,11 +96,11 @@ returnValue WeightGeneration::getWeights( const int    &m        ,
 
 
 returnValue WeightGeneration::generateWeights( const  int    &n         ,
-                                               Vector        &weight    ,
-                                               Matrix        &Weights   ,
-                                               const  Vector &weightsLB ,
-                                               const  Vector &weightsUB ,
-                                               Vector        &formers   ,
+                                               DVector        &weight    ,
+                                               DMatrix        &Weights   ,
+                                               const  DVector &weightsLB ,
+                                               const  DVector &weightsUB ,
+                                               DVector        &formers   ,
                                                const int     &layer     ,
                                                int           &lastOne   ,
                                                int           &currentOne,
@@ -123,7 +123,7 @@ returnValue WeightGeneration::generateWeights( const  int    &n         ,
 
             if( currentOne >= 0 ){
 
-                Vector tmp( formers.getDim()+1 );
+                DVector tmp( formers.getDim()+1 );
 
                 for( run1 = 0; run1 < (int) formers.getDim(); run1++ )
                     tmp(run1) = formers(run1);
@@ -135,7 +135,7 @@ returnValue WeightGeneration::generateWeights( const  int    &n         ,
             }
             else{
 
-                Vector tmp( formers.getDim()+1 );
+                DVector tmp( formers.getDim()+1 );
 
                 for( run1 = 0; run1 < (int) formers.getDim(); run1++ )
                     tmp(run1) = formers(run1);
@@ -146,7 +146,7 @@ returnValue WeightGeneration::generateWeights( const  int    &n         ,
 
              weight(n) = weight_test;
 
-             Matrix tmp( weight.getDim(), Weights.getNumCols()+1 );
+             DMatrix tmp( weight.getDim(), Weights.getNumCols()+1 );
 
              for( run1 = 0; run1 < (int) Weights.getNumRows(); run1++ ){
                  for( run2 = 0; run2 < (int) Weights.getNumCols(); run2++ )

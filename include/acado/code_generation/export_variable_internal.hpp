@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -37,7 +37,6 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/code_generation/export_argument_internal.hpp>
 #include <acado/code_generation/export_index.hpp>
-#include <acado/code_generation/export_variable.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -52,7 +51,7 @@ class ExportArithmeticStatement;
  *	\ingroup UserDataStructures
  *
  *	The class ExportVariableInternal defines a matrix-valued variable to be used for exporting
- *	code. Instances of this class can be used similar to usual Matrix objects
+ *	code. Instances of this class can be used similar to usual DMatrix objects
  *	but offer additional functionality, e.g. they allow to export arithmetic
  *	expressions and they can be passed as argument to exported functions. By
  *	default, all entries of a ExportVariableInternal are undefined, but each of its
@@ -63,8 +62,6 @@ class ExportArithmeticStatement;
 
 class ExportVariableInternal : public ExportArgumentInternal
 {
-	friend class ExportVariable;
-
 	//
     // PUBLIC MEMBER FUNCTIONS:
     //
@@ -79,17 +76,17 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	values of the given matrix.
 		 *
 		 *	@param[in] _name			Name of the argument.
-		 *	@param[in] _data			Matrix used for initialization.
+		 *	@param[in] _data			DMatrix used for initialization.
 		 *	@param[in] _type			Data type of the argument.
 		 *	@param[in] _dataStruct		Global data struct to which the argument belongs to (if any).
 		 *	@param[in] _callByValue		Flag indicating whether argument it to be called by value.
 		 */
-		ExportVariableInternal(	const String& _name,
-								const matrixPtr& _data,
+		ExportVariableInternal(	const std::string& _name,
+								const DMatrixPtr& _data,
 								ExportType _type = REAL,
 								ExportStruct _dataStruct = ACADO_LOCAL,
-								BooleanType _callItByValue = BT_FALSE,
-								const String& _prefix = emptyConstString
+								bool _callItByValue = false,
+								const std::string& _prefix = std::string()
 								);
 
         /** Destructor.
@@ -102,28 +99,15 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 */
 		virtual ExportVariableInternal* clone() const;
 
-		/** Resets all components of the variable to be undefined.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		returnValue resetAll( );
-
-		/** Resets all diagonal components of the square variable to be undefined.
-		 *
-		 *	\return SUCCESSFUL_RETURN, \n
-		 *	        RET_MATRIX_NOT_SQUARE
-		 */
-		returnValue resetDiagonal( );
-
 		/** Returns whether given component is set to zero.
 		 *
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to zero, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to zero, \n
+		 *	        false otherwise
 		 */
-		BooleanType isZero( const ExportIndex& rowIdx,
+		bool isZero( const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 
@@ -132,10 +116,10 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to one, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to one, \n
+		 *	        false otherwise
 		 */
-		BooleanType isOne(	const ExportIndex& rowIdx,
+		bool isOne(	const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 
@@ -144,14 +128,14 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return BT_TRUE  iff given component is set to a given value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to a given value, \n
+		 *	        false otherwise
 		 */
-		BooleanType isGiven(	const ExportIndex& rowIdx,
+		bool isGiven(	const ExportIndex& rowIdx,
 								const ExportIndex& colIdx
 								) const;
 
-		virtual BooleanType isGiven() const;
+		virtual bool isGiven() const;
 
 
 		/** Returns string containing the value of a given component. If its
@@ -160,9 +144,9 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] rowIdx		Variable row index of the component.
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *
-		 *	\return String containing the value of a given component
+		 *	\return std::string containing the value of a given component
 		 */
-		const String get(	const ExportIndex& rowIdx,
+		const std::string get(	const ExportIndex& rowIdx,
 							const ExportIndex& colIdx
 							) const;
 
@@ -261,17 +245,17 @@ class ExportVariableInternal : public ExportArgumentInternal
 
 		/** Returns whether variable is a vector.
 		 *
-		 *	\return BT_TRUE  iff variable is a vector, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff variable is a vector, \n
+		 *	        false otherwise
 		 */
-		BooleanType isVector( ) const;
+		bool isVector( ) const;
 
 
 		/** Returns the internal data matrix.
 		 *
 		 *	\return Internal data matrix
 		 */
-		Matrix getGivenMatrix( ) const;
+		const DMatrix& getGivenMatrix( ) const;
 
 
 		/** Prints contents of variable to screen.
@@ -280,6 +264,8 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 */
 		returnValue print( ) const;
 
+		/** Check whether the matrix is actually a submatrix. */
+		bool isSubMatrix() const;
 
 	//
     // PROTECTED MEMBER FUNCTIONS:
@@ -332,20 +318,17 @@ class ExportVariableInternal : public ExportArgumentInternal
 		 *	@param[in] colIdx		Variable column index of the component.
 		 *	@param[in] _value		Value used for comparison.
 		 *
-		 *	\return BT_TRUE  iff given component is set to given value, \n
-		 *	        BT_FALSE otherwise
+		 *	\return true  iff given component is set to given value, \n
+		 *	        false otherwise
 		 */
-		BooleanType hasValue(	const ExportIndex& _rowIdx,
-								const ExportIndex& _colIdx,
-								double _value
-								) const;
-
-		/** Check whether the matrix is actually a submatrix. */
-		BooleanType isSubMatrix() const;
+		bool hasValue(	const ExportIndex& _rowIdx,
+						const ExportIndex& _colIdx,
+						double _value
+						) const;
 
 	protected:
 
-		BooleanType doAccessTransposed;				/**< Flag indicating whether variable is to be accessed in a transposed manner. */
+		bool doAccessTransposed;				/**< Flag indicating whether variable is to be accessed in a transposed manner. */
 
 		ExportIndex rowOffset;						/**< Index of first row of a possible sub-matrix of the variable. */
 		ExportIndex colOffset;						/**< Index of first column of a possible sub-matrix of the variable. */

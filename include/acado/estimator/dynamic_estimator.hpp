@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -80,13 +80,13 @@ class DynamicEstimator : public Estimator
 
         /** Initialization. */
         virtual returnValue init(	double startTime = 0.0,
-									const Vector &x0_ = emptyConstVector,
-									const Vector &p_  = emptyConstVector
+									const DVector &x0_ = emptyConstVector,
+									const DVector &p_  = emptyConstVector
 									);
 
         /** Executes next single step. */
         virtual returnValue step(	double currentTime,
-									const Vector& _y
+									const DVector& _y
 									);
 
 

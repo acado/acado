@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,14 +32,10 @@
  *    This file collects default values for all options within the ACADO Toolkit.
  */
 
-
 #ifndef ACADO_TOOLKIT_ACADO_DEFAULT_OPTIONS_HPP
 #define ACADO_TOOLKIT_ACADO_DEFAULT_OPTIONS_HPP
 
-
-
 #include <acado/utils/acado_types.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 
@@ -111,10 +107,7 @@ const int 		defaultOutputPlotting = PLOT_REAL;							/**< Default value for spec
 
 CLOSE_NAMESPACE_ACADO
 
-
-
 #endif	// ACADO_TOOLKIT_ACADO_DEFAULT_OPTIONS_HPP
-
 
 /*
  *	end of file

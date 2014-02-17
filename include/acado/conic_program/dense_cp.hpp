@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -78,8 +78,8 @@ class DenseCP{
 
 
 
-//         returnValue setBounds( const Vector &lb,
-//                                const Vector &ub  );
+//         returnValue setBounds( const DVector &lb,
+//                                const DVector &ub  );
 
 
         /** Returns whether or not the conic program is an LP */
@@ -107,7 +107,7 @@ class DenseCP{
          *                                                                   \n
          *  \return SUCCESSFUL_RETURN                                        \n
          */
-        returnValue setQPsolution( const Vector &x_, const Vector &y_ );
+        returnValue setQPsolution( const DVector &x_, const DVector &y_ );
 
 
         /** Sets the primal and dual solution converting the dual solution   \n
@@ -117,7 +117,7 @@ class DenseCP{
          *                                                                   \n
          *  \return SUCCESSFUL_RETURN                                        \n
          */
-        Vector getMergedDualSolution( ) const;
+        DVector getMergedDualSolution( ) const;
 
 
 		/** Prints CP to standard ouput stream. Various settings can
@@ -186,7 +186,7 @@ class DenseCP{
 		/** Prints CP to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] file				File for printing.
+		 *	@param[in] stream			File for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] startString		Prefix before printing the numerical values.
 		 *	@param[in] endString		Suffix after printing the numerical values.
@@ -199,7 +199,7 @@ class DenseCP{
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue printToFile(	FILE* file,
+		returnValue printToFile(	std::ostream& stream,
 									const char* const name         = DEFAULT_LABEL,
 									const char* const startString  = DEFAULT_START_STRING,
 									const char* const endString    = DEFAULT_END_STRING,
@@ -228,7 +228,7 @@ class DenseCP{
 		/** Prints CP to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] filen			File for printing.
+		 *	@param[in] stream			File for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] printScheme		Print scheme defining the output format of the information.
 		 *
@@ -236,7 +236,7 @@ class DenseCP{
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue printToFile(	FILE* file,
+		returnValue printToFile(	std::ostream& stream,
 									const char* const name,
 									PrintScheme printScheme
 									) const;
@@ -307,7 +307,7 @@ class DenseCP{
 		/** Prints CP solution to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] file				File for printing.
+		 *	@param[in] stream			File for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] startString		Prefix before printing the numerical values.
 		 *	@param[in] endString		Suffix after printing the numerical values.
@@ -320,7 +320,7 @@ class DenseCP{
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue printSolutionToFile(	FILE* file,
+		returnValue printSolutionToFile(	std::ostream& stream,
 											const char* const name         = DEFAULT_LABEL,
 											const char* const startString  = DEFAULT_START_STRING,
 											const char* const endString    = DEFAULT_END_STRING,
@@ -349,7 +349,7 @@ class DenseCP{
 		/** Prints CP solution to given file. Various settings can
 		 *	be specified defining its output format. 
 		 *
-		 *	@param[in] filen			File for printing.
+		 *	@param[in] stream			File for printing.
 		 *	@param[in] name				Name label to be printed before the numerical values.
 		 *	@param[in] printScheme		Print scheme defining the output format of the information.
 		 *
@@ -357,7 +357,7 @@ class DenseCP{
 		 *	        RET_FILE_CAN_NOT_BE_OPENED, \n
 		 *	        RET_UNKNOWN_BUG
 		 */
-		returnValue printSolutionToFile(	FILE* file,
+		returnValue printSolutionToFile(	std::ostream& stream,
 											const char* const name,
 											PrintScheme printScheme
 											) const;
@@ -378,33 +378,33 @@ class DenseCP{
     // DENSE CP IN MATRIX-VECTOR FORMAT:
     // -------------------------------------------------------
 
-    Matrix        H;    /**< The Hessian matrix             */
-    Vector        g;    /**< The objective gradient         */
+    DMatrix        H;    /**< The Hessian matrix             */
+    DVector        g;    /**< The objective gradient         */
 
-    Vector       lb;    /**< Simple lower bounds            */
-    Vector       ub;    /**< Simple upper bounds            */
+    DVector       lb;    /**< Simple lower bounds            */
+    DVector       ub;    /**< Simple upper bounds            */
 
-    Matrix        A;    /**< Constraint matrix              */
-    Vector      lbA;    /**< Constraint lower bounds        */
-    Vector      ubA;    /**< Constraint upper bounds        */
+    DMatrix        A;    /**< Constraint matrix              */
+    DVector      lbA;    /**< Constraint lower bounds        */
+    DVector      ubA;    /**< Constraint upper bounds        */
 
-    Matrix      **B;    /**< SDP constraint tensor          */
-    Vector     *lbB;    /**< SDP lower bounds               */
-    Vector     *ubB;    /**< SDP upper bounds               */
+    DMatrix      **B;    /**< SDP constraint tensor          */
+    DVector     *lbB;    /**< SDP lower bounds               */
+    DVector     *ubB;    /**< SDP upper bounds               */
 
 
     // SOLUTION OF THE DENSE CP:
     // -------------------------------------------------------
-    Vector       *x;    /**< Primal Solution                */
+    DVector       *x;    /**< Primal Solution                */
 
-    Vector     *ylb;    /**< Dual solution, lower bound     */
-    Vector     *yub;    /**< Dual solution, upper bound     */
+    DVector     *ylb;    /**< Dual solution, lower bound     */
+    DVector     *yub;    /**< Dual solution, upper bound     */
 
-    Vector    *ylbA;    /**< Dual solution, LP lower bound  */
-    Vector    *yubA;    /**< Dual solution, LP upper bound  */
+    DVector    *ylbA;    /**< Dual solution, LP lower bound  */
+    DVector    *yubA;    /**< Dual solution, LP upper bound  */
 
-    Vector   **ylbB;    /**< Dual solution, SDB lower bound */
-    Vector   **yubB;    /**< Dual solution, SDP upper bound */
+    DVector   **ylbB;    /**< Dual solution, SDB lower bound */
+    DVector   **yubB;    /**< Dual solution, SDP upper bound */
 
 
 

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,7 +26,7 @@
 
 /**
  *    \file include/acado/variables_grid/variables_grid.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  */
 
 
@@ -88,9 +88,9 @@ class VariablesGrid : public MatrixVariablesGrid
 						VariableType _type = VT_UNKNOWN,
 						const char** const _names = 0,
 						const char** const _units = 0,
-						const VectorspaceElement* const _scaling = 0,
-						const VectorspaceElement* const _lb = 0,
-						const VectorspaceElement* const _ub = 0,
+						const DVector* const _scaling = 0,
+						const DVector* const _lb = 0,
+						const DVector* const _ub = 0,
 						const BooleanType* const _autoInit = 0
 						);
 
@@ -114,9 +114,9 @@ class VariablesGrid : public MatrixVariablesGrid
 						VariableType _type = VT_UNKNOWN,
 						const char** const _names = 0,
 						const char** const _units = 0,
-						const VectorspaceElement* const _scaling = 0,
-						const VectorspaceElement* const _lb = 0,
-						const VectorspaceElement* const _ub = 0,
+						const DVector* const _scaling = 0,
+						const DVector* const _lb = 0,
+						const DVector* const _ub = 0,
 						const BooleanType* const _autoInit = 0
 						);
 
@@ -145,9 +145,9 @@ class VariablesGrid : public MatrixVariablesGrid
 						VariableType _type = VT_UNKNOWN,
 						const char** const _names = 0,
 						const char** const _units = 0,
-						const VectorspaceElement* const _scaling = 0,
-						const VectorspaceElement* const _lb = 0,
-						const VectorspaceElement* const _ub = 0,
+						const DVector* const _scaling = 0,
+						const DVector* const _lb = 0,
+						const DVector* const _ub = 0,
 						const BooleanType* const _autoInit = 0
 						);
 
@@ -155,11 +155,11 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *	At each grid point, the vector-valued MatrixVariable is constructed from the 
 		 *	vector passed.
 		 *
-		 *	@param[in] arg			Vector to be assign at each point of the grid.
+		 *	@param[in] arg			DVector to be assign at each point of the grid.
 		 *	@param[in] _grid		Grid on which the vector-valued MatrixVariable(s) are defined.
 		 *	@param[in] _type		Type of the variable(s).
 		 */
-        VariablesGrid(	const Vector& arg,
+        VariablesGrid(	const DVector& arg,
 						const Grid& _grid = trivialGrid,
 						VariableType _type = VT_UNKNOWN
 						);
@@ -177,26 +177,9 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *
 		 *	\note The file is closed at the end of routine.
 		 */
-        VariablesGrid(	const Matrix& arg,
+        VariablesGrid(	const DMatrix& arg,
 						VariableType _type = VT_UNKNOWN
 						);
-
-		/** Constructor which reads data from a file. The data is interpreted 
-		 *	as follows: the first entry of each row is taken as time of the 
-		 *	grid point to be added, all remaining entries of each row are taken 
-		 *	as numerical values of a vector-valued MatrixVariable with exactly 
-		 *	one column. In effect, a MatrixVariablesGrid consisting of 
-		 *	<number of columns - 1>-by-1 MatrixVariables defined on 
-		 *	<number of rows> grid points is setup. Note that all rows are expected 
-		 *	to have equal number of columns.
-		 *	
-		 *	@param[in] file		File to be read.
-		 *
-		 *	\note The file is closed at the end of routine.
-		 */
-        VariablesGrid(	FILE *file
-						);
-
 
 		/** Copy constructor (deep copy).
 		 *
@@ -232,22 +215,7 @@ class VariablesGrid : public MatrixVariablesGrid
         VariablesGrid& operator=(	const MatrixVariablesGrid& rhs
 									);
 
-		/** Assignment operator which reads data from a file. The data is expected 
-		 *	to be in matrix format and is interpreted as follows: the first entry 
-		 *	of each row is taken as time of the grid point to be added, all remaining
-		 *	entries of each row are taken as numerical values of a vector-valued
-		 *	MatrixVariable with exactly one column. In effect, a MatrixVariablesGrid
-		 *	consisting of <number of columns - 1>-by-1 MatrixVariables defined on 
-		 *	<number of rows> grid points is setup. Note that all rows are expected
-		 *	to have equal number of columns.
-		 *	
-		 *	@param[in] rhs		File to be read.
-		 *
-		 *	\note The file is closed at the end of routine.
-		 *
-		 */
-        VariablesGrid& operator=(	FILE *rhs
-									);
+        operator DMatrix() const;
 
 		/** Assignment operator which reads data from a matrix. The data is interpreted 
 		 *	as follows: the first entry of each row is taken as time of the grid point 
@@ -256,25 +224,23 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *	MatrixVariablesGrid consisting of <number of columns - 1>-by-1 MatrixVariables 
 		 *	defined on <number of rows> grid points is setup.
 		 *	
-		 *	@param[in] rhs		Matrix to be read.
+		 *	@param[in] rhs		DMatrix to be read.
 		 *
 		 *	\note The file is closed at the end of routine.
 		 */
-        VariablesGrid& operator=(	const Matrix& rhs
+        VariablesGrid& operator=(	const DMatrix& rhs
 									);
 
 
-	/** Tests for equality, 
-		*
-		*	@param[in] rhs	Object of comparison.
-		*
-		*  \return BT_TRUE  iff both objects are equal, \n
-		*	        BT_FALSE otherwise
-		*/
-	inline BooleanType operator==(	const VariablesGrid& arg
-									) const;
-
-
+        /** Tests for equality,
+         *
+         *	@param[in] rhs	Object of comparison.
+         *
+         *  \return BT_TRUE  iff both objects are equal, \n
+         *	        BT_FALSE otherwise
+         */
+        inline BooleanType operator==(	const VariablesGrid& arg
+        								) const;
 
         /** Returns the value of a certain component at a certain grid point.
 		 *
@@ -384,9 +350,9 @@ class VariablesGrid : public MatrixVariablesGrid
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							const VectorspaceElement* const _scaling = 0,
-							const VectorspaceElement* const _lb = 0,
-							const VectorspaceElement* const _ub = 0,
+							const DVector* const _scaling = 0,
+							const DVector* const _lb = 0,
+							const DVector* const _ub = 0,
 							const BooleanType* const _autoInit = 0
 							);
 
@@ -411,9 +377,9 @@ class VariablesGrid : public MatrixVariablesGrid
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							const VectorspaceElement* const _scaling = 0,
-							const VectorspaceElement* const _lb = 0,
-							const VectorspaceElement* const _ub = 0,
+							const DVector* const _scaling = 0,
+							const DVector* const _lb = 0,
+							const DVector* const _ub = 0,
 							const BooleanType* const _autoInit = 0
 							);
 
@@ -444,22 +410,22 @@ class VariablesGrid : public MatrixVariablesGrid
 							VariableType _type = VT_UNKNOWN,
 							const char** const _names = 0,
 							const char** const _units = 0,
-							const VectorspaceElement* const _scaling = 0,
-							const VectorspaceElement* const _lb = 0,
-							const VectorspaceElement* const _ub = 0,
+							const DVector* const _scaling = 0,
+							const DVector* const _lb = 0,
+							const DVector* const _ub = 0,
 							const BooleanType* const _autoInit = 0
 							);
 
 		/** Initializes the VariablesGrid on a given grid with given type.
 		 *	At each grid point, the vector-valued MatrixVariable is constructed from the matrix passed.
 		 *
-		 *	@param[in] arg			Vector to be assign at each point of the grid.
+		 *	@param[in] arg			DVector to be assign at each point of the grid.
 		 *	@param[in] _grid		Grid on which the vector-valued MatrixVariable(s) are defined.
 		 *	@param[in] _type		Type of the variable(s).
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-        returnValue init(	const Vector& arg,
+        returnValue init(	const DVector& arg,
 							const Grid& _grid = trivialGrid,
 							VariableType _type = VT_UNKNOWN
 							);
@@ -467,13 +433,13 @@ class VariablesGrid : public MatrixVariablesGrid
 
 		/** Adds a new grid point with given vector and time to grid.
 		 *
-		 *	@param[in] newVector	Vector of grid point to be added.
+		 *	@param[in] newVector	DVector of grid point to be added.
 		 *	@param[in] newTime		Time of grid point to be added.
 		 *
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INVALID_ARGUMENTS
 		 */
-		returnValue addVector(	const Vector& newVector,
+		returnValue addVector(	const DVector& newVector,
 								double newTime = -INFTY
 								);
 
@@ -488,7 +454,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *			RET_VECTOR_DIMENSION_MISMATCH
 		 */
 		returnValue setVector(	uint pointIdx,			/**< Index of the grid point. */
-								const Vector& _values	/**< New values of the sub-vector. */
+								const DVector& _values	/**< New values of the sub-vector. */
 								);
 
 		/** Assigns new vector to all grid points.
@@ -499,7 +465,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *	        RET_INDEX_OUT_OF_BOUNDS, \n
 		 *			RET_VECTOR_DIMENSION_MISMATCH
 		 */
-		returnValue setAllVectors(	const Vector& _values
+		returnValue setAllVectors(	const DVector& _values
 									);
 
 
@@ -507,22 +473,22 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *
 		 *	@param[in] pointIdx		Index of grid point.
 		 *
-		 *  \return Vector at grid point with given index (empty if index is out of bounds)
+		 *  \return DVector at grid point with given index (empty if index is out of bounds)
 		 */
-		Vector getVector(	uint pointIdx
+		DVector getVector(	uint pointIdx
 							) const;
 
 		/** Returns vector at first grid point.
 		 *
-		 *  \return Vector at first grid point
+		 *  \return DVector at first grid point
 		 */
-		Vector getFirstVector( ) const;
+		DVector getFirstVector( ) const;
 
 		/** Returns vector at first grid point.
 		 *
-		 *  \return Vector at first grid point
+		 *  \return DVector at first grid point
 		 */
-		Vector getLastVector( ) const;
+		DVector getLastVector( ) const;
 
 
 		/** Appends grid point of given grid to object. A merge
@@ -547,7 +513,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *	\return SUCCESSFUL_RETURN, \n
 		 *	        RET_INVALID_ARGUMENTS
 		 */
-		returnValue appendTimes(	const Matrix& arg,
+		returnValue appendTimes(	const DMatrix& arg,
 									MergeMethod _mergeMethod = MM_DUPLICATE
 									);
 									
@@ -638,7 +604,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *
 		 *  \return Reference to object with shifted points
 		 */
-		VariablesGrid& shiftBackwards( Vector lastValue = emptyVector );
+		VariablesGrid& shiftBackwards( DVector lastValue = emptyVector );
 
 
 		/** Returns the component-wise sum over all vectors at all grid points.
@@ -647,7 +613,7 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue getSum(	Vector& sum
+		returnValue getSum(	DVector& sum
 							) const;
 
 		/** Returns a component-wise approximation of the integral over all vectors at all grid points.
@@ -658,24 +624,8 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		returnValue getIntegral(	InterpolationMode mode,
-									Vector& value
+									DVector& value
 									) const;
-
-
-
-		/** Prints the MatrixVariablesGrid into a file. \n
-		 *
-		 *	@param[in] file			File to print to.
-		 *	@param[in] arg			VariablesGrid to print.
-		 *
-		 *  \return SUCCESSFUL_RETURN            \n
-		 *          RET_CAN_NOT_WRITE_INTO_FILE  \n
-		 */
-		friend returnValue operator<<(	FILE          *file,
-										VariablesGrid &arg
-										);
-
-
 
     //
     // PROTECTED MEMBER FUNCTIONS:
@@ -691,21 +641,11 @@ class VariablesGrid : public MatrixVariablesGrid
 		 *  \return SUCCESSFUL_RETURN
          */
         returnValue initializeFromBounds( );
-
-
-    //
-    // DATA MEMBERS:
-    //
-    protected:
-		
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
 #include <acado/variables_grid/variables_grid.ipp>
-
 
 BEGIN_NAMESPACE_ACADO
 
@@ -713,7 +653,6 @@ static       VariablesGrid emptyVariablesGrid;
 static const VariablesGrid emptyConstVariablesGrid;
 
 CLOSE_NAMESPACE_ACADO
-
 
 #endif  // ACADO_TOOLKIT_VARIABLES_GRID_HPP
 

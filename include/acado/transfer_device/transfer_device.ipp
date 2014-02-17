@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -74,7 +74,7 @@ inline BooleanType TransferDevice::hasDeadTime( ) const
 	if ( deadTimes.getDim() == 0 )
 		return BT_FALSE;
 
-	if ( deadTimes.isNegative( ) == BT_TRUE )
+	if ( deadTimes < DVector( deadTimes.size() ) )
 		return BT_FALSE;
 	else
 		return BT_TRUE;

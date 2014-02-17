@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -87,8 +87,8 @@ Estimator& Estimator::operator=( const Estimator& rhs )
 
 
 returnValue Estimator::init(	double startTime,
-								const Vector &x0_,
-								const Vector &p_
+								const DVector &x0_,
+								const DVector &p_
 								)
 {
 	setStatus( BS_READY );

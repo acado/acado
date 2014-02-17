@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,17 +33,16 @@
 #ifndef ACADO_TOOLKIT_OPTIMIZATION_ALGORITHM_BASE_HPP
 #define ACADO_TOOLKIT_OPTIMIZATION_ALGORITHM_BASE_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
-
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/variables_grid/variables_grid.hpp>
-#include <acado/ocp/ocp.hpp>
+//#include <acado/ocp/ocp.hpp>
 #include <acado/nlp_solver/nlp_solver.hpp>
 #include <acado/nlp_solver/scp_method.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
+
+class OCP;
 
 
 /**
@@ -99,17 +98,16 @@ class OptimizationAlgorithmBase
         returnValue initializeControls          ( const VariablesGrid &p_init_);
         returnValue initializeDisturbances      ( const VariablesGrid &w_init_);
 
-	/**
-	Use this call to overwrite all states by a single shooting initialization.
-	This function takes the initial state and controls and overwrite all states
-        apart from the first one by simulation.
-	*/
+        /** Use this call to overwrite all states by a single shooting initialization.
+         *  This function takes the initial state and controls and overwrite all states
+         *  apart from the first one by simulation.
+         */
         returnValue simulateStatesForInitialization();
 
         returnValue getDifferentialStates( VariablesGrid &xd_ ) const;
         returnValue getAlgebraicStates   ( VariablesGrid &xa_ ) const;
         returnValue getParameters        ( VariablesGrid &u_  ) const;
-        returnValue getParameters        ( Vector &u_  ) const;
+        returnValue getParameters        ( DVector &u_  ) const;
         returnValue getControls          ( VariablesGrid &p_  ) const;
         returnValue getDisturbances      ( VariablesGrid &w_  ) const;
 
@@ -250,10 +248,7 @@ class OptimizationAlgorithmBase
 		OCPiterate userInit;
 };
 
-
 CLOSE_NAMESPACE_ACADO
-
-
 
 #endif  // ACADO_TOOLKIT_OPTIMIZATION_ALGORITHM_BASE_HPP
 

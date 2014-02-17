@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -37,9 +37,7 @@
 #define ACADO_TOOLKIT_ACADO_DEBUGGING_HPP
 
 #ifdef __MATLAB__
-
 	#include <mex.h>
-	//#define ASSERT(expr) do { if (!(expr)) { mexErrMsgTxt("An error while executing your program occurred. Assertion " #expr " failed!"); } } while(0);
 #endif
 
 #if __DEBUG__
@@ -55,10 +53,7 @@
 
 #endif
 
-
-
 #endif   // ACADO_TOOLKIT_ACADO_DEBUGGING_HPP
-
 
 /*
  *    end of file

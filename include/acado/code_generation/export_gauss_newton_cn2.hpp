@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -55,7 +55,7 @@ public:
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
 	ExportGaussNewtonCN2(	UserInteraction* _userInteraction = 0,
-								const String& _commonHeaderName = ""
+								const std::string& _commonHeaderName = ""
 								);
 
 	/** Destructor. */
@@ -152,7 +152,7 @@ protected:
 
 	virtual returnValue setupCondensing( );
 
-	BooleanType performFullCondensing( ) const;
+	bool performFullCondensing( ) const;
 
 protected:
 
@@ -190,6 +190,7 @@ protected:
 	/** Variable containing the dual QP variables. */
 	ExportVariable yVars;
 
+	std::vector< unsigned > xBoundsIdx;
 	ExportVariable lbValues, ubValues;
 	ExportVariable lbAValues, ubAValues;
 
@@ -249,12 +250,6 @@ protected:
 	ExportFunction expansionStep;
 
 };
-
-/** \internal */
-static struct RegisterGaussNewtonCN2
-{
-	RegisterGaussNewtonCN2();
-} registerGaussNewtonCN2;
 
 CLOSE_NAMESPACE_ACADO
 

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -90,10 +90,10 @@ RealTimeAlgorithm::RealTimeAlgorithm(	const OCP& ocp_,
 
 RealTimeAlgorithm::RealTimeAlgorithm( const RealTimeAlgorithm& rhs ) : OptimizationAlgorithmBase( rhs ), ControlLaw( rhs )
 {
-    if( rhs.x0 != 0 ) x0 = new Vector(*rhs.x0);
+    if( rhs.x0 != 0 ) x0 = new DVector(*rhs.x0);
     else              x0 = 0                  ;
 
-    if( rhs.p0 != 0 ) p0 = new Vector(*rhs.p0);
+    if( rhs.p0 != 0 ) p0 = new DVector(*rhs.p0);
     else              p0 = 0                  ;
 
     if( rhs.reference != 0 ) reference = new VariablesGrid(*rhs.reference);
@@ -117,10 +117,10 @@ RealTimeAlgorithm& RealTimeAlgorithm::operator=( const RealTimeAlgorithm& rhs ){
 		OptimizationAlgorithmBase::operator=( rhs );
 		ControlLaw::operator=( rhs );
 
-        if( rhs.x0 != 0 ) x0 = new Vector(*rhs.x0);
+        if( rhs.x0 != 0 ) x0 = new DVector(*rhs.x0);
         else              x0 = 0                  ;
 
-        if( rhs.p0 != 0 ) p0 = new Vector(*rhs.p0);
+        if( rhs.p0 != 0 ) p0 = new DVector(*rhs.p0);
         else              p0 = 0                  ;
 
         if( rhs.reference != 0 ) reference = new VariablesGrid(*rhs.reference);
@@ -181,8 +181,8 @@ returnValue RealTimeAlgorithm::init( )
 
 
 returnValue RealTimeAlgorithm::init(	double startTime,
-										const Vector& _x,
-										const Vector& _p,
+										const DVector& _x,
+										const DVector& _p,
 										const VariablesGrid& _yRef
 										)
 {
@@ -209,10 +209,10 @@ returnValue RealTimeAlgorithm::init(	double startTime,
 	if ( _yRef.isEmpty( ) == BT_FALSE )
 		reference = new VariablesGrid( _yRef );
 
-    x0 = new Vector(_x);
+    x0 = new DVector(_x);
 
 	if ( _p.isEmpty( ) == BT_FALSE )
-		p0 = new Vector(_p);	
+		p0 = new DVector(_p);	
 
 
 	/* 2) Initialize all sub-blocks. */
@@ -233,8 +233,8 @@ returnValue RealTimeAlgorithm::init(	double startTime,
 
 
 returnValue RealTimeAlgorithm::step(	double currentTime,
-										const Vector& _x,
-										const Vector& _p,
+										const DVector& _x,
+										const DVector& _p,
 										const VariablesGrid& _yRef
 										)
 {
@@ -249,8 +249,8 @@ returnValue RealTimeAlgorithm::step(	double currentTime,
 
 
 returnValue RealTimeAlgorithm::feedbackStep(	double currentTime,
-												const Vector &_x,
-												const Vector &_p,
+												const DVector &_x,
+												const DVector &_p,
 												const VariablesGrid& _yRef
 												)
 {
@@ -329,8 +329,8 @@ returnValue RealTimeAlgorithm::preparationStep(	double nextTime,
 
 
 returnValue RealTimeAlgorithm::solve(	double startTime,
-										const Vector &_x,
-										const Vector &_p,
+										const DVector &_x,
+										const DVector &_p,
 										const VariablesGrid& _yRef
 										)
 {
@@ -616,8 +616,8 @@ returnValue RealTimeAlgorithm::initializeObjective( Objective *F )
 
 
 returnValue RealTimeAlgorithm::performFeedbackStep(	double currentTime,
-													const Vector &_x,
-													const Vector &_p
+													const DVector &_x,
+													const DVector &_p
 													)
 {
 	if ( getStatus( ) == BS_NOT_INITIALIZED )

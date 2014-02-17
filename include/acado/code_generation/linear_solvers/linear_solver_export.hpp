@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -44,9 +44,6 @@
 
 #include <acado/user_interaction/options.hpp>
 
-#include <sstream>
-using namespace std;
-
 
 BEGIN_NAMESPACE_ACADO
 
@@ -75,27 +72,11 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
         ExportLinearSolver(	UserInteraction* _userInteraction = 0,
-							const String& _commonHeaderName = ""
+							const std::string& _commonHeaderName = ""
 							);
 
-		/** Copy constructor (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-        ExportLinearSolver(	const ExportLinearSolver& arg
-							);
-
-        /** Destructor. 
-		 */
+        /** Destructor. */
         virtual ~ExportLinearSolver( );
-
-		/** Assignment operator (deep copy).
-		 *
-		 *	@param[in] arg		Right-hand side object.
-		 */
-		ExportLinearSolver& operator=(	const ExportLinearSolver& arg
-									);
-
 
 		/** Initializes code export into given file.
 		 *
@@ -116,8 +97,8 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue init(	const uint newDim,
-							const BooleanType& reuse = BT_TRUE,
-							const BooleanType& unrolling = BT_FALSE
+							const bool& reuse = true,
+							const bool& unrolling = false
 							);
 
 
@@ -134,18 +115,18 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue init(	const uint newDim,
-							const BooleanType& reuse,
-							const BooleanType& unrolling,
-							const String& newId
+							const bool& reuse,
+							const bool& unrolling,
+							const std::string& newId
 							);
 
 		/** \todo DOC */
 		returnValue init(	unsigned _nRows,
 							unsigned _nCols,
 							unsigned _nBacksolves,
-							BooleanType _reuse,
-							BooleanType _unroll,
-							const String& _id
+							bool _reuse,
+							bool _unroll,
+							const std::string& _id
 							);
 
 		/** Adds all data declarations of the auto-generated algorithm to given list of declarations.
@@ -185,7 +166,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue appendVariableNames( stringstream& string ) = 0;
+		virtual returnValue appendVariableNames( std::stringstream& string ) = 0;
 
 
 		/** Returns the dimensions of the linear system.
@@ -199,14 +180,14 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *
 		 *  \return The dimension of the auxiliary variables for the linear solver.
 		 */
-		virtual ExportVariable getGlobalExportVariable( const uint factor ) const = 0;
+		virtual ExportVariable getGlobalExportVariable( const uint factor ) const;
 		
 		
 		/** Returns a boolean that is true when an extra algorithm will be exported for reuse.
 		 *
 		 *  \return A boolean that is true when an extra algorithm will be exported for reuse.
 		 */
-		BooleanType getReuse() const;
+		bool getReuse() const;
 		
 		
 		/** Sets the boolean that is true when an extra algorithm will be exported for reuse.
@@ -215,7 +196,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue setReuse( const BooleanType& reuse );
+		returnValue setReuse( const bool& reuse );
 		
 		
 		/** Returns a boolean that is true when the exported code for the linear solver needs to be unrolled
@@ -224,7 +205,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *  \return A boolean that is true when the exported code for the linear solver needs to be unrolled
 		 * 			completely.
 		 */
-		BooleanType getUnrolling() const;
+		bool getUnrolling() const;
 		
 		
 		/** Sets the boolean that is true when the exported code for the linear solver needs to be unrolled
@@ -234,14 +215,14 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		returnValue setUnrolling( const BooleanType& unrolling );
+		returnValue setUnrolling( const bool& unrolling );
 		
 		
 		/** Returns a string containing the name of the function which is exported to solve the linear system.
 		 *
 		 *  \return A string containing the name of the function which is exported to solve the linear system.
 		 */
-		const String getNameSolveFunction(); 
+		const std::string getNameSolveFunction(); 
 		
 		
 		/** Returns a string containing the name of the function which is exported to solve the linear system with
@@ -250,7 +231,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 *  \return A string containing the name of the function which is exported to solve the linear system with
 		 * 			the reuse of previous results.
 		 */
-		const String getNameSolveReuseFunction(); 
+		const std::string getNameSolveReuseFunction(); 
 
 
 	//
@@ -261,10 +242,10 @@ class ExportLinearSolver : public ExportAlgorithm
 
     protected:
     
-		String identifier;							/**< This identifier allows the use of more than one exported linear solver. */
+		std::string identifier;							/**< This identifier allows the use of more than one exported linear solver. */
     
-		BooleanType UNROLLING;						/**< The boolean that defines the unrolling. */
-		BooleanType REUSE;							/**< The boolean that defines the reuse. */
+		bool UNROLLING;						/**< The boolean that defines the unrolling. */
+		bool REUSE;							/**< The boolean that defines the reuse. */
 		uint dim;									/**< The dimensions of the linear system. */
 		
 		unsigned nRows;								/**< Number of rows of matrix A. */

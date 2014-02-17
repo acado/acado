@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -501,8 +501,8 @@ returnValue COperator::AD_backward2( int number, double seed1, double seed2,
 }
 
 
-Stream& COperator::print( Stream &stream ) const{
-
+std::ostream& COperator::print( std::ostream& stream ) const
+{
     return stream << "C functions can not be printed";
 }
 

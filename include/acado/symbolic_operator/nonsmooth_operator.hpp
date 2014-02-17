@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -67,25 +67,25 @@ public:
     /** Sets the argument (note that arg should have dimension 1). */
 
     virtual TreeProjection& operator=( const double      & arg );
-    virtual TreeProjection& operator=( const Vector      & arg );
-    virtual TreeProjection& operator=( const Matrix      & arg );
+    virtual TreeProjection& operator=( const DVector      & arg );
+    virtual TreeProjection& operator=( const DMatrix      & arg );
     virtual TreeProjection& operator=( const Expression  & arg );
     virtual TreeProjection& operator=( const Operator    & arg );
 
 
     TreeProjection& operator+=( const double      & arg );
-    TreeProjection& operator+=( const Vector      & arg );
-    TreeProjection& operator+=( const Matrix      & arg );
+    TreeProjection& operator+=( const DVector      & arg );
+    TreeProjection& operator+=( const DMatrix      & arg );
     TreeProjection& operator+=( const Expression  & arg );
 
     TreeProjection& operator-=( const double      & arg );
-    TreeProjection& operator-=( const Vector      & arg );
-    TreeProjection& operator-=( const Matrix      & arg );
+    TreeProjection& operator-=( const DVector      & arg );
+    TreeProjection& operator-=( const DMatrix      & arg );
     TreeProjection& operator-=( const Expression  & arg );
 
     TreeProjection& operator*=( const double      & arg );
-    TreeProjection& operator*=( const Vector      & arg );
-    TreeProjection& operator*=( const Matrix      & arg );
+    TreeProjection& operator*=( const DVector      & arg );
+    TreeProjection& operator*=( const DMatrix      & arg );
     TreeProjection& operator*=( const Expression  & arg );
 
     TreeProjection& operator/=( const double      & arg );
@@ -93,22 +93,22 @@ public:
 
 
     Expression operator+( const double        & arg ) const;
-    Expression operator+( const Vector        & arg ) const;
-    Expression operator+( const Matrix        & arg ) const;
+    Expression operator+( const DVector        & arg ) const;
+    Expression operator+( const DMatrix        & arg ) const;
     Expression operator+( const Operator& arg ) const;
     Expression operator+( const Expression    & arg ) const;
 
     Expression operator-( const double          & arg ) const;
-    Expression operator-( const Vector          & arg ) const;
-    Expression operator-( const Matrix          & arg ) const;
+    Expression operator-( const DVector          & arg ) const;
+    Expression operator-( const DMatrix          & arg ) const;
     Expression operator-( const Operator  & arg ) const;
     Expression operator-( const Expression      & arg ) const;
 
     Expression operator-( ) const;
 
     Expression operator*( const double         & arg ) const;
-    Expression operator*( const Vector         & arg ) const;
-    Expression operator*( const Matrix         & arg ) const;
+    Expression operator*( const DVector         & arg ) const;
+    Expression operator*( const DMatrix         & arg ) const;
     Expression operator*( const Operator & arg ) const;
     Expression operator*( const Expression     & arg ) const;
 
@@ -121,9 +121,9 @@ public:
     ConstraintComponent operator>=( const double& lb ) const;
     ConstraintComponent operator==( const double&  b ) const;
 
-    ConstraintComponent operator<=( const Vector& ub ) const;
-    ConstraintComponent operator>=( const Vector& lb ) const;
-    ConstraintComponent operator==( const Vector&  b ) const;
+    ConstraintComponent operator<=( const DVector& ub ) const;
+    ConstraintComponent operator>=( const DVector& lb ) const;
+    ConstraintComponent operator==( const DVector&  b ) const;
 
     ConstraintComponent operator<=( const VariablesGrid& ub ) const;
     ConstraintComponent operator>=( const VariablesGrid& lb ) const;
@@ -421,16 +421,7 @@ public:
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual Stream& print( Stream &stream ) const;
-
-
-
-    /** Prints the expression into a stream ("flush" version). \n
-     *  \return SUCCESFUL_RETURN                               \n
-     */
-     Stream operator<<( Stream &stream );
-
-
+     virtual std::ostream& print( std::ostream &stream ) const;
 
      /** Provides a deep copy of the expression. \n
       *  \return a clone of the expression.      \n

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,13 +31,14 @@
  *    \date 2008
  */
 
-#include <time.h>
-
 #include <acado/utils/acado_utils.hpp>
 #include <acado/user_interaction/user_interaction.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/function/function.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
 void my_function( double *x_, double *f, void *user_data ){
@@ -49,67 +50,63 @@ void my_function( double *x_, double *f, void *user_data ){
     f[0] = x*x + pow(y,3);
 }
 
+int main( )
+{
+	DifferentialState a, b;
+	TIME t;
 
+	CFunction myFunction(1, my_function);
 
-int main( ){
+	IntermediateState x(3);
 
-    USING_NAMESPACE_ACADO
+	return 0;
 
-    DifferentialState a,b;
-    TIME t;
+	x(0) = t;
+	x(1) = a;
+	x(2) = b;
 
-    CFunction myFunction( 1, my_function );
+	Function f;
+	f << myFunction(x);
 
-    IntermediateState x(3);
+	// TEST THE FUNCTION f:
+	// --------------------
+	int x_index, y_index;
 
-    x(0) = t;
-    x(1) = a;
-    x(2) = b;
+	x_index = f.index(VT_DIFFERENTIAL_STATE, 0);
+	y_index = f.index(VT_DIFFERENTIAL_STATE, 1);
 
-    Function f;
-    f << myFunction( x );
+	double *xx = new double[f.getNumberOfVariables() + 1];
+	double *seed = new double[f.getNumberOfVariables() + 1];
+	double *ff = new double[f.getDim()];
+	double *df = new double[f.getDim()];
 
+	xx[x_index] = 1.0;
+	xx[y_index] = 1.0;
 
-    // TEST THE FUNCTION f:
-    // --------------------
-       int x_index, y_index;
+	seed[x_index] = 0.5;
+	seed[y_index] = 0.5;
 
-       x_index = f.index(VT_DIFFERENTIAL_STATE,0);
-       y_index = f.index(VT_DIFFERENTIAL_STATE,1);
+	// FORWARD DIFFERENTIATION:
+	// ------------------------
+	f.evaluate(0, xx, ff);
+	f.AD_forward(0, seed, df);
 
-       double *xx    = new double[f.getNumberOfVariables()+1];
-       double *seed  = new double[f.getNumberOfVariables()+1];
-       double *ff    = new double[f.getDim()                ];
-       double *df    = new double[f.getDim()                ];
+	// PRINT THE RESULTS:
+	// ------------------
+	cout << scientific
+		 << "     x = " << xx[x_index] << endl
+		 << "     y = " << xx[y_index] << endl
+		 << "seed_x = " << seed[x_index] << endl
+		 << "seed_y = " << seed[y_index] << endl
+		 << "     f = " << ff[0] << endl
+		 << "    df = " << df[0] << endl;
 
-       xx[x_index] = 1.0;
-       xx[y_index] = 1.0;
+	delete[] xx;
+	delete[] seed;
+	delete[] ff;
+	delete[] df;
 
-       seed[x_index] = 0.5;
-       seed[y_index] = 0.5;
-
-
-    // FORWARD DIFFERENTIATION:
-    // ------------------------
-       f.evaluate  ( 0, xx  , ff );
-       f.AD_forward( 0, seed, df );
-
-
-    // PRINT THE RESULTS:
-    // ------------------
-       printf("     x = %10.16e \n",   xx[x_index] );
-       printf("     y = %10.16e \n",   xx[y_index] );
-       printf("seed_x = %10.16e \n", seed[x_index] );
-       printf("seed_y = %10.16e \n", seed[y_index] );
-       printf("     f = %10.16e \n",   ff[0      ] );
-       printf("    df = %10.16e \n",   df[0      ] );
-
-    delete[] xx;
-    delete[] seed;
-    delete[] ff;
-    delete[] df;
-
-    return 0;
+	return 0;
 }
 /* <<< end tutorial code <<< */
 

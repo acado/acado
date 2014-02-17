@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -146,7 +146,7 @@ class TransferDevice : public SimulationBlock
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue init(	double _startTime = 0.0,
-									const Vector& _startValue = emptyConstVector
+									const DVector& _startValue = emptyConstVector
 									);
 
 		/** Generates additive noise on the given time interval based on the internal
@@ -175,9 +175,9 @@ class TransferDevice : public SimulationBlock
 		VariablesGrid lastSignal;					/**< Most recent transfer device signal. */
 
 		Noise** additiveNoise;						/**< Array of additive noise for each component of the transfer device signal. */
-		Vector  noiseSamplingTimes;					/**< Noise sampling times for each component of the transfer device signal. */
+		DVector  noiseSamplingTimes;					/**< Noise sampling times for each component of the transfer device signal. */
 
-		Vector  deadTimes;							/**< Dead times for each component of the transfer device signal. */
+		DVector  deadTimes;							/**< Dead times for each component of the transfer device signal. */
 };
 
 

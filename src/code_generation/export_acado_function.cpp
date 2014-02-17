@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -34,7 +34,7 @@
 #include <acado/code_generation/export_acado_function.hpp>
 #include <acado/function/function_.hpp>
 
-
+using namespace std;
 BEGIN_NAMESPACE_ACADO
 
 
@@ -47,50 +47,32 @@ ExportAcadoFunction::ExportAcadoFunction( ) : ExportFunction( )
 	numX = 0;
 	numXA = 0;
 	numU = 0;
-	numDX = 0;
 	numP = 0;
-	f = std::tr1::shared_ptr< Function >(new Function());
+	numDX = 0;
+	numOD = 0;
+
+	f = std::tr1::shared_ptr< Function >(new Function( ));
+
+	external = false;
 }
 
 
 ExportAcadoFunction::ExportAcadoFunction(	const Function& _f,
-										const String& _name
-										) : ExportFunction( _name )
+											const std::string& _name
+											) : ExportFunction( _name )
 {
 	init(_f, _name);
 }
 
-
-ExportAcadoFunction::ExportAcadoFunction( const ExportAcadoFunction& arg ) : ExportFunction( arg )
+ExportAcadoFunction::ExportAcadoFunction(	const std::string& _name
+											) : ExportFunction( _name )
 {
-	numX = arg.numX;
-	numXA = arg.numXA;
-	numU = arg.numU;
-	numP = arg.numP;
-	numDX = arg.numDX;
-	globalVar = arg.globalVar;
-	f = arg.f;
+	init(Function(), _name);
+	external = true;
 }
-
 
 ExportAcadoFunction::~ExportAcadoFunction( )
 {}
-
-
-ExportAcadoFunction& ExportAcadoFunction::operator=( const ExportAcadoFunction& arg )
-{
-	if( this != &arg )
-	{
-		ExportFunction::operator=( arg );
-		numX = arg.numX;
-		numXA = arg.numXA;
-		numU = arg.numU;
-		globalVar = arg.globalVar;
-		f = arg.f;
-	}
-
-	return *this;
-}
 
 
 ExportStatement* ExportAcadoFunction::clone( ) const
@@ -98,21 +80,14 @@ ExportStatement* ExportAcadoFunction::clone( ) const
 	return new ExportAcadoFunction(*this);
 }
 
-
-ExportFunction* ExportAcadoFunction::cloneFunction( ) const
-{
-	return new ExportAcadoFunction(*this);
-}
-
-
-
 returnValue ExportAcadoFunction::init(	const Function& _f,
-										const String& _name,
+										const std::string& _name,
 										const uint _numX,
 										const uint _numXA,
 										const uint _numU,
 										const uint _numP,
-										const uint _numDX
+										const uint _numDX,
+										const uint _numOD
 										)
 {
 	numX = _numX;
@@ -120,60 +95,85 @@ returnValue ExportAcadoFunction::init(	const Function& _f,
 	numU = _numU;
 	numP = _numP;
 	numDX = _numDX;
+	numOD = _numOD;
 
 	f = std::tr1::shared_ptr< Function >(new Function( _f ));
 
 	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
 	f->setGlobalExportVariableName( globalVar.getFullName() );
 
+	external = false;
+
 	// Just add two dummy arguments in order to keep addFunctionCall function happy.
 	return ExportFunction::init(_name, ExportArgument("input", 1, 1), ExportArgument("output", 1, 1));
 }
 
-
-
-returnValue ExportAcadoFunction::exportDataDeclaration(	FILE* file,
-														const String& _realString,
-														const String& _intString,
+returnValue ExportAcadoFunction::exportDataDeclaration(	std::ostream& stream,
+														const std::string& _realString,
+														const std::string& _intString,
 														int _precision
 														) const
 {
-	return f->exportHeader(file, name.getName(), _realString.getName());
+	ASSERT( external == false );
+
+	stream	<< _realString << " " << f->getGlobalExportVariableName()
+			<< "[ " << f->getGlobalExportVariableSize( ) << " ];" << std::endl;
+
+	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ExportAcadoFunction::exportForwardDeclaration(	FILE* file,
-															const String& _realString,
-															const String& _intString,
+returnValue ExportAcadoFunction::exportForwardDeclaration(	std::ostream& stream,
+															const std::string& _realString,
+															const std::string& _intString,
 															int _precision
 															) const
 {
-	return f->exportForwardDeclarations(file, name.getName(), _realString.getName());
+	if (flagPrivate == true)
+		return SUCCESSFUL_RETURN;
+
+	if (external == true)
+	{
+		stream << endl;
+		stream << "/** An external function for evaluation of symbolic expressions. */" << endl;
+		stream << "void " << name << "(const " << _realString << "* in, " << _realString << "* out);" << endl;
+
+		return SUCCESSFUL_RETURN;
+	}
+
+	return f->exportForwardDeclarations(stream, name.c_str(), _realString.c_str());
 }
 
 
-returnValue ExportAcadoFunction::exportCode(	FILE* file,
-											const String& _realString,
-											const String& _intString,
-											int _precision
-											) const
+returnValue ExportAcadoFunction::exportCode(	std::ostream& stream,
+												const std::string& _realString,
+												const std::string& _intString,
+												int _precision
+												) const
 {
-	return f->exportCode(file, name.getName(), _realString.getName(),
-			_precision, numX, numXA, numU, numP, numDX);
+	if (external == true)
+		return SUCCESSFUL_RETURN;
+
+	return f->exportCode(
+			stream, name.c_str(), _realString.c_str(), numX, numXA, numU, numP, numDX, numOD,
+			// TODO: Here we allocate local memory for the function, this should be extended.
+			false, false);
 }
 
 
-BooleanType ExportAcadoFunction::isDefined( ) const
+bool ExportAcadoFunction::isDefined( ) const
 {
-	if (f->getDim() > 0)
-		return BT_TRUE;
+	if (f->getDim() > 0 || external == true)
+		return true;
 
-	return BT_FALSE;
+	return false;
 }
 
 
 unsigned ExportAcadoFunction::getFunctionDim( void )
 {
+	ASSERT( external == false );
+
 	return f->getDim();
 }
 
@@ -184,6 +184,8 @@ ExportVariable ExportAcadoFunction::getGlobalExportVariable( ) const
 
 returnValue ExportAcadoFunction::setGlobalExportVariable(const ExportVariable& var)
 {
+	ASSERT( external == false );
+
 	if (getFunctionDim() == 0)
 		return SUCCESSFUL_RETURN;
 
@@ -198,12 +200,4 @@ returnValue ExportAcadoFunction::setGlobalExportVariable(const ExportVariable& v
 	return SUCCESSFUL_RETURN;
 }
 
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-
 CLOSE_NAMESPACE_ACADO
-
-// end of file.

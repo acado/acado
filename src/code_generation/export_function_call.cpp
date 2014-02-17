@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -41,7 +41,7 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportFunctionCall::ExportFunctionCall(	const String& _name,
+ExportFunctionCall::ExportFunctionCall(	const std::string& _name,
 										const ExportArgument& _argument1,
 										const ExportArgument& _argument2,
 										const ExportArgument& _argument3,
@@ -114,7 +114,7 @@ ExportStatement* ExportFunctionCall::clone( ) const
 
 
 
-returnValue ExportFunctionCall::init(	const String& _name,
+returnValue ExportFunctionCall::init(	const std::string& _name,
 										const ExportArgument& _argument1,
 										const ExportArgument& _argument2,
 										const ExportArgument& _argument3,
@@ -154,7 +154,7 @@ returnValue ExportFunctionCall::init(	const ExportFunction& _f,
 
 	setName( _f.getName() );
 
-	if (_f.isDefined() == BT_FALSE)
+	if (_f.isDefined() == false)
 	{
 		LOG( LVL_DEBUG ) << "ExportFunctionCall: " << _f.getName() << " is empty" << std::endl;
 		return SUCCESSFUL_RETURN;
@@ -177,18 +177,18 @@ returnValue ExportFunctionCall::init(	const ExportFunction& _f,
 
 
 
-returnValue ExportFunctionCall::exportCode(	FILE *file,
-											const String& _realString,
-											const String& _intString,
+returnValue ExportFunctionCall::exportCode(	std::ostream& stream,
+											const std::string& _realString,
+											const std::string& _intString,
 											int _precision
 											) const
 {
-	if ( name.isEmpty() == BT_TRUE )
+	if ( name.empty() == true )
 		return ACADOERROR( RET_MEMBER_NOT_INITIALISED );
 
-	acadoFPrintf( file,"%s( ", name.getName() );
-	functionArguments.exportCode( file,_realString,_intString,_precision );
-	acadoFPrintf( file," );\n");
+	stream << name << "( ";
+	functionArguments.exportCode(stream, _realString, _intString, _precision);
+	stream << " );\n";
 
 	return SUCCESSFUL_RETURN;
 }
@@ -209,10 +209,10 @@ returnValue ExportFunctionCall::clear( )
 
 
 
-returnValue	ExportFunctionCall::setName(	const String& _name
+returnValue	ExportFunctionCall::setName(	const std::string& _name
 											)
 {
-	if ( _name.isEmpty() == BT_TRUE )
+	if ( _name.empty() == true )
 		return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	name = _name;

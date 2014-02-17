@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -158,7 +158,7 @@ class Actuator : public TransferDevice
 		 *	        RET_INVALID_ARGUMENTS, \n
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
-		returnValue setControlDeadTimes(	const Vector& _deadTimes
+		returnValue setControlDeadTimes(	const DVector& _deadTimes
 											);
 
 		/** Assigns new dead time to all components of the actuator control signal.
@@ -194,7 +194,7 @@ class Actuator : public TransferDevice
 		 *	        RET_INVALID_ARGUMENTS, \n
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
-		returnValue setParameterDeadTimes(	const Vector& _deadTimes
+		returnValue setParameterDeadTimes(	const DVector& _deadTimes
 											);
 
 		/** Assigns new dead time to all components of the actuator parameter signal.
@@ -232,8 +232,8 @@ class Actuator : public TransferDevice
 		 *  \return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue init(	double _startTime = 0.0,
-									const Vector& _startValueU = emptyConstVector,
-									const Vector& _startValueP = emptyConstVector
+									const DVector& _startValueU = emptyConstVector,
+									const DVector& _startValueP = emptyConstVector
 									);
 
 
@@ -298,7 +298,7 @@ class Actuator : public TransferDevice
 		 *
 		 *  \return Dead times of actuator control signal
 		 */
-		inline Vector getControlDeadTimes( ) const;
+		inline DVector getControlDeadTimes( ) const;
 
 
 		/** Returns dead time of given component of the actuator parameter signal.
@@ -314,7 +314,7 @@ class Actuator : public TransferDevice
 		 *
 		 *  \return Dead times of actuator parameter signal
 		 */
-		inline Vector getParameterDeadTimes( ) const;
+		inline DVector getParameterDeadTimes( ) const;
 
 
 

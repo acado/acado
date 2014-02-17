@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -30,26 +30,24 @@ BEGIN_NAMESPACE_ACADO
 using namespace std;
 
 
-returnValue ExportIndexNode::exportDataDeclaration(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+returnValue ExportIndexNode::exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision
 													) const
 {
-	stringstream s;
-
-	if (isGiven() == BT_TRUE)
+	if (isGiven() == true)
 		return ACADOERRORTEXT(RET_UNABLE_TO_EXPORT_CODE, "Declaration of given indices is not supported.");
-	else if (isBinary() == BT_TRUE)
+	else if (isBinary() == true)
 		return ACADOERRORTEXT(RET_UNABLE_TO_EXPORT_CODE, "Declaration of binary node indices is not supported.");
 
-	s << _intString.getName() << " " << getFullName().getName() << ";" << endl;
+	stream << _intString << " " << getFullName() << ";" << endl;
 
-	return acadoFPrintf(file, "%s", s.str().c_str());
+	return SUCCESSFUL_RETURN;
 }
 
 
-const String ExportIndexNode::get( ) const
+const std::string ExportIndexNode::get( ) const
 {
 	stringstream s;
 
@@ -61,9 +59,9 @@ const String ExportIndexNode::get( ) const
 
 	case EVT_VARIABLE:
 		if (factor == 1)
-			s << getFullName().getName();
+			s << getFullName();
 		else
-			s << getFullName().getName() << " * " << factor;
+			s << getFullName() << " * " << factor;
 
 		if (offset > 0)
 			s << " + " << offset;
@@ -74,7 +72,7 @@ const String ExportIndexNode::get( ) const
 
 	case EVT_BINARY_OPERATOR:
 
-		s << "(" << left.get().getName() << ")";
+		s << "(" << left.get() << ")";
 		switch ( op )
 		{
 		case ESO_ADD:
@@ -96,13 +94,11 @@ const String ExportIndexNode::get( ) const
 			s << " % ";
 			break;
 		}
-		s << "(" << right.get().getName() << ")";
+		s << "(" << right.get() << ")";
 		break;
 	}
 
-	String str( s.str().c_str() );
-
-	return str;
+	return s.str();
 }
 
 
@@ -137,12 +133,12 @@ const int ExportIndexNode::getGivenValue( ) const
 }
 
 
-BooleanType ExportIndexNode::isGiven( ) const
+bool ExportIndexNode::isGiven( ) const
 {
 	if (varType == EVT_VALUE)
-		return BT_TRUE;
+		return true;
 
-	return BT_FALSE;
+	return false;
 }
 
 

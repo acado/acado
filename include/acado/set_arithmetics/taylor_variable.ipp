@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -309,7 +309,7 @@ TaylorVariable<T>::_eigen
   ASSERT(1==0);
   
 // #ifdef MC__TVAR_DEBUG_EIGEN
-//   TaylorModel<T>::_display( n, n, a, n, "Matrix Q", std::cout );
+//   TaylorModel<T>::_display( n, n, a, n, "DMatrix Q", std::cout );
 // #endif
 // 
 //   // get optimal size
@@ -322,8 +322,8 @@ TaylorVariable<T>::_eigen
 //   double*work = new double[lwork];
 //   dsyev_( "Vectors", "Upper", &n, a, &n, d, work, &lwork, &info );
 // #ifdef MC__TVAR_DEBUG_EIGEN
-//   TaylorModel<T>::_display( n, n, a, n, "Matrix U", std::cout );
-//   TaylorModel<T>::_display( 1, n, d, 1, "Matrix D", std::cout );
+//   TaylorModel<T>::_display( n, n, a, n, "DMatrix U", std::cout );
+//   TaylorModel<T>::_display( 1, n, d, 1, "DMatrix D", std::cout );
 // #endif
 //   delete[] work;
 // 

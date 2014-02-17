@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,11 +33,8 @@
 #ifndef ACADO_TOOLKIT_OPTIMIZATION_ALGORITHM_HPP
 #define ACADO_TOOLKIT_OPTIMIZATION_ALGORITHM_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
-#include <acado/optimization_algorithm/optimization_algorithm_base.hpp>
 #include <acado/user_interaction/user_interaction.hpp>
-
+#include <acado/optimization_algorithm/optimization_algorithm_base.hpp>
 
 BEGIN_NAMESPACE_ACADO
 

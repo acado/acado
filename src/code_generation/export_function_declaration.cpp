@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -41,69 +41,21 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportFunctionDeclaration::ExportFunctionDeclaration( ) : ExportStatement( )
-{
-	f = 0;
-}
+ExportFunctionDeclaration::ExportFunctionDeclaration( ) : ExportStatement( ), f( ExportFunction() )
+{}
 
 
 ExportFunctionDeclaration::ExportFunctionDeclaration(	const ExportFunction& _f
-														) : ExportStatement( )
-{
-	f = new ExportFunction( _f );
-}
+														) : ExportStatement( ), f( _f )
+{}
 
 
 ExportFunctionDeclaration::ExportFunctionDeclaration(	const ExportAcadoFunction& _f
-														) : ExportStatement( )
-{
-	f = new ExportAcadoFunction( _f );
-}
-
-
-ExportFunctionDeclaration::ExportFunctionDeclaration(	const ExportFunctionDeclaration& arg
-														) : ExportStatement( arg )
-{
-	if ( arg.f != 0 )
-		f = arg.f->cloneFunction( );
-	else
-		f = 0;
-}
-
+														) : ExportStatement( ), f( _f )
+{}
 
 ExportFunctionDeclaration::~ExportFunctionDeclaration( )
-{
-	if ( f != 0 )
-	{
-		delete f;
-		f = 0;
-	}
-}
-
-
-ExportFunctionDeclaration& ExportFunctionDeclaration::operator=(	const ExportFunctionDeclaration& arg
-																	)
-{
-	if( this != &arg )
-	{
-		if ( f != 0 )
-		{
-			delete f;
-			f = 0;
-		}
-
-		ExportStatement::operator= ( arg );
-
-		if ( arg.f != 0 )
-			f = arg.f->cloneFunction( );
-		else
-			f = 0;
-	}
-
-	return *this;
-}
-
-
+{}
 
 ExportStatement* ExportFunctionDeclaration::clone( ) const
 {
@@ -111,28 +63,13 @@ ExportStatement* ExportFunctionDeclaration::clone( ) const
 }
 
 
-
-
-returnValue ExportFunctionDeclaration::exportCode(	FILE* file,
-													const String& _realString,
-													const String& _intString,
+returnValue ExportFunctionDeclaration::exportCode(	std::ostream& stream,
+													const std::string& _realString,
+													const std::string& _intString,
 													int _precision
 													) const
 {
-	if ( f == 0 )
-		return SUCCESSFUL_RETURN;
-	
-	return f->exportForwardDeclaration( file,_realString,_intString,_precision );
+	return f.exportForwardDeclaration(stream, _realString, _intString, _precision);
 }
 
-
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-//
-
-
-
 CLOSE_NAMESPACE_ACADO
-
-// end of file.

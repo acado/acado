@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -59,43 +59,46 @@ public:
     IntermediateState();
 
     /** Default constructor */
-    explicit IntermediateState( uint nRows_, uint nCols_ = 1, String name_ = "" );
-    explicit IntermediateState( int  nRows_,  int nCols_ = 1, String name_ = "" );
+    explicit IntermediateState(const std::string& name_, uint nRows_, uint nCols_);
 
-    explicit IntermediateState( uint  nRows_, String name_);
-    explicit IntermediateState( String name_ );
+    /** Default constructor */
+    explicit IntermediateState(const std::string& name_);
+
+    /** Default constructor */
+    explicit IntermediateState( unsigned nRows_, unsigned nCols_ = 1);
+
+    /** Default constructor */
+    explicit IntermediateState( int nRows_, int nCols_ = 1);
 
     /** Copy constructor (deep copy). */
     IntermediateState( const double      & arg );
-    IntermediateState( const Vector      & arg );
-    IntermediateState( const Matrix      & arg );
+    IntermediateState( const DVector      & arg );
+    IntermediateState( const DMatrix      & arg );
     IntermediateState( const Operator    & arg );
     IntermediateState( const Expression  & arg );
 
-
-    /** Default destructor. */
+    /** Destructor. */
     virtual ~IntermediateState();
 
-
     Expression & operator=( const double      & arg );
-    Expression & operator=( const Vector      & arg );
-    Expression & operator=( const Matrix      & arg );
+    Expression & operator=( const DVector      & arg );
+    Expression & operator=( const DMatrix      & arg );
     Expression & operator=( const Expression  & arg );
 
 
     Expression& operator+=( const double      & arg );
-    Expression& operator+=( const Vector      & arg );
-    Expression& operator+=( const Matrix      & arg );
+    Expression& operator+=( const DVector      & arg );
+    Expression& operator+=( const DMatrix      & arg );
     Expression& operator+=( const Expression  & arg );
 
     Expression& operator-=( const double      & arg );
-    Expression& operator-=( const Vector      & arg );
-    Expression& operator-=( const Matrix      & arg );
+    Expression& operator-=( const DVector      & arg );
+    Expression& operator-=( const DMatrix      & arg );
     Expression& operator-=( const Expression  & arg );
 
     Expression& operator*=( const double      & arg );
-    Expression& operator*=( const Vector      & arg );
-    Expression& operator*=( const Matrix      & arg );
+    Expression& operator*=( const DVector      & arg );
+    Expression& operator*=( const DMatrix      & arg );
     Expression& operator*=( const Expression  & arg );
 
     Expression& operator/=( const double      & arg );

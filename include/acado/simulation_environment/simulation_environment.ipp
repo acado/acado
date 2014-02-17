@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -91,7 +91,7 @@ inline returnValue SimulationEnvironment::getSampledProcessOutput(	VariablesGrid
 	process->updateLogRecord( tmp );
     tmp.getAll( LOG_PROCESS_OUTPUT,sampledProcessOutput );
 	
-	Matrix sampledProcessOutputMatrix( sampledProcessOutput.getMatrix(0) );
+	DMatrix sampledProcessOutputMatrix( sampledProcessOutput.getMatrix(0) );
 
 	for( uint i=1; i<sampledProcessOutput.getNumPoints()-1; ++i )
 		sampledProcessOutputMatrix.appendRows( sampledProcessOutput.getMatrix(i) );

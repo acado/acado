@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -50,8 +50,8 @@ enum ExportVariableType
 class ExportIndexNode : public ExportDataInternal
 {
 public:
-	ExportIndexNode(	const String& _name,
-						const String& _prefix,
+	ExportIndexNode(	const std::string& _name,
+						const std::string& _prefix,
 						const int _factor = 1,
 						const int _offset = 0)
 	:	ExportDataInternal(_name, INT, ACADO_LOCAL, _prefix)
@@ -96,14 +96,14 @@ public:
 		return new ExportIndexNode( *this );
 	}
 
-	virtual returnValue exportDataDeclaration(	FILE* file,
-												const String& _realString = "real_t",
-												const String& _intString = "int",
+	virtual returnValue exportDataDeclaration(	std::ostream& stream,
+												const std::string& _realString = "real_t",
+												const std::string& _intString = "int",
 												int _precision = 16
 												) const;
 
 	/// Returns a string containing the value of the index.
-	const String get( ) const;
+	const std::string get( ) const;
 
 
 	/** Returns the given value of the index (if defined).
@@ -115,25 +115,25 @@ public:
 
 	/** Returns whether the index is set to a given value.
 	 *
-	 *	\return BT_TRUE  iff index is set to a given value, \n
-	 *	        BT_FALSE otherwise
+	 *	\return true  iff index is set to a given value, \n
+	 *	        false otherwise
 	 */
-	virtual BooleanType isGiven( ) const;
+	virtual bool isGiven( ) const;
 
-	BooleanType isBinary() const
+	bool isBinary() const
 	{
 		if (varType == EVT_BINARY_OPERATOR)
-			return BT_TRUE;
+			return true;
 
-		return BT_FALSE;
+		return false;
 	}
 
-	BooleanType isVariable() const
+	bool isVariable() const
 	{
 		if (varType == EVT_VARIABLE)
-			return BT_TRUE;
+			return true;
 
-		return BT_FALSE;
+		return false;
 	}
 
 	const int getFactor( ) const

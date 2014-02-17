@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -125,10 +125,10 @@ returnValue SCPstep::applyStep(	OCPiterate& iter,
 // returnValue SCPstep::getUpdatedFirstControl(	const OCPiterate& iter,
 // 												const BandedCP& cp,
 // 												double alpha,
-// 												Vector& _u
+// 												DVector& _u
 // 												) const
 // {
-//     Matrix tmp;
+//     DMatrix tmp;
 // 
 // 	cp.deltaX.getSubBlock( 3*iter.getNumPoints()+0, 0, tmp, _u.getDim(), 1 );
 // 

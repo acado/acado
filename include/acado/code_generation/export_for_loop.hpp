@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -73,7 +73,7 @@ class ExportForLoop : public ExportStatementBlock
 						const ExportIndex& _startValue = emptyConstExportIndex,
 						const ExportIndex& _finalValue = emptyConstExportIndex,
 						const ExportIndex& _increment = constExportIndexValueOne,
-						BooleanType _doLoopUnrolling = BT_FALSE
+						bool _doLoopUnrolling = false
 						);
 
 		/** Copy constructor (deep copy).
@@ -112,23 +112,23 @@ class ExportForLoop : public ExportStatementBlock
 							const ExportIndex& _startValue,
 							const ExportIndex& _finalValue,
 							const ExportIndex& _increment,
-							BooleanType _doLoopUnrolling
+							bool _doLoopUnrolling
 							);
 
 
 		/** Exports data declaration of the statement into given file. Its appearance can 
 		 *  can be adjusted by various options.
 		 *
-		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] stream			Name of file to be used to export statement.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportDataDeclaration(	FILE *file,
-													const String& _realString = "real_t",
-													const String& _intString = "int",
+		virtual returnValue exportDataDeclaration(	std::ostream& stream,
+													const std::string& _realString = "real_t",
+													const std::string& _intString = "int",
 													int _precision = 16
 													) const;
 
@@ -136,15 +136,15 @@ class ExportForLoop : public ExportStatementBlock
 		 *  can be adjusted by various options.
 		 *
 		 *	@param[in] file				Name of file to be used to export statement.
-		 *	@param[in] _realString		String to be used to declare real variables.
-		 *	@param[in] _intString		String to be used to declare integer variables.
+		 *	@param[in] _realString		std::string to be used to declare real variables.
+		 *	@param[in] _intString		std::string to be used to declare integer variables.
 		 *	@param[in] _precision		Number of digits to be used for exporting real values.
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue exportCode(	FILE* file,
-										const String& _realString = "real_t",
-										const String& _intString = "int",
+		virtual returnValue exportCode(	std::ostream& stream,
+										const std::string& _realString = "real_t",
+										const std::string& _intString = "int",
 										int _precision = 16
 										) const;
 
@@ -189,7 +189,7 @@ class ExportForLoop : public ExportStatementBlock
 		ExportIndex finalValue;			/**< Final value of the loop counter. */
 		ExportIndex increment;			/**< Increment of the loop counter. */
 		
-		BooleanType doLoopUnrolling;	/**< Flag indicating whether loop shall be unrolled when exporting the code. */
+		bool doLoopUnrolling;	/**< Flag indicating whether loop shall be unrolled when exporting the code. */
 };
 
 
