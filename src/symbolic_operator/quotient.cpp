@@ -339,11 +339,13 @@ Operator* Quotient::AD_forward( int dim,
 }
 
 
-returnValue Quotient::AD_backward( int dim,
-                                   VariableType *varType,
-                                   int *component,
-                                   Operator *seed,
-                                   Operator **df         ){
+returnValue Quotient::AD_backward( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
 
     if( seed->isOneOrZero() != NE_ZERO ){
@@ -356,9 +358,12 @@ returnValue Quotient::AD_backward( int dim,
                                     tmp.clone(),
                                     argument2->clone()
                                 ),
-                                df );
-
-        argument2->AD_backward( dim, varType, component,
+                                df, nNewIS, newIS );
+	
+	
+	if( seed->isOneOrZero() != NE_ONE ){
+	  
+           argument2->AD_backward( dim, varType, component,
                                 new Subtraction(
                                     new DoubleConstant( 0.0, NE_ZERO ),
                                     new Quotient(
@@ -372,7 +377,22 @@ returnValue Quotient::AD_backward( int dim,
                                         )
                                     )
                                 ),
-                                df );
+                                df, nNewIS, newIS );
+	}
+	else{
+	    argument2->AD_backward( dim, varType, component,
+                                new Subtraction(
+                                    new DoubleConstant( 0.0, NE_ZERO ),
+                                    new Quotient(
+                                        argument1->clone(),
+                                        new Power_Int(
+                                            argument2->clone(),
+                                            2
+                                        )
+                                    )
+                                ),
+                                df, nNewIS, newIS );
+	}
     }
 
     delete seed;
@@ -380,6 +400,34 @@ returnValue Quotient::AD_backward( int dim,
 }
 
 
+returnValue Quotient::ADsymmetric( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+    TreeProjection dx,dy,dxx,dxy,dyy;
+    
+    dx  = Quotient( new DoubleConstant(1.0,NE_ONE ), argument2->clone() );
+    dxy = Product( new DoubleConstant(-1.0,NE_NEITHER_ONE_NOR_ZERO), new Power_Int( argument2->clone(),-2) );
+    dxx = DoubleConstant(0.0,NE_ZERO);
+    dy  = Product( dxy.clone(), argument1->clone() );
+    dyy = Product( new Product( new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO), new Power_Int( argument2->clone(),-3) ),
+		    argument1->clone() );
+    
+    return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
+			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+}
 
 
 Operator* Quotient::substitute( int index, const Operator *sub ){

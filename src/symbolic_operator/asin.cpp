@@ -180,11 +180,13 @@ Operator* Asin::ADforwardProtected( int dim,
 
 
 
-returnValue Asin::ADbackwardProtected( int dim,
-                                       VariableType *varType,
-                                       int *component,
-                                       Operator *seed,
-                                       Operator **df         ){
+returnValue Asin::ADbackwardProtected( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
 
     if( seed->isOneOrZero() == NE_ZERO ){
@@ -192,7 +194,7 @@ returnValue Asin::ADbackwardProtected( int dim,
                                           varType,
                                           component,
                                           new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df
+                                          df, nNewIS, newIS
             );
         delete seed;
         return SUCCESSFUL_RETURN;
@@ -211,7 +213,7 @@ returnValue Asin::ADbackwardProtected( int dim,
                                   ),
                                   new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
                               ),
-                              df
+                              df, nNewIS, newIS
             );
         delete seed;
         return SUCCESSFUL_RETURN;
@@ -232,12 +234,66 @@ returnValue Asin::ADbackwardProtected( int dim,
                                       ),
                                       seed->clone()
                                   ),
-                                  df
+                                  df, nNewIS, newIS
             );
 
     delete seed;
     return SUCCESSFUL_RETURN;
 }
+
+
+returnValue Asin::ADsymmetricProtected( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+    TreeProjection tmp, tmp2;
+    tmp  = Power(
+		         new Addition(
+                            new DoubleConstant(1.0 , NE_ONE),
+                            new Product(
+                                new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
+                                new Power_Int(
+                                    argument->clone(),
+                                    2
+                                )
+                            )
+                         ),
+                         new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
+               );    
+    
+    tmp2 = Product(
+		         new Power(
+		           new Addition(
+                            new DoubleConstant(1.0 , NE_ONE),
+                            new Product(
+                                new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
+                                new Power_Int(
+                                    argument->clone(),
+                                    2
+                                )
+                            )
+                           ),
+                           new DoubleConstant( -1.5 , NE_NEITHER_ONE_NOR_ZERO )
+                        ),
+		         argument->clone()
+           );
+    
+    return ADsymCommon( argument, tmp, tmp2, dim, varType, component, l, S, dimS, dfS,
+			 ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+}
+
 
 
 Operator* Asin::substitute( int index, const Operator *sub ){

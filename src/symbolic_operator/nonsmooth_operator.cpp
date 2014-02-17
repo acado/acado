@@ -203,15 +203,40 @@ Operator* NonsmoothOperator::AD_forward( int dim,
 
 
 
-returnValue NonsmoothOperator::AD_backward( int dim,
-                                         VariableType *varType,
-                                         int *component,
-                                         Operator *seed,
-                                         Operator **df         ){
+returnValue NonsmoothOperator::AD_backward( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
     delete seed;
     return SUCCESSFUL_RETURN;
 }
+
+
+
+returnValue NonsmoothOperator::ADsymmetric( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+
+    delete l;
+    return SUCCESSFUL_RETURN; 
+}
+
 
 
 Operator* NonsmoothOperator::substitute( int index, const Operator *sub ){

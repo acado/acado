@@ -235,15 +235,20 @@ Operator* Product::AD_forward( int dim,
 }
 
 
-returnValue Product::AD_backward( int dim,
-                                  VariableType *varType,
-                                  int *component,
-                                  Operator *seed,
-                                  Operator **df         ){
+returnValue Product::AD_backward( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
 
     if( seed->isOneOrZero() != NE_ZERO ){
 
+      
+      if( seed->isOneOrZero() != NE_ONE ){
+	
         TreeProjection tmp;
         tmp = *seed;
 
@@ -252,19 +257,58 @@ returnValue Product::AD_backward( int dim,
                                     argument2->clone(),
                                     tmp.clone()
                                 ),
-                                df );
+                                df, nNewIS, newIS );
 
         argument2->AD_backward( dim, varType, component,
                                 new Product(
                                     argument1->clone(),
                                     tmp.clone()
                                 ),
-                                df );
+                                df, nNewIS, newIS );
+      }
+      else{
+        argument1->AD_backward( dim, varType, component, argument2->clone(),
+                                df, nNewIS, newIS );
+
+        argument2->AD_backward( dim, varType, component, argument1->clone(),
+                                df, nNewIS, newIS );
+      }
     }
 
     delete seed;
     return SUCCESSFUL_RETURN;
 }
+
+
+returnValue Product::ADsymmetric( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+    TreeProjection dx,dy,dxx,dxy,dyy;
+    
+    dx  = *argument2;
+    dy  = *argument1;
+    dxx = DoubleConstant(0.0,NE_ZERO);
+    dxy = DoubleConstant(1.0,NE_ONE );
+    dyy = DoubleConstant(0.0,NE_ZERO);
+    
+    return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
+			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+}
+
+
 
 
 Operator* Product::substitute( int index, const Operator *sub ){

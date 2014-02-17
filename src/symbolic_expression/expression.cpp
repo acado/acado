@@ -333,7 +333,7 @@ Expression& Expression::appendCols(const Expression& arg) {
 }
 
 Expression& Expression::operator<<( const Expression& arg ){
-
+  
     if( dim == 0 ) return operator=(arg);
 
     uint run1;
@@ -342,8 +342,9 @@ Expression& Expression::operator<<( const Expression& arg ){
     dim   += arg.dim  ;
     nRows += arg.dim  ;
 
-    if( arg.variableType != variableType )
-        variableType = VT_UNKNOWN;
+    variableType = VT_VARIABLE;
+
+    if( arg.isVariable() == BT_FALSE )) variableType = VT_UNKNOWN;
 
     element = (Operator**)realloc(element, dim*sizeof(Operator*) );
 
@@ -1278,11 +1279,12 @@ Expression Expression::ADbackward( const Expression &arg, const Expression &seed
     Operator    **iresult   = new Operator*   [Dim];
 
     for( run1 = 0; run1 < Dim; run1++ ){
-        varType  [run1] = arg .getVariableType(    );
-        Component[run1] = arg .getComponent   (run1);
+        arg.element[run1]->isVariable(varType[run1],Component[run1]);
     }
 
-
+	int nIS = 0;
+	TreeProjection **IS = 0;
+	
     for( run1 = 0; run1 < (int) getDim(); run1++ ){
 
         Operator *seed1 = seed.element[run1]->clone();
@@ -1290,7 +1292,7 @@ Expression Expression::ADbackward( const Expression &arg, const Expression &seed
         for( run2 = 0; run2 < Dim; run2++ )
              iresult[run2] = new DoubleConstant(0.0,NE_ZERO);
 
-        element[run1]->AD_backward( Dim, varType, Component, seed1, iresult );
+        element[run1]->AD_backward( Dim, varType, Component, seed1, iresult, nIS, &IS );
 
         for( run2 = 0; run2 < Dim; run2++ ){
             Operator *sum = result.element[run2]->clone();
@@ -1301,7 +1303,129 @@ Expression Expression::ADbackward( const Expression &arg, const Expression &seed
         }
     }
 
+
+	for( int run = 0; run < nIS; run++ ){
+		
+		if( IS[run] != 0 ) delete IS[run];
+	}
+	if( IS != 0 ) free(IS);
+    
     delete[] iresult   ;
+    delete[] varType   ;
+    delete[] Component ;
+
+    return result;
+}
+
+
+Expression Expression::ADsymmetric( const Expression &arg, /** argument      */
+				     const Expression &S  , /** forward seed  */
+				     const Expression &l  , /** backward seed */
+				     Expression *dfS,    /** first order forward  result */
+				     Expression *ldf   /** first order backward result */
+				    ) const{
+
+    int Dim = arg.getDim();
+    int nS  = S.getNumCols();
+    int run1, run2;
+
+    ASSERT( arg .isVariable()    == BT_TRUE  );
+    ASSERT( l.getDim()           == getDim() );
+    ASSERT( (int) S.getNumRows() == Dim      );
+
+    Expression result( nS, nS );
+
+    VariableType *varType   = new VariableType[Dim];
+    int          *Component = new int         [Dim];
+    Operator    **dS        = new Operator*   [nS];
+    Operator    **ld        = new Operator*   [Dim];
+    Operator    **H         = new Operator*   [nS*nS];
+    
+    for( run1 = 0; run1 < Dim; run1++ ){
+        varType  [run1] = arg .getVariableType(    );
+        Component[run1] = arg .getComponent   (run1);
+    }
+
+	int nLIS = 0;
+	int nSIS = 0;
+	int nHIS = 0;
+	TreeProjection **LIS = 0;
+	TreeProjection **SIS = 0;
+	TreeProjection **HIS = 0;
+	
+    for( run1 = 0; run1 < (int) getDim(); run1++ ){
+
+        Operator *l1 = l.element[run1]->clone();
+        Operator **S1 = new Operator*[Dim*nS]; 
+
+	for( run2 = 0; run2 < Dim*nS; run2++ )
+	     S1[run2] = S.element[run2]->clone();
+	
+        for( run2 = 0; run2 < nS; run2++ )
+             dS[run2] = new DoubleConstant(0.0,NE_ZERO);
+	
+        for( run2 = 0; run2 < Dim; run2++ )
+             ld[run2] = new DoubleConstant(0.0,NE_ZERO);
+	
+        for( run2 = 0; run2 < nS*nS; run2++ )
+             H[run2] = new DoubleConstant(0.0,NE_ZERO);
+
+	element[run1]->ADsymmetric( Dim, varType, Component, l1, S1, nS, dS, ld, H, nLIS, &LIS, nSIS, &SIS, nHIS, &HIS );
+	
+	int run3 = 0;
+	
+        for( run2 = 0; run2 < nS; run2++ ){
+	  for( run3 = 0; run3 < run2; run3++ ){
+            Operator *sum = result.element[run2*nS+run3]->clone();
+            delete result.element[run2*nS+run3];
+            delete result.element[run3*nS+run2];
+            result.element[run2*nS+run3] = new Addition( sum->clone(), H[run2*nS+run3]->clone() );
+	    result.element[run3*nS+run2] = new Addition( sum->clone(), H[run2*nS+run3]->clone() );
+            delete sum;
+	  }
+          Operator *sum = result.element[run2*nS+run2]->clone();
+          delete result.element[run2*nS+run2];
+          result.element[run2*nS+run2] = new Addition( sum->clone(), H[run2*nS+run2]->clone() );
+          delete sum;
+        }
+        
+        // TODO: IMPLEMENTATION OF dfS and ldf
+        
+        
+     	for( run2 = 0; run2 < Dim*nS; run2++ )
+	     delete S1[run2];
+	
+        for( run2 = 0; run2 < nS; run2++ )
+             delete dS[run2];
+	
+        for( run2 = 0; run2 < Dim; run2++ )
+             delete ld[run2];
+	
+        for( run2 = 0; run2 < nS*nS; run2++ )
+             delete H[run2];
+	
+	delete[] S1;
+    }
+
+
+	for( int run = 0; run < nLIS; run++ ){
+		if( LIS[run] != 0 ) delete LIS[run];
+	}
+	if( LIS != 0 ) free(LIS);
+	
+	for( int run = 0; run < nSIS; run++ ){
+		if( SIS[run] != 0 ) delete SIS[run];
+	}
+	if( SIS != 0 ) free(SIS);
+	
+	for( int run = 0; run < nHIS; run++ ){
+		if( HIS[run] != 0 ) delete HIS[run];
+	}
+	if( HIS != 0 ) free(HIS);
+	
+    delete[] dS        ;
+    delete[] ld        ;
+    delete[] H         ;
     delete[] varType   ;
     delete[] Component ;
 
@@ -1378,7 +1502,7 @@ void Expression::copy( const Expression &rhs ){
     dim          = rhs.dim         ;
     variableType = rhs.variableType;
     component    = rhs.component   ;
-
+    
     uint i;
     element = (Operator**)calloc(dim,sizeof(Operator*));
 

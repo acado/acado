@@ -204,11 +204,36 @@ public:
      *  backward derivative                                        \n
      *  \return SUCCESSFUL_RETURN                                  \n
      */
-     virtual returnValue AD_backward( int           dim      , /**< number of directions  */
-                                      VariableType *varType  , /**< the variable types    */
-                                      int          *component, /**< and their components  */
-                                      Operator   *seed     , /**< the backward seed     */
-                                      Operator  **df         /**< the result            */ ) = 0;
+    virtual returnValue AD_backward( int           dim      , /**< number of directions  */
+                                     VariableType *varType  , /**< the variable types    */
+                                     int          *component, /**< and their components  */
+                                     Operator     *seed     , /**< the backward seed     */
+                                     Operator    **df       , /**< the result            */
+                                     int           &nNewIS  , /**< the number of new IS  */
+                                     TreeProjection ***newIS  /**< the new IS-pointer    */ ) = 0;
+
+    
+    
+    /** Automatic Differentiation in symmetric mode on the symbolic \n
+     *  level. This function generates an expression for a          \n
+     *  second order derivative.                                    \n
+     *  \return SUCCESSFUL_RETURN                                   \n
+     */
+     virtual returnValue ADsymmetric( int            dim       , /**< number of directions  */
+                                      VariableType  *varType   , /**< the variable types    */
+                                      int           *component , /**< and their components  */
+                                      Operator      *l         , /**< the backward seed     */
+                                      Operator     **S         , /**< forward seed matrix   */
+                                      int            dimS      , /**< dimension of forward seed             */
+                                      Operator     **dfS       , /**< first order foward result             */
+                                      Operator     **ldf       , /**< first order backward result           */
+                                      Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ) = 0;
 
 
 
@@ -561,7 +586,52 @@ public:
 
 protected:
 
+  
+    virtual Operator* myProd(Operator* a,Operator* b);
+    virtual Operator* myAdd (Operator* a,Operator* b);
+  
+        returnValue ADsymCommon( Operator     *a  ,
+                                        TreeProjection &da ,
+                                        TreeProjection &dda,
+                                        int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
 
+	
+        returnValue ADsymCommon2( Operator       *a  ,
+				   Operator       *b  ,
+                                  TreeProjection &dx ,
+                                  TreeProjection &dy ,
+                                  TreeProjection &dxx,
+                                  TreeProjection &dxy,
+                                  TreeProjection &dyy,
+                                        int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
 };
 
 

@@ -68,8 +68,17 @@ inline VariableType Expression::getVariableType( ) const{
 
 inline BooleanType Expression::isVariable( ) const{
 
-    if( getVariableType() == VT_UNKNOWN            ) return BT_FALSE;
-    if( getVariableType() == VT_INTERMEDIATE_STATE ) return BT_FALSE;
+   if( getVariableType() != VT_DIFFERENTIAL_STATE &&
+       getVariableType() != VT_ALGEBRAIC_STATE &&
+       getVariableType() != VT_CONTROL &&
+       getVariableType() != VT_INTEGER_CONTROL &&
+       getVariableType() != VT_PARAMETER &&
+       getVariableType() != VT_INTEGER_PARAMETER &&
+       getVariableType() != VT_DISTURBANCE &&
+       getVariableType() != VT_TIME &&
+       getVariableType() != VT_DDIFFERENTIAL_STATE &&
+       getVariableType() != VT_VARIABLE ) return BT_FALSE;
+
     return BT_TRUE;
 }
 

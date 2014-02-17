@@ -128,11 +128,35 @@ protected:
      *  backward derivative                                        \n
      *  \return SUCCESSFUL_RETURN                                  \n
      */
-     virtual returnValue ADbackwardProtected( int           dim      , /**< number of directions  */
-                                              VariableType *varType  , /**< the variable types    */
-                                              int          *component, /**< and their components  */
-                                              Operator   *seed     , /**< the backward seed     */
-                                              Operator  **df         /**< the result            */ );
+     virtual returnValue ADbackwardProtected( int            dim      , /**< number of directions  */
+                                              VariableType  *varType  , /**< the variable types    */
+                                              int           *component, /**< and their components  */
+                                              Operator      *seed     , /**< the backward seed     */
+                                              Operator     **df       , /**< the result            */
+                                              int            &nNewIS  , /**< the number of new IS  */
+                                              TreeProjection ***newIS    /**< the new IS-pointer   */ );
+     
+     
+    /** Automatic Differentiation in symmetric mode on the symbolic \n
+     *  level. This function generates an expression for a          \n
+     *  second order derivative.                                    \n
+     *  \return SUCCESSFUL_RETURN                                   \n
+     */
+     virtual returnValue ADsymmetricProtected( int            dim       , /**< number of directions  */
+                                               VariableType  *varType   , /**< the variable types    */
+                                               int           *component , /**< and their components  */
+                                               Operator      *l         , /**< the backward seed     */
+                                               Operator     **S         , /**< forward seed matrix   */
+                                               int            dimS      , /**< dimension of forward seed             */
+                                               Operator     **dfS       , /**< first order foward result             */
+                                               Operator     **ldf       , /**< first order backward result           */
+                                               Operator     **H         , /**< upper trianglular part of the Hessian */
+                                               int            &nNewLIS  , /**< the number of newLIS  */
+                                               TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                               int            &nNewSIS  , /**< the number of newSIS  */
+                                               TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                               int            &nNewHIS  , /**< the number of newHIS  */
+                                               TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
 };
 
 

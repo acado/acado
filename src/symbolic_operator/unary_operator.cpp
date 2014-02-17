@@ -189,14 +189,39 @@ Operator* UnaryOperator::AD_forward( int                dim      ,
 }
 
 
-returnValue UnaryOperator::AD_backward( int           dim      ,
-                                        VariableType *varType  ,
-                                        int          *component,
-                                        Operator   *seed     ,
-                                        Operator  **df         ){
-
-    return ADbackwardProtected( dim, varType, component, seed, df );
+returnValue UnaryOperator::AD_backward( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+  
+    return ADbackwardProtected( dim, varType, component, seed, df, nNewIS, newIS );
 }
+
+    
+    
+returnValue UnaryOperator::ADsymmetric( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+return ADsymmetricProtected( dim, varType, component, l, S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+}
+
+
 
 
 NeutralElement UnaryOperator::isOneOrZero() const{ return NE_NEITHER_ONE_NOR_ZERO; }
@@ -419,6 +444,9 @@ returnValue UnaryOperator::setVariableExportName( const VariableType &type, cons
 
 	return Operator::setVariableExportName(type, name);
 }
+
+
+
 
 CLOSE_NAMESPACE_ACADO
 

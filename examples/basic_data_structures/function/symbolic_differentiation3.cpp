@@ -54,15 +54,16 @@ int main( ){
     // DEFINE A TEST FUNCTION:
     // -----------------------
 
-    IntermediateState ff;
-    ff = sin(x(0)*x(1));
+    IntermediateState ff,a1;
+    a1 = cos(x(0));
+    ff = a1*a1;
 
     f <<     forwardDerivative(  ff + x(0)   , x(0) );
     f <<     forwardDerivative(  x(1) + ff  , x(1) );
-    f <<     forwardDerivative(  ff + ff  , x );
+    f << backwardDerivative( ff, x );    
     f <<     forwardDerivative(  ff + ff  , x, y );
     f <<     forwardDerivative(  ff + ff  , x, dot(x) );
-    //f << dot(sin(x(0)*x(1)));
+    f << dot(sin(x(0)*x(1)));
 
     FILE *file = fopen("symbolic_differentiation3_output.txt", "w" );
     file << f;

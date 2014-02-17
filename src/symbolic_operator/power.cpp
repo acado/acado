@@ -397,15 +397,18 @@ Operator* Power::AD_forward( int dim,
 }
 
 
-returnValue Power::AD_backward( int dim,
-                                VariableType *varType,
-                                int *component,
-                                Operator *seed,
-                                Operator **df         ){
+returnValue Power::AD_backward( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
     if( seed->isOneOrZero() != NE_ZERO ){
 
-
+      if( seed->isOneOrZero() != NE_ONE ){
+	
         TreeProjection tmp;
         tmp = *seed;
 
@@ -423,7 +426,7 @@ returnValue Power::AD_backward( int dim,
                                         tmp.clone()
                                     )
                                 ),
-                                df );
+                                df, nNewIS, newIS );
 
         argument2->AD_backward( dim, varType, component,
                                 new Product(
@@ -435,12 +438,76 @@ returnValue Power::AD_backward( int dim,
                                         )
                                     )
                                 ),
-                                df );
+                                df, nNewIS, newIS );
+      }
+      else{
+        argument1->AD_backward( dim, varType, component,
+                                new Product(
+                                    argument2->clone(),
+                                    new Power(
+                                        argument1->clone(),
+                                        new Addition(
+                                            argument2->clone(),
+                                            new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
+                                        )
+                                    )
+                                ),
+                                df, nNewIS, newIS );
+
+        argument2->AD_backward( dim, varType, component,
+                                new Product(
+                                    clone(),
+                                    new Logarithm(
+                                        argument1->clone()
+                                    )
+                                ),
+                                df, nNewIS, newIS );
+      }
     }
 
     delete seed;
     return SUCCESSFUL_RETURN;
 }
+
+
+returnValue Power::ADsymmetric( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+    TreeProjection dx,dy,dxx,dxy,dyy;
+    TreeProjection tmp1,tmp2,tmp3,tmp4,tmp5;
+    
+    tmp1 = Subtraction( argument2->clone(), new DoubleConstant(1.0,NE_ONE ) );
+    tmp2 = Power(argument1->clone(),argument2->clone());
+    tmp3 = Power(argument1->clone(),tmp1.clone());
+    tmp4 = Logarithm(argument1->clone());
+    tmp5 = Power(
+                argument1->clone(),
+		 new Subtraction( argument2->clone(), new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO ))
+	   );
+    
+    dx  = Product( argument2->clone(), tmp3.clone() );
+    dy  = Product( tmp2.clone(), tmp4.clone() );
+    dxx = Product( new Product( argument2->clone(), tmp1.clone() ), tmp5.clone() );
+    dxy = Product( tmp3.clone(), new Addition( new DoubleConstant(1.0,NE_ONE ), tmp4.clone() ) );
+    dyy = Product( dy.clone(), tmp4.clone() );
+    
+    return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
+			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+}
+
 
 
 Operator* Power::substitute( int index, const Operator *sub ){

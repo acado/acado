@@ -143,21 +143,53 @@ Operator* Addition::AD_forward( int dim,
 }
 
 
-returnValue Addition::AD_backward( int dim,
-                                   VariableType *varType,
-                                   int *component,
-                                   Operator *seed,
-                                   Operator **df         ){
+returnValue Addition::AD_backward( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
     TreeProjection tmp;
     tmp = *seed;
 
-    argument1->AD_backward( dim, varType, component, tmp.clone(), df );
-    argument2->AD_backward( dim, varType, component, tmp.clone(), df );
+    argument1->AD_backward( dim, varType, component, tmp.clone(), df, nNewIS, newIS );
+    argument2->AD_backward( dim, varType, component, tmp.clone(), df, nNewIS, newIS );
 
     delete seed;
 
     return SUCCESSFUL_RETURN;
+}
+
+
+
+returnValue Addition::ADsymmetric( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+    TreeProjection dx,dy,dxx,dxy,dyy;
+    
+    dx  = DoubleConstant(1.0,NE_ONE );
+    dy  = DoubleConstant(1.0,NE_ONE );
+    dxx = DoubleConstant(0.0,NE_ZERO);
+    dxy = DoubleConstant(0.0,NE_ZERO);
+    dyy = DoubleConstant(0.0,NE_ZERO);
+    
+    return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
+			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
 }
 
 

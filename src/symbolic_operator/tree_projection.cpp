@@ -236,41 +236,213 @@ Operator* TreeProjection::ADforwardProtected( int dim,
 
 
 
-returnValue TreeProjection::ADbackwardProtected( int dim,
-                                                    VariableType *varType,
-                                                    int *component,
-                                                    Operator *seed,
-                                                    Operator **df         ){
+returnValue TreeProjection::ADbackwardProtected( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
     ASSERT( argument != 0 );
 
-    Operator **results = new Operator*[dim];
-
     int run1;
 
-    for( run1 = 0; run1 < dim; run1++ ){
-       results[run1] = new DoubleConstant(0.0,NE_ZERO);
+    if( (vIndex+1)*dim-1 >= nNewIS ){
+
+        *newIS = (TreeProjection**)realloc(*newIS,((vIndex+1)*dim)*sizeof(TreeProjection*));
+
+        for( run1 = nNewIS; run1 < (vIndex+1)*dim; run1++ )
+             newIS[0][run1] = 0;
+
+        nNewIS = (vIndex+1)*dim;
+    }
+    
+    if( newIS[0][vIndex*dim] == 0 ){
+      
+        Operator **results = new Operator*[dim];
+        for( run1 = 0; run1 < dim; run1++ ){
+            results[run1] = new DoubleConstant(0.0,NE_ZERO);
+        }
+        Operator *aux = new DoubleConstant(1.0,NE_ONE);
+        argument->AD_backward(dim,varType,component, aux, results, nNewIS, newIS );
+        for( run1 = 0; run1 < dim; run1++ ){  
+	      newIS[0][vIndex*dim+run1] = new TreeProjection();
+	      newIS[0][vIndex*dim+run1]->operator=(*results[run1]);
+	      newIS[0][vIndex*dim+run1]->setCurvature( CT_UNKNOWN );
+	      delete results[run1];
+	}
+        delete[] results;
     }
 
-    argument->AD_backward(dim,varType,component,seed, results );
-
-    for( run1 = 0; run1 < dim; run1++ ){
-
-       Operator *tmp = df[run1]->clone();
-       delete df[run1];
-       df[run1] = new Addition( results[run1]->clone(), tmp->clone() );
-       delete tmp;
+    if( seed->isOneOrZero() != NE_ZERO ){
+      
+        for( run1 = 0; run1 < dim; run1++ ){
+	  
+	    Operator *tmp = df[run1]->clone();
+            delete df[run1];
+	    
+	    if( seed->isOneOrZero() == NE_ONE ){
+	        df[run1] = myAdd( newIS[0][vIndex*dim+run1], tmp );
+	    }
+	    else{
+                Operator *projTmp = myProd(newIS[0][vIndex*dim+run1],seed);
+                df[run1] = myAdd( projTmp, tmp );
+                delete projTmp;
+	    }
+            delete tmp;
+        }
     }
-
-    for( run1 = 0; run1 < dim; run1++ )
-        delete results[run1];
-
-    delete[] results;
+    delete seed;
 
     return SUCCESSFUL_RETURN;
 }
 
 
+
+returnValue TreeProjection::ADsymmetricProtected( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+  
+    ASSERT( argument != 0 );
+
+    int run1;
+
+    if( (vIndex+1)*dim-1 >= nNewLIS ){
+
+        *newLIS = (TreeProjection**)realloc(*newLIS,((vIndex+1)*dim)*sizeof(TreeProjection*));
+        for( run1 = nNewLIS; run1 < (vIndex+1)*dim; run1++ )
+             newLIS[0][run1] = 0;
+        nNewLIS = (vIndex+1)*dim;
+    }
+    
+    if( (vIndex+1)*dimS-1 >= nNewSIS ){
+
+        *newSIS = (TreeProjection**)realloc(*newSIS,((vIndex+1)*dimS)*sizeof(TreeProjection*));
+        for( run1 = nNewSIS; run1 < (vIndex+1)*dimS; run1++ )
+             newSIS[0][run1] = 0;
+        nNewSIS = (vIndex+1)*dimS;
+    }
+    
+    if( (vIndex+1)*dimS*dimS-1 >= nNewHIS ){
+
+        *newHIS = (TreeProjection**)realloc(*newHIS,((vIndex+1)*dimS*dimS)*sizeof(TreeProjection*));
+        for( run1 = nNewHIS; run1 < (vIndex+1)*dimS*dimS; run1++ )
+             newHIS[0][run1] = 0;
+        nNewHIS = (vIndex+1)*dimS*dimS;
+    }
+  
+  // ============================================================================
+  
+  printf("I am tree-prjection: %d \n", vIndex );
+  
+    if( newLIS[0][vIndex*dim] == 0 ){
+      
+        Operator **lres = new Operator*[dim];
+        for( run1 = 0; run1 < dim; run1++ ){
+            lres[run1] = new DoubleConstant(0.0,NE_ZERO);
+        }
+        Operator *aux = new DoubleConstant(1.0,NE_ONE);
+	
+	Operator **Sres = new Operator*[dimS];
+        for( run1 = 0; run1 < dimS; run1++ ){
+            Sres[run1] = new DoubleConstant(0.0,NE_ZERO);
+        }
+	
+	Operator **Hres = new Operator*[dimS*dimS];
+        for( run1 = 0; run1 < dimS*dimS; run1++ ){
+            Hres[run1] = new DoubleConstant(0.0,NE_ZERO);
+        }
+	
+	  printf("tree-prjection AD call... \n");
+	
+	argument->ADsymmetric( dim, varType, component, aux, S, dimS,
+	                       Sres, lres, Hres,
+	                       nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+	
+	
+        for( run1 = 0; run1 < dim; run1++ ){  
+	      newLIS[0][vIndex*dim+run1] = new TreeProjection();
+	      newLIS[0][vIndex*dim+run1]->operator=(*lres[run1]);
+	      newLIS[0][vIndex*dim+run1]->setCurvature( CT_UNKNOWN );
+	      delete lres[run1];
+	}
+        delete[] lres;
+	
+        for( run1 = 0; run1 < dimS; run1++ ){  
+	      newSIS[0][vIndex*dimS+run1] = new TreeProjection();
+	      newSIS[0][vIndex*dimS+run1]->operator=(*Sres[run1]);
+	      newSIS[0][vIndex*dimS+run1]->setCurvature( CT_UNKNOWN );
+	      delete Sres[run1];
+	}
+        delete[] Sres;
+	
+        for( run1 = 0; run1 < dimS*dimS; run1++ ){  
+	      newHIS[0][vIndex*dimS*dimS+run1] = new TreeProjection();
+	      newHIS[0][vIndex*dimS*dimS+run1]->operator=(*Hres[run1]);
+	      newHIS[0][vIndex*dimS*dimS+run1]->setCurvature( CT_UNKNOWN );
+	      delete Hres[run1];
+	}
+        delete[] Hres;
+    }
+
+  // ============================================================================
+  
+    if( l->isOneOrZero() != NE_ZERO ){
+      
+        for( run1 = 0; run1 < dim; run1++ ){
+	  
+	    Operator *tmp = ldf[run1]->clone();
+            delete ldf[run1];
+	    
+	    if( l->isOneOrZero() == NE_ONE ){
+	        ldf[run1] = myAdd( newLIS[0][vIndex*dim+run1], tmp );
+	    }
+	    else{
+	        Operator *projTmp = myProd( newLIS[0][vIndex*dim+run1], l );
+                ldf[run1] = myAdd( projTmp, tmp );
+                delete projTmp;
+	    }
+            delete tmp;
+        }
+    }
+
+    for( run1 = 0; run1 < dimS; run1++ ){
+        delete dfS[run1];
+        dfS[run1] = newSIS[0][vIndex*dimS+run1]->clone();
+    }
+  
+    for( run1 = 0; run1 < dimS*dimS; run1++ ){
+
+        delete H[run1];
+	    
+	if( l->isOneOrZero() == NE_ONE ){
+	    H[run1] = newHIS[0][vIndex*dimS*dimS+run1]->clone();
+	}
+	else{
+            H[run1] = myProd(newHIS[0][vIndex*dimS*dimS+run1],l);
+	}
+     }
+     
+     delete l;
+     return SUCCESSFUL_RETURN; 
+}
+  
+
+  
 returnValue TreeProjection::loadIndices( SymbolicIndexList *indexList ){
 
     returnValue returnvalue = SUCCESSFUL_RETURN;

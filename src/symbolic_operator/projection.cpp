@@ -194,14 +194,37 @@ Operator* Projection::AD_forward( int dim,
 
 
 
-returnValue Projection::AD_backward( int dim,
-                                           VariableType *varType,
-                                           int *component,
-                                           Operator *seed,
-                                           Operator **df         ){
+returnValue Projection::AD_backward( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
-    return ADbackwardProtected( dim, varType, component, seed, df );
+    return ADbackwardProtected( dim, varType, component, seed, df, nNewIS, newIS );
 }
+
+
+returnValue Projection::ADsymmetric( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+return ADsymmetricProtected( dim, varType, component, l, S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+}
+
 
 
 Operator* Projection::substitute( int index, const Operator *sub ){
@@ -447,11 +470,13 @@ Operator* Projection::ADforwardProtected( int dim,
 
 
 
-returnValue Projection::ADbackwardProtected( int dim,
-                                                   VariableType *varType,
-                                                   int *component,
-                                                   Operator *seed,
-                                                   Operator **df         ){
+returnValue Projection::ADbackwardProtected( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
     int run1 = 0;
 
@@ -483,6 +508,57 @@ returnValue Projection::ADbackwardProtected( int dim,
     return SUCCESSFUL_RETURN;
 }
 
+
+returnValue Projection::ADsymmetricProtected( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+
+     int run1 = 0;
+     
+     while( run1 < dim ){
+
+        if( varType[run1] == variableType && component[run1] == vIndex ){
+	  
+	    int run2;
+	    for( run2 = 0; run2 < dimS; run2++ ){
+	         delete dfS[run2];
+		 dfS[run2] = S[run1*dimS+run2]->clone();
+	    }
+	  
+	    if(   ldf[run1]->isOneOrZero() == NE_ZERO ){
+                  delete ldf[run1];
+                  ldf[run1] = l->clone();
+            }
+            else{
+
+                if( l->isOneOrZero() != NE_ZERO ){
+
+                    Operator *tmp = ldf[run1]->clone();
+                    delete ldf[run1];
+                    ldf[run1] = new Addition(tmp->clone(),l->clone());
+                    delete tmp;
+                }
+            }
+            break;
+        }
+        run1++;
+     }
+ 
+    delete l;
+    return SUCCESSFUL_RETURN; 
+}
 
 returnValue Projection::setVariableExportName( const VariableType &_type, const Stream *_name ){
 

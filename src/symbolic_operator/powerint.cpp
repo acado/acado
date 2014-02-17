@@ -298,11 +298,13 @@ Operator* Power_Int::AD_forward( int dim,
 
 
 
-returnValue Power_Int::AD_backward( int dim,
-                                    VariableType *varType,
-                                    int *component,
-                                    Operator *seed,
-                                    Operator **df         ){
+returnValue Power_Int::AD_backward( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
 
     if( seed->isOneOrZero() == NE_ZERO ){
@@ -310,7 +312,7 @@ returnValue Power_Int::AD_backward( int dim,
                                           varType,
                                           component,
                                           new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df
+                                          df, nNewIS, newIS
             );
 
         delete seed;
@@ -330,7 +332,7 @@ returnValue Power_Int::AD_backward( int dim,
                                                   exponent-1
                                               )
                                           ),
-                                          df
+                                          df, nNewIS, newIS
             );
         delete seed;
         return SUCCESSFUL_RETURN;
@@ -351,11 +353,55 @@ returnValue Power_Int::AD_backward( int dim,
                                       ),
                                       seed->clone()
                                   ),
-                                  df
+                                  df, nNewIS, newIS
             );
 
     delete seed;
     return SUCCESSFUL_RETURN;
+}
+
+
+
+returnValue Power_Int::ADsymmetric( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+    TreeProjection tmp, tmp2;
+    if( exponent == 0 ){
+        tmp  = DoubleConstant( 0.0 , NE_ZERO );
+        tmp2 = DoubleConstant( 0.0 , NE_ZERO );
+    }
+    if( exponent == 1 ){
+        tmp  = DoubleConstant( 1.0 , NE_ONE   );
+        tmp2 = DoubleConstant( 0.0 , NE_ZERO  );
+    }
+    if( exponent == 2 ){
+        tmp  = Product( new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO ), argument->clone() );
+        tmp2 = DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO );
+    }
+    if( exponent != 0 && exponent != 1 && exponent != 2 ){
+        tmp  = Product( new DoubleConstant( (double) exponent, NE_NEITHER_ONE_NOR_ZERO ),
+			 new Power_Int( argument->clone(), exponent-1 )
+	       );
+        tmp2 = Product( new DoubleConstant( (double) exponent*(exponent-1), NE_NEITHER_ONE_NOR_ZERO ),
+			 new Power_Int( argument->clone(), exponent-2 )
+	       ); 
+    }
+    
+    return ADsymCommon( argument, tmp, tmp2, dim, varType, component, l, S, dimS, dfS,
+			 ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
 }
 
 

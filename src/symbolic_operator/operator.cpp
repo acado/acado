@@ -243,6 +243,226 @@ returnValue Operator::setVariableExportName( const VariableType &_type, const St
 
 
 
+Operator* Operator::myProd(Operator* a,Operator* b){
+  
+    if( a->isOneOrZero() == NE_ZERO ) return new DoubleConstant( 0.0 , NE_ZERO );
+    if( b->isOneOrZero() == NE_ZERO ) return new DoubleConstant( 0.0 , NE_ZERO );
+    
+    if( a->isOneOrZero() == NE_ONE  ) return b->clone();
+    if( b->isOneOrZero() == NE_ONE  ) return a->clone();
+    
+    if( a == b ) return new Power_Int( a->clone(), 2 );
+    
+    return new Product(a->clone(),b->clone()); 
+}
+  
+
+Operator* Operator::myAdd (Operator* a,Operator* b){
+
+    if( a->isOneOrZero() == NE_ZERO ) return b->clone();
+    if( b->isOneOrZero() == NE_ZERO ) return a->clone();
+    
+    if( a->isOneOrZero() == NE_ONE && b->isOneOrZero() == NE_ONE )
+        return new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO );
+    
+    if( a == b ) return new Product( a->clone(), new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO ) );
+    
+    return new Addition(a->clone(),b->clone());
+}
+
+
+returnValue Operator::ADsymCommon( Operator     *a  ,
+                                        TreeProjection &da ,
+                                        TreeProjection &dda,
+                                        int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+
+  // FIRST ORDER BACKWARD SWEEP:
+  // ---------------------------
+  
+    a->ADsymmetric( dim, varType, component,
+                    myProd( l, &da ),
+                    S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS 
+              );
+    
+    
+  // SECOND ORDER FORWARD SWEEP:
+  // -------------------------------------
+    
+    int run1, run2;
+    for( run1 = 0; run1 < dimS; run1++ ){
+      for( run2 = 0; run2 <= run1; run2++ ){
+        Operator *tmp1 = H[run1*dimS+run2]->clone();
+        delete H[run1*dimS+run2];
+	Operator *tmp2 = myProd( dfS[run1], dfS[run2] );
+	Operator *tmp3 = myProd( &dda     , l         );
+	Operator *tmp4 = myProd( tmp2     , tmp3      );
+        H[run1*dimS+run2] = myAdd( tmp1, tmp4 );
+        delete tmp1;
+	delete tmp2;
+	delete tmp3;
+	delete tmp4;
+      }
+    }
+    
+    
+  // FIRST ORDER FORWARD SWEEP:
+  // -------------------------------------
+    
+    for( run1 = 0; run1 < dimS; run1++ ){
+        Operator *tmp1 = dfS[run1]->clone();
+        delete dfS[run1];
+        dfS[run1] = myProd( tmp1, &da );
+        delete tmp1;
+    }
+    
+  // CLEAR MEMORY FROM BACKWARD SWEEP:
+  // -------------------------------------
+    
+    delete l;
+    return SUCCESSFUL_RETURN;
+}
+
+
+returnValue Operator::ADsymCommon2( Operator       *a  ,
+				   Operator       *b  ,
+                                  TreeProjection &dx ,
+                                  TreeProjection &dy ,
+                                  TreeProjection &dxx,
+                                  TreeProjection &dxy,
+                                  TreeProjection &dyy,
+                                        int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+    int run1, run2;
+  
+  // FIRST ORDER BACKWARD SWEEP:
+  // ---------------------------
+    Operator    **S1 = new Operator*[dimS];
+    Operator    **S2 = new Operator*[dimS];
+    Operator    **H1 = new Operator*[dimS*dimS];
+    Operator    **H2 = new Operator*[dimS*dimS];
+  
+    for( run2 = 0; run2 < dimS; run2++ ){
+         S1[run2] = new DoubleConstant(0.0,NE_ZERO);
+         S2[run2] = new DoubleConstant(0.0,NE_ZERO);
+    }
+    
+    for( run2 = 0; run2 < dimS*dimS; run2++ ){
+         H1[run2] = new DoubleConstant(0.0,NE_ZERO);
+         H2[run2] = new DoubleConstant(0.0,NE_ZERO);
+    }
+    
+
+    a->ADsymmetric( dim, varType, component, myProd( l, &dx ),
+                    S, dimS, S1, ldf, H1, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+
+
+    b->ADsymmetric( dim, varType, component, myProd( l, &dy ),
+                    S, dimS, S2, ldf, H2, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+    
+   
+    
+  // SECOND ORDER FORWARD SWEEP:
+  // -------------------------------------
+    
+    for( run1 = 0; run1 < dimS; run1++ ){
+      for( run2 = 0; run2 <= run1; run2++ ){
+        delete H[run1*dimS+run2];
+	Operator *tmp1 = myProd( S1[run1], S1[run2] );
+	Operator *tmp2 = myProd( S1[run1], S2[run2] );
+	Operator *tmp3 = myProd( S2[run1], S1[run2] );
+	Operator *tmp4 = myProd( S2[run1], S2[run2] );
+	Operator *tmp5;
+	if( run1 == run2 ) tmp5 = myAdd(tmp2,tmp2);
+	else               tmp5 = myAdd(tmp2,tmp3);
+	Operator *tmp6 = myProd( tmp1, &dxx );
+	Operator *tmp7 = myProd( tmp5, &dxy );
+	Operator *tmp8 = myProd( tmp4, &dyy );
+	Operator *tmp9  = myAdd ( tmp6, tmp7 );
+	Operator *tmp10 = myAdd ( tmp8, tmp9 );
+	Operator *tmp11 = myProd( l, tmp10 );
+	Operator *tmp12 = myAdd ( tmp11 , H1[run1*dimS+run2] );
+	H[run1*dimS+run2] = myAdd ( tmp12 , H2[run1*dimS+run2] );
+        delete tmp1;
+	delete tmp2;
+	delete tmp3;
+	delete tmp4;
+        delete tmp5;
+	delete tmp6;
+	delete tmp7;
+	delete tmp8;
+        delete tmp9;
+	delete tmp10;
+	delete tmp11;
+	delete tmp12;
+      }
+    }
+    
+    
+  // FIRST ORDER FORWARD SWEEP:
+  // -------------------------------------
+    
+    for( run1 = 0; run1 < dimS; run1++ ){
+        delete dfS[run1];
+	Operator *tmp1 = myProd( S1[run1], &dx );
+	Operator *tmp2 = myProd( S2[run1], &dy );
+        dfS[run1] = myAdd(tmp1,tmp2);
+        delete tmp1;
+	delete tmp2;
+    }
+    
+  // CLEAR MEMORY FROM SWEEPS:
+  // -------------------------------------
+    
+    for( run2 = 0; run2 < dimS; run2++ ){
+         delete S1[run2];
+         delete S2[run2];
+    }
+    for( run2 = 0; run2 < dimS*dimS; run2++ ){
+         delete H1[run2];
+         delete H2[run2];
+    }
+    delete[] S1;
+    delete[] S2;
+    delete[] H1;
+    delete[] H2;
+    
+    delete l;
+    return SUCCESSFUL_RETURN;
+}
+
+
+
+
+
+
 CLOSE_NAMESPACE_ACADO
 
 
