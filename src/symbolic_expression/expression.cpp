@@ -352,7 +352,7 @@ Expression& Expression::operator<<( const Expression& arg ){
 
     variableType = VT_VARIABLE;
 
-    if( arg.isVariable() == BT_FALSE )) variableType = VT_UNKNOWN;
+    if( arg.isVariable() == BT_FALSE ) variableType = VT_UNKNOWN;
 
     element = (Operator**)realloc(element, dim*sizeof(Operator*) );
 

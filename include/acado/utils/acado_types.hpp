@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -26,30 +26,31 @@
 
 /**
  *    \file include/acado/utils/acado_types.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
  *
- *    This file collects all declarations of all non-built-in types
- *    (except for classes).
+ *    This file collects all declarations of all non-built-in types (except for classes).
  */
-
 
 #ifndef ACADO_TOOLKIT_ACADO_TYPES_HPP
 #define ACADO_TOOLKIT_ACADO_TYPES_HPP
 
-
 #include <acado/utils/acado_namespace_macros.hpp>
 
-
 BEGIN_NAMESPACE_ACADO
-
 
 /** Short-cut for unsigned integer. */
 typedef unsigned int uint;
 
-
-/** Alias for DifferentialEquation. */
-//typedef DifferentialEquation DynamicModel;
-
+/** Boolean type aliasing. */
+typedef bool BooleanType;
+/** Aliasing true. */
+#define BT_TRUE true
+/** Aliasing false. */
+#define BT_FALSE false
+/** Aliasing yes. */
+#define YES true
+/** Aliasing no. */
+#define NO false
 
 /** Function pointer type for functions given as C source code. */
 typedef void (*cFcnPtr)( double* x, double* f, void *userData );
@@ -57,19 +58,8 @@ typedef void (*cFcnPtr)( double* x, double* f, void *userData );
 /** Function pointer type for derivatives given as C source code. */
 typedef void (*cFcnDPtr)( int number, double* x, double* seed, double* f, double* df, void *userData );
 
-/** Summarises all possible logical values. */
-enum BooleanType{
-
-    BT_FALSE,    /**< Logical value for "false". */
-    BT_TRUE      /**< Logical value for "true".  */
-};
-
-#define NO  BT_FALSE
-#define YES BT_TRUE
-
-
-/** Defines the Neutral Elements ZERO and ONE as well as the default \n
- *  NEITHER_ONE_NOR_ZERO                                             \n
+/** Defines the Neutral Elements ZERO and ONE as well as the default
+ *  NEITHER_ONE_NOR_ZERO
  */
 enum NeutralElement{
 
@@ -78,9 +68,7 @@ enum NeutralElement{
     NE_NEITHER_ONE_NOR_ZERO
 };
 
-
-/** Defines the names of all implemented symbolic operators.
-*/
+/** Defines the names of all implemented symbolic operators. */
 enum OperatorName{
 
     ON_SIN,
@@ -103,8 +91,6 @@ enum OperatorName{
     ON_CEXPRESSION
 };
 
-
-
 /** Defines the names of all implemented variable types. */
 enum VariableType{
 
@@ -118,8 +104,9 @@ enum VariableType{
     VT_TIME,
     VT_INTERMEDIATE_STATE,
     VT_DDIFFERENTIAL_STATE,
-	VT_OUTPUT,
+    VT_OUTPUT,
     VT_VARIABLE,
+    VT_ONLINE_DATA,
     VT_UNKNOWN
 };
 
@@ -309,17 +296,6 @@ enum PrintLevel
                      *   debugging the code.                                                */
 };
 
-
-/** Summarises all possible types of OptionItems.
- */
-enum OptionsItemType
-{
-	OIT_INT,			/**< Option item comprising a value of integer type. */
-	OIT_DOUBLE,			/**< Option item comprising a value of double type.  */
-	OIT_UNKNOWN			/**< Option item comprising a value of unknown type. */
-};
-
-
 enum LogRecordItemType{
 
     LRT_ENUM,
@@ -350,6 +326,9 @@ enum LogPrintMode
 
 enum OptionsName
 {
+	CG_CONDENSED_HESSIAN_CHOLESKY,				/**< Type of the Cholesky decomposition of the condensed Hessian. \sa CondensedHessianCholeskyDecomposition */
+	CG_MODULE_NAME,								/**< Name of the module, used as a prefix for the file-names and data structures. */
+	CG_EXPORT_FOLDER_NAME,						/**< Export folder name. */
 	CG_USE_ARRIVAL_COST,						/**< Enable interface for arival cost calculation. */
 	CG_USE_OPENMP,								/**< Use OpenMP for parallelization in multiple shooting. */
 	CG_USE_VARIABLE_WEIGHTING_MATRIX,			/**< Use variable weighting matrix S on first N shooting nodes. */
@@ -725,34 +704,12 @@ enum ClockStatus
 };
 
 
-/** Defines flags for different vector norms.
- */
-enum VectorNorm
+/** Defines the time horizon start and end. */
+enum TimeHorizonElement
 {
-    VN_L1,
-    VN_L2,
-    VN_LINF
-};
-
-
-/** Defines flags for different vector norms.
- */
-enum MatrixNorm
-{
-    MN_COLUMN_SUM,
-    MN_ROW_SUM,
-    MN_FROBENIUS
-};
-
-
-
-/** Defines the time horizon start and end. \n
- */
-enum TimeHorizonElement{
-
-    AT_START      ,
-    AT_END        ,
-    AT_TRANSITION
+	AT_TRANSITION = -3,
+    AT_START,
+    AT_END
 };
 
 
@@ -779,7 +736,8 @@ enum SparseQPsolutionMethods
 	SPARSE_SOLVER,
 	CONDENSING,
 	FULL_CONDENSING,
-	FULL_CONDENSING_N2
+	FULL_CONDENSING_N2,
+	FULL_CONDENSING_N2_FACTORIZATION
 };
 
 
@@ -817,7 +775,6 @@ enum ExportType
 	STATIC_CONST_REAL
 };
 
-
 enum ExportStruct
 {
 	ACADO_VARIABLES,
@@ -831,14 +788,16 @@ enum ExportStruct
 	FORCES_INFO
 };
 
-
+enum CondensedHessianCholeskyDecomposition
+{
+	EXTERNAL,		/**< External, performed within a QP solver. */
+	INTERNAL_N3,	/**< n-cube version, performed within the exported code and passed to a QP solver. */
+	INTERNAL_N2		/**< n-square version, performed within the exported code, and passed to a QP solver. */
+};
 
 CLOSE_NAMESPACE_ACADO
 
-
-
 #endif	// ACADO_TOOLKIT_ACADO_TYPES_HPP
-
 
 /*
  *    end of file

@@ -52,20 +52,20 @@ Projection::Projection()
 }
 
 
-Projection::Projection( const String &name_ )
+Projection::Projection( const std::string &name_ )
            :SmoothOperator( ){
 
     scale          = 1.0             ;
     curvature      = CT_AFFINE       ;
     monotonicity   = MT_NONDECREASING;
     operatorName   = ON_VARIABLE     ;
-    name           << name_          ;
+    name           = name_           ;
 
     nCount = 0;
 }
 
 
-Projection::Projection( VariableType variableType_, int vIndex_, const String &name_ ) :SmoothOperator( )
+Projection::Projection( VariableType variableType_, int vIndex_, const std::string &name_ ) :SmoothOperator( )
 {
     variableType   = variableType_ ;
     vIndex         = vIndex_       ;
@@ -76,50 +76,52 @@ Projection::Projection( VariableType variableType_, int vIndex_, const String &n
     monotonicity = MT_NONDECREASING;
     operatorName = ON_VARIABLE     ;
 
+    std::stringstream ss;
     switch(variableType){
 
          case VT_DIFFERENTIAL_STATE:
-              name << "xd" << "[" << vIndex <<"]";
+              ss << "xd" << "[" << vIndex <<"]";
               break;
 
          case VT_ALGEBRAIC_STATE:
-              name << "xa" << "[" << vIndex <<"]";
+              ss << "xa" << "[" << vIndex <<"]";
               break;
 
          case VT_CONTROL:
-              name << "u" << "[" << vIndex <<"]";
+              ss << "u" << "[" << vIndex <<"]";
               break;
 
          case VT_INTEGER_CONTROL:
-              name << "v" << "[" << vIndex <<"]";
+              ss << "v" << "[" << vIndex <<"]";
               break;
 
          case VT_PARAMETER:
-              name << "p" << "[" << vIndex <<"]";
+              ss << "p" << "[" << vIndex <<"]";
               break;
 
          case VT_INTEGER_PARAMETER:
-              name << "q" << "[" << vIndex <<"]";
+              ss << "q" << "[" << vIndex <<"]";
               break;
 
          case VT_DISTURBANCE:
-              name << "w" << "[" << vIndex <<"]";
+              ss << "w" << "[" << vIndex <<"]";
               break;
 
          case VT_TIME:
-              name << "t" << "[" << vIndex <<"]";
+              ss << "t" << "[" << vIndex <<"]";
               break;
 
          case VT_INTERMEDIATE_STATE:
-              name << "a" << "[" << vIndex <<"]";
+              ss << "a" << "[" << vIndex <<"]";
               break;
 
          case VT_DDIFFERENTIAL_STATE:
-              name << "dx" << "[" << vIndex <<"]";
+              ss << "dx" << "[" << vIndex <<"]";
               break;
 
          default: break;
     }
+    name = ss.str();
     nCount = 0;
 }
 
@@ -370,7 +372,7 @@ returnValue Projection::AD_backward2( int number, double seed1, double seed2,
 
 
 
-Stream& Projection::print( Stream &stream ) const{
+std::ostream& Projection::print( std::ostream &stream ) const{
 
     return stream << name;
 }
@@ -560,7 +562,7 @@ returnValue Projection::ADsymmetricProtected( int            dim       , /**< nu
     return SUCCESSFUL_RETURN; 
 }
 
-returnValue Projection::setVariableExportName( const VariableType &_type, const Stream *_name ){
+returnValue Projection::setVariableExportName( const VariableType &_type, const std::vector<std::string > &_name ){
 
 	if (variableType == _type)
 	{

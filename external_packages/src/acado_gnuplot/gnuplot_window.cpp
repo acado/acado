@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -27,7 +27,7 @@
 /**
  *    \file external_packages/acado_gnuplot/gnuplot_window.cpp
  *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
- *    \date   2009-2013
+ *    \date   2009 - 2013
  */
 
 
@@ -44,9 +44,9 @@
 #include <cstdlib>
 #include <string>
 
-BEGIN_NAMESPACE_ACADO
-
 using namespace std;
+
+BEGIN_NAMESPACE_ACADO
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -125,7 +125,7 @@ returnValue GnuplotWindow::init()
 #ifndef __NO_PIPES__
 	gnuPipe = popen("gnuplot -persist -background white", "w");
 
-	// In principle, we should just print out a warning, plot is not going
+	// TODO In principle, we should just print out a warning, plot is not going
 	// to generated anyways.
 	if ( !gnuPipe )
 		ACADOWARNING( RET_PLOT_WINDOW_CAN_NOT_BE_OPEN );
@@ -159,14 +159,11 @@ returnValue GnuplotWindow::waitForMouseEvents(){
 }
 
 
-BooleanType GnuplotWindow::getMouseEvent( double &mouseX, double &mouseY ){
-
-    FILE *readFile;
-    readFile = fopen("mouse.dat", "r" );
-
-    if( readFile == 0 ) return BT_FALSE;
-
-    Vector tmp(readFile);
+BooleanType GnuplotWindow::getMouseEvent( double &mouseX, double &mouseY )
+{
+    DVector tmp;
+    if (tmp.read( "mouse.dat" ) != SUCCESSFUL_RETURN)
+    	return BT_FALSE;
 
     mouseX = tmp( tmp.getDim()-2 );
     mouseY = tmp( tmp.getDim()-1 );
@@ -197,13 +194,13 @@ returnValue GnuplotWindow::waitForMouseEvent( double &mouseX, double &mouseY ){
         	return RET_PLOTTING_FAILED;
     }
 
-    acadoFPrintf(gnuPipe,"pause mouse\n");
+    fprintf(gnuPipe,"pause mouse\n");
     fflush(gnuPipe);
-    acadoFPrintf(gnuPipe,"a = MOUSE_X \n");
+    fprintf(gnuPipe,"a = MOUSE_X \n");
     fflush(gnuPipe);
-    acadoFPrintf(gnuPipe,"b = MOUSE_Y \n");
+    fprintf(gnuPipe,"b = MOUSE_Y \n");
     fflush(gnuPipe);
-    acadoFPrintf(gnuPipe,"save var 'mouse.dat'\n");
+    fprintf(gnuPipe,"save var 'mouse.dat'\n");
     fflush(gnuPipe);
 
     while(1){
@@ -284,14 +281,14 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 	VariablesGrid dataGrid, dataGridX, dataGridTmp;
 	MatrixVariablesGrid dataMatrixGrid;
 
-	char* plotDataString  = 0;
-	char* userDataString  = 0;
-	char* plotModeString  = 0;
-	char* plotStyleString = 0;
+	string plotDataString;
+	string userDataString;
+	string plotModeString;
+	string plotStyleString;
 
 	returnValue returnvalue;
 
-    acadoFPrintf( gnuPipe,"set multiplot;\n" );
+    fprintf( gnuPipe,"set multiplot;\n" );
 
 	run1 = 0;
 	for( run3 = 0; run3<nRows; run3++ )
@@ -382,41 +379,41 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 
 
 				// define subplot position
-				acadoFPrintf(gnuPipe,"      set size   %.16e,%.16e;\n", (1.0 /nCols), (1.0 /nRows) );
-				acadoFPrintf(gnuPipe,"      set origin %.16e,%.16e;\n", (double) run2/((double) nCols),
+				fprintf(gnuPipe,"      set size   %.16e,%.16e;\n", (1.0 /nCols), (1.0 /nRows) );
+				fprintf(gnuPipe,"      set origin %.16e,%.16e;\n", (double) run2/((double) nCols),
 															(double) (nRows-1-run3)/((double) nRows) );
 
 				// define subplot title
-				if ( operator()( run1 ).title != 0 )
-					acadoFPrintf(gnuPipe,"      set title '%s'\n", operator()( run1 ).title );
+				if ( operator()( run1 ).title.empty() == false )
+					fprintf(gnuPipe,"      set title '%s'\n", operator()( run1 ).title.c_str() );
 				else
-					acadoFPrintf(gnuPipe,"      set title ' '\n"  );
+					fprintf(gnuPipe,"      set title ' '\n"  );
 
 				// define subplot axes labels
-				if ( operator()( run1 ).xLabel != 0 )
-					acadoFPrintf(gnuPipe,"      set xlabel '%s'\n", operator()( run1 ).xLabel );
+				if ( operator()( run1 ).xLabel.empty() == false )
+					fprintf(gnuPipe,"      set xlabel '%s'\n", operator()( run1 ).xLabel.c_str() );
 				else
-					acadoFPrintf(gnuPipe,"      set xlabel ' '\n"  );
+					fprintf(gnuPipe,"      set xlabel ' '\n"  );
 
-				if ( operator()( run1 ).yLabel != 0 )
-					acadoFPrintf(gnuPipe,"      set ylabel '%s'\n", operator()( run1 ).yLabel );
+				if ( operator()( run1 ).yLabel.empty() == false )
+					fprintf(gnuPipe,"      set ylabel '%s'\n", operator()( run1 ).yLabel.c_str() );
 				else
-					acadoFPrintf(gnuPipe,"      set ylabel ' '\n"  );
+					fprintf(gnuPipe,"      set ylabel ' '\n"  );
 
 				if( ( acadoIsFinite( operator()( run1 ).xRangeLowerLimit ) == BT_TRUE ) &&
 					( acadoIsFinite( operator()( run1 ).xRangeUpperLimit ) == BT_TRUE ) )
 				{
-					acadoFPrintf(gnuPipe,"      set xrange [%.16e:%.16e]\n", operator()( run1 ).xRangeLowerLimit, operator()( run1 ).xRangeUpperLimit );
+					fprintf(gnuPipe,"      set xrange [%.16e:%.16e]\n", operator()( run1 ).xRangeLowerLimit, operator()( run1 ).xRangeUpperLimit );
 				}
 				else
 				{
-					acadoFPrintf(gnuPipe,"      set autoscale x\n" );
+					fprintf(gnuPipe,"      set autoscale x\n" );
 				}
 
 				if( ( acadoIsFinite( operator()( run1 ).yRangeLowerLimit ) == BT_TRUE ) &&
 					( acadoIsFinite( operator()( run1 ).yRangeUpperLimit ) == BT_TRUE ) )
 				{
-					acadoFPrintf(gnuPipe,"      set yrange [%.16e:%.16e]\n", operator()( run1 ).yRangeLowerLimit, operator()( run1 ).yRangeUpperLimit );
+					fprintf(gnuPipe,"      set yrange [%.16e:%.16e]\n", operator()( run1 ).yRangeLowerLimit, operator()( run1 ).yRangeUpperLimit );
 				}
 				else
 				{
@@ -424,30 +421,30 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 					{
 						double lowerLimit, upperLimit;
 						getAutoScaleYLimits( dataGrid,operator()( run1 ).plotFormat,lowerLimit,upperLimit );
-						acadoFPrintf(gnuPipe,"      set yrange [%.16e:%.16e]\n", lowerLimit, upperLimit );
+						fprintf(gnuPipe,"      set yrange [%.16e:%.16e]\n", lowerLimit, upperLimit );
 					}
 					else
 					{
-						acadoFPrintf(gnuPipe,"      set autoscale y\n" );
+						fprintf(gnuPipe,"      set autoscale y\n" );
 					}
 				}
 
 				if ( operator()( run1 ).getPlotFormat( ) == PF_LOG )
-					acadoFPrintf(gnuPipe,"      set logscale y\n" );
+					fprintf(gnuPipe,"      set logscale y\n" );
 
 				if ( operator()( run1 ).plot3D == BT_FALSE )
-					acadoFPrintf(gnuPipe,"      plot ");
+					fprintf(gnuPipe,"      plot ");
 				else
-					acadoFPrintf(gnuPipe,"      splot ");
+					fprintf(gnuPipe,"      splot ");
 
 				// plot lines
 				if ( operator()( run1 ).nLines > 0 )
 					for( run4 = 0; run4 < operator()( run1 ).nLines; run4++ )
-						acadoFPrintf(gnuPipe,"%.16e title '' lt 2 lw 2,\\\n", operator()( run1 ).lineValues[run4] );
+						fprintf(gnuPipe,"%.16e title '' lt 2 lw 2,\\\n", operator()( run1 ).lineValues[run4] );
 
 
-				getPlotModeString( operator()( run1 ).plotMode,&plotModeString );
-				getPlotStyleString( myType,&plotStyleString );
+				getPlotModeString(operator()(run1).plotMode, plotModeString);
+				getPlotStyleString(myType, plotStyleString);
 
 				switch ( operator()(run1).getSubPlotType( ) )
 				{
@@ -455,9 +452,9 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 					case SPT_EXPRESSION:
 						if ( discretizationGrid.getNumPoints() > 1 )
 							for( run4=0; run4<discretizationGrid.getNumPoints()-2; ++run4 )
-								acadoFPrintf(gnuPipe,"'-' using 1:2 title '' with %s %s,\\\n", plotModeString,plotStyleString );
+								fprintf(gnuPipe,"'-' using 1:2 title '' with %s %s,\\\n", plotModeString.c_str(),plotStyleString.c_str() );
 
-						acadoFPrintf(gnuPipe,"'-' using 1:2 title '' with %s %s", plotModeString,plotStyleString );
+						fprintf(gnuPipe,"'-' using 1:2 title '' with %s %s", plotModeString.c_str(),plotStyleString.c_str() );
 						break;
 
 					case SPT_VARIABLE_VARIABLE:
@@ -466,9 +463,9 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 					case SPT_EXPRESSION_VARIABLE:
 						if ( discretizationGrid.getNumPoints() > 1 )
 							for( run4=0; run4<discretizationGrid.getNumPoints()-2; ++run4 )
-								acadoFPrintf(gnuPipe,"'-' using 2:3 title '' with %s %s,\\\n", plotModeString,plotStyleString );
+								fprintf(gnuPipe,"'-' using 2:3 title '' with %s %s,\\\n", plotModeString.c_str(),plotStyleString.c_str() );
 
-						acadoFPrintf(gnuPipe,"'-' using 2:3 title '' with %s %s", plotModeString,plotStyleString );
+						fprintf(gnuPipe,"'-' using 2:3 title '' with %s %s", plotModeString.c_str(),plotStyleString.c_str() );
 						break;
 
 					case SPT_VARIABLES_GRID:
@@ -478,67 +475,61 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 						if( operator()( run1 ).plot3D == BT_FALSE )
 						{
 // 							for( run4=0; run4<dataGrid.getNumValues( )-1; ++run4 )
-// 								acadoFPrintf(gnuPipe,"'-' using 1:2 title '' with %s %s,\\\n", plotModeString,plotStyleString );
+// 								fprintf(gnuPipe,"'-' using 1:2 title '' with %s %s,\\\n", plotModeString,plotStyleString );
 							if ( discretizationGrid.getNumPoints() > 1 )
 								for( run4=0; run4<discretizationGrid.getNumPoints()-2; ++run4 )
-									acadoFPrintf(gnuPipe,"'-' using 1:2 title '' with %s %s,\\\n", plotModeString,plotStyleString );
+									fprintf(gnuPipe,"'-' using 1:2 title '' with %s %s,\\\n", plotModeString.c_str(),plotStyleString.c_str() );
 
-							acadoFPrintf(gnuPipe,"'-' using 1:2 title '' with %s %s", plotModeString,plotStyleString );
+							fprintf(gnuPipe,"'-' using 1:2 title '' with %s %s", plotModeString.c_str(),plotStyleString.c_str() );
 						}
 						else
 						{
 							if ( dataGrid.getNumValues( ) != 2 )
 								return ACADOERROR( RET_INVALID_ARGUMENTS );
 
-							acadoFPrintf(gnuPipe,"'-' title '' with %s", plotModeString );
+							fprintf(gnuPipe,"'-' title '' with %s", plotModeString.c_str() );
 						}
 						break;
 
 					default:
-						acadoFPrintf(gnuPipe,"'-' using 1:2 title '' with %s %s", plotModeString,plotStyleString );
+						fprintf(gnuPipe,"'-' using 1:2 title '' with %s %s", plotModeString.c_str(),plotStyleString.c_str() );
 				}
 
 				// plot user-specified data
 				if ( operator()(run1).nData > 0 )
 				{
-					returnvalue = obtainPlotDataString( *(operator()(run1).data[0]),&userDataString );
+					returnvalue = obtainPlotDataString( *(operator()(run1).data[0]),userDataString );
 					if( returnvalue != SUCCESSFUL_RETURN )
 						return ACADOERROR( returnvalue );
 				}
 
-				if( userDataString != 0 )
-					acadoFPrintf(gnuPipe,",\\\n'-' using 1:2 title '' with points lt 3 lw 3\n" );
+				if( userDataString.empty() == false )
+					fprintf(gnuPipe,",\\\n'-' using 1:2 title '' with points lt 3 lw 3\n" );
 				else
-					acadoFPrintf(gnuPipe,"\n");
+					fprintf(gnuPipe,"\n");
 
 				if ( discretizationGrid.getNumPoints( ) == 0 )
 				{
 					if ( dataGrid.getNumValues( ) == 1 )
 					{
-						returnvalue = obtainPlotDataString( dataGrid,&plotDataString );
+						returnvalue = obtainPlotDataString( dataGrid,plotDataString );
 						if( returnvalue != SUCCESSFUL_RETURN )
 							return ACADOERROR( returnvalue );
 
-						acadoFPrintf( gnuPipe, "%s", plotDataString );
-						acadoFPrintf( gnuPipe, "e\n" );
+						fprintf( gnuPipe, "%s", plotDataString.c_str() );
+						fprintf( gnuPipe, "e\n" );
 					}
 					else
 					{
 						for( run4=0; run4<dataGrid.getNumValues( ); ++run4 )
 						{
 							dataGridTmp = dataGrid(run4);
-							returnvalue = obtainPlotDataString( dataGridTmp,&plotDataString );
+							returnvalue = obtainPlotDataString( dataGridTmp,plotDataString );
 							if( returnvalue != SUCCESSFUL_RETURN )
 								return ACADOERROR( returnvalue );
 
-							acadoFPrintf( gnuPipe, "%s", plotDataString );
-							acadoFPrintf( gnuPipe, "e\n" );
-
-							if ( plotDataString != 0 )
-							{
-								delete[] plotDataString;
-								plotDataString = 0;
-							}
+							fprintf( gnuPipe, "%s", plotDataString.c_str() );
+							fprintf( gnuPipe, "e\n" );
 						}
 					}
 				}
@@ -552,64 +543,27 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 						endIdx   = (uint)round( discretizationGrid.getTime( run4+1 ) ) - 1;
 						dataGridTmp = dataGrid.getTimeSubGrid( startIdx,endIdx );
 
-						returnvalue = obtainPlotDataString( dataGridTmp,&plotDataString );
+						returnvalue = obtainPlotDataString( dataGridTmp, plotDataString );
 						if( returnvalue != SUCCESSFUL_RETURN )
 							return ACADOERROR( returnvalue );
 
-						acadoFPrintf( gnuPipe, "%s", plotDataString );
-						acadoFPrintf( gnuPipe, "e\n" );
-
-						if ( plotDataString != 0 )
-						{
-							delete[] plotDataString;
-							plotDataString = 0;
-						}
+						fprintf( gnuPipe, "%s", plotDataString.c_str() );
+						fprintf( gnuPipe, "e\n" );
 					}
 				}
 
-				if( userDataString != 0 )
-				{
-					acadoFPrintf( gnuPipe, "%s", userDataString );
-					acadoFPrintf( gnuPipe, "e\n" );
-				}
-
-				// cleanup string memory of current subplot
-				if ( plotDataString != 0 )
-				{
-					delete[] plotDataString;
-					plotDataString = 0;
-				}
-
-				if( userDataString != 0 )
-				{
-					delete[] userDataString;
-					userDataString = 0;
-				}
-
-				if ( plotModeString != 0 )
-				{
-					delete[] plotModeString;
-					plotModeString = 0;
-				}
-
-				if ( plotStyleString != 0 )
-				{
-					delete[] plotStyleString;
-					plotStyleString = 0;
-				}
-
 				if ( operator()( run1 ).getPlotFormat( ) == PF_LOG )
-					acadoFPrintf(gnuPipe,"      unset logscale y\n" );
+					fprintf(gnuPipe,"      unset logscale y\n" );
 			}
 
-			acadoFPrintf( gnuPipe,"\n" );
+			fprintf( gnuPipe,"\n" );
 			fflush( gnuPipe );
 
 			++run1;
 		}
 	}
 
-	acadoFPrintf( gnuPipe,"unset multiplot\n" );
+	fprintf( gnuPipe,"unset multiplot\n" );
 
 	fflush( gnuPipe );
 
@@ -641,16 +595,16 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 
 	if( mouseEvent == BT_TRUE )
 	{
-		acadoFPrintf(gnuPipe,"pause mouse\n");
+		fprintf(gnuPipe,"pause mouse\n");
 		fflush(gnuPipe);
 
-		acadoFPrintf(gnuPipe,"a = MOUSE_X \n");
+		fprintf(gnuPipe,"a = MOUSE_X \n");
 		fflush(gnuPipe);
 
-		acadoFPrintf(gnuPipe,"b = MOUSE_Y \n");
+		fprintf(gnuPipe,"b = MOUSE_Y \n");
 		fflush(gnuPipe);
 
-		acadoFPrintf(gnuPipe,"save var 'mouse.dat'\n");
+		fprintf(gnuPipe,"save var 'mouse.dat'\n");
 		fflush(gnuPipe);
 	}
 
@@ -661,82 +615,75 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 
 
 returnValue GnuplotWindow::getPlotModeString(	PlotMode plotMode,
-												char** plotModeString
+												std::string& plotModeString
 												) const
 {
     switch( plotMode )
 	{
         case PM_LINES:
-            return acadoAssignString( plotModeString,"lines lw 2.5","lines lw 2.5" );
+        	plotModeString = "lines lw 2.5";
+        	break;
 
         case PM_POINTS:
-			return acadoAssignString( plotModeString,"points pt 2.5","points pt 2.5" );
+        	plotModeString = "points pt 2.5";
+        	break;
 
         default:
-            return acadoAssignString( plotModeString,"lines lw 2.5","lines lw 2.5" );
+        	plotModeString = "lines lw 2.5";
     }
+
+    return SUCCESSFUL_RETURN;
 }
 
 
 returnValue GnuplotWindow::getPlotStyleString(	VariableType _type,
-												char** plotStyleString
+												std::string& plotStyleString
 												) const
 {
 	switch( _type )
 	{
 		case VT_DIFFERENTIAL_STATE:
-			return acadoAssignString( plotStyleString,"lt -1","lt -1" ); //black
+			plotStyleString = "lt -1"; //black
 			break;
 
 		case VT_ALGEBRAIC_STATE:
-			return acadoAssignString( plotStyleString,"lt 4","lt 4" ); //magenta
+			plotStyleString = "lt 4"; //magenta
 			break;
 
 		case VT_PARAMETER:
-			return acadoAssignString( plotStyleString,"lt 8","lt 8" ); //orange
+			plotStyleString = "lt 8"; //orange
 			break;
 
 		case VT_CONTROL:
-			return acadoAssignString( plotStyleString,"lt 3","lt 3" ); //blue
+			plotStyleString = "lt 3"; //blue
 			break;
 
 		case VT_DISTURBANCE:
-			return acadoAssignString( plotStyleString,"lt 5","lt 5" ); //light blue
+			plotStyleString = "lt 5"; //light blue
 			break;
 
 		case VT_INTERMEDIATE_STATE:
-			return acadoAssignString( plotStyleString,"lt 2","lt 2" ); //green
+			plotStyleString = "lt 2"; //green
 			break;
 
 		default:
 		//case VT_OUTPUT:
-			return acadoAssignString( plotStyleString,"lt 1","lt 1" ); //red
+			plotStyleString = "lt 1"; //red
 	}
+
+	return SUCCESSFUL_RETURN;
 }
 
 
 returnValue GnuplotWindow::obtainPlotDataString(	VariablesGrid& _dataGrid,
-													char** _plotDataString
+													std::string& _plotDataString
 													) const
 {
-	if ( *_plotDataString != 0 )
-		return ACADOERROR( RET_INVALID_ARGUMENTS );
+    stringstream ss;
 
-    int localDim;
+    _dataGrid.sprint( ss );
 
-	// obtain data for user-specified variables grids
-	localDim = _dataGrid.sprintf( *_plotDataString );
-
-	if( localDim >= 0 )
-	{
-		*_plotDataString = new char[ localDim+1 ];
-
-		localDim = _dataGrid.sprintf( *_plotDataString );
-		(*_plotDataString)[localDim] = '\0';
-
-		if( localDim < 0 )
-			return ACADOERROR( RET_MEMBER_NOT_INITIALISED );
-	}
+	_plotDataString = ss.str();
 
 	return SUCCESSFUL_RETURN;
 }

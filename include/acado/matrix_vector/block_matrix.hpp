@@ -156,7 +156,7 @@ class BlockMatrix
 		inline returnValue setZero( uint rowIdx, uint colIdx );
 
 		/** Returns whether the block matrix element is empty. */
-		inline BooleanType isEmpty() const;
+		inline bool isEmpty() const;
 
 		/** Sets everyting to zero.
 		 *  \return SUCCESSFUL_RETURN */
@@ -175,11 +175,11 @@ class BlockMatrix
 
 		/** Tests if object is a block-square matrix.
 		 *  \return BT_TRUE iff block matrix object is square. */
-		inline BooleanType isSquare( ) const;
+		inline bool isSquare( ) const;
 
 		/** Tests if a specified sub-matrix is a square matrix.
 		 *  \return BT_TRUE iff submatrix object is square. */
-		inline BooleanType isSquare( uint rowIdx, uint colIdx ) const;
+		inline bool isSquare( uint rowIdx, uint colIdx ) const;
 
         /** Returns the a block matrix whose components are the absolute
          *  values of the components of this object.

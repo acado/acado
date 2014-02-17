@@ -134,10 +134,9 @@ int main( ){
     f << backwardDerivative( a, arg );
     
     
-    
-    FILE *file = fopen("symmetricAD_output.txt", "w" );
-    file << f;
-    fclose(file);
+    std::ofstream stream( "ADsymbolic_output.txt" );
+    stream << f;
+    stream.close();
 
     return 0;
 }
