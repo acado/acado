@@ -108,6 +108,10 @@ REFER_NAMESPACE_ACADO Expression forwardDerivative ( const REFER_NAMESPACE_ACADO
                                                      const REFER_NAMESPACE_ACADO Expression &arg2,
                                                      const REFER_NAMESPACE_ACADO Expression &seed );
 
+REFER_NAMESPACE_ACADO Expression backwardDerivative( const REFER_NAMESPACE_ACADO Expression &arg1,
+                                                     const REFER_NAMESPACE_ACADO Expression &arg2,
+                                                     const REFER_NAMESPACE_ACADO Expression &seed );
+
 REFER_NAMESPACE_ACADO Expression multipleForwardDerivative ( const REFER_NAMESPACE_ACADO Expression &arg1,
                                                      	 	 	 const REFER_NAMESPACE_ACADO Expression &arg2,
                                                      	 	 	 const REFER_NAMESPACE_ACADO Expression &seed );
@@ -116,9 +120,12 @@ REFER_NAMESPACE_ACADO Expression multipleBackwardDerivative ( const REFER_NAMESP
                                                      	 	 	 const REFER_NAMESPACE_ACADO Expression &arg2,
                                                      	 	 	 const REFER_NAMESPACE_ACADO Expression &seed );
 
-REFER_NAMESPACE_ACADO Expression backwardDerivative( const REFER_NAMESPACE_ACADO Expression &arg1,
-                                                     const REFER_NAMESPACE_ACADO Expression &arg2,
-                                                     const REFER_NAMESPACE_ACADO Expression &seed );
+REFER_NAMESPACE_ACADO Expression symmetricDerivative( 	const REFER_NAMESPACE_ACADO Expression &arg1,
+ 	 	 	 	 	 	 	 	 	 	 	 	 	 		const REFER_NAMESPACE_ACADO Expression &arg2,
+ 	 	 	 	 	 	 	 	 	 	 	 	 	 		const REFER_NAMESPACE_ACADO Expression &forward_seed,
+ 	 	 	 	 	 	 	 	 	 	 	 	 	 		const REFER_NAMESPACE_ACADO Expression &backward_seed,
+ 	 	 	 	 	 	 	 	 	 	 	 	 	 		REFER_NAMESPACE_ACADO Expression *forward_result = 0,
+ 	 	 	 	 	 	 	 	 	 	 	 	 	 		REFER_NAMESPACE_ACADO Expression *backward_result = 0 );
 
 REFER_NAMESPACE_ACADO Expression jacobian           ( const REFER_NAMESPACE_ACADO Expression &arg1,
                                                       const REFER_NAMESPACE_ACADO Expression &arg2 );

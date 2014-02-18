@@ -148,6 +148,15 @@ Expression multipleBackwardDerivative( const Expression &arg1,
     return tmp;
 }
 
+Expression symmetricDerivative( 	const Expression &arg1,
+ 	 	 	 	 	 	 	 	 	const Expression &arg2,
+ 	 	 	 	 	 	 	 	 	const Expression &forward_seed,
+ 	 	 	 	 	 	 	 	 	const Expression &backward_seed,
+ 	 	 	 	 	 	 	 	 	Expression *forward_result,
+ 	 	 	 	 	 	 	 	 	Expression *backward_result ) {
+	return arg1.ADsymmetric( arg2, forward_seed, backward_seed, forward_result, backward_result );
+}
+
 
 Expression jacobian          ( const Expression &arg1,
                                const Expression &arg2 ){

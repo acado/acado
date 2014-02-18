@@ -269,7 +269,7 @@ class Expression{
 	 *  S^T*(l^T*f'')*S  with f'' being the second  \n
 	 * order derivative of the current expression.  \n
 	 * The matrix S and the vector l can be         \n
-	 * intepreted as forward/backward seeds,        \n
+	 * interpreted as forward/backward seeds,        \n
 	 * respectively. Optionally, this routine also  \n
 	 * returns expressions for the first order      \n
 	 * order terms f'*S  and  l^T*f' computed by    \n

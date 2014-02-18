@@ -217,14 +217,14 @@ returnValue Projection::ADsymmetric( int            dim       , /**< number of d
                                         Operator     **dfS       , /**< first order foward result             */
                                         Operator     **ldf       , /**< first order backward result           */
                                         Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        int            &nNewLIS  , /**< the number of newLIS  */
+                                        TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                        int            &nNewSIS  , /**< the number of newSIS  */
+                                        TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                        int            &nNewHIS  , /**< the number of newHIS  */
+                                        TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
   
-return ADsymmetricProtected( dim, varType, component, l, S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+	return ADsymmetricProtected( dim, varType, component, l, S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
 }
 
 
@@ -517,49 +517,49 @@ returnValue Projection::ADsymmetricProtected( int            dim       , /**< nu
                                         Operator      *l         , /**< the backward seed     */
                                         Operator     **S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **dfS       , /**< first order forward result             */
                                         Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        Operator     **H         , /**< upper triangular part of the Hessian */
+                                        int            &nNewLIS  , /**< the number of newLIS  */
+                                        TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                        int            &nNewSIS  , /**< the number of newSIS  */
+                                        TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                        int            &nNewHIS  , /**< the number of newHIS  */
+                                        TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
 
-     int run1 = 0;
-     
-     while( run1 < dim ){
+	int run1 = 0;
 
-        if( varType[run1] == variableType && component[run1] == vIndex ){
-	  
-	    int run2;
-	    for( run2 = 0; run2 < dimS; run2++ ){
-	         delete dfS[run2];
-		 dfS[run2] = S[run1*dimS+run2]->clone();
-	    }
-	  
-	    if(   ldf[run1]->isOneOrZero() == NE_ZERO ){
-                  delete ldf[run1];
-                  ldf[run1] = l->clone();
-            }
-            else{
+	while( run1 < dim ){
 
-                if( l->isOneOrZero() != NE_ZERO ){
+		if( varType[run1] == variableType && component[run1] == vIndex ){
 
-                    Operator *tmp = ldf[run1]->clone();
-                    delete ldf[run1];
-                    ldf[run1] = new Addition(tmp->clone(),l->clone());
-                    delete tmp;
-                }
-            }
-            break;
-        }
-        run1++;
-     }
- 
-    delete l;
-    return SUCCESSFUL_RETURN; 
+			int run2;
+			for( run2 = 0; run2 < dimS; run2++ ){
+				delete dfS[run2];
+				dfS[run2] = S[run1*dimS+run2]->clone();
+			}
+
+			if(   ldf[run1]->isOneOrZero() == NE_ZERO ){
+				delete ldf[run1];
+				ldf[run1] = l->clone();
+			}
+			else{
+
+				if( l->isOneOrZero() != NE_ZERO ){
+
+					Operator *tmp = ldf[run1]->clone();
+					delete ldf[run1];
+					ldf[run1] = new Addition(tmp->clone(),l->clone());
+					delete tmp;
+				}
+			}
+			break;
+		}
+		run1++;
+	}
+
+	delete l;
+	return SUCCESSFUL_RETURN;
 }
 
 returnValue Projection::setVariableExportName( const VariableType &_type, const std::vector<std::string > &_name ){

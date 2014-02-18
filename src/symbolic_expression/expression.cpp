@@ -1325,33 +1325,32 @@ Expression Expression::ADbackward( const Expression &arg, const Expression &seed
 }
 
 
-Expression Expression::ADsymmetric( const Expression &arg, /** argument      */
-				     const Expression &S  , /** forward seed  */
-				     const Expression &l  , /** backward seed */
-				     Expression *dfS,    /** first order forward  result */
-				     Expression *ldf   /** first order backward result */
-				    ) const{
+Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
+										const Expression &S  , /** forward seed  */
+										const Expression &l  , /** backward seed */
+										Expression *dfS,    /** first order forward  result */
+										Expression *ldf   /** first order backward result */ ) const{
 
-    int Dim = arg.getDim();
-    int nS  = S.getNumCols();
-    int run1, run2;
+	int Dim = arg.getDim();
+	int nS  = S.getNumCols();
+	int run1, run2;
 
-    ASSERT( arg .isVariable()    == BT_TRUE  );
-    ASSERT( l.getDim()           == getDim() );
-    ASSERT( (int) S.getNumRows() == Dim      );
+	ASSERT( arg .isVariable()    == BT_TRUE  );
+	ASSERT( l.getDim()           == getDim() );
+	ASSERT( (int) S.getNumRows() == Dim      );
 
-    Expression result( nS, nS );
+	Expression result( nS, nS );
 
-    VariableType *varType   = new VariableType[Dim];
-    int          *Component = new int         [Dim];
-    Operator    **dS        = new Operator*   [nS];
-    Operator    **ld        = new Operator*   [Dim];
-    Operator    **H         = new Operator*   [nS*nS];
-    
-    for( run1 = 0; run1 < Dim; run1++ ){
-        varType  [run1] = arg .getVariableType(    );
-        Component[run1] = arg .getComponent   (run1);
-    }
+	VariableType *varType   = new VariableType[Dim];
+	int          *Component = new int         [Dim];
+	Operator    **dS        = new Operator*   [nS];
+	Operator    **ld        = new Operator*   [Dim];
+	Operator    **H         = new Operator*   [nS*nS];
+
+	for( run1 = 0; run1 < Dim; run1++ ){
+		varType  [run1] = arg .getVariableType(    );
+		Component[run1] = arg .getComponent   (run1);
+	}
 
 	int nLIS = 0;
 	int nSIS = 0;
@@ -1359,84 +1358,84 @@ Expression Expression::ADsymmetric( const Expression &arg, /** argument      */
 	TreeProjection **LIS = 0;
 	TreeProjection **SIS = 0;
 	TreeProjection **HIS = 0;
-	
-    for( run1 = 0; run1 < (int) getDim(); run1++ ){
 
-        Operator *l1 = l.element[run1]->clone();
-        Operator **S1 = new Operator*[Dim*nS]; 
+	for( run1 = 0; run1 < (int) getDim(); run1++ ){
 
-	for( run2 = 0; run2 < Dim*nS; run2++ )
-	     S1[run2] = S.element[run2]->clone();
-	
-        for( run2 = 0; run2 < nS; run2++ )
-             dS[run2] = new DoubleConstant(0.0,NE_ZERO);
-	
-        for( run2 = 0; run2 < Dim; run2++ )
-             ld[run2] = new DoubleConstant(0.0,NE_ZERO);
-	
-        for( run2 = 0; run2 < nS*nS; run2++ )
-             H[run2] = new DoubleConstant(0.0,NE_ZERO);
+		Operator *l1 = l.element[run1]->clone();
+		Operator **S1 = new Operator*[Dim*nS];
 
-	element[run1]->ADsymmetric( Dim, varType, Component, l1, S1, nS, dS, ld, H, nLIS, &LIS, nSIS, &SIS, nHIS, &HIS );
-	
-	int run3 = 0;
-	
-        for( run2 = 0; run2 < nS; run2++ ){
-	  for( run3 = 0; run3 < run2; run3++ ){
-            Operator *sum = result.element[run2*nS+run3]->clone();
-            delete result.element[run2*nS+run3];
-            delete result.element[run3*nS+run2];
-            result.element[run2*nS+run3] = new Addition( sum->clone(), H[run2*nS+run3]->clone() );
-	    result.element[run3*nS+run2] = new Addition( sum->clone(), H[run2*nS+run3]->clone() );
-            delete sum;
-	  }
-          Operator *sum = result.element[run2*nS+run2]->clone();
-          delete result.element[run2*nS+run2];
-          result.element[run2*nS+run2] = new Addition( sum->clone(), H[run2*nS+run2]->clone() );
-          delete sum;
-        }
-        
-        // TODO: IMPLEMENTATION OF dfS and ldf
-        
-        
-     	for( run2 = 0; run2 < Dim*nS; run2++ )
-	     delete S1[run2];
-	
-        for( run2 = 0; run2 < nS; run2++ )
-             delete dS[run2];
-	
-        for( run2 = 0; run2 < Dim; run2++ )
-             delete ld[run2];
-	
-        for( run2 = 0; run2 < nS*nS; run2++ )
-             delete H[run2];
-	
-	delete[] S1;
-    }
+		for( run2 = 0; run2 < Dim*nS; run2++ )
+			S1[run2] = S.element[run2]->clone();
+
+		for( run2 = 0; run2 < nS; run2++ )
+			dS[run2] = new DoubleConstant(0.0,NE_ZERO);
+
+		for( run2 = 0; run2 < Dim; run2++ )
+			ld[run2] = new DoubleConstant(0.0,NE_ZERO);
+
+		for( run2 = 0; run2 < nS*nS; run2++ )
+			H[run2] = new DoubleConstant(0.0,NE_ZERO);
+
+		element[run1]->ADsymmetric( Dim, varType, Component, l1, S1, nS, dS, ld, H, nLIS, &LIS, nSIS, &SIS, nHIS, &HIS );
+
+		int run3 = 0;
+
+		for( run2 = 0; run2 < nS; run2++ ){
+			for( run3 = 0; run3 < run2; run3++ ){
+				Operator *sum = result.element[run2*nS+run3]->clone();
+				delete result.element[run2*nS+run3];
+				delete result.element[run3*nS+run2];
+				result.element[run2*nS+run3] = new Addition( sum->clone(), H[run2*nS+run3]->clone() );
+				result.element[run3*nS+run2] = new Addition( sum->clone(), H[run2*nS+run3]->clone() );
+				delete sum;
+			}
+			Operator *sum = result.element[run2*nS+run2]->clone();
+			delete result.element[run2*nS+run2];
+			result.element[run2*nS+run2] = new Addition( sum->clone(), H[run2*nS+run2]->clone() );
+			delete sum;
+		}
+
+		// TODO: IMPLEMENTATION OF dfS and ldf
+
+
+		for( run2 = 0; run2 < Dim*nS; run2++ )
+			delete S1[run2];
+
+		for( run2 = 0; run2 < nS; run2++ )
+			delete dS[run2];
+
+		for( run2 = 0; run2 < Dim; run2++ )
+			delete ld[run2];
+
+		for( run2 = 0; run2 < nS*nS; run2++ )
+			delete H[run2];
+
+		delete[] S1;
+	}
 
 
 	for( int run = 0; run < nLIS; run++ ){
 		if( LIS[run] != 0 ) delete LIS[run];
 	}
 	if( LIS != 0 ) free(LIS);
-	
+
 	for( int run = 0; run < nSIS; run++ ){
 		if( SIS[run] != 0 ) delete SIS[run];
 	}
 	if( SIS != 0 ) free(SIS);
-	
+
 	for( int run = 0; run < nHIS; run++ ){
 		if( HIS[run] != 0 ) delete HIS[run];
 	}
 	if( HIS != 0 ) free(HIS);
-	
-    delete[] dS        ;
-    delete[] ld        ;
-    delete[] H         ;
-    delete[] varType   ;
-    delete[] Component ;
 
-    return result;
+	delete[] dS        ;
+	delete[] ld        ;
+	delete[] H         ;
+	delete[] varType   ;
+	delete[] Component ;
+
+	return result;
 }
 
 
