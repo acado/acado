@@ -381,7 +381,7 @@ returnValue Operator::ADsymCommon2( Operator       *a  ,
     	for( run2 = 0; run2 <= run1; run2++ ){
     		delete H[run1*dimS+run2];
     		Operator *tmp1 = myProd( S1[run1], S1[run2] );
-    		Operator *tmp2 = myProd( S1chat[run1], S2[run2] );
+    		Operator *tmp2 = myProd( S1[run1], S2[run2] );
     		Operator *tmp3 = myProd( S2[run1], S1[run2] );
     		Operator *tmp4 = myProd( S2[run1], S2[run2] );
     		Operator *tmp5;

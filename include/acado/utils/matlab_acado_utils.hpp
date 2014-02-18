@@ -144,34 +144,6 @@ void acadoPlot(VariablesGrid grid){
 }
 
 
-returnValue clearAllStaticCounters()
-{
-	AlgebraicState              dummy1;
-	Control                     dummy2;
-	DifferentialState           dummy3;
-	DifferentialStateDerivative dummy4;
-	Disturbance                 dummy5;
-	IntegerControl              dummy6;
-	IntegerParameter            dummy7;
-	IntermediateState           dummy8;
-	Parameter                   dummy9;
-	
-	dummy1.clearStaticCounters();
-	dummy2.clearStaticCounters();
-	dummy3.clearStaticCounters();
-	dummy4.clearStaticCounters();
-	dummy5.clearStaticCounters();
-	dummy6.clearStaticCounters();
-	dummy7.clearStaticCounters();
-	dummy8.clearStaticCounters();
-	dummy9.clearStaticCounters();
-	
-	return SUCCESSFUL_RETURN;
-}
-
-
-
-
 
 CLOSE_NAMESPACE_ACADO
 

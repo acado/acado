@@ -144,6 +144,11 @@ REFER_NAMESPACE_ACADO Expression getRiccatiODE( const REFER_NAMESPACE_ACADO Expr
 
 REFER_NAMESPACE_ACADO Expression chol( const REFER_NAMESPACE_ACADO Expression &arg );
 
+
+/** Function which clears all the static counters, used throughout ACADO symbolics. */
+REFER_NAMESPACE_ACADO returnValue clearAllStaticCounters();
+
+
 /** @} */
 
 #endif  // ACADO_TOOLKIT_SYNTAX_HPP
