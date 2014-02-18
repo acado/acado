@@ -375,7 +375,6 @@ Expression ThreeSweepsERKExport::symmetricDoubleProduct( const Expression& expr,
 	Expression new_expr;
 	for( uint i = 0; i < dim; i++ ) {
 		for( uint j = 0; j <= i; j++ ) {
-			uint dim2 = arg.getNumRows();
 			Expression new_tmp = 0;
 			for( uint k1 = 0; k1 < dim2; k1++ ) {
 				new_tmp = new_tmp+arg(k1,i)*inter_res(k1,j);
