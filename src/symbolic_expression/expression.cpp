@@ -1142,20 +1142,24 @@ Expression Expression::ADforward ( const Expression &arg, const Expression &seed
     ASSERT( arg .isVariable() == BT_TRUE );
     ASSERT( seed.getDim    () == n       );
 
-    int *Component = new int[n];
+    VariableType *varType   = new VariableType[n];
+    int          *Component = new int[n];
 
-    for( run1 = 0; run1 < n; run1++ ) Component[run1] = arg.getComponent(run1);
+    for( run1 = 0; run1 < n; run1++ ){
+    	arg.element[run1]->isVariable(varType[run1],Component[run1]);
+    }
 
-	Expression result = ADforward( arg.getVariableType(), Component, seed );
+	Expression result = ADforward( varType, Component, seed );
     delete[] Component;
+    delete[] varType;
 
     return result;
 }
 
 
-Expression Expression::ADforward ( const VariableType &varType_,
-								   const int          *arg     ,
-								   const Expression   &seed      ) const{
+Expression Expression::ADforward (  const VariableType &varType_,
+								   	   const int          *arg     ,
+								   	   const Expression   &seed      ) const{
 
 	VariableType *varType = new VariableType[seed.getDim()];
 	for( uint run1 = 0; run1 < seed.getDim(); run1++ ) varType[run1] = varType_;
@@ -1348,8 +1352,7 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 	Operator    **H         = new Operator*   [nS*nS];
 
 	for( run1 = 0; run1 < Dim; run1++ ){
-		varType  [run1] = arg .getVariableType(    );
-		Component[run1] = arg .getComponent   (run1);
+		arg.element[run1]->isVariable(varType[run1],Component[run1]);
 	}
 
 	int nLIS = 0;

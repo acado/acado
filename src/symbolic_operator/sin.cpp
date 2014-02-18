@@ -142,35 +142,35 @@ returnValue Sin::ADbackwardProtected( int           dim      , /**< number of di
                                         TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
 
-    if( seed->isOneOrZero() == NE_ZERO ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df, nNewIS, newIS
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    if( seed->isOneOrZero() == NE_ONE ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new Cos( argument->clone() ),
-                                          df, nNewIS, newIS
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    argument->AD_backward( dim,
-                                  varType,
-                                  component,
-                                  new Product( seed->clone() , new Cos( argument->clone() ) ),
-                                  df, nNewIS, newIS
-            );
+	if( seed->isOneOrZero() == NE_ZERO ){
+		argument->AD_backward( dim,
+				varType,
+				component,
+				new DoubleConstant( 0.0 , NE_ZERO ),
+				df, nNewIS, newIS
+		);
+		delete seed;
+		return SUCCESSFUL_RETURN;
+	}
+	if( seed->isOneOrZero() == NE_ONE ){
+		argument->AD_backward( dim,
+				varType,
+				component,
+				new Cos( argument->clone() ),
+				df, nNewIS, newIS
+		);
+		delete seed;
+		return SUCCESSFUL_RETURN;
+	}
+	argument->AD_backward( dim,
+			varType,
+			component,
+			new Product( seed->clone() , new Cos( argument->clone() ) ),
+			df, nNewIS, newIS
+	);
 
-    delete seed;
-    return SUCCESSFUL_RETURN;
+	delete seed;
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -184,12 +184,12 @@ returnValue Sin::ADsymmetricProtected( int            dim       , /**< number of
                                         Operator     **dfS       , /**< first order foward result             */
                                         Operator     **ldf       , /**< first order backward result           */
                                         Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        int            &nNewLIS  , /**< the number of newLIS  */
+                                        TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                        int            &nNewSIS  , /**< the number of newSIS  */
+                                        TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                        int            &nNewHIS  , /**< the number of newHIS  */
+                                        TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
   
     TreeProjection tmp, tmp2;
     tmp  = Cos(argument->clone());
