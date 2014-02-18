@@ -567,7 +567,7 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 			rhs1.isGiven() == true && rhs1.getGivenMatrix().isZero() == true)
 	{
 		stream 	<< "{ int lCopy; for (lCopy = 0; lCopy < "<< lhs.getDim() << "; lCopy++) "
-				<< lhs.getFullName() << "[ lCopy ] = 0.0; }" << endl;
+				<< lhs.getFullName() << "[ lCopy ] = 0; }" << endl;
 	}
 	else if ((numOps < 128) || (rhs1.isGiven() == true))
 	{
@@ -578,7 +578,12 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 					stream << lhs->get(i, j) << " " << _op << " ";
 					if (rhs1->isGiven() == true)
 					{
-						stream << scientific << rhs1(i, j) << ";\n";
+						if (lhs->getType() == REAL or lhs->getType() == STATIC_CONST_REAL)
+							stream << scientific << rhs1(i, j);
+						else
+							stream << (int)rhs1(i, j);
+
+						stream <<  ";\n";
 					}
 					else
 					{

@@ -116,6 +116,38 @@ class QProblem : public QProblemB
 							);
 
 
+		/** Initialises a QProblem with given QP data and solves it
+		 *	using an initial homotopy with empty working set (at most nWSR iterations).
+		 *	\return SUCCESSFUL_RETURN \n
+					RET_INIT_FAILED \n
+					RET_INIT_FAILED_CHOLESKY \n
+					RET_INIT_FAILED_TQ \n
+					RET_INIT_FAILED_HOTSTART \n
+					RET_INIT_FAILED_INFEASIBILITY \n
+					RET_INIT_FAILED_UNBOUNDEDNESS \n
+					RET_MAX_NWSR_REACHED \n
+					RET_INVALID_ARGUMENTS \n
+					RET_INACCURATE_SOLUTION \n
+		 			RET_NO_SOLUTION */
+		returnValue init(	const real_t* const _H, 		/**< Hessian matrix. */
+							const real_t* const _R, 		/**< Cholesky factorization of the Hessian matrix. */
+							const real_t* const _g, 		/**< Gradient vector. */
+							const real_t* const _A,  		/**< Constraint matrix. */
+							const real_t* const _lb,		/**< Lower bound vector (on variables). \n
+																If no lower bounds exist, a NULL pointer can be passed. */
+							const real_t* const _ub,		/**< Upper bound vector (on variables). \n
+																If no upper bounds exist, a NULL pointer can be passed. */
+							const real_t* const _lbA,		/**< Lower constraints' bound vector. \n
+																If no lower constraints' bounds exist, a NULL pointer can be passed. */
+							const real_t* const _ubA,		/**< Upper constraints' bound vector. \n
+																If no lower constraints' bounds exist, a NULL pointer can be passed. */
+							int& nWSR,						/**< Input: Maximum number of working set recalculations when using initial homotopy.
+																Output: Number of performed working set recalculations. */
+							const real_t* const yOpt = 0,	/**< Initial guess for dual solution vector. */
+							real_t* const cputime = 0		/**< Output: CPU time required to initialise QP. */
+							);
+
+
 		/** Solves QProblem using online active set strategy.
 		 *	\return SUCCESSFUL_RETURN \n
 		 			RET_MAX_NWSR_REACHED \n
@@ -521,6 +553,7 @@ class QProblem : public QProblemB
 		 *	\return SUCCESSFUL_RETURN \n
 					RET_INVALID_ARGUMENTS */
 		returnValue setupQPdata(	const real_t* const _H, 	/**< Hessian matrix. */
+									const real_t* const _R, 	/**< Cholesky factorization of the Hessian matrix. */
 									const real_t* const _g, 	/**< Gradient vector. */
 									const real_t* const _A,  	/**< Constraint matrix. */
 									const real_t* const _lb,	/**< Lower bound vector (on variables). \n

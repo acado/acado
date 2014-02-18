@@ -70,85 +70,149 @@ returnValue ExportCholeskySolver::init(	unsigned _dimA,
 
 returnValue ExportCholeskySolver::setup()
 {
+	unsigned flopsChol, flopsSolve;
+
 	if (REUSE == true)
 		return RET_NOT_IMPLEMENTED_YET;
 
-	/* Setup evaluation of the Cholesky factorization. */
-
 	ExportVariable sum("sum", 1, 1, REAL, ACADO_LOCAL, true);
 	ExportVariable div("div", 1, 1, REAL, ACADO_LOCAL, true);
+	ExportVariable ret("ret", 1, 1, INT, ACADO_LOCAL, true);
+
 	chol.addVariable( sum );
 	chol.addVariable( div );
+	chol.setReturnValue( ret );
+	chol.addStatement( ret == 0 );
 
-	for(int ii = 0; ii < (int)nRows; ++ii)
-	{
-		for (int k = 0; k < ii; ++k)
-			chol.addStatement( A.getElement(ii, k) == 0.0 );
+	// Approximate number of flops
+	flopsChol = nRows * nRows * nRows / 3;
 
-
-		/* j == i */
-//		sum = H[ii * nCols + ii];
-		chol.addStatement( sum == A.getElement(ii, ii) );
-
-		chol.addComment( "j == i" );
-		for(int k = (ii - 1); k >= 0; --k)
-//			sum -= A[k*NVMAX + i] * A[k*NVMAX + i];
-			chol.addStatement( sum -= A.getElement(k, ii) * A.getElement(k, ii) );
-
-//		if ( sum > 0.0 )
-//			R[i*NVMAX + i] = sqrt( sum );
-//		else
-//		{
-//			hessianType = HST_SEMIDEF;
-//			return THROWERROR( RET_HESSIAN_NOT_SPD );
-//		}
-
-		chol << A.getElement(ii, ii).get(0, 0) << " = sqrt(" << sum.getFullName() << ");\n";
-		chol << div.getFullName() << " = 1.0 / " << A.getElement(ii, ii).get(0, 0) << ";\n";
-
-		/* j > i */
-		chol.addComment( "j loop" );
-		for(int jj = (ii + 1); jj < (int)nRows; ++jj)
+	if (flopsChol < 128)
+		for(int ii = 0; ii < (int)nRows; ++ii)
 		{
-//			jj = FR_idx[j];
-//			sum = H[jj*NVMAX + ii];
-			chol.addStatement( sum == A.getElement(jj, ii) );
+			for (int k = 0; k < ii; ++k)
+				chol.addStatement( A.getElement(ii, k) == 0.0 );
 
-			chol.addComment( "k loop" );
+			/* j == i */
+			//		sum = H[ii * nCols + ii];
+			chol.addStatement( sum == A.getElement(ii, ii) );
 			for(int k = (ii - 1); k >= 0; --k)
-//				sum -= R[k * NVMAX + ii] * R[k * NVMAX + jj];
-				chol.addStatement( sum -= A.getElement(k, ii) * A.getElement(k, jj) );
+				//			sum -= A[k*NVMAX + i] * A[k*NVMAX + i];
+				chol.addStatement( sum -= A.getElement(k, ii) * A.getElement(k, ii) );
 
-//			R[ii * NVMAX + jj] = sum / R[ii * NVMAX + ii];
-			chol.addStatement( A.getElement(ii, jj) == sum * div );
+			chol << "if (" << sum.getFullName() << "< 0.0) return 1;\n";
+
+			//		if ( sum > 0.0 )
+			//			R[i*NVMAX + i] = sqrt( sum );
+			//		else
+			//		{
+			//			hessianType = HST_SEMIDEF;
+			//			return THROWERROR( RET_HESSIAN_NOT_SPD );
+			//		}
+
+			chol << A.getElement(ii, ii).get(0, 0) << " = sqrt(" << sum.getFullName() << ");\n";
+			chol << div.getFullName() << " = 1.0 / " << A.getElement(ii, ii).get(0, 0) << ";\n";
+
+			/* j > i */
+			for(int jj = (ii + 1); jj < (int)nRows; ++jj)
+			{
+				//			jj = FR_idx[j];
+				//			sum = H[jj*NVMAX + ii];
+				chol.addStatement( sum == A.getElement(jj, ii) );
+
+				for(int k = (ii - 1); k >= 0; --k)
+					//				sum -= R[k * NVMAX + ii] * R[k * NVMAX + jj];
+					chol.addStatement( sum -= A.getElement(k, ii) * A.getElement(k, jj) );
+
+				//			R[ii * NVMAX + jj] = sum / R[ii * NVMAX + ii];
+				chol.addStatement( A.getElement(ii, jj) == sum * div );
+			}
 		}
+	else
+	{
+		ExportIndex ii, jj, k;
+		chol.acquire( ii ).acquire( jj ).acquire( k );
+
+		ExportForLoop iiLoop(ii, 0, nRows);
+
+		ExportForLoop kLoop(k, 0, ii);
+		kLoop.addStatement( A.getElement(ii, k) == 0.0 );
+		iiLoop.addStatement( kLoop );
+
+		iiLoop.addStatement( sum == A.getElement(ii, ii) );
+
+		ExportForLoop kLoop2(k, ii - 1, -1, -1);
+		kLoop2.addStatement( sum -= A.getElement(k, ii) * A.getElement(k, ii) );
+		iiLoop.addStatement( kLoop2 );
+
+		iiLoop << "if (" << sum.getFullName() << "< 0.0) return 1;\n";
+		iiLoop << A.getElement(ii, ii).get(0, 0) << " = sqrt(" << sum.getFullName() << ");\n";
+		iiLoop << div.getFullName() << " = 1.0 / " << A.getElement(ii, ii).get(0, 0) << ";\n";
+
+		ExportForLoop jjLoop(jj, ii + 1, nRows);
+		jjLoop.addStatement( sum == A.getElement(jj, ii) );
+
+		ExportForLoop kLoop3(k, ii - 1, -1, -1);
+		kLoop3.addStatement( sum -= A.getElement(k, ii) * A.getElement(k, jj) );
+		jjLoop.addStatement( kLoop3 );
+
+		jjLoop.addStatement( A.getElement(ii, jj) == sum * div );
+
+		iiLoop.addStatement( jjLoop );
+
+		chol.addStatement( iiLoop );
+		chol.release( ii ).release( jj ).release( k );
 	}
 
-	/* Setup evaluation of the solve function. */
-	/* Implements R' X = B -> X = R^{-T} * B. B is replaced by the solution. */
+	//
+	// Setup evaluation of the solve function
+	// Implements R^T X = B -> X = R^{-T} * B. B is replaced by the solution.
+	//
 
-	/* solve R^T*a = b */
+	// Approximate number of flops
+	flopsSolve = nRows * nRows * nColsB;
 
 	solve.addVariable( sum );
 
-	for (unsigned col = 0; col < nColsB; ++col)
-		for(int i = 0; i < int(nRows); ++i)
-		{
-//			sum = b[i];
-			solve.addStatement( sum == B.getElement(i, col) );
+	if (flopsSolve < 128)
+		for (unsigned col = 0; col < nColsB; ++col)
+			for(int i = 0; i < int(nRows); ++i)
+			{
+				//			sum = b[i];
+				solve.addStatement( sum == B.getElement(i, col) );
 
-			for(int j = 0; j < i; ++j)
-//				sum -= R[j*NVMAX + i] * a[j];
-				solve.addStatement( sum-= A.getElement(j, i) * B.getElement(j, col) );
+				for(int j = 0; j < i; ++j)
+					//				sum -= R[j*NVMAX + i] * a[j];
+					solve.addStatement( sum-= A.getElement(j, i) * B.getElement(j, col) );
 
-//			if ( getAbs( R[i*NVMAX + i] ) > ZERO )
-//				a[i] = sum / R[i*NVMAX + i];
-//			else
-//				return THROWERROR( RET_DIV_BY_ZERO );
+				// TODO Error checking
+				//			if ( getAbs( R[i*NVMAX + i] ) > ZERO )
+				//				a[i] = sum / R[i*NVMAX + i];
+				//			else
+				//				return THROWERROR( RET_DIV_BY_ZERO );
 
-			solve << B.getElement(i, col).get(0, 0) << " = " << sum.getFullName() << " / " << A.getElement(i, i).get(0, 0) << ";\n";
-		}
+				solve << B.getElement(i, col).get(0, 0) << " = " << sum.getFullName() << " / " << A.getElement(i, i).get(0, 0) << ";\n";
+			}
+	else
+	{
+		ExportIndex col, i, j;
+		solve.acquire( col ).acquire( i ).acquire( j );
 
+		ExportForLoop colLoop(col, 0, nColsB);
+
+		ExportForLoop iLoop(i, 0, nRows);
+		iLoop.addStatement( sum == B.getElement(i, col) );
+
+		ExportForLoop jLoop(j, 0, i);
+		jLoop.addStatement( sum-= A.getElement(j, i) * B.getElement(j, col) );
+		iLoop << jLoop;
+
+		iLoop << B.getElement(i, col).get(0, 0) << " = " << sum.getFullName() << " / " << A.getElement(i, i).get(0, 0) << ";\n";
+
+		colLoop << iLoop;
+		solve << colLoop;
+		solve.release( col ).release( i ).release( j );
+	}
 
 	return SUCCESSFUL_RETURN;
 }

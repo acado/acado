@@ -241,7 +241,21 @@ returnValue QProblem::init(	const real_t* const _H, const real_t* const _g, cons
 							)
 {
 	/* 1) Setup QP data. */
-	if ( setupQPdata( _H,_g,_A,_lb,_ub,_lbA,_ubA ) != SUCCESSFUL_RETURN )
+	if (setupQPdata(_H, 0, _g, _A, _lb, _ub, _lbA, _ubA) != SUCCESSFUL_RETURN)
+		return THROWERROR( RET_INVALID_ARGUMENTS );
+
+	/* 2) Call to main initialisation routine (without any additional information). */
+	return solveInitialQP( 0,yOpt,0,0, nWSR,cputime );
+}
+
+returnValue QProblem::init(	const real_t* const _H, const real_t* const _R, const real_t* const _g, const real_t* const _A,
+							const real_t* const _lb, const real_t* const _ub,
+							const real_t* const _lbA, const real_t* const _ubA,
+							int& nWSR, const real_t* const yOpt, real_t* const cputime
+							)
+{
+	/* 1) Setup QP data. */
+	if (setupQPdata(_H, _R, _g, _A, _lb, _ub, _lbA, _ubA) != SUCCESSFUL_RETURN)
 		return THROWERROR( RET_INVALID_ARGUMENTS );
 
 	/* 2) Call to main initialisation routine (without any additional information). */
@@ -781,14 +795,18 @@ returnValue QProblem::solveInitialQP(	const real_t* const xOpt, const real_t* co
 	if ( ( getNAC( ) + getNFX( ) ) == 0 )
 	{
 		/* Factorise full Hessian if no bounds/constraints are active. */
-		if ( setupCholeskyDecomposition( ) != SUCCESSFUL_RETURN )
-			return THROWERROR( RET_INIT_FAILED_CHOLESKY );
+		if (hasCholesky == BT_FALSE)
+			if ( setupCholeskyDecomposition( ) != SUCCESSFUL_RETURN )
+				return THROWERROR( RET_INIT_FAILED_CHOLESKY );
+		/* ... else we use user provided Cholesky factorization. At the moment
+		 * we can do that only for cold-started solver. */
 	}
 	else
 	{
 		/* Factorise projected Hessian if there active bounds/constraints. */
 		if ( setupCholeskyDecompositionProjected( ) != SUCCESSFUL_RETURN )
 			return THROWERROR( RET_INIT_FAILED_CHOLESKY );
+		/* TODO: use user-supplied Hessian decomposition. R_Z = R * Z. */
 	}
 
 	/* 5) Store original QP formulation... */
@@ -3517,7 +3535,7 @@ BooleanType QProblem::areBoundsConsistent(	const real_t* const delta_lb, const r
 /*
  *	s e t u p Q P d a t a
  */
-returnValue QProblem::setupQPdata(	const real_t* const _H, const real_t* const _g, const real_t* const _A,
+returnValue QProblem::setupQPdata(	const real_t* const _H, const real_t* const _R, const real_t* const _g, const real_t* const _A,
 									const real_t* const _lb, const real_t* const _ub,
 									const real_t* const _lbA, const real_t* const _ubA
 									)
@@ -3528,7 +3546,7 @@ returnValue QProblem::setupQPdata(	const real_t* const _H, const real_t* const _
 
 
 	/* 1) Load Hessian matrix as well as lower and upper bounds vectors. */
-	if ( QProblemB::setupQPdata( _H,_g,_lb,_ub ) != SUCCESSFUL_RETURN )
+	if (QProblemB::setupQPdata(_H, _R, _g, _lb, _ub) != SUCCESSFUL_RETURN)
 		return THROWERROR( RET_INVALID_ARGUMENTS );
 
 	/* 2) Load constraint matrix. */

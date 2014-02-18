@@ -97,8 +97,6 @@ returnValue ExportGaussNewtonCn2Factorization::getDataDeclarations(	ExportStatem
 	declarations.addDeclaration(x0, dataStruct);
 	declarations.addDeclaration(Dx0, dataStruct);
 
-	declarations.addDeclaration(T, dataStruct);
-
 	declarations.addDeclaration(W1, dataStruct);
 	declarations.addDeclaration(W2, dataStruct);
 
@@ -109,11 +107,8 @@ returnValue ExportGaussNewtonCn2Factorization::getDataDeclarations(	ExportStatem
 	declarations.addDeclaration(T2, dataStruct);
 	declarations.addDeclaration(T3, dataStruct);
 
-//	declarations.addDeclaration(W3, dataStruct);
-
-
 	declarations.addDeclaration(E, dataStruct);
-//	declarations.addDeclaration(QE, dataStruct);
+	declarations.addDeclaration(F, dataStruct);
 
 	declarations.addDeclaration(QDy, dataStruct);
 	declarations.addDeclaration(w1, dataStruct);
@@ -215,6 +210,16 @@ returnValue ExportGaussNewtonCn2Factorization::getCode(	ExportStatementBlock& co
 	code.addFunction( updateQ );
 	code.addFunction( mul_T2_A_L );
 	code.addFunction( mult_BT_T1_T2 );
+
+//	ExportFunction mac_R_BT_F_D, mult_FT_A_L;
+//		ExportFunction updateQ2;
+//		ExportFunction mac_W1_T1_E_F;
+
+	code.addFunction( mac_R_BT_F_D );
+	code.addFunction( mult_FT_A_L );
+	code.addFunction( updateQ2 );
+	code.addFunction( mac_W1_T1_E_F );
+	code.addFunction( move_GxT_T3 );
 
 	cholSolver.getCode( code );
 
@@ -744,8 +749,32 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	W1.setup("W1", NX, NU, REAL, ACADO_WORKSPACE);
-	W2.setup("W2", NX, NU, REAL, ACADO_WORKSPACE);
+	unsigned prepCacheSize =
+			2 * NX * NU +
+			NU * NU + NU * NX +
+			2 * NX * NX + NU * NX;
+
+	int useSinglePrecision;
+	get(USE_SINGLE_PRECISION, useSinglePrecision);
+	prepCacheSize = prepCacheSize * (useSinglePrecision ? 4 : 8);
+	LOG( LVL_DEBUG ) << "---> Condensing prep. part, cache size: " << prepCacheSize << " bytes" << endl;
+
+	ExportStruct prepCache = prepCacheSize < 16384 ? ACADO_LOCAL : ACADO_WORKSPACE;
+
+	W1.setup("W1", NX, NU, REAL, prepCache);
+	W2.setup("W2", NX, NU, REAL, prepCache);
+
+	D.setup("D", NU, NU, REAL, prepCache);
+	L.setup("L", NU, NX, REAL, prepCache);
+
+	T1.setup("T1", NX, NX, REAL, prepCache);
+	T2.setup("T2", NU, NX, REAL, prepCache);
+	T3.setup("T3", NX, NX, REAL, prepCache);
+
+	condensePrep
+			.addVariable( W1 ).addVariable( W2 )
+			.addVariable( D ).addVariable( L )
+			.addVariable( T1 ).addVariable( T2 ).addVariable( T3 );
 
 	LOG( LVL_DEBUG ) << "---> Setup condensing: E" << endl;
 	/// Setup E matrix as in the N^3 implementation
@@ -753,19 +782,19 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	// Special case, row = col = 0
 	condensePrep.addFunctionCall(moveGuE, evGu.getAddress(0, 0), E.getAddress(0, 0) );
 
-	if (N <= 20)
+	if (N <= 15)
 	{
 		unsigned row, col, prev, curr;
 		for (row = 1; row < N; ++row)
 		{
-			condensePrep.addFunctionCall(moveGxT, evGx.getAddress(row* NX, 0), T);
+			condensePrep.addFunctionCall(moveGxT, evGx.getAddress(row* NX, 0), T1);
 
 			for(col = 0; col < row; ++col)
 			{
 				prev = row * (row - 1) / 2 + col;
 				curr = (row + 1) * row / 2 + col;
 
-				condensePrep.addFunctionCall(multGxGu, T, E.getAddress(prev * NX, 0), E.getAddress(curr * NX, 0));
+				condensePrep.addFunctionCall(multGxGu, T1, E.getAddress(prev * NX, 0), E.getAddress(curr * NX, 0));
 			}
 
 			curr = (row + 1) * row / 2 + col;
@@ -782,11 +811,11 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 
 		ExportForLoop lRow(row, 1, N), lCol(col, 0, row);
 
-		lRow.addFunctionCall(moveGxT, evGx.getAddress(row* NX, 0), T);
+		lRow.addFunctionCall(moveGxT, evGx.getAddress(row* NX, 0), T1);
 
 		lCol.addStatement( prev == row * (row - 1) / 2 + col );
 		lCol.addStatement( curr == (row + 1) * row / 2 + col );
-		lCol.addFunctionCall( multGxGu, T, E.getAddress(prev * NX, 0), E.getAddress(curr * NX, 0) );
+		lCol.addFunctionCall( multGxGu, T1, E.getAddress(prev * NX, 0), E.getAddress(curr * NX, 0) );
 
 		lRow.addStatement( lCol );
 		lRow.addStatement( curr == (row + 1) * row / 2 + col );
@@ -796,6 +825,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 
 		condensePrep.release( row ).release( col ).release( curr ).release( prev );
 	}
+	condensePrep.addLinebreak( 2 );
 
 	LOG( LVL_DEBUG ) << "---> Setup condensing: H11" << endl;
 
@@ -824,57 +854,104 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 
 	 */
 
-	for (unsigned col = 0; col < N; ++col)
+	if (N <= 15)
 	{
-		// row = 0
-		unsigned curr = (N) * (N - 1) / 2 + (N - 1 - col);
-		if (QN1.isGiven() == true)
-			condensePrep.addFunctionCall(
-					multQN1Gu, E.getAddress(curr * NX), W1
-			);
-		else
-			condensePrep.addFunctionCall(
-					multGxGu, QN1, E.getAddress(curr * NX), W1
-			);
-
-		for (unsigned row = 0; row < col; ++row)
+		for (unsigned col = 0; col < N; ++col)
 		{
-			condensePrep.addFunctionCall(
-					multBTW1, evGu.getAddress((N - 1 - row) * NX), W1, ExportIndex( row ), ExportIndex( col )
-			);
-
-			condensePrep.addFunctionCall(
-					multGxTGu, evGx.getAddress((N - (row + 1)) * NX), W1, W2
-			);
-
-			unsigned next = (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col);
-			if (Q1.isGiven() == true)
+			// row = 0
+			unsigned curr = (N) * (N - 1) / 2 + (N - 1 - col);
+			if (QN1.isGiven() == true)
 				condensePrep.addFunctionCall(
-						macQEW2, Q1, E.getAddress(next * NX), W2, W1
+						multQN1Gu, E.getAddress(curr * NX), W1
 				);
 			else
 				condensePrep.addFunctionCall(
-						macQEW2,
-						Q1.getAddress((N - (row + 1)) * NX), E.getAddress(next * NX), W2, W1
+						multGxGu, QN1, E.getAddress(curr * NX), W1
 				);
+
+			for (unsigned row = 0; row < col; ++row)
+			{
+				condensePrep.addFunctionCall(
+						multBTW1, evGu.getAddress((N - 1 - row) * NX), W1, ExportIndex( row ), ExportIndex( col )
+				);
+
+				condensePrep.addFunctionCall(
+						multGxTGu, evGx.getAddress((N - (row + 1)) * NX), W1, W2
+				);
+
+				unsigned next = (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col);
+				if (Q1.isGiven() == true)
+					condensePrep.addFunctionCall(
+							macQEW2, Q1, E.getAddress(next * NX), W2, W1
+					);
+				else
+					condensePrep.addFunctionCall(
+							macQEW2,
+							Q1.getAddress((N - (row + 1)) * NX), E.getAddress(next * NX), W2, W1
+					);
+			}
+
+			if (R1.isGiven() == true)
+				condensePrep.addFunctionCall(
+						macBTW1_R1, R1, evGu.getAddress((N - 1 - col) * NX), W1, ExportIndex( col )
+				);
+			else
+				condensePrep.addFunctionCall(
+						macBTW1_R1, R1.getAddress((N - 1 - col) * NU), evGu.getAddress((N - 1 - col) * NX), W1, ExportIndex( col )
+				);
+
+			condensePrep.addLinebreak();
 		}
+	}
+	else
+	{
+		// No loop unrolling...
+		ExportIndex row, col, curr, next;
+		condensePrep.acquire( row ).acquire( col ).acquire( curr ).acquire( next );
+
+		ExportForLoop colLoop(col, 0, N);
+		colLoop << (curr == (N) * (N - 1) / 2 + (N - 1 - col));
+
+		if (QN1.isGiven() == true)
+			colLoop.addFunctionCall(multQN1Gu, E.getAddress(curr * NX), W1);
+		else
+			colLoop.addFunctionCall(multGxGu, QN1, E.getAddress(curr * NX), W1);
+
+		ExportForLoop rowLoop(row, 0, col);
+		rowLoop.addFunctionCall(
+				multBTW1, evGu.getAddress((N - 1 - row) * NX), W1, ExportIndex( row ), ExportIndex( col )
+		);
+
+		rowLoop.addFunctionCall(
+				multGxTGu, evGx.getAddress((N - (row + 1)) * NX), W1, W2
+		);
+
+		rowLoop << (next == (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col));
+		if (Q1.isGiven() == true)
+			rowLoop.addFunctionCall(macQEW2, Q1, E.getAddress(next * NX), W2, W1);
+		else
+			rowLoop.addFunctionCall(macQEW2, Q1.getAddress((N - (row + 1)) * NX), E.getAddress(next * NX), W2, W1);
+
+		colLoop << rowLoop;
 
 		if (R1.isGiven() == true)
-			condensePrep.addFunctionCall(
+			colLoop.addFunctionCall(
 					macBTW1_R1, R1, evGu.getAddress((N - 1 - col) * NX), W1, ExportIndex( col )
 			);
 		else
-			condensePrep.addFunctionCall(
+			colLoop.addFunctionCall(
 					macBTW1_R1, R1.getAddress((N - 1 - col) * NU), evGu.getAddress((N - 1 - col) * NX), W1, ExportIndex( col )
 			);
 
-		condensePrep.addLinebreak();
+		condensePrep << colLoop;
+		condensePrep.release( row ).release( col ).release( curr ).release( next );
 	}
+	condensePrep.addLinebreak( 2 );
 
 	LOG( LVL_DEBUG ) << "---> Copy H11 upper to lower triangular part" << endl;
 
 	// Copy to H11 upper triangular part to lower triangular part
-	if (N <= 20)
+	if (N <= 15)
 	{
 		for (unsigned row = 0; row < N; ++row)
 			for(unsigned col = 0; col < row; ++col)
@@ -894,7 +971,7 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 
 		condensePrep.release( row ).release( col );
 	}
-	condensePrep.addLinebreak();
+	condensePrep.addLinebreak( 2 );
 
 	LOG( LVL_DEBUG ) << "---> Factorization of the condensed Hessian" << endl;
 
@@ -925,23 +1002,56 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	chol( D )
 	U(N - 1, N - 1) = D
 
+	************************************************
+	************************************************
+	OR, an alternative, n_x^3 free version would be:
+
+	T1 = Q( N )
+	for col = 0: N - 1
+		F( col ) = T1 * E(0, col)
+
+	for blk = N - 1: 1
+		row = N - 1 - blk
+
+		D = R( blk ) + B( blk )^T * F( row )
+		L = F( row )^T * A( blk )
+
+		chol( D )
+		L = chol_solve(D, L) // L <- D^(-T) * L
+
+		T1 = Q( blk ) - L^T * L
+
+		T3 = A( blk )^T
+
+		for col = row + 1: N - 1
+			W1 = T3 * F( col )
+			F( col ) = T1 * E(row + 1, col) + W1
+
+		U(row, row) = D
+		for col = row + 1: N - 1
+			U(row, col) = L * E(row + 1, col)
+
+	D = R( 0 ) + B( 0 )^T * F(N - 1)
+	chol( D )
+	U(N - 1, N - 1) = D
+
 	 */
 
+	// The matrix where we store the factorization
 	U.setup("U", getNumQPvars(), getNumQPvars(), REAL, ACADO_WORKSPACE);
-
-	D.setup("D", NU, NU, REAL, ACADO_WORKSPACE);
-	L.setup("L", NU, NX, REAL, ACADO_WORKSPACE);
-
-	T1.setup("T1", NX, NX, REAL, ACADO_WORKSPACE);
-	T2.setup("T2", NU, NX, REAL, ACADO_WORKSPACE);
-	T3.setup("T3", NX, NX, REAL, ACADO_WORKSPACE);
+	// A helper matrix
+	F.setup("F", N * NX, NU, REAL, ACADO_WORKSPACE);
 
 	cholSolver.init(NU, NX, "condensing");
 	cholSolver.setup();
 
+	// Just for testing...
 //	condensePrep.addStatement( U == H );
 //	condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), U);
 //	condensePrep.addFunctionCall(cholSolver.getSolveFunction(), U, Id);
+
+#if 0
+	// N^2 factorization with n_x^3 terms
 
 	condensePrep.addStatement( T1 == QN1 );
 	for (unsigned blk = N - 1; blk > 0; --blk)
@@ -980,7 +1090,132 @@ returnValue ExportGaussNewtonCn2Factorization::setupCondensing( void )
 	condensePrep.addFunctionCall(mac_R_T2_B_D, R1.getAddress( 0 ), T2, evGu.getAddress( 0 ), D);
 	condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), D);
 	condensePrep.addFunctionCall(move_D_U, D, U, ExportIndex( N - 1 ));
+#else
+	// N^2 factorization, n_x^3 free version
 
+	// Initial value for the "updated" Q^* matrix
+	condensePrep.addStatement( T1 == QN1 );
+
+	if (N <= 15)
+	{
+		for (unsigned col = 0; col < N; ++col)
+		{
+			unsigned blkE = (N - 0) * (N - 1 - 0) / 2 + (N - 1 - col);
+			condensePrep.addFunctionCall(
+					multGxGu, T1, E.getAddress(blkE * NX), F.getAddress(col * NX));
+		}
+
+		for (unsigned blk = N - 1; blk > 0; --blk)
+		{
+			unsigned row = N - 1 - blk;
+
+			// D = R( blk ) + B( blk )^T * F( row )
+			// L = F( row )^T * A( blk )
+			if (R1.isGiven() == true)
+				condensePrep.addFunctionCall(
+						mac_R_BT_F_D, R1, evGu.getAddress(blk * NX), F.getAddress(row * NX), D);
+			else
+				condensePrep.addFunctionCall(
+						mac_R_BT_F_D, R1.getAddress(blk * NX), evGu.getAddress(blk * NX), F.getAddress(row * NX), D);
+			condensePrep.addFunctionCall(mult_FT_A_L, F.getAddress(row * NX), evGx.getAddress(blk * NX), L);
+
+			// Chol and system solve
+			condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), D);
+			condensePrep.addFunctionCall(cholSolver.getSolveFunction(), D, L);
+
+			// Update Q
+			if (Q1.isGiven() == true)
+				condensePrep.addFunctionCall(updateQ2, Q1, L, T1);
+			else
+				condensePrep.addFunctionCall(updateQ2, Q1.getAddress(blk * NX), L, T1);
+
+			// for col = row + 1: N - 1
+			//	 W1 = A( blk )^T * F( col )
+			//	 F( col ) = W1 + T1 * E(row + 1, col)
+
+			condensePrep.addFunctionCall(move_GxT_T3, evGx.getAddress(blk * NX), T3);
+
+			for (unsigned col = row + 1; col < N; ++col)
+			{
+				condensePrep.addFunctionCall(multGxGu, T3, F.getAddress(col * NX), W1);
+
+				unsigned blkE = (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col);
+				condensePrep.addFunctionCall(mac_W1_T1_E_F, W1, T1, E.getAddress(blkE * NX), F.getAddress(col * NX));
+			}
+
+			// Calculate one block-row of the factorized matrix
+			condensePrep.addFunctionCall(move_D_U, D, U, ExportIndex( row ));
+			for (unsigned col = row + 1; col < N; ++col)
+			{
+				// U(row, col) = L * E(row + 1, col)
+
+				unsigned blkE = (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col);
+				condensePrep.addFunctionCall(mult_L_E_U, L, E.getAddress(blkE * NX), U, ExportIndex( row ), ExportIndex( col ));
+			}
+		}
+	}
+	else
+	{
+		// Do not unroll the for-loops...
+
+		ExportIndex col, blkE, blk, row;
+
+		condensePrep.acquire( col ).acquire( blkE ).acquire( blk ).acquire( row );
+
+		ExportForLoop colLoop(col, 0, N);
+		colLoop << (blkE == (N - 0) * (N - 1 - 0) / 2 + (N - 1 - col));
+		colLoop.addFunctionCall(
+				multGxGu, T1, E.getAddress(blkE * NX), F.getAddress(col * NX));
+		condensePrep << colLoop;
+
+		ExportForLoop blkLoop(blk, N - 1, 0, -1);
+		blkLoop << ( row == N - 1 - blk );
+
+		if (R1.isGiven() == true)
+			blkLoop.addFunctionCall(
+					mac_R_BT_F_D, R1, evGu.getAddress(blk * NX), F.getAddress(row * NX), D);
+		else
+			blkLoop.addFunctionCall(
+					mac_R_BT_F_D, R1.getAddress(blk * NX), evGu.getAddress(blk * NX), F.getAddress(row * NX), D);
+		blkLoop.addFunctionCall(mult_FT_A_L, F.getAddress(row * NX), evGx.getAddress(blk * NX), L);
+
+		// Chol and system solve
+		blkLoop.addFunctionCall(cholSolver.getCholeskyFunction(), D);
+		blkLoop.addFunctionCall(cholSolver.getSolveFunction(), D, L);
+
+		// Update Q
+		if (Q1.isGiven() == true)
+			blkLoop.addFunctionCall(updateQ2, Q1, L, T1);
+		else
+			blkLoop.addFunctionCall(updateQ2, Q1.getAddress(blk * NX), L, T1);
+
+		blkLoop.addFunctionCall(move_GxT_T3, evGx.getAddress(blk * NX), T3);
+
+		ExportForLoop colLoop2(col, row + 1, N);
+		colLoop2.addFunctionCall(multGxGu, T3, F.getAddress(col * NX), W1);
+		colLoop2 << (blkE == (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col));
+		colLoop2.addFunctionCall(mac_W1_T1_E_F, W1, T1, E.getAddress(blkE * NX), F.getAddress(col * NX));
+		blkLoop << colLoop2;
+
+		// Calculate one block-row of the factorized matrix
+		blkLoop.addFunctionCall(move_D_U, D, U, ExportIndex( row ));
+		ExportForLoop colLoop3(col, row + 1, N);
+		colLoop3 << (blkE == (N - (row + 1)) * (N - 1 - (row + 1)) / 2 + (N - 1 - col));
+		colLoop3.addFunctionCall(mult_L_E_U, L, E.getAddress(blkE * NX), U, row, col);
+		blkLoop << colLoop3;
+
+		condensePrep << blkLoop;
+		condensePrep.release( col ).release( blkE ).release( blk ).release( row );
+	}
+
+	// Calculate the bottom-right block of the factorized Hessian
+	condensePrep.addFunctionCall(
+			mac_R_BT_F_D, R1.getAddress(0 * NX), evGu.getAddress(0 * NX), F.getAddress((N - 1) * NX), D);
+	condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), D);
+	condensePrep.addFunctionCall(move_D_U, D, U, ExportIndex( N - 1 ));
+	condensePrep.addLinebreak( 2 );
+
+#endif
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -1209,7 +1444,6 @@ returnValue ExportGaussNewtonCn2Factorization::setupVariables( )
 		Dx0.setup("Dx0", NX, 1, REAL, ACADO_WORKSPACE);
 	}
 
-	T.setup("T", NX, NX, REAL, ACADO_WORKSPACE);
 	E.setup("E", N * (N + 1) / 2 * NX, NU, REAL, ACADO_WORKSPACE);
 	QE.setup("QE", N * (N + 1) / 2 * NX, NU, REAL, ACADO_WORKSPACE);
 	QGx.setup("QGx", N * NX, NX, REAL, ACADO_WORKSPACE);
@@ -1510,6 +1744,28 @@ returnValue ExportGaussNewtonCn2Factorization::setupMultiplicationRoutines( )
 	updateQ.addStatement( T11 == Q11 + T33 * Gx1 );
 	updateQ.addStatement( T11 -= (L1 ^ L1) );
 
+//	ExportFunction mac_R_BT_F_D, mult_FT_A_L;
+//	ExportFunction updateQ2;
+//	ExportFunction mac_W1_T1_E_F;
+
+	mac_R_BT_F_D.setup("mac_R_BT_F_D", R11, Gu1, Gu2, D1);
+	mac_R_BT_F_D.addStatement( D1 == R11 + (Gu1 ^ Gu2) );
+
+	mult_FT_A_L.setup("mult_FT_A_L", Gu1, Gx1, L1);
+	mult_FT_A_L.addStatement( L1 == (Gu1 ^ Gx1) );
+
+	updateQ2.setup("updateQ2", Q11, L1, T11);
+	// TODO T11 == Q11 - (L1^L1) does not work properly
+	//      Revisit this...
+	updateQ2.addStatement( T11 == Q11 );
+	updateQ2.addStatement( T11 -= (L1 ^ L1) );
+
+	mac_W1_T1_E_F.setup("mac_W1_T1_E_F", Gu1, Gx1, Gu2, Gu3);
+	mac_W1_T1_E_F.addStatement( Gu3 == Gu1 + Gx1 * Gu2 );
+
+	move_GxT_T3.setup("move_GxT_T3", Gx1, Gx2);
+	move_GxT_T3.addStatement( Gx2 == Gx1.getTranspose() );
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -1625,6 +1881,9 @@ returnValue ExportGaussNewtonCn2Factorization::setupQPInterface( )
 	int maxNumQPiterations;
 	get(MAX_NUM_QP_ITERATIONS, maxNumQPiterations);
 
+	int externalCholesky;
+	get(CG_CONDENSED_HESSIAN_CHOLESKY, externalCholesky);
+
 	//
 	// Set up export of the source file
 	//
@@ -1647,7 +1906,9 @@ returnValue ExportGaussNewtonCn2Factorization::setupQPInterface( )
 			"", // TODO
 //			sigma.getFullName(),
 			hotstartQP,
+			(CondensedHessianCholeskyDecomposition)externalCholesky == EXTERNAL,
 			H.getFullName(),
+			U.getFullName(),
 			g.getFullName(),
 			A.getFullName(),
 			lb.getFullName(),

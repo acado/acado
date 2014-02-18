@@ -26,7 +26,7 @@
 /**
  *    \file src/code_generation/export_qpoases_interface.cpp
  *    \author Milan Vukov
- *    \date 2012 - 2013
+ *    \date 2012 - 2014
  */
 
 #include <acado/code_generation/export_qpoases_interface.hpp>
@@ -64,7 +64,9 @@ returnValue ExportQpOasesInterface::configure(	const std::string& _prefix,
 												const std::string& _dualSolution,
 												const std::string& _sigma,
 												bool _hotstartQP,
+												bool _externalCholesky,
 												const std::string& _qpH,
+												const std::string& _qpR,
 												const std::string& _qpg,
 												const std::string& _qpA,
 												const std::string& _qplb,
@@ -83,7 +85,10 @@ returnValue ExportQpOasesInterface::configure(	const std::string& _prefix,
 	{
 		solverName = "QProblem";
 
-		s	<< _qpH << ", " << _qpg << ", " << _qpA << ", " << _qplb << ", " << _qpub << ", "
+		s	<< _qpH << ", ";
+		if (_externalCholesky == false)
+			s << _qpR << ", ";
+		s	<< _qpg << ", " << _qpA << ", " << _qplb << ", " << _qpub << ", "
 			<< _qplbA << ", " << _qpubA << ", " << "nWSR";
 
 		if ( (bool)_hotstartQP == true )
@@ -95,7 +100,10 @@ returnValue ExportQpOasesInterface::configure(	const std::string& _prefix,
 	{
 		solverName = "QProblemB";
 
-		s << _qpH << ", " << _qpg << ", " << _qplb << ", " << _qpub << ", " << "nWSR";
+		s	<< _qpH << ", ";
+		if (_externalCholesky == false)
+			s << _qpR << ", ";
+		s	<< _qpg << ", " << _qplb << ", " << _qpub << ", " << "nWSR";
 
 		if ( (bool)_hotstartQP == true )
 			s << ", " << _dualSolution;

@@ -171,6 +171,9 @@ public:
 	/** Set global export variable - a variable that holds intermediate values. */
 	ExportVariable getGlobalExportVariable( ) const;
 
+	/** A helper function to check whether a function is external. */
+	bool isExternal() const;
+
 protected:
 	/** The number of states that are needed to evaluate the system of differential equations.
 	 *  If this number isn't specified, then it will be set to the number of equations (minus

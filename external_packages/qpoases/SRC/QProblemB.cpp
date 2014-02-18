@@ -65,6 +65,8 @@ QProblemB::QProblemB( )
 
 	bounds.init( 0 );
 
+	hasCholesky = BT_FALSE;
+
 	tau = 0.0;
 
 	hessianType = HST_POSDEF_NULLSPACE; /* Hessian is assumed to be positive definite by default */
@@ -100,6 +102,8 @@ QProblemB::QProblemB( int _nV )
 	getGlobalMessageHandler( )->reset( );
 
 	bounds.init( _nV );
+
+	hasCholesky = BT_FALSE;
 
 	tau = 0.0;
 
@@ -148,6 +152,7 @@ QProblemB::QProblemB( const QProblemB& rhs )
 	for( i=0; i<_nV; ++i )
 		for( j=0; j<_nV; ++j )
 			R[i*NVMAX + j] = rhs.R[i*NVMAX + j];
+	hasCholesky = rhs.hasCholesky;
 
 	for( i=0; i<_nV; ++i )
 		x[i] = rhs.x[i];
@@ -206,6 +211,7 @@ QProblemB& QProblemB::operator=( const QProblemB& rhs )
 		for( i=0; i<_nV; ++i )
 			for( j=0; j<_nV; ++j )
 				R[i*NVMAX + j] = rhs.R[i*NVMAX + j];
+		hasCholesky = rhs.hasCholesky;
 
 
 		for( i=0; i<_nV; ++i )
@@ -248,6 +254,7 @@ returnValue QProblemB::reset( )
 	for( i=0; i<nV; ++i )
 		for( j=0; j<nV; ++j )
 			R[i*NVMAX + j] = 0.0;
+	hasCholesky = BT_FALSE;
 
 	/* 3) Reset steplength and status flags. */
 	tau = 0.0;
@@ -271,11 +278,24 @@ returnValue QProblemB::init(	const real_t* const _H, const real_t* const _g,
 								)
 {
 	/* 1) Setup QP data. */
-	if ( setupQPdata( _H,_g,_lb,_ub ) != SUCCESSFUL_RETURN )
+	if (setupQPdata(_H, 0, _g, _lb, _ub) != SUCCESSFUL_RETURN)
 		return THROWERROR( RET_INVALID_ARGUMENTS );
 
 	/* 2) Call to main initialisation routine (without any additional information). */
-	return solveInitialQP( 0,yOpt,0, nWSR,cputime );
+	return solveInitialQP(0, yOpt, 0, nWSR, cputime);
+}
+
+returnValue QProblemB::init(	const real_t* const _H, const real_t* const _R, const real_t* const _g,
+								const real_t* const _lb, const real_t* const _ub,
+								int& nWSR, const real_t* const yOpt, real_t* const cputime
+								)
+{
+	/* 1) Setup QP data. */
+	if (setupQPdata(_H, _R, _g, _lb, _ub) != SUCCESSFUL_RETURN)
+		return THROWERROR( RET_INVALID_ARGUMENTS );
+
+	/* 2) Call to main initialisation routine (without any additional information). */
+	return solveInitialQP(0, yOpt, 0, nWSR, cputime);
 }
 
 
@@ -793,7 +813,7 @@ returnValue QProblemB::solveInitialQP(	const real_t* const xOpt, const real_t* c
 										int& nWSR, real_t* const cputime
 										)
 {
-	int i;
+	int i, nFR;
 	int nV = getNV( );
 
 
@@ -839,8 +859,12 @@ returnValue QProblemB::solveInitialQP(	const real_t* const xOpt, const real_t* c
 	if ( setupAuxiliaryWorkingSet( &auxiliaryBounds,BT_TRUE ) != SUCCESSFUL_RETURN )
 		return THROWERROR( RET_INIT_FAILED );
 
-	if ( setupCholeskyDecomposition( ) != SUCCESSFUL_RETURN )
-		return THROWERROR( RET_INIT_FAILED_CHOLESKY );
+	nFR = getNFR();
+	/* At the moment we can only provide a Cholesky of the Hessian if
+	 * the solver is cold-started. */
+	if (hasCholesky == BT_FALSE || nFR != nV)
+		if (setupCholeskyDecomposition() != SUCCESSFUL_RETURN)
+			return THROWERROR( RET_INIT_FAILED_CHOLESKY );
 
 	/* 5) Store original QP formulation... */
 	real_t g_original[NVMAX];
@@ -1502,20 +1526,30 @@ BooleanType QProblemB::areBoundsConsistent(	const real_t* const delta_lb, const 
 /*
  *	s e t u p Q P d a t a
  */
-returnValue QProblemB::setupQPdata(	const real_t* const _H, const real_t* const _g,
+returnValue QProblemB::setupQPdata(	const real_t* const _H, const real_t* const _R, const real_t* const _g,
 									const real_t* const _lb, const real_t* const _ub
 									)
 {
 	int i, j;
 	int nV = getNV( );
 
-	/* 1) Setup Hessian matrix. */
+	/* 1) Setup Hessian matrix and it's Cholesky factorization. */
 	if ( _H == 0 )
 		return THROWERROR( RET_INVALID_ARGUMENTS );
 
 	for( i=0; i<nV; ++i )
 		for( j=0; j<nV; ++j )
 			H[i*NVMAX + j] = _H[i*nV + j];
+
+	if (_R != 0)
+	{
+		for( i=0; i<nV; ++i )
+			for( j=0; j<nV; ++j )
+				R[i*NVMAX + j] = _R[i*nV + j];
+		hasCholesky = BT_TRUE;
+	}
+	else
+		hasCholesky = BT_FALSE;
 
 	/* 2) Setup gradient vector. */
 	if ( _g == 0 )

@@ -64,7 +64,7 @@ returnValue ExportCholeskyDecomposition::setup()
 
 	stringstream s;
 
-	ExportVariable ret("ret", 1, 1, INT, ACADO_LOCAL);
+	ExportVariable ret("ret", 1, 1, INT, ACADO_LOCAL, true);
 	fcn.setReturnValue( ret );
 
 	string name( A.getName() );
