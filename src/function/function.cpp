@@ -198,6 +198,7 @@ int Function::getN   (VariableType &variableType_) const{
 	case VT_INTERMEDIATE_STATE 	: return getN(); break;
 	case VT_DDIFFERENTIAL_STATE  	: return getNDX();	 break;
 	case VT_OUTPUT 	 		: return 0; break;
+	case VT_VARIABLE 	 	: return getNX()+getNXA()+getNU()+getNUI()+getNP()+getNPI()+getNW(); break;
 	case VT_UNKNOWN 		: return 0;
     }
     return evaluationTree.getNX();
