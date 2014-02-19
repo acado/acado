@@ -120,7 +120,7 @@ class ThreeSweepsERKExport : public AdjointERKExport
 
 	protected:
 
-		Expression returnLowerTriangular( const Expression& expr, uint dim );
+		Expression returnLowerTriangular( const Expression& expr );
 
 		Expression symmetricDoubleProduct( const Expression& expr, const Expression& arg );
 

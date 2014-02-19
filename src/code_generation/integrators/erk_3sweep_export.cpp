@@ -134,7 +134,7 @@ returnValue ThreeSweepsERKExport::setDifferentialEquation(	const Expression& rhs
 		h << symmetricDoubleProduct(tmp2, Gx);
 		h << Gu.transpose()*tmp2*Gx + multipleForwardDerivative(tmp3, x, Gx);
 		Expression tmp7 = tmp4 + tmp4.transpose() + forwardDerivative(tmp3, u);
-		h << symmetricDoubleProduct(tmp2, Gu) + returnLowerTriangular(tmp7, NU);
+		h << symmetricDoubleProduct(tmp2, Gu) + returnLowerTriangular(tmp7);
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -342,10 +342,12 @@ returnValue ThreeSweepsERKExport::getCode(	ExportStatementBlock& code
 }
 
 
-Expression ThreeSweepsERKExport::returnLowerTriangular( const Expression& expr, uint dim ) {
+Expression ThreeSweepsERKExport::returnLowerTriangular( const Expression& expr ) {
 //	std::cout << "returnLowerTriangular with " << expr.getNumRows() << " rows and " << expr.getNumCols() << " columns\n";
+	ASSERT( expr.getNumRows() == expr.getNumCols() );
+
 	Expression new_expr;
-	for( uint i = 0; i < dim; i++ ) {
+	for( uint i = 0; i < expr.getNumRows(); i++ ) {
 		for( uint j = 0; j <= i; j++ ) {
 			new_expr << expr(i,j);
 		}
