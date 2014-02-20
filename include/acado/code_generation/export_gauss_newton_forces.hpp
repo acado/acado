@@ -176,6 +176,7 @@ private:
 	/** @{ */
 	std::vector< ExportVariable > conLB;
 	std::vector< ExportVariable > conUB;
+	ExportVariable lbValues, ubValues;
 
 	std::vector< std::vector< unsigned > > conLBIndices, conUBIndices;
 	std::vector< std::vector< double > > conLBValues, conUBValues;
