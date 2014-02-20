@@ -620,6 +620,22 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		}
 		condensePrep.addLinebreak( );
 
+
+		unsigned nXBounds = getNumStateBounds( );
+		// TODO This might be set with an option to be variable!!!
+		if (hardcodeConstraintValues == YES)
+		{
+			lbAValues.setup("lbAValues", xLowerBounds, REAL, ACADO_VARIABLES);
+			ubAValues.setup("ubAValues", xUpperBounds, REAL, ACADO_VARIABLES);
+		}
+		else
+		{
+			lbAValues.setup("lbAValues", nXBounds, 1, REAL, ACADO_VARIABLES);
+			lbAValues.setDoc( "Lower bounds values for affine constraints." );
+			ubAValues.setup("ubAValues", nXBounds, 1, REAL, ACADO_VARIABLES);
+			ubAValues.setDoc( "Upper bounds values for affine constraints." );
+		}
+
 		// Shift constraint bounds by first interval
 		for(unsigned boundIndex = 0; boundIndex < getNumStateBounds( ); ++boundIndex)
 		{
@@ -627,8 +643,8 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 //			LOG( LVL_DEBUG ) << row << endl;
 
 			condenseFdb.addStatement( tmp == sbar.getRow( row ) + x.makeRowVector().getCol( row ) );
-			condenseFdb.addStatement( lbA.getRow( boundIndex ) == xLowerBounds( boundIndex ) - tmp );
-			condenseFdb.addStatement( ubA.getRow( boundIndex ) == xUpperBounds( boundIndex ) - tmp );
+			condenseFdb.addStatement( lbA.getRow( boundIndex ) == lbAValues.getRow( boundIndex ) - tmp );
+			condenseFdb.addStatement( ubA.getRow( boundIndex ) == ubAValues.getRow( boundIndex ) - tmp );
 		}
 		condenseFdb.addLinebreak( );
 	}
