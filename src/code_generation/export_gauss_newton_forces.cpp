@@ -847,12 +847,10 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	//
 	ExportFunction solveQP;
 	solveQP.setup("solve");
-	string prefix;
-	prefix = "forces";
 
 	feedback
 		<< returnValueFeedbackPhase.getFullName() << " = "
-		<< qpModuleName << "_" << solveQP << "( "
+		<< qpModuleName << "_" << solveQP.getName() << "( "
 		<< "&" << qpObjPrefix << "_" << "params" << ", "
 		<< "&" << qpObjPrefix << "_" << "output" << ", "
 		<< "&" << qpObjPrefix << "_" << "info" << " );\n";
