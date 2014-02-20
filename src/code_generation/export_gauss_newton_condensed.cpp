@@ -521,17 +521,20 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 			ubBoundValues(offsetBounds + node * NU + el) = uBounds.getUpperBound(node, el);
 		}
 
-	if (hardcodeConstraintValues == YES || !(isFinite( lbBoundValues ) || isFinite( ubBoundValues )))
+	if (hardcodeConstraintValues == YES)
 	{
 		lbValues.setup("lbValues", lbBoundValues, REAL, ACADO_VARIABLES);
 		ubValues.setup("ubValues", ubBoundValues, REAL, ACADO_VARIABLES);
 	}
-	else if (isFinite( lbBoundValues ) || isFinite( ubBoundValues ))
+	else
 	{
 		lbValues.setup("lbValues", numBounds, 1, REAL, ACADO_VARIABLES);
 		lbValues.setDoc( "Lower bounds values." );
 		ubValues.setup("ubValues", numBounds, 1, REAL, ACADO_VARIABLES);
 		ubValues.setDoc( "Upper bounds values." );
+
+		initialize.addStatement( lbValues == lbBoundValues );
+		initialize.addStatement( ubValues == ubBoundValues );
 	}
 
 	ExportFunction* boundSetFcn = hardcodeConstraintValues == YES ? &condensePrep : &condenseFdb;
@@ -576,31 +579,30 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 
 	if ( sizeA )
 	{
-		if (hardcodeConstraintValues == true)
+		DVector lbTmp, ubTmp;
+
+		if ( numStateBounds )
 		{
-			DVector lbTmp, ubTmp;
-
-			if ( numStateBounds )
+			DVector lbStateBoundValues( numStateBounds );
+			DVector ubStateBoundValues( numStateBounds );
+			for (unsigned i = 0; i < numStateBounds; ++i)
 			{
-				DVector lbStateBoundValues( numStateBounds );
-				DVector ubStateBoundValues( numStateBounds );
-				for (unsigned i = 0; i < numStateBounds; ++i)
-				{
-					lbStateBoundValues( i ) = xBounds.getLowerBound( xBoundsIdx[ i ] / NX, xBoundsIdx[ i ] % NX );
-					ubStateBoundValues( i ) = xBounds.getUpperBound( xBoundsIdx[ i ] / NX, xBoundsIdx[ i ] % NX );
-				}
-
-				lbTmp.append( lbStateBoundValues );
-				ubTmp.append( ubStateBoundValues );
+				lbStateBoundValues( i ) = xBounds.getLowerBound( xBoundsIdx[ i ] / NX, xBoundsIdx[ i ] % NX );
+				ubStateBoundValues( i ) = xBounds.getUpperBound( xBoundsIdx[ i ] / NX, xBoundsIdx[ i ] % NX );
 			}
 
-			lbTmp.append( lbPathConValues );
-			ubTmp.append( ubPathConValues );
+			lbTmp.append( lbStateBoundValues );
+			ubTmp.append( ubStateBoundValues );
+		}
 
-			lbTmp.append( lbPointConValues );
-			ubTmp.append( ubPointConValues );
+		lbTmp.append( lbPathConValues );
+		ubTmp.append( ubPathConValues );
 
+		lbTmp.append( lbPointConValues );
+		ubTmp.append( ubPointConValues );
 
+		if (hardcodeConstraintValues == true)
+		{
 			lbAValues.setup("lbAValues", lbTmp, REAL, ACADO_VARIABLES);
 			ubAValues.setup("ubAValues", ubTmp, REAL, ACADO_VARIABLES);
 		}
@@ -610,6 +612,9 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 			lbAValues.setDoc( "Lower bounds values for affine constraints." );
 			ubAValues.setup("ubAValues", sizeA, 1, REAL, ACADO_VARIABLES);
 			ubAValues.setDoc( "Upper bounds values for affine constraints." );
+
+			initialize.addStatement( lbAValues == lbTmp );
+			initialize.addStatement( ubAValues == ubTmp );
 		}
 	}
 

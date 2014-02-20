@@ -508,17 +508,20 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		}
 
 	// TODO This might be set with an option to be variable!!!
-	if (hardcodeConstraintValues == YES || !(isFinite( lbValuesMatrix ) || isFinite( ubValuesMatrix )))
+	if (hardcodeConstraintValues == YES)
 	{
 		lbValues.setup("lbValues", lbValuesMatrix, REAL, ACADO_VARIABLES);
 		ubValues.setup("ubValues", ubValuesMatrix, REAL, ACADO_VARIABLES);
 	}
-	else if (isFinite( lbValuesMatrix ) || isFinite( ubValuesMatrix ))
+	else
 	{
 		lbValues.setup("lbValues", numBounds, 1, REAL, ACADO_VARIABLES);
 		lbValues.setDoc( "Lower bounds values." );
 		ubValues.setup("ubValues", numBounds, 1, REAL, ACADO_VARIABLES);
 		ubValues.setDoc( "Upper bounds values." );
+
+		initialize.addStatement(lbValues == lbValuesMatrix);
+		initialize.addStatement(ubValues == ubValuesMatrix);
 	}
 
 	ExportFunction* boundSetFcn = hardcodeConstraintValues == YES ? &condensePrep : &condenseFdb;
@@ -634,6 +637,9 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 			lbAValues.setDoc( "Lower bounds values for affine constraints." );
 			ubAValues.setup("ubAValues", nXBounds, 1, REAL, ACADO_VARIABLES);
 			ubAValues.setDoc( "Upper bounds values for affine constraints." );
+
+			initialize.addStatement(lbAValues == xLowerBounds);
+			initialize.addStatement(ubAValues == xUpperBounds);
 		}
 
 		// Shift constraint bounds by first interval
