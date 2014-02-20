@@ -521,7 +521,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 			ubBoundValues(offsetBounds + node * NU + el) = uBounds.getUpperBound(node, el);
 		}
 
-	if (hardcodeConstraintValues == YES)
+	if (hardcodeConstraintValues == YES || !(isFinite( lbBoundValues ) || isFinite( ubBoundValues )))
 	{
 		lbValues.setup("lbValues", lbBoundValues, REAL, ACADO_VARIABLES);
 		ubValues.setup("ubValues", ubBoundValues, REAL, ACADO_VARIABLES);

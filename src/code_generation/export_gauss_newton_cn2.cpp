@@ -508,7 +508,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		}
 
 	// TODO This might be set with an option to be variable!!!
-	if (hardcodeConstraintValues == YES)
+	if (hardcodeConstraintValues == YES || !(isFinite( lbValuesMatrix ) || isFinite( ubValuesMatrix )))
 	{
 		lbValues.setup("lbValues", lbValuesMatrix, REAL, ACADO_VARIABLES);
 		ubValues.setup("ubValues", ubValuesMatrix, REAL, ACADO_VARIABLES);
