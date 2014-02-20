@@ -609,7 +609,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 			lbAValues.setup("lbAValues", sizeA, 1, REAL, ACADO_VARIABLES);
 			lbAValues.setDoc( "Lower bounds values for affine constraints." );
 			ubAValues.setup("ubAValues", sizeA, 1, REAL, ACADO_VARIABLES);
-			ubAValues.setDoc( "Lower bounds values for affine constraints." );
+			ubAValues.setDoc( "Upper bounds values for affine constraints." );
 		}
 	}
 
