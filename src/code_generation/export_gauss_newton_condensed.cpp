@@ -526,7 +526,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 		lbValues.setup("lbValues", lbBoundValues, REAL, ACADO_VARIABLES);
 		ubValues.setup("ubValues", ubBoundValues, REAL, ACADO_VARIABLES);
 	}
-	else
+	else if (isFinite( lbBoundValues ) || isFinite( ubBoundValues ))
 	{
 		lbValues.setup("lbValues", numBounds, 1, REAL, ACADO_VARIABLES);
 		lbValues.setDoc( "Lower bounds values." );
