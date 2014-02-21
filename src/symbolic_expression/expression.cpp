@@ -1442,22 +1442,22 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 		}
 
 		if( dfS != 0 ){
-		     for( run2 = 0; run2 < nS; run2++ ){
-			delete tmp.element[run1*nS+run2];
-			tmp.element[run1*nS+run2] = dS[run2]->clone();
-		     }
+			for( run2 = 0; run2 < nS; run2++ ){
+				delete tmp.element[run1*nS+run2];
+				tmp.element[run1*nS+run2] = dS[run2]->clone();
+			}
 		}
 
 		if( ldf != 0 ){
-		   for( run2 = 0; run2 < nS; run2++ ){
-			Operator *sum = tmp2.element[run2]->clone();
-			delete tmp2.element[run2];
-				
+			for( run2 = 0; run2 < nS; run2++ ){
+				Operator *sum = tmp2.element[run2]->clone();
+				delete tmp2.element[run2];
+
 				// THIS IS NOT EFFICIENT YET (CHECK FOR ==ZERO)
-			
-			tmp2.element[run2] = new Addition( sum->clone(), ld[run2]->clone() );
-			delete sum;
-		  }
+
+				tmp2.element[run2] = new Addition( sum->clone(), ld[run2]->clone() );
+				delete sum;
+			}
 		}
 
 		for( run2 = 0; run2 < Dim*nS; run2++ )
@@ -1475,10 +1475,8 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 		delete[] S1;
 	}
 
-
 	if( dfS != 0 ) *dfS = tmp ;
 	if( ldf != 0 ) *ldf = tmp2;
-	
 	
 	
 	for( int run = 0; run < nLIS; run++ ){
