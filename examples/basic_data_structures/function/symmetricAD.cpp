@@ -234,7 +234,7 @@ int main( ){
     
     fun2.init(f2, "alternativeSymmetric", NX*(1+NX+NU)+expr.getDim(), 0, 2, 0, 0, 0);
     
-    std::ofstream stream( "test/ADsymbolic_output.c" );
+    std::ofstream stream( "ADtest/ADsymbolic_output.c" );
     fun.exportCode( stream, "double" );
     fun2.exportCode( stream, "double" );
     
