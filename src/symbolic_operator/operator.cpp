@@ -256,6 +256,15 @@ Operator* Operator::myAdd (Operator* a,Operator* b){
 }
 
 
+Operator* Operator::convert2TreeProjection( Operator* a ){
+  
+   TreeProjection b;
+   b = *a;
+   delete a;
+   return b.clone();
+}
+
+
 returnValue Operator::ADsymCommon( Operator     *a  ,
                                         TreeProjection &da ,
                                         TreeProjection &dda,
@@ -279,29 +288,29 @@ returnValue Operator::ADsymCommon( Operator     *a  ,
   // ---------------------------
   
     a->ADsymmetric( dim, varType, component,
-                    myProd( l, &da ),
+                    convert2TreeProjection(myProd(l,&da)),
                     S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS 
               );
     
     
   // SECOND ORDER FORWARD SWEEP:
   // -------------------------------------
-    
+    Operator *tmp3 = convert2TreeProjection(myProd(&dda,l));
+
     int run1, run2;
     for( run1 = 0; run1 < dimS; run1++ ){
     	for( run2 = 0; run2 <= run1; run2++ ){
     		Operator *tmp1 = H[run1*dimS+run2]->clone();
     		delete H[run1*dimS+run2];
     		Operator *tmp2 = myProd( dfS[run1], dfS[run2] );
-    		Operator *tmp3 = myProd( &dda     , l         );
     		Operator *tmp4 = myProd( tmp2     , tmp3      );
     		H[run1*dimS+run2] = myAdd( tmp1, tmp4 );
     		delete tmp1;
     		delete tmp2;
-    		delete tmp3;
     		delete tmp4;
     	}
     }
+    delete tmp3;
     
     
   // FIRST ORDER FORWARD SWEEP:
@@ -310,7 +319,7 @@ returnValue Operator::ADsymCommon( Operator     *a  ,
     for( run1 = 0; run1 < dimS; run1++ ){
         Operator *tmp1 = dfS[run1]->clone();
         delete dfS[run1];
-        dfS[run1] = myProd( tmp1, &da );
+        dfS[run1] = convert2TreeProjection( myProd( tmp1, &da ) );
         delete tmp1;
     }
     
@@ -364,18 +373,21 @@ returnValue Operator::ADsymCommon2( Operator       *a  ,
          H2[run2] = new DoubleConstant(0.0,NE_ZERO);
     }
     
-
-    a->ADsymmetric( dim, varType, component, myProd( l, &dx ),
+    a->ADsymmetric( dim, varType, component, convert2TreeProjection(myProd(l,&dx)),
                     S, dimS, S1, ldf, H1, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
 
 
-    b->ADsymmetric( dim, varType, component, myProd( l, &dy ),
+    b->ADsymmetric( dim, varType, component, convert2TreeProjection(myProd(l,&dy)),
                     S, dimS, S2, ldf, H2, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
     
    
     
   // SECOND ORDER FORWARD SWEEP:
   // -------------------------------------
+    
+    Operator *tmpXX = convert2TreeProjection(myProd( l,&dxx ));
+    Operator *tmpXY = convert2TreeProjection(myProd( l,&dxy ));
+    Operator *tmpYY = convert2TreeProjection(myProd( l,&dyy ));
     
     for( run1 = 0; run1 < dimS; run1++ ){
     	for( run2 = 0; run2 <= run1; run2++ ){
@@ -387,13 +399,12 @@ returnValue Operator::ADsymCommon2( Operator       *a  ,
     		Operator *tmp5;
     		if( run1 == run2 ) tmp5 = myAdd(tmp2,tmp2);
     		else               tmp5 = myAdd(tmp2,tmp3);
-    		Operator *tmp6 = myProd( tmp1, &dxx );
-    		Operator *tmp7 = myProd( tmp5, &dxy );
-    		Operator *tmp8 = myProd( tmp4, &dyy );
+    		Operator *tmp6 = myProd( tmp1, tmpXX );
+    		Operator *tmp7 = myProd( tmp5, tmpXY );
+    		Operator *tmp8 = myProd( tmp4, tmpYY );
     		Operator *tmp9  = myAdd ( tmp6, tmp7 );
     		Operator *tmp10 = myAdd ( tmp8, tmp9 );
-    		Operator *tmp11 = myProd( l, tmp10 );
-    		Operator *tmp12 = myAdd ( tmp11 , H1[run1*dimS+run2] );
+    		Operator *tmp12 = myAdd ( tmp10 , H1[run1*dimS+run2] );
     		H[run1*dimS+run2] = myAdd ( tmp12 , H2[run1*dimS+run2] );
     		delete tmp1;
     		delete tmp2;
@@ -405,10 +416,13 @@ returnValue Operator::ADsymCommon2( Operator       *a  ,
     		delete tmp8;
     		delete tmp9;
     		delete tmp10;
-    		delete tmp11;
     		delete tmp12;
     	}
     }
+    
+    delete tmpXX;
+    delete tmpXY;
+    delete tmpYY;
     
     
   // FIRST ORDER FORWARD SWEEP:
@@ -416,8 +430,8 @@ returnValue Operator::ADsymCommon2( Operator       *a  ,
     
     for( run1 = 0; run1 < dimS; run1++ ){
     	delete dfS[run1];
-    	Operator *tmp1 = myProd( S1[run1], &dx );
-    	Operator *tmp2 = myProd( S2[run1], &dy );
+    	Operator *tmp1 = convert2TreeProjection( myProd( S1[run1], &dx ) );
+    	Operator *tmp2 = convert2TreeProjection( myProd( S2[run1], &dy ) );
     	dfS[run1] = myAdd(tmp1,tmp2);
     	delete tmp1;
     	delete tmp2;

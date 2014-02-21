@@ -1328,21 +1328,58 @@ Expression Expression::ADbackward( const Expression &arg, const Expression &seed
     return result;
 }
 
-
 Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
-										const Expression &S  , /** forward seed  */
-										const Expression &l  , /** backward seed */
-										Expression *dfS,    /** first order forward  result */
-										Expression *ldf   /** first order backward result */ ) const{
+					const Expression &S  , /** forward seed  */
+					const Expression &l  , /** backward seed */
+					Expression *dfS,    /** first order forward  result */
+					Expression *ldf   /** first order backward result */ ) const{
 
 	int Dim = arg.getDim();
-	int nS  = S.getNumCols();
-	int run1, run2;
+	ASSERT( (int) S.getNumRows() == Dim      );
+	ASSERT( (int) S.getNumRows() == (int) S.getNumCols() );
+	
+	IntermediateState H    = ADsymmetric( arg, l, dfS, ldf );
+	IntermediateState sum  = zeros<double>(Dim,Dim);
+	IntermediateState sum2 = zeros<double>(Dim,Dim);
+	
+	int i,j,k;
+	for( i=0; i<Dim; i++ )
+	     for( j=0; j<Dim; j++ ){
+		  for( k=0; k<=i; k++ ){
+	              sum(i,j) += H(i,k)*S(k,j);
+		  }
+		  for( k=i+1; k<Dim; k++ ){
+	              sum(i,j) += H(k,i)*S(k,j);
+		  }
+	     }
+	
+	for( i=0; i<Dim; i++ )
+	     for( j=0; j<=i; j++ )
+		  for( k=0; k<Dim; k++ )
+	              sum2(i,j) += S(k,i)*sum(k,j);
+	
+	for( i=0; i<Dim; i++ )
+	     for( j=0; j<i; j++ )
+	          sum2(j,i) = sum2(i,j);
+	  
+	return sum2;
+}
 
+
+Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
+					const Expression &l  , /** backward seed */
+					Expression *dfS,    /** first order forward  result */
+					Expression *ldf   /** first order backward result */ ) const{
+
+	int Dim = arg.getDim();
+	int nS  = Dim;
+	int run1, run2;
+	
+	Expression S = eye<double>(Dim);
+	
 	ASSERT( arg .isVariable()    == BT_TRUE  );
 	ASSERT( l.getDim()           == getDim() );
-	ASSERT( (int) S.getNumRows() == Dim      );
-
+	
 	Expression result( nS, nS );
 
 	VariableType *varType   = new VariableType[Dim];
