@@ -210,8 +210,13 @@ int main( ){
 	Expression S_tmp = S;
 	S_tmp.appendRows(zeros<double>(NU,NX).appendCols(eye<double>(NU)));
     
-    Expression f_tmp = symmetricDerivative( expr, arg, S_tmp, lambda );
+	IntermediateState dfS,dl;
+	
+    Expression f_tmp = symmetricDerivative( expr, arg, S_tmp, lambda, &dfS, &dl );
     f << returnLowerTriangular( f_tmp );
+    f << dfS;
+    f << dl;
+    
     fun.init(f, "symmetricDerivative", NX*(1+NX+NU)+expr.getDim(), 0, 2, 0, 0, 0);
     
 	// ALTERNATIVE DERIVATIVES
@@ -233,6 +238,15 @@ int main( ){
     
     
     fun2.init(f2, "alternativeSymmetric", NX*(1+NX+NU)+expr.getDim(), 0, 2, 0, 0, 0);
+    
+    Function f1;
+    
+    f1 << dfS;
+    f1 << dl;
+    
+    std::ofstream stream2( "ADtest/ADsymbolic_output2.c" );
+    stream2 << f1;
+    stream2.close();
     
     std::ofstream stream( "ADtest/ADsymbolic_output.c" );
     fun.exportCode( stream, "double" );

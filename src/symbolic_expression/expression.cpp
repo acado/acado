@@ -1399,6 +1399,9 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 	TreeProjection **SIS = 0;
 	TreeProjection **HIS = 0;
 
+	Expression tmp(Dim,Dim);
+	Expression tmp2(Dim);
+	
 	for( run1 = 0; run1 < (int) getDim(); run1++ ){
 
 		Operator *l1 = l.element[run1]->clone();
@@ -1425,6 +1428,9 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 				Operator *sum = result.element[run2*nS+run3]->clone();
 				delete result.element[run2*nS+run3];
 				delete result.element[run3*nS+run2];
+				
+				// THIS IS NOT EFFICIENT YET (CHECK FOR ==ZERO)
+				
 				result.element[run2*nS+run3] = new Addition( sum->clone(), H[run2*nS+run3]->clone() );
 				result.element[run3*nS+run2] = new Addition( sum->clone(), H[run2*nS+run3]->clone() );
 				delete sum;
@@ -1435,8 +1441,24 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 			delete sum;
 		}
 
-		// TODO: IMPLEMENTATION OF dfS and ldf
+		if( dfS != 0 ){
+		     for( run2 = 0; run2 < nS; run2++ ){
+			delete tmp.element[run1*nS+run2];
+			tmp.element[run1*nS+run2] = dS[run2]->clone();
+		     }
+		}
 
+		if( ldf != 0 ){
+		   for( run2 = 0; run2 < nS; run2++ ){
+			Operator *sum = tmp2.element[run2]->clone();
+			delete tmp2.element[run2];
+				
+				// THIS IS NOT EFFICIENT YET (CHECK FOR ==ZERO)
+			
+			tmp2.element[run2] = new Addition( sum->clone(), ld[run2]->clone() );
+			delete sum;
+		  }
+		}
 
 		for( run2 = 0; run2 < Dim*nS; run2++ )
 			delete S1[run2];
@@ -1454,6 +1476,11 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 	}
 
 
+	if( dfS != 0 ) *dfS = tmp ;
+	if( ldf != 0 ) *ldf = tmp2;
+	
+	
+	
 	for( int run = 0; run < nLIS; run++ ){
 		if( LIS[run] != 0 ) delete LIS[run];
 	}
