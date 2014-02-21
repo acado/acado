@@ -564,15 +564,17 @@ public:
     											);
 
 
+    
+    
+    virtual Operator* myProd(Operator* a,Operator* b);
+    virtual Operator* myAdd (Operator* a,Operator* b);
+    
+    
 //
 //  PROTECTED FUNCTIONS:
 //
 
 protected:
-
-  
-    virtual Operator* myProd(Operator* a,Operator* b);
-    virtual Operator* myAdd (Operator* a,Operator* b);
   
     
     virtual Operator* convert2TreeProjection( Operator* a ); // Caution: a is deleted inside...

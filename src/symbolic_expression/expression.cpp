@@ -1428,16 +1428,13 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 				Operator *sum = result.element[run2*nS+run3]->clone();
 				delete result.element[run2*nS+run3];
 				delete result.element[run3*nS+run2];
-				
-				// THIS IS NOT EFFICIENT YET (CHECK FOR ==ZERO)
-				
-				result.element[run2*nS+run3] = new Addition( sum->clone(), H[run2*nS+run3]->clone() );
-				result.element[run3*nS+run2] = new Addition( sum->clone(), H[run2*nS+run3]->clone() );
+				result.element[run2*nS+run3] = sum->myAdd( sum, H[run2*nS+run3] );
+				result.element[run3*nS+run2] = sum->myAdd( sum, H[run2*nS+run3] );
 				delete sum;
 			}
 			Operator *sum = result.element[run2*nS+run2]->clone();
 			delete result.element[run2*nS+run2];
-			result.element[run2*nS+run2] = new Addition( sum->clone(), H[run2*nS+run2]->clone() );
+			result.element[run2*nS+run2] = sum->myAdd( sum, H[run2*nS+run2] );
 			delete sum;
 		}
 
@@ -1452,10 +1449,7 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 		   for( run2 = 0; run2 < nS; run2++ ){
 			Operator *sum = tmp2.element[run2]->clone();
 			delete tmp2.element[run2];
-				
-				// THIS IS NOT EFFICIENT YET (CHECK FOR ==ZERO)
-			
-			tmp2.element[run2] = new Addition( sum->clone(), ld[run2]->clone() );
+			tmp2.element[run2] = sum->myAdd( sum, ld[run2] );
 			delete sum;
 		  }
 		}

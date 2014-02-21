@@ -346,8 +346,6 @@ returnValue TreeProjection::ADsymmetricProtected( int            dim       , /**
 	}
   
   // ============================================================================
-  
-	printf("I am tree-projection: %d \n", vIndex );
 
 	if( newLIS[0][vIndex*dim] == 0 ){
 
@@ -366,8 +364,6 @@ returnValue TreeProjection::ADsymmetricProtected( int            dim       , /**
 		for( run1 = 0; run1 < dimS*dimS; run1++ ){
 			Hres[run1] = new DoubleConstant(0.0,NE_ZERO);
 		}
-
-		printf("tree-projection AD call... \n");
 
 		argument->ADsymmetric( dim, varType, component, aux, S, dimS,
 				Sres, lres, Hres,
