@@ -236,8 +236,8 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		f << multipleForwardDerivative( rhs_, x, Gx );
 		/*	if ( f.getDim() != f.getNX() )
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
-		
-		
+
+
 		// add VDE for control inputs
 		f << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
 		// 	if ( f.getDim() != f.getNX() )

@@ -1344,23 +1344,28 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 	
 	int i,j,k;
 	for( i=0; i<Dim; i++ )
-	     for( j=0; j<Dim; j++ ){
-		  for( k=0; k<=i; k++ ){
-	              sum(i,j) += H(i,k)*S(k,j);
-		  }
-		  for( k=i+1; k<Dim; k++ ){
-	              sum(i,j) += H(k,i)*S(k,j);
-		  }
-	     }
-	
+		for( j=0; j<Dim; j++ ){
+			for( k=0; k<=i; k++ ){
+				sum(i,j) += H(i,k)*S(k,j);
+			}
+			for( k=i+1; k<Dim; k++ ){
+				sum(i,j) += H(k,i)*S(k,j);
+			}
+		}
+
 	for( i=0; i<Dim; i++ )
-	     for( j=0; j<=i; j++ )
-		  for( k=0; k<Dim; k++ )
-	              sum2(i,j) += S(k,i)*sum(k,j);
-	
+		for( j=0; j<=i; j++ )
+			for( k=0; k<Dim; k++ )
+				sum2(i,j) += S(k,i)*sum(k,j);
+
 	for( i=0; i<Dim; i++ )
-	     for( j=0; j<i; j++ )
-	          sum2(j,i) = sum2(i,j);
+		for( j=0; j<i; j++ )
+			sum2(j,i) = sum2(i,j);
+
+	if( dfS != 0 ) {
+		// multiplication with the proper forward seeds:
+		*dfS = *dfS*S;
+	}
 	  
 	return sum2;
 }
@@ -1399,7 +1404,7 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 	TreeProjection **SIS = 0;
 	TreeProjection **HIS = 0;
 
-	Expression tmp(Dim,Dim);
+	Expression tmp((int) getDim(),Dim);
 	Expression tmp2(Dim);
 	
 	for( run1 = 0; run1 < (int) getDim(); run1++ ){
