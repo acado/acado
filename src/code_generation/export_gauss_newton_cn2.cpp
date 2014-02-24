@@ -354,13 +354,11 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		{
 			if (variableObjS == YES)
 			{
-				if (objEvFx.isGiven() == true)
-
-					loopObjective.addFunctionCall(
-							setObjQ1Q2,
-							objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
-							Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-					);
+				loopObjective.addFunctionCall(
+						setObjQ1Q2,
+						objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
+						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+				);
 			}
 			else
 			{
@@ -436,7 +434,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
-	// Evaluate the objective function
+	// Evaluate the objective function, last node.
 	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
