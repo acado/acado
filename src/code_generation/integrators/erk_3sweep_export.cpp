@@ -100,6 +100,7 @@ returnValue ThreeSweepsERKExport::setDifferentialEquation(	const Expression& rhs
 
 	uint numX = NX*(NX+1)/2.0;
 	uint numU = NU*(NU+1)/2.0;
+	uint numZ = (NX+NU)*(NX+NU+1)/2.0;
 	if( (ExportSensitivityType)sensGen == THREE_SWEEPS ) {
 		// SWEEP 1:
 		// ---------
@@ -117,24 +118,49 @@ returnValue ThreeSweepsERKExport::setDifferentialEquation(	const Expression& rhs
 		// SWEEP 3:
 		// ---------
 		DifferentialState Gx("", NX,NX), Gu("", NX,NU);
-		DifferentialState Sxx("", numX,1), Sux("", NU,NX), Suu("", numU,1);
+		DifferentialState H("", numZ,1);
 
-		// add VDE for differential states
-		h << multipleForwardDerivative( rhs_, x, Gx );
+		Expression S = Gx;
+		S.appendCols(Gu);
+		Expression arg;
+		arg << x;
+		arg << u;
 
-		// add VDE for control inputs
-		h << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
+		// SYMMETRIC DERIVATIVES
+		Expression S_tmp = S;
+		S_tmp.appendRows(zeros<double>(NU,NX).appendCols(eye<double>(NU)));
 
-		IntermediateState tmp2 = forwardDerivative(tmp, x);
-		Expression tmp3 = backwardDerivative(rhs_, u, lx);
-		Expression tmp4 = multipleForwardDerivative(tmp3, x, Gu);
+		Expression dfS;
+		Expression h_tmp = symmetricDerivative( rhs_, arg, S_tmp, lx, &dfS );
+		Expression VDE_X;
+		Expression VDE_U;
+		for( uint i = 0; i < NX; i++ ) {
+			VDE_X.appendCols(dfS.getCol(i));
+		}
+		for( uint i = NX; i < NX+NU; i++ ) {
+			VDE_U.appendCols(dfS.getCol(i));
+		}
+		h << VDE_X;
+		h << VDE_U;
+		h << returnLowerTriangular( h_tmp );
 
-		// TODO: include a symmetric_AD_operator to strongly improve the symmetric left-right multiplied second order derivative computations !!
-//		Expression tmp6 = Gx.transpose()*tmp2*Gx;
-		h << symmetricDoubleProduct(tmp2, Gx);
-		h << Gu.transpose()*tmp2*Gx + multipleForwardDerivative(tmp3, x, Gx);
-		Expression tmp7 = tmp4 + tmp4.transpose() + forwardDerivative(tmp3, u);
-		h << symmetricDoubleProduct(tmp2, Gu) + returnLowerTriangular(tmp7);
+		// OLD VERSION:
+//		// add VDE for differential states
+//		h << multipleForwardDerivative( rhs_, x, Gx );
+//
+//		// add VDE for control inputs
+//		h << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
+//
+//		IntermediateState tmp2 = forwardDerivative(tmp, x);
+//		Expression tmp3 = backwardDerivative(rhs_, u, lx);
+//		Expression tmp4 = multipleForwardDerivative(tmp3, x, Gu);
+//
+//		// TODO: include a symmetric_AD_operator to strongly improve the symmetric left-right multiplied second order derivative computations !!
+////		Expression tmp6 = Gx.transpose()*tmp2*Gx;
+//		h << symmetricDoubleProduct(tmp2, Gx);
+//		h << Gu.transpose()*tmp2*Gx + multipleForwardDerivative(tmp3, x, Gx);
+//		Expression tmp7 = tmp4 + tmp4.transpose() + forwardDerivative(tmp3, u);
+//		h << symmetricDoubleProduct(tmp2, Gu) + returnLowerTriangular(tmp7);
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );

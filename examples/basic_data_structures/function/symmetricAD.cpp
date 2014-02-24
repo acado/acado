@@ -92,49 +92,6 @@ Expression returnLowerTriangular( const Expression& expr ) {
 
 /* >>> start tutorial code >>> */
 int main( ){
-
-
-    // DEFINE VALRIABLES:
-    // ---------------------------
-//     DifferentialState x(2);
- //   Function          f;
-
-    // DEFINE A TEST FUNCTION:
-    // -----------------------
-    
-//     f << (sin (x)).ADsymmetric( x,1.,1.);
-//     f << (cos (x)).ADsymmetric( x,1.,1.);
-//     f << (tan (x)).ADsymmetric( x,1.,1.);
-//     f << (asin(x)).ADsymmetric( x,1.,1.);
-//     f << (acos(x)).ADsymmetric( x,1.,1.);
-//     f << (atan(x)).ADsymmetric( x,1.,1.);
-//     f << (exp (x)).ADsymmetric( x,1.,1.);
-//     f << (log (x)).ADsymmetric( x,1.,1.);
-
-//     f << (pow (x,2)).ADsymmetric( x,1.,1.);
-//     f << (pow (x,3)).ADsymmetric( x,1.,1.);
-    
-//     f << (sin(x)+cos(x)).ADsymmetric( x,1.,1.);
-//     f << (sin(x)*cos(x)).ADsymmetric( x,1.,1.);
-//     f << (sin(x)-cos(x)).ADsymmetric( x,1.,1.);
-//     f << (sin(x)/cos(x)).ADsymmetric( x,1.,1.);
-//     f << (pow(sin(x),cos(x))).ADsymmetric( x,1.,1.);
-    
-//     IntermediateState a = cos(x(0));
-//     IntermediateState b = log(x(1));
-    
-//     Matrix S = eye(2);    //   S^T*(l*f'')*S
-//     Vector l(2);
-//     l(0) = 1.0;
-//     l(1) = 5.0;
-//     
-//     IntermediateState c(2);
-//     
-//     c(0) = a*b;
-//     c(1) = sin(a);
-//     
-//     f << c.ADsymmetric( x, S, l );
-    
     
     DifferentialState   xT;     // the trolley position
     DifferentialState   vT;     // the trolley velocity
@@ -151,7 +108,7 @@ int main( ){
     Control             duT;
     Control             duL;
 
-	//
+    //
     // DEFINE THE PARAMETERS:
     //
     const double      tau1 = 0.012790605943772;
@@ -214,8 +171,6 @@ int main( ){
 	
     Expression f_tmp = symmetricDerivative( expr, arg, S_tmp, lambda, &dfS, &dl );
     f << returnLowerTriangular( f_tmp );
-    f << dfS;
-    f << dl;
     
     fun.init(f, "symmetricDerivative", NX*(1+NX+NU)+expr.getDim(), 0, 2, 0, 0, 0);
     

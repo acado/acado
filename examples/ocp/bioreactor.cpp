@@ -112,9 +112,15 @@ int main( ){
     
     algorithm.solve();
 
-    algorithm.getDifferentialStates("s3.txt");
-    algorithm.getControls          ("c3.txt");
+    VariablesGrid s3,c3;
+    algorithm.getDifferentialStates(s3);
+    algorithm.getControls          (c3);
     
+    std::ofstream stream1( "s3.txt" );
+	
+    s3.print(stream1, 0," "," ", 16, 16, " ", "\n" );
+//     s3.print(stream, " ", PS_PLAIN );
+    stream1.close();
     
     return 0;
 }
