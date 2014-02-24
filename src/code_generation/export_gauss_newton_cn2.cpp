@@ -519,6 +519,9 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		lbValues.setDoc( "Lower bounds values." );
 		ubValues.setup("ubValues", numBounds, 1, REAL, ACADO_VARIABLES);
 		ubValues.setDoc( "Upper bounds values." );
+
+		initialize.addStatement(lbValues == lbValuesMatrix);
+		initialize.addStatement(ubValues == ubValuesMatrix);
 	}
 
 	ExportFunction* boundSetFcn = hardcodeConstraintValues == YES ? &condensePrep : &condenseFdb;
@@ -634,6 +637,9 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 			lbAValues.setDoc( "Lower bounds values for affine constraints." );
 			ubAValues.setup("ubAValues", nXBounds, 1, REAL, ACADO_VARIABLES);
 			ubAValues.setDoc( "Upper bounds values for affine constraints." );
+
+			initialize.addStatement(lbAValues == xLowerBounds);
+			initialize.addStatement(ubAValues == xUpperBounds);
 		}
 
 		// Shift constraint bounds by first interval
