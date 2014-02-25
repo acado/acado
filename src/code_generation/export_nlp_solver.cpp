@@ -381,7 +381,7 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		// ExportVariable objEvFx, objEvFu, objEvFxEnd; // aliasing
 
 		objEvFx.setup("evFx", NY, NX, REAL, ACADO_WORKSPACE);
-		objEvFu.setup("evFx", NY, NU, REAL, ACADO_WORKSPACE);
+		objEvFu.setup("evFu", NY, NU, REAL, ACADO_WORKSPACE);
 		objEvFxEnd.setup("evFx", NYN, NX, REAL, ACADO_WORKSPACE);
 
 		Q1.setup("Q1", NX * N, NX, REAL, ACADO_WORKSPACE);
