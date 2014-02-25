@@ -41,7 +41,7 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\ingroup NumericalAlgorithms
  *
- *	\authors Milan Vukov, Joel Andersson
+ *	\authors Milan Vukov, Joel Andersson, Rien Quirynen
  *
  *	\note Early experimental implementation
  */
@@ -245,7 +245,7 @@ protected:
 	ExportVariable W1, W2;
 	ExportVariable sbar, w1, w2;
 
-	ExportFunction multBTW1, multGxTGu, macQEW2;
+	ExportFunction multBTW1, macBTW1_R1, multGxTGu, macQEW2;
 	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macASbarD2;
 	ExportFunction expansionStep;
 

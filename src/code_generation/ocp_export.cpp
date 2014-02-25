@@ -344,6 +344,17 @@ returnValue OCPexport::setup( )
 
 		break;
 
+	case FULL_CONDENSING_N2_NEW:
+
+		if ((QPSolverName)qpSolver != QP_QPOASES)
+			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
+					"For condensed solution only qpOASES QP solver is supported");
+
+		solver = ExportNLPSolverPtr(
+				NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_CN2_NEW));
+
+		break;
+
 	case FULL_CONDENSING_N2_FACTORIZATION:
 
 			if ((QPSolverName)qpSolver != QP_QPOASES)

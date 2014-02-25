@@ -43,6 +43,8 @@ ExportGaussNewtonCN2New::ExportGaussNewtonCN2New(	UserInteraction* _userInteract
 
 returnValue ExportGaussNewtonCN2New::setup( )
 {
+	std::cout << "NOTE: You are using the new (unstable) N2 condensing feature..\n";
+
 	if (performFullCondensing() == false || initialStateFixed() == false || getNumComplexConstraints() > 0)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 	if (performsSingleShooting() == true)
@@ -186,6 +188,7 @@ returnValue ExportGaussNewtonCN2New::getCode(	ExportStatementBlock& code
 	code.addFunction( moveGuE );
 
 	code.addFunction( multBTW1 );
+	code.addFunction( macBTW1_R1 );
 	code.addFunction( multGxTGu );
 	code.addFunction( macQEW2 );
 
@@ -354,13 +357,11 @@ returnValue ExportGaussNewtonCN2New::setupObjectiveEvaluation( void )
 		{
 			if (variableObjS == YES)
 			{
-				if (objEvFx.isGiven() == true)
-
-					loopObjective.addFunctionCall(
-							setObjQ1Q2,
-							objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
-							Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-					);
+				loopObjective.addFunctionCall(
+						setObjQ1Q2,
+						objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
+						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+				);
 			}
 			else
 			{
@@ -436,7 +437,7 @@ returnValue ExportGaussNewtonCN2New::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
-	// Evaluate the objective function
+	// Evaluate the objective function, last node.
 	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
@@ -519,6 +520,9 @@ returnValue ExportGaussNewtonCN2New::setupConstraintsEvaluation( void )
 		lbValues.setDoc( "Lower bounds values." );
 		ubValues.setup("ubValues", numBounds, 1, REAL, ACADO_VARIABLES);
 		ubValues.setDoc( "Upper bounds values." );
+
+		initialize.addStatement(lbValues == lbValuesMatrix);
+		initialize.addStatement(ubValues == ubValuesMatrix);
 	}
 
 	ExportFunction* boundSetFcn = hardcodeConstraintValues == YES ? &condensePrep : &condenseFdb;
@@ -634,6 +638,9 @@ returnValue ExportGaussNewtonCN2New::setupConstraintsEvaluation( void )
 			lbAValues.setDoc( "Lower bounds values for affine constraints." );
 			ubAValues.setup("ubAValues", nXBounds, 1, REAL, ACADO_VARIABLES);
 			ubAValues.setDoc( "Upper bounds values for affine constraints." );
+
+			initialize.addStatement(lbAValues == xLowerBounds);
+			initialize.addStatement(ubAValues == xUpperBounds);
 		}
 
 		// Shift constraint bounds by first interval
@@ -654,15 +661,6 @@ returnValue ExportGaussNewtonCN2New::setupConstraintsEvaluation( void )
 
 returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 {
-	//
-	// Define LM regularization terms
-	//
-	DMatrix mRegH00 = eye<double>( getNX() );
-	DMatrix mRegH11 = eye<double>( getNU() );
-
-	mRegH00 *= levenbergMarquardt;
-	mRegH11 *= levenbergMarquardt;
-
 	condensePrep.setup("condensePrep");
 	condenseFdb.setup( "condenseFdb" );
 
@@ -785,21 +783,15 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 					);
 			}
 
-			condensePrep.addFunctionCall(
-					multBTW1, evGu.getAddress(col * NX), W1,
-					ExportIndex( col ), ExportIndex( col )
-			);
-
-			// TODO move this addition to multBTW1
 			if (R1.isGiven() == true)
-				condensePrep.addStatement(
-						H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-						+= R1 + mRegH11
+				condensePrep.addFunctionCall(
+						macBTW1_R1, R1, evGu.getAddress(col * NX), W1,
+						ExportIndex( col )
 				);
 			else
-				condensePrep.addStatement(
-						H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-						+= R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU) + mRegH11
+				condensePrep.addFunctionCall(
+						macBTW1_R1, R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU), evGu.getAddress(col * NX), W1,
+						ExportIndex( col )
 				);
 
 			condensePrep.addLinebreak();
@@ -862,20 +854,15 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 
 		cLoop.addStatement( adjLoop );
 
-		cLoop.addFunctionCall(
-				multBTW1, evGu.getAddress(col * NX), W1,
-				col, col
-		);
-
 		if (R1.isGiven() == true)
-			cLoop.addStatement(
-					H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-					+= R1 + mRegH11
+			cLoop.addFunctionCall(
+					macBTW1_R1, R1, evGu.getAddress(col * NX), W1,
+					ExportIndex( col )
 			);
 		else
-			cLoop.addStatement(
-					H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-					+= R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU) + mRegH11
+			cLoop.addFunctionCall(
+					macBTW1_R1, R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU), evGu.getAddress(col * NX), W1,
+					ExportIndex( col )
 			);
 
 		condensePrep.addStatement( cLoop );
@@ -1081,8 +1068,6 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 		expand.addLinebreak();
 		expand.addStatement( u.makeColVector() += xVars.getRows(NX, getNumQPvars()) );
 	}
-
-	// Calculation of multipliers
 
 	expand.addStatement( sbar.getRows(0, NX) == Dx0 );
 	expand.addStatement( sbar.getRows(NX, (N + 1) * NX) == d );
@@ -1368,6 +1353,30 @@ returnValue ExportGaussNewtonCN2New::setupMultiplicationRoutines( )
 	expansionStep.setup("expansionStep", Gx1, Gu1, U1, w11, w12);
 	expansionStep.addStatement( w12 += Gx1 * w11 );
 	expansionStep.addStatement( w12 += Gu1 * U1 );
+
+	//
+	// Define LM regularization terms
+	//
+	DMatrix mRegH00 = eye<double>( getNX() );
+	DMatrix mRegH11 = eye<double>( getNU() );
+
+	mRegH00 *= levenbergMarquardt;
+	mRegH11 *= levenbergMarquardt;
+
+	ExportVariable R11;
+	if (R1.isGiven() == true)
+		R11 = R1;
+	else
+		R11.setup("R11", NU, NU, REAL, ACADO_LOCAL);
+
+	macBTW1_R1.setup("multBTW1_R1", R11, Gu1, Gu2, iRow);
+	macBTW1_R1.addStatement(
+			H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iRow * NU, (iRow + 1) * NU) ==
+					R11 + (Gu1 ^ Gu2)
+	);
+	macBTW1_R1.addStatement(
+			H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iRow * NU, (iRow + 1) * NU) += mRegH11
+	);
 
 	return SUCCESSFUL_RETURN;
 }
