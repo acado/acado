@@ -148,7 +148,6 @@ int main( ){
     
     int NX = states.getDim();
     int NU = controls.getDim();
-    int NZ = NX+NU;
     
     IntermediateState expr(2);
     
