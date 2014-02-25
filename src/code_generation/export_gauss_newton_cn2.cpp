@@ -186,6 +186,7 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 	code.addFunction( moveGuE );
 
 	code.addFunction( multBTW1 );
+	code.addFunction( macBTW1_R1 );
 	code.addFunction( multGxTGu );
 	code.addFunction( macQEW2 );
 
@@ -354,13 +355,11 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		{
 			if (variableObjS == YES)
 			{
-				if (objEvFx.isGiven() == true)
-
-					loopObjective.addFunctionCall(
-							setObjQ1Q2,
-							objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
-							Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-					);
+				loopObjective.addFunctionCall(
+						setObjQ1Q2,
+						objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
+						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+				);
 			}
 			else
 			{
@@ -436,7 +435,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
-	// Evaluate the objective function
+	// Evaluate the objective function, last node.
 	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
@@ -660,15 +659,6 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 
 returnValue ExportGaussNewtonCN2::setupCondensing( void )
 {
-	//
-	// Define LM regularization terms
-	//
-	DMatrix mRegH00 = eye<double>( getNX() );
-	DMatrix mRegH11 = eye<double>( getNU() );
-
-	mRegH00 *= levenbergMarquardt;
-	mRegH11 *= levenbergMarquardt;
-
 	condensePrep.setup("condensePrep");
 	condenseFdb.setup( "condenseFdb" );
 
@@ -791,21 +781,15 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 					);
 			}
 
-			condensePrep.addFunctionCall(
-					multBTW1, evGu.getAddress(col * NX), W1,
-					ExportIndex( col ), ExportIndex( col )
-			);
-
-			// TODO move this addition to multBTW1
 			if (R1.isGiven() == true)
-				condensePrep.addStatement(
-						H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-						+= R1 + mRegH11
+				condensePrep.addFunctionCall(
+						macBTW1_R1, R1, evGu.getAddress(col * NX), W1,
+						ExportIndex( col )
 				);
 			else
-				condensePrep.addStatement(
-						H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-						+= R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU) + mRegH11
+				condensePrep.addFunctionCall(
+						macBTW1_R1, R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU), evGu.getAddress(col * NX), W1,
+						ExportIndex( col )
 				);
 
 			condensePrep.addLinebreak();
@@ -868,20 +852,15 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 		cLoop.addStatement( adjLoop );
 
-		cLoop.addFunctionCall(
-				multBTW1, evGu.getAddress(col * NX), W1,
-				col, col
-		);
-
 		if (R1.isGiven() == true)
-			cLoop.addStatement(
-					H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-					+= R1 + mRegH11
+			cLoop.addFunctionCall(
+					macBTW1_R1, R1, evGu.getAddress(col * NX), W1,
+					ExportIndex( col )
 			);
 		else
-			cLoop.addStatement(
-					H.getSubMatrix(col * NU, (col + 1) * NU, col * NU, (col + 1) * NU)
-					+= R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU) + mRegH11
+			cLoop.addFunctionCall(
+					macBTW1_R1, R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU), evGu.getAddress(col * NX), W1,
+					ExportIndex( col )
 			);
 
 		condensePrep.addStatement( cLoop );
@@ -1372,6 +1351,30 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	expansionStep.setup("expansionStep", Gx1, Gu1, U1, w11, w12);
 	expansionStep.addStatement( w12 += Gx1 * w11 );
 	expansionStep.addStatement( w12 += Gu1 * U1 );
+
+	//
+	// Define LM regularization terms
+	//
+	DMatrix mRegH00 = eye<double>( getNX() );
+	DMatrix mRegH11 = eye<double>( getNU() );
+
+	mRegH00 *= levenbergMarquardt;
+	mRegH11 *= levenbergMarquardt;
+
+	ExportVariable R11;
+	if (R1.isGiven() == true)
+		R11 = R1;
+	else
+		R11.setup("R11", NU, NU, REAL, ACADO_LOCAL);
+
+	macBTW1_R1.setup("multBTW1_R1", R11, Gu1, Gu2, iRow);
+	macBTW1_R1.addStatement(
+			H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iRow * NU, (iRow + 1) * NU) ==
+					R11 + (Gu1 ^ Gu2)
+	);
+	macBTW1_R1.addStatement(
+			H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iRow * NU, (iRow + 1) * NU) += mRegH11
+	);
 
 	return SUCCESSFUL_RETURN;
 }
