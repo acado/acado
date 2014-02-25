@@ -62,6 +62,8 @@ UnaryOperator::UnaryOperator( Operator *_argument ) : SmoothOperator( )
     monotonicity      = MT_UNKNOWN                       ;
 
     nCount = 0;
+
+    initDerivative();
 }
 
 
@@ -76,6 +78,7 @@ UnaryOperator::UnaryOperator( const UnaryOperator &arg ){
     bufferSize = arg.bufferSize;
 
  	argument   = arg.argument->clone();
+ 	derivative = arg.derivative->clone();
 	
 // 	argument   = arg.argument;
 //     argument->nCount++;
@@ -145,6 +148,7 @@ UnaryOperator& UnaryOperator::operator=( const UnaryOperator &arg ){
         free( dargument_result );
 
  		argument = arg.argument->clone();
+ 	 	derivative = arg.derivative->clone();
 		
 //         argument = arg.argument;
 // 		argument->nCount++;

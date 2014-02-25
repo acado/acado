@@ -190,11 +190,11 @@ returnValue Sin::ADsymmetricProtected( int            dim       , /**< number of
                                         TreeProjection ***newSIS , /**< the new SIS-pointer   */
                                         int            &nNewHIS  , /**< the number of newHIS  */
                                         TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
-  
+
     TreeProjection tmp, tmp2;
     tmp  = Cos(argument->clone());
     tmp2 = Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Sin(argument->clone()) );
-    
+
     return ADsymCommon( argument, tmp, tmp2, dim, varType, component, l, S, dimS, dfS,
 			 ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
 }
