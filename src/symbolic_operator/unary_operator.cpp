@@ -487,7 +487,7 @@ Operator* UnaryOperator::differentiate( int index ){
 	initDerivative();
 
 	dargument = argument->differentiate( index );
-	return myProd( dargument->clone() , derivative );
+	return myProd( dargument, derivative );
 }
 
 
@@ -505,7 +505,7 @@ Operator* UnaryOperator::ADforwardProtected( int dim,
 
     dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
 
-    return myProd( dargument->clone() , derivative );
+    return myProd( dargument, derivative );
 }
 
 
@@ -523,7 +523,7 @@ returnValue UnaryOperator::ADbackwardProtected( int           dim      , /**< nu
     argument->AD_backward( dim,
                                   varType,
                                   component,
-                                  myProd( seed->clone() , derivative ),
+                                  myProd( seed, derivative ),
                                   df, nNewIS, newIS
             );
 
