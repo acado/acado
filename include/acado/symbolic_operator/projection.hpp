@@ -470,6 +470,9 @@ public:
     											const std::vector< std::string >& _name
     											);
 
+
+    virtual BooleanType isTrivial() const;
+
 //
 //  PROTECTED FUNCTIONS:
 //

@@ -72,12 +72,12 @@ public:
     virtual ~TreeProjection();
 
     /** Assignment Operator (deep copy). */
-    TreeProjection& operator=( const Operator &arg );
+    Operator& operator=( const Operator &arg );
 
 
     /** Sets the argument (note that arg should have dimension 1). */
-    virtual TreeProjection& operator=( const Expression  & arg );
-    virtual TreeProjection& operator=( const double      & arg );
+    virtual Operator& operator=( const Expression& arg );
+    virtual Operator& operator=( const double& arg );
 
 
 
@@ -197,6 +197,9 @@ public:
 
      /** Returns the argument or NULL if no intermediate argument available */
      virtual Operator* passArgument() const;
+
+
+     virtual BooleanType isTrivial() const;
 
 //
 //  PROTECTED FUNCTIONS:

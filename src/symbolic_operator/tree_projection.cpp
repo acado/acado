@@ -100,7 +100,7 @@ TreeProjection::~TreeProjection(){
 
 
 
-TreeProjection& TreeProjection::operator=( const Operator &arg ){
+Operator& TreeProjection::operator=( const Operator &arg ){
 
     if( this != &arg ){
 
@@ -135,24 +135,44 @@ TreeProjection& TreeProjection::operator=( const Operator &arg ){
 }
 
 
-TreeProjection& TreeProjection::operator=( const Expression &arg ){
+Operator& TreeProjection::operator=( const Expression &arg ){
 
-    ASSERT( arg.getDim() == 1 );
+	ASSERT( arg.getDim() == 1 );
 
-    Operator *tmp = arg.getOperatorClone(0);
-    TreeProjection result = this->operator=(*tmp);
-    delete tmp;
+	if( argument != 0 ){
+		if( argument->nCount == 0 ){
+			delete argument;
+			argument = 0;
+		}
+		else{
+			argument->nCount--;
+		}
+	}
 
-    return result;
+	argument = arg.getOperatorClone(0);
+
+	vIndex         = count++;
+	variableIndex  = vIndex ;
+
+	curvature      = CT_UNKNOWN; // argument->getCurvature();
+	monotonicity   = MT_UNKNOWN; // argument->getMonotonicity();
+
+	ne = argument->isOneOrZero();
+
+	if( curvature == CT_CONSTANT )
+		scale = argument->getValue();
+
+	return *this;
 }
 
 
-TreeProjection& TreeProjection::operator=( const double& arg ){
+Operator& TreeProjection::operator=( const double& arg ){
 
+	std::cout << "operator= double!\n";
     scale = arg;
 
     Expression tmp;
-    return operator=( tmp.convert(arg) );
+    return this->operator=( tmp.convert(arg) );
 }
 
 
@@ -524,6 +544,12 @@ returnValue TreeProjection::setVariableExportName(	const VariableType &_type,
 		argument->setVariableExportName(_type, _name);
 
 	return Projection::setVariableExportName(_type, _name);
+}
+
+
+
+BooleanType TreeProjection::isTrivial() const {
+	return BT_FALSE;
 }
 
 

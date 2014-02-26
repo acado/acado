@@ -66,30 +66,30 @@ public:
 
     /** Sets the argument (note that arg should have dimension 1). */
 
-    virtual TreeProjection& operator=( const double      & arg );
-    virtual TreeProjection& operator=( const DVector      & arg );
-    virtual TreeProjection& operator=( const DMatrix      & arg );
-    virtual TreeProjection& operator=( const Expression  & arg );
-    virtual TreeProjection& operator=( const Operator    & arg );
+    virtual Operator& operator=( const double      & arg );
+    virtual Operator& operator=( const DVector      & arg );
+    virtual Operator& operator=( const DMatrix      & arg );
+    virtual Operator& operator=( const Expression  & arg );
+    virtual Operator& operator=( const Operator    & arg );
 
 
-    TreeProjection& operator+=( const double      & arg );
-    TreeProjection& operator+=( const DVector      & arg );
-    TreeProjection& operator+=( const DMatrix      & arg );
-    TreeProjection& operator+=( const Expression  & arg );
+    Operator& operator+=( const double      & arg );
+    Operator& operator+=( const DVector      & arg );
+    Operator& operator+=( const DMatrix      & arg );
+    Operator& operator+=( const Expression  & arg );
 
-    TreeProjection& operator-=( const double      & arg );
-    TreeProjection& operator-=( const DVector      & arg );
-    TreeProjection& operator-=( const DMatrix      & arg );
-    TreeProjection& operator-=( const Expression  & arg );
+    Operator& operator-=( const double      & arg );
+    Operator& operator-=( const DVector      & arg );
+    Operator& operator-=( const DMatrix      & arg );
+    Operator& operator-=( const Expression  & arg );
 
-    TreeProjection& operator*=( const double      & arg );
-    TreeProjection& operator*=( const DVector      & arg );
-    TreeProjection& operator*=( const DMatrix      & arg );
-    TreeProjection& operator*=( const Expression  & arg );
+    Operator& operator*=( const double      & arg );
+    Operator& operator*=( const DVector      & arg );
+    Operator& operator*=( const DMatrix      & arg );
+    Operator& operator*=( const Expression  & arg );
 
-    TreeProjection& operator/=( const double      & arg );
-    TreeProjection& operator/=( const Expression  & arg );
+    Operator& operator/=( const double      & arg );
+    Operator& operator/=( const Expression  & arg );
 
 
     Expression operator+( const double        & arg ) const;

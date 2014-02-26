@@ -52,35 +52,35 @@ Operator::Operator(){
 Operator::~Operator(){ }
 
 
-TreeProjection& Operator::operator=( const double &arg ){
+Operator& Operator::operator=( const double &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& Operator::operator=( const DVector &arg ){
+Operator& Operator::operator=( const DVector &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& Operator::operator=( const DMatrix &arg ){
+Operator& Operator::operator=( const DMatrix &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& Operator::operator=( const Expression &arg ){
+Operator& Operator::operator=( const Expression &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& Operator::operator=( const Operator &arg ){
+Operator& Operator::operator=( const Operator &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
@@ -107,23 +107,23 @@ int Operator::getGlobalIndex( ) const{
 
 
 
-TreeProjection& Operator::operator+=( const double    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& Operator::operator+=( const DVector    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& Operator::operator+=( const DMatrix    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& Operator::operator+=( const Expression& arg ){ return operator=( this->operator+(arg) ); }
+Operator& Operator::operator+=( const double    & arg ){ return operator=( this->operator+(arg) ); }
+Operator& Operator::operator+=( const DVector    & arg ){ return operator=( this->operator+(arg) ); }
+Operator& Operator::operator+=( const DMatrix    & arg ){ return operator=( this->operator+(arg) ); }
+Operator& Operator::operator+=( const Expression& arg ){ return operator=( this->operator+(arg) ); }
 
-TreeProjection& Operator::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& Operator::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& Operator::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& Operator::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
+Operator& Operator::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
+Operator& Operator::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
+Operator& Operator::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
+Operator& Operator::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
 
-TreeProjection& Operator::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& Operator::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& Operator::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& Operator::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
+Operator& Operator::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
+Operator& Operator::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
+Operator& Operator::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
+Operator& Operator::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
 
-TreeProjection& Operator::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
-TreeProjection& Operator::operator/=( const Expression  & arg ){ return operator=( this->operator/(arg) ); }
+Operator& Operator::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
+Operator& Operator::operator/=( const Expression  & arg ){ return operator=( this->operator/(arg) ); }
 
 
 
@@ -458,6 +458,9 @@ returnValue Operator::ADsymCommon2( Operator       *a  ,
 }
 
 
+BooleanType Operator::isTrivial() const {
+	return BT_FALSE;
+}
 
 
 

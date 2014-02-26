@@ -572,6 +572,11 @@ returnValue Projection::setVariableExportName( const VariableType &_type, const 
 }
 
 
+BooleanType Projection::isTrivial() const {
+	return BT_TRUE;
+}
+
+
 CLOSE_NAMESPACE_ACADO
 
 // end of file.
