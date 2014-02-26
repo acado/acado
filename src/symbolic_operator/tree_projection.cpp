@@ -139,30 +139,11 @@ TreeProjection& TreeProjection::operator=( const Expression &arg ){
 
     ASSERT( arg.getDim() == 1 );
 
-    if( argument != 0 ){
-        if( argument->nCount == 0 ){
-            delete argument;
-            argument = 0;
-        }
-        else{
-            argument->nCount--;
-        }
-    }
+    Operator *tmp = arg.getOperatorClone(0);
+    TreeProjection result = this->operator=(*tmp);
+    delete tmp;
 
-    argument = arg.getOperatorClone(0);
-
-    vIndex         = count++;
-    variableIndex  = vIndex ;
-
-        curvature      = CT_UNKNOWN; // argument->getCurvature();
-        monotonicity   = MT_UNKNOWN; // argument->getMonotonicity();
-
-    ne = argument->isOneOrZero();
-
-    if( curvature == CT_CONSTANT )
-        scale = argument->getValue();
-
-    return *this;
+    return result;
 }
 
 
