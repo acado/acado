@@ -577,7 +577,7 @@ public:
 protected:
 
 
-    virtual Operator* convert2TreeProjection( Operator* a ); // Caution: a is deleted inside...
+    virtual TreeProjection* convert2TreeProjection( Operator* a ); // Caution: a is deleted inside...
     
     returnValue ADsymCommon( 	Operator     *a  ,
                               	TreeProjection &da ,

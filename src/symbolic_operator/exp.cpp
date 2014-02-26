@@ -121,10 +121,7 @@ returnValue Exp::initDerivative() {
 
 	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
 
-	TreeProjection der;
-	der = Exp(argument->clone());
-
-	derivative = der.clone();
+	derivative = convert2TreeProjection(new Exp(argument->clone()));
 	derivative2 = derivative;
 
 	return SUCCESSFUL_RETURN;

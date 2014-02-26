@@ -256,7 +256,7 @@ Operator* Operator::myAdd (Operator* a,Operator* b){
 }
 
 
-Operator* Operator::convert2TreeProjection( Operator* a ){
+TreeProjection* Operator::convert2TreeProjection( Operator* a ){
   
    TreeProjection b;
    b = *a;

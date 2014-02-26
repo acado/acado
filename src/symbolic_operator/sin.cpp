@@ -114,12 +114,8 @@ returnValue Sin::initDerivative() {
 		return SUCCESSFUL_RETURN;
 	}
 
-	TreeProjection der, der2;
-	der = Cos(argument->clone());
-	der2 = Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Sin(argument->clone()) );
-
-	derivative = der.clone();
-	derivative2 = der2.clone();
+	derivative = convert2TreeProjection(new Cos(argument->clone()));
+	derivative2 = convert2TreeProjection(new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Sin(argument->clone()) ));
 
 	return SUCCESSFUL_RETURN;
 }

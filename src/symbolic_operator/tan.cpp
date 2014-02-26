@@ -118,17 +118,13 @@ returnValue Tan::initDerivative() {
 
 	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
 
-	TreeProjection der, der2;
-	der = Quotient( new DoubleConstant( 1.0 , NE_ONE ), new Power_Int( new Cos( argument->clone() ), 2 ) );
-	der2 = Quotient(    new Product(
-            new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO ),
-            new Tan(argument->clone())
-         ),
-         new Power_Int( new Cos( argument->clone() ), 2 )
-    );
-
-	derivative = der.clone();
-	derivative2 = der2.clone();
+	derivative = convert2TreeProjection(new Quotient( new DoubleConstant( 1.0 , NE_ONE ), new Power_Int( new Cos( argument->clone() ), 2 ) ));
+	derivative2 = convert2TreeProjection(new Quotient(    new Product(
+			new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO ),
+			new Tan(argument->clone())
+	),
+			new Power_Int( new Cos( argument->clone() ), 2 )
+	));
 
 	return SUCCESSFUL_RETURN;
 }

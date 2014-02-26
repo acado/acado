@@ -126,23 +126,14 @@ UnaryOperator::~UnaryOperator(){
     }
     if( derivative != 0 ){
 
-        if( derivative->nCount == 0 ){
-            delete derivative;
-            derivative = 0;
-        }
-        else{
-        	derivative->nCount--;
-        }
+    	if( derivative2 == derivative ) derivative2 = 0;
+        delete derivative;
+        derivative = 0;
     }
     if( derivative2 != 0 ){
 
-        if( derivative2->nCount == 0 ){
-            delete derivative2;
-            derivative2 = 0;
-        }
-        else{
-        	derivative2->nCount--;
-        }
+        delete derivative2;
+        derivative2 = 0;
     }
     if( dargument != 0 ) delete dargument;
 
@@ -171,23 +162,14 @@ UnaryOperator& UnaryOperator::operator=( const UnaryOperator &arg ){
         }
         if( derivative != 0 ){
 
-            if( derivative->nCount == 0 ){
-                delete derivative;
-                derivative = 0;
-            }
-            else{
-            	derivative->nCount--;
-            }
+        	if( derivative2 == derivative ) derivative2 = 0;
+        	delete derivative;
+        	derivative = 0;
         }
         if( derivative2 != 0 ){
 
-            if( derivative2->nCount == 0 ){
-                delete derivative2;
-                derivative2 = 0;
-            }
-            else{
-            	derivative2->nCount--;
-            }
+            delete derivative2;
+            derivative2 = 0;
         }
         if( dargument != 0 ) delete dargument;
 
@@ -195,8 +177,6 @@ UnaryOperator& UnaryOperator::operator=( const UnaryOperator &arg ){
         free( dargument_result );
 
  		argument = arg.argument->clone();
- 	    derivative = 0;
- 	    derivative2 = 0;
  	 	if( arg.derivative != 0 ) 	derivative = arg.derivative->clone();
  	 	if( arg.derivative2 != 0 ) 	derivative2 = arg.derivative2->clone();
 		

@@ -117,39 +117,37 @@ returnValue Asin::initDerivative() {
 
 	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
 
-	TreeProjection der, der2;
-	der = Power(
-	         new Addition(
-                       new DoubleConstant(1.0 , NE_ONE),
-                       new Product(
-                           new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
-                           new Power_Int(
-                               argument->clone(),
-                               2
-                           )
-                       )
-                    ),
-                    new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
-          );
-	der2 = Product(
-	         new Power(
-	           new Addition(
-                       new DoubleConstant(1.0 , NE_ONE),
-                       new Product(
-                           new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
-                           new Power_Int(
-                               argument->clone(),
-                               2
-                           )
-                       )
-                      ),
-                      new DoubleConstant( -1.5 , NE_NEITHER_ONE_NOR_ZERO )
-                   ),
-	         argument->clone()
-      );
-
-	derivative = der.clone();
-	derivative2 = der2.clone();
+	derivative = convert2TreeProjection(
+			new Power(
+					new Addition(
+							new DoubleConstant(1.0 , NE_ONE),
+							new Product(
+									new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
+									new Power_Int(
+											argument->clone(),
+											2
+									)
+							)
+					),
+					new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
+			));
+	derivative2 = convert2TreeProjection(
+			new Product(
+					new Power(
+							new Addition(
+									new DoubleConstant(1.0 , NE_ONE),
+									new Product(
+											new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
+											new Power_Int(
+													argument->clone(),
+													2
+											)
+									)
+							),
+							new DoubleConstant( -1.5 , NE_NEITHER_ONE_NOR_ZERO )
+					),
+					argument->clone()
+			));
 
 	return SUCCESSFUL_RETURN;
 }
