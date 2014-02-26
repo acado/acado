@@ -229,7 +229,7 @@ returnValue Operator::setVariableExportName(	const VariableType &_type,
 
 
 Operator* Operator::myProd(Operator* a,Operator* b){
-  
+
     if( a->isOneOrZero() == NE_ZERO ) return new DoubleConstant( 0.0 , NE_ZERO );
     if( b->isOneOrZero() == NE_ZERO ) return new DoubleConstant( 0.0 , NE_ZERO );
     

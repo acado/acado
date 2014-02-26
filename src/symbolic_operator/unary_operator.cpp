@@ -45,6 +45,9 @@ UnaryOperator::UnaryOperator() : SmoothOperator( )
     dfcn  = 0;
     ddfcn = 0;
     nCount = 0;
+
+    derivative = 0;
+    derivative2 = 0;
 }
 
 UnaryOperator::UnaryOperator( Operator *_argument ) : SmoothOperator( )
@@ -63,7 +66,8 @@ UnaryOperator::UnaryOperator( Operator *_argument ) : SmoothOperator( )
 
     nCount = 0;
 
-    initDerivative();
+    derivative = 0;
+    derivative2 = 0;
 }
 
 
@@ -78,7 +82,10 @@ UnaryOperator::UnaryOperator( const UnaryOperator &arg ){
     bufferSize = arg.bufferSize;
 
  	argument   = arg.argument->clone();
- 	derivative = arg.derivative->clone();
+    derivative = 0;
+    derivative2 = 0;
+ 	if( arg.derivative != 0 ) 	derivative = arg.derivative->clone();
+ 	if( arg.derivative2 != 0 ) 	derivative2 = arg.derivative2->clone();
 	
 // 	argument   = arg.argument;
 //     argument->nCount++;
@@ -117,6 +124,26 @@ UnaryOperator::~UnaryOperator(){
             argument->nCount--;
         }
     }
+    if( derivative != 0 ){
+
+        if( derivative->nCount == 0 ){
+            delete derivative;
+            derivative = 0;
+        }
+        else{
+        	derivative->nCount--;
+        }
+    }
+    if( derivative2 != 0 ){
+
+        if( derivative2->nCount == 0 ){
+            delete derivative2;
+            derivative2 = 0;
+        }
+        else{
+        	derivative2->nCount--;
+        }
+    }
     if( dargument != 0 ) delete dargument;
 
     free(  argument_result );
@@ -142,13 +169,36 @@ UnaryOperator& UnaryOperator::operator=( const UnaryOperator &arg ){
                 argument->nCount--;
             }
         }
+        if( derivative != 0 ){
+
+            if( derivative->nCount == 0 ){
+                delete derivative;
+                derivative = 0;
+            }
+            else{
+            	derivative->nCount--;
+            }
+        }
+        if( derivative2 != 0 ){
+
+            if( derivative2->nCount == 0 ){
+                delete derivative2;
+                derivative2 = 0;
+            }
+            else{
+            	derivative2->nCount--;
+            }
+        }
         if( dargument != 0 ) delete dargument;
 
         free(  argument_result );
         free( dargument_result );
 
  		argument = arg.argument->clone();
- 	 	derivative = arg.derivative->clone();
+ 	    derivative = 0;
+ 	    derivative2 = 0;
+ 	 	if( arg.derivative != 0 ) 	derivative = arg.derivative->clone();
+ 	 	if( arg.derivative2 != 0 ) 	derivative2 = arg.derivative2->clone();
 		
 //         argument = arg.argument;
 // 		argument->nCount++;
@@ -449,6 +499,79 @@ returnValue UnaryOperator::setVariableExportName(	const VariableType &_type,
 	argument->setVariableExportName(_type, _name);
 
 	return Operator::setVariableExportName(_type, _name);
+}
+
+
+Operator* UnaryOperator::differentiate( int index ){
+
+	initDerivative();
+
+	dargument = argument->differentiate( index );
+	return myProd( dargument->clone() , derivative );
+}
+
+
+Operator* UnaryOperator::ADforwardProtected( int dim,
+                                     VariableType *varType,
+                                     int *component,
+                                     Operator **seed,
+                                     int &nNewIS,
+                                     TreeProjection ***newIS ){
+
+	initDerivative();
+
+    if( dargument != 0 )
+        delete dargument;
+
+    dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
+
+    return myProd( dargument->clone() , derivative );
+}
+
+
+
+returnValue UnaryOperator::ADbackwardProtected( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+
+	initDerivative();
+
+    argument->AD_backward( dim,
+                                  varType,
+                                  component,
+                                  myProd( seed->clone() , derivative ),
+                                  df, nNewIS, newIS
+            );
+
+    delete seed;
+    return SUCCESSFUL_RETURN;
+}
+
+
+returnValue UnaryOperator::ADsymmetricProtected( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+
+	initDerivative();
+
+    return ADsymCommon( argument, *derivative, *derivative2, dim, varType, component, l, S, dimS, dfS,
+			 ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
 }
 
 

@@ -93,7 +93,7 @@ public:
      *  \return The expression for the derivative.                \n
      *
      */
-    virtual Operator* differentiate( int index  /**< diff. index    */ ) = 0;
+    Operator* differentiate( int index  /**< diff. index    */ );
 
 
     /** Automatic Differentiation in forward mode on the symbolic \n
@@ -399,12 +399,12 @@ protected:
      *  forward derivative                                        \n
      *  \return SUCCESSFUL_RETURN                                 \n
      */
-     virtual Operator* ADforwardProtected( int                dim      , /**< dimension of the seed */
+     Operator* ADforwardProtected( int                dim      , /**< dimension of the seed */
                                              VariableType      *varType  , /**< the variable types    */
                                              int               *component, /**< and their components  */
                                              Operator       **seed     , /**< the forward seed      */
                                              int                &nNewIS  , /**< the number of new IS  */
-                                             TreeProjection ***newIS    /**< the new IS-pointer    */ ) = 0;
+                                             TreeProjection ***newIS    /**< the new IS-pointer    */ );
 
 
 
@@ -413,13 +413,13 @@ protected:
      *  backward derivative                                        \n
      *  \return SUCCESSFUL_RETURN                                  \n
      */
-     virtual returnValue ADbackwardProtected( int            dim      , /**< number of directions  */
+     returnValue ADbackwardProtected( int            dim      , /**< number of directions  */
                                               VariableType  *varType  , /**< the variable types    */
                                               int           *component, /**< and their components  */
                                               Operator      *seed     , /**< the backward seed     */
                                               Operator     **df       , /**< the result            */
                                               int            &nNewIS  , /**< the number of new IS  */
-                                              TreeProjection ***newIS    /**< the new IS-pointer   */ ) = 0;
+                                              TreeProjection ***newIS    /**< the new IS-pointer   */ );
 
 
     /** Automatic Differentiation in symmetric mode on the symbolic \n
@@ -427,7 +427,7 @@ protected:
      *  second order derivative.                                    \n
      *  \return SUCCESSFUL_RETURN                                   \n
      */
-     virtual returnValue ADsymmetricProtected( int            dim       , /**< number of directions  */
+     returnValue ADsymmetricProtected( int            dim       , /**< number of directions  */
                                                VariableType  *varType   , /**< the variable types    */
                                                int           *component , /**< and their components  */
                                                Operator      *l         , /**< the backward seed     */
@@ -441,7 +441,7 @@ protected:
                                                int            &nNewSIS  , /**< the number of newSIS  */
                                                TreeProjection ***newSIS , /**< the new SIS-pointer   */
                                                int            &nNewHIS  , /**< the number of newHIS  */
-                                               TreeProjection ***newHIS   /**< the new HIS-pointer   */ ) = 0;
+                                               TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
 
 
 					      
@@ -457,7 +457,8 @@ protected:
   // -------------------------
   protected:
 
-    IntermediateState  *derivative;		/**< The derivative of this unary operator. */
+    TreeProjection  *derivative;		/**< The derivative of this unary operator. */
+    TreeProjection  *derivative2;		/**< The second order derivative of this unary operator. */
 
     Operator *argument        ;     /**< The argument                         */
     Operator *dargument       ;     /**< The derivative                       */

@@ -74,16 +74,6 @@ public:
 	
 	/** Evaluates the expression (templated version) */
 	virtual returnValue evaluate( EvaluationBase *x );
-	
-	
-	
-
-    /** Returns the derivative of the expression with respect     \n
-     *  to the variable var(index).                               \n
-     *  \return The expression for the derivative.                \n
-     *
-     */
-     virtual Operator* differentiate( int index  /**< diff. index    */ );
 
 	 
     /** Substitutes var(index) with the expression sub.           \n
@@ -106,56 +96,7 @@ public:
 
 protected:
 
-
-
-    /** Automatic Differentiation in forward mode on the symbolic \n
-     *  level. This function generates an expression for a        \n
-     *  forward derivative                                        \n
-     *  \return SUCCESSFUL_RETURN                                 \n
-     */
-     virtual Operator* ADforwardProtected( int                dim      , /**< dimension of the seed */
-                                             VariableType      *varType  , /**< the variable types    */
-                                             int               *component, /**< and their components  */
-                                             Operator       **seed     , /**< the forward seed      */
-                                             int                &nNewIS  , /**< the number of new IS  */
-                                             TreeProjection ***newIS    /**< the new IS-pointer    */ );
-
-
-
-    /** Automatic Differentiation in backward mode on the symbolic \n
-     *  level. This function generates an expression for a         \n
-     *  backward derivative                                        \n
-     *  \return SUCCESSFUL_RETURN                                  \n
-     */
-     virtual returnValue ADbackwardProtected( int            dim      , /**< number of directions  */
-                                              VariableType  *varType  , /**< the variable types    */
-                                              int           *component, /**< and their components  */
-                                              Operator      *seed     , /**< the backward seed     */
-                                              Operator     **df       , /**< the result            */
-                                              int            &nNewIS  , /**< the number of new IS  */
-                                              TreeProjection ***newIS    /**< the new IS-pointer   */ );
-
-
-    /** Automatic Differentiation in symmetric mode on the symbolic \n
-     *  level. This function generates an expression for a          \n
-     *  second order derivative.                                    \n
-     *  \return SUCCESSFUL_RETURN                                   \n
-     */
-     virtual returnValue ADsymmetricProtected( int            dim       , /**< number of directions  */
-                                               VariableType  *varType   , /**< the variable types    */
-                                               int           *component , /**< and their components  */
-                                               Operator      *l         , /**< the backward seed     */
-                                               Operator     **S         , /**< forward seed matrix   */
-                                               int            dimS      , /**< dimension of forward seed             */
-                                               Operator     **dfS       , /**< first order foward result             */
-                                               Operator     **ldf       , /**< first order backward result           */
-                                               Operator     **H         , /**< upper trianglular part of the Hessian */
-                                               int            &nNewLIS  , /**< the number of newLIS  */
-                                               TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                               int            &nNewSIS  , /**< the number of newSIS  */
-                                               TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                               int            &nNewHIS  , /**< the number of newHIS  */
-                                               TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
+     virtual returnValue initDerivative();
 };
 
 

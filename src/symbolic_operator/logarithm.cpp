@@ -101,126 +101,6 @@ returnValue Logarithm::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Logarithm::differentiate( int index ){
-
-  dargument = argument->differentiate( index );
-  if( dargument->isOneOrZero() == NE_ONE ){
-    return new Power_Int(
-             argument->clone(),
-             -1
-           );
-  }
-  if( dargument->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  return new Quotient(
-                dargument->clone(),
-                argument->clone()
-             );
-}
-
-
-Operator* Logarithm::ADforwardProtected( int dim,
-                                           VariableType *varType,
-                                           int *component,
-                                           Operator **seed,
-                                           int &nNewIS,
-                                           TreeProjection ***newIS ){
-
-    if( dargument != 0 )
-        delete dargument;
-
-    dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
-    if( dargument->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if( dargument->isOneOrZero() == NE_ONE ){
-        return new Power_Int(
-                 argument->clone(),
-                 -1
-             );
-    }
-    return new Quotient(
-                dargument->clone(),
-                argument->clone()
-             );
-}
-
-
-
-returnValue Logarithm::ADbackwardProtected( int           dim      , /**< number of directions  */
-                                        VariableType *varType  , /**< the variable types    */
-                                        int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
-
-
-    if( seed->isOneOrZero() == NE_ZERO ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df, nNewIS, newIS
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    if( seed->isOneOrZero() == NE_ONE ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new Power_Int(
-                                              argument->clone(),
-                                              -1
-                                          ),
-                                          df, nNewIS, newIS
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    argument->AD_backward( dim,
-                                  varType,
-                                  component,
-                                  new Quotient(
-                                      seed->clone(),
-                                      argument->clone()
-                                  ),
-                                  df, nNewIS, newIS
-            );
-
-    delete seed;
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue Logarithm::ADsymmetricProtected( int            dim       , /**< number of directions  */
-                                        VariableType  *varType   , /**< the variable types    */
-                                        int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
-                                        int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
-  
-    TreeProjection tmp, tmp2;
-    tmp  = Power_Int( argument->clone(), -1 );
-    tmp2 = Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Power_Int( argument->clone(), -2 ) );
-    
-    return ADsymCommon( argument, tmp, tmp2, dim, varType, component, l, S, dimS, dfS,
-			 ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
-}
-
-
 
 Operator* Logarithm::substitute( int index, const Operator *sub ){
 
@@ -246,6 +126,21 @@ CurvatureType Logarithm::getCurvature( ){
 
     return CT_NEITHER_CONVEX_NOR_CONCAVE;
 }
+
+returnValue Logarithm::initDerivative() {
+
+	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+
+	TreeProjection der, der2;
+	der = Power_Int( argument->clone(), -1 );
+	der2 = Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Power_Int( argument->clone(), -2 ) );
+
+	derivative = der.clone();
+	derivative2 = der2.clone();
+
+	return SUCCESSFUL_RETURN;
+}
+
 
 CLOSE_NAMESPACE_ACADO
 

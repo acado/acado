@@ -175,7 +175,7 @@ TreeProjection& TreeProjection::operator=( const double& arg ){
 }
 
 
-Operator* TreeProjection::clone() const{
+TreeProjection* TreeProjection::clone() const{
 
     return new TreeProjection( *this );
 }

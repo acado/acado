@@ -84,7 +84,7 @@ public:
      /** Provides a deep copy of the expression. \n
       *  \return a clone of the expression.      \n
       */
-     virtual Operator* clone() const;
+     virtual TreeProjection* clone() const;
 
 
      /** Provides a deep copy of a tree projection. \n

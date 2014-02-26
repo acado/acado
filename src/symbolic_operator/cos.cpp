@@ -101,141 +101,6 @@ returnValue Cos::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Cos::differentiate( int index ){
-
-  dargument = argument->differentiate( index );
-  if( dargument->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  if( dargument->isOneOrZero() == NE_ONE ){
-    return new Product(
-             new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-             new Sin( argument->clone() )
-           );
-  }
-  return new Product(
-           new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-           new Product(
-             dargument->clone(),
-             new Sin(
-               argument->clone()
-             )
-           )
-         );
-}
-
-
-Operator* Cos::ADforwardProtected( int dim,
-                                     VariableType *varType,
-                                     int *component,
-                                     Operator **seed,
-                                     int &nNewIS,
-                                     TreeProjection ***newIS ){
-
-    if( dargument != 0 )
-        delete dargument;
-
-    dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
-    if( dargument->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if( dargument->isOneOrZero() == NE_ONE ){
-        return new Product(
-                new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-                new Sin( argument->clone() )
-             );
-    }
-    return new Product(
-           new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-           new Product(
-             dargument->clone(),
-             new Sin(
-               argument->clone()
-             )
-           )
-         );
-}
-
-
-
-returnValue Cos::ADbackwardProtected( int           dim      , /**< number of directions  */
-                                        VariableType *varType  , /**< the variable types    */
-                                        int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
-
-
-    if( seed->isOneOrZero() == NE_ZERO ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df, nNewIS, newIS
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    if( seed->isOneOrZero() == NE_ONE ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-             new Product(
-                new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-                new Sin( argument->clone() )
-             ),
-                              df, nNewIS, newIS
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    argument->AD_backward( dim,
-                                  varType,
-                                  component,
-                                  new Product(
-                                      new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-                                      new Product(
-                                          seed->clone(),
-                                          new Sin(
-                                              argument->clone()
-                                          )
-                                      )
-                                  ),
-                                  df, nNewIS, newIS
-            );
-    delete seed;
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue Cos::ADsymmetricProtected( int            dim       , /**< number of directions  */
-                                        VariableType  *varType   , /**< the variable types    */
-                                        int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
-                                        int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
-  
-    TreeProjection tmp, tmp2;
-    tmp  = Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Sin(argument->clone()) );
-    tmp2 = Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Cos(argument->clone()) );
-    
-    return ADsymCommon( argument, tmp, tmp2, dim, varType, component, l, S, dimS, dfS,
-			 ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
-}
-
-
-
 Operator* Cos::substitute( int index, const Operator *sub ){
 
     return new Cos( argument->substitute( index , sub ) );
@@ -245,6 +110,20 @@ Operator* Cos::substitute( int index, const Operator *sub ){
 Operator* Cos::clone() const{
 
     return new Cos(*this);
+}
+
+returnValue Cos::initDerivative() {
+
+	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+
+	TreeProjection der, der2;
+	der = Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Sin(argument->clone()) );
+	der2 = Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Cos(argument->clone()) );
+
+	derivative = der.clone();
+	derivative2 = der2.clone();
+
+	return SUCCESSFUL_RETURN;
 }
 
 
