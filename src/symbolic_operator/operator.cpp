@@ -259,19 +259,6 @@ Operator* Operator::myAdd (Operator* a,Operator* b){
 }
 
 
-Operator* Operator::myPower (Operator* a,Operator* b){
-
-    if( a->isOneOrZero() == NE_ZERO && b->isOneOrZero() == NE_ONE ) return new DoubleConstant( 0.0 , NE_ZERO );
-
-    if( b->isOneOrZero() == NE_ZERO ) return new DoubleConstant( 1.0 , NE_ONE );
-    if( a->isOneOrZero() == NE_ONE ) return new DoubleConstant( 1.0 , NE_ONE );
-
-    if( b->isOneOrZero() == NE_ONE ) return a->clone();
-
-    return new Power(a->clone(),b->clone());
-}
-
-
 Operator* Operator::mySubtract (Operator* a,Operator* b){
 
     if( a->isOneOrZero() == NE_ZERO && b->isOneOrZero() == NE_ZERO )
@@ -286,6 +273,27 @@ Operator* Operator::mySubtract (Operator* a,Operator* b){
     if( a == b ) return new DoubleConstant( 0.0 , NE_ZERO );
 
     return new Subtraction(a->clone(),b->clone());
+}
+
+
+Operator* Operator::myPower (Operator* a,Operator* b){
+
+    if( a->isOneOrZero() == NE_ZERO && b->isOneOrZero() == NE_ONE ) return new DoubleConstant( 0.0 , NE_ZERO );
+
+    if( b->isOneOrZero() == NE_ZERO ) return new DoubleConstant( 1.0 , NE_ONE );
+    if( a->isOneOrZero() == NE_ONE ) return new DoubleConstant( 1.0 , NE_ONE );
+
+    if( b->isOneOrZero() == NE_ONE ) return a->clone();
+
+    return new Power(a->clone(),b->clone());
+}
+
+
+Operator* Operator::myLogarithm (Operator* a){
+
+    if( a->isOneOrZero() == NE_ONE ) return new DoubleConstant( 0.0 , NE_ZERO );
+
+    return new Logarithm(a->clone());
 }
 
 
