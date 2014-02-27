@@ -197,10 +197,12 @@ returnValue Quotient::AD_backward( int           dim      , /**< number of direc
 
 		Operator *prodTmp2 = myProd( argument1, &tmp );
 		Operator *prodTmp3 = myProd( prodTmp2, derivative1 );
-		Operator *subTmp = mySubtract( new DoubleConstant( 0.0, NE_ZERO ), prodTmp3 );
+		Operator *zeroTmp = new DoubleConstant( 0.0, NE_ZERO );
+		Operator *subTmp = mySubtract( zeroTmp, prodTmp3 );
 
 		argument2->AD_backward( dim, varType, component, subTmp->clone(), df, nNewIS, newIS );
 
+		delete zeroTmp;
 		delete prodTmp;
 		delete prodTmp2;
 		delete prodTmp3;

@@ -95,145 +95,29 @@ Operator* Power::differentiate( int index ){
 
   dargument1 = argument1->differentiate( index );
   dargument2 = argument2->differentiate( index );
-  if( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ONE ){
-    return new Product(
-             clone(),
-             new Logarithm(
-               argument1->clone()
-             )
-           );
-  }
-  if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ZERO ){
-    return new Product(
-             argument2->clone(),
-             new Power(
-               argument1->clone(),
-               new Addition(
-                 argument2->clone(),
-                 new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-               )
-             )
-           );
-  }
-  if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ONE ){
-    return new Addition(
-             new Product(
-               clone(),
-               new Logarithm(
-                 argument1->clone()
-               )
-             ),
-             new Product(
-               argument2->clone(),
-               new Power(
-                 argument1->clone(),
-                 new Addition(
-                   argument2->clone(),
-                   new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                 )
-               )
-             )
-           );
-  }
-  if ( dargument1->isOneOrZero() == NE_ZERO ){
-    return new Product(
-             clone(),
-             new Product(
-               dargument2->clone(),
-               new Logarithm(
-                 argument1->clone()
-               )
-             )
-           );
-  }
-  if ( dargument2->isOneOrZero() == NE_ZERO ){
-    return new Product(
-             argument2->clone(),
-             new Product(
-               new Power(
-                 argument1->clone(),
-                 new Addition(
-                   argument2->clone(),
-                   new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                 )
-               ),
-               dargument1->clone()
-             )
-           );
-  }
-  if ( dargument1->isOneOrZero() == NE_ONE ){
-    return new Addition(
-             new Product(
-               clone(),
-               new Product(
-                 dargument2->clone(),
-                 new Logarithm(
-                   argument1->clone()
-                 )
-               )
-             ),
-             new Product(
-               argument2->clone(),
-               new Power(
-                 argument1->clone(),
-                 new Addition(
-                   argument2->clone(),
-                   new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                 )
-               )
-             )
-           );
-  }
-  if ( dargument2->isOneOrZero() == NE_ONE ){
-    return new Addition(
-             new Product(
-               clone(),
-               new Logarithm(
-                 argument1->clone()
-               )
-             ),
-             new Product(
-               argument2->clone(),
-               new Product(
-                 new Power(
-                   argument1->clone(),
-                   new Addition(
-                     argument2->clone(),
-                     new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                   )
-                 ),
-                 dargument1->clone()
-               )
-             )
-           );
-  }
-  return new Addition(
-           new Product(
-             clone(),
-             new Product(
-               dargument2->clone(),
-               new Logarithm(
-                 argument1->clone()
-               )
-             )
-           ),
-           new Product(
-             argument2->clone(),
-             new Product(
-               new Power(
-                 argument1->clone(),
-                 new Addition(
-                   argument2->clone(),
-                   new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                 )
-               ),
-               dargument1->clone()
-             )
-           )
-         );
+
+  Operator *logTmp = myLogarithm( argument1 );
+  Operator *prodTmp1 = myProd( dargument2, logTmp );
+  Operator *prodTmp2 = myProd( this, prodTmp1 );
+
+  Operator *oneTmp = new DoubleConstant(1.0, NE_ONE);
+  Operator *addTmp1 = mySubtract( argument2, oneTmp );
+  Operator *powerTmp1 = myPower( argument1, addTmp1 );
+  Operator *prodTmp3 = myProd( powerTmp1, dargument1 );
+  Operator *prodTmp4 = myProd( argument2, prodTmp3 );
+
+  Operator *result = myAdd( prodTmp2, prodTmp4 );
+
+  delete logTmp;
+  delete prodTmp1;
+  delete prodTmp2;
+  delete oneTmp;
+  delete addTmp1;
+  delete powerTmp1;
+  delete prodTmp3;
+  delete prodTmp4;
+
+  return result;
 
 }
 
@@ -254,146 +138,28 @@ Operator* Power::AD_forward( int dim,
     dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
     dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
 
+    Operator *logTmp = myLogarithm( argument1 );
+    Operator *prodTmp1 = myProd( dargument2, logTmp );
+    Operator *prodTmp2 = myProd( this, prodTmp1 );
 
-    if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ONE ){
-        return new Product(
-                 clone(),
-                 new Logarithm(
-                     argument1->clone()
-                 )
-             );
-    }
-    if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ZERO ){
-       return new Product(
-                argument2->clone(),
-                new Power(
-                    argument1->clone(),
-                    new Addition(
-                        argument2->clone(),
-                        new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                    )
-                )
-            );
-    }
-    if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ONE ){
-        return new Addition(
-                 new Product(
-                     clone(),
-                     new Logarithm(
-                         argument1->clone()
-                     )
-                 ),
-                 new Product(
-                     argument2->clone(),
-                     new Power(
-                         argument1->clone(),
-                         new Addition(
-                             argument2->clone(),
-                             new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                         )
-                     )
-                 )
-             );
-    }
-    if ( dargument1->isOneOrZero() == NE_ZERO ){
-        return new Product(
-                 clone(),
-                 new Product(
-                     dargument2->clone(),
-                     new Logarithm(
-                         argument1->clone()
-                     )
-                 )
-             );
-    }
-    if ( dargument2->isOneOrZero() == NE_ZERO ){
-        return new Product(
-                 argument2->clone(),
-                 new Product(
-                     new Power(
-                         argument1->clone(),
-                         new Addition(
-                             argument2->clone(),
-                             new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                         )
-                     ),
-                     dargument1->clone()
-                 )
-             );
-    }
-    if ( dargument1->isOneOrZero() == NE_ONE ){
-        return new Addition(
-                 new Product(
-                     clone(),
-                     new Product(
-                         dargument2->clone(),
-                         new Logarithm(
-                             argument1->clone()
-                         )
-                     )
-                 ),
-                 new Product(
-                     argument2->clone(),
-                     new Power(
-                         argument1->clone(),
-                         new Addition(
-                             argument2->clone(),
-                             new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                         )
-                     )
-                 )
-            );
-    }
-    if ( dargument2->isOneOrZero() == NE_ONE ){
-        return new Addition(
-                 new Product(
-                     clone(),
-                     new Logarithm(
-                         argument1->clone()
-                     )
-                 ),
-                 new Product(
-                     argument2->clone(),
-                     new Product(
-                         new Power(
-                             argument1->clone(),
-                             new Addition(
-                                 argument2->clone(),
-                                 new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                             )
-                         ),
-                         dargument1->clone()
-                     )
-                 )
-            );
-    }
-    return new Addition(
-           new Product(
-             clone(),
-             new Product(
-               dargument2->clone(),
-               new Logarithm(
-                 argument1->clone()
-               )
-             )
-           ),
-           new Product(
-             argument2->clone(),
-             new Product(
-               new Power(
-                 argument1->clone(),
-                 new Addition(
-                   argument2->clone(),
-                   new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                 )
-               ),
-               dargument1->clone()
-             )
-           )
-         );
+    Operator *oneTmp = new DoubleConstant(1.0, NE_ONE);
+    Operator *addTmp1 = mySubtract( argument2, oneTmp );
+    Operator *powerTmp1 = myPower( argument1, addTmp1 );
+    Operator *prodTmp3 = myProd( powerTmp1, dargument1 );
+    Operator *prodTmp4 = myProd( argument2, prodTmp3 );
+
+    Operator *result = myAdd( prodTmp2, prodTmp4 );
+
+    delete logTmp;
+    delete prodTmp1;
+    delete prodTmp2;
+    delete oneTmp;
+    delete addTmp1;
+    delete powerTmp1;
+    delete prodTmp3;
+    delete prodTmp4;
+
+    return result;
 }
 
 
@@ -405,65 +171,34 @@ returnValue Power::AD_backward( int           dim      , /**< number of directio
                                         int           &nNewIS  , /**< the number of new IS  */
                                         TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
-    if( seed->isOneOrZero() != NE_ZERO ){
+	if( seed->isOneOrZero() != NE_ZERO ){
 
-      if( seed->isOneOrZero() != NE_ONE ){
-	
-        TreeProjection tmp;
-        tmp = *seed;
+		TreeProjection tmp;
+		tmp = *seed;
 
-        argument1->AD_backward( dim, varType, component,
-                                new Product(
-                                    argument2->clone(),
-                                    new Product(
-                                        new Power(
-                                            argument1->clone(),
-                                            new Addition(
-                                                argument2->clone(),
-                                                new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                                            )
-                                        ),
-                                        tmp.clone()
-                                    )
-                                ),
-                                df, nNewIS, newIS );
+	    Operator *oneTmp = new DoubleConstant(1.0, NE_ONE);
+		Operator *addTmp1 = mySubtract( argument2, oneTmp );
+		Operator *powerTmp1 = myPower( argument1, addTmp1 );
+		Operator *prodTmp3 = myProd( powerTmp1, &tmp );
+		Operator *prodTmp4 = myProd( argument2, prodTmp3 );
 
-        argument2->AD_backward( dim, varType, component,
-                                new Product(
-                                    clone(),
-                                    new Product(
-                                        tmp.clone(),
-                                        new Logarithm(
-                                            argument1->clone()
-                                        )
-                                    )
-                                ),
-                                df, nNewIS, newIS );
-      }
-      else{
-        argument1->AD_backward( dim, varType, component,
-                                new Product(
-                                    argument2->clone(),
-                                    new Power(
-                                        argument1->clone(),
-                                        new Addition(
-                                            argument2->clone(),
-                                            new DoubleConstant(-1.0, NE_NEITHER_ONE_NOR_ZERO)
-                                        )
-                                    )
-                                ),
-                                df, nNewIS, newIS );
+		argument1->AD_backward( dim, varType, component, prodTmp4->clone(), df, nNewIS, newIS );
 
-        argument2->AD_backward( dim, varType, component,
-                                new Product(
-                                    clone(),
-                                    new Logarithm(
-                                        argument1->clone()
-                                    )
-                                ),
-                                df, nNewIS, newIS );
-      }
-    }
+		Operator *logTmp = myLogarithm( argument1 );
+		Operator *prodTmp1 = myProd( &tmp, logTmp );
+		Operator *prodTmp2 = myProd( this, prodTmp1 );
+
+		argument2->AD_backward( dim, varType, component, prodTmp2->clone(), df, nNewIS, newIS );
+
+		delete logTmp;
+		delete prodTmp1;
+		delete prodTmp2;
+		delete oneTmp;
+		delete addTmp1;
+		delete powerTmp1;
+		delete prodTmp3;
+		delete prodTmp4;
+	}
 
     delete seed;
     return SUCCESSFUL_RETURN;
