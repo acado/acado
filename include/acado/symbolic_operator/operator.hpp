@@ -568,6 +568,7 @@ public:
     
     virtual Operator* myProd(Operator* a,Operator* b);
     virtual Operator* myAdd (Operator* a,Operator* b);
+    virtual Operator* mySubtract (Operator* a,Operator* b);
 
 
     virtual BooleanType isTrivial() const;

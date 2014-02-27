@@ -256,6 +256,20 @@ Operator* Operator::myAdd (Operator* a,Operator* b){
 }
 
 
+Operator* Operator::mySubtract (Operator* a,Operator* b){
+
+    if( a->isOneOrZero() == NE_ZERO ) return new Subtraction(new DoubleConstant( 0.0 , NE_ZERO ), b->clone());
+    if( b->isOneOrZero() == NE_ZERO ) return a->clone();
+
+    if( a->isOneOrZero() == NE_ONE && b->isOneOrZero() == NE_ONE )
+        return new DoubleConstant( 0.0 , NE_ZERO );
+
+    if( a == b ) return new DoubleConstant( 0.0 , NE_ZERO );
+
+    return new Subtraction(a->clone(),b->clone());
+}
+
+
 TreeProjection* Operator::convert2TreeProjection( Operator* a ){
   
    TreeProjection b;
