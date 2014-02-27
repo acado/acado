@@ -101,14 +101,14 @@ public:
      virtual CurvatureType getCurvature( );
 
 
+     virtual returnValue initDerivative();
+
+
 //
 //  PROTECTED FUNCTIONS:
 //
 
 protected:
-
-
-     virtual returnValue initDerivative();
 
 };
 

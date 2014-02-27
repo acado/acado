@@ -572,6 +572,9 @@ public:
 
 
     virtual BooleanType isTrivial() const;
+
+
+    virtual returnValue initDerivative();
     
     
 //
@@ -581,7 +584,7 @@ public:
 protected:
 
 
-    virtual TreeProjection* convert2TreeProjection( Operator* a ); // Caution: a is deleted inside...
+    virtual TreeProjection* convert2TreeProjection( Operator* a ) const; // Caution: a is deleted inside...
     
     returnValue ADsymCommon( 	Operator     *a  ,
                               	TreeProjection &da ,

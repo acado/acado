@@ -391,9 +391,6 @@ public:
 protected:
 
 
-    virtual returnValue initDerivative() = 0;
-
-
     /** Automatic Differentiation in forward mode on the symbolic \n
      *  level. This function generates an expression for a        \n
      *  forward derivative                                        \n
@@ -457,8 +454,8 @@ protected:
   // -------------------------
   protected:
 
-    TreeProjection  *derivative;		/**< The derivative of this unary operator. */
-    TreeProjection  *derivative2;		/**< The second order derivative of this unary operator. */
+    Operator  *derivative;		/**< The derivative of this unary operator. */
+    Operator  *derivative2;		/**< The second order derivative of this unary operator. */
 
     Operator *argument        ;     /**< The argument                         */
     Operator *dargument       ;     /**< The derivative                       */

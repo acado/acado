@@ -322,6 +322,9 @@ public:
      virtual OperatorName getName();
 
 
+     virtual returnValue initDerivative();
+
+
 //
 //  PROTECTED FUNCTIONS:
 //
@@ -334,6 +337,10 @@ protected:
 //
 
 protected:
+
+	TreeProjection  *derivative0;		/**< An auxiliary variable to define the quotient. */
+	TreeProjection  *derivative1;		/**< An auxiliary variable to define the first order derivative of the quotient. */
+	TreeProjection  *derivative2;		/**< An auxiliary variable to define the second order derivative of the quotient. */
 
 };
 

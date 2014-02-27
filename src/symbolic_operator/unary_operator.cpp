@@ -550,7 +550,11 @@ returnValue UnaryOperator::ADsymmetricProtected( int            dim       , /**<
 
 	initDerivative();
 
-    return ADsymCommon( argument, *derivative, *derivative2, dim, varType, component, l, S, dimS, dfS,
+	TreeProjection dx, ddx;
+	dx = *derivative;
+	ddx = *derivative2;
+
+    return ADsymCommon( argument, dx, ddx, dim, varType, component, l, S, dimS, dfS,
 			 ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
 }
 

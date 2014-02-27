@@ -168,7 +168,6 @@ Operator& TreeProjection::operator=( const Expression &arg ){
 
 Operator& TreeProjection::operator=( const double& arg ){
 
-	std::cout << "operator= double!\n";
     scale = arg;
 
     Expression tmp;

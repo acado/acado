@@ -42,21 +42,48 @@ BEGIN_NAMESPACE_ACADO
 
 
 
-Quotient::Quotient():BinaryOperator(){ }
+Quotient::Quotient():BinaryOperator(){
+	derivative0 = 0;
+	derivative1 = 0;
+	derivative2 = 0;
+}
 
 Quotient::Quotient( Operator *_argument1, Operator *_argument2 )
          :BinaryOperator( _argument1, _argument2 ){
 
+	derivative0 = 0;
+	derivative1 = 0;
+	derivative2 = 0;
 }
 
 
 Quotient::Quotient( const Quotient &arg ):BinaryOperator( arg ){
 
+	derivative0 = 0;
+	derivative1 = 0;
+	derivative2 = 0;
+	if( arg.derivative0 != 0 && arg.derivative0 != 0 && arg.derivative0 != 0 ) {
+		derivative0 = arg.derivative0->clone();
+		derivative1 = arg.derivative1->clone();
+		derivative2 = arg.derivative2->clone();
+	}
 }
 
 
 Quotient::~Quotient(){
 
+	if( derivative2 != 0 ) {
+		delete derivative2;
+	}
+	if( derivative1 != 0 ) {
+		delete derivative1;
+	}
+	if( derivative0 != 0 ) {
+		delete derivative0;
+	}
+	derivative0 = 0;
+	derivative1 = 0;
+	derivative2 = 0;
 }
 
 Quotient& Quotient::operator=( const Quotient &arg ){
@@ -98,115 +125,21 @@ returnValue Quotient::evaluate( EvaluationBase *x ){
 
 Operator* Quotient::differentiate( int index ){
 
-  dargument1 = argument1->differentiate( index );
-  dargument2 = argument2->differentiate( index );
-  if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ZERO ){
-    return new Quotient(
-                   new DoubleConstant( 1.0, NE_ONE ),
-                   argument2->clone()
-               );
-  }
-  if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ONE ){
-    return new Quotient(
-                   new Subtraction(
-                           new DoubleConstant( 0.0 , NE_ZERO ),
-                           argument1->clone()
-                       ),
-                   new Power_Int(
-                           argument2->clone(),
-                           2
-                       )
-               );
-  }
-  if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ONE ){
-      return new Subtraction(
-                     new Quotient(
-                         new DoubleConstant( 1.0, NE_ONE ),
-                         argument2->clone()
-                     ),
-                     new Quotient(
-                             argument1->clone(),
-                             new Power_Int(
-                                     argument2->clone(),
-                                     2
-                                 )
-                         )
-                 );
-  }
-  if ( dargument1->isOneOrZero() == NE_ONE ){
-      return new Subtraction(
-                     new Quotient(
-                         new DoubleConstant( 1.0, NE_ONE ),
-                         argument2->clone()
-                     ),
-                     new Quotient(
-                             new Product(
-                                     argument1->clone(),
-                                     dargument2->clone()
-                                 ),
-                             new Power_Int(
-                                     argument2->clone(),
-                                     2
-                                 )
-                         )
-                  );
-  }
-  if ( dargument1->isOneOrZero() == NE_ZERO ){
-      return new Subtraction(
-                     new DoubleConstant( 0.0, NE_ZERO ),
-                     new Quotient(
-                             new Product(
-                                     argument1->clone(),
-                                     dargument2->clone()
-                                 ),
-                             new Power_Int(
-                                     argument2->clone(),
-                                     2
-                                 )
-                         )
-                  );
-  }
-  if ( dargument2->isOneOrZero() == NE_ONE ){
-      return new Subtraction(
-                     new Quotient(
-                         dargument1->clone(),
-                         argument2->clone()
-                     ),
-                     new Quotient(
-                             argument1->clone(),
-                             new Power_Int(
-                                     argument2->clone(),
-                                     2
-                                 )
-                         )
-                 );
-  }
-  if ( dargument2->isOneOrZero() == NE_ZERO ){
-      return new Quotient(
-                     dargument1->clone(),
-                     argument2->clone()
-                 );
-  }
-  return new Subtraction(
-                   new Quotient(
-                       dargument1->clone(),
-                       argument2->clone()
-                   ),
-                   new Quotient(
-                           new Product(
-                                   argument1->clone(),
-                                   dargument2->clone()
-                               ),
-                           new Power_Int(
-                                   argument2->clone(),
-                                   2
-                               )
-                       )
-              );
+	initDerivative();
 
+	dargument1 = argument1->differentiate( index );
+	dargument2 = argument2->differentiate( index );
+
+	Operator* prodTmp = myProd( dargument1, derivative0 );
+	Operator* prodTmp2 = myProd( argument1, dargument2 );
+	Operator* prodTmp3 = myProd( prodTmp2, derivative1 );
+	Operator* result = mySubtract( prodTmp, prodTmp3 );
+
+	delete prodTmp;
+	delete prodTmp2;
+	delete prodTmp3;
+
+	return result;
 }
 
 
@@ -219,6 +152,8 @@ Operator* Quotient::AD_forward( int dim,
                                   int &nNewIS,
                                   TreeProjection ***newIS ){
 
+	initDerivative();
+
     if( dargument1 != 0 )
         delete dargument1;
 
@@ -228,114 +163,16 @@ Operator* Quotient::AD_forward( int dim,
     dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
     dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
 
+    Operator* prodTmp = myProd( dargument1, derivative0 );
+    Operator* prodTmp2 = myProd( argument1, dargument2 );
+    Operator* prodTmp3 = myProd( prodTmp2, derivative1 );
+    Operator* result = mySubtract( prodTmp, prodTmp3 );
 
-    if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
+    delete prodTmp;
+    delete prodTmp2;
+    delete prodTmp3;
 
-    if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ZERO ){
-        return new Quotient(
-                   new DoubleConstant( 1.0, NE_ONE ),
-                   argument2->clone()
-               );
-    }
-    if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ONE ){
-       return new Quotient(
-                   new Subtraction(
-                           new DoubleConstant( 0.0 , NE_ZERO ),
-                           argument1->clone()
-                       ),
-                   new Power_Int(
-                           argument2->clone(),
-                           2
-                       )
-               );
-    }
-    if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ONE ){
-        return new Subtraction(
-                     new Quotient(
-                         new DoubleConstant( 1.0, NE_ONE ),
-                         argument2->clone()
-                     ),
-                     new Quotient(
-                             argument1->clone(),
-                             new Power_Int(
-                                     argument2->clone(),
-                                     2
-                                 )
-                         )
-                 );
-    }
-    if ( dargument1->isOneOrZero() == NE_ONE ){
-        return new Subtraction(
-                     new Quotient(
-                         new DoubleConstant( 1.0, NE_ONE ),
-                         argument2->clone()
-                     ),
-                     new Quotient(
-                             new Product(
-                                     argument1->clone(),
-                                     dargument2->clone()
-                                 ),
-                             new Power_Int(
-                                     argument2->clone(),
-                                     2
-                                 )
-                         )
-                  );
-    }
-    if ( dargument1->isOneOrZero() == NE_ZERO ){
-        return new Subtraction(
-                     new DoubleConstant( 0.0, NE_ZERO ),
-                     new Quotient(
-                             new Product(
-                                     argument1->clone(),
-                                     dargument2->clone()
-                                 ),
-                             new Power_Int(
-                                     argument2->clone(),
-                                     2
-                                 )
-                         )
-                  );
-    }
-    if ( dargument2->isOneOrZero() == NE_ONE ){
-        return new Subtraction(
-                     new Quotient(
-                         dargument1->clone(),
-                         argument2->clone()
-                     ),
-                     new Quotient(
-                             argument1->clone(),
-                             new Power_Int(
-                                     argument2->clone(),
-                                     2
-                                 )
-                         )
-                 );
-    }
-    if ( dargument2->isOneOrZero() == NE_ZERO ){
-        return new Quotient(
-                     dargument1->clone(),
-                     argument2->clone()
-                 );
-    }
-    return new Subtraction(
-                   new Quotient(
-                       dargument1->clone(),
-                       argument2->clone()
-                   ),
-                   new Quotient(
-                           new Product(
-                                   argument1->clone(),
-                                   dargument2->clone()
-                               ),
-                           new Power_Int(
-                                   argument2->clone(),
-                                   2
-                               )
-                       )
-              );
+    return result;
 }
 
 
@@ -347,56 +184,31 @@ returnValue Quotient::AD_backward( int           dim      , /**< number of direc
                                         int           &nNewIS  , /**< the number of new IS  */
                                         TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
+	initDerivative();
 
-    if( seed->isOneOrZero() != NE_ZERO ){
+	if( seed->isOneOrZero() != NE_ZERO ){
 
-        TreeProjection tmp;
-        tmp = *seed;
+		TreeProjection tmp;
+		tmp = *seed;
 
-        argument1->AD_backward( dim, varType, component,
-                                new Quotient(
-                                    tmp.clone(),
-                                    argument2->clone()
-                                ),
-                                df, nNewIS, newIS );
-	
-	
-	if( seed->isOneOrZero() != NE_ONE ){
-	  
-           argument2->AD_backward( dim, varType, component,
-                                new Subtraction(
-                                    new DoubleConstant( 0.0, NE_ZERO ),
-                                    new Quotient(
-                                        new Product(
-                                            argument1->clone(),
-                                            tmp.clone()
-                                        ),
-                                        new Power_Int(
-                                            argument2->clone(),
-                                            2
-                                        )
-                                    )
-                                ),
-                                df, nNewIS, newIS );
+		Operator *prodTmp = myProd( &tmp, derivative0 );
+
+		argument1->AD_backward( dim, varType, component, prodTmp->clone(), df, nNewIS, newIS );
+
+		Operator *prodTmp2 = myProd( argument1, &tmp );
+		Operator *prodTmp3 = myProd( prodTmp2, derivative1 );
+		Operator *subTmp = mySubtract( new DoubleConstant( 0.0, NE_ZERO ), prodTmp3 );
+
+		argument2->AD_backward( dim, varType, component, subTmp->clone(), df, nNewIS, newIS );
+
+		delete prodTmp;
+		delete prodTmp2;
+		delete prodTmp3;
+		delete subTmp;
 	}
-	else{
-	    argument2->AD_backward( dim, varType, component,
-                                new Subtraction(
-                                    new DoubleConstant( 0.0, NE_ZERO ),
-                                    new Quotient(
-                                        argument1->clone(),
-                                        new Power_Int(
-                                            argument2->clone(),
-                                            2
-                                        )
-                                    )
-                                ),
-                                df, nNewIS, newIS );
-	}
-    }
 
-    delete seed;
-    return SUCCESSFUL_RETURN;
+	delete seed;
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -415,18 +227,36 @@ returnValue Quotient::ADsymmetric( int            dim       , /**< number of dir
                                       TreeProjection ***newSIS , /**< the new SIS-pointer   */
                                       int            &nNewHIS  , /**< the number of newHIS  */
                                       TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
-  
-    TreeProjection dx,dy,dxx,dxy,dyy;
+
+	initDerivative();
+
+    TreeProjection dy,dxx,dxy,dyy;
     
-    dx  = Quotient( new DoubleConstant(1.0,NE_ONE ), argument2->clone() );
-    dxy = Product( new DoubleConstant(-1.0,NE_NEITHER_ONE_NOR_ZERO), new Power_Int( argument2->clone(),-2) );
+    TreeProjection dx(*derivative0);
+    dxy = Product( new DoubleConstant(-1.0,NE_NEITHER_ONE_NOR_ZERO), derivative1->clone() );
     dxx = DoubleConstant(0.0,NE_ZERO);
     dy  = Product( dxy.clone(), argument1->clone() );
-    dyy = Product( new Product( new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO), new Power_Int( argument2->clone(),-3) ),
+    dyy = Product( new Product( new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO), derivative2->clone() ),
 		    argument1->clone() );
     
     return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
 			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+}
+
+
+returnValue Quotient::initDerivative() {
+
+	if( derivative0 != 0 && derivative1 != 0 && derivative2 != 0 ) {
+		return SUCCESSFUL_RETURN;
+	}
+
+	derivative0 = convert2TreeProjection(new Quotient( new DoubleConstant(1.0,NE_ONE), argument2->clone() ));
+//	derivative1 = convert2TreeProjection(new Power_Int( argument2->clone(), -2 ));
+//	derivative2 = convert2TreeProjection(new Power_Int( argument2->clone(), -3 ));
+	derivative1 = convert2TreeProjection(new Product( derivative0->clone(), derivative0->clone() ));
+	derivative2 = convert2TreeProjection(new Product( derivative0->clone(), derivative1->clone() ));
+
+	return SUCCESSFUL_RETURN;
 }
 
 

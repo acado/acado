@@ -90,6 +90,8 @@ public:
       */
      virtual Operator* clone() const;
 
+     virtual returnValue initDerivative();
+
 
 
 //
@@ -97,8 +99,6 @@ public:
 //
 
 protected:
-
-     virtual returnValue initDerivative();
 };
 
 

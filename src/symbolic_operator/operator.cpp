@@ -244,6 +244,9 @@ Operator* Operator::myProd(Operator* a,Operator* b){
 
 Operator* Operator::myAdd (Operator* a,Operator* b){
 
+    if( a->isOneOrZero() == NE_ZERO && b->isOneOrZero() == NE_ZERO )
+        return new DoubleConstant( 0.0 , NE_ZERO );
+
     if( a->isOneOrZero() == NE_ZERO ) return b->clone();
     if( b->isOneOrZero() == NE_ZERO ) return a->clone();
     
@@ -258,6 +261,9 @@ Operator* Operator::myAdd (Operator* a,Operator* b){
 
 Operator* Operator::mySubtract (Operator* a,Operator* b){
 
+    if( a->isOneOrZero() == NE_ZERO && b->isOneOrZero() == NE_ZERO )
+        return new DoubleConstant( 0.0 , NE_ZERO );
+
     if( a->isOneOrZero() == NE_ZERO ) return new Subtraction(new DoubleConstant( 0.0 , NE_ZERO ), b->clone());
     if( b->isOneOrZero() == NE_ZERO ) return a->clone();
 
@@ -270,7 +276,7 @@ Operator* Operator::mySubtract (Operator* a,Operator* b){
 }
 
 
-TreeProjection* Operator::convert2TreeProjection( Operator* a ){
+TreeProjection* Operator::convert2TreeProjection( Operator* a ) const{
   
    TreeProjection b;
    b = *a;
@@ -476,6 +482,11 @@ BooleanType Operator::isTrivial() const {
 	return BT_FALSE;
 }
 
+
+returnValue Operator::initDerivative() {
+
+	return SUCCESSFUL_RETURN;
+}
 
 
 

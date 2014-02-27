@@ -89,14 +89,14 @@ public:
       */
      virtual Operator* clone() const;
 
+     virtual returnValue initDerivative();
+
 
 //
 //  PROTECTED FUNCTIONS:
 //
 
 protected:
-
-     virtual returnValue initDerivative();
 };
 
 
