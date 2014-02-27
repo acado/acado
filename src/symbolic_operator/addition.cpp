@@ -128,18 +128,7 @@ Operator* Addition::AD_forward( int dim,
     dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
     dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
 
-
-    if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if ( dargument1->isOneOrZero() == NE_ZERO ){
-        return dargument2->clone();
-    }
-    if ( dargument2->isOneOrZero() == NE_ZERO ){
-        return dargument1->clone();
-    }
-
-    return new Addition( dargument1->clone() , dargument2->clone() );
+    return myAdd( dargument1, dargument2 );
 }
 
 
