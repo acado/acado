@@ -44,38 +44,70 @@ BEGIN_NAMESPACE_ACADO
 
 Power::Power( ):BinaryOperator( ){
 
-	derivative11 = 0;
+	derivative01 = 0;
+	derivative02 = 0;
 	derivative12 = 0;
+	derivative21 = 0;
+	derivative22 = 0;
+	derivative23 = 0;
 }
 
 Power::Power( Operator *_argument1, Operator *_argument2 )
       :BinaryOperator( _argument1, _argument2 ){
 
-	derivative11 = 0;
+	derivative01 = 0;
+	derivative02 = 0;
 	derivative12 = 0;
+	derivative21 = 0;
+	derivative22 = 0;
+	derivative23 = 0;
 }
 
 Power::Power( const Power &arg ):BinaryOperator( arg ){
 
-	derivative11 = 0;
+	derivative01 = 0;
+	derivative02 = 0;
 	derivative12 = 0;
-	if( arg.derivative11 != 0 && arg.derivative12 != 0 ) {
-		derivative11 = arg.derivative11->clone();
+	derivative21 = 0;
+	derivative22 = 0;
+	derivative23 = 0;
+	if( arg.derivative01 != 0 ) {
+		derivative01 = arg.derivative01->clone();
+		derivative02 = arg.derivative02->clone();
 		derivative12 = arg.derivative12->clone();
+		derivative21 = arg.derivative21->clone();
+		derivative22 = arg.derivative22->clone();
+		derivative23 = arg.derivative23->clone();
 	}
 }
 
 
 Power::~Power(){
 
-	if( derivative11 != 0 ) {
-		delete derivative11;
+	if( derivative01 != 0 ) {
+		delete derivative01;
+	}
+	if( derivative02 != 0 ) {
+		delete derivative02;
 	}
 	if( derivative12 != 0 ) {
 		delete derivative12;
 	}
-	derivative11 = 0;
+	if( derivative21 != 0 ) {
+		delete derivative21;
+	}
+	if( derivative22 != 0 ) {
+		delete derivative22;
+	}
+	if( derivative23 != 0 ) {
+		delete derivative23;
+	}
+	derivative01 = 0;
+	derivative02 = 0;
 	derivative12 = 0;
+	derivative21 = 0;
+	derivative22 = 0;
+	derivative23 = 0;
 }
 
 
@@ -117,16 +149,16 @@ returnValue Power::evaluate( EvaluationBase *x ){
 
 Operator* Power::differentiate( int index ){
 
-	initDerivative();
-
 	dargument1 = argument1->differentiate( index );
 	dargument2 = argument2->differentiate( index );
 
-	Operator *prodTmp2 = myProd( dargument2, derivative11 );
+	Operator *prodTmp1 = myProd( this, derivative02);
+	Operator *prodTmp2 = myProd( dargument2, prodTmp1 );
 	Operator *prodTmp4 = myProd( dargument1, derivative12 );
 
 	Operator *result = myAdd( prodTmp2, prodTmp4 );
 
+	delete prodTmp1;
 	delete prodTmp2;
 	delete prodTmp4;
 
@@ -142,8 +174,6 @@ Operator* Power::AD_forward( int dim,
                                int &nNewIS,
                                TreeProjection ***newIS ){
 
-	initDerivative();
-
     if( dargument1 != 0 )
         delete dargument1;
 
@@ -153,11 +183,13 @@ Operator* Power::AD_forward( int dim,
     dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
     dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
 
-    Operator *prodTmp2 = myProd( dargument2, derivative11 );
+	Operator *prodTmp1 = myProd( this, derivative02);
+    Operator *prodTmp2 = myProd( dargument2, prodTmp1 );
     Operator *prodTmp4 = myProd( dargument1, derivative12 );
 
     Operator *result = myAdd( prodTmp2, prodTmp4 );
 
+    delete prodTmp1;
     delete prodTmp2;
     delete prodTmp4;
 
@@ -173,8 +205,6 @@ returnValue Power::AD_backward( int           dim      , /**< number of directio
                                         int           &nNewIS  , /**< the number of new IS  */
                                         TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
-	initDerivative();
-
 	if( seed->isOneOrZero() != NE_ZERO ){
 
 		TreeProjection tmp;
@@ -184,10 +214,12 @@ returnValue Power::AD_backward( int           dim      , /**< number of directio
 
 		argument1->AD_backward( dim, varType, component, prodTmp4->clone(), df, nNewIS, newIS );
 
-		Operator *prodTmp2 = myProd( &tmp, derivative11 );
+		Operator *prodTmp1 = myProd( this, derivative02);
+		Operator *prodTmp2 = myProd( &tmp, prodTmp1 );
 
 		argument2->AD_backward( dim, varType, component, prodTmp2->clone(), df, nNewIS, newIS );
 
+		delete prodTmp1;
 		delete prodTmp2;
 		delete prodTmp4;
 	}
@@ -213,21 +245,13 @@ returnValue Power::AD_symmetric( int            dim       , /**< number of direc
                                       int            &nNewHIS  , /**< the number of newHIS  */
                                       TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
 
-	initDerivative();
-
-    TreeProjection dxx,dxy,dyy;
-    TreeProjection tmp1,tmp3,tmp4,tmp5;
-    
-    tmp1 = Subtraction( argument2->clone(), new DoubleConstant(1.0,NE_ONE ) );
-    tmp3 = Power(argument1->clone(),tmp1.clone());
-    tmp4 = Logarithm(argument1->clone());
-    tmp5 = Power( argument1->clone(), new Subtraction( argument2->clone(), new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO )) );
+    TreeProjection dyy, dy;
     
     TreeProjection dx( *derivative12 );
-    TreeProjection dy( *derivative11 );
-    dxx = Product( new Product( argument2->clone(), tmp1.clone() ), tmp5.clone() );
-    dxy = Product( tmp3.clone(), new Addition( new DoubleConstant(1.0,NE_ONE ), tmp4.clone() ) );
-    dyy = Product( dy.clone(), tmp4.clone() );
+    dy = Product( clone(), derivative02->clone());
+    TreeProjection dxx( *derivative22 );
+    TreeProjection dxy( *derivative23 );
+    dyy = Product( dy.clone(), derivative02->clone() );
     
     return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
 			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
@@ -236,12 +260,18 @@ returnValue Power::AD_symmetric( int            dim       , /**< number of direc
 
 returnValue Power::initDerivative() {
 
-	if( derivative11 != 0 && derivative12 != 0 ) {
+	if( derivative01 != 0 ) {
 		return SUCCESSFUL_RETURN;
 	}
 
-	derivative11 = convert2TreeProjection(new Product( clone(), new Logarithm( argument1->clone() )));
-	derivative12 = convert2TreeProjection(new Product( new Power( argument1->clone(), new Subtraction( argument2->clone(), new DoubleConstant(1.0, NE_ONE) )), argument2->clone() ));
+	derivative01 = convert2TreeProjection(new Power( argument1->clone(), new Subtraction( argument2->clone(), new DoubleConstant(1.0, NE_ONE) )));
+	derivative02 = convert2TreeProjection(new Logarithm( argument1->clone() ));
+
+	derivative12 = convert2TreeProjection(new Product( derivative01->clone(), argument2->clone() ));
+
+	derivative21 = convert2TreeProjection(new Power( argument1->clone(), new Subtraction( argument2->clone(), new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO ) )));
+	derivative22 = convert2TreeProjection(new Product( new Product( argument2->clone(), new Subtraction( argument2->clone(), new DoubleConstant(1.0,NE_ONE ) ) ), derivative21->clone() ));
+	derivative23 = convert2TreeProjection(new Product( derivative01->clone(), new Addition( new DoubleConstant(1.0,NE_ONE ), new Product( argument2->clone(), derivative02->clone() ) ) ));
 
 	argument1->initDerivative();
 	return argument2->initDerivative();
