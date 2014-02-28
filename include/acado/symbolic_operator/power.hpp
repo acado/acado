@@ -331,8 +331,15 @@ public:
 
 protected:
 
- 	TreeProjection  *derivative11;		/**< An auxiliary variable to define the first order derivative of the power. */
+  	TreeProjection  *derivative01;		/**< An auxiliary variable to define the power. */
+  	TreeProjection  *derivative02;		/**< An auxiliary variable to define the power. */
+
  	TreeProjection  *derivative12;		/**< An auxiliary variable to define the first order derivative of the power. */
+
+ 	TreeProjection  *derivative21;		/**< An auxiliary variable to define the second order derivative of the power. */
+ 	TreeProjection  *derivative22;		/**< An auxiliary variable to define the second order derivative of the power. */
+ 	TreeProjection  *derivative23;		/**< An auxiliary variable to define the second order derivative of the power. */
+
 
 //
 //  PROTECTED MEMBERS:

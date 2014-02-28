@@ -125,8 +125,6 @@ returnValue Quotient::evaluate( EvaluationBase *x ){
 
 Operator* Quotient::differentiate( int index ){
 
-	initDerivative();
-
 	dargument1 = argument1->differentiate( index );
 	dargument2 = argument2->differentiate( index );
 
@@ -151,8 +149,6 @@ Operator* Quotient::AD_forward( int dim,
                                   Operator **seed,
                                   int &nNewIS,
                                   TreeProjection ***newIS ){
-
-	initDerivative();
 
     if( dargument1 != 0 )
         delete dargument1;
@@ -183,8 +179,6 @@ returnValue Quotient::AD_backward( int           dim      , /**< number of direc
                                         Operator    **df       , /**< the result            */
                                         int           &nNewIS  , /**< the number of new IS  */
                                         TreeProjection ***newIS  /**< the new IS-pointer    */ ){
-
-	initDerivative();
 
 	if( seed->isOneOrZero() != NE_ZERO ){
 
@@ -229,8 +223,6 @@ returnValue Quotient::AD_symmetric( int            dim       , /**< number of di
                                       TreeProjection ***newSIS , /**< the new SIS-pointer   */
                                       int            &nNewHIS  , /**< the number of newHIS  */
                                       TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
-
-	initDerivative();
 
     TreeProjection dy,dxx,dxy,dyy;
     

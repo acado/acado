@@ -133,7 +133,6 @@ Operator& TreeProjection::operator=( const Operator &arg ){
     	else {
     		if( p != 0 ) {
         		// special case: argument is a projection
-    			Projection *p = dynamic_cast<Projection *>(arg_tmp);
     			argument = 0;
     			ne = NE_NEITHER_ONE_NOR_ZERO;
     			copy(*p);
