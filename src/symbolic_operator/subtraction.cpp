@@ -94,16 +94,8 @@ Operator* Subtraction::differentiate( int index ){
 
   dargument1 = argument1->differentiate( index );
   dargument2 = argument2->differentiate( index );
-  if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  if ( dargument1->isOneOrZero() == NE_ZERO ){
-    return new Subtraction( new DoubleConstant( 0.0 , NE_ZERO ), dargument2->clone() );
-  }
-  if ( dargument2->isOneOrZero() == NE_ZERO ){
-    return dargument1->clone();
-  }
-  return new Subtraction( dargument1->clone() , dargument2->clone() );
+
+  return mySubtract( dargument1, dargument2 );
 
 }
 
@@ -124,17 +116,7 @@ Operator* Subtraction::AD_forward( int dim,
     dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
     dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
 
-    if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if ( dargument1->isOneOrZero() == NE_ZERO ){
-        return new Subtraction( new DoubleConstant( 0.0 , NE_ZERO ), dargument2->clone() );
-    }
-    if ( dargument2->isOneOrZero() == NE_ZERO ){
-        return dargument1->clone();
-    }
-
-    return new Subtraction( dargument1->clone() , dargument2->clone() );
+    return mySubtract( dargument1, dargument2 );
 }
 
 
