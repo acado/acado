@@ -289,6 +289,17 @@ Operator* Operator::myPower (Operator* a,Operator* b){
 }
 
 
+Operator* Operator::myPowerInt (Operator* a, int b){
+
+	if( a->isOneOrZero() == NE_ZERO && b>0 ) 	return new DoubleConstant( 0.0 , NE_ZERO );
+	if( b == 0 ) 								return new DoubleConstant( 1.0 , NE_ONE );
+	if( a->isOneOrZero() == NE_ONE ) 			return new DoubleConstant( 1.0 , NE_ONE );
+	if( b == 1 ) 								return a->clone();
+
+    return new Power_Int(a->clone(),b);
+}
+
+
 Operator* Operator::myLogarithm (Operator* a){
 
     if( a->isOneOrZero() == NE_ONE ) return new DoubleConstant( 0.0 , NE_ZERO );

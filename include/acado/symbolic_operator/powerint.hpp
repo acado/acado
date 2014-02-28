@@ -387,6 +387,9 @@ public:
      virtual OperatorName getName();
 
 
+     virtual returnValue initDerivative();
+
+
 
      /** Asks the expression whether it is a variable.   \n
       *  \return The answer. \n
@@ -435,8 +438,6 @@ public:
     											const std::vector< std::string >& _name
     											);
 
-    virtual returnValue initDerivative();
-
 
 //
 //  PROTECTED FUNCTIONS:
@@ -450,6 +451,9 @@ protected:
 //
 
 protected:
+
+ 	TreeProjection  *derivative;		/**< An auxiliary variable to define the first order derivative of the power. */
+ 	TreeProjection  *derivative2;		/**< An auxiliary variable to define the second order derivative of the power. */
 
     Operator *argument ;       /**< The basis argument of
                                    *  the power.               */

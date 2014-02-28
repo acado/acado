@@ -45,6 +45,8 @@ BEGIN_NAMESPACE_ACADO
 Power_Int::Power_Int() : SmoothOperator( )
 {
     nCount = 0;
+    derivative = 0;
+    derivative2 = 0;
 }
 
 Power_Int::Power_Int( Operator *_argument, int _exponent ) : SmoothOperator( )
@@ -59,6 +61,8 @@ Power_Int::Power_Int( Operator *_argument, int _exponent ) : SmoothOperator( )
     monotonicity      = MT_UNKNOWN                       ;
 
     nCount = 0;
+    derivative = 0;
+    derivative2 = 0;
 }
 
 
@@ -94,6 +98,12 @@ Power_Int::Power_Int( const Power_Int &arg ){
     monotonicity      = arg.monotonicity;
 
     nCount = 0;
+    derivative = 0;
+    derivative2 = 0;
+    if( arg.derivative != 0 ) {
+    	derivative = arg.derivative->clone();
+    	derivative2 = arg.derivative2->clone();
+    }
 }
 
 
@@ -118,6 +128,14 @@ Power_Int::~Power_Int(){
     free(  argument_result );
     free( dargument_result );
 
+    if( derivative != 0 ) {
+    	delete derivative;
+    }
+    if( derivative2 != 0 ) {
+    	delete derivative2;
+    }
+    derivative = 0;
+    derivative2 = 0;
 }
 
 Power_Int& Power_Int::operator=( const Power_Int &arg ){
@@ -194,47 +212,10 @@ Operator* Power_Int::differentiate( int index ){
   }
   
   dargument = argument->differentiate( index );
-  if ( dargument->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
 
-  if( exponent == 1 ){
-    return dargument->clone();
-  }
-  
-  if( exponent == 2 ){
-    return new Product( argument->clone(),
-						new Product( new DoubleConstant( 2.0, NE_NEITHER_ONE_NOR_ZERO ),
-									 dargument->clone() )
-						);
-  }
-  
-  if ( dargument->isOneOrZero() == NE_ONE ){
-  return new Product(
-           new DoubleConstant(
-             (double) exponent,
-             NE_NEITHER_ONE_NOR_ZERO
-           ),
-           new Power_Int(
-             argument->clone(),
-             exponent-1
-           )
-         );
-  }
-  return new Product(
-           new Product(
-             new DoubleConstant(
-               (double) exponent,
-               NE_NEITHER_ONE_NOR_ZERO
-             ),
-             new Power_Int(
-               argument->clone(),
-               exponent-1
-             )
-           ),
-           dargument->clone()
-         );
+  Operator *result = myProd( derivative, dargument );
 
+  return result;
 }
 
 
@@ -250,50 +231,9 @@ Operator* Power_Int::AD_forward( int dim,
 
 	dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
 
-	if( exponent == 0 ){
-		return new DoubleConstant( 0.0 , NE_ZERO );
-	}
-	
-	if ( dargument->isOneOrZero() == NE_ZERO ){
-		return new DoubleConstant( 0.0 , NE_ZERO );
-	}
+	Operator *result = myProd( derivative, dargument );
 
-	if( exponent == 1 ){
-		return dargument->clone();
-	}
-  
-	if( exponent == 2 ){
-		return new Product( argument->clone(),
-							new Product( new DoubleConstant( 2.0, NE_NEITHER_ONE_NOR_ZERO ),
-										 dargument->clone() )
-							);
-	}
-  
-  if ( dargument->isOneOrZero() == NE_ONE ){
-  return new Product(
-           new DoubleConstant(
-             (double) exponent,
-             NE_NEITHER_ONE_NOR_ZERO
-           ),
-           new Power_Int(
-             argument->clone(),
-             exponent-1
-           )
-         );
-  }
-  return new Product(
-           new Product(
-             new DoubleConstant(
-               (double) exponent,
-               NE_NEITHER_ONE_NOR_ZERO
-             ),
-             new Power_Int(
-               argument->clone(),
-               exponent-1
-             )
-           ),
-           dargument->clone()
-         );
+	return result;
 }
 
 
@@ -306,55 +246,9 @@ returnValue Power_Int::AD_backward( int           dim      , /**< number of dire
                                         int           &nNewIS  , /**< the number of new IS  */
                                         TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
+    Operator *result = myProd( derivative, seed );
 
-    if( seed->isOneOrZero() == NE_ZERO ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df, nNewIS, newIS
-            );
-
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    if( seed->isOneOrZero() == NE_ONE ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new Product(
-                                              new DoubleConstant(
-                                                  (double) exponent,
-                                                  NE_NEITHER_ONE_NOR_ZERO
-                                              ),
-                                              new Power_Int(
-                                                  argument->clone(),
-                                                  exponent-1
-                                              )
-                                          ),
-                                          df, nNewIS, newIS
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    argument->AD_backward( dim,
-                                  varType,
-                                  component,
-                                  new Product(
-                                      new Product(
-                                          new DoubleConstant(
-                                              (double) exponent,
-                                              NE_NEITHER_ONE_NOR_ZERO
-                                          ),
-                                          new Power_Int(
-                                              argument->clone(),
-                                              exponent-1
-                                          )
-                                      ),
-                                      seed->clone()
-                                  ),
-                                  df, nNewIS, newIS
-            );
+    argument->AD_backward( dim, varType, component, result, df, nNewIS, newIS );
 
     delete seed;
     return SUCCESSFUL_RETURN;
@@ -377,31 +271,39 @@ returnValue Power_Int::AD_symmetric( int            dim       , /**< number of d
                                       TreeProjection ***newSIS , /**< the new SIS-pointer   */
                                       int            &nNewHIS  , /**< the number of newHIS  */
                                       TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
-  
-    TreeProjection tmp, tmp2;
-    if( exponent == 0 ){
-        tmp  = DoubleConstant( 0.0 , NE_ZERO );
-        tmp2 = DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if( exponent == 1 ){
-        tmp  = DoubleConstant( 1.0 , NE_ONE   );
-        tmp2 = DoubleConstant( 0.0 , NE_ZERO  );
-    }
-    if( exponent == 2 ){
-        tmp  = Product( new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO ), argument->clone() );
-        tmp2 = DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO );
-    }
-    if( exponent != 0 && exponent != 1 && exponent != 2 ){
-        tmp  = Product( new DoubleConstant( (double) exponent, NE_NEITHER_ONE_NOR_ZERO ),
-			 new Power_Int( argument->clone(), exponent-1 )
-	       );
-        tmp2 = Product( new DoubleConstant( (double) exponent*(exponent-1), NE_NEITHER_ONE_NOR_ZERO ),
-			 new Power_Int( argument->clone(), exponent-2 )
-	       ); 
-    }
     
+    TreeProjection tmp( *derivative );
+    TreeProjection tmp2( *derivative2 );
+
     return ADsymCommon( argument, tmp, tmp2, dim, varType, component, l, S, dimS, dfS,
 			 ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+}
+
+
+returnValue Power_Int::initDerivative() {
+
+	if( derivative != 0 ) {
+		return SUCCESSFUL_RETURN;
+	}
+
+	Operator *powerTmp = myPowerInt( argument, exponent-1 );
+	Operator *expTmp = new DoubleConstant( (double) exponent, NE_NEITHER_ONE_NOR_ZERO );
+
+	derivative = convert2TreeProjection(myProd( expTmp, powerTmp ));
+
+	Operator *powerTmp2 = myPowerInt( argument, exponent-2 );
+	Operator *expTmp2 = new DoubleConstant( (double) exponent-1, NE_NEITHER_ONE_NOR_ZERO );
+	Operator *prodTmp = myProd( expTmp, expTmp2 );
+
+	derivative2 = convert2TreeProjection(myProd( prodTmp, powerTmp2 ));
+
+	delete powerTmp;
+	delete expTmp;
+	delete powerTmp2;
+	delete expTmp2;
+	delete prodTmp;
+
+	return argument->initDerivative();
 }
 
 
@@ -708,12 +610,6 @@ returnValue Power_Int::setVariableExportName(	const VariableType &_type,
 	argument->setVariableExportName(_type, _name);
 
 	return Operator::setVariableExportName(_type, _name);
-}
-
-
-returnValue Power_Int::initDerivative() {
-
-	return argument->initDerivative();
 }
 
 CLOSE_NAMESPACE_ACADO

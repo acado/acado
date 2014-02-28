@@ -264,14 +264,31 @@ returnValue Power::initDerivative() {
 		return SUCCESSFUL_RETURN;
 	}
 
-	derivative01 = convert2TreeProjection(new Power( argument1->clone(), new Subtraction( argument2->clone(), new DoubleConstant(1.0, NE_ONE) )));
-	derivative02 = convert2TreeProjection(new Logarithm( argument1->clone() ));
+	Operator *oneTmp = new DoubleConstant(1.0, NE_ONE);
+	Operator *subTmp = mySubtract( argument2, oneTmp );
 
-	derivative12 = convert2TreeProjection(new Product( derivative01->clone(), argument2->clone() ));
+	derivative01 = convert2TreeProjection(myPower( argument1, subTmp));
+	derivative02 = convert2TreeProjection(myLogarithm( argument1 ));
 
-	derivative21 = convert2TreeProjection(new Power( argument1->clone(), new Subtraction( argument2->clone(), new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO ) )));
-	derivative22 = convert2TreeProjection(new Product( new Product( argument2->clone(), new Subtraction( argument2->clone(), new DoubleConstant(1.0,NE_ONE ) ) ), derivative21->clone() ));
-	derivative23 = convert2TreeProjection(new Product( derivative01->clone(), new Addition( new DoubleConstant(1.0,NE_ONE ), new Product( argument2->clone(), derivative02->clone() ) ) ));
+	derivative12 = convert2TreeProjection(myProd( derivative01, argument2 ));
+
+	Operator *twoTmp = new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO);
+	Operator *subTmp2 = mySubtract( argument2, twoTmp );
+	Operator *prodTmp = myProd( argument2, subTmp );
+	Operator *prodTmp2 = myProd( argument2, derivative02 );
+	Operator *addTmp = myAdd( oneTmp, prodTmp2 );
+
+	derivative21 = convert2TreeProjection(myPower( argument1, subTmp2));
+	derivative22 = convert2TreeProjection(myProd( prodTmp, derivative21 ));
+	derivative23 = convert2TreeProjection(myProd( derivative01, addTmp ));
+
+	delete oneTmp;
+	delete subTmp;
+	delete twoTmp;
+	delete subTmp2;
+	delete prodTmp;
+	delete prodTmp2;
+	delete addTmp;
 
 	argument1->initDerivative();
 	return argument2->initDerivative();

@@ -570,6 +570,7 @@ public:
     virtual Operator* myAdd (Operator* a,Operator* b);
     virtual Operator* mySubtract (Operator* a,Operator* b);
     virtual Operator* myPower (Operator* a,Operator* b);
+    virtual Operator* myPowerInt (Operator* a,int b);
     virtual Operator* myLogarithm (Operator* a);
 
 
