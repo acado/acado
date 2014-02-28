@@ -40,43 +40,38 @@ USING_NAMESPACE_ACADO
 // ------------------------------------------------------------------------------------
 
 
-Expression sin ( const Expression &arg ){ IntermediateState i = arg; return i.getSin(); }
-Expression cos ( const Expression &arg ){ IntermediateState i = arg; return i.getCos (); }
-Expression tan ( const Expression &arg ){ IntermediateState i = arg; return i.getTan (); }
-Expression asin( const Expression &arg ){ IntermediateState i = arg; return i.getAsin(); }
-Expression acos( const Expression &arg ){ IntermediateState i = arg; return i.getAcos(); }
-Expression atan( const Expression &arg ){ IntermediateState i = arg; return i.getAtan(); }
-Expression exp ( const Expression &arg ){ IntermediateState i = arg; return i.getExp (); }
-Expression sqrt( const Expression &arg ){ IntermediateState i = arg; return i.getSqrt(); }
-Expression ln  ( const Expression &arg ){ IntermediateState i = arg; return i.getLn  (); }
-Expression log ( const Expression &arg ){ IntermediateState i = arg; return i.getLn  (); }
+IntermediateState sin ( const Expression &arg ){ return arg.getSin(); }
+IntermediateState cos ( const Expression &arg ){ return arg.getCos (); }
+IntermediateState tan ( const Expression &arg ){ return arg.getTan (); }
+IntermediateState asin( const Expression &arg ){ return arg.getAsin(); }
+IntermediateState acos( const Expression &arg ){ return arg.getAcos(); }
+IntermediateState atan( const Expression &arg ){ return arg.getAtan(); }
+IntermediateState exp ( const Expression &arg ){ return arg.getExp (); }
+IntermediateState sqrt( const Expression &arg ){ return arg.getSqrt(); }
+IntermediateState ln  ( const Expression &arg ){ return arg.getLn  (); }
+IntermediateState log ( const Expression &arg ){ return arg.getLn  (); }
 
-Expression pow( const Expression &arg1, const Expression &arg2 ){
+IntermediateState pow( const Expression &arg1, const Expression &arg2 ){
   
-  IntermediateState i1 = arg1;
-  IntermediateState i2 = arg2;
-  return i1.getPow(i2);
+  return arg1.getPow(arg2);
 }
 
-Expression pow( const double &arg1, const Expression &arg2 ){
+IntermediateState pow( const double &arg1, const Expression &arg2 ){
   
-  IntermediateState i2 = arg2;
-  return i2.convert(arg1).getPow(i2);
+  return arg2.convert(arg1).getPow(arg2);
 }
 
-Expression pow( const Expression &arg1, const double &arg2 ){
-
-    IntermediateState i1 = arg1;
+IntermediateState pow( const Expression &arg1, const double &arg2 ){
   
     if( fabs( arg2 - floor(arg2) ) <= 10.0*EPS ){
         int intarg = (int) floor(arg2);
-        return i1.getPowInt( intarg );
+        return arg1.getPowInt( intarg );
     }
     if( fabs( arg2 - ceil(arg2) ) <= 10.0*EPS ){
         int intarg = (int) ceil(arg2);
-        return i1.getPowInt( intarg );
+        return arg1.getPowInt( intarg );
     }
-    return i1.getPow(i1.convert(arg2));
+    return arg1.getPow(arg1.convert(arg2));
 }
 
 
@@ -86,11 +81,11 @@ Expression pow( const Expression &arg1, const double &arg2 ){
 // ---------------------------------------------------------------------------------------------
 
 
-Expression square         ( const Expression &arg ){ IntermediateState i = arg; return i.getSumSquare    (); }
-Expression sum_square     ( const Expression &arg ){ IntermediateState i = arg; return i.getSumSquare    (); }
-Expression log_sum_exp    ( const Expression &arg ){ IntermediateState i = arg; return i.getLogSumExp    (); }
-Expression euclidean_norm ( const Expression &arg ){ IntermediateState i = arg; return i.getEuclideanNorm(); }
-Expression entropy        ( const Expression &arg ){ IntermediateState i = arg; return i.getEntropy      (); }
+IntermediateState square         ( const Expression &arg ){ return arg.getSumSquare    (); }
+IntermediateState sum_square     ( const Expression &arg ){ return arg.getSumSquare    (); }
+IntermediateState log_sum_exp    ( const Expression &arg ){ return arg.getLogSumExp    (); }
+IntermediateState euclidean_norm ( const Expression &arg ){ return arg.getEuclideanNorm(); }
+IntermediateState entropy        ( const Expression &arg ){ return arg.getEntropy      (); }
 
 
 
