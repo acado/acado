@@ -256,6 +256,13 @@ returnValue BinaryOperator::setVariableExportName(	const VariableType &_type,
 	return Operator::setVariableExportName(_type, _name);
 }
 
+
+returnValue BinaryOperator::initDerivative() {
+
+	argument1->initDerivative();
+	return argument2->initDerivative();
+}
+
 CLOSE_NAMESPACE_ACADO
 
 // end of file.

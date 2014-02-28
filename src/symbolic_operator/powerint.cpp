@@ -362,7 +362,7 @@ returnValue Power_Int::AD_backward( int           dim      , /**< number of dire
 
 
 
-returnValue Power_Int::ADsymmetric( int            dim       , /**< number of directions  */
+returnValue Power_Int::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
                                         Operator      *l         , /**< the backward seed     */
@@ -710,6 +710,11 @@ returnValue Power_Int::setVariableExportName(	const VariableType &_type,
 	return Operator::setVariableExportName(_type, _name);
 }
 
+
+returnValue Power_Int::initDerivative() {
+
+	return argument->initDerivative();
+}
 
 CLOSE_NAMESPACE_ACADO
 

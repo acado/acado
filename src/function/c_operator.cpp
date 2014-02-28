@@ -270,7 +270,7 @@ returnValue COperator::AD_backward( int           dim      , /**< number of dire
 }
 
 
-returnValue COperator::ADsymmetric( int            dim       , /**< number of directions  */
+returnValue COperator::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component_, /**< and their components  */
                                         Operator      *l         , /**< the backward seed     */

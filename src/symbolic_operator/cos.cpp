@@ -119,7 +119,7 @@ returnValue Cos::initDerivative() {
 	derivative = convert2TreeProjection(new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Sin(argument->clone()) ));
 	derivative2 = convert2TreeProjection(new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Cos(argument->clone()) ));
 
-	return SUCCESSFUL_RETURN;
+	return argument->initDerivative();
 }
 
 

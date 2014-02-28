@@ -1196,6 +1196,7 @@ Expression Expression::ADforward ( const VariableType *varType_,
         int nIS = 0;
         TreeProjection **IS = 0;
 
+        element[run1]->initDerivative();
         result.element[run1] = element[run1]->AD_forward( Dim, varType, Component, seed1, nIS, &IS );
 
         for( run2 = 0; (int) run2 < nIS; run2++ ){
@@ -1247,6 +1248,7 @@ Expression Expression::getODEexpansion( const int &order, const int *arg ) const
 	
 	for( int j=0; j<order; j++ ){
 		for( uint i=0; i<dim; i++ ){
+			der[dim*j+i]->initDerivative();
 			der[dim*(j+1)+i] = der[dim*j+i]->AD_forward( (j+1)*dim+1, vType, Comp, seed, nIS, &IS );
 		}
 		for( uint i=0; i<dim; i++ ){
@@ -1303,6 +1305,7 @@ Expression Expression::ADbackward( const Expression &arg, const Expression &seed
         for( run2 = 0; run2 < Dim; run2++ )
              iresult[run2] = new DoubleConstant(0.0,NE_ZERO);
 
+        element[run1]->initDerivative();
         element[run1]->AD_backward( Dim, varType, Component, seed1, iresult, nIS, &IS );
 
         for( run2 = 0; run2 < Dim; run2++ ){
@@ -1424,7 +1427,8 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 		for( run2 = 0; run2 < nS*nS; run2++ )
 			H[run2] = new DoubleConstant(0.0,NE_ZERO);
 
-		element[run1]->ADsymmetric( Dim, varType, Component, l1, S1, nS, dS, ld, H, nLIS, &LIS, nSIS, &SIS, nHIS, &HIS );
+		element[run1]->initDerivative();
+		element[run1]->AD_symmetric( Dim, varType, Component, l1, S1, nS, dS, ld, H, nLIS, &LIS, nSIS, &SIS, nHIS, &HIS );
 
 		int run3 = 0;
 

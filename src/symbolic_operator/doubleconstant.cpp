@@ -140,7 +140,7 @@ returnValue DoubleConstant::AD_backward( int           dim      , /**< number of
 }
 
 
-returnValue DoubleConstant::ADsymmetric( int            dim       , /**< number of directions  */
+returnValue DoubleConstant::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
                                         Operator      *l         , /**< the backward seed     */

@@ -197,7 +197,7 @@ returnValue Power::AD_backward( int           dim      , /**< number of directio
 }
 
 
-returnValue Power::ADsymmetric( int            dim       , /**< number of directions  */
+returnValue Power::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
                                         Operator      *l         , /**< the backward seed     */
@@ -243,8 +243,8 @@ returnValue Power::initDerivative() {
 	derivative11 = convert2TreeProjection(new Product( clone(), new Logarithm( argument1->clone() )));
 	derivative12 = convert2TreeProjection(new Product( new Power( argument1->clone(), new Subtraction( argument2->clone(), new DoubleConstant(1.0, NE_ONE) )), argument2->clone() ));
 
-
-	return SUCCESSFUL_RETURN;
+	argument1->initDerivative();
+	return argument2->initDerivative();
 }
 
 

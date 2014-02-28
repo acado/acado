@@ -214,7 +214,7 @@ returnValue Quotient::AD_backward( int           dim      , /**< number of direc
 }
 
 
-returnValue Quotient::ADsymmetric( int            dim       , /**< number of directions  */
+returnValue Quotient::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
                                         Operator      *l         , /**< the backward seed     */
@@ -253,12 +253,11 @@ returnValue Quotient::initDerivative() {
 	}
 
 	derivative0 = convert2TreeProjection(new Quotient( new DoubleConstant(1.0,NE_ONE), argument2->clone() ));
-//	derivative1 = convert2TreeProjection(new Power_Int( argument2->clone(), -2 ));
-//	derivative2 = convert2TreeProjection(new Power_Int( argument2->clone(), -3 ));
 	derivative1 = convert2TreeProjection(new Product( derivative0->clone(), derivative0->clone() ));
 	derivative2 = convert2TreeProjection(new Product( derivative0->clone(), derivative1->clone() ));
 
-	return SUCCESSFUL_RETURN;
+	argument1->initDerivative();
+	return argument2->initDerivative();
 }
 
 

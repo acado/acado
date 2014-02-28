@@ -328,7 +328,7 @@ returnValue Operator::ADsymCommon( Operator     *a  ,
   // FIRST ORDER BACKWARD SWEEP:
   // ---------------------------
   
-    a->ADsymmetric( dim, varType, component,
+    a->AD_symmetric( dim, varType, component,
                     convert2TreeProjection(myProd(l,&da)),
                     S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS 
               );
@@ -414,11 +414,11 @@ returnValue Operator::ADsymCommon2( Operator       *a  ,
          H2[run2] = new DoubleConstant(0.0,NE_ZERO);
     }
     
-    a->ADsymmetric( dim, varType, component, convert2TreeProjection(myProd(l,&dx)),
+    a->AD_symmetric( dim, varType, component, convert2TreeProjection(myProd(l,&dx)),
                     S, dimS, S1, ldf, H1, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
 
 
-    b->ADsymmetric( dim, varType, component, convert2TreeProjection(myProd(l,&dy)),
+    b->AD_symmetric( dim, varType, component, convert2TreeProjection(myProd(l,&dy)),
                     S, dimS, S2, ldf, H2, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
     
    

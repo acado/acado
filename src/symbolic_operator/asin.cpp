@@ -149,7 +149,7 @@ returnValue Asin::initDerivative() {
 					argument->clone()
 			));
 
-	return SUCCESSFUL_RETURN;
+	return argument->initDerivative();
 }
 
 

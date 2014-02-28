@@ -145,7 +145,7 @@ returnValue Atan::initDerivative() {
 					)
 			));
 
-	return SUCCESSFUL_RETURN;
+	return argument->initDerivative();
 }
 
 

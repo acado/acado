@@ -126,7 +126,7 @@ returnValue Tan::initDerivative() {
 			new Power_Int( new Cos( argument->clone() ), 2 )
 	));
 
-	return SUCCESSFUL_RETURN;
+	return argument->initDerivative();
 }
 
 

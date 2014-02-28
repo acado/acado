@@ -124,7 +124,7 @@ returnValue Exp::initDerivative() {
 	derivative = convert2TreeProjection(new Exp(argument->clone()));
 	derivative2 = derivative;
 
-	return SUCCESSFUL_RETURN;
+	return argument->initDerivative();
 }
 
 CLOSE_NAMESPACE_ACADO

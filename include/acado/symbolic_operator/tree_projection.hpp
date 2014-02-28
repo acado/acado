@@ -201,6 +201,8 @@ public:
 
      virtual BooleanType isTrivial() const;
 
+     virtual returnValue initDerivative();
+
 //
 //  PROTECTED FUNCTIONS:
 //

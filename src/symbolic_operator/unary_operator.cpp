@@ -236,7 +236,7 @@ returnValue UnaryOperator::AD_backward( int           dim      , /**< number of 
 
     
     
-returnValue UnaryOperator::ADsymmetric( int            dim       , /**< number of directions  */
+returnValue UnaryOperator::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
                                         Operator      *l         , /**< the backward seed     */
@@ -484,8 +484,6 @@ returnValue UnaryOperator::setVariableExportName(	const VariableType &_type,
 
 Operator* UnaryOperator::differentiate( int index ){
 
-	initDerivative();
-
 	dargument = argument->differentiate( index );
 	return myProd( dargument, derivative );
 }
@@ -497,8 +495,6 @@ Operator* UnaryOperator::ADforwardProtected( int dim,
                                      Operator **seed,
                                      int &nNewIS,
                                      TreeProjection ***newIS ){
-
-	initDerivative();
 
     if( dargument != 0 )
         delete dargument;
@@ -517,8 +513,6 @@ returnValue UnaryOperator::ADbackwardProtected( int           dim      , /**< nu
                                         Operator    **df       , /**< the result            */
                                         int           &nNewIS  , /**< the number of new IS  */
                                         TreeProjection ***newIS  /**< the new IS-pointer    */ ){
-
-	initDerivative();
 
     argument->AD_backward( dim,
                                   varType,
@@ -547,8 +541,6 @@ returnValue UnaryOperator::ADsymmetricProtected( int            dim       , /**<
                                       TreeProjection ***newSIS , /**< the new SIS-pointer   */
                                       int            &nNewHIS  , /**< the number of newHIS  */
                                       TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
-
-	initDerivative();
 
 	TreeProjection dx, ddx;
 	dx = *derivative;
