@@ -1254,9 +1254,9 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		if( sensGen ) diffs_outputs.push_back( diffs_OUTPUT );
 
 		DMatrix dependencyMat = outputExpressions[i].getDependencyPattern( x );
-		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( z ) );
-		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( u ) );
-		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( dx ) );
+		if(z.getDim()>0)  dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( z ) );
+		if(u.getDim()>0)  dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( u ) );
+		if(dx.getDim()>0) dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( dx ) );
 
 		outputDependencies.push_back( dependencyMat );
 		totalMeas.push_back( outputGrids[i].getNumIntervals() );

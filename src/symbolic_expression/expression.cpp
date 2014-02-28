@@ -714,6 +714,9 @@ Expression Expression::getCol( const uint& colIdx ) const{
 
 DMatrix Expression::getDependencyPattern( const Expression& arg ) const{
 
+	DMatrix tmp;
+	if( arg.getDim() == 0 ) return tmp;
+
     Function f;
     f << backwardDerivative( *this, arg );
 
@@ -734,7 +737,7 @@ DMatrix Expression::getDependencyPattern( const Expression& arg ) const{
     // ---------------------------------
     f.evaluate( 0, x, result );
 
-    DMatrix tmp( getDim(), arg.getDim(), result );
+    tmp = DMatrix( getDim(), arg.getDim(), result );
 
     delete[] result;
     delete[] x;
