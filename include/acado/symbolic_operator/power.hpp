@@ -321,6 +321,9 @@ public:
      virtual OperatorName getName();
 
 
+     virtual returnValue initDerivative();
+
+
 
 //
 //  PROTECTED FUNCTIONS:
@@ -328,6 +331,8 @@ public:
 
 protected:
 
+ 	TreeProjection  *derivative11;		/**< An auxiliary variable to define the first order derivative of the power. */
+ 	TreeProjection  *derivative12;		/**< An auxiliary variable to define the first order derivative of the power. */
 
 //
 //  PROTECTED MEMBERS:

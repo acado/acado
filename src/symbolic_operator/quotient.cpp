@@ -62,7 +62,7 @@ Quotient::Quotient( const Quotient &arg ):BinaryOperator( arg ){
 	derivative0 = 0;
 	derivative1 = 0;
 	derivative2 = 0;
-	if( arg.derivative0 != 0 && arg.derivative0 != 0 && arg.derivative0 != 0 ) {
+	if( arg.derivative0 != 0 && arg.derivative1 != 0 && arg.derivative2 != 0 ) {
 		derivative0 = arg.derivative0->clone();
 		derivative1 = arg.derivative1->clone();
 		derivative2 = arg.derivative2->clone();
