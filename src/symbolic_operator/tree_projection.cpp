@@ -114,21 +114,46 @@ Operator& TreeProjection::operator=( const Operator &arg ){
             }
         }
 
-        Operator *tmp = arg.passArgument();
+    	Operator *arg_tmp = arg.clone();
+    	TreeProjection *tp = dynamic_cast<TreeProjection *>(arg_tmp);
+    	Projection *p = dynamic_cast<Projection *>(arg_tmp);
+    	if( tp != 0 ) {
+    		// special case: argument is a treeprojection
+    		if( tp->argument != 0 ) {
+    			argument = tp->argument->clone();
+    			ne = argument->isOneOrZero();
+    		}
+    		else {
+    			argument = 0;
+    			ne = NE_NEITHER_ONE_NOR_ZERO;
+    		}
+			copy(*tp);
 
-        if( tmp == 0 ) argument = arg.clone() ;
-        else           argument = tmp->clone();
+    	}
+    	else {
+    		if( p != 0 ) {
+        		// special case: argument is a projection
+    			Projection *p = dynamic_cast<Projection *>(arg_tmp);
+    			argument = 0;
+    			ne = NE_NEITHER_ONE_NOR_ZERO;
+    			copy(*p);
+    		}
+    		else {
+    			// no special case: create a new treeprojection
+    			argument = arg.clone() ;
+    			vIndex   = count++;
+    			variableIndex  = vIndex ;
 
-        vIndex         = count++;
-        variableIndex  = vIndex ;
+    			curvature      = CT_UNKNOWN; // argument->getCurvature();
+    			monotonicity   = MT_UNKNOWN; // argument->getMonotonicity();
 
-        curvature      = CT_UNKNOWN; // argument->getCurvature();
-        monotonicity   = MT_UNKNOWN; // argument->getMonotonicity();
+    			ne = argument->isOneOrZero();
 
-        ne = argument->isOneOrZero();
-
-        if( curvature == CT_CONSTANT )
-            scale = argument->getValue();
+    			if( curvature == CT_CONSTANT )
+    				scale = argument->getValue();
+    		}
+    	}
+    	delete arg_tmp;
     }
 
     return *this;
@@ -195,7 +220,10 @@ Operator* TreeProjection::ADforwardProtected( int dim,
                                                    int &nNewIS,
                                                    TreeProjection ***newIS ){
 
-    ASSERT( argument != 0 );
+	if (argument == 0) {
+		return Projection::ADforwardProtected( dim, varType, component, seed, nNewIS, newIS );
+	}
+	else {
 
     int run1 = 0;
 
@@ -232,6 +260,7 @@ Operator* TreeProjection::ADforwardProtected( int dim,
 
     delete tmp;
     return newIS[0][vIndex]->clone();
+	}
 }
 
 
@@ -244,7 +273,10 @@ returnValue TreeProjection::ADbackwardProtected( int           dim      , /**< n
                                         int           &nNewIS  , /**< the number of new IS  */
                                         TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
-    ASSERT( argument != 0 );
+	if (argument == 0) {
+		return Projection::ADbackwardProtected( dim, varType, component, seed, df, nNewIS, newIS );
+	}
+	else {
 
     int run1;
 
@@ -296,6 +328,7 @@ returnValue TreeProjection::ADbackwardProtected( int           dim      , /**< n
     delete seed;
 
     return SUCCESSFUL_RETURN;
+	}
 }
 
 
@@ -317,7 +350,10 @@ returnValue TreeProjection::ADsymmetricProtected( int            dim       , /**
                                         TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
   
   
-	ASSERT( argument != 0 );
+	if (argument == 0) {
+		return Projection::ADsymmetricProtected( dim, varType, component, l, S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+	}
+	else {
 
 	int run1;
 
@@ -365,7 +401,7 @@ returnValue TreeProjection::ADsymmetricProtected( int            dim       , /**
 			Hres[run1] = new DoubleConstant(0.0,NE_ZERO);
 		}
 
-		argument->ADsymmetric( dim, varType, component, aux, S, dimS,
+		argument->AD_symmetric( dim, varType, component, aux, S, dimS,
 				Sres, lres, Hres,
 				nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
 
@@ -435,6 +471,7 @@ returnValue TreeProjection::ADsymmetricProtected( int            dim       , /**
 
 	delete l;
 	return SUCCESSFUL_RETURN;
+	}
 }
   
 
@@ -443,9 +480,8 @@ returnValue TreeProjection::loadIndices( SymbolicIndexList *indexList ){
 
     returnValue returnvalue = SUCCESSFUL_RETURN;
 
-    if( argument == NULL ){
-        ACADOERROR(RET_INTERMEDIATE_STATE_HAS_NO_ARGUMENT);
-        ASSERT( 1 == 0 );
+    if( argument == 0 ){
+        return Projection::loadIndices( indexList );
     }
 
     if( indexList->addNewElement( VT_INTERMEDIATE_STATE, vIndex ) == BT_TRUE ){
@@ -471,7 +507,10 @@ BooleanType TreeProjection::isDependingOn( int dim,
                                                 int *component,
                                                 BooleanType   *implicit_dep ){
 
-    return implicit_dep[vIndex];
+	if( argument == 0 ){
+		return Projection::isDependingOn( dim, varType, component, implicit_dep );
+	}
+	return implicit_dep[vIndex];
 }
 
 
@@ -480,6 +519,9 @@ BooleanType TreeProjection::isLinearIn( int dim,
                                              int *component,
                                              BooleanType   *implicit_dep ){
 
+	if( argument == 0 ){
+		return Projection::isLinearIn( dim, varType, component, implicit_dep );
+	}
     return implicit_dep[vIndex];
 }
 
@@ -489,6 +531,9 @@ BooleanType TreeProjection::isPolynomialIn( int dim,
                                                  int *component,
                                                  BooleanType   *implicit_dep ){
 
+	if( argument == 0 ){
+		return Projection::isPolynomialIn( dim, varType, component, implicit_dep );
+	}
     return implicit_dep[vIndex];
 }
 
@@ -498,7 +543,10 @@ BooleanType TreeProjection::isRationalIn( int dim,
                                                int *component,
                                                BooleanType   *implicit_dep ){
 
-    return implicit_dep[vIndex];
+	if( argument == 0 ){
+		return Projection::isRationalIn( dim, varType, component, implicit_dep );
+	}
+	return implicit_dep[vIndex];
 }
 
 
@@ -539,16 +587,27 @@ returnValue TreeProjection::setVariableExportName(	const VariableType &_type,
 													const std::vector< std::string >& _name
 													)
 {
-	if (argument->getName() == ON_POWER_INT)
+	if (argument != 0 && argument->getName() == ON_POWER_INT)
 		argument->setVariableExportName(_type, _name);
 
 	return Projection::setVariableExportName(_type, _name);
 }
 
 
-
 BooleanType TreeProjection::isTrivial() const {
-	return BT_FALSE;
+
+	return argument != 0;
+}
+
+
+returnValue TreeProjection::initDerivative() {
+
+	if( argument != 0 ) {
+		return argument->initDerivative();
+	}
+	else {
+		return SUCCESSFUL_RETURN;
+	}
 }
 
 
