@@ -207,8 +207,8 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	z.setDoc( string("Matrix containing ") + toString( N ) + " algebraic variable vectors." );
 	u.setup("u", getN(), getNU(), REAL, ACADO_VARIABLES);
 	u.setDoc( string("Matrix containing ") + toString( N ) + " control variable vectors." );
-	od.setup("od", 1, getNOD(), REAL, ACADO_VARIABLES);
-	od.setDoc( "Vector of online data values." );
+	od.setup("od", getN() + 1, getNOD(), REAL, ACADO_VARIABLES);
+	od.setDoc( string("Matrix containing ") + toString(getN() + 1) + " online data vectors." );
 
 	if (performsSingleShooting() == false)
 	{
@@ -240,7 +240,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 		modelSimulation.addStatement( state.getCols(0, NX)				== x.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(NX, NX + NXA)		== z.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( 0 ) );
-		modelSimulation.addStatement( state.getCols(indexU, indexOD)		== od );
+		modelSimulation.addStatement( state.getCols(indexU, indexOD)	== od.getRow( 0 ) );
 		modelSimulation.addLinebreak( );
 	}
 
@@ -262,7 +262,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 
 	// Fill in the input vector
 	loop.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( run ) );
-	loop.addStatement( state.getCols(indexU, indexOD)	== od );
+	loop.addStatement( state.getCols(indexU, indexOD)	== od.getRow( run ) );
 	loop.addLinebreak( );
 
 	// Integrate the model
@@ -1154,7 +1154,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	shiftStates.addStatement( "else\n{\n" );
 	shiftStates.addStatement( state.getCols(indexGzu, indexU) == u.getRow(N - 1) );
 	shiftStates.addStatement( "}\n" );
-	shiftStates.addStatement( state.getCols(indexU, indexOD) == od );
+	shiftStates.addStatement( state.getCols(indexU, indexOD) == od.getRow( N ) );
 	shiftStates.addLinebreak( );
 
 	if ( integrator->equidistantControlGrid() )
@@ -1197,7 +1197,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 		iLoop << std::string("}\n");
 	}
 	iLoop.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( index ) );
-	iLoop.addStatement( state.getCols(indexU, indexOD)	== od );
+	iLoop.addStatement( state.getCols(indexU, indexOD)	== od.getRow( index ) );
 	iLoop.addLinebreak( );
 
 	if ( integrator->equidistantControlGrid() )
@@ -1251,7 +1251,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( oInd ) );
 	loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( oInd ) );
-	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
+	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( oInd ) );
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
@@ -1266,7 +1266,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	getObjective.addStatement( loopObjective );
 
 	getObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
-	getObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
+	getObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
 	// Evaluate the objective function
 	getObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
@@ -1402,7 +1402,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	updateArrivalCost.addStatement( state.getCols(0, NX) == x.getRow( 0 ) );
 	updateArrivalCost.addStatement( state.getCols(NX, NX + NXA) == z.getRow( 0 ) );
 	updateArrivalCost.addStatement( state.getCols(indexGzu, indexU) == u.getRow( 0 ) );
-	updateArrivalCost.addStatement( state.getCols(indexU, indexNOD) == od );
+	updateArrivalCost.addStatement( state.getCols(indexU, indexNOD) == od.getRow( 0 ) );
 
 	if (integrator->equidistantControlGrid())
 		updateArrivalCost << "integrate" << "(" << state.getFullName() << ", 1);\n";
@@ -1416,7 +1416,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 
 	updateArrivalCost.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( 0 ) );
 	updateArrivalCost.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( 0 ) );
-	updateArrivalCost.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
+	updateArrivalCost.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( 0 ) );
 
 	updateArrivalCost.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 	updateArrivalCost.addLinebreak( );
