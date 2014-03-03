@@ -374,6 +374,7 @@ returnValue SIMexport::exportTest(	const std::string& _dirName,
 	ExportFile main( fileName,commonHeaderName );
 
 	main.addStatement( "#include <stdio.h>\n" );
+	main << "#include \"acado_auxiliary_sim_functions.h\"\n";
 	main.addLinebreak( 1 );
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
 	main.addComment( "---------------------------------------------------------------" );
@@ -572,6 +573,7 @@ returnValue SIMexport::exportEvaluation(	const std::string& _dirName,
 	ExportFile main( fileName,commonHeaderName );
 
 	main.addStatement( "#include <stdio.h>\n" );
+	main.addStatement( "#include \"acado_auxiliary_sim_functions.h\"\n" );
 	main.addLinebreak( 1 );
 	main.addComment( "SOME CONVENIENT DEFINTIONS:" );
 	main.addComment( "---------------------------------------------------------------" );
