@@ -101,7 +101,7 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 			ss << "typedef float real_t;\n";
 		else
 			ss << "typedef double real_t;\n";
-		ss << "#include \"acado_auxiliary_sim_functions.h\"\n";
+//		ss << "#include \"acado_auxiliary_sim_functions.h\"\n";
 
 		break;
 
