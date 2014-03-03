@@ -245,9 +245,15 @@ protected:
 	ExportVariable W1, W2;
 	ExportVariable sbar, w1, w2;
 
+	// lagrange multipliers
+	ExportVariable mu;
+	ExportVariable S1;
+	ExportFunction expansionStep2;
+
 	ExportFunction multBTW1, macBTW1_R1, multGxTGu, macQEW2;
 	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macASbarD2;
 	ExportFunction expansionStep;
+
 
 };
 

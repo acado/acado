@@ -129,6 +129,10 @@ returnValue ExportGaussNewtonCN2New::getDataDeclarations(	ExportStatementBlock& 
 	declarations.addDeclaration(xVars, dataStruct);
 	declarations.addDeclaration(yVars, dataStruct);
 
+	// lagrange multipliers
+	declarations.addDeclaration(mu, dataStruct);
+	declarations.addDeclaration(S1, dataStruct);
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -200,6 +204,8 @@ returnValue ExportGaussNewtonCN2New::getCode(	ExportStatementBlock& code
 	code.addFunction( macASbar );
 //	code.addFunction( macASbarD2 );
 	code.addFunction( expansionStep );
+
+	code.addFunction( expansionStep2 );
 
 //	code.addFunction( setBlockH11 );
 //	code.addFunction( zeroBlockH11 );
@@ -326,13 +332,17 @@ returnValue ExportGaussNewtonCN2New::setupObjectiveEvaluation( void )
 	//
 	if (Q1.isGiven() == false)
 	{
-		ExportVariable tmpQ1, tmpQ2;
+		ExportVariable tmpQ1, tmpS1, tmpQ2;
 		tmpQ1.setup("tmpQ1", NX, NX, REAL, ACADO_LOCAL);
+		tmpS1.setup("tmpS1", NX, NU, REAL, ACADO_LOCAL);
 		tmpQ2.setup("tmpQ2", NX, NY, REAL, ACADO_LOCAL);
 
-		setObjQ1Q2.setup("setObjQ1Q2", tmpFx, tmpObjS, tmpQ1, tmpQ2);
+		setObjQ1Q2.setup("setObjQ1S1Q2", tmpFx, tmpObjS, tmpQ1, tmpS1, tmpQ2);
 		setObjQ1Q2.addStatement( tmpQ2 == (tmpFx ^ tmpObjS) );
 		setObjQ1Q2.addStatement( tmpQ1 == tmpQ2 * tmpFx );
+		setObjQ1Q2.addStatement( tmpS1 == tmpQ2 * tmpFu );
+
+		S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
 
 		if (tmpFx.isGiven() == true)
 		{
@@ -341,7 +351,7 @@ returnValue ExportGaussNewtonCN2New::setupObjectiveEvaluation( void )
 				loopObjective.addFunctionCall(
 						setObjQ1Q2,
 						tmpFx, objS.getAddress(runObj * NY, 0),
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+						Q1.getAddress(runObj * NX, 0), S1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
 				);
 			}
 			else
@@ -349,7 +359,7 @@ returnValue ExportGaussNewtonCN2New::setupObjectiveEvaluation( void )
 				loopObjective.addFunctionCall(
 						setObjQ1Q2,
 						tmpFx, objS,
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+						Q1.getAddress(runObj * NX, 0), S1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
 				);
 			}
 		}
@@ -360,7 +370,7 @@ returnValue ExportGaussNewtonCN2New::setupObjectiveEvaluation( void )
 				loopObjective.addFunctionCall(
 						setObjQ1Q2,
 						objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+						Q1.getAddress(runObj * NX, 0), S1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
 				);
 			}
 			else
@@ -368,7 +378,7 @@ returnValue ExportGaussNewtonCN2New::setupObjectiveEvaluation( void )
 				loopObjective.addFunctionCall(
 						setObjQ1Q2,
 						objValueOut.getAddress(0, indexX), objS,
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+						Q1.getAddress(runObj * NX, 0), S1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
 				);
 			}
 			indexX += objEvFx.getDim();
@@ -718,7 +728,7 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 
 		for k = N - 1: i + 1
 		{
-			H_{k, i} = B_k^T * W1;
+			H_{k, i} = B_k^T * W1 + S_k^T * E_{j + k - i - 1};  --> !! THIS IS CHANGED IN multBTW1
 
 			W2 = A_k^T * W1;
 			W1 = Q_k^T * E_{j + k - i - 1} + W2;
@@ -733,6 +743,7 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 
 	W1.setup("W1", NX, NU, REAL, ACADO_WORKSPACE);
 	W2.setup("W2", NX, NU, REAL, ACADO_WORKSPACE);
+
 
 	if (N <= 15)
 	{
@@ -764,7 +775,7 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 			for (unsigned row = N - 1; col < row; --row)
 			{
 				condensePrep.addFunctionCall(
-						multBTW1, evGu.getAddress(row * NX), W1,
+						multBTW1, evGu.getAddress(row * NX), W1, S1.getAddress(row * NX), E.getAddress((offset + row - col - 1) * NX),
 						ExportIndex( row ), ExportIndex( col )
 				);
 
@@ -833,7 +844,7 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 			);
 
 		adjLoop.addFunctionCall(
-				multBTW1, evGu.getAddress(row * NX), W1,
+				multBTW1, evGu.getAddress(row * NX), W1, S1.getAddress(row * NX), E.getAddress((offset + row - col - 1) * NX),
 				row, col
 //				col, row
 		);
@@ -972,12 +983,12 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 	w1 = Q_N^T * sbar_N + q_N;
 	for k = N - 1: 1
 	{
-		g1_k += B_k^T * w1;
+		g1_k += B_k^T * w1 + S_k^T * sbar_k;  --> macBTw1 is UPDATED
 		w2 = A_k^T * w1 + q_k;
 		w1 = Q_k^T * sbar_k + w2;
 	}
 
-	g1_0 += B_0^T * w1;
+	g1_0 += B_0^T * w1 + S_0^T * sbar_0;  --> macBTw1 is UPDATED
 
 	*/
 
@@ -1002,7 +1013,7 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 	for (unsigned i = N - 1; 0 < i; --i)
 	{
 		condenseFdb.addFunctionCall(
-				macBTw1, evGu.getAddress(i * NX), w1, g.getAddress(i * NU)
+				macBTw1, evGu.getAddress(i * NX), w1, g.getAddress(i * NU), S1.getAddress(i*NX,0), sbar.getAddress(i * NX)
 		);
 		condenseFdb.addFunctionCall(
 				macATw1QDy, evGx.getAddress(i * NX), w1, QDy.getAddress(i * NX), w2 // Proveri indexiranje za QDy
@@ -1017,7 +1028,7 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 			);
 	}
 	condenseFdb.addFunctionCall(
-			macBTw1, evGu.getAddress( 0 ), w1, g.getAddress( 0 )
+			macBTw1, evGu.getAddress( 0 ), w1, g.getAddress( 0 ), S1.getAddress( 0 ), sbar.getAddress( 0 )
 	);
 	condenseFdb.addLinebreak();
 
@@ -1080,6 +1091,22 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 		);
 
 	expand.addStatement( x.makeColVector() += sbar );
+
+	mu.setup("mu", (N+1), NX, REAL, ACADO_WORKSPACE);
+	// TODO Calculation of multipliers
+	// NOTE: CURRENTLY ASSUMING THERE ARE ONLY STATE CONSTRAINTS ON THE LAST NODE
+	if( getNumStateBounds() != NX ) return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+//	mu_N = lambda_N + Q_N^T * s_N
+//		for i = N - 1: 0
+//			mu_k = Q_k^T * s_k + A_k^T * mu_{k + 1} + S_k * u_k + q_k
+	expand.addStatement( mu.getRow(N) == yVars.getRows(N*NU,N*NU+NX).getTranspose() + x.getRow(N)*QN1 );
+	for (int i = N - 1; i >= 0; i--) {
+		expand.addFunctionCall(
+				expansionStep2, QDy.getAddress(i*NX), Q1.getAddress(i * NX), x.getAddress(i),
+				S1.getAddress(i * NX), xVars.getAddress(i * NU), evGx.getAddress(i * NX),
+				mu.getAddress(i), mu.getAddress(i+1) );
+	}
+
 
 	return SUCCESSFUL_RETURN;
 }
@@ -1310,11 +1337,19 @@ returnValue ExportGaussNewtonCN2New::setupMultiplicationRoutines( )
 	//ExportFunction multBTW1, multGxTGu, macQEW2;
 
 	// multBTW1, evGu.getAddress(row * NX), W1, row, col
-	multBTW1.setup("multBTW1", Gu1, Gu2, iRow, iCol);
+
+	ExportVariable S11;
+	S11.setup("S11", NX, NU, REAL, ACADO_LOCAL);
+
+	multBTW1.setup("multBTW1SE", Gu1, Gu2, S11, Gu3, iRow, iCol);
 	multBTW1.addStatement(
 			H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iCol * NU, (iCol + 1) * NU) ==
 					(Gu1 ^ Gu2)
 //					(Gu2 ^ Gu1)
+	);
+	multBTW1.addStatement(
+			H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iCol * NU, (iCol + 1) * NU) +=
+					(S11 ^ Gu3)
 	);
 
 	multGxTGu.setup("multGxTGu", Gx1, Gu1, Gu2);
@@ -1339,8 +1374,9 @@ returnValue ExportGaussNewtonCN2New::setupMultiplicationRoutines( )
 //	macASbarD2.addStatement( w13 == Gx1 * w11 );
 //	macASbarD2.addStatement( w13 -= w12 );
 
-	macBTw1.setup("macBTw1", Gu1, w11, 	U1);
+	macBTw1.setup("macBTw1SSbar", Gu1, w11, U1, S11, w12 );
 	macBTw1.addStatement( U1 += Gu1 ^ w11 );
+	macBTw1.addStatement( U1 += S11 ^ w12 );
 
 	// macATw1QDy, A.getAddress(i * NX), w1, QDy.getAddress(i * NX), w2
 	macATw1QDy.setup("macATw1QDy", Gx1, w11, w12, w13);
@@ -1353,6 +1389,15 @@ returnValue ExportGaussNewtonCN2New::setupMultiplicationRoutines( )
 	expansionStep.setup("expansionStep", Gx1, Gu1, U1, w11, w12);
 	expansionStep.addStatement( w12 += Gx1 * w11 );
 	expansionStep.addStatement( w12 += Gu1 * U1 );
+
+	ExportVariable mu1; mu1.setup("mu1", 1, NX, REAL, ACADO_LOCAL);
+	ExportVariable mu2; mu2.setup("mu2", 1, NX, REAL, ACADO_LOCAL);
+
+	expansionStep2.setup("expansionStep2", QDy1, Q11, w11, S11, U1, Gx1, mu1, mu2);
+	expansionStep2.addStatement( mu1 == QDy1.getTranspose() );
+	expansionStep2.addStatement( mu1 += w11 ^ Q11 );
+	expansionStep2.addStatement( mu1 += U1 ^ S11.getTranspose() );
+	expansionStep2.addStatement( mu1 += mu2*Gx1 );
 
 	//
 	// Define LM regularization terms
