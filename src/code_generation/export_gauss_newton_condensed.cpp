@@ -291,7 +291,7 @@ returnValue ExportGaussNewtonCondensed::setupObjectiveEvaluation( void )
 
 	loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( runObj ) );
 	loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( runObj ) );
-	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
+	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( runObj ) );
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
@@ -439,7 +439,7 @@ returnValue ExportGaussNewtonCondensed::setupObjectiveEvaluation( void )
 	// Evaluate the quadratic Mayer term
 	//
 	evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
-	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
+	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
 	// Evaluate the objective function, last node.
 	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
@@ -742,7 +742,7 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 
 		loopPac.addStatement( conValueIn.getCols(0, NX) == x.getRow( runPac ) );
 		loopPac.addStatement( conValueIn.getCols(NX, NX + NU) == u.getRow( runPac ) );
-		loopPac.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od );
+		loopPac.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( runPac ) );
 		loopPac.addFunctionCall( evaluatePathConstraints.getName(), conValueIn, conValueOut );
 
 		loopPac.addStatement( pacEvH.getRows( runPac * dimPacH, (runPac + 1) * dimPacH) ==
@@ -1046,10 +1046,10 @@ returnValue ExportGaussNewtonCondensed::setupConstraintsEvaluation( void )
 			if (i < N)
 			{
 				condensePrep.addStatement( conValueIn.getCols(NX, NX + NU) == u.getRow( i ) );
-				condensePrep.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od );
+				condensePrep.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( i ) );
 			}
 			else
-				condensePrep.addStatement( conValueIn.getCols(NX, NX + NOD) == od );
+				condensePrep.addStatement( conValueIn.getCols(NX, NX + NOD) == od.getRow( i ) );
 
 			condensePrep.addFunctionCall( evaluatePointConstraints[ i ]->getName(), conValueIn, conValueOut );
 			condensePrep.addLinebreak();
