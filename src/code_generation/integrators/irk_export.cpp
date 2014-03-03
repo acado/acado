@@ -1142,9 +1142,9 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	if( !equidistantControlGrid() ) integrate.addArgument( rk_index );
 	integrate.setReturnValue( error_code );
 
-	rk_eta.setDoc( "Working array to pass the input values and return the results." );
+	rk_eta.setDoc( "Working array of size " + toString( rk_eta.getDim() ) + " to pass the input values and return the results." );
 	for( i = 0; i < rk_outputs.size(); i++ ) {
-		rk_outputs[i].setDoc( "Working array to return the extra output results." );
+		rk_outputs[i].setDoc( "Working array of size " + toString( rk_outputs[ i ].getDim() ) + " to return the extra output results." );
 	}
 	reset_int.setDoc( "The internal memory of the integrator can be reset." );
 	rk_index.setDoc( "Number of the shooting interval." );
