@@ -431,7 +431,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		/* NOTE: Matlab is column-major, while C is row-major order !! */
 		/* NOTE: The order here is the lower triangular of the full Hessian H !! */
 	    for( i = 0; i < ACADO_NX+ACADO_NU; ++i ) {
-	        for( j = 0; j < ACADO_NX+ACADO_NU; ++j ) {
+	        for( j = 0; j <= i; ++j ) {
 	            sens2[j*(ACADO_NX+ACADO_NU)+i] = next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NX+i*(i+1)/2+j];
 	            sens2[i*(ACADO_NX+ACADO_NU)+j] = sens2[j*(ACADO_NX+ACADO_NU)+i];
 	        }
