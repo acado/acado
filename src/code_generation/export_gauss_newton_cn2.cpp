@@ -788,7 +788,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				);
 			else
 				condensePrep.addFunctionCall(
-						macBTW1_R1, R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU), evGu.getAddress(col * NX), W1,
+						macBTW1_R1, R1.getAddress(col * NU), evGu.getAddress(col * NX), W1,
 						ExportIndex( col )
 				);
 
@@ -859,7 +859,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 			);
 		else
 			cLoop.addFunctionCall(
-					macBTW1_R1, R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU), evGu.getAddress(col * NX), W1,
+					macBTW1_R1, R1.getAddress(col * NU), evGu.getAddress(col * NX), W1,
 					ExportIndex( col )
 			);
 
