@@ -728,12 +728,12 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 
 		for k = N - 1: i + 1
 		{
-			H_{k, i} = B_k^T * W1 + S_k^T * E_{j + k - i - 1};  --> !! THIS IS CHANGED IN multBTW1
+			H_{k, i} = B_k^T * W1 + S_k^T * E_{j + k - i - 1};  --> !! multBTW1 is UPDATED !
 
 			W2 = A_k^T * W1;
 			W1 = Q_k^T * E_{j + k - i - 1} + W2;
 		}
-		H_{i, i} = B_i^T * W1 + R_i^T
+		H_{i, i} = B_i^T * W1 + R_i^T  --> !! macBTW1_R1 is NOT UPDATED !
 	}
 
 	 */
@@ -801,7 +801,7 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 				);
 			else
 				condensePrep.addFunctionCall(
-						macBTW1_R1, R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU), evGu.getAddress(col * NX), W1,
+						macBTW1_R1, R1.getAddress(col * NU), evGu.getAddress(col * NX), W1,
 						ExportIndex( col )
 				);
 
@@ -865,16 +865,18 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 
 		cLoop.addStatement( adjLoop );
 
-		if (R1.isGiven() == true)
+		if (R1.isGiven() == true) {
 			cLoop.addFunctionCall(
 					macBTW1_R1, R1, evGu.getAddress(col * NX), W1,
 					ExportIndex( col )
 			);
-		else
+		}
+		else {
 			cLoop.addFunctionCall(
-					macBTW1_R1, R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU), evGu.getAddress(col * NX), W1,
+					macBTW1_R1, R1.getAddress(col * NU), evGu.getAddress(col * NX), W1,
 					ExportIndex( col )
 			);
+		}
 
 		condensePrep.addStatement( cLoop );
 		condensePrep.addLinebreak();
@@ -983,7 +985,7 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 	w1 = Q_N^T * sbar_N + q_N;
 	for k = N - 1: 1
 	{
-		g1_k += B_k^T * w1 + S_k^T * sbar_k;  --> macBTw1 is UPDATED
+		g1_k += B_k^T * w1 + S_k^T * sbar_{k};  --> macBTw1 is UPDATED
 		w2 = A_k^T * w1 + q_k;
 		w1 = Q_k^T * sbar_k + w2;
 	}
@@ -1056,11 +1058,9 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 
 	// TODO Calculation of multipliers
 
-	mu_N = lambda_N + Q_N^T * s_N
+	mu_N = lambda_N + q_N + Q_N^T * Ds_N  --> wrong in Joel's paper !!
 	for i = N - 1: 1
-		mu_k = lambda_k + Q_k^T * s_k + A_k^T * mu_{k + 1} + q_k
-
-	mu_0 = Q_0^T s_0 + A_0^T * mu_1 + q_0
+		mu_k = lambda_k + Q_k^T * Ds_k + A_k^T * mu_{k + 1} + S_k * Du_k + q_k
 
 	 */
 
@@ -1092,19 +1092,23 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 
 	expand.addStatement( x.makeColVector() += sbar );
 
-	mu.setup("mu", (N+1), NX, REAL, ACADO_WORKSPACE);
+	mu.setup("mu", N, NX, REAL, ACADO_WORKSPACE);
 	// TODO Calculation of multipliers
 	// NOTE: CURRENTLY ASSUMING THERE ARE ONLY STATE CONSTRAINTS ON THE LAST NODE
+
 	if( getNumStateBounds() != NX ) return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
-//	mu_N = lambda_N + Q_N^T * s_N
-//		for i = N - 1: 0
-//			mu_k = Q_k^T * s_k + A_k^T * mu_{k + 1} + S_k * u_k + q_k
-	expand.addStatement( mu.getRow(N) == yVars.getRows(N*NU,N*NU+NX).getTranspose() + x.getRow(N)*QN1 );
-	for (int i = N - 1; i >= 0; i--) {
+
+//	mu_N = lambda_N + q_N + Q_N^T * Ds_N  --> wrong in Joel's paper !!
+//		for i = N - 1: 1
+//			mu_k = Q_k^T * Ds_k + A_k^T * mu_{k + 1} + S_k * Du_k + q_k
+
+	expand.addStatement( mu.getRow(N-1) == yVars.getRows(N*NU,N*NU+NX).getTranspose() + sbar.getRows(N*NX,(N+1)*NX).getTranspose()*QN1 );
+	expand.addStatement( mu.getRow(N-1) += QDy.getRows(N*NX,(N+1)*NX).getTranspose() );
+	for (int i = N - 1; i >= 1; i--) {
 		expand.addFunctionCall(
-				expansionStep2, QDy.getAddress(i*NX), Q1.getAddress(i * NX), x.getAddress(i),
+				expansionStep2, QDy.getAddress(i*NX), Q1.getAddress(i * NX), sbar.getAddress(i*NX),
 				S1.getAddress(i * NX), xVars.getAddress(i * NU), evGx.getAddress(i * NX),
-				mu.getAddress(i), mu.getAddress(i+1) );
+				mu.getAddress(i-1), mu.getAddress(i) );
 	}
 
 
@@ -1395,7 +1399,7 @@ returnValue ExportGaussNewtonCN2New::setupMultiplicationRoutines( )
 
 	expansionStep2.setup("expansionStep2", QDy1, Q11, w11, S11, U1, Gx1, mu1, mu2);
 	expansionStep2.addStatement( mu1 == QDy1.getTranspose() );
-	expansionStep2.addStatement( mu1 += w11 ^ Q11 );
+	expansionStep2.addStatement( mu1 += w11 ^ Q11.getTranspose() );
 	expansionStep2.addStatement( mu1 += U1 ^ S11.getTranspose() );
 	expansionStep2.addStatement( mu1 += mu2*Gx1 );
 
