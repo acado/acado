@@ -172,14 +172,6 @@ public:
      */
     int index( VariableType variableType_, int index_ ) const;
 
-
-    /** Returns the scale of a given variable.   \n
-     *  \return The requested scale      or      \n
-     *          1.0  if index is out of range    \n
-     */
-    double scale( VariableType variableType_, int index_ ) const;
-
-
     /** Returns the variable counter.           \n
      *  \return The number of variables         \n
      */
@@ -482,13 +474,6 @@ public:
      returnValue clearBuffer();
 
 
-
-     /** Defines a scale for the case that a C-function is used \n
-      *  \return SUCCESSFUL_RETURN
-      */
-     returnValue setScale( double *scale_ );
-
-
      /** Returns whether the function is symbolic or not. If BT_TRUE \n
       *  is returned, automatic differentiation will be used by      \n
       *  default.
@@ -497,9 +482,6 @@ public:
 
 
      inline BooleanType ADisSupported() const;
-
-
-     inline returnValue setMemoryOffset( int memoryOffset_ );
 
      /** Set name of the variable that holds intermediate values. */
      returnValue setGlobalExportVariableName(const std::string& var);
@@ -516,8 +498,6 @@ public:
 protected:
 
     FunctionEvaluationTree evaluationTree;
-    int                    memoryOffset  ;
-	
 	double* result;
 };
 

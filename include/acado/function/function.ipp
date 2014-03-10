@@ -65,11 +65,11 @@ inline BooleanType Function::ADisSupported() const{
 }
 
 
-inline returnValue Function::setMemoryOffset( int memoryOffset_ ){
-
-    memoryOffset = memoryOffset_;
-    return SUCCESSFUL_RETURN;
-}
+// inline returnValue Function::setMemoryOffset( int memoryOffset_ ){
+// 
+//     memoryOffset = memoryOffset_;
+//     return SUCCESSFUL_RETURN;
+// }
 
 
 inline DVector Function::operator()( const EvaluationPoint &x     ,

@@ -119,9 +119,6 @@ Operator& TreeProjection::operator=( const SharedOperator &arg ){
     			monotonicity   = MT_UNKNOWN; // argument->getMonotonicity();
 
     			ne = argument->isOneOrZero();
-
-    			if( curvature == CT_CONSTANT )
-    				scale = argument->getValue();
     		}
     	}
     return *this;
@@ -142,16 +139,11 @@ Operator& TreeProjection::operator=( const Expression &arg ){
 
 	ne = argument->isOneOrZero();
 
-	if( curvature == CT_CONSTANT )
-		scale = argument->getValue();
-
 	return *this;
 }
 
 
 Operator& TreeProjection::operator=( const double& arg ){
-
-    scale = arg;
 
     Expression tmp;
     return this->operator=( tmp.convert(arg) );

@@ -1021,12 +1021,6 @@ int FunctionEvaluationTree::index( VariableType variableType_, int index_ ) cons
     return indexList->index( variableType_, index_ );
 }
 
-double FunctionEvaluationTree::scale( VariableType variableType_, int index_ ) const{
-
-    return indexList->scale( variableType_, index_ );
-}
-
-
 int FunctionEvaluationTree::getNumberOfVariables() const{
 
     return indexList->getNumberOfVariables();
@@ -1054,11 +1048,6 @@ BooleanType FunctionEvaluationTree::isSymbolic() const{
     return BT_TRUE;
 }
 
-
-returnValue FunctionEvaluationTree::setScale( double *scale_ )
-{
-    return ACADOERROR(RET_INVALID_USE_OF_FUNCTION);
-}
 
 returnValue FunctionEvaluationTree::setGlobalExportVariableName(const std::string& _name)
 {

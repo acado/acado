@@ -384,18 +384,6 @@ public:
      virtual OperatorName getName();
 
 
-     /** Asks the expression for its scale.   \n
-      *  \return the scale of the expression. \n
-      */
-     virtual double getScale() const;
-
-
-     /** Sets the scale of the variable.   \n
-      *  \returns void \n
-      */
-     virtual returnValue setScale( const double &scale_ );
-
-
      /** Asks the expression whether it is a variable.   \n
       *  \return The answer. \n
       */
@@ -529,7 +517,6 @@ protected:
     VariableType      variableType ;
     int               variableIndex;
     int               vIndex       ;
-    double            scale        ;
     std::string       name         ;
 
     OperatorName      operatorName ;

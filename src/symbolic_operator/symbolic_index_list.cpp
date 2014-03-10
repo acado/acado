@@ -65,14 +65,12 @@ SymbolicIndexList::SymbolicIndexList(){
 
     variableCounter = 0;
     variableIndex   = new int*[numberOfVariableTypes];
-    variableScale   = new double*[numberOfVariableTypes];
 
     for( run1 = 0; run1 < numberOfVariableTypes; run1++ ){
 
         maxNumberOfEntries[run1] = 0;
         entryExists[run1]        = 0;
         variableIndex[run1]      = 0;
-        variableScale[run1]      = 0;
     }
 }
 
@@ -93,7 +91,6 @@ SymbolicIndexList::~SymbolicIndexList(){
 
             free(entryExists  [run1]);
             free(variableIndex[run1]);
-            free(variableScale[run1]);
         }
     }
 
@@ -108,7 +105,6 @@ SymbolicIndexList::~SymbolicIndexList(){
 
     delete[] maxNumberOfEntries;
     delete[] variableIndex;
-    delete[] variableScale;
     delete[] entryExists;
 }
 
@@ -142,7 +138,6 @@ SymbolicIndexList::SymbolicIndexList( const SymbolicIndexList &arg ){
 
     entryExists   = new BooleanType*[numberOfVariableTypes];
     variableIndex = new int*[numberOfVariableTypes];
-    variableScale = new double*[numberOfVariableTypes];
 
 
     maxNumberOfEntries = new int[numberOfVariableTypes];
@@ -156,18 +151,14 @@ SymbolicIndexList::SymbolicIndexList( const SymbolicIndexList &arg ){
                                        sizeof(BooleanType));
             variableIndex     [run1] = (int*)calloc(maxNumberOfEntries[run1],
                                        sizeof(int));
-            variableScale     [run1] = (double*)calloc(maxNumberOfEntries[run1],
-                                       sizeof(double));
         }
         else{
             entryExists  [run1] = 0;
             variableIndex[run1] = 0;
-            variableScale[run1] = 0;
         }
         for( run2 = 0; run2 < maxNumberOfEntries[run1]; run2++ ){
             entryExists  [run1][run2] = arg.entryExists  [run1][run2];
             variableIndex[run1][run2] = arg.variableIndex[run1][run2];
-            variableScale[run1][run2] = arg.variableScale[run1][run2];
         }
     }
 
@@ -212,13 +203,11 @@ SymbolicIndexList& SymbolicIndexList::operator=( const SymbolicIndexList &arg ){
 
                 free(entryExists  [run1]);
                 free(variableIndex[run1]);
-                free(variableScale[run1]);
             }
         }
 
         delete[] maxNumberOfEntries;
         delete[] variableIndex;
-        delete[] variableScale;
         delete[] entryExists;
 
         free(cExist);
@@ -232,7 +221,6 @@ SymbolicIndexList& SymbolicIndexList::operator=( const SymbolicIndexList &arg ){
 
         entryExists   = new BooleanType*[numberOfVariableTypes];
         variableIndex = new int*[numberOfVariableTypes];
-        variableScale = new double*[numberOfVariableTypes];
 
         maxNumberOfEntries = new int[numberOfVariableTypes];
 
@@ -245,19 +233,15 @@ SymbolicIndexList& SymbolicIndexList::operator=( const SymbolicIndexList &arg ){
                                            sizeof(BooleanType));
                 variableIndex     [run1] = (int*)calloc(maxNumberOfEntries[run1],
                                            sizeof(int));
-                variableScale     [run1] = (double*)calloc(maxNumberOfEntries[run1],
-                                           sizeof(double));
             }
             else{
                 entryExists  [run1] = 0;
                 variableIndex[run1] = 0;
-                variableScale[run1] = 0;
             }
 
             for( run2 = 0; run2 < maxNumberOfEntries[run1]; run2++ ){
                 entryExists  [run1][run2] = arg.entryExists  [run1][run2];
                 variableIndex[run1][run2] = arg.variableIndex[run1][run2];
-                variableScale[run1][run2] = arg.variableScale[run1][run2];
             }
         }
 
@@ -351,14 +335,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[0] = (int*)realloc(variableIndex[0],
                                      (index_+1)*sizeof(int));
-                 variableScale[0] = (double*)realloc(variableScale[0],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[0]; run1 < index_+1; run1++ ){
                       entryExists[0]  [run1] = BT_FALSE;
                       variableIndex[0][run1] = -1      ;
-                      variableScale[0][run1] = 1.0     ;
                  }
                  maxNumberOfEntries[0] = index_+1;
              }
@@ -376,14 +357,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[1] = (int*)realloc(variableIndex[1],
                                      (index_+1)*sizeof(int));
-                 variableScale[1] = (double*)realloc(variableScale[1],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[1]; run1 < index_+1; run1++ ){
                       entryExists[1]  [run1] = BT_FALSE;
                       variableIndex[1][run1] = -1      ;
-                      variableScale[1][run1] = 1.0     ;
                  }
                  maxNumberOfEntries[1] = index_+1;
              }
@@ -401,14 +379,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[2] = (int*)realloc(variableIndex[2],
                                      (index_+1)*sizeof(int));
-                 variableScale[2] = (double*)realloc(variableScale[2],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[2]; run1 < index_+1; run1++ ){
                       entryExists[2]  [run1] = BT_FALSE;
                       variableIndex[2][run1] = -1      ;
-                      variableScale[2][run1] = 1.0     ;
                  }
                  maxNumberOfEntries[2] = index_+1;
              }
@@ -426,14 +401,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[3] = (int*)realloc(variableIndex[3],
                                      (index_+1)*sizeof(int));
-                 variableScale[3] = (double*)realloc(variableScale[3],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[3]; run1 < index_+1; run1++ ){
                       entryExists[3]  [run1] = BT_FALSE;
                       variableIndex[3][run1] = -1      ;
-                      variableScale[3][run1] = 1.0     ;
                  }
                  maxNumberOfEntries[3] = index_+1;
              }
@@ -451,14 +423,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[4] = (int*)realloc(variableIndex[4],
                                      (index_+1)*sizeof(int));
-                 variableScale[4] = (double*)realloc(variableScale[4],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[4]; run1 < index_+1; run1++ ){
                       entryExists[4]  [run1] = BT_FALSE;
                       variableIndex[4][run1] = -1      ;
-                      variableScale[4][run1] = 1.0     ;
                  }
                  maxNumberOfEntries[4] = index_+1;
              }
@@ -476,8 +445,6 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[5] = (int*)realloc(variableIndex[5],
                                      (index_+1)*sizeof(int));
-                 variableScale[5] = (double*)realloc(variableScale[5],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[5]; run1 < index_+1; run1++ ){
@@ -500,14 +467,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[6] = (int*)realloc(variableIndex[6],
                                      (index_+1)*sizeof(int));
-                 variableScale[6] = (double*)realloc(variableScale[6],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[6]; run1 < index_+1; run1++ ){
                       entryExists[6]  [run1] = BT_FALSE;
                       variableIndex[6][run1] = -1      ;
-                      variableScale[6][run1] = 1.0     ;
                  }
                  maxNumberOfEntries[6] = index_+1;
              }
@@ -525,14 +489,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[7] = (int*)realloc(variableIndex[7],
                                      (index_+1)*sizeof(int));
-                 variableScale[7] = (double*)realloc(variableScale[7],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[7]; run1 < index_+1; run1++ ){
                       entryExists[7]  [run1] = BT_FALSE;
                       variableIndex[7][run1] = -1      ;
-                      variableScale[7][run1] = 1.0     ;
                  }
                  maxNumberOfEntries[7] = index_+1;
              }
@@ -550,14 +511,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[8] = (int*)realloc(variableIndex[8],
                                      (index_+1)*sizeof(int));
-                 variableScale[8] = (double*)realloc(variableScale[8],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[8]; run1 < index_+1; run1++ ){
                       entryExists[8]  [run1] = BT_FALSE;
                       variableIndex[8][run1] = -1      ;
-                      variableScale[8][run1] = 1.0     ;
                  }
                  maxNumberOfEntries[8] = index_+1;
              }
@@ -576,14 +534,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[9] = (int*)realloc(variableIndex[9],
                                      (index_+1)*sizeof(int));
-                 variableScale[9] = (double*)realloc(variableScale[9],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[9]; run1 < index_+1; run1++ ){
                       entryExists[9]  [run1] = BT_FALSE;
                       variableIndex[9][run1] = -1      ;
-                      variableScale[9][run1] = 1.0     ;
                  }
                  maxNumberOfEntries[9] = index_+1;
              }
@@ -600,14 +555,11 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
                                      (index_+1)*sizeof(BooleanType));
                  variableIndex[10] = (int*)realloc(variableIndex[10],
                                      (index_+1)*sizeof(int));
-                 variableScale[10] = (double*)realloc(variableScale[10],
-                                     (index_+1)*sizeof(double));
 
                  int run1;
                  for( run1 = maxNumberOfEntries[10]; run1 < index_+1; run1++ ){
                       entryExists[10]  [run1] = BT_FALSE;
                       variableIndex[10][run1] = -1      ;
-                      variableScale[10][run1] = 1.0     ;
                  }
                  maxNumberOfEntries[10] = index_+1;
              }
@@ -663,7 +615,7 @@ BooleanType SymbolicIndexList::determineCExpressionIndices( uint  dimension,
 }
 
 
-int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int index_, double scale_ ){
+int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int index_ ){
 
     switch(variableType_){
 
@@ -676,7 +628,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[0][index_] == -1 ){
                  variableIndex[0][index_] = variableCounter;
-                 variableScale[0][index_] = scale_;
                  variableCounter++;
                  return variableIndex[0][index_];
              }
@@ -690,7 +641,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[1][index_] == -1 ){
                  variableIndex[1][index_] = variableCounter;
-                 variableScale[1][index_] = scale_;
                  variableCounter++;
                  return variableIndex[1][index_];
              }
@@ -705,7 +655,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[2][index_] == -1 ){
                  variableIndex[2][index_] = variableCounter;
-                 variableScale[2][index_] = scale_;
                  variableCounter++;
                  return variableIndex[2][index_];
              }
@@ -720,7 +669,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[3][index_] == -1 ){
                  variableIndex[3][index_] = variableCounter;
-                 variableScale[3][index_] = scale_;
                  variableCounter++;
                  return variableIndex[3][index_];
              }
@@ -735,7 +683,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[4][index_] == -1 ){
                  variableIndex[4][index_] = variableCounter;
-                 variableScale[4][index_] = scale_;
                  variableCounter++;
                  return variableIndex[4][index_];
              }
@@ -750,7 +697,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[5][index_] == -1 ){
                  variableIndex[5][index_] = variableCounter;
-                 variableScale[5][index_] = scale_;
                  variableCounter++;
                  return variableIndex[5][index_];
              }
@@ -765,7 +711,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[6][index_] == -1 ){
                  variableIndex[6][index_] = variableCounter;
-                 variableScale[6][index_] = scale_;
                  variableCounter++;
                  return variableIndex[6][index_];
              }
@@ -780,7 +725,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[7][index_] == -1 ){
                  variableIndex[7][index_] = variableCounter;
-                 variableScale[7][index_] = scale_;
                  variableCounter++;
                  return variableIndex[7][index_];
              }
@@ -795,7 +739,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[8][index_] == -1 ){
                  variableIndex[8][index_] = variableCounter;
-                 variableScale[8][index_] = scale_;
                  variableCounter++;
                  return variableIndex[8][index_];
              }
@@ -810,7 +753,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[9][index_] == -1 ){
                  variableIndex[9][index_] = variableCounter;
-                 variableScale[9][index_] = scale_;
                  variableCounter++;
                  return variableIndex[9][index_];
              }
@@ -824,7 +766,6 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
              }
              if( variableIndex[10][index_] == -1 ){
                  variableIndex[10][index_] = variableCounter;
-                 variableScale[10][index_] = scale_;
                  variableCounter++;
                  return variableIndex[10][index_];
              }

@@ -335,10 +335,10 @@ void IntegratorBDF::allocateMemory( ){
     diff_scale.init(m);
 
     for( run1 = 0; run1 < md; run1++ ){
-        diff_scale(run1) = rhs->scale( VT_DIFFERENTIAL_STATE, run1 );
+        diff_scale(run1) = 1.0;
     }
     for( run1 = 0; run1 < ma; run1++ ){
-        diff_scale(md+run1) = rhs->scale( VT_ALGEBRAIC_STATE, run1 );
+        diff_scale(md+run1) = 1.0;
     }
 
     initial_guess    = new double[m];
@@ -683,10 +683,10 @@ void IntegratorBDF::constructAll( const IntegratorBDF& arg ){
     diff_scale.init(m);
 
     for( run1 = 0; run1 < md; run1++ ){
-        diff_scale(run1) = rhs->scale( VT_DIFFERENTIAL_STATE, run1 );
+        diff_scale(run1) = 1.0;
     }
     for( run1 = 0; run1 < ma; run1++ ){
-        diff_scale(md+run1) = rhs->scale( VT_ALGEBRAIC_STATE, run1 );
+        diff_scale(md+run1) = 1.0;
     }
 
     initial_guess    = new double[m];

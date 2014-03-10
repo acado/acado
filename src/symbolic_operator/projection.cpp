@@ -43,7 +43,6 @@ BEGIN_NAMESPACE_ACADO
 Projection::Projection()
            :SmoothOperator( ){
 
-    scale          = 1.0           ;
     curvature      = CT_AFFINE     ;
     monotonicity = MT_NONDECREASING;
     operatorName = ON_VARIABLE     ;
@@ -53,7 +52,6 @@ Projection::Projection()
 Projection::Projection( const std::string &name_ )
            :SmoothOperator( ){
 
-    scale          = 1.0             ;
     curvature      = CT_AFFINE       ;
     monotonicity   = MT_NONDECREASING;
     operatorName   = ON_VARIABLE     ;
@@ -66,7 +64,6 @@ Projection::Projection( VariableType variableType_, int vIndex_, const std::stri
     variableType   = variableType_ ;
     vIndex         = vIndex_       ;
     variableIndex  = vIndex        ;
-    scale          = 1.0           ;
     curvature      = CT_AFFINE     ;
     monotonicity = MT_NONDECREASING;
     operatorName = ON_VARIABLE     ;
@@ -137,7 +134,6 @@ void Projection::copy( const Projection &arg ){
         variableType   = arg.variableType ;
         variableIndex  = arg.variableIndex;
         vIndex         = arg.vIndex       ;
-        scale          = arg.scale        ;
         name           = arg.name         ;
         operatorName   = arg.operatorName ;
         curvature      = arg.curvature    ;
@@ -372,19 +368,6 @@ OperatorName Projection::getName(){
 }
 
 
-double Projection::getScale() const{
-
-    return scale;
-}
-
-
-returnValue Projection::setScale( const double &scale_ ){
-
-    scale = scale_;
-    return SUCCESSFUL_RETURN;
-}
-
-
 BooleanType Projection::isVariable( VariableType &varType, int &component ) const
 {
   varType   = variableType;
@@ -396,7 +379,7 @@ BooleanType Projection::isVariable( VariableType &varType, int &component ) cons
 returnValue Projection::enumerateVariables( SymbolicIndexList *indexList ){
 
   variableIndex = indexList->determineVariableIndex( variableType,
-						     vIndex, scale         );
+						     vIndex );
   
 //   printf("Projection::enumerateVariables \n");
 //   printf("I am  %d , %d \n", variableType, vIndex );

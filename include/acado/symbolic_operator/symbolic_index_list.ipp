@@ -73,19 +73,16 @@ inline SymbolicIndexList* SymbolicIndexList::substitute( VariableType variableTy
 
             free(tmp.entryExists  [run1]);
             free(tmp.variableIndex[run1]);
-            free(tmp.variableScale[run1]);
         }
     }
 
     delete[] tmp.maxNumberOfEntries;
     delete[] tmp.variableIndex;
-    delete[] tmp.variableScale;
     delete[] tmp.entryExists;
 
 
     tmp.entryExists        = new BooleanType*[numberOfVariableTypes];
     tmp.variableIndex      = new int        *[numberOfVariableTypes];
-    tmp.variableScale      = new double     *[numberOfVariableTypes];
     tmp.maxNumberOfEntries = new int         [numberOfVariableTypes];
 
 
@@ -98,13 +95,10 @@ inline SymbolicIndexList* SymbolicIndexList::substitute( VariableType variableTy
                                                sizeof(BooleanType));
                 tmp.variableIndex     [run1] = (int*)calloc(maxNumberOfEntries[run1],
                                                sizeof(int));
-                tmp.variableScale     [run1] = (double*)calloc(maxNumberOfEntries[run1],
-                                               sizeof(double));
             }
             for( run2 = 0; run2 < maxNumberOfEntries[run1]; run2++ ){
                 tmp.entryExists  [run1][run2] = entryExists  [run1][run2];
                 tmp.variableIndex[run1][run2] = variableIndex[run1][run2];
-                tmp.variableScale[run1][run2] = variableScale[run1][run2];
             }
         }
         else{
@@ -117,20 +111,16 @@ inline SymbolicIndexList* SymbolicIndexList::substitute( VariableType variableTy
                                                sizeof(BooleanType));
                 tmp.variableIndex     [run1] = (int*)calloc(tmp.maxNumberOfEntries[run1],
                                                sizeof(int));
-                tmp.variableScale     [run1] = (double*)calloc(tmp.maxNumberOfEntries[run1],
-                                               sizeof(double));
             }
             for( run2 = 0; run2 < tmp.maxNumberOfEntries[run1]; run2++ ){
 
                 if( run2 < index_ ){
                     tmp.entryExists  [run1][run2] = entryExists  [run1][run2];
                     tmp.variableIndex[run1][run2] = variableIndex[run1][run2];
-                    tmp.variableScale[run1][run2] = variableScale[run1][run2];
                 }
                 else{
                     tmp.entryExists  [run1][run2] = entryExists  [run1][run2+1];
                     tmp.variableIndex[run1][run2] = variableIndex[run1][run2+1];
-                    tmp.variableScale[run1][run2] = variableScale[run1][run2+1];
                 }
             }
         }
@@ -240,73 +230,6 @@ inline int SymbolicIndexList::index( VariableType variableType_, int index_ ) co
 }
 
 
-
-inline double SymbolicIndexList::scale( VariableType variableType_, int index_ ) const{
-
-    switch(variableType_){
-
-        case VT_DIFFERENTIAL_STATE:
-             if( index_ < maxNumberOfEntries[0] )
-                 return variableScale[0][index_];
-             return 1.0;
-
-        case VT_ALGEBRAIC_STATE:
-             if( index_ < maxNumberOfEntries[1] )
-                 return variableScale[1][index_];
-             return 1.0;
-
-        case VT_CONTROL:
-             if( index_ < maxNumberOfEntries[2] )
-                 return variableScale[2][index_];
-             return 1.0;
-
-        case VT_INTEGER_CONTROL:
-             if( index_ < maxNumberOfEntries[3] )
-                 return variableScale[3][index_];
-             return 1.0;
-
-        case VT_PARAMETER:
-             if( index_ < maxNumberOfEntries[4] )
-                 return variableScale[4][index_];
-             return 1.0;
-
-        case VT_INTEGER_PARAMETER:
-             if( index_ < maxNumberOfEntries[5] )
-                 return variableScale[5][index_];
-             return 1.0;
-
-        case VT_DISTURBANCE:
-             if( index_ < maxNumberOfEntries[6] )
-                 return variableScale[6][index_];
-             return 1.0;
-
-        case VT_TIME:
-             if( maxNumberOfEntries[7] > 0 )
-                 return variableScale[7][index_];
-             return 1.0;
-
-        case VT_INTERMEDIATE_STATE:
-             if( index_ < maxNumberOfEntries[8] )
-                 return variableScale[8][index_];
-             return 1.0;
-
-        case VT_DDIFFERENTIAL_STATE:
-             if( index_ < maxNumberOfEntries[9] )
-                 return variableScale[9][index_];
-             return 1.0;
-             
-        case VT_ONLINE_DATA:
-             if( index_ < maxNumberOfEntries[10] )
-                 return variableScale[10][index_];
-             return 1.0;
-
-        default:
-			return 1.0;
-
-    }
-}
-
-
 inline int SymbolicIndexList::makeImplicit( int dim ){
 
     if( maxNumberOfEntries[9] != 0 ){
@@ -316,13 +239,11 @@ inline int SymbolicIndexList::makeImplicit( int dim ){
 
     entryExists  [9] = (BooleanType*)calloc(dim,sizeof(BooleanType));
     variableIndex[9] = (int*)        calloc(dim,sizeof(int)        );
-    variableScale[9] = (double*)     calloc(dim,sizeof(double)     );
 
     int run1;
     for( run1 = 0; run1 < dim; run1++ ){
          entryExists[9]  [run1] = BT_TRUE        ;
          variableIndex[9][run1] = variableCounter;
-         variableScale[9][run1] = 1.0            ;
          variableCounter++;
     }
 

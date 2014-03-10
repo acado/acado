@@ -48,7 +48,6 @@ BEGIN_NAMESPACE_ACADO
 
 Function::Function(){
 
-    memoryOffset = 0;
 	result       = 0;
 }
 
@@ -56,7 +55,6 @@ Function::Function(){
 Function::Function( const Function& arg ){
 
     evaluationTree = arg.evaluationTree;
-    memoryOffset   = arg.memoryOffset  ;
 	
 	if ( arg.getDim() != 0 )
 	{
@@ -83,7 +81,6 @@ Function& Function::operator=( const Function& arg ){
 			free( result );
 
         evaluationTree = arg.evaluationTree;
-        memoryOffset   = arg.memoryOffset  ;
 		
 		if ( arg.getDim() != 0 )
 		{
@@ -154,7 +151,6 @@ Function Function::operator()(	uint idx
 	}
 
 	tmp.evaluationTree = evaluationTree;
-	tmp.memoryOffset   = memoryOffset  ;
 
 	return tmp;
 }
@@ -164,7 +160,6 @@ returnValue Function::reset( ){
 
     FunctionEvaluationTree tmp;
     evaluationTree = tmp;
-    memoryOffset = 0;
 
 	if ( result != 0 )
 		free( result );
@@ -178,11 +173,6 @@ int Function::index( VariableType variableType_, int index_ ) const{
     return evaluationTree.index( variableType_, index_ );
 }
 
-
-double Function::scale( VariableType variableType_, int index_ ) const{
-
-    return evaluationTree.scale( variableType_, index_ );
-}
 
 int Function::getN   (VariableType &variableType_) const{
     switch(variableType_) {
@@ -276,12 +266,7 @@ SharedOperator Function::getExpression( uint componentIdx ) const{
 
 returnValue Function::evaluate( int number, double *x, double *_result ){
 
-//     return evaluationTree.evaluate( number+memoryOffset, x, _result );
-
-    evaluationTree.evaluate( number+memoryOffset, x, _result );
-
-
-
+    evaluationTree.evaluate( number, x, _result );
     return SUCCESSFUL_RETURN;
 }
 
@@ -428,27 +413,27 @@ returnValue Function::jacobian(DMatrix &x) {
 
 returnValue Function::AD_forward( int number, double *seed, double *df  ){
 
-    return evaluationTree.AD_forward( number+memoryOffset, seed, df );
+    return evaluationTree.AD_forward( number, seed, df );
 }
 
 
 returnValue Function::AD_backward( int number, double *seed, double  *df ){
 
-    return evaluationTree.AD_backward( number+memoryOffset, seed, df );
+    return evaluationTree.AD_backward( number, seed, df );
 }
 
 
 returnValue Function::AD_forward2( int number, double *seed, double *dseed,
                                    double *df, double *ddf ){
 
-    return evaluationTree.AD_forward2( number+memoryOffset, seed, dseed, df, ddf );
+    return evaluationTree.AD_forward2( number, seed, dseed, df, ddf );
 }
 
 
 returnValue Function::AD_backward2( int number, double *seed1, double *seed2,
                                     double *df, double *ddf ){
 
-    return evaluationTree.AD_backward2( number+memoryOffset, seed1, seed2, df, ddf );
+    return evaluationTree.AD_backward2( number, seed1, seed2, df, ddf );
 }
 
 
@@ -507,13 +492,6 @@ returnValue Function::exportCode(	std::ostream& stream,
 returnValue Function::clearBuffer(){
 
     return evaluationTree.clearBuffer();
-}
-
-
-
-returnValue Function::setScale( double *scale_ ){
-
-    return evaluationTree.setScale(scale_);
 }
 
 

@@ -143,13 +143,6 @@ public:
     virtual int index( VariableType variableType_, int index_ ) const;
 
 
-    /** Returns the scale of a given variable.   \n
-     *  \return The requested scale      or      \n
-     *          1.0  if index is out of range    \n
-     */
-    virtual double scale( VariableType variableType_, int index_ ) const;
-
-
     /** Returns the variable counter.           \n
      *  \return The number of variables         \n
      */
@@ -450,10 +443,6 @@ public:
       *  default.
       */
      virtual BooleanType isSymbolic() const;
-
-
-     /** Defines scalings for the variables. */
-     virtual returnValue setScale( double *scale_ );
 
      virtual returnValue getExpression( Expression& expression ) const;
 

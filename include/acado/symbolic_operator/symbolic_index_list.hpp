@@ -103,8 +103,6 @@ public:
     int determineVariableIndex( VariableType variableType_  /**< The type of
                                                              *    the variable  */,
                                  int index_                  /**< The index of the
-                                                             *    variable      */,
-                                 double scale               /**< The scale of the
                                                              *    variable      */ );
 
 
@@ -134,13 +132,6 @@ public:
      *          out of range.                    \n
      */
     inline int index( VariableType variableType_, int index_ ) const;
-
-
-    /** Returns the scale of a given variable.   \n
-     *  \return The requested scale      or      \n
-     *          1.0  if index is out of range    \n
-     */
-    inline double scale( VariableType variableType_, int index_ ) const;
 
 
     /** Returns the variable counter.           \n
@@ -267,7 +258,6 @@ protected:
     uint         *cDim           ;   /**< dimesions of C expressions    */
 
     int         **variableIndex  ;   /**< The indices of the variables. */
-    double      **variableScale  ;   /**< The scales  of the variables. */
 
     // INTERNAL USE / ONLY FOR MEMORY ALLOCATION:
     int       *maxNumberOfEntries;   /**< Maximum number of entries    \n

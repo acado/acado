@@ -259,7 +259,7 @@ void IntegratorRK::allocateMemory( ){
 
     diff_scale.init(m);
     for( run1 = 0; run1 < m; run1++ )
-        diff_scale(run1) = rhs->scale( VT_DIFFERENTIAL_STATE, run1 );
+        diff_scale(run1) = 1.0;
 
 
     // SENSITIVITIES:
