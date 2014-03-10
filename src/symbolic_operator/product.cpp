@@ -44,7 +44,7 @@ BEGIN_NAMESPACE_ACADO
 
 Product::Product():BinaryOperator(){ }
 
-Product::Product( Operator *_argument1, Operator *_argument2 )
+Product::Product( const SharedOperator &_argument1, const SharedOperator &_argument2 )
         :BinaryOperator( _argument1, _argument2 ){
 
 }
@@ -97,44 +97,31 @@ returnValue Product::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Product::differentiate( int index ){
+SharedOperator Product::differentiate( int index ){
 
 	dargument1 = argument1->differentiate( index );
 	dargument2 = argument2->differentiate( index );
 
-	Operator *prodTmp1 = myProd(dargument1, argument2);
-	Operator *prodTmp2 = myProd(argument1, dargument2);
-	Operator *result = myAdd(prodTmp1, prodTmp2);
-
-	delete prodTmp1;
-	delete prodTmp2;
+	SharedOperator prodTmp1 = myProd(dargument1, argument2);
+	SharedOperator prodTmp2 = myProd(argument1, dargument2);
+	SharedOperator result = myAdd(prodTmp1, prodTmp2);
 
 	return result;
 }
 
 
-Operator* Product::AD_forward( int dim,
+SharedOperator Product::AD_forward( int dim,
                                  VariableType *varType,
                                  int *component,
-                                 Operator **seed,
-                                 int &nNewIS,
-                                 TreeProjection ***newIS ){
+                                 SharedOperator *seed,
+                                 std::vector<SharedOperator> &newIS ){
 
-    if( dargument1 != 0 )
-        delete dargument1;
+    dargument1 = argument1->AD_forward(dim,varType,component,seed,newIS);
+    dargument2 = argument2->AD_forward(dim,varType,component,seed,newIS);
 
-    if( dargument2 != 0 )
-        delete dargument2;
-
-    dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-    dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
-    Operator *prodTmp1 = myProd(dargument1, argument2);
-    Operator *prodTmp2 = myProd(argument1, dargument2);
-    Operator *result = myAdd(prodTmp1, prodTmp2);
-
-    delete prodTmp1;
-    delete prodTmp2;
+    SharedOperator prodTmp1 = myProd(dargument1, argument2);
+    SharedOperator prodTmp2 = myProd(argument1, dargument2);
+    SharedOperator result = myAdd(prodTmp1, prodTmp2);
 
     return result;
 }
@@ -143,34 +130,24 @@ Operator* Product::AD_forward( int dim,
 returnValue Product::AD_backward( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+                                        SharedOperator     &seed     , /**< the backward seed     */
+                                        SharedOperator    *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
 
 
     if( seed->isOneOrZero() != NE_ZERO ){
 	
-        TreeProjection tmp;
-        tmp = *seed;
+        SharedOperator tmp = convert2TreeProjection(seed);
+        SharedOperator prodTmp1 = myProd(argument2, tmp);
 
-        Operator *prodTmp1 = myProd(argument2, &tmp);
+        argument1->AD_backward( dim, varType, component, prodTmp1,
+                                df, newIS );
 
-        argument1->AD_backward( dim, varType, component,
-        						prodTmp1->clone(),
-                                df, nNewIS, newIS );
+        SharedOperator prodTmp2 = myProd(argument1, tmp);
 
-        Operator *prodTmp2 = myProd(argument1, &tmp);
-
-        argument2->AD_backward( dim, varType, component,
-        						prodTmp2->clone(),
-                                df, nNewIS, newIS );
-
-        delete prodTmp1;
-        delete prodTmp2;
+        argument2->AD_backward( dim, varType, component, prodTmp2,
+                                df, newIS );
     }
-
-    delete seed;
     return SUCCESSFUL_RETURN;
 }
 
@@ -178,38 +155,35 @@ returnValue Product::AD_backward( int           dim      , /**< number of direct
 returnValue Product::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                        SharedOperator   &l         , /**< the backward seed     */
+                                        SharedOperator     *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        SharedOperator     *dfS       , /**< first order foward result             */
+                                        SharedOperator     *ldf       , /**< first order backward result           */
+                                        SharedOperator     *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
   
-    TreeProjection dx,dy,dxx,dxy,dyy;
+    SharedOperator dx,dy,dxx,dxy,dyy;
     
-    dx  = *argument2;
-    dy  = *argument1;
-    dxx = DoubleConstant(0.0,NE_ZERO);
-    dxy = DoubleConstant(1.0,NE_ONE );
-    dyy = DoubleConstant(0.0,NE_ZERO);
+    dx  = convert2TreeProjection( argument2 );
+    dy  = convert2TreeProjection( argument1 );
+    dxx = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
+    dxy = SharedOperator( new DoubleConstant(1.0,NE_ONE ) );
+    dyy = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
     
     return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
-			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+			  ldf, H, newLIS, newSIS, newHIS );
 }
 
 
 
 
-Operator* Product::substitute( int index, const Operator *sub ){
+SharedOperator Product::substitute( int index, const SharedOperator &sub ){
 
-    return new Product( argument1->substitute( index , sub ),
-                        argument2->substitute( index , sub ) );
+    return SharedOperator( new Product( argument1->substitute( index , sub ),
+                                        argument2->substitute( index , sub ) ));
 
 }
 
@@ -461,13 +435,6 @@ std::ostream& Product::print( std::ostream &stream ) const{
 	{
 		return stream << "((real_t)(" << ((argument1->getValue()) * (argument2->getValue())) << "))";
 	}
-}
-
-
-Operator* Product::clone() const{
-
-    return new Product(*this);
-
 }
 
 

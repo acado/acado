@@ -55,7 +55,7 @@ Sin::Sin():UnaryOperator(){
 
 }
 
-Sin::Sin( Operator *_argument ):UnaryOperator(_argument){
+Sin::Sin( const SharedOperator &_argument ):UnaryOperator(_argument){
   cName = "sin";
 
   fcn = &sin;
@@ -97,15 +97,10 @@ returnValue Sin::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Sin::substitute( int index, const Operator *sub ){
+SharedOperator Sin::substitute( int index, const SharedOperator &sub ){
 
-    return new Sin( argument->substitute( index , sub ) );
+    return SharedOperator( new Sin( argument->substitute( index , sub ) ));
 
-}
-
-Operator* Sin::clone() const{
-
-    return new Sin(*this);
 }
 
 returnValue Sin::initDerivative() {
@@ -114,8 +109,8 @@ returnValue Sin::initDerivative() {
 		return SUCCESSFUL_RETURN;
 	}
 
-	derivative = convert2TreeProjection(new Cos(argument->clone()));
-	derivative2 = convert2TreeProjection(new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Sin(argument->clone()) ));
+	derivative = convert2TreeProjection( SharedOperator( new Cos(argument)));
+	derivative2 = convert2TreeProjection( SharedOperator( new Product( SharedOperator( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO )), SharedOperator( new Sin(argument)) )));
 
 	return argument->initDerivative();
 }

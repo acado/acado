@@ -51,7 +51,7 @@ Exp::Exp():UnaryOperator(){
 
 }
 
-Exp::Exp( Operator *_argument ):UnaryOperator(_argument){
+Exp::Exp( const SharedOperator &_argument ):UnaryOperator(_argument){
   cName = "exp";
 
   fcn = &exp;
@@ -93,15 +93,10 @@ returnValue Exp::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Exp::substitute( int index, const Operator *sub ){
+SharedOperator Exp::substitute( int index, const SharedOperator &sub ){
 
-    return new Exp( argument->substitute( index , sub ) );
+    return SharedOperator( new Exp( argument->substitute( index , sub ) ));
 
-}
-
-Operator* Exp::clone() const{
-
-    return new Exp(*this);
 }
 
 CurvatureType Exp::getCurvature( ){
@@ -121,7 +116,7 @@ returnValue Exp::initDerivative() {
 
 	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
 
-	derivative = convert2TreeProjection(new Exp(argument->clone()));
+	derivative = convert2TreeProjection( SharedOperator( new Exp(argument)));
 	derivative2 = derivative;
 
 	return argument->initDerivative();

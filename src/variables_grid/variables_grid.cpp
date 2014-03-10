@@ -673,7 +673,6 @@ returnValue VariablesGrid::initializeFromBounds( )
                 fabs( getUpperBound(run1,run2) ) <  0.999*INFTY ){
 
                 operator()(run1,run2) = 0.5*( getLowerBound(run1,run2) + getUpperBound(run1,run2) );
-
             }
 
             if( fabs( getLowerBound(run1,run2) ) >= 0.999*INFTY &&

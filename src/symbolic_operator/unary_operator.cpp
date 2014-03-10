@@ -44,30 +44,20 @@ UnaryOperator::UnaryOperator() : SmoothOperator( )
     fcn   = 0;
     dfcn  = 0;
     ddfcn = 0;
-    nCount = 0;
-
-    derivative = 0;
-    derivative2 = 0;
 }
 
-UnaryOperator::UnaryOperator( Operator *_argument ) : SmoothOperator( )
+UnaryOperator::UnaryOperator( const SharedOperator &_argument ) : SmoothOperator( )
 {
     fcn   = 0;
     dfcn  = 0;
     ddfcn = 0;
 
     argument          = _argument                        ;
-    dargument         = NULL                             ;
     argument_result   = (double*)calloc(1,sizeof(double));
     dargument_result  = (double*)calloc(1,sizeof(double));
     bufferSize        = 1                                ;
     curvature         = CT_UNKNOWN                       ;
     monotonicity      = MT_UNKNOWN                       ;
-
-    nCount = 0;
-
-    derivative = 0;
-    derivative2 = 0;
 }
 
 
@@ -81,17 +71,11 @@ UnaryOperator::UnaryOperator( const UnaryOperator &arg ){
 
     bufferSize = arg.bufferSize;
 
- 	argument   = arg.argument->clone();
-    derivative = 0;
-    derivative2 = 0;
- 	if( arg.derivative != 0 ) 	derivative = arg.derivative->clone();
- 	if( arg.derivative2 != 0 ) 	derivative2 = arg.derivative2->clone();
-	
-// 	argument   = arg.argument;
-//     argument->nCount++;
+    argument    = arg.argument;
+    derivative  = arg.derivative;
+    derivative2 = arg.derivative2;
 
-    if( arg.dargument == 0 ) dargument = 0;
-    else                     dargument = arg.dargument->clone();
+    dargument = arg.dargument;
 
     argument_result  = (double*)calloc(bufferSize,sizeof(double));
     dargument_result = (double*)calloc(bufferSize,sizeof(double));
@@ -105,37 +89,10 @@ UnaryOperator::UnaryOperator( const UnaryOperator &arg ){
     curvature    = arg.curvature   ;
     monotonicity = arg.monotonicity;
     cName        = arg.cName       ;
-
-    nCount = 0;
 }
 
 
 UnaryOperator::~UnaryOperator(){
- 
- 
-//  delete argument;
-    if( argument != 0 ){
-
-        if( argument->nCount == 0 ){
-            delete argument;
-            argument = 0;
-        }
-        else{
-            argument->nCount--;
-        }
-    }
-    if( derivative != 0 ){
-
-    	if( derivative2 == derivative ) derivative2 = 0;
-        delete derivative;
-        derivative = 0;
-    }
-    if( derivative2 != 0 ){
-
-        delete derivative2;
-        derivative2 = 0;
-    }
-    if( dargument != 0 ) delete dargument;
 
     free(  argument_result );
     free( dargument_result );
@@ -146,44 +103,12 @@ UnaryOperator& UnaryOperator::operator=( const UnaryOperator &arg ){
 
     if( this != &arg ){
 
-	 
-	 
-// 	 delete argument;
-	 
-        if( argument != 0 ){
-
-            if( argument->nCount == 0 ){
-                delete argument;
-                argument = 0;
-            }
-            else{
-                argument->nCount--;
-            }
-        }
-        if( derivative != 0 ){
-
-        	if( derivative2 == derivative ) derivative2 = 0;
-        	delete derivative;
-        	derivative = 0;
-        }
-        if( derivative2 != 0 ){
-
-            delete derivative2;
-            derivative2 = 0;
-        }
-        if( dargument != 0 ) delete dargument;
-
         free(  argument_result );
         free( dargument_result );
 
- 		argument = arg.argument->clone();
- 	 	if( arg.derivative != 0 ) 	derivative = arg.derivative->clone();
- 	 	if( arg.derivative2 != 0 ) 	derivative2 = arg.derivative2->clone();
-		
-//         argument = arg.argument;
-// 		argument->nCount++;
-
-        dargument         = NULL                               ;
+        argument    = arg.argument;
+        derivative  = arg.derivative;
+        derivative2 = arg.derivative2;
         bufferSize        = arg.bufferSize                     ;
         argument_result   = (double*)calloc(bufferSize,sizeof(double))  ;
         dargument_result  = (double*)calloc(bufferSize,sizeof(double))  ;
@@ -191,8 +116,6 @@ UnaryOperator& UnaryOperator::operator=( const UnaryOperator &arg ){
         curvature    = arg.curvature   ;
         monotonicity = arg.monotonicity;
         cName        = arg.cName       ;
-
-        nCount = 0;
     }
     return *this;
 }
@@ -212,26 +135,24 @@ returnValue UnaryOperator::evaluate( int number, double *x, double *result ){
 }
 
 
-Operator* UnaryOperator::AD_forward( int                dim      ,
+SharedOperator UnaryOperator::AD_forward( int                dim      ,
                                        VariableType      *varType  ,
                                        int               *component,
-                                       Operator       **seed     ,
-                                       int                &nNewIS  ,
-                                       TreeProjection ***newIS   ){
+                                       SharedOperator       *seed     ,
+                                       std::vector<SharedOperator> &newIS   ){
 
-    return ADforwardProtected( dim, varType, component, seed, nNewIS, newIS );
+    return ADforwardProtected( dim, varType, component, seed, newIS );
 }
 
 
 returnValue UnaryOperator::AD_backward( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+                                        SharedOperator    &seed     , /**< the backward seed     */
+                                        SharedOperator    *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
   
-    return ADbackwardProtected( dim, varType, component, seed, df, nNewIS, newIS );
+    return ADbackwardProtected( dim, varType, component, seed, df, newIS );
 }
 
     
@@ -239,20 +160,17 @@ returnValue UnaryOperator::AD_backward( int           dim      , /**< number of 
 returnValue UnaryOperator::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                        SharedOperator  &l         , /**< the backward seed     */
+                                        SharedOperator  *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        SharedOperator  *dfS       , /**< first order foward result             */
+                                        SharedOperator  *ldf       , /**< first order backward result           */
+                                        SharedOperator    *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
   
-return ADsymmetricProtected( dim, varType, component, l, S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+return ADsymmetricProtected( dim, varType, component, l, S, dimS, dfS, ldf, H, newLIS, newSIS, newHIS );
 }
 
 
@@ -482,25 +400,20 @@ returnValue UnaryOperator::setVariableExportName(	const VariableType &_type,
 }
 
 
-Operator* UnaryOperator::differentiate( int index ){
+SharedOperator UnaryOperator::differentiate( int index ){
 
 	dargument = argument->differentiate( index );
 	return myProd( dargument, derivative );
 }
 
 
-Operator* UnaryOperator::ADforwardProtected( int dim,
+SharedOperator UnaryOperator::ADforwardProtected( int dim,
                                      VariableType *varType,
                                      int *component,
-                                     Operator **seed,
-                                     int &nNewIS,
-                                     TreeProjection ***newIS ){
+                                     SharedOperator *seed,
+                                     std::vector<SharedOperator> &newIS ){
 
-    if( dargument != 0 )
-        delete dargument;
-
-    dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
+    dargument = argument->AD_forward(dim,varType,component,seed,newIS);
     return myProd( dargument, derivative );
 }
 
@@ -509,19 +422,12 @@ Operator* UnaryOperator::ADforwardProtected( int dim,
 returnValue UnaryOperator::ADbackwardProtected( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+                                        SharedOperator &seed     , /**< the backward seed     */
+                                        SharedOperator *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
 
-    argument->AD_backward( dim,
-                                  varType,
-                                  component,
-                                  myProd( seed, derivative ),
-                                  df, nNewIS, newIS
-            );
-
-    delete seed;
+    SharedOperator ttt = myProd( seed, derivative );
+    argument->AD_backward( dim, varType, component, ttt, df, newIS );
     return SUCCESSFUL_RETURN;
 }
 
@@ -529,25 +435,22 @@ returnValue UnaryOperator::ADbackwardProtected( int           dim      , /**< nu
 returnValue UnaryOperator::ADsymmetricProtected( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                        SharedOperator &l         , /**< the backward seed     */
+                                        SharedOperator *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        SharedOperator *dfS       , /**< first order foward result             */
+                                        SharedOperator *ldf       , /**< first order backward result           */
+                                        SharedOperator *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
 
-	TreeProjection dx, ddx;
-	dx = *derivative;
-	ddx = *derivative2;
+    SharedOperator dx, ddx;
+    dx  = convert2TreeProjection(derivative);
+    ddx = convert2TreeProjection(derivative2);
 
     return ADsymCommon( argument, dx, ddx, dim, varType, component, l, S, dimS, dfS,
-			 ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+			 ldf, H, newLIS, newSIS, newHIS );
 }
 
 

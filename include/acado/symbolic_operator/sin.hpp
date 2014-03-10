@@ -60,7 +60,7 @@ public:
     Sin();
 
     /** Default constructor. */
-    Sin( Operator *_argument );
+    Sin( const SharedOperator &_argument );
 
     /** Copy constructor (deep copy). */
     Sin( const Sin &arg );
@@ -81,17 +81,11 @@ public:
      *  \return The substituted expression.                       \n
      *
      */
-     virtual Operator* substitute( int   index           /**< subst. index    */,
-                                     const Operator *sub /**< the substitution*/);
+     virtual SharedOperator substitute( int   index           /**< subst. index    */,
+                                     const SharedOperator &sub /**< the substitution*/);
 
-
-     /** Provides a deep copy of the expression. \n
-      *  \return a clone of the expression.      \n
-      */
-     virtual Operator* clone() const;
 
      virtual returnValue initDerivative();
-
 
 
 //

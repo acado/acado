@@ -36,6 +36,13 @@
 
 #include <acado/utils/acado_namespace_macros.hpp>
 
+#ifdef _WIN32
+    #include <memory>
+#else
+    #include <tr1/memory>
+#endif
+
+
 BEGIN_NAMESPACE_ACADO
 
 /** Short-cut for unsigned integer. */
@@ -57,6 +64,14 @@ typedef void (*cFcnPtr)( double* x, double* f, void *userData );
 
 /** Function pointer type for derivatives given as C source code. */
 typedef void (*cFcnDPtr)( int number, double* x, double* seed, double* f, double* df, void *userData );
+
+
+/** Forward Declarations. */
+class Operator;
+
+/** Smart pointers that are used in the symbolic expression and operator classes.*/
+typedef std::tr1::shared_ptr<Operator> SharedOperator;
+
 
 /** Defines the Neutral Elements ZERO and ONE as well as the default
  *  NEITHER_ONE_NOR_ZERO

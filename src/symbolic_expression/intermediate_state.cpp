@@ -98,12 +98,12 @@ IntermediateState::IntermediateState( const DMatrix& arg ):Expression(){
 }
 
 
-IntermediateState::IntermediateState( const Operator& arg ):Expression(){
-
-    nRows = 1;
-    nCols = 1;
-    operator=( Expression(arg) );
-}
+// IntermediateState::IntermediateState( const Operator& arg ):Expression(){
+// 
+//     nRows = 1;
+//     nCols = 1;
+//     operator=( Expression(arg) );
+// }
 
 
 IntermediateState::IntermediateState( const Expression& arg ):Expression(){
@@ -121,10 +121,9 @@ IntermediateState::~IntermediateState(){ }
 Expression& IntermediateState::operator= ( const double & arg ){
 
     return operator= ( convert(arg)  );
-}
-
-
-
+}   
+    
+    
 Expression& IntermediateState::operator= ( const DVector & arg ){ return operator= ( convert(arg)  ); }
 Expression& IntermediateState::operator= ( const DMatrix & arg ){ return operator= ( convert(arg)  ); }
 
@@ -149,7 +148,6 @@ Expression& IntermediateState::operator*=( const Expression  & arg ){ return ope
 
 Expression& IntermediateState::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
 Expression& IntermediateState::operator/=( const Expression  & arg ){ return operator=( this->operator/(arg) ); }
-
 
 
 

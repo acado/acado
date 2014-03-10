@@ -44,59 +44,9 @@ BEGIN_NAMESPACE_ACADO
 //TreeProjection emptyTreeProjection;
 
 
-Operator::Operator(){
-
-    nCount = 0;
-}
+Operator::Operator(){ }
 
 Operator::~Operator(){ }
-
-
-Operator& Operator::operator=( const double &arg ){
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return emptyTreeProjection;
-}
-
-Operator& Operator::operator=( const DVector &arg ){
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return emptyTreeProjection;
-}
-
-Operator& Operator::operator=( const DMatrix &arg ){
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return emptyTreeProjection;
-}
-
-Operator& Operator::operator=( const Expression &arg ){
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return emptyTreeProjection;
-}
-
-Operator& Operator::operator=( const Operator &arg ){
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return emptyTreeProjection;
-}
-
-
-TreeProjection* Operator::cloneTreeProjection() const{
-
-    // if this routine is ever called something went
-    // really wrong ....
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return new TreeProjection();
-}
 
 
 int Operator::getGlobalIndex( ) const{
@@ -106,105 +56,13 @@ int Operator::getGlobalIndex( ) const{
 }
 
 
-
-Operator& Operator::operator+=( const double    & arg ){ return operator=( this->operator+(arg) ); }
-Operator& Operator::operator+=( const DVector    & arg ){ return operator=( this->operator+(arg) ); }
-Operator& Operator::operator+=( const DMatrix    & arg ){ return operator=( this->operator+(arg) ); }
-Operator& Operator::operator+=( const Expression& arg ){ return operator=( this->operator+(arg) ); }
-
-Operator& Operator::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
-Operator& Operator::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
-Operator& Operator::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
-Operator& Operator::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
-
-Operator& Operator::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
-Operator& Operator::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
-Operator& Operator::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
-Operator& Operator::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
-
-Operator& Operator::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
-Operator& Operator::operator/=( const Expression  & arg ){ return operator=( this->operator/(arg) ); }
-
-
-
-
-Expression Operator::operator+( const double        & arg ) const{ return Expression(*this)+arg; }
-Expression Operator::operator+( const DVector        & arg ) const{ return Expression(*this)+arg; }
-Expression Operator::operator+( const DMatrix        & arg ) const{ return Expression(*this)+arg; }
-Expression Operator::operator+( const Operator& arg ) const{ return Expression(*this)+arg; }
-Expression Operator::operator+( const Expression    & arg ) const{ return Expression(*this)+arg; }
-
-Expression operator+( const double & arg1, const Operator& arg2 ){ return arg1 + Expression(arg2); }
-Expression operator+( const DVector & arg1, const Operator& arg2 ){ return arg1 + Expression(arg2); }
-Expression operator+( const DMatrix & arg1, const Operator& arg2 ){ return arg1 + Expression(arg2); }
-
-Expression Operator::operator-( const double        & arg ) const{ return Expression(*this)-arg; }
-Expression Operator::operator-( const DVector        & arg ) const{ return Expression(*this)-arg; }
-Expression Operator::operator-( const DMatrix        & arg ) const{ return Expression(*this)-arg; }
-Expression Operator::operator-( const Operator& arg ) const{ return Expression(*this)-arg; }
-Expression Operator::operator-( const Expression    & arg ) const{ return Expression(*this)-arg; }
-
-Expression Operator::operator-( ) const{ return -Expression(*this); }
-
-Expression operator-( const double & arg1, const Operator& arg2 ){ return arg1 - Expression(arg2); }
-Expression operator-( const DVector & arg1, const Operator& arg2 ){ return arg1 - Expression(arg2); }
-Expression operator-( const DMatrix & arg1, const Operator& arg2 ){ return arg1 - Expression(arg2); }
-
-Expression Operator::operator*( const double        & arg ) const{ return Expression(*this)*arg; }
-Expression Operator::operator*( const DVector        & arg ) const{ return Expression(*this)*arg; }
-Expression Operator::operator*( const DMatrix        & arg ) const{ return Expression(*this)*arg; }
-
-
-Expression Operator::operator*( const Operator& arg ) const{
-
-    Expression tmp2(arg);
-
-
-    Expression tmp1(*this);
-
-
-    return tmp1*tmp2;
-}
-
-
-Expression Operator::operator*( const Expression    & arg ) const{ return Expression(*this)*arg; }
-
-Expression operator*( const double & arg1, const Operator& arg2 ){ return arg1 * Expression(arg2); }
-Expression operator*( const DVector & arg1, const Operator& arg2 ){ return arg1 * Expression(arg2); }
-Expression operator*( const DMatrix & arg1, const Operator& arg2 ){ return arg1 * Expression(arg2); }
-
-Expression Operator::operator/( const double        & arg ) const{ return Expression(*this)/arg; }
-Expression Operator::operator/( const Operator& arg ) const{ return Expression(*this)/arg; }
-Expression Operator::operator/( const Expression    & arg ) const{ return Expression(*this)/arg; }
-
-Expression operator/( const double & arg1, const Operator& arg2 ){ return arg1 / Expression(arg2); }
-Expression operator/( const DVector & arg1, const Operator& arg2 ){ return arg1 / Expression(arg2); }
-Expression operator/( const DMatrix & arg1, const Operator& arg2 ){ return arg1 / Expression(arg2); }
-
-ConstraintComponent Operator::operator<=( const double& ub ) const{ return Expression(*this) <= ub; }
-ConstraintComponent Operator::operator>=( const double& lb ) const{ return Expression(*this) >= lb; }
-ConstraintComponent Operator::operator==( const double&  b ) const{ return Expression(*this) ==  b; }
-
-ConstraintComponent Operator::operator<=( const DVector& ub ) const{ return Expression(*this) <= ub; }
-ConstraintComponent Operator::operator>=( const DVector& lb ) const{ return Expression(*this) >= lb; }
-ConstraintComponent Operator::operator==( const DVector&  b ) const{ return Expression(*this) ==  b; }
-
-ConstraintComponent Operator::operator<=( const VariablesGrid& ub ) const{ return Expression(*this) <= ub; }
-ConstraintComponent Operator::operator>=( const VariablesGrid& lb ) const{ return Expression(*this) >= lb; }
-ConstraintComponent Operator::operator==( const VariablesGrid&  b ) const{ return Expression(*this) ==  b; }
-
-ConstraintComponent operator<=( double lb, const Operator &arg ){ return lb <= Expression(arg); }
-ConstraintComponent operator==( double  b, const Operator &arg ){ return  b == Expression(arg); }
-ConstraintComponent operator>=( double ub, const Operator &arg ){ return ub >= Expression(arg); }
-
-ConstraintComponent operator<=( DVector lb, const Operator &arg ){ return lb <= Expression(arg); }
-ConstraintComponent operator==( DVector  b, const Operator &arg ){ return  b == Expression(arg); }
-ConstraintComponent operator>=( DVector ub, const Operator &arg ){ return ub >= Expression(arg); }
-
-ConstraintComponent operator<=( VariablesGrid lb, const Operator &arg ){ return lb <= Expression(arg); }
-ConstraintComponent operator==( VariablesGrid  b, const Operator &arg ){ return  b == Expression(arg); }
-ConstraintComponent operator>=( VariablesGrid ub, const Operator &arg ){ return ub >= Expression(arg); }
-
+Operator& Operator::operator= ( const double         & arg ){ return *this; }
+Operator& Operator::operator= ( const Expression     & arg ){ return *this; }
+Operator& Operator::operator= ( const SharedOperator & arg ){ return *this; }
+Operator& Operator::operator+=( const Expression     & arg ){ return *this; }
+Operator& Operator::operator-=( const Expression     & arg ){ return *this; }
+Operator& Operator::operator*=( const Expression     & arg ){ return *this; }
+Operator& Operator::operator/=( const Expression     & arg ){ return *this; }
 
 
 double Operator::getValue() const{ return INFTY; }
@@ -214,9 +72,10 @@ std::ostream& operator<<(std::ostream &stream, const Operator &arg)
 	return arg.print( stream );
 }
 
-Operator* Operator::passArgument() const{
+SharedOperator Operator::passArgument() const{
 
-    return 0;
+    Operator *tmp = 0;
+    return SharedOperator(tmp);
 }
 
 returnValue Operator::setVariableExportName(	const VariableType &_type,
@@ -228,284 +87,239 @@ returnValue Operator::setVariableExportName(	const VariableType &_type,
 
 
 
-Operator* Operator::myProd(Operator* a,Operator* b){
+SharedOperator Operator::myProd(const SharedOperator &a, const SharedOperator &b) const{
 
-    if( a->isOneOrZero() == NE_ZERO ) return new DoubleConstant( 0.0 , NE_ZERO );
-    if( b->isOneOrZero() == NE_ZERO ) return new DoubleConstant( 0.0 , NE_ZERO );
+    if( a->isOneOrZero() == NE_ZERO ) return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ) );
+    if( b->isOneOrZero() == NE_ZERO ) return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ) );
     
-    if( a->isOneOrZero() == NE_ONE  ) return b->clone();
-    if( b->isOneOrZero() == NE_ONE  ) return a->clone();
+    if( a->isOneOrZero() == NE_ONE  ) return b;
+    if( b->isOneOrZero() == NE_ONE  ) return a;
     
-    if( a == b ) return new Power_Int( a->clone(), 2 );
+    if( a == b ) return SharedOperator( new Power_Int(a,2) );
     
-    return new Product(a->clone(),b->clone()); 
+    return SharedOperator( new Product(a,b) ); 
 }
   
 
-Operator* Operator::myAdd (Operator* a,Operator* b){
+SharedOperator Operator::myAdd( const SharedOperator &a, const SharedOperator &b) const{
 
     if( a->isOneOrZero() == NE_ZERO && b->isOneOrZero() == NE_ZERO )
-        return new DoubleConstant( 0.0 , NE_ZERO );
+        return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ) );
 
-    if( a->isOneOrZero() == NE_ZERO ) return b->clone();
-    if( b->isOneOrZero() == NE_ZERO ) return a->clone();
+    if( a->isOneOrZero() == NE_ZERO ) return b;
+    if( b->isOneOrZero() == NE_ZERO ) return a;
     
     if( a->isOneOrZero() == NE_ONE && b->isOneOrZero() == NE_ONE )
-        return new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO );
+        return SharedOperator( new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO ) );
     
-    if( a == b ) return new Product( a->clone(), new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO ) );
+    if( a == b ) return SharedOperator( new Product( a, SharedOperator( new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO) ) ) );
     
-    return new Addition(a->clone(),b->clone());
+    return SharedOperator( new Addition(a,b) );
 }
 
 
-Operator* Operator::mySubtract (Operator* a,Operator* b){
+SharedOperator Operator::mySubtract (const SharedOperator &a,const SharedOperator &b) const{
 
     if( a->isOneOrZero() == NE_ZERO && b->isOneOrZero() == NE_ZERO )
-        return new DoubleConstant( 0.0 , NE_ZERO );
+        return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ) );
 
-    if( a->isOneOrZero() == NE_ZERO ) return new Subtraction(new DoubleConstant( 0.0 , NE_ZERO ), b->clone());
-    if( b->isOneOrZero() == NE_ZERO ) return a->clone();
+    if( a->isOneOrZero() == NE_ZERO ) return SharedOperator( new Subtraction(SharedOperator( new DoubleConstant( 0.0 , NE_ZERO )), b));
+    if( b->isOneOrZero() == NE_ZERO ) return a;
 
     if( a->isOneOrZero() == NE_ONE && b->isOneOrZero() == NE_ONE )
-        return new DoubleConstant( 0.0 , NE_ZERO );
+        return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ) );
 
-    if( a == b ) return new DoubleConstant( 0.0 , NE_ZERO );
+    if( a == b ) return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ) );
 
-    return new Subtraction(a->clone(),b->clone());
+    return SharedOperator( new Subtraction(a,b) );
 }
 
 
-Operator* Operator::myPower (Operator* a,Operator* b){
+SharedOperator Operator::myPower (const SharedOperator &a, const SharedOperator &b) const{
 
-    if( a->isOneOrZero() == NE_ZERO && b->isOneOrZero() == NE_ONE ) return new DoubleConstant( 0.0 , NE_ZERO );
+    if( a->isOneOrZero() == NE_ZERO && b->isOneOrZero() == NE_ONE ) return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ) );
 
-    if( b->isOneOrZero() == NE_ZERO ) return new DoubleConstant( 1.0 , NE_ONE );
-    if( a->isOneOrZero() == NE_ONE ) return new DoubleConstant( 1.0 , NE_ONE );
+    if( b->isOneOrZero() == NE_ZERO ) return SharedOperator( new DoubleConstant( 1.0 , NE_ONE ) );
+    if( a->isOneOrZero() == NE_ONE ) return SharedOperator( new DoubleConstant( 1.0 , NE_ONE ) );
 
-    if( b->isOneOrZero() == NE_ONE ) return a->clone();
+    if( b->isOneOrZero() == NE_ONE ) return a;
 
-    return new Power(a->clone(),b->clone());
+    return SharedOperator( new Power(a,b) );
 }
 
 
-Operator* Operator::myPowerInt (Operator* a, int b){
+SharedOperator Operator::myPowerInt (const SharedOperator &a, const int &b) const{
 
-	if( a->isOneOrZero() == NE_ZERO && b>0 ) 	return new DoubleConstant( 0.0 , NE_ZERO );
-	if( b == 0 ) 								return new DoubleConstant( 1.0 , NE_ONE );
-	if( a->isOneOrZero() == NE_ONE ) 			return new DoubleConstant( 1.0 , NE_ONE );
-	if( b == 1 ) 								return a->clone();
+	if( a->isOneOrZero() == NE_ZERO && b>0 ) 	return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ) );
+	if( b == 0 ) 					return SharedOperator( new DoubleConstant( 1.0 , NE_ONE  ) );
+	if( a->isOneOrZero() == NE_ONE ) 		return SharedOperator( new DoubleConstant( 1.0 , NE_ONE  ) );
+	if( b == 1 ) 					return a;
 
-    return new Power_Int(a->clone(),b);
+    return SharedOperator( new Power_Int(a,b) );
 }
 
 
-Operator* Operator::myLogarithm (Operator* a){
+SharedOperator Operator::myLogarithm (const SharedOperator &a) const{
 
-    if( a->isOneOrZero() == NE_ONE ) return new DoubleConstant( 0.0 , NE_ZERO );
+    if( a->isOneOrZero() == NE_ONE ) return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ) );
 
-    return new Logarithm(a->clone());
+    return SharedOperator( new Logarithm(a) );
 }
 
 
-TreeProjection* Operator::convert2TreeProjection( Operator* a ) const{
+SharedOperator Operator::convert2TreeProjection( const SharedOperator &a ) const{
   
    TreeProjection b;
-   b = *a;
-   delete a;
-   return b.clone();
+   b = a;
+   return SharedOperator( new TreeProjection(b) );
 }
 
 
-returnValue Operator::ADsymCommon( Operator     *a  ,
-                                        TreeProjection &da ,
-                                        TreeProjection &dda,
-                                        int            dim       , /**< number of directions  */
-                                        VariableType  *varType   , /**< the variable types    */
-                                        int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
-                                        int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                        int            &nNewLIS  , /**< the number of newLIS  */
-                                        TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                        int            &nNewSIS  , /**< the number of newSIS  */
-                                        TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                        int            &nNewHIS  , /**< the number of newHIS  */
-                                        TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+returnValue Operator::ADsymCommon( const SharedOperator       &a  ,
+                                   const SharedOperator &da ,
+                                   const SharedOperator &dda,
+                                   int            dim       ,
+                                   VariableType  *varType   ,
+                                   int           *component ,
+                                   SharedOperator        &l ,
+                                   SharedOperator        *S ,
+                                   int                 dimS ,
+                                   SharedOperator      *dfS ,
+                                   SharedOperator      *ldf ,
+                                   SharedOperator      *H   ,
+                                   std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                   std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                   std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
 
   // FIRST ORDER BACKWARD SWEEP:
   // ---------------------------
-  
-    a->AD_symmetric( dim, varType, component,
-                    convert2TreeProjection(myProd(l,&da)),
-                    S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS 
+    SharedOperator ttt = convert2TreeProjection(myProd(l,da));
+    
+    a->AD_symmetric( dim, varType, component, ttt,
+                    S, dimS, dfS, ldf, H, newLIS, newSIS, newHIS 
               );
     
     
   // SECOND ORDER FORWARD SWEEP:
   // -------------------------------------
-    Operator *tmp3 = convert2TreeProjection(myProd(&dda,l));
+    SharedOperator tmp3 = convert2TreeProjection(myProd(dda,l));
 
     int run1, run2;
     for( run1 = 0; run1 < dimS; run1++ ){
     	for( run2 = 0; run2 <= run1; run2++ ){
-    		Operator *tmp1 = H[run1*dimS+run2]->clone();
-    		delete H[run1*dimS+run2];
-    		Operator *tmp2 = myProd( dfS[run1], dfS[run2] );
-    		Operator *tmp4 = myProd( tmp2     , tmp3      );
+    		SharedOperator tmp1 = H[run1*dimS+run2];
+    		SharedOperator tmp2 = myProd( dfS[run1], dfS[run2] );
+    		SharedOperator tmp4 = myProd( tmp2     , tmp3      );
     		H[run1*dimS+run2] = myAdd( tmp1, tmp4 );
-    		delete tmp1;
-    		delete tmp2;
-    		delete tmp4;
     	}
     }
-    delete tmp3;
     
     
   // FIRST ORDER FORWARD SWEEP:
   // -------------------------------------
     
     for( run1 = 0; run1 < dimS; run1++ ){
-        Operator *tmp1 = dfS[run1]->clone();
-        delete dfS[run1];
-        dfS[run1] = convert2TreeProjection( myProd( tmp1, &da ) );
-        delete tmp1;
+        SharedOperator tmp1 = dfS[run1];
+        dfS[run1] = convert2TreeProjection( myProd( tmp1,da ) );
     }
     
-  // CLEAR MEMORY FROM BACKWARD SWEEP:
-  // -------------------------------------
-    
-    delete l;
     return SUCCESSFUL_RETURN;
 }
 
 
-returnValue Operator::ADsymCommon2( Operator       *a  ,
-				   	   	   	   	   	   Operator       *b  ,
-				   	   	   	   	   	   TreeProjection &dx ,
-				   	   	   	   	   	   TreeProjection &dy ,
-				   	   	   	   	   	   TreeProjection &dxx,
-				   	   	   	   	   	   TreeProjection &dxy,
-				   	   	   	   	   	   TreeProjection &dyy,
+returnValue Operator::ADsymCommon2( const SharedOperator &a  ,
+				     const SharedOperator &b  ,
+				   	   	   	   	   	  const  SharedOperator &dx ,
+				   	   	   	   	   	  const  SharedOperator &dy ,
+				   	   	   	   	   	  const  SharedOperator &dxx,
+				   	   	   	   	   	  const  SharedOperator &dxy,
+				   	   	   	   	   	  const  SharedOperator &dyy,
                                        int            dim       , /**< number of directions  */
                                        VariableType  *varType   , /**< the variable types    */
                                        int           *component , /**< and their components  */
-                                       Operator      *l         , /**< the backward seed     */
-                                       Operator     **S         , /**< forward seed matrix   */
+                                       SharedOperator     &l         , /**< the backward seed     */
+                                       SharedOperator     *S         , /**< forward seed matrix   */
                                        int            dimS      , /**< dimension of forward seed             */
-                                       Operator     **dfS       , /**< first order foward result             */
-                                       Operator     **ldf       , /**< first order backward result           */
-                                       Operator     **H         , /**< upper trianglular part of the Hessian */
-                                       int            &nNewLIS  , /**< the number of newLIS  */
-                                       TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                       int            &nNewSIS  , /**< the number of newSIS  */
-                                       TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                       int            &nNewHIS  , /**< the number of newHIS  */
-                                       TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                       SharedOperator     *dfS       , /**< first order foward result             */
+                                       SharedOperator     *ldf       , /**< first order backward result           */
+                                       SharedOperator     *H         , /**< upper trianglular part of the Hessian */
+                                       std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                       std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                       std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
   
     int run1, run2;
   
   // FIRST ORDER BACKWARD SWEEP:
   // ---------------------------
-    Operator    **S1 = new Operator*[dimS];
-    Operator    **S2 = new Operator*[dimS];
-    Operator    **H1 = new Operator*[dimS*dimS];
-    Operator    **H2 = new Operator*[dimS*dimS];
+    SharedOperator    *S1 = new SharedOperator[dimS];
+    SharedOperator    *S2 = new SharedOperator[dimS];
+    SharedOperator    *H1 = new SharedOperator[dimS*dimS];
+    SharedOperator    *H2 = new SharedOperator[dimS*dimS];
   
     for( run2 = 0; run2 < dimS; run2++ ){
-         S1[run2] = new DoubleConstant(0.0,NE_ZERO);
-         S2[run2] = new DoubleConstant(0.0,NE_ZERO);
+         S1[run2] = SharedOperator( new DoubleConstant(0.0,NE_ZERO));
+         S2[run2] = SharedOperator( new DoubleConstant(0.0,NE_ZERO));
     }
     
     for( run2 = 0; run2 < dimS*dimS; run2++ ){
-         H1[run2] = new DoubleConstant(0.0,NE_ZERO);
-         H2[run2] = new DoubleConstant(0.0,NE_ZERO);
+         H1[run2] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
+         H2[run2] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
     }
     
-    a->AD_symmetric( dim, varType, component, convert2TreeProjection(myProd(l,&dx)),
-                    S, dimS, S1, ldf, H1, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+    SharedOperator ttt1 = convert2TreeProjection(myProd(l,dx));
+    SharedOperator ttt2 = convert2TreeProjection(myProd(l,dy));
+
+    a->AD_symmetric( dim, varType, component, ttt1,
+                    S, dimS, S1, ldf, H1, newLIS, newSIS, newHIS );
 
 
-    b->AD_symmetric( dim, varType, component, convert2TreeProjection(myProd(l,&dy)),
-                    S, dimS, S2, ldf, H2, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+    b->AD_symmetric( dim, varType, component, ttt2,
+                    S, dimS, S2, ldf, H2, newLIS, newSIS, newHIS );
     
    
     
   // SECOND ORDER FORWARD SWEEP:
   // -------------------------------------
     
-    Operator *tmpXX = convert2TreeProjection(myProd( l,&dxx ));
-    Operator *tmpXY = convert2TreeProjection(myProd( l,&dxy ));
-    Operator *tmpYY = convert2TreeProjection(myProd( l,&dyy ));
+    SharedOperator tmpXX = convert2TreeProjection(myProd( l,dxx ));
+    SharedOperator tmpXY = convert2TreeProjection(myProd( l,dxy ));
+    SharedOperator tmpYY = convert2TreeProjection(myProd( l,dyy ));
     
     for( run1 = 0; run1 < dimS; run1++ ){
     	for( run2 = 0; run2 <= run1; run2++ ){
-    		delete H[run1*dimS+run2];
-    		Operator *tmp1 = myProd( S1[run1], S1[run2] );
-    		Operator *tmp2 = myProd( S1[run1], S2[run2] );
-    		Operator *tmp3 = myProd( S2[run1], S1[run2] );
-    		Operator *tmp4 = myProd( S2[run1], S2[run2] );
-    		Operator *tmp5;
+    		SharedOperator tmp1 = myProd( S1[run1], S1[run2] );
+    		SharedOperator tmp2 = myProd( S1[run1], S2[run2] );
+    		SharedOperator tmp3 = myProd( S2[run1], S1[run2] );
+    		SharedOperator tmp4 = myProd( S2[run1], S2[run2] );
+    		SharedOperator tmp5;
     		if( run1 == run2 ) tmp5 = myAdd(tmp2,tmp2);
     		else               tmp5 = myAdd(tmp2,tmp3);
-    		Operator *tmp6 = myProd( tmp1, tmpXX );
-    		Operator *tmp7 = myProd( tmp5, tmpXY );
-    		Operator *tmp8 = myProd( tmp4, tmpYY );
-    		Operator *tmp9  = myAdd ( tmp6, tmp7 );
-    		Operator *tmp10 = myAdd ( tmp8, tmp9 );
-    		Operator *tmp12 = myAdd ( tmp10 , H1[run1*dimS+run2] );
+    		SharedOperator tmp6 = myProd( tmp1, tmpXX );
+    		SharedOperator tmp7 = myProd( tmp5, tmpXY );
+    		SharedOperator tmp8 = myProd( tmp4, tmpYY );
+    		SharedOperator tmp9  = myAdd ( tmp6, tmp7 );
+    		SharedOperator tmp10 = myAdd ( tmp8, tmp9 );
+    		SharedOperator tmp12 = myAdd ( tmp10 , H1[run1*dimS+run2] );
     		H[run1*dimS+run2] = myAdd ( tmp12 , H2[run1*dimS+run2] );
-    		delete tmp1;
-    		delete tmp2;
-    		delete tmp3;
-    		delete tmp4;
-    		delete tmp5;
-    		delete tmp6;
-    		delete tmp7;
-    		delete tmp8;
-    		delete tmp9;
-    		delete tmp10;
-    		delete tmp12;
     	}
-    }
-    
-    delete tmpXX;
-    delete tmpXY;
-    delete tmpYY;
-    
+    }    
     
   // FIRST ORDER FORWARD SWEEP:
   // -------------------------------------
     
     for( run1 = 0; run1 < dimS; run1++ ){
-    	delete dfS[run1];
-    	Operator *tmp1 = convert2TreeProjection( myProd( S1[run1], &dx ) );
-    	Operator *tmp2 = convert2TreeProjection( myProd( S2[run1], &dy ) );
+    	SharedOperator tmp1 = convert2TreeProjection( myProd( S1[run1], dx ) );
+    	SharedOperator tmp2 = convert2TreeProjection( myProd( S2[run1], dy ) );
     	dfS[run1] = myAdd(tmp1,tmp2);
-    	delete tmp1;
-    	delete tmp2;
     }
     
   // CLEAR MEMORY FROM SWEEPS:
   // -------------------------------------
-    
-    for( run2 = 0; run2 < dimS; run2++ ){
-    	delete S1[run2];
-    	delete S2[run2];
-    }
-    for( run2 = 0; run2 < dimS*dimS; run2++ ){
-    	delete H1[run2];
-    	delete H2[run2];
-    }
     delete[] S1;
     delete[] S2;
     delete[] H1;
     delete[] H2;
 
-    delete l;
     return SUCCESSFUL_RETURN;
 }
 

@@ -55,8 +55,6 @@ COperator::COperator( ) :SmoothOperator( )
 
     first        = BT_FALSE;
     globalTypeID = counter ;
-
-    nCount = 0;
 }
 
 
@@ -92,8 +90,6 @@ COperator::COperator( const CFunction &fcn, const Expression &arg, int component
         cresult  [run1] = new double[cFunction.getDim()];
         d_cresult[run1] = new double[cFunction.getDim()];
     }
-
-    nCount = 0;
 }
 
 
@@ -160,7 +156,6 @@ void COperator::copy( const COperator &arg ){
         }
     }
 
-    nCount = 0;
 }
 
 
@@ -235,66 +230,63 @@ returnValue COperator::evaluate( EvaluationBase *x ){
 
 
 
-Operator* COperator::differentiate( int index ){
+SharedOperator COperator::differentiate( int index ){
 
     ASSERT( 1 == 0 );
     ACADOERROR(RET_ASSERTION);
-    return 0;
+    return SharedOperator( new COperator(*this) );
 }
 
 
-
-Operator* COperator::AD_forward( int dim,
-                                     VariableType *varType,
-                                     int *component_,
-                                     Operator **seed,
-                                     int &nNewIS,
-                                     TreeProjection ***newIS ){
+SharedOperator COperator::AD_forward( int dim,
+                                  VariableType *varType,
+                                  int *component_,
+                                  SharedOperator *seed,
+                                  std::vector<SharedOperator> &newIS ){
 
     ASSERT( 1 == 0 );
     ACADOERROR(RET_ASSERTION);
-    return 0;
+    return SharedOperator( new COperator(*this) );
 }
+
 
 
 returnValue COperator::AD_backward( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component_, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS_  /**< the new IS-pointer    */ ){
+                                        SharedOperator   &seed     , /**< the backward seed     */
+                                        SharedOperator    *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
 
     ASSERT( 1 == 0 );
     return ACADOERROR(RET_ASSERTION);
 }
+
 
 
 returnValue COperator::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
-                                        int           *component_, /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                        int           *component_ , /**< and their components  */
+                                        SharedOperator  &l         , /**< the backward seed     */
+                                        SharedOperator  *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
-  
+                                        SharedOperator     *dfS       , /**< first order foward result             */
+                                        SharedOperator     *ldf       , /**< first order backward result           */
+                                        SharedOperator     *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
+
     ASSERT( 1 == 0 );
     return ACADOERROR(RET_ASSERTION);
 }
 
 
-Operator* COperator::substitute( int index, const Operator *sub ){
+SharedOperator COperator::substitute( int index, const SharedOperator &sub ){
 
-    ACADOERROR( RET_NOT_IMPLEMENTED_YET );
-    return 0;
+    ASSERT( 1 == 0 );
+    ACADOERROR(RET_ASSERTION);
+    return SharedOperator( new COperator(*this) );
 }
 
 
@@ -505,14 +497,6 @@ std::ostream& COperator::print( std::ostream& stream ) const
 {
     return stream << "C functions can not be printed";
 }
-
-
-
-Operator* COperator::clone() const{
-
-    return new COperator(*this);
-}
-
 
 returnValue COperator::clearBuffer(){
 

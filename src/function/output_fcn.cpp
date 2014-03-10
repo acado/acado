@@ -74,16 +74,8 @@ OutputFcn& OutputFcn::operator=( const OutputFcn& rhs )
 Output OutputFcn::operator()(	uint componentIdx
 								)
 {
-	Operator* componentOperator = getExpression( componentIdx );
-
-	Expression tmp;
-	
-	if ( componentOperator != 0 )
-	{
-		tmp = *componentOperator;
-		delete componentOperator;
-	}
-
+	SharedOperator componentOperator = getExpression( componentIdx );
+	Expression tmp(componentOperator);
 	return Output( tmp,componentIdx );
 }
 

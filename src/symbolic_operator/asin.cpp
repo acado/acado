@@ -59,7 +59,7 @@ Asin::Asin():UnaryOperator(){
 
 }
 
-Asin::Asin( Operator *_argument ):UnaryOperator(_argument){
+Asin::Asin( const SharedOperator &_argument ):UnaryOperator(_argument){
   cName = "asin";
 
   fcn = &asin;
@@ -102,52 +102,47 @@ returnValue Asin::evaluate( EvaluationBase *x ){
 
 
 
-Operator* Asin::substitute( int index, const Operator *sub ){
+SharedOperator Asin::substitute( int index, const SharedOperator &sub ){
 
-    return new Asin( argument->substitute( index , sub ) );
+    return SharedOperator( new Asin( argument->substitute( index , sub ) ));
 
 }
 
-Operator* Asin::clone() const{
-
-    return new Asin(*this);
-}
 
 returnValue Asin::initDerivative() {
 
 	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
 
 	derivative = convert2TreeProjection(
-			new Power(
-					new Addition(
-							new DoubleConstant(1.0 , NE_ONE),
-							new Product(
-									new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
-									new Power_Int(
-											argument->clone(),
+			SharedOperator( new Power(
+					SharedOperator( new Addition(
+							SharedOperator( new DoubleConstant(1.0 , NE_ONE)),
+							SharedOperator( new Product(
+									SharedOperator( new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO)),
+									SharedOperator( new Power_Int(
+											argument,
 											2
-									)
-							)
-					),
-					new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
-			));
+									))
+							))
+					)),
+					SharedOperator( new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO ))
+			)));
 	derivative2 = convert2TreeProjection(
-			new Product(
-					new Power(
-							new Addition(
-									new DoubleConstant(1.0 , NE_ONE),
-									new Product(
-											new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
-											new Power_Int(
-													argument->clone(),
+			SharedOperator( new Product(
+					     SharedOperator( new Power(
+							          SharedOperator( new Addition(
+									           SharedOperator( new DoubleConstant(1.0 , NE_ONE)),
+									   SharedOperator( new Product(
+											       SharedOperator( new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO)),
+											       SharedOperator( new Power_Int(
+													argument,
 													2
-											)
-									)
-							),
-							new DoubleConstant( -1.5 , NE_NEITHER_ONE_NOR_ZERO )
-					),
-					argument->clone()
-			));
+											)))
+									))),
+							SharedOperator( new DoubleConstant( -1.5 , NE_NEITHER_ONE_NOR_ZERO ))
+					)),
+					argument
+			)));
 
 	return argument->initDerivative();
 }

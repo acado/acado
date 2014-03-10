@@ -100,7 +100,7 @@ Function& Function::operator=( const Function& arg ){
 
 
 Function& Function::operator<<( const Expression& arg ){
-
+  
     evaluationTree.operator<<( arg );
 
 	result = (double*) realloc( result,getDim()*sizeof(double) );
@@ -268,7 +268,7 @@ int Function::getNumberOfVariables() const{
 }
 
 
-Operator* Function::getExpression( uint componentIdx ) const{
+SharedOperator Function::getExpression( uint componentIdx ) const{
 
     return evaluationTree.getExpression( componentIdx );
 }

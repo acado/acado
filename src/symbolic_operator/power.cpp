@@ -42,72 +42,26 @@ BEGIN_NAMESPACE_ACADO
 
 
 
-Power::Power( ):BinaryOperator( ){
+Power::Power( ):BinaryOperator( ){ }
 
-	derivative01 = 0;
-	derivative02 = 0;
-	derivative12 = 0;
-	derivative21 = 0;
-	derivative22 = 0;
-	derivative23 = 0;
-}
-
-Power::Power( Operator *_argument1, Operator *_argument2 )
+Power::Power( const SharedOperator &_argument1, const SharedOperator &_argument2 )
       :BinaryOperator( _argument1, _argument2 ){
 
-	derivative01 = 0;
-	derivative02 = 0;
-	derivative12 = 0;
-	derivative21 = 0;
-	derivative22 = 0;
-	derivative23 = 0;
 }
 
 Power::Power( const Power &arg ):BinaryOperator( arg ){
 
-	derivative01 = 0;
-	derivative02 = 0;
-	derivative12 = 0;
-	derivative21 = 0;
-	derivative22 = 0;
-	derivative23 = 0;
-	if( arg.derivative01 != 0 ) {
-		derivative01 = arg.derivative01->clone();
-		derivative02 = arg.derivative02->clone();
-		derivative12 = arg.derivative12->clone();
-		derivative21 = arg.derivative21->clone();
-		derivative22 = arg.derivative22->clone();
-		derivative23 = arg.derivative23->clone();
-	}
+    derivative01 = arg.derivative01;
+    derivative02 = arg.derivative02;
+    derivative12 = arg.derivative12;
+    derivative21 = arg.derivative21;
+    derivative22 = arg.derivative22;
+    derivative23 = arg.derivative23;
 }
 
 
 Power::~Power(){
 
-	if( derivative01 != 0 ) {
-		delete derivative01;
-	}
-	if( derivative02 != 0 ) {
-		delete derivative02;
-	}
-	if( derivative12 != 0 ) {
-		delete derivative12;
-	}
-	if( derivative21 != 0 ) {
-		delete derivative21;
-	}
-	if( derivative22 != 0 ) {
-		delete derivative22;
-	}
-	if( derivative23 != 0 ) {
-		delete derivative23;
-	}
-	derivative01 = 0;
-	derivative02 = 0;
-	derivative12 = 0;
-	derivative21 = 0;
-	derivative22 = 0;
-	derivative23 = 0;
 }
 
 
@@ -147,51 +101,36 @@ returnValue Power::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Power::differentiate( int index ){
+SharedOperator Power::differentiate( int index ){
 
 	dargument1 = argument1->differentiate( index );
 	dargument2 = argument2->differentiate( index );
 
-	Operator *prodTmp1 = myProd( this, derivative02);
-	Operator *prodTmp2 = myProd( dargument2, prodTmp1 );
-	Operator *prodTmp4 = myProd( dargument1, derivative12 );
+	SharedOperator prodTmp1 = myProd( SharedOperator( new Power(*this) ), derivative02);
+	SharedOperator prodTmp2 = myProd( dargument2, prodTmp1 );
+	SharedOperator prodTmp4 = myProd( dargument1, derivative12 );
 
-	Operator *result = myAdd( prodTmp2, prodTmp4 );
-
-	delete prodTmp1;
-	delete prodTmp2;
-	delete prodTmp4;
+	SharedOperator result = myAdd( prodTmp2, prodTmp4 );
 
 	return result;
 
 }
 
 
-Operator* Power::AD_forward( int dim,
+SharedOperator Power::AD_forward( int dim,
                                VariableType *varType,
                                int *component,
-                               Operator **seed,
-                               int &nNewIS,
-                               TreeProjection ***newIS ){
+                               SharedOperator *seed,
+                               std::vector<SharedOperator> &newIS ){
 
-    if( dargument1 != 0 )
-        delete dargument1;
+    dargument1 = argument1->AD_forward(dim,varType,component,seed,newIS);
+    dargument2 = argument2->AD_forward(dim,varType,component,seed,newIS);
 
-    if( dargument2 != 0 )
-    	delete dargument2;
+    SharedOperator prodTmp1 = myProd( SharedOperator( new Power(*this) ), derivative02);
+    SharedOperator prodTmp2 = myProd( dargument2, prodTmp1 );
+    SharedOperator prodTmp4 = myProd( dargument1, derivative12 );
 
-    dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-    dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
-	Operator *prodTmp1 = myProd( this, derivative02);
-    Operator *prodTmp2 = myProd( dargument2, prodTmp1 );
-    Operator *prodTmp4 = myProd( dargument1, derivative12 );
-
-    Operator *result = myAdd( prodTmp2, prodTmp4 );
-
-    delete prodTmp1;
-    delete prodTmp2;
-    delete prodTmp4;
+    SharedOperator result = myAdd( prodTmp2, prodTmp4 );
 
     return result;
 }
@@ -200,31 +139,22 @@ Operator* Power::AD_forward( int dim,
 returnValue Power::AD_backward( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+                                        SharedOperator  &seed     , /**< the backward seed     */
+                                        SharedOperator    *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
 
 	if( seed->isOneOrZero() != NE_ZERO ){
 
-		TreeProjection tmp;
-		tmp = *seed;
+		SharedOperator tmp = convert2TreeProjection(seed);
+		SharedOperator prodTmp4 = myProd( tmp, derivative12 );
 
-		Operator *prodTmp4 = myProd( &tmp, derivative12 );
+		argument1->AD_backward( dim, varType, component, prodTmp4, df, newIS );
 
-		argument1->AD_backward( dim, varType, component, prodTmp4->clone(), df, nNewIS, newIS );
+		SharedOperator prodTmp1 = myProd( SharedOperator(new Power(*this)), derivative02);
+		SharedOperator prodTmp2 = myProd( tmp, prodTmp1 );
 
-		Operator *prodTmp1 = myProd( this, derivative02);
-		Operator *prodTmp2 = myProd( &tmp, prodTmp1 );
-
-		argument2->AD_backward( dim, varType, component, prodTmp2->clone(), df, nNewIS, newIS );
-
-		delete prodTmp1;
-		delete prodTmp2;
-		delete prodTmp4;
+		argument2->AD_backward( dim, varType, component, prodTmp2, df, newIS );
 	}
-
-    delete seed;
     return SUCCESSFUL_RETURN;
 }
 
@@ -232,29 +162,24 @@ returnValue Power::AD_backward( int           dim      , /**< number of directio
 returnValue Power::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                 SharedOperator      &l         , /**< the backward seed     */
+                                 SharedOperator     *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
-
-    TreeProjection dyy, dy;
+                                  SharedOperator     *dfS       , /**< first order foward result             */
+                                  SharedOperator     *ldf       , /**< first order backward result           */
+                                  SharedOperator     *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
     
-    TreeProjection dx( *derivative12 );
-    dy = Product( clone(), derivative02->clone());
-    TreeProjection dxx( *derivative22 );
-    TreeProjection dxy( *derivative23 );
-    dyy = Product( dy.clone(), derivative02->clone() );
+    SharedOperator dx = convert2TreeProjection(derivative12);
+    SharedOperator dy = SharedOperator( new Product( SharedOperator( new Power(*this) ), derivative02));
+    SharedOperator dxx = convert2TreeProjection( derivative22 );
+    SharedOperator dxy = convert2TreeProjection( derivative23 );
+    SharedOperator dyy = SharedOperator( new Product( dy, derivative02 ));
     
     return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
-			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+			  ldf, H, newLIS, newSIS, newHIS );
 }
 
 
@@ -264,42 +189,33 @@ returnValue Power::initDerivative() {
 		return SUCCESSFUL_RETURN;
 	}
 
-	Operator *oneTmp = new DoubleConstant(1.0, NE_ONE);
-	Operator *subTmp = mySubtract( argument2, oneTmp );
+	SharedOperator oneTmp = SharedOperator( new DoubleConstant(1.0, NE_ONE));
+	SharedOperator subTmp = mySubtract( argument2, oneTmp );
 
-	derivative01 = convert2TreeProjection(myPower( argument1, subTmp));
-	derivative02 = convert2TreeProjection(myLogarithm( argument1 ));
+	derivative01 = convert2TreeProjection( myPower( argument1, subTmp) );
+	derivative02 = convert2TreeProjection( myLogarithm( argument1 )    );
 
 	derivative12 = convert2TreeProjection(myProd( derivative01, argument2 ));
 
-	Operator *twoTmp = new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO);
-	Operator *subTmp2 = mySubtract( argument2, twoTmp );
-	Operator *prodTmp = myProd( argument2, subTmp );
-	Operator *prodTmp2 = myProd( argument2, derivative02 );
-	Operator *addTmp = myAdd( oneTmp, prodTmp2 );
+	SharedOperator twoTmp = SharedOperator( new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO));
+	SharedOperator subTmp2 = mySubtract( argument2, twoTmp );
+	SharedOperator prodTmp = myProd( argument2, subTmp );
+	SharedOperator prodTmp2 = myProd( argument2, derivative02 );
+	SharedOperator addTmp = myAdd( oneTmp, prodTmp2 );
 
 	derivative21 = convert2TreeProjection(myPower( argument1, subTmp2));
 	derivative22 = convert2TreeProjection(myProd( prodTmp, derivative21 ));
 	derivative23 = convert2TreeProjection(myProd( derivative01, addTmp ));
-
-	delete oneTmp;
-	delete subTmp;
-	delete twoTmp;
-	delete subTmp2;
-	delete prodTmp;
-	delete prodTmp2;
-	delete addTmp;
 
 	argument1->initDerivative();
 	return argument2->initDerivative();
 }
 
 
-Operator* Power::substitute( int index, const Operator *sub ){
+SharedOperator Power::substitute( int index, const SharedOperator &sub ){
 
-    return new Power( argument1->substitute( index , sub ),
-                      argument2->substitute( index , sub ) );
-
+    return SharedOperator( new Power( argument1->substitute( index , sub ),
+                                      argument2->substitute( index , sub ) ) );
 }
 
 
@@ -591,12 +507,6 @@ std::ostream& Power::print( std::ostream &stream ) const{
 			return stream << "(pow(" << *argument1 << "," << *argument2 << "))";
 		}
 	}
-}
-
-
-Operator* Power::clone() const{
-
-    return new Power(*this);
 }
 
 

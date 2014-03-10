@@ -73,21 +73,50 @@ Expression::Expression( int nRows_, int nCols_, VariableType variableType_, int 
        construct( variableType_, globalTypeID, nRows_, nCols_, "" );
    }
 
-Expression::Expression(const Operator &tree_)
+Expression::Expression(const SharedOperator &tree_)
 {
+	nRows =  1;
+	nCols =  1;
+	dim   =  1;
+	name  = "";
+	
 	VariableType tmpType;
 	int tmpComp;
+	
+	if( tree_->isVariable(tmpType, tmpComp) == BT_TRUE ) {
 
-	if (tree_.isVariable(tmpType, tmpComp) == BT_TRUE) {
-
-		construct(tmpType, tmpComp, 1, 1, "");
-	} else {
-
-		construct(VT_UNKNOWN, 0, 1, 1, "");
+		variableType = tmpType;
+		component    = tmpComp;
 	}
+	else {
+		variableType = VT_UNKNOWN;
+		component    = 0;
+	}
+	element.resize(1);
+	element[0] = tree_;
+}
 
-	delete element[0];
-	element[0] = tree_.clone();
+Expression::Expression( const TemporaryExpression &arg_ ){
+
+	nRows =  1;
+	nCols =  1;
+	dim   =  1;
+	name  = "";
+	
+	VariableType tmpType;
+	int tmpComp;
+	
+	if( (*arg_.element)->isVariable(tmpType, tmpComp) == BT_TRUE ) {
+
+		variableType = tmpType;
+		component    = tmpComp;
+	}
+	else {
+		variableType = VT_UNKNOWN;
+		component    = 0;
+	}
+	element.resize(1);
+	element[0] = *arg_.element;
 }
 
 
@@ -102,7 +131,6 @@ Expression::Expression(const Operator &tree_)
        nRows   = 1;
        nCols   = 1;
        dim     = 0;
-       element = 0;
        assignmentSetup( convert(rhs) );
    }
 
@@ -111,7 +139,6 @@ Expression::Expression(const Operator &tree_)
        nRows   = rhs.getDim();
        nCols   = 1;
        dim     = 0;
-       element = 0;
        assignmentSetup( convert(rhs) );
    }
 
@@ -120,7 +147,6 @@ Expression::Expression(const Operator &tree_)
        nRows   = rhs.getNumRows();
        nCols   = rhs.getNumCols();
        dim     = 0;
-       element = 0;
        assignmentSetup( convert(rhs) );
    }
 
@@ -317,10 +343,10 @@ Expression&  Expression::appendRows(const Expression& arg) {
 
 	if( arg.variableType != variableType )
 		variableType = VT_UNKNOWN;
-	element = (Operator**)realloc(element, dim*sizeof(Operator*) );
+	element.resize(dim);
 	    
 	for( run1 = oldDim; run1 < dim; run1++ )
-		element[run1] = arg.element[run1-oldDim]->clone();
+		element[run1] = arg.element[run1-oldDim];
 	
 	return *this;
 }
@@ -354,10 +380,10 @@ Expression& Expression::operator<<( const Expression& arg ){
 
     if( arg.isVariable() == BT_FALSE ) variableType = VT_UNKNOWN;
 
-    element = (Operator**)realloc(element, dim*sizeof(Operator*) );
+    element.resize(dim);
 
     for( run1 = oldDim; run1 < dim; run1++ )
-        element[run1] = arg.element[run1-oldDim]->clone();
+        element[run1] = arg.element[run1-oldDim];
 
     return *this;
 }
@@ -386,13 +412,12 @@ std::ostream& operator<<( std::ostream& stream, const Expression &arg )
 
 
 Expression Expression::operator()( uint idx ) const{
-
+  
     ASSERT( idx < getDim( ) );
 
     Expression tmp(1);
 
-    delete tmp.element[0];
-    tmp.element[0] = element[idx]->clone();
+    tmp.element[0] = element[idx];
 
     tmp.component    = component + idx;
     tmp.variableType = variableType;
@@ -401,14 +426,13 @@ Expression Expression::operator()( uint idx ) const{
 }
 
 Expression Expression::operator()( uint rowIdx, uint colIdx ) const{
-
+  
     ASSERT( rowIdx < getNumRows( ) );
     ASSERT( colIdx < getNumCols( ) );
 
     Expression tmp(1);
 
-    delete tmp.element[0];
-    tmp.element[0] = element[rowIdx*getNumCols()+colIdx]->clone();
+    tmp.element[0] = element[rowIdx*getNumCols()+colIdx];
 
     tmp.component    = component + rowIdx*getNumCols() + colIdx;
     tmp.variableType = variableType;
@@ -417,53 +441,32 @@ Expression Expression::operator()( uint rowIdx, uint colIdx ) const{
 }
 
 
-Operator& Expression::operator()( uint idx ){
-
+TemporaryExpression Expression::operator()( uint idx ){
+  
     switch( variableType ){
 
         case  VT_INTERMEDIATE_STATE:
               ASSERT( idx < getDim( ) );
-              return *element[idx];
+              return TemporaryExpression(&element[idx]);
 
         case VT_UNKNOWN:
               ASSERT( idx < getDim( ) );
-              delete  element[idx];
-              element[idx] = new TreeProjection();
-              return *element[idx];
+              element[idx] = SharedOperator( new TreeProjection() );
+              return TemporaryExpression(&element[idx]);
 
         default:
               ASSERT( idx < getDim( ) );
-              return *element[idx];
-    }
+              return TemporaryExpression(&element[idx]);
+    }    
     ASSERT( 1 == 0 );
-    return *element[0];
+    return TemporaryExpression(&element[0]);
 }
 
 
-Operator& Expression::operator()( uint rowIdx, uint colIdx ){
+TemporaryExpression Expression::operator()( uint rowIdx, uint colIdx ){
 
-    switch( variableType ){
-
-        case  VT_INTERMEDIATE_STATE:
-              ASSERT( rowIdx < getNumRows( ) );
-              ASSERT( colIdx < getNumCols( ) );
-              return *element[rowIdx*getNumCols()+colIdx];
-
-//        case  VT_UNKNOWN:
-        default:
-              ASSERT( rowIdx < getNumRows( ) );
-              ASSERT( colIdx < getNumCols( ) );
-              delete  element[rowIdx*getNumCols()+colIdx];
-              element[rowIdx*getNumCols()+colIdx] = new TreeProjection();
-              return *element[rowIdx*getNumCols()+colIdx];
-
-//               ASSERT( 1 == 0 );
-//               return *element[0];
-    }
-    ASSERT( 1 == 0 );
-    return *element[0];
+    return operator()(rowIdx*getNumCols()+colIdx);
 }
-
 
 
 Expression Expression::operator+( const Expression& arg ) const{
@@ -478,18 +481,17 @@ Expression Expression::operator+( const Expression& arg ) const{
     for( i=0; i<getNumRows(); ++i ){
         for( j=0; j<getNumCols(); ++j ){
 
-            delete tmp.element[i*getNumCols()+j];
             if( element[i*getNumCols()+j]->isOneOrZero() != NE_ZERO ){
                 if( arg.element[i*getNumCols()+j]->isOneOrZero() != NE_ZERO )
-                    tmp.element[i*getNumCols()+j] = new Addition( element[i*getNumCols()+j]->clone(),
-                                                    arg.element[i*getNumCols()+j]->clone() );
+                    tmp.element[i*getNumCols()+j] = SharedOperator( new Addition( element[i*getNumCols()+j],
+                                                    arg.element[i*getNumCols()+j] ) );
                 else
-                    tmp.element[i*getNumCols()+j] = element[i*getNumCols()+j]->clone();
+                    tmp.element[i*getNumCols()+j] = element[i*getNumCols()+j];
             }
             else{
                 if( arg.element[i*getNumCols()+j]->isOneOrZero() != NE_ZERO )
-                     tmp.element[i*getNumCols()+j] = arg.element[i*getNumCols()+j]->clone();
-                else tmp.element[i*getNumCols()+j] = new DoubleConstant(0.0,NE_ZERO);
+                     tmp.element[i*getNumCols()+j] = arg.element[i*getNumCols()+j];
+                else tmp.element[i*getNumCols()+j] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
             }
         }
     }
@@ -509,19 +511,19 @@ Expression Expression::operator-( const Expression& arg ) const{
     for( i=0; i<getNumRows(); ++i ){
         for( j=0; j<getNumCols(); ++j ){
 
-            delete tmp.element[i*getNumCols()+j];
             if( element[i*getNumCols()+j]->isOneOrZero() != NE_ZERO ){
                 if( arg.element[i*getNumCols()+j]->isOneOrZero() != NE_ZERO )
-                    tmp.element[i*getNumCols()+j] = new Subtraction( element[i*getNumCols()+j]->clone(),
-                                                    arg.element[i*getNumCols()+j]->clone() );
+                    tmp.element[i*getNumCols()+j] = SharedOperator( new Subtraction( element[i*getNumCols()+j],
+                                                    arg.element[i*getNumCols()+j] ));
                 else
-                    tmp.element[i*getNumCols()+j] = element[i*getNumCols()+j]->clone();
+                    tmp.element[i*getNumCols()+j] = element[i*getNumCols()+j];
             }
             else{
                 if( arg.element[i*getNumCols()+j]->isOneOrZero() != NE_ZERO )
-                     tmp.element[i*getNumCols()+j] = new Subtraction( new DoubleConstant(0.0,NE_ZERO),
-                                                                      arg.element[i*getNumCols()+j]->clone() );
-                else tmp.element[i*getNumCols()+j] = new DoubleConstant(0.0,NE_ZERO);
+                     tmp.element[i*getNumCols()+j] = SharedOperator( new Subtraction( SharedOperator(
+		                                                                      new DoubleConstant(0.0,NE_ZERO) ),
+                                                                      arg.element[i*getNumCols()+j] ));
+                else tmp.element[i*getNumCols()+j] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
             }
         }
     }
@@ -529,32 +531,32 @@ Expression Expression::operator-( const Expression& arg ) const{
 }
 
 
-Operator* Expression::product( const Operator *a, const Operator *b ) const{
+SharedOperator Expression::product( const SharedOperator &a, const SharedOperator &b ) const{
 
 
     switch( a->isOneOrZero() ){
 
         case NE_ZERO:
-             return new DoubleConstant( 0.0, NE_ZERO );
+             return SharedOperator( new DoubleConstant( 0.0, NE_ZERO ) );
 
         case NE_ONE:
-             return b->clone();
+             return b;
 
         default:
 
              switch( b->isOneOrZero() ){
 
                  case NE_ZERO:
-                      return new DoubleConstant( 0.0, NE_ZERO );
+                      return SharedOperator( new DoubleConstant( 0.0, NE_ZERO ) );
 
                  case NE_ONE:
-                      return a->clone();
+                      return a;
 
                  default:
-                      return new Product( a->clone(), b->clone() );
+                      return SharedOperator( new Product(a,b) );
              }
     }
-    return 0;
+    return SharedOperator( new Product(a,b) );
 }
 
 
@@ -569,14 +571,9 @@ Expression Expression::operator*( const Expression& arg ) const{
 
         Expression tmp("", arg.getNumRows(), arg.getNumCols() );
 
-        for( i = 0; i< arg.getDim(); i++ ){
-
-             delete tmp.element[i];
-             Operator *prod = product( element[0], arg.element[i] );
-             tmp.element[i] = prod->clone();
-
-             delete prod;
-        }
+        for( i = 0; i< arg.getDim(); i++ )
+             tmp.element[i] = product( element[0], arg.element[i] );
+	
         return tmp;
     }
 
@@ -586,12 +583,7 @@ Expression Expression::operator*( const Expression& arg ) const{
         Expression tmp("", getNumRows(), getNumCols() );
 
         for( i = 0; i< getDim(); i++ ){
-
-             delete tmp.element[i];
-             Operator *prod = product( arg.element[0], element[i] );
-             tmp.element[i] = prod->clone();
-
-             delete prod;
+             tmp.element[i] = product( arg.element[0], element[i] );
         }
         return tmp;
     }
@@ -607,13 +599,11 @@ Expression Expression::operator*( const Expression& arg ) const{
         for( j=0; j<newNumCols; ++j ){
             for( k=0; k<getNumCols( ); ++k ){
 
-                 Operator *tmpO = product( element[i*getNumCols()+k],
+                 SharedOperator tmpO = product( element[i*getNumCols()+k],
                                            arg.element[k*arg.getNumCols()+j] );
 
                  if( tmpO->isOneOrZero() != NE_ZERO )
-                     tmp(i,j) += *tmpO;
-
-                 delete tmpO;
+                     tmp(i,j) += tmpO;
             }
         }
     }
@@ -631,8 +621,7 @@ Expression Expression::operator/( const Expression& arg ) const{
     Expression tmp("", getNumRows(), getNumCols() );
 
     for( i = 0; i< getDim(); i++ ){
-         delete tmp.element[i];
-         tmp.element[i] = new Quotient( element[i]->clone(), arg.element[0]->clone() );
+         tmp.element[i] = SharedOperator( new Quotient( element[i], arg.element[0] ) );
     }
     return tmp;
 }
@@ -673,8 +662,7 @@ Expression Expression::getInverse() const{
     Expression I("", M,M);
     for( i = 0; i < M; i++ ){
         for( j = 0; j < M; j++ ){
-            delete I.element[i*M+j];
-            I.element[i*M+j] = tmp.element[i*2*M+j+M]->clone();
+            I.element[i*M+j] = tmp.element[i*2*M+j+M];
         }
     }
 
@@ -690,8 +678,7 @@ Expression Expression::getRow( const uint& rowIdx ) const{
     Expression tmp("", 1, (int) getNumCols() );
 
     for( run1 = 0; run1 < getNumCols(); run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = element[rowIdx*getNumCols()+run1]->clone();
+        tmp.element[run1] = element[rowIdx*getNumCols()+run1];
     }
     return tmp;
 }
@@ -705,8 +692,7 @@ Expression Expression::getCol( const uint& colIdx ) const{
     Expression tmp("", (int) getNumRows(), 1 );
 
     for( run1 = 0; run1 < getNumRows(); run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = element[run1*getNumCols()+colIdx]->clone();
+        tmp.element[run1] = element[run1*getNumCols()+colIdx];
     }
     return tmp;
 }
@@ -753,8 +739,7 @@ Expression Expression::getSin( ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Sin( element[run1]->clone() ); 
+        tmp.element[run1] = SharedOperator( new Sin( element[run1] )); 
     }
     return tmp;
 }
@@ -765,8 +750,7 @@ Expression Expression::getCos( ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Cos( element[run1]->clone() ); 
+        tmp.element[run1] = SharedOperator( new Cos( element[run1] ) ); 
     }
     return tmp;
 }
@@ -777,8 +761,7 @@ Expression Expression::getTan( ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Tan( element[run1]->clone() ); 
+        tmp.element[run1] = SharedOperator( new Tan( element[run1] )); 
     }
     return tmp;
 }
@@ -789,8 +772,7 @@ Expression Expression::getAsin( ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Asin( element[run1]->clone() ); 
+        tmp.element[run1] = SharedOperator( new Asin( element[run1] )); 
     }
     return tmp;
 }
@@ -801,8 +783,7 @@ Expression Expression::getAcos( ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Acos( element[run1]->clone() ); 
+        tmp.element[run1] = SharedOperator( new Acos( element[run1] )); 
     }
     return tmp;
 }
@@ -813,8 +794,7 @@ Expression Expression::getAtan( ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Atan( element[run1]->clone() ); 
+        tmp.element[run1] = SharedOperator( new Atan( element[run1] )); 
     }
     return tmp;
 }
@@ -825,8 +805,7 @@ Expression Expression::getExp( ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Exp( element[run1]->clone() ); 
+        tmp.element[run1] = SharedOperator( new Exp( element[run1] )); 
     }
     return tmp;
 }
@@ -837,8 +816,8 @@ Expression Expression::getSqrt( ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Power( element[run1]->clone(), new DoubleConstant( 0.5, NE_NEITHER_ONE_NOR_ZERO ) ); 
+        tmp.element[run1] = SharedOperator( new Power( element[run1],
+						        SharedOperator( new DoubleConstant( 0.5, NE_NEITHER_ONE_NOR_ZERO )) )); 
     }
     return tmp;
 }
@@ -849,8 +828,7 @@ Expression Expression::getLn( ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Logarithm( element[run1]->clone() ); 
+        tmp.element[run1] = SharedOperator( new Logarithm( element[run1] )); 
     }
     return tmp;
 }
@@ -864,8 +842,7 @@ Expression Expression::getPow( const Expression& arg ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Power( element[run1]->clone(), arg.element[0]->clone() ); 
+        tmp.element[run1] = SharedOperator( new Power( element[run1], arg.element[0] )); 
     }
     return tmp;
 }
@@ -877,8 +854,7 @@ Expression Expression::getPowInt( const int &arg ) const{
     uint run1;
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new Power_Int( element[run1]->clone(), arg );
+        tmp.element[run1] = SharedOperator( new Power_Int( element[run1], arg ));
     }
     return tmp;
 }
@@ -893,8 +869,7 @@ Expression Expression::transpose( ) const{
 
     for( run1 = 0; run1 < getNumRows(); run1++ ){
         for( run2 = 0; run2 < getNumCols(); run2++ ){
-             delete tmp.element[run2*getNumRows()+run1];
-             tmp.element[run2*getNumRows()+run1] = element[run1*getNumCols()+run2]->clone();
+             tmp.element[run2*getNumRows()+run1] = SharedOperator( element[run1*getNumCols()+run2] );
         }
     }
     return tmp;
@@ -1058,17 +1033,14 @@ Expression Expression::ADforward ( const Expression &arg ) const{
 
     for( run1 = 0; run1 < arg.getNumRows(); run1++ ){
 
-        delete seed.element[run1];
-        seed.element[run1] = new DoubleConstant( 1.0, NE_ONE );
+        seed.element[run1] = SharedOperator( new DoubleConstant( 1.0, NE_ONE ));
 
         Expression tmp = ADforward( arg, seed );
 
-        delete seed.element[run1];
-        seed.element[run1] = new DoubleConstant( 0.0, NE_ZERO );
+        seed.element[run1] = SharedOperator( new DoubleConstant( 0.0, NE_ZERO ));
 
         for( run2 = 0; run2 < getNumRows(); run2++ ){
-            delete result.element[run2*arg.getNumRows()+run1];
-            result.element[run2*arg.getNumRows()+run1] = tmp.element[run2]->clone();
+            result.element[run2*arg.getNumRows()+run1] = tmp.element[run2];
         }
     }
 
@@ -1097,8 +1069,7 @@ Expression Expression::ADforward ( const VariableType &varType_, const int *arg,
         seed(run1) = 0.0;
 
         for( run2 = 0; run2 < (int) getNumRows(); run2++ ){
-            delete result.element[run2*nV+run1];
-            result.element[run2*nV+run1] = tmp.element[run2]->clone();
+            result.element[run2*nV+run1] = tmp.element[run2];
         }
     }
     return result;
@@ -1119,17 +1090,14 @@ Expression Expression::ADbackward ( const Expression &arg ) const{
 
     for( run1 = 0; run1 < getNumRows(); run1++ ){
 
-        delete seed.element[run1];
-        seed.element[run1] = new DoubleConstant( 1.0, NE_ONE );
+        seed.element[run1] = SharedOperator( new DoubleConstant( 1.0, NE_ONE ));
 
         Expression tmp = ADbackward( arg, seed );
 
-        delete seed.element[run1];
-        seed.element[run1] = new DoubleConstant( 0.0, NE_ZERO );
+        seed.element[run1] = SharedOperator( new DoubleConstant( 0.0, NE_ZERO ));
 
         for( run2 = 0; run2 < arg.getNumRows(); run2++ ){
-            delete result.element[run1*arg.getNumRows()+run2];
-            result.element[run1*arg.getNumRows()+run2] = tmp.element[run2]->clone();
+            result.element[run1*arg.getNumRows()+run2] = tmp.element[run2];
         }
     }
 
@@ -1175,47 +1143,33 @@ Expression Expression::ADforward (  const VariableType &varType_,
 Expression Expression::ADforward ( const VariableType *varType_,
 								   const int          *arg     ,
 								   const Expression   &seed      ) const{
-
-    unsigned int run1, run2;
+    
+    unsigned int run1;
     const unsigned int n = seed.getDim();
 
 	Expression result("", getNumRows(), getNumCols());
 
-    VariableType  *varType   = new VariableType[n];
-    int           *Component = new int         [n];
-    Operator     **seed1     = new Operator*   [n];
+    VariableType   *varType   = new VariableType[n];
+    int            *Component = new int         [n];
+    SharedOperator *seed1     = new SharedOperator[n];
 
     for( run1 = 0; run1 < n; run1++ ){
         varType  [run1] = varType_[run1];
         Component[run1] = arg[run1];
-        seed1    [run1] = seed.element[run1]->clone();
+        seed1    [run1] = seed.element[run1];
     }
 
     for( run1 = 0; run1 < getDim(); run1++ ){
 
-        delete result.element[run1];
-
         int Dim = n;
-        int nIS = 0;
-        TreeProjection **IS = 0;
+        std::vector<SharedOperator> IS;
 
         element[run1]->initDerivative();
-        result.element[run1] = element[run1]->AD_forward( Dim, varType, Component, seed1, nIS, &IS );
-
-        for( run2 = 0; (int) run2 < nIS; run2++ ){
-            if( IS[run2] != 0 ){
-                delete IS[run2];
-            }
-        }
-        if( IS != 0 )
-            free(IS);
+        result.element[run1] = element[run1]->AD_forward( Dim, varType, Component, seed1, IS );
     }
 
     delete[] varType  ;
     delete[] Component;
-
-    for( run1 = 0; run1 < n; run1++ )
-        delete seed1[run1];
 
     delete[] seed1;
 
@@ -1227,15 +1181,15 @@ Expression Expression::getODEexpansion( const int &order, const int *arg ) const
  
 	IntermediateState coeff("", (int) dim, order+2 );
 	
-    VariableType  *vType = new VariableType[dim*(order+1)+1];
-    int           *Comp  = new int         [dim*(order+1)+1];
-    Operator     **seed  = new Operator*   [dim*(order+1)+1];
+    VariableType    *vType = new VariableType  [dim*(order+1)+1];
+    int             *Comp  = new int           [dim*(order+1)+1];
+    SharedOperator  *seed  = new SharedOperator[dim*(order+1)+1];
 	
-	Operator **der = new Operator*[dim*(order+1)];
+	SharedOperator *der = new SharedOperator[dim*(order+1)];
 	
 	vType[0] = VT_TIME;
 	Comp [0] = 0      ;
-	seed [0] = new DoubleConstant( 1.0 , NE_ONE );
+	seed [0] = SharedOperator( new DoubleConstant( 1.0 , NE_ONE ));
 	
 	for( uint i=0; i<dim; i++ ){
 		coeff(i,0)   = Expression("",1,1,VT_DIFFERENTIAL_STATE,arg[i]);
@@ -1243,42 +1197,32 @@ Expression Expression::getODEexpansion( const int &order, const int *arg ) const
 		vType[i+1]   = VT_DIFFERENTIAL_STATE;
 		Comp [i+1]   = arg[i];
 		seed [i+1]   = coeff.element[(order+2)*i+1];
-		der[i]       = element[i]->clone();
+		der[i]       = element[i];
 	}
 	
-	int nIS = 0;
-	TreeProjection **IS = 0;
+	std::vector<SharedOperator> IS;
 	
 	for( int j=0; j<order; j++ ){
 		for( uint i=0; i<dim; i++ ){
 			der[dim*j+i]->initDerivative();
-			der[dim*(j+1)+i] = der[dim*j+i]->AD_forward( (j+1)*dim+1, vType, Comp, seed, nIS, &IS );
+			der[dim*(j+1)+i] = der[dim*j+i]->AD_forward( (j+1)*dim+1, vType, Comp, seed, IS );
 		}
 		for( uint i=0; i<dim; i++ ){
-			coeff(i,j+2) = *der[dim*(j+1)+i];
+			coeff(i,j+2) = der[dim*(j+1)+i];
 			vType[dim*(j+1)+i+1] = VT_INTERMEDIATE_STATE;
 			Comp [dim*(j+1)+i+1] = coeff.element[(order+2)*i+j+1]->getGlobalIndex();
 			seed [dim*(j+1)+i+1] = coeff.element[(order+2)*i+j+2];
 		}
-	}
-	
-	for( int run = 0; run < nIS; run++ ){
-		
-		if( IS[run] != 0 ) delete IS[run];
-	}
-	if( IS != 0 ) free(IS);
-	
+	}	
 	delete[] vType;
 	delete[] Comp;
-	for( uint i=0; i<dim*(order+1); i++ ) delete der[i];
 	delete[] der;
-	delete seed[0];
 	delete[] seed;
 	
 	return coeff;
 }
 
-
+/// CHANGING OF SHARED OPERATORS GOT TO THIS POINT ...
 
 Expression Expression::ADbackward( const Expression &arg, const Expression &seed ) const{
 
@@ -1290,42 +1234,31 @@ Expression Expression::ADbackward( const Expression &arg, const Expression &seed
 
 	Expression result("", arg.getNumRows(), arg.getNumCols());
 
-    VariableType *varType   = new VariableType[Dim];
-    int          *Component = new int         [Dim];
-    Operator    **iresult   = new Operator*   [Dim];
+    VariableType   *varType   = new VariableType  [Dim];
+    int            *Component = new int           [Dim];
+    SharedOperator *iresult   = new SharedOperator[Dim];
 
     for( run1 = 0; run1 < Dim; run1++ ){
         arg.element[run1]->isVariable(varType[run1],Component[run1]);
     }
 
-	int nIS = 0;
-	TreeProjection **IS = 0;
+    std::vector<SharedOperator> IS;
 	
     for( run1 = 0; run1 < (int) getDim(); run1++ ){
 
-        Operator *seed1 = seed.element[run1]->clone();
+        SharedOperator seed1 = seed.element[run1];
 
         for( run2 = 0; run2 < Dim; run2++ )
-             iresult[run2] = new DoubleConstant(0.0,NE_ZERO);
+             iresult[run2] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
 
         element[run1]->initDerivative();
-        element[run1]->AD_backward( Dim, varType, Component, seed1, iresult, nIS, &IS );
+        element[run1]->AD_backward( Dim, varType, Component, seed1, iresult, IS );
 
         for( run2 = 0; run2 < Dim; run2++ ){
-            Operator *sum = result.element[run2]->clone();
-            delete result.element[run2];
-            result.element[run2] = new Addition( sum->clone(), iresult[run2]->clone() );
-            delete sum;
-            delete iresult[run2];
+            SharedOperator sum = result.element[run2];
+            result.element[run2] = sum->myAdd(sum,iresult[run2]);
         }
     }
-
-
-	for( int run = 0; run < nIS; run++ ){
-		
-		if( IS[run] != 0 ) delete IS[run];
-	}
-	if( IS != 0 ) free(IS);
     
     delete[] iresult   ;
     delete[] varType   ;
@@ -1395,110 +1328,71 @@ Expression Expression::ADsymmetric( 	const Expression &arg, /** argument      */
 
 	VariableType *varType   = new VariableType[Dim];
 	int          *Component = new int         [Dim];
-	Operator    **dS        = new Operator*   [nS];
-	Operator    **ld        = new Operator*   [Dim];
-	Operator    **H         = new Operator*   [nS*nS];
+	SharedOperator *dS      = new SharedOperator[nS];
+	SharedOperator *ld      = new SharedOperator[Dim];
+	SharedOperator *H       = new SharedOperator[nS*nS];
 
 	for( run1 = 0; run1 < Dim; run1++ ){
 		arg.element[run1]->isVariable(varType[run1],Component[run1]);
 	}
 
-	int nLIS = 0;
-	int nSIS = 0;
-	int nHIS = 0;
-	TreeProjection **LIS = 0;
-	TreeProjection **SIS = 0;
-	TreeProjection **HIS = 0;
+	std::vector<SharedOperator> LIS;
+	std::vector<SharedOperator> SIS;
+	std::vector<SharedOperator> HIS;
 
 	Expression tmp((int) getDim(),Dim);
 	Expression tmp2(Dim);
 	
 	for( run1 = 0; run1 < (int) getDim(); run1++ ){
 
-		Operator *l1 = l.element[run1]->clone();
-		Operator **S1 = new Operator*[Dim*nS];
+		SharedOperator l1  = l.element[run1];
+		SharedOperator *S1 = new SharedOperator[Dim*nS];
 
 		for( run2 = 0; run2 < Dim*nS; run2++ )
-			S1[run2] = S.element[run2]->clone();
+			S1[run2] = S.element[run2];
 
 		for( run2 = 0; run2 < nS; run2++ )
-			dS[run2] = new DoubleConstant(0.0,NE_ZERO);
+			dS[run2] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
 
 		for( run2 = 0; run2 < Dim; run2++ )
-			ld[run2] = new DoubleConstant(0.0,NE_ZERO);
+			ld[run2] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
 
 		for( run2 = 0; run2 < nS*nS; run2++ )
-			H[run2] = new DoubleConstant(0.0,NE_ZERO);
+			H[run2] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
 
 		element[run1]->initDerivative();
-		element[run1]->AD_symmetric( Dim, varType, Component, l1, S1, nS, dS, ld, H, nLIS, &LIS, nSIS, &SIS, nHIS, &HIS );
+		element[run1]->AD_symmetric( Dim, varType, Component, l1, S1, nS, dS, ld, H, LIS, SIS, HIS );
 
 		int run3 = 0;
 
 		for( run2 = 0; run2 < nS; run2++ ){
 			for( run3 = 0; run3 < run2; run3++ ){
-				Operator *sum = result.element[run2*nS+run3]->clone();
-				delete result.element[run2*nS+run3];
-				delete result.element[run3*nS+run2];
+				SharedOperator sum = result.element[run2*nS+run3];
 				result.element[run2*nS+run3] = sum->myAdd( sum, H[run2*nS+run3] );
 				result.element[run3*nS+run2] = sum->myAdd( sum, H[run2*nS+run3] );
-				delete sum;
 			}
-			Operator *sum = result.element[run2*nS+run2]->clone();
-			delete result.element[run2*nS+run2];
+			SharedOperator sum = result.element[run2*nS+run2];
 			result.element[run2*nS+run2] = sum->myAdd( sum, H[run2*nS+run2] );
-			delete sum;
 		}
 
 		if( dfS != 0 ){
 			for( run2 = 0; run2 < nS; run2++ ){
-				delete tmp.element[run1*nS+run2];
-				tmp.element[run1*nS+run2] = dS[run2]->clone();
+				tmp.element[run1*nS+run2] = dS[run2];
 			}
 		}
 
 		if( ldf != 0 ){
 		   for( run2 = 0; run2 < nS; run2++ ){
-			Operator *sum = tmp2.element[run2]->clone();
-			delete tmp2.element[run2];
+			SharedOperator sum = tmp2.element[run2];
 			tmp2.element[run2] = sum->myAdd( sum, ld[run2] );
-			delete sum;
 		  }
 		}
-
-		for( run2 = 0; run2 < Dim*nS; run2++ )
-			delete S1[run2];
-
-		for( run2 = 0; run2 < nS; run2++ )
-			delete dS[run2];
-
-		for( run2 = 0; run2 < Dim; run2++ )
-			delete ld[run2];
-
-		for( run2 = 0; run2 < nS*nS; run2++ )
-			delete H[run2];
 
 		delete[] S1;
 	}
 
 	if( dfS != 0 ) *dfS = tmp ;
 	if( ldf != 0 ) *ldf = tmp2;
-	
-	
-	for( int run = 0; run < nLIS; run++ ){
-		if( LIS[run] != 0 ) delete LIS[run];
-	}
-	if( LIS != 0 ) free(LIS);
-
-	for( int run = 0; run < nSIS; run++ ){
-		if( SIS[run] != 0 ) delete SIS[run];
-	}
-	if( SIS != 0 ) free(SIS);
-
-	for( int run = 0; run < nHIS; run++ ){
-		if( HIS[run] != 0 ) delete HIS[run];
-	}
-	if( HIS != 0 ) free(HIS);
 
 	delete[] dS        ;
 	delete[] ld        ;
@@ -1529,16 +1423,13 @@ Expression Expression::operator-() const{
 
     for( run1 = 0; run1 < getNumRows(); run1++ ){
         for( run2 = 0; run2 < getNumCols(); run2++ ){
-             delete tmp.element[run1*getNumCols()+run2];
-             tmp.element[run1*getNumCols()+run2] = new Subtraction( new DoubleConstant(0.0,NE_ZERO),
-                                                                    element[run1*getNumCols()+run2]->clone() );
+             tmp.element[run1*getNumCols()+run2] = SharedOperator( new Subtraction(
+	                                                                SharedOperator( new DoubleConstant(0.0,NE_ZERO) ),
+                                                                        element[run1*getNumCols()+run2] ));
         }
     }
     return tmp;
 }
-
-
-
 
 
 //
@@ -1555,16 +1446,16 @@ void Expression::construct( VariableType variableType_, uint globalTypeID, uint 
     name         = name_        ;
 
     uint i;
-    element = (Operator**)calloc(dim,sizeof(Operator*));
+    element.resize(dim);
 
     for( i = 0; i < dim; i++ ){
 
         switch( variableType ){
-            case VT_UNKNOWN           : element[i] = new DoubleConstant( 0.0, NE_ZERO ); break;
+            case VT_UNKNOWN           : element[i] = SharedOperator( new DoubleConstant( 0.0, NE_ZERO ) ); break;
             case VT_INTERMEDIATE_STATE:
-                                        element[i] = new TreeProjection( "" );
+                                        element[i] = SharedOperator( new TreeProjection( "" ) );
                                         break;
-            default                   : element[i] = new Projection( variableType_, globalTypeID+i, "" ); break;
+            default                   : element[i] = SharedOperator( new Projection( variableType_, globalTypeID+i, "" ) ); break;
         }
     }
 }
@@ -1577,29 +1468,13 @@ void Expression::copy( const Expression &rhs ){
     dim          = rhs.dim         ;
     variableType = rhs.variableType;
     component    = rhs.component   ;
-    
-    uint i;
-    element = (Operator**)calloc(dim,sizeof(Operator*));
+    element      = rhs.element     ;
 
-    for( i = 0; i < dim; i++ ){
-         if( rhs.element[i] != 0 )  element[i] = rhs.element[i]->clone();
-         else                       element[i] = 0;
-    }
-	
 	// Name not copied?
 }
 
 
-void Expression::deleteAll( ){
-
-    uint i;
-
-    for( i = 0; i < dim; i++ )
-        if( element[i] != 0 )
-            delete element[i];
-
-    if( element != 0 ) free(element);
-}
+void Expression::deleteAll( ){ }
 
 
 Expression& Expression::assignmentSetup( const Expression &arg ){
@@ -1612,7 +1487,7 @@ Expression& Expression::assignmentSetup( const Expression &arg ){
     dim          = nRows*nCols          ;
     variableType = VT_INTERMEDIATE_STATE;
 
-    element = (Operator**)calloc(dim,sizeof(Operator*));
+    element.resize(dim);
 
     VariableType tt = VT_UNKNOWN; int comp = 0;
 
@@ -1620,7 +1495,7 @@ Expression& Expression::assignmentSetup( const Expression &arg ){
 
 		arg.element[i]->isVariable(tt, comp);
 		if (tt == VT_INTERMEDIATE_STATE)
-			element[i] = arg.element[i]->clone();
+			element[i] = arg.element[i];
 		else
 		{
 			std::stringstream tmpName;
@@ -1631,7 +1506,7 @@ Expression& Expression::assignmentSetup( const Expression &arg ){
 				else
 					tmpName << name;
 			}
-			element[i] = (arg.getTreeProjection(i, tmpName.str())).clone();
+			element[i] = arg.getTreeProjection(i, tmpName.str());
 		}
     }
     return *this;
@@ -1641,9 +1516,8 @@ Expression& Expression::assignmentSetup( const Expression &arg ){
 Expression Expression::convert( const double& arg ) const{
 
      Expression tmp("", 1, 1);
-     delete tmp.element[0];
 
-     tmp.element[0] = new DoubleConstant( arg, NE_NEITHER_ONE_NOR_ZERO );
+     tmp.element[0] = SharedOperator( new DoubleConstant( arg, NE_NEITHER_ONE_NOR_ZERO ) );
      return tmp;
 }
 
@@ -1654,8 +1528,7 @@ Expression Expression::convert( const DVector& arg ) const{
      Expression tmp("", arg.getDim(), 1);
 
      for( run1 = 0; run1 < arg.getDim(); run1++ ){
-         delete tmp.element[run1];
-         tmp.element[run1] = new DoubleConstant( arg(run1), NE_NEITHER_ONE_NOR_ZERO );
+         tmp.element[run1] = SharedOperator( new DoubleConstant( arg(run1), NE_NEITHER_ONE_NOR_ZERO ) );
      }
      return tmp;
 }
@@ -1668,8 +1541,7 @@ Expression Expression::convert( const DMatrix& arg ) const{
 
      for( run1 = 0; run1 < arg.getNumRows(); run1++ ){
          for( run2 = 0; run2 < arg.getNumCols(); run2++ ){
-             delete tmp.element[arg.getNumCols()*run1+run2];
-             tmp.element[arg.getNumCols()*run1+run2] = new DoubleConstant( arg(run1,run2), NE_NEITHER_ONE_NOR_ZERO );
+             tmp.element[arg.getNumCols()*run1+run2] = SharedOperator( new DoubleConstant( arg(run1,run2), NE_NEITHER_ONE_NOR_ZERO ));
          }
      }
      return tmp;
@@ -1696,6 +1568,60 @@ BooleanType Expression::isDependingOn( const Expression &e ) const{
     if( fabs(sum(0) - EPS) > 0 ) return BT_TRUE;
     return BT_FALSE;
 }
+
+
+
+TemporaryExpression::TemporaryExpression(SharedOperator *arg_){element = arg_;}
+    
+    TemporaryExpression& TemporaryExpression::operator= ( const double      & arg ){ (*element)->operator=(arg); return *this; }
+    TemporaryExpression& TemporaryExpression::operator= ( const Expression  & arg ){ (*element)->operator=(arg); return *this; }
+    
+    TemporaryExpression& TemporaryExpression::operator+=( const Expression  & arg ){ (*element)->operator+=(arg); return *this; }
+    TemporaryExpression& TemporaryExpression::operator-=( const Expression  & arg ){ (*element)->operator-=(arg); return *this; }
+    TemporaryExpression& TemporaryExpression::operator*=( const Expression  & arg ){ (*element)->operator*=(arg); return *this; }
+    TemporaryExpression& TemporaryExpression::operator/=( const Expression  & arg ){ (*element)->operator/=(arg); return *this; }
+
+    Expression TemporaryExpression::operator-( ) const{ return Expression(*element).operator-(); }
+
+    Expression TemporaryExpression::operator+( const Expression & arg ) const{ return Expression(*element).operator+(arg); }
+    Expression TemporaryExpression::operator-( const Expression & arg ) const{ return Expression(*element).operator+(arg); }
+    Expression TemporaryExpression::operator*( const Expression & arg ) const{ return Expression(*element).operator+(arg); }
+    Expression TemporaryExpression::operator/( const Expression & arg ) const{ return Expression(*element).operator+(arg); }
+  
+Expression operator+( const Expression& arg1, const TemporaryExpression& arg2 ){return arg1.operator+(Expression(*(arg2.element)));}
+Expression operator-( const Expression& arg1, const TemporaryExpression& arg2 ){return arg1.operator-(Expression(*(arg2.element)));}
+Expression operator*( const Expression& arg1, const TemporaryExpression& arg2 ){return arg1.operator*(Expression(*(arg2.element)));}
+Expression operator/( const Expression& arg1, const TemporaryExpression& arg2 ){return arg1.operator/(Expression(*(arg2.element)));}
+    
+Expression TemporaryExpression::operator+(const TemporaryExpression &arg ) const{return Expression(*element).operator+(Expression(*(arg.element)));}
+Expression TemporaryExpression::operator-(const TemporaryExpression &arg ) const{return Expression(*element).operator-(Expression(*(arg.element)));}
+Expression TemporaryExpression::operator*(const TemporaryExpression &arg ) const{return Expression(*element).operator*(Expression(*(arg.element)));}
+Expression TemporaryExpression::operator/(const TemporaryExpression &arg ) const{return Expression(*element).operator/(Expression(*(arg.element)));}
+
+
+ConstraintComponent TemporaryExpression::operator<=( const double& ub ) const{ return Expression(*element).operator<=(ub); }
+ConstraintComponent TemporaryExpression::operator>=( const double& lb ) const{ return Expression(*element).operator>=(lb); }
+ConstraintComponent TemporaryExpression::operator==( const double&  b ) const{ return Expression(*element).operator==(b); }
+
+ConstraintComponent TemporaryExpression::operator<=( const DVector& ub ) const{ return Expression(*element).operator<=(ub); }
+ConstraintComponent TemporaryExpression::operator>=( const DVector& lb ) const{ return Expression(*element).operator>=(lb); }
+ConstraintComponent TemporaryExpression::operator==( const DVector&  b ) const{ return Expression(*element).operator==(b); }
+
+ConstraintComponent TemporaryExpression::operator<=( const VariablesGrid& ub ) const{ return Expression(*element).operator<=(ub); }
+ConstraintComponent TemporaryExpression::operator>=( const VariablesGrid& lb ) const{ return Expression(*element).operator>=(lb); }
+ConstraintComponent TemporaryExpression::operator==( const VariablesGrid&  b ) const{ return Expression(*element).operator==(b); }
+
+ConstraintComponent operator<=( double lb, const TemporaryExpression &arg ){return (lb <= (Expression(*(arg.element))));}
+ConstraintComponent operator==( double  b, const TemporaryExpression &arg ){return ( b == (Expression(*(arg.element))));}
+ConstraintComponent operator>=( double ub, const TemporaryExpression &arg ){return (ub >= (Expression(*(arg.element))));}
+
+ConstraintComponent operator<=( DVector lb, const TemporaryExpression &arg ){return (lb <= (Expression(*(arg.element))));}
+ConstraintComponent operator==( DVector  b, const TemporaryExpression &arg ){return ( b == (Expression(*(arg.element))));}
+ConstraintComponent operator>=( DVector ub, const TemporaryExpression &arg ){return (ub >= (Expression(*(arg.element))));}
+
+ConstraintComponent operator<=( VariablesGrid lb, const TemporaryExpression &arg ){return (lb <= (Expression(*(arg.element))));}
+ConstraintComponent operator==( VariablesGrid  b, const TemporaryExpression &arg ){return ( b == (Expression(*(arg.element))));}
+ConstraintComponent operator>=( VariablesGrid ub, const TemporaryExpression &arg ){return (ub >= (Expression(*(arg.element))));}
 
 
 CLOSE_NAMESPACE_ACADO

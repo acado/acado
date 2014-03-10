@@ -43,7 +43,7 @@ BEGIN_NAMESPACE_ACADO
 
 Subtraction::Subtraction():BinaryOperator(){}
 
-Subtraction::Subtraction( Operator *_argument1, Operator *_argument2 )
+Subtraction::Subtraction( const SharedOperator &_argument1, const SharedOperator &_argument2 )
             :BinaryOperator( _argument1, _argument2 ){
 
 }
@@ -90,7 +90,7 @@ returnValue Subtraction::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Subtraction::differentiate( int index ){
+SharedOperator Subtraction::differentiate( int index ){
 
   dargument1 = argument1->differentiate( index );
   dargument2 = argument2->differentiate( index );
@@ -100,21 +100,14 @@ Operator* Subtraction::differentiate( int index ){
 }
 
 
-Operator* Subtraction::AD_forward( int dim,
+SharedOperator Subtraction::AD_forward( int dim,
                                      VariableType *varType,
                                      int *component,
-                                     Operator **seed,
-                                     int &nNewIS,
-                                     TreeProjection ***newIS ){
+                                     SharedOperator *seed,
+                                     std::vector<SharedOperator> &newIS ){
 
-    if( dargument1 != 0 )
-        delete dargument1;
-
-    if( dargument2 != 0 )
-        delete dargument2;
-
-    dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-    dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
+    dargument1 = argument1->AD_forward(dim,varType,component,seed,newIS);
+    dargument2 = argument2->AD_forward(dim,varType,component,seed,newIS);
 
     return mySubtract( dargument1, dargument2 );
 }
@@ -123,22 +116,19 @@ Operator* Subtraction::AD_forward( int dim,
 returnValue Subtraction::AD_backward( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+                                        SharedOperator     &seed     , /**< the backward seed     */
+                                        SharedOperator    *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
 
-    TreeProjection tmp;
-    tmp = *seed;
-
-    argument1->AD_backward( dim, varType, component, tmp.clone(), df, nNewIS, newIS );
+    SharedOperator tmp = convert2TreeProjection(seed);
+    argument1->AD_backward( dim, varType, component, tmp, df, newIS );
 
     if( seed->isOneOrZero() != NE_ZERO ){
-        argument2->AD_backward( dim, varType, component,
-                                new Subtraction( new DoubleConstant( 0.0 , NE_ZERO ), tmp.clone() ), df, nNewIS, newIS );
+      
+        SharedOperator ttt = SharedOperator( new Subtraction( SharedOperator( new DoubleConstant( 0.0 , NE_ZERO )), tmp ));
+      
+        argument2->AD_backward( dim, varType, component, ttt, df, newIS );
     }
-
-    delete seed;
     return SUCCESSFUL_RETURN;
 }
 
@@ -146,36 +136,33 @@ returnValue Subtraction::AD_backward( int           dim      , /**< number of di
 returnValue Subtraction::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                        SharedOperator &l         , /**< the backward seed     */
+                                        SharedOperator     *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        SharedOperator    *dfS       , /**< first order foward result             */
+                                        SharedOperator     *ldf       , /**< first order backward result           */
+                                        SharedOperator     *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
   
-    TreeProjection dx,dy,dxx,dxy,dyy;
+    SharedOperator dx,dy,dxx,dxy,dyy;
     
-    dx  = DoubleConstant(1.0,NE_ONE );
-    dy  = DoubleConstant(-1.0,NE_NEITHER_ONE_NOR_ZERO );
-    dxx = DoubleConstant(0.0,NE_ZERO);
-    dxy = DoubleConstant(0.0,NE_ZERO);
-    dyy = DoubleConstant(0.0,NE_ZERO);
+    dx  = SharedOperator( new DoubleConstant(1.0,NE_ONE ) );
+    dy  = SharedOperator( new DoubleConstant(-1.0,NE_NEITHER_ONE_NOR_ZERO ));
+    dxx = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
+    dxy = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
+    dyy = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
     
     return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
-			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+			  ldf, H, newLIS, newSIS, newHIS );
 }
 
 
-Operator* Subtraction::substitute( int index, const Operator *sub ){
+SharedOperator Subtraction::substitute( int index, const SharedOperator &sub ){
 
-    return new Subtraction( argument1->substitute( index , sub ),
-                            argument2->substitute( index , sub ) );
+    return SharedOperator( new Subtraction( argument1->substitute( index , sub ),
+                             argument2->substitute( index , sub ) ));
 
 }
 
@@ -396,12 +383,6 @@ returnValue Subtraction::AD_backward2( int number, double seed1, double seed2,
 std::ostream& Subtraction::print( std::ostream &stream ) const{
 
     return stream << "(" << *argument1 << "-" << *argument2 << ")";
-}
-
-
-Operator* Subtraction::clone() const{
-
-    return new Subtraction(*this);
 }
 
 

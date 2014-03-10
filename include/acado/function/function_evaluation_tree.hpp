@@ -159,8 +159,7 @@ public:
     /** Returns the symbolic expression of the given component of the function.  \n
      *  \return The symbolic expression         \n
      */
-    virtual Operator* getExpression(	uint componentIdx
-										) const;
+    virtual SharedOperator getExpression( uint componentIdx ) const;
 
 
     /** Evaluates the expression
@@ -469,12 +468,12 @@ public:
      //
 protected:
 
-     Operator           **f        ;   /**< The right-hand side expressions */
-     Operator           **sub      ;   /**< The intermediate expressions    */
-     int                 *lhs_comp ;   /**< The components of the intermediate states */
-     SymbolicIndexList   *indexList;   /**< an SymbolicIndexList            */
-     int                  dim      ;   /**< The dimension of the function.  */
-     int                  n        ;   /**< The number of Intermediate expressions */
+     std::vector<SharedOperator>   f;   /**< The right-hand side expressions */
+     std::vector<SharedOperator> sub;   /**< The intermediate expressions    */
+     int                  *lhs_comp ;   /**< The components of the intermediate states */
+     SymbolicIndexList    *indexList;   /**< an SymbolicIndexList            */
+     int                   dim      ;   /**< The dimension of the function.  */
+     int                   n        ;   /**< The number of Intermediate expressions */
 
      Expression           safeCopy ;
 

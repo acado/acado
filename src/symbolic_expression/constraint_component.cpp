@@ -83,7 +83,7 @@ ConstraintComponent& ConstraintComponent::operator=( const ConstraintComponent &
 
 
 returnValue ConstraintComponent::initialize( const DVector& lb_, Expression arg, const DVector& ub_ ){
-
+  
     expression = arg;
     ub         = ub_;
     lb         = lb_;

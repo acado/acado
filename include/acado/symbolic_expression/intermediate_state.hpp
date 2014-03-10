@@ -74,12 +74,12 @@ public:
     IntermediateState( const double      & arg );
     IntermediateState( const DVector      & arg );
     IntermediateState( const DMatrix      & arg );
-    IntermediateState( const Operator    & arg );
+//     IntermediateState( const Operator    & arg );
     IntermediateState( const Expression  & arg );
 
     /** Destructor. */
     virtual ~IntermediateState();
-
+    
     Expression & operator=( const double      & arg );
     Expression & operator=( const DVector      & arg );
     Expression & operator=( const DMatrix      & arg );

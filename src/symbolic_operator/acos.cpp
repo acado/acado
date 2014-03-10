@@ -59,7 +59,7 @@ Acos::Acos():UnaryOperator(){
 
 }
 
-Acos::Acos( Operator *_argument ):UnaryOperator(_argument){
+Acos::Acos( const SharedOperator &_argument ):UnaryOperator(_argument){
   cName = "acos";
 
   fcn = &acos;
@@ -101,15 +101,10 @@ returnValue Acos::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Acos::substitute( int index, const Operator *sub ){
+SharedOperator Acos::substitute( int index, const SharedOperator &sub ){
 
-    return new Acos( argument->substitute( index , sub ) );
+    return SharedOperator( new Acos( argument->substitute(index,sub) ) );
 
-}
-
-Operator* Acos::clone() const{
-
-    return new Acos(*this);
 }
 
 returnValue Acos::initDerivative() {
@@ -117,40 +112,40 @@ returnValue Acos::initDerivative() {
 	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
 
 	derivative = convert2TreeProjection(
-			new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-					new Power(
-							new Addition(
-									new DoubleConstant(1.0 , NE_ONE),
-									new Product(
-											new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
-											new Power_Int(
-													argument->clone(),
+			SharedOperator( new Product( SharedOperator( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO )),
+					SharedOperator( new Power(
+							SharedOperator( new Addition(
+									SharedOperator( new DoubleConstant(1.0 , NE_ONE)),
+									SharedOperator( new Product(
+											SharedOperator( new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO)),
+											SharedOperator( new Power_Int(
+													argument,
 													2
-											)
-									)
-							),
-							new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
-					)
-			));
+											))
+									))
+							)),
+							SharedOperator( new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO ))
+					))
+			)));
 	derivative2 = convert2TreeProjection(
-			new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-					new Product(
-							new Power(
-									new Addition(
-											new DoubleConstant(1.0 , NE_ONE),
-											new Product(
-													new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
-													new Power_Int(
-															argument->clone(),
+			SharedOperator( new Product( SharedOperator( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO )),
+					SharedOperator( new Product(
+							SharedOperator( new Power(
+									SharedOperator( new Addition(
+											SharedOperator( new DoubleConstant(1.0 , NE_ONE)),
+											SharedOperator( new Product(
+													SharedOperator( new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO)),
+													SharedOperator( new Power_Int(
+															argument,
 															2
-													)
-											)
-									),
-									new DoubleConstant( -1.5 , NE_NEITHER_ONE_NOR_ZERO )
-							),
-							argument->clone()
-					)
-			));
+													))
+											))
+									)),
+									SharedOperator( new DoubleConstant( -1.5 , NE_NEITHER_ONE_NOR_ZERO ))
+							)),
+							argument
+					))
+			)));
 
 	return argument->initDerivative();
 }

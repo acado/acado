@@ -188,8 +188,7 @@ Expression CFunction::operator()( const Expression &arg ){
     dummy.increaseID();
 
     for( run1 = 0; run1 < dim; run1++ ){
-        delete tmp.element[run1];
-        tmp.element[run1] = new COperator( thisFunction, arg, run1 );
+        tmp.element[run1] = SharedOperator(new COperator( thisFunction, arg, run1 ));
     }
 
     return tmp;

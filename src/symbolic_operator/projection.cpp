@@ -47,8 +47,6 @@ Projection::Projection()
     curvature      = CT_AFFINE     ;
     monotonicity = MT_NONDECREASING;
     operatorName = ON_VARIABLE     ;
-
-    nCount = 0;
 }
 
 
@@ -60,8 +58,6 @@ Projection::Projection( const std::string &name_ )
     monotonicity   = MT_NONDECREASING;
     operatorName   = ON_VARIABLE     ;
     name           = name_           ;
-
-    nCount = 0;
 }
 
 
@@ -70,7 +66,6 @@ Projection::Projection( VariableType variableType_, int vIndex_, const std::stri
     variableType   = variableType_ ;
     vIndex         = vIndex_       ;
     variableIndex  = vIndex        ;
-
     scale          = 1.0           ;
     curvature      = CT_AFFINE     ;
     monotonicity = MT_NONDECREASING;
@@ -122,7 +117,6 @@ Projection::Projection( VariableType variableType_, int vIndex_, const std::stri
          default: break;
     }
     name = ss.str();
-    nCount = 0;
 }
 
 
@@ -134,11 +128,6 @@ Projection::Projection( const Projection& arg ){
     copy( arg );
 }
 
-
-Operator* Projection::clone() const{
-
-    return new Projection(*this);
-}
 
 
 void Projection::copy( const Projection &arg ){
@@ -153,8 +142,6 @@ void Projection::copy( const Projection &arg ){
         operatorName   = arg.operatorName ;
         curvature      = arg.curvature    ;
         monotonicity   = arg.monotonicity ;
-
-        nCount = 0;
     }
 }
 
@@ -173,25 +160,24 @@ returnValue Projection::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Projection::differentiate( int index ){
+SharedOperator Projection::differentiate( int index ){
 
     if( variableIndex == index ){
-        return new DoubleConstant( 1.0 , NE_ONE );
+        return SharedOperator( new DoubleConstant( 1.0 , NE_ONE ) );
     }
     else{
-        return new DoubleConstant( 0.0 , NE_ZERO );
+        return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ) );
     }
 }
 
 
-Operator* Projection::AD_forward( int dim,
+SharedOperator Projection::AD_forward( int dim,
                                           VariableType *varType,
                                           int *component,
-                                          Operator **seed,
-                                          int &nNewIS,
-                                          TreeProjection ***newIS ){
+                                          SharedOperator *seed,
+                                          std::vector<SharedOperator> &newIS ){
 
-    return ADforwardProtected( dim, varType, component, seed, nNewIS, newIS );
+    return ADforwardProtected( dim, varType, component, seed, newIS );
 }
 
 
@@ -199,43 +185,39 @@ Operator* Projection::AD_forward( int dim,
 returnValue Projection::AD_backward( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+                                        SharedOperator     &seed     , /**< the backward seed     */
+                                        SharedOperator    *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
 
-    return ADbackwardProtected( dim, varType, component, seed, df, nNewIS, newIS );
+    return ADbackwardProtected( dim, varType, component, seed, df, newIS );
 }
 
 
 returnValue Projection::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                        SharedOperator      &l         , /**< the backward seed     */
+                                        SharedOperator     *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                        int            &nNewLIS  , /**< the number of newLIS  */
-                                        TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                        int            &nNewSIS  , /**< the number of newSIS  */
-                                        TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                        int            &nNewHIS  , /**< the number of newHIS  */
-                                        TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        SharedOperator     *dfS       , /**< first order foward result             */
+                                        SharedOperator     *ldf       , /**< first order backward result           */
+                                        SharedOperator     *H         , /**< upper trianglular part of the Hessian */
+                                        std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                        std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                        std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
   
-	return ADsymmetricProtected( dim, varType, component, l, S, dimS, dfS, ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+	return ADsymmetricProtected( dim, varType, component, l, S, dimS, dfS, ldf, H, newLIS, newSIS, newHIS );
 }
 
 
 
-Operator* Projection::substitute( int index, const Operator *sub ){
+SharedOperator Projection::substitute( int index, const SharedOperator &sub ){
 
     if( variableIndex == index ){
-        return sub->clone();
+        return sub;
     }
     else{
-        return clone();
+        return SharedOperator( new Projection(*this));
     }
 }
 
@@ -373,7 +355,7 @@ returnValue Projection::AD_backward2( int number, double seed1, double seed2,
 
 
 std::ostream& Projection::print( std::ostream &stream ) const{
-
+  
     return stream << name;
 }
 
@@ -415,6 +397,11 @@ returnValue Projection::enumerateVariables( SymbolicIndexList *indexList ){
 
   variableIndex = indexList->determineVariableIndex( variableType,
 						     vIndex, scale         );
+  
+//   printf("Projection::enumerateVariables \n");
+//   printf("I am  %d , %d \n", variableType, vIndex );
+//   printf("My index is %d \n", variableIndex );
+  
   return SUCCESSFUL_RETURN;
 }
 
@@ -450,24 +437,23 @@ BooleanType Projection::isSymbolic() const{
 }
 
 
-Operator* Projection::ADforwardProtected( int dim,
+SharedOperator Projection::ADforwardProtected( int dim,
                                                   VariableType *varType,
                                                   int *component,
-                                                  Operator **seed,
-                                                  int &nNewIS,
-                                                  TreeProjection ***newIS ){
+                                                  SharedOperator *seed,
+                                                  std::vector<SharedOperator> &newIS ){
 
     int run1 = 0;
 
     while( run1 < dim ){
 
         if( varType[run1] == variableType && component[run1] == vIndex ){
-            return seed[run1]->clone();
+            return seed[run1];
         }
         run1++;
     }
 
-    return new DoubleConstant( 0.0 , NE_ZERO );
+    return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ));
 }
 
 
@@ -475,10 +461,9 @@ Operator* Projection::ADforwardProtected( int dim,
 returnValue Projection::ADbackwardProtected( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+                                        SharedOperator     &seed     , /**< the backward seed     */
+                                        SharedOperator    *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
 
     int run1 = 0;
 
@@ -487,17 +472,12 @@ returnValue Projection::ADbackwardProtected( int           dim      , /**< numbe
         if( varType[run1] == variableType && component[run1] == vIndex ){
 
             if(   df[run1]->isOneOrZero() == NE_ZERO ){
-                  delete df[run1];
-                  df[run1] = seed->clone();
+                  df[run1] = seed;
             }
             else{
-
                 if( seed-> isOneOrZero() != NE_ZERO ){
-
-                    Operator *tmp = df[run1]->clone();
-                    delete df[run1];
-                    df[run1] = new Addition(tmp->clone(),seed->clone());
-                    delete tmp;
+                    SharedOperator tmp = df[run1];
+                    df[run1] = myAdd(tmp,seed);
                 }
             }
 
@@ -505,8 +485,6 @@ returnValue Projection::ADbackwardProtected( int           dim      , /**< numbe
         }
         run1++;
     }
-
-    delete seed;
     return SUCCESSFUL_RETURN;
 }
 
@@ -514,18 +492,15 @@ returnValue Projection::ADbackwardProtected( int           dim      , /**< numbe
 returnValue Projection::ADsymmetricProtected( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                        SharedOperator   &l         , /**< the backward seed     */
+                                        SharedOperator     *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order forward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper triangular part of the Hessian */
-                                        int            &nNewLIS  , /**< the number of newLIS  */
-                                        TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                        int            &nNewSIS  , /**< the number of newSIS  */
-                                        TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                        int            &nNewHIS  , /**< the number of newHIS  */
-                                        TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        SharedOperator     *dfS       , /**< first order forward result             */
+                                        SharedOperator    *ldf       , /**< first order backward result           */
+                                        SharedOperator     *H         , /**< upper triangular part of the Hessian */
+                                        std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                        std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                        std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
 
 	int run1 = 0;
 
@@ -535,30 +510,24 @@ returnValue Projection::ADsymmetricProtected( int            dim       , /**< nu
 
 			int run2;
 			for( run2 = 0; run2 < dimS; run2++ ){
-				delete dfS[run2];
-				dfS[run2] = S[run1*dimS+run2]->clone();
+				dfS[run2] = S[run1*dimS+run2];
 			}
 
 			if(   ldf[run1]->isOneOrZero() == NE_ZERO ){
-				delete ldf[run1];
-				ldf[run1] = l->clone();
+				ldf[run1] = l;
 			}
 			else{
 
 				if( l->isOneOrZero() != NE_ZERO ){
 
-					Operator *tmp = ldf[run1]->clone();
-					delete ldf[run1];
-					ldf[run1] = new Addition(tmp->clone(),l->clone());
-					delete tmp;
+					SharedOperator tmp = ldf[run1];
+					ldf[run1] = myAdd(tmp,l);
 				}
 			}
 			break;
 		}
 		run1++;
 	}
-
-	delete l;
 	return SUCCESSFUL_RETURN;
 }
 

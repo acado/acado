@@ -42,6 +42,67 @@
 BEGIN_NAMESPACE_ACADO
 
 class ConstraintComponent;
+class Expression;
+
+
+class TemporaryExpression{
+
+public:
+
+  
+    TemporaryExpression( SharedOperator *arg_ );
+    
+    TemporaryExpression& operator= ( const double      & arg );
+    TemporaryExpression& operator= ( const Expression  & arg );
+    
+    TemporaryExpression& operator+=( const Expression  & arg );
+    TemporaryExpression& operator-=( const Expression  & arg );
+    TemporaryExpression& operator*=( const Expression  & arg );
+    TemporaryExpression& operator/=( const Expression  & arg );
+    
+    Expression operator+( const Expression  & arg ) const;
+    Expression operator-( const Expression  & arg ) const;
+    Expression operator*( const Expression  & arg ) const;
+    Expression operator/( const Expression  & arg ) const;
+    
+    Expression operator-( ) const;
+    
+    friend Expression operator+( const Expression& arg1, const TemporaryExpression& arg2 );
+    friend Expression operator-( const Expression& arg1, const TemporaryExpression& arg2 );
+    friend Expression operator*( const Expression& arg1, const TemporaryExpression& arg2 );
+    friend Expression operator/( const Expression& arg1, const TemporaryExpression& arg2 );
+    
+    Expression operator+( const TemporaryExpression  & arg ) const;
+    Expression operator-( const TemporaryExpression  & arg ) const;
+    Expression operator*( const TemporaryExpression  & arg ) const;
+    Expression operator/( const TemporaryExpression  & arg ) const;
+    
+    ConstraintComponent operator<=( const double& ub ) const;
+    ConstraintComponent operator>=( const double& lb ) const;
+    ConstraintComponent operator==( const double&  b ) const;
+
+    ConstraintComponent operator<=( const DVector& ub ) const;
+    ConstraintComponent operator>=( const DVector& lb ) const;
+    ConstraintComponent operator==( const DVector&  b ) const;
+
+    ConstraintComponent operator<=( const VariablesGrid& ub ) const;
+    ConstraintComponent operator>=( const VariablesGrid& lb ) const;
+    ConstraintComponent operator==( const VariablesGrid&  b ) const;
+
+    friend ConstraintComponent operator<=( double lb, const TemporaryExpression &arg );
+    friend ConstraintComponent operator==( double  b, const TemporaryExpression &arg );
+    friend ConstraintComponent operator>=( double ub, const TemporaryExpression &arg );
+
+    friend ConstraintComponent operator<=( DVector lb, const TemporaryExpression &arg );
+    friend ConstraintComponent operator==( DVector  b, const TemporaryExpression &arg );
+    friend ConstraintComponent operator>=( DVector ub, const TemporaryExpression &arg );
+
+    friend ConstraintComponent operator<=( VariablesGrid lb, const TemporaryExpression &arg );
+    friend ConstraintComponent operator==( VariablesGrid  b, const TemporaryExpression &arg );
+    friend ConstraintComponent operator>=( VariablesGrid ub, const TemporaryExpression &arg );
+    
+    SharedOperator *element;
+};
 
 /**
  *  \brief Base class for all variables within the symbolic expressions family.
@@ -74,8 +135,11 @@ class Expression{
         Expression( );
 
         /** Casting constructor. */
-        Expression( const Operator &tree_ );
-
+        Expression( const SharedOperator &tree_ );
+        Expression( const TemporaryExpression &arg_ );
+	
+	
+	
         /** Casting constructor. */
         explicit Expression(	const std::string& name_
         						);
@@ -175,10 +239,10 @@ class Expression{
         Expression operator()( uint idx                 ) const;
         Expression operator()( uint rowIdx, uint colIdx ) const;
 
-        Operator& operator()( uint idx                 );
-        Operator& operator()( uint rowIdx, uint colIdx );
-
-
+        TemporaryExpression operator()( uint idx                 );
+        TemporaryExpression operator()( uint rowIdx, uint colIdx );
+	
+	
         Expression operator+( const double      & arg ) const;
         Expression operator+( const DVector      & arg ) const;
         Expression operator+( const DMatrix      & arg ) const;
@@ -381,7 +445,7 @@ class Expression{
 
         /** Returns a clone of the operator with index idx.
          *  \return A clone of the requested operator. */
-         inline Operator* getOperatorClone( uint idx ) const;
+         inline SharedOperator getOperatorClone( uint idx ) const;
 
 
 
@@ -407,7 +471,7 @@ class Expression{
 
 
         /** Returns a tree projection with respect to the specified index. */
-        inline TreeProjection getTreeProjection( const uint &idx, const std::string& name_ ) const;
+        inline SharedOperator getTreeProjection( const uint &idx, const std::string& name_ ) const;
 
 
 
@@ -441,14 +505,14 @@ class Expression{
 
 
         /** Internal product routine (protected, only for internal use). */
-        Operator* product( const Operator *a, const Operator *b ) const;
+        SharedOperator product( const SharedOperator &a, const SharedOperator &b ) const;
 
 
     // PROTECTED DATA MEMBERS:
     // ---------------------------------------------------------------
     protected:
 
-        Operator**         element     ;   /**< Element of vector space.   */
+        std::vector<SharedOperator> element;   /**< Element of vector space.   */
         uint               dim         ;   /**< DVector space dimension.    */
         uint               nRows, nCols;   /**< DMatrix dimension.          */
         VariableType       variableType;   /**< Variable type.             */
@@ -524,6 +588,9 @@ private:
 
 template<class Derived, VariableType Type, bool AllowCounter>
 unsigned ExpressionType<Derived, Type, AllowCounter>::count( 0 );
+
+
+
 
 CLOSE_NAMESPACE_ACADO
 

@@ -46,7 +46,6 @@ SymbolicIndexList::SymbolicIndexList(){
 
     numberOfOperators = 0;
     comp              = 0;
-    expression        = 0;
 
     int run1                             ;
     const int numberOfVariableTypes = 11 ;
@@ -82,12 +81,6 @@ SymbolicIndexList::~SymbolicIndexList(){
 
     int run1;
 
-    if( expression != NULL ){
-        for( run1 = 0; run1 < numberOfOperators; run1++ ){
-             delete expression[run1];
-        }
-        free(expression);
-    }
     if( comp != NULL ){
         free(comp);
     }
@@ -127,21 +120,7 @@ SymbolicIndexList::SymbolicIndexList( const SymbolicIndexList &arg ){
 
     numberOfOperators = arg.numberOfOperators;
 
-    if( arg.expression != NULL ){
-
-        if( numberOfOperators > 0 ){
-            expression = (Operator**)calloc(numberOfOperators,sizeof(Operator*));
-        }
-        else{
-            expression = NULL;
-        }
-        for( run1 = 0; run1 < numberOfOperators; run1++ ){
-             expression[run1] = arg.expression[run1]->clone();
-        }
-    }
-    else{
-        expression = NULL;
-    }
+    expression = arg.expression;
 
     if( arg.comp != NULL ){
         if( numberOfOperators > 0 ){
@@ -220,14 +199,6 @@ SymbolicIndexList& SymbolicIndexList::operator=( const SymbolicIndexList &arg ){
     if( this != &arg ){
 
         int run1;
-
-        if( expression != NULL ){
-            for( run1 = 0; run1 < numberOfOperators; run1++ ){
-                 delete expression[run1];
-            }
-            free(expression);
-        }
-
         if( comp != NULL ){
             free(comp);
         }
@@ -312,20 +283,7 @@ SymbolicIndexList& SymbolicIndexList::operator=( const SymbolicIndexList &arg ){
 
         numberOfOperators = arg.numberOfOperators;
 
-        if( arg.expression != NULL ){
-            if( numberOfOperators > 0 ){
-                expression = (Operator**)calloc(numberOfOperators,sizeof(Operator*));
-            }
-            else{
-                expression = NULL;
-            }
-            for( run1 = 0; run1 < numberOfOperators; run1++ ){
-                 expression[run1] = arg.expression[run1]->clone();
-            }
-        }
-        else{
-            expression = NULL;
-        }
+        expression = arg.expression;
 
         if( arg.comp != NULL ){
             if( numberOfOperators > 0 ){
@@ -353,12 +311,11 @@ SymbolicIndexList& SymbolicIndexList::operator=( const SymbolicIndexList &arg ){
 //  ------------------------
 
 
-int SymbolicIndexList::addOperatorPointer( Operator* intermediateOperator,
+int SymbolicIndexList::addOperatorPointer( SharedOperator &intermediateOperator,
                                                      int comp_ ){
 
-    expression = (Operator**)realloc(expression,
-                                      (numberOfOperators+1)*sizeof(Operator*));
-    expression[numberOfOperators] = intermediateOperator->clone();
+    expression.resize(numberOfOperators+1);
+    expression[numberOfOperators] = intermediateOperator;
 
     comp = (int*)realloc(comp,(numberOfOperators+1)*sizeof(int));
     comp[numberOfOperators] = comp_;
@@ -369,11 +326,11 @@ int SymbolicIndexList::addOperatorPointer( Operator* intermediateOperator,
 }
 
 
-returnValue SymbolicIndexList::getOperators( Operator **sub, int *comp_, int *n ){
+returnValue SymbolicIndexList::getOperators( std::vector<SharedOperator> &sub, int *comp_, int *n ){
 
     while( n[0] < numberOfOperators ){
 
-        sub   [*n]      = expression[*n]->clone();
+        sub   [*n]      = expression[*n];
         comp_ [*n]      = comp[*n];
         *n = *n+1;
     }
@@ -387,6 +344,7 @@ BooleanType SymbolicIndexList::addNewElement( VariableType variableType_, int in
     switch(variableType_){
 
         case VT_DIFFERENTIAL_STATE:
+
              if( index_ >= maxNumberOfEntries[0] ){
 
                  entryExists[0]   = (BooleanType*)realloc(entryExists[0],
@@ -710,6 +668,7 @@ int SymbolicIndexList::determineVariableIndex( VariableType variableType_, int i
     switch(variableType_){
 
         case VT_DIFFERENTIAL_STATE:
+
              if( index_ >= maxNumberOfEntries[0] ){
 
                  ACADOERROR(RET_INDEX_OUT_OF_RANGE);

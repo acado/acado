@@ -60,7 +60,7 @@ public:
     Asin();
 
     /** Default constructor. */
-    Asin( Operator *_argument );
+    Asin( const SharedOperator &_argument );
 
     /** Copy constructor (deep copy). */
     Asin( const Asin &arg );
@@ -80,14 +80,8 @@ public:
      *  \return The substituted expression.                       \n
      *
      */
-     virtual Operator* substitute( int index             /**< subst. index    */,
-                                     const Operator *sub /**< the substitution*/);
-
-
-     /** Provides a deep copy of the expression. \n
-      *  \return a clone of the expression.      \n
-      */
-     virtual Operator* clone() const;
+     virtual SharedOperator substitute( int   index                 /**< subst. index    */,
+                                        const SharedOperator &sub /**< the substitution*/);
 
      virtual returnValue initDerivative();
 

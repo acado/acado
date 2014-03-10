@@ -39,17 +39,12 @@
 BEGIN_NAMESPACE_ACADO
 
 
-BinaryOperator::BinaryOperator( ) : SmoothOperator( )
-{
-    nCount = 0;
-}
+BinaryOperator::BinaryOperator( ) : SmoothOperator( ){ }
 
-BinaryOperator::BinaryOperator( Operator *_argument1, Operator *_argument2 ) : SmoothOperator( )
+BinaryOperator::BinaryOperator( const SharedOperator &_argument1, const SharedOperator &_argument2 ) : SmoothOperator( )
 {
     argument1          = _argument1                      ;
     argument2          = _argument2                      ;
-    dargument1         = NULL                            ;
-    dargument2         = NULL                            ;
     argument1_result  = (double*)calloc(1,sizeof(double));
     argument2_result  = (double*)calloc(1,sizeof(double));
     dargument1_result = (double*)calloc(1,sizeof(double));
@@ -57,15 +52,13 @@ BinaryOperator::BinaryOperator( Operator *_argument1, Operator *_argument2 ) : S
     bufferSize        = 1                                ;
     curvature         = CT_UNKNOWN                       ;
     monotonicity      = MT_UNKNOWN                       ;
-
-    nCount = 0;
 }
 
 
 BinaryOperator::BinaryOperator( const BinaryOperator &arg ){
 
-	argument1  = arg.argument1->clone();
-    argument2  = arg.argument2->clone();
+    argument1  = arg.argument1;
+    argument2  = arg.argument2;
     copy( arg );
 }
 
@@ -194,19 +187,8 @@ void BinaryOperator::copy( const BinaryOperator &arg ){
 
     bufferSize = arg.bufferSize;
 
-    if( arg.dargument1 == NULL ){
-        dargument1 = NULL;
-    }
-    else{
-        dargument1 = arg.dargument1->clone();
-    }
-
-    if( arg.dargument2 == NULL ){
-        dargument2 = NULL;
-    }
-    else{
-        dargument2 = arg.dargument2->clone();
-    }
+    dargument1 = arg.dargument1;
+    dargument2 = arg.dargument2;
 
     argument1_result  = (double*)calloc(bufferSize,sizeof(double));
     argument2_result  = (double*)calloc(bufferSize,sizeof(double));
@@ -223,22 +205,10 @@ void BinaryOperator::copy( const BinaryOperator &arg ){
     }
     curvature         = arg.curvature   ;
     monotonicity      = arg.monotonicity;
-
-    nCount = 0;
 }
 
 
 void BinaryOperator::deleteAll(){
-
-    if( argument1 != 0 ) delete argument1;
-    if( argument2 != 0 ) delete argument2;
-
-    if( dargument1 != NULL ){
-        delete dargument1;
-    }
-    if( dargument2 != NULL ){
-        delete dargument2;
-    }
 
     free(  argument1_result );
     free(  argument2_result );

@@ -44,8 +44,6 @@ BEGIN_NAMESPACE_ACADO
 
 DoubleConstant::DoubleConstant( ) : SmoothOperator( )
 {
-	nCount = 0;
-
 	value = 0;
 	neutralElement = NE_ZERO;
 }
@@ -53,8 +51,6 @@ DoubleConstant::DoubleConstant( ) : SmoothOperator( )
 DoubleConstant::DoubleConstant( double value_, NeutralElement neutralElement_ )
 	: SmoothOperator( ), value( value_ ), neutralElement( neutralElement_ )
 {
-	nCount = 0;
-
 	// XXX: This should be revised!!!
     if (fabs( value ) < 10.0 * EPS)
     {
@@ -71,8 +67,6 @@ DoubleConstant::DoubleConstant( const DoubleConstant &arg ){
 
     value           = arg.value          ;
     neutralElement  = arg.neutralElement ;
-
-    nCount = 0;
 }
 
 
@@ -87,8 +81,6 @@ DoubleConstant& DoubleConstant::operator=( const DoubleConstant &arg ){
 
         value           = arg.value          ;
         neutralElement  = arg.neutralElement ;
-
-        nCount = 0;
     }
 
     return *this;
@@ -109,20 +101,19 @@ returnValue DoubleConstant::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* DoubleConstant::differentiate( int index ){
+SharedOperator DoubleConstant::differentiate( int index ){
 
-  return new DoubleConstant( 0.0 , NE_ZERO );
+  return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ));
 }
 
 
-Operator* DoubleConstant::AD_forward( int dim,
+SharedOperator DoubleConstant::AD_forward( int dim,
                                         VariableType *varType,
                                         int *component,
-                                        Operator **seed,
-                                        int &nNewIS,
-                                        TreeProjection ***newIS ){
+                                        SharedOperator *seed,
+                                        std::vector<SharedOperator> &newIS ){
 
-    return new DoubleConstant( 0.0, NE_ZERO );
+    return SharedOperator( new DoubleConstant( 0.0, NE_ZERO ));
 }
 
 
@@ -130,12 +121,10 @@ Operator* DoubleConstant::AD_forward( int dim,
 returnValue DoubleConstant::AD_backward( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+                                        SharedOperator &seed     , /**< the backward seed     */
+                                        SharedOperator *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
 
-    delete seed;
     return SUCCESSFUL_RETURN;
 }
 
@@ -143,27 +132,23 @@ returnValue DoubleConstant::AD_backward( int           dim      , /**< number of
 returnValue DoubleConstant::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                        SharedOperator  &l         , /**< the backward seed     */
+                                        SharedOperator     *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        SharedOperator     *dfS       , /**< first order foward result             */
+                                        SharedOperator     *ldf       , /**< first order backward result           */
+                                        SharedOperator     *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
   
-    delete l;
     return SUCCESSFUL_RETURN; 
 }
 
 
-Operator* DoubleConstant::substitute( int index, const Operator *sub ){
+SharedOperator DoubleConstant::substitute( int index, const SharedOperator &sub ){
 
-    return clone();
+    return SharedOperator( new DoubleConstant(*this) );
 }
 
 
@@ -285,12 +270,6 @@ returnValue DoubleConstant::AD_backward2( int number, double seed1, double seed2
 std::ostream& DoubleConstant::print( std::ostream &stream ) const{
 
     return stream << "(real_t)(" << value << ")";
-}
-
-
-Operator* DoubleConstant::clone() const{
-
-    return new DoubleConstant(*this);
 }
 
 

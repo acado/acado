@@ -83,22 +83,22 @@ inline BooleanType Expression::isVariable( ) const{
 }
 
 
-inline Operator* Expression::getOperatorClone( uint idx ) const{
+inline SharedOperator Expression::getOperatorClone( uint idx ) const{
 
     ASSERT( idx < getDim() );
 
-    Operator *tmp = element[idx]->passArgument();
+    SharedOperator tmp = element[idx]->passArgument();
     if( tmp == 0 ) tmp = element[idx];
 
-    return tmp->clone();
+    return tmp;
 }
 
 
-inline TreeProjection Expression::getTreeProjection( const uint &idx, const std::string& name_ ) const{
-
-    TreeProjection tmp( name_ );
-    tmp.operator=( *element[idx] );
-    return tmp;
+inline SharedOperator Expression::getTreeProjection( const uint &idx, const std::string& name_ ) const{
+  
+   TreeProjection b; // TODO: check how to set name correctly
+   b = element[idx];
+   return SharedOperator( new TreeProjection(b) );
 }
 
 

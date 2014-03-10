@@ -60,7 +60,7 @@ Atan::Atan():UnaryOperator(){
 
 }
 
-Atan::Atan( Operator *_argument ):UnaryOperator(_argument){
+Atan::Atan( const SharedOperator &_argument ):UnaryOperator(_argument){
   cName = "atan";
 
   fcn = &atan;
@@ -102,48 +102,43 @@ returnValue Atan::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Atan::substitute( int index, const Operator *sub ){
+SharedOperator Atan::substitute( int index, const SharedOperator &sub ){
 
-    return new Atan( argument->substitute( index , sub ) );
-
+    return SharedOperator( new Atan( argument->substitute( index , sub ) ));
 }
 
-Operator* Atan::clone() const{
-
-    return new Atan(*this);
-}
 
 returnValue Atan::initDerivative() {
 
 	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
 
 	derivative = convert2TreeProjection(
-			new Quotient(
-					new DoubleConstant( 1.0 , NE_ONE ),
-					new Addition(
-							new DoubleConstant( 1.0 , NE_ONE ),
-							new Power_Int(
-									argument->clone(),
+			SharedOperator( new Quotient(
+					SharedOperator( new DoubleConstant( 1.0 , NE_ONE )),
+					SharedOperator( new Addition(
+							SharedOperator( new DoubleConstant( 1.0 , NE_ONE )),
+							SharedOperator( new Power_Int(
+									argument,
 									2
-							)
-					)
-			));
+							))
+					))
+			)));
 	derivative2 = convert2TreeProjection(
-			new Product( new DoubleConstant( -2.0 , NE_NEITHER_ONE_NOR_ZERO ),
-					new Product(
-							new Power(
-									new Addition(
-											new DoubleConstant(1.0 , NE_ONE),
-											new Power_Int(
-													argument->clone(),
+			SharedOperator( new Product( SharedOperator( new DoubleConstant( -2.0 , NE_NEITHER_ONE_NOR_ZERO )),
+					SharedOperator( new Product(
+							SharedOperator( new Power(
+									SharedOperator( new Addition(
+											SharedOperator( new DoubleConstant(1.0 , NE_ONE)),
+											SharedOperator( new Power_Int(
+													argument,
 													2
-											)
-									),
-									new DoubleConstant( -2.0 , NE_NEITHER_ONE_NOR_ZERO )
-							),
-							argument->clone()
-					)
-			));
+											))
+									)),
+									SharedOperator( new DoubleConstant( -2.0 , NE_NEITHER_ONE_NOR_ZERO ))
+							)),
+							argument
+					))
+			)));
 
 	return argument->initDerivative();
 }

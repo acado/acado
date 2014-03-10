@@ -94,7 +94,7 @@ public:
      *  \return The expression for the derivative.                \n
      *
      */
-     virtual Operator* differentiate( int index  /**< diff. index    */ );
+     virtual SharedOperator differentiate( int index  /**< diff. index    */ );
 
 
 
@@ -103,12 +103,11 @@ public:
      *  forward derivative                                        \n
      *  \return SUCCESSFUL_RETURN                                 \n
      */
-     virtual Operator* AD_forward( int                dim      , /**< dimension of the seed */
+     virtual SharedOperator AD_forward( int                dim      , /**< dimension of the seed */
                                      VariableType      *varType  , /**< the variable types    */
                                      int               *component, /**< and their components  */
-                                     Operator       **seed     , /**< the forward seed      */
-                                     int                &nNewIS  , /**< the number of new IS  */
-                                     TreeProjection ***newIS    /**< the new IS-pointer    */ );
+                                     SharedOperator *seed     , /**< the forward seed      */
+                                     std::vector<SharedOperator> &newIS    /**< the new IS-pointer    */ );
 
 
 
@@ -120,10 +119,9 @@ public:
     virtual returnValue AD_backward( int           dim      , /**< number of directions  */
                                      VariableType *varType  , /**< the variable types    */
                                      int          *component, /**< and their components  */
-                                     Operator     *seed     , /**< the backward seed     */
-                                     Operator    **df       , /**< the result            */
-                                     int           &nNewIS  , /**< the number of new IS  */
-                                     TreeProjection ***newIS  /**< the new IS-pointer    */ );
+                                     SharedOperator  &seed     , /**< the backward seed     */
+                                     SharedOperator *df       , /**< the result            */
+                                     std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ );
 
     
     
@@ -135,26 +133,25 @@ public:
      virtual returnValue AD_symmetric( int            dim       , /**< number of directions  */
                                       VariableType  *varType   , /**< the variable types    */
                                       int           *component , /**< and their components  */
-                                      Operator      *l         , /**< the backward seed     */
-                                      Operator     **S         , /**< forward seed matrix   */
+                                      SharedOperator &l         , /**< the backward seed     */
+                                      SharedOperator *S         , /**< forward seed matrix   */
                                       int            dimS      , /**< dimension of forward seed             */
-                                      Operator     **dfS       , /**< first order foward result             */
-                                      Operator     **ldf       , /**< first order backward result           */
-                                      Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
+                                      SharedOperator *dfS       , /**< first order foward result             */
+                                      SharedOperator *ldf       , /**< first order backward result           */
+                                      SharedOperator *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ );
+
 
 
     /** Substitutes var(index) with the expression sub.           \n
      *  \return The substituted expression.                       \n
      *
      */
-     virtual Operator* substitute( int   index           /**< subst. index    */,
-                                     const Operator *sub /**< the substitution*/);
+     virtual SharedOperator substitute( int index             /**< subst. index    */,
+                                        const SharedOperator &sub /**< the substitution*/);
+
 
 
 
@@ -357,13 +354,6 @@ public:
      *  \return SUCCESFUL_RETURN             \n
      */
      virtual std::ostream& print( std::ostream &stream ) const;
-
-
-     /** Provides a deep copy of the expression. \n
-      *  \return a clone of the expression.      \n
-      */
-     virtual Operator* clone() const;
-
 
 
      /** Clears the buffer and resets the buffer size \n

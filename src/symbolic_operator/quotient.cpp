@@ -43,48 +43,23 @@ BEGIN_NAMESPACE_ACADO
 
 
 Quotient::Quotient():BinaryOperator(){
-	derivative0 = 0;
-	derivative1 = 0;
-	derivative2 = 0;
 }
 
-Quotient::Quotient( Operator *_argument1, Operator *_argument2 )
+Quotient::Quotient( const SharedOperator &_argument1, const SharedOperator &_argument2 )
          :BinaryOperator( _argument1, _argument2 ){
 
-	derivative0 = 0;
-	derivative1 = 0;
-	derivative2 = 0;
 }
 
 
 Quotient::Quotient( const Quotient &arg ):BinaryOperator( arg ){
 
-	derivative0 = 0;
-	derivative1 = 0;
-	derivative2 = 0;
-	if( arg.derivative0 != 0 && arg.derivative1 != 0 && arg.derivative2 != 0 ) {
-		derivative0 = arg.derivative0->clone();
-		derivative1 = arg.derivative1->clone();
-		derivative2 = arg.derivative2->clone();
-	}
+    derivative0 = arg.derivative0;
+    derivative1 = arg.derivative1;
+    derivative2 = arg.derivative2;
 }
 
 
-Quotient::~Quotient(){
-
-	if( derivative2 != 0 ) {
-		delete derivative2;
-	}
-	if( derivative1 != 0 ) {
-		delete derivative1;
-	}
-	if( derivative0 != 0 ) {
-		delete derivative0;
-	}
-	derivative0 = 0;
-	derivative1 = 0;
-	derivative2 = 0;
-}
+Quotient::~Quotient(){ }
 
 Quotient& Quotient::operator=( const Quotient &arg ){
 
@@ -123,50 +98,34 @@ returnValue Quotient::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Quotient::differentiate( int index ){
+SharedOperator Quotient::differentiate( int index ){
 
 	dargument1 = argument1->differentiate( index );
 	dargument2 = argument2->differentiate( index );
 
-	Operator* prodTmp = myProd( dargument1, derivative0 );
-	Operator* prodTmp2 = myProd( argument1, dargument2 );
-	Operator* prodTmp3 = myProd( prodTmp2, derivative1 );
-	Operator* result = mySubtract( prodTmp, prodTmp3 );
-
-	delete prodTmp;
-	delete prodTmp2;
-	delete prodTmp3;
-
+	SharedOperator prodTmp = myProd( dargument1, derivative0 );
+	SharedOperator prodTmp2 = myProd( argument1, dargument2 );
+	SharedOperator prodTmp3 = myProd( prodTmp2, derivative1 );
+	SharedOperator result = mySubtract( prodTmp, prodTmp3 );
 	return result;
 }
 
 
 
 
-Operator* Quotient::AD_forward( int dim,
+SharedOperator Quotient::AD_forward( int dim,
                                   VariableType *varType,
                                   int *component,
-                                  Operator **seed,
-                                  int &nNewIS,
-                                  TreeProjection ***newIS ){
+                                  SharedOperator *seed,
+                                  std::vector<SharedOperator> &newIS ){
 
-    if( dargument1 != 0 )
-        delete dargument1;
+    dargument1 = argument1->AD_forward(dim,varType,component,seed,newIS);
+    dargument2 = argument2->AD_forward(dim,varType,component,seed,newIS);
 
-    if( dargument2 != 0 )
-        delete dargument2;
-
-    dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-    dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
-    Operator* prodTmp = myProd( dargument1, derivative0 );
-    Operator* prodTmp2 = myProd( argument1, dargument2 );
-    Operator* prodTmp3 = myProd( prodTmp2, derivative1 );
-    Operator* result = mySubtract( prodTmp, prodTmp3 );
-
-    delete prodTmp;
-    delete prodTmp2;
-    delete prodTmp3;
+    SharedOperator prodTmp = myProd( dargument1, derivative0 );
+    SharedOperator prodTmp2 = myProd( argument1, dargument2 );
+    SharedOperator prodTmp3 = myProd( prodTmp2, derivative1 );
+    SharedOperator result = mySubtract( prodTmp, prodTmp3 );
 
     return result;
 }
@@ -175,35 +134,25 @@ Operator* Quotient::AD_forward( int dim,
 returnValue Quotient::AD_backward( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+                                        SharedOperator &seed     , /**< the backward seed     */
+                                        SharedOperator    *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
 
 	if( seed->isOneOrZero() != NE_ZERO ){
 
-		TreeProjection tmp;
-		tmp = *seed;
+		SharedOperator tmp = convert2TreeProjection(seed);
 
-		Operator *prodTmp = myProd( &tmp, derivative0 );
+		SharedOperator prodTmp = myProd( tmp, derivative0 );
 
-		argument1->AD_backward( dim, varType, component, prodTmp->clone(), df, nNewIS, newIS );
+		argument1->AD_backward( dim, varType, component, prodTmp, df, newIS );
 
-		Operator *prodTmp2 = myProd( argument1, &tmp );
-		Operator *prodTmp3 = myProd( prodTmp2, derivative1 );
-		Operator *zeroTmp = new DoubleConstant( 0.0, NE_ZERO );
-		Operator *subTmp = mySubtract( zeroTmp, prodTmp3 );
+		SharedOperator prodTmp2 = myProd( argument1, tmp );
+		SharedOperator prodTmp3 = myProd( prodTmp2, derivative1 );
+		SharedOperator zeroTmp = SharedOperator(new DoubleConstant( 0.0, NE_ZERO ));
+		SharedOperator subTmp = mySubtract( zeroTmp, prodTmp3 );
 
-		argument2->AD_backward( dim, varType, component, subTmp->clone(), df, nNewIS, newIS );
-
-		delete zeroTmp;
-		delete prodTmp;
-		delete prodTmp2;
-		delete prodTmp3;
-		delete subTmp;
+		argument2->AD_backward( dim, varType, component, subTmp, df, newIS );
 	}
-
-	delete seed;
 	return SUCCESSFUL_RETURN;
 }
 
@@ -211,30 +160,27 @@ returnValue Quotient::AD_backward( int           dim      , /**< number of direc
 returnValue Quotient::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                    SharedOperator     &l         , /**< the backward seed     */
+                                    SharedOperator     *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                    SharedOperator     *dfS       , /**< first order foward result             */
+                                    SharedOperator     *ldf       , /**< first order backward result           */
+                                    SharedOperator     *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
 
-    TreeProjection dy,dxx,dxy,dyy;
+    SharedOperator dy,dxx,dxy,dyy;
     
-    TreeProjection dx(*derivative0);
-    dxy = Product( new DoubleConstant(-1.0,NE_NEITHER_ONE_NOR_ZERO), derivative1->clone() );
-    dxx = DoubleConstant(0.0,NE_ZERO);
-    dy  = Product( dxy.clone(), argument1->clone() );
-    dyy = Product( new Product( new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO), derivative2->clone() ),
-		    argument1->clone() );
+    SharedOperator dx = convert2TreeProjection(derivative0);
+    dxy = SharedOperator( new Product( SharedOperator( new DoubleConstant(-1.0,NE_NEITHER_ONE_NOR_ZERO)), derivative1 ));
+    dxx = SharedOperator( new DoubleConstant(0.0,NE_ZERO));
+    dy  = SharedOperator( new Product( dxy, argument1 ));
+    dyy = SharedOperator( new Product( SharedOperator( new Product( SharedOperator( new DoubleConstant(2.0,NE_NEITHER_ONE_NOR_ZERO)), derivative2 )),
+		    argument1 ));
     
     return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
-			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+			  ldf, H, newLIS, newSIS, newHIS );
 }
 
 
@@ -244,19 +190,19 @@ returnValue Quotient::initDerivative() {
 		return SUCCESSFUL_RETURN;
 	}
 
-	derivative0 = convert2TreeProjection(new Quotient( new DoubleConstant(1.0,NE_ONE), argument2->clone() ));
-	derivative1 = convert2TreeProjection(new Product( derivative0->clone(), derivative0->clone() ));
-	derivative2 = convert2TreeProjection(new Product( derivative0->clone(), derivative1->clone() ));
+	derivative0 = convert2TreeProjection( SharedOperator( new Quotient( SharedOperator( new DoubleConstant(1.0,NE_ONE)), argument2 )));
+	derivative1 = convert2TreeProjection( SharedOperator( new Product ( derivative0, derivative0 )));
+	derivative2 = convert2TreeProjection( SharedOperator( new Product( derivative0, derivative1 )));
 
 	argument1->initDerivative();
 	return argument2->initDerivative();
 }
 
 
-Operator* Quotient::substitute( int index, const Operator *sub ){
+SharedOperator Quotient::substitute( int index, const SharedOperator &sub ){
 
-    return new Quotient( argument1->substitute( index , sub ),
-                         argument2->substitute( index , sub ) );
+    return SharedOperator( new Quotient( argument1->substitute( index , sub ),
+                                         argument2->substitute( index , sub ) ) );
 
 }
 
@@ -478,12 +424,6 @@ returnValue Quotient::AD_backward2( int number, double seed1, double seed2,
 std::ostream& Quotient::print( std::ostream &stream ) const{
 
     return stream << "(" << *argument1 << "/" << *argument2 << ")";
-}
-
-
-Operator* Quotient::clone() const{
-
-    return new Quotient(*this);
 }
 
 

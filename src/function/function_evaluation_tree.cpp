@@ -47,8 +47,6 @@ BEGIN_NAMESPACE_ACADO
 
 FunctionEvaluationTree::FunctionEvaluationTree( ){
 
-    f         = NULL;
-    sub       = NULL;
     lhs_comp  = NULL;
     indexList = new SymbolicIndexList();
     dim       =  0;
@@ -66,60 +64,28 @@ FunctionEvaluationTree::FunctionEvaluationTree( const FunctionEvaluationTree& ar
 
     globalExportVariableName = arg.globalExportVariableName;
 
-    if( arg.f == NULL ){
-        f = NULL;
-    }
-    else{
-        f = (Operator**)calloc(dim,sizeof(Operator*));
-
-        for( run1 = 0; run1 < dim; run1++ ){
-            f[run1] = arg.f[run1]->clone();
-        }
-    }
+    f = arg.f;
 
     indexList = new SymbolicIndexList(*arg.indexList);
 
-    if( arg.sub == NULL ){
-        sub       = NULL;
+    if( n == 0 ){
         lhs_comp  = NULL;
     }
     else{
-        sub = (Operator**)calloc(n,sizeof(Operator*));
         lhs_comp = (int*)calloc(n,sizeof(int));
 
         for( run1 = 0; run1 < n; run1++ ){
-            sub[run1] = arg.sub[run1]->clone();
             lhs_comp[run1] = arg.lhs_comp[run1];
         }
     }
-
+    sub = arg.sub;    
     safeCopy = arg.safeCopy;
 }
 
 
 FunctionEvaluationTree::~FunctionEvaluationTree( ){
 
-    int run1;
-
-    for( run1 = 0; run1 < dim; run1++ ){
-         delete f[run1];
-    }
-    if( f != NULL){
-        free(f);
-    }
-
-    for( run1 = 0; run1 < n; run1++ ){
-
-         delete sub[run1];
-    }
-
-    if( sub != NULL ){
-        free(sub);
-    }
-
-    if( lhs_comp != NULL ){
-        free(lhs_comp);
-    }
+    if( lhs_comp != NULL ) free(lhs_comp);
 
     delete indexList;
 }
@@ -130,20 +96,6 @@ FunctionEvaluationTree& FunctionEvaluationTree::operator=( const FunctionEvaluat
     int run1;
 
     if( this != &arg ){
-
-        for( run1 = 0; run1 < dim; run1++ ){
-             delete f[run1];
-        }
-        if( f != NULL ){
-            free(f);
-        }
-
-        for( run1 = 0; run1 < n; run1++ ){
-             delete sub[run1];
-        }
-        if( sub != 0 ){
-           free(sub);
-        }
 
         if( lhs_comp != NULL ){
             free(lhs_comp);
@@ -156,32 +108,21 @@ FunctionEvaluationTree& FunctionEvaluationTree::operator=( const FunctionEvaluat
 
         globalExportVariableName = arg.globalExportVariableName;
 
-        if( arg.f == NULL ){
-            f = NULL;
-        }
-        else{
-            f = (Operator**)calloc(dim,sizeof(Operator*));
-
-            for( run1 = 0; run1 < dim; run1++ ){
-                f[run1] = arg.f[run1]->clone();
-            }
-        }
+        f = arg.f;
 
         indexList = new SymbolicIndexList(*arg.indexList);
 
-        if( arg.sub == NULL ){
-            sub = NULL;
+        if( n == 0 ){
             lhs_comp = NULL;
         }
         else{
-            sub = (Operator**)calloc(n,sizeof(Operator*));
             lhs_comp = (int*)calloc(n,sizeof(int));
 
             for( run1 = 0; run1 < n; run1++ ){
-                sub[run1] = arg.sub[run1]->clone();
                 lhs_comp[run1] = arg.lhs_comp[run1];
             }
         }
+        sub = arg.sub;
         safeCopy = arg.safeCopy;
     }
 
@@ -197,9 +138,8 @@ returnValue FunctionEvaluationTree::getExpression( Expression& expression ) cons
 
 
 returnValue FunctionEvaluationTree::operator<<( const Expression& arg ){
-
-    safeCopy << arg;
-
+  
+    safeCopy << arg;    
     uint run1;
 
     for( run1 = 0; run1 < arg.getDim(); run1++ ){
@@ -208,16 +148,14 @@ returnValue FunctionEvaluationTree::operator<<( const Expression& arg ){
 
         nn = n;
 
-        f = (Operator**)realloc(f,(dim+1)*sizeof(Operator*));
+        f.resize(dim+1);
+        f[dim] = arg.element[run1];
+        f[dim]-> loadIndices(indexList);
 
-        f[dim] = arg.element[run1]->clone();
-        f[dim]-> loadIndices  ( indexList );
-
-        sub       = (Operator**)realloc(sub,
-                    (indexList->getNumberOfOperators())*sizeof(Operator*));
+        sub.resize(indexList->getNumberOfOperators());
         lhs_comp  = (int*)realloc(lhs_comp,
                     (indexList->getNumberOfOperators())*sizeof(int));
-
+	
         indexList->getOperators( sub, lhs_comp, &n );
 
         while( nn < n ){
@@ -225,9 +163,8 @@ returnValue FunctionEvaluationTree::operator<<( const Expression& arg ){
             sub[nn]-> enumerateVariables( indexList );
             nn++;
         }
-
+        
         f[dim]-> enumerateVariables( indexList );
-
         dim++;
     }
     return SUCCESSFUL_RETURN;
@@ -316,74 +253,62 @@ FunctionEvaluationTree FunctionEvaluationTree::substitute( VariableType variable
     tmp.dim = dim;
     tmp.n   = n  ;
 
-    if( f == NULL ){
-        tmp.f = NULL;
-    }
-    else{
-        tmp.f = (Operator**)calloc(dim,sizeof(Operator*));
+        (tmp.f).resize(dim);
 
-        Operator *temp;
+        SharedOperator temp_;
 
         if( fabs( sub_ ) > 10.0*EPS ){
             if( fabs( 1.0 - sub_ ) < 10.0*EPS  ){
-                temp = new DoubleConstant(1.0,NE_ONE);
+                temp_ = SharedOperator( new DoubleConstant(1.0,NE_ONE) );
                 for( run1 = 0; run1 < dim; run1++ ){
-                    tmp.f[run1] = f[run1]->substitute(sub_index,temp);
+                    tmp.f[run1] = f[run1]->substitute(sub_index,temp_);
                 }
-                delete temp;
             }
             else{
-                temp = new DoubleConstant(sub_,NE_NEITHER_ONE_NOR_ZERO);
+                temp_ = SharedOperator( new DoubleConstant(sub_,NE_NEITHER_ONE_NOR_ZERO) );
                 for( run1 = 0; run1 < dim; run1++ ){
-                    tmp.f[run1] = f[run1]->substitute(sub_index,temp);
+                    tmp.f[run1] = f[run1]->substitute(sub_index,temp_);
                 }
-                delete temp;
             }
         }
         else{
-            temp = new DoubleConstant(0.0,NE_ZERO);
+            temp_ = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
             for( run1 = 0; run1 < dim; run1++ ){
-                tmp.f[run1] = f[run1]->substitute(sub_index,temp);
+                tmp.f[run1] = f[run1]->substitute(sub_index,temp_);
             }
-            delete temp;
         }
-    }
 
-    if( sub == NULL ){
-        tmp.sub       = NULL;
+    if( n == 0 ){
         tmp.lhs_comp  = NULL;
     }
     else{
-        tmp.sub      = (Operator**)calloc(n,sizeof(Operator*));
+        (tmp.sub).resize(n);
         tmp.lhs_comp = (int*)calloc(n,sizeof(int));
 
-        Operator *temp;
+        SharedOperator temp;
 
         if( fabs(sub_) > 10.0*EPS ){
             if( fabs( 1.0-sub_ ) < 10.0*EPS  ){
-                temp = new DoubleConstant(1.0,NE_ONE);
+                temp = SharedOperator( new DoubleConstant(1.0,NE_ONE) );
                 for( run1 = 0; run1 < n; run1++ ){
                     tmp.sub[run1]      = sub[run1]->substitute(sub_index,temp);
                     tmp.lhs_comp[run1] = lhs_comp[run1];
                 }
-                delete temp;
             }
             else{
-                temp = new DoubleConstant(sub_,NE_NEITHER_ONE_NOR_ZERO);
+                temp = SharedOperator( new DoubleConstant(sub_,NE_NEITHER_ONE_NOR_ZERO) );
                 for( run1 = 0; run1 < n; run1++ ){
                     tmp.sub[run1]      = sub[run1]->substitute(sub_index,temp);
                     tmp.lhs_comp[run1] = lhs_comp[run1];
                 }
-                delete temp;
             }
         }
         else{
-            temp = new DoubleConstant(0.0,NE_ZERO);
+            temp = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
             for( run1 = 0; run1 < n; run1++ ){
                 tmp.sub[run1]      = sub[run1]->substitute(sub_index,temp);
                 tmp.lhs_comp[run1] = lhs_comp[run1];
             }
-            delete temp;
         }
     }
 
@@ -444,12 +369,11 @@ BooleanType FunctionEvaluationTree::isDependingOn( const Expression &variable ){
 
     for( run1 = 0; run1 < nn; run1++ ){
 
-        Operator *tmp2 = (variable.element[run1])->clone();
+        SharedOperator tmp2 = variable.element[run1];
 
         if( tmp2->isVariable( varType[run1], component[run1] ) == BT_FALSE ){
 
              ACADOERROR(RET_INVALID_ARGUMENTS);
-             delete   tmp2     ;
              delete[] varType  ;
              delete[] component;
              return   BT_TRUE  ;
@@ -458,12 +382,10 @@ BooleanType FunctionEvaluationTree::isDependingOn( const Expression &variable ){
         if( varType[run1] == VT_INTERMEDIATE_STATE ){
 
              ACADOERROR(RET_INVALID_ARGUMENTS);
-             delete   tmp2     ;
              delete[] varType  ;
              delete[] component;
              return   BT_TRUE  ;
         }
-        delete tmp2;
     }
 
 
@@ -497,12 +419,11 @@ BooleanType FunctionEvaluationTree::isLinearIn( const Expression &variable ){
 
     for( run1 = 0; run1 < nn; run1++ ){
 
-        Operator *tmp2 = (variable.element[run1])->clone();
+        SharedOperator tmp2 = variable.element[run1];
 
         if( tmp2->isVariable( varType[run1], component[run1] ) == BT_FALSE ){
 
              ACADOERROR(RET_INVALID_ARGUMENTS);
-             delete   tmp2     ;
              delete[] varType  ;
              delete[] component;
              return   BT_TRUE  ;
@@ -511,12 +432,10 @@ BooleanType FunctionEvaluationTree::isLinearIn( const Expression &variable ){
         if( varType[run1] == VT_INTERMEDIATE_STATE ){
 
              ACADOERROR(RET_INVALID_ARGUMENTS);
-             delete   tmp2     ;
              delete[] varType  ;
              delete[] component;
              return   BT_TRUE  ;
         }
-        delete tmp2;
     }
 
 
@@ -550,12 +469,11 @@ BooleanType FunctionEvaluationTree::isPolynomialIn( const Expression &variable )
 
     for( run1 = 0; run1 < nn; run1++ ){
 
-        Operator *tmp2 = (variable.element[run1])->clone();
+        SharedOperator tmp2 = variable.element[run1];
 
         if( tmp2->isVariable( varType[run1], component[run1] ) == BT_FALSE ){
 
              ACADOERROR(RET_INVALID_ARGUMENTS);
-             delete   tmp2     ;
              delete[] varType  ;
              delete[] component;
              return   BT_TRUE  ;
@@ -564,12 +482,10 @@ BooleanType FunctionEvaluationTree::isPolynomialIn( const Expression &variable )
         if( varType[run1] == VT_INTERMEDIATE_STATE ){
 
              ACADOERROR(RET_INVALID_ARGUMENTS);
-             delete   tmp2     ;
              delete[] varType  ;
              delete[] component;
              return   BT_TRUE  ;
         }
-        delete tmp2;
     }
 
 
@@ -604,12 +520,11 @@ BooleanType FunctionEvaluationTree::isRationalIn( const Expression &variable ){
 
     for( run1 = 0; run1 < nn; run1++ ){
 
-        Operator *tmp2 = (variable.element[run1])->clone();
+        SharedOperator tmp2 = variable.element[run1];
 
         if( tmp2->isVariable( varType[run1], component[run1] ) == BT_FALSE ){
 
              ACADOERROR(RET_INVALID_ARGUMENTS);
-             delete   tmp2     ;
              delete[] varType  ;
              delete[] component;
              return   BT_TRUE  ;
@@ -618,12 +533,10 @@ BooleanType FunctionEvaluationTree::isRationalIn( const Expression &variable ){
         if( varType[run1] == VT_INTERMEDIATE_STATE ){
 
              ACADOERROR(RET_INVALID_ARGUMENTS);
-             delete   tmp2     ;
              delete[] varType  ;
              delete[] component;
              return   BT_TRUE  ;
         }
-        delete tmp2;
     }
 
 
@@ -1040,15 +953,13 @@ returnValue FunctionEvaluationTree::makeImplicit( int dim_ ){
 
     for( run1 = 0; run1 < dim_; run1++ ){
 
-        Operator *tmp = f[run1]->clone();
-        delete f[run1];
-        Projection pp;
-        pp.variableType   = VT_DDIFFERENTIAL_STATE;
-        pp.vIndex         = run1                  ;
-        pp.variableIndex  = var_counter-dim_+run1  ;
+        SharedOperator tmp = f[run1];
+        Projection *pp = new Projection();
+        pp->variableType   = VT_DDIFFERENTIAL_STATE;
+        pp->vIndex         = run1                  ;
+        pp->variableIndex  = var_counter-dim_+run1  ;
 
-        f[run1] = new Subtraction( pp.clone(), tmp->clone() );
-        delete tmp;
+        f[run1] = SharedOperator( new Subtraction( SharedOperator(pp), tmp ));
     }
 
     return SUCCESSFUL_RETURN;
@@ -1122,13 +1033,12 @@ int FunctionEvaluationTree::getNumberOfVariables() const{
 }
 
 
-Operator* FunctionEvaluationTree::getExpression(	uint componentIdx
-												) const
-{
+SharedOperator FunctionEvaluationTree::getExpression( uint componentIdx ) const{
+
 	if ( (int)componentIdx < getDim( ) )
-		return f[componentIdx]->clone( );
+		return f[componentIdx];
 	else
-		return new DoubleConstant( 0.0,NE_ZERO );
+		return SharedOperator( new DoubleConstant( 0.0,NE_ZERO ));
 }
 
 

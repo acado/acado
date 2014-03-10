@@ -188,8 +188,7 @@ public:
     /** Returns the symbolic expression of the given component of the function.  \n
      *  \return The symbolic expression         \n
      */
-    Operator* getExpression(	uint componentIdx
-								) const;
+    SharedOperator getExpression( uint componentIdx ) const;
 
 
     /** Evaluates the function.                \n

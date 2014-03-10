@@ -50,127 +50,6 @@ NonsmoothOperator::~NonsmoothOperator()
 }
 
 
-Operator& NonsmoothOperator::operator=( const double &arg ){
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return emptyTreeProjection;
-}
-
-Operator& NonsmoothOperator::operator=( const DVector &arg ){
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return emptyTreeProjection;
-}
-
-Operator& NonsmoothOperator::operator=( const DMatrix &arg ){
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return emptyTreeProjection;
-}
-
-Operator& NonsmoothOperator::operator=( const Expression &arg ){
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return emptyTreeProjection;
-}
-
-Operator& NonsmoothOperator::operator=( const Operator &arg ){
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return emptyTreeProjection;
-}
-
-
-TreeProjection* NonsmoothOperator::cloneTreeProjection() const{
-
-    // if this routine is ever called something went
-    // really wrong ....
-
-    ACADOERROR( RET_UNKNOWN_BUG );
-    ASSERT( 1 == 0 );
-    return new TreeProjection();
-}
-
-
-Operator& NonsmoothOperator::operator+=( const double    & arg ){ return operator=( this->operator+(arg) ); }
-Operator& NonsmoothOperator::operator+=( const DVector    & arg ){ return operator=( this->operator+(arg) ); }
-Operator& NonsmoothOperator::operator+=( const DMatrix    & arg ){ return operator=( this->operator+(arg) ); }
-Operator& NonsmoothOperator::operator+=( const Expression& arg ){ return operator=( this->operator+(arg) ); }
-
-Operator& NonsmoothOperator::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
-Operator& NonsmoothOperator::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
-Operator& NonsmoothOperator::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
-Operator& NonsmoothOperator::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
-
-Operator& NonsmoothOperator::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
-Operator& NonsmoothOperator::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
-Operator& NonsmoothOperator::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
-Operator& NonsmoothOperator::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
-
-Operator& NonsmoothOperator::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
-Operator& NonsmoothOperator::operator/=( const Expression  & arg ){ return operator=( this->operator/(arg) ); }
-
-
-
-
-Expression NonsmoothOperator::operator+( const double        & arg ) const{ return Expression(*this)+arg; }
-Expression NonsmoothOperator::operator+( const DVector        & arg ) const{ return Expression(*this)+arg; }
-Expression NonsmoothOperator::operator+( const DMatrix        & arg ) const{ return Expression(*this)+arg; }
-Expression NonsmoothOperator::operator+( const Operator& arg ) const{ return Expression(*this)+arg; }
-Expression NonsmoothOperator::operator+( const Expression    & arg ) const{ return Expression(*this)+arg; }
-
-Expression NonsmoothOperator::operator-( const double        & arg ) const{ return Expression(*this)-arg; }
-Expression NonsmoothOperator::operator-( const DVector        & arg ) const{ return Expression(*this)-arg; }
-Expression NonsmoothOperator::operator-( const DMatrix        & arg ) const{ return Expression(*this)-arg; }
-Expression NonsmoothOperator::operator-( const Operator& arg ) const{ return Expression(*this)-arg; }
-Expression NonsmoothOperator::operator-( const Expression    & arg ) const{ return Expression(*this)-arg; }
-
-Expression NonsmoothOperator::operator-( ) const{ return -Expression(*this); }
-
-Expression NonsmoothOperator::operator*( const double        & arg ) const{ return Expression(*this)*arg; }
-Expression NonsmoothOperator::operator*( const DVector        & arg ) const{ return Expression(*this)*arg; }
-Expression NonsmoothOperator::operator*( const DMatrix        & arg ) const{ return Expression(*this)*arg; }
-
-
-Expression NonsmoothOperator::operator*( const Operator& arg ) const{
-
-    Expression tmp2(arg);
-
-
-    Expression tmp1(*this);
-
-
-    return tmp1*tmp2;
-}
-
-
-Expression NonsmoothOperator::operator*( const Expression    & arg ) const{ return Expression(*this)*arg; }
-
-Expression NonsmoothOperator::operator/( const double        & arg ) const{ return Expression(*this)/arg; }
-Expression NonsmoothOperator::operator/( const Operator& arg ) const{ return Expression(*this)/arg; }
-Expression NonsmoothOperator::operator/( const Expression    & arg ) const{ return Expression(*this)/arg; }
-
-
-ConstraintComponent NonsmoothOperator::operator<=( const double& ub ) const{ return Expression(*this) <= ub; }
-ConstraintComponent NonsmoothOperator::operator>=( const double& lb ) const{ return Expression(*this) >= lb; }
-ConstraintComponent NonsmoothOperator::operator==( const double&  b ) const{ return Expression(*this) ==  b; }
-
-ConstraintComponent NonsmoothOperator::operator<=( const DVector& ub ) const{ return Expression(*this) <= ub; }
-ConstraintComponent NonsmoothOperator::operator>=( const DVector& lb ) const{ return Expression(*this) >= lb; }
-ConstraintComponent NonsmoothOperator::operator==( const DVector&  b ) const{ return Expression(*this) ==  b; }
-
-ConstraintComponent NonsmoothOperator::operator<=( const VariablesGrid& ub ) const{ return Expression(*this) <= ub; }
-ConstraintComponent NonsmoothOperator::operator>=( const VariablesGrid& lb ) const{ return Expression(*this) >= lb; }
-ConstraintComponent NonsmoothOperator::operator==( const VariablesGrid&  b ) const{ return Expression(*this) ==  b; }
-
-
-
-
 returnValue NonsmoothOperator::evaluate( int number, double *x, double *result ){
 
     //result[0] = value;
@@ -185,20 +64,19 @@ returnValue NonsmoothOperator::evaluate( EvaluationBase *x ){
 
 
 
-Operator* NonsmoothOperator::differentiate( int index ){
+SharedOperator NonsmoothOperator::differentiate( int index ){
 
-  return new NonsmoothOperator();
+  return SharedOperator( new NonsmoothOperator());
 }
 
 
-Operator* NonsmoothOperator::AD_forward( int dim,
-                                        VariableType *varType,
-                                        int *component,
-                                        Operator **seed,
-                                        int &nNewIS,
-                                        TreeProjection ***newIS ){
+SharedOperator NonsmoothOperator::AD_forward( int dim,
+                                  VariableType *varType,
+                                  int *component,
+                                  SharedOperator *seed,
+                                  std::vector<SharedOperator> &newIS ){
 
-    return new NonsmoothOperator();
+    return SharedOperator( new NonsmoothOperator() );
 }
 
 
@@ -206,12 +84,10 @@ Operator* NonsmoothOperator::AD_forward( int dim,
 returnValue NonsmoothOperator::AD_backward( int           dim      , /**< number of directions  */
                                         VariableType *varType  , /**< the variable types    */
                                         int          *component, /**< and their components  */
-                                        Operator     *seed     , /**< the backward seed     */
-                                        Operator    **df       , /**< the result            */
-                                        int           &nNewIS  , /**< the number of new IS  */
-                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
+                                        SharedOperator   &seed     , /**< the backward seed     */
+                                        SharedOperator    *df       , /**< the result            */
+                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
 
-    delete seed;
     return SUCCESSFUL_RETURN;
 }
 
@@ -220,28 +96,23 @@ returnValue NonsmoothOperator::AD_backward( int           dim      , /**< number
 returnValue NonsmoothOperator::AD_symmetric( int            dim       , /**< number of directions  */
                                         VariableType  *varType   , /**< the variable types    */
                                         int           *component , /**< and their components  */
-                                        Operator      *l         , /**< the backward seed     */
-                                        Operator     **S         , /**< forward seed matrix   */
+                                        SharedOperator  &l         , /**< the backward seed     */
+                                        SharedOperator  *S         , /**< forward seed matrix   */
                                         int            dimS      , /**< dimension of forward seed             */
-                                        Operator     **dfS       , /**< first order foward result             */
-                                        Operator     **ldf       , /**< first order backward result           */
-                                        Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+                                        SharedOperator     *dfS       , /**< first order foward result             */
+                                        SharedOperator     *ldf       , /**< first order backward result           */
+                                        SharedOperator     *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
 
-    delete l;
     return SUCCESSFUL_RETURN; 
 }
 
 
+SharedOperator NonsmoothOperator::substitute( int index, const SharedOperator &sub ){
 
-Operator* NonsmoothOperator::substitute( int index, const Operator *sub ){
-
-    return clone();
+    return SharedOperator( new NonsmoothOperator(*this) );
 }
 
 
@@ -371,12 +242,6 @@ std::ostream& NonsmoothOperator::print( std::ostream &stream ) const
 }
 
 
-Operator* NonsmoothOperator::clone() const{
-
-    return new NonsmoothOperator(*this);
-}
-
-
 returnValue NonsmoothOperator::clearBuffer(){
 
     return SUCCESSFUL_RETURN;
@@ -425,9 +290,10 @@ int NonsmoothOperator::getGlobalIndex( ) const{
 }
 
 
-Operator* NonsmoothOperator::passArgument() const{
+SharedOperator NonsmoothOperator::passArgument() const{
 
-    return 0;
+    Operator *tmp = 0;
+    return SharedOperator(tmp);
 }
 
 

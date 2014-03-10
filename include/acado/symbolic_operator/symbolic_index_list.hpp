@@ -206,7 +206,7 @@ public:
      *  \return SUCCESSFUL_RETURN                                 \n
      *
      */
-    int addOperatorPointer( Operator* intermediateOperator
+    int addOperatorPointer( SharedOperator &intermediateOperator
                                                            /**< The intermediate
                                                              *  OperatorPointer
                                                              *  to be added.      */,
@@ -225,7 +225,7 @@ public:
      *  \return SUCCESSFUL_RETURN                        \n
      *
      */
-    returnValue getOperators( Operator **sub, int *comp_, int *n );
+    returnValue getOperators( std::vector<SharedOperator> &sub, int *comp_, int *n );
 
 
     /** Optimizes the index list for the case that a variable has \n
@@ -241,7 +241,7 @@ public:
 
 protected:
 
-    Operator  **expression     ;   /**< Pointer to the expressions    \n
+    std::vector<SharedOperator> expression;   /**< Vector of the expressions    \n
                                        *  of the intermediate states.   */
 
     int          *comp           ;   /**< The components of the intermediate

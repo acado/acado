@@ -59,7 +59,7 @@ Cos::Cos():UnaryOperator(){
 
 }
 
-Cos::Cos( Operator *_argument ):UnaryOperator(_argument){
+Cos::Cos( const SharedOperator &_argument ):UnaryOperator(_argument){
   cName = "cos";
 
   fcn = &cos;
@@ -101,23 +101,19 @@ returnValue Cos::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Cos::substitute( int index, const Operator *sub ){
+SharedOperator Cos::substitute( int index, const SharedOperator &sub ){
 
-    return new Cos( argument->substitute( index , sub ) );
+    return SharedOperator( new Cos( argument->substitute( index , sub ) ));
 
 }
 
-Operator* Cos::clone() const{
-
-    return new Cos(*this);
-}
 
 returnValue Cos::initDerivative() {
 
 	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
 
-	derivative = convert2TreeProjection(new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Sin(argument->clone()) ));
-	derivative2 = convert2TreeProjection(new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Cos(argument->clone()) ));
+	derivative = convert2TreeProjection( SharedOperator( new Product( SharedOperator( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO )), SharedOperator( new Sin(argument))) ));
+	derivative2 = convert2TreeProjection(SharedOperator( new Product( SharedOperator( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO )), SharedOperator( new Cos(argument) ))));
 
 	return argument->initDerivative();
 }

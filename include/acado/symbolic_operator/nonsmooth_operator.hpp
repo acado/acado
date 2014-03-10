@@ -64,72 +64,6 @@ public:
     virtual ~NonsmoothOperator();
 
 
-    /** Sets the argument (note that arg should have dimension 1). */
-
-    virtual Operator& operator=( const double      & arg );
-    virtual Operator& operator=( const DVector      & arg );
-    virtual Operator& operator=( const DMatrix      & arg );
-    virtual Operator& operator=( const Expression  & arg );
-    virtual Operator& operator=( const Operator    & arg );
-
-
-    Operator& operator+=( const double      & arg );
-    Operator& operator+=( const DVector      & arg );
-    Operator& operator+=( const DMatrix      & arg );
-    Operator& operator+=( const Expression  & arg );
-
-    Operator& operator-=( const double      & arg );
-    Operator& operator-=( const DVector      & arg );
-    Operator& operator-=( const DMatrix      & arg );
-    Operator& operator-=( const Expression  & arg );
-
-    Operator& operator*=( const double      & arg );
-    Operator& operator*=( const DVector      & arg );
-    Operator& operator*=( const DMatrix      & arg );
-    Operator& operator*=( const Expression  & arg );
-
-    Operator& operator/=( const double      & arg );
-    Operator& operator/=( const Expression  & arg );
-
-
-    Expression operator+( const double        & arg ) const;
-    Expression operator+( const DVector        & arg ) const;
-    Expression operator+( const DMatrix        & arg ) const;
-    Expression operator+( const Operator& arg ) const;
-    Expression operator+( const Expression    & arg ) const;
-
-    Expression operator-( const double          & arg ) const;
-    Expression operator-( const DVector          & arg ) const;
-    Expression operator-( const DMatrix          & arg ) const;
-    Expression operator-( const Operator  & arg ) const;
-    Expression operator-( const Expression      & arg ) const;
-
-    Expression operator-( ) const;
-
-    Expression operator*( const double         & arg ) const;
-    Expression operator*( const DVector         & arg ) const;
-    Expression operator*( const DMatrix         & arg ) const;
-    Expression operator*( const Operator & arg ) const;
-    Expression operator*( const Expression     & arg ) const;
-
-    Expression operator/( const double         & arg ) const;
-    Expression operator/( const Operator & arg ) const;
-    Expression operator/( const Expression     & arg ) const;
-
-
-    ConstraintComponent operator<=( const double& ub ) const;
-    ConstraintComponent operator>=( const double& lb ) const;
-    ConstraintComponent operator==( const double&  b ) const;
-
-    ConstraintComponent operator<=( const DVector& ub ) const;
-    ConstraintComponent operator>=( const DVector& lb ) const;
-    ConstraintComponent operator==( const DVector&  b ) const;
-
-    ConstraintComponent operator<=( const VariablesGrid& ub ) const;
-    ConstraintComponent operator>=( const VariablesGrid& lb ) const;
-    ConstraintComponent operator==( const VariablesGrid&  b ) const;
-
-
     /** Evaluates the expression and stores the intermediate      \n
      *  results in a buffer (needed for automatic differentiation \n
      *  in backward mode)                                         \n
@@ -150,7 +84,7 @@ public:
      *  \return The expression for the derivative.                \n
      *
      */
-     virtual Operator* differentiate( int index     /**< diff. index    */ );
+     virtual SharedOperator differentiate( int index  /**< diff. index    */ );
 
 
 
@@ -159,12 +93,11 @@ public:
      *  forward derivative                                        \n
      *  \return SUCCESSFUL_RETURN                                 \n
      */
-     virtual Operator* AD_forward( int                dim      , /**< dimension of the seed */
+     virtual SharedOperator AD_forward( int                dim      , /**< dimension of the seed */
                                      VariableType      *varType  , /**< the variable types    */
                                      int               *component, /**< and their components  */
-                                     Operator       **seed     , /**< the forward seed      */
-                                     int                &nNewIS  , /**< the number of new IS  */
-                                     TreeProjection ***newIS    /**< the new IS-pointer    */ );
+                                     SharedOperator *seed     , /**< the forward seed      */
+                                     std::vector<SharedOperator> &newIS    /**< the new IS-pointer    */ );
 
 
 
@@ -176,10 +109,9 @@ public:
     virtual returnValue AD_backward( int           dim      , /**< number of directions  */
                                      VariableType *varType  , /**< the variable types    */
                                      int          *component, /**< and their components  */
-                                     Operator     *seed     , /**< the backward seed     */
-                                     Operator    **df       , /**< the result            */
-                                     int           &nNewIS  , /**< the number of new IS  */
-                                     TreeProjection ***newIS  /**< the new IS-pointer    */ );
+                                     SharedOperator  &seed     , /**< the backward seed     */
+                                     SharedOperator *df       , /**< the result            */
+                                     std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ );
 
     
     
@@ -191,18 +123,15 @@ public:
      virtual returnValue AD_symmetric( int            dim       , /**< number of directions  */
                                       VariableType  *varType   , /**< the variable types    */
                                       int           *component , /**< and their components  */
-                                      Operator      *l         , /**< the backward seed     */
-                                      Operator     **S         , /**< forward seed matrix   */
+                                      SharedOperator &l         , /**< the backward seed     */
+                                      SharedOperator *S         , /**< forward seed matrix   */
                                       int            dimS      , /**< dimension of forward seed             */
-                                      Operator     **dfS       , /**< first order foward result             */
-                                      Operator     **ldf       , /**< first order backward result           */
-                                      Operator     **H         , /**< upper trianglular part of the Hessian */
-                                      int            &nNewLIS  , /**< the number of newLIS  */
-                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
-                                      int            &nNewSIS  , /**< the number of newSIS  */
-                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
-                                      int            &nNewHIS  , /**< the number of newHIS  */
-                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
+                                      SharedOperator *dfS       , /**< first order foward result             */
+                                      SharedOperator *ldf       , /**< first order backward result           */
+                                      SharedOperator *H         , /**< upper trianglular part of the Hessian */
+                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
+                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
+                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ );
 
 
 
@@ -210,8 +139,9 @@ public:
      *  \return The substituted expression.                       \n
      *
      */
-     virtual Operator* substitute( int   index            /**< subst. index    */,
-                                     const Operator *sub  /**< the substitution*/);
+     virtual SharedOperator substitute( int index             /**< subst. index    */,
+                                        const SharedOperator &sub /**< the substitution*/);
+
 
 
 
@@ -423,20 +353,6 @@ public:
      */
      virtual std::ostream& print( std::ostream &stream ) const;
 
-     /** Provides a deep copy of the expression. \n
-      *  \return a clone of the expression.      \n
-      */
-     virtual Operator* clone() const;
-
-
-     /** Provides a deep copy of a tree projection. \n
-      *  \return a clone of the TreeProjection or   \n
-      *          an assertion if the type this is   \n
-      *          expression is no TreeProjection.   \n
-      */
-     virtual TreeProjection* cloneTreeProjection() const;
-
-
 
      /** Clears the buffer and resets the buffer size \n
       *  to 1.                                        \n
@@ -506,7 +422,7 @@ public:
 
 
      /** Returns the argument or NULL if no intermediate argument available */
-     virtual Operator* passArgument() const;
+     virtual SharedOperator passArgument() const;
 
 
     /** Asks whether all elements are purely symbolic.                \n
@@ -515,9 +431,6 @@ public:
       *         BT_FALSE otherwise (e.g. if C functions are linked).  \n
       */
     virtual BooleanType isSymbolic() const;
-
-
-    int nCount;
 
 
 //
