@@ -392,6 +392,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		R1.setup("R1", NU * N, NU, REAL, ACADO_WORKSPACE);
 		R2.setup("R2", NU * N, NY, REAL, ACADO_WORKSPACE);
 
+		S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+
 		QN1.setup("QN1", NX, NX, REAL, ACADO_WORKSPACE);
 		QN2.setup("QN2", NX, NYN, REAL, ACADO_WORKSPACE);
 
