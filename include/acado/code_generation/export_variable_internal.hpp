@@ -267,6 +267,9 @@ class ExportVariableInternal : public ExportArgumentInternal
 		/** Check whether the matrix is actually a submatrix. */
 		bool isSubMatrix() const;
 
+		/** Check whether the matrix is diagonal. */
+		bool isDiagonal() const;
+
 	//
     // PROTECTED MEMBER FUNCTIONS:
     //

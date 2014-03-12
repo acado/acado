@@ -479,6 +479,20 @@ bool ExportVariableInternal::isSubMatrix() const
 	return true;
 }
 
+bool ExportVariableInternal::isDiagonal() const
+{
+	if (isSubMatrix() == true)
+	{
+		LOG( LVL_DEBUG ) << "Digonal check works for non-sub-matrices only ATM" << endl;
+		return false;
+	}
+
+	DMatrix foo( *data );
+	Eigen::DiagonalMatrix<double, Eigen::Dynamic, Eigen::Dynamic> bar( foo.diagonal() );
+
+	return (foo == bar);
+}
+
 
 CLOSE_NAMESPACE_ACADO
 

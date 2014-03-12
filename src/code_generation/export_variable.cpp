@@ -473,6 +473,11 @@ bool ExportVariable::isSubMatrix() const
 	return (*this)->isSubMatrix();
 }
 
+bool ExportVariable::isDiagonal() const
+{
+	return (*this)->isDiagonal();
+}
+
 CLOSE_NAMESPACE_ACADO
 
 // end of file.

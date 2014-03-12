@@ -249,6 +249,7 @@ protected:
 
 	ExportVariable Q1, Q2;
 	ExportVariable R1, R2;
+	ExportVariable S1;
 	ExportVariable QN1, QN2;
 
 	ExportVariable objSlx, objSlu;

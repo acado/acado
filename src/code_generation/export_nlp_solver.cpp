@@ -116,6 +116,8 @@ returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarat
 	declarations.addDeclaration(R1, dataStruct);
 	declarations.addDeclaration(R2, dataStruct);
 
+	declarations.addDeclaration(S1, dataStruct);
+
 	declarations.addDeclaration(objSEndTerm, dataStruct);
 
 	declarations.addDeclaration(QN1, dataStruct);
@@ -492,13 +494,6 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	Fx << expFx;
 	Fu << expFu;
 
-	if (expFx.isDependingOn( VT_CONTROL ) == true)
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-				"Jacobian of the objective function w.r.t diff. states depends on controls.");
-	if (expFu.isDependingOn( VT_DIFFERENTIAL_STATE ) == true)
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-				"Jacobian of the objective function w.r.t controls depends on diff. states.");
-
 	if (Fx.isConstant() == true)
 	{
 		EvaluationPoint epFx( Fx );
@@ -617,6 +612,36 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		R1.setup("R1", NU * N, NU, REAL, ACADO_WORKSPACE);
 		R2.setup("R2", NU * N, NY, REAL, ACADO_WORKSPACE);
 	}
+
+	if (objS.isGiven() == true && objEvFu.isGiven() == true && objEvFx.isGiven() == true)
+	{
+		S1 = objEvFx.getGivenMatrix().transpose() * objS.getGivenMatrix() * objEvFu.getGivenMatrix();
+	}
+	else if (Fu.isOneOrZero() == NE_ZERO or Fx.isOneOrZero() == NE_ZERO)
+	{
+		S1 = zeros<double>(NX, NU);
+	}
+	else
+	{
+		if (objS.isGiven() == true or objS.isDiagonal() == true)
+		{
+			DMatrix depFx = objEvFx.isGiven() == true ? objEvFx.getGivenMatrix() : expFx.getDependencyPattern( vX );
+
+			DMatrix depFu = objEvFu.isGiven() == true ? objEvFu.getGivenMatrix() : expFu.getDependencyPattern( vU );
+
+			DMatrix depS  = objS.isGiven() == true ? objS.getGivenMatrix() : eye<double>( objS.getNumRows() );
+
+			DMatrix dep = depFx.transpose() * depS * depFu;
+			if (dep.isZero() == true)
+				S1 = zeros<double>(NX, NU);
+		}
+		else
+		{
+			S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+		}
+	}
+
+//	cout << "S1 is: " << (S1.getGivenMatrix().isZero() ? "zero" : "not zero") << endl;
 
 	////////////////////////////////////////////////////////////////////////////
 	//
