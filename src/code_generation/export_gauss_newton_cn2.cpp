@@ -412,8 +412,6 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 
 	if (QN1.isGiven() == false)
 	{
-		indexX = getNYN();
-
 		ExportVariable tmpQN1, tmpQN2;
 		tmpQN1.setup("tmpQN1", NX, NX, REAL, ACADO_LOCAL);
 		tmpQN2.setup("tmpQN2", NX, NYN, REAL, ACADO_LOCAL);
@@ -422,18 +420,14 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		setObjQN1QN2.addStatement( tmpQN2 == (tmpFxEnd ^ tmpObjSEndTerm) );
 		setObjQN1QN2.addStatement( tmpQN1 == tmpQN2 * tmpFxEnd );
 
-		if (tmpFxEnd.isGiven() == true)
-			evaluateObjective.addFunctionCall(
-					setObjQN1QN2,
-					tmpFxEnd, objSEndTerm,
-					QN1.getAddress(0, 0), QN2.getAddress(0, 0)
-			);
-		else
-			evaluateObjective.addFunctionCall(
-					setObjQN1QN2,
-					objValueOut.getAddress(0, indexX), objSEndTerm,
-					QN1.getAddress(0, 0), QN2.getAddress(0, 0)
-			);
+		indexX = getNYN();
+		ExportArgument tmpFxEndCall = tmpFxEnd.isGiven() == true ? tmpFxEnd  : objValueOut.getAddress(0, indexX);
+
+		evaluateObjective.addFunctionCall(
+				setObjQN1QN2,
+				tmpFxEndCall, objSEndTerm,
+				QN1.getAddress(0, 0), QN2.getAddress(0, 0)
+		);
 
 		evaluateObjective.addLinebreak( );
 	}
