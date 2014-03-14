@@ -187,6 +187,7 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 	code.addFunction( moveGuE );
 
 	code.addFunction( multBTW1 );
+	code.addFunction( mac_S1T_E );
 	code.addFunction( macBTW1_R1 );
 	code.addFunction( multGxTGu );
 	code.addFunction( macQEW2 );
@@ -195,6 +196,7 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 
 	code.addFunction( macATw1QDy );
 	code.addFunction( macBTw1 );
+	code.addFunction( macS1TSbar );
 	code.addFunction( macQSbarW2 );
 	code.addFunction( macASbar );
 //	code.addFunction( macASbarD2 );
@@ -678,7 +680,8 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 		for k = N - 1: i + 1
 		{
-			H_{k, i} = B_k^T * W1;
+			H_{k, i}  = B_k^T * W1;
+			H_{k, i} += S_k^T * E_{j + k - i - 1};
 
 			W2 = A_k^T * W1;
 			W1 = Q_k^T * E_{j + k - i - 1} + W2;
@@ -721,12 +724,26 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 						multGxGu, QN1, E.getAddress((offset + N - col - 1) * NX), W1
 				);
 
+//			cout << "E block " << (offset + N - col - 1) << endl;
+
 			for (unsigned row = N - 1; col < row; --row)
 			{
 				condensePrep.addFunctionCall(
 						multBTW1, evGu.getAddress(row * NX), W1,
 						ExportIndex( row ), ExportIndex( col )
 				);
+
+				if ((S1.isGiven() and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+				{
+					ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(row * NX) : S1;
+
+					condensePrep.addFunctionCall(
+							mac_S1T_E,
+							S1Call, E.getAddress((offset + row - col - 1) * NX),
+							ExportIndex( row ), ExportIndex( col )
+					);
+//					cout << "S1 E Block " << (offset + row - col - 1) << endl;
+				}
 
 				condensePrep.addFunctionCall(
 						multGxTGu, evGx.getAddress(row * NX), W1, W2
@@ -741,7 +758,10 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 							macQEW2,
 							Q1.getAddress(row * NX), E.getAddress((offset + row - col - 1) * NX), W2, W1
 					);
+
+//				cout << "E block " << (offset + row - col - 1) << endl;
 			}
+//			cout << endl;
 
 			if (R1.isGiven() == true)
 				condensePrep.addFunctionCall(
@@ -762,9 +782,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		// Long horizons
 
 		ExportIndex row, col, offset;
-		condensePrep.acquire( row );
-		condensePrep.acquire( col );
-		condensePrep.acquire( offset );
+		condensePrep.acquire( row ).acquire( col ).acquire( offset );
 
 		ExportForLoop cLoop(col, 0, N);
 		ExportForLoop fwdLoop(row, 1, N - col);
@@ -798,6 +816,17 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 //				col, row
 		);
 
+		if ((S1.isGiven() and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+		{
+			ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(row * NX) : S1;
+
+			adjLoop.addFunctionCall(
+					mac_S1T_E,
+					S1Call, E.getAddress((offset + row - col - 1) * NX),
+					row, col
+			);
+		}
+
 		adjLoop.addFunctionCall(
 				multGxTGu, evGx.getAddress(row * NX), W1, W2
 		);
@@ -828,9 +857,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		condensePrep.addStatement( cLoop );
 		condensePrep.addLinebreak();
 
-		condensePrep.release( row );
-		condensePrep.release( col );
-		condensePrep.release( offset );
+		condensePrep.release( row ).release( col ).release( offset );
 	}
 
 	/// NEW CODE END
@@ -933,11 +960,13 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	for k = N - 1: 1
 	{
 		g1_k += B_k^T * w1;
+		g1_k += S_k^T * sbar_k;
 		w2 = A_k^T * w1 + q_k;
 		w1 = Q_k^T * sbar_k + w2;
 	}
 
 	g1_0 += B_0^T * w1;
+	g1_0 += S^0^T * x0;
 
 	*/
 
@@ -964,8 +993,16 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		condenseFdb.addFunctionCall(
 				macBTw1, evGu.getAddress(i * NX), w1, g.getAddress(i * NU)
 		);
+
+		if ((S1.isGiven() == true and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+		{
+			ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(i * NX) : S1;
+			condenseFdb.addFunctionCall(macS1TSbar, S1Call, sbar.getAddress(i * NX), g.getAddress(i * NU));
+		}
+
 		condenseFdb.addFunctionCall(
-				macATw1QDy, evGx.getAddress(i * NX), w1, QDy.getAddress(i * NX), w2 // Proveri indexiranje za QDy
+				// TODO Check indexing for QDy
+				macATw1QDy, evGx.getAddress(i * NX), w1, QDy.getAddress(i * NX), w2
 		);
 		if (Q1.isGiven() == true)
 			condenseFdb.addFunctionCall(
@@ -979,6 +1016,10 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	condenseFdb.addFunctionCall(
 			macBTw1, evGu.getAddress( 0 ), w1, g.getAddress( 0 )
 	);
+	if ((S1.isGiven() == true and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+	{
+		condenseFdb.addFunctionCall(macS1TSbar, S1, x0, g);
+	}
 	condenseFdb.addLinebreak();
 
 	//// NEW CODE END
@@ -1340,6 +1381,28 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	macBTW1_R1.addStatement(
 			H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iRow * NU, (iRow + 1) * NU) += mRegH11
 	);
+
+	if (S1.isGiven() == true and S1.getGivenMatrix().isZero() == false)
+	{
+		ExportVariable S11 = S1;
+		mac_S1T_E.setup("mac_S1T_E", S11, Gu2, iRow, iCol);
+		mac_S1T_E.addStatement(
+				H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iCol * NU, (iCol + 1) * NU) += (S11 ^ Gu2)
+		);
+
+		macS1TSbar.setup("macS1TSbar", S11, w11, U1);
+		macS1TSbar.addStatement( U1 == (S11 ^ w11) );
+	}
+	else if (S1.isGiven() == false)
+	{
+		mac_S1T_E.setup("mac_S1T_E", Gu1, Gu2, iRow, iCol);
+		mac_S1T_E.addStatement(
+				H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iCol * NU, (iCol + 1) * NU) += (Gu1 ^ Gu2)
+		);
+
+		macS1TSbar.setup("macS1TSbar", Gu1, w11, U1);
+		macS1TSbar.addStatement( U1 == (Gu1 ^ w11) );
+	}
 
 	return SUCCESSFUL_RETURN;
 }
