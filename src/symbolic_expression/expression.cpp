@@ -741,6 +741,21 @@ DMatrix Expression::getDependencyPattern( const Expression& arg ) const{
     return tmp;
 }
 
+DMatrix Expression::getSparsityPattern() const
+{
+	DMatrix res = zeros<double>(getNumRows(), getNumCols());
+
+	for (unsigned el = 0; el < getDim(); ++el)
+	{
+		Operator* foo = getOperatorClone(el);
+		if (foo->isOneOrZero() != NE_ZERO)
+			res(el) = 1.0;
+		delete foo;
+	}
+
+	return res;
+}
+
 
 
 Expression Expression::getSin( ) const{

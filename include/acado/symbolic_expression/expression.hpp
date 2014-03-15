@@ -238,6 +238,8 @@ class Expression{
 	*/
         DMatrix getDependencyPattern( const Expression& arg ) const;
 
+        DMatrix getSparsityPattern() const;
+
         Expression getSin    ( ) const;
         Expression getCos    ( ) const;
         Expression getTan    ( ) const;
