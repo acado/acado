@@ -392,7 +392,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		R1.setup("R1", NU * N, NU, REAL, ACADO_WORKSPACE);
 		R2.setup("R2", NU * N, NY, REAL, ACADO_WORKSPACE);
 
-		S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+//		S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+		S1 = zeros<double>(NX, NU);
 
 		QN1.setup("QN1", NX, NX, REAL, ACADO_WORKSPACE);
 		QN2.setup("QN2", NX, NYN, REAL, ACADO_WORKSPACE);
@@ -625,54 +626,33 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	}
 	else
 	{
-//		if (objS.isGiven() == true or objS.isDiagonal() == true)
-//		{
-//			// Dependency pattern of Fx
-//			DMatrix depFx;
-//			// Dependency pattern of Fx
-//			DMatrix depFu;
-//
-//			if (objEvFx.isGiven() == true)
-//			{
-//				depFx = objEvFx.getGivenMatrix();
-//			}
-//			else
-//			{
-//				for (unsigned el = 0; el < expFx.getNumCols(); ++el)
-//					depFx.appendCols( expFx.getCol( el ).getDependencyPattern( vU ).sumCol() );
-//			}
-//
-//			if (objEvFu.isGiven() == true)
-//			{
-//				depFu = objEvFu.getGivenMatrix();
-//			}
-//			else
-//			{
-//				for (unsigned el = 0; el < expFu.getNumCols(); ++el)
-//				{
-//					depFu.appendCols( expFu.getCol( el ).getDependencyPattern( vU ).sumCol() );
-//				}
-//			}
-//
+		if (objS.isGiven() == true or objS.isDiagonal() == true)
+		{
+			// Dependency pattern of Fx
+			DMatrix depFx = objEvFx.isGiven() == true ? objEvFx.getGivenMatrix() : expFx.getSparsityPattern();
+			// Dependency pattern of Fx
+			DMatrix depFu = objEvFu.isGiven() == true ? objEvFu.getGivenMatrix() : expFu.getSparsityPattern();
+
 //			cout << depFx << endl;
+//			cout << expFx << endl;
 //			cout << depFu << endl;
 //			cout << expFu << endl;
-//
-//			// The sparsity of the weighting matrix
-//			DMatrix depS  = objS.isGiven() == true ? objS.getGivenMatrix() : eye<double>( objS.getNumRows() );
-//
-//			// Mutiply sparsities to check if S1 is indded zero in the end.
-//			DMatrix dep = depFx.transpose() * depS * depFu;
-//			if (dep.isZero() == true)
-//				S1 = zeros<double>(NX, NU);
-//		}
-//		else
-//		{
-			S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
-//		}
-	}
 
-//	cout << "S1 is: " << (S1.getGivenMatrix().isZero() ? "zero" : "not zero") << endl;
+			// The sparsity of the weighting matrix
+			DMatrix depS  = objS.isGiven() == true ? objS.getGivenMatrix() : eye<double>( objS.getNumRows() );
+
+			// Mutiply sparsities to check if S1 is indeed zero in the end.
+			DMatrix dep = depFx.transpose() * depS * depFu;
+			if (dep.isZero() == true)
+				S1 = zeros<double>(NX, NU);
+			else
+				S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+		}
+		else
+		{
+			S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+		}
+	}
 
 	////////////////////////////////////////////////////////////////////////////
 	//
