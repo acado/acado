@@ -199,6 +199,7 @@ private:
 	ExportFunction multGxGu;
 	ExportFunction moveGuE;
 	ExportFunction setBlockH11;
+	ExportFunction setBlockH11_R1;
 	ExportFunction zeroBlockH11;
 	ExportFunction copyHTH;
 	ExportFunction multQ1d;
