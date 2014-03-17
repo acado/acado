@@ -129,8 +129,8 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 		DifferentialState Sxx("", NX,NX), Sux("", NU,NX), Suu("", NU,NU);
 
 		g << multipleForwardDerivative(tmp, x, Gx) + multipleBackwardDerivative(rhs_, x, Sxx);
-		g << multipleBackwardDerivative(tmp, x, Gu).transpose() + forwardDerivative(tmp, u) + multipleBackwardDerivative(rhs_, x, Sux.transpose()).transpose();
-		g << forwardDerivative(backwardDerivative(rhs_, u, lx), u) + multipleForwardDerivative(tmp, u, Gu) + multipleBackwardDerivative(rhs_, u, Sux.transpose());
+		g << multipleBackwardDerivative(tmp, x, Gu).transpose() + forwardDerivative(tmp, u).transpose() + multipleBackwardDerivative(rhs_, x, Sux.transpose()).transpose();
+		g << forwardDerivative(backwardDerivative(rhs_, u, lx), u) + multipleBackwardDerivative(tmp, u, Gu) + multipleBackwardDerivative(rhs_, u, Sux.transpose());
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
