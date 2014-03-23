@@ -47,8 +47,6 @@ ExportNLPSolver::ExportNLPSolver(	UserInteraction* _userInteraction,
 
 	dimPacH = 0;
 	dimPocH = 0;
-
-	externObjective = false;
 }
 
 returnValue ExportNLPSolver::setIntegratorExport(	IntegratorExportPtr const _integrator
@@ -404,8 +402,6 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 		evaluateLSQ = ExportAcadoFunction(lsqExternElements[ 0 ].h);
 		evaluateLSQEndTerm = ExportAcadoFunction(lsqExternEndTermElements[ 0 ].h);
-
-		externObjective = true;
 
 		setupResidualVariables();
 

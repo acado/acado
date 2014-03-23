@@ -245,7 +245,6 @@ protected:
 	ExportVariable objAuxVar, objValueIn, objValueOut;
 	ExportAcadoFunction evaluateLSQ;
 	ExportAcadoFunction evaluateLSQEndTerm;
-	bool externObjective;
 
 	ExportVariable Q1, Q2;
 	ExportVariable R1, R2;
@@ -328,7 +327,8 @@ enum ExportNLPType
 	GAUSS_NEWTON_CN2,
 	GAUSS_NEWTON_CN2_FACTORIZATION,
 	GAUSS_NEWTON_FORCES,
-	GAUSS_NEWTON_QPDUNES
+	GAUSS_NEWTON_QPDUNES,
+	GAUSS_NEWTON_HPMPC
 };
 
 /** Factory for creation of exported NLP/OCP solvers. */
