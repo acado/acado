@@ -99,6 +99,10 @@ Projection::Projection( VariableType variableType_, int vIndex_, const std::stri
               ss << "p" << "[" << vIndex <<"]";
               break;
 
+         case VT_ONLINE_DATA:
+              ss << "od" << "[" << vIndex <<"]";
+              break;
+
          case VT_INTEGER_PARAMETER:
               ss << "q" << "[" << vIndex <<"]";
               break;
