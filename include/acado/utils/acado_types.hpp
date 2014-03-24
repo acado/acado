@@ -35,6 +35,8 @@
 #define ACADO_TOOLKIT_ACADO_TYPES_HPP
 
 #include <acado/utils/acado_namespace_macros.hpp>
+#include <map>
+#include <vector>
 
 #ifdef _WIN32
     #include <memory>
@@ -65,12 +67,31 @@ typedef void (*cFcnPtr)( double* x, double* f, void *userData );
 /** Function pointer type for derivatives given as C source code. */
 typedef void (*cFcnDPtr)( int number, double* x, double* seed, double* f, double* df, void *userData );
 
-
 /** Forward Declarations. */
 class Operator;
+class Expression;
+
 
 /** Smart pointers that are used in the symbolic expression and operator classes.*/
 typedef std::tr1::shared_ptr<Operator> SharedOperator;
+
+/** Define a vector of SharedOperators.*/
+typedef std::vector<SharedOperator> SharedOperatorVector;
+
+/** Define a 1D map of SharedOperators.*/
+typedef std::map<Operator*,SharedOperator> SharedOperatorMap ;
+
+/** Define a 2D map of SharedOperators.*/
+typedef std::map<Operator*,SharedOperatorMap> SharedOperatorMap2;
+
+/** Define a 3D map of SharedOperators.*/
+typedef std::map<Operator*,SharedOperatorMap2> SharedOperatorMap3;
+
+/** Define a dependency map.*/
+typedef std::map<Operator*,bool> DependencyMap;
+
+/** Define a name map.*/
+typedef std::map<const Operator*,std::string> StringMap;
 
 
 /** Defines the Neutral Elements ZERO and ONE as well as the default

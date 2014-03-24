@@ -47,7 +47,7 @@ inline returnValue LogRecord::getAll(	const Expression& _name,
 										MatrixVariablesGrid& values
 										) const
 {
-	return getAll( _name.getComponent( 0 ),LRT_VARIABLE,values );
+	return getAll(0,LRT_VARIABLE,values );// TODO: check whether this works...
 }
 
 
@@ -62,7 +62,7 @@ inline returnValue LogRecord::getFirst(	const Expression& _name,
 										DMatrix& firstValue
 										) const
 {
-	return getFirst( _name.getComponent( 0 ),LRT_VARIABLE,firstValue );
+	return getFirst(0,LRT_VARIABLE,firstValue );// TODO: check whether this works...
 }
 
 inline returnValue LogRecord::getFirst(	LogName _name,
@@ -81,10 +81,12 @@ inline returnValue LogRecord::getFirst(	const Expression& _name,
 										) const
 {
 	DMatrix tmp;
-	getFirst( _name.getComponent( 0 ),LRT_VARIABLE,tmp );
+	getFirst(0,LRT_VARIABLE,tmp );// TODO: check whether this works...
 	firstValue = tmp;
-	firstValue.setType( _name.getVariableType() );
+// 	firstValue.setType( _name.getVariableType() );
 
+	return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+	
 	return SUCCESSFUL_RETURN;
 }
 
@@ -102,7 +104,7 @@ inline returnValue LogRecord::getLast(	const Expression& _name,
 										DMatrix& lastValue
 										) const
 {
-	return getLast( _name.getComponent( 0 ),LRT_VARIABLE,lastValue );
+	return getLast(0,LRT_VARIABLE,lastValue ); // TODO: check whether this works...
 }
 
 
@@ -123,7 +125,7 @@ inline returnValue LogRecord::getLast(	const Expression& _name,
 										) const
 {
 	DMatrix tmp;
-	getLast( _name.getComponent( 0 ),LRT_VARIABLE,tmp );
+	getLast(0,LRT_VARIABLE,tmp );
 	lastValue = tmp;
 
 	return SUCCESSFUL_RETURN;
@@ -143,7 +145,7 @@ inline returnValue LogRecord::setAll(	const Expression& _name,
 										const MatrixVariablesGrid& values
 										)
 {	
-	return setAll( _name.getComponent( 0 ),LRT_VARIABLE,values );
+	return setAll(0,LRT_VARIABLE,values );
 }
 
 
@@ -162,7 +164,7 @@ inline returnValue LogRecord::setLast(	const Expression& _name,
 										double time
 										)
 {	
-	return setLast( _name.getComponent( 0 ),LRT_VARIABLE,value,time );
+	return setLast( 0,LRT_VARIABLE,value,time );
 }
 
 
@@ -236,7 +238,7 @@ inline BooleanType LogRecord::hasItem(	LogName _name
 inline BooleanType LogRecord::hasItem(	const Expression& _name
 										) const
 {
-	if (items.count(std::make_pair(_name.getComponent( 0 ), LRT_VARIABLE)))
+	if (items.count(std::make_pair(0, LRT_VARIABLE)))
 		return true;
 	
 	return false;
@@ -261,7 +263,7 @@ inline BooleanType LogRecord::hasNonEmptyItem(	const Expression& _name
 												) const
 {
 	LogRecordItems::const_iterator it;
-	it = items.find(std::make_pair(_name.getComponent( 0 ), LRT_VARIABLE));
+	it = items.find(std::make_pair(0, LRT_VARIABLE));
 	if (it == items.end())
 		return false;
 	if (it->second.values.isEmpty( ) == false)
@@ -299,7 +301,7 @@ inline returnValue LogRecord::enableWriteProtection(        const Expression& _n
                                                                                                                 )
 {
 	LogRecordItems::iterator it;
-	it = items.find(std::make_pair(_name.getComponent( 0 ), LRT_VARIABLE));
+	it = items.find(std::make_pair(0, LRT_VARIABLE));
 	if (it == items.end())
 		return SUCCESSFUL_RETURN;
 	
@@ -327,7 +329,7 @@ inline returnValue LogRecord::disableWriteProtection(        const Expression& _
                                                                                                                 )
 {
 	LogRecordItems::iterator it;
-	it = items.find(std::make_pair(_name.getComponent( 0 ), LRT_VARIABLE));
+	it = items.find(std::make_pair(0, LRT_VARIABLE));
 	if (it == items.end())
 		return SUCCESSFUL_RETURN;
 	

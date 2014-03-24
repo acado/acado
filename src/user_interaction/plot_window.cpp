@@ -324,34 +324,36 @@ returnValue PlotWindow::addSubplot(	const Expression& _expression,
 									double _yRangeUpperLimit
 									){
 
-    uint run1;
+//     uint run1;
+// 
+//     for( run1 = 0; run1 < _expression.getDim(); run1++ ){
+// 
+//     	PlotWindowSubplot* newSubplot = new PlotWindowSubplot(	_expression(run1),
+// 																_title,_xLabel,_yLabel,_plotMode,
+// 																_xRangeLowerLimit,_xRangeUpperLimit,
+// 																_yRangeLowerLimit,_yRangeUpperLimit );
+// 
+// 		if ( number == 0 )
+// 		{
+// 			first = newSubplot;
+// 			last = newSubplot;
+// 		}
+// 		else
+// 		{
+// 			if ( last->setNext( newSubplot ) != SUCCESSFUL_RETURN )
+// 				return ACADOERROR( RET_PLOT_WINDOW_CORRUPTED );
+// 			last = newSubplot;
+// 		}
+// 
+//         Expression tmp( _expression(run1) );
+// 
+// 		if ( addPlotDataItem( &tmp ) != SUCCESSFUL_RETURN )
+// 			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
+// 
+// 		++number;
+// 	}
 
-    for( run1 = 0; run1 < _expression.getDim(); run1++ ){
-
-    	PlotWindowSubplot* newSubplot = new PlotWindowSubplot(	_expression(run1),
-																_title,_xLabel,_yLabel,_plotMode,
-																_xRangeLowerLimit,_xRangeUpperLimit,
-																_yRangeLowerLimit,_yRangeUpperLimit );
-
-		if ( number == 0 )
-		{
-			first = newSubplot;
-			last = newSubplot;
-		}
-		else
-		{
-			if ( last->setNext( newSubplot ) != SUCCESSFUL_RETURN )
-				return ACADOERROR( RET_PLOT_WINDOW_CORRUPTED );
-			last = newSubplot;
-		}
-
-        Expression tmp( _expression(run1) );
-
-		if ( addPlotDataItem( &tmp ) != SUCCESSFUL_RETURN )
-			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
-
-		++number;
-	}
+return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -370,41 +372,44 @@ returnValue PlotWindow::addSubplot(	const Expression& _expressionX,
 									)
 {
 
-    ASSERT( _expressionX.getDim() == _expressionY.getDim() );
+//     ASSERT( _expressionX.getDim() == _expressionY.getDim() );
+// 
+//     uint run1;
+// 
+//     for( run1 = 0; run1 < _expressionX.getDim(); run1++ ){
+// 
+// 		PlotWindowSubplot* newSubplot = new PlotWindowSubplot(	_expressionX(run1),_expressionY(run1),
+// 																_title,_xLabel,_yLabel,_plotMode,
+// 																_xRangeLowerLimit,_xRangeUpperLimit,
+// 																_yRangeLowerLimit,_yRangeUpperLimit );
+// 
+// 		if ( number == 0 )
+// 		{
+// 			first = newSubplot;
+// 			last = newSubplot;
+// 		}
+// 		else
+// 		{
+// 			if ( last->setNext( newSubplot ) != SUCCESSFUL_RETURN )
+// 				return ACADOERROR( RET_OPTIONS_LIST_CORRUPTED );
+// 			last = newSubplot;
+// 		}
+// 
+//         Expression tmpX( _expressionX(run1) );
+// 
+// 		if ( addPlotDataItem( &tmpX ) != SUCCESSFUL_RETURN )
+// 			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
+// 
+//         Expression tmpY( _expressionY(run1) );
+// 
+// 		if ( addPlotDataItem( &tmpY ) != SUCCESSFUL_RETURN )
+// 			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
+// 
+// 		++number;
+//     }
 
-    uint run1;
 
-    for( run1 = 0; run1 < _expressionX.getDim(); run1++ ){
-
-		PlotWindowSubplot* newSubplot = new PlotWindowSubplot(	_expressionX(run1),_expressionY(run1),
-																_title,_xLabel,_yLabel,_plotMode,
-																_xRangeLowerLimit,_xRangeUpperLimit,
-																_yRangeLowerLimit,_yRangeUpperLimit );
-
-		if ( number == 0 )
-		{
-			first = newSubplot;
-			last = newSubplot;
-		}
-		else
-		{
-			if ( last->setNext( newSubplot ) != SUCCESSFUL_RETURN )
-				return ACADOERROR( RET_OPTIONS_LIST_CORRUPTED );
-			last = newSubplot;
-		}
-
-        Expression tmpX( _expressionX(run1) );
-
-		if ( addPlotDataItem( &tmpX ) != SUCCESSFUL_RETURN )
-			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
-
-        Expression tmpY( _expressionY(run1) );
-
-		if ( addPlotDataItem( &tmpY ) != SUCCESSFUL_RETURN )
-			return ACADOERROR( RET_LOG_RECORD_CORRUPTED );
-
-		++number;
-    }
+return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -588,24 +593,26 @@ returnValue PlotWindow::clearAllSubplots( )
 returnValue PlotWindow::addPlotDataItem(	const Expression* const _expression
 											)
 {
-	if ( _expression != 0 )
-	{
-		// use dedicated call for variables
-		if ( _expression->isVariable( ) == BT_TRUE )
-			return addPlotDataItem( _expression->getVariableType( ) );
+// 	if ( _expression != 0 )
+// 	{
+// 		// use dedicated call for variables
+// 		if ( _expression->isVariable( ) == BT_TRUE )
+// 			return addPlotDataItem( _expression->getVariableType( ) );
+// 
+// 		// otherwise add all log entries that might be needed
+// 		plotDataRecord.addItem( LOG_DIFFERENTIAL_STATES );
+// 		plotDataRecord.addItem( LOG_ALGEBRAIC_STATES );
+// 		plotDataRecord.addItem( LOG_PARAMETERS );
+// 		plotDataRecord.addItem( LOG_CONTROLS );
+// 		plotDataRecord.addItem( LOG_DISTURBANCES );
+// 
+// 		plotDataRecord.addItem( LOG_SIMULATED_OUTPUT );
+// 
+// 		plotDataRecord.addItem( LOG_DISCRETIZATION_INTERVALS );
+// 		plotDataRecord.addItem( LOG_STAGE_BREAK_POINTS );
+// 	}
 
-		// otherwise add all log entries that might be needed
-		plotDataRecord.addItem( LOG_DIFFERENTIAL_STATES );
-		plotDataRecord.addItem( LOG_ALGEBRAIC_STATES );
-		plotDataRecord.addItem( LOG_PARAMETERS );
-		plotDataRecord.addItem( LOG_CONTROLS );
-		plotDataRecord.addItem( LOG_DISTURBANCES );
-
-		plotDataRecord.addItem( LOG_SIMULATED_OUTPUT );
-
-		plotDataRecord.addItem( LOG_DISCRETIZATION_INTERVALS );
-		plotDataRecord.addItem( LOG_STAGE_BREAK_POINTS );
-	}
+return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -761,89 +768,90 @@ returnValue PlotWindow::getVariableDataGrids(	const Expression* const variable,
 												)
 {
 
-    ASSERT( variable->isVariable() == BT_TRUE );
-
-	VariablesGrid dataGridTmp, dataGridComponent;
-	int component = variable->getComponent(0);
-
-	_type = variable->getVariableType();
+//     ASSERT( variable->isVariable() == BT_TRUE );
+// 
+// 	VariablesGrid dataGridTmp, dataGridComponent;
+// 	int component = variable->getComponent(0);
+// 
+// 	_type = variable->getVariableType();
+// 	
+// 	switch( _type )
+// 	{
+// 		case VT_DIFFERENTIAL_STATE:
+// 			plotDataRecord.getLast( LOG_DIFFERENTIAL_STATES,dataGridTmp );
+// 			break;
+// 
+// 		case VT_ALGEBRAIC_STATE:
+// 			plotDataRecord.getLast( LOG_ALGEBRAIC_STATES,dataGridTmp );
+// 			break;
+// 
+// 		case VT_PARAMETER:
+// 			if ( shallPlotNominalParameters == BT_TRUE )
+// 				plotDataRecord.getLast( LOG_NOMINAL_PARAMETERS,dataGridTmp );
+// 			else
+// 				plotDataRecord.getLast( LOG_PARAMETERS,dataGridTmp );
+// 			
+// 			component = variable->getComponent(0);
+// 			if ( dataGridTmp.getNumValues( ) <= (uint)component )
+// 				return ACADOERROR( RET_EMPTY_PLOT_DATA );
+// 			
+// 			dataGridComponent = dataGridTmp(component);
+// 			dataGridComponent.setType( VT_PARAMETER );
+// 
+// 			return getDataGrids( &dataGridComponent,_type,_dataGrid,_discretizationGrid );
+// 
+// 		case VT_CONTROL:
+// 			if ( shallPlotNominalControls == BT_TRUE )
+// 				plotDataRecord.getLast( LOG_NOMINAL_CONTROLS,dataGridTmp );
+// 			else
+// 				plotDataRecord.getLast( LOG_CONTROLS,dataGridTmp );
+// 			
+// 			component = variable->getComponent(0);
+// 			if ( dataGridTmp.getNumValues( ) <= (uint)component )
+// 				return ACADOERROR( RET_EMPTY_PLOT_DATA );
+// 			
+// 			dataGridComponent = dataGridTmp(component);
+// 			dataGridComponent.setType( VT_CONTROL );
+// 
+// 			return getDataGrids( &dataGridComponent,_type,_dataGrid,_discretizationGrid );
+// 
+// 		case VT_DISTURBANCE:
+// 			plotDataRecord.getLast( LOG_DISTURBANCES,dataGridTmp );
+// 			break;
+// 
+// 		case VT_INTERMEDIATE_STATE:
+// 			plotDataRecord.getLast( LOG_INTERMEDIATE_STATES,dataGridTmp );
+// 			break;
+// 
+// 		case VT_OUTPUT:
+// 			if ( shallPlotNominalOutputs == BT_TRUE )
+// 				plotDataRecord.getLast( LOG_SIMULATED_OUTPUT,dataGridTmp );
+// 			else
+// 				plotDataRecord.getLast( LOG_PROCESS_OUTPUT,dataGridTmp );
+// 			
+// 			if ( dataGridTmp.getNumValues( ) > (uint)component )
+// 				_dataGrid = dataGridTmp(component);
+// 			else
+// 				return ACADOERROR( RET_EMPTY_PLOT_DATA );
+// 			
+// 			_discretizationGrid.init();
+// 			return SUCCESSFUL_RETURN;
+// 
+// 		default:
+// 			// empty plot
+// 			return ACADOERROR( RET_EMPTY_PLOT_DATA );
+// 	}
+// 
+// 	if ( dataGridTmp.getNumValues( ) > (uint)component )
+// 		_dataGrid = dataGridTmp(component);
+// 	else
+// 		return ACADOERROR( RET_EMPTY_PLOT_DATA );
+// 
+// 	VariablesGrid tmp;
+// 	plotDataRecord.getLast( LOG_DISCRETIZATION_INTERVALS,tmp );
+// 	tmp.getGrid( _discretizationGrid );
 	
-	switch( _type )
-	{
-		case VT_DIFFERENTIAL_STATE:
-			plotDataRecord.getLast( LOG_DIFFERENTIAL_STATES,dataGridTmp );
-			break;
-
-		case VT_ALGEBRAIC_STATE:
-			plotDataRecord.getLast( LOG_ALGEBRAIC_STATES,dataGridTmp );
-			break;
-
-		case VT_PARAMETER:
-			if ( shallPlotNominalParameters == BT_TRUE )
-				plotDataRecord.getLast( LOG_NOMINAL_PARAMETERS,dataGridTmp );
-			else
-				plotDataRecord.getLast( LOG_PARAMETERS,dataGridTmp );
-			
-			component = variable->getComponent(0);
-			if ( dataGridTmp.getNumValues( ) <= (uint)component )
-				return ACADOERROR( RET_EMPTY_PLOT_DATA );
-			
-			dataGridComponent = dataGridTmp(component);
-			dataGridComponent.setType( VT_PARAMETER );
-
-			return getDataGrids( &dataGridComponent,_type,_dataGrid,_discretizationGrid );
-
-		case VT_CONTROL:
-			if ( shallPlotNominalControls == BT_TRUE )
-				plotDataRecord.getLast( LOG_NOMINAL_CONTROLS,dataGridTmp );
-			else
-				plotDataRecord.getLast( LOG_CONTROLS,dataGridTmp );
-			
-			component = variable->getComponent(0);
-			if ( dataGridTmp.getNumValues( ) <= (uint)component )
-				return ACADOERROR( RET_EMPTY_PLOT_DATA );
-			
-			dataGridComponent = dataGridTmp(component);
-			dataGridComponent.setType( VT_CONTROL );
-
-			return getDataGrids( &dataGridComponent,_type,_dataGrid,_discretizationGrid );
-
-		case VT_DISTURBANCE:
-			plotDataRecord.getLast( LOG_DISTURBANCES,dataGridTmp );
-			break;
-
-		case VT_INTERMEDIATE_STATE:
-			plotDataRecord.getLast( LOG_INTERMEDIATE_STATES,dataGridTmp );
-			break;
-
-		case VT_OUTPUT:
-			if ( shallPlotNominalOutputs == BT_TRUE )
-				plotDataRecord.getLast( LOG_SIMULATED_OUTPUT,dataGridTmp );
-			else
-				plotDataRecord.getLast( LOG_PROCESS_OUTPUT,dataGridTmp );
-			
-			if ( dataGridTmp.getNumValues( ) > (uint)component )
-				_dataGrid = dataGridTmp(component);
-			else
-				return ACADOERROR( RET_EMPTY_PLOT_DATA );
-			
-			_discretizationGrid.init();
-			return SUCCESSFUL_RETURN;
-
-		default:
-			// empty plot
-			return ACADOERROR( RET_EMPTY_PLOT_DATA );
-	}
-
-	if ( dataGridTmp.getNumValues( ) > (uint)component )
-		_dataGrid = dataGridTmp(component);
-	else
-		return ACADOERROR( RET_EMPTY_PLOT_DATA );
-
-	VariablesGrid tmp;
-	plotDataRecord.getLast( LOG_DISCRETIZATION_INTERVALS,tmp );
-	tmp.getGrid( _discretizationGrid );
-	
+	return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 	return SUCCESSFUL_RETURN;
 }
 
@@ -854,35 +862,37 @@ returnValue PlotWindow::getExpressionDataGrids(	const Expression* const expressi
 												Grid& _discretizationGrid
 												)
 {
-	OutputFcn f;
-	VariablesGrid loggedX,loggedXA,loggedP,loggedU,loggedW;
+// 	OutputFcn f;
+// 	VariablesGrid loggedX,loggedXA,loggedP,loggedU,loggedW;
+// 
+// 	_type = expression->getVariableType( );
+// 
+// 	f << *expression;
+// 
+// 	plotDataRecord.getLast( LOG_DIFFERENTIAL_STATES,loggedX );
+// 	plotDataRecord.getLast( LOG_ALGEBRAIC_STATES,loggedXA );
+// 	plotDataRecord.getLast( LOG_PARAMETERS,loggedP );
+// 	plotDataRecord.getLast( LOG_CONTROLS,loggedU );
+// 	plotDataRecord.getLast( LOG_DISTURBANCES,loggedW );
+// 
+// 	if ( loggedP.isEmpty() == BT_FALSE )
+// 		loggedP.refineGrid( loggedX );
+// 
+// 	if ( loggedU.isEmpty() == BT_FALSE )
+// 		loggedU.refineGrid( loggedX );
+// 
+// 	if ( loggedW.isEmpty() == BT_FALSE )
+// 		loggedW.refineGrid( loggedX );
+// 
+// 	returnValue returnvalue = f.evaluate( &loggedX,&loggedXA,&loggedP,&loggedU,&loggedW, &_dataGrid );
+// 	if( returnvalue != SUCCESSFUL_RETURN )
+// 		return ACADOERROR( returnvalue );
+// 
+// 	VariablesGrid tmp;
+// 	plotDataRecord.getLast( LOG_DISCRETIZATION_INTERVALS,tmp );
+// 	tmp.getGrid( _discretizationGrid );
 
-	_type = expression->getVariableType( );
-
-	f << *expression;
-
-	plotDataRecord.getLast( LOG_DIFFERENTIAL_STATES,loggedX );
-	plotDataRecord.getLast( LOG_ALGEBRAIC_STATES,loggedXA );
-	plotDataRecord.getLast( LOG_PARAMETERS,loggedP );
-	plotDataRecord.getLast( LOG_CONTROLS,loggedU );
-	plotDataRecord.getLast( LOG_DISTURBANCES,loggedW );
-
-	if ( loggedP.isEmpty() == BT_FALSE )
-		loggedP.refineGrid( loggedX );
-
-	if ( loggedU.isEmpty() == BT_FALSE )
-		loggedU.refineGrid( loggedX );
-
-	if ( loggedW.isEmpty() == BT_FALSE )
-		loggedW.refineGrid( loggedX );
-
-	returnValue returnvalue = f.evaluate( &loggedX,&loggedXA,&loggedP,&loggedU,&loggedW, &_dataGrid );
-	if( returnvalue != SUCCESSFUL_RETURN )
-		return ACADOERROR( returnvalue );
-
-	VariablesGrid tmp;
-	plotDataRecord.getLast( LOG_DISCRETIZATION_INTERVALS,tmp );
-	tmp.getGrid( _discretizationGrid );
+return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 	
 	return SUCCESSFUL_RETURN;
 }
@@ -954,8 +964,8 @@ returnValue PlotWindow::getAutoScaleYLimits(	const VariablesGrid& dataGridY,
 	{
 		if ( ( acadoIsStrictlyGreater( minValue,0.0, ZERO ) == BT_TRUE ) && ( acadoIsGreater( lowerLimit,0.0, ZERO ) == BT_FALSE ) )
 		{
-			lowerLimit = ( minValue + acadoMin( minValue,EPS ) ) / sqrt(10.0);
-			upperLimit = upperLimit * sqrt(10.0);
+			lowerLimit = ( minValue + acadoMin( minValue,EPS ) ) / ::sqrt(10.0);
+			upperLimit = upperLimit * ::sqrt(10.0);
 		}
 	}
 	else

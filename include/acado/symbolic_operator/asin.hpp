@@ -62,41 +62,26 @@ public:
     /** Default constructor. */
     Asin( const SharedOperator &_argument );
 
-    /** Copy constructor (deep copy). */
+    /** Copy constructor. */
     Asin( const Asin &arg );
 
     /** Default destructor. */
     ~Asin();
 
-    /** Assignment Operator (deep copy). */
-    Asin& operator=( const Asin &arg );
+    /** Evaluates the expression (templated version) */
+    virtual returnValue evaluate( EvaluationBase *x );
 
-	/** Evaluates the expression (templated version) */
-	virtual returnValue evaluate( EvaluationBase *x );
-
-
-
-    /** Substitutes var(index) with the expression sub.           \n
-     *  \return The substituted expression.                       \n
+    /** Substitutes key with the expression sub. \n
+     *  \return The substituted expression.      \n
      *
      */
-     virtual SharedOperator substitute( int   index                 /**< subst. index    */,
-                                        const SharedOperator &sub /**< the substitution*/);
+    virtual SharedOperator substitute( SharedOperatorMap &sub /**< the substitution */ );
 
-     virtual returnValue initDerivative();
-
-
-//
-//  PROTECTED FUNCTIONS:
-//
-
-protected:
-
+    /** Initializes the derivative operators */
+    virtual returnValue initDerivative();
 };
 
 
 CLOSE_NAMESPACE_ACADO
-
-
 
 #endif

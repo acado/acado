@@ -34,203 +34,148 @@
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/symbolic_operator/symbolic_operator.hpp>
+#include <set>
 
 
 BEGIN_NAMESPACE_ACADO
 
 
-BinaryOperator::BinaryOperator( ) : SmoothOperator( ){ }
+BinaryOperator::BinaryOperator():SmoothOperator(){}
 
-BinaryOperator::BinaryOperator( const SharedOperator &_argument1, const SharedOperator &_argument2 ) : SmoothOperator( )
-{
-    argument1          = _argument1                      ;
-    argument2          = _argument2                      ;
-    argument1_result  = (double*)calloc(1,sizeof(double));
-    argument2_result  = (double*)calloc(1,sizeof(double));
-    dargument1_result = (double*)calloc(1,sizeof(double));
-    dargument2_result = (double*)calloc(1,sizeof(double));
-    bufferSize        = 1                                ;
-    curvature         = CT_UNKNOWN                       ;
-    monotonicity      = MT_UNKNOWN                       ;
+BinaryOperator::BinaryOperator( const SharedOperator &_argument1, const SharedOperator &_argument2 ):SmoothOperator(){
+
+    a1 = _argument1;  a2 = _argument2;
 }
 
 
 BinaryOperator::BinaryOperator( const BinaryOperator &arg ){
 
-    argument1  = arg.argument1;
-    argument2  = arg.argument2;
-    copy( arg );
+    a1  = arg.a1;   a2  = arg.a2;
+    d1  = arg.d1;   d2  = arg.d2;
+    
+    d11  = arg.d11; d12  = arg.d12; d22  = arg.d22;
+}
+
+BinaryOperator::~BinaryOperator(){}
+
+
+SharedOperator BinaryOperator::AD_forward( SharedOperatorMap &seed ){
+
+    return myAdd( myProd( d1, a1->AD_forward(seed) ),
+                  myProd( d2, a2->AD_forward(seed) ) );
 }
 
 
-BinaryOperator::~BinaryOperator(){
+returnValue BinaryOperator::AD_backward( SharedOperator     &seed,
+                                         SharedOperatorMap  &df  ,
+                                         SharedOperatorMap2 &IS   ){
 
-    deleteAll();
+    SharedOperator tmp = convert2TreeProjection(seed);
+    SharedOperator seed1 = myProd(d1,tmp);
+    SharedOperator seed2 = myProd(d2,tmp);
+    
+    a1->AD_backward( seed1, df, IS );
+    a2->AD_backward( seed2, df, IS );
+
+    return SUCCESSFUL_RETURN;  
 }
 
 
-BinaryOperator& BinaryOperator::operator=( const BinaryOperator &arg ){
+returnValue BinaryOperator::AD_symmetric( SharedOperator     &l  ,
+                                          SharedOperatorMap  &ldf,
+                                          SharedOperatorMap  &df ,
+                                          SharedOperatorMap2 &H  ,
+                                          SharedOperatorMap2 &LIS,
+                                          SharedOperatorMap2 &SIS,
+                                          SharedOperatorMap3 &HIS  ){
+    
+  // FIRST ORDER BACKWARD SWEEP:
+  // ---------------------------
+    SharedOperatorMap S1;
+    SharedOperatorMap S2;
+    
+    SharedOperatorMap2 H1;
+    SharedOperatorMap2 H2;
+    
+    SharedOperator ttt1 = convert2TreeProjection(myProd(l,d1));
+    SharedOperator ttt2 = convert2TreeProjection(myProd(l,d2));
 
-    if( this != &arg ){
-        deleteAll();
-        copy( arg );
+    a1->AD_symmetric( ttt1, ldf, S1, H1, LIS, SIS, HIS );
+    a2->AD_symmetric( ttt2, ldf, S2, H2, LIS, SIS, HIS );
+    
+    
+  // DETERMINE THE UNION OF ALL DEPENDENCIES:
+  // ------------------------------------------------
+    
+    std::set<Operator*> dep;
+    std::set<Operator*>::iterator run1, run2;
+    SharedOperatorMap::iterator it;
+    
+    for( it = S1.begin(); it != S1.end(); ++it ) dep.insert(it->first);
+    for( it = S2.begin(); it != S2.end(); ++it ) dep.insert(it->first);
+    
+    
+  // SECOND ORDER FORWARD SWEEP:
+  // -------------------------------------
+    
+    SharedOperator tmpXX = convert2TreeProjection(myProd( l,d11 ));
+    SharedOperator tmpXY = convert2TreeProjection(myProd( l,d12 ));
+    SharedOperator tmpYY = convert2TreeProjection(myProd( l,d22 ));
+    
+    for( run1 = dep.begin(); run1 != dep.end(); ++run1 ){
+    	for( run2 = dep.begin(); run2 != dep.end(); ++run2 ){
+    		SharedOperator tmp1 = myProd( checkForZero(S1[*run1]), checkForZero(S1[*run2]) );
+    		SharedOperator tmp2 = myProd( checkForZero(S1[*run1]), checkForZero(S2[*run2]) );
+    		SharedOperator tmp3 = myProd( checkForZero(S2[*run1]), checkForZero(S1[*run2]) );
+    		SharedOperator tmp4 = myProd( checkForZero(S2[*run1]), checkForZero(S2[*run2]) );
+    		SharedOperator tmp5;
+    		if( run1 == run2 ) tmp5 = myAdd(tmp2,tmp2);
+    		else               tmp5 = myAdd(tmp2,tmp3);
+    		SharedOperator tmp6 = myProd( tmp1, tmpXX );
+    		SharedOperator tmp7 = myProd( tmp5, tmpXY );
+    		SharedOperator tmp8 = myProd( tmp4, tmpYY );
+    		SharedOperator tmp9  = myAdd ( tmp6, tmp7 );
+    		SharedOperator tmp10 = myAdd ( tmp8, tmp9 );
+    		SharedOperator tmp12 = myAdd ( tmp10 , checkForZero(H1[*run1][*run2]) );
+    		H[*run1][*run2] = myAdd ( tmp12 , checkForZero(H2[*run1][*run2]) );
+    	}
     }
-    return *this;
-}
+    
+  // FIRST ORDER FORWARD SWEEP:
+  // -------------------------------------
+    
+    for( run1 = dep.begin(); run1 != dep.end(); ++run1 ){
+    	SharedOperator tmp1 = convert2TreeProjection( myProd( checkForZero(S1[*run1]), d1 ) );
+    	SharedOperator tmp2 = convert2TreeProjection( myProd( checkForZero(S2[*run1]), d2 ) );
+    	df[*run1] = myAdd(tmp1,tmp2);
+    }
 
+    return SUCCESSFUL_RETURN;
+}
 
 NeutralElement BinaryOperator::isOneOrZero() const{ return NE_NEITHER_ONE_NOR_ZERO; }
 
-BooleanType BinaryOperator::isDependingOn( VariableType var ) const{
+returnValue BinaryOperator::getArgumentList( DependencyMap &exists,
+                                             SharedOperatorVector &list  ){
 
-    if( argument1->isDependingOn(var) == BT_FALSE &&
-        argument2->isDependingOn(var) == BT_FALSE )
-        return BT_FALSE;
-
-    return BT_TRUE;
-}
-
-
-BooleanType BinaryOperator::isDependingOn( int dim,
-                                           VariableType *varType,
-                                           int *component,
-                                           BooleanType   *implicit_dep ){
-
-    if( argument1->isDependingOn( dim, varType, component, implicit_dep ) == BT_TRUE ||
-        argument2->isDependingOn( dim, varType, component, implicit_dep ) == BT_TRUE ){
-        return BT_TRUE;
-    }
-
-    return BT_FALSE;
-}
-
-
-returnValue BinaryOperator::setMonotonicity( MonotonicityType monotonicity_ ){
-
-    monotonicity = monotonicity_;
+    a1->getArgumentList( exists, list );
+    a2->getArgumentList( exists, list );
     return SUCCESSFUL_RETURN;
 }
-
-
-returnValue BinaryOperator::setCurvature( CurvatureType curvature_ ){
-
-    curvature = curvature_;
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue BinaryOperator::clearBuffer(){
-
-    if( bufferSize > 1 ){
-        bufferSize = 1;
-        argument1_result  = (double*)realloc( argument1_result,bufferSize*sizeof(double));
-        argument2_result  = (double*)realloc( argument2_result,bufferSize*sizeof(double));
-        dargument1_result = (double*)realloc(dargument1_result,bufferSize*sizeof(double));
-        dargument2_result = (double*)realloc(dargument2_result,bufferSize*sizeof(double));
-    }
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-
-returnValue BinaryOperator::enumerateVariables( SymbolicIndexList *indexList ){
-
-    returnValue returnvalue;
-    returnvalue = argument1->enumerateVariables( indexList );
-    if( returnvalue != SUCCESSFUL_RETURN ){
-        return returnvalue;
-    }
-
-    return argument2->enumerateVariables( indexList );
-}
-
-
-BooleanType BinaryOperator::isVariable( VariableType &varType, int &component ) const{
-
-    return BT_FALSE;
-}
-
-
-returnValue BinaryOperator::loadIndices( SymbolicIndexList *indexList ){
-
-    returnValue returnvalue;
-
-    returnvalue = argument1->loadIndices( indexList );
-
-    if( returnvalue != SUCCESSFUL_RETURN ){
-        return returnvalue;
-    }
-
-    return argument2->loadIndices( indexList );
-}
-
 
 BooleanType BinaryOperator::isSymbolic() const{
 
-    if( argument1->isSymbolic() == BT_FALSE ) return BT_FALSE;
-    if( argument2->isSymbolic() == BT_FALSE ) return BT_FALSE;
+    if( a1->isSymbolic() == BT_FALSE ) return BT_FALSE;
+    if( a2->isSymbolic() == BT_FALSE ) return BT_FALSE;
 
     return BT_TRUE;
 }
 
-
-
-// //
-// // PROTECTED MEMBER FUNCTIONS:
-// // ---------------------------
-
-
-void BinaryOperator::copy( const BinaryOperator &arg ){
-
-    int run1;
-
-    bufferSize = arg.bufferSize;
-
-    dargument1 = arg.dargument1;
-    dargument2 = arg.dargument2;
-
-    argument1_result  = (double*)calloc(bufferSize,sizeof(double));
-    argument2_result  = (double*)calloc(bufferSize,sizeof(double));
-    dargument1_result = (double*)calloc(bufferSize,sizeof(double));
-    dargument2_result = (double*)calloc(bufferSize,sizeof(double));
-
-    for( run1 = 0; run1 < bufferSize; run1++ ){
-
-        argument1_result[run1] = arg.argument1_result[run1];
-        argument2_result[run1] = arg.argument2_result[run1];
-       dargument1_result[run1] = arg.dargument1_result[run1];
-       dargument2_result[run1] = arg.dargument2_result[run1];
-
-    }
-    curvature         = arg.curvature   ;
-    monotonicity      = arg.monotonicity;
-}
-
-
-void BinaryOperator::deleteAll(){
-
-    free(  argument1_result );
-    free(  argument2_result );
-    free( dargument1_result );
-    free( dargument2_result );
-}
-
-returnValue BinaryOperator::setVariableExportName(	const VariableType &_type,
-													const std::vector< std::string >& _name
-													)
-{
-	argument1->setVariableExportName(_type, _name);
-	argument2->setVariableExportName(_type, _name);
-
-	return Operator::setVariableExportName(_type, _name);
-}
-
-
 returnValue BinaryOperator::initDerivative() {
 
-	argument1->initDerivative();
-	return argument2->initDerivative();
+    a1->initDerivative();
+    a2->initDerivative();
+    return SUCCESSFUL_RETURN;
 }
 
 CLOSE_NAMESPACE_ACADO

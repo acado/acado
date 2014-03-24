@@ -34,18 +34,15 @@
  
 #include <acado_integrators.hpp>
 #include <include/acado_gnuplot/gnuplot_window.hpp>
+   
+USING_NAMESPACE_ACADO
 
-
-/* >>> start tutorial code >>> */
 int main( ){
-
-    USING_NAMESPACE_ACADO
-
-
+    
     // DEFINE SOME FUNCTIONS:
     // ----------------------
 
-    TIME t;
+    Expression t;
     Function sine, cosine,
              ramp1, ramp2, ramp3,
              parabola;
@@ -59,7 +56,14 @@ int main( ){
 
     parabola << t*t/M_PI - 3.0*t + 2.0*M_PI;
 
-
+    sine.setInput(t);
+    cosine.setInput(t);
+    ramp1.setInput(t);
+    ramp2.setInput(t);
+    ramp3.setInput(t);
+    parabola.setInput(t);
+    
+    
     // DEFINE SOME CURVES:
     // -------------------
 
@@ -75,8 +79,6 @@ int main( ){
     c4.add( 0.0 ,     M_PI, sine     );
     c4.add( M_PI, 2.0*M_PI, parabola );
 
-
-
     // PLOT CURVES ON GIVEN GRID:
     // --------------------------
 	GnuplotWindow window;
@@ -88,6 +90,5 @@ int main( ){
 
     return 0;
 }
-/* <<< end tutorial code <<< */
 
 

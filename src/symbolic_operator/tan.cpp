@@ -36,66 +36,15 @@
 #include <acado/symbolic_operator/symbolic_operator.hpp>
 
 
-double dTan(double x){
-  double v1 = tan(x);
-  return 1+v1*v1;
-}
-
-double ddTan(double x){
-  double v1 = tan(x);
-  return 2*v1*(1+v1*v1);
-}
-
 BEGIN_NAMESPACE_ACADO
 
+Tan::Tan():UnaryOperator(){}
 
+Tan::Tan( const SharedOperator &_argument ):UnaryOperator(_argument,"tan"){}
 
+Tan::Tan( const Tan &arg ):UnaryOperator(arg){}
 
-Tan::Tan():UnaryOperator(){
-  cName = "tan";
-
-  fcn = &tan;
-  dfcn = &dTan;
-  ddfcn = &ddTan;
-
-  operatorName = ON_TAN;
-
-}
-
-Tan::Tan( const SharedOperator &_argument ):UnaryOperator(_argument){
-  cName = "tan";
-
-  fcn = &tan;
-  dfcn = &dTan;
-  ddfcn = &ddTan;
-
-  operatorName = ON_TAN;
-}
-
-
-Tan::Tan( const Tan &arg ):UnaryOperator(arg){
-  cName = "tan";
-
-  fcn = &tan;
-  dfcn = &dTan;
-  ddfcn = &ddTan;
-
-  operatorName = ON_TAN;
-}
-
-
-Tan::~Tan(){
-
-}
-
-
-Tan& Tan::operator=( const Tan &arg ){
-
-  UnaryOperator::operator=(arg);
-
-  return *this;
-}
-
+Tan::~Tan(){}
 
 returnValue Tan::evaluate( EvaluationBase *x ){
 
@@ -103,10 +52,9 @@ returnValue Tan::evaluate( EvaluationBase *x ){
     return SUCCESSFUL_RETURN;
 }
 
-SharedOperator Tan::substitute( int index, const SharedOperator &sub ){
+SharedOperator Tan::substitute( SharedOperatorMap &sub ){
 
-    return SharedOperator( new Tan( argument->substitute( index , sub ) ));
-
+    return SharedOperator( new Tan( argument->substitute(sub) ));
 }
 
 

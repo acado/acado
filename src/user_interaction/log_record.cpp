@@ -85,9 +85,9 @@ returnValue LogRecord::addItem(	const Expression& _name,
 								const char* const _label
 								)
 {
-	if (items.count(make_pair(_name.getComponent( 0 ), LRT_VARIABLE)))
+	if (items.count(make_pair(0, LRT_VARIABLE)))
 		return SUCCESSFUL_RETURN;
-	items[ make_pair(_name.getComponent( 0 ), LRT_VARIABLE) ] = LogRecordData( _label );
+	items[ make_pair(0, LRT_VARIABLE) ] = LogRecordData( _label );
 
 	return SUCCESSFUL_RETURN;
 }

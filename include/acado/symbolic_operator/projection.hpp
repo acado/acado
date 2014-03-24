@@ -65,55 +65,22 @@ public:
     Projection();
 
     /** Default constructor */
-    Projection( const std::string& name_ );
-
-    /** Default constructor */
-    Projection( VariableType variableType_, int vIndex_, const std::string& name_ );
-
-
-    /** Default constructor */
     Projection( const Projection& arg );
-
 
     /** Default destructor. */
     virtual ~Projection();
 
 
+    /** Evaluates the expression (templated version) */
+    virtual returnValue evaluate( EvaluationBase *x );
 
-    /** Evaluates the expression and stores the intermediate      \n
-     *  results in a buffer (needed for automatic differentiation \n
-     *  in backward mode)                                         \n
-     *  \return SUCCESSFUL_RETURN                  \n
-     *          RET_NAN                            \n
-     * */
-    virtual returnValue evaluate( int     number    /**< storage position     */,
-                                  double *x         /**< the input variable x */,
-                                  double *result    /**< the result           */  );
-
-
-	/** Evaluates the expression (templated version) */
-	virtual returnValue evaluate( EvaluationBase *x );
-	
-	
-    /** Returns the derivative of the expression with respect     \n
-     *  to the variable var(index).                               \n
-     *  \return The expression for the derivative.                \n
-     *
-     */
-     virtual SharedOperator differentiate( int index  /**< diff. index    */ );
-
-
-
+    
     /** Automatic Differentiation in forward mode on the symbolic \n
      *  level. This function generates an expression for a        \n
      *  forward derivative                                        \n
      *  \return SUCCESSFUL_RETURN                                 \n
      */
-     virtual SharedOperator AD_forward( int                dim      , /**< dimension of the seed */
-                                     VariableType      *varType  , /**< the variable types    */
-                                     int               *component, /**< and their components  */
-                                     SharedOperator *seed     , /**< the forward seed      */
-                                     std::vector<SharedOperator> &newIS    /**< the new IS-pointer    */ );
+     virtual SharedOperator AD_forward( SharedOperatorMap &seed /**< the forward seed   */ );
 
 
 
@@ -122,13 +89,9 @@ public:
      *  backward derivative                                        \n
      *  \return SUCCESSFUL_RETURN                                  \n
      */
-    virtual returnValue AD_backward( int           dim      , /**< number of directions  */
-                                     VariableType *varType  , /**< the variable types    */
-                                     int          *component, /**< and their components  */
-                                     SharedOperator  &seed     , /**< the backward seed     */
-                                     SharedOperator *df       , /**< the result            */
-                                     std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ );
-
+    virtual returnValue AD_backward( SharedOperator     &seed, /**< the backward seed  */
+                                     SharedOperatorMap  &df  , /**< the result         */
+                                     SharedOperatorMap2 &IS    /**< the new IS-pointer */ );
     
     
     /** Automatic Differentiation in symmetric mode on the symbolic \n
@@ -136,29 +99,21 @@ public:
      *  second order derivative.                                    \n
      *  \return SUCCESSFUL_RETURN                                   \n
      */
-     virtual returnValue AD_symmetric( int            dim       , /**< number of directions  */
-                                      VariableType  *varType   , /**< the variable types    */
-                                      int           *component , /**< and their components  */
-                                      SharedOperator &l         , /**< the backward seed     */
-                                      SharedOperator *S         , /**< forward seed matrix   */
-                                      int            dimS      , /**< dimension of forward seed             */
-                                      SharedOperator *dfS       , /**< first order foward result             */
-                                      SharedOperator *ldf       , /**< first order backward result           */
-                                      SharedOperator *H         , /**< upper trianglular part of the Hessian */
-                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
-                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
-                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ );
+     virtual returnValue AD_symmetric( SharedOperator     &l  ,
+                                       SharedOperatorMap  &ldf,
+                                       SharedOperatorMap  &df ,
+                                       SharedOperatorMap2 &H  ,
+                                       SharedOperatorMap2 &LIS,
+                                       SharedOperatorMap2 &SIS,
+                                       SharedOperatorMap3 &HIS  );
 
 
 
-    /** Substitutes var(index) with the expression sub.           \n
-     *  \return The substituted expression.                       \n
+    /** Substitutes key with the expression sub. \n
+     *  \return The substituted expression.      \n
      *
      */
-     virtual SharedOperator substitute( int index             /**< subst. index    */,
-                                        const SharedOperator &sub /**< the substitution*/);
-
-
+     virtual SharedOperator substitute( SharedOperatorMap &sub /**< the substitution */ );
 
 
     /** Checks whether the expression is zero or one              \n
@@ -170,266 +125,14 @@ public:
      virtual NeutralElement isOneOrZero() const;
 
 
-
-     /** Asks the expression whether it is depending on a certian type of \n
-       * variable.                                                        \n
-       * \return BT_TRUE if a dependency is detected,                     \n
-       *         BT_FALSE otherwise.                                      \n
-       */
-     virtual BooleanType isDependingOn( VariableType var ) const;
-
-
-
-    /** Checks whether the expression is depending on a variable  \n
-     *  \return BT_FALSE if no dependence is detected             \n
-     *          BT_TRUE  otherwise                                \n
-     *
-     */
-     virtual BooleanType isDependingOn( int           dim      ,    /**< number of directions  */
-                                          VariableType *varType  ,    /**< the variable types    */
-                                          int          *component,    /**< and their components  */
-                                          BooleanType   *implicit_dep /**< implicit dependencies */ );
-
-
-
-
-    /** Checks whether the expression is linear in                \n
-     *  (or not depending on) a variable                          \n
-     *  \return BT_FALSE if no linearity is                       \n
-     *                detected                                    \n
-     *          BT_TRUE  otherwise                                \n
-     *
-     */
-     virtual BooleanType isLinearIn( int           dim      ,    /**< number of directions  */
-                                       VariableType *varType  ,    /**< the variable types    */
-                                       int          *component,    /**< and their components  */
-                                       BooleanType  *implicit_dep  /**< implicit dependencies */ );
-
-
-
-    /** Checks whether the expression is polynomial in            \n
-     *  the specified variables                                   \n
-     *  \return BT_FALSE if the expression is not  polynomial     \n
-     *          BT_TRUE  otherwise                                \n
-     *
-     */
-     virtual BooleanType isPolynomialIn( int           dim      ,    /**< number of directions  */
-                                           VariableType *varType  ,    /**< the variable types    */
-                                           int          *component,    /**< and their components  */
-                                           BooleanType  *implicit_dep  /**< implicit dependencies */ );
-
-
-
-    /** Checks whether the expression is rational in              \n
-     *  the specified variables                                   \n
-     *  \return BT_FALSE if the expression is not rational        \n
-     *          BT_TRUE  otherwise                                \n
-     *
-     */
-     virtual BooleanType isRationalIn( int           dim      ,    /**< number of directions  */
-                                         VariableType *varType  ,    /**< the variable types    */
-                                         int          *component,    /**< and their components  */
-                                         BooleanType  *implicit_dep  /**< implicit dependencies */ );
-
-
-
-    /** Returns the monotonicity of the expression.               \n
-     *  \return MT_NONDECREASING                                  \n
-     *          MT_NONINCREASING                                  \n
-     *          MT_NONMONOTONIC                                   \n
-     *
-     */
-     virtual MonotonicityType getMonotonicity( );
-
-
-
-    /** Returns the curvature of the expression                   \n
-     *  \return CT_CONSTANT                                       \n
-     *          CT_AFFINE                                         \n
-     *          CT_CONVEX                                         \n
-     *          CT_CONCAVE                                        \n
-     *
-     */
-     virtual CurvatureType getCurvature( );
-
-
-
-    /** Overwrites the monotonicity of the expression.            \n
-     *  (For the case that the monotonicity is explicitly known)  \n
-     *  \return SUCCESSFUL_RETURN                                 \n
-     *
-     */
-     virtual returnValue setMonotonicity( MonotonicityType monotonicity_ );
-
-
-
-
-    /** Overwrites the curvature of the expression.               \n
-     *  (For the case that the curvature is explicitly known)     \n
-     *  \return SUCCESSFUL_RETURN                                 \n
-     *
-     */
-     virtual returnValue setCurvature( CurvatureType curvature_  );
-
-
-
-    /** Automatic Differentiation in forward mode.                \n
-     *  This function uses the intermediate                       \n
-     *  results from a buffer                                     \n
-     *  \return SUCCESFUL_RETURN                                  \n
-     *          RET_NAN                                           \n
-     */
-     virtual returnValue AD_forward( int     number  /**< storage position */,
-                                     double *seed    /**< the seed         */,
-                                     double *df      /**< the derivative of
-                                                          the expression   */  );
-
-
-
-    /** Automatic Differentiation in forward mode.                \n
-     *  This function stores the intermediate                     \n
-     *  results in a buffer (needed for 2nd order automatic       \n
-     *  differentiation in backward mode)                         \n
-     *  \return SUCCESSFUL_RETURN                                 \n
-     *          RET_NAN                                           \n
-     */
-     virtual returnValue AD_forward( int     number  /**< storage position */,
-                                     double *x       /**< The evaluation
-                                                          point x          */,
-                                     double *seed    /**< the seed         */,
-                                     double *f       /**< the value of the
-                                                          expression at x  */,
-                                     double *df      /**< the derivative of
-                                                          the expression   */  );
-
-
-    // IMPORTANT REMARK FOR AD_BACKWARD: run evaluate first to define
-    //                                   the point x and to compute f.
-
-    /** Automatic Differentiation in backward mode based on       \n
-     *  buffered values                                           \n
-     *  \return SUCCESSFUL_RETURN                                 \n
-     *          RET_NAN                                           \n
-     */
-     virtual returnValue AD_backward( int    number /**< the buffer
-                                                         position         */,
-                                      double seed   /**< the seed         */,
-                                      double  *df   /**< the derivative of
-                                                         the expression   */);
-
-
-
-    /** Automatic Differentiation in forward mode for             \n
-     *  2nd derivatives.                                          \n
-     *  This function uses intermediate                           \n
-     *  results from a buffer.                                    \n
-     *  \return SUCCESFUL_RETURN                                  \n
-     *          RET_NAN                                           \n
-     */
-     virtual returnValue AD_forward2( int    number  /**< the buffer
-                                                          position         */,
-                                      double *seed1  /**< the seed         */,
-                                      double *seed2  /**< the seed for the
-                                                          first derivative */,
-                                      double *df     /**< the derivative of
-                                                          the expression   */,
-                                      double *ddf    /**< the 2nd derivative
-                                                          of the expression*/);
-
-
-
-    // IMPORTANT REMARK FOR AD_BACKWARD2: run AD_forward first to define
-    //                                    the point x and to compute f and df.
-
-    /** Automatic Differentiation in backward mode for 2nd order  \n
-     *  derivatives based on buffered values.                     \n
-     *  \return SUCCESFUL_RETURN                                  \n
-     *          RET_NAN                                           \n
-     */
-     virtual returnValue AD_backward2( int    number /**< the buffer
-                                                          position           */,
-                                       double seed1  /**< the seed1          */,
-                                       double seed2  /**< the seed2          */,
-                                       double   *df  /**< the 1st derivative
-                                                          of the expression  */,
-                                       double  *ddf  /**< the 2nd derivative
-                                                          of the expression  */   );
-
-
-
     /** Prints the expression into a stream. \n
      *  \return SUCCESFUL_RETURN             \n
      */
-     virtual std::ostream& print( std::ostream &stream ) const;
+     virtual std::ostream& print( std::ostream &stream, StringMap &name ) const;
 
 
-     /** Clears the buffer and resets the buffer size \n
-      *  to 1.                                        \n
-      *  \return SUCCESSFUL_RETURN                    \n
-      */
-     virtual returnValue clearBuffer();
-
-
-
-     /** Enumerates all variables based on a common   \n
-      *  IndexList.                                   \n
-      *  \return SUCCESFUL_RETURN
-      */
-     virtual returnValue enumerateVariables( SymbolicIndexList *indexList );
-
-
-     /** Asks the expression for its name.   \n
-      *  \return the name of the expression. \n
-      */
-     virtual OperatorName getName();
-
-
-     /** Asks the expression whether it is a variable.   \n
-      *  \return The answer. \n
-      */
-     virtual BooleanType isVariable( VariableType &varType,
-                                     int &component          ) const;
-
-
-
-     /** Asks the variable for its relative index. \n
-      */
-     virtual int getVariableIndex( ) const;
-
-
-     /** Returns the global type ID of this variable \n
-      *                                              \n
-      *  \return the requested global type ID.       \n
-      */
-     virtual int getGlobalIndex() const;
-
-
-     /** Asks the variable for its type. \n
-      */
-     VariableType getType( ) const;
-
-
-     /** The function loadIndices passes an IndexList through    \n
-      *  the whole expression tree. Whenever a variable gets the \n
-      *  IndexList it tries to make an entry. However if a       \n
-      *  variable recognices that it has already been added      \n
-      *  before, it will not be allowed to make a second entry.  \n
-      *  Note that all variables, in paticular the intermediate  \n
-      *  states, will keep in mind whether they were allowed     \n
-      *  to make an entry or not. This guarantees that           \n
-      *  intermediate states are never evaluated twice if they   \n
-      *  occur at several knots of the tree.                     \n
-      *                                                          \n
-      *  THIS FUNCTION IS FOR INTERNAL USE ONLY.                 \n
-      *                                                          \n
-      *  PLEASE CALL THIS FUNTION AT MOST ONCE FOR AN EXPRESSION \n
-      *  AS A KIND OF INIT ROUTINE.                              \n
-      *                                                          \n
-      *  \return the name of the expression.                     \n
-      */
-     virtual returnValue loadIndices( SymbolicIndexList *indexList
-                                                           /**< The index list to be
-                                                             *  filled with entries  */ );
+     virtual returnValue getArgumentList( DependencyMap &exists,
+                                          SharedOperatorVector &list  );
 
 
     /** Asks whether all elements are purely symbolic.                \n
@@ -438,91 +141,6 @@ public:
       *         BT_FALSE otherwise (e.g. if C functions are linked).  \n
       */
     virtual BooleanType isSymbolic() const;
-
-
-	/** Sets the name of the variable that is used for code export.   \n
-	 *  \return SUCCESSFUL_RETURN                                     \n
-	 */
-    virtual returnValue setVariableExportName(	const VariableType &_type, const std::vector< std::string >& _name );
-
-
-    virtual BooleanType isTrivial() const;
-
-//
-//  PROTECTED FUNCTIONS:
-//
-
-protected:
-
-
-    /** Automatic Differentiation in forward mode on the symbolic \n
-     *  level. This function generates an expression for a        \n
-     *  forward derivative                                        \n
-     *  \return SUCCESSFUL_RETURN                                 \n
-     */
-     virtual SharedOperator ADforwardProtected( int                dim      , /**< dimension of the seed */
-                                     VariableType      *varType  , /**< the variable types    */
-                                     int               *component, /**< and their components  */
-                                     SharedOperator *seed     , /**< the forward seed      */
-                                     std::vector<SharedOperator> &newIS    /**< the new IS-pointer    */ );
-
-
-
-    /** Automatic Differentiation in backward mode on the symbolic \n
-     *  level. This function generates an expression for a         \n
-     *  backward derivative                                        \n
-     *  \return SUCCESSFUL_RETURN                                  \n
-     */
-     virtual returnValue ADbackwardProtected( int           dim      , /**< number of directions  */
-                                     VariableType *varType  , /**< the variable types    */
-                                     int          *component, /**< and their components  */
-                                     SharedOperator  &seed     , /**< the backward seed     */
-                                     SharedOperator *df       , /**< the result            */
-                                     std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ );
-
-
-    /** Automatic Differentiation in symmetric mode on the symbolic \n
-     *  level. This function generates an expression for a          \n
-     *  second order derivative.                                    \n
-     *  \return SUCCESSFUL_RETURN                                   \n
-     */
-     virtual returnValue ADsymmetricProtected( int            dim       , /**< number of directions  */
-                                      VariableType  *varType   , /**< the variable types    */
-                                      int           *component , /**< and their components  */
-                                      SharedOperator &l         , /**< the backward seed     */
-                                      SharedOperator *S         , /**< forward seed matrix   */
-                                      int            dimS      , /**< dimension of forward seed             */
-                                      SharedOperator *dfS       , /**< first order foward result             */
-                                      SharedOperator *ldf       , /**< first order backward result           */
-                                      SharedOperator *H         , /**< upper trianglular part of the Hessian */
-                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
-                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
-                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ );
-
-
-
-//  PROTECTED MEMBER FUNCTIONS:
-// ---------------------------------------------
-
-    /** Copy function. */
-    virtual void copy( const Projection &arg );
-
-
-//
-//  PROTECTED MEMBERS:
-//
-
-protected:
-
-    VariableType      variableType ;
-    int               variableIndex;
-    int               vIndex       ;
-    std::string       name         ;
-
-    OperatorName      operatorName ;
-
-    CurvatureType     curvature    ;
-    MonotonicityType  monotonicity ;
 };
 
 

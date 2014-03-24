@@ -28,7 +28,7 @@
 /**
  *    \file include/acado/symbolic_expression/symbolic_expression.hpp
  *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
- *    \date 2008 - 2013
+ *    \date 2008 - 2014
  */
 
 
@@ -40,40 +40,7 @@
 // -------------------------------------------------------
 
 #include <acado/symbolic_expression/expression.hpp>
-
-#include <acado/symbolic_expression/variable_types.hpp>
-#include <acado/symbolic_expression/intermediate_state.hpp>
 #include <acado/symbolic_expression/lyapunov.hpp>
-
 #include <acado/symbolic_expression/acado_syntax.hpp>
-
-#include <acado/symbolic_expression/constraint_component.hpp>
-
-
-// 	BEGIN_NAMESPACE_ACADO
-// 
-// 	returnValue clearAllStaticCounters( )
-// 	{
-// 		DifferentialState           dummy1;
-// 		DifferentialStateDerivative dummy2;
-// 		AlgebraicState              dummy3;
-// 		IntermediateState           dummy4;
-// 		Parameter                   dummy5;
-// 		Control                     dummy6;
-// 		Disturbance                 dummy7;
-// 
-// 		dummy1.clearStaticCounters( );
-// 		dummy2.clearStaticCounters( );
-// 		dummy3.clearStaticCounters( );
-// 		dummy4.clearStaticCounters( );
-// 		dummy5.clearStaticCounters( );
-// 		dummy6.clearStaticCounters( );
-// 		dummy7.clearStaticCounters( );
-// 		
-// 		return SUCCESSFUL_RETURN;
-// 	}
-// 	
-// 	CLOSE_NAMESPACE_ACADO
-
 
 #endif // ACADO_TOOLKIT_SYMBOLIC_EXPRESSION_HPP

@@ -41,68 +41,8 @@
 
 BEGIN_NAMESPACE_ACADO
 
-class ConstraintComponent;
 class Expression;
-
-
-class TemporaryExpression{
-
-public:
-
-  
-    TemporaryExpression( SharedOperator *arg_ );
-    
-    TemporaryExpression& operator= ( const double      & arg );
-    TemporaryExpression& operator= ( const Expression  & arg );
-    
-    TemporaryExpression& operator+=( const Expression  & arg );
-    TemporaryExpression& operator-=( const Expression  & arg );
-    TemporaryExpression& operator*=( const Expression  & arg );
-    TemporaryExpression& operator/=( const Expression  & arg );
-    
-    Expression operator+( const Expression  & arg ) const;
-    Expression operator-( const Expression  & arg ) const;
-    Expression operator*( const Expression  & arg ) const;
-    Expression operator/( const Expression  & arg ) const;
-    
-    Expression operator-( ) const;
-    
-    friend Expression operator+( const Expression& arg1, const TemporaryExpression& arg2 );
-    friend Expression operator-( const Expression& arg1, const TemporaryExpression& arg2 );
-    friend Expression operator*( const Expression& arg1, const TemporaryExpression& arg2 );
-    friend Expression operator/( const Expression& arg1, const TemporaryExpression& arg2 );
-    
-    Expression operator+( const TemporaryExpression  & arg ) const;
-    Expression operator-( const TemporaryExpression  & arg ) const;
-    Expression operator*( const TemporaryExpression  & arg ) const;
-    Expression operator/( const TemporaryExpression  & arg ) const;
-    
-    ConstraintComponent operator<=( const double& ub ) const;
-    ConstraintComponent operator>=( const double& lb ) const;
-    ConstraintComponent operator==( const double&  b ) const;
-
-    ConstraintComponent operator<=( const DVector& ub ) const;
-    ConstraintComponent operator>=( const DVector& lb ) const;
-    ConstraintComponent operator==( const DVector&  b ) const;
-
-    ConstraintComponent operator<=( const VariablesGrid& ub ) const;
-    ConstraintComponent operator>=( const VariablesGrid& lb ) const;
-    ConstraintComponent operator==( const VariablesGrid&  b ) const;
-
-    friend ConstraintComponent operator<=( double lb, const TemporaryExpression &arg );
-    friend ConstraintComponent operator==( double  b, const TemporaryExpression &arg );
-    friend ConstraintComponent operator>=( double ub, const TemporaryExpression &arg );
-
-    friend ConstraintComponent operator<=( DVector lb, const TemporaryExpression &arg );
-    friend ConstraintComponent operator==( DVector  b, const TemporaryExpression &arg );
-    friend ConstraintComponent operator>=( DVector ub, const TemporaryExpression &arg );
-
-    friend ConstraintComponent operator<=( VariablesGrid lb, const TemporaryExpression &arg );
-    friend ConstraintComponent operator==( VariablesGrid  b, const TemporaryExpression &arg );
-    friend ConstraintComponent operator>=( VariablesGrid ub, const TemporaryExpression &arg );
-    
-    SharedOperator *element;
-};
+class ScalarExpression;
 
 /**
  *  \brief Base class for all variables within the symbolic expressions family.
@@ -111,19 +51,12 @@ public:
  *
  *  The class Expression serves as a base class for all
  *  symbolic variables within the symbolic expressions family.
- *  Moreover, the Expression class defines all kind of matrix
- *  and vector operations on a symbolic level.
  *
  *  \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
 
 
-class Expression{
-
-
-    friend class COperator;
-    friend class CFunction;
-    friend class FunctionEvaluationTree;
+class ScalarExpression{
 
     //
     // PUBLIC MEMBER FUNCTIONS:
@@ -132,236 +65,88 @@ class Expression{
     public:
 
         /** Default constructor. */
-        Expression( );
+        ScalarExpression( );
 
         /** Casting constructor. */
-        Expression( const SharedOperator &tree_ );
-        Expression( const TemporaryExpression &arg_ );
-	
-	
-	
+        ScalarExpression( const double &element_ );
+
         /** Casting constructor. */
-        explicit Expression(	const std::string& name_
-        						);
+        ScalarExpression( const SharedOperator &element_ );
 
-        /** Constructor which takes the arguments. */
-        explicit Expression(	const std::string&  name_,							/**< the name                */
-        						uint          		nRows_,							/**< number of rows          */
-        						uint          		nCols_,							/**< number of columns       */
-        						VariableType  		variableType_  = VT_UNKNOWN,	/**< the variable type       */
-        						uint          		globalTypeID   = 0				/**< the global type ID      */
-        						);
-
-        /** Constructor which takes the arguments. */
-        explicit Expression(	int          nRows_                     ,  /**< number of rows          */
-        						int          nCols_         = 1         ,  /**< number of columns       */
-        						VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
-        						int          globalTypeID   = 0            /**< the global type ID      */
-        						);
-
-        /** Constructor which takes the arguments. */
-        explicit Expression(	uint         nRows_                     ,  /**< number of rows          */
-        						uint         nCols_         = 1         ,  /**< number of columns       */
-        						VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
-        						uint         globalTypeID   = 0            /**< the global type ID      */
-        						);
-
-        /** Copy constructor (deep copy). */
-        Expression( const double      & rhs );
-        Expression( const DVector      & rhs );
-        Expression( const DMatrix      & rhs );
-
-        Expression( const Expression  & rhs );
-
+        /** Explicit copy constructor. */
+        ScalarExpression( const ScalarExpression &rhs );
 
         /** Destructor. */
-        virtual ~Expression( );
+        ~ScalarExpression();
 
-        /** Function for cloning. */
-        virtual Expression* clone() const
-        { return new Expression( *this ); }
+        ScalarExpression& operator= ( const Expression& arg );
+        ScalarExpression& operator+=( const Expression& arg );
+        ScalarExpression& operator-=( const Expression& arg );
+        ScalarExpression& operator*=( const Expression& arg );
+        ScalarExpression& operator/=( const Expression& arg );
 
-        /** Assignment Operator.                                             \n
-         *                                                                   \n
-         *  \param arg  the double value to be assigned to the expression.   \n
-         */
-        Expression& operator=( const double& arg );
+        ScalarExpression& operator= ( const ScalarExpression& arg );
+        ScalarExpression& operator+=( const ScalarExpression& arg );
+        ScalarExpression& operator-=( const ScalarExpression& arg );
+        ScalarExpression& operator*=( const ScalarExpression& arg );
+        ScalarExpression& operator/=( const ScalarExpression& arg );
+
+        ScalarExpression& operator= ( const double& arg );
+        ScalarExpression& operator+=( const double& arg );
+        ScalarExpression& operator-=( const double& arg );
+        ScalarExpression& operator*=( const double& arg );
+        ScalarExpression& operator/=( const double& arg );
+
+        const ScalarExpression operator-( ) const;
+
+        const ScalarExpression operator+( const ScalarExpression  & arg ) const;
+        const ScalarExpression operator-( const ScalarExpression  & arg ) const;
+        const ScalarExpression operator*( const ScalarExpression  & arg ) const;
+        const ScalarExpression operator/( const ScalarExpression  & arg ) const;
+
+        friend const ScalarExpression operator+( const double &arg1, const ScalarExpression& arg2 );
+        friend const ScalarExpression operator-( const double &arg1, const ScalarExpression& arg2 );
+        friend const ScalarExpression operator*( const double &arg1, const ScalarExpression& arg2 );
+        friend const ScalarExpression operator/( const double &arg1, const ScalarExpression& arg2 );
 
 
-        /** Assignment Operator.                                       \n
-         *                                                             \n
-         *  \param arg  the vector to be assigned to the expression.   \n
-         */
-        Expression& operator=( const DVector& arg );
-
-
-        /** Assignment Operator.                                       \n
-         *                                                             \n
-         *  \param arg  the matrix to be assigned to the expression.   \n
-         */
-        Expression& operator=( const DMatrix& arg );
-
-
-        /** Assignment Operator.                         \n
-         *                                               \n
-         *  \param arg  the Expression to be assigned.   \n
-         */
-        Expression& operator=( const Expression& arg );
-
-        Expression& operator<<( const double      & arg );
-        Expression& operator<<( const DVector      & arg );
-        Expression& operator<<( const DMatrix      & arg );
-        Expression& operator<<( const Expression  & arg );
-
-	/**
-	Appends an Expression matrix (n x m)
-	with an argument matrix (s x m) in the row direction,
-	such that the result is ( (n + s) x m).
+        bool operator==( const ScalarExpression& arg ) const;
+        bool operator!=( const ScalarExpression& arg ) const;
+        bool operator>=( const ScalarExpression& arg ) const;
+        bool operator<=( const ScalarExpression& arg ) const;
+        bool operator< ( const ScalarExpression& arg ) const;
+        bool operator> ( const ScalarExpression& arg ) const;
 	
-	As a special case, when applied on an empty Expression,
-	the Expression will be assigned the argument.
+//         std::ostream& print( std::ostream &stream ) const;
+//         friend std::ostream& operator<<( std::ostream& stream, const ScalarExpression &arg );
 	
-	
-	*/
-	Expression&  appendRows(const Expression& arg);
-	
-	/**
-	Appends an Expression matrix (n x m)
-	with an argument matrix (n x s) in the column direction,
-	such that the result is ( n x (m + s) ).
-	
-	As a special case, when applied on an empty Expression,
-	the Expression will be assigned the argument.
-	
-	*/
-	Expression&  appendCols(const Expression& arg);
+//         /**
+// 	* When operated on an n x 1 ScalarExpression, returns an m x n DMatrix.
+// 	* The element (i,j) of this matrix is zero when this(i) does not depend on arg(j)
+// 	* \param arg m x 1 ScalarExpression
+// 	*/
+//         DMatrix getDependencyPattern( const ScalarExpression& arg ) const;
 
-        Expression operator()( uint idx                 ) const;
-        Expression operator()( uint rowIdx, uint colIdx ) const;
+        const ScalarExpression getSin    ( ) const;
+        const ScalarExpression getCos    ( ) const;
+        const ScalarExpression getTan    ( ) const;
+        const ScalarExpression getAsin   ( ) const;
+        const ScalarExpression getAcos   ( ) const;
+        const ScalarExpression getAtan   ( ) const;
+        const ScalarExpression getExp    ( ) const;
+        const ScalarExpression getSqrt   ( ) const;
+        const ScalarExpression getLn     ( ) const;
 
-        TemporaryExpression operator()( uint idx                 );
-        TemporaryExpression operator()( uint rowIdx, uint colIdx );
-	
-	
-        Expression operator+( const double      & arg ) const;
-        Expression operator+( const DVector      & arg ) const;
-        Expression operator+( const DMatrix      & arg ) const;
-        Expression operator+( const Expression  & arg ) const;
+        const ScalarExpression getPow   ( const ScalarExpression &arg ) const;
+        const ScalarExpression getPowInt( const int              &arg ) const;
 
-        friend Expression operator+( const double       & arg1, const Expression& arg2 );
-        friend Expression operator+( const DVector       & arg1, const Expression& arg2 );
-        friend Expression operator+( const DMatrix       & arg1, const Expression& arg2 );
-
-
-        Expression operator-( const double      & arg ) const;
-        Expression operator-( const DVector      & arg ) const;
-        Expression operator-( const DMatrix      & arg ) const;
-        Expression operator-( const Expression  & arg ) const;
-
-        Expression operator-( ) const;
-
-        friend Expression operator-( const double       & arg1, const Expression& arg2 );
-        friend Expression operator-( const DVector       & arg1, const Expression& arg2 );
-        friend Expression operator-( const DMatrix       & arg1, const Expression& arg2 );
-
-
-
-        Expression operator*( const double      & arg ) const;
-        Expression operator*( const DVector      & arg ) const;
-        Expression operator*( const DMatrix      & arg ) const;
-        Expression operator*( const Expression  & arg ) const;
-
-        friend Expression operator*( const double       & arg1, const Expression& arg2 );
-        friend Expression operator*( const DVector       & arg1, const Expression& arg2 );
-        friend Expression operator*( const DMatrix       & arg1, const Expression& arg2 );
-
-
-        Expression operator/( const double      & arg ) const;
-        Expression operator/( const Expression  & arg ) const;
-
-        friend Expression operator/( const double       & arg1, const Expression& arg2 );
-        friend Expression operator/( const DVector       & arg1, const Expression& arg2 );
-        friend Expression operator/( const DMatrix       & arg1, const Expression& arg2 );
-
-
-        std::ostream& print( std::ostream &stream ) const;
-        friend std::ostream& operator<<( std::ostream& stream, const Expression &arg );
-
-
-        /** Returns the symbolic inverse of a matrix (only for square matrices) */
-        Expression getInverse( ) const;
-
-        Expression getRow( const uint& rowIdx ) const;
-        Expression getCol( const uint& colIdx ) const;
-	
-	
-        /**
-	* When operated on an n x 1 Expression, returns an m x n DMatrix.
-	* The element (i,j) of this matrix is zero when this(i) does not depend on arg(j)
-	* \param arg m x 1 Expression
-	*/
-        DMatrix getDependencyPattern( const Expression& arg ) const;
-
-        Expression getSin    ( ) const;
-        Expression getCos    ( ) const;
-        Expression getTan    ( ) const;
-        Expression getAsin   ( ) const;
-        Expression getAcos   ( ) const;
-        Expression getAtan   ( ) const;
-        Expression getExp    ( ) const;
-        Expression getSqrt   ( ) const;
-        Expression getLn     ( ) const;
-
-        Expression getPow   ( const Expression &arg ) const;
-        Expression getPowInt( const int        &arg ) const;
-
-        Expression getSumSquare    ( ) const;
-        Expression getLogSumExp    ( ) const;
-        Expression getEuclideanNorm( ) const;
-        Expression getEntropy      ( ) const;
-
-        Expression getDot          ( ) const;
-        Expression getNext         ( ) const;
-
-
-        Expression ADforward  ( const Expression &arg ) const;
-        Expression ADforward  ( const VariableType &varType_, const int *arg, int nV ) const;
-        Expression ADbackward ( const Expression &arg ) const;
-	
-	
-	/** Second order symmetric AD routine returning \n
-	 *  S^T*(l^T*f'')*S  with f'' being the second  \n
-	 * order derivative of the current expression.  \n
-	 * The matrix S and the vector l can be         \n
-	 * interpreted as forward/backward seeds,        \n
-	 * respectively. Optionally, this routine also  \n
-	 * returns expressions for the first order      \n
-	 * order terms f'*S  and  l^T*f' computed by    \n
-	 * first order forward and first order backward \n
-	 * automatic differentiation, respectively.     \n
-	 * Caution: this routine is tailored for        \n
-	 * full Hessian computation exploiting symmetry.\n
-	 * If only single elements of the Hessian are   \n
-	 * needed, forward-over-adjoint or ajoint-over- \n
-	 * forward differentiation may be more          \n
-	 * efficient.                                   \n
-	 */
-	Expression ADsymmetric( const Expression &arg, /** argument      */
-				 const Expression &S  , /** forward seed  */
-				 const Expression &l  , /** backward seed */
-				 Expression *dfS = 0,    /** first order forward  result */
-				 Expression *ldf = 0    /** first order backward result */
-			       ) const;
-	
-	       
 	/** Second order symmetric AD routine returning \n
 	 *  l^T*f''  with f'' being the second          \n
 	 * order derivative of the current expression.  \n
-	 * The he vector l can be                       \n
-	 * interpreted as backward seed,                \n
-	 * respectively. Optionally, this routine also  \n
+	 * The he vector l can be interpreted as a      \n
+	 * backward seed. Optionally, this routine also \n
 	 * returns expressions for the first order      \n
-	 * order terms f'*S  and  l^T*f' computed by    \n
+	 * order terms f'  and  l^T*f' computed by      \n
 	 * first order forward and first order backward \n
 	 * automatic differentiation, respectively.     \n
 	 * Caution: this routine is tailored for        \n
@@ -371,225 +156,117 @@ class Expression{
 	 * forward differentiation may be more          \n
 	 * efficient.                                   \n
 	 */
-	Expression ADsymmetric( const Expression &arg, /** argument      */
-				 const Expression &l  , /** backward seed */
-				 Expression *dfS = 0,    /** first order forward  result */
-				 Expression *ldf = 0    /** first order backward result */
-			       ) const;
-	
-	
-	Expression getODEexpansion( const int &order, const int *arg ) const;
+        SharedOperatorMap2 ADsymmetric( const ScalarExpression &l  , /** backward seed */
+                                        SharedOperatorMap      &dfS, /** first order forward  result */
+                                        SharedOperatorMap      &ldf  /** first order backward result */ ) const;
 
-        Expression ADforward ( const Expression &arg, const Expression &seed ) const;
-        Expression ADforward ( const VariableType &varType_, const int *arg, const Expression &seed ) const;
-        Expression ADforward ( const VariableType *varType_, const int *arg, const Expression &seed ) const;
-        Expression ADbackward( const Expression &arg, const Expression &seed ) const;
+        const ScalarExpression AD_forward ( const Expression &arg, const Expression &seed ) const;
+
+        SharedOperatorMap AD_backward( const ScalarExpression &seed ) const;
+
+        /** Returns whether the expression is a variable.
+         *  \return true if the expression is a variable, false otherwise. */
+        BooleanType isVariable( ) const;
 
 
-        ConstraintComponent operator<=( const double& ub ) const;
-        ConstraintComponent operator>=( const double& lb ) const;
-        ConstraintComponent operator==( const double&  b ) const;
-
-        ConstraintComponent operator<=( const DVector& ub ) const;
-        ConstraintComponent operator>=( const DVector& lb ) const;
-        ConstraintComponent operator==( const DVector&  b ) const;
-
-        ConstraintComponent operator<=( const VariablesGrid& ub ) const;
-        ConstraintComponent operator>=( const VariablesGrid& lb ) const;
-        ConstraintComponent operator==( const VariablesGrid&  b ) const;
-
-        friend ConstraintComponent operator<=( double lb, const Expression &arg );
-        friend ConstraintComponent operator==( double  b, const Expression &arg );
-        friend ConstraintComponent operator>=( double ub, const Expression &arg );
-
-        friend ConstraintComponent operator<=( DVector lb, const Expression &arg );
-        friend ConstraintComponent operator==( DVector  b, const Expression &arg );
-        friend ConstraintComponent operator>=( DVector ub, const Expression &arg );
-
-        friend ConstraintComponent operator<=( VariablesGrid lb, const Expression &arg );
-        friend ConstraintComponent operator==( VariablesGrid  b, const Expression &arg );
-        friend ConstraintComponent operator>=( VariablesGrid ub, const Expression &arg );
-
-
-
-        /** Returns the transpose of this expression.
-         *  \return The transposed expression. */
-         Expression transpose( ) const;
-
-
-
-        /** Returns dimension of vector space.
-         *  \return Dimension of vector space. */
-         inline uint getDim( ) const;
-
-
-        /** Returns the number of rows.
-         *  \return The number of rows. */
-         inline uint getNumRows( ) const;
-
-
-        /** Returns the number of columns.
-         *  \return The number of columns. */
-         inline uint getNumCols( ) const;
-
-
-        /** Returns the global type idea of the idx-component.
-         *  \return The global type ID. */
-         inline uint getComponent( const unsigned int idx ) const;
-
-
-        /** Returns the number of columns.
-         *  \return The number of columns. */
-         inline BooleanType isVariable( ) const;
-
-
-        /** Returns a clone of the operator with index idx.
-         *  \return A clone of the requested operator. */
-         inline SharedOperator getOperatorClone( uint idx ) const;
-
-
-
-        /** Returns the variable type
-         *  \return The the variable type. */
-         inline VariableType getVariableType( ) const;
-
-
-         BooleanType isDependingOn( VariableType type ) const;
-         BooleanType isDependingOn(const  Expression &e ) const;
-
-
-        /** Substitutes a given variable with an expression.
-         *  \return SUCCESSFUL_RETURN
-         */
-        returnValue substitute( int idx, const Expression &arg ) const;
-
-
-        Expression convert( const double      & arg ) const;
-        Expression convert( const DVector      & arg ) const;
-        Expression convert( const DMatrix      & arg ) const;
-
-
-
-        /** Returns a tree projection with respect to the specified index. */
-        inline SharedOperator getTreeProjection( const uint &idx, const std::string& name_ ) const;
-
-
-
-    // PROTECTED FUNCTIONS:
+    // DATA MEMBERS:
     // ---------------------------------------------------------------
-    protected:
-
-
-        /** Generic constructor (protected, only for internal use).
-         */
-        void construct( VariableType  variableType_,  /**< The variable type.     */
-                        uint          globalTypeID_,  /**< the global type ID     */
-                        uint                 nRows_,  /**< The number of rows.    */
-                        uint                 nCols_,  /**< The number of columns. */
-                        const std::string&   name_    /**< The name               */ );
-
-
-        /** Generic copy routine (protected, only for internal use).
-         */
-        void copy( const Expression &rhs );
-
-
-        /** Generic destructor (protected, only for internal use).
-         */
-        void deleteAll( );
-
-
-        /** Generic copy routine (protected, only for internal use).
-         */
-        Expression& assignmentSetup( const Expression &arg );
-
-
-        /** Internal product routine (protected, only for internal use). */
-        SharedOperator product( const SharedOperator &a, const SharedOperator &b ) const;
-
-
-    // PROTECTED DATA MEMBERS:
-    // ---------------------------------------------------------------
-    protected:
-
-        std::vector<SharedOperator> element;   /**< Element of vector space.   */
-        uint               dim         ;   /**< DVector space dimension.    */
-        uint               nRows, nCols;   /**< DMatrix dimension.          */
-        VariableType       variableType;   /**< Variable type.             */
-        uint               component   ;   /**< The expression component   */
-        std::string             name   ;   /**< The name of the expression */
+        SharedOperator element;   /**< The element of the expression. */
 };
 
 CLOSE_NAMESPACE_ACADO
 
-#include <acado/symbolic_expression/expression.ipp>
+namespace Eigen {
+template<> struct NumTraits<ACADO::ScalarExpression>
+: NumTraits<double> // permits to get the epsilon, dummy_precision, lowest, highest functions
+{
+typedef ACADO::ScalarExpression Real;
+typedef ACADO::ScalarExpression NonInteger;
+typedef ACADO::ScalarExpression Nested;
+enum {
+IsComplex = 0,
+IsInteger = 0,
+IsSigned = 1,
+RequireInitialization = 1,
+ReadCost = 1,
+AddCost = 3,
+MulCost = 3
+};
+};
+}
+
+namespace ACADO {
+inline ScalarExpression sqrt(const ScalarExpression& x) { return x.getSqrt(); }
+inline const ScalarExpression& conj(const ScalarExpression& x) { return x; }
+inline const ScalarExpression& real(const ScalarExpression& x) { return x; }
+inline ScalarExpression imag(const ScalarExpression&) { return 0.; }
+inline ScalarExpression abs(const ScalarExpression& x) { return sqrt(x*x); }
+inline ScalarExpression abs2(const ScalarExpression& x) { return x*x; }
+}
+
 
 BEGIN_NAMESPACE_ACADO
 
-/** A helper class implementing the CRTP design pattern.
- *
- *  This class gives object counting and clone capability to a derived
- *  class via static polymorphism.
- *
- *  \tparam Derived      The derived class.
- *  \tparam Type         The expression type. \sa VariableType
- *  \tparam AllowCounter Allow object instance counting.
- *
- *  \note Unfortunately the derived classes have to implement all necessary
- *        ctors. In C++11, this can be done in a much simpler way. One only
- *        needs to say: using Base::Base.
- *
- */
-template<class Derived, VariableType Type, bool AllowCounter = true>
-class ExpressionType : public Expression
-{
+class Expression : public Eigen::Matrix<ScalarExpression,Eigen::Dynamic,Eigen::Dynamic>{
+  
 public:
+  
+  typedef Eigen::Matrix<ScalarExpression,Eigen::Dynamic,Eigen::Dynamic> Base;
+  
+  Expression( const int &nRows = 1, const int &nCols = 1 );
+  
+  Expression( const ScalarExpression &arg );
+  
+  Expression( const double &arg );
+  
+  Expression( const DMatrix &arg );
+  
+  template<typename OtherDerived>
+  inline Expression(const Eigen::MatrixBase<OtherDerived>& other) : Base(other){ }
+  using Base::operator=;
+  
+  template<typename OtherDerived>
+  inline Expression(const Eigen::ReturnByValue<OtherDerived>& other) : Base( other ) {}
 
-	/** Default constructor. */
-	ExpressionType()
-		: Expression("", 1, 1, Type, AllowCounter ? count : 0)
-	{
-		if (AllowCounter == true)
-			count++;
-	}
+  template<typename OtherDerived>
+  inline Expression(const Eigen::EigenBase<OtherDerived>& other) : Base( other ) {}
+  
+  Expression operator,( const Expression &arg ) const;
+  
+  const Expression operator+( const double& arg ) const{ return Base::operator+(Expression(arg)); }
+  const Expression operator-( const double& arg ) const{ return Base::operator-(Expression(arg)); }
+  const Expression operator*( const double& arg ) const{ return Base::operator*(Expression(arg)); }
+  const Expression operator/( const double& arg ) const{ return Base::operator/(ScalarExpression(arg)); }
 
-	/** The constructor with arguments. */
-	ExpressionType(const std::string& _name, unsigned _nRows, unsigned _nCols)
-		: Expression(_name, _nRows, _nCols, Type, AllowCounter ? count : 0)
-	{
-		if (AllowCounter == true)
-			count += _nRows * _nCols;
-	}
+  const Expression operator+( const Expression& arg ) const{ return Base::operator+(arg); }
+  const Expression operator-( const Expression& arg ) const{ return Base::operator-(arg); }
+  const Expression operator*( const Expression& arg ) const{ return Base::operator*(arg); }
+  const Expression operator/( const Expression& arg ) const{ ASSERT(arg.size()==1); return Base::operator/(arg(0)); }
+  
+  friend const Expression operator+( const double &arg1, const Expression& arg2 ){ return Expression(arg1)+arg2; }
+  friend const Expression operator-( const double &arg1, const Expression& arg2 ){ return Expression(arg1)-arg2; }
+  friend const Expression operator*( const double &arg1, const Expression& arg2 ){ return Expression(arg1)*arg2; }
+  friend const Expression operator/( const double &arg1, const Expression& arg2 ){ return Expression(arg1)/arg2; }
+  
+  Expression& appendRows( const Expression &arg );
+  
+  Expression& appendCols( const Expression &arg );
+  
+  Expression AD_backward( const Expression &arg, const Expression &seed ) const;
+  
+  Expression AD_symmetric( const Expression &arg, const Expression &seed,
+                           Expression *dfS = 0  , Expression *ldf = 0 ) const;
+  
+  /** Checks whether the expression is a variable */
+  BooleanType isVariable() const;
+  
+  /** Checks componentwise whether the expression is one or zero */
+  std::vector<NeutralElement> isOneOrZero() const;
+  
+  /** Checks whether the expression is smooth */
+  BooleanType isSmooth() const;
 
-	/** The constructor from an expression. */
-	ExpressionType(const Expression& _expression, unsigned _componentIdx = 0)
-		: Expression( _expression )
-	{
-		variableType = Type;
-		component += _componentIdx;
-		if (AllowCounter == true)
-			count++;
-	}
-
-	/** Destructor. */
-	virtual ~ExpressionType() {}
-
-	/** Function for cloning. */
-	virtual Expression* clone() const
-	{ return new Derived( static_cast< Derived const& >( *this ) ); }
-
-	/** A function for resetting of the istance counter. */
-	returnValue clearStaticCounters()
-	{ count = 0; return SUCCESSFUL_RETURN; }
-
-private:
-	static unsigned count;
 };
-
-template<class Derived, VariableType Type, bool AllowCounter>
-unsigned ExpressionType<Derived, Type, AllowCounter>::count( 0 );
-
-
 
 
 CLOSE_NAMESPACE_ACADO

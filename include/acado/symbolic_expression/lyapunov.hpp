@@ -36,8 +36,7 @@
 #define ACADO_TOOLKIT_LYAPUNOV_HPP
 
 
-#include <acado/symbolic_expression/acado_syntax.hpp>
-#include <acado/symbolic_expression/intermediate_state.hpp>
+#include <acado/symbolic_expression/expression.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

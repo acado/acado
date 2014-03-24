@@ -36,63 +36,16 @@
 #include <acado/symbolic_operator/symbolic_operator.hpp>
 
 
-double dAtan(double x){
-  return 1/(1+x*x);
-}
-
-
-double ddAtan(double x){
-  double v1 = 1+x*x;
-  return -2*x/v1/v1;
-}
-
 BEGIN_NAMESPACE_ACADO
 
 
-Atan::Atan():UnaryOperator(){
-  cName = "atan";
+Atan::Atan():UnaryOperator(){}
 
-  fcn = &atan;
-  dfcn = &dAtan;
-  ddfcn = &ddAtan;
+Atan::Atan( const SharedOperator &_argument ):UnaryOperator(_argument,"atan"){}
 
-  operatorName = ON_ATAN;
+Atan::Atan( const Atan &arg ):UnaryOperator(arg){}
 
-}
-
-Atan::Atan( const SharedOperator &_argument ):UnaryOperator(_argument){
-  cName = "atan";
-
-  fcn = &atan;
-  dfcn = &dAtan;
-  ddfcn = &ddAtan;
-
-  operatorName = ON_ATAN;
-}
-
-
-Atan::Atan( const Atan &arg ):UnaryOperator(arg){
-  cName = "atan";
-
-  fcn = &atan;
-  dfcn = &dAtan;
-  ddfcn = &ddAtan;
-
-  operatorName = ON_ATAN;
-}
-
-
-Atan::~Atan(){
-
-}
-
-
-Atan& Atan::operator=( const Atan &arg ){
-
-  UnaryOperator::operator=(arg);
-
-  return *this;
-}
+Atan::~Atan(){}
 
 
 returnValue Atan::evaluate( EvaluationBase *x ){
@@ -102,9 +55,9 @@ returnValue Atan::evaluate( EvaluationBase *x ){
 }
 
 
-SharedOperator Atan::substitute( int index, const SharedOperator &sub ){
+SharedOperator Atan::substitute( SharedOperatorMap &sub ){
 
-    return SharedOperator( new Atan( argument->substitute( index , sub ) ));
+    return SharedOperator( new Atan( argument->substitute(sub) ));
 }
 
 

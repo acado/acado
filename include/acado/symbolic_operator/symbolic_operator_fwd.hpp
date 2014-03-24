@@ -41,14 +41,10 @@ BEGIN_NAMESPACE_ACADO
 // FORWARD DECLARATIONS:
 // ---------------------
 
-   class IndexList                   ;
-   class CFunction                   ;
-   class COperator                   ;
-   class SymbolicIndexList           ;
-
    class Operator                    ;
    class SmoothOperator              ;
-
+   class NonsmoothOperator           ;
+   
    class BinaryOperator              ;
    class Addition                    ;
    class Subtraction                 ;
@@ -71,7 +67,6 @@ BEGIN_NAMESPACE_ACADO
    class DoubleConstant              ;
    class Projection                  ;
    class TreeProjection              ;
-
 
 CLOSE_NAMESPACE_ACADO
 

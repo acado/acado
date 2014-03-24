@@ -125,7 +125,7 @@ public:
 	{
 		if (Base::rows() != _arg.rows())
 			return false;
-		for (unsigned el = 0; el < Base::rows(); ++el)
+		for (int el = 0; el < Base::rows(); ++el)
 			if (Base::data()[ el ] > _arg.data()[ el ])
 				return false;
 		return true;
@@ -135,7 +135,7 @@ public:
 	{
 		if (Base::rows() != _arg.rows())
 			return false;
-		for (unsigned el = 0; el < Base::rows(); ++el)
+		for (int el = 0; el < Base::rows(); ++el)
 			if (Base::data()[ el ] < _arg.data()[ el ])
 				return false;
 		return true;

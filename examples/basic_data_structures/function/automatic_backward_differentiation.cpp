@@ -44,43 +44,38 @@ int main()
 
 	// DEFINE VALRIABLES:
 	// ---------------------------
-	DifferentialState	x,y;
+	Expression     x,y;
+	Expression  rhs(3);
 
+	rhs(0) = (x+1)*(y+1) + y*x*y;
+	rhs(1) = x;
+	rhs(2) = y;
+	
+	Expression input = (x,y);
+	
+	// DEFINE A BACKWARD SEED:
+	// -----------------------
+	Expression seed(3);
+	seed(0) = 1.;
+	seed(1) = 0.;
+	seed(2) = 0.;
+	
+	// SETUP A FUNCTION:
+	// -----------------
+	
 	Function f;
-
-	f << (x+1)*(y+1) + y*x*y;//pow(y,3);
-	f << x;
-	f << y;
-
+	f << backwardDerivative(rhs,input,seed);
+	f.setInput(input);
+	
 	// EVALUATE THE FUNCTION f:
 	// ------------------------
-	EvaluationPoint z(f);
-
-	DVector diffState(2);
-
-	diffState(0) = 1.0;
-	diffState(1) = 2.0;
-
-	z.setX( diffState );
-
-	DVector ff = f(z);
-
-	ff.print();
-
-	// COMPUTE THE BACKWARD DERIVATIVE:
-	// --------------------------------
-
-	DVector seed(f.getDim());
-
-	seed(0) = 1.0;
-	seed(1) = 0.0;
-	seed(2) = 0.0;
-
-	EvaluationPoint df(f);
-
-	f.AD_backward( seed, df );
-
-	df.getX().print(cout, "df");
+	std::vector<double> z(2);
+	z[0] = 1.;
+	z[1] = 2.;
+	
+	std::vector<double> result = f.evaluate(z);
+	
+	std::cout << "f = [" << result[0] << "," << result[1] << "]" << std::endl;
 
 	return 0;
 }

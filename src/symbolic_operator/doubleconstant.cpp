@@ -42,26 +42,17 @@ BEGIN_NAMESPACE_ACADO
 
 
 
-DoubleConstant::DoubleConstant( ) : SmoothOperator( )
-{
-	value = 0;
-	neutralElement = NE_ZERO;
+DoubleConstant::DoubleConstant():SmoothOperator(){
+    value = 0.;
+    neutralElement = NE_ZERO;
 }
 
 DoubleConstant::DoubleConstant( double value_, NeutralElement neutralElement_ )
 	: SmoothOperator( ), value( value_ ), neutralElement( neutralElement_ )
 {
-	// XXX: This should be revised!!!
-    if (fabs( value ) < 10.0 * EPS)
-    {
-    	neutralElement = NE_ZERO;
-    }
-    else if (fabs(1.0 - value) < 10.0 * EPS)
-    {
-    	neutralElement = NE_ONE;
-    }
+    if( acadoIsEqual(value,0.0) == BT_TRUE ) neutralElement = NE_ZERO;
+    if( acadoIsEqual(value,1.0) == BT_TRUE ) neutralElement = NE_ONE;
 }
-
 
 DoubleConstant::DoubleConstant( const DoubleConstant &arg ){
 
@@ -69,29 +60,7 @@ DoubleConstant::DoubleConstant( const DoubleConstant &arg ){
     neutralElement  = arg.neutralElement ;
 }
 
-
-DoubleConstant::~DoubleConstant(){
-
-}
-
-
-DoubleConstant& DoubleConstant::operator=( const DoubleConstant &arg ){
-
-    if( this != &arg ){
-
-        value           = arg.value          ;
-        neutralElement  = arg.neutralElement ;
-    }
-
-    return *this;
-}
-
-
-returnValue DoubleConstant::evaluate( int number, double *x, double *result ){
-
-    result[0] = value;
-    return SUCCESSFUL_RETURN;
-}
+DoubleConstant::~DoubleConstant(){}
 
 
 returnValue DoubleConstant::evaluate( EvaluationBase *x ){
@@ -101,220 +70,51 @@ returnValue DoubleConstant::evaluate( EvaluationBase *x ){
 }
 
 
-SharedOperator DoubleConstant::differentiate( int index ){
-
-  return SharedOperator( new DoubleConstant( 0.0 , NE_ZERO ));
-}
-
-
-SharedOperator DoubleConstant::AD_forward( int dim,
-                                        VariableType *varType,
-                                        int *component,
-                                        SharedOperator *seed,
-                                        std::vector<SharedOperator> &newIS ){
+SharedOperator DoubleConstant::AD_forward( SharedOperatorMap &seed ){
 
     return SharedOperator( new DoubleConstant( 0.0, NE_ZERO ));
 }
 
 
 
-returnValue DoubleConstant::AD_backward( int           dim      , /**< number of directions  */
-                                        VariableType *varType  , /**< the variable types    */
-                                        int          *component, /**< and their components  */
-                                        SharedOperator &seed     , /**< the backward seed     */
-                                        SharedOperator *df       , /**< the result            */
-                                        std::vector<SharedOperator> &newIS  /**< the new IS-pointer    */ ){
+returnValue DoubleConstant::AD_backward( SharedOperator     &seed,
+                                         SharedOperatorMap  &df  ,
+                                         SharedOperatorMap2 &IS   ){
 
     return SUCCESSFUL_RETURN;
 }
 
 
-returnValue DoubleConstant::AD_symmetric( int            dim       , /**< number of directions  */
-                                        VariableType  *varType   , /**< the variable types    */
-                                        int           *component , /**< and their components  */
-                                        SharedOperator  &l         , /**< the backward seed     */
-                                        SharedOperator     *S         , /**< forward seed matrix   */
-                                        int            dimS      , /**< dimension of forward seed             */
-                                        SharedOperator     *dfS       , /**< first order foward result             */
-                                        SharedOperator     *ldf       , /**< first order backward result           */
-                                        SharedOperator     *H         , /**< upper trianglular part of the Hessian */
-                                      std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
-                                      std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
-                                      std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
+returnValue DoubleConstant::AD_symmetric( SharedOperator     &l  ,
+                                          SharedOperatorMap  &ldf,
+                                          SharedOperatorMap  &df ,
+                                          SharedOperatorMap2 &H  ,
+                                          SharedOperatorMap2 &LIS,
+                                          SharedOperatorMap2 &SIS,
+                                          SharedOperatorMap3 &HIS  ){
   
     return SUCCESSFUL_RETURN; 
 }
 
-
-SharedOperator DoubleConstant::substitute( int index, const SharedOperator &sub ){
+SharedOperator DoubleConstant::substitute( SharedOperatorMap &sub ){
 
     return SharedOperator( new DoubleConstant(*this) );
 }
 
+NeutralElement DoubleConstant::isOneOrZero() const{  return neutralElement; }
 
 
-NeutralElement DoubleConstant::isOneOrZero() const{
-
-    return neutralElement;
-}
-
-
-BooleanType DoubleConstant::isDependingOn( VariableType var ) const{
-
-    return BT_FALSE;
-}
-
-
-BooleanType DoubleConstant::isDependingOn( int dim,
-                                             VariableType *varType,
-                                             int *component,
-                                             BooleanType   *implicit_dep ){
-
-    return BT_FALSE;
-}
-
-
-BooleanType DoubleConstant::isLinearIn( int dim,
-                                          VariableType *varType,
-                                          int *component,
-                                          BooleanType   *implicit_dep ){
-
-    return BT_TRUE;
-}
-
-
-BooleanType DoubleConstant::isPolynomialIn( int dim,
-                                              VariableType *varType,
-                                              int *component,
-                                              BooleanType   *implicit_dep ){
-
-    return BT_TRUE;
-}
-
-
-BooleanType DoubleConstant::isRationalIn( int dim,
-                                            VariableType *varType,
-                                            int *component,
-                                            BooleanType   *implicit_dep ){
-
-    return BT_TRUE;
-}
-
-
-MonotonicityType DoubleConstant::getMonotonicity( ){
-
-    return MT_CONSTANT;
-}
-
-
-CurvatureType DoubleConstant::getCurvature( ){
-
-    return CT_CONSTANT;
-}
-
-
-returnValue DoubleConstant::setMonotonicity( MonotonicityType monotonicity_ ){
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue DoubleConstant::setCurvature( CurvatureType curvature_ ){
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue DoubleConstant::AD_forward( int number, double *x, double *seed,
-                                        double *f, double *df ){
-
-      f[0] =  value;
-     df[0] =  0.0;
-
-     return SUCCESSFUL_RETURN;
-}
-
-
-
-returnValue DoubleConstant::AD_forward( int number, double *seed, double *df ){
-
-     df[0] =  0.0;
-     return SUCCESSFUL_RETURN;
-}
-
-
-returnValue DoubleConstant::AD_backward( int number, double seed, double *df ){
-
-     return SUCCESSFUL_RETURN;
-}
-
-
-returnValue DoubleConstant::AD_forward2( int number, double *seed, double *dseed,
-                                         double *df, double *ddf ){
-
-     df[0] = 0.0;
-    ddf[0] = 0.0;
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue DoubleConstant::AD_backward2( int number, double seed1, double seed2,
-                                          double *df, double *ddf ){
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-
-std::ostream& DoubleConstant::print( std::ostream &stream ) const{
+std::ostream& DoubleConstant::print( std::ostream &stream, StringMap &name ) const{
 
     return stream << "(real_t)(" << value << ")";
 }
 
+returnValue DoubleConstant::getArgumentList( DependencyMap &exists,
+                                             SharedOperatorVector &list  ){ return SUCCESSFUL_RETURN; }
 
-returnValue DoubleConstant::clearBuffer(){
+BooleanType DoubleConstant::isSymbolic() const{ return BT_TRUE; }
 
-    return SUCCESSFUL_RETURN;
-}
-
-
-returnValue DoubleConstant::enumerateVariables( SymbolicIndexList *indexList ){
-
-    return SUCCESSFUL_RETURN;
-}
-
-//
-// PROTECTED MEMBER FUNCTIONS:
-// ---------------------------
-
-OperatorName DoubleConstant::getName(){
-
-    return ON_DOUBLE_CONSTANT;
-}
-
-BooleanType DoubleConstant::isVariable( VariableType &varType, int &component ) const
-{
-    return BT_FALSE;
-}
-
-
-returnValue DoubleConstant::loadIndices( SymbolicIndexList *indexList ){
-
-    return SUCCESSFUL_RETURN;
-}
-
-
-BooleanType DoubleConstant::isSymbolic() const{
-
-    return BT_TRUE;
-}
-
-
-double DoubleConstant::getValue() const{
-
-    return value;
-}
+double DoubleConstant::getValue() const{  return value; }
 
 
 CLOSE_NAMESPACE_ACADO

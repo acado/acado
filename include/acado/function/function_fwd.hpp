@@ -42,10 +42,13 @@ BEGIN_NAMESPACE_ACADO
 // FORWARD DEKLARATIONS:
 // ---------------------
 
+   template<typename T> class UserFunction       ;
+   template<typename T> class UserDefinedOperator;
+   
+   
    class Function                       ;
-   class DifferentialEquation           ;
-   class DiscretizedDifferentialEquation;
-   class OutputFcn                      ;
+//    class DifferentialEquation           ;
+//    class DiscretizedDifferentialEquation;
 
 
 CLOSE_NAMESPACE_ACADO

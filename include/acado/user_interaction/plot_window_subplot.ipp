@@ -199,22 +199,26 @@ inline SubPlotType PlotWindowSubplot::getSubPlotType( ) const
 
 inline VariableType PlotWindowSubplot::getXVariableType( ) const
 {
-	if ( plotVariableX == 0 )
+// 	if ( plotVariableX == 0 )
+
+ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+
 		return VT_TIME;
-	else
-		return plotVariableX->getVariableType( );
+// 	else
+// 		return plotVariableX->getVariableType( );
 }
 
 
 inline VariableType PlotWindowSubplot::getYVariableType( ) const
 {
-	if ( plotVariableY == 0 )
-		if ( plotVariablesGrid == 0 )
+// 	if ( plotVariableY == 0 )
+// 		if ( plotVariablesGrid == 0 )
 			return VT_UNKNOWN;
-		else
-			return plotVariablesGrid->getType( );
-	else
-		return plotVariableY->getVariableType( );
+// 		else
+// 			return plotVariablesGrid->getType( );
+// 	else
+// 		return plotVariableY->getVariableType( );
+ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 }
 
 

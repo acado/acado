@@ -31,11 +31,7 @@
 *    \date 2008
 */
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/symbolic_operator/symbolic_operator.hpp>
-#include <acado/symbolic_expression/symbolic_expression.hpp>
-#include <acado/symbolic_expression/constraint_component.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -54,21 +50,7 @@ BooleanType SmoothOperator::isSmooth( ) const
     return BT_TRUE;
 }
 
-
 double SmoothOperator::getValue() const{ return INFTY; }
-
-int SmoothOperator::getGlobalIndex( ) const{
-
-	ACADOERROR( RET_UNKNOWN_BUG );
-    return -1;
-}
-
-
-SharedOperator SmoothOperator::passArgument() const{
-
-    Operator *tmp = 0;
-    return SharedOperator(tmp);
-}
 
 CLOSE_NAMESPACE_ACADO
 

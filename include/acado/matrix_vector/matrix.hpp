@@ -201,7 +201,7 @@ public:
 	GenericVector< T > getRow(	unsigned _idx
 								) const
 	{
-		ASSERT( _idx < Base::rows() );
+		ASSERT( (int) _idx < Base::rows() );
 		return Base::row( _idx ).transpose();
 	}
 
@@ -209,7 +209,7 @@ public:
 	GenericVector< T > getCol(	unsigned _idx
 								) const
 	{
-		ASSERT( _idx < Base::cols() );
+		ASSERT( (int) _idx < Base::cols() );
 		return Base::col( _idx );
 	}
 
@@ -218,7 +218,7 @@ public:
 							const GenericVector< T >& _values
 							)
 	{
-		ASSERT(Base::cols() == _values.rows() && _idx < Base::rows());
+		ASSERT(Base::cols() == _values.rows() && (int) _idx < Base::rows());
 		Base::row( _idx ) = _values.transpose();
 
 		return *this;
@@ -229,7 +229,7 @@ public:
 							const GenericVector< T >& _arg
 							)
 	{
-		ASSERT(Base::rows() == _arg.rows() && _idx < Base::cols());
+		ASSERT(Base::rows() == _arg.rows() && (int) _idx < Base::cols());
 		Base::col( _idx ) = _arg;
 
 		return *this;
@@ -240,7 +240,7 @@ public:
 							unsigned _end
 							) const
 	{
-		if (_start >= Base::rows() || _end >= Base::rows() || _start > _end)
+		if ((int) _start >= Base::rows() || (int) _end >= Base::rows() || _start > _end)
 			return GenericMatrix();
 
 		return Base::block(_start, 0, _end - _start + 1, Base::cols());
@@ -251,7 +251,7 @@ public:
 							unsigned _end
 							) const
 	{
-		if (_start >= Base::cols() || _end >= Base::cols() || _start > _end)
+		if ((int) _start >= Base::cols() || (int) _end >= Base::cols() || _start > _end)
 			return GenericMatrix();
 
 		return Base::block(0, _start, Base::rows(), _end - _start + 1);

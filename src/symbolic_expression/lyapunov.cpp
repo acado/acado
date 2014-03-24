@@ -63,7 +63,8 @@ Lyapunov::Lyapunov(const Expression &rhs1_,                                     
     p=p_;
 }
 
-Lyapunov::Lyapunov(const Expression &rhs1_,                                                        const Expression &rhs2_,                                                        const Expression &A_,                                                           const Expression &B_,                                                           const Expression &P_,                                                           const Expression &x1_,                                                          const Expression &x2_,                                                          const Expression &u_,                                                           const Expression &p_,                                                           const Expression &useed_,                                                       const Expression &pseed_,                                                       const Expression &Yx1_,                                                         const Expression &Yx2_,                                                         const Expression &YP_){
+Lyapunov::Lyapunov(const Expression &rhs1_,                                                        const Expression &rhs2_,                                                        const Expression &A_,                                                           const Expression &B_,                                                           const Expression &P_,                                                           const Expression &x1_,                                                          const Expression &x2_,                                                          const Expression &u_,                                                           const Expression &p_,                                                           const Expression &useed_,                                                       const Expression &pseed_,                                                       const Expression &Yx1_,                                                         const Expression &Yx2_,                      
+                                   const Expression &YP_){
 
     rhs1=rhs1_;
     rhs2=rhs2_;
@@ -108,7 +109,8 @@ Lyapunov::Lyapunov(const Expression &rhs1_,                                     
     w=w_;
 }
 
-Lyapunov::Lyapunov(const Expression &rhs1_,                                                        const Expression &rhs2_,                                                        const Expression &A_,                                                           const Expression &B_,                                                           const Expression &P_,                                                           const Expression &x1_,                                                          const Expression &x2_,                                                          const Expression &u_,                                                           const Expression &p_,                                                           const Expression &w_,                                                           const Expression &useed_,                                                       const Expression &pseed_,                                                       const Expression &Yx1_,                                                         const Expression &Yx2_,                                                         const Expression &YP_){
+Lyapunov::Lyapunov(const Expression &rhs1_,                                                        const Expression &rhs2_,                                                        const Expression &A_,                                                           const Expression &B_,                                                           const Expression &P_,                                                           const Expression &x1_,                                                          const Expression &x2_,                                                          const Expression &u_,                                                           const Expression &p_,                                                           const Expression &w_,                                                           const Expression &useed_,                                                       const Expression &pseed_,                                                       const Expression &Yx1_,                      
+                                   const Expression &Yx2_,                                                         const Expression &YP_){
 
     rhs1=rhs1_;
     rhs2=rhs2_;
@@ -176,7 +178,7 @@ Lyapunov& Lyapunov::operator=( const Lyapunov &arg ){
 }
 
 BooleanType Lyapunov::isEmpty() const{
-  if ((P).getDim() == 0)  return BT_TRUE;
+  if ((P).size() == 0)  return BT_TRUE;
   return BT_FALSE;
 }
 

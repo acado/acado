@@ -62,36 +62,24 @@ public:
     /** Default constructor. */
     Tan( const SharedOperator &_argument );
 
-    /** Copy constructor (deep copy). */
+    /** Copy constructor. */
     Tan( const Tan &arg );
 
     /** Default destructor. */
     ~Tan();
 
-    /** Assignment Operator (deep copy). */
-    Tan& operator=( const Tan &arg );
+    /** Evaluates the expression (templated version) */
+    virtual returnValue evaluate( EvaluationBase *x );
 
-
-	/** Evaluates the expression (templated version) */
-	virtual returnValue evaluate( EvaluationBase *x );
-
-
-
-    /** Substitutes var(index) with the expression sub.           \n
-     *  \return The substituted expression.                       \n
+    /** Substitutes key with the expression sub. \n
+     *  \return The substituted expression.      \n
      *
      */
-     virtual SharedOperator substitute( int   index           /**< subst. index    */,
-                                        const SharedOperator &sub /**< the substitution*/);
+    virtual SharedOperator substitute( SharedOperatorMap &sub /**< the substitution */ );
 
-     virtual returnValue initDerivative();
+    /** Initializes the derivative operators */
+    virtual returnValue initDerivative();
 
-
-//
-//  PROTECTED FUNCTIONS:
-//
-
-protected:
 };
 
 

@@ -104,7 +104,7 @@ template<typename T>
 GenericVector< T > GenericMatrix< T >::sumCol() const
 {
 	GenericVector< T > foo(Base::rows());
-	for (unsigned r = 0; r < Base::rows(); ++r)
+	for (int r = 0; r < Base::rows(); ++r)
 		foo( r ) = Base::row( r ).sum();
 
 	return foo;
@@ -114,7 +114,7 @@ template<typename T>
 GenericVector< T > GenericMatrix<T>::sumRow() const
 {
 	GenericVector< T > foo(Base::cols());
-	for (unsigned c = 0; c < Base::cols(); ++c)
+	for (int c = 0; c < Base::cols(); ++c)
 		foo( c ) = Base::col( c ).sum();
 
 	return foo;
@@ -271,9 +271,9 @@ returnValue GenericMatrix< T >::print(	std::ostream& _stream,
 	iof.set(_precision > 0 ? _precision :
 			iof.precision, _width, _precision > 0 ? ios::scientific | ios::right : ios::fixed);
 
-	for (unsigned r = 0; r < Base::rows(); ++r)
+	for (int r = 0; r < Base::rows(); ++r)
 	{
-		for (unsigned c = 0; c < Base::cols(); ++c)
+		for (int c = 0; c < Base::cols(); ++c)
 		{
 			_stream << Base::operator()(r, c);
 

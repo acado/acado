@@ -45,39 +45,28 @@ int main( ){
 
     // DEFINE VARIABLES:
     // ----------------------
-    DifferentialState      x;
-    TIME                   t;
-    Function               f;
+    Expression x;
+    Expression t;
+    Function   f;
 
-    f << pow(x,2) + t       ;
-    f << pow(x,2)           ;
+    Expression a;
+    
+    a = x*x;
+    
+    f << a + t       ;
+    f << a           ;
 
+    f.setInput((x,t));
+    
+    std::vector<double> xx(2);
 
-    // TEST THE FUNCTION f:
-    // ---------------------------------------
-    EvaluationPoint z(f);
-
-    DVector xx(1);
-    xx(0) = 2.0;
-    double tt = 1.0;
-
-    z.setT( tt );
-    z.setX( xx );
-
-    DVector result = f.evaluate( z );
-
-
-    // PRINT THE RESULT:
-    // -----------------
-    printf("\nf( %.1e , %.1e ) = ", tt, xx(0) );
-    result.print();
-
-    printf("\n\n");
-    printf("the dimension of f is      %d                      \n",  f.getDim() );
-    printf("the function f depends on  %d  differential states \n",  f.getNX () );
-    printf("the function f depends on  %d  controls            \n",  f.getNU () );
-    printf("the function f depends on  %d  parameters          \n",  f.getNP () );
-
+    xx[0] = 2.;
+    xx[1] = 1.;
+    
+    std::vector<double> result = f.evaluate(xx);
+    
+    std::cout << "f = [" << result[0] << "," << result[1] << "]" << std::endl;
+    
     return 0;
 }
 /* <<< end tutorial code <<< */

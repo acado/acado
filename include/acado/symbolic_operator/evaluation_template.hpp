@@ -54,7 +54,7 @@ public:
 
 	/** Default constructor. */
 	EvaluationTemplate();
-	EvaluationTemplate( Tmatrix<T> *_val );
+	EvaluationTemplate( std::map<Operator*,T> *_map );
 	
 	virtual ~EvaluationTemplate();
 
@@ -65,7 +65,7 @@ public:
 	virtual void power      ( Operator &arg1, Operator &arg2 );
 	virtual void powerInt   ( Operator &arg1, int      &arg2 );
 
-	virtual void project    ( int      &idx );
+	virtual void project    ( Operator *idx );
 	virtual void set        ( double   &arg );
 	virtual void Acos       ( Operator &arg );
 	virtual void Asin       ( Operator &arg );
@@ -76,9 +76,8 @@ public:
 	virtual void Sin        ( Operator &arg );
 	virtual void Tan        ( Operator &arg );
 	
-	Tmatrix<T> *val;
-	T           res;
-	
+	std::map<Operator*,T> *map;
+	T                      res;
 };
 
 
@@ -91,49 +90,49 @@ BEGIN_NAMESPACE_ACADO
 
 
 
-template <typename T> EvaluationTemplate<T>::EvaluationTemplate():EvaluationBase(){ val = 0; }
-template <typename T> EvaluationTemplate<T>::EvaluationTemplate( Tmatrix<T> *_val ):EvaluationBase()
-{ val = _val; }
+template <typename T> EvaluationTemplate<T>::EvaluationTemplate():EvaluationBase(){ map = 0; }
+template <typename T> EvaluationTemplate<T>::EvaluationTemplate( std::map<Operator*,T> *_map ):EvaluationBase()
+{ map = _map; }
 template <typename T> EvaluationTemplate<T>::~EvaluationTemplate(){}
 
 template <typename T> void EvaluationTemplate<T>::addition( Operator &arg1, Operator &arg2 ){
 	
-	EvaluationTemplate<T> r(val);
 	arg1.evaluate( this );
-	arg2.evaluate( &r );
-	res += r.res;
+	T tmp = res;
+	arg2.evaluate( this );
+	res += tmp; 
 }
 
 template <typename T> void EvaluationTemplate<T>::subtraction( Operator &arg1, Operator &arg2 ){
  
-	EvaluationTemplate<T> r(val);
+	arg2.evaluate( this );
+	T tmp = res;
 	arg1.evaluate( this );
-	arg2.evaluate( &r );
-	res -= r.res;
+	res -= tmp;
 }
 
 template <typename T> void EvaluationTemplate<T>::product( Operator &arg1, Operator &arg2 ){
  
-	EvaluationTemplate<T> r(val);
 	arg1.evaluate( this );
-	arg2.evaluate( &r );
-	res *= r.res;
+	T tmp = res;
+	arg2.evaluate( this );
+	res *= tmp;
 }
 
 template <typename T> void EvaluationTemplate<T>::quotient( Operator &arg1, Operator &arg2 ){
 
-	EvaluationTemplate<T> r(val);
+	arg2.evaluate( this );
+	T tmp = res;
 	arg1.evaluate( this );
-	arg2.evaluate( &r );
-	res /= r.res;
+	res /= tmp;
 }
 
 template <typename T> void EvaluationTemplate<T>::power( Operator &arg1, Operator &arg2 ){
- 
-	EvaluationTemplate<T> r(val);
+
 	arg1.evaluate( this );
-	arg2.evaluate( &r );
-	res = pow(res,r.res);
+	T tmp = res;
+	arg2.evaluate( this );
+	res = pow(tmp,res);
 }
 
 template <typename T> void EvaluationTemplate<T>::powerInt( Operator &arg1, int &arg2 ){
@@ -143,9 +142,9 @@ template <typename T> void EvaluationTemplate<T>::powerInt( Operator &arg1, int 
 }
 
 
-template <typename T> void EvaluationTemplate<T>::project( int &idx ){
+template <typename T> void EvaluationTemplate<T>::project( Operator *idx ){
 
-	res = val->operator()(idx);
+	res = map->operator[](idx);
 }
 
 

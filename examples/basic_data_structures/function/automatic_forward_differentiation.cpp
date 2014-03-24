@@ -47,33 +47,30 @@ int main()
 {
 	// DEFINE VALRIABLES:
 	// ---------------------------
-	DifferentialState	x, y;
+	Expression      x,y;
+	Expression  seed(2);
 	Function f;
-
-	f << x*x + pow(y,2);
-
+	
+	Expression input = (x,y);
+	f.setInput(input);
+	
+	seed(0) = 0.5;
+	seed(1) = 0.1; 
+	
+	f << forwardDerivative( x*x + pow(y,2), input, seed );
+	
 	// TEST THE FUNCTION f:
 	// --------------------
-	EvaluationPoint z(f);
-	EvaluationPoint dz(f);
-
-	DVector xx(2); DVector dx(2);
-
-	xx(0) = 1.0; dx(0) = 0.5;
-	xx(1) = 1.0; dx(1) = 0.1;
-
-	z.setX( xx ); dz.setX( dx );
-
-	// FORWARD DIFFERENTIATION:
-	// ------------------------
-	DVector ff = f.evaluate ( z );
-	DVector df = f.AD_forward( dz );
-
+	std::vector<double> xx(2);
+	xx[0] = 1.0;
+	xx[1] = 1.0;
+	
+	std::vector<double> result = f.evaluate(xx);
+	
 	// PRINT THE RESULTS:
 	// ------------------
-	cout << "result of evaluation    : " << ff;
-	cout << "result of the derivative: " << df;
-
+	cout << "f = " << result[0] << std::endl;
+	
 	return 0;
 }
 /* <<< end tutorial code <<< */

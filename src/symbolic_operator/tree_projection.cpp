@@ -35,422 +35,164 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/symbolic_operator/symbolic_operator.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
-#include <acado/symbolic_expression/constraint_component.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
 
 
-
-int TreeProjection::count = 0;
-
-TreeProjection::TreeProjection( )
-               :Projection(){
-
-    variableType   = VT_INTERMEDIATE_STATE ;
-    vIndex         = 0                     ;
-    variableIndex  = 0                     ;
-    Operator *tmp  = 0                     ;
-    argument       = SharedOperator(tmp)   ;
-    ne             = NE_ZERO               ;
-}
-
-
-TreeProjection::TreeProjection( const std::string &name_ )
-               :Projection( name_ ){
-
-    variableType   = VT_INTERMEDIATE_STATE ;
-    vIndex         = 0                     ;
-    variableIndex  = 0                     ;
-    Operator *tmp  = 0                     ;
-    argument       = SharedOperator(tmp)   ;
-    ne             = NE_ZERO               ;
-}
-
-
+TreeProjection::TreeProjection():Projection(){ ne = NE_ZERO; }
 
 TreeProjection::TreeProjection( const TreeProjection &arg )
-               :Projection(){
+               :Projection(arg){
 
-    copy(arg);
     argument = arg.argument;
     ne = arg.ne;
 }
 
-
 TreeProjection::~TreeProjection(){ }
 
+returnValue TreeProjection::setArgument( const SharedOperator & arg ){
+  
+     argument = arg;
+     ne = argument->isOneOrZero();
+     return SUCCESSFUL_RETURN;
+}
+
+returnValue TreeProjection::evaluate( EvaluationBase *x ){
+
+    x->project(argument.get());    
+    return SUCCESSFUL_RETURN;
+}
 
 
-Operator& TreeProjection::operator=( const SharedOperator &arg ){
+Operator& TreeProjection::operator+=( const ScalarExpression& arg ){
 
-    	Operator *arg_tmp = arg.get();
-    	TreeProjection *tp = dynamic_cast<TreeProjection *>(arg_tmp);
-    	Projection *p = dynamic_cast<Projection *>(arg_tmp);
-    	if( tp != 0 ) {
-    		// special case: argument is a treeprojection
-    		if( tp->argument != 0 ) {
-    			argument = tp->argument;
-    			ne = argument->isOneOrZero();
-    		}
-    		else {
-			Operator *tmp = 0;
-    			argument = SharedOperator( tmp );
-    			ne = NE_NEITHER_ONE_NOR_ZERO;
-    		}
-		copy(*tp);
-    	}
-    	else {
-    		if( p != 0 ) {
-        		// special case: argument is a projection
-			Operator *tmp = 0;
-    			argument = SharedOperator( tmp );
-    			ne = NE_NEITHER_ONE_NOR_ZERO;
-    			copy(*p);
-    		}
-    		else {
-    			// no special case: create a new treeprojection
-    			argument = arg;
-    			vIndex   = count++;
-    			variableIndex  = vIndex ;
-			variableType   = VT_INTERMEDIATE_STATE ;
+    setArgument( myAdd( SharedOperator(new TreeProjection(*this)), arg.element ) );
+    return *this;
+}
 
-    			curvature      = CT_UNKNOWN; // argument->getCurvature();
-    			monotonicity   = MT_UNKNOWN; // argument->getMonotonicity();
+Operator& TreeProjection::operator-=( const ScalarExpression& arg ){
+  
+    setArgument( mySubtract( SharedOperator(new TreeProjection(*this)), arg.element ) );
+    return *this;
+}
 
-    			ne = argument->isOneOrZero();
-    		}
-    	}
+Operator& TreeProjection::operator*=( const ScalarExpression& arg ){
+  
+    setArgument( myProd( SharedOperator(new TreeProjection(*this)), arg.element ) );
+    return *this;
+}
+
+Operator& TreeProjection::operator/=( const ScalarExpression& arg ){
+
+    setArgument( myQuotient( SharedOperator(new TreeProjection(*this)), arg.element ) );
     return *this;
 }
 
 
-Operator& TreeProjection::operator=( const Expression &arg ){
-
-	ASSERT( arg.getDim() == 1 );
-
-	argument = arg.getOperatorClone(0);
-
-	vIndex         = count++;
-	variableIndex  = vIndex ;
-
-	curvature      = CT_UNKNOWN; // argument->getCurvature();
-	monotonicity   = MT_UNKNOWN; // argument->getMonotonicity();
-
-	ne = argument->isOneOrZero();
-
-	return *this;
-}
-
-
-Operator& TreeProjection::operator=( const double& arg ){
-
-    Expression tmp;
-    return this->operator=( tmp.convert(arg) );
-}
-
-
-Operator& TreeProjection::operator+=( const Expression& arg ){
-  
-return operator=( myAdd( SharedOperator(new TreeProjection(*this)), arg.getOperatorClone(0) ) );
-}
-
-Operator& TreeProjection::operator-=( const Expression& arg ){
-  
-return operator=( mySubtract( SharedOperator(new TreeProjection(*this)), arg.getOperatorClone(0) ) );
-}
-
-Operator& TreeProjection::operator*=( const Expression& arg ){
-  
-return operator=( myProd( SharedOperator(new TreeProjection(*this)), arg.getOperatorClone(0) ) );
-}
-
-Operator& TreeProjection::operator/=( const Expression& arg ){
-  
-return operator=( SharedOperator( new Quotient( SharedOperator(new TreeProjection(*this)), arg.getOperatorClone(0) ) ));
-}
-
-
-SharedOperator TreeProjection::ADforwardProtected( int dim,
-                                                   VariableType *varType,
-                                                   int *component,
-                                                   SharedOperator *seed,
-                                                   std::vector<SharedOperator> &newIS ){
-  
-    if (argument == 0) {
-        return Projection::ADforwardProtected( dim, varType, component, seed, newIS );
-    }
-
-    int run1 = 0;
-
-    while( run1 < dim ){
-
-        if( varType[run1] == variableType && component[run1] == vIndex ){
-            return seed[run1];
-        }
-        run1++;
-    }
+SharedOperator TreeProjection::AD_forward( SharedOperatorMap &seed ){
     
-    newIS.resize(vIndex+1);
-
-    if( newIS[vIndex] != 0 ) return newIS[vIndex];
+    SharedOperator tmp = seed[argument.get()];
     
-    SharedOperator tmp = argument->AD_forward(dim,varType,component,seed,newIS);
+    if( tmp != 0 ) return tmp;
+    
+    tmp = Operator::convert2TreeProjection(argument->AD_forward(seed));
+    seed[argument.get()] = tmp;
+    
+    return tmp;
+}
 
-    newIS[vIndex] = SharedOperator(new TreeProjection());
-    newIS[vIndex]->operator=(tmp);
-    newIS[vIndex]->setCurvature( CT_UNKNOWN );
 
-    return newIS[vIndex];
+void TreeProjection::convert2TreeProjection(SharedOperatorMap &arg) const{
+
+    SharedOperatorMap::iterator it;
+    for( it=arg.begin(); it!=arg.end(); ++it )
+         arg[it->first] = Operator::convert2TreeProjection(it->second);
 }
 
 
 
-returnValue TreeProjection::ADbackwardProtected( int           dim      , /**< number of directions  */
-                                        VariableType *varType  , /**< the variable types    */
-                                        int          *component, /**< and their components  */
-                                        SharedOperator &seed     , /**< the backward seed     */
-                                        SharedOperator    *df       , /**< the result            */
-                                        std::vector<SharedOperator> &newIS ){
+returnValue TreeProjection::AD_backward( SharedOperator     &seed ,
+                                         SharedOperatorMap  &df   ,
+                                         SharedOperatorMap2 &IS     ){
 
-	if (argument == 0) {
-		return Projection::ADbackwardProtected( dim, varType, component, seed, df, newIS );
-	}
-	else {
+    SharedOperatorMap tmp = IS[this];
+    SharedOperatorMap::iterator it;
 
-    int run1;
-
-    newIS.resize((vIndex+1)*dim);
-    
-    if( newIS[vIndex*dim] == 0 ){
-      
-        SharedOperator *results = new SharedOperator[dim];
-        for( run1 = 0; run1 < dim; run1++ ){
-            results[run1] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
-        }
+    if( tmp.size() == 0 ){
         SharedOperator aux = SharedOperator( new DoubleConstant(1.0,NE_ONE) );
-        argument->AD_backward(dim,varType,component, aux, results, newIS );
-        for( run1 = 0; run1 < dim; run1++ ){  
-	      newIS[vIndex*dim+run1] = SharedOperator( new TreeProjection() );
-	      newIS[vIndex*dim+run1]->operator=(results[run1]);
-	      newIS[vIndex*dim+run1]->setCurvature( CT_UNKNOWN );
-	}
-        delete[] results;
+        argument->AD_backward(aux,tmp,IS);
+        convert2TreeProjection(tmp);
+        IS[this] = tmp;
     }
 
-    if( seed->isOneOrZero() != NE_ZERO ){
-      
-        for( run1 = 0; run1 < dim; run1++ ){
-	  
-	    SharedOperator tmp = df[run1];
-	    
-	    if( seed->isOneOrZero() == NE_ONE ){
-	        df[run1] = myAdd( newIS[vIndex*dim+run1], tmp );
-	    }
-	    else{
-                SharedOperator projTmp = myProd(newIS[vIndex*dim+run1],seed);
-                df[run1] = myAdd( projTmp, tmp );
-	    }
-        }
-    }
-    return SUCCESSFUL_RETURN;
-  }
-}
+    for( it=tmp.begin(); it!=tmp.end(); ++it )
+         df[it->first] = myAdd( myProd( seed, it->second ), checkForZero(df[it->first]) );
 
-
-
-returnValue TreeProjection::ADsymmetricProtected( int            dim       , /**< number of directions  */
-                                        VariableType  *varType   , /**< the variable types    */
-                                        int           *component , /**< and their components  */
-                                        SharedOperator    &l         , /**< the backward seed     */
-                                        SharedOperator    *S         , /**< forward seed matrix   */
-                                        int            dimS      , /**< dimension of forward seed             */
-                                        SharedOperator     *dfS       , /**< first order forward result             */
-                                        SharedOperator     *ldf       , /**< first order backward result           */
-                                        SharedOperator     *H         , /**< upper triangular part of the Hessian */
-                                        std::vector<SharedOperator> &newLIS , /**< the new LIS-pointer   */
-                                        std::vector<SharedOperator> &newSIS , /**< the new SIS-pointer   */
-                                        std::vector<SharedOperator> &newHIS   /**< the new HIS-pointer   */ ){
-  
-	if (argument == 0) {
-		return Projection::ADsymmetricProtected( dim, varType, component, l, S, dimS, dfS, ldf, H, newLIS, newSIS, newHIS );
-	}
-	else {
-
-	int run1;
-
-	newLIS.resize((vIndex+1)*dim );
-	newSIS.resize((vIndex+1)*dimS);
-	newHIS.resize((vIndex+1)*dimS*dimS);
-  
-  // ============================================================================
-
-	if( newLIS[vIndex*dim] == 0 ){
-
-		SharedOperator *lres = new SharedOperator[dim];
-		for( run1 = 0; run1 < dim; run1++ ){
-			lres[run1] = SharedOperator( new DoubleConstant(0.0,NE_ZERO));
-		}
-		SharedOperator aux = SharedOperator( new DoubleConstant(1.0,NE_ONE) );
-
-		SharedOperator *Sres = new SharedOperator[dimS];
-		for( run1 = 0; run1 < dimS; run1++ ){
-			Sres[run1] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
-		}
-
-		SharedOperator *Hres = new SharedOperator[dimS*dimS];
-		for( run1 = 0; run1 < dimS*dimS; run1++ ){
-			Hres[run1] = SharedOperator( new DoubleConstant(0.0,NE_ZERO) );
-		}
-
-		argument->AD_symmetric( dim, varType, component, aux, S, dimS,
-				Sres, lres, Hres,
-				newLIS, newSIS, newHIS );
-
-
-		for( run1 = 0; run1 < dim; run1++ ){
-			newLIS[vIndex*dim+run1] = SharedOperator( new TreeProjection() );
-			newLIS[vIndex*dim+run1]->operator=(lres[run1]);
-			newLIS[vIndex*dim+run1]->setCurvature( CT_UNKNOWN );
-		}
-		delete[] lres;
-
-		for( run1 = 0; run1 < dimS; run1++ ){
-			newSIS[vIndex*dimS+run1] = SharedOperator( new TreeProjection() );
-			newSIS[vIndex*dimS+run1]->operator=(Sres[run1]);
-			newSIS[vIndex*dimS+run1]->setCurvature( CT_UNKNOWN );
-		}
-		delete[] Sres;
-
-		for( run1 = 0; run1 < dimS*dimS; run1++ ){
-			newHIS[vIndex*dimS*dimS+run1] = SharedOperator( new TreeProjection() );
-			newHIS[vIndex*dimS*dimS+run1]->operator=(Hres[run1]);
-			newHIS[vIndex*dimS*dimS+run1]->setCurvature( CT_UNKNOWN );
-		}
-		delete[] Hres;
-	}
-
-  // ============================================================================
-  
-	if( l->isOneOrZero() != NE_ZERO ){
-
-		for( run1 = 0; run1 < dim; run1++ ){
-
-			SharedOperator tmp = ldf[run1];
-
-			if( l->isOneOrZero() == NE_ONE ){
-				ldf[run1] = myAdd( newLIS[vIndex*dim+run1], tmp );
-			}
-			else{
-				SharedOperator projTmp = myProd( newLIS[vIndex*dim+run1], l );
-				ldf[run1] = myAdd( projTmp, tmp );
-			}
-		}
-	}
-
-	for( run1 = 0; run1 < dimS; run1++ ){
-		dfS[run1] = newSIS[vIndex*dimS+run1];
-	}
-
-	for( run1 = 0; run1 < dimS*dimS; run1++ ){
-
-		if( l->isOneOrZero() == NE_ONE ){
-			H[run1] = newHIS[vIndex*dimS*dimS+run1];
-		}
-		else{
-			H[run1] = myProd(newHIS[vIndex*dimS*dimS+run1],l);
-		}
-	}
-	return SUCCESSFUL_RETURN;
-	}
-}
-  
-
-  
-returnValue TreeProjection::loadIndices( SymbolicIndexList *indexList ){
-
-    returnValue returnvalue = SUCCESSFUL_RETURN;
-
-    if( argument == 0 ){
-        return Projection::loadIndices( indexList );
-    }
-
-    if( indexList->addNewElement( VT_INTERMEDIATE_STATE, vIndex ) == BT_TRUE ){
-
-        returnvalue = argument->loadIndices( indexList );
-
-        indexList->addOperatorPointer( argument, vIndex );
-    }
-
-    if (name.empty())
-    {
-    	std::stringstream ss;
-        ss << "a" << "[" << vIndex << "]";
-        name = ss.str();
-    }
-
-    return returnvalue;
-}
-
-
-BooleanType TreeProjection::isDependingOn( int dim,
-                                                VariableType *varType,
-                                                int *component,
-                                                BooleanType   *implicit_dep ){
-
-	if( argument == 0 ){
-		return Projection::isDependingOn( dim, varType, component, implicit_dep );
-	}
-	return implicit_dep[vIndex];
-}
-
-
-BooleanType TreeProjection::isLinearIn( int dim,
-                                             VariableType *varType,
-                                             int *component,
-                                             BooleanType   *implicit_dep ){
-
-	if( argument == 0 ){
-		return Projection::isLinearIn( dim, varType, component, implicit_dep );
-	}
-    return implicit_dep[vIndex];
-}
-
-
-BooleanType TreeProjection::isPolynomialIn( int dim,
-                                                 VariableType *varType,
-                                                 int *component,
-                                                 BooleanType   *implicit_dep ){
-
-	if( argument == 0 ){
-		return Projection::isPolynomialIn( dim, varType, component, implicit_dep );
-	}
-    return implicit_dep[vIndex];
-}
-
-
-BooleanType TreeProjection::isRationalIn( int dim,
-                                               VariableType *varType,
-                                               int *component,
-                                               BooleanType   *implicit_dep ){
-
-	if( argument == 0 ){
-		return Projection::isRationalIn( dim, varType, component, implicit_dep );
-	}
-	return implicit_dep[vIndex];
-}
-
-
-returnValue TreeProjection::clearStaticCounters(){
-
-    count     = 0;
     return SUCCESSFUL_RETURN;
 }
 
 
-SharedOperator TreeProjection::getArgument() const{
 
-    return argument;
+returnValue TreeProjection::AD_symmetric( SharedOperator     &l  ,
+                                          SharedOperatorMap  &ldf,
+                                          SharedOperatorMap  &df ,
+                                          SharedOperatorMap2 &H  ,
+                                          SharedOperatorMap2 &LIS,
+                                          SharedOperatorMap2 &SIS,
+                                          SharedOperatorMap3 &HIS  ){
+
+    SharedOperatorMap  tmpLIS = LIS[this];
+    SharedOperatorMap  tmpSIS = SIS[this];
+    SharedOperatorMap2 tmpHIS = HIS[this];
+    
+    SharedOperatorMap ::iterator it1;
+    SharedOperatorMap2::iterator it2;
+    
+    
+  // ============================================================================
+
+    if( tmpLIS.size() == 0 ){
+
+        SharedOperator aux = SharedOperator( new DoubleConstant(1.0,NE_ONE) );
+
+        argument->AD_symmetric( aux, tmpLIS, tmpSIS, tmpHIS, LIS, SIS, HIS );
+
+        convert2TreeProjection(tmpLIS);
+        convert2TreeProjection(tmpSIS);
+
+        for(it2=tmpHIS.begin();it2!=tmpHIS.end();++it2)
+            convert2TreeProjection(tmpHIS[it2->first]);
+
+        LIS[this] = tmpLIS;
+        SIS[this] = tmpSIS;
+        HIS[this] = tmpHIS;
+    }
+
+  // ============================================================================
+  
+    for( it1=tmpLIS.begin(); it1!=tmpLIS.end(); ++it1 )
+         ldf[it1->first] = myAdd( myProd( l, it1->second ), checkForZero(ldf[it1->first]) );
+
+    df = tmpSIS;
+
+    for( it2=tmpHIS.begin(); it2!=tmpHIS.end(); ++it2 )
+        for( it1=(it2->second).begin(); it1!=(it2->second).end(); ++it1 )      
+             H[it2->first][it1->first] = myProd(it1->second,l);
+
+    return SUCCESSFUL_RETURN;
+} 
+
+ 
+returnValue TreeProjection::getArgumentList( DependencyMap &exists,
+                                             SharedOperatorVector &list  ){
+
+    if( exists[this] != true ){
+         argument->getArgumentList(exists,list);
+         list.push_back(argument);
+         exists[this] = true;
+    }
+    return SUCCESSFUL_RETURN;
 }
 
 
@@ -459,44 +201,15 @@ NeutralElement TreeProjection::isOneOrZero() const{
     return ne;
 }
 
-
-
-void TreeProjection::copy( const Projection &arg ){
-
-    Projection::copy(arg);
-}
-
-
-SharedOperator TreeProjection::passArgument() const{
-
-    return argument;
-}
-
-
-returnValue TreeProjection::setVariableExportName( const VariableType &_type,
-						    const std::vector< std::string >& _name )
-{
-	if (argument != 0 && argument->getName() == ON_POWER_INT)
-		argument->setVariableExportName(_type, _name);
-	
-	return Projection::setVariableExportName(_type, _name);
-}
-
-
-BooleanType TreeProjection::isTrivial() const {
-
-	return argument != 0;
-}
-
-
 returnValue TreeProjection::initDerivative() {
 
-	if( argument != 0 ) {
-		return argument->initDerivative();
-	}
-	else {
-		return SUCCESSFUL_RETURN;
-	}
+     return argument->initDerivative();
+}
+
+
+std::ostream& TreeProjection::print(std::ostream& stream, StringMap &name ) const{
+  
+    return stream << name[argument.get()];
 }
 
 

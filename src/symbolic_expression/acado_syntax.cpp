@@ -30,7 +30,8 @@
  */
 
 #include <acado/symbolic_expression/acado_syntax.hpp>
-#include <acado/symbolic_expression/intermediate_state.hpp>
+#include <acado/symbolic_expression/symbolic_expression.hpp>
+
 
 USING_NAMESPACE_ACADO
 
@@ -40,63 +41,41 @@ USING_NAMESPACE_ACADO
 // ------------------------------------------------------------------------------------
 
 
-IntermediateState sin ( const Expression &arg ){ return arg.getSin(); }
-IntermediateState cos ( const Expression &arg ){ return arg.getCos (); }
-IntermediateState tan ( const Expression &arg ){ return arg.getTan (); }
-IntermediateState asin( const Expression &arg ){ return arg.getAsin(); }
-IntermediateState acos( const Expression &arg ){ return arg.getAcos(); }
-IntermediateState atan( const Expression &arg ){ return arg.getAtan(); }
-IntermediateState exp ( const Expression &arg ){ return arg.getExp (); }
-IntermediateState sqrt( const Expression &arg ){ return arg.getSqrt(); }
-IntermediateState ln  ( const Expression &arg ){ return arg.getLn  (); }
-IntermediateState log ( const Expression &arg ){ return arg.getLn  (); }
+const Expression sin ( const Expression &arg ){ ASSERT( arg.size() == 1 ); return arg(0).getSin (); }
+const Expression cos ( const Expression &arg ){ ASSERT( arg.size() == 1 ); return arg(0).getCos (); }
+const Expression tan ( const Expression &arg ){ ASSERT( arg.size() == 1 ); return arg(0).getTan (); }
+const Expression asin( const Expression &arg ){ ASSERT( arg.size() == 1 ); return arg(0).getAsin(); }
+const Expression acos( const Expression &arg ){ ASSERT( arg.size() == 1 ); return arg(0).getAcos(); }
+const Expression atan( const Expression &arg ){ ASSERT( arg.size() == 1 ); return arg(0).getAtan(); }
+const Expression exp ( const Expression &arg ){ ASSERT( arg.size() == 1 ); return arg(0).getExp (); }
+const Expression sqrt( const Expression &arg ){ ASSERT( arg.size() == 1 ); return arg(0).getSqrt(); }
+const Expression ln  ( const Expression &arg ){ ASSERT( arg.size() == 1 ); return arg(0).getLn  (); }
+const Expression log ( const Expression &arg ){ ASSERT( arg.size() == 1 ); return arg(0).getLn  (); }
 
-IntermediateState pow( const Expression &arg1, const Expression &arg2 ){
+const Expression pow( const Expression &arg1, const Expression &arg2 ){
   
-  return arg1.getPow(arg2);
+  ASSERT( arg1.size() == 1 );
+  ASSERT( arg2.size() == 1 );
+  
+  return arg1(0).getPow(arg2(0));
 }
 
-IntermediateState pow( const double &arg1, const Expression &arg2 ){
+const Expression pow( const Expression &arg1, const double &arg2 ){
   
-  return arg2.convert(arg1).getPow(arg2);
-}
-
-IntermediateState pow( const Expression &arg1, const double &arg2 ){
+    ASSERT( arg1.size() == 1 );
   
     if( fabs( arg2 - floor(arg2) ) <= 10.0*EPS ){
         int intarg = (int) floor(arg2);
-        return arg1.getPowInt( intarg );
+        return arg1(0).getPowInt( intarg );
     }
     if( fabs( arg2 - ceil(arg2) ) <= 10.0*EPS ){
         int intarg = (int) ceil(arg2);
-        return arg1.getPowInt( intarg );
+        return arg1(0).getPowInt( intarg );
     }
-    return arg1.getPow(arg1.convert(arg2));
+    return arg1(0).getPow(arg2);
 }
 
 
-
-// ---------------------------------------------------------------------------------------------
-//                     SPECIAL CONVEX DICIPLINED PROGRAMMING FUNCTIONS:
-// ---------------------------------------------------------------------------------------------
-
-
-IntermediateState square         ( const Expression &arg ){ return arg.getSumSquare    (); }
-IntermediateState sum_square     ( const Expression &arg ){ return arg.getSumSquare    (); }
-IntermediateState log_sum_exp    ( const Expression &arg ){ return arg.getLogSumExp    (); }
-IntermediateState euclidean_norm ( const Expression &arg ){ return arg.getEuclideanNorm(); }
-IntermediateState entropy        ( const Expression &arg ){ return arg.getEntropy      (); }
-
-
-
-// ---------------------------------------------------------------------------------------------
-//                    SPECIAL ROUTINES FOR THE SET UP OF DYNAMIC SYSTEMS:
-// ---------------------------------------------------------------------------------------------
-
-
-
-Expression dot ( const Expression &arg ){ return arg.getDot (); }
-Expression next( const Expression &arg ){ return arg.getNext(); }
 
 // ---------------------------------------------------------------------------------------------
 //                              SYMBOLIC DERIVATIVE OPERATORS:
@@ -106,170 +85,109 @@ Expression next( const Expression &arg ){ return arg.getNext(); }
 Expression forwardDerivative( const Expression &arg1,
                               const Expression &arg2  ){
 
-    return arg1.ADforward(arg2);
+    return multipleForwardDerivative(arg1,arg2,eye<double>(arg2.size()));
+}
+
+Expression forwardDerivative( const Expression &arg1,
+                              const Expression &arg2,
+                              const Expression &seed  ){
+
+    if( arg1.size() == 1 ) return arg1(0).AD_forward(arg2,seed);
+    
+    Expression df(arg1.rows(),arg1.cols());
+    for( int i=0; i<arg1.size(); ++i ) df(i) = arg1(i).AD_forward(arg2,seed);
+    return df;
+}
+
+Expression multipleForwardDerivative( const Expression &arg1,
+                                      const Expression &arg2,
+                                      const Expression &seed  ){
+
+    Expression tmp = forwardDerivative( arg1, arg2, seed.col(0) );
+    
+    for( int i = 1; i < seed.cols(); ++i ) {
+        tmp.appendCols( forwardDerivative( arg1, arg2, seed.col(i) ) );
+    }
+    return tmp;
 }
 
 
 Expression backwardDerivative( const Expression &arg1,
                                const Expression &arg2  ){
 
-    return arg1.ADbackward(arg2);
+    return multipleBackwardDerivative(arg1,arg2,eye<double>(arg1.size()));
 }
 
-
-Expression forwardDerivative( const Expression &arg1,
-                              const Expression &arg2,
-                              const Expression &seed  ){
-
-    return arg1.ADforward(arg2,seed);
-}
-
-
-Expression multipleForwardDerivative( const Expression &arg1,
-                              const Expression &arg2,
-                              const Expression &seed  ){
-
-	Expression tmp;
-	for( uint i = 0; i < seed.getNumCols(); i++ ) {
-		tmp.appendCols( forwardDerivative( arg1, arg2, seed.getCol(i) ) );
-	}
-    return tmp;
-}
 
 
 Expression backwardDerivative( const Expression &arg1,
                                const Expression &arg2,
                                const Expression &seed  ){
 
-    return arg1.ADbackward(arg2,seed);
+    return arg1.AD_backward(arg2,seed);
 }
 
 
 Expression multipleBackwardDerivative( const Expression &arg1,
-                              const Expression &arg2,
-                              const Expression &seed  ){
-
-	Expression tmp;
-	for( uint i = 0; i < seed.getNumCols(); i++ ) {
-		tmp.appendCols( backwardDerivative( arg1, arg2, seed.getCol(i) ) );
-	}
+                                       const Expression &arg2,
+                                       const Expression &seed  ){
+  
+    Expression tmp = backwardDerivative( arg1, arg2, seed.col(0) );
+        
+    for( int i = 1; i < seed.cols(); i++ ) {
+        tmp.appendCols( backwardDerivative( arg1, arg2, seed.col(i) ) );
+    }
     return tmp;
 }
 
-Expression symmetricDerivative( 	const Expression &arg1,
- 	 	 	 	 	 	 	 	 	const Expression &arg2,
- 	 	 	 	 	 	 	 	 	const Expression &forward_seed,
- 	 	 	 	 	 	 	 	 	const Expression &backward_seed,
- 	 	 	 	 	 	 	 	 	Expression *forward_result,
- 	 	 	 	 	 	 	 	 	Expression *backward_result ) {
-	return arg1.ADsymmetric( arg2, forward_seed, backward_seed, forward_result, backward_result );
-}
 
+// 
+// ScalarExpression symmetricDerivative( 	const ScalarExpression &arg1,
+//  	 	 	 	 	 	 	 	 	const ScalarExpression &arg2,
+//  	 	 	 	 	 	 	 	 	const ScalarExpression &forward_seed,
+//  	 	 	 	 	 	 	 	 	const ScalarExpression &backward_seed,
+//  	 	 	 	 	 	 	 	 	ScalarExpression *forward_result,
+//  	 	 	 	 	 	 	 	 	ScalarExpression *backward_result ) {
+// 	return arg1.ADsymmetric( arg2, forward_seed, backward_seed, forward_result, backward_result );
+// }
+// 
 
-Expression jacobian          ( const Expression &arg1,
-                               const Expression &arg2 ){
+Expression jacobian( const Expression &arg1,
+                     const Expression &arg2 ){
 
     return backwardDerivative( arg1, arg2 );
 }
 
 
-Expression laplace           ( const Expression &arg1,
-                               const Expression &arg2 ){
+Expression laplace( const Expression &arg1,
+                    const Expression &arg2 ){
 
     return forwardDerivative( forwardDerivative(arg1,arg2), arg2 );
 }
 
-Expression getRiccatiODE( const Expression        &rhs,
-                          const DifferentialState &x  ,
-                          const Control           &u  ,
-                          const DifferentialState &P  ,
-                          const DMatrix            &Q  ,
-                          const DMatrix            &R  ){
 
-	IntermediateState RHS("", x.getDim(), x.getDim());
+Expression getRiccatiODE( const Expression &rhs ,
+                          const Expression &x   ,
+                          const Expression &u   ,
+                          const Expression &P   ,
+                          const Expression &Q   ,
+                          const Expression &Rinv ){
 
-    IntermediateState A = forwardDerivative( rhs, x );
-    IntermediateState B = forwardDerivative( rhs, u );
+    Expression A = forwardDerivative( rhs, x );
+    Expression B = forwardDerivative( rhs, u );
+    
+    Expression C1 = Rinv*B.transpose();
+    Expression C2 = B*C1;
+    Expression C3 = P*C2;
+    Expression C4 = C3*P;
 
-    return A.transpose()*P + P*A + Q - P*B*(DMatrix(R.inverse()))*B.transpose()*P;
+    return A.transpose()*P + P*A + Q - C4;
 }
 
 
 Expression chol( const Expression &arg ){
-
-    // --------------------------------------------------
-    // COMPUTES THE CHOLESKY FACTOR L OF THE ARGUMENT
-    // SUCH THAT
-    //
-    //               ARG = L * L.transpose
-    //
-    // WHERE THE MATRIX L IS RETURNED.
-    // THIS IS A SYMBOLIC CHOLESKY ROUTINE AS ACADO
-    // SIMPLIFIES PRODUCTS WITH ZERO AUTOMATICALLY.
-    //
-    // CAUTION: THE ROUTINE WORKS ON A SYMBOLIC LEVEL
-    //          ALWAYS WITHOUT DETECTING PSD-MATRICES.
-    //          HOWEVER, THE EVEALUATION WILL ONLY WORK
-    //          FOR SYMMETRIC AND POSITIVE SEMI-DEFINITE
-    //          MATRICES.
-    //          THE SAFE-GUARD CONSTANT IS 100*EPS.
-    // --------------------------------------------------
-
-
-    ASSERT( arg.getNumRows() == arg.getNumCols() );
-
-    int dim = arg.getNumRows();
-    IntermediateState L("", dim,dim);
-
-    // COMPUTE THE LOWER TRIANGLE RECURSIVELY:
-    // ---------------------------------------
-
-    int i,j,k;
-
-    for( j = 0; j < dim; j++ ){
-                                  L(j,j)  = arg(j,j)       ;
-        for( k = 0; k < j; k++ )  L(j,j) -= L(j,k)*L(j,k)  ;
-                                  L(j,j)  = sqrt( L(j,j) + 100.0*EPS );
-        for( i = j+1; i < dim; i++ ){
-                                      L(i,j)  = arg(i,j)       ;
-            for( k = 0; k < j; k++ )  L(i,j) -= L(i,k)*L(j,k)  ;
-                                      L(i,j)  = L(i,j)/(L(j,j) + 100.0*EPS );
-        }
-    }
-
-    for( j = 0; j < dim; j++ )
-        for( k = j+1; k < dim; k++ )
-             L(j,k) = 0.0;
-
-    return L;
-}
-
-
-returnValue clearAllStaticCounters()
-{
-	AlgebraicState              dummy1;
-	Control                     dummy2;
-	DifferentialState           dummy3;
-	DifferentialStateDerivative dummy4;
-	Disturbance                 dummy5;
-	IntegerControl              dummy6;
-	IntegerParameter            dummy7;
-	IntermediateState           dummy8;
-	Parameter                   dummy9;
-	OnlineData                  dummy10;
-
-	dummy1.clearStaticCounters();
-	dummy2.clearStaticCounters();
-	dummy3.clearStaticCounters();
-	dummy4.clearStaticCounters();
-	dummy5.clearStaticCounters();
-	dummy6.clearStaticCounters();
-	dummy7.clearStaticCounters();
-	dummy8.clearStaticCounters();
-	dummy9.clearStaticCounters();
-	dummy10.clearStaticCounters();
-
-	return SUCCESSFUL_RETURN;
+  
+    return arg.llt().matrixL();
 }
 
 

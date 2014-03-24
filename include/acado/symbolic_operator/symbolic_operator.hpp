@@ -39,7 +39,7 @@
     
     #include <acado/symbolic_operator/operator.hpp>
     #include <acado/symbolic_operator/smooth_operator.hpp>
-	#include <acado/symbolic_operator/nonsmooth_operator.hpp>
+    #include <acado/symbolic_operator/nonsmooth_operator.hpp>
 
     #include <acado/symbolic_operator/unary_operator.hpp>
     #include <acado/symbolic_operator/binary_operator.hpp>
@@ -58,12 +58,10 @@
     #include <acado/symbolic_operator/quotient.hpp>
     #include <acado/symbolic_operator/sin.hpp>
     #include <acado/symbolic_operator/subtraction.hpp>
-    #include <acado/symbolic_operator/symbolic_index_list.hpp>
     #include <acado/symbolic_operator/tan.hpp>
     #include <acado/symbolic_operator/projection.hpp>
     #include <acado/symbolic_operator/tree_projection.hpp>
-
-
+    
     // -------------------------------------------------------
     // -------------------------------------------------------
     // end of file.

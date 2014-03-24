@@ -113,7 +113,7 @@ Curve& Curve::operator=( const Curve& arg ){
 
 Curve Curve::operator()(	uint idx
 							) const
-{
+{  
 	Curve tmp;
 
 	if ( (int)idx >= getDim() )
@@ -136,7 +136,7 @@ Curve Curve::operator()(	uint idx
 	if( grid != 0 )  tmp.grid = new Grid(*grid);
 	else             tmp.grid = 0;
 
-	return tmp;
+ 	return tmp;  
 }
 
 
@@ -160,7 +160,8 @@ returnValue Curve::add( const VariablesGrid& sampledData, InterpolationMode mode
     uint         run1,run2  ;
     returnValue  returnvalue;
     Function    *tmp        ;
-    TIME         t          ;
+    
+    Expression   t          ;
     double       m,b        ;
 
     switch( mode ){
@@ -170,6 +171,7 @@ returnValue Curve::add( const VariablesGrid& sampledData, InterpolationMode mode
                  tmp = new Function();
                  for( run2 = 0; run2 < sampledData.getNumRows(); run2++ )
                      tmp->operator<<( sampledData(run1,run2) );
+                 tmp->setInput(t);
                  returnvalue = add( sampledData.getTime(run1), sampledData.getTime(run1+1), *tmp );
                  if( returnvalue != SUCCESSFUL_RETURN )
                      ACADOERROR(returnvalue);
@@ -190,6 +192,7 @@ returnValue Curve::add( const VariablesGrid& sampledData, InterpolationMode mode
 
                      tmp->operator<<( m*t + b );
                  }
+                 tmp->setInput(t);
                  returnvalue = add( sampledData.getTime(run1), sampledData.getTime(run1+1), *tmp );
                  if( returnvalue != SUCCESSFUL_RETURN )
                      ACADOERROR(returnvalue);
@@ -224,7 +227,7 @@ returnValue Curve::add( double tStart, double tEnd, const Function &parameteriza
 
     // CHECK WHETHER THE INPUT VECTOR IS EMPTY: 
     // ------------------------------------------------
-    if( parameterization_.getDim() == 0 )
+    if( parameterization_.size() == 0 )
         return ACADOERROR(RET_INPUT_DIMENSION_MISMATCH);
 
 
@@ -233,7 +236,7 @@ returnValue Curve::add( double tStart, double tEnd, const Function &parameteriza
 
         // IF THE CURVE IS NOT EMPTY THE DIMENSIONS MUST BE CHECKED:
         // ---------------------------------------------------------
-        if( getDim() != (int) parameterization_.getDim() )
+        if( getDim() != (int) parameterization_.size() )
             return ACADOERROR(RET_INPUT_DIMENSION_MISMATCH);
 
         // CHECK WHETHER THE CURVE HAS NO GAP's:
@@ -271,25 +274,10 @@ returnValue Curve::add( double tStart, double tEnd, const Function &parameteriza
         // ----------------------------------------------------
     }
 
-
-    // CHECK WHETHER THE FUNCTION ITSELF IS VALID:
-    // -------------------------------------------
-    if( parameterization_.getNX () != 0 ||
-        parameterization_.getNXA() != 0 ||
-        parameterization_.getNP () != 0 ||
-        parameterization_.getNPI() != 0 ||
-        parameterization_.getNU () != 0 ||
-        parameterization_.getNUI() != 0 ||
-        parameterization_.getNW()  != 0 ){
-            return ACADOERROR(RET_INPUT_DIMENSION_MISMATCH);
-    }
-
-
     // SET THE DIMENSION OF THE CURVE:
-    // (the correctness of the dimension has already been cecked)
     // ----------------------------------------------------------
 
-    dim = parameterization_.getDim();
+    dim = parameterization_.size();
 
 
     // ALLOCATE MEMORY FOR THE NEW PIECE OF CURVE:
@@ -343,12 +331,10 @@ returnValue Curve::evaluate( double t, double *result ) const{
 
     // EVALUATE THE FUNCTION ASSOCIATED WITH THIS INTERVAL:
     // ----------------------------------------------------
-    double tt[1] = { t };
-    returnvalue = parameterization[idx]->evaluate(0,tt,result);
-
-
-    if( returnvalue != SUCCESSFUL_RETURN )
-        return ACADOERROR(returnvalue);
+    
+    std::vector<double> tt(1); tt[0] = t;
+    std::vector<double> tp = parameterization[idx]->evaluate(tt);
+    *result = tp[0];
 
     return SUCCESSFUL_RETURN;
 }

@@ -44,23 +44,19 @@ int main( ){
 
     USING_NAMESPACE_ACADO
 
-    DifferentialState x,y,z;
-    Function              f;
+    Expression x,y,z;
+    Expression     a;
+    Function       f;
 
-    OnlineData od;
-
-	IntermediateState a;
-	
-	a = z*z;
-	
+    a = z*z;
     f << x*y + z + a;
     f << y*y + a;
-
+    
+    f.setInput((x,y,z));
+    
     // EXPORT THE FUNCTION INTO PLAIN C CODE:
     // --------------------------------------
-
-	// Print the function on standard output
-	f.print( std::cout );
+    std::cout << f;
 
     return 0;
 }

@@ -36,63 +36,16 @@
 #include <acado/symbolic_operator/symbolic_operator.hpp>
 
 
-double dCos(double x){
-  return -sin(x);
-}
-
-
-double ddCos(double x){
-  return -cos(x);
-}
-
 BEGIN_NAMESPACE_ACADO
 
 
-Cos::Cos():UnaryOperator(){
-  cName = "cos";
+Cos::Cos():UnaryOperator(){}
 
-  fcn = &cos;
-  dfcn = &dCos;
-  ddfcn = &ddCos;
+Cos::Cos( const SharedOperator &_argument ):UnaryOperator(_argument,"cos"){}
 
-  operatorName = ON_COS;
+Cos::Cos( const Cos &arg ):UnaryOperator(arg){}
 
-}
-
-Cos::Cos( const SharedOperator &_argument ):UnaryOperator(_argument){
-  cName = "cos";
-
-  fcn = &cos;
-  dfcn = &dCos;
-  ddfcn = &ddCos;
-
-  operatorName = ON_COS;
-}
-
-
-Cos::Cos( const Cos &arg ):UnaryOperator(arg){
-  cName = "cos";
-
-  fcn = &cos;
-  dfcn = &dCos;
-  ddfcn = &ddCos;
-
-  operatorName = ON_COS;
-}
-
-
-Cos::~Cos(){
-
-}
-
-
-Cos& Cos::operator=( const Cos &arg ){
-
-  UnaryOperator::operator=(arg);
-
-  return *this;
-}
-
+Cos::~Cos(){}
 
 returnValue Cos::evaluate( EvaluationBase *x ){
  
@@ -101,9 +54,9 @@ returnValue Cos::evaluate( EvaluationBase *x ){
 }
 
 
-SharedOperator Cos::substitute( int index, const SharedOperator &sub ){
+SharedOperator Cos::substitute( SharedOperatorMap &sub ){
 
-    return SharedOperator( new Cos( argument->substitute( index , sub ) ));
+    return SharedOperator( new Cos( argument->substitute(sub) ));
 
 }
 

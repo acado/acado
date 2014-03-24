@@ -46,25 +46,24 @@ int main( ){
 
     // DEFINE VARIABLES:
     // ----------------------
-    Parameter  x,y,z;
-    Function       f;
+    Expression  x,y,z;
+    Function        f;
 
-	f << x+y*z;
-	f << x*x+y;
+    f << x+y*z;
+    f << x*x+y;
 
-
+    f.setInput((x,y,z));
+    
+    
     // TEST THE FUNCTION f:
     // ---------------------------------------
-    TevaluationPoint<Interval> e(f);
+    std::vector<Interval> xx(3);
+    
+    xx[0] = Interval(-1.0, 1.0);
+    xx[1] = Interval(-0.1, 0.5);
+    xx[2] = Interval( 1.0, 2.0);
 
-    Tmatrix<Interval> p(3);
-    p(0) = Interval(-1.0, 1.0 );
-	p(1) = Interval( 0.0, 2.0 );
-	p(2) = Interval( 0.0, 0.1 );
-
-    e.setP( p );
-
-    Tmatrix<Interval> result = f.evaluate( e );
+    std::vector<Interval> result = f.evaluate(xx);
 
     std::cout << "result:\n" << result << "\n";
 

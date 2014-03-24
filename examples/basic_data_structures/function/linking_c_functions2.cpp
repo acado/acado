@@ -38,63 +38,87 @@
 #include <acado/function/function.hpp>
 
 
+USING_NAMESPACE_ACADO
 
-void my_function( double *x_, double *f, void *userData ){
+// =================================================
+//  DEFINE A SYMBLOIC FUNCTION CALLED "MyFunction":
+// =================================================
 
-    double          t =  x_[ 0];    // the time
-    double          x =  x_[ 1];    // the differential state
+class MyFunction : public UserFunction<double>{   // inherit form UserFunction<double>,
+                                                  // the template parameter "double"
+                                                  // specifies that the evaluation is
+                                                  // based on double.
+                                           
+public:
+  
+    MyFunction() : UserFunction<double>(2){ }  // we may set the output dimension
+                                               // in the constructor as it
+                                               // is not allowed to change anyhow.
+  
+    MyFunction( const MyFunction &rhs ):UserFunction<double>(rhs){ }
+  
+    //  Overwrite the evaluate routine!
+    //  Notice the input and output vector are of type double
+    //  in this example, since we inherit from "UserFunction<double>".
+    // ----------------------------------------------------------------
+    virtual void evaluate( const std::vector<double> &input,
+                                 std::vector<double> &output ){
 
-    f[0] = x*x + t;
-    f[1] = t;
-}
+       // An example how to access the input dimension.
+       // --------------------------------------------------------------------
+       std::cout << "The input dimension is : " << input.size()  << std::endl;
+       
+       output[0] = input[0]*input[0] + input[1]; // this is standard C-code,
+       output[1] = sin(input[0]);                // define what-ever you like!
+    }
+};
+
+// =================================================
+// ==================================================================
 
 
 int main( ){
-
-    USING_NAMESPACE_ACADO
-
-    CFunction map( 2, my_function );
-
-    TIME t;
-    DifferentialState y;
-
-    IntermediateState x(2);
-
-    x(0) = t;
-    x(1) = 2*y+1;
-
+  
+    Expression y,z;
+    Expression x(2);
+    Expression m;
+    
     Function f;
+    
+    MyFunction map;    // constructs an instance of the class MyFunction
+    
+    f.setInput((y,z));
+    
+    x(0) = y;
+    x(1) = 2*z+1;
 
-    f << map(2*x)*t;
-    f << t;
-    f << map(x);
+    printf("main: here 1 \n");
+    
+    m = map(x);     // The use function "map" can be use like
+                    // any other symbolic function
+                    // the user-definition is now part
+                    // of the evaluation tree.
 
-    IntermediateState z;
+    
+    printf("main: here 2 \n");
+    
+    f << m(0);
+    f << m(1);        // m is an expression like any other.
 
-    z = euclidean_norm( map(x) );
+// ==================================================================
+    
+    std::vector<double> xx(2);
 
-    f << z + z;
-
-    EvaluationPoint zz(f);
-
-    DVector xx(1);
-    double tt   ;
-
-    xx(0) = 2.0;
-    tt    = 1.0;
-
-    zz.setT( tt );
-    zz.setX( xx );
-
-
-    // EVALUATE f AT THE POINT  (tt,xx):
-    // ---------------------------------
-    DVector result = f.evaluate( zz );
-
-
-    // PRINT THE RESULT:
-    // -----------------
-    result.print();
+    xx[0] = 1.;
+    xx[1] = 2.;
+    
+    std::vector<double> result = f.evaluate(xx); // Notice: the evaluation has to be based on
+                                                 // double, since MyFunction inherits from
+                                                 // UserFunction<double>. If the function should
+                                                 // be evaluated based on other types, the
+                                                 // class MyFunction should be defined accordingly.
+    
+    std::cout << "f = [ " << result[0] << "," << result[1] << "]" << std::endl;  // print the result.
 
     return 0;
 }

@@ -36,59 +36,16 @@
 #include <acado/symbolic_operator/symbolic_operator.hpp>
 
 
-double ddSin(double x){
-  return -sin(x);
-}
-
-
 BEGIN_NAMESPACE_ACADO
 
 
-Sin::Sin():UnaryOperator(){
-  cName = "sin";
+Sin::Sin():UnaryOperator(){}
 
-  fcn = &sin;
-  dfcn = &cos;
-  ddfcn = &ddSin;
+Sin::Sin( const SharedOperator &_argument ):UnaryOperator(_argument,"sin"){}
 
-  operatorName = ON_SIN;
+Sin::Sin( const Sin &arg ):UnaryOperator(arg){}
 
-}
-
-Sin::Sin( const SharedOperator &_argument ):UnaryOperator(_argument){
-  cName = "sin";
-
-  fcn = &sin;
-  dfcn = &cos;
-  ddfcn = &ddSin;
-
-  operatorName = ON_SIN;
-}
-
-
-Sin::Sin( const Sin &arg ):UnaryOperator(arg){
-  cName = "sin";
-
-  fcn = &sin;
-  dfcn = &cos;
-  ddfcn = &ddSin;
-
-  operatorName = ON_SIN;
-}
-
-
-Sin::~Sin(){
-
-}
-
-
-Sin& Sin::operator=( const Sin &arg ){
-
-  UnaryOperator::operator=(arg);
-
-  return *this;
-}
-
+Sin::~Sin(){}
 
 returnValue Sin::evaluate( EvaluationBase *x ){
 
@@ -97,9 +54,9 @@ returnValue Sin::evaluate( EvaluationBase *x ){
 }
 
 
-SharedOperator Sin::substitute( int index, const SharedOperator &sub ){
+SharedOperator Sin::substitute( SharedOperatorMap &sub ){
 
-    return SharedOperator( new Sin( argument->substitute( index , sub ) ));
+    return SharedOperator( new Sin( argument->substitute(sub) ));
 
 }
 

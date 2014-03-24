@@ -55,7 +55,7 @@ template<typename T>
 GenericVector<T>& GenericVector< T >::setUnitVector(	unsigned _idx
 )
 {
-	ASSERT( _idx < Base::rows() );
+	ASSERT( (int) _idx < Base::rows() );
 
 	Base::setZero( );
 	Base::operator()( _idx ) = T( 1 );

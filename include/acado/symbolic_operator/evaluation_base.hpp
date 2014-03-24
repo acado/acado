@@ -65,7 +65,7 @@ public:
 	virtual void power      ( Operator &arg1, Operator &arg2 ) = 0;
 	virtual void powerInt   ( Operator &arg1, int      &arg2 ) = 0;
 
-	virtual void project    ( int      &idx ) = 0;
+	virtual void project    ( Operator *idx ) = 0;
 	virtual void set        ( double   &arg ) = 0;
 	virtual void Acos       ( Operator &arg ) = 0;
 	virtual void Asin       ( Operator &arg ) = 0;

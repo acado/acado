@@ -40,13 +40,11 @@
 #include <acado/symbolic_expression/acado_syntax.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 
-#include <acado/function/evaluation_point.hpp>
-#include <acado/function/t_evaluation_point.hpp>
 #include <acado/function/function_.hpp>
-#include <acado/function/c_function.hpp>
-#include <acado/function/differential_equation.hpp>
-#include <acado/function/transition.hpp>
-#include <acado/function/output_fcn.hpp>
+#include <acado/function/user_function.hpp>
+// #include <acado/function/differential_equation.hpp>
+// #include <acado/function/transition.hpp>
+// #include <acado/function/output_fcn.hpp>
 
 
 // BEGIN_NAMESPACE_ACADO

@@ -62,30 +62,23 @@ public:
     /** Default constructor. */
     Sin( const SharedOperator &_argument );
 
-    /** Copy constructor (deep copy). */
+    /** Copy constructor. */
     Sin( const Sin &arg );
 
     /** Default destructor. */
     ~Sin();
 
-    /** Assignment Operator (deep copy). */
-    Sin& operator=( const Sin &arg );
+    /** Evaluates the expression (templated version) */
+    virtual returnValue evaluate( EvaluationBase *x );
 
-
-	/** Evaluates the expression (templated version) */
-	virtual returnValue evaluate( EvaluationBase *x );
-
-
-
-    /** Substitutes var(index) with the expression sub.           \n
-     *  \return The substituted expression.                       \n
+    /** Substitutes key with the expression sub. \n
+     *  \return The substituted expression.      \n
      *
      */
-     virtual SharedOperator substitute( int   index           /**< subst. index    */,
-                                     const SharedOperator &sub /**< the substitution*/);
+    virtual SharedOperator substitute( SharedOperatorMap &sub /**< the substitution */ );
 
-
-     virtual returnValue initDerivative();
+    /** Initializes the derivative operators */
+    virtual returnValue initDerivative();
 
 
 //

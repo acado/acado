@@ -40,51 +40,13 @@
 BEGIN_NAMESPACE_ACADO
 
 
-Exp::Exp():UnaryOperator(){
-  cName = "exp";
+Exp::Exp():UnaryOperator(){}
 
-  fcn = &exp;
-  dfcn = &exp;
-  ddfcn = &exp;
+Exp::Exp( const SharedOperator &_argument ):UnaryOperator(_argument,"exp"){}
 
-  operatorName = ON_EXP;
+Exp::Exp( const Exp &arg ):UnaryOperator(arg){}
 
-}
-
-Exp::Exp( const SharedOperator &_argument ):UnaryOperator(_argument){
-  cName = "exp";
-
-  fcn = &exp;
-  dfcn = &exp;
-  ddfcn = &exp;
-
-  operatorName = ON_EXP;
-}
-
-
-Exp::Exp( const Exp &arg ):UnaryOperator(arg){
-  cName = "exp";
-
-  fcn = &exp;
-  dfcn = &exp;
-  ddfcn = &exp;
-
-  operatorName = ON_EXP;
-}
-
-
-Exp::~Exp(){
-
-}
-
-
-Exp& Exp::operator=( const Exp &arg ){
-
-  UnaryOperator::operator=(arg);
-
-  return *this;
-}
-
+Exp::~Exp(){}
 
 returnValue Exp::evaluate( EvaluationBase *x ){
  
@@ -93,23 +55,9 @@ returnValue Exp::evaluate( EvaluationBase *x ){
 }
 
 
-SharedOperator Exp::substitute( int index, const SharedOperator &sub ){
+SharedOperator Exp::substitute( SharedOperatorMap &sub ){
 
-    return SharedOperator( new Exp( argument->substitute( index , sub ) ));
-
-}
-
-CurvatureType Exp::getCurvature( ){
-
-    if( curvature != CT_UNKNOWN )  return curvature;
-
-    const CurvatureType cc = argument->getCurvature();
-
-    if( cc == CT_CONSTANT )  return CT_CONSTANT;
-    if( cc == CT_AFFINE   )  return CT_CONVEX  ;
-    if( cc == CT_CONVEX   )  return CT_CONVEX  ;
-
-    return CT_NEITHER_CONVEX_NOR_CONCAVE;
+    return SharedOperator( new Exp( argument->substitute(sub) ));
 }
 
 returnValue Exp::initDerivative() {
