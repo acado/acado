@@ -28,7 +28,7 @@ function getInstructions(obj, cppobj, get)
 % 
 
 
-if (get == 'B')
+if (get == 'FB')
     
     fprintf(cppobj.fileMEX,sprintf('    int %s_count = 0;\n', obj.name));
     fprintf(cppobj.fileMEX,sprintf('    if (mxGetM(prhs[%d]) == 1 && mxGetN(prhs[%d]) >= 1) \n', obj.counter, obj.counter));

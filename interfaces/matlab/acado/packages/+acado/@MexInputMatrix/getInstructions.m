@@ -29,7 +29,7 @@ function getInstructions(obj, cppobj, get)
 
 
 
-if (get == 'B')
+if (get == 'FB')
     
 
     fprintf(cppobj.fileMEX,sprintf('    double *%s_temp = NULL; \n', obj.name));
@@ -38,17 +38,15 @@ if (get == 'B')
     fprintf(cppobj.fileMEX,sprintf('    } \n'));
     fprintf(cppobj.fileMEX,sprintf('    %s_temp = mxGetPr(prhs[%d]); \n', obj.name, obj.counter));
 
-    fprintf(cppobj.fileMEX,sprintf('    Matrix %s(mxGetM(prhs[%d]), mxGetN(prhs[%d]));\n', obj.name_m, obj.counter, obj.counter));
+    fprintf(cppobj.fileMEX,sprintf('    Matrix %s(mxGetM(prhs[%d]), mxGetN(prhs[%d]));\n', obj.name, obj.counter, obj.counter));
 
     % Mex stored all cols after each other. So first loop over cols,
     % then loop over rows.
     fprintf(cppobj.fileMEX,sprintf('    for( int i=0; i<mxGetN(prhs[%d]); ++i ){ \n', obj.counter));
     fprintf(cppobj.fileMEX,sprintf('        for( int j=0; j<mxGetM(prhs[%d]); ++j ){ \n', obj.counter));
-    fprintf(cppobj.fileMEX,sprintf('           %s(j,i) = %s_temp[i*mxGetM(prhs[%d]) + j];\n', obj.name_m, obj.name, obj.counter));
+    fprintf(cppobj.fileMEX,sprintf('           %s(j,i) = %s_temp[i*mxGetM(prhs[%d]) + j];\n', obj.name, obj.name, obj.counter));
     fprintf(cppobj.fileMEX,        '        } \n');	
-    fprintf(cppobj.fileMEX,        '    } \n');	
-    
-    fprintf(cppobj.fileMEX,sprintf('    VariablesGrid %s(%s); \n', obj.name, obj.name_m));	
+    fprintf(cppobj.fileMEX,        '    } \n');
     
     
 

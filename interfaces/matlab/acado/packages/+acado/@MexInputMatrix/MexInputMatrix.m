@@ -38,15 +38,13 @@
 % 
 classdef MexInputMatrix < acado.MexInput
     properties(SetAccess='protected')
-       name_m = '';
+        
     end
     
     methods
         function obj = MexInputMatrix(varargin)
 
             obj.type = 3;
-           
-            obj.name_m = strcat(obj.name, '_m');
             
         end
      
