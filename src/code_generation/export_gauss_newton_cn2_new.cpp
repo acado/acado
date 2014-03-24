@@ -1096,7 +1096,11 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 	// TODO Calculation of multipliers
 	// NOTE: CURRENTLY ASSUMING THERE ARE ONLY STATE CONSTRAINTS ON THE LAST NODE
 
-	if( getNumStateBounds() != NX ) return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+	if( getNumStateBounds() != NX ) {
+		std::cout << "Number of state bounds: " << getNumStateBounds() << ", while number of states: " << NX << "\n";
+		std::cout << "(!!) NOTE: The expansion step for the multipliers is not going to work out of the box for your case.. (!!)\n";
+		return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
+	}
 
 //	mu_N = lambda_N + q_N + Q_N^T * Ds_N  --> wrong in Joel's paper !!
 //		for i = N - 1: 1
