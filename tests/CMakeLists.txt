@@ -7,67 +7,15 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2013.
+#	2013 - 2014.
 #
 # Usage:
-#	- TBD
+#	- One cpp file is one app.
+#	- This file is supposed to be called from the main CMake script.
+#	- The script defines one additional target: type "make test_verbose" for
+#	  verbose output. The default one "make test" is silent.
 #
 ################################################################################
-
-################################################################################
-#
-# Project settings
-#
-################################################################################
-
-#
-# Minimum required version of cmake 
-#
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
-
-#
-# Project name and programming languages used
-#
-PROJECT( ACADO_UNIT_TESTS CXX C )
-
-#
-# Folder path for generated executables
-#
-SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
-
-#
-# Folder path for generated libraries
-#
-SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/libs )
-
-#
-# CMake module(s) path
-#
-SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../cmake" )
-
-################################################################################
-#
-# User configuration
-#
-################################################################################
-
-#
-# Set this to true (ON) if you are using makefiles and want to see the full
-# compile and link commands instead of only the shortened ones
-#
-IF( NOT CMAKE_VERBOSE_MAKEFILE )
-	SET( CMAKE_VERBOSE_MAKEFILE OFF )
-ENDIF( NOT CMAKE_VERBOSE_MAKEFILE )
-
-#
-# Build type
-#
-IF( NOT CMAKE_BUILD_TYPE )
-	SET(CMAKE_BUILD_TYPE Debug CACHE STRING
-		"Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-		FORCE
-	)
-ENDIF( NOT CMAKE_BUILD_TYPE )
 
 ################################################################################
 #
@@ -81,12 +29,48 @@ ENDIF()
 
 FIND_PACKAGE( Boost COMPONENTS system filesystem unit_test_framework REQUIRED )
 
-IF( NOT ACADO_BUILD )
-	FIND_PACKAGE( ACADO REQUIRED )
-ENDIF()
+INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIRS} )
 
 ################################################################################
 #
 # Adding unit tests
 #
 ################################################################################
+
+FILE( GLOB SOURCES *.cpp )
+FOREACH( SRC ${SOURCES} )
+	GET_FILENAME_COMPONENT( EXEC_NAME ${SRC} NAME_WE )
+
+	SET( CURR_EXE ${EXEC_NAME}_unittest )
+
+	ADD_EXECUTABLE( ${CURR_EXE} ${SRC} )
+
+	IF ( ACADO_BUILD_SHARED )
+		TARGET_LINK_LIBRARIES(
+			${CURR_EXE}
+			${ACADO_SHARED_LIBRARIES}
+		)
+	ELSE()
+		TARGET_LINK_LIBRARIES(
+			${CURR_EXE}
+			${ACADO_STATIC_LIBRARIES}
+		)
+	ENDIF()
+	
+	TARGET_LINK_LIBRARIES(
+		${CURR_EXE}	
+		${Boost_LIBRARIES}
+	)
+	
+	ADD_TEST(
+		NAME
+			${CURR_EXE}
+		COMMAND
+			${EXECUTABLE_OUTPUT_PATH}/${CURR_EXE}
+	)
+ENDFOREACH( SRC ${SOURCES} )
+
+ADD_CUSTOM_TARGET( test_verbose
+	COMMAND
+		${CMAKE_CTEST_COMMAND} --verbose
+)

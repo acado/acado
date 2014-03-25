@@ -9,7 +9,7 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2011 - 2013.
+#	2011 - 2014.
 #
 # Usage:
 #	- Linux, OS X, Windows: more info can be found on www.acadotoolkit.org
@@ -625,6 +625,16 @@ CONFIGURE_FILE(
 IF( ACADO_WITH_EXAMPLES )
 	ADD_SUBDIRECTORY( ./examples )
 ENDIF( ACADO_WITH_EXAMPLES )
+
+################################################################################
+#
+# Unit tests
+#
+################################################################################
+
+IF( ACADO_WITH_TESTING )
+	ADD_SUBDIRECTORY( ./tests )
+ENDIF( ACADO_WITH_TESTING )
 
 ################################################################################
 #
