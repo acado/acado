@@ -44,6 +44,12 @@ BEGIN_NAMESPACE_ACADO
 
 Function::Function(){ }
 
+Function::Function( const Expression &input, const Expression &output ){
+  
+   setInput(input);
+   operator<<(output);
+}
+
 Function::Function( const Function& rhs ){ copy(rhs); }
 
 Function::~Function( ){ }

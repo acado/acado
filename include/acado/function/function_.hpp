@@ -62,6 +62,9 @@ public:
     /** Default constructor. */
     Function();
 
+    /** Constructor accepting input and output arguments */
+    Function( const Expression &input, const Expression &output );
+    
     /** Copy constructor (deep copy). */
     Function( const Function& rhs );
 

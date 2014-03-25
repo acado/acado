@@ -28,7 +28,7 @@
  /**
  *    \file examples/function/matrix_vector_expressions.cpp
  *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 2008
+ *    \date 2008, 2014
  */
 
 #include <time.h>
@@ -46,11 +46,9 @@ int main( ){
 
     // DEFINE VALRIABLES:
     // ---------------------------
-    DMatrix                 A(3,3);
-    DVector                 b(3)  ;
-    DifferentialState      x("", 3, 1);
-    Function               f     ;
-
+    Expression  A(3,3);
+    Expression  b(3)  ;
+    Expression  x(3)  ;
 
     // DEFINE THE VECTOR AND MATRIX ENTRIES:
     // -------------------------------------
@@ -58,27 +56,9 @@ int main( ){
     A(0,0) = 1.0;  A(1,1) = 2.0;  A(2,2) = 3.0;
     b(0)   = 1.0;  b(1)   = 1.0;  b(2)   = 1.0;
 
+    Function f( x , A*x + b );
 
-    // DEFINE A TEST FUNCTION:
-    // -----------------------
-    f << A*x + b;
-    f << ( A*x(0) ).getRow( 1 );
-    f << ( A*x(0) ).getCol( 0 );
-
-    // TEST THE FUNCTION f:
-    // --------------------
-    EvaluationPoint zz(f);
-
-    DVector xx(3);
-    xx(0) = 1.0;
-    xx(1) = 2.0;
-    xx(2) = 3.0;
-
-    zz.setX( xx );
-
-    DVector result = f.evaluate( zz );
-
-    result.print(std::cout, "result");
+    std::cout << f << std::endl;
 
     return 0;
 }

@@ -41,9 +41,8 @@ BEGIN_NAMESPACE_ACADO
 
 // FORWARD DEKLARATIONS:
 // ---------------------
-
-   template<typename T> class UserFunction       ;
-   template<typename T> class UserDefinedOperator;
+   template <typename T, class Derived> class UserFunction;
+   template <typename T, class Derived> class UserDefinedOperator;
    
    
    class Function                       ;

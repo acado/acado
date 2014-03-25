@@ -44,35 +44,20 @@ int main( ){
 
     USING_NAMESPACE_ACADO
 
-    // DEFINE VARIABLES:
-    // -----------------------
-       DifferentialState x, y;
-       IntermediateState z   ;
-       Function f;
+       Expression x,y,z;
 
        z = 1.0;
 
-       int run1;
-
-       for( run1 = 0; run1 < 5; run1++ )
+       for( int i=0; i<5; ++i )
             z += sin( z + x*y );
 
-       f << z;
+       Function f((x,y),z);
 
+       std::vector<double> xx(2);
+       xx[0] = 2.0;
+       xx[1] = 0.0;
 
-    // TEST THE FUNCTION f:
-    // --------------------
-       EvaluationPoint zz(f);
-
-       DVector xx(2);
-       xx.setZero();
-       xx(0) = 2.0;
-       xx(1) = 0.0;
-
-       zz.setX(xx);
-
-       DVector result = f.evaluate( zz );
-       result.print("result");
+       std::cout << "f = " << f.evaluate(xx)[0] << std::endl;
 
     return 0;
 }
