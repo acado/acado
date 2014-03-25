@@ -114,12 +114,12 @@ display('               Simulation Loop'                                    )
 display('------------------------------------------------------------------')
 
 time = 0;
-Tf = 10;
+Tf = 6;
 KKT_MPC = []; INFO_MPC = [];
 controls_MPC = [];
 state_sim = X0;
 
-visualize; pause
+visualize;
 while time(end) < Tf
     tic
     % Solve NMPC OCP
