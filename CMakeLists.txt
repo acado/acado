@@ -101,7 +101,7 @@ OPTION( ACADO_WITH_EXAMPLES "Building ACADO examples" ON )
 #
 # Compilation of testing suite
 #
-OPTION( ACADO_WITH_TESTING "Building the testing framework" OFF )
+OPTION( ACADO_WITH_TESTING "Building the testing framework" ON )
 
 #
 # ACADO developer flag

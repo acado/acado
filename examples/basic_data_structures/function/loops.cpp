@@ -44,20 +44,36 @@ int main( ){
 
     USING_NAMESPACE_ACADO
 
+       double t = -acadoGetTime();
+    
        Expression x,y,z;
 
        z = 1.0;
 
-       for( int i=0; i<5; ++i )
+       for( int i=0; i<5000; ++i )
             z += sin( z + x*y );
 
        Function f((x,y),z);
 
+       t += acadoGetTime();
+       
+       printf("time for loading = %.6e \n", t );
+       
+       t = -acadoGetTime();
+       
        std::vector<double> xx(2);
        xx[0] = 2.0;
        xx[1] = 0.0;
-
-       std::cout << "f = " << f.evaluate(xx)[0] << std::endl;
+       
+       std::vector<double> result = f.evaluate(xx);
+       
+       t += acadoGetTime();
+       
+       printf("time for evaluation = %.6e \n", t );
+       
+       std::cout << "f = " << result[0] << std::endl;
+       
+       
 
     return 0;
 }

@@ -56,9 +56,7 @@ BEGIN_NAMESPACE_ACADO
 template <typename T, class Derived>
 class UserDefinedOperator : public SmoothOperator{
 
-    typedef std::vector<T>                             TVector;
     typedef UserFunction<T,Derived>                    FcnName;
-    typedef std::tr1::shared_ptr<TVector>         SharedResult;
     typedef std::tr1::shared_ptr<FcnName>   SharedUserFunction;
     
 public:
@@ -69,7 +67,6 @@ public:
     /** Default constructor. */
     UserDefinedOperator( const SharedUserFunction &fcn_      ,
                          const Expression         &argument_ ,
-                         const SharedResult       &result_   ,
                          const int                &component_  );
 
     /** Copy constructor (deep copy). */
@@ -148,7 +145,7 @@ public:
     virtual BooleanType isSymbolic() const;
     
     
-    void setID( const SharedOperator &ID_ );
+    void setID( const SharedOperatorVector &ID_ );
     
     
 //
@@ -159,11 +156,8 @@ protected:
 
     SharedUserFunction   userFcn;
     Expression          argument;
-    SharedResult          result;
     int                component;
-    
-    SharedOperator            ID;
-    BooleanType            first;
+    SharedOperatorVector      ID;
 };
 
 
@@ -172,12 +166,10 @@ template <typename T, class Derived> UserDefinedOperator<T,Derived>::UserDefined
 
 template <typename T, class Derived> UserDefinedOperator<T,Derived>::UserDefinedOperator( const SharedUserFunction  &fcn_      ,
                                                                            const Expression          &argument_ ,
-                                                                           const SharedResult        &result_   ,
                                                                            const int                 &component_  ){
   
     userFcn    = fcn_      ;
     argument   = argument_ ;
-    result     = result_   ;
     component  = component_;
 }
 
@@ -185,10 +177,8 @@ template <typename T, class Derived> UserDefinedOperator<T,Derived>::UserDefined
   
     userFcn    = arg.userFcn   ;
     argument   = arg.argument  ;
-    result     = arg.result    ;
     component  = arg.component ;
     ID         = arg.ID        ;
-    first      = arg.first     ;
 }
 
 template <typename T, class Derived> UserDefinedOperator<T,Derived>::~UserDefinedOperator(){}
@@ -201,18 +191,21 @@ template <typename T, class Derived> returnValue UserDefinedOperator<T,Derived>:
   EvalType *xx = dynamic_cast<EvalType*>(x);
   if( xx == 0 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
     
-  if( first == true ){
+  if( (xx->map)->count(this) == 0 ){
     
-      TVector input(argument.size());
+      std::vector<T> input ( argument.size() );  // input
+      std::vector<T> result( userFcn->size() );  // output
       
       for( int i=0; i<argument.size(); ++i ){
            xx->project(argument(i).element.get());
            input[i] = xx->res;
       }
-      result->resize(userFcn->size());
-      userFcn->evaluate( input, *result );
-  } 
-  xx->res = result->operator[](component);
+      userFcn->evaluate( input, result );
+      
+      for( int i=0; i<argument.size(); ++i )
+           (xx->map)->operator[](ID[i].get()) = result[i];
+  }
+  xx->res = (xx->map)->operator[](this);
   
   return SUCCESSFUL_RETURN;
 }
@@ -220,11 +213,13 @@ template <typename T, class Derived> returnValue UserDefinedOperator<T,Derived>:
 
 
 template <typename T, class Derived> SharedOperator UserDefinedOperator<T,Derived>::AD_forward( SharedOperatorMap &seed ){
-
-    return SharedOperator(); 
+  
+    return SharedOperator( );
 }
 
-template <typename T, class Derived> returnValue UserDefinedOperator<T,Derived>::AD_backward( SharedOperator     &seed,
+
+template <typename T, class Derived> returnValue UserDefinedOperator<T,Derived>::AD_backward(
+                                    SharedOperator     &seed,
                                     SharedOperatorMap  &df  ,
                                     SharedOperatorMap2 &IS    ){
 
@@ -254,21 +249,20 @@ template <typename T, class Derived> SharedOperator UserDefinedOperator<T,Derive
 
 template <typename T, class Derived> NeutralElement UserDefinedOperator<T,Derived>::isOneOrZero() const{ return NE_NEITHER_ONE_NOR_ZERO; }
 
-template <typename T, class Derived> std::ostream& UserDefinedOperator<T,Derived>::print( std::ostream &stream, StringMap &name ) const{ return stream; }
+template <typename T, class Derived> std::ostream& UserDefinedOperator<T,Derived>::print( std::ostream &stream, StringMap &name ) const{
+    
+    
+   return stream;
+}
     
 template <typename T, class Derived> returnValue UserDefinedOperator<T,Derived>::getArgumentList( DependencyMap &exists, SharedOperatorVector &list ){
-
-    first = false;
   
-    if( exists[ID.get()] != true ){
-      
+    if( exists[ID[0].get()] != true ){
          for( int i=0; i<argument.size(); ++i ){
              (argument(i)).element->getArgumentList(exists,list);
              list.push_back((argument(i)).element);
          }
- 
-         exists[ID.get()] = true;
-         first            = true;
+         exists[ID[0].get()] = true;
     }
     return SUCCESSFUL_RETURN;
 }
@@ -276,7 +270,7 @@ template <typename T, class Derived> returnValue UserDefinedOperator<T,Derived>:
 
 template <typename T, class Derived> BooleanType UserDefinedOperator<T,Derived>::isSymbolic() const{ return BT_FALSE; }
 
-template <typename T, class Derived> void UserDefinedOperator<T,Derived>::setID( const SharedOperator &ID_ ){ ID = ID_; }
+template <typename T, class Derived> void UserDefinedOperator<T,Derived>::setID( const SharedOperatorVector &ID_ ){ ID = ID_; }
 
 
 
@@ -341,29 +335,28 @@ class UserFunction{
 
 
 template<typename T, class Derived> Expression UserFunction<T,Derived>::operator()( const Expression &arg ){
- 
-    typedef std::vector<T>                                 TVector;
-    typedef UserFunction<T,Derived>                        FcnName;
-    typedef std::tr1::shared_ptr<TVector>             SharedResult;
-    typedef std::tr1::shared_ptr<FcnName>       SharedUserFunction;
+
+    typedef UserFunction<T,Derived>                   FcnName;
+    typedef std::tr1::shared_ptr<FcnName>  SharedUserFunction;
+    typedef UserDefinedOperator<T,Derived>                UDO;
     
     Expression tmp((int) dim,1);
     
-    SharedUserFunction     fcn( clone()                 );
-    SharedResult        result( new TVector(arg.size()) );
+    SharedUserFunction fcn(clone());
     
-    SharedOperator ID;
+    std::vector<UDO*> temp(dim); 
+    SharedOperatorVector ID(dim);
     
     for( uint i=0; i<dim; ++i ){
-         UserDefinedOperator<T,Derived> *temp = new UserDefinedOperator<T,Derived>( fcn, arg, result, i );
-         SharedOperator component = SharedOperator( temp );
-         if( i == 0 ) ID = component;
-         temp->setID(ID);
-	 tmp(i) = ScalarExpression(component);
+         temp[i] = new UDO( fcn, arg, i );
+         ID[i] = SharedOperator(temp[i]);
+    }
+    for( uint i=0; i<dim; ++i ){
+         temp[i]->setID(ID);
+	 tmp(i) = ScalarExpression(ID[i]);
     }
     return tmp;
 }
-
 
 
 CLOSE_NAMESPACE_ACADO
