@@ -34,7 +34,7 @@
 #	Enrico Bertolazzi, Universita` degli Studi di Trento
 #
 # Year:
-#	2011 - 2013
+#	2011 - 2014
 #
 # Usage:
 #	- /
@@ -169,6 +169,18 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER
 	IF( ACADO_WITH_TESTING )
 		ADD_DEFINITIONS( -D__NO_PIPES__ )
 		ADD_DEFINITIONS( -D__NO_PLOTTING__ )
+	ENDIF()
+	
+	#
+	# Check for C++11/C++0x support
+	#
+	INCLUDE( CheckCXXCompilerFlag )
+	CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+	CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+	IF( COMPILER_SUPPORTS_CXX11 )
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
+	ELSEIF( COMPILER_SUPPORTS_CXX0X )
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x" )
 	ENDIF()
 
 ################################################################################
