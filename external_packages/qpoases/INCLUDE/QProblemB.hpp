@@ -589,6 +589,8 @@ class QProblemB
 	 */
 	protected:
 		real_t H[NVMAX*NVMAX];		/**< Hessian matrix. */
+		BooleanType hasHessian;		/**< Flag indicating whether H contains Hessian or corresponding Cholesky factor R; \sa init. */
+
 		real_t g[NVMAX];			/**< Gradient. */
 		real_t lb[NVMAX];			/**< Lower bound vector (on variables). */
 		real_t ub[NVMAX];			/**< Upper bound vector (on variables). */
