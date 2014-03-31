@@ -1,25 +1,3 @@
-#
-# This file is part of ACADO Toolkit.
-#
-# ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
-# Copyright (C) 2008-2011 by Boris Houska and Hans Joachim Ferreau.
-# All rights reserved.
-#
-# ACADO Toolkit is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 3 of the License, or (at your option) any later version.
-#
-# ACADO Toolkit is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with ACADO Toolkit; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-#
-
 ################################################################################
 #
 # Description:
@@ -178,9 +156,9 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER
 	CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 	CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 	IF( COMPILER_SUPPORTS_CXX11 )
-		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -DACADO_HAS_CXX11" )
 	ELSEIF( COMPILER_SUPPORTS_CXX0X )
-		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x" )
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -DACADO_HAS_CXX0X" )
 	ENDIF()
 
 ################################################################################
