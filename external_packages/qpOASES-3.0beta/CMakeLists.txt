@@ -8,7 +8,7 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2011 - 2013
+#	2011 - 2014
 #
 # NOTE:
 #   - This is a quite modified version of the original qpOASES build script.
@@ -19,21 +19,12 @@
 #
 ################################################################################
 
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
-
-PROJECT( qpOASES CXX )
-
 SET( qpOASES_VERSION_MAJOR 3 )
 SET( qpOASES_VERSION_MINOR 0 )
 SET( qpOASES_VERSION_PATCH beta )
 SET( qpOASES_VERSION_STRING
 	${qpOASES_VERSION_MAJOR}.${qpOASES_VERSION_MINOR}.${qpOASES_VERSION_PATCH}
 )
-
-#
-# Project library output directory
-#
-SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/libs )
 
 IF ( UNIX )
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D__NO_COPYRIGHT__")
@@ -54,9 +45,6 @@ OPTION( QPOASES_WITH_BLAS
 	"Build qpOASES using original BLAS routines"
 	OFF
 )
-
-
-INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/include )
 
 #
 # Compile qpOASES libraries
@@ -119,18 +107,18 @@ SET( QPOASES_EXTRAS_SOURCES
 #
 # Build only the static library with extra features
 #
-ADD_LIBRARY(acado_qpOASESextras STATIC ${QPOASES_SOURCES} ${QPOASES_EXTRAS_SOURCES})
+ADD_LIBRARY(acado_qpoases STATIC ${QPOASES_SOURCES} ${QPOASES_EXTRAS_SOURCES})
 
 IF ( QPOASES_WITH_LAPACK AND LAPACK_FOUND )
 	TARGET_LINK_LIBRARIES(
-		acado_qpOASESextras
+		acado_qpoases
 		${LAPACK_LIBRARIES}
 	)
 ENDIF()
 
 IF ( QPOASES_WITH_BLAS AND BLAS_FOUND )
 	TARGET_LINK_LIBRARIES(
-		acado_qpOASESextras
+		acado_qpoases
 		${BLAS_LIBRARIES}
 	)
 ENDIF()
@@ -154,8 +142,8 @@ example3b
 
 IF( QPOASES_WITH_EXAMPLES )
 	FOREACH(ELEMENT ${EXAMPLE_NAMES})
-		ADD_EXECUTABLE(${ELEMENT} examples/${ELEMENT}.cpp)
-		TARGET_LINK_LIBRARIES(${ELEMENT} acado_qpOASESextras)
+		ADD_EXECUTABLE(qpoases_${ELEMENT} examples/${ELEMENT}.cpp)
+		TARGET_LINK_LIBRARIES(qpoases_${ELEMENT} acado_qpoases)
 	ENDFOREACH(ELEMENT ${EXAMPLE_NAMES})
 ENDIF( QPOASES_WITH_EXAMPLES )
 

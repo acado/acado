@@ -295,7 +295,7 @@ IF( ACADO_BUILD_SHARED )
 	)
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit_s
-		acado_qpOASESextras acado_csparse acado_casadi
+		acado_qpoases acado_csparse acado_casadi
 	)
 ENDIF( ACADO_BUILD_SHARED )
 

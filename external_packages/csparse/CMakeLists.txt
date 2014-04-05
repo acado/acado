@@ -1,29 +1,8 @@
-################################################################################
-#
-# Project settings
-#
-################################################################################
-
-#
-# Minimum required version of cmake 
-#
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
-
-#
-# Project name and programming languages used
-#
-PROJECT( CSPARSE C )
-
 #
 # Project info from file cs.h
 #
 SET( CSPARSE_VERSION "2.2.3" )
 SET( CSPARSE_SOVERSION "2" )
-
-#
-# Project library output directory
-#
-SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/libs )
 
 ################################################################################
 #
