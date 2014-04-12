@@ -262,7 +262,7 @@ void mexFunction(	int nlhs,
 #endif	
 	
 #if ACADO_NOD
-	getArray(1, src, 0, "od", acadoVariables.od, ACADO_NOD, 1);
+	getArray(1, src, 0, "od", acadoVariables.od, ACADO_N + 1, ACADO_NOD);
 #endif
 	
 	getArray(1, src, 0, "y", acadoVariables.y, ACADO_N, ACADO_NY);
