@@ -36,7 +36,7 @@ if @MODULE_NAME@_NXA > 0
 end;
 
 if @MODULE_NAME@_NOD > 0
-    avCells{ 6 }{ idx } = {'od', [1, @MODULE_NAME@_NOD], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
+    avCells{ 6 }{ idx } = {'od', [1, (@MODULE_NAME@_N + 1) * @MODULE_NAME@_NOD], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1;
 end;
 
 avCells{ 6 }{ idx } = {'y', [1, @MODULE_NAME@_N * @MODULE_NAME@_NY], aRealT, -1, 'real', 'Sample', 'Fixed', [], []}; idx = idx + 1; 

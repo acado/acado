@@ -21,7 +21,7 @@ typedef struct
 #endif
 
 #if ACADO_NOD
-	real_t od[ ACADO_NOD ];
+	real_t od[(ACADO_N + 1) * ACADO_NOD];
 #endif
 
 	real_t y[ACADO_N * ACADO_NY];
