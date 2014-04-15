@@ -299,6 +299,9 @@ IF( ACADO_BUILD_SHARED )
 	)
 ENDIF( ACADO_BUILD_SHARED )
 
+include(CppLint)
+add_style_check_target(lint ${ACADO_SOURCES})
+
 ################################################################################
 #
 # Building external packages
