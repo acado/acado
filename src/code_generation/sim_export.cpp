@@ -108,7 +108,7 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 									int _precision
 									)
 {
-	if (!modelDimensionsSet()) return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+	if (!modelDimensionsSet() && !exportRhs()) return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 	set( QP_SOLVER, QP_NONE );
 
 	string moduleName;
@@ -301,11 +301,6 @@ returnValue SIMexport::setup( )
 
 returnValue SIMexport::checkConsistency( ) const
 {
-	// Number of differential state derivatives must be either zero or equal to the number of differential states:
-	if( !modelData.checkConsistency() ) {
-		return ACADOERROR( RET_INVALID_OPTION );
-	}
-
 	// consistency checks:
 	// only time-continuous DAEs without parameter and disturbances supported!
 	DifferentialEquation f;

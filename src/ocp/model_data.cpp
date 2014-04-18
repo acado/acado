@@ -85,6 +85,11 @@ uint ModelData::addOutput( const OutputFcn& outputEquation_, const Grid& grid ){
 		outputExpressions.push_back( next );
 		dim_outputs.push_back( next.getDim() );
 
+		if( NDX == 0 ) NDX = outputEquation_.getNDX();
+		if( NU == 0 ) NU = outputEquation_.getNU();
+		if( NP == 0 ) NP = outputEquation_.getNP();
+		if( NOD == 0 ) NOD = outputEquation_.getNOD();
+
 		outputGrids.push_back( grid );
 
 		uint numOuts = (int) ceil((double)grid.getNumIntervals());
@@ -244,14 +249,14 @@ returnValue ModelData::setModel( const DifferentialEquation& _f )
 		Expression rhs;
 		differentialEquation.getExpression( rhs );
 
-		NX2 = rhs.getDim() - differentialEquation.getNXA();
-		if( NDX == 0 ) NDX = differentialEquation.getNDX();
 		NXA = differentialEquation.getNXA();
-		if( NU == 0 ) NU = differentialEquation.getNU();
-		if( NP == 0 ) NP = differentialEquation.getNP();
-		if( NOD == 0 ) NOD = differentialEquation.getNOD();
+		NX2 = rhs.getDim() - NXA;
+		if( NDX == 0 ) NDX = _f.getNDX();
+		if( _f.getNDX() > 0 && _f.getNDX() != (int)NX2 ) return ACADOERROR( RET_INVALID_OPTION );
+		if( NU == 0 ) NU = _f.getNU();
+		if( NP == 0 ) NP = _f.getNP();
+		if( NOD == 0 ) NOD = _f.getNOD();
 
-		model_dimensions_set = BT_TRUE;
 		export_rhs = BT_TRUE;
 	}
 	else {
@@ -281,7 +286,6 @@ returnValue ModelData::setNARXmodel( const uint _delay, const DMatrix& _parms ) 
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 		}
 
-		model_dimensions_set = BT_TRUE;
 		export_rhs = BT_TRUE;
 	}
 	else {
@@ -297,10 +301,7 @@ returnValue ModelData::setLinearInput( const DMatrix& M1_, const DMatrix& A1_, c
 	A1 = A1_;
 	B1 = B1_;
 	NX1 = A1.getNumCols();
-	if( !model_dimensions_set ) {
-		NU = B1.getNumCols();
-		model_dimensions_set = BT_TRUE;
-	}
+	NU = B1.getNumCols();
 	export_rhs = BT_TRUE;
 
 	return SUCCESSFUL_RETURN;
@@ -311,12 +312,14 @@ returnValue ModelData::setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, 
 {
 	M3 = M3_;
 	A3 = A3_;
-	rhs3 = rhs3_;
 	NX3 = A3.getNumCols();
-	if( !model_dimensions_set ) {
-		if( NU == 0 ) NU = rhs3_.getNU();
-		model_dimensions_set = BT_TRUE;
-	}
+
+	rhs3 = rhs3_;
+	if( NDX == 0 ) NDX = rhs3_.getNDX();
+	if( NU == 0 ) NU = rhs3_.getNU();
+	if( NP == 0 ) NP = rhs3_.getNP();
+	if( NOD == 0 ) NOD = rhs3_.getNOD();
+
 	export_rhs = BT_TRUE;
 
 	return SUCCESSFUL_RETURN;
@@ -608,16 +611,6 @@ returnValue ModelData::getNameOutputs( std::vector<std::string>& names ) const {
 returnValue ModelData::getNameDiffsOutputs( std::vector<std::string>& names ) const {
 	names = diffs_outputNames;
 	return SUCCESSFUL_RETURN;
-}
-
-
-BooleanType ModelData::checkConsistency( ) const
-{
-	// Number of differential state derivatives must be either zero or equal to the number of differential states:
-	if( NDX == 0 || NX3 > 0 || NX1 > 0 || NDX == NX2 ) {
-		return BT_TRUE;
-	}
-	return BT_FALSE;
 }
 
 

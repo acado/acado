@@ -902,6 +902,7 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 	unsigned numU = _numU > 0 ? _numU : getNU();
 	unsigned numP = _numP > 0 ? _numP : getNP();
 	unsigned numDX = _numDX > 0 ? _numDX : getNDX();
+	unsigned numOD = _numOD > 0 ? _numOD : getNOD();
 
 	unsigned offset = 0;
 
@@ -935,6 +936,10 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 		stream << "const " << realString << "* w = in + " << offset << ";" << endl;
 	offset += getNW();
 
+	if (numOD > 0)
+		stream << "const " << realString << "* od = in + " << offset << ";" << endl;
+	offset += numOD;
+
 	if (numDX > 0)
 		stream << "const " << realString << "* dx = in + " << offset << ";" << endl;
 	offset += numDX;
@@ -942,10 +947,6 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 	if (getNT() > 0)
 		stream << "const " << realString << "* t = in + " << offset << ";" << endl;
 	offset += getNT();
-
-	if (getNOD() > 0)
-		stream << "const " << realString << "* od = in + " << offset << ";" << endl;
-	offset += getNOD();
 
     if (n > 0)
     {

@@ -572,7 +572,6 @@ CLOSE_NAMESPACE_ACADO
 
 
 #include <acado/code_generation/integrators/irk_forward_export.hpp>
-#include <acado/code_generation/integrators/irk_adjoint_export.hpp>
 #include <acado/code_generation/integrators/irk_export.ipp>
 
 
