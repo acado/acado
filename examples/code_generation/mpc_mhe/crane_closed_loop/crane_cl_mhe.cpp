@@ -57,8 +57,8 @@ int main()
 	h << p << phi << a;
 	hN << p << phi;
 
-	BMatrix W(h.getDim(), h.getDim()); W.setOnes();
-	BMatrix WN(hN.getDim(), hN.getDim()); WN.setOnes();
+	BMatrix W = eye<bool>( h.getDim() );
+	BMatrix WN = eye<bool>( hN.getDim() );
 
 	//
 	// Optimal Control Problem
