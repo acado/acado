@@ -54,10 +54,10 @@ int main( ){
     const double alpha   = 2.2 ;
     const double beta    = 0.2 ;
     const double mum     = 0.48;
-    const double Sfbar   = 32.9;
+    // const double Sfbar   = 32.9;
     const double Sfmin   = 28.7;
     const double Sfmax   = 40.0;
-    const double Xbarmax = 5.8 ;
+    // const double Xbarmax = 5.8 ;
 
     const double t_start =  0.0;
     const double t_end   = 48.0;
