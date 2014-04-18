@@ -30,8 +30,7 @@
  */
 
 #include <acado/code_generation/export_gauss_newton_hpmpc.hpp>
-
-#include <sstream>
+#include <acado/code_generation/templates/templates.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -40,17 +39,12 @@ using namespace std;
 ExportGaussNewtonHpmpc::ExportGaussNewtonHpmpc(	UserInteraction* _userInteraction,
 													const std::string& _commonHeaderName
 													) : ExportNLPSolver( _userInteraction,_commonHeaderName )
-{
-	diagH = diagHN = false;
-}
+{}
 
 returnValue ExportGaussNewtonHpmpc::setup( )
 {
 	LOG( LVL_DEBUG ) << "Solver: setup initialization... " << endl;
 	setupInitialization();
-	// Add QP initialization call to the initialization
-//	ExportFunction initializeForces( "initializeForces" );
-//	initialize.addFunctionCall( initializeForces );
 
 	LOG( LVL_DEBUG ) << "done!" << endl;
 
@@ -120,12 +114,12 @@ returnValue ExportGaussNewtonHpmpc::getFunctionDeclarations(	ExportStatementBloc
 }
 
 returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
-														)
+												)
 {
 	setupQPInterface();
-//	code.addStatement( *qpInterface );
 
-	code << "int hpmpc_solve(unsigned N, unsigned nx, unsigned nu, double* A, double* B, double* d, double* Q, double* Qf, double* S, double* R, double* q, double* qf, double* r, double* lb, double* ub, double* x, double* u, unsigned* nIt);\n";
+	// Forward declaration, same as in the template file.
+	code << "int acado_hpmpc_ip_wrapper(unsigned N, unsigned nx, unsigned nu, double* A, double* B, double* d, double* Q, double* Qf, double* S, double* R, double* q, double* qf, double* r, double* lb, double* ub, double* x, double* u, int* nIt);\n";
 
 	code.addLinebreak( 2 );
 	code.addStatement( "/******************************************************************************/\n" );
@@ -153,8 +147,6 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 	code.addFunction( setStagef );
 	code.addFunction( evaluateObjective );
 
-//	code.addFunction( conSetGxGu );
-//	code.addFunction( conSetd );
 	code.addFunction( evaluateConstraints );
 
 	code.addFunction( acc );
@@ -192,40 +184,6 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 	if (S1.isGiven() == false or S1.getGivenMatrix().isZero() == false)
 		return ACADOFATALTEXT(RET_INVALID_ARGUMENTS,
 				"Mixed control-state terms in the objective function are not supported at the moment.");
-
-	diagH = false;
-	diagHN = false;
-//	unsigned dimHRows = NX + NU;
-//	unsigned dimHCols = NX + NU;
-//	unsigned dimHNRows = NX;
-//	unsigned dimHNCols = NX;
-//	if (objS.isGiven() == true)
-//		if (objS.getGivenMatrix().isDiagonal())
-//		{
-//			diagH = true;
-//			dimHCols = 1;
-//		}
-//
-//	if (objSEndTerm.isGiven() == true)
-//		if (objSEndTerm.getGivenMatrix().isDiagonal() == true)
-//		{
-//			diagHN = true;
-//			dimHNCols = 1;
-//		}
-
-//	objHessians.resize(N + 1);
-//	for (unsigned i = 0; i < N; ++i)
-//	{
-//		objHessians[ i ].setup(string("H") + toString(i + 1), dimHRows, dimHCols, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//	}
-//	objHessians[ N ].setup(string("H") + toString(N + 1), dimHNRows, dimHNCols, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//
-//	objGradients.resize(N + 1);
-//	for (unsigned i = 0; i < N; ++i)
-//	{
-//		objGradients[ i ].setup(string("f") + toString(i + 1), NX + NU, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//	}
-//	objGradients[ N ].setup(string("f") + toString(N + 1), NX, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
 
 	//
 	// LM regularization preparation
@@ -450,87 +408,9 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 
 	ExportIndex index( "index" );
 
-//	ExportVariable stageH;
-
-//	stageH.setup("stageH", dimHRows, dimHCols, REAL, ACADO_LOCAL);
-//	setStageH.setup("setStageH", stageH, index);
-//
-//	if (Q1.isGiven() == false)
-//		setStageH.addStatement(
-//				stageH.getSubMatrix(0, NX, 0, NX) == Q1.getSubMatrix(index * NX, (index + 1) * NX, 0, NX) + evLmX
-//		);
-//	else
-//	{
-//		setStageH << index.getFullName() << " = " << index.getFullName() << ";\n";
-//		if (diagH == false)
-//		{
-//			setStageH.addStatement(
-//					stageH.getSubMatrix(0, NX, 0, NX) == Q1 + evLmX
-//			);
-//		}
-//		else
-//		{
-//			setStageH.addStatement(
-//					stageH.getRows(0, NX) == Q1.getGivenMatrix().getDiag() + evLmX.getGivenMatrix().getDiag()
-//			);
-//		}
-//	}
-//	setStageH.addLinebreak();
-//
-//	if (R1.isGiven() == false)
-//		setStageH.addStatement(
-//				stageH.getSubMatrix(NX, NX + NU, NX, NX + NU) == R1.getSubMatrix(index * NU, (index + 1) * NU, 0, NU) + evLmU
-//		);
-//	else
-//	{
-//		if (diagH == false)
-//		{
-//			setStageH.addStatement(
-//					stageH.getSubMatrix(NX, NX + NU, NX, NX + NU) == R1 + evLmU
-//			);
-//		}
-//		else
-//		{
-//			setStageH.addStatement(
-//					stageH.getRows(NX, NX + NU) == R1.getGivenMatrix().getDiag() + evLmU.getGivenMatrix().getDiag()
-//			);
-//		}
-//	}
-//
-//	if (Q1.isGiven() == true && R1.isGiven() == true)
-//	{
-//		initialize <<
-//				setStageH.getName() << "( " << objHessians[ 0 ].getFullName() << ", " << "0" << " );\n";
-//		initialize.addLinebreak();
-//		if (diagHN == false)
-//		{
-//			initialize.addStatement(
-//					objHessians[ N ] == QN1 + evLmX
-//			);
-//		}
-//		else
-//		{
-//			initialize.addStatement(
-//					objHessians[ N ] == QN1.getGivenMatrix().getDiag() + evLmX.getGivenMatrix().getDiag()
-//			);
-//		}
-//	}
-//	else
-//	{
-//		for (unsigned i = 0; i < N; ++i)
-//			evaluateObjective.addFunctionCall(setStageH, objHessians[ i ], ExportIndex(i));
-//		evaluateObjective.addLinebreak();
-//		evaluateObjective.addStatement(
-//				objHessians[ N ] == QN1 + evLmX
-//		);
-//	}
-
 	//
 	// Gradient setup
 	//
-
-	// TODO, this guy should have 2 outputs: q & r separately.
-
 	ExportVariable qq, rr;
 	qq.setup("stageq", NX, 1, REAL, ACADO_LOCAL);
 	rr.setup("stager", NU, 1, REAL, ACADO_LOCAL);
@@ -563,7 +443,6 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 	//
 	// Setup necessary QP variables
 	//
-	// ExportVariable qpQ, qpQf, qpS, qpR;
 
 	qpQ.setup("qpQ", N * NX, NX, REAL, ACADO_WORKSPACE);
 	qpQf.setup("qpQf", NX, NX, REAL, ACADO_WORKSPACE);
@@ -599,14 +478,12 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 		lbValues.append( uBounds.getLowerBounds( node ) );
 		ubValues.append( uBounds.getUpperBounds( node ) );
 	}
-//	cout << lbValues.rows() << " x " << lbValues.cols() << endl;
 
 	for(unsigned node = 1; node < N + 1; ++node)
 	{
 		lbValues.append( xBounds.getLowerBounds( node ) );
 		ubValues.append( xBounds.getUpperBounds( node ) );
 	}
-//	cout << lbValues.rows() << " x " << lbValues.cols() << endl;
 
 	qpLb.setup("qpLb", N * NU + N * NX, 1, REAL, ACADO_WORKSPACE);
 	qpUb.setup("qpUb", N * NU + N * NX, 1, REAL, ACADO_WORKSPACE);
@@ -705,7 +582,7 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 
 	// Call the solver
 	feedback
-		<< returnValueFeedbackPhase.getFullName() << " = " << "hpmpc_solve("
+		<< returnValueFeedbackPhase.getFullName() << " = " << "acado_hpmpc_ip_wrapper("
 
 		<< toString( N ) << ", " << toString( NX ) << ", " << toString( NU ) << ", "
 
@@ -755,89 +632,11 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 
 returnValue ExportGaussNewtonHpmpc::setupQPInterface( )
 {
-	// NEW interface!
-//	(prec, sp_thr, &kk, k_max, tol, sigma, info, nx, nu, N,
-//			AA, BB, bb,
-//			Q, Qf, S, R,
-//			q, qf, r, lb, ub, x, u, work);
+	string folderName;
+	get(CG_EXPORT_FOLDER_NAME, folderName);
+	string outFile = folderName + "/acado_hpmpc_interface.c";
 
-	/*
-
-
-
-	 */
-
-//	//
-//	// Configure and export QP interface
-//	//
-//
-//	qpInterface = std::tr1::shared_ptr< ExportForcesInterface >(new ExportForcesInterface(FORCES_TEMPLATE, "", commonHeaderName));
-//
-//	ExportVariable tmp1("tmp", 1, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//	ExportVariable tmp2("tmp", 1, 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
-//	ExportVariable tmp3("tmp", 1, 1, REAL, FORCES_INFO, false, qpObjPrefix);
-//
-//	string params = qpModuleName + "_params";
-//
-//	string output = qpModuleName + "_output";
-//
-//	string info = qpModuleName + "_info";
-//
-//	string header = qpModuleName + ".h";
-//
-//	qpInterface->configure(
-//			header,
-//
-//			params,
-//			tmp1.getDataStructString(),
-//
-//			output,
-//			tmp2.getDataStructString(),
-//
-//			info,
-//			tmp3.getDataStructString()
-//	);
-//
-//	//
-//	// Configure and export QP generator
-//	//
-//
-//	string folderName;
-//	get(CG_EXPORT_FOLDER_NAME, folderName);
-//	string outFile = folderName + "/acado_forces_generator.m";
-//
-//	qpGenerator = std::tr1::shared_ptr< ExportForcesGenerator >(new ExportForcesGenerator(FORCES_GENERATOR, outFile, "", "real_t", "int", 16, "%"));
-//
-//	int maxNumQPiterations;
-//	get( MAX_NUM_QP_ITERATIONS,maxNumQPiterations );
-//
-//	int printLevel;
-//	get(PRINTLEVEL, printLevel);
-//
-//	// if not specified, use default value
-//	if ( maxNumQPiterations <= 0 )
-//		maxNumQPiterations = 3 * getNumQPvars();
-//
-//	int useOMP;
-//	get(CG_USE_OPENMP, useOMP);
-//
-//	qpGenerator->configure(
-//			NX,
-//			NU,
-//			N,
-//			conLBIndices,
-//			conUBIndices,
-//			(Q1.isGiven() == true && R1.isGiven() == true) ? 1 : 0,
-//			diagH,
-//			diagHN,
-//			true, // TODO enable MHE
-//			qpModuleName,
-//			(PrintLevel)printLevel == HIGH ? 2 : 0,
-//			maxNumQPiterations,
-//			useOMP
-//	);
-//
-//	qpGenerator->exportCode();
+	acadoCopyTempateFile(HPMPC_INTERFACE, outFile, "", true);
 
 	return SUCCESSFUL_RETURN;
 }

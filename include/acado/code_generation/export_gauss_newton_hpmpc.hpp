@@ -153,9 +153,6 @@ private:
 	/** @{ */
 	ExportFunction evaluateObjective;
 
-//	std::vector< ExportVariable > objHessians;
-//	std::vector< ExportVariable > objGradients;
-
 	ExportFunction setStageH;
 	ExportFunction setStagef;
 
@@ -163,25 +160,11 @@ private:
 	ExportFunction setObjR1R2;
 	ExportFunction setObjQN1QN2;
 
-	bool diagH;
-	bool diagHN;
 	/** @} */
 
 	/** \name Constraint evaluation */
 	/** @{ */
-//	std::vector< ExportVariable > conLB;
-//	std::vector< ExportVariable > conUB;
-
-//	std::vector< std::vector< unsigned > > conLBIndices, conUBIndices;
-//	std::vector< std::vector< double > > conLBValues, conUBValues;
-
 	ExportFunction evaluateConstraints;
-//	ExportFunction conSetGxGu;
-//	ExportVariable conStageC;
-
-//	std::vector< ExportVariable > conC;
-//	std::vector< ExportVariable > cond;
-//	ExportFunction conSetd;
 	/** @} */
 
 	/** \name RTI related */

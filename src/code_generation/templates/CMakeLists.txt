@@ -8,7 +8,7 @@
 # 	Rien Quirynen
 #
 # Year:
-#	2011 - 2013
+#	2011 - 2014
 #
 #
 ################################################################################
@@ -56,6 +56,8 @@ SET( SOLVER_SFUN_HEADER acado_solver_sfunction.h.in)
 SET( DUMMY_TEST_FILE dummy_test_file.in)
 
 SET( COMMON_HEADER_TEMPLATE acado_common_header.h.in)
+
+SET( HPMPC_INTERFACE acado_hpmpc_interface.c.in)
 
 #
 # Configure templates
