@@ -260,9 +260,8 @@ returnValue Power::AD_symmetric( int            dim       , /**< number of direc
 
 returnValue Power::initDerivative() {
 
-	if( derivative01 != 0 ) {
-		return SUCCESSFUL_RETURN;
-	}
+	if( initialized ) return SUCCESSFUL_RETURN;
+	initialized = BT_TRUE;
 
 	Operator *oneTmp = new DoubleConstant(1.0, NE_ONE);
 	Operator *subTmp = mySubtract( argument2, oneTmp );

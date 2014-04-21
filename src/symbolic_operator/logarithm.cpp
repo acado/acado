@@ -129,7 +129,8 @@ CurvatureType Logarithm::getCurvature( ){
 
 returnValue Logarithm::initDerivative() {
 
-	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+	if( initialized ) return SUCCESSFUL_RETURN;
+	initialized = BT_TRUE;
 
 	derivative = convert2TreeProjection(new Power_Int( argument->clone(), -1 ));
 	derivative2 = convert2TreeProjection(new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Power_Int( argument->clone(), -2 ) ));

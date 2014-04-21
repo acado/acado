@@ -115,7 +115,8 @@ Operator* Asin::clone() const{
 
 returnValue Asin::initDerivative() {
 
-	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+	if( initialized ) return SUCCESSFUL_RETURN;
+	initialized = BT_TRUE;
 
 	derivative = convert2TreeProjection(
 			new Power(

@@ -259,8 +259,14 @@ returnValue BinaryOperator::setVariableExportName(	const VariableType &_type,
 
 returnValue BinaryOperator::initDerivative() {
 
-	argument1->initDerivative();
-	return argument2->initDerivative();
+	if( !initialized ) {
+		initialized = BT_TRUE;
+		argument1->initDerivative();
+		return argument2->initDerivative();
+	}
+	else {
+		return SUCCESSFUL_RETURN;
+	}
 }
 
 CLOSE_NAMESPACE_ACADO

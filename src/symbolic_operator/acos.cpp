@@ -114,7 +114,8 @@ Operator* Acos::clone() const{
 
 returnValue Acos::initDerivative() {
 
-	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+	if( initialized ) return SUCCESSFUL_RETURN;
+	initialized = BT_TRUE;
 
 	derivative = convert2TreeProjection(
 			new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),

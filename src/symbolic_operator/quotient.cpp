@@ -240,9 +240,8 @@ returnValue Quotient::AD_symmetric( int            dim       , /**< number of di
 
 returnValue Quotient::initDerivative() {
 
-	if( derivative0 != 0 && derivative1 != 0 && derivative2 != 0 ) {
-		return SUCCESSFUL_RETURN;
-	}
+	if( initialized ) return SUCCESSFUL_RETURN;
+	initialized = BT_TRUE;
 
 	derivative0 = convert2TreeProjection(new Quotient( new DoubleConstant(1.0,NE_ONE), argument2->clone() ));
 	derivative1 = convert2TreeProjection(new Product( derivative0->clone(), derivative0->clone() ));
