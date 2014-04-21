@@ -19,7 +19,7 @@ int initializeQpDunes( void )
 	qpOptions = qpDUNES_setupDefaultOptions();
 	qpOptions.maxIter    = @MAX_ITER@;
 	/* qpOptions.printLevel = @PRINT_LEVEL@;*/
-	qpOptions.printLevel = 4;
+	qpOptions.printLevel = 0;
 	qpOptions.stationarityTolerance = 1.e-6;
 	qpOptions.regParam = 1.e-6;
 	qpOptions.newtonHessDiagRegTolerance  = 1.e-8;
