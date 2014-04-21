@@ -47,8 +47,6 @@ ExportNLPSolver::ExportNLPSolver(	UserInteraction* _userInteraction,
 
 	dimPacH = 0;
 	dimPocH = 0;
-
-	externObjective = false;
 }
 
 returnValue ExportNLPSolver::setIntegratorExport(	IntegratorExportPtr const _integrator
@@ -115,6 +113,8 @@ returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarat
 
 	declarations.addDeclaration(R1, dataStruct);
 	declarations.addDeclaration(R2, dataStruct);
+
+	declarations.addDeclaration(S1, dataStruct);
 
 	declarations.addDeclaration(objSEndTerm, dataStruct);
 
@@ -207,8 +207,8 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	z.setDoc( string("Matrix containing ") + toString( N ) + " algebraic variable vectors." );
 	u.setup("u", getN(), getNU(), REAL, ACADO_VARIABLES);
 	u.setDoc( string("Matrix containing ") + toString( N ) + " control variable vectors." );
-	od.setup("od", 1, getNOD(), REAL, ACADO_VARIABLES);
-	od.setDoc( "Vector of online data values." );
+	od.setup("od", getN() + 1, getNOD(), REAL, ACADO_VARIABLES);
+	od.setDoc( string("Matrix containing ") + toString(getN() + 1) + " online data vectors." );
 
 	if (performsSingleShooting() == false)
 	{
@@ -240,7 +240,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 		modelSimulation.addStatement( state.getCols(0, NX)				== x.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(NX, NX + NXA)		== z.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( 0 ) );
-		modelSimulation.addStatement( state.getCols(indexU, indexOD)		== od );
+		modelSimulation.addStatement( state.getCols(indexU, indexOD)	== od.getRow( 0 ) );
 		modelSimulation.addLinebreak( );
 	}
 
@@ -262,7 +262,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 
 	// Fill in the input vector
 	loop.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( run ) );
-	loop.addStatement( state.getCols(indexU, indexOD)	== od );
+	loop.addStatement( state.getCols(indexU, indexOD)	== od.getRow( run ) );
 	loop.addLinebreak( );
 
 	// Integrate the model
@@ -390,6 +390,9 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		R1.setup("R1", NU * N, NU, REAL, ACADO_WORKSPACE);
 		R2.setup("R2", NU * N, NY, REAL, ACADO_WORKSPACE);
 
+//		S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+		S1 = zeros<double>(NX, NU);
+
 		QN1.setup("QN1", NX, NX, REAL, ACADO_WORKSPACE);
 		QN2.setup("QN2", NX, NYN, REAL, ACADO_WORKSPACE);
 
@@ -399,8 +402,6 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 
 		evaluateLSQ = ExportAcadoFunction(lsqExternElements[ 0 ].h);
 		evaluateLSQEndTerm = ExportAcadoFunction(lsqExternEndTermElements[ 0 ].h);
-
-		externObjective = true;
 
 		setupResidualVariables();
 
@@ -491,13 +492,6 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	Function Fx, Fu;
 	Fx << expFx;
 	Fu << expFu;
-
-	if (expFx.isDependingOn( VT_CONTROL ) == true)
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-				"Jacobian of the objective function w.r.t diff. states depends on controls.");
-	if (expFu.isDependingOn( VT_DIFFERENTIAL_STATE ) == true)
-		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-				"Jacobian of the objective function w.r.t controls depends on diff. states.");
 
 	if (Fx.isConstant() == true)
 	{
@@ -616,6 +610,44 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	{
 		R1.setup("R1", NU * N, NU, REAL, ACADO_WORKSPACE);
 		R2.setup("R2", NU * N, NY, REAL, ACADO_WORKSPACE);
+	}
+
+	if (objS.isGiven() == true && objEvFu.isGiven() == true && objEvFx.isGiven() == true)
+	{
+		S1 = objEvFx.getGivenMatrix().transpose() * objS.getGivenMatrix() * objEvFu.getGivenMatrix();
+	}
+	else if (Fu.isOneOrZero() == NE_ZERO or Fx.isOneOrZero() == NE_ZERO)
+	{
+		S1 = zeros<double>(NX, NU);
+	}
+	else
+	{
+		if (objS.isGiven() == true or objS.isDiagonal() == true)
+		{
+			// Dependency pattern of Fx
+			DMatrix depFx = objEvFx.isGiven() == true ? objEvFx.getGivenMatrix() : expFx.getSparsityPattern();
+			// Dependency pattern of Fx
+			DMatrix depFu = objEvFu.isGiven() == true ? objEvFu.getGivenMatrix() : expFu.getSparsityPattern();
+
+//			cout << depFx << endl;
+//			cout << expFx << endl;
+//			cout << depFu << endl;
+//			cout << expFu << endl;
+
+			// The sparsity of the weighting matrix
+			DMatrix depS  = objS.isGiven() == true ? objS.getGivenMatrix() : eye<double>( objS.getNumRows() );
+
+			// Mutiply sparsities to check if S1 is indeed zero in the end.
+			DMatrix dep = depFx.transpose() * depS * depFu;
+			if (dep.isZero() == true)
+				S1 = zeros<double>(NX, NU);
+			else
+				S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+		}
+		else
+		{
+			S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+		}
 	}
 
 	////////////////////////////////////////////////////////////////////////////
@@ -1154,7 +1186,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	shiftStates.addStatement( "else\n{\n" );
 	shiftStates.addStatement( state.getCols(indexGzu, indexU) == u.getRow(N - 1) );
 	shiftStates.addStatement( "}\n" );
-	shiftStates.addStatement( state.getCols(indexU, indexOD) == od );
+	shiftStates.addStatement( state.getCols(indexU, indexOD) == od.getRow( N ) );
 	shiftStates.addLinebreak( );
 
 	if ( integrator->equidistantControlGrid() )
@@ -1197,7 +1229,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 		iLoop << std::string("}\n");
 	}
 	iLoop.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( index ) );
-	iLoop.addStatement( state.getCols(indexU, indexOD)	== od );
+	iLoop.addStatement( state.getCols(indexU, indexOD)	== od.getRow( index ) );
 	iLoop.addLinebreak( );
 
 	if ( integrator->equidistantControlGrid() )
@@ -1251,7 +1283,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( oInd ) );
 	loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( oInd ) );
-	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
+	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( oInd ) );
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
@@ -1266,7 +1298,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	getObjective.addStatement( loopObjective );
 
 	getObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
-	getObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
+	getObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
 	// Evaluate the objective function
 	getObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
@@ -1402,7 +1434,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	updateArrivalCost.addStatement( state.getCols(0, NX) == x.getRow( 0 ) );
 	updateArrivalCost.addStatement( state.getCols(NX, NX + NXA) == z.getRow( 0 ) );
 	updateArrivalCost.addStatement( state.getCols(indexGzu, indexU) == u.getRow( 0 ) );
-	updateArrivalCost.addStatement( state.getCols(indexU, indexNOD) == od );
+	updateArrivalCost.addStatement( state.getCols(indexU, indexNOD) == od.getRow( 0 ) );
 
 	if (integrator->equidistantControlGrid())
 		updateArrivalCost << "integrate" << "(" << state.getFullName() << ", 1);\n";
@@ -1416,7 +1448,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 
 	updateArrivalCost.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( 0 ) );
 	updateArrivalCost.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( 0 ) );
-	updateArrivalCost.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
+	updateArrivalCost.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( 0 ) );
 
 	updateArrivalCost.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
 	updateArrivalCost.addLinebreak( );

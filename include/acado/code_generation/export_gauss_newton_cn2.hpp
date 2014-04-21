@@ -162,6 +162,7 @@ protected:
 
 	ExportFunction setObjQ1Q2;
 	ExportFunction setObjR1R2;
+	ExportFunction setObjS1;
 	ExportFunction setObjQN1QN2;
 
 	/** Variable containing the QP Hessian matrix. */
@@ -245,8 +246,8 @@ protected:
 	ExportVariable W1, W2;
 	ExportVariable sbar, w1, w2;
 
-	ExportFunction multBTW1, macBTW1_R1, multGxTGu, macQEW2;
-	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macASbarD2;
+	ExportFunction multBTW1, macBTW1_R1, multGxTGu, macQEW2, mac_S1T_E;
+	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macASbarD2, macS1TSbar;
 	ExportFunction expansionStep;
 
 };

@@ -64,10 +64,8 @@ int main( )
 	WN *= 5;
 
 	// Or provide sparsity patterns for the weighting matrices
-//	BMatrix W(h.getDim(), h.getDim());
-//	BMatrix WN(hN.getDim(), hN.getDim());
-//	W.setOnes();
-//	WN.setOnes();
+//	BMatrix W = eye<bool>( h.getDim() );
+//	BMatrix WN = eye<bool>( hN.getDim() );
 
 	//
 	// Optimal Control Problem

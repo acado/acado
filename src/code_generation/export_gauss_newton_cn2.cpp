@@ -176,6 +176,7 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 
 	code.addFunction( setObjQ1Q2 );
 	code.addFunction( setObjR1R2 );
+	code.addFunction( setObjS1 );
 	code.addFunction( setObjQN1QN2 );
 	code.addFunction( evaluateObjective );
 
@@ -186,6 +187,7 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 	code.addFunction( moveGuE );
 
 	code.addFunction( multBTW1 );
+	code.addFunction( mac_S1T_E );
 	code.addFunction( macBTW1_R1 );
 	code.addFunction( multGxTGu );
 	code.addFunction( macQEW2 );
@@ -194,6 +196,7 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 
 	code.addFunction( macATw1QDy );
 	code.addFunction( macBTw1 );
+	code.addFunction( macS1TSbar );
 	code.addFunction( macQSbarW2 );
 	code.addFunction( macASbar );
 //	code.addFunction( macASbarD2 );
@@ -279,13 +282,13 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 	// A loop the evaluates objective and corresponding gradients
 	//
 	ExportIndex runObj( "runObj" );
-	ExportForLoop loopObjective( runObj, 0, N );
+	ExportForLoop loopObjective(runObj, 0, N);
 
 	evaluateObjective.addIndex( runObj );
 
 	loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( runObj ) );
 	loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( runObj ) );
-	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
+	loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( runObj ) );
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
@@ -298,8 +301,6 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 	loopObjective.addLinebreak( );
 
 	// Optionally compute derivatives
-	unsigned indexX = getNY();
-//	unsigned indexG = indexX;
 
 	ExportVariable tmpObjS, tmpFx, tmpFu;
 	ExportVariable tmpFxEnd, tmpObjSEndTerm;
@@ -319,6 +320,22 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 	if (objSEndTerm.isGiven() == true)
 		tmpObjSEndTerm = objSEndTerm;
 
+	unsigned indexX = getNY();
+	ExportArgument tmpFxCall = tmpFx;
+	if (tmpFx.isGiven() == false)
+	{
+		tmpFxCall = objValueOut.getAddress(0, indexX);
+		indexX += objEvFx.getDim();
+	}
+
+	ExportArgument tmpFuCall = tmpFu;
+	if (tmpFu.isGiven() == false)
+	{
+		tmpFuCall = objValueOut.getAddress(0, indexX);
+	}
+
+	ExportArgument objSCall = variableObjS == true ? objS.getAddress(runObj * NY, 0) : objS;
+
 	//
 	// Optional computation of Q1, Q2
 	//
@@ -332,45 +349,11 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		setObjQ1Q2.addStatement( tmpQ2 == (tmpFx ^ tmpObjS) );
 		setObjQ1Q2.addStatement( tmpQ1 == tmpQ2 * tmpFx );
 
-		if (tmpFx.isGiven() == true)
-		{
-			if (variableObjS == YES)
-			{
-				loopObjective.addFunctionCall(
-						setObjQ1Q2,
-						tmpFx, objS.getAddress(runObj * NY, 0),
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-				);
-			}
-			else
-			{
-				loopObjective.addFunctionCall(
-						setObjQ1Q2,
-						tmpFx, objS,
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-				);
-			}
-		}
-		else
-		{
-			if (variableObjS == YES)
-			{
-				loopObjective.addFunctionCall(
-						setObjQ1Q2,
-						objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-				);
-			}
-			else
-			{
-				loopObjective.addFunctionCall(
-						setObjQ1Q2,
-						objValueOut.getAddress(0, indexX), objS,
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-				);
-			}
-			indexX += objEvFx.getDim();
-		}
+		loopObjective.addFunctionCall(
+				setObjQ1Q2,
+				tmpFxCall, objSCall,
+				Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+		);
 
 		loopObjective.addLinebreak( );
 	}
@@ -385,46 +368,33 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		setObjR1R2.addStatement( tmpR2 == (tmpFu ^ tmpObjS) );
 		setObjR1R2.addStatement( tmpR1 == tmpR2 * tmpFu );
 
-		if (tmpFu.isGiven() == true)
-		{
-			if (variableObjS == YES)
-			{
-				loopObjective.addFunctionCall(
-						setObjR1R2,
-						tmpFu, objS.getAddress(runObj * NY, 0),
-						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
-				);
-			}
-			else
-			{
-				loopObjective.addFunctionCall(
-						setObjR1R2,
-						tmpFu, objS,
-						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
-				);
-			}
-		}
-		else
-		{
-			if (variableObjS == YES)
-			{
-				loopObjective.addFunctionCall(
-						setObjR1R2,
-						objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
-						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
-				);
-			}
-			else
-			{
-				loopObjective.addFunctionCall(
-						setObjR1R2,
-						objValueOut.getAddress(0, indexX), objS,
-						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
-				);
-			}
-		}
+		loopObjective.addFunctionCall(
+				setObjR1R2,
+				tmpFuCall, objSCall,
+				R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
+		);
 
 		loopObjective.addLinebreak( );
+	}
+
+	if (S1.isGiven() == false)
+	{
+		ExportVariable tmpS1;
+		ExportVariable tmpS2;
+
+		tmpS1.setup("tmpS1", NX, NU, REAL, ACADO_LOCAL);
+		tmpS2.setup("tmpS2", NX, NY, REAL, ACADO_LOCAL);
+
+		setObjS1.setup("setObjS1", tmpFx, tmpFu, tmpObjS, tmpS1);
+		setObjS1.addVariable( tmpS2 );
+		setObjS1.addStatement( tmpS2 == (tmpFx ^ tmpObjS) );
+		setObjS1.addStatement( tmpS1 == tmpS2 * tmpFu );
+
+		loopObjective.addFunctionCall(
+				setObjS1,
+				tmpFxCall, tmpFuCall, objSCall,
+				S1.getAddress(runObj * NX, 0)
+		);
 	}
 
 	evaluateObjective.addStatement( loopObjective );
@@ -433,7 +403,7 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 	// Evaluate the quadratic Mayer term
 	//
 	evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
-	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
+	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
 	// Evaluate the objective function, last node.
 	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
@@ -444,8 +414,6 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 
 	if (QN1.isGiven() == false)
 	{
-		indexX = getNYN();
-
 		ExportVariable tmpQN1, tmpQN2;
 		tmpQN1.setup("tmpQN1", NX, NX, REAL, ACADO_LOCAL);
 		tmpQN2.setup("tmpQN2", NX, NYN, REAL, ACADO_LOCAL);
@@ -454,18 +422,14 @@ returnValue ExportGaussNewtonCN2::setupObjectiveEvaluation( void )
 		setObjQN1QN2.addStatement( tmpQN2 == (tmpFxEnd ^ tmpObjSEndTerm) );
 		setObjQN1QN2.addStatement( tmpQN1 == tmpQN2 * tmpFxEnd );
 
-		if (tmpFxEnd.isGiven() == true)
-			evaluateObjective.addFunctionCall(
-					setObjQN1QN2,
-					tmpFxEnd, objSEndTerm,
-					QN1.getAddress(0, 0), QN2.getAddress(0, 0)
-			);
-		else
-			evaluateObjective.addFunctionCall(
-					setObjQN1QN2,
-					objValueOut.getAddress(0, indexX), objSEndTerm,
-					QN1.getAddress(0, 0), QN2.getAddress(0, 0)
-			);
+		indexX = getNYN();
+		ExportArgument tmpFxEndCall = tmpFxEnd.isGiven() == true ? tmpFxEnd  : objValueOut.getAddress(0, indexX);
+
+		evaluateObjective.addFunctionCall(
+				setObjQN1QN2,
+				tmpFxEndCall, objSEndTerm,
+				QN1.getAddress(0, 0), QN2.getAddress(0, 0)
+		);
 
 		evaluateObjective.addLinebreak( );
 	}
@@ -716,7 +680,8 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 		for k = N - 1: i + 1
 		{
-			H_{k, i} = B_k^T * W1;
+			H_{k, i}  = B_k^T * W1;
+			H_{k, i} += S_k^T * E_{j + k - i - 1};
 
 			W2 = A_k^T * W1;
 			W1 = Q_k^T * E_{j + k - i - 1} + W2;
@@ -759,12 +724,26 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 						multGxGu, QN1, E.getAddress((offset + N - col - 1) * NX), W1
 				);
 
+//			cout << "E block " << (offset + N - col - 1) << endl;
+
 			for (unsigned row = N - 1; col < row; --row)
 			{
 				condensePrep.addFunctionCall(
 						multBTW1, evGu.getAddress(row * NX), W1,
 						ExportIndex( row ), ExportIndex( col )
 				);
+
+				if ((S1.isGiven() and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+				{
+					ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(row * NX) : S1;
+
+					condensePrep.addFunctionCall(
+							mac_S1T_E,
+							S1Call, E.getAddress((offset + row - col - 1) * NX),
+							ExportIndex( row ), ExportIndex( col )
+					);
+//					cout << "S1 E Block " << (offset + row - col - 1) << endl;
+				}
 
 				condensePrep.addFunctionCall(
 						multGxTGu, evGx.getAddress(row * NX), W1, W2
@@ -779,7 +758,10 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 							macQEW2,
 							Q1.getAddress(row * NX), E.getAddress((offset + row - col - 1) * NX), W2, W1
 					);
+
+//				cout << "E block " << (offset + row - col - 1) << endl;
 			}
+//			cout << endl;
 
 			if (R1.isGiven() == true)
 				condensePrep.addFunctionCall(
@@ -788,7 +770,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				);
 			else
 				condensePrep.addFunctionCall(
-						macBTW1_R1, R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU), evGu.getAddress(col * NX), W1,
+						macBTW1_R1, R1.getAddress(col * NU), evGu.getAddress(col * NX), W1,
 						ExportIndex( col )
 				);
 
@@ -800,9 +782,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		// Long horizons
 
 		ExportIndex row, col, offset;
-		condensePrep.acquire( row );
-		condensePrep.acquire( col );
-		condensePrep.acquire( offset );
+		condensePrep.acquire( row ).acquire( col ).acquire( offset );
 
 		ExportForLoop cLoop(col, 0, N);
 		ExportForLoop fwdLoop(row, 1, N - col);
@@ -836,6 +816,17 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 //				col, row
 		);
 
+		if ((S1.isGiven() and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+		{
+			ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(row * NX) : S1;
+
+			adjLoop.addFunctionCall(
+					mac_S1T_E,
+					S1Call, E.getAddress((offset + row - col - 1) * NX),
+					row, col
+			);
+		}
+
 		adjLoop.addFunctionCall(
 				multGxTGu, evGx.getAddress(row * NX), W1, W2
 		);
@@ -859,16 +850,14 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 			);
 		else
 			cLoop.addFunctionCall(
-					macBTW1_R1, R1.getSubMatrix(col * NU, (col + 1) * NU, 0, NU), evGu.getAddress(col * NX), W1,
+					macBTW1_R1, R1.getAddress(col * NU), evGu.getAddress(col * NX), W1,
 					ExportIndex( col )
 			);
 
 		condensePrep.addStatement( cLoop );
 		condensePrep.addLinebreak();
 
-		condensePrep.release( row );
-		condensePrep.release( col );
-		condensePrep.release( offset );
+		condensePrep.release( row ).release( col ).release( offset );
 	}
 
 	/// NEW CODE END
@@ -971,11 +960,13 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	for k = N - 1: 1
 	{
 		g1_k += B_k^T * w1;
+		g1_k += S_k^T * sbar_k;
 		w2 = A_k^T * w1 + q_k;
 		w1 = Q_k^T * sbar_k + w2;
 	}
 
 	g1_0 += B_0^T * w1;
+	g1_0 += S^0^T * x0;
 
 	*/
 
@@ -1002,8 +993,16 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		condenseFdb.addFunctionCall(
 				macBTw1, evGu.getAddress(i * NX), w1, g.getAddress(i * NU)
 		);
+
+		if ((S1.isGiven() == true and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+		{
+			ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(i * NX) : S1;
+			condenseFdb.addFunctionCall(macS1TSbar, S1Call, sbar.getAddress(i * NX), g.getAddress(i * NU));
+		}
+
 		condenseFdb.addFunctionCall(
-				macATw1QDy, evGx.getAddress(i * NX), w1, QDy.getAddress(i * NX), w2 // Proveri indexiranje za QDy
+				// TODO Check indexing for QDy
+				macATw1QDy, evGx.getAddress(i * NX), w1, QDy.getAddress(i * NX), w2
 		);
 		if (Q1.isGiven() == true)
 			condenseFdb.addFunctionCall(
@@ -1017,6 +1016,10 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	condenseFdb.addFunctionCall(
 			macBTw1, evGu.getAddress( 0 ), w1, g.getAddress( 0 )
 	);
+	if ((S1.isGiven() == true and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+	{
+		condenseFdb.addFunctionCall(macS1TSbar, S1, x0, g);
+	}
 	condenseFdb.addLinebreak();
 
 	//// NEW CODE END
@@ -1265,31 +1268,34 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 		multQ1Gx.setup("multQ1Gx", Gx1, Gx2);
 		multQ1Gx.addStatement( Gx2 == Q1 * Gx1 );
 
-		// multQN1Gx
-		multQN1Gx.setup("multQN1Gx", Gx1, Gx2);
-		multQN1Gx.addStatement( Gx2 == QN1 * Gx1 );
-
 		// multQ1Gu
 		multQ1Gu.setup("multQ1Gu", Gu1, Gu2);
 		multQ1Gu.addStatement( Gu2 == Q1 * Gu1 );
 
-		// multQN1Gu
-		multQN1Gu.setup("multQN1Gu", Gu1, Gu2);
-		multQN1Gu.addStatement( Gu2 == QN1 * Gu1 );
-
 		// multQ1d
 		multQ1d.setup("multQ1d", Q1, dp, dn);
 		multQ1d.addStatement( dn == Q1 * dp );
-
-		// multQN1d
-		multQN1d.setup("multQN1d", QN1, dp, dn);
-		multQN1d.addStatement( dn == QN1 * dp );
 	}
 	else
 	{
 		// multQ1d
 		multQ1d.setup("multQ1d", Gx1, dp, dn);
 		multQ1d.addStatement( dn == Gx1 * dp );
+	}
+
+	if (QN1.isGiven() == true)
+	{
+		// multQN1Gx
+		multQN1Gx.setup("multQN1Gx", Gx1, Gx2);
+		multQN1Gx.addStatement( Gx2 == QN1 * Gx1 );
+
+		// multQN1Gu
+		multQN1Gu.setup("multQN1Gu", Gu1, Gu2);
+		multQN1Gu.addStatement( Gu2 == QN1 * Gu1 );
+
+		// multQN1d
+		multQN1d.setup("multQN1d", QN1, dp, dn);
+		multQN1d.addStatement( dn == QN1 * dp );
 	}
 
 	if (performFullCondensing() == false)
@@ -1375,6 +1381,28 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	macBTW1_R1.addStatement(
 			H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iRow * NU, (iRow + 1) * NU) += mRegH11
 	);
+
+	if (S1.isGiven() == true and S1.getGivenMatrix().isZero() == false)
+	{
+		ExportVariable S11 = S1;
+		mac_S1T_E.setup("mac_S1T_E", S11, Gu2, iRow, iCol);
+		mac_S1T_E.addStatement(
+				H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iCol * NU, (iCol + 1) * NU) += (S11 ^ Gu2)
+		);
+
+		macS1TSbar.setup("macS1TSbar", S11, w11, U1);
+		macS1TSbar.addStatement( U1 == (S11 ^ w11) );
+	}
+	else if (S1.isGiven() == false)
+	{
+		mac_S1T_E.setup("mac_S1T_E", Gu1, Gu2, iRow, iCol);
+		mac_S1T_E.addStatement(
+				H.getSubMatrix(iRow * NU, (iRow + 1) * NU, iCol * NU, (iCol + 1) * NU) += (Gu1 ^ Gu2)
+		);
+
+		macS1TSbar.setup("macS1TSbar", Gu1, w11, U1);
+		macS1TSbar.addStatement( U1 == (Gu1 ^ w11) );
+	}
 
 	return SUCCESSFUL_RETURN;
 }

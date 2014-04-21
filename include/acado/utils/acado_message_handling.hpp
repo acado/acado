@@ -528,27 +528,27 @@ public:
 
 /** Macro to return a error */
 #define ACADOERROR(retval) \
-		returnValue("Code: ("#retval") \n  File: "__FILE__"\n  Line: "QUOTE(__LINE__), LVL_ERROR, retval)
+		returnValue("Code: ("#retval") \n  File: " __FILE__ "\n  Line: " QUOTE(__LINE__), LVL_ERROR, retval)
 
 /** Macro to return a error, with user message */
 #define ACADOERRORTEXT(retval, text) \
-		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    "__FILE__"\n  Line:    "QUOTE(__LINE__), LVL_ERROR, retval)
+		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    " __FILE__ "\n  Line:    " QUOTE(__LINE__), LVL_ERROR, retval)
 
 /** Macro to return a fatal error */
 #define ACADOFATAL(retval) \
-		returnValue("Code: ("#retval") \n  File: "__FILE__"\n  Line: "QUOTE(__LINE__), LVL_FATAL, retval)
+		returnValue("Code: ("#retval") \n  File: " __FILE__ "\n  Line: " QUOTE(__LINE__), LVL_FATAL, retval)
 
 /** Macro to return a fatal error, with user message */
 #define ACADOFATALTEXT(retval, text) \
-		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    "__FILE__"\n  Line:    "QUOTE(__LINE__), LVL_FATAL, retval)
+		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    " __FILE__ "\n  Line:    " QUOTE(__LINE__), LVL_FATAL, retval)
 
 /** Macro to return a warning */
 #define ACADOWARNING(retval) \
-		returnValue("Code: ("#retval") \n  File: "__FILE__"\n  Line: "QUOTE(__LINE__), LVL_WARNING, retval)
+		returnValue("Code: ("#retval") \n  File: " __FILE__ "\n  Line: " QUOTE(__LINE__), LVL_WARNING, retval)
 
 /** Macro to return a warning, with user message */
 #define ACADOWARNINGTEXT(retval,text) \
-		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    "__FILE__"\n  Line:    "QUOTE(__LINE__), LVL_WARNING, retval)
+		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    " __FILE__ "\n  Line:    " QUOTE(__LINE__), LVL_WARNING, retval)
 
 /** Macro to return a information */
 #define ACADOINFO(retval) \
@@ -556,7 +556,7 @@ public:
 
 /** Macro to return a information, with user message */
 #define ACADOINFOTEXT(retval,text) \
-		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    "__FILE__"\n  Line:    "QUOTE(__LINE__), LVL_INFO, retval)
+		returnValue("Message: "#text"\n  Code:    ("#retval") \n  File:    " __FILE__ "\n  Line:    " QUOTE(__LINE__), LVL_INFO, retval)
 
 
 /** Executes the statement X and handles returned message.

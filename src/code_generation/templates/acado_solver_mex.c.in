@@ -262,7 +262,7 @@ void mexFunction(	int nlhs,
 #endif	
 	
 #if ACADO_NOD
-	getArray(1, src, 0, "od", acadoVariables.od, ACADO_NOD, 1);
+	getArray(1, src, 0, "od", acadoVariables.od, ACADO_N + 1, ACADO_NOD);
 #endif
 	
 	getArray(1, src, 0, "y", acadoVariables.y, ACADO_N, ACADO_NY);
@@ -284,6 +284,11 @@ void mexFunction(	int nlhs,
 #endif /* ACADO_WEIGHTING_MATRICES_TYPE */
 
 #if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPOASES)
+
+	if (!initialized)
+	{
+		initializeSolver();
+	}
 	
 	/* Bounds */
 #if ACADO_INITIAL_STATE_FIXED == 1
@@ -340,7 +345,9 @@ void mexFunction(	int nlhs,
 			{
 				memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));
 			
+#if ACADO_HARDCODED_CONSTRAINT_VALUES == 1
 				initializeSolver();
+#endif /* ACADO_HARDCODED_CONSTRAINT_VALUES == 1 */
 				
 				if (initType == 1)
 				{

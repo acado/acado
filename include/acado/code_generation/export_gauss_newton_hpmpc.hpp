@@ -24,30 +24,28 @@
  */
 
 /**
- *    \file include/acado/code_generation/export_gauss_newton_condensed.hpp
- *    \authors Boris Houska, Hans Joachim Ferreau, Milan Vukov
- *    \date 2010 - 2013
+ *    \file include/acado/code_generation/export_gauss_newton_hpmpc.hpp
+ *    \author Milan Vukov
+ *    \date 2014
  */
 
-#ifndef ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_CONDENSED_HPP
-#define ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_CONDENSED_HPP
+#ifndef ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_HPMPC_HPP
+#define ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_HPMPC_HPP
 
 #include <acado/code_generation/export_nlp_solver.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
-/**
- *	\brief A class for export of Gauss-Newton condensed OCP solver
+/** 
+ *	\brief TBD
  *
  *	\ingroup NumericalAlgorithms
  *
- *	The class ExportGaussNewtonCondensed allows to export an OCP solver
- *	using the generalized Gauss-Newton method. The sparse QP is condensed
- *	and solved with qpOASES QP solver.
- *
- *	\authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *  TBD
+ * 
+ *	\author Milan Vukov
  */
-class ExportGaussNewtonCondensed : public ExportNLPSolver
+class ExportGaussNewtonHpmpc : public ExportNLPSolver
 {
 public:
 
@@ -56,13 +54,13 @@ public:
 	 *	@param[in] _userInteraction		Pointer to corresponding user interface.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
-	ExportGaussNewtonCondensed(	UserInteraction* _userInteraction = 0,
-								const std::string& _commonHeaderName = ""
-								);
+	ExportGaussNewtonHpmpc(	UserInteraction* _userInteraction = 0,
+							const std::string& _commonHeaderName = ""
+							);
 
 	/** Destructor.
 	*/
-	virtual ~ExportGaussNewtonCondensed( )
+	virtual ~ExportGaussNewtonHpmpc( )
 	{}
 
 	/** Initializes export of an algorithm.
@@ -110,12 +108,6 @@ public:
 	 */
 	unsigned getNumQPvars( ) const;
 
-	/** Returns number of bounds on differential states.
-	 *
-	 *  \return Number of bounds on differential states
-	 */
-	virtual unsigned getNumStateBounds( ) const;
-
 protected:
 
 	/** Setting up of an objective evaluation:
@@ -151,86 +143,28 @@ protected:
 	 */
 	virtual returnValue setupEvaluation( );
 
-	/** Setup qpOASES interface. */
 	virtual returnValue setupQPInterface( );
 
-	/** Setup condensing routine variables and functions. */
-	virtual returnValue setupCondensing( );
-
-	/** Indicator for full condensing. */
-	bool performFullCondensing( ) const;
-
 private:
-
 	/** Current state feedback. */
 	ExportVariable x0;
-	/** Current state feedback deviation. */
-	ExportVariable Dx0;
 
 	/** \name Objective evaluation */
 	/** @{ */
 	ExportFunction evaluateObjective;
+
+	ExportFunction setStageH;
+	ExportFunction setStagef;
+
 	ExportFunction setObjQ1Q2;
 	ExportFunction setObjR1R2;
 	ExportFunction setObjQN1QN2;
+
 	/** @} */
 
-	/** \name Condensing functions and variables */
+	/** \name Constraint evaluation */
 	/** @{ */
-	ExportFunction condensePrep;
-	ExportFunction condenseFdb;
-	ExportFunction expand;
-
-	ExportVariable T, E, QE, QGx, QDy, Qd;
-
-	ExportVariable H00, H10, H11;
-	ExportVariable g0, g1;
-
-	std::vector< unsigned > xBoundsIdx;
-	ExportVariable lbValues, ubValues;
-	ExportVariable lbAValues, ubAValues;
-	/** @} */
-
-	/** \name Helper functions */
-	/** @{ */
-	ExportFunction multGxd;
-	ExportFunction moveGxT;
-	ExportFunction multGxGx;
-	ExportFunction multGxGu;
-	ExportFunction moveGuE;
-	ExportFunction setBlockH11;
-	ExportFunction setBlockH11_R1;
-	ExportFunction zeroBlockH11;
-	ExportFunction copyHTH;
-	ExportFunction multQ1d;
-	ExportFunction multQN1d;
-	ExportFunction multRDy;
-	ExportFunction multQDy;
-	ExportFunction multEQDy;
-	ExportFunction multQETGx;
-	ExportFunction zeroBlockH10;
-	ExportFunction multEDu;
-	ExportFunction multQ1Gx;
-	ExportFunction multQN1Gx;
-	ExportFunction multQ1Gu;
-	ExportFunction multQN1Gu;
-	ExportFunction zeroBlockH00;
-	ExportFunction multCTQC;
-
-	ExportFunction macCTSlx;
-	ExportFunction macETSlu;
-
-	ExportFunction multHxC;
-	ExportFunction multHxE;
-	ExportFunction macHxd;
-	/** @} */
-
-	/** \name Contraint evaluation variables */
-	/** @{ */
-	ExportVariable A10;
-	ExportVariable A20;
-	ExportVariable pacA01Dx0;
-	ExportVariable pocA02Dx0;
+	ExportFunction evaluateConstraints;
 	/** @} */
 
 	/** \name RTI related */
@@ -241,35 +175,26 @@ private:
 	ExportFunction getKKT;
 	/** @} */
 
-	/** \name Covariance calculation varibables and functions */
+	/** \name Helper functions */
 	/** @{ */
-	ExportVariable CEN, sigmaTmp, sigma, sigmaN;
-	ExportFunction calculateCovariance;
+	ExportFunction acc;
 	/** @} */
 
-	/** \name qpOASES interface variables */
+	/** \name QP interface */
 	/** @{ */
-	/** Variable containing the QP Hessian matrix. */
-	ExportVariable H;
-	/** Variable containing the QP constraint matrix. */
-	ExportVariable A;
-	/** Variable containing the QP gradient. */
-	ExportVariable g;
-	/** Variable containing the lower limits on QP variables. */
-	ExportVariable lb;
-	/** Variable containing the upper limits on QP variables. */
-	ExportVariable ub;
-	/** Variable containing lower limits on QP constraints. */
-	ExportVariable lbA;
-	/** Variable containing upper limits on QP constraints. */
-	ExportVariable ubA;
-	/** Variable containing the primal QP variables. */
-	ExportVariable xVars;
-	/** Variable containing the dual QP variables. */
-	ExportVariable yVars;
+
+	ExportVariable qpQ, qpQf, qpS, qpR;
+
+	ExportVariable qpq, qpqf, qpr;
+	ExportVariable qpx, qpu;
+
+	ExportVariable evLbValues, evUbValues;
+	ExportVariable qpLb, qpUb;
+
+	ExportVariable nIt;
 	/** @} */
 };
 
 CLOSE_NAMESPACE_ACADO
 
-#endif  // ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_CONDENSED_HPP
+#endif  // ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_HPMPC_HPP

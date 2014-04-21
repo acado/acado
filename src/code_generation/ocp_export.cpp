@@ -160,7 +160,8 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 				break;
 
 			case QP_QPDUNES:
-				ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "Makefile for qpDUNES based OCP solver is not yet available.");
+			case QP_HPMPC:
+				ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "Makefile for qpDUNES and HPMPC based OCP solver is not yet available.");
 				break;
 
 			default:
@@ -201,6 +202,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			break;
 
 		case QP_QPDUNES:
+		case QP_HPMPC:
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface for qpDUNES based OCP solver is not yet available.");
 			break;
 
@@ -367,7 +369,7 @@ returnValue OCPexport::setup( )
 			break;
 
 	case SPARSE_SOLVER:
-		if ((QPSolverName)qpSolver != QP_FORCES && (QPSolverName)qpSolver != QP_QPDUNES)
+		if ((QPSolverName)qpSolver != QP_FORCES && (QPSolverName)qpSolver != QP_QPDUNES && (QPSolverName)qpSolver != QP_HPMPC)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
 					"For sparse solution FORCES and qpDUNES QP solvers are supported");
 		if ( (QPSolverName)qpSolver == QP_FORCES)
@@ -376,6 +378,9 @@ returnValue OCPexport::setup( )
 		else if ((QPSolverName)qpSolver == QP_QPDUNES)
 			solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_QPDUNES));
+		else if ((QPSolverName)qpSolver == QP_HPMPC)
+			solver = ExportNLPSolverPtr(
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_HPMPC));
 		break;
 
 	default:

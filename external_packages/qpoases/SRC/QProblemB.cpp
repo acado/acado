@@ -63,6 +63,8 @@ QProblemB::QProblemB( )
 	/* reset global message handler */
 	getGlobalMessageHandler( )->reset( );
 
+	hasHessian = BT_FALSE;
+
 	bounds.init( 0 );
 
 	hasCholesky = BT_FALSE;
@@ -97,6 +99,8 @@ QProblemB::QProblemB( int _nV )
 		_nV = 1;
 		THROWERROR( RET_INVALID_ARGUMENTS );
 	}
+
+	hasHessian = BT_FALSE;
 
 	/* reset global message handler */
 	getGlobalMessageHandler( )->reset( );
@@ -136,6 +140,8 @@ QProblemB::QProblemB( const QProblemB& rhs )
 	for( i=0; i<_nV; ++i )
 		for( j=0; j<_nV; ++j )
 			H[i*NVMAX + j] = rhs.H[i*NVMAX + j];
+
+	hasHessian = rhs.hasHessian;
 
 	for( i=0; i<_nV; ++i )
 		g[i] = rhs.g[i];
@@ -197,6 +203,8 @@ QProblemB& QProblemB::operator=( const QProblemB& rhs )
 			for( j=0; j<_nV; ++j )
 				H[i*NVMAX + j] = rhs.H[i*NVMAX + j];
 
+		hasHessian = rhs.hasHessian;
+
 		for( i=0; i<_nV; ++i )
 			g[i] = rhs.g[i];
 
@@ -246,6 +254,8 @@ returnValue QProblemB::reset( )
 	int i, j;
 	int nV = getNV( );
 
+	/** 0) Reset has Hessian flag. */
+	hasHessian = BT_FALSE;
 
 	/* 1) Reset bounds. */
 	bounds.init( nV );
@@ -371,7 +381,7 @@ returnValue QProblemB::hotstart(	const real_t* const g_new, const real_t* const 
 		if ( bounds.getFixed( )->getNumberArray( FX_idx ) != SUCCESSFUL_RETURN )
 			return THROWERROR( RET_HOTSTART_FAILED );
 
-		/* 2) Initialise shift direction of the gradient and the bounds. */
+		/* 2) Initialize shift direction of the gradient and the bounds. */
 		returnvalue = hotstart_determineDataShift(  FX_idx,
 													g_new,lb_new,ub_new,
 													delta_g,delta_lb,delta_ub,
@@ -410,7 +420,7 @@ returnValue QProblemB::hotstart(	const real_t* const g_new, const real_t* const 
 			return returnvalue;
 		}
 
-		/* 5) Realisation of the homotopy step. */
+		/* 5) Realization of the homotopy step. */
 		returnvalue = hotstart_performStep(	FR_idx,FX_idx,
 											delta_g,delta_lb,delta_ub,
 											delta_xFX,delta_xFR,delta_yFX,
@@ -746,6 +756,11 @@ returnValue QProblemB::setupCholeskyDecomposition( )
 	int nV  = getNV( );
 	int nFR = getNFR( );
 
+	/* If Hessian flag is false, it means that H & R already contain Cholesky
+	 * factorization -- provided from outside. */
+	if (hasHessian == BT_FALSE)
+		return SUCCESSFUL_RETURN;
+
 	/* 1) Initialises R with all zeros. */
 	for( i=0; i<nV; ++i )
 		for( j=0; j<nV; ++j )
@@ -768,6 +783,7 @@ returnValue QProblemB::setupCholeskyDecomposition( )
 
 			/* R'*R = H */
 			real_t sum;
+			real_t inv;
 
 			for( i=0; i<nFR; ++i )
 			{
@@ -779,7 +795,10 @@ returnValue QProblemB::setupCholeskyDecomposition( )
 					sum -= R[k*NVMAX + i] * R[k*NVMAX + i];
 
 				if ( sum > 0.0 )
+				{
 					R[i*NVMAX + i] = sqrt( sum );
+					inv = 1.0 / R[i*NVMAX + i];
+				}
 				else
 				{
 					hessianType = HST_SEMIDEF;
@@ -795,7 +814,7 @@ returnValue QProblemB::setupCholeskyDecomposition( )
 					for( k=(i-1); k>=0; --k )
 						sum -= R[k*NVMAX + i] * R[k*NVMAX + j];
 
-					R[i*NVMAX + j] = sum / R[i*NVMAX + i];
+					R[i*NVMAX + j] = sum * inv;
 				}
 			}
 		}
@@ -872,11 +891,11 @@ returnValue QProblemB::solveInitialQP(	const real_t* const xOpt, const real_t* c
 	real_t ub_original[NVMAX];
 
 	for( i=0; i<nV; ++i )
-	{
 		g_original[i] = g[i];
+	for( i=0; i<nV; ++i )
 		lb_original[i] = lb[i];
+	for( i=0; i<nV; ++i )
 		ub_original[i] = ub[i];
-	}
 
 	/* ... and setup QP data of an auxiliary QP having an optimal solution
 	 * as specified by the user (or xOpt = yOpt = 0, by default). */
@@ -1534,12 +1553,15 @@ returnValue QProblemB::setupQPdata(	const real_t* const _H, const real_t* const 
 	int nV = getNV( );
 
 	/* 1) Setup Hessian matrix and it's Cholesky factorization. */
-	if ( _H == 0 )
-		return THROWERROR( RET_INVALID_ARGUMENTS );
-
-	for( i=0; i<nV; ++i )
-		for( j=0; j<nV; ++j )
-			H[i*NVMAX + j] = _H[i*nV + j];
+	if (_H != 0)
+	{
+		for( i=0; i<nV; ++i )
+			for( j=0; j<nV; ++j )
+				H[i*NVMAX + j] = _H[i*nV + j];
+		hasHessian = BT_TRUE;
+	}
+	else
+		hasHessian = BT_FALSE;
 
 	if (_R != 0)
 	{
@@ -1547,9 +1569,19 @@ returnValue QProblemB::setupQPdata(	const real_t* const _H, const real_t* const 
 			for( j=0; j<nV; ++j )
 				R[i*NVMAX + j] = _R[i*nV + j];
 		hasCholesky = BT_TRUE;
+
+		/* If Hessian is not provided, store it's factorization in H, and that guy
+		 * is going to be used for H * x products (R^T * R * x in this case). */
+		if (hasHessian == BT_FALSE)
+			for( i=0; i<nV; ++i )
+				for( j=0; j<nV; ++j )
+					H[i*NVMAX + j] = _R[i*nV + j];
 	}
 	else
 		hasCholesky = BT_FALSE;
+
+	if (hasHessian == BT_FALSE && hasCholesky == BT_FALSE)
+		return THROWERROR( RET_INVALID_ARGUMENTS );
 
 	/* 2) Setup gradient vector. */
 	if ( _g == 0 )
@@ -1585,6 +1617,7 @@ returnValue QProblemB::setupQPdata(	const real_t* const _H, const real_t* const 
 	}
 
 	//printmatrix( "H",H,nV,nV );
+	//printmatrix( "R",R,nV,nV );
 	//printmatrix( "g",g,1,nV );
 	//printmatrix( "lb",lb,1,nV );
 	//printmatrix( "ub",ub,1,nV );

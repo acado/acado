@@ -516,6 +516,9 @@ class ExportVariable : public ExportArgument
 		/** Check whether the matrix is actually a submatrix. */
 		bool isSubMatrix() const;
 
+		/** Check whether the matrix is diagonal. */
+		bool isDiagonal() const;
+
 		/** Prints contents of variable to screen.
 		 *
 		 *	\return SUCCESSFUL_RETURN

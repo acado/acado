@@ -7,7 +7,7 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2013
+#	2013 - 2014
 #
 # NOTE:
 #
@@ -104,7 +104,7 @@ MACRO( ACADO_GENERATE_COMPILE generator exportFolder testFile )
 		ENDIF()
 		
 	ELSE(NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.10"))
-		MESSAGE( WARNING "Your CMake is old, thus we cannot generate and compile the code.")
+		MESSAGE( WARNING "Your CMake is old, thus we cannot generate and compile the code with a macro -- i.e. you have to do it by hand.")
 	
 	ENDIF (NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.10"))
 	

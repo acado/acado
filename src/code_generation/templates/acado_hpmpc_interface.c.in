@@ -1,0 +1,263 @@
+/**************************************************************************************************
+ *
+ * Author: Gianluca Frison, giaf@imm.dtu.dk
+ *
+ **************************************************************************************************/
+
+#include <stdio.h>
+
+/* ACADO auto-generated header */
+#include "acado_common.h"
+/* HPMPC configuration */
+#include "include/block_size.h"
+#include "include/aux_d.h"
+#include "include/mpc_solvers.h"
+
+// problem size (states, inputs, horizon)
+#define NX ACADO_NX
+#define NU ACADO_NU
+#define NN ACADO_N
+
+// compound problem sizes
+#define NZ NX+NU+1
+#define PNZ D_MR*((NZ+D_MR-NU%D_MR+D_MR-1)/D_MR) // 16 // pnz = dbs*((nz+dbs-nu%dbs+dbs-1)/dbs);
+#define SPNZ S_MR*((NZ+S_MR-NU%S_MR+S_MR-1)/S_MR) // spnz = sbs*((nz+sbs-nu%sbs+sbs-1)/sbs);
+
+// number of inequality constraints
+#define NB 2*NU+2*NX
+
+// double/single/mixed ('d'/'s'/'m') precision
+#define PREC 'd'
+
+// number of iterations of IP method
+#define K_MAX 100
+
+// tolerance in the duality measure
+#define TOL 1e-6
+
+// threshold in the duality measure to switch from single to double precision
+#define SP_THR 1e5
+
+// Debug flag
+#ifndef PC_DEBUG
+#define PC_DEBUG 0
+#endif /* PC_DEBUG */
+
+int acado_hpmpc_ip_wrapper(	unsigned N, unsigned nx, unsigned nu, double* A, double* B,
+							double* b, double* Q, double* Qf, double* S, double* R, double* q,
+							double* qf, double* r, double* lb, double* ub, double* x, double* u,
+							int* nIt
+							)
+{
+	char prec = 'd';
+	double sp_thr = SP_THR; // threshold to switch between double and single precision
+	int k_max = K_MAX; // maximum number of iterations in the IP method
+	double tol = TOL; // tolerance in the duality measure
+	static double sigma_par[] = {0.4, 0.1, 0.0001}; // control primal-dual IP behaviour
+	static double info[5*K_MAX]; // infos from the IP routine
+	static double work0[8 + (NN+1)*PNZ*PNZ + NN*PNZ*PNZ + 2*(NN+1)*PNZ + (NN+1)*PNZ + 3*((NN+1)*(PNZ*PNZ+PNZ+5*NB)+2*PNZ*PNZ)];
+
+	int i, ii, jj, ll;
+
+	const int dbs = d_get_mr();
+	const int sbs = s_get_mr();
+
+	int nz = nx + nu + 1;
+	int pnz = dbs * ((nz + dbs - nu % dbs + dbs - 1) / dbs);
+
+	int nb = 2 * nu + 2 * nx; // number of box constraints
+
+	/* align work space */
+	size_t align = 64;
+	size_t addr = (size_t) work0;
+	size_t offset = addr % 64;
+	double *work = work0 + offset / 8;
+
+	/*	printf("\n%zd\n\n", ((size_t) &work[0])%align);*/
+	/*	printf("\nIP solver\n\n");*/
+
+	/* array or pointers */
+
+	double *(hpBAbt[N]);
+	double *(hpQ[N + 1]);
+	double *(hux[N + 1]);
+	double *(hdb[N + 1]);
+	float *(hpsBAbt[N]);
+	float *(hpsQ[N + 1]);
+
+	double *ptr = work;
+	for (ii = 0; ii < N; ii++)
+	{
+		/*		hpQ[ii] = ptr;*/
+		hpBAbt[ii] = ptr;
+		/*		ptr += 2*pnz*pnz;*/
+		ptr += pnz * pnz;
+	}
+	/*	hpQ[N] = ptr;*/
+	/*	ptr += pnz*pnz;*/
+
+	for (ii = 0; ii < N; ii++) // time variant and copied again internally in the IP !!!
+	{
+		hpQ[ii] = ptr;
+		ptr += pnz * pnz;
+	}
+	hpQ[N] = ptr;
+	ptr += pnz * pnz;
+
+	for (ii = 0; ii <= N; ii++)
+	{
+		hux[ii] = ptr;
+		ptr += pnz;
+	}
+
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		hdb[ii] = ptr;
+		ptr += 2 * pnz; // nb; // for alignment of ptr
+	}
+
+	/* pack matrices 	*/
+
+	/*	d_print_mat(nx, 1, b, nx);*/
+
+	/*	d_print_mat(nx, nx, A, nx);*/
+	/*	d_print_mat(nu, nx, B, nu);*/
+	/*	d_print_mat(1, nx, b, 1);*/
+
+	// dynamic system
+	for (ii = 0; ii < N; ii++)
+	{
+		d_cvt_mat2pmat(nu, nx, 0, dbs, B + ii * nu * nx, nu, hpBAbt[ii], pnz);
+		d_cvt_mat2pmat(nx, nx, nu, dbs, A + ii * nx * nx, nx,
+				hpBAbt[ii] + nu / dbs * pnz * dbs + nu % dbs, pnz);
+		for (jj = 0; jj < nx; jj++)
+			hpBAbt[ii][(nx + nu) / dbs * pnz * dbs + (nx + nu) % dbs + jj * dbs] =
+					b[ii * nx + jj];
+	}
+
+	/*	d_print_pmat(nz, nx, dbs, hpBAbt[0], pnz);*/
+	/*	d_print_pmat(nz, nx, dbs, hpBAbt[1], pnz);*/
+	/*	d_print_pmat(nz, nx, dbs, hpBAbt[N-1], pnz);*/
+	/*	exit(3);*/
+
+	// cost function
+	/*	d_print_mat(nx, nx, Q, nx);*/
+
+	for (jj = 0; jj < N; jj++)
+	{
+		d_cvt_mat2pmat(nu, nu, 0, dbs, R + jj * nu * nu, nu, hpQ[jj], pnz);
+		d_cvt_mat2pmat(nx, nu, nu, dbs, S + jj * nx * nu, nx,
+				hpQ[jj] + nu / dbs * pnz * dbs + nu % dbs, pnz);
+		d_cvt_mat2pmat(nx, nx, nu, dbs, Q + jj * nx * nx, nx,
+				hpQ[jj] + nu / dbs * pnz * dbs + nu % dbs + nu * dbs, pnz);
+		for (ii = 0; ii < nu; ii++)
+			hpQ[jj][(nx + nu) / dbs * pnz * dbs + (nx + nu) % dbs + ii * dbs] =
+					r[ii + jj * nu];
+		for (ii = 0; ii < nx; ii++)
+			hpQ[jj][(nx + nu) / dbs * pnz * dbs + (nx + nu) % dbs
+					+ (nu + ii) * dbs] = q[ii + nx * jj];
+		hpQ[jj][(nx + nu) / dbs * pnz * dbs + (nx + nu) % dbs + (nx + nu) * dbs] =
+				1e6;
+	}
+
+	/*	for(ii=1; ii<N; ii++)*/
+	/*		for(jj=0; jj<pnz*pnz; jj++)*/
+	/*			hpQ[ii][jj] = hpQ[0][jj];*/
+
+	for (jj = 0; jj < nu; jj++)
+		for (ii = 0; ii < nz; ii += dbs)
+			for (i = 0; i < dbs; i++)
+				hpQ[N][ii * pnz + i + jj * dbs] = 0.0;
+	for (jj = 0; jj < nu; jj++)
+		hpQ[N][jj / dbs * pnz * dbs + jj % dbs + jj * dbs] = 1.0;
+	d_cvt_mat2pmat(nx, nx, nu, dbs, Q, nx,
+			hpQ[N] + nu / dbs * pnz * dbs + nu % dbs + nu * dbs, pnz);
+	for (jj = 0; jj < nx; jj++)
+		hpQ[N][(nx + nu) / dbs * pnz * dbs + (nx + nu) % dbs + (nu + jj) * dbs] =
+				q[jj];
+	hpQ[N][(nx + nu) / dbs * pnz * dbs + (nx + nu) % dbs + (nx + nu) * dbs] =
+			1e6;
+
+	/*	d_print_pmat(nz, nx, dbs, hpBAbt[0], pnz);*/
+	/*	d_print_pmat(nz, nx, dbs, hpBAbt[1], pnz);*/
+	/*	d_print_pmat(nz, nx, dbs, hpBAbt[N-1], pnz);*/
+	/*	exit(3);*/
+
+	/*	d_print_pmat(nz, nz, dbs, hpQ[0], pnz);*/
+	/*	d_print_pmat(nz, nz, dbs, hpQ[1], pnz);*/
+	/*	d_print_pmat(nz, nz, dbs, hpQ[N-1], pnz);*/
+	/*	d_print_pmat(nz, nz, dbs, hpQ[N], pnz);*/
+	/*	exit(3);*/
+
+	// box constraints (time invariant !!!)
+	/*	for(ii=0; ii<nb; ii+=2)*/
+	/*		{*/
+	/*		hdb[0][ii+0] =   lb[ii/2];*/
+	/*		hdb[0][ii+1] = - ub[ii/2];*/
+	/*		}*/
+
+	// input constraints
+	for (jj = 0; jj < N; jj++)
+	{
+		for (ii = 0; ii < nu; ii++)
+		{
+			hdb[jj][2 * ii + 0] = lb[ii + nu * jj];
+			/*	printf("\nciao\n");*/
+			hdb[jj][2 * ii + 1] = -ub[ii + nu * jj];
+		}
+	}
+	// x0 constraints (for compatibility with ip solver TODO remove from the ip solver !!!)
+	for (ii = 0; ii < nx; ii++)
+	{
+		hdb[0][2 * nu + 2 * ii + 0] = x[ii] - 5.0;
+		hdb[0][2 * nu + 2 * ii + 1] = -(x[ii] + 5.0);
+	}
+	// state constraints
+	for (jj = 0; jj < N; jj++)
+	{
+		for (ii = 0; ii < nx; ii++)
+		{
+			hdb[jj + 1][2 * nu + 2 * ii + 0] = lb[N * nu + ii + nx * jj];
+			hdb[jj + 1][2 * nu + 2 * ii + 1] = -ub[N * nu + ii + nx * jj];
+		}
+	}
+
+	/*	d_print_mat(nb, 1, hdb[0], 1);*/
+	/*	d_print_mat(nb, 1, hdb[1], 1);*/
+	/*	d_print_mat(nb, 1, hdb[N-1], 1);*/
+	/*	d_print_mat(nb, 1, hdb[N], 1);*/
+	/*	exit(3);*/
+
+	// initial guess
+	for (jj = 0; jj < N; jj++)
+		for (ii = 0; ii < nu; ii++)
+			hux[jj][ii] = u[ii + nu * jj];
+
+	for (jj = 0; jj <= N; jj++)
+		for (ii = 0; ii < nx; ii++)
+			hux[0][nu + ii] = x[ii];
+
+	// call the IP solver
+	ip_d_box(prec, sp_thr, nIt, k_max, tol, sigma_par, info, nx, nu, N, nb,
+			hpBAbt, hpsBAbt, hpQ, hpsQ, hdb, hux, ptr);
+
+	// copy back inputs and states
+	for (jj = 0; jj < N; jj++)
+		for (ii = 0; ii < nu; ii++)
+			u[ii + nu * jj] = hux[jj][ii];
+
+	for (jj = 1; jj <= N; jj++)
+		for (ii = 0; ii < nx; ii++)
+			x[ii + nx * jj] = hux[jj][nu + ii];
+
+#if PC_DEBUG == 1
+	for (jj = 0; jj < *nIt; jj++)
+		printf("k = %d\tsigma = %f\talpha = %f\tmu = %f\t\tmu = %e\n", jj,
+				info[5 * jj], info[5 * jj + 1], info[5 * jj + 2],
+				info[5 * jj + 2]);
+	printf("\n");
+#endif /* PC_DEBUG == 1 */
+
+	// Successfull return -- since we don't have anything else now.
+	return 0;
+}
