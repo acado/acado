@@ -92,6 +92,7 @@ RegisterNlpSolvers::RegisterNlpSolvers()
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2_FACTORIZATION, createGaussNewtonCn2Factorization);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CONDENSED, createGaussNewtonCondensed);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_FORCES, createGaussNewtonForces);
+	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES, createGaussNewtonQpDunes);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_HPMPC, createGaussNewtonHpmpc);
 }
 
