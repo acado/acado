@@ -247,7 +247,6 @@ protected:
 
 	// lagrange multipliers
 	ExportVariable mu;
-	ExportVariable S1;
 	ExportFunction expansionStep2;
 
 	ExportFunction multBTW1, macBTW1_R1, multGxTGu, macQEW2;

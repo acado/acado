@@ -131,7 +131,6 @@ returnValue ExportGaussNewtonCN2New::getDataDeclarations(	ExportStatementBlock& 
 
 	// lagrange multipliers
 	declarations.addDeclaration(mu, dataStruct);
-	declarations.addDeclaration(S1, dataStruct);
 
 	return SUCCESSFUL_RETURN;
 }
@@ -341,8 +340,6 @@ returnValue ExportGaussNewtonCN2New::setupObjectiveEvaluation( void )
 		setObjQ1Q2.addStatement( tmpQ2 == (tmpFx ^ tmpObjS) );
 		setObjQ1Q2.addStatement( tmpQ1 == tmpQ2 * tmpFx );
 		setObjQ1Q2.addStatement( tmpS1 == tmpQ2 * tmpFu );
-
-		S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
 
 		if (tmpFx.isGiven() == true)
 		{
@@ -1093,22 +1090,33 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 	expand.addStatement( x.makeColVector() += sbar );
 
 	mu.setup("mu", N, NX, REAL, ACADO_WORKSPACE);
-	// TODO Calculation of multipliers
-	// NOTE: CURRENTLY ASSUMING THERE ARE ONLY STATE CONSTRAINTS ON THE LAST NODE
-
-	if( getNumStateBounds() != NX ) {
-		std::cout << "Number of state bounds: " << getNumStateBounds() << ", while number of states: " << NX << "\n";
-		std::cout << "(!!) NOTE: The expansion step for the multipliers is not going to work out of the box for your case.. (!!)\n";
-		return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
-	}
-
 //	mu_N = lambda_N + q_N + Q_N^T * Ds_N  --> wrong in Joel's paper !!
 //		for i = N - 1: 1
 //			mu_k = Q_k^T * Ds_k + A_k^T * mu_{k + 1} + S_k * Du_k + q_k
 
-	expand.addStatement( mu.getRow(N-1) == yVars.getRows(N*NU,N*NU+NX).getTranspose() + sbar.getRows(N*NX,(N+1)*NX).getTranspose()*QN1 );
+	for (uint j = 0; j < NX; j++ ) {
+		uint item = N*NX+j;
+		uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
+		if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
+			expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == yVars.getRow(N*NU+IdxF) );
+		}
+		else { // INDEX NOT FOUND
+			expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == 0.0 );
+		}
+	}
+	expand.addStatement( mu.getRow(N-1) += sbar.getRows(N*NX,(N+1)*NX).getTranspose()*QN1 );
 	expand.addStatement( mu.getRow(N-1) += QDy.getRows(N*NX,(N+1)*NX).getTranspose() );
 	for (int i = N - 1; i >= 1; i--) {
+		for (uint j = 0; j < NX; j++ ) {
+			uint item = i*NX+j;
+			uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
+			if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
+				expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == yVars.getRow(N*NU+IdxF) );
+			}
+			else { // INDEX NOT FOUND
+				expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == 0.0 );
+			}
+		}
 		expand.addFunctionCall(
 				expansionStep2, QDy.getAddress(i*NX), Q1.getAddress(i * NX), sbar.getAddress(i*NX),
 				S1.getAddress(i * NX), xVars.getAddress(i * NU), evGx.getAddress(i * NX),
@@ -1402,7 +1410,7 @@ returnValue ExportGaussNewtonCN2New::setupMultiplicationRoutines( )
 	ExportVariable mu2; mu2.setup("mu2", 1, NX, REAL, ACADO_LOCAL);
 
 	expansionStep2.setup("expansionStep2", QDy1, Q11, w11, S11, U1, Gx1, mu1, mu2);
-	expansionStep2.addStatement( mu1 == QDy1.getTranspose() );
+	expansionStep2.addStatement( mu1 += QDy1.getTranspose() );
 	expansionStep2.addStatement( mu1 += w11 ^ Q11.getTranspose() );
 	expansionStep2.addStatement( mu1 += U1 ^ S11.getTranspose() );
 	expansionStep2.addStatement( mu1 += mu2*Gx1 );
