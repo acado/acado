@@ -97,6 +97,10 @@ returnValue ExportGaussNewtonCN2::getDataDeclarations(	ExportStatementBlock& dec
 	declarations.addDeclaration(x0, dataStruct);
 	declarations.addDeclaration(Dx0, dataStruct);
 
+	declarations.addDeclaration(T1, dataStruct);
+	declarations.addDeclaration(T2, dataStruct);
+	declarations.addDeclaration(C, dataStruct);
+
 	declarations.addDeclaration(W1, dataStruct);
 	declarations.addDeclaration(W2, dataStruct);
 	declarations.addDeclaration(E, dataStruct);
@@ -439,7 +443,6 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 			ubValuesMatrix(offsetBounds + run1 * getNU() + run2) = uBounds.getUpperBound(run1, run2);
 		}
 
-	// TODO This might be set with an option to be variable!!!
 	if (hardcodeConstraintValues == YES)
 	{
 		lbValues.setup("lbValues", lbValuesMatrix, REAL, ACADO_VARIABLES);
@@ -557,8 +560,6 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 
 
 		unsigned nXBounds = getNumStateBounds( );
-		// TODO This might be set with an option to be variable!!!
-		// TODO Disable this and force users to use OnlineData for this functionality
 		if (hardcodeConstraintValues == YES)
 		{
 			lbAValues.setup("lbAValues", xLowerBounds, REAL, ACADO_VARIABLES);
@@ -594,6 +595,48 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 {
 	condensePrep.setup("condensePrep");
 	condenseFdb.setup( "condenseFdb" );
+
+	////////////////////////////////////////////////////////////////////////////
+	//
+	// Setup local memory for preparation phase: T1, T2, W1, W2
+	//
+	////////////////////////////////////////////////////////////////////////////
+
+	// TODO
+
+	////////////////////////////////////////////////////////////////////////////
+	//
+	// Compute Hessian block H00, H10 and C
+	//
+	////////////////////////////////////////////////////////////////////////////
+
+	if (performFullCondensing() == false)
+	{
+		LOG( LVL_DEBUG ) << "Setup condensing: H00, H10 and C" << endl;
+
+		T1.setup("T", NX, NX, REAL, ACADO_WORKSPACE);
+		T2.setup("T", NX, NX, REAL, ACADO_WORKSPACE);
+
+		condensePrep.addFunctionCall(moveGxT, evGx.getAddress(0, 0), C.getAddress(0, 0));
+		for (unsigned row = 1; row < N; ++row)
+			condensePrep.addFunctionCall(
+					multGxGx, evGx.getAddress(row * NX), C.getAddress((row - 1) * NX), C.getAddress(row * NX));
+
+		/* Algorithm for computation of H10 and H00
+
+		T1 = Q_N * C_{N - 1}
+		for i = N - 1: 1
+		 	H_{i + 1, 0} =  B_i^T * T1
+		 	H_{i + 1, 0} += S_i^T * C_{i - 1}
+
+			T2 = A_i^T1 * T1
+			T1 = Q_i * C_{i - 1} + T2
+
+		H_{1, 0} = S_0^T + B_0^T * T1
+		H_{0, 0} = Q_0 + A_0^T * T1
+
+		 */
+	}
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -659,9 +702,6 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	}
 
 	 */
-
-
-	/// NEW CODE START
 
 	W1.setup("W1", NX, NU, REAL, ACADO_WORKSPACE);
 	W2.setup("W2", NX, NU, REAL, ACADO_WORKSPACE);
@@ -799,6 +839,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	LOG( LVL_DEBUG ) << "---> Copy H11 lower part" << endl;
 
 	// Copy to H11 upper lower part to upper triangular part
+	// XXX Copy H10 to H01
 	if (N <= 20)
 	{
 		for (unsigned ii = 0; ii < N; ++ii)
@@ -830,8 +871,6 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	// Compute gradient components g0 and g1
 	//
 	////////////////////////////////////////////////////////////////////////////
-
-	//// NEW CODE START
 
 	LOG( LVL_DEBUG ) << "Setup condensing: create Dx0, Dy and DyN" << endl;
 
@@ -933,8 +972,6 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	}
 	condenseFdb.addLinebreak();
 
-	//// NEW CODE END
-
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Expansion routine
@@ -1034,17 +1071,18 @@ returnValue ExportGaussNewtonCN2::setupVariables( )
 		x0.setDoc( (std::string)"Current state feedback vector." );
 		Dx0.setup("Dx0", NX, 1, REAL, ACADO_WORKSPACE);
 	}
+
+	if (performFullCondensing() == false)
+	{
+		C.setup("C", N, NX, REAL, ACADO_WORKSPACE);
+	}
 	E.setup("E", N * (N + 1) / 2 * NX, NU, REAL, ACADO_WORKSPACE);
 
 	QDy.setup ("QDy", (N + 1) * NX, 1, REAL, ACADO_WORKSPACE);
 
-	// Setup all QP stuff
-
 	H.setup("H", getNumQPvars(), getNumQPvars(), REAL, ACADO_WORKSPACE);
-
-	A.setup("A", getNumStateBounds( ) + getNumComplexConstraints(), getNumQPvars(), REAL, ACADO_WORKSPACE);
-
 	g.setup("g",  getNumQPvars(), 1, REAL, ACADO_WORKSPACE);
+	A.setup("A", getNumStateBounds( ) + getNumComplexConstraints(), getNumQPvars(), REAL, ACADO_WORKSPACE);
 
 	lb.setup("lb", getNumQPvars(), 1, REAL, ACADO_WORKSPACE);
 	ub.setup("ub", getNumQPvars(), 1, REAL, ACADO_WORKSPACE);

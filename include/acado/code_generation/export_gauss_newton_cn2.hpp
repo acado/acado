@@ -199,7 +199,7 @@ protected:
 	ExportFunction condenseFdb;
 	ExportFunction expand;
 
-	ExportVariable E, QDy, Qd;
+	ExportVariable C, E, QDy, Qd;
 
 	ExportFunction multGxd;
 	ExportFunction moveGxT;
@@ -225,7 +225,7 @@ protected:
 	ExportFunction getKKT;
 
 	// N2 condensing related
-	ExportVariable W1, W2;
+	ExportVariable T1, T2, W1, W2;
 	ExportVariable sbar, w1, w2;
 
 	ExportFunction multBTW1, macBTW1_R1, multGxTGu, macQEW2, mac_S1T_E;
