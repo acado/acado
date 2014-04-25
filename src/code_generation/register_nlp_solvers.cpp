@@ -37,6 +37,7 @@
 #include <acado/code_generation/export_gauss_newton_condensed.hpp>
 #include <acado/code_generation/export_gauss_newton_forces.hpp>
 #include <acado/code_generation/export_gauss_newton_qpdunes.hpp>
+#include <acado/code_generation/export_gauss_newton_qpdunes2.hpp>
 #include <acado/code_generation/export_gauss_newton_hpmpc.hpp>
 
 BEGIN_NAMESPACE_ACADO
@@ -87,6 +88,13 @@ ExportNLPSolver* createGaussNewtonQpDunes(	UserInteraction* _userInteraction,
 	return new ExportGaussNewtonQpDunes(_userInteraction, _commonHeaderName);
 }
 
+ExportNLPSolver* createGaussNewtonQpDunes2(	UserInteraction* _userInteraction,
+											const std::string& _commonHeaderName
+											)
+{
+	return new ExportGaussNewtonQpDunes2(_userInteraction, _commonHeaderName);
+}
+
 ExportNLPSolver* createGaussNewtonHpmpc(	UserInteraction* _userInteraction,
 											const std::string& _commonHeaderName
 										)
@@ -102,6 +110,7 @@ RegisterNlpSolvers::RegisterNlpSolvers()
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CONDENSED, createGaussNewtonCondensed);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_FORCES, createGaussNewtonForces);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES, createGaussNewtonQpDunes);
+	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES2, createGaussNewtonQpDunes2);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_HPMPC, createGaussNewtonHpmpc);
 }
 
