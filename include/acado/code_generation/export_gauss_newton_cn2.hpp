@@ -224,13 +224,18 @@ protected:
 
 	ExportFunction getKKT;
 
+	//
 	// N2 condensing related
+	//
 	ExportVariable T1, T2, W1, W2;
 	ExportVariable sbar, w1, w2;
 
 	ExportFunction multBTW1, macBTW1_R1, multGxTGu, macQEW2, mac_S1T_E;
 	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macS1TSbar;
 	ExportFunction expansionStep;
+
+	// H00 and H10 computations
+	ExportFunction mult_BT_T1, mac_ST_C, multGxTGx, macGxTGx;
 };
 
 CLOSE_NAMESPACE_ACADO
