@@ -26,7 +26,7 @@
 /**
  *    \file src/code_generation/export_gauss_newton_condensed.cpp
  *    \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
- *    \date 2012
+ *    \date 2012 - 2014
  */
 
 #include <acado/code_generation/export_gauss_newton_condensed.hpp>
@@ -126,6 +126,7 @@ returnValue ExportGaussNewtonCondensed::getDataDeclarations(	ExportStatementBloc
 	declarations.addDeclaration(sigma, dataStruct);
 
 	declarations.addDeclaration(H, dataStruct);
+	declarations.addDeclaration(R, dataStruct);
 	declarations.addDeclaration(A, dataStruct);
 	declarations.addDeclaration(g, dataStruct);
 	declarations.addDeclaration(lb, dataStruct);
@@ -228,6 +229,8 @@ returnValue ExportGaussNewtonCondensed::getCode(	ExportStatementBlock& code
 
 	code.addFunction( macCTSlx );
 	code.addFunction( macETSlu );
+
+	cholSolver.getCode( code );
 
 	code.addFunction( condensePrep );
 	code.addFunction( condenseFdb );
@@ -1608,6 +1611,22 @@ returnValue ExportGaussNewtonCondensed::setupCondensing( void )
 		condensePrep.addLinebreak();
 	}
 
+	int externalCholesky;
+	get(CG_CONDENSED_HESSIAN_CHOLESKY, externalCholesky);
+	ASSERT((CondensedHessianCholeskyDecomposition)externalCholesky == INTERNAL_N3 or
+			(CondensedHessianCholeskyDecomposition)externalCholesky == EXTERNAL)
+
+	if ((CondensedHessianCholeskyDecomposition)externalCholesky == INTERNAL_N3)
+	{
+		R.setup("R", getNumQPvars(), getNumQPvars(), REAL, ACADO_WORKSPACE);
+
+		cholSolver.init(getNumQPvars(), NX, "condensing");
+		cholSolver.setup();
+
+		condensePrep.addStatement( R == H );
+		condensePrep.addFunctionCall(cholSolver.getCholeskyFunction(), R);
+	}
+
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Compute gradient components g0 and g1
@@ -2331,6 +2350,9 @@ returnValue ExportGaussNewtonCondensed::setupQPInterface( )
 	int maxNumQPiterations;
 	get(MAX_NUM_QP_ITERATIONS, maxNumQPiterations);
 
+	int externalCholesky;
+	get(CG_CONDENSED_HESSIAN_CHOLESKY, externalCholesky);
+
 	//
 	// Set up export of the source file
 	//
@@ -2352,9 +2374,9 @@ returnValue ExportGaussNewtonCondensed::setupQPInterface( )
 			yVars.getFullName(),
 			sigma.getFullName(),
 			hotstartQP,
-			true,
+			(CondensedHessianCholeskyDecomposition)externalCholesky == EXTERNAL,
 			H.getFullName(),
-			string(), // U
+			R.getFullName(),
 			g.getFullName(),
 			A.getFullName(),
 			lb.getFullName(),

@@ -26,13 +26,14 @@
 /**
  *    \file include/acado/code_generation/export_gauss_newton_condensed.hpp
  *    \authors Boris Houska, Hans Joachim Ferreau, Milan Vukov
- *    \date 2010 - 2013
+ *    \date 2010 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_CONDENSED_HPP
 #define ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_CONDENSED_HPP
 
 #include <acado/code_generation/export_nlp_solver.hpp>
+#include <acado/code_generation/linear_solvers/export_cholesky_solver.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -186,6 +187,8 @@ private:
 	ExportVariable H00, H10, H11;
 	ExportVariable g0, g1;
 
+	ExportCholeskySolver cholSolver;
+
 	std::vector< unsigned > xBoundsIdx;
 	ExportVariable lbValues, ubValues;
 	ExportVariable lbAValues, ubAValues;
@@ -251,6 +254,8 @@ private:
 	/** @{ */
 	/** Variable containing the QP Hessian matrix. */
 	ExportVariable H;
+	/** Variable containing factorization of the QP Hessian matrix; R' * R = H. */
+	ExportVariable R;
 	/** Variable containing the QP constraint matrix. */
 	ExportVariable A;
 	/** Variable containing the QP gradient. */
