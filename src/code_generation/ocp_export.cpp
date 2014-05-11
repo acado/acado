@@ -202,12 +202,11 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			break;
 
 		case QP_QPDUNES:
-		case QP_HPMPC:
-			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface for qpDUNES based OCP solver is not yet available.");
+			acadoCopyTempateFile(MAKE_MEX_QPDUNES, str, "%", true);
 			break;
 
 		default:
-			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface is not yet available.");
 		}
 	}
 
@@ -219,42 +218,44 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	if ((bool) generateSimulinkInterface == true)
 	{
 		if ((QPSolverName)qpSolver != QP_QPOASES)
-			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
+			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
 					"At the moment, Simulink interface is available only with qpOASES based OCP solver.");
+		else
+		{
+			string makefileName = dirName + "/make_" + moduleName + "_solver_sfunction.m";
+			string wrapperHeaderName = dirName + "/" + moduleName + "_solver_sfunction.h";
+			string wrapperSourceName = dirName + "/" + moduleName + "_solver_sfunction.c";
 
-		string makefileName = dirName + "/make_" + moduleName + "_solver_sfunction.m";
-		string wrapperHeaderName = dirName + "/" + moduleName + "_solver_sfunction.h";
-		string wrapperSourceName = dirName + "/" + moduleName + "_solver_sfunction.c";
+			ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName);
 
-		ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName);
+			// Get options
+			int useSinglePrecision;
+			get(USE_SINGLE_PRECISION, useSinglePrecision);
 
-		// Get options
-		int useSinglePrecision;
-		get(USE_SINGLE_PRECISION, useSinglePrecision);
+			int hardcodeConstraintValues;
+			get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
+			if ((bool)hardcodeConstraintValues == false)
+				return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
-		int hardcodeConstraintValues;
-		get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
-		if ((bool)hardcodeConstraintValues == false)
-			return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+			int fixInitialState;
+			get(FIX_INITIAL_STATE, fixInitialState);
+			int useAC;
+			get(CG_USE_ARRIVAL_COST, useAC);
+			int covCalc;
+			get(CG_COMPUTE_COVARIANCE_MATRIX, covCalc);
 
-		int fixInitialState;
-		get(FIX_INITIAL_STATE, fixInitialState);
-		int useAC;
-		get(CG_USE_ARRIVAL_COST, useAC);
-		int covCalc;
-		get(CG_COMPUTE_COVARIANCE_MATRIX, covCalc);
+			// Configure templates
+			esi.configure(
+					ocp.getN(), ocp.getNX(), ocp.getNDX(), ocp.getNXA(), ocp.getNU(), ocp.getNOD(),
+					solver->getNY(), solver->getNYN(),
+					(bool)fixInitialState,
+					(unsigned)solver->weightingMatricesType(),
+					(bool)hardcodeConstraintValues,
+					(bool)useAC,
+					(bool)covCalc);
 
-		// Configure templates
-		esi.configure(
-				ocp.getN(), ocp.getNX(), ocp.getNDX(), ocp.getNXA(), ocp.getNU(), ocp.getNOD(),
-				solver->getNY(), solver->getNYN(),
-				(bool)fixInitialState,
-				(unsigned)solver->weightingMatricesType(),
-				(bool)hardcodeConstraintValues,
-				(bool)useAC,
-				(bool)covCalc);
-
-		esi.exportCode();
+			esi.exportCode();
+		}
 	}
 
     return SUCCESSFUL_RETURN;
