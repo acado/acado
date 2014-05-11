@@ -160,12 +160,11 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 				break;
 
 			case QP_QPDUNES:
-			case QP_HPMPC:
-				ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "Makefile for qpDUNES and HPMPC based OCP solver is not yet available.");
+				acadoCopyTempateFile(MAKEFILE_QPDUNES, str, "#", true);
 				break;
 
 			default:
-				return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+				ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "Makefile is not yet available.");
 		}
 	}
 
