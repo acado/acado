@@ -7,8 +7,8 @@ endif
 
 CCACHE_APP := $(shell which ccache 2>/dev/null)
 
-CFLAGS = -std=c99 -O3 -finline-functions -I. -I./qpdunes/include -I./qpdunes/src
-CXXFLAGS = -O3 -finline-functions -I. -I./qpdunes/include -I./qpdunes/src
+CFLAGS = -std=c99 -O3 -finline-functions -I. -I./qpdunes/include -D__SIMPLE_BOUNDS_ONLY__
+CXXFLAGS = -O3 -finline-functions -I. -I./qpdunes/include
 CC     = $(CCACHE_APP) gcc
 CXX    = $(CCACHE_APP) g++
 
@@ -17,7 +17,6 @@ OBJECTS = \
 	./qpdunes/src/matrix_vector.o \
 	./qpdunes/src/setup_qp.o \
 	./qpdunes/src/stage_qp_solver_clipping.o \
-	./qpdunes/src/stage_qp_solver_qpoases.o \
 	./qpdunes/src/utils.o \
 	acado_integrator.o \
 	acado_solver.o \
@@ -40,4 +39,4 @@ libacado_exported_rti.a: ${OBJECTS}
 
 .PHONY : clean
 clean :
-	-rm -f *.o *.a test
+	-rm -f *.o *.a test qpdunes/src/*.o
