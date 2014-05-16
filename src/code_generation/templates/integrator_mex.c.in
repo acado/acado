@@ -185,11 +185,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		real_t next[ACADO_NX+ACADO_NXA+ACADO_NU+ACADO_NOD];
     #endif
     const char *fieldnames[4], *infonames[3];
-    #if (defined WIN32 || defined _WIN64)
-        LARGE_INTEGER counter, frequency;
-    #else
-        struct timeval theclock;
-    #endif
+    timer tmr;
 	real_t start, end, time;
 	real_t *result_timing;
     
@@ -301,14 +297,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		#endif
     }
     
-    #if (defined WIN32 || defined _WIN64)
-        QueryPerformanceFrequency(&frequency);
-        QueryPerformanceCounter(&counter);
-        start = ((real_t) counter.QuadPart) / ((real_t) frequency.QuadPart);
-    #else
-        gettimeofday( &theclock,0 );
-        start = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
-    #endif
+    tic(&tmr);
     for( c = 0; c < CALLS_TIMING; ++c ) {
 	    for( i = 0; i < ACADO_NX+ACADO_NXA; ++i ) {
 	        next[i] = x[i];
@@ -331,15 +320,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	    #endif
 	    reset = 0;
     }
-    #if (defined WIN32 || defined _WIN64)
-        QueryPerformanceFrequency(&frequency);
-        QueryPerformanceCounter(&counter);
-        end = ((real_t) counter.QuadPart) / ((real_t) frequency.QuadPart);
-    #else
-        gettimeofday( &theclock,0 );
-        end = 1.0*theclock.tv_sec + 1.0e-6*theclock.tv_usec;
-    #endif
-    time = (end-start)/CALLS_TIMING;
+    time = toc(&tmr)/CALLS_TIMING;
     
     #if SENS_PROP == 1
 		plhs[0] = mxCreateStructMatrix(1, 1, 3, fieldnames);
