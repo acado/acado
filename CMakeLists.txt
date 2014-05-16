@@ -299,8 +299,14 @@ IF( ACADO_BUILD_SHARED )
 	)
 ENDIF( ACADO_BUILD_SHARED )
 
-include(CppLint)
-add_style_check_target(lint ${ACADO_SOURCES})
+################################################################################
+#
+# CPP lint check target
+#
+################################################################################
+
+INCLUDE( CppLint )
+ADD_STYLE_CHECK_TARGET(lint ${ACADO_SOURCES})
 
 ################################################################################
 #
