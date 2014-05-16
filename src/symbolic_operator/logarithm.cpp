@@ -101,97 +101,6 @@ returnValue Logarithm::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Logarithm::differentiate( int index ){
-
-  dargument = argument->differentiate( index );
-  if( dargument->isOneOrZero() == NE_ONE ){
-    return new Power_Int(
-             argument->clone(),
-             -1
-           );
-  }
-  if( dargument->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  return new Quotient(
-                dargument->clone(),
-                argument->clone()
-             );
-}
-
-
-Operator* Logarithm::ADforwardProtected( int dim,
-                                           VariableType *varType,
-                                           int *component,
-                                           Operator **seed,
-                                           int &nNewIS,
-                                           TreeProjection ***newIS ){
-
-    if( dargument != 0 )
-        delete dargument;
-
-    dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
-    if( dargument->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if( dargument->isOneOrZero() == NE_ONE ){
-        return new Power_Int(
-                 argument->clone(),
-                 -1
-             );
-    }
-    return new Quotient(
-                dargument->clone(),
-                argument->clone()
-             );
-}
-
-
-
-returnValue Logarithm::ADbackwardProtected( int dim,
-                                            VariableType *varType,
-                                            int *component,
-                                            Operator *seed,
-                                            Operator **df         ){
-
-
-    if( seed->isOneOrZero() == NE_ZERO ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    if( seed->isOneOrZero() == NE_ONE ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new Power_Int(
-                                              argument->clone(),
-                                              -1
-                                          ),
-                                          df
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    argument->AD_backward( dim,
-                                  varType,
-                                  component,
-                                  new Quotient(
-                                      seed->clone(),
-                                      argument->clone()
-                                  ),
-                                  df
-            );
-
-    delete seed;
-    return SUCCESSFUL_RETURN;
-}
 
 Operator* Logarithm::substitute( int index, const Operator *sub ){
 
@@ -217,6 +126,17 @@ CurvatureType Logarithm::getCurvature( ){
 
     return CT_NEITHER_CONVEX_NOR_CONCAVE;
 }
+
+returnValue Logarithm::initDerivative() {
+
+	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+
+	derivative = convert2TreeProjection(new Power_Int( argument->clone(), -1 ));
+	derivative2 = convert2TreeProjection(new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Power_Int( argument->clone(), -2 ) ));
+
+	return argument->initDerivative();
+}
+
 
 CLOSE_NAMESPACE_ACADO
 

@@ -188,17 +188,18 @@ int Function::getN   (VariableType &variableType_) const{
     switch(variableType_) {
 	case VT_DIFFERENTIAL_STATE 	: return getNX(); break;	
 	case VT_ALGEBRAIC_STATE 	: return getNXA(); break;		
-	case VT_CONTROL 		: return getNU(); break;
+	case VT_CONTROL 			: return getNU(); break;
 	case VT_INTEGER_CONTROL 	: return getNUI(); break;	
-	case VT_PARAMETER 		: return getNP(); break;
+	case VT_PARAMETER 			: return getNP(); break;
 	case VT_ONLINE_DATA 		: return getNOD(); break;
 	case VT_INTEGER_PARAMETER 	: return getNPI(); break;
 	case VT_DISTURBANCE 		: return getNW(); break;
-	case VT_TIME 			: return 1; break;
+	case VT_TIME 				: return 1; break;
 	case VT_INTERMEDIATE_STATE 	: return getN(); break;
-	case VT_DDIFFERENTIAL_STATE  	: return getNDX();	 break;
-	case VT_OUTPUT 	 		: return 0; break;
-	case VT_UNKNOWN 		: return 0;
+	case VT_DDIFFERENTIAL_STATE	: return getNDX();	 break;
+	case VT_VARIABLE			: return getNX()+getNXA()+getNU()+getNUI()+getNP()+getNPI()+getNW()+getNDX();	 break;
+	case VT_OUTPUT 	 			: return 0; break;
+	case VT_UNKNOWN 			: return 0;
     }
     return evaluationTree.getNX();
 }

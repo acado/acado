@@ -93,81 +93,6 @@ returnValue Exp::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Exp::differentiate( int index ){
-
-  dargument = argument->differentiate( index );
-  if( dargument->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  if( dargument->isOneOrZero() == NE_ONE ){
-    return clone();
-  }
-  return new Product( dargument->clone() , clone() );
-}
-
-
-
-Operator* Exp::ADforwardProtected( int dim,
-                                     VariableType *varType,
-                                     int *component,
-                                     Operator **seed,
-                                     int &nNewIS,
-                                     TreeProjection ***newIS ){
-
-    if( dargument != 0 )
-        delete dargument;
-
-    dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
-    if( dargument->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if( dargument->isOneOrZero() == NE_ONE ){
-        return clone();
-    }
-    return new Product( dargument->clone() , clone() );
-}
-
-
-
-returnValue Exp::ADbackwardProtected( int dim,
-                                      VariableType *varType,
-                                      int *component,
-                                      Operator *seed,
-                                      Operator **df         ){
-
-
-    if( seed->isOneOrZero() == NE_ZERO ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    if( seed->isOneOrZero() == NE_ONE ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          clone(),
-                                          df
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    argument->AD_backward( dim,
-                                  varType,
-                                  component,
-                                  new Product( seed->clone() , clone() ),
-                                  df
-            );
-
-    delete seed;
-    return SUCCESSFUL_RETURN;
-}
-
 Operator* Exp::substitute( int index, const Operator *sub ){
 
     return new Exp( argument->substitute( index , sub ) );
@@ -190,6 +115,16 @@ CurvatureType Exp::getCurvature( ){
     if( cc == CT_CONVEX   )  return CT_CONVEX  ;
 
     return CT_NEITHER_CONVEX_NOR_CONCAVE;
+}
+
+returnValue Exp::initDerivative() {
+
+	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+
+	derivative = convert2TreeProjection(new Exp(argument->clone()));
+	derivative2 = derivative;
+
+	return argument->initDerivative();
 }
 
 CLOSE_NAMESPACE_ACADO

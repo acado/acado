@@ -101,112 +101,6 @@ returnValue Cos::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Cos::differentiate( int index ){
-
-  dargument = argument->differentiate( index );
-  if( dargument->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  if( dargument->isOneOrZero() == NE_ONE ){
-    return new Product(
-             new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-             new Sin( argument->clone() )
-           );
-  }
-  return new Product(
-           new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-           new Product(
-             dargument->clone(),
-             new Sin(
-               argument->clone()
-             )
-           )
-         );
-}
-
-
-Operator* Cos::ADforwardProtected( int dim,
-                                     VariableType *varType,
-                                     int *component,
-                                     Operator **seed,
-                                     int &nNewIS,
-                                     TreeProjection ***newIS ){
-
-    if( dargument != 0 )
-        delete dargument;
-
-    dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
-    if( dargument->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if( dargument->isOneOrZero() == NE_ONE ){
-        return new Product(
-                new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-                new Sin( argument->clone() )
-             );
-    }
-    return new Product(
-           new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-           new Product(
-             dargument->clone(),
-             new Sin(
-               argument->clone()
-             )
-           )
-         );
-}
-
-
-
-returnValue Cos::ADbackwardProtected( int dim,
-                                      VariableType *varType,
-                                      int *component,
-                                      Operator *seed,
-                                      Operator **df         ){
-
-
-    if( seed->isOneOrZero() == NE_ZERO ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    if( seed->isOneOrZero() == NE_ONE ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-             new Product(
-                new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-                new Sin( argument->clone() )
-             ),
-                              df
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    argument->AD_backward( dim,
-                                  varType,
-                                  component,
-                                  new Product(
-                                      new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ),
-                                      new Product(
-                                          seed->clone(),
-                                          new Sin(
-                                              argument->clone()
-                                          )
-                                      )
-                                  ),
-                                  df
-            );
-    delete seed;
-    return SUCCESSFUL_RETURN;
-}
-
 Operator* Cos::substitute( int index, const Operator *sub ){
 
     return new Cos( argument->substitute( index , sub ) );
@@ -216,6 +110,16 @@ Operator* Cos::substitute( int index, const Operator *sub ){
 Operator* Cos::clone() const{
 
     return new Cos(*this);
+}
+
+returnValue Cos::initDerivative() {
+
+	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+
+	derivative = convert2TreeProjection(new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Sin(argument->clone()) ));
+	derivative2 = convert2TreeProjection(new Product( new DoubleConstant( -1.0 , NE_NEITHER_ONE_NOR_ZERO ), new Cos(argument->clone()) ));
+
+	return argument->initDerivative();
 }
 
 

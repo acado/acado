@@ -94,16 +94,8 @@ Operator* Subtraction::differentiate( int index ){
 
   dargument1 = argument1->differentiate( index );
   dargument2 = argument2->differentiate( index );
-  if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  if ( dargument1->isOneOrZero() == NE_ZERO ){
-    return new Subtraction( new DoubleConstant( 0.0 , NE_ZERO ), dargument2->clone() );
-  }
-  if ( dargument2->isOneOrZero() == NE_ZERO ){
-    return dargument1->clone();
-  }
-  return new Subtraction( dargument1->clone() , dargument2->clone() );
+
+  return mySubtract( dargument1, dargument2 );
 
 }
 
@@ -124,38 +116,59 @@ Operator* Subtraction::AD_forward( int dim,
     dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
     dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
 
-    if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if ( dargument1->isOneOrZero() == NE_ZERO ){
-        return new Subtraction( new DoubleConstant( 0.0 , NE_ZERO ), dargument2->clone() );
-    }
-    if ( dargument2->isOneOrZero() == NE_ZERO ){
-        return dargument1->clone();
-    }
-
-    return new Subtraction( dargument1->clone() , dargument2->clone() );
+    return mySubtract( dargument1, dargument2 );
 }
 
 
-returnValue Subtraction::AD_backward( int dim,
-                                      VariableType *varType,
-                                      int *component,
-                                      Operator *seed,
-                                      Operator **df         ){
+returnValue Subtraction::AD_backward( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
     TreeProjection tmp;
     tmp = *seed;
 
-    argument1->AD_backward( dim, varType, component, tmp.clone(), df );
+    argument1->AD_backward( dim, varType, component, tmp.clone(), df, nNewIS, newIS );
 
     if( seed->isOneOrZero() != NE_ZERO ){
         argument2->AD_backward( dim, varType, component,
-                                new Subtraction( new DoubleConstant( 0.0 , NE_ZERO ), tmp.clone() ), df );
+                                new Subtraction( new DoubleConstant( 0.0 , NE_ZERO ), tmp.clone() ), df, nNewIS, newIS );
     }
 
     delete seed;
     return SUCCESSFUL_RETURN;
+}
+
+
+returnValue Subtraction::AD_symmetric( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+    TreeProjection dx,dy,dxx,dxy,dyy;
+    
+    dx  = DoubleConstant(1.0,NE_ONE );
+    dy  = DoubleConstant(-1.0,NE_NEITHER_ONE_NOR_ZERO );
+    dxx = DoubleConstant(0.0,NE_ZERO);
+    dxy = DoubleConstant(0.0,NE_ZERO);
+    dyy = DoubleConstant(0.0,NE_ZERO);
+    
+    return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
+			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
 }
 
 

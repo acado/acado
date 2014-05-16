@@ -443,12 +443,13 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 			ubValuesMatrix(offsetBounds + run1 * getNU() + run2) = uBounds.getUpperBound(run1, run2);
 		}
 
+
 	if (hardcodeConstraintValues == YES)
 	{
 		lbValues.setup("lbValues", lbValuesMatrix, REAL, ACADO_VARIABLES);
 		ubValues.setup("ubValues", ubValuesMatrix, REAL, ACADO_VARIABLES);
 	}
-	else
+	else if (isFinite( lbValuesMatrix ) || isFinite( ubValuesMatrix ))
 	{
 		lbValues.setup("lbValues", numBounds, 1, REAL, ACADO_VARIABLES);
 		lbValues.setDoc( "Lower bounds values." );

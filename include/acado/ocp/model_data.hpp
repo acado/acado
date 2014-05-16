@@ -402,13 +402,6 @@ public:
      returnValue getNameDiffsOutputs( std::vector<std::string>& names ) const;
 
 
- 	/**
- 	 * Checks whether the model formulation is compatible with code export capabilities.
- 	 *
- 	 */
- 	BooleanType checkConsistency() const;
-
-
      //
     // PROTECTED FUNCTIONS:
     //

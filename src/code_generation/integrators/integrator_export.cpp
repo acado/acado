@@ -201,8 +201,12 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 		if( (uint)f.getNDX() > (NX1+NX2) ) {
 			return ACADOERROR( RET_INVALID_LINEAR_OUTPUT_FUNCTION );
 		}
-		if( f.getNDX() > 0 ) NDX3 = NX1+NX2;
+		if( f.getNDX() > 0 ) {
+			NDX3 = NX1+NX2;
+			NDX = NX;
+		}
 		else NDX3 = 0;
+
 		dummy4.clearStaticCounters();
 		dx = DifferentialStateDerivative("", NDX3, 1);
 

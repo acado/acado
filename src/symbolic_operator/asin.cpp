@@ -101,144 +101,6 @@ returnValue Asin::evaluate( EvaluationBase *x ){
 }
 
 
-Operator* Asin::differentiate( int index ){
-
-  dargument = argument->differentiate( index );
-  if( dargument->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  if( dargument->isOneOrZero() == NE_ONE ){
-    return new Power(
-                   new Subtraction(
-                           new DoubleConstant(1.0 , NE_ONE),
-                           new Power_Int(
-                                   argument->clone(),
-                                   2
-                               )
-                       ),
-                   new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
-              );
-  }
-  return new Product(
-                 new Power(
-                         new Subtraction(
-                                 new DoubleConstant(1.0 , NE_ONE),
-                                 new Power_Int(
-                                         argument->clone(),
-                                         2
-                                     )
-                             ),
-                         new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
-                     ),
-                 dargument->clone()
-            );
-}
-
-
-
-Operator* Asin::ADforwardProtected( int dim,
-                                      VariableType *varType,
-                                      int *component,
-                                      Operator **seed,
-                                      int &nNewIS,
-                                      TreeProjection ***newIS  ){
-
-    if( dargument != 0 )
-        delete dargument;
-
-    dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
-    if( dargument->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if( dargument->isOneOrZero() == NE_ONE ){
-        return new Power(
-                   new Subtraction(
-                           new DoubleConstant(1.0 , NE_ONE),
-                           new Power_Int(
-                                   argument->clone(),
-                                   2
-                               )
-                       ),
-                   new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
-             );
-    }
-    return new Product(
-                 new Power(
-                         new Subtraction(
-                                 new DoubleConstant(1.0 , NE_ONE),
-                                 new Power_Int(
-                                         argument->clone(),
-                                         2
-                                     )
-                             ),
-                         new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
-                     ),
-                 dargument->clone()
-         );
-}
-
-
-
-returnValue Asin::ADbackwardProtected( int dim,
-                                       VariableType *varType,
-                                       int *component,
-                                       Operator *seed,
-                                       Operator **df         ){
-
-
-    if( seed->isOneOrZero() == NE_ZERO ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    if( seed->isOneOrZero() == NE_ONE ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                              new Power(
-                                  new Subtraction(
-                                      new DoubleConstant(1.0 , NE_ONE),
-                                      new Power_Int(
-                                          argument->clone(),
-                                          2
-                                      )
-                                  ),
-                                  new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
-                              ),
-                              df
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    argument->AD_backward( dim,
-                                  varType,
-                                  component,
-                                  new Product(
-                                      new Power(
-                                          new Subtraction(
-                                              new DoubleConstant(1.0 , NE_ONE),
-                                              new Power_Int(
-                                                  argument->clone(),
-                                                  2
-                                              )
-                                          ),
-                                          new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
-                                      ),
-                                      seed->clone()
-                                  ),
-                                  df
-            );
-
-    delete seed;
-    return SUCCESSFUL_RETURN;
-}
-
 
 Operator* Asin::substitute( int index, const Operator *sub ){
 
@@ -249,6 +111,45 @@ Operator* Asin::substitute( int index, const Operator *sub ){
 Operator* Asin::clone() const{
 
     return new Asin(*this);
+}
+
+returnValue Asin::initDerivative() {
+
+	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+
+	derivative = convert2TreeProjection(
+			new Power(
+					new Addition(
+							new DoubleConstant(1.0 , NE_ONE),
+							new Product(
+									new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
+									new Power_Int(
+											argument->clone(),
+											2
+									)
+							)
+					),
+					new DoubleConstant( -0.5 , NE_NEITHER_ONE_NOR_ZERO )
+			));
+	derivative2 = convert2TreeProjection(
+			new Product(
+					new Power(
+							new Addition(
+									new DoubleConstant(1.0 , NE_ONE),
+									new Product(
+											new DoubleConstant( -1.0, NE_NEITHER_ONE_NOR_ZERO),
+											new Power_Int(
+													argument->clone(),
+													2
+											)
+									)
+							),
+							new DoubleConstant( -1.5 , NE_NEITHER_ONE_NOR_ZERO )
+					),
+					argument->clone()
+			));
+
+	return argument->initDerivative();
 }
 
 

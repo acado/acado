@@ -69,30 +69,30 @@ public:
 
     /** Sets the argument (note that arg should have dimension 1). */
 
-    virtual TreeProjection& operator=( const double      & arg );
-    virtual TreeProjection& operator=( const DVector      & arg );
-    virtual TreeProjection& operator=( const DMatrix      & arg );
-    virtual TreeProjection& operator=( const Expression  & arg );
-    virtual TreeProjection& operator=( const Operator    & arg );
+    virtual Operator& operator=( const double      & arg );
+    virtual Operator& operator=( const DVector      & arg );
+    virtual Operator& operator=( const DMatrix      & arg );
+    virtual Operator& operator=( const Expression  & arg );
+    virtual Operator& operator=( const Operator    & arg );
 
 
-    TreeProjection& operator+=( const double      & arg );
-    TreeProjection& operator+=( const DVector      & arg );
-    TreeProjection& operator+=( const DMatrix      & arg );
-    TreeProjection& operator+=( const Expression  & arg );
+    Operator& operator+=( const double      & arg );
+    Operator& operator+=( const DVector      & arg );
+    Operator& operator+=( const DMatrix      & arg );
+    Operator& operator+=( const Expression  & arg );
 
-    TreeProjection& operator-=( const double      & arg );
-    TreeProjection& operator-=( const DVector      & arg );
-    TreeProjection& operator-=( const DMatrix      & arg );
-    TreeProjection& operator-=( const Expression  & arg );
+    Operator& operator-=( const double      & arg );
+    Operator& operator-=( const DVector      & arg );
+    Operator& operator-=( const DMatrix      & arg );
+    Operator& operator-=( const Expression  & arg );
 
-    TreeProjection& operator*=( const double      & arg );
-    TreeProjection& operator*=( const DVector      & arg );
-    TreeProjection& operator*=( const DMatrix      & arg );
-    TreeProjection& operator*=( const Expression  & arg );
+    Operator& operator*=( const double      & arg );
+    Operator& operator*=( const DVector      & arg );
+    Operator& operator*=( const DMatrix      & arg );
+    Operator& operator*=( const Expression  & arg );
 
-    TreeProjection& operator/=( const double      & arg );
-    TreeProjection& operator/=( const Expression  & arg );
+    Operator& operator/=( const double      & arg );
+    Operator& operator/=( const Expression  & arg );
 
 
     Expression operator+( const double        & arg ) const;
@@ -204,11 +204,36 @@ public:
      *  backward derivative                                        \n
      *  \return SUCCESSFUL_RETURN                                  \n
      */
-     virtual returnValue AD_backward( int           dim      , /**< number of directions  */
-                                      VariableType *varType  , /**< the variable types    */
-                                      int          *component, /**< and their components  */
-                                      Operator   *seed     , /**< the backward seed     */
-                                      Operator  **df         /**< the result            */ ) = 0;
+    virtual returnValue AD_backward( int           dim      , /**< number of directions  */
+                                     VariableType *varType  , /**< the variable types    */
+                                     int          *component, /**< and their components  */
+                                     Operator     *seed     , /**< the backward seed     */
+                                     Operator    **df       , /**< the result            */
+                                     int           &nNewIS  , /**< the number of new IS  */
+                                     TreeProjection ***newIS  /**< the new IS-pointer    */ ) = 0;
+
+    
+    
+    /** Automatic Differentiation in symmetric mode on the symbolic \n
+     *  level. This function generates an expression for a          \n
+     *  second order derivative.                                    \n
+     *  \return SUCCESSFUL_RETURN                                   \n
+     */
+     virtual returnValue AD_symmetric( int            dim       , /**< number of directions  */
+                                      VariableType  *varType   , /**< the variable types    */
+                                      int           *component , /**< and their components  */
+                                      Operator      *l         , /**< the backward seed     */
+                                      Operator     **S         , /**< forward seed matrix   */
+                                      int            dimS      , /**< dimension of forward seed             */
+                                      Operator     **dfS       , /**< first order foward result             */
+                                      Operator     **ldf       , /**< first order backward result           */
+                                      Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ) = 0;
 
 
 
@@ -539,11 +564,73 @@ public:
     											);
 
 
+    
+    
+    virtual Operator* myProd(Operator* a,Operator* b);
+    virtual Operator* myAdd (Operator* a,Operator* b);
+    virtual Operator* mySubtract (Operator* a,Operator* b);
+    virtual Operator* myPower (Operator* a,Operator* b);
+    virtual Operator* myPowerInt (Operator* a,int b);
+    virtual Operator* myLogarithm (Operator* a);
+
+
+    virtual BooleanType isTrivial() const;
+
+
+    virtual returnValue initDerivative();
+    
+    
 //
 //  PROTECTED FUNCTIONS:
 //
 
 protected:
+
+
+    virtual TreeProjection* convert2TreeProjection( Operator* a ) const; // Caution: a is deleted inside...
+    
+    returnValue ADsymCommon( 	Operator     *a  ,
+                              	TreeProjection &da ,
+                              	TreeProjection &dda,
+                                int            dim       , /**< number of directions  */
+                                VariableType  *varType   , /**< the variable types    */
+                                int           *component , /**< and their components  */
+                                Operator      *l         , /**< the backward seed     */
+                                Operator     **S         , /**< forward seed matrix   */
+                                int            dimS      , /**< dimension of forward seed             */
+                                Operator     **dfS       , /**< first order foward result             */
+                                Operator     **ldf       , /**< first order backward result           */
+                                Operator     **H         , /**< upper trianglular part of the Hessian */
+                                int            &nNewLIS  , /**< the number of newLIS  */
+                                TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                int            &nNewSIS  , /**< the number of newSIS  */
+                                TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                int            &nNewHIS  , /**< the number of newHIS  */
+                                TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
+
+	
+    returnValue ADsymCommon2( 	  Operator       *a  ,
+				   	   	   	   	  Operator       *b  ,
+                                  TreeProjection &dx ,
+                                  TreeProjection &dy ,
+                                  TreeProjection &dxx,
+                                  TreeProjection &dxy,
+                                  TreeProjection &dyy,
+                                  int            dim       , /**< number of directions  */
+                                  VariableType  *varType   , /**< the variable types    */
+                                  int           *component , /**< and their components  */
+                                  Operator      *l         , /**< the backward seed     */
+                                  Operator     **S         , /**< forward seed matrix   */
+                                  int            dimS      , /**< dimension of forward seed             */
+                                  Operator     **dfS       , /**< first order foward result             */
+                                  Operator     **ldf       , /**< first order backward result           */
+                                  Operator     **H         , /**< upper trianglular part of the Hessian */
+                                  int            &nNewLIS  , /**< the number of newLIS  */
+                                  TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                  int            &nNewSIS  , /**< the number of newSIS  */
+                                  TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                  int            &nNewHIS  , /**< the number of newHIS  */
+                                  TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
 
 
 };

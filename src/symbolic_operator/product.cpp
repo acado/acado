@@ -99,64 +99,17 @@ returnValue Product::evaluate( EvaluationBase *x ){
 
 Operator* Product::differentiate( int index ){
 
-  dargument1 = argument1->differentiate( index );
-  dargument2 = argument2->differentiate( index );
-  if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ZERO ){
-    return argument2->clone();
-  }
-  if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ONE ){
-    return argument1->clone();
-  }
-  if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ONE ){
-    return new Addition(
-             argument1->clone(),
-             argument2->clone()
-           );
-  }
-  if ( dargument1->isOneOrZero() == NE_ONE ){
-    return new Addition(
-             argument2->clone(),
-             new Product(
-               argument1->clone(),
-               dargument2->clone()
-             )
-           );
-  }
-  if ( dargument1->isOneOrZero() == NE_ZERO ){
-    return new Product(
-             argument1->clone(),
-             dargument2->clone()
-           );
-  }
-  if ( dargument2->isOneOrZero() == NE_ONE ){
-    return new Addition(
-             argument1->clone(),
-             new Product(
-               argument2->clone(),
-               dargument1->clone()
-             )
-           );
-  }
-  if ( dargument2->isOneOrZero() == NE_ZERO ){
-    return new Product(
-             argument2->clone(),
-             dargument1->clone()
-           );
-  }
-  return new Addition(
-           new Product(
-             dargument1->clone(),
-             argument2->clone()
-           ),
-           new Product(
-             argument1->clone(),
-             dargument2->clone()
-           )
-         );
+	dargument1 = argument1->differentiate( index );
+	dargument2 = argument2->differentiate( index );
 
+	Operator *prodTmp1 = myProd(dargument1, argument2);
+	Operator *prodTmp2 = myProd(argument1, dargument2);
+	Operator *result = myAdd(prodTmp1, prodTmp2);
+
+	delete prodTmp1;
+	delete prodTmp2;
+
+	return result;
 }
 
 
@@ -176,95 +129,81 @@ Operator* Product::AD_forward( int dim,
     dargument1 = argument1->AD_forward(dim,varType,component,seed,nNewIS,newIS);
     dargument2 = argument2->AD_forward(dim,varType,component,seed,nNewIS,newIS);
 
+    Operator *prodTmp1 = myProd(dargument1, argument2);
+    Operator *prodTmp2 = myProd(argument1, dargument2);
+    Operator *result = myAdd(prodTmp1, prodTmp2);
 
-    if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ZERO ){
-        return argument2->clone();
-    }
-    if ( dargument1->isOneOrZero() == NE_ZERO && dargument2->isOneOrZero() == NE_ONE ){
-        return argument1->clone();
-    }
-    if ( dargument1->isOneOrZero() == NE_ONE && dargument2->isOneOrZero() == NE_ONE ){
-        return new Addition(
-                 argument1->clone(),
-                 argument2->clone()
-             );
-    }
-    if ( dargument1->isOneOrZero() == NE_ONE ){
-        return new Addition(
-                 argument2->clone(),
-                 new Product(
-                     argument1->clone(),
-                     dargument2->clone()
-                 )
-             );
-    }
-    if ( dargument1->isOneOrZero() == NE_ZERO ){
-        return new Product(
-                 argument1->clone(),
-                 dargument2->clone()
-             );
-    }
-    if ( dargument2->isOneOrZero() == NE_ONE ){
-        return new Addition(
-                 argument1->clone(),
-                 new Product(
-                     argument2->clone(),
-                     dargument1->clone()
-                 )
-             );
-    }
-    if ( dargument2->isOneOrZero() == NE_ZERO ){
-        return new Product(
-                 argument2->clone(),
-                 dargument1->clone()
-             );
-    }
-    return new Addition(
-           new Product(
-             dargument1->clone(),
-             argument2->clone()
-           ),
-           new Product(
-             argument1->clone(),
-             dargument2->clone()
-           )
-         );
+    delete prodTmp1;
+    delete prodTmp2;
+
+    return result;
 }
 
 
-returnValue Product::AD_backward( int dim,
-                                  VariableType *varType,
-                                  int *component,
-                                  Operator *seed,
-                                  Operator **df         ){
+returnValue Product::AD_backward( int           dim      , /**< number of directions  */
+                                        VariableType *varType  , /**< the variable types    */
+                                        int          *component, /**< and their components  */
+                                        Operator     *seed     , /**< the backward seed     */
+                                        Operator    **df       , /**< the result            */
+                                        int           &nNewIS  , /**< the number of new IS  */
+                                        TreeProjection ***newIS  /**< the new IS-pointer    */ ){
 
 
     if( seed->isOneOrZero() != NE_ZERO ){
-
+	
         TreeProjection tmp;
         tmp = *seed;
 
+        Operator *prodTmp1 = myProd(argument2, &tmp);
+
         argument1->AD_backward( dim, varType, component,
-                                new Product(
-                                    argument2->clone(),
-                                    tmp.clone()
-                                ),
-                                df );
+        						prodTmp1->clone(),
+                                df, nNewIS, newIS );
+
+        Operator *prodTmp2 = myProd(argument1, &tmp);
 
         argument2->AD_backward( dim, varType, component,
-                                new Product(
-                                    argument1->clone(),
-                                    tmp.clone()
-                                ),
-                                df );
+        						prodTmp2->clone(),
+                                df, nNewIS, newIS );
+
+        delete prodTmp1;
+        delete prodTmp2;
     }
 
     delete seed;
     return SUCCESSFUL_RETURN;
 }
+
+
+returnValue Product::AD_symmetric( int            dim       , /**< number of directions  */
+                                        VariableType  *varType   , /**< the variable types    */
+                                        int           *component , /**< and their components  */
+                                        Operator      *l         , /**< the backward seed     */
+                                        Operator     **S         , /**< forward seed matrix   */
+                                        int            dimS      , /**< dimension of forward seed             */
+                                        Operator     **dfS       , /**< first order foward result             */
+                                        Operator     **ldf       , /**< first order backward result           */
+                                        Operator     **H         , /**< upper trianglular part of the Hessian */
+                                      int            &nNewLIS  , /**< the number of newLIS  */
+                                      TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                      int            &nNewSIS  , /**< the number of newSIS  */
+                                      TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                      int            &nNewHIS  , /**< the number of newHIS  */
+                                      TreeProjection ***newHIS   /**< the new HIS-pointer   */ ){
+  
+    TreeProjection dx,dy,dxx,dxy,dyy;
+    
+    dx  = *argument2;
+    dy  = *argument1;
+    dxx = DoubleConstant(0.0,NE_ZERO);
+    dxy = DoubleConstant(1.0,NE_ONE );
+    dyy = DoubleConstant(0.0,NE_ZERO);
+    
+    return ADsymCommon2( argument1,argument2,dx,dy,dxx,dxy,dyy, dim, varType, component, l, S, dimS, dfS,
+			  ldf, H, nNewLIS, newLIS, nNewSIS, newSIS, nNewHIS, newHIS );
+}
+
+
 
 
 Operator* Product::substitute( int index, const Operator *sub ){

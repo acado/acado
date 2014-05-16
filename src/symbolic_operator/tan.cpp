@@ -103,124 +103,6 @@ returnValue Tan::evaluate( EvaluationBase *x ){
     return SUCCESSFUL_RETURN;
 }
 
-
-Operator* Tan::differentiate( int index ){
-
-  dargument = argument->differentiate( index );
-  if( dargument->isOneOrZero() == NE_ZERO ){
-    return new DoubleConstant( 0.0 , NE_ZERO );
-  }
-  if( dargument->isOneOrZero() == NE_ONE ){
-    return new Power_Int(
-             new Power_Int(
-               new Cos(
-                 argument->clone()
-               ),
-               2
-             ),
-             -1
-           );
-  }
-  return new Quotient(
-                 dargument->clone(),
-                 new Power_Int(
-                         new Cos(
-                                 argument->clone()
-                             ),
-                         2
-                         )
-             );
-}
-
-
-Operator* Tan::ADforwardProtected( int dim,
-                                     VariableType *varType,
-                                     int *component,
-                                     Operator **seed,
-                                     int &nNewIS,
-                                     TreeProjection ***newIS ){
-
-    if( dargument != 0 )
-        delete dargument;
-
-    dargument = argument->AD_forward(dim,varType,component,seed,nNewIS,newIS);
-
-    if( dargument->isOneOrZero() == NE_ZERO ){
-        return new DoubleConstant( 0.0 , NE_ZERO );
-    }
-    if( dargument->isOneOrZero() == NE_ONE ){
-        return new Power_Int(
-                     new Cos(
-                         argument->clone()
-                     ),
-                     -2
-             );
-    }
-    return new Quotient(
-                 dargument->clone(),
-                 new Power_Int(
-                         new Cos(
-                                 argument->clone()
-                             ),
-                         2
-                         )
-             );
-}
-
-
-
-returnValue Tan::ADbackwardProtected( int dim,
-                                      VariableType *varType,
-                                      int *component,
-                                      Operator *seed,
-                                      Operator **df         ){
-
-
-    if( seed->isOneOrZero() == NE_ZERO ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new DoubleConstant( 0.0 , NE_ZERO ),
-                                          df
-            );
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    if( seed->isOneOrZero() == NE_ONE ){
-            argument->AD_backward( dim,
-                                          varType,
-                                          component,
-                                          new Power_Int(
-                                              new Cos(
-                                                  argument->clone()
-                                              ),
-                                              -2
-                                          ),
-                                          df
-            );
-
-        delete seed;
-        return SUCCESSFUL_RETURN;
-    }
-    argument->AD_backward( dim,
-                                  varType,
-                                  component,
-                                  new Quotient(
-                                      seed->clone(),
-                                      new Power_Int(
-                                          new Cos(
-                                              argument->clone()
-                                          ),
-                                          2
-                                      )
-                                  ),
-                                  df
-            );
-
-    delete seed;
-    return SUCCESSFUL_RETURN;
-}
-
 Operator* Tan::substitute( int index, const Operator *sub ){
 
     return new Tan( argument->substitute( index , sub ) );
@@ -230,6 +112,21 @@ Operator* Tan::substitute( int index, const Operator *sub ){
 Operator* Tan::clone() const{
 
     return new Tan(*this);
+}
+
+returnValue Tan::initDerivative() {
+
+	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+
+	derivative = convert2TreeProjection(new Quotient( new DoubleConstant( 1.0 , NE_ONE ), new Power_Int( new Cos( argument->clone() ), 2 ) ));
+	derivative2 = convert2TreeProjection(new Quotient(    new Product(
+			new DoubleConstant( 2.0 , NE_NEITHER_ONE_NOR_ZERO ),
+			new Tan(argument->clone())
+	),
+			new Power_Int( new Cos( argument->clone() ), 2 )
+	));
+
+	return argument->initDerivative();
 }
 
 

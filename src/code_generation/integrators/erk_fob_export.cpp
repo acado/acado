@@ -108,12 +108,12 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
 		// add VDE for differential states
-		f << forwardDerivative( rhs_, x ) * Gx;
+		f << multipleForwardDerivative( rhs_, x, Gx );
 		/*	if ( f.getDim() != f.getNX() )
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
 		// add VDE for control inputs
-		f << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
+		f << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
 		// 	if ( f.getDim() != f.getNX() )
 		// 		return ACADOERROR( RET_ILLFORMED_ODE );
 
@@ -128,9 +128,9 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 
 		DifferentialState Sxx("", NX,NX), Sux("", NU,NX), Suu("", NU,NU);
 
-		g << forwardDerivative(tmp, x)*Gx + forwardDerivative(rhs_,x).transpose()*Sxx;
-		g << Gu.transpose()*forwardDerivative(tmp, x) + forwardDerivative(tmp, u) + Sux*forwardDerivative(rhs_,x);
-		g << forwardDerivative(backwardDerivative(rhs_, u, lx), u) + forwardDerivative(tmp, u)*Gu + forwardDerivative(rhs_,u).transpose()*Sux.transpose();
+		g << multipleForwardDerivative(tmp, x, Gx) + multipleBackwardDerivative(rhs_, x, Sxx);
+		g << multipleBackwardDerivative(tmp, x, Gu).transpose() + forwardDerivative(tmp, u).transpose() + multipleBackwardDerivative(rhs_, x, Sux.transpose()).transpose();
+		g << forwardDerivative(backwardDerivative(rhs_, u, lx), u) + multipleBackwardDerivative(tmp, u, Gu) + multipleBackwardDerivative(rhs_, u, Sux.transpose());
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
@@ -168,6 +168,7 @@ returnValue ForwardOverBackwardERKExport::setup( )
 
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
+	seed_backward.setup( "seed", 1, NX );
 
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
@@ -181,22 +182,22 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	rk_xxx.setup("rk_xxx", 1, inputDim+timeDep, REAL, structWspace);
 	rk_kkk.setup("rk_kkk", rkOrder, NX+NX*NX+NX*NU+NU*NU, REAL, structWspace);
 	rk_forward_sweep.setup("rk_sweep1", 1, grid.getNumIntervals()*rkOrder*NX*(NX+NU+1), REAL, structWspace);
-	seed_backward.setup("seed", 1, NX, REAL, ACADO_VARIABLES);
 
 	if ( useOMP )
 	{
 		ExportVariable auxVar;
 
-		auxVar = diffs_rhs.getGlobalExportVariable();
+		auxVar = getAuxVariable();
 		auxVar.setName( "odeAuxVar" );
 		auxVar.setDataStruct( ACADO_LOCAL );
+		rhs.setGlobalExportVariable( auxVar );
 		diffs_rhs.setGlobalExportVariable( auxVar );
 	}
 
 	ExportIndex run( "run1" );
 
 	// setup INTEGRATE function
-	integrate = ExportFunction( "integrate", rk_eta, reset_int );
+	integrate = ExportFunction( "integrate", rk_eta, reset_int, seed_backward );
 	integrate.setReturnValue( error_code );
 	rk_eta.setDoc( "Working array to pass the input values and return the results." );
 	reset_int.setDoc( "The internal memory of the integrator can be reset." );

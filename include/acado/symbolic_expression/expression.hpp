@@ -262,11 +262,61 @@ class Expression{
         Expression getNext         ( ) const;
 
 
-        Expression ADforward ( const Expression &arg ) const;
-        Expression ADforward ( const VariableType &varType_, const int *arg, int nV ) const;
-        Expression ADbackward( const Expression &arg ) const;
-
-		Expression getODEexpansion( const int &order, const int *arg ) const;
+        Expression ADforward  ( const Expression &arg ) const;
+        Expression ADforward  ( const VariableType &varType_, const int *arg, int nV ) const;
+        Expression ADbackward ( const Expression &arg ) const;
+	
+	
+	/** Second order symmetric AD routine returning \n
+	 *  S^T*(l^T*f'')*S  with f'' being the second  \n
+	 * order derivative of the current expression.  \n
+	 * The matrix S and the vector l can be         \n
+	 * interpreted as forward/backward seeds,        \n
+	 * respectively. Optionally, this routine also  \n
+	 * returns expressions for the first order      \n
+	 * order terms f'*S  and  l^T*f' computed by    \n
+	 * first order forward and first order backward \n
+	 * automatic differentiation, respectively.     \n
+	 * Caution: this routine is tailored for        \n
+	 * full Hessian computation exploiting symmetry.\n
+	 * If only single elements of the Hessian are   \n
+	 * needed, forward-over-adjoint or ajoint-over- \n
+	 * forward differentiation may be more          \n
+	 * efficient.                                   \n
+	 */
+	Expression ADsymmetric( const Expression &arg, /** argument      */
+				 const Expression &S  , /** forward seed  */
+				 const Expression &l  , /** backward seed */
+				 Expression *dfS = 0,    /** first order forward  result */
+				 Expression *ldf = 0    /** first order backward result */
+			       ) const;
+	
+	       
+	/** Second order symmetric AD routine returning \n
+	 *  l^T*f''  with f'' being the second          \n
+	 * order derivative of the current expression.  \n
+	 * The he vector l can be                       \n
+	 * interpreted as backward seed,                \n
+	 * respectively. Optionally, this routine also  \n
+	 * returns expressions for the first order      \n
+	 * order terms f'*S  and  l^T*f' computed by    \n
+	 * first order forward and first order backward \n
+	 * automatic differentiation, respectively.     \n
+	 * Caution: this routine is tailored for        \n
+	 * full Hessian computation exploiting symmetry.\n
+	 * If only single elements of the Hessian are   \n
+	 * needed, forward-over-adjoint or ajoint-over- \n
+	 * forward differentiation may be more          \n
+	 * efficient.                                   \n
+	 */
+	Expression ADsymmetric( const Expression &arg, /** argument      */
+				 const Expression &l  , /** backward seed */
+				 Expression *dfS = 0,    /** first order forward  result */
+				 Expression *ldf = 0    /** first order backward result */
+			       ) const;
+	
+	
+	Expression getODEexpansion( const int &order, const int *arg ) const;
 
         Expression ADforward ( const Expression &arg, const Expression &seed ) const;
         Expression ADforward ( const VariableType &varType_, const int *arg, const Expression &seed ) const;

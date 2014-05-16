@@ -108,6 +108,16 @@ class AdjointERKExport : public ExplicitRungeKuttaExport
 													) const;
 
 
+		/** Exports source code of the auto-generated integrator into the given directory.
+		 *
+		 *	@param[in] code				Code block containing the auto-generated integrator.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue getCode(	ExportStatementBlock& code
+										);
+
+
 	protected:
 
 

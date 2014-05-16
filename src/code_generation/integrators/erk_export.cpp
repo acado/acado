@@ -103,9 +103,10 @@ returnValue ExplicitRungeKuttaExport::setup( )
 	{
 		ExportVariable auxVar;
 
-		auxVar = diffs_rhs.getGlobalExportVariable();
+		auxVar = getAuxVariable();
 		auxVar.setName( "odeAuxVar" );
 		auxVar.setDataStruct( ACADO_LOCAL );
+		rhs.setGlobalExportVariable( auxVar );
 		diffs_rhs.setGlobalExportVariable( auxVar );
 	}
 
@@ -232,12 +233,13 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
 		// add VDE for differential states
-		f << forwardDerivative( rhs_, x ) * Gx;
+		f << multipleForwardDerivative( rhs_, x, Gx );
 		/*	if ( f.getDim() != f.getNX() )
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
+
 		// add VDE for control inputs
-		f << forwardDerivative( rhs_, x ) * Gu + forwardDerivative( rhs_, u );
+		f << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
 		// 	if ( f.getDim() != f.getNX() )
 		// 		return ACADOERROR( RET_ILLFORMED_ODE );
 
@@ -333,7 +335,7 @@ returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
 		getDataDeclarations( code, ACADO_LOCAL );
 
 		code << "#pragma omp threadprivate( "
-				<< diffs_rhs.getGlobalExportVariable().getFullName()  << ", "
+				<< getAuxVariable().getFullName()  << ", "
 				<< rk_xxx.getFullName() << ", "
 				<< rk_ttt.getFullName() << ", "
 				<< rk_kkk.getFullName()

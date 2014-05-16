@@ -142,7 +142,7 @@ inline BlockMatrix BlockMatrix::addRegularisation( double eps ){
 }
 
 
-inline BooleanType BlockMatrix::isSquare( ) const{
+inline bool BlockMatrix::isSquare( ) const{
 
     if( getNumRows() == getNumCols() ) return BT_TRUE;
     return BT_FALSE;
@@ -150,7 +150,7 @@ inline BooleanType BlockMatrix::isSquare( ) const{
 
 
 
-inline BooleanType BlockMatrix::isSquare( uint rowIdx, uint colIdx ) const{
+inline bool BlockMatrix::isSquare( uint rowIdx, uint colIdx ) const{
 
     ASSERT( rowIdx < getNumRows( ) );
     ASSERT( colIdx < getNumCols( ) );
@@ -159,7 +159,7 @@ inline BooleanType BlockMatrix::isSquare( uint rowIdx, uint colIdx ) const{
 }
 
 
-inline BooleanType BlockMatrix::isEmpty() const{
+inline bool BlockMatrix::isEmpty() const{
 
     if( (getNumRows() == 0) && (getNumCols() == 0) ) return BT_TRUE;
     return BT_FALSE;

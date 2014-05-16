@@ -50,35 +50,35 @@ SmoothOperator::~SmoothOperator()
 }
 
 
-TreeProjection& SmoothOperator::operator=( const double &arg ){
+Operator& SmoothOperator::operator=( const double &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& SmoothOperator::operator=( const DVector &arg ){
+Operator& SmoothOperator::operator=( const DVector &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& SmoothOperator::operator=( const DMatrix &arg ){
+Operator& SmoothOperator::operator=( const DMatrix &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& SmoothOperator::operator=( const Expression &arg ){
+Operator& SmoothOperator::operator=( const Expression &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
     return emptyTreeProjection;
 }
 
-TreeProjection& SmoothOperator::operator=( const Operator &arg ){
+Operator& SmoothOperator::operator=( const Operator &arg ){
 
     ACADOERROR( RET_UNKNOWN_BUG );
     ASSERT( 1 == 0 );
@@ -99,23 +99,23 @@ TreeProjection* SmoothOperator::cloneTreeProjection() const{
 
 
 
-TreeProjection& SmoothOperator::operator+=( const double    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& SmoothOperator::operator+=( const DVector    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& SmoothOperator::operator+=( const DMatrix    & arg ){ return operator=( this->operator+(arg) ); }
-TreeProjection& SmoothOperator::operator+=( const Expression& arg ){ return operator=( this->operator+(arg) ); }
+Operator& SmoothOperator::operator+=( const double    & arg ){ return operator=( this->operator+(arg) ); }
+Operator& SmoothOperator::operator+=( const DVector    & arg ){ return operator=( this->operator+(arg) ); }
+Operator& SmoothOperator::operator+=( const DMatrix    & arg ){ return operator=( this->operator+(arg) ); }
+Operator& SmoothOperator::operator+=( const Expression& arg ){ return operator=( this->operator+(arg) ); }
 
-TreeProjection& SmoothOperator::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& SmoothOperator::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& SmoothOperator::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
-TreeProjection& SmoothOperator::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
+Operator& SmoothOperator::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
+Operator& SmoothOperator::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
+Operator& SmoothOperator::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
+Operator& SmoothOperator::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
 
-TreeProjection& SmoothOperator::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& SmoothOperator::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& SmoothOperator::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
-TreeProjection& SmoothOperator::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
+Operator& SmoothOperator::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
+Operator& SmoothOperator::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
+Operator& SmoothOperator::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
+Operator& SmoothOperator::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
 
-TreeProjection& SmoothOperator::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
-TreeProjection& SmoothOperator::operator/=( const Expression  & arg ){ return operator=( this->operator/(arg) ); }
+Operator& SmoothOperator::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
+Operator& SmoothOperator::operator/=( const Expression  & arg ){ return operator=( this->operator/(arg) ); }
 
 
 

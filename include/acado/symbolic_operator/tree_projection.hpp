@@ -72,19 +72,19 @@ public:
     virtual ~TreeProjection();
 
     /** Assignment Operator (deep copy). */
-    TreeProjection& operator=( const Operator &arg );
+    Operator& operator=( const Operator &arg );
 
 
     /** Sets the argument (note that arg should have dimension 1). */
-    virtual TreeProjection& operator=( const Expression  & arg );
-    virtual TreeProjection& operator=( const double      & arg );
+    virtual Operator& operator=( const Expression& arg );
+    virtual Operator& operator=( const double& arg );
 
 
 
      /** Provides a deep copy of the expression. \n
       *  \return a clone of the expression.      \n
       */
-     virtual Operator* clone() const;
+     virtual TreeProjection* clone() const;
 
 
      /** Provides a deep copy of a tree projection. \n
@@ -198,6 +198,11 @@ public:
      /** Returns the argument or NULL if no intermediate argument available */
      virtual Operator* passArgument() const;
 
+
+     virtual BooleanType isTrivial() const;
+
+     virtual returnValue initDerivative();
+
 //
 //  PROTECTED FUNCTIONS:
 //
@@ -225,14 +230,38 @@ protected:
      *  backward derivative                                        \n
      *  \return SUCCESSFUL_RETURN                                  \n
      */
-     virtual returnValue ADbackwardProtected( int               dim      , /**< number of directions  */
-                                              VariableType     *varType  , /**< the variable types    */
-                                              int              *component, /**< and their components  */
-                                              Operator  *seed     , /**< the backward seed     */
-                                              Operator **df         /**< the result            */ );
+     virtual returnValue ADbackwardProtected( int            dim      , /**< number of directions  */
+                                              VariableType  *varType  , /**< the variable types    */
+                                              int           *component, /**< and their components  */
+                                              Operator      *seed     , /**< the backward seed     */
+                                              Operator     **df       , /**< the result            */
+                                              int            &nNewIS  , /**< the number of new IS  */
+                                              TreeProjection ***newIS    /**< the new IS-pointer   */ );
 
 
-
+    /** Automatic Differentiation in symmetric mode on the symbolic \n
+     *  level. This function generates an expression for a          \n
+     *  second order derivative.                                    \n
+     *  \return SUCCESSFUL_RETURN                                   \n
+     */
+     virtual returnValue ADsymmetricProtected( int            dim       , /**< number of directions  */
+                                               VariableType  *varType   , /**< the variable types    */
+                                               int           *component , /**< and their components  */
+                                               Operator      *l         , /**< the backward seed     */
+                                               Operator     **S         , /**< forward seed matrix   */
+                                               int            dimS      , /**< dimension of forward seed             */
+                                               Operator     **dfS       , /**< first order foward result             */
+                                               Operator     **ldf       , /**< first order backward result           */
+                                               Operator     **H         , /**< upper trianglular part of the Hessian */
+                                               int            &nNewLIS  , /**< the number of newLIS  */
+                                               TreeProjection ***newLIS , /**< the new LIS-pointer   */
+                                               int            &nNewSIS  , /**< the number of newSIS  */
+                                               TreeProjection ***newSIS , /**< the new SIS-pointer   */
+                                               int            &nNewHIS  , /**< the number of newHIS  */
+                                               TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
+       
+       
+       
     /** Copy function. */
     virtual void copy( const Projection &arg );
 

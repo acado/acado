@@ -136,11 +136,8 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 		if( NDX2 > 0 && (NDX2 < NX2 || NDX2 > (NX1+NX2)) ) {
 			return ACADOERROR( RET_INVALID_OPTION );
 		}
-		else if( NDX2 > 0 ) {
-			NDX2 = NX1+NX2;
-		}
+		else if( NDX2 > 0 ) NDX2 = NX1+NX2;
 		dx = DifferentialStateDerivative("", NDX2, 1);
-		NDX = NX;
 
 		DifferentialEquation g;
 		for( uint i = 0; i < rhs_.getDim(); i++ ) {
@@ -152,8 +149,8 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 
 		if( f.getNT() > 0 ) timeDependant = true;
 
-		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX, NOD ) &
-				diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX, NOD ) );
+		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX,NOD ) &
+				diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX,NOD ) );
 	}
 	return SUCCESSFUL_RETURN;
 }
@@ -1105,10 +1102,6 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	NVARS3 = 0;
 	diffsDim = 0;
 	inputDim = NX+NXA + NU + NOD;
-	
-	uint numDX = NDX2;
-	if( NDX3 > numDX ) numDX = NDX3;
-	if( NDX > numDX ) numDX = NDX;
 
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
@@ -1119,7 +1112,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	if( timeDependant ) timeDep = 1;
 
 	rk_ttt = ExportVariable( "rk_ttt", 1, 1, REAL, structWspace, true );
-	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim+numDX+timeDep, REAL, structWspace );
+	rk_xxx = ExportVariable( "rk_xxx", 1, inputDim+NDX+timeDep, REAL, structWspace );
 	rk_kkk = ExportVariable( "rk_kkk", NX+NXA, numStages, REAL, structWspace );
 	rk_A = ExportVariable( "rk_A", numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, structWspace );
 	if ( (bool)debugMode == true && useOMP ) {
@@ -1129,7 +1122,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 		debug_mat = ExportVariable( "debug_mat", numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, ACADO_VARIABLES );
 	}
 	rk_b = ExportVariable( "rk_b", numStages*(Xmax+NXA), 1, REAL, structWspace );
-	rk_rhsTemp = ExportVariable( "rk_rhsTemp", NX+NXA+numDX, 1, REAL, structWspace );
+	rk_rhsTemp = ExportVariable( "rk_rhsTemp", NX+NXA+NDX, 1, REAL, structWspace );
 	rk_diffsTemp2 = ExportVariable( "rk_diffsTemp2", 1, (NX2+NXA)*(NVARS2), REAL, structWspace );
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
@@ -1226,6 +1219,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 
 		if( f_Output.getNDX() > 0 ) numDX_output(i) = NDX;
 		else						numDX_output(i) = 0;
+
 		if( f_Output.getNXA() > 0 ) numXA_output(i) = NXA;
 		else						numXA_output(i) = 0;
 	
@@ -1245,7 +1239,7 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		if( numVARS_output(i) > maxVARS ) maxVARS = numVARS_output(i);
 	
 		ExportAcadoFunction OUTPUT, diffs_OUTPUT;
-		val = val & OUTPUT.init( f_Output,std::string("acado_output")+toString(i)+"_rhs",NX,NXA,NU ) & diffs_OUTPUT.init( g_Output,std::string("acado_output")+toString(i)+"_diffs",NX,NXA,NU );
+		val = val & OUTPUT.init( f_Output,std::string("acado_output")+toString(i)+"_rhs",NX,NXA,NU,NP,NDX,NOD ) & diffs_OUTPUT.init( g_Output,std::string("acado_output")+toString(i)+"_diffs",NX,NXA,NU,NP,NDX,NOD );
 		
 		ExportVariable rk_output( std::string("rk_output")+toString(i), 1, outputDim, REAL );
 		rk_outputs.push_back( rk_output );
@@ -1254,9 +1248,9 @@ returnValue ImplicitRungeKuttaExport::setupOutput( const std::vector<Grid> outpu
 		if( sensGen ) diffs_outputs.push_back( diffs_OUTPUT );
 
 		DMatrix dependencyMat = outputExpressions[i].getDependencyPattern( x );
-		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( z ) );
-		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( u ) );
-		dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( dx ) );
+		if(z.getDim()>0)  dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( z ) );
+		if(u.getDim()>0)  dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( u ) );
+		if(dx.getDim()>0) dependencyMat.appendCols( outputExpressions[i].getDependencyPattern( dx ) );
 
 		outputDependencies.push_back( dependencyMat );
 		totalMeas.push_back( outputGrids[i].getNumIntervals() );

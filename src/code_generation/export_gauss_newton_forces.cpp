@@ -88,6 +88,9 @@ returnValue ExportGaussNewtonForces::getDataDeclarations(	ExportStatementBlock& 
 
 	declarations.addDeclaration(x0, dataStruct);
 
+	declarations.addDeclaration(lbValues, dataStruct);
+	declarations.addDeclaration(ubValues, dataStruct);
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -582,7 +585,8 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 	//
 	// Stack state constraints
 	//
-	unsigned numStateBox = 0;
+	unsigned numLB = 0;
+	unsigned numUB = 0;
 	for (unsigned i = 0; i < xBounds.getNumPoints(); ++i)
 	{
 		lbTmp = xBounds.getLowerBounds( i );
@@ -591,20 +595,20 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 		if (isFinite( lbTmp ) == false && isFinite( ubTmp ) == false)
 			continue;
 
-		++numStateBox;
-
 		for (unsigned j = 0; j < lbTmp.getDim(); ++j)
 		{
 			if (acadoIsFinite( lbTmp( j ) ) == true)
 			{
 				conLBIndices[ i ].push_back( j );
 				conLBValues[ i ].push_back( lbTmp( j ) );
+				numLB++;
 			}
 
 			if (acadoIsFinite( ubTmp( j ) ) == true)
 			{
 				conUBIndices[ i ].push_back( j );
 				conUBValues[ i ].push_back( ubTmp( j ) );
+				numUB++;
 			}
 		}
 	}
@@ -626,12 +630,14 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 			{
 				conLBIndices[ i ].push_back(NX + j);
 				conLBValues[ i ].push_back( lbTmp( j ) );
+				numLB++;
 			}
 
 			if (acadoIsFinite( ubTmp( j ) ) == true)
 			{
 				conUBIndices[ i ].push_back(NX + j);
 				conUBValues[ i ].push_back( ubTmp( j ) );
+				numUB++;
 			}
 		}
 	}
@@ -645,28 +651,54 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 		conUB[ i ].setup(string("ub") + toString(i + 1), conUBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
 	}
 
+	int hardcodeConstraintValues;
+	get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
+	uint numBounds = numLB+numUB;
+	if (!hardcodeConstraintValues && numBounds > 0)
+	{
+		lbValues.setup("lbValues", numLB, 1, REAL, ACADO_VARIABLES);
+		lbValues.setDoc( "Lower bounds values." );
+		ubValues.setup("ubValues", numUB, 1, REAL, ACADO_VARIABLES);
+		ubValues.setDoc( "Upper bounds values." );
+	}
+
 	evaluateConstraints.setup("evaluateConstraints");
 
 	//
 	// Export evaluation of simple box constraints
 	//
-	for (unsigned i = 0; i < N + 1; ++i)
+	uint indexB = 0;
+	for (unsigned i = 0; i < N + 1; ++i) {
 		for (unsigned j = 0; j < conLBIndices[ i ].size(); ++j)
 		{
-			evaluateConstraints << conLB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << toString(conLBValues[ i ][ j ]) << " - ";
+			if( hardcodeConstraintValues ) {
+				evaluateConstraints << conLB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << toString(conLBValues[ i ][ j ]) << " - ";
+			}
+			else {
+				evaluateConstraints << conLB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << lbValues.get( indexB,0 ) << " - ";
+			}
+			indexB++;
 
 			if (conLBIndices[ i ][ j ] < NX)
 				evaluateConstraints << x.getFullName() << "[ " << toString(i * NX + conLBIndices[ i ][ j ]) << " ];\n";
 			else
 				evaluateConstraints << u.getFullName() << "[ " << toString(i * NU + conLBIndices[ i ][ j ] - NX) << " ];\n";
 		}
+	}
 	evaluateConstraints.addLinebreak();
 
+	indexB = 0;
 	for (unsigned i = 0; i < N + 1; ++i)
 		for (unsigned j = 0; j < conUBIndices[ i ].size(); ++j)
 		{
-			evaluateConstraints << conUB[ i ].getFullName()
-					<< "[ " << toString(j) << " ]" << " = " << toString(conUBValues[ i ][ j ]) << " - ";
+			if( hardcodeConstraintValues ) {
+				evaluateConstraints << conUB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << toString(conUBValues[ i ][ j ]) << " - ";
+			}
+			else {
+				evaluateConstraints << conUB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << ubValues.get( indexB,0 ) << " - ";
+			}
+			indexB++;
+
 			if (conUBIndices[ i ][ j ] < NX)
 				evaluateConstraints << x.getFullName() << "[ " << toString(i * NX + conUBIndices[ i ][ j ]) << " ];\n";
 			else
@@ -851,12 +883,10 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	//
 	ExportFunction solveQP;
 	solveQP.setup("solve");
-	string prefix;
-	prefix = "forces";
 
 	feedback
 		<< returnValueFeedbackPhase.getFullName() << " = "
-		<< qpModuleName << "_" << solveQP << "( "
+		<< qpModuleName << "_" << solveQP.getName() << "( "
 		<< "&" << qpObjPrefix << "_" << "params" << ", "
 		<< "&" << qpObjPrefix << "_" << "output" << ", "
 		<< "&" << qpObjPrefix << "_" << "info" << " );\n";

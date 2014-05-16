@@ -45,8 +45,7 @@ int main( )
 {
 	// DEFINE VALRIABLES:
 	// ---------------------------
-	DifferentialState x("", 2, 1);
-	DifferentialState y("", 2, 1);
+	DifferentialState x("",2,1);
 
 	Function f;
 
@@ -54,14 +53,11 @@ int main( )
 	// -----------------------
 
 	IntermediateState ff;
-	ff = sin(x(0) * x(1));
+	IntermediateState a;
+	ff = sin(x(0)*x(1));
 
-	f << forwardDerivative(ff + x(0), x(0));
-	f << forwardDerivative(x(1) + ff, x(1));
-	f << forwardDerivative(ff + ff, x);
-	f << forwardDerivative(ff + ff, x, y);
-	f << forwardDerivative(ff + ff, x, dot(x));
-	//f << dot(sin(x(0)*x(1)));
+	f << ff;
+	f << forwardDerivative(ff,x);
 
 	ofstream stream( "symbolic_differentiation3_output.txt" );
 	stream << f;

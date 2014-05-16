@@ -40,21 +40,29 @@ USING_NAMESPACE_ACADO
 // ------------------------------------------------------------------------------------
 
 
-Expression sin ( const Expression &arg ){ return arg.getSin (); }
-Expression cos ( const Expression &arg ){ return arg.getCos (); }
-Expression tan ( const Expression &arg ){ return arg.getTan (); }
-Expression asin( const Expression &arg ){ return arg.getAsin(); }
-Expression acos( const Expression &arg ){ return arg.getAcos(); }
-Expression atan( const Expression &arg ){ return arg.getAtan(); }
-Expression exp ( const Expression &arg ){ return arg.getExp (); }
-Expression sqrt( const Expression &arg ){ return arg.getSqrt(); }
-Expression ln  ( const Expression &arg ){ return arg.getLn  (); }
-Expression log ( const Expression &arg ){ return arg.getLn  (); }
+IntermediateState sin ( const Expression &arg ){ return arg.getSin(); }
+IntermediateState cos ( const Expression &arg ){ return arg.getCos (); }
+IntermediateState tan ( const Expression &arg ){ return arg.getTan (); }
+IntermediateState asin( const Expression &arg ){ return arg.getAsin(); }
+IntermediateState acos( const Expression &arg ){ return arg.getAcos(); }
+IntermediateState atan( const Expression &arg ){ return arg.getAtan(); }
+IntermediateState exp ( const Expression &arg ){ return arg.getExp (); }
+IntermediateState sqrt( const Expression &arg ){ return arg.getSqrt(); }
+IntermediateState ln  ( const Expression &arg ){ return arg.getLn  (); }
+IntermediateState log ( const Expression &arg ){ return arg.getLn  (); }
 
-Expression pow( const Expression &arg1, const Expression &arg2 ){ return arg1.getPow(arg2);               }
-Expression pow( const double     &arg1, const Expression &arg2 ){ return arg2.convert(arg1).getPow(arg2); }
-Expression pow( const Expression &arg1, const double     &arg2 ){
+IntermediateState pow( const Expression &arg1, const Expression &arg2 ){
+  
+  return arg1.getPow(arg2);
+}
 
+IntermediateState pow( const double &arg1, const Expression &arg2 ){
+  
+  return arg2.convert(arg1).getPow(arg2);
+}
+
+IntermediateState pow( const Expression &arg1, const double &arg2 ){
+  
     if( fabs( arg2 - floor(arg2) ) <= 10.0*EPS ){
         int intarg = (int) floor(arg2);
         return arg1.getPowInt( intarg );
@@ -73,11 +81,11 @@ Expression pow( const Expression &arg1, const double     &arg2 ){
 // ---------------------------------------------------------------------------------------------
 
 
-Expression square         ( const Expression &arg ){ return arg.getSumSquare    (); }
-Expression sum_square     ( const Expression &arg ){ return arg.getSumSquare    (); }
-Expression log_sum_exp    ( const Expression &arg ){ return arg.getLogSumExp    (); }
-Expression euclidean_norm ( const Expression &arg ){ return arg.getEuclideanNorm(); }
-Expression entropy        ( const Expression &arg ){ return arg.getEntropy      (); }
+IntermediateState square         ( const Expression &arg ){ return arg.getSumSquare    (); }
+IntermediateState sum_square     ( const Expression &arg ){ return arg.getSumSquare    (); }
+IntermediateState log_sum_exp    ( const Expression &arg ){ return arg.getLogSumExp    (); }
+IntermediateState euclidean_norm ( const Expression &arg ){ return arg.getEuclideanNorm(); }
+IntermediateState entropy        ( const Expression &arg ){ return arg.getEntropy      (); }
 
 
 
@@ -117,11 +125,44 @@ Expression forwardDerivative( const Expression &arg1,
 }
 
 
+Expression multipleForwardDerivative( const Expression &arg1,
+                              const Expression &arg2,
+                              const Expression &seed  ){
+
+	Expression tmp;
+	for( uint i = 0; i < seed.getNumCols(); i++ ) {
+		tmp.appendCols( forwardDerivative( arg1, arg2, seed.getCol(i) ) );
+	}
+    return tmp;
+}
+
+
 Expression backwardDerivative( const Expression &arg1,
                                const Expression &arg2,
                                const Expression &seed  ){
 
     return arg1.ADbackward(arg2,seed);
+}
+
+
+Expression multipleBackwardDerivative( const Expression &arg1,
+                              const Expression &arg2,
+                              const Expression &seed  ){
+
+	Expression tmp;
+	for( uint i = 0; i < seed.getNumCols(); i++ ) {
+		tmp.appendCols( backwardDerivative( arg1, arg2, seed.getCol(i) ) );
+	}
+    return tmp;
+}
+
+Expression symmetricDerivative( 	const Expression &arg1,
+ 	 	 	 	 	 	 	 	 	const Expression &arg2,
+ 	 	 	 	 	 	 	 	 	const Expression &forward_seed,
+ 	 	 	 	 	 	 	 	 	const Expression &backward_seed,
+ 	 	 	 	 	 	 	 	 	Expression *forward_result,
+ 	 	 	 	 	 	 	 	 	Expression *backward_result ) {
+	return arg1.ADsymmetric( arg2, forward_seed, backward_seed, forward_result, backward_result );
 }
 
 
@@ -201,6 +242,34 @@ Expression chol( const Expression &arg ){
              L(j,k) = 0.0;
 
     return L;
+}
+
+
+returnValue clearAllStaticCounters()
+{
+	AlgebraicState              dummy1;
+	Control                     dummy2;
+	DifferentialState           dummy3;
+	DifferentialStateDerivative dummy4;
+	Disturbance                 dummy5;
+	IntegerControl              dummy6;
+	IntegerParameter            dummy7;
+	IntermediateState           dummy8;
+	Parameter                   dummy9;
+	OnlineData                  dummy10;
+
+	dummy1.clearStaticCounters();
+	dummy2.clearStaticCounters();
+	dummy3.clearStaticCounters();
+	dummy4.clearStaticCounters();
+	dummy5.clearStaticCounters();
+	dummy6.clearStaticCounters();
+	dummy7.clearStaticCounters();
+	dummy8.clearStaticCounters();
+	dummy9.clearStaticCounters();
+	dummy10.clearStaticCounters();
+
+	return SUCCESSFUL_RETURN;
 }
 
 

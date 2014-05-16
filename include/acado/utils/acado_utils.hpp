@@ -142,6 +142,7 @@ int acadoRound (double x);
 /** Specific rounding implementation for rounding away from zero. */
 int acadoRoundAway (double x);
 
+
 CLOSE_NAMESPACE_ACADO
 
 #endif	// ACADO_TOOLKIT_ACADO_UTILS_HPP
