@@ -26,7 +26,7 @@
 /**
  *    \file include/acado/code_generation/export_gauss_newton_cn2.hpp
  *    \authors Milan Vukov, Joel Andersson
- *    \date 2013
+ *    \date 2013 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_CN2_HPP
@@ -37,13 +37,13 @@
 BEGIN_NAMESPACE_ACADO
 
 /**
- *	\brief TBD
+ *	\brief An OCP solver based on the N^2 condensing algorithm
  *
  *	\ingroup NumericalAlgorithms
  *
  *	\authors Milan Vukov, Joel Andersson
  *
- *	\note Early experimental implementation
+ *	\note Still a limited experimental version
  */
 class ExportGaussNewtonCN2 : public ExportNLPSolver
 {
@@ -55,8 +55,8 @@ public:
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
 	ExportGaussNewtonCN2(	UserInteraction* _userInteraction = 0,
-								const std::string& _commonHeaderName = ""
-								);
+							const std::string& _commonHeaderName = ""
+							);
 
 	/** Destructor. */
 	virtual ~ExportGaussNewtonCN2( )
@@ -166,12 +166,12 @@ protected:
 	ExportFunction setObjQN1QN2;
 
 	/** Variable containing the QP Hessian matrix. */
-	ExportVariable H, H00, H10, H11;
+	ExportVariable H;
 	/** Variable containing the QP constraint matrix. */
 	ExportVariable A;
 
 	/** Variable containing the QP gradient. */
-	ExportVariable g, g0, g1;
+	ExportVariable g;
 
 	/** Variable containing the lower limits on QP variables. */
 	ExportVariable lb;
@@ -195,21 +195,17 @@ protected:
 	ExportVariable lbValues, ubValues;
 	ExportVariable lbAValues, ubAValues;
 
-	ExportVariable Qd;
-
 	ExportFunction condensePrep;
 	ExportFunction condenseFdb;
 	ExportFunction expand;
 
-	ExportVariable T, E, QE, QGx, QDy;
+	ExportVariable C, E, QDy, Qd;
 
 	ExportFunction multGxd;
 	ExportFunction moveGxT;
 	ExportFunction multGxGx;
 	ExportFunction multGxGu;
 	ExportFunction moveGuE;
-	ExportFunction setBlockH11;
-	ExportFunction zeroBlockH11;
 	ExportFunction copyHTH;
 	ExportFunction multQ1d;
 	ExportFunction multQN1d;
@@ -217,39 +213,29 @@ protected:
 	ExportFunction multQDy;
 	ExportFunction multEQDy;
 	ExportFunction multQETGx;
-	ExportFunction zeroBlockH10;
 	ExportFunction multEDu;
 	ExportFunction multQ1Gx;
 	ExportFunction multQN1Gx;
 	ExportFunction multQ1Gu;
 	ExportFunction multQN1Gu;
-	ExportFunction zeroBlockH00;
-	ExportFunction multCTQC;
-
-	ExportVariable A10;
-	ExportVariable A20;
-	ExportVariable pacA01Dx0;
-	ExportVariable pocA02Dx0;
-	ExportFunction multHxC;
-	ExportFunction multHxE;
-	ExportFunction macHxd;
-
-	ExportFunction macCTSlx;
-	ExportFunction macETSlu;
 
 	ExportFunction preparation;
 	ExportFunction feedback;
 
 	ExportFunction getKKT;
 
+	//
 	// N2 condensing related
-	ExportVariable W1, W2;
+	//
+	ExportVariable T1, T2, W1, W2;
 	ExportVariable sbar, w1, w2;
 
 	ExportFunction multBTW1, macBTW1_R1, multGxTGu, macQEW2, mac_S1T_E;
-	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macASbarD2, macS1TSbar;
+	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macS1TSbar;
 	ExportFunction expansionStep;
 
+	// H00 and H10 computations
+	ExportFunction mult_BT_T1, mac_ST_C, multGxTGx, macGxTGx;
 };
 
 CLOSE_NAMESPACE_ACADO
