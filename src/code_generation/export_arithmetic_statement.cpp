@@ -397,9 +397,9 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 					}
 				}
 
-				if (op2 == ESO_ADD)
+				if (op2 == ESO_ADD && rhs3->isZero(ii, j) == false)
 					stream << " + " << rhs3->get(ii, j);
-				if (op2 == ESO_SUBTRACT)
+				if (op2 == ESO_SUBTRACT && rhs3->isZero(ii, j) == false)
 					stream << " - " << rhs3->get(ii, j);
 				if (op2 == ESO_UNDEFINED && allZero == true)
 					stream << " 0.0;\n";
@@ -564,7 +564,8 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 	unsigned numOps = lhs.getNumRows() * lhs.getNumCols();
 
 	if (	lhs.isSubMatrix() == false && lhs.getDim() > 1 &&
-			rhs1.isGiven() == true && rhs1.getGivenMatrix().isZero() == true)
+			rhs1.isGiven() == true && rhs1.getGivenMatrix().isZero() == true &&
+			_op == "=" )
 	{
 		stream 	<< "{ int lCopy; for (lCopy = 0; lCopy < "<< lhs.getDim() << "; lCopy++) "
 				<< lhs.getFullName() << "[ lCopy ] = 0; }" << endl;
