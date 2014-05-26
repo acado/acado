@@ -118,9 +118,7 @@ Objective::Objective( const Objective& rhs )
     cgExternLsqElements = rhs.cgExternLsqElements;
     cgExternLsqEndTermElements = rhs.cgExternLsqEndTermElements;
 
-    cgLSQWeightingVectorsSlx = rhs.cgLSQWeightingVectorsSlx;
-    cgLSQWeightingVectorsSlu = rhs.cgLSQWeightingVectorsSlu;
-
+    cgLsqLinearElements = rhs.cgLsqLinearElements;
 }
 
 
@@ -152,8 +150,7 @@ Objective::~Objective( ){
     cgExternLsqElements.clear();
     cgExternLsqEndTermElements.clear();
 
-    cgLSQWeightingVectorsSlx.clear();
-    cgLSQWeightingVectorsSlu.clear();
+    cgLsqLinearElements.clear();
 }
 
 returnValue Objective::addLSQ( const MatrixVariablesGrid *S_,
@@ -248,9 +245,7 @@ Objective& Objective::operator=( const Objective& rhs ){
         cgExternLsqElements = rhs.cgExternLsqElements;
         cgExternLsqEndTermElements = rhs.cgExternLsqEndTermElements;
 
-        cgLSQWeightingVectorsSlx = rhs.cgLSQWeightingVectorsSlx;
-        cgLSQWeightingVectorsSlu = rhs.cgLSQWeightingVectorsSlu;
-
+        cgLsqLinearElements = rhs.cgLsqLinearElements;
     }
     return *this;
 }
@@ -610,10 +605,9 @@ returnValue Objective::getLSQEndTerms( LsqExternElements& _elements ) const
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue Objective::getLSQLinearTerms(std::vector<DMatrix>& _vSlx, std::vector<DMatrix>& _vSlu) const
+returnValue Objective::getLSQLinearTerms(LsqLinearElements& _elements) const
 {
-	_vSlx = cgLSQWeightingVectorsSlx;
-	_vSlu = cgLSQWeightingVectorsSlu;
+	_elements = cgLsqLinearElements;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -680,11 +674,14 @@ returnValue Objective::addLSQEndTerm(const BMatrix& S, const std::string& h)
 
 returnValue Objective::addLSQLinearTerms(const DVector& Slx, const DVector& Slu)
 {
-	DMatrix evSlx( Slx );
-	DMatrix evSlu( Slu );
+	cgLsqLinearElements.push_back( LsqLinearData(Slx, Slu, true) );
 
-	cgLSQWeightingVectorsSlx.push_back( evSlx );
-	cgLSQWeightingVectorsSlu.push_back( evSlu );
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue Objective::addLSQLinearTerms(const BVector& Slx, const BVector& Slu)
+{
+	cgLsqLinearElements.push_back( LsqLinearData(Slx.cast<double>(), Slu.cast<double>(), false) );
 
 	return SUCCESSFUL_RETURN;
 }

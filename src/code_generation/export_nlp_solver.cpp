@@ -403,6 +403,8 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 		evaluateLSQ = ExportAcadoFunction(lsqExternElements[ 0 ].h);
 		evaluateLSQEndTerm = ExportAcadoFunction(lsqExternEndTermElements[ 0 ].h);
 
+		setupObjectiveLinearTerms( _objective );
+
 		setupResidualVariables();
 
 		return SUCCESSFUL_RETURN;
@@ -749,45 +751,53 @@ returnValue ExportNLPSolver::setObjective(const Objective& _objective)
 	if (getNYN() && (objS.isGiven() ^ objSEndTerm.isGiven()))
 		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "All weighting matrices have to be defined (or all undefined)");
 
+	setupObjectiveLinearTerms( _objective );
+
+	setupResidualVariables();
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue ExportNLPSolver::setupObjectiveLinearTerms(const Objective& _objective)
+{
+	int variableObjS;
+	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
+
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Setup the linear terms
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	std::vector<ExportVariable> vSlx, vSlu;
+	LsqLinearElements lsqLinearElements;
+	_objective.getLSQLinearTerms( lsqLinearElements );
 
-//	_objective.getLSQLinearTerms(vSlx, vSlu);
-
-	if (vSlx.size() > 0 && vSlu.size() > 0)
+	if (lsqLinearElements.size() > 0)
 	{
-		if (vSlx.size() != 1 || vSlu.size() != 1)
-			return ACADOERROR(RET_INVALID_ARGUMENTS);
+		ASSERT_RETURN(lsqLinearElements.size() == 1);
 
-		if (vSlx[ 0 ].getDim() > 0)
+		if (variableObjS == YES)
 		{
-			if (vSlx[ 0 ].isGiven() && vSlx[ 0 ].getDim() != NX && vSlx[ 0 ].getNumCols() == 1)
-				return ACADOERROR(RET_INVALID_ARGUMENTS);
-
-			if (vSlx[ 0 ].isGiven() == true)
-				objSlx.setup("Wlx", vSlx[ 0 ].getGivenMatrix(), REAL, ACADO_VARIABLES);
-			else
-				objSlx.setup("Wlx", NX, 1, REAL, ACADO_VARIABLES);
+			objSlx.setup("Wlx", (N + 1) * NX, 1, REAL, ACADO_VARIABLES);
+			objSlu.setup("Wlu", N * NU, 1, REAL, ACADO_VARIABLES);
 		}
-
-		if (vSlu[ 0 ].getDim() > 0)
+		else
 		{
-			if (vSlu[ 0 ].isGiven() && vSlu[ 0 ].getDim() != NU && vSlu[ 0 ].getNumCols() == 1)
-				return ACADOERROR(RET_INVALID_ARGUMENTS);
+			ASSERT_RETURN( lsqLinearElements[ 0 ].Wlx.getDim() == NX );
+			ASSERT_RETURN( lsqLinearElements[ 0 ].Wlu.getDim() == NU );
 
-			if (vSlu[ 0 ].isGiven() == true)
-				objSlu.setup("Wlu", vSlu[ 0 ].getGivenMatrix(), REAL, ACADO_VARIABLES);
+			if (lsqLinearElements[ 0 ].givenW == false)
+			{
+				objSlx.setup("Wlx", lsqLinearElements[ 0 ].Wlx, REAL, ACADO_VARIABLES, false, "", false);
+				objSlu.setup("Wlu", lsqLinearElements[ 0 ].Wlu, REAL, ACADO_VARIABLES, false, "", false);
+			}
 			else
-				objSlu.setup("Wlu", NU, 1, REAL, ACADO_VARIABLES);
+			{
+				objSlx.setup("Wlx", lsqLinearElements[ 0 ].Wlx, REAL, ACADO_VARIABLES);
+				objSlu.setup("Wlu", lsqLinearElements[ 0 ].Wlu, REAL, ACADO_VARIABLES);
+			}
 		}
 	}
-
-	setupResidualVariables();
 
 	return SUCCESSFUL_RETURN;
 }
