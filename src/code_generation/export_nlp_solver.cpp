@@ -103,6 +103,9 @@ returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarat
 	declarations.addDeclaration(evGu, dataStruct);
 
 	declarations.addDeclaration(objS, dataStruct);
+	declarations.addDeclaration(objSEndTerm, dataStruct);
+	declarations.addDeclaration(objSlx, dataStruct);
+	declarations.addDeclaration(objSlu, dataStruct);
 
 	declarations.addDeclaration(objAuxVar, dataStruct);
 	declarations.addDeclaration(objValueIn, dataStruct);
@@ -115,8 +118,6 @@ returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarat
 	declarations.addDeclaration(R2, dataStruct);
 
 	declarations.addDeclaration(S1, dataStruct);
-
-	declarations.addDeclaration(objSEndTerm, dataStruct);
 
 	declarations.addDeclaration(QN1, dataStruct);
 	declarations.addDeclaration(QN2, dataStruct);
@@ -798,6 +799,14 @@ returnValue ExportNLPSolver::setupObjectiveLinearTerms(const Objective& _objecti
 			}
 		}
 	}
+	else
+	{
+		objSlx = zeros<double>(NX, 1);
+		objSlu = zeros<double>(NU, 1);
+	}
+
+	objSlx.setDoc("Linear term weighting vector for states.");
+	objSlu.setDoc("Linear term weighting vector for controls.");
 
 	return SUCCESSFUL_RETURN;
 }
