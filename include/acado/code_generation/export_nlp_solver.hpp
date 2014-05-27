@@ -318,6 +318,7 @@ protected:
 
 private:
 	returnValue setupResidualVariables();
+	returnValue setupObjectiveLinearTerms(const Objective& _objective);
 };
 
 /** Types of NLP/OCP solvers. */

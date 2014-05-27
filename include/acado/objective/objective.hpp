@@ -80,6 +80,23 @@ struct LsqExternData
 /** A vector of externally defined LSQ data elements. */
 typedef std::vector< LsqExternData > LsqExternElements;
 
+/** An LSQ element data type used for code generation. */
+struct LsqLinearData
+{
+	LsqLinearData(const DVector& _Wlx, const DVector& _Wlu, bool _givenW = true)
+		: Wlx( _Wlx ), Wlu( _Wlu ), givenW( _givenW )
+	{}
+
+	/** Weighting vectors. If \a givenW is true, then this guy is used
+	 *  as a sparsity pattern, only. */
+	DMatrix Wlx, Wlu;
+	/** Indicator. */
+	bool givenW;
+};
+
+/** A vector of LSQ data linear elements. */
+typedef std::vector< LsqLinearData > LsqLinearElements;
+
 /** 
  *	\brief Stores and evaluates the objective function of optimal control problems.
  *
@@ -200,6 +217,8 @@ class Objective : public LagrangeTerm
         returnValue addLSQEndTerm(const BMatrix& S, const std::string& h);
 
         returnValue addLSQLinearTerms(const DVector& Slx, const DVector& Slu);
+
+        returnValue addLSQLinearTerms(const BVector& Slx, const BVector& Slu);
 
 // =======================================================================================
 //
@@ -434,7 +453,7 @@ class Objective : public LagrangeTerm
         returnValue getLSQTerms( LsqExternElements& _elements ) const;
         returnValue getLSQEndTerms( LsqExternElements& _elements ) const;
 
-        returnValue getLSQLinearTerms(std::vector<DMatrix>& _vSlx, std::vector<DMatrix>& _vSlu) const;
+        returnValue getLSQLinearTerms( LsqLinearElements& _elements ) const;
 
         /** @} */
 
@@ -457,8 +476,7 @@ class Objective : public LagrangeTerm
     LsqExternElements cgExternLsqElements;
     LsqExternElements cgExternLsqEndTermElements;
 
-    std::vector<DMatrix> cgLSQWeightingVectorsSlx;
-    std::vector<DMatrix> cgLSQWeightingVectorsSlu;
+    LsqLinearElements cgLsqLinearElements;
 };
 
 CLOSE_NAMESPACE_ACADO

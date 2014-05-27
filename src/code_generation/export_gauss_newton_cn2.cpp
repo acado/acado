@@ -916,12 +916,17 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	condenseFdb << (Dy -= y) << (DyN -= yN);
 	condenseFdb.addLinebreak();
 
+	int variableObjS;
+	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
+
 	// Compute RDy
 	for(unsigned run1 = 0; run1 < N; ++run1)
 	{
 		ExportArgument R2Call = R2.isGiven() == true ? R2 : R2.getAddress(run1 * NU, 0);
+		ExportArgument SluCall =
+				objSlu.isGiven() == true or variableObjS == false ? objSlu : objSlu.getAddress(run1 * NU, 0);
 		condenseFdb.addFunctionCall(
-				multRDy, R2Call, Dy.getAddress(run1 * NY, 0), g.getAddress(offset + run1 * NU, 0)
+				multRDy, R2Call, Dy.getAddress(run1 * NY, 0), SluCall, g.getAddress(offset + run1 * NU, 0)
 		);
 	}
 	condenseFdb.addLinebreak();
@@ -930,11 +935,15 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	for(unsigned run1 = 0; run1 < N; run1++ )
 	{
 		ExportArgument Q2Call = Q2.isGiven() == true ? Q2 : Q2.getAddress(run1 * NX);
+		ExportArgument SlxCall =
+				objSlx.isGiven() == true or variableObjS == false ? objSlx : objSlx.getAddress(run1 * NX, 0);
 		condenseFdb.addFunctionCall(
-				multQDy, Q2Call, Dy.getAddress(run1 * NY), QDy.getAddress(run1 * NX) );
+				multQDy, Q2Call, Dy.getAddress(run1 * NY), SlxCall, QDy.getAddress(run1 * NX) );
 	}
 	condenseFdb.addLinebreak();
-	condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) == QN2 * DyN );
+	ExportVariable SlxCall =
+				objSlx.isGiven() == true or variableObjS == false ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
+	condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) == SlxCall + QN2 * DyN );
 	condenseFdb.addLinebreak();
 
 	if (performFullCondensing() == false)
@@ -1212,11 +1221,16 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 					H.getSubMatrix(offset + iCol * NU, offset + (iCol + 1) * NU, offset + iRow * NU, offset + (iRow + 1) * NU).getTranspose()
 	);
 	// multRDy
-	multRDy.setup("multRDy", R22, Dy1, RDy1);
-	multRDy.addStatement( RDy1 == R22 * Dy1 );
+	ExportVariable SluCall = objSlu.isGiven() == true ? objSlu : ExportVariable("Slu", NU, 1, REAL, ACADO_LOCAL);
+	multRDy.setup("multRDy", R22, Dy1, SluCall, RDy1);
+	multRDy.addStatement( RDy1 ==  R22 * Dy1 );
+	multRDy.addStatement( RDy1 +=  SluCall );
+
 	// mult QDy1
-	multQDy.setup("multQDy", Q22, Dy1, QDy1);
+	ExportVariable SlxCall = objSlx.isGiven() == true ? objSlx : ExportVariable("Slx", NX, 1, REAL, ACADO_LOCAL);
+	multQDy.setup("multQDy", Q22, Dy1, SlxCall, QDy1);
 	multQDy.addStatement( QDy1 == Q22 * Dy1 );
+	multQDy.addStatement( QDy1 += SlxCall );
 	// multEQDy;
 	multEQDy.setup("multEQDy", E1, QDy1, U1);
 	multEQDy.addStatement( U1 += (E1 ^ QDy1) );

@@ -273,6 +273,11 @@ public:
 	 *  \note Experimental. */
 	returnValue minimizeLSQLinearTerms(	const DVector& Slx,	/**< a weighting vector for differential states. */
 										const DVector& Slu	/**< a weighting vector for controls. */ );
+
+	/** Applicable only for automatic code generation.
+	 *  \note Experimental. */
+	returnValue minimizeLSQLinearTerms(	const BVector& Slx,	/**< a weighting vector for differential states. */
+										const BVector& Slu	/**< a weighting vector for controls. */ );
 	/** @} */
 
 	/** Adds an differential equation (as a continuous equality constraint). \n

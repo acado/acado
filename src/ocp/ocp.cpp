@@ -400,6 +400,11 @@ returnValue OCP::minimizeLSQLinearTerms(const DVector& Slx, const DVector& Slu)
 	return objective.addLSQLinearTerms(Slx, Slu);
 }
 
+returnValue OCP::minimizeLSQLinearTerms(const BVector& Slx, const BVector& Slu)
+{
+	return objective.addLSQLinearTerms(Slx, Slu);
+}
+
 // PROTECTED FUNCTIONS:
 // --------------------
 void OCP::setupGrid( double tStart, double tEnd, int N ){
