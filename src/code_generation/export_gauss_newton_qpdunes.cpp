@@ -209,7 +209,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
 
 	if (S1.isGiven() == false or S1.getGivenMatrix().isZero() == false)
-		return ACADOFATALTEXT(RET_INVALID_ARGUMENTS,
+		ACADOWARNINGTEXT(RET_INVALID_ARGUMENTS,
 				"Mixed control-state terms in the objective function are not supported at the moment.");
 
 	qpH.setup("qpH", N * (NX + NU) * (NX + NU) + NX * NX, 1, REAL, ACADO_WORKSPACE);

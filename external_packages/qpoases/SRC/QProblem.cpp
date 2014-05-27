@@ -616,11 +616,7 @@ returnValue QProblem::setupCholeskyDecompositionProjected( )
 			if ( bounds.getFree( )->getNumberArray( FR_idx ) != SUCCESSFUL_RETURN )
 				return THROWERROR( RET_INDEXLIST_CORRUPTED );
 
-			int AC_idx[NCMAX_ALLOC];
-			if ( constraints.getActive( )->getNumberArray( AC_idx ) != SUCCESSFUL_RETURN )
-				return THROWERROR( RET_INDEXLIST_CORRUPTED );
-
-
+#if 0
 			real_t HZ[NVMAX*NVMAX];
 			real_t ZHZ[NVMAX*NVMAX];
 
@@ -631,12 +627,13 @@ returnValue QProblem::setupCholeskyDecompositionProjected( )
 
 				for ( j=0; j<nZ; ++j )
 				{
-					HZ[i*NVMAX + j] = 0.0;
+					real_t sum = 0.0;
 					for ( k=0; k<nFR; ++k )
 					{
 						kk = FR_idx[k];
-						HZ[i*NVMAX + j] += H[ii*NVMAX + kk] * Q[kk*NVMAX + j];
+						sum += H[ii*NVMAX + kk] * Q[kk*NVMAX + j];
 					}
+					HZ[i * NVMAX + j] = sum;
 				}
 			}
 
@@ -644,16 +641,17 @@ returnValue QProblem::setupCholeskyDecompositionProjected( )
 			for ( i=0; i<nZ; ++i )
 				for ( j=0; j<nZ; ++j )
 				{
-					ZHZ[i*NVMAX + j] = 0.0;
+					real_t sum = 0.0;
 					for ( k=0; k<nFR; ++k )
 					{
 						kk = FR_idx[k];
-						ZHZ[i*NVMAX + j] += Q[kk*NVMAX + i] * HZ[k*NVMAX + j];
+						sum += Q[kk*NVMAX + i] * HZ[k*NVMAX + j];
 					}
+					ZHZ[i * NVMAX + j] = sum;
 				}
 
 			/* R'*R = Z'*H*Z */
-			real_t sum;
+			real_t sum, inv;
 
 			for( i=0; i<nZ; ++i )
 			{
@@ -664,7 +662,10 @@ returnValue QProblem::setupCholeskyDecompositionProjected( )
 					sum -= R[k*NVMAX + i] * R[k*NVMAX + i];
 
 				if ( sum > 0.0 )
+				{
 					R[i*NVMAX + i] = sqrt( sum );
+					inv = 1.0 / R[i * NVMAX + i];
+				}
 				else
 				{
 					hessianType = HST_SEMIDEF;
@@ -678,9 +679,77 @@ returnValue QProblem::setupCholeskyDecompositionProjected( )
 					for( k=(i-1); k>=0; --k )
 						sum -= R[k*NVMAX + i] * R[k*NVMAX + j];
 
-					R[i*NVMAX + j] = sum / R[i*NVMAX + i];
+					R[i*NVMAX + j] = sum * inv;
 				}
 			}
+#else
+			real_t HZ[NVMAX];
+			real_t ZHZ[NVMAX];
+
+			real_t sum, inv;
+			for (j = 0; j < nZ; ++j)
+			{
+				/* Cache one column of Z. */
+				for (i = 0; i < NVMAX; ++i)
+					ZHZ[i] = Q[i * NVMAX + j];
+
+				/* Create one column of the product H * Z. */
+				for (i = 0; i < nFR; ++i)
+				{
+					ii = FR_idx[i];
+
+					sum = 0.0;
+					for (k = 0; k < nFR; ++k)
+					{
+						kk = FR_idx[k];
+						sum += H[ii * NVMAX + kk] * ZHZ[kk];
+					}
+					HZ[ii] = sum;
+				}
+
+				/* Create one column of the product Z^T * H * Z. */
+				for (i = j; i < nZ; ++i)
+					ZHZ[ i ] = 0.0;
+
+				for (k = 0; k < nFR; ++k)
+				{
+					kk = FR_idx[k];
+					real_t q = HZ[kk];
+					for (i = j; i < nZ; ++i)
+					{
+						ZHZ[i] += Q[kk * NVMAX + i] * q;
+					}
+				}
+
+				/* Use the computed column to update the factorization. */
+				/* j == i */
+				sum = ZHZ[j];
+
+				for (k = (j - 1); k >= 0; --k)
+					sum -= R[k * NVMAX + j] * R[k * NVMAX + j];
+
+				if (sum > 0.0)
+				{
+					R[j * NVMAX + j] = sqrt(sum);
+					inv = 1.0 / R[j * NVMAX + j];
+				}
+				else
+				{
+					hessianType = HST_SEMIDEF;
+					return THROWERROR( RET_HESSIAN_NOT_SPD );
+				}
+
+				for (i = (j + 1); i < nZ; ++i)
+				{
+					sum = ZHZ[i];
+
+					for (k = (j - 1); k >= 0; --k)
+						sum -= R[k * NVMAX + j] * R[k * NVMAX + i];
+
+					R[j * NVMAX + i] = sum * inv;
+				}
+			}
+#endif
 		}
 	}
 

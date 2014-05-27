@@ -163,6 +163,10 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 				acadoCopyTempateFile(MAKEFILE_QPDUNES, str, "#", true);
 				break;
 
+			case QP_HPMPC:
+				acadoCopyTempateFile(MAKEFILE_HPMPC, str, "#", true);
+				break;
+
 			default:
 				ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "Makefile is not yet available.");
 		}

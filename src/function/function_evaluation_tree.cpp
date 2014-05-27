@@ -646,30 +646,37 @@ BooleanType FunctionEvaluationTree::isRationalIn( const Expression &variable ){
 }
 
 
-MonotonicityType FunctionEvaluationTree::getMonotonicity( ){
+MonotonicityType FunctionEvaluationTree::getMonotonicity()
+{
+	int run1;
+	MonotonicityType m = MT_CONSTANT;
 
-    int run1;
-    MonotonicityType m = MT_CONSTANT;
+	for (run1 = 0; run1 < dim; run1++)
+	{
+		int mf = f[run1]->getMonotonicity();
 
-    for( run1 = 0; run1 < dim; run1++ ){
+		switch (mf)
+		{
+		case MT_NONDECREASING:
+			if (m == MT_CONSTANT) m = MT_NONDECREASING;
+			if (m == MT_NONINCREASING) return MT_NONMONOTONIC;
 
-        MonotonicityType mf = f[run1]->getMonotonicity();
+			break;
 
-        if( mf == MT_NONDECREASING ){
+		case MT_NONINCREASING:
+			if (m == MT_CONSTANT) m = MT_NONINCREASING;
+			if (m == MT_NONDECREASING) return MT_NONMONOTONIC;
 
-            if( m == MT_CONSTANT      )  m = MT_NONDECREASING;
-            if( m == MT_NONINCREASING )  return MT_NONMONOTONIC;
-        }
+			break;
 
-        if( mf == MT_NONINCREASING ){
+		case MT_NONMONOTONIC:
+			return MT_NONMONOTONIC;
 
-            if( m == MT_CONSTANT      )  m = MT_NONINCREASING;
-            if( m == MT_NONDECREASING )  return MT_NONMONOTONIC;
-        }
-
-        if( mf == MT_NONMONOTONIC ) return MT_NONMONOTONIC;
-    }
-    return m;
+		case MT_UNKNOWN:
+			return MT_UNKNOWN;
+		}
+	}
+	return m;
 }
 
 
@@ -930,7 +937,7 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 
 	if (getNOD() > 0)
 		stream << "const " << realString << "* od = in + " << offset << ";" << endl;
-	offset += getNOD();
+	offset += numOD;
 
 	if (getNPI() > 0)
 		stream << "const " << realString << "* q = in + " << offset << ";" << endl;
@@ -939,10 +946,6 @@ returnValue FunctionEvaluationTree::exportCode(	std::ostream& stream,
 	if (getNW() > 0)
 		stream << "const " << realString << "* w = in + " << offset << ";" << endl;
 	offset += getNW();
-
-	if (numOD > 0)
-		stream << "const " << realString << "* od = in + " << offset << ";" << endl;
-	offset += numOD;
 
 	if (numDX > 0)
 		stream << "const " << realString << "* dx = in + " << offset << ";" << endl;
