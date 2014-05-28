@@ -26,7 +26,7 @@
 /**
  *    \file source/code_generation/ocp_export.cpp
  *    \authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
- *    \date 2010 - 2013
+ *    \date 2010 - 2014
  */
 
 #include <acado/code_generation/ocp_export.hpp>
@@ -527,6 +527,8 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 			make_pair(toString( fixInitialState ), "Indicator for fixed initial state.");
 	options[ "ACADO_WEIGHTING_MATRICES_TYPE" ] =
 			make_pair(toString( (unsigned)solver->weightingMatricesType() ), "Indicator for type of fixed weighting matrices.");
+	options[ "ACADO_USE_LINEAR_TERMS" ] =
+				make_pair(toString( (unsigned)solver->usingLinearTerms() ), "Indicator for usage of non-hard-coded linear terms in the objective.");
 	options[ "ACADO_HARDCODED_CONSTRAINT_VALUES" ] =
 			make_pair(toString( hardcodeConstraintValues ), "Flag indicating whether constraint values are hard-coded or not.");
 	options[ "ACADO_USE_ARRIVAL_COST" ] =

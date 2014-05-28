@@ -1131,6 +1131,14 @@ bool ExportNLPSolver::initialStateFixed() const
 	return (bool)fixInitialState;
 }
 
+bool ExportNLPSolver::usingLinearTerms() const
+{
+	if (objSlx.isGiven() == false and objSlu.isGiven() == false)
+		return true;
+	// Otherwise they are hard-coded and we don't need this indicator
+	return false;
+}
+
 returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 {
 	////////////////////////////////////////////////////////////////////////////

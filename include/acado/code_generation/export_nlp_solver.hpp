@@ -172,6 +172,9 @@ public:
 	/** Indicates whether initial state is fixed. */
 	bool initialStateFixed( ) const;
 
+	/** Indicates whether linear terms in the objective are used. */
+	bool usingLinearTerms() const;
+
 protected:
 
 	/** Setting up of a model simulation:
