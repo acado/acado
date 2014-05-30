@@ -169,7 +169,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     real_t u[ACADO_NU];
     real_t od[ACADO_NOD];
 	#if SENS_PROP == 2 || SENS_PROP == 3 || SENS_PROP == 4
-		real_t seed[ACADO_NX+ACADO_NXA];
+		real_t seed[ACADO_NX];
 	#endif
     #if SENS_PROP == 1
 		real_t next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU+ACADO_NOD];
@@ -270,6 +270,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     #endif     
     
     reset = 1;
+    
+    #if SENS_PROP == 3
+		for( i = 0; i < ACADO_NX; ++i ) {
+			next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = seed[i];
+		}
+    #elif SENS_PROP == 2 || SENS_PROP == 4
+		for( i = 0; i < ACADO_NX; ++i ) {
+			next[ACADO_NX+ACADO_NXA+i] = seed[i];
+		}
+	#endif
+		
+	#else
     for( i = 0; i < ACADO_NU; ++i ) {
 		#if SENS_PROP == 1
 			next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
@@ -312,11 +324,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	    #elif ACADO_NUMOUT > 0
 	        error = integrate( next, out1, reset );
 	    #else 
-			#if SENS_PROP == 2 || SENS_PROP == 3 || SENS_PROP == 4
-				error = integrate( next, reset, seed );
-			#else
-				error = integrate( next, reset );
-		    #endif
+			error = integrate( next, reset );
 	    #endif
 	    reset = 0;
     }
