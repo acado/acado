@@ -281,7 +281,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	#endif
 		
-	#else
     for( i = 0; i < ACADO_NU; ++i ) {
 		#if SENS_PROP == 1
 			next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
