@@ -220,14 +220,20 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	get(GENERATE_SIMULINK_INTERFACE, generateSimulinkInterface);
 	if ((bool) generateSimulinkInterface == true)
 	{
-		if ((QPSolverName)qpSolver != QP_QPOASES)
+		if (!((QPSolverName)qpSolver == QP_QPOASES or (QPSolverName)qpSolver == QP_QPDUNES))
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
-					"At the moment, Simulink interface is available only with qpOASES based OCP solver.");
+					"At the moment, Simulink interface is available only with qpOASES and qpDUNES based OCP solvers.");
 		else
 		{
 			string makefileName = dirName + "/make_" + moduleName + "_solver_sfunction.m";
 			string wrapperHeaderName = dirName + "/" + moduleName + "_solver_sfunction.h";
 			string wrapperSourceName = dirName + "/" + moduleName + "_solver_sfunction.c";
+			string qpSolverString;
+
+			if ((QPSolverName)qpSolver == QP_QPOASES)
+				qpSolverString = "QPOASES";
+			else
+				qpSolverString = "QPDUNES";
 
 			ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName);
 
@@ -255,7 +261,8 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 					(unsigned)solver->weightingMatricesType(),
 					(bool)hardcodeConstraintValues,
 					(bool)useAC,
-					(bool)covCalc);
+					(bool)covCalc,
+					qpSolverString);
 
 			esi.exportCode();
 		}

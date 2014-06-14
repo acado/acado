@@ -26,7 +26,7 @@
 /**
  *    \file src/code_generation/export_simulink_interface.cpp
  *    \author Milan Vukov
- *    \date 2013
+ *    \date 2013 - 2014
  */
 
 #include <acado/code_generation/export_simulink_interface.hpp>
@@ -68,7 +68,8 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 												unsigned _wMatrixType,
 												bool _hardcodedConstraints,
 												bool _useArrivalCost,
-												bool _compCovMatrix
+												bool _compCovMatrix,
+												std::string _qpSolver
 												)
 {
 	//
@@ -111,6 +112,8 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 	makefile.dictionary[ "@ARRIVAL_COST@" ] = _useArrivalCost == true ? "1" : "0";
 
 	makefile.dictionary[ "@COV_MATRIX@" ] = _compCovMatrix == true ? "1" : "0";
+
+	makefile.dictionary[ "@QP_SOLVER@" ] = _qpSolver;
 
 	makefile.fillTemplate();
 

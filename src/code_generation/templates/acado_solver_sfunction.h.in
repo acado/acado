@@ -72,18 +72,24 @@ typedef struct
 } @MODULE_NAME@output;
 
 #ifdef __cplusplus
-
 extern "C"
 {
+#endif /* __cplusplus */
 
-/** Wrapper function for the solver. */
-void @MODULE_NAME@_solver_wrapper(
+/** The step function of the solver. */
+void @MODULE_NAME@_step(
 	@MODULE_NAME@input*  inData,	/**< Input data. */
 	@MODULE_NAME@output* outData	/**< Output data. */
 	);
-	
-}
 
+/** Initialization of the solver. */
+void @MODULE_NAME@_initialize( void );
+
+/** Cleanup of the solver. */
+void @MODULE_NAME@_cleanup( void );
+
+#ifdef __cplusplus
+} /* extern "C" */
 #endif /* __cplusplus */
 
 #endif /* @MODULE_NAME@_SOLVER_SFUNCTION */

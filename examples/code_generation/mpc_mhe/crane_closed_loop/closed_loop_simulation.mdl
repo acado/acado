@@ -6,7 +6,7 @@ Model {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.323"
+    ComputedModelVersion    "1.329"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
@@ -30,7 +30,7 @@ Model {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [44.0, 44.0, 1191.0, 693.0]
+      Location		      [21.0, 56.0, 1191.0, 693.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -66,9 +66,9 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "madwolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Dec 06 14:11:42 2013"
-  RTWModifiedTimeStamp	  308239733
-  ModelVersionFormat	  "1.%<AutoIncrement:323>"
+  LastModifiedDate	  "Sun Jun 15 01:36:59 2014"
+  RTWModifiedTimeStamp	  324697008
+  ModelVersionFormat	  "1.%<AutoIncrement:329>"
   ConfigurationManager	  "None"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -858,7 +858,7 @@ Model {
   }
   System {
     Name		    "closed_loop_simulation"
-    Location		    [44, 44, 1235, 737]
+    Location		    [21, 56, 1212, 749]
     Open		    on
     ModelBrowserVisibility  on
     ModelBrowserWidth	    200
@@ -872,7 +872,7 @@ Model {
     ShowPageBoundaries	    off
     ZoomFactor		    "92"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "27"
+    SIDHighWatermark	    "34"
     Block {
       BlockType		      SubSystem
       Name		      "Bridge + references"
@@ -1822,10 +1822,10 @@ Model {
     Block {
       BlockType		      S-Function
       Name		      "mhe_solver_sfun"
-      SID		      "1"
+      SID		      "33"
       Ports		      [1, 1]
-      Position		      [230, 130, 330, 160]
-      ZOrder		      2
+      Position		      [215, 132, 310, 158]
+      ZOrder		      35
       FunctionName	      "mhe_solver_sfun"
       EnableBusSupport	      off
       Object {
@@ -1834,17 +1834,17 @@ Model {
 	$ClassName		"Simulink.Mask"
 	Type			"Legacy Function"
 	Description		"This block allows you to call the legacy functions specified by the following Legacy Code Tool definiti"
-	"on:\ndef.SFunctionName = 'mhe_solver_sfun';\ndef.OutputFcnSpec = 'mhe_solver_wrapper(mheinput u1[1], mheoutput y1[1])"
-	"';\ndef.HeaderFiles = {'mhe_common.h', 'mhe_solver_sfunction.h'};\ndef.SourceFiles = {'qpoases/SRC/QProblem.cpp', 'qp"
-	"oases/SRC/QProblemB.cpp', 'qpoases/SRC/Bounds.cpp', 'qpoases/SRC/Constraints.cpp', 'qpoases/SRC/SubjectTo.cpp', 'qpoa"
-	"ses/SRC/Indexlist.cpp', 'qpoases/SRC/CyclingManager.cpp', 'qpoases/SRC/Utils.cpp', 'qpoases/SRC/MessageHandling.cpp',"
-	" 'qpoases/SRC/EXTRAS/SolutionAnalysis.cpp', 'mhe_solver.c', 'mhe_integrator.c', 'mhe_auxiliary_functions.c', 'mhe_qpo"
-	"ases_interface.cpp', 'mhe_solver_sfunction.c'};\ndef.IncPaths = {'qpoases', 'qpoases/INCLUDE', 'qpoases/SRC'};\ndef.O"
-	"ptions.language = 'C++';\n"
+	"on:\ndef.SFunctionName = 'mhe_solver_sfun';\ndef.OutputFcnSpec = 'mhe_step(mheinput u1[1], mheoutput y1[1])';\ndef.St"
+	"artFcnSpec = 'mhe_initialize( void )';\ndef.TerminateFcnSpec = 'mhe_cleanup( void )';\ndef.HeaderFiles = {'mhe_common"
+	".h', 'mhe_solver_sfunction.h'};\ndef.SourceFiles = {'mhe_solver.c', 'mhe_integrator.c', 'mhe_auxiliary_functions.c', "
+	"'mhe_solver_sfunction.c', 'mhe_qpoases_interface.cpp', 'qpoases/SRC/QProblem.cpp', 'qpoases/SRC/QProblemB.cpp', 'qpoa"
+	"ses/SRC/Bounds.cpp', 'qpoases/SRC/Constraints.cpp', 'qpoases/SRC/SubjectTo.cpp', 'qpoases/SRC/Indexlist.cpp', 'qpoase"
+	"s/SRC/CyclingManager.cpp', 'qpoases/SRC/Utils.cpp', 'qpoases/SRC/MessageHandling.cpp', 'qpoases/SRC/EXTRAS/SolutionAn"
+	"alysis.cpp'};\ndef.IncPaths = {'qpoases', 'qpoases/INCLUDE', 'qpoases/SRC'};\ndef.Options.language = 'C++';\n"
 	Help			"<p>This block was generated automatically by the Legacy Code Tool. For detailed help on this tool, call<a hre"
 	"f=\"matlab:legacy_code('help')\"> legacy_code('help')</a>.</p>"
 	SelfModifiable		"on"
-	Display			"fprintf('mhe_solver_wrapper(mheinput u1[1], mheoutput y1[1])');"
+	Display			"fprintf('mhe_step(mheinput u1[1], mheoutput y1[1])');"
 	IconRotate		"port"
 	IconUnits		"normalized"
 	Array {
@@ -1855,7 +1855,7 @@ Model {
 	    Type		    "edit"
 	    Name		    "SFunctionSpec"
 	    Prompt		    "SFunctionSpec"
-	    Value		    "mhe_solver_wrapper(mheinput u1[1], mheoutput y1[1])"
+	    Value		    "mhe_step(mheinput u1[1], mheoutput y1[1])"
 	    Evaluate		    "off"
 	    Tunable		    "off"
 	    Visible		    "off"
@@ -1967,10 +1967,10 @@ Model {
     Block {
       BlockType		      S-Function
       Name		      "nmpc_solver_sfun"
-      SID		      "2"
+      SID		      "34"
       Ports		      [1, 1]
-      Position		      [545, 130, 635, 160]
-      ZOrder		      3
+      Position		      [565, 132, 640, 158]
+      ZOrder		      36
       FunctionName	      "nmpc_solver_sfun"
       EnableBusSupport	      off
       Object {
@@ -1979,17 +1979,18 @@ Model {
 	$ClassName		"Simulink.Mask"
 	Type			"Legacy Function"
 	Description		"This block allows you to call the legacy functions specified by the following Legacy Code Tool definiti"
-	"on:\ndef.SFunctionName = 'nmpc_solver_sfun';\ndef.OutputFcnSpec = 'nmpc_solver_wrapper(nmpcinput u1[1], nmpcoutput y1"
-	"[1])';\ndef.HeaderFiles = {'nmpc_common.h', 'nmpc_solver_sfunction.h'};\ndef.SourceFiles = {'qpoases/SRC/QProblem.cpp"
-	"', 'qpoases/SRC/QProblemB.cpp', 'qpoases/SRC/Bounds.cpp', 'qpoases/SRC/Constraints.cpp', 'qpoases/SRC/SubjectTo.cpp',"
-	" 'qpoases/SRC/Indexlist.cpp', 'qpoases/SRC/CyclingManager.cpp', 'qpoases/SRC/Utils.cpp', 'qpoases/SRC/MessageHandling"
-	".cpp', 'qpoases/SRC/EXTRAS/SolutionAnalysis.cpp', 'nmpc_solver.c', 'nmpc_integrator.c', 'nmpc_auxiliary_functions.c',"
-	" 'nmpc_qpoases_interface.cpp', 'nmpc_solver_sfunction.c'};\ndef.IncPaths = {'qpoases', 'qpoases/INCLUDE', 'qpoases/SR"
-	"C'};\ndef.Options.language = 'C++';\n"
+	"on:\ndef.SFunctionName = 'nmpc_solver_sfun';\ndef.OutputFcnSpec = 'nmpc_step(nmpcinput u1[1], nmpcoutput y1[1])';\nde"
+	"f.StartFcnSpec = 'nmpc_initialize( void )';\ndef.TerminateFcnSpec = 'nmpc_cleanup( void )';\ndef.HeaderFiles = {'nmpc"
+	"_common.h', 'nmpc_solver_sfunction.h'};\ndef.SourceFiles = {'nmpc_solver.c', 'nmpc_integrator.c', 'nmpc_auxiliary_fun"
+	"ctions.c', 'nmpc_solver_sfunction.c', 'nmpc_qpoases_interface.cpp', 'qpoases/SRC/QProblem.cpp', 'qpoases/SRC/QProblem"
+	"B.cpp', 'qpoases/SRC/Bounds.cpp', 'qpoases/SRC/Constraints.cpp', 'qpoases/SRC/SubjectTo.cpp', 'qpoases/SRC/Indexlist."
+	"cpp', 'qpoases/SRC/CyclingManager.cpp', 'qpoases/SRC/Utils.cpp', 'qpoases/SRC/MessageHandling.cpp', 'qpoases/SRC/EXTR"
+	"AS/SolutionAnalysis.cpp'};\ndef.IncPaths = {'qpoases', 'qpoases/INCLUDE', 'qpoases/SRC'};\ndef.Options.language = 'C+"
+	"+';\n"
 	Help			"<p>This block was generated automatically by the Legacy Code Tool. For detailed help on this tool, call<a hre"
 	"f=\"matlab:legacy_code('help')\"> legacy_code('help')</a>.</p>"
 	SelfModifiable		"on"
-	Display			"fprintf('nmpc_solver_wrapper(nmpcinput u1[1], nmpcoutput y1[1])');"
+	Display			"fprintf('nmpc_step(nmpcinput u1[1], nmpcoutput y1[1])');"
 	IconRotate		"port"
 	IconUnits		"normalized"
 	Array {
@@ -2000,7 +2001,7 @@ Model {
 	    Type		    "edit"
 	    Name		    "SFunctionSpec"
 	    Prompt		    "SFunctionSpec"
-	    Value		    "nmpc_solver_wrapper(nmpcinput u1[1], nmpcoutput y1[1])"
+	    Value		    "nmpc_step(nmpcinput u1[1], nmpcoutput y1[1])"
 	    Evaluate		    "off"
 	    Tunable		    "off"
 	    Visible		    "off"
@@ -2112,7 +2113,7 @@ Model {
     Line {
       SrcBlock		      "nmpc_solver_sfun"
       SrcPort		      1
-      Points		      [43, 0]
+      Points		      [38, 0]
       Branch {
 	Points			[0, -55]
 	DstBlock		"Delay2"
@@ -2132,7 +2133,7 @@ Model {
     Line {
       SrcBlock		      "mhe_solver_sfun"
       SrcPort		      1
-      Points		      [31, 0]
+      Points		      [51, 0]
       Branch {
 	Points			[0, 190]
 	DstBlock		"MHE post-ptocessing"
@@ -2300,10 +2301,7 @@ Stateflow {
     firstTransition	    9
     firstJunction	    8
     viewObj		    2
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    8
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2484,10 +2482,7 @@ Stateflow {
     firstTransition	    18
     firstJunction	    17
     viewObj		    11
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    9
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -2810,10 +2805,7 @@ Stateflow {
     firstTransition	    35
     firstJunction	    34
     viewObj		    27
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    8
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
@@ -3001,10 +2993,7 @@ Stateflow {
     firstTransition	    46
     firstJunction	    45
     viewObj		    37
-    visible		    1
     machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    9
     decomposition	    CLUSTER_CHART
     type		    EML_CHART

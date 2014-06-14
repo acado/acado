@@ -81,7 +81,12 @@ int main( )
 	mpc.set( INTEGRATOR_TYPE, INT_RK4 );
 	mpc.set( NUM_INTEGRATOR_STEPS, 30 );
 
+	mpc.set( SPARSE_QP_SOLUTION, CONDENSING );
 	mpc.set( QP_SOLVER, QP_QPOASES );
+	
+// 	mpc.set( SPARSE_QP_SOLUTION, SPARSE_SOLVER );
+// 	mpc.set( QP_SOLVER, QP_QPDUNES );
+	
 	mpc.set( HOTSTART_QP, YES );
 	mpc.set( GENERATE_TEST_FILE, NO);
 	mpc.set( GENERATE_MAKE_FILE, NO );
