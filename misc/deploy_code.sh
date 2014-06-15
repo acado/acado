@@ -9,7 +9,7 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2013.
+#	2013 - 2014.
 #
 # Usage:
 #	- This script is automatically called from Travis-CI script
@@ -27,7 +27,7 @@ echo "Remote: $TRAVIS_REPO_SLUG" >> VERSION.txt
 # Deploy only if:
 # - the code is pushed to the "blessed" remote and
 # - a g++ compiler is being used
-if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ]; then
+if [ "$TRAVIS_REPO_SLUG" == "acado/acado" ] && [ "$CXX" == "g++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then
 	# Make an archive of the current travis-ci checked commit
 	git archive -o $ZIP_FILE $TRAVIS_COMMIT
 	# Add version information
