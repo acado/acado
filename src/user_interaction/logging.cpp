@@ -77,7 +77,7 @@ int Logging::addLogRecord(	LogRecord& _record
 returnValue Logging::getLogRecord(	LogRecord& _record
 									) const
 {
-	if (_record.aliasIdx < 0  or _record.aliasIdx >= ((int)getNumLogRecords( ) - 1))
+	if (_record.aliasIdx < 0  || _record.aliasIdx >= ((int)getNumLogRecords( ) - 1))
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 
 	_record = logCollection[ _record.aliasIdx ];

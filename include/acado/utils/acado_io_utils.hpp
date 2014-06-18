@@ -190,7 +190,7 @@ istream& operator>>(	istream& stream,
 		vector< T > data;
 		getline(stream, line);
 		// Skip lines beginning with "/" or "#" or empty lines
-		if (line[ 0 ] == '/' or line[ 0 ] == '#' or line.empty())
+		if (line[ 0 ] == '/' || line[ 0 ] == '#' || line.empty())
 			continue;
 
 		stringstream ss( line );
