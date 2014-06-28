@@ -31,19 +31,12 @@
  *    \date 2012
  */
 
+#include <acado/code_generation/sim_export.hpp>
 #include <acado/code_generation/integrators/export_matlab_integrator.hpp>
 #include <acado/code_generation/integrators/integrator_generation.hpp>
-#include <acado/code_generation/export_file.hpp>
-#include <acado/ocp/model_container.hpp>
-
-#include <string>
-#include <sstream>
-#include <acado/code_generation/sim_export.hpp>
-
-#include <acado/code_generation/templates/templates.hpp>
 #include <acado/code_generation/export_common_header.hpp>
+#include <acado/code_generation/templates/templates.hpp>
 #include <acado/code_generation/integrators/export_auxiliary_sim_functions.hpp>
-
 #include <acado/code_generation/export_algorithm_factory.hpp>
 
 #ifdef WIN32
