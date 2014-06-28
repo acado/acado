@@ -32,6 +32,8 @@
 #ifndef ACADO_TOOLKIT_INTEGRATOR_EXPORT_TYPES_HPP
 #define ACADO_TOOLKIT_INTEGRATOR_EXPORT_TYPES_HPP
 
+#include <acado/utils/acado_namespace_macros.hpp>
+
 BEGIN_NAMESPACE_ACADO
 
 /** Summarizes all available integrators for code generation.  */
