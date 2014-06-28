@@ -31,6 +31,11 @@
  *    \date 2012
  */
 
+#include <acado/code_generation/integrators/export_matlab_integrator.hpp>
+#include <acado/code_generation/integrators/integrator_generation.hpp>
+#include <acado/code_generation/export_file.hpp>
+#include <acado/ocp/model_container.hpp>
+
 #include <string>
 #include <sstream>
 #include <acado/code_generation/sim_export.hpp>

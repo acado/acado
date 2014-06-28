@@ -37,15 +37,11 @@
 
 
 #include <acado/code_generation/export_module.hpp>
-#include <acado/code_generation/integrators/export_matlab_integrator.hpp>
-#include <acado/code_generation/integrators/integrator_generation.hpp>
-#include <acado/code_generation/export_file.hpp>
-#include <acado/ocp/model_container.hpp>
-
 
 
 BEGIN_NAMESPACE_ACADO
 
+class IntegratorExport;
 
 /** 
  *	\brief User-interface to automatically generate simulation algorithms for fast optimal control.

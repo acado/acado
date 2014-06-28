@@ -383,7 +383,6 @@ INSTALL(
 # Install (parts of) external packages and interfaces to those packages
 #
 SET( EXTERNAL_PACKAGES_DIRS
-	external_packages/include
 	external_packages/qpoases
 	external_packages/eigen3
 )	
@@ -400,8 +399,6 @@ INSTALL(
 SET( ACADO_INSTALL_INCLUDE_DIRS
 	${INSTALL_INCLUDE_DIR}
 	${INSTALL_DATA_DIR}/external_packages
-	${INSTALL_DATA_DIR}/external_packages/csparse/
-	${INSTALL_DATA_DIR}/external_packages/qpOASES-3.0beta/include
 	${INSTALL_DATA_DIR}/external_packages/eigen3
 )
 SET( ACADO_INSTALL_LIBRARY_DIRS

@@ -27,31 +27,15 @@
 /**
  *    \file include/code_generation/code_generation.hpp
  *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov, Rien Quirynen
- *    \date 2010 - 2013
+ *    \date 2010 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_CODE_GENERATION_HPP
 #define ACADO_TOOLKIT_CODE_GENERATION_HPP
 
-#include <acado/code_generation/integrators/integrator_export.hpp>
-
-#include <acado/code_generation/integrators/explicit_euler_export.hpp>
-#include <acado/code_generation/integrators/erk2_export.hpp>
-#include <acado/code_generation/integrators/erk3_export.hpp>
-#include <acado/code_generation/integrators/erk4_export.hpp>
-
-#include <acado/code_generation/integrators/gauss_legendre2_export.hpp>
-#include <acado/code_generation/integrators/gauss_legendre4_export.hpp>
-#include <acado/code_generation/integrators/gauss_legendre6_export.hpp>
-#include <acado/code_generation/integrators/gauss_legendre8_export.hpp>
-
-#include <acado/code_generation/integrators/radau_IIA1_export.hpp>
-#include <acado/code_generation/integrators/radau_IIA3_export.hpp>
-#include <acado/code_generation/integrators/radau_IIA5_export.hpp>
-
-#include <acado/code_generation/register_nlp_solvers.hpp>
-
+#include <acado/code_generation/integrators/integrator_export_types.hpp>
 #include <acado/code_generation/sim_export.hpp>
 #include <acado/code_generation/ocp_export.hpp>
+#include <acado/code_generation/register_nlp_solvers.hpp>
 
 #endif  // ACADO_TOOLKIT_CODE_GENERATION_HPP
