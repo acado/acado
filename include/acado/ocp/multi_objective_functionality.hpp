@@ -33,14 +33,9 @@
 #ifndef ACADO_TOOLKIT_MULTI_OBJECTIVE_FUNCTIONALITY_HPP
 #define ACADO_TOOLKIT_MULTI_OBJECTIVE_FUNCTIONALITY_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/function/function.hpp>
-
 #include <acado/variables_grid/grid.hpp>
-#include <acado/constraint/constraint.hpp>
 #include <acado/objective/objective.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 

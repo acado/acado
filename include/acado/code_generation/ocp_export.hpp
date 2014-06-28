@@ -26,13 +26,14 @@
 /**
  *    \file include/acado/code_generation/ocp_export.hpp
  *    \authors Hans Joachim Ferreau, Boris Houska, Milan Vukov
- *    \date 2010 - 2013
+ *    \date 2010 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_OCP_EXPORT_HPP
 #define ACADO_TOOLKIT_OCP_EXPORT_HPP
 
 #include <acado/code_generation/export_module.hpp>
+#include <acado/ocp/ocp.hpp>
 
 BEGIN_NAMESPACE_ACADO
 

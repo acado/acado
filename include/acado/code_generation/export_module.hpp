@@ -28,7 +28,7 @@
 /**
  *    \file include/acado/code_generation/export_module.hpp
  *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
- *    \date 2010 - 2013
+ *    \date 2010 - 2014
  */
 
 
@@ -36,9 +36,6 @@
 #define ACADO_TOOLKIT_EXPORT_MODULE_HPP
 
 #include <acado/user_interaction/user_interaction.hpp>
-#include <acado/matrix_vector/matrix_vector.hpp>
-#include <acado/function/function.hpp>
-#include <acado/ocp/ocp.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -57,86 +54,85 @@ class ExportStatementBlock;
  */
 class ExportModule : public UserInteraction
 {
-    //
-    // PUBLIC MEMBER FUNCTIONS:
-    //
-    public:
+//
+// PUBLIC MEMBER FUNCTIONS:
+//
+public:
 
-		/** Default constructor. */
-		ExportModule( );
+	/** Default constructor. */
+	ExportModule( );
 
-		/** Destructor. 
-		 */
-		virtual ~ExportModule( );
+	/** Destructor.
+	 */
+	virtual ~ExportModule( );
 
-		/** Exports all files of the auto-generated code into the given directory.
-		 *
-		 *	@param[in] dirName			Name of directory to be used to export files.
-		 *	@param[in] _realString		std::string to be used to declare real variables.
-		 *	@param[in] _intString		std::string to be used to declare integer variables.
-		 *	@param[in] _precision		Number of digits to be used for exporting real values.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-        virtual returnValue exportCode(	const std::string& dirName,
-										const std::string& _realString = "real_t",
-										const std::string& _intString = "int",
-										int _precision = 16
-										) = 0;
+	/** Exports all files of the auto-generated code into the given directory.
+	 *
+	 *	@param[in] dirName			Name of directory to be used to export files.
+	 *	@param[in] _realString		std::string to be used to declare real variables.
+	 *	@param[in] _intString		std::string to be used to declare integer variables.
+	 *	@param[in] _precision		Number of digits to be used for exporting real values.
+	 *
+	 *	\return SUCCESSFUL_RETURN
+	 */
+	virtual returnValue exportCode(	const std::string& dirName,
+									const std::string& _realString = "real_t",
+									const std::string& _intString = "int",
+									int _precision = 16
+									) = 0;
+
+protected:
+
+	/** Exports main header file for using the exported algorithm.
+	 *
+	 *	@param[in] _dirName			Name of directory to be used to export file.
+	 *	@param[in] _fileName		Name of file to be exported.
+	 *	@param[in] _realString		std::string to be used to declare real variables.
+	 *	@param[in] _intString		std::string to be used to declare integer variables.
+	 *	@param[in] _precision		Number of digits to be used for exporting real values.
+	 *
+	 *	\return SUCCESSFUL_RETURN
+	 */
+	virtual returnValue exportAcadoHeader(	const std::string& _dirName,
+											const std::string& _fileName,
+											const std::string& _realString = "real_t",
+											const std::string& _intString = "int",
+											int _precision = 16
+											) const = 0;
 
 
-		/** Exports main header file for using the exported algorithm.
-		 *
-		 *	@param[in] _dirName			Name of directory to be used to export file.
-		 *	@param[in] _fileName		Name of file to be exported.
-		 *	@param[in] _realString		std::string to be used to declare real variables.
-		 *	@param[in] _intString		std::string to be used to declare integer variables.
-		 *	@param[in] _precision		Number of digits to be used for exporting real values.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue exportAcadoHeader(	const std::string& _dirName,
-												const std::string& _fileName,
-												const std::string& _realString = "real_t",
-												const std::string& _intString = "int",
-												int _precision = 16
-												) const = 0;
+	/** Collects all data declarations of the auto-generated sub-modules to given
+	 *	list of declarations.
+	 *
+	 *	@param[in] declarations		List of declarations.
+	 *
+	 *	\return SUCCESSFUL_RETURN, \n
+	 *	        RET_UNABLE_TO_EXPORT_CODE
+	 */
+	virtual returnValue collectDataDeclarations(	ExportStatementBlock& declarations,
+													ExportStruct dataStruct = ACADO_ANY
+													) const = 0;
 
 
-		/** Collects all data declarations of the auto-generated sub-modules to given
-		 *	list of declarations.
-		 *
-		 *	@param[in] declarations		List of declarations.
-		 *
-		 *	\return SUCCESSFUL_RETURN, \n
-		 *	        RET_UNABLE_TO_EXPORT_CODE
-		 */
-		virtual returnValue collectDataDeclarations(	ExportStatementBlock& declarations,
-														ExportStruct dataStruct = ACADO_ANY
+	/** Collects all function (forward) declarations of the auto-generated sub-modules
+	 *	to given list of declarations.
+	 *
+	 *	@param[in] declarations		List of declarations.
+	 *
+	 *	\return SUCCESSFUL_RETURN, \n
+	 *	        RET_UNABLE_TO_EXPORT_CODE
+	 */
+	virtual returnValue collectFunctionDeclarations(	ExportStatementBlock& declarations
 														) const = 0;
 
+	/** Sets-up default options.
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue setupOptions( );
 
-		/** Collects all function (forward) declarations of the auto-generated sub-modules
-		 *	to given list of declarations.
-		 *
-		 *	@param[in] declarations		List of declarations.
-		 *
-		 *	\return SUCCESSFUL_RETURN, \n
-		 *	        RET_UNABLE_TO_EXPORT_CODE
-		 */
-		virtual returnValue collectFunctionDeclarations(	ExportStatementBlock& declarations
-															) const = 0;
-
-	protected:
-
-		/** Sets-up default options.
-		 *
-		 *  \return SUCCESSFUL_RETURN
-		 */
-		returnValue setupOptions( );
-
-		/** Name of common header file. */
-		std::string commonHeaderName;
+	/** Name of common header file. */
+	std::string commonHeaderName;
 };
 
 CLOSE_NAMESPACE_ACADO

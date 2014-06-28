@@ -26,23 +26,8 @@
 
 /**
  *    \file include/acado_code_generation.hpp
- *    \author Hans Joachim Ferreau, Boris Houska
- *    \date 10.06.2009
+ *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
+ *    \date 2009 - 2014
  */
 
-
-
-#include <acado_integrators.hpp>
-
 #include <acado/code_generation/code_generation.hpp>
-#include <acado/dynamic_system/dynamic_system.hpp>
-#include <acado/dynamic_discretization/dynamic_discretization.hpp>
-#include <acado/dynamic_discretization/integration_algorithm.hpp>
-#include <acado/nlp_solver/nlp_solver.hpp>
-#include <acado/nlp_solver/scp_method.hpp>
-#include <acado/ocp/ocp.hpp>
-#include <acado/optimization_algorithm/optimization_algorithm.hpp>
-#include <acado/optimization_algorithm/real_time_algorithm.hpp>
-#include <acado/optimization_algorithm/parameter_estimation_algorithm.hpp>
-#include <acado/optimization_algorithm/multi_objective_algorithm.hpp>
-

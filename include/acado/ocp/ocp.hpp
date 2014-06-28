@@ -26,16 +26,12 @@
 /**
  *    \file include/acado/ocp/ocp.hpp
  *    \authors Boris Houska, Hans Joachim Ferreau, Milan Vukov, Rien Quirynen
- *    \date 2008 - 2013
+ *    \date 2008 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_OCP_HPP
 #define ACADO_TOOLKIT_OCP_HPP
 
-#include <acado/function/function.hpp>
-#include <acado/variables_grid/grid.hpp>
-#include <acado/constraint/constraint.hpp>
-#include <acado/objective/objective.hpp>
 #include <acado/ocp/multi_objective_functionality.hpp>
 #include <acado/ocp/model_container.hpp>
 
