@@ -35,9 +35,8 @@
 #ifndef ACADO_TOOLKIT_SIM_EXPORT_HPP
 #define ACADO_TOOLKIT_SIM_EXPORT_HPP
 
-
 #include <acado/code_generation/export_module.hpp>
-
+#include <acado/ocp/model_container.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
