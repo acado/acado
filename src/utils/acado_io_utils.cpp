@@ -265,7 +265,7 @@ returnValue acadoCreateFolder(	const std::string& name
 {
 #if defined( __WIN32__ ) || defined( WIN32 )
 
-	int status = _mkdir( name );
+	int status = _mkdir( name.c_str() );
 	errno_t err;
 	_get_errno( &err );
 	if (status && err != EEXIST)

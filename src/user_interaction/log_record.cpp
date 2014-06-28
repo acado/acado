@@ -134,7 +134,7 @@ returnValue LogRecord::print(	std::ostream& _stream,
 			for (it = items.begin(); it != items.end(); ++it)
 			{
 				if (i >= it->second.values.getNumPoints()
-						or it->second.values.getNumPoints() == 0)
+						|| it->second.values.getNumPoints() == 0)
 					break;
 				if (it->second.values.getMatrix( i ).print(
 						_stream, it->second.label.c_str(),
