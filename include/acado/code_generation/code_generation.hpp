@@ -36,6 +36,7 @@
 #include <acado/code_generation/integrators/integrator_export_types.hpp>
 #include <acado/code_generation/sim_export.hpp>
 #include <acado/code_generation/ocp_export.hpp>
+#include <acado/code_generation/integrators/register_exported_integrators.hpp>
 #include <acado/code_generation/register_nlp_solvers.hpp>
 
 #endif  // ACADO_TOOLKIT_CODE_GENERATION_HPP

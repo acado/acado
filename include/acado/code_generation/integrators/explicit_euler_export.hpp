@@ -83,10 +83,8 @@ class ExplicitEulerExport : public ExplicitRungeKuttaExport
 
 };
 
-static struct RegisterExplicitEulerExport
-{
-	RegisterExplicitEulerExport();
-} registerExplicitEulerExport;
+IntegratorExport* createExplicitEulerExport(	UserInteraction* _userInteraction,
+												const std::string &_commonHeaderName);
 
 
 CLOSE_NAMESPACE_ACADO

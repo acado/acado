@@ -465,11 +465,6 @@ IntegratorExport* createDiscreteTimeExport(	UserInteraction* _userInteraction,
 	return new DiscreteTimeExport(_userInteraction, _commonHeaderName);
 }
 
-RegisterDiscreteTimeExport::RegisterDiscreteTimeExport()
-{
-	IntegratorExportFactory::instance().registerAlgorithm(INT_DT, createDiscreteTimeExport);
-}
-
 
 ExportVariable DiscreteTimeExport::getAuxVariable() const
 {

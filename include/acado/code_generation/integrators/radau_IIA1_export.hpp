@@ -83,10 +83,8 @@ class RadauIIA1Export : public ImplicitRungeKuttaExport
 
 };
 
-static struct RegisterRadauIIA1Export
-{
-	RegisterRadauIIA1Export();
-} registerRadauIIA1Export;
+IntegratorExport* createRadauIIA1Export(	UserInteraction* _userInteraction,
+											const std::string &_commonHeaderName);
 
 CLOSE_NAMESPACE_ACADO
 

@@ -246,10 +246,8 @@ class NARXExport : public DiscreteTimeExport
 
 };
 
-static struct RegisterNARXExport
-{
-	RegisterNARXExport();
-} registerNARXExport;
+IntegratorExport* createNARXExport(	UserInteraction* _userInteraction,
+													const std::string &_commonHeaderName);
 
 
 CLOSE_NAMESPACE_ACADO

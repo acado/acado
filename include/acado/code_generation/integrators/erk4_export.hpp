@@ -83,10 +83,8 @@ class ExplicitRungeKutta4Export : public ExplicitRungeKuttaExport
 
 };
 
-static struct RegisterExplicitRungeKutta4Export
-{
-	RegisterExplicitRungeKutta4Export();
-} registerExplicitRungeKutta4Export;
+IntegratorExport* createExplicitRungeKutta4Export(	UserInteraction* _userInteraction,
+													const std::string &_commonHeaderName);
 
 CLOSE_NAMESPACE_ACADO
 

@@ -23,71 +23,26 @@
  *
  */
 
-
-
 /**
- *    \file src/code_generation/explicit_euler_export.cpp
- *    \author Rien Quirynen
- *    \date 2012
+ *    \file include/code_generation/integrators/register_exported_integrators.hpp
+ *    \author Milan Vukov
+ *    \date 2014
  */
 
-#include <acado/code_generation/integrators/explicit_euler_export.hpp>
+#ifndef ACADO_TOOLKIT_REGISTER_EXPORTED_INTEGRATORS_HPP
+#define ACADO_TOOLKIT_REGISTER_EXPORTED_INTEGRATORS_HPP
 
-#include <acado/code_generation/export_algorithm_factory.hpp>
+#include <acado/utils/acado_utils.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
-
-//
-// PUBLIC MEMBER FUNCTIONS:
-//
-
-ExplicitEulerExport::ExplicitEulerExport(	UserInteraction* _userInteraction,
-									const std::string& _commonHeaderName
-									) : ExplicitRungeKuttaExport( _userInteraction,_commonHeaderName )
+/** \internal */
+static struct RegisterExportedIntegrators
 {
-}
-
-
-ExplicitEulerExport::ExplicitEulerExport(	const ExplicitEulerExport& arg
-									) : ExplicitRungeKuttaExport( arg )
-{
-	copy( arg );
-}
-
-
-ExplicitEulerExport::~ExplicitEulerExport( )
-{
-	clear( );
-}
-
-
-// PROTECTED:
-
-//
-// Register the integrator
-//
-
-IntegratorExport* createExplicitEulerExport(	UserInteraction* _userInteraction,
-												const std::string &_commonHeaderName)
-{
-	DMatrix AA(1,1);
-	DVector bb(1);
-	DVector cc(1);
-
-	AA(0,0) = 0.0;
-
-	bb(0) = 1.0;
-
-	cc(0) = 0.0;
-
-	ExplicitRungeKuttaExport* integrator = createExplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
-	integrator->initializeButcherTableau(AA, bb, cc);
-
-	return integrator;
-}
-
+	RegisterExportedIntegrators();
+} registerExportedIntegrators;
+/** \endinternal */
 
 CLOSE_NAMESPACE_ACADO
 
-// end of file.
+#endif  // ACADO_TOOLKIT_REGISTER_EXPORTED_INTEGRATORS_HPP

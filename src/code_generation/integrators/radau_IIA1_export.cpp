@@ -89,11 +89,6 @@ IntegratorExport* createRadauIIA1Export(	UserInteraction* _userInteraction,
 	return integrator;
 }
 
-RegisterRadauIIA1Export::RegisterRadauIIA1Export()
-{
-	IntegratorExportFactory::instance().registerAlgorithm(INT_IRK_RIIA1, createRadauIIA1Export);
-}
-
 CLOSE_NAMESPACE_ACADO
 
 // end of file.

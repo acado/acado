@@ -217,10 +217,8 @@ class DiscreteTimeExport : public IntegratorExport
 
 };
 
-static struct RegisterDiscreteTimeExport
-{
-	RegisterDiscreteTimeExport();
-} registerDiscreteTimeExport;
+IntegratorExport* createDiscreteTimeExport(	UserInteraction* _userInteraction,
+											const std::string &_commonHeaderName );
 
 
 CLOSE_NAMESPACE_ACADO

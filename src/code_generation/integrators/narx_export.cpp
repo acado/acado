@@ -755,11 +755,6 @@ IntegratorExport* createNARXExport(	UserInteraction* _userInteraction,
 	return new NARXExport(_userInteraction, _commonHeaderName);
 }
 
-RegisterNARXExport::RegisterNARXExport()
-{
-	IntegratorExportFactory::instance().registerAlgorithm(INT_NARX, createNARXExport);
-}
-
 
 
 CLOSE_NAMESPACE_ACADO

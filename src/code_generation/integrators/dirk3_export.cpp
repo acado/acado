@@ -92,11 +92,6 @@ IntegratorExport* createDiagonallyIRK3Export(	UserInteraction* _userInteraction,
 	return integrator;
 }
 
-RegisterDiagonallyIRK3Export::RegisterDiagonallyIRK3Export()
-{
-	IntegratorExportFactory::instance().registerAlgorithm(INT_DIRK3, createDiagonallyIRK3Export);
-}
-
 CLOSE_NAMESPACE_ACADO
 
 // end of file.

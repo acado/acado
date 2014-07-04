@@ -92,11 +92,6 @@ IntegratorExport* createGaussLegendre4Export(	UserInteraction* _userInteraction,
 	return integrator;
 }
 
-RegisterGaussLegendre4Export::RegisterGaussLegendre4Export()
-{
-	IntegratorExportFactory::instance().registerAlgorithm(INT_IRK_GL4, createGaussLegendre4Export);
-}
-
 CLOSE_NAMESPACE_ACADO
 
 // end of file.
