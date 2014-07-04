@@ -39,7 +39,7 @@ void printHeader();
  * providing us with the following timing routines.
  */
 
-#if (defined WIN32 || defined _WIN64)
+#if (defined WIN32 || defined _WIN64) && !(defined __MINGW32__ || defined __MINGW64__)
 
 /* Use Windows QueryPerformanceCounter for timing. */
 #include <Windows.h>
