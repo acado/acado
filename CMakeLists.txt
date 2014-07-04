@@ -79,7 +79,7 @@ ENDIF( NOT CMAKE_VERBOSE_MAKEFILE )
 #
 # Enable building of shared and static libraries
 #
-IF ( MSVC OR CYGWIN )
+IF ( MSVC OR CYGWIN OR MINGW )
 	# All Windows builds that we currently support
 	SET( ACADO_BUILD_SHARED OFF )
 	SET( ACADO_BUILD_STATIC ON )
@@ -282,7 +282,7 @@ IF ( ACADO_BUILD_STATIC )
 	ADD_LIBRARY( acado_toolkit STATIC ${ACADO_SOURCES} )
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit
-		acado_qpOASESextras acado_csparse acado_casadi
+		acado_qpoases acado_csparse acado_casadi
 	)
 ENDIF ( ACADO_BUILD_STATIC )
 

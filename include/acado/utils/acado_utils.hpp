@@ -45,6 +45,11 @@
 #include <acado/utils/acado_debugging.hpp>
 #include <acado/utils/acado_io_utils.hpp>
 
+// A very ugly hack
+#if (defined __MINGW32__ || defined __MINGW64__)
+namespace std { namespace tr1 { using namespace std; } }
+#endif // (defined __MINGW32__ || defined __MINGW64__)
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif

@@ -25,6 +25,8 @@
 #
 ################################################################################
 
+INCLUDE( CheckCXXCompilerFlag )
+
 #
 # ACADO build flags, used internally for conditional code compilation
 #
@@ -78,10 +80,10 @@ IF (    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
      OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel" )
 	
 	# Cygwin complains in about the -fPIC flag...
-	IF( NOT CYGWIN )
+	IF( NOT (CYGWIN OR WIN32) )
 		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
 		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC" )
-	ENDIF( NOT CYGWIN )
+	ENDIF( )
 	
 	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
 	SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
@@ -90,7 +92,7 @@ IF (    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
 		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual" )
 	ENDIF()
 
-	IF ( NOT (APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") )
+	IF (NOT (APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") AND (NOT MINGW))
 		SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 		SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native")
 	ENDIF()
@@ -116,15 +118,28 @@ IF (    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
 	#       (version >= 4.0) since there are namespace problems (std::tr1 is removed).
 	#
 	IF ( NOT (APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") )
-		INCLUDE( CheckCXXCompilerFlag )
-		CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-		CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+		CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11 )
+		CHECK_CXX_COMPILER_FLAG(-std=gnu++11 COMPILER_SUPPORTS_GNU11)
+		CHECK_CXX_COMPILER_FLAG(-std=c++0x COMPILER_SUPPORTS_CXX0X)
+		CHECK_CXX_COMPILER_FLAG(-std=gnu++0x COMPILER_SUPPORTS_GNU0X)
+
 		IF( COMPILER_SUPPORTS_CXX11 )
 			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -DACADO_HAS_CXX11" )
-		ELSEIF( COMPILER_SUPPORTS_CXX0X )
+		ELSEIF( COMPILER_SUPPORTS_GNU11 )
+			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -DACADO_HAS_CXX11" )
+		ELSEIF( COMPILER_SUPPORTS_CXX0X)
 			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -DACADO_HAS_CXX0X" )
+		ELSEIF( COMPILER_SUPPORTS_GNU0X)
+			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x -DACADO_HAS_CXX0X" )
 		ENDIF()
 	ENDIF()
+
+	IF ( MINGW )
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+		SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static -s")
+		SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static -s")
+	ENDIF( )
 
 ################################################################################
 #
