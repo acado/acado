@@ -30,7 +30,7 @@
  */
 
 
-#include <acado_toolkit.hpp>
+#include <acado_code_generation.hpp>
 
 const double k10 =  1.287e12;
 const double k20 =  1.287e12;

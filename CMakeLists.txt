@@ -114,6 +114,11 @@ OPTION ( ACADO_DEVELOPER "Choose developer/user building mode" OFF )
 OPTION( ACADO_INTERNAL "Select building of ACADO internal stuff" OFF )
 
 #
+# Compile only the code generation tool
+#
+OPTION( ACADO_BUILD_CGT_ONLY "Build only the code generation tool" OFF )
+
+#
 # Build type
 #
 IF( NOT CMAKE_BUILD_TYPE )
@@ -194,46 +199,66 @@ INCLUDE( CompilerOptions )
 ################################################################################
 
 SET( ACADO_SOURCE_DIRS
-	# Integrators source folders
+	# Core 
 	./src/utils
 	./src/clock
 	./src/matrix_vector
-	./src/set_arithmetics
 	./src/variables_grid
 	./src/curve
 	./src/user_interaction
 	./src/symbolic_operator
 	./src/symbolic_expression
 	./src/function
-	./src/integrator
-	./src/validated_integrator
-	./src/sparse_solver
-	./external_packages/src/acado_csparse
-	./external_packages/src/acado_gnuplot
+)
+
+IF (NOT ACADO_BUILD_CGT_ONLY)
+	SET ( ACADO_SOURCE_DIRS ${ACADO_SOURCE_DIRS}
+		# Integrators
+		./src/integrator
+		./src/set_arithmetics
+		./src/validated_integrator
+		./src/sparse_solver
+		./external_packages/src/acado_csparse
+		./external_packages/src/acado_gnuplot
+	)
+ENDIF()
 	
-	# Optimal Control and Simulation source folders.
-	## Optimal Control
-	./src/dynamic_system
-	./src/dynamic_discretization
+# Optimal Control and Simulation source folders.
+## Optimal Control
+SET ( ACADO_SOURCE_DIRS ${ACADO_SOURCE_DIRS}
 	./src/objective
 	./src/constraint
 	./src/ocp
-	./src/conic_program
-	./src/conic_solver
-	./src/nlp_solver
-	./src/nlp_derivative_approximation
-	./src/optimization_algorithm
-	./external_packages/src/acado_qpoases
-	## Simulation
-	./src/process
-	./src/noise
-	./src/transfer_device
-	./src/controller
-	./src/control_law
-	./src/estimator
-	./src/reference_trajectory
-	./src/simulation_environment
+)
 
+IF (NOT ACADO_BUILD_CGT_ONLY)
+	SET ( ACADO_SOURCE_DIRS ${ACADO_SOURCE_DIRS}
+		./src/dynamic_system
+		./src/dynamic_discretization
+		./src/conic_program
+		./src/conic_solver
+		./src/nlp_solver
+		./src/nlp_derivative_approximation
+		./src/optimization_algorithm
+		./external_packages/src/acado_qpoases
+	)
+ENDIF()
+
+## Simulation
+IF (NOT ACADO_BUILD_CGT_ONLY)
+	SET ( ACADO_SOURCE_DIRS ${ACADO_SOURCE_DIRS}
+		./src/process
+		./src/noise
+		./src/transfer_device
+		./src/controller
+		./src/control_law
+		./src/estimator
+		./src/reference_trajectory
+		./src/simulation_environment
+	)
+ENDIF()
+
+SET ( ACADO_SOURCE_DIRS ${ACADO_SOURCE_DIRS}
 	# Code Generation Tool
 	./src/code_generation
 	./src/code_generation/linear_solvers	
@@ -282,8 +307,14 @@ IF ( ACADO_BUILD_STATIC )
 	ADD_LIBRARY( acado_toolkit STATIC ${ACADO_SOURCES} )
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit
-		acado_qpoases acado_csparse acado_casadi
+		acado_casadi
 	)
+	IF (NOT ACADO_BUILD_CGT_ONLY)
+		TARGET_LINK_LIBRARIES(
+			acado_toolkit
+			acado_qpoases acado_csparse
+		)
+	ENDIF()
 ENDIF ( ACADO_BUILD_STATIC )
 
 IF( ACADO_BUILD_SHARED )
@@ -295,8 +326,14 @@ IF( ACADO_BUILD_SHARED )
 	)
 	TARGET_LINK_LIBRARIES(
 		acado_toolkit_s
-		acado_qpoases acado_csparse acado_casadi
+		acado_casadi
 	)
+	IF (NOT ACADO_BUILD_CGT_ONLY)
+		TARGET_LINK_LIBRARIES(
+			acado_toolkit_s
+			acado_qpoases acado_csparse
+		)
+	ENDIF()
 ENDIF( ACADO_BUILD_SHARED )
 
 ################################################################################
@@ -314,15 +351,17 @@ ADD_STYLE_CHECK_TARGET(lint ${ACADO_SOURCES})
 #
 ################################################################################
 
-#
-# Build qpOASES library
-#
-ADD_SUBDIRECTORY( ./external_packages/qpOASES-3.0beta )
-
-#
-# Build csparse library
-#
-ADD_SUBDIRECTORY( ./external_packages/csparse )
+IF (NOT ACADO_BUILD_CGT_ONLY)
+	#
+	# Build qpOASES library
+	#
+	ADD_SUBDIRECTORY( ./external_packages/qpOASES-3.0beta )
+	
+	#
+	# Build csparse library
+	#
+	ADD_SUBDIRECTORY( ./external_packages/csparse )
+ENDIF()
 
 #
 # Build (a part of) CasADi library
