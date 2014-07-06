@@ -35,7 +35,7 @@
 #ifndef ACADO_TOOLKIT_LSQ_TERM_HPP
 #define ACADO_TOOLKIT_LSQ_TERM_HPP
 
-#include <acado/curve/curve.hpp>
+
 #include <acado/objective/objective_element.hpp>
 
 

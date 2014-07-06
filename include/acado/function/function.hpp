@@ -31,12 +31,11 @@
  *    \date 31.05.2008
  */
 
-
 #ifndef ACADO_TOOLKIT_FUNCTION_HPP
 #define ACADO_TOOLKIT_FUNCTION_HPP
 
-#include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
+
 #include <acado/symbolic_expression/acado_syntax.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 
@@ -48,14 +47,4 @@
 #include <acado/function/transition.hpp>
 #include <acado/function/output_fcn.hpp>
 
-
-// BEGIN_NAMESPACE_ACADO
-// 
-// const OutputFcn undefinedOutputFcn;
-// 
-// CLOSE_NAMESPACE_ACADO
-
-
 #endif  // ACADO_TOOLKIT_FUNCTION_HPP
-
-// end of file.

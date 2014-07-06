@@ -37,6 +37,10 @@
 
 BEGIN_NAMESPACE_ACADO
 
+class Grid;
+class Objective;
+class Constraint;
+
 /** 
  *	\brief Data class for defining optimal control problems.
  *
@@ -389,11 +393,11 @@ protected:
 	void setupGrid( const DVector& times );
 
 	/** Common discretization grid. */
-	Grid grid;
+	std::tr1::shared_ptr<Grid> grid;
 	/** The Objective. */
-	Objective objective;
+	std::tr1::shared_ptr<Objective> objective;
 	/** The Constraints. */
-	Constraint constraint;
+	std::tr1::shared_ptr<Constraint> constraint;
 };
 
 CLOSE_NAMESPACE_ACADO
