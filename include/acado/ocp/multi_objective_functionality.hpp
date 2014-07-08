@@ -33,7 +33,7 @@
 #ifndef ACADO_TOOLKIT_MULTI_OBJECTIVE_FUNCTIONALITY_HPP
 #define ACADO_TOOLKIT_MULTI_OBJECTIVE_FUNCTIONALITY_HPP
 
-#include <acado/utils/acado_utils.hpp>
+#include <acado/utils/acado_types.hpp>
 
 BEGIN_NAMESPACE_ACADO
 

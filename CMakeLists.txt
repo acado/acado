@@ -201,7 +201,6 @@ INCLUDE( CompilerOptions )
 SET( ACADO_SOURCE_DIRS
 	# Core 
 	./src/utils
-	./src/clock
 	./src/matrix_vector
 	./src/variables_grid
 	./src/curve
@@ -214,6 +213,7 @@ SET( ACADO_SOURCE_DIRS
 IF (NOT ACADO_BUILD_CGT_ONLY)
 	SET ( ACADO_SOURCE_DIRS ${ACADO_SOURCE_DIRS}
 		# Integrators
+		./src/clock
 		./src/integrator
 		./src/set_arithmetics
 		./src/validated_integrator

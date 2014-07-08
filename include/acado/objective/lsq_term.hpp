@@ -144,7 +144,7 @@ class LSQTerm : public ObjectiveElement{
          *                                       \n
          *  \return SUCCESSFUL_RETURN
          */
-        inline returnValue setReference( const VariablesGrid &ref );
+        returnValue setReference( const VariablesGrid &ref );
 
 
 // =======================================================================================

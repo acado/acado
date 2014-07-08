@@ -38,12 +38,10 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
-#include <acado/curve/curve.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 
-
+class Curve;
 
 /**
  *	\brief Allows to manage sub-windows of user-specified plot windows for algorithmic outputs (for internal use).

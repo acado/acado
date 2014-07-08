@@ -32,7 +32,7 @@
 
 
 #include <acado/user_interaction/plot_window_subplot.hpp>
-
+#include <acado/curve/curve.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

@@ -33,7 +33,6 @@
 #ifndef ACADO_TOOLKIT_VARIABLES_GRID_HPP
 #define ACADO_TOOLKIT_VARIABLES_GRID_HPP
 
-#include <acado/variables_grid/variable_settings.hpp>
 #include <acado/variables_grid/matrix_variables_grid.hpp>
 
 
