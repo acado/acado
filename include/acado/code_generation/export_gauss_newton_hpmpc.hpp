@@ -153,11 +153,11 @@ private:
 	/** @{ */
 	ExportFunction evaluateObjective;
 
-	ExportFunction setStageH;
 	ExportFunction setStagef;
 
 	ExportFunction setObjQ1Q2;
 	ExportFunction setObjR1R2;
+	ExportFunction setObjS1;
 	ExportFunction setObjQN1QN2;
 
 	/** @} */

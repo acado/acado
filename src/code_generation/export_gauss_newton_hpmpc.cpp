@@ -43,10 +43,7 @@ ExportGaussNewtonHpmpc::ExportGaussNewtonHpmpc(	UserInteraction* _userInteractio
 
 returnValue ExportGaussNewtonHpmpc::setup( )
 {
-	LOG( LVL_DEBUG ) << "Solver: setup initialization... " << endl;
 	setupInitialization();
-
-	LOG( LVL_DEBUG ) << "done!" << endl;
 
 	setupVariables();
 
@@ -74,10 +71,14 @@ returnValue ExportGaussNewtonHpmpc::getDataDeclarations(	ExportStatementBlock& d
 
 	declarations.addDeclaration(x0, dataStruct);
 
-	declarations.addDeclaration(qpQ, dataStruct);
-	declarations.addDeclaration(qpQf, dataStruct);
-	declarations.addDeclaration(qpS, dataStruct);
-	declarations.addDeclaration(qpR, dataStruct);
+	if (Q1.isGiven() == true)
+		declarations.addDeclaration(qpQ, dataStruct);
+	if (QN1.isGiven() == true)
+		declarations.addDeclaration(qpQf, dataStruct);
+	if (S1.isGiven() == true)
+		declarations.addDeclaration(qpS, dataStruct);
+	if (R1.isGiven() == true)
+		declarations.addDeclaration(qpR, dataStruct);
 
 	declarations.addDeclaration(qpq, dataStruct);
 	declarations.addDeclaration(qpqf, dataStruct);
@@ -119,7 +120,11 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 	setupQPInterface();
 
 	// Forward declaration, same as in the template file.
+	code << "#ifdef __cplusplus\n";
+	code << "extern \"C\"{\n";
 	code << "int acado_hpmpc_ip_wrapper(unsigned N, unsigned nx, unsigned nu, double* A, double* B, double* d, double* Q, double* Qf, double* S, double* R, double* q, double* qf, double* r, double* lb, double* ub, double* x, double* u, int* nIt);\n";
+	code << "}\n";
+	code << "#endif\n";
 
 	code.addLinebreak( 2 );
 	code.addStatement( "/******************************************************************************/\n" );
@@ -143,7 +148,6 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 	code.addFunction( setObjQ1Q2 );
 	code.addFunction( setObjR1R2 );
 	code.addFunction( setObjQN1QN2 );
-	code.addFunction( setStageH );
 	code.addFunction( setStagef );
 	code.addFunction( evaluateObjective );
 
@@ -181,27 +185,12 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
 
-	if (S1.isGiven() == false or S1.getGivenMatrix().isZero() == false)
-		ACADOWARNINGTEXT(RET_INVALID_ARGUMENTS,
-				"Mixed control-state terms in the objective function are not supported at the moment.");
-
 	//
 	// LM regularization preparation
 	//
-
-	ExportVariable evLmX = zeros<double>(NX, NX);
-	ExportVariable evLmU = zeros<double>(NU, NU);
-
 	if (levenbergMarquardt > 0.0)
 	{
-		DMatrix lmX = eye<double>( NX );
-		lmX *= levenbergMarquardt;
-
-		DMatrix lmU = eye<double>( NU );
-		lmU *= levenbergMarquardt;
-
-		evLmX = lmX;
-		evLmU = lmU;
+		ACADOWARNINGTEXT(RET_INVALID_ARGUMENTS, "LM regularization is under development.");
 	}
 
 	//
@@ -228,8 +217,6 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 	loopObjective.addLinebreak( );
 
 	// Optionally compute derivatives
-	unsigned indexX = getNY();
-	//	unsigned indexG = indexX;
 
 	ExportVariable tmpObjS, tmpFx, tmpFu;
 	ExportVariable tmpFxEnd, tmpObjSEndTerm;
@@ -249,6 +236,22 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 	if (objSEndTerm.isGiven() == true)
 		tmpObjSEndTerm = objSEndTerm;
 
+	unsigned indexX = getNY();
+	ExportArgument tmpFxCall = tmpFx;
+	if (tmpFx.isGiven() == false)
+	{
+		tmpFxCall = objValueOut.getAddress(0, indexX);
+		indexX += objEvFx.getDim();
+	}
+
+	ExportArgument tmpFuCall = tmpFu;
+	if (tmpFu.isGiven() == false)
+	{
+		tmpFuCall = objValueOut.getAddress(0, indexX);
+	}
+
+	ExportArgument objSCall = variableObjS == true ? objS.getAddress(runObj * NY, 0) : objS;
+
 	//
 	// Optional computation of Q1, Q2
 	//
@@ -262,47 +265,11 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 		setObjQ1Q2.addStatement( tmpQ2 == (tmpFx ^ tmpObjS) );
 		setObjQ1Q2.addStatement( tmpQ1 == tmpQ2 * tmpFx );
 
-		if (tmpFx.isGiven() == true)
-		{
-			if (variableObjS == YES)
-			{
-				loopObjective.addFunctionCall(
-						setObjQ1Q2,
-						tmpFx, objS.getAddress(runObj * NY, 0),
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-				);
-			}
-			else
-			{
-				loopObjective.addFunctionCall(
-						setObjQ1Q2,
-						tmpFx, objS,
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-				);
-			}
-		}
-		else
-		{
-			if (variableObjS == YES)
-			{
-				if (objEvFx.isGiven() == true)
-
-					loopObjective.addFunctionCall(
-							setObjQ1Q2,
-							objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
-							Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-					);
-			}
-			else
-			{
-				loopObjective.addFunctionCall(
-						setObjQ1Q2,
-						objValueOut.getAddress(0, indexX), objS,
-						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-				);
-			}
-			indexX += objEvFx.getDim();
-		}
+		loopObjective.addFunctionCall(
+				setObjQ1Q2,
+				tmpFxCall, objSCall,
+				Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+		);
 
 		loopObjective.addLinebreak( );
 	}
@@ -317,46 +284,33 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 		setObjR1R2.addStatement( tmpR2 == (tmpFu ^ tmpObjS) );
 		setObjR1R2.addStatement( tmpR1 == tmpR2 * tmpFu );
 
-		if (tmpFu.isGiven() == true)
-		{
-			if (variableObjS == YES)
-			{
-				loopObjective.addFunctionCall(
-						setObjR1R2,
-						tmpFu, objS.getAddress(runObj * NY, 0),
-						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
-				);
-			}
-			else
-			{
-				loopObjective.addFunctionCall(
-						setObjR1R2,
-						tmpFu, objS,
-						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
-				);
-			}
-		}
-		else
-		{
-			if (variableObjS == YES)
-			{
-				loopObjective.addFunctionCall(
-						setObjR1R2,
-						objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
-						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
-				);
-			}
-			else
-			{
-				loopObjective.addFunctionCall(
-						setObjR1R2,
-						objValueOut.getAddress(0, indexX), objS,
-						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
-				);
-			}
-		}
+		loopObjective.addFunctionCall(
+				setObjR1R2,
+				tmpFuCall, objSCall,
+				R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
+		);
 
 		loopObjective.addLinebreak( );
+	}
+
+	if (S1.isGiven() == false)
+	{
+		ExportVariable tmpS1;
+		ExportVariable tmpS2;
+
+		tmpS1.setup("tmpS1", NX, NU, REAL, ACADO_LOCAL);
+		tmpS2.setup("tmpS2", NX, NY, REAL, ACADO_LOCAL);
+
+		setObjS1.setup("setObjS1", tmpFx, tmpFu, tmpObjS, tmpS1);
+		setObjS1.addVariable( tmpS2 );
+		setObjS1.addStatement( tmpS2 == (tmpFx ^ tmpObjS) );
+		setObjS1.addStatement( tmpS1 == tmpS2 * tmpFu );
+
+		loopObjective.addFunctionCall(
+				setObjS1,
+				tmpFxCall, tmpFuCall, objSCall,
+				S1.getAddress(runObj * NX, 0)
+		);
 	}
 
 	evaluateObjective.addStatement( loopObjective );
@@ -367,7 +321,7 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
-	// Evaluate the objective function
+	// Evaluate the objective function, last node.
 	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
@@ -376,8 +330,6 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 
 	if (QN1.isGiven() == false)
 	{
-		indexX = getNYN();
-
 		ExportVariable tmpQN1, tmpQN2;
 		tmpQN1.setup("tmpQN1", NX, NX, REAL, ACADO_LOCAL);
 		tmpQN2.setup("tmpQN2", NX, NYN, REAL, ACADO_LOCAL);
@@ -386,18 +338,14 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 		setObjQN1QN2.addStatement( tmpQN2 == (tmpFxEnd ^ tmpObjSEndTerm) );
 		setObjQN1QN2.addStatement( tmpQN1 == tmpQN2 * tmpFxEnd );
 
-		if (tmpFxEnd.isGiven() == true)
-			evaluateObjective.addFunctionCall(
-					setObjQN1QN2,
-					tmpFxEnd, objSEndTerm,
-					QN1.getAddress(0, 0), QN2.getAddress(0, 0)
-			);
-		else
-			evaluateObjective.addFunctionCall(
-					setObjQN1QN2,
-					objValueOut.getAddress(0, indexX), objSEndTerm,
-					QN1.getAddress(0, 0), QN2.getAddress(0, 0)
-			);
+		indexX = getNYN();
+		ExportArgument tmpFxEndCall = tmpFxEnd.isGiven() == true ? tmpFxEnd  : objValueOut.getAddress(0, indexX);
+
+		evaluateObjective.addFunctionCall(
+				setObjQN1QN2,
+				tmpFxEndCall, objSEndTerm,
+				QN1.getAddress(0, 0), QN2.getAddress(0, 0)
+		);
 
 		evaluateObjective.addLinebreak( );
 	}
@@ -444,20 +392,51 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 	// Setup necessary QP variables
 	//
 
-	qpQ.setup("qpQ", N * NX, NX, REAL, ACADO_WORKSPACE);
-	qpQf.setup("qpQf", NX, NX, REAL, ACADO_WORKSPACE);
-	qpR.setup("qpR", N * NU, NU, REAL, ACADO_WORKSPACE);
-	qpS.setup("qpS", N * NX, NU, REAL, ACADO_WORKSPACE);
+	if (Q1.isGiven() == true)
+	{
+		qpQ.setup("qpQ", N * NX, NX, REAL, ACADO_WORKSPACE);
+		for (unsigned blk = 0; blk < N; ++blk)
+			initialize.addStatement( qpQ.getSubMatrix(blk * NX, (blk + 1) * NX, 0, NX) == Q1);
+	}
+	else
+	{
+		qpQ = Q1;
+	}
 
-	ASSERT(Q1.isGiven() == true and QN1.isGiven() == true);
-	ASSERT(R1.isGiven() == true);
+	if (R1.isGiven() == true)
+	{
+		qpR.setup("qpR", N * NU, NU, REAL, ACADO_WORKSPACE);
+		for (unsigned blk = 0; blk < N; ++blk)
+			initialize.addStatement( qpR.getSubMatrix(blk * NU, (blk + 1) * NU, 0, NU) == R1);
+	}
+	else
+	{
+		qpR = R1;
+	}
 
-	for (unsigned blk = 0; blk < N; ++blk)
-		initialize.addStatement( qpQ.getSubMatrix(blk * NX, (blk + 1) * NX, 0, NX) == Q1);
-	initialize.addStatement( qpQf == QN1 );
-	for (unsigned blk = 0; blk < N; ++blk)
-		initialize.addStatement( qpR.getSubMatrix(blk * NU, (blk + 1) * NU, 0, NU) == R1);
-	initialize.addStatement( qpS == zeros<double>(N * NX, NU) );
+	if (S1.isGiven() == true)
+	{
+		qpS.setup("qpS", N * NX, NU, REAL, ACADO_WORKSPACE);
+		if (S1.getGivenMatrix().isZero() == true)
+			initialize.addStatement(qpS == zeros<double>(N * NX, NU));
+		else
+			for (unsigned blk = 0; blk < N; ++blk)
+				initialize.addStatement( qpS.getSubMatrix(blk * NX, (blk + 1) * NX, 0, NU) == S1);
+	}
+	else
+	{
+		qpS = S1;
+	}
+
+	if (QN1.isGiven() == true)
+	{
+		qpQf.setup("qpQf", NX, NX, REAL, ACADO_WORKSPACE);
+		initialize.addStatement( qpQf == QN1 );
+	}
+	else
+	{
+		qpQf = QN1;
+	}
 
 	return SUCCESSFUL_RETURN;
 }
