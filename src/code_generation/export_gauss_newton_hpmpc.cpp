@@ -453,17 +453,50 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 
 	evaluateConstraints.setup("evaluateConstraints");
 
+	DVector lbTmp, ubTmp;
+
+	DVector lbXInf( NX );
+	lbXInf.setAll( -INFTY );
+
+	DVector ubXInf( NX );
+	ubXInf.setAll( INFTY );
+
+	DVector lbUInf( NU );
+	lbUInf.setAll( -INFTY );
+
+	DVector ubUInf( NU );
+	ubUInf.setAll( INFTY );
+
 	DVector lbValues, ubValues;
+
 	for(unsigned node = 0; node < N; ++node)
 	{
-		lbValues.append( uBounds.getLowerBounds( node ) );
-		ubValues.append( uBounds.getUpperBounds( node ) );
+		lbTmp = uBounds.getLowerBounds( node );
+		if ( !lbTmp.getDim() )
+			lbValues.append( lbUInf );
+		else
+			lbValues.append( lbTmp );
+
+		ubTmp = uBounds.getUpperBounds( node );
+		if ( !ubTmp.getDim() )
+			ubValues.append( ubUInf );
+		else
+			ubValues.append( ubTmp );
 	}
 
-	for(unsigned node = 1; node < N + 1; ++node)
+	for (unsigned node = 1; node < N + 1; ++node)
 	{
-		lbValues.append( xBounds.getLowerBounds( node ) );
-		ubValues.append( xBounds.getUpperBounds( node ) );
+		lbTmp = xBounds.getLowerBounds( node );
+		if ( !lbTmp.getDim() )
+			lbValues.append( lbXInf );
+		else
+			lbValues.append( lbTmp );
+
+		ubTmp = xBounds.getUpperBounds( node );
+		if ( !ubTmp.getDim() )
+			ubValues.append( ubXInf );
+		else
+			ubValues.append( ubTmp );
 	}
 
 	qpLb.setup("qpLb", N * NU + N * NX, 1, REAL, ACADO_WORKSPACE);
