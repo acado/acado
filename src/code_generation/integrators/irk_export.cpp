@@ -568,9 +568,9 @@ returnValue ImplicitRungeKuttaExport::solveInputSystem( ExportStatementBlock* bl
 		ExportForLoop loop4( index1,0,numStages );
 		ExportForLoop loop5( index2,0,NX1 );
 		loop5.addStatement( tmp_index == index1*NX1+index2 );
-		loop5.addStatement( rk_kkk.getSubMatrix(index2,index2+1,index1,index1+1) == rk_mat1.getSubMatrix(tmp_index,tmp_index+1,0,1)*rk_b.getRow(0) );
+		loop5.addStatement( rk_kkk.getElement(index2,index1) == rk_mat1.getElement(tmp_index,0)*rk_b.getRow(0) );
 		ExportForLoop loop6( index3,1,numStages*NX1 );
-		loop6.addStatement( rk_kkk.getSubMatrix(index2,index2+1,index1,index1+1) += rk_mat1.getSubMatrix(tmp_index,tmp_index+1,index3,index3+1)*rk_b.getRow(index3) );
+		loop6.addStatement( rk_kkk.getElement(index2,index1) += rk_mat1.getElement(tmp_index,index3)*rk_b.getRow(index3) );
 		loop5.addStatement(loop6);
 		loop4.addStatement(loop5);
 		block->addStatement(loop4);
@@ -642,9 +642,9 @@ returnValue ImplicitRungeKuttaExport::solveOutputSystem( ExportStatementBlock* b
 		ExportForLoop loop4( index1,0,numStages );
 		ExportForLoop loop5( index2,0,NX3 );
 		loop5.addStatement( tmp_index == index1*NX3+index2 );
-		loop5.addStatement( rk_kkk.getSubMatrix(NX1+NX2+index2,NX1+NX2+index2+1,index1,index1+1) == rk_mat3.getSubMatrix(tmp_index,tmp_index+1,0,1)*rk_b.getRow(0) );
+		loop5.addStatement( rk_kkk.getElement(NX1+NX2+index2,index1) == rk_mat3.getElement(tmp_index,0)*rk_b.getRow(0) );
 		ExportForLoop loop6( index3,1,numStages*NX3 );
-		loop6.addStatement( rk_kkk.getSubMatrix(NX1+NX2+index2,NX1+NX2+index2+1,index1,index1+1) += rk_mat3.getSubMatrix(tmp_index,tmp_index+1,index3,index3+1)*rk_b.getRow(index3) );
+		loop6.addStatement( rk_kkk.getElement(NX1+NX2+index2,index1) += rk_mat3.getElement(tmp_index,index3)*rk_b.getRow(index3) );
 		loop5.addStatement(loop6);
 		loop4.addStatement(loop5);
 		block->addStatement(loop4);
@@ -659,16 +659,16 @@ returnValue ImplicitRungeKuttaExport::evaluateStatesImplicitSystem( ExportStatem
 	ExportForLoop loop1( i, 0, NX1+NX2 );
 	loop1.addStatement( rk_xxx.getCol( i ) == rk_eta.getCol( i ) );
 	ExportForLoop loop2( j, 0, numStages );
-	loop2.addStatement( rk_xxx.getCol( i ) += Ah.getSubMatrix(stage,stage+1,j,j+1)*rk_kkk.getSubMatrix( i,i+1,j,j+1 ) );
+	loop2.addStatement( rk_xxx.getCol( i ) += Ah.getElement(stage,j)*rk_kkk.getElement( i,j ) );
 	loop1.addStatement( loop2 );
 	block->addStatement( loop1 );
 
 	ExportForLoop loop3( i, 0, NXA );
-	loop3.addStatement( rk_xxx.getCol( NX+i ) == rk_kkk.getSubMatrix( NX+i,NX+i+1,stage,stage+1 ) );
+	loop3.addStatement( rk_xxx.getCol( NX+i ) == rk_kkk.getElement( NX+i,stage ) );
 	block->addStatement( loop3 );
 
 	ExportForLoop loop4( i, 0, NDX2 );
-	loop4.addStatement( rk_xxx.getCol( inputDim-diffsDim+i ) == rk_kkk.getSubMatrix( i,i+1,stage,stage+1 ) );
+	loop4.addStatement( rk_xxx.getCol( inputDim-diffsDim+i ) == rk_kkk.getElement( i,stage ) );
 	block->addStatement( loop4 );
 
 	if( C.getDim() > 0 ) {	// There is a time dependence, so it must be set
@@ -685,17 +685,17 @@ returnValue ImplicitRungeKuttaExport::evaluateStatesOutputSystem( ExportStatemen
 	for( i = 0; i < NX1+NX2; i++ ) {
 		block->addStatement( rk_xxx.getCol( i ) == rk_eta.getCol( i ) );
 		for( j = 0; j < numStages; j++ ) {
-			block->addStatement( rk_xxx.getCol( i ) += Ah.getSubMatrix(stage,stage+1,j,j+1)*rk_kkk.getSubMatrix( i,i+1,j,j+1 ) );
+			block->addStatement( rk_xxx.getCol( i ) += Ah.getElement(stage,j)*rk_kkk.getElement( i,j ) );
 		}
 	}
 	for( i = 0; i < NX3; i++ ) {
 		block->addStatement( rk_xxx.getCol( NX1+NX2+i ) == rk_eta.getCol( NX1+NX2+i ) );
 	}
 	for( i = 0; i < NXA3; i++ ) {
-		block->addStatement( rk_xxx.getCol( NX+i ) == rk_kkk.getSubMatrix( NX+i,NX+i+1,stage,stage+1 ) );
+		block->addStatement( rk_xxx.getCol( NX+i ) == rk_kkk.getElement( NX+i,stage ) );
 	}
 	for( i = 0; i < NDX3; i++ ) {
-		block->addStatement( rk_xxx.getCol( inputDim-diffsDim+i ) == rk_kkk.getSubMatrix( i,i+1,stage,stage+1 ) );
+		block->addStatement( rk_xxx.getCol( inputDim-diffsDim+i ) == rk_kkk.getElement( i,stage ) );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -735,12 +735,12 @@ returnValue ImplicitRungeKuttaExport::evaluateMatrix( ExportStatementBlock* bloc
 	loop2.addStatement( tmp_index == index1*(NX2+NXA)+index2 );
 	for( i = 0; i < numStages; i++ ) { // differential states
 		if( NDX2 == 0 ) {
-			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,i*NX2,i*NX2+NX2 ) == Ah.getSubMatrix( index1,index1+1,i,i+1 )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
+			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,i*NX2,i*NX2+NX2 ) == Ah.getElement( index1,i )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
 			loop2.addStatement( std::string( "if( " ) + toString(i) + " == " + index1.getName() + " ) " );
-			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,index2+i*NX2,index2+i*NX2+1 ) -= 1 );
+			loop2.addStatement( rk_A.getElement( tmp_index,index2+i*NX2 ) -= 1 );
 		}
 		else {
-			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,i*NX2,i*NX2+NX2 ) == Ah.getSubMatrix( index1,index1+1,i,i+1 )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
+			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,i*NX2,i*NX2+NX2 ) == Ah.getElement( index1,i )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
 			loop2.addStatement( std::string( "if( " ) + toString(i) + " == " + index1.getName() + " ) {\n" );
 			loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,i*NX2,i*NX2+NX2 ) += rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NVARS2-NX2,index2*(NVARS2)+NVARS2 ) );
 			loop2.addStatement( std::string( "}\n" ) );
@@ -780,11 +780,11 @@ returnValue ImplicitRungeKuttaExport::generateOutput( ExportStatementBlock* bloc
 			loop1->addStatement( std::string("for(") + index1.getName() + " = 0; " + index1.getName() + " < (int)" + numMeasVariables[i].get(0,index0) + "; " + index1.getName() + "++) {\n" );
 			loop1->addStatement( tmp_index1 == numMeas[i]+index1 );
 			for( j = 0; j < numStages; j++ ) {
-				loop1->addStatement( rk_outH.getRow(j) == polynVariables[i].getSubMatrix( tmp_index1,tmp_index1+1,j,j+1 ) );
+				loop1->addStatement( rk_outH.getRow(j) == polynVariables[i].getElement( tmp_index1,j ) );
 			}
 			if( numXA_output(i) > 0 || numDX_output(i) > 0 ) {
 				for( j = 0; j < numStages; j++ ) {
-					loop1->addStatement( rk_out.getRow(j) == polynDerVariables[i].getSubMatrix( tmp_index1,tmp_index1+1,j,j+1 ) );
+					loop1->addStatement( rk_out.getRow(j) == polynDerVariables[i].getElement( tmp_index1,j ) );
 				}
 			}
 		}
