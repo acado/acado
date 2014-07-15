@@ -30,7 +30,7 @@
  */
 
 #include <acado/code_generation/export_gauss_newton_hpmpc.hpp>
-#include <acado/code_generation/templates/templates.hpp>
+#include <acado/code_generation/export_hpmpc_interface.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -56,6 +56,8 @@ returnValue ExportGaussNewtonHpmpc::setup( )
 	setupEvaluation();
 
 	setupAuxiliaryFunctions();
+
+	setupQPInterface();
 
 	return SUCCESSFUL_RETURN;
 }
@@ -117,7 +119,7 @@ returnValue ExportGaussNewtonHpmpc::getFunctionDeclarations(	ExportStatementBloc
 returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 												)
 {
-	setupQPInterface();
+	qpInterface->exportCode();
 
 	// Forward declaration, same as in the template file.
 	code << "#ifdef __cplusplus\n";
@@ -611,11 +613,43 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 
 returnValue ExportGaussNewtonHpmpc::setupQPInterface( )
 {
+	//
+	// Configure and export QP interface
+	//
+
 	string folderName;
 	get(CG_EXPORT_FOLDER_NAME, folderName);
 	string outFile = folderName + "/acado_hpmpc_interface.c";
 
-	acadoCopyTempateFile(HPMPC_INTERFACE, outFile, "", true);
+	qpInterface = std::tr1::shared_ptr< ExportHpmpcInterface >(new ExportHpmpcInterface(outFile, commonHeaderName));
+
+	int maxNumQPiterations;
+	get(MAX_NUM_QP_ITERATIONS, maxNumQPiterations);
+
+	// XXX If not specified, use default value
+	if ( maxNumQPiterations <= 0 )
+		maxNumQPiterations = getNumQPvars();
+
+	int printLevel;
+	get(PRINTLEVEL, printLevel);
+
+	if ( (PrintLevel)printLevel >= HIGH )
+		printLevel = 2;
+	else
+		printLevel = 0;
+
+	int useSinglePrecision;
+	get(USE_SINGLE_PRECISION, useSinglePrecision);
+
+	int hotstartQP;
+	get(HOTSTART_QP, hotstartQP);
+
+	qpInterface->configure(
+			maxNumQPiterations,
+			printLevel,
+			useSinglePrecision,
+			hotstartQP
+	);
 
 	return SUCCESSFUL_RETURN;
 }

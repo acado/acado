@@ -36,6 +36,8 @@
 
 BEGIN_NAMESPACE_ACADO
 
+class ExportHpmpcInterface;
+
 /** 
  *	\brief TBD
  *
@@ -192,6 +194,8 @@ private:
 	ExportVariable qpLb, qpUb;
 
 	ExportVariable nIt;
+
+	std::tr1::shared_ptr< ExportHpmpcInterface > qpInterface;
 	/** @} */
 };
 
