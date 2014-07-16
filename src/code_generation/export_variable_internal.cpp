@@ -464,7 +464,12 @@ bool ExportVariableInternal::hasValue(	const ExportIndex& rowIdx,
 										double _value
 										) const
 {
+	if ((getType() == STATIC_CONST_INT || getType() == STATIC_CONST_REAL) &&
+			acadoIsEqual(_value, undefinedEntry) == true)
+		return true;
+
 	ExportIndex ind = getTotalIdx(rowIdx + rowOffset, colIdx + colOffset);
+
 	if (ind.isGiven() == true)
 		return acadoIsEqual(data->operator()(ind.getGivenValue()), _value);
 

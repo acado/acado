@@ -64,8 +64,7 @@ GenericVector<T>& GenericVector< T >::setUnitVector(	unsigned _idx
 }
 
 template<typename T>
-T GenericVector< T >::getNorm(	VectorNorm _norm
-) const
+T GenericVector< T >::getNorm(VectorNorm _norm ) const
 {
 	GenericVector scale( getDim() );
 	scale.setOnes();
@@ -74,8 +73,7 @@ T GenericVector< T >::getNorm(	VectorNorm _norm
 
 template<typename T>
 T GenericVector< T >::getNorm(	VectorNorm _norm,
-		const GenericVector< T >& _scale
-) const
+								const GenericVector< T >& _scale ) const
 {
 	GenericVector foo( getDim() );
 
@@ -110,6 +108,34 @@ returnValue GenericVector<T>::print(	std::ostream& stream,
 										const std::string& rowSeparator
 										) const
 {
+	if (name.size())
+		stream << name << " = ";
+
+	stream << startString;
+
+	for (unsigned i = 0; i < getDim(); ++i)
+	{
+		stream << Base::operator()( i );
+
+		if (i < (getDim() - 1))
+			stream << rowSeparator;
+	}
+	stream << endString;
+
+	return SUCCESSFUL_RETURN;
+}
+
+template<>
+returnValue GenericVector< double >::print(	std::ostream& stream,
+											const std::string& name,
+											const std::string& startString,
+											const std::string& endString,
+											uint width,
+											uint precision,
+											const std::string& colSeparator,
+											const std::string& rowSeparator
+											) const
+{
 	IoFormatter iof( stream );
 
 	if (name.size())
@@ -117,7 +143,9 @@ returnValue GenericVector<T>::print(	std::ostream& stream,
 
 	stream << startString;
 
-	iof.set(precision > 0 ? precision : iof.precision, width, precision > 0 ? ios::scientific : iof.flags);
+	iof.set(precision > 0 ? precision : iof.precision,
+			width,
+			precision > 0 ? ios::scientific | ios::right : ios::fixed);
 
 	for (unsigned i = 0; i < getDim(); ++i)
 	{
@@ -252,7 +280,7 @@ returnValue GenericVector<T>::read(	const std::string& filename
 }
 
 //
-// Explicit instantiations of templates
+// Explicit instantiation of templates
 //
 template class GenericVector<double>;
 template class GenericVector<int>;
