@@ -930,44 +930,46 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 		condenseFdb.addLinebreak();
 	}
 
-	condenseFdb.addStatement( Dy -= y );
-	condenseFdb.addStatement( DyN -= yN );
-	condenseFdb.addLinebreak();
+	if( y.getDim() > 0 ) {
+		condenseFdb.addStatement( Dy -= y );
+		condenseFdb.addStatement( DyN -= yN );
+		condenseFdb.addLinebreak();
 
-	// Compute RDy
-	for(unsigned run1 = 0; run1 < N; ++run1)
-	{
-		if (R2.isGiven() == true)
-			condenseFdb.addFunctionCall(
-					multRDy, R2,
-					Dy.getAddress(run1 * NY, 0),
-					g.getAddress(run1 * NU, 0) );
-		else
-			condenseFdb.addFunctionCall(
-					multRDy, R2.getAddress(run1 * NU, 0),
-					Dy.getAddress(run1 * NY, 0),
-					g.getAddress(run1 * NU, 0) );
-	}
-	condenseFdb.addLinebreak();
+		// Compute RDy
+		for(unsigned run1 = 0; run1 < N; ++run1)
+		{
+			if (R2.isGiven() == true)
+				condenseFdb.addFunctionCall(
+						multRDy, R2,
+						Dy.getAddress(run1 * NY, 0),
+						g.getAddress(run1 * NU, 0) );
+			else
+				condenseFdb.addFunctionCall(
+						multRDy, R2.getAddress(run1 * NU, 0),
+						Dy.getAddress(run1 * NY, 0),
+						g.getAddress(run1 * NU, 0) );
+		}
+		condenseFdb.addLinebreak();
 
-	// Compute QDy
-	// NOTE: This is just for the MHE case :: run1 starts from 0; in MPC :: from 1 ;)
-	for(unsigned run1 = 0; run1 < N; run1++ )
-	{
-		if (Q2.isGiven() == true)
-			condenseFdb.addFunctionCall(
-					multQDy, Q2,
-					Dy.getAddress(run1 * NY),
-					QDy.getAddress(run1 * NX) );
-		else
-			condenseFdb.addFunctionCall(
-					multQDy, Q2.getAddress(run1 * NX),
-					Dy.getAddress(run1 * NY),
-					QDy.getAddress(run1 * NX) );
+		// Compute QDy
+		// NOTE: This is just for the MHE case :: run1 starts from 0; in MPC :: from 1 ;)
+		for(unsigned run1 = 0; run1 < N; run1++ )
+		{
+			if (Q2.isGiven() == true)
+				condenseFdb.addFunctionCall(
+						multQDy, Q2,
+						Dy.getAddress(run1 * NY),
+						QDy.getAddress(run1 * NX) );
+			else
+				condenseFdb.addFunctionCall(
+						multQDy, Q2.getAddress(run1 * NX),
+						Dy.getAddress(run1 * NY),
+						QDy.getAddress(run1 * NX) );
+		}
+		condenseFdb.addLinebreak();
+		condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) == QN2 * DyN );
+		condenseFdb.addLinebreak();
 	}
-	condenseFdb.addLinebreak();
-	condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) == QN2 * DyN );
-	condenseFdb.addLinebreak();
 
 	/*
 	for k = 0: N - 1
@@ -1089,38 +1091,42 @@ returnValue ExportGaussNewtonCN2New::setupCondensing( void )
 
 	expand.addStatement( x.makeColVector() += sbar );
 
-	mu.setup("mu", N, NX, REAL, ACADO_WORKSPACE);
-//	mu_N = lambda_N + q_N + Q_N^T * Ds_N  --> wrong in Joel's paper !!
-//		for i = N - 1: 1
-//			mu_k = Q_k^T * Ds_k + A_k^T * mu_{k + 1} + S_k * Du_k + q_k
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	if( secondOrder ) {
+		//	mu_N = lambda_N + q_N + Q_N^T * Ds_N  --> wrong in Joel's paper !!
+		//		for i = N - 1: 1
+		//			mu_k = Q_k^T * Ds_k + A_k^T * mu_{k + 1} + S_k * Du_k + q_k
 
-	for (uint j = 0; j < NX; j++ ) {
-		uint item = N*NX+j;
-		uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
-		if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
-			expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == yVars.getRow(N*NU+IdxF) );
-		}
-		else { // INDEX NOT FOUND
-			expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == 0.0 );
-		}
-	}
-	expand.addStatement( mu.getRow(N-1) += sbar.getRows(N*NX,(N+1)*NX).getTranspose()*QN1 );
-	expand.addStatement( mu.getRow(N-1) += QDy.getRows(N*NX,(N+1)*NX).getTranspose() );
-	for (int i = N - 1; i >= 1; i--) {
 		for (uint j = 0; j < NX; j++ ) {
-			uint item = i*NX+j;
+			uint item = N*NX+j;
 			uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
 			if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
-				expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == yVars.getRow(N*NU+IdxF) );
+				expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == yVars.getRow(N*NU+IdxF) );
 			}
 			else { // INDEX NOT FOUND
-				expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == 0.0 );
+				expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == 0.0 );
 			}
 		}
-		expand.addFunctionCall(
-				expansionStep2, QDy.getAddress(i*NX), Q1.getAddress(i * NX), sbar.getAddress(i*NX),
-				S1.getAddress(i * NX), xVars.getAddress(i * NU), evGx.getAddress(i * NX),
-				mu.getAddress(i-1), mu.getAddress(i) );
+		expand.addStatement( mu.getRow(N-1) += sbar.getRows(N*NX,(N+1)*NX).getTranspose()*QN1 );
+		expand.addStatement( mu.getRow(N-1) += QDy.getRows(N*NX,(N+1)*NX).getTranspose() );
+		for (int i = N - 1; i >= 1; i--) {
+			for (uint j = 0; j < NX; j++ ) {
+				uint item = i*NX+j;
+				uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
+				if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
+					expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == yVars.getRow(N*NU+IdxF) );
+				}
+				else { // INDEX NOT FOUND
+					expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == 0.0 );
+				}
+			}
+			expand.addFunctionCall(
+					expansionStep2, QDy.getAddress(i*NX), Q1.getAddress(i * NX), sbar.getAddress(i*NX),
+					S1.getAddress(i * NX), xVars.getAddress(i * NU), evGx.getAddress(i * NX),
+					mu.getAddress(i-1), mu.getAddress(i) );
+		}
 	}
 
 

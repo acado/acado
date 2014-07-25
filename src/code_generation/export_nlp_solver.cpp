@@ -191,6 +191,9 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	// Condensing based QP solvers should redefine/extend model simulation
 	//
 
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+
 	modelSimulation.setup( "modelSimulation" );
 	ExportVariable retSim("ret", 1, 1, INT, ACADO_LOCAL, true);
 	modelSimulation.setReturnValue(retSim, false);
@@ -216,19 +219,31 @@ returnValue ExportNLPSolver::setupSimulation( void )
 		d.setup("d", getN() * getNX(), 1, REAL, ACADO_WORKSPACE);
 	}
 
+	uint symH = (NX+NU)*(NX+NU+1)/2;
+
 	evGx.setup("evGx", N * NX, NX, REAL, ACADO_WORKSPACE);
 	evGu.setup("evGu", N * NX, NU, REAL, ACADO_WORKSPACE);
+
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+
+	if( secondOrder ) mu.setup("mu", N, NX, REAL, ACADO_VARIABLES);
 
 	ExportStruct dataStructWspace;
 	dataStructWspace = (useOMP && performsSingleShooting() == false) ? ACADO_LOCAL : ACADO_WORKSPACE;
 	state.setup("state", 1, (getNX() + getNXA()) * (getNX() + getNU() + 1) + getNU() + getNOD(), REAL, dataStructWspace);
+	if( secondOrder ) {
+		state.setup("state", 1, (getNX() + getNXA()) * (getNX() + getNU() + 1) + getNX() + symH + getNU() + getNOD(), REAL, dataStructWspace);
+	}
 
 	unsigned indexZ   = NX + NXA;
+	if( secondOrder ) indexZ = indexZ + NX; 	// because of the first order adjoint direction
 	unsigned indexGxx = indexZ + NX * NX;
 	unsigned indexGzx = indexGxx + NXA * NX;
 	unsigned indexGxu = indexGzx + NX * NU;
 	unsigned indexGzu = indexGxu + NXA * NU;
-	unsigned indexU   = indexGzu + NU;
+	unsigned indexH = indexGzu;
+	if( secondOrder ) indexH = indexGzu + symH; 	// because of the second order derivatives
+	unsigned indexU   = indexH + NU;
 	unsigned indexOD   = indexU + NOD;
 
 	////////////////////////////////////////////////////////////////////////////
@@ -240,7 +255,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	{
 		modelSimulation.addStatement( state.getCols(0, NX)				== x.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(NX, NX + NXA)		== z.getRow( 0 ) );
-		modelSimulation.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( 0 ) );
+		modelSimulation.addStatement( state.getCols(indexH, indexU)	== u.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(indexU, indexOD)	== od.getRow( 0 ) );
 		modelSimulation.addLinebreak( );
 	}
@@ -262,7 +277,10 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	loop.addLinebreak( );
 
 	// Fill in the input vector
-	loop.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( run ) );
+	if( secondOrder ) {
+		loop.addStatement( state.getCols(NX+NXA, 2*NX+NXA)	== mu.getRow( run ) );
+	}
+	loop.addStatement( state.getCols(indexH, indexU)	== u.getRow( run ) );
 	loop.addStatement( state.getCols(indexU, indexOD)	== od.getRow( run ) );
 	loop.addLinebreak( );
 
@@ -326,15 +344,277 @@ returnValue ExportNLPSolver::setupSimulation( void )
 			evGu.makeRowVector().getCols(run * NX * NU, (run + 1) * NX * NU) == state.getCols(indexGzx, indexGxu)
 	);
 
-	modelSimulation.addStatement( loop );
+	// TODO: write this in exported loops (RIEN)
+	if( secondOrder ) {
+		for( uint i = 0; i < NX+NU; i++ ) {
+			for( uint j = 0; j <= i; j++ ) {
+				loop.addStatement( objS.getElement(run*(NX+NU)+i,j) == -1.0*state.getCol(indexGzu + i*(i+1)/2+j) );
+				if( i != j) {
+					loop.addStatement( objS.getElement(run*(NX+NU)+j,i) == objS.getElement(run*(NX+NU)+i,j) );
+				}
+			}
+		}
+	}
 
-	// XXX This should be revisited at some point
-//	modelSimulation.release( run );
+	modelSimulation.addStatement( loop );
 
 	return SUCCESSFUL_RETURN;
 }
 
+
 returnValue ExportNLPSolver::setObjective(const Objective& _objective)
+{
+	if( _objective.getNumMayerTerms() == 0 && _objective.getNumLagrangeTerms() == 0 ) {
+		return setLSQObjective( _objective );
+	}
+	else {
+		return setGeneralObjective( _objective );
+	}
+}
+
+
+returnValue ExportNLPSolver::setGeneralObjective(const Objective& _objective)
+{
+	////////////////////////////////////////////////////////////////////////////
+	//   ONLY ACADO AD SUPPORTED FOR NOW
+	////////////////////////////////////////////////////////////////////////////
+
+	Function objF, objFEndTerm;
+	DifferentialState dummy0;
+	Control dummy1;
+	dummy0.clearStaticCounters();
+	dummy1.clearStaticCounters();
+
+	DifferentialState vX("", NX, 1);
+	Control vU("", NU, 1);
+
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	if( secondOrder ) {
+		objS.setup("EH", N * (NX + NU), NX + NU, REAL, ACADO_WORKSPACE);  // EXACT HESSIAN
+	}
+
+	S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+	Q1.setup("Q1", NX * N, NX, REAL, ACADO_WORKSPACE);
+	R1.setup("R1", NU * N, NU, REAL, ACADO_WORKSPACE);
+	QN1.setup("QN1", NX, NX, REAL, ACADO_WORKSPACE);
+
+	objValueIn.setup("objValueIn", 1, NX + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
+	// -----------------
+	//   Lagrange Term:
+	setNY( 0 );
+	if( _objective.getNumLagrangeTerms() ) {
+		_objective.getLagrangeTerm(0, objF);
+
+		objS.setup("EH", N * (NX+NU), NX+NU, REAL, ACADO_WORKSPACE);  // EXACT HESSIAN
+
+		Expression expF;
+		objF.getExpression( expF );
+
+		// FIRST ORDER DERIVATIVES
+		Expression expFx, expFu, expDF, expDDF, S, lambda, arg, dl;
+		S = eye<double>(NX+NU);
+		lambda = 1;
+		arg << vX;
+		arg << vU;
+
+		expDDF = symmetricDerivative( expF, arg, S, lambda, &expDF, &dl );
+
+		expFx = expDF.getCols(0, NX).transpose();
+		expFu = expDF.getCols(NX, NX+NU).transpose();
+
+		Function Fx, Fu;
+		Fx << expFx;
+		Fu << expFu;
+
+//		if (Fx.isConstant() == true)
+//		{
+//			EvaluationPoint epFx( Fx );
+//
+//			DVector vFx = Fx.evaluate( epFx );
+//
+//			objEvFx.setup("evFx", Eigen::Map<DMatrix>(vFx.data(), 1, NX), REAL, ACADO_WORKSPACE);
+//		}
+//		else
+//		{
+			objF << expFx;
+
+			objEvFx.setup("evFx", 1, NX, REAL, ACADO_WORKSPACE);
+//		}
+
+//		if (Fu.isConstant() == true)
+//		{
+//			EvaluationPoint epFu( Fu );
+//
+//			DVector vFu = Fu.evaluate( epFu );
+//
+//			objEvFu.setup("evFu", Eigen::Map<DMatrix>(vFu.data(), 1, NU), REAL, ACADO_WORKSPACE);
+//		}
+//		else
+//		{
+			objF << expFu;
+
+			objEvFu.setup("evFu", 1, NU, REAL, ACADO_WORKSPACE);
+//		}
+
+		// SECOND ORDER DERIVATIVES
+		Expression expFxx;
+		Expression expFxu;
+		Expression expFuu;
+
+		expFxx = expDDF.getSubMatrix(0,NX,0,NX);
+		expFxu = expDDF.getSubMatrix(0,NX,NX,NX+NU);
+		expFuu = expDDF.getSubMatrix(NX,NX+NU,NX,NX+NU);
+
+		Function Fxx, Fxu, Fuu;
+		Fxx << expFxx;
+		Fxu << expFxu;
+		Fuu << expFuu;
+
+//		if (Fxx.isConstant() == true)
+//		{
+//			EvaluationPoint epFxx( Fxx );
+//
+//			DVector vFxx = Fxx.evaluate( epFxx );
+//
+//			objEvFxx.setup("evFxx", Eigen::Map<DMatrix>(vFxx.data(), NX, NX), REAL, ACADO_WORKSPACE);
+//			Q1 = vFxx.data();
+//		}
+//		else
+//		{
+			objF << expFxx;
+
+			objEvFxx.setup("evFxx", NX, NX, REAL, ACADO_WORKSPACE);
+//		}
+
+//		if (Fxu.isConstant() == true)
+//		{
+//			EvaluationPoint epFxu( Fxu );
+//
+//			DVector vFxu = Fxu.evaluate( epFxu );
+//
+//			objEvFxu.setup("evFxu", Eigen::Map<DMatrix>(vFxu.data(), NX, NU), REAL, ACADO_WORKSPACE);
+//			S1 = vFxu.data();
+//		}
+//		else
+//		{
+			objF << expFxu;
+
+			objEvFxu.setup("evFxu", NX, NU, REAL, ACADO_WORKSPACE);
+//		}
+
+//		if (Fuu.isConstant() == true)
+//		{
+//			EvaluationPoint epFuu( Fuu );
+//
+//			DVector vFuu = Fuu.evaluate( epFuu );
+//
+//			objEvFuu.setup("evFuu", Eigen::Map<DMatrix>(vFuu.data(), NU, NU), REAL, ACADO_WORKSPACE);
+//			R1 = vFuu.data();
+//		}
+//		else
+//		{
+			objF << expFuu;
+
+			objEvFuu.setup("evFuu", NU, NU, REAL, ACADO_WORKSPACE);
+//		}
+
+		// Set the separate aux variable for the evaluation of the objective.
+		objAuxVar.setup("objAuxVar", objF.getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
+		evaluateLSQ.init(objF, "evaluateLagrange", NX, 0, NU);
+		evaluateLSQ.setGlobalExportVariable( objAuxVar );
+		evaluateLSQ.setPrivate( true );
+
+		objValueOut.setup("objValueOut", 1, objF.getDim(), REAL, ACADO_WORKSPACE);
+	}
+
+	// -----------------
+	//   Mayer Term:
+	setNYN( 0 );
+	if( _objective.getNumMayerTerms() ) {
+		_objective.getMayerTerm(0, objFEndTerm);
+
+		if (objFEndTerm.getNU() > 0)
+			return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost function must not depend on controls.");
+
+		objSEndTerm.setup("EH_N", NX, NX, REAL, ACADO_WORKSPACE);  // EXACT HESSIAN
+
+		Expression expFEndTerm;
+		objFEndTerm.getExpression( expFEndTerm );
+
+		// FIRST ORDER DERIVATIVES
+
+		Expression expFEndTermX, expFEndTermXX, S, lambda, dl;
+		S = eye<double>(NX);
+		lambda = 1;
+
+		expFEndTermXX = symmetricDerivative( expFEndTerm, vX, S, lambda, &expFEndTermX, &dl );
+
+		Function FEndTermX;
+		FEndTermX << expFEndTermX.transpose();
+
+//		if (FEndTermX.isConstant() == true)
+//		{
+//			EvaluationPoint epFEndTermX( FEndTermX );
+//
+//			DVector vFx = FEndTermX.evaluate( epFEndTermX );
+//
+//			objEvFxEnd.setup("evFxEnd", Eigen::Map<DMatrix>(vFx.data(), 1, NX), REAL, ACADO_WORKSPACE);
+//		}
+//		else
+//		{
+			objFEndTerm << expFEndTermX;
+
+			objEvFxEnd.setup("evFxEnd", 1, NX, REAL, ACADO_WORKSPACE);
+//		}
+
+		// SECOND ORDER DERIVATIVES
+
+		Function FEndTermXX;
+		FEndTermXX << expFEndTermXX;
+
+//		if (FEndTermXX.isConstant() == true)
+//		{
+//			EvaluationPoint epFEndTermXX( FEndTermXX );
+//
+//			DVector vFxx = FEndTermXX.evaluate( epFEndTermXX );
+//
+//			objEvFxxEnd.setup("evFxxEnd", Eigen::Map<DMatrix>(vFxx.data(), NX, NX), REAL, ACADO_WORKSPACE);
+//			QN1 = vFxx.data();
+//		}
+//		else
+//		{
+			objFEndTerm << expFEndTermXX;
+
+			objEvFxxEnd.setup("evFxxEnd", NX, NX, REAL, ACADO_WORKSPACE);
+//		}
+
+		unsigned objFEndTermSize = objFEndTerm.getGlobalExportVariableSize();
+		if ( objFEndTermSize > objAuxVar.getDim() )
+		{
+			objAuxVar.setup("objAuxVar", objFEndTermSize, 1, REAL, ACADO_WORKSPACE);
+		}
+
+		evaluateLSQEndTerm.init(objFEndTerm, "evaluateMayer", NX, 0, 0);
+		evaluateLSQEndTerm.setGlobalExportVariable( objAuxVar );
+		evaluateLSQEndTerm.setPrivate( true );
+
+		if (objFEndTerm.getDim() > objF.getDim())
+		{
+			objValueOut.setup("objValueOut", 1, objFEndTerm.getDim(), REAL, ACADO_WORKSPACE);
+		}
+
+//		setupObjectiveLinearTerms( _objective );
+//
+//		setupResidualVariables();
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 {
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
@@ -1189,21 +1469,30 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	shiftStates.addStatement( "}\n" );
 	shiftStates.addStatement( "else if (strategy == 2) \n{\n" );
 
+	uint symH = (NX+NU)*(NX+NU+1)/2;
+
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+
 	unsigned indexZ   = NX + NXA;
+	if( secondOrder ) indexZ = indexZ + NX; 	// because of the first order adjoint direction
 	unsigned indexGxx = indexZ + NX * NX;
 	unsigned indexGzx = indexGxx + NXA * NX;
 	unsigned indexGxu = indexGzx + NX * NU;
 	unsigned indexGzu = indexGxu + NXA * NU;
-	unsigned indexU   = indexGzu + NU;
+	unsigned indexH = indexGzu;
+	if( secondOrder ) indexH = indexGzu + symH; 	// because of the second order derivatives
+	unsigned indexU   = indexH + NU;
 	unsigned indexOD   = indexU + NOD;
 
 	shiftStates.addStatement( state.getCols(0, NX) == x.getRow( N ) );
 	shiftStates.addStatement( state.getCols(NX, NX + NXA) == z.getRow(N - 1) );
 	shiftStates.addStatement( "if (uEnd != 0)\n{\n" );
-	shiftStates.addStatement( state.getCols(indexGzu, indexU) == uEnd.getTranspose() );
+	shiftStates.addStatement( state.getCols(indexH, indexU) == uEnd.getTranspose() );
 	shiftStates.addStatement( "}\n" );
 	shiftStates.addStatement( "else\n{\n" );
-	shiftStates.addStatement( state.getCols(indexGzu, indexU) == u.getRow(N - 1) );
+	shiftStates.addStatement( state.getCols(indexH, indexU) == u.getRow(N - 1) );
 	shiftStates.addStatement( "}\n" );
 	shiftStates.addStatement( state.getCols(indexU, indexOD) == od.getRow( N ) );
 	shiftStates.addLinebreak( );
@@ -1247,7 +1536,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 		iLoop.addStatement( state.getCols(NX, NX + NXA)	== z.getRow(index - 1) );
 		iLoop << std::string("}\n");
 	}
-	iLoop.addStatement( state.getCols(indexGzu, indexU)	== u.getRow( index ) );
+	iLoop.addStatement( state.getCols(indexH, indexU)	== u.getRow( index ) );
 	iLoop.addStatement( state.getCols(indexU, indexOD)	== od.getRow( index ) );
 	iLoop.addLinebreak( );
 
@@ -1274,6 +1563,10 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	initializeNodes.addStatement( iLoop );
 
+	return setupGetObjective();
+}
+
+returnValue ExportNLPSolver::setupGetObjective() {
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Objective value calculation
