@@ -699,14 +699,14 @@ Expression Expression::getRow( const uint& rowIdx ) const{
 
 Expression Expression::getRows( const uint& rowIdx1, const uint& rowIdx2 ) const{
 
-    uint run1, run2, nRows;
+    uint run1, run2, _nRows;
     ASSERT( rowIdx1 < getNumRows() );
     ASSERT( rowIdx2 <= getNumRows() );
-    nRows = rowIdx2 - rowIdx1;
+    _nRows = rowIdx2 - rowIdx1;
 
-    Expression tmp("", nRows, (int) getNumCols() );
+    Expression tmp("", _nRows, (int) getNumCols() );
 
-    for( run1 = 0; run1 < nRows; run1++ ){
+    for( run1 = 0; run1 < _nRows; run1++ ){
     	for( run2 = 0; run2 < getNumCols(); run2++ ){
     		delete tmp.element[run1*getNumCols()+run2];
     		tmp.element[run1*getNumCols()+run2] = element[(rowIdx1+run1)*getNumCols()+run2]->clone();
@@ -733,17 +733,17 @@ Expression Expression::getCol( const uint& colIdx ) const{
 
 Expression Expression::getCols( const uint& colIdx1, const uint& colIdx2 ) const{
 
-    uint run1, run2, nCols;
+    uint run1, run2, _nCols;
     ASSERT( colIdx1 < getNumCols() );
     ASSERT( colIdx2 <= getNumCols() );
-    nCols = colIdx2 - colIdx1;
+    _nCols = colIdx2 - colIdx1;
 
-    Expression tmp("", (int) getNumRows(), nCols );
+    Expression tmp("", (int) getNumRows(), _nCols );
 
     for( run1 = 0; run1 < getNumRows(); run1++ ){
-    	for( run2 = 0; run2 < nCols; run2++ ){
-    		delete tmp.element[run1*nCols+run2];
-    		tmp.element[run1*nCols+run2] = element[run1*getNumCols()+colIdx1+run2]->clone();
+    	for( run2 = 0; run2 < _nCols; run2++ ){
+    		delete tmp.element[run1*_nCols+run2];
+    		tmp.element[run1*_nCols+run2] = element[run1*getNumCols()+colIdx1+run2]->clone();
     	}
     }
     return tmp;
@@ -752,20 +752,20 @@ Expression Expression::getCols( const uint& colIdx1, const uint& colIdx2 ) const
 
 Expression Expression::getSubMatrix( const uint& rowIdx1, const uint& rowIdx2, const uint& colIdx1, const uint& colIdx2 ) const{
 
-    uint run1, run2, nRows, nCols;
+    uint run1, run2, _nRows, _nCols;
     ASSERT( colIdx1 < getNumCols() );
     ASSERT( colIdx2 <= getNumCols() );
-    nCols = colIdx2 - colIdx1;
+    _nCols = colIdx2 - colIdx1;
     ASSERT( rowIdx1 < getNumRows() );
     ASSERT( rowIdx2 <= getNumRows() );
-    nRows = rowIdx2 - rowIdx1;
+    _nRows = rowIdx2 - rowIdx1;
 
-    Expression tmp("", nRows, nCols );
+    Expression tmp("", _nRows, _nCols );
 
-    for( run1 = 0; run1 < nRows; run1++ ){
-    	for( run2 = 0; run2 < nCols; run2++ ){
-    		delete tmp.element[run1*nCols+run2];
-    		tmp.element[run1*nCols+run2] = element[(rowIdx1+run1)*getNumCols()+colIdx1+run2]->clone();
+    for( run1 = 0; run1 < _nRows; run1++ ){
+    	for( run2 = 0; run2 < _nCols; run2++ ){
+    		delete tmp.element[run1*_nCols+run2];
+    		tmp.element[run1*_nCols+run2] = element[(rowIdx1+run1)*getNumCols()+colIdx1+run2]->clone();
     	}
     }
     return tmp;
