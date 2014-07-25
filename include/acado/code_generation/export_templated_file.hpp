@@ -56,6 +56,7 @@ public:
 	friend class ExportQpOasesInterface;
 	friend class ExportSimulinkInterface;
 	friend class ExportAuxiliaryFunctions;
+	friend class ExportHessianRegularization;
 	friend class ExportAuxiliarySimFunctions;
 
 	/** Default constructor.
