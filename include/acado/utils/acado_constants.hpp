@@ -46,7 +46,7 @@ const double EPS = 2.221e-16;
 const double ZERO_EPS = 2.221e-16;
 
 /** Numerical value which is used for numerical equality checks. */
-const double EQUALITY_EPS = 1.0e-11;
+const double EQUALITY_EPS = 1.0e-12;
 
 /** Numerical value of sqrt of EPS. */
 const double SQRT_EPS = 1.490301982821e-08;
