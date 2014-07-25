@@ -228,7 +228,10 @@ class Expression{
         Expression getInverse( ) const;
 
         Expression getRow( const uint& rowIdx ) const;
+        Expression getRows( const uint& rowIdx1, const uint& rowIdx2 ) const;
         Expression getCol( const uint& colIdx ) const;
+        Expression getCols( const uint& colIdx1, const uint& colIdx2 ) const;
+        Expression getSubMatrix( const uint& rowIdx1, const uint& rowIdx2, const uint& colIdx1, const uint& colIdx2 ) const;
 	
 	
         /**
