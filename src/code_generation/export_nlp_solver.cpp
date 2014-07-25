@@ -356,6 +356,9 @@ returnValue ExportNLPSolver::setupSimulation( void )
 		}
 	}
 
+	// XXX This should be revisited at some point
+	//	modelSimulation.release( run );
+
 	modelSimulation.addStatement( loop );
 
 	return SUCCESSFUL_RETURN;
