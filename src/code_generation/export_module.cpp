@@ -83,7 +83,6 @@ returnValue ExportModule::setupOptions( )
 	addOption( GENERATE_MATLAB_INTERFACE, 	false        	);
 	addOption( MEX_ITERATION_STEPS, 		1        		);
 	addOption( MEX_VERBOSE, 				0       		);
-	addOption( OPERATING_SYSTEM,            OS_DEFAULT      );
 	addOption( USE_SINGLE_PRECISION,        false        	);
 	addOption( PRINTLEVEL,                  MEDIUM          );
 

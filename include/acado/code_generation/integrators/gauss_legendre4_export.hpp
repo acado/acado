@@ -83,10 +83,8 @@ class GaussLegendre4Export : public ImplicitRungeKuttaExport
 
 };
 
-static struct RegisterGaussLegendre4Export
-{
-	RegisterGaussLegendre4Export();
-} registerGaussLegendre4Export;
+IntegratorExport* createGaussLegendre4Export(	UserInteraction* _userInteraction,
+												const std::string &_commonHeaderName);
 
 
 CLOSE_NAMESPACE_ACADO

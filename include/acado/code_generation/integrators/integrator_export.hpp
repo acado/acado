@@ -38,6 +38,7 @@
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/code_generation/export_algorithm_factory.hpp>
 #include <acado/ocp/model_data.hpp>
+#include <acado/code_generation/integrators/integrator_export_types.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -482,42 +483,6 @@ class IntegratorExport : public ExportAlgorithm
         std::vector<ExportAcadoFunction> diffs_outputs;		/**< Module to export the evaluation of the derivatives of the output functions. */
 
         std::vector<uint> num_outputs;					/**< A separate dimension for each output. */
-};
-
-
-/** Summarizes all available integrators for code generation.  */
-enum ExportIntegratorType{
-
-     INT_EX_EULER,         	/**< Explicit Euler method.           */
-     INT_RK2,         	 	/**< Explicit Runge-Kutta integrator of order 2.           */
-     INT_RK3,         	 	/**< Explicit Runge-Kutta integrator of order 3.           */
-     INT_RK4,         	 	/**< Explicit Runge-Kutta integrator of order 4.           */
-     INT_IRK_GL2,			/**< Gauss-Legendre integrator of order 2 (Continuous output Implicit Runge-Kutta). */
-     INT_IRK_GL4,			/**< Gauss-Legendre integrator of order 4 (Continuous output Implicit Runge-Kutta). */
-     INT_IRK_GL6,			/**< Gauss-Legendre integrator of order 6 (Continuous output Implicit Runge-Kutta). */
-     INT_IRK_GL8,			/**< Gauss-Legendre integrator of order 8 (Continuous output Implicit Runge-Kutta). */
-
-     INT_IRK_RIIA1,			/**< Radau IIA integrator of order 1 (Continuous output Implicit Runge-Kutta). */
-     INT_IRK_RIIA3,			/**< Radau IIA integrator of order 3 (Continuous output Implicit Runge-Kutta). */
-     INT_IRK_RIIA5,			/**< Radau IIA integrator of order 5 (Continuous output Implicit Runge-Kutta). */
-
-     INT_DIRK3,				/**< Diagonally Implicit 2-stage Runge-Kutta integrator of order 3 (Continuous output). */
-     INT_DIRK4,				/**< Diagonally Implicit 3-stage Runge-Kutta integrator of order 4 (Continuous output). */
-     INT_DIRK5,				/**< Diagonally Implicit 5-stage Runge-Kutta integrator of order 5 (Continuous output). */
-
-     INT_DT,				/**< An algorithm which handles the simulation and sensitivity generation for a discrete time state-space model. */
-     INT_NARX				/**< An algorithm which handles the simulation and sensitivity generation for a NARX model. */
-};
-
-
-/**  Summarizes all possible sensitivity generation types for exported integrators.  */
-enum ExportSensitivityType{
-
-	NO_SENSITIVITY, 				/**< No sensitivities are computed, if possible. 		  					 */
-    FORWARD,    					/**< Sensitivities are computed in forward mode.                             */
-    BACKWARD,    					/**< Sensitivities are computed in backward mode.                            */
-    FORWARD_OVER_BACKWARD,         	/**< Sensitivities (first and second order) are computed.					 */
-    THREE_SWEEPS         			/**< Sensitivities (first and second order) are computed.					 */
 };
 
 /** Factory for creation of exported integrators.*/

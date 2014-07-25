@@ -32,11 +32,6 @@ ELSEIF( WINDOWS )
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nologo -EHsc -DWIN32 -Dsnprintf=_snprintf -D__NO_COPYRIGHT__")
 ENDIF()
 
-
-OPTION( QPOASES_WITH_EXAMPLES
-	"Build qpOASES examples"
-	OFF
-)
 OPTION( QPOASES_WITH_LAPACK
 	"Build qpOASES using original LAPACK routines"
 	OFF
@@ -122,38 +117,3 @@ IF ( QPOASES_WITH_BLAS AND BLAS_FOUND )
 		${BLAS_LIBRARIES}
 	)
 ENDIF()
-
-# Compile examples only if the option is enabled (set to ON)
-SET(EXAMPLE_NAMES
-example1
-example1a
-example1b
-example4
-example5
-example6
-exampleLP
-qrecipe
-
-# Extra examples
-example2
-example3
-example3b
-)
-
-IF( QPOASES_WITH_EXAMPLES )
-	FOREACH(ELEMENT ${EXAMPLE_NAMES})
-		ADD_EXECUTABLE(qpoases_${ELEMENT} examples/${ELEMENT}.cpp)
-		TARGET_LINK_LIBRARIES(qpoases_${ELEMENT} acado_qpoases)
-	ENDFOREACH(ELEMENT ${EXAMPLE_NAMES})
-ENDIF( QPOASES_WITH_EXAMPLES )
-
-#
-# Installation rules
-#
-
-INSTALL(
-	DIRECTORY
-		include
-	DESTINATION
-		${INSTALL_DATA_DIR}/external_packages/qpOASES-3.0
-)

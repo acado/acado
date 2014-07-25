@@ -97,11 +97,6 @@ IntegratorExport* createDiagonallyIRK4Export(	UserInteraction* _userInteraction,
 	return integrator;
 }
 
-RegisterDiagonallyIRK4Export::RegisterDiagonallyIRK4Export()
-{
-	IntegratorExportFactory::instance().registerAlgorithm(INT_DIRK4, createDiagonallyIRK4Export);
-}
-
 CLOSE_NAMESPACE_ACADO
 
 // end of file.

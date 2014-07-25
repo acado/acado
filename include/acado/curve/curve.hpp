@@ -33,13 +33,8 @@
 #ifndef ACADO_TOOLKIT_CURVE_HPP
 #define ACADO_TOOLKIT_CURVE_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
-
 #include <acado/variables_grid/variables_grid.hpp>
-#include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/function/function.hpp>
-
 
 BEGIN_NAMESPACE_ACADO
 

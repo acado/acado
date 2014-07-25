@@ -34,4 +34,7 @@ int @PREFIX@solve( void );
 /** Get the number of active set changes */
 int @PREFIX@getNWSR( void );
 
+/** Get the error string. */
+const char* getErrorString(int error);
+
 #endif /* @SOLVER_DEFINE@ */

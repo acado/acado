@@ -32,6 +32,7 @@
 
 
 #include <acado/variables_grid/variables_grid.hpp>
+#include <acado/variables_grid/matrix_variable.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

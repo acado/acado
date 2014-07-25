@@ -97,11 +97,6 @@ IntegratorExport* createExplicitRungeKutta4Export(	UserInteraction* _userInterac
 	return integrator;
 }
 
-RegisterExplicitRungeKutta4Export::RegisterExplicitRungeKutta4Export()
-{
-	IntegratorExportFactory::instance().registerAlgorithm(INT_RK4, createExplicitRungeKutta4Export);
-}
-
 CLOSE_NAMESPACE_ACADO
 
 

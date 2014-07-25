@@ -87,10 +87,6 @@ IntegratorExport* createExplicitEulerExport(	UserInteraction* _userInteraction,
 	return integrator;
 }
 
-RegisterExplicitEulerExport::RegisterExplicitEulerExport()
-{
-	IntegratorExportFactory::instance().registerAlgorithm(INT_EX_EULER, createExplicitEulerExport);
-}
 
 CLOSE_NAMESPACE_ACADO
 

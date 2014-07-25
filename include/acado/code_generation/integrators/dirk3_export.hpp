@@ -83,10 +83,8 @@ class DiagonallyIRK3Export : public DiagonallyImplicitRKExport
 
 };
 
-static struct RegisterDiagonallyIRK3Export
-{
-	RegisterDiagonallyIRK3Export();
-} registerDiagonallyIRK3Export;
+IntegratorExport* createDiagonallyIRK3Export(	UserInteraction* _userInteraction,
+												const std::string &_commonHeaderName);
 
 
 CLOSE_NAMESPACE_ACADO

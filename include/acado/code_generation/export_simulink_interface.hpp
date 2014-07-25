@@ -26,7 +26,7 @@
 /**
  *    \file include/acado/code_generation/export_simulink_interface.hpp
  *    \author Milan Vukov
- *    \date 2013
+ *    \date 2013 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_EXPORT_SIMULINK_INTERFACE_HPP
@@ -90,7 +90,8 @@ public:
 							unsigned _wMatrixType,
 							bool _hardcodedConstraints,
 							bool _useArrivalCost,
-							bool _compCovMatrix
+							bool _compCovMatrix,
+							std::string _qpSolver
 							);
 
 	/** Export the interface. */

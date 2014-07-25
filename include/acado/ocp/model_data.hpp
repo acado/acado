@@ -33,7 +33,6 @@
 #ifndef ACADO_TOOLKIT_MODELDATA_HPP
 #define ACADO_TOOLKIT_MODELDATA_HPP
 
-#include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/function/function.hpp>
 
 

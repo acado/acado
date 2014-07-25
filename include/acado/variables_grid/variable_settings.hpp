@@ -201,7 +201,7 @@ class VariableSettings
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
 		returnValue getName(	uint idx,
-								char* const _name
+								char* _name
 								) const;
 
 		/** Assigns new name label to given component.
@@ -228,7 +228,7 @@ class VariableSettings
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
 		returnValue getUnit(	uint idx,
-								char* const _unit
+								char* _unit
 								) const;
 
 		/** Assigns new unit label to given component.

@@ -20,10 +20,3 @@ FILE( GLOB ACADO_CASADI_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/symbolic/*.hpp )
 # Make static libraries
 #
 ADD_LIBRARY( acado_casadi STATIC ${ACADO_CASADI_SOURCES} )
-
-INSTALL(
-	FILES
-		${ACADO_CASADI_HEADERS}
-	DESTINATION
-		${INSTALL_DATA_DIR}/external_packages/casadi/symbolic
-)

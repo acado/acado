@@ -33,17 +33,11 @@
 #ifndef ACADO_TOOLKIT_MULTI_OBJECTIVE_FUNCTIONALITY_HPP
 #define ACADO_TOOLKIT_MULTI_OBJECTIVE_FUNCTIONALITY_HPP
 
-
-#include <acado/utils/acado_utils.hpp>
-#include <acado/function/function.hpp>
-
-#include <acado/variables_grid/grid.hpp>
-#include <acado/constraint/constraint.hpp>
-#include <acado/objective/objective.hpp>
-
+#include <acado/utils/acado_types.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
+class Expression;
 
 /**
  *	\brief Encapsulates functionality for defining OCPs having multiple objectives.
@@ -56,70 +50,43 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\author Boris Houska, Hans Joachim Ferreau
  */
-class MultiObjectiveFunctionality{
-
-//
-// PUBLIC MEMBER FUNCTIONS:
-//
+class MultiObjectiveFunctionality
+{
 public:
+	/** Default constructor. */
+	MultiObjectiveFunctionality( );
 
-    /** Default constructor. */
-    MultiObjectiveFunctionality( );
+	/** Copy constructor (deep copy). */
+	MultiObjectiveFunctionality( const MultiObjectiveFunctionality& rhs );
 
-    /** Copy constructor (deep copy). */
-    MultiObjectiveFunctionality( const MultiObjectiveFunctionality& rhs );
+	/** Destructor. */
+	~MultiObjectiveFunctionality( );
 
-    /** Destructor. */
-    ~MultiObjectiveFunctionality( );
+	/** Assignment operator (deep copy). */
+	MultiObjectiveFunctionality& operator=( const MultiObjectiveFunctionality& rhs );
 
-    /** Assignment operator (deep copy). */
-    MultiObjectiveFunctionality& operator=( const MultiObjectiveFunctionality& rhs );
+	/** Adds an expression as a the Mayer term to be minimized, within \n
+	 *  a multi-objective context.                                     \n
+	 *                                                                 \n
+	 *  @param multiObjectiveIdx The index of the objective the        \n
+	 *                           expression should be added to.        \n
+	 *                                                                 \n
+	 *  @param arg The expression to be added as a Mayer term.         \n
+	 *                                                                 \n
+	 *  \return SUCCESSFUL_RETURN                                      \n
+	 */
+	returnValue minimizeMayerTerm( const int &multiObjectiveIdx,  const Expression& arg );
 
+	int getNumberOfMayerTerms() const;
 
+	returnValue getObjective( const int &multiObjectiveIdx, Expression **arg ) const;
 
-     /** Adds an expression as a the Mayer term to be minimized, within \n
-      *  a multi-objective context.                                     \n
-      *                                                                 \n
-      *  @param multiObjectiveIdx The index of the objective the        \n
-      *                           expression should be added to.        \n
-      *                                                                 \n
-      *  @param arg The expression to be added as a Mayer term.         \n
-      *                                                                 \n
-      *  \return SUCCESSFUL_RETURN                                      \n
-      */
-     returnValue minimizeMayerTerm( const int &multiObjectiveIdx,  const Expression& arg );
+protected:
 
-
-
-
-     inline int getNumberOfMayerTerms() const;
-
-
-     inline returnValue getObjective( const int &multiObjectiveIdx, Expression **arg ) const;
-
-
-
-
-
-
-    //
-    // DATA MEMBERS:
-    //
-    protected:
-
-        int              nMayer;
-        Expression **mayerTerms;
+	int              nMayer;
+	Expression **mayerTerms;
 };
-
 
 CLOSE_NAMESPACE_ACADO
 
-
-
-#include <acado/ocp/multi_objective_functionality.ipp>
-
 #endif  // ACADO_TOOLKIT_MULTI_OBJECTIVE_FUNCTIONALITY_HPP
-
-/*
- *   end of file
- */

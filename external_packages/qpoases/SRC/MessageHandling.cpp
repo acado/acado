@@ -517,6 +517,11 @@ MessageHandling* getGlobalMessageHandler( )
 	return &globalMessageHandler;
 }
 
+const char* MessageHandling::getErrorString(int error)
+{
+	return returnValueList[ error ].data;
+}
+
 
 
 /*

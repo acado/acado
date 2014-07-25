@@ -31,8 +31,6 @@
  *
  */
 
-#include <acado/curve/curve.hpp>
-
 BEGIN_NAMESPACE_ACADO
 
 
@@ -122,27 +120,6 @@ inline BooleanType LSQTerm::isQuadratic(){
     return BT_FALSE;
 }
 
-
-inline returnValue LSQTerm::setReference( const VariablesGrid &ref ){
-    uint run1;
-    const uint N  = grid.getNumPoints();
-    //ASSERT( N == ref.getNumPoints() );
-// 	printf("setReference!!!!\n");
-    if( r == 0 ) r = new DVector[N];
-    if ( N == ref.getNumPoints() ) {
-      for( run1 = 0; run1 < N; run1++ )
-	  r[run1] = ref.getVector(run1);
-// 	  r[run1].print( "ref[run1]" );
-    } else {
-      Curve tmp;tmp.add(ref);
-      for( run1 = 0; run1 < N; run1++ ) {
-	  tmp.evaluate(grid.getTime(run1)+ref.getFirstTime(), r[run1]);
-// 	  printf( "time = %e\n", grid.getTime(run1)+ref.getFirstTime() );
-// 	  r[run1].print( "ref[run1]" );
-      }
-    }
-    return SUCCESSFUL_RETURN;
-}
 
 
 

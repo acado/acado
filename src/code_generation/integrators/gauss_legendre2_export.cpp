@@ -89,11 +89,6 @@ IntegratorExport* createGaussLegendre2Export(	UserInteraction* _userInteraction,
 	return integrator;
 }
 
-RegisterGaussLegendre2Export::RegisterGaussLegendre2Export()
-{
-	IntegratorExportFactory::instance().registerAlgorithm(INT_IRK_GL2, createGaussLegendre2Export);
-}
-
 CLOSE_NAMESPACE_ACADO
 
 // end of file.

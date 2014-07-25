@@ -20,16 +20,3 @@ FILE( GLOB CSPARSE_HEADERS *.h )
 # Make static & shared libraries
 #
 ADD_LIBRARY( acado_csparse STATIC ${CSPARSE_SOURCES} )
-
-################################################################################
-#
-# Installation rules
-#
-################################################################################
-
-INSTALL(
-	FILES
-		${CSPARSE_HEADERS}
-	DESTINATION
-		${INSTALL_DATA_DIR}/external_packages/csparse
-)

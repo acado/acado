@@ -23,11 +23,26 @@
  *
  */
 
-
 /**
- *    \file include/acado_code_generation.hpp
- *    \author Hans Joachim Ferreau, Boris Houska, Milan Vukov
- *    \date 2009 - 2014
+ *    \file include/code_generation/integrators/register_exported_integrators.hpp
+ *    \author Milan Vukov
+ *    \date 2014
  */
 
-#include <acado/code_generation/code_generation.hpp>
+#ifndef ACADO_TOOLKIT_REGISTER_EXPORTED_INTEGRATORS_HPP
+#define ACADO_TOOLKIT_REGISTER_EXPORTED_INTEGRATORS_HPP
+
+#include <acado/utils/acado_utils.hpp>
+
+BEGIN_NAMESPACE_ACADO
+
+/** \internal */
+static struct RegisterExportedIntegrators
+{
+	RegisterExportedIntegrators();
+} registerExportedIntegrators;
+/** \endinternal */
+
+CLOSE_NAMESPACE_ACADO
+
+#endif  // ACADO_TOOLKIT_REGISTER_EXPORTED_INTEGRATORS_HPP

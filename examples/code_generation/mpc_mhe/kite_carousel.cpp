@@ -29,7 +29,7 @@
  *    \date   2010-2013
  */
 
-#include <acado_toolkit.hpp>
+#include <acado_code_generation.hpp>
 
 int main()
 {

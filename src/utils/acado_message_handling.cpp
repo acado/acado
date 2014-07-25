@@ -389,6 +389,16 @@ const char* returnValueTypeToString(returnValueType type) {
 	return p->data;
 }
 
+/** Internal data holding class for returnValue class
+ *  Owner is always set to the last returnValue instance which was copy constructed/assigned to it.
+ */
+class returnValue::returnValueData
+{
+public:
+	returnValue* owner;
+	std::vector<const char*> messages;
+};
+
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
@@ -406,6 +416,93 @@ returnValue::returnValue(const char* msg, returnValueLevel _level, returnValueTy
 	level = _level;
 }
 
+/* Construct default returnValue.
+ *
+ */
+returnValue::returnValue() : data(0) {}
+
+/* Construct returnValue only from typedef.
+ *
+ */
+returnValue::returnValue(returnValueType _type) : type(_type), level(LVL_ERROR), status(STATUS_UNHANDLED), data(0) {}
+
+/* Construct returnValue from int, for compatibility
+ *
+ */
+returnValue::returnValue(int _type) : level(LVL_ERROR), status(STATUS_UNHANDLED), data(0) {
+	type = returnValueType(_type);
+}
+
+/* Copy constructor with minimum performance cost.
+ *  Newly constructed instance takes ownership of data.
+ */
+returnValue::returnValue(const returnValue& old) {
+	// Copy data
+	if (old.data) {
+		data = old.data;
+		data->owner = this;
+	} else {
+		data = 0;
+	}
+	// Copy details
+	type = old.type;
+	level = old.level;
+	status = old.status;
+}
+
+returnValueLevel returnValue::getLevel() const {
+	return level;
+}
+
+/* Compares the returnValue type to its enum
+ *
+ */
+bool returnValue::operator!=(returnValueType cmp_type) const {
+	return type != cmp_type;
+}
+
+/* Compares the returnValue type to its enum
+ *
+ */
+bool returnValue::operator==(returnValueType cmp_type) const {
+	return type == cmp_type;
+}
+
+/* Returns true if return value type is not SUCCESSFUL_RETURN
+ *
+ */
+bool returnValue::operator!() const {
+	return type != SUCCESSFUL_RETURN;
+}
+
+/*  Assignment operator.
+ *  Left hand side instance takes ownership of data.
+ */
+returnValue& returnValue::operator=(const returnValue& old) {
+	// Clean up data if already existing
+	if (data && (data->owner == this)) delete data;
+
+	// Copy data
+	if (old.data) {
+		data = old.data;
+		data->owner = this;
+	} else {
+		data = 0;
+	}
+	// Copy details
+	type = old.type;
+	level = old.level;
+	status = old.status;
+
+	return *this;
+}
+
+/* Compatibility function, allows returnValue to be used as a number, similar to a enum.
+ *
+ */
+returnValue::operator int() {
+	return type;
+}
 
 /* Destroys data instance only if it owns it
  *

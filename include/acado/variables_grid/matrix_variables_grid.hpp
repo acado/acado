@@ -33,7 +33,6 @@
 #ifndef ACADO_TOOLKIT_MATRIX_VARIABLES_GRID_HPP
 #define ACADO_TOOLKIT_MATRIX_VARIABLES_GRID_HPP
 
-#include <acado/variables_grid/matrix_variable.hpp>
 #include <acado/variables_grid/grid.hpp>
 
 BEGIN_NAMESPACE_ACADO
@@ -42,6 +41,7 @@ const Grid emptyGrid;
 const Grid trivialGrid( 1 );
 
 class VariablesGrid;
+class MatrixVariable;
 
 /**
  *	\brief Provides a time grid consisting of matrix-valued optimization variables at each grid point.
@@ -212,7 +212,7 @@ class MatrixVariablesGrid : public Grid
 		 *
          *  \return Value of component 'valueIdx' at grid point 'pointIdx' 
 		 */
-        inline double& operator()(	uint pointIdx,
+        double& operator()(	uint pointIdx,
 									uint rowIdx,
 									uint colIdx
 									);
@@ -226,7 +226,7 @@ class MatrixVariablesGrid : public Grid
 		 *
          *  \return Value of component 'valueIdx' at grid point 'pointIdx' 
 		 */
-        inline double operator()(	uint pointIdx,
+        double operator()(	uint pointIdx,
 									uint rowIdx,
 									uint colIdx
 									) const;
@@ -237,7 +237,7 @@ class MatrixVariablesGrid : public Grid
 		 *
          *  \return MatrixVariablesGrid consisting only of the given row
          */
-        inline MatrixVariablesGrid operator()(	const uint rowIdx
+        MatrixVariablesGrid operator()(	const uint rowIdx
 												) const;
 
         /** Returns a MatrixVariablesGrid consisting only of the values at 
@@ -247,7 +247,7 @@ class MatrixVariablesGrid : public Grid
 		 *
          *  \return MatrixVariablesGrid consisting only of the values at given grid point
          */
-        inline MatrixVariablesGrid operator[](	const uint pointIdx
+        MatrixVariablesGrid operator[](	const uint pointIdx
 												) const;
 
 
@@ -257,7 +257,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Temporary object containing sum of MatrixVariablesGrids.
 		 */
-		inline MatrixVariablesGrid operator+(	const MatrixVariablesGrid& arg
+		MatrixVariablesGrid operator+(	const MatrixVariablesGrid& arg
 												) const;
 
 		/** Adds (element-wise) a MatrixVariablesGrid to object.
@@ -266,7 +266,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Reference to object after addition
 		 */
-		inline MatrixVariablesGrid& operator+=(	const MatrixVariablesGrid& arg
+		MatrixVariablesGrid& operator+=(	const MatrixVariablesGrid& arg
 												);
 
 
@@ -277,7 +277,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Temporary object containing the difference of the MatrixVariablesGrids
 		 */
-		inline MatrixVariablesGrid operator-(	const MatrixVariablesGrid& arg
+		MatrixVariablesGrid operator-(	const MatrixVariablesGrid& arg
 												) const;
 
 		/** Subtracts (element-wise) a MatrixVariablesGrid from the object.
@@ -286,7 +286,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Reference to object after subtraction
 		 */
-		inline MatrixVariablesGrid& operator-=(	const MatrixVariablesGrid& arg
+		MatrixVariablesGrid& operator-=(	const MatrixVariablesGrid& arg
 												);
 
 
@@ -464,26 +464,26 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Total dimension of MatrixVariablesGrid
 		 */
-		inline uint getDim( ) const;
+		uint getDim( ) const;
 
 
 		/** Returns number of rows of matrix at first grid point.
 		 *
 		 *  \return Number of rows of matrix at first grid point
 		 */
-		inline uint getNumRows( ) const;
+		uint getNumRows( ) const;
 
 		/** Returns number of columns of matrix at first grid point.
 		 *
 		 *  \return Number of columns of matrix at first grid point
 		 */
-		inline uint getNumCols( ) const;
+		uint getNumCols( ) const;
 
 		/** Returns number of values of matrix at first grid point.
 		 *
 		 *  \return Number of values of matrix at first grid point
 		 */
-		inline uint getNumValues( ) const;
+		uint getNumValues( ) const;
 
 
 		/** Returns number of rows of matrix at grid point with given index.
@@ -492,7 +492,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Number of rows of matrix at grid point with given index
 		 */
-		inline uint getNumRows(	uint pointIdx
+		uint getNumRows(	uint pointIdx
 								) const;
 
 		/** Returns number of columns of matrix at grid point with given index.
@@ -501,7 +501,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Number of columns of matrix at grid point with given index
 		 */
-		inline uint getNumCols(	uint pointIdx
+		uint getNumCols(	uint pointIdx
 								) const;
 
 		/** Returns number of values of matrix at grid point with given index.
@@ -510,7 +510,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Number of values of matrix at grid point with given index
 		 */
-		inline uint getNumValues(	uint pointIdx
+		uint getNumValues(	uint pointIdx
 									) const;
 
 
@@ -518,7 +518,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Variable type of MatrixVariable at first grid point
 		 */
-        inline VariableType getType( ) const;
+        VariableType getType( ) const;
 
 		/** Assigns new variable type at all grid points.
 		 *
@@ -526,7 +526,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-        inline returnValue setType(	VariableType _type
+        returnValue setType(	VariableType _type
 									);
 
 		/** Returns variable type of MatrixVariable at grid point with given index.
@@ -535,7 +535,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Variable type of MatrixVariable at grid point with given index
 		 */
-		inline VariableType getType(	uint pointIdx
+		VariableType getType(	uint pointIdx
 										) const;
 
 		/** Assigns new variable type to MatrixVariable at grid point with given index.
@@ -546,7 +546,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INDEX_OUT_OF_BOUNDS
 		 */
-        inline returnValue setType(	uint pointIdx,
+        returnValue setType(	uint pointIdx,
 									VariableType _type
 									);
 
@@ -560,7 +560,7 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_INDEX_OUT_OF_BOUNDS, \n
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
-		inline returnValue getName(	uint pointIdx,
+		returnValue getName(	uint pointIdx,
 									uint idx,
 									char* const _name
 									) const;
@@ -575,7 +575,7 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_INDEX_OUT_OF_BOUNDS, \n
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
-		inline returnValue setName(	uint pointIdx,
+		returnValue setName(	uint pointIdx,
 									uint idx,
 									const char* const _name
 									);
@@ -591,7 +591,7 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_INDEX_OUT_OF_BOUNDS, \n
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
-		inline returnValue getUnit(	uint pointIdx,
+		returnValue getUnit(	uint pointIdx,
 									uint idx,
 									char* const _unit
 									) const;
@@ -606,7 +606,7 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_INDEX_OUT_OF_BOUNDS, \n
 		 *	        RET_MEMBER_NOT_INITIALISED
 		 */
-		inline returnValue setUnit(	uint pointIdx,
+		returnValue setUnit(	uint pointIdx,
 									uint idx,
 									const char* const _unit
 									);
@@ -617,7 +617,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Scaling of MatrixVariable at given grid point
 		 */
-		inline DVector getScaling(	uint pointIdx
+		DVector getScaling(	uint pointIdx
 												) const;
 
 		/** Assigns new scaling to MatrixVariable at grid point with given index.
@@ -629,7 +629,7 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_INDEX_OUT_OF_BOUNDS, \n
 		 *	        RET_INVALID_ARGUMENTS
 		 */
-		inline returnValue setScaling(	uint pointIdx,
+		returnValue setScaling(	uint pointIdx,
 										const DVector& _scaling
 										);
 
@@ -642,7 +642,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return > 0.0: Scaling of given component of MatrixVariable at given grid point, \n
 		 *	         -1.0: Index out of bounds
 		 */
-		inline double getScaling(	uint pointIdx,
+		double getScaling(	uint pointIdx,
 									uint valueIdx
 									) const;
 
@@ -657,7 +657,7 @@ class MatrixVariablesGrid : public Grid
 		 *	        RET_INDEX_OUT_OF_BOUNDS, \n
 		 *	        RET_INVALID_ARGUMENTS
 		 */
-		inline returnValue setScaling(	uint pointIdx,
+		returnValue setScaling(	uint pointIdx,
 										uint valueIdx,
 										double _scaling
 										);
@@ -668,7 +668,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Lower bounds of MatrixVariable at given grid point
 		 */
-		inline DVector getLowerBounds(	uint pointIdx
+		DVector getLowerBounds(	uint pointIdx
 													) const;
 
 		/** Assigns new lower bounds to MatrixVariable at grid point with given index.
@@ -679,7 +679,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INDEX_OUT_OF_BOUNDS
 		 */
-		inline returnValue setLowerBounds(	uint pointIdx,
+		returnValue setLowerBounds(	uint pointIdx,
 											const DVector& _lb
 											);
 
@@ -692,7 +692,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return < INFTY: Lower bound of given component of MatrixVariable at given grid point, \n
 		 *	          INFTY: Index out of bounds
 		 */
-		inline double getLowerBound(	uint pointIdx,
+		double getLowerBound(	uint pointIdx,
 										uint valueIdx
 										) const;
 
@@ -706,7 +706,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INDEX_OUT_OF_BOUNDS
 		 */
-		inline returnValue setLowerBound(	uint pointIdx,
+		returnValue setLowerBound(	uint pointIdx,
 											uint valueIdx,
 											double _lb
 											);
@@ -717,7 +717,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return Upper bounds of MatrixVariable at given grid point
 		 */
-		inline DVector getUpperBounds(	uint pointIdx
+		DVector getUpperBounds(	uint pointIdx
 													) const;
 
 		/** Assigns new upper bounds to MatrixVariable at grid point with given index.
@@ -728,7 +728,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INDEX_OUT_OF_BOUNDS
 		 */
-		inline returnValue setUpperBounds(	uint pointIdx,
+		returnValue setUpperBounds(	uint pointIdx,
 											const DVector& _ub
 											);
 
@@ -741,7 +741,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return > -INFTY: Upper bound of given component of MatrixVariable at given grid point, \n
 		 *	          -INFTY: Index out of bounds
 		 */
-		inline double getUpperBound(	uint pointIdx,
+		double getUpperBound(	uint pointIdx,
 										uint valueIdx
 										) const;
 
@@ -755,7 +755,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INDEX_OUT_OF_BOUNDS
 		 */
-		inline returnValue setUpperBound(	uint pointIdx,
+		returnValue setUpperBound(	uint pointIdx,
 											uint valueIdx,
 											double _ub
 											);
@@ -769,7 +769,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return BT_TRUE  iff MatrixVariable at given grid point will be automatically initialized, \n
 		 *	        BT_FALSE otherwise
 		 */
-		inline BooleanType getAutoInit(	uint pointIdx
+		BooleanType getAutoInit(	uint pointIdx
 										) const;
 
 		/** Assigns new auto initialization flag to MatrixVariable at grid point 
@@ -781,7 +781,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return SUCCESSFUL_RETURN, \n
 		 *	        RET_INDEX_OUT_OF_BOUNDS
 		 */
-		inline returnValue setAutoInit(	uint pointIdx,
+		returnValue setAutoInit(	uint pointIdx,
 										BooleanType _autoInit
 										);
 
@@ -789,13 +789,13 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue disableAutoInit( );
+		returnValue disableAutoInit( );
 
 		/** Disables auto initialization at all grid points.
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue enableAutoInit( );
+		returnValue enableAutoInit( );
 
 
 		/** Returns whether MatrixVariablesGrid comprises (non-empty) name labels
@@ -804,7 +804,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return BT_TRUE  iff MatrixVariablesGrid comprises name labels, \n
 		 *	        BT_FALSE otherwise
 		 */
-		inline BooleanType hasNames( ) const;
+		BooleanType hasNames( ) const;
 
 		/** Returns whether MatrixVariablesGrid comprises (non-empty) unit labels
 		 *	(at at least one of its grid points).
@@ -812,14 +812,14 @@ class MatrixVariablesGrid : public Grid
 		 *  \return BT_TRUE  iff MatrixVariablesGrid comprises unit labels, \n
 		 *	        BT_FALSE otherwise
 		 */
-		inline BooleanType hasUnits( ) const;
+		BooleanType hasUnits( ) const;
 
 		/** Returns whether scaling is set (at at least one grid point).
 		 *
 		 *  \return BT_TRUE  iff scaling is set, \n
 		 *	        BT_FALSE otherwise
 		 */
-		inline BooleanType hasScaling( ) const;
+		BooleanType hasScaling( ) const;
 
 		/** Returns whether MatrixVariablesGrid comprises lower bounds 
 		 *	(at at least one of its grid points).
@@ -827,7 +827,7 @@ class MatrixVariablesGrid : public Grid
 		 *  \return BT_TRUE  iff MatrixVariablesGrid comprises lower bounds, \n
 		 *	        BT_FALSE otherwise
 		 */
-		inline BooleanType hasLowerBounds( ) const;
+		BooleanType hasLowerBounds( ) const;
 
 		/** Returns whether MatrixVariablesGrid comprises upper bounds
 		 *	(at at least one of its grid points).
@@ -835,32 +835,32 @@ class MatrixVariablesGrid : public Grid
 		 *  \return BT_TRUE  iff MatrixVariablesGrid comprises upper bounds, \n
 		 *	        BT_FALSE otherwise
 		 */
-		inline BooleanType hasUpperBounds( ) const;
+		BooleanType hasUpperBounds( ) const;
 
 
 		/** Returns maximum value over all matrices at all grid points.
 		 *
 		 *  \return Maximum value over all matrices at all grid points
 		 */
-		inline double getMax( ) const;
+		double getMax( ) const;
 
 		/** Returns minimum value over all matrices at all grid points.
 		 *
 		 *  \return Minimum value over all matrices at all grid points
 		 */
-		inline double getMin( ) const;
+		double getMin( ) const;
 
 		/** Returns mean value over all matrices at all grid points.
 		 *
 		 *  \return Mean value over all matrices at all grid points
 		 */
-		inline double getMean( ) const;
+		double getMean( ) const;
 
 		/** Assigns zero to all components of all matrices at all grid points.
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue setZero( );
+		returnValue setZero( );
 
 		/** Assigns given value to all components of all matrices at all grid points.
 		 *
@@ -868,7 +868,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *  \return SUCCESSFUL_RETURN
 		 */
-		inline returnValue setAll(	double _value
+		returnValue setAll(	double _value
 									);
 
 		/** Appends grid point of given grid to object. A merge
@@ -919,7 +919,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-        inline returnValue getGrid(	Grid& _grid
+        returnValue getGrid(	Grid& _grid
 									) const;
 
 		/** Returns (deep-copy of) time grid of MatrixVariablesGrid.
@@ -930,7 +930,7 @@ class MatrixVariablesGrid : public Grid
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		inline Grid getTimePoints( ) const;
+		Grid getTimePoints( ) const;
 
 		/** Returns the sub grid in time starting and ending at given 
 		 *	indices.
@@ -1235,8 +1235,6 @@ class MatrixVariablesGrid : public Grid
 };
 
 CLOSE_NAMESPACE_ACADO
-
-#include <acado/variables_grid/matrix_variables_grid.ipp>
 
 #endif  // ACADO_TOOLKIT_MATRIX_VARIABLES_GRID_HPP
 

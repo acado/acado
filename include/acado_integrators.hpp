@@ -34,6 +34,7 @@
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/clock/clock.hpp>
+#include <acado/curve/curve.hpp>
 #include <acado/user_interaction/user_interaction.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 #include <acado/variables_grid/variables_grid.hpp>
@@ -41,4 +42,3 @@
 #include <acado/function/function.hpp>
 #include <acado/integrator/integrator.hpp>
 #include <acado/sparse_solver/sparse_solver.hpp>
-//#include <acado/modeling_tools/modeling_tools.hpp>

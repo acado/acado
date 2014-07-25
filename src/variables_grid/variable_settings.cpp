@@ -438,8 +438,8 @@ returnValue VariableSettings::appendSettings(	uint _dim,
 
 
 
-inline returnValue VariableSettings::getName(	uint idx,
-												char* const _name
+returnValue VariableSettings::getName(	uint idx,
+												char* _name
 												) const
 {
 	if ( hasNames( ) != BT_TRUE )
@@ -455,7 +455,7 @@ inline returnValue VariableSettings::getName(	uint idx,
 }
 
 
-inline returnValue VariableSettings::setName(	uint idx,
+returnValue VariableSettings::setName(	uint idx,
 												const char* const _name
 												)
 {
@@ -485,8 +485,8 @@ inline returnValue VariableSettings::setName(	uint idx,
 
 
 
-inline returnValue VariableSettings::getUnit(	uint idx,
-												char* const _unit
+returnValue VariableSettings::getUnit(	uint idx,
+												char* _unit
 												) const
 {
 	if ( idx >= dim )
@@ -502,7 +502,7 @@ inline returnValue VariableSettings::getUnit(	uint idx,
 }
 
 
-inline returnValue VariableSettings::setUnit(	uint idx,
+returnValue VariableSettings::setUnit(	uint idx,
 												const char* const _unit
 												)
 {

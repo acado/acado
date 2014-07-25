@@ -44,3 +44,8 @@ int @PREFIX@getNWSR( void )
 {
 	return nWSR;
 }
+
+const char* @PREFIX@getErrorString(int error)
+{
+	return MessageHandling::getErrorString( error );
+}

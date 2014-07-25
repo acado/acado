@@ -26,20 +26,20 @@
 /**
  *    \file include/acado/ocp/ocp.hpp
  *    \authors Boris Houska, Hans Joachim Ferreau, Milan Vukov, Rien Quirynen
- *    \date 2008 - 2013
+ *    \date 2008 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_OCP_HPP
 #define ACADO_TOOLKIT_OCP_HPP
 
-#include <acado/function/function.hpp>
-#include <acado/variables_grid/grid.hpp>
-#include <acado/constraint/constraint.hpp>
-#include <acado/objective/objective.hpp>
 #include <acado/ocp/multi_objective_functionality.hpp>
 #include <acado/ocp/model_container.hpp>
 
 BEGIN_NAMESPACE_ACADO
+
+class Grid;
+class Objective;
+class Constraint;
 
 /** 
  *	\brief Data class for defining optimal control problems.
@@ -393,11 +393,11 @@ protected:
 	void setupGrid( const DVector& times );
 
 	/** Common discretization grid. */
-	Grid grid;
+	std::tr1::shared_ptr<Grid> grid;
 	/** The Objective. */
-	Objective objective;
+	std::tr1::shared_ptr<Objective> objective;
 	/** The Constraints. */
-	Constraint constraint;
+	std::tr1::shared_ptr<Constraint> constraint;
 };
 
 CLOSE_NAMESPACE_ACADO

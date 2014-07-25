@@ -31,6 +31,8 @@
  */
 
 #include <acado/ocp/multi_objective_functionality.hpp>
+#include <acado/matrix_vector/matrix_vector.hpp>
+#include <acado/symbolic_expression/symbolic_expression.hpp>
 
 
 BEGIN_NAMESPACE_ACADO
@@ -122,6 +124,19 @@ returnValue MultiObjectiveFunctionality::minimizeMayerTerm( const int &multiObje
     return SUCCESSFUL_RETURN;
 }
 
+int MultiObjectiveFunctionality::getNumberOfMayerTerms() const{
+
+    return nMayer;
+}
+
+returnValue MultiObjectiveFunctionality::getObjective( const int &multiObjectiveIdx, Expression **arg ) const{
+
+    ASSERT( arg != 0 );
+    ASSERT( multiObjectiveIdx < nMayer);
+    *arg = new Expression(*mayerTerms[multiObjectiveIdx]);
+
+    return SUCCESSFUL_RETURN;
+}
 
 
 CLOSE_NAMESPACE_ACADO
