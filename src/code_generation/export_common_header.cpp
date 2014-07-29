@@ -82,22 +82,21 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 
 	case QP_FORCES:
 	case QP_HPMPC:
+	case QP_QPDUNES:
 		if (_qpSolver == QP_FORCES)
 			ss << "#define ACADO_QP_SOLVER ACADO_FORCES\n" << endl;
-		else
+		else if (_qpSolver == QP_HPMPC)
 			ss << "#define ACADO_QP_SOLVER ACADO_HPMPC\n" << endl;
-		ss << "#include <string.h>\n" << endl;
+		else
+			ss << "#define ACADO_QP_SOLVER ACADO_QPDUNES\n" << endl;
+
+		ss << "\n#include <string.h>\n\n" << endl;
+
 		ss << "/** Definition of the floating point data type. */\n";
 		if (_useSinglePrecision == true)
 			ss << "typedef float real_t;\n";
 		else
 			ss << "typedef double real_t;\n";
-
-		break;
-
-	case QP_QPDUNES:
-		ss << "#define ACADO_QP_SOLVER ACADO_QPDUNES\n" << endl;
-		ss << "#include \"qpDUNES.h\"\n";
 
 		break;
 
@@ -107,7 +106,6 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 			ss << "typedef float real_t;\n";
 		else
 			ss << "typedef double real_t;\n";
-//		ss << "#include \"acado_auxiliary_sim_functions.h\"\n";
 
 		break;
 
