@@ -187,6 +187,10 @@ FIND_PACKAGE( Doxygen )
 #
 ################################################################################
 
+# Suppressing some stupid warnings from CMake 3.0
+CMAKE_POLICY(SET CMP0026 OLD)
+CMAKE_POLICY(SET CMP0042 OLD)
+
 #
 # Compiler options are in separate file
 #
