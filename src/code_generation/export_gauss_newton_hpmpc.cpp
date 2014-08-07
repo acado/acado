@@ -187,12 +187,19 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
 
-	//
-	// LM regularization preparation
-	//
+	ExportVariable evLmX = zeros<double>(NX, NX);
+	ExportVariable evLmU = zeros<double>(NU, NU);
+
 	if (levenbergMarquardt > 0.0)
 	{
-		ACADOWARNINGTEXT(RET_INVALID_ARGUMENTS, "LM regularization is under development.");
+		DMatrix lmX = eye<double>( NX );
+		lmX *= levenbergMarquardt;
+
+		DMatrix lmU = eye<double>( NU );
+		lmU *= levenbergMarquardt;
+
+		evLmX = lmX;
+		evLmU = lmU;
 	}
 
 	//
@@ -266,6 +273,7 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 		setObjQ1Q2.setup("setObjQ1Q2", tmpFx, tmpObjS, tmpQ1, tmpQ2);
 		setObjQ1Q2.addStatement( tmpQ2 == (tmpFx ^ tmpObjS) );
 		setObjQ1Q2.addStatement( tmpQ1 == tmpQ2 * tmpFx );
+		setObjQ1Q2.addStatement( tmpQ1 += evLmX );
 
 		loopObjective.addFunctionCall(
 				setObjQ1Q2,
@@ -275,6 +283,8 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 
 		loopObjective.addLinebreak( );
 	}
+	else if (levenbergMarquardt > 0.0)
+		Q1 = Q1.getGivenMatrix() + evLmX.getGivenMatrix();
 
 	if (R1.isGiven() == false)
 	{
@@ -285,6 +295,7 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 		setObjR1R2.setup("setObjR1R2", tmpFu, tmpObjS, tmpR1, tmpR2);
 		setObjR1R2.addStatement( tmpR2 == (tmpFu ^ tmpObjS) );
 		setObjR1R2.addStatement( tmpR1 == tmpR2 * tmpFu );
+		setObjR1R2.addStatement( tmpR1 += evLmU );
 
 		loopObjective.addFunctionCall(
 				setObjR1R2,
@@ -294,6 +305,8 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 
 		loopObjective.addLinebreak( );
 	}
+	else if (levenbergMarquardt > 0.0)
+		R1 = R1.getGivenMatrix() + evLmU.getGivenMatrix();
 
 	if (S1.isGiven() == false)
 	{
@@ -339,6 +352,7 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 		setObjQN1QN2.setup("setObjQN1QN2", tmpFxEnd, tmpObjSEndTerm, tmpQN1, tmpQN2);
 		setObjQN1QN2.addStatement( tmpQN2 == (tmpFxEnd ^ tmpObjSEndTerm) );
 		setObjQN1QN2.addStatement( tmpQN1 == tmpQN2 * tmpFxEnd );
+		setObjQN1QN2.addStatement( tmpQN1 += evLmX );
 
 		indexX = getNYN();
 		ExportArgument tmpFxEndCall = tmpFxEnd.isGiven() == true ? tmpFxEnd  : objValueOut.getAddress(0, indexX);
@@ -351,6 +365,8 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 
 		evaluateObjective.addLinebreak( );
 	}
+	else if (levenbergMarquardt > 0.0)
+		QN1 = QN1.getGivenMatrix() + evLmX.getGivenMatrix();
 
 	//
 	// Hessian setup
