@@ -5,6 +5,12 @@ close all;
 Ts = 0.1;
 EXPORT = 1;
 
+SIM_folder = 'export_SIM';
+NMPC_folder = 'export_MPC';
+if EXPORT
+    copyfile('../../../../../../external_packages/qpoases', [NMPC_folder '\qpoases'])
+end
+
 DifferentialState xC vC xL vL uC uL theta omega;
 Control duC duL;
 
@@ -51,7 +57,7 @@ sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5' );
 sim.set( 'NUM_INTEGRATOR_STEPS',        numSteps        );
 
 if EXPORT
-    sim.exportCode('export_SIM');
+    sim.exportCode( SIM_folder );
     
     cd export_SIM
     make_acado_integrator('../integrate_crane')
@@ -90,7 +96,7 @@ mpc.set( 'LEVENBERG_MARQUARDT', 		 1e-10				);
 % mpc.set( 'GENERATE_SIMULINK_INTERFACE', 'YES'               );
 
 if EXPORT
-    mpc.exportCode( 'export_MPC' );
+    mpc.exportCode( NMPC_folder );
     
     cd export_MPC
     make_acado_solver('../acado_MPCstep')
