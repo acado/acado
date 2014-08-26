@@ -23,7 +23,7 @@ int initializeQpDunes( void )
 	qpOptions.stationarityTolerance = 1.e-6;
 	qpOptions.regParam = 1.e-6;
 	qpOptions.newtonHessDiagRegTolerance  = 1.e-8;
-	qpOptions.lsType            = 7;
+	qpOptions.lsType            = QPDUNES_LS_ACCELERATED_GRADIENT_BISECTION_LS;
 /*	qpOptions.lsType			= QPDUNES_LS_BACKTRACKING_LS; */
 	qpOptions.lineSearchReductionFactor	= 0.1;
 	qpOptions.lineSearchMaxStepSize	= 1.;
@@ -36,9 +36,9 @@ int initializeQpDunes( void )
 	
 	for (kk = 0; kk < ACADO_N + 1; ++kk)
 	{
-		/* TODO qpData.intervals[ kk ]->H.sparsityType = QPDUNES_DIAGONAL; */
+		qpData.intervals[ kk ]->H.sparsityType = QPDUNES_DIAGONAL;
 		qpData.intervals[ kk ]->D.sparsityType = QPDUNES_IDENTITY;
-		qpData.intervals[ kk ]->H.sparsityType = QPDUNES_DENSE;
+		/* TODO qpData.intervals[ kk ]->H.sparsityType = QPDUNES_DENSE; */
 	}
 	
 	statusFlag = qpDUNES_init(&qpData, @QP_H@, @QP_G@, @QP_C@, @QP_c@, @QP_LB@, @QP_UB@, @QP_D@, @QP_LBA@, @QP_UBA@);
