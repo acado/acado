@@ -26,7 +26,7 @@
 /**
  *    \file src/code_generation/export_gauss_newton_forces.cpp
  *    \author Milan Vukov
- *    \date 2012 - 2013
+ *    \date 2012 - 2014
  */
 
 #include <acado/code_generation/export_gauss_newton_forces.hpp>
@@ -999,7 +999,7 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 	);
 
 	//
-	// Configure and export QP generator
+	// Configure and export MATLAB QP generator
 	//
 
 	string folderName;
@@ -1034,7 +1034,35 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			qpModuleName,
 			(PrintLevel)printLevel == HIGH ? 2 : 0,
 			maxNumQPiterations,
-			useOMP
+			useOMP,
+			true
+	);
+
+	qpGenerator->exportCode();
+
+	//
+	// Export Python generator
+	//
+
+	outFile = folderName + "/acado_forces_generator.py";
+
+	qpGenerator = std::tr1::shared_ptr< ExportForcesGenerator >(new ExportForcesGenerator(FORCES_GENERATOR_PYTHON, outFile, "", "real_t", "int", 16, "#"));
+
+	qpGenerator->configure(
+			NX,
+			NU,
+			N,
+			conLBIndices,
+			conUBIndices,
+			(Q1.isGiven() == true && R1.isGiven() == true) ? 1 : 0,
+			diagH,
+			diagHN,
+			true, // TODO enable MHE
+			qpModuleName,
+			(PrintLevel)printLevel == HIGH ? 2 : 0,
+			maxNumQPiterations,
+			useOMP,
+			false
 	);
 
 	qpGenerator->exportCode();

@@ -26,7 +26,7 @@
 /**
  *    \file include/acado/code_generation/export_gauss_newton_forces.hpp
  *    \author Milan Vukov
- *    \date 2012 - 2013
+ *    \date 2012 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_FORCES_HPP

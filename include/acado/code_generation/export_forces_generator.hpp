@@ -26,7 +26,7 @@
 /**
  *    \file include/acado/code_generation/export_forces_generator.hpp
  *    \author Milan Vukov
- *    \date 2012
+ *    \date 2012 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_EXPORT_FORCES_GENERATOR_HPP
@@ -88,7 +88,8 @@ public:
 							const std::string& _solverName,
 							const unsigned _printLevel,
 							const unsigned _maxIterations,
-							const unsigned _parallel
+							const unsigned _parallel,
+							bool matlabGenerator = true
 							);
 };
 

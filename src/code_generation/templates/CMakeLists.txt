@@ -32,6 +32,7 @@ SET( RHS_MEX_TEMPLATE rhs_mex.c.in)
 
 SET( FORCES_TEMPLATE forces_interface.in)
 SET( FORCES_GENERATOR acado_forces_generator.m.in)
+SET( FORCES_GENERATOR_PYTHON acado_forces_generator.py.in)
 SET( QPOASES_HEADER qpoases_interface.hpp.in)
 SET( QPOASES_SOURCE qpoases_interface.cpp.in)
 SET( QPDUNES_TEMPLATE qpdunes_interface.in)
