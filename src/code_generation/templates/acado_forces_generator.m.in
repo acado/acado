@@ -56,7 +56,11 @@ for i = 1: N
 				params( 1 ) = newParam('H1', 1: 1: N - 1, 'cost.H');
 			end;
 		else
-			params( 1 ) = newParam('H1', 1, 'cost.H');
+			if (diagHessian == 1)
+				params( 1 ) = newParam('H1', 1, 'cost.H', 'diag');
+			else
+				params( 1 ) = newParam('H1', 1, 'cost.H');
+			end;
 		end;
 		params(end + 1) = newParam('f1', 1, 'cost.f');
         
@@ -96,7 +100,11 @@ for i = 1: N
         
         % Cost
 		if (constHessian == 0)
-			params(end + 1) = newParam(sprintf('%s%d', 'H', i), i, 'cost.H');
+			if (diagHessian == 1)
+				params(end + 1) = newParam(sprintf('%s%d', 'H', i), i, 'cost.H', 'diag');
+			else
+				params(end + 1) = newParam(sprintf('%s%d', 'H', i), i, 'cost.H');
+			end;
 		end;
 		params(end + 1) = newParam(sprintf('%s%d', 'f', i), i, 'cost.f');
 		

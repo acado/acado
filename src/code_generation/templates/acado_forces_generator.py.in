@@ -208,7 +208,10 @@ for i in range( N ):
             else:
                 stages.newParam('H1', range(1, N), 'cost.H')
         else:
-            stages.newParam('H1', [ 1 ], 'cost.H')
+            if diagHessian == 1:
+                stages.newParam('H1', [ 1 ], 'cost.H', 'diag')
+            else:
+                stages.newParam('H1', [ 1 ], 'cost.H')
 
         stages.newParam('f1', [ 1 ], 'cost.f')
 
@@ -239,7 +242,10 @@ for i in range( N ):
 
         # Cost
         if constHessian == 0:
-            stages.newParam('H' + str(i + 1), [i + 1], 'cost.H')
+            if diagHessian == 1:
+                stages.newParam('H' + str(i + 1), [i + 1], 'cost.H', 'diag')
+            else:
+                stages.newParam('H' + str(i + 1), [i + 1], 'cost.H')
 
         stages.newParam('f' + str(i + 1), [i + 1], 'cost.f')
 
@@ -266,7 +272,7 @@ for i in range( N ):
 
         # Dimensions
         stages.setDims(i, nx, nx if fixedInitialState == 1 else 0,
-	                   len( lbIdx[ i ] ), len( ubIdx[ i ] ), 0, 0)
+                       len( lbIdx[ i ] ), len( ubIdx[ i ] ), 0, 0)
         # Cost
         if diagHessianN == 1:
             stages.newParam('H' + str(i + 1), [i + 1], 'cost.H', 'diag')
