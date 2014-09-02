@@ -248,6 +248,7 @@ void IntegratorBDF::allocateMemory( ){
 
     maxNM = 1;
     M     = (DMatrix**)calloc(maxNM,sizeof(DMatrix*));
+//    qr.resize( maxNM );
     M_index   = (int*)calloc(maxNM,sizeof(int));
 
     M_index[0] = 0;
@@ -2445,7 +2446,7 @@ returnValue IntegratorBDF::determineCorrector( int stepnumber, BooleanType ini )
            jacComputation.stop();
            jacDecomposition.start();
 
-           if( decomposeJacobian( *M[M_index[stepnumber]] ) != SUCCESSFUL_RETURN )
+           if( decomposeJacobian(M_index[stepnumber], *M[M_index[stepnumber]] ) != SUCCESSFUL_RETURN )
                return ACADOERROR(RET_THE_DAE_INDEX_IS_TOO_LARGE);
 
            jacDecomposition.stop();
@@ -2454,7 +2455,8 @@ returnValue IntegratorBDF::determineCorrector( int stepnumber, BooleanType ini )
            COMPUTE_JACOBIAN  = BT_FALSE;
        }
 
-       norm1 = applyNewtonStep( eta[newtonsteps+1],
+       norm1 = applyNewtonStep( M_index[stepnumber],
+    		   	   	   	   	   	   eta[newtonsteps+1],
                                 eta[newtonsteps],
                                *M[M_index[stepnumber]],
                                 F );
@@ -2953,7 +2955,7 @@ returnValue IntegratorBDF::rk_start_solve( int stepnumber ){
            jacComputation.stop();
            jacDecomposition.start();
 
-           if( decomposeJacobian( *M[M_index[stepnumber]] ) != SUCCESSFUL_RETURN )
+           if( decomposeJacobian(M_index[stepnumber], *M[M_index[stepnumber]] ) != SUCCESSFUL_RETURN )
                    return ACADOERROR(RET_THE_DAE_INDEX_IS_TOO_LARGE);
 
            jacDecomposition.stop();
@@ -2962,7 +2964,8 @@ returnValue IntegratorBDF::rk_start_solve( int stepnumber ){
            COMPUTE_JACOBIAN  = BT_FALSE;
        }
 
-       norm1 = applyNewtonStep( k[newtonsteps+1][stepnumber],
+       norm1 = applyNewtonStep( M_index[stepnumber],
+    		   	   	   	   	   k[newtonsteps+1][stepnumber],
                                 k[newtonsteps][stepnumber]  ,
                                *M[M_index[stepnumber]],
                                 F );
@@ -3069,7 +3072,8 @@ void IntegratorBDF::determineRKEtaGForward(){
                }
 
 
-               applyNewtonStep( k[newtonsteps+1][run1],
+               applyNewtonStep( M_index[run1],
+            		   	   	   	   k[newtonsteps+1][run1],
                                 k[newtonsteps][run1]  ,
                                *M[M_index[run1]],
                                 F );
@@ -3147,7 +3151,7 @@ void IntegratorBDF::determineRKEtaHBackward(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H );
 
@@ -3194,7 +3198,7 @@ void IntegratorBDF::determineRKEtaHBackward(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H );
 
@@ -3247,7 +3251,7 @@ void IntegratorBDF::determineRKEtaHBackward(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H );
 
@@ -3306,7 +3310,7 @@ void IntegratorBDF::determineRKEtaHBackward(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H );
 
@@ -3370,7 +3374,7 @@ void IntegratorBDF::determineRKEtaHBackward(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H );
 
@@ -3439,7 +3443,7 @@ void IntegratorBDF::determineRKEtaHBackward(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H );
 
@@ -3513,7 +3517,7 @@ void IntegratorBDF::determineRKEtaHBackward(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H );
 
@@ -3615,11 +3619,11 @@ void IntegratorBDF::determineRKEtaGForward2(){
                }
 
 
-               applyNewtonStep( k[newtonsteps+1][run1],
+               applyNewtonStep( M_index[run1], k[newtonsteps+1][run1],
                                 k[newtonsteps][run1]  ,
                                *M[M_index[run1]],
                                 F );
-               applyNewtonStep( k2[newtonsteps+1][run1],
+               applyNewtonStep( M_index[run1], k2[newtonsteps+1][run1],
                                 k2[newtonsteps][run1]  ,
                                *M[M_index[run1]],
                                 F2 );
@@ -3723,11 +3727,11 @@ void IntegratorBDF::determineRKEtaHBackward2(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH2[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH2[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H2 );
 
-            applyMTranspose( kH3[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH3[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H3 );
 
@@ -3790,10 +3794,10 @@ void IntegratorBDF::determineRKEtaHBackward2(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH2[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH2[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H2 );
-            applyMTranspose( kH3[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH3[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H3 );
 
@@ -3868,10 +3872,10 @@ void IntegratorBDF::determineRKEtaHBackward2(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH2[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH2[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H2 );
-            applyMTranspose( kH3[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH3[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H3 );
 
@@ -3958,10 +3962,10 @@ void IntegratorBDF::determineRKEtaHBackward2(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH2[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH2[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H2 );
-            applyMTranspose( kH3[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH3[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H3 );
 
@@ -4058,10 +4062,10 @@ void IntegratorBDF::determineRKEtaHBackward2(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH2[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH2[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H2 );
-            applyMTranspose( kH3[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH3[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H3 );
 
@@ -4168,10 +4172,10 @@ void IntegratorBDF::determineRKEtaHBackward2(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH2[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH2[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H2 );
-            applyMTranspose( kH3[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH3[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H3 );
 
@@ -4288,10 +4292,10 @@ void IntegratorBDF::determineRKEtaHBackward2(){
 
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( kH2[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH2[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H2 );
-            applyMTranspose( kH3[number_][newtonsteps+1],
+            applyMTranspose( M_index[number_], kH3[number_][newtonsteps+1],
                             *M[M_index[number_]],
                              H3 );
 
@@ -4416,7 +4420,7 @@ void IntegratorBDF::determineBDFEtaGForward( int number_ ){
                 ACADOERROR(RET_UNSUCCESSFUL_RETURN_FROM_INTEGRATOR_BDF);
             }
 
-            applyNewtonStep( eta[newtonsteps+1],
+            applyNewtonStep( M_index[number_], eta[newtonsteps+1],
                              eta[newtonsteps],
                             *M[M_index[number_]],
                              F );
@@ -4468,7 +4472,7 @@ void IntegratorBDF::determineBDFEtaHBackward( int number_ ){
     newtonsteps--;
     while( newtonsteps >= 0 ){
 
-        applyMTranspose( etaH[newtonsteps+1], M[M_index[number_]][0], H );
+        applyMTranspose( M_index[number_], etaH[newtonsteps+1], M[M_index[number_]][0], H );
 
         if( rhs[0].AD_backward( 3*number_+newtonsteps, H, l[newtonsteps][0] ) != SUCCESSFUL_RETURN )
             ACADOERROR(RET_UNSUCCESSFUL_RETURN_FROM_INTEGRATOR_BDF);
@@ -4628,12 +4632,12 @@ void IntegratorBDF::determineBDFEtaGForward2( int number_ ){
                 ACADOERROR(RET_UNSUCCESSFUL_RETURN_FROM_INTEGRATOR_BDF);
             }
 
-            applyNewtonStep( eta[newtonsteps+1],
+            applyNewtonStep( M_index[number_], eta[newtonsteps+1],
                              eta[newtonsteps],
                             *M[M_index[number_]],
                              F );
 
-            applyNewtonStep( eta2[newtonsteps+1],
+            applyNewtonStep( M_index[number_], eta2[newtonsteps+1],
                              eta2[newtonsteps],
                             *M[M_index[number_]],
                              F2 );
@@ -4706,11 +4710,11 @@ void IntegratorBDF::determineBDFEtaHBackward2( int number_ ){
         newtonsteps--;
         while( newtonsteps >= 0 ){
 
-            applyMTranspose( etaH2[newtonsteps+1],
+            applyMTranspose( M_index[number_], etaH2[newtonsteps+1],
                             *M[M_index[number_]],
                              H2 );
 
-            applyMTranspose( etaH3[newtonsteps+1],
+            applyMTranspose( M_index[number_], etaH3[newtonsteps+1],
                             *M[M_index[number_]],
                              H3 );
 
@@ -5107,16 +5111,22 @@ void IntegratorBDF::printRKIntermediateResults(){
 }
 
 
-returnValue IntegratorBDF::decomposeJacobian( DMatrix &J ) const{
+returnValue IntegratorBDF::decomposeJacobian(int index, DMatrix &J){
 
-	ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
+//	ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
 
     switch( las ){
 
         case HOUSEHOLDER_METHOD:
-//             return J.computeQRdecomposition();
+//        	ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
+        	break;
+//        	ASSERT( index < qr.size() );
+//        	qr[ index ] = Eigen::HouseholderQR< DMatrix::Base >( J );
+//        	return SUCCESSFUL_RETURN;
 
         case SPARSE_LU:
+        		ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
+        		break;
 //             return J.computeSparseLUdecomposition();
 
         default:
@@ -5127,20 +5137,26 @@ returnValue IntegratorBDF::decomposeJacobian( DMatrix &J ) const{
 }
 
 
-double IntegratorBDF::applyNewtonStep( double *etakplus1, const double *etak, const DMatrix &J, const double *FFF ){
+double IntegratorBDF::applyNewtonStep( int index, double *etakplus1, const double *etak, const DMatrix &J, const double *FFF ){
 
     int run1;
     DVector bb(m,FFF);
     DVector deltaX;
 
-    ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
-
-    switch( las ){
-
-//        case      HOUSEHOLDER_METHOD:  deltaX = J.solveQR      ( bb ); break;
-//        case      SPARSE_LU:           deltaX = J.solveSparseLU( bb ); break;
-        default:                       deltaX.setZero          (    ); break;        
-    }
+	switch (las)
+	{
+	case HOUSEHOLDER_METHOD:
+		deltaX = J.householderQr().solve( bb );
+//		deltaX = qr[ index ].solve(bb);
+		break;
+	case SPARSE_LU:
+		ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
+//		deltaX = J.solveSparseLU(bb);
+		break;
+	default:
+		deltaX.setZero();
+		break;
+	}
 
     for( run1 = 0; run1 < m; run1++ )
         etakplus1[run1] = etak[run1] - deltaX(run1);
@@ -5149,7 +5165,7 @@ double IntegratorBDF::applyNewtonStep( double *etakplus1, const double *etak, co
 }
 
 
-void IntegratorBDF::applyMTranspose( double *seed1, DMatrix &J, double *seed2 ){
+void IntegratorBDF::applyMTranspose( int index, double *seed1, DMatrix &J, double *seed2 ){
 
     int run1;
     DVector bb(m);
@@ -5159,14 +5175,24 @@ void IntegratorBDF::applyMTranspose( double *seed1, DMatrix &J, double *seed2 ){
 
     DVector deltaX;
 
-    ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
-
-    switch( las ){
-
-//        case      HOUSEHOLDER_METHOD:  deltaX = J.solveTransposeQR      ( bb ); break;
-//        case      SPARSE_LU:           deltaX = J.solveTransposeSparseLU( bb ); break;
-        default:                       deltaX.setZero                   (    ); break;
-    }
+	switch (las)
+	{
+	case HOUSEHOLDER_METHOD:
+		// Dodgy
+		deltaX = J.transpose().householderQr().solve( bb );
+//		deltaX = J.solveTransposeQR(bb);
+//		deltaX = qr[ index ].matrixQR().block(0, 0, J.cols(), J.cols()).
+//			triangularView<Eigen::Upper>().transpose().solve( bb );
+		break;
+	case SPARSE_LU:
+		ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
+//		deltaX = J.solveTransposeSparseLU(bb);
+		break;
+	default:
+		ACADOFATAL(  RET_NOT_IMPLEMENTED_YET );
+		deltaX.setZero();
+		break;
+	}
 
     for( run1 = 0; run1 < m; run1++ )
         seed2[run1] = deltaX(run1);

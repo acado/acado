@@ -380,20 +380,20 @@ protected:
      *  \return SUCCESSFUL_RETURN                \n
      *          RET_THE_DAE_INDEX_IS_TOO_LARGE   \n
      */
-    returnValue decomposeJacobian( DMatrix &J ) const;
+    returnValue decomposeJacobian(int index, DMatrix &J );
 
 
     /** applies a newton step                                              \n
      *  \return the norm of the increment                                  \n
      */
-    double applyNewtonStep( double *etakplus1, const double *etak, const DMatrix &J, const double *FFF );
+    double applyNewtonStep( int index, double *etakplus1, const double *etak, const DMatrix &J, const double *FFF );
 
 
     /** applies the transpose of M (needed for automatic differentiation   \n
      *  in backward mode)                                                  \n
      *  \return (void)                                                     \n
      */
-    void applyMTranspose( double *seed1, DMatrix &J, double *seed2 );
+    void applyMTranspose( int index, double *seed1, DMatrix &J, double *seed2 );
 
 
     /** Initializes a second forward seed. (only for internal use)         \n
@@ -547,6 +547,7 @@ protected:
                                   *   polynom.                                            */
 
     DMatrix **M                 ; /**< the Jacobians for Newton's method                   */
+//    std::vector< Eigen::HouseholderQR< DMatrix::Base > > qr;
     int     *M_index           ; /**< the index of the inverse approximation              */
     int      nOfM              ; /**< number of distinct inverse Jacobian approximations  */
     int      maxNM             ; /**< number of allocated Jacobian storage positions      */
