@@ -31,6 +31,9 @@
 
 #include <acado/code_generation/export_nlp_solver.hpp>
 
+#include <acado/objective/objective.hpp>
+#include <acado/ocp/ocp.hpp>
+
 BEGIN_NAMESPACE_ACADO
 
 using namespace std;
