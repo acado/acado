@@ -33,10 +33,12 @@
 
 #include <acado/code_generation/export_gauss_newton_cn2.hpp>
 #include <acado/code_generation/export_gauss_newton_cn2_new.hpp>
+#include <acado/code_generation/export_exact_hessian_cn2_new.hpp>
 #include <acado/code_generation/export_gauss_newton_cn2_factorization.hpp>
 #include <acado/code_generation/export_gauss_newton_condensed.hpp>
 #include <acado/code_generation/export_gauss_newton_forces.hpp>
 #include <acado/code_generation/export_gauss_newton_qpdunes.hpp>
+#include <acado/code_generation/export_gauss_newton_qpdunes2.hpp>
 #include <acado/code_generation/export_gauss_newton_hpmpc.hpp>
 
 BEGIN_NAMESPACE_ACADO
@@ -57,6 +59,13 @@ ExportNLPSolver* createGaussNewtonCN2New(	UserInteraction* _userInteraction,
 											)
 {
 	return new ExportGaussNewtonCN2New(_userInteraction, _commonHeaderName);
+}
+
+ExportNLPSolver* createExactHessianCN2New(	UserInteraction* _userInteraction,
+											const std::string& _commonHeaderName
+											)
+{
+	return new ExportExactHessianCN2New(_userInteraction, _commonHeaderName);
 }
 
 ExportNLPSolver* createGaussNewtonCn2Factorization(	UserInteraction* _userInteraction,
@@ -87,6 +96,13 @@ ExportNLPSolver* createGaussNewtonQpDunes(	UserInteraction* _userInteraction,
 	return new ExportGaussNewtonQpDunes(_userInteraction, _commonHeaderName);
 }
 
+ExportNLPSolver* createGaussNewtonQpDunes2(	UserInteraction* _userInteraction,
+											const std::string& _commonHeaderName
+											)
+{
+	return new ExportGaussNewtonQpDunes2(_userInteraction, _commonHeaderName);
+}
+
 ExportNLPSolver* createGaussNewtonHpmpc(	UserInteraction* _userInteraction,
 											const std::string& _commonHeaderName
 										)
@@ -98,10 +114,12 @@ RegisterNlpSolvers::RegisterNlpSolvers()
 {
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2, createGaussNewtonCN2);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2_NEW, createGaussNewtonCN2New);
+	NLPSolverFactory::instance().registerAlgorithm(EXACT_HESSIAN_CN2_NEW, createExactHessianCN2New);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2_FACTORIZATION, createGaussNewtonCn2Factorization);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CONDENSED, createGaussNewtonCondensed);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_FORCES, createGaussNewtonForces);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES, createGaussNewtonQpDunes);
+	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES2, createGaussNewtonQpDunes2);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_HPMPC, createGaussNewtonHpmpc);
 }
 

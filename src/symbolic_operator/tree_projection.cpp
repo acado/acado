@@ -601,7 +601,8 @@ BooleanType TreeProjection::isTrivial() const {
 
 returnValue TreeProjection::initDerivative() {
 
-	if( argument != 0 ) {
+	if( !initialized && argument != 0 ) {
+		initialized = BT_TRUE;
 		return argument->initDerivative();
 	}
 	else {

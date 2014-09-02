@@ -51,7 +51,7 @@ sim.set( 'INTEGRATOR_TYPE',             'INT_IRK_RIIA5' );
 sim.set( 'NUM_INTEGRATOR_STEPS',        numSteps        );
 
 if EXPORT
-    sim.exportCode('export_SIM');
+    sim.exportCode( 'export_SIM' );
     
     cd export_SIM
     make_acado_integrator('../integrate_crane')
@@ -90,6 +90,7 @@ mpc.set( 'LEVENBERG_MARQUARDT', 		 1e-10				);
 % mpc.set( 'GENERATE_SIMULINK_INTERFACE', 'YES'               );
 
 if EXPORT
+    copyfile('../../../../../../external_packages/qpoases', 'export_MPC/qpoases')
     mpc.exportCode( 'export_MPC' );
     
     cd export_MPC

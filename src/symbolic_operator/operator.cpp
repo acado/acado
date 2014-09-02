@@ -47,6 +47,7 @@ BEGIN_NAMESPACE_ACADO
 Operator::Operator(){
 
     nCount = 0;
+    initialized = BT_FALSE;
 }
 
 Operator::~Operator(){ }
@@ -517,6 +518,7 @@ BooleanType Operator::isTrivial() const {
 
 returnValue Operator::initDerivative() {
 
+	initialized = BT_TRUE;
 	return SUCCESSFUL_RETURN;
 }
 

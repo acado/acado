@@ -457,6 +457,12 @@ class Objective : public LagrangeTerm
 
         /** @} */
 
+        uint getNumMayerTerms( ) const;
+        uint getNumLagrangeTerms( ) const;
+
+        returnValue getMayerTerm( uint index, Function& mayerTerm ) const;
+        returnValue getLagrangeTerm( uint index, Function& lagrangeTerm ) const;
+
     //
     // DATA MEMBERS:
     //

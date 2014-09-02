@@ -252,7 +252,10 @@ returnValue ModelData::setModel( const DifferentialEquation& _f )
 		NXA = differentialEquation.getNXA();
 		NX2 = rhs.getDim() - NXA;
 		if( NDX == 0 ) NDX = _f.getNDX();
-		if( _f.getNDX() > 0 && _f.getNDX() != (int)NX2 ) return ACADOERROR( RET_INVALID_OPTION );
+//		if( _f.getNDX() > 0 && _f.getNDX() != (int)NX2 ) { // TODO: this test returns an error for well-defined models when using a linear input subsystem!
+//			std::cout << "nonlinear model of size " << NX2 << " depends on " << _f.getNDX() << " differential state derivatives!" << std::endl;
+//			return ACADOERROR( RET_INVALID_OPTION );
+//		}
 		if( NU == 0 ) NU = _f.getNU();
 		if( NP == 0 ) NP = _f.getNP();
 		if( NOD == 0 ) NOD = _f.getNOD();

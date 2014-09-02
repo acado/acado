@@ -119,7 +119,8 @@ CurvatureType Exp::getCurvature( ){
 
 returnValue Exp::initDerivative() {
 
-	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+	if( initialized ) return SUCCESSFUL_RETURN;
+	initialized = BT_TRUE;
 
 	derivative = convert2TreeProjection(new Exp(argument->clone()));
 	derivative2 = derivative;

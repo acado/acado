@@ -612,6 +612,32 @@ returnValue Objective::getLSQLinearTerms(LsqLinearElements& _elements) const
 	return SUCCESSFUL_RETURN;
 }
 
+uint Objective::getNumMayerTerms( ) const
+{
+
+	return nMayer;
+}
+
+returnValue Objective::getMayerTerm(uint index, Function& _mayerTerm) const
+{
+	mayerTerm[index]->getFunction(_mayerTerm);
+
+	return SUCCESSFUL_RETURN;
+}
+
+uint Objective::getNumLagrangeTerms( ) const
+{
+
+	return nLagrangeTerms;
+}
+
+returnValue Objective::getLagrangeTerm(uint index, Function& _lagrangeTerm) const
+{
+	_lagrangeTerm << *lagrangeFcn[index];
+
+	return SUCCESSFUL_RETURN;
+}
+
 //
 // Code generation related functions
 //

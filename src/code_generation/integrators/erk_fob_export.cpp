@@ -168,7 +168,7 @@ returnValue ForwardOverBackwardERKExport::setup( )
 
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
-	seed_backward.setup( "seed", 1, NX );
+//	seed_backward.setup( "seed", 1, NX );
 
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
@@ -197,7 +197,7 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	ExportIndex run( "run1" );
 
 	// setup INTEGRATE function
-	integrate = ExportFunction( "integrate", rk_eta, reset_int, seed_backward );
+	integrate = ExportFunction( "integrate", rk_eta, reset_int );
 	integrate.setReturnValue( error_code );
 	rk_eta.setDoc( "Working array to pass the input values and return the results." );
 	reset_int.setDoc( "The internal memory of the integrator can be reset." );
@@ -215,7 +215,7 @@ returnValue ForwardOverBackwardERKExport::setup( )
 		integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
 		integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
 
-		integrate.addStatement( rk_eta.getCols( NX*(1+NX+NU),NX*(2+NX+NU) ) == seed_backward );
+//		integrate.addStatement( rk_eta.getCols( NX*(1+NX+NU),NX*(2+NX+NU) ) == seed_backward );
 		integrate.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) == zeros<double>( 1,NX*NX+NX*NU+NU*NU ) );
 		// FORWARD SWEEP FIRST
 		integrate.addStatement( rk_xxx.getCols( NX*(1+NX+NU),NX*(1+NX+NU)+NU+NOD ) == rk_eta.getCols( rhsDim,inputDim ) );

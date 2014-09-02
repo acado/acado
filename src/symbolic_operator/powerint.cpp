@@ -282,9 +282,8 @@ returnValue Power_Int::AD_symmetric( int            dim       , /**< number of d
 
 returnValue Power_Int::initDerivative() {
 
-	if( derivative != 0 ) {
-		return SUCCESSFUL_RETURN;
-	}
+	if( initialized ) return SUCCESSFUL_RETURN;
+	initialized = BT_TRUE;
 
 	Operator *powerTmp = myPowerInt( argument, exponent-1 );
 	Operator *expTmp = new DoubleConstant( (double) exponent, NE_NEITHER_ONE_NOR_ZERO );

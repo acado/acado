@@ -24,45 +24,32 @@
  */
 
 /**
- *    \file include/acado/code_generation/export_templated_file.hpp
- *    \author Milan Vukov
- *    \date 2012 - 2013
+ *    \file include/acado/code_generation/export_hessian_regularization.hpp
+ *    \author Rien Quirynen
+ *    \date 2014
  */
 
-#ifndef ACADO_TOOLKIT_EXPORT_TEMPLATED_FILE_HPP
-#define ACADO_TOOLKIT_EXPORT_TEMPLATED_FILE_HPP
+#ifndef ACADO_TOOLKIT_EXPORT_HESSIAN_REG_HPP
+#define ACADO_TOOLKIT_EXPORT_HESSIAN_REG_HPP
 
-#include <acado/code_generation/export_file.hpp>
-
-#include <map>
+#include <acado/code_generation/export_templated_file.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
-class ExportQpOasesInterface;
-class ExportSimulinkInterface;
-class ExportAuxiliaryFunctions;
-
-/** 
- *	\brief Allows export of template files.
+/**
+ *	\brief A class for generating code implementing a symmetric EigenValue Decomposition.
  *
- *	\ingroup AuxiliaryFunctionality
+ *	\ingroup ExportHessianRegularization
  *
- *	\author Milan Vukov
+ *	\author Rien Quirynen
  */
-class ExportTemplatedFile : public ExportFile
+class ExportHessianRegularization : public ExportTemplatedFile
 {
 public:
 
-	friend class ExportQpOasesInterface;
-	friend class ExportSimulinkInterface;
-	friend class ExportAuxiliaryFunctions;
-	friend class ExportHessianRegularization;
-	friend class ExportAuxiliarySimFunctions;
-
 	/** Default constructor.
 	 *
-	 *	@param[in] _templateName		Name of a template.
-	 *	@param[in] _fileName			Name of exported file.
+	 *	@param[in] _moduleName		    Module name for customization.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 *	@param[in] _realString			std::string to be used to declare real variables.
 	 *	@param[in] _intString			std::string to be used to declare integer variables.
@@ -71,40 +58,31 @@ public:
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	ExportTemplatedFile(	const std::string& _templateName,
-							const std::string& _fileName,
-							const std::string& _commonHeaderName = "",
-							const std::string& _realString = "real_t",
-							const std::string& _intString = "int",
-							int _precision = 16,
-							const std::string& _commentString = std::string()
-							);
+	ExportHessianRegularization(	const std::string& _sourceFileName,
+								const std::string& _moduleName = "acado",
+								const std::string& _commonHeaderName = "",
+								const std::string& _realString = "double",
+								const std::string& _intString = "int",
+								int _precision = 16,
+								const std::string& _commentString = std::string()
+								);
 
 	/** Destructor. */
-	virtual ~ExportTemplatedFile( )
+	virtual ~ExportHessianRegularization()
 	{}
 
 	/** Configure the template
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	virtual returnValue configure(  )
-	{
-		return fillTemplate( );
-	}
+	returnValue configure(	uint DIM, double eps );
 
-protected:
+private:
 
-	/** Fill in the template. */
-	returnValue fillTemplate( );
-	/** Name of the template file. */
-	std::string templateName;
-	/** Dictionary used to fill in the template file. */
-	std::map< std::string, std::string > dictionary;
-	/** List of folders where templates are stored. */
-	std::string folders;
+	std::string moduleName;
+
 };
 
 CLOSE_NAMESPACE_ACADO
 
-#endif  // ACADO_TOOLKIT_EXPORT_TEMPLATED_FILE_HPP
+#endif  // ACADO_TOOLKIT_EXPORT_HESSIAN_REG_HPP

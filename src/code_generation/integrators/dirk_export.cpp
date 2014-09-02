@@ -85,16 +85,16 @@ returnValue DiagonallyImplicitRKExport::solveInputSystem( ExportStatementBlock* 
 		loop.addStatement( rk_xxx.getCols(0,NX1) == rk_eta.getCols(0,NX1) );
 		ExportForLoop loop01( index2,0,NX1 );
 		ExportForLoop loop02( index3,0,index1 );
-		loop02.addStatement( rk_xxx.getCol( index2 ) += Ah.getSubMatrix(index1,index1+1,index3,index3+1)*rk_kkk.getSubMatrix(index2,index2+1,index3,index3+1) );
+		loop02.addStatement( rk_xxx.getCol( index2 ) += Ah.getElement(index1,index3)*rk_kkk.getElement(index2,index3) );
 		loop01.addStatement( loop02 );
 		loop.addStatement( loop01 );
 		loop.addFunctionCall( lin_input.getName(), rk_xxx, rk_b.getAddress(0,0) );
 
 		ExportForLoop loop5( index2,0,NX1 );
 		loop5.addStatement( tmp_index == index1*NX1+index2 );
-		loop5.addStatement( rk_kkk.getSubMatrix(index2,index2+1,index1,index1+1) == rk_mat1.getSubMatrix(tmp_index,tmp_index+1,0,1)*rk_b.getRow(0) );
+		loop5.addStatement( rk_kkk.getElement(index2,index1) == rk_mat1.getElement(tmp_index,0)*rk_b.getRow(0) );
 		ExportForLoop loop6( index3,1,NX1 );
-		loop6.addStatement( rk_kkk.getSubMatrix(index2,index2+1,index1,index1+1) += rk_mat1.getSubMatrix(tmp_index,tmp_index+1,index3,index3+1)*rk_b.getRow(index3) );
+		loop6.addStatement( rk_kkk.getElement(index2,index1) += rk_mat1.getElement(tmp_index,index3)*rk_b.getRow(index3) );
 		loop5.addStatement(loop6);
 		loop.addStatement(loop5);
 		block->addStatement(loop);
@@ -245,7 +245,7 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportState
 			ExportForLoop loop2( index3,0,NX1 );
 			loop2.addStatement( std::string(rk_rhsTemp.get( index3,0 )) + " = -(" + index3.getName() + " == " + index1.getName() + ");\n" );
 			ExportForLoop loop21( tmp_index1,0,index2+1 );
-			loop21.addStatement( rk_rhsTemp.getRow( index3 ) -= rk_diffK.getSubMatrix( index3,index3+1,tmp_index1,tmp_index1+1 )*Ah.getSubMatrix(index2,index2+1,tmp_index1,tmp_index1+1) );
+			loop21.addStatement( rk_rhsTemp.getRow( index3 ) -= rk_diffK.getElement( index3,tmp_index1 )*Ah.getElement(index2,tmp_index1) );
 			loop2.addStatement( loop21 );
 			loop1.addStatement( loop2 );
 			ExportForLoop loop3( index3,0,NX2+NXA );
@@ -257,19 +257,19 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportState
 		}
 		else if( STATES && number == 2 ) {
 			for( i = 0; i < NX2+NXA; i++ ) {
-				loop1.addStatement( rk_b.getRow( i ) == zeroM.getRow( 0 ) - rk_diffsTemp2.getSubMatrix( index2,index2+1,index1+i*(NVARS2),index1+i*(NVARS2)+1 ) );
+				loop1.addStatement( rk_b.getRow( i ) == zeroM.getRow( 0 ) - rk_diffsTemp2.getElement( index2,index1+i*(NVARS2) ) );
 			}
 		}
 		else { // ~= STATES
 			ExportForLoop loop2( index3,0,NX1 );
-			loop2.addStatement( rk_rhsTemp.getRow( index3 ) == rk_diffK.getSubMatrix( index3,index3+1,0,1 )*Ah.getSubMatrix(index2,index2+1,0,1) );
+			loop2.addStatement( rk_rhsTemp.getRow( index3 ) == rk_diffK.getElement( index3,0 )*Ah.getElement(index2,0) );
 			ExportForLoop loop21( tmp_index1,1,index2+1 );
-			loop21.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getSubMatrix( index3,index3+1,tmp_index1,tmp_index1+1 )*Ah.getSubMatrix(index2,index2+1,tmp_index1,tmp_index1+1) );
+			loop21.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getElement( index3,tmp_index1 )*Ah.getElement(index2,tmp_index1) );
 			loop2.addStatement( loop21 );
 			loop1.addStatement( loop2 );
 			ExportForLoop loop3( index3,0,NX2+NXA );
 			loop3.addStatement( tmp_index2 == index1+index3*(NVARS2) );
-			loop3.addStatement( rk_b.getRow( index3 ) == zeroM.getRow( 0 ) - rk_diffsTemp2.getSubMatrix( index2,index2+1,tmp_index2+NX1+NX2+NXA,tmp_index2+NX1+NX2+NXA+1 ) );
+			loop3.addStatement( rk_b.getRow( index3 ) == zeroM.getRow( 0 ) - rk_diffsTemp2.getElement( index2,tmp_index2+NX1+NX2+NXA ) );
 			loop3.addStatement( rk_b.getRow( index3 ) -= rk_diffsTemp2.getSubMatrix( index2,index2+1,index3*(NVARS2),index3*(NVARS2)+NX1 )*rk_rhsTemp.getRows(0,NX1) );
 			if( NDX2 > 0 ) {
 				loop3.addStatement( rk_b.getRow( index3 ) -= rk_diffsTemp2.getSubMatrix( index2,index2+1,index3*(NVARS2)+NVARS2-NX1-NX2,index3*(NVARS2)+NVARS2-NX2 )*rk_diffK.getSubMatrix( 0,NX1,index2,index2+1 ) );
@@ -298,15 +298,15 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesImplicitSystem( ExportState
 		ExportForLoop loop3( index2,0,NX2 );
 		if( STATES && number == 2 ) loop3.addStatement( std::string(rk_diffsNew2.get( index2,index1 )) + " = (" + index2.getName() + " == " + index1.getName() + "-" + toString(NX1) + ");\n" );
 
-		if( STATES && number == 2 ) loop3.addStatement( rk_diffsNew2.getSubMatrix( index2,index2+1,index1,index1+1 ) += rk_diffK.getRow( NX1+index2 )*Bh );
-		else if( STATES )	loop3.addStatement( rk_diffsNew2.getSubMatrix( index2,index2+1,index1,index1+1 ) == rk_diffK.getRow( NX1+index2 )*Bh );
-		else		 		loop3.addStatement( rk_diffsNew2.getSubMatrix( index2,index2+1,index1+NX1+NX2,index1+NX1+NX2+1 ) == rk_diffK.getRow( NX1+index2 )*Bh );
+		if( STATES && number == 2 ) loop3.addStatement( rk_diffsNew2.getElement( index2,index1 ) += rk_diffK.getRow( NX1+index2 )*Bh );
+		else if( STATES )	loop3.addStatement( rk_diffsNew2.getElement( index2,index1 ) == rk_diffK.getRow( NX1+index2 )*Bh );
+		else		 		loop3.addStatement( rk_diffsNew2.getElement( index2,index1+NX1+NX2 ) == rk_diffK.getRow( NX1+index2 )*Bh );
 		block->addStatement( loop3 );
 		if( NXA > 0 ) {
 			block->addStatement( std::string("if( run == 0 ) {\n") );
 			ExportForLoop loop4( index2,0,NXA );
-			if( STATES ) loop4.addStatement( rk_diffsNew2.getSubMatrix( index2+NX2,index2+NX2+1,index1,index1+1 ) == rk_diffK.getRow( NX+index2 )*tempCoefs );
-			else 		 loop4.addStatement( rk_diffsNew2.getSubMatrix( index2+NX2,index2+NX2+1,index1+NX1+NX2,index1+NX1+NX2+1 ) == rk_diffK.getRow( NX+index2 )*tempCoefs );
+			if( STATES ) loop4.addStatement( rk_diffsNew2.getElement( index2+NX2,index1 ) == rk_diffK.getRow( NX+index2 )*tempCoefs );
+			else 		 loop4.addStatement( rk_diffsNew2.getElement( index2+NX2,index1+NX1+NX2 ) == rk_diffK.getRow( NX+index2 )*tempCoefs );
 			block->addStatement( loop4 );
 			block->addStatement( std::string("}\n") );
 		}
@@ -327,11 +327,11 @@ returnValue DiagonallyImplicitRKExport::evaluateMatrix( ExportStatementBlock* bl
 	ExportForLoop loop2( index2,0,NX2+NXA );
 	loop2.addStatement( tmp_index == index1*(NX2+NXA)+index2 );
 	if( NDX2 == 0 ) {
-		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) == Ah.getSubMatrix( 0,1,0,1 )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
-		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,index2,index2+1 ) -= 1 );
+		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) == Ah.getElement( 0,0 )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
+		loop2.addStatement( rk_A.getElement( tmp_index,index2 ) -= 1 );
 	}
 	else {
-		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) == Ah.getSubMatrix( 0,1,0,1 )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
+		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) == Ah.getElement( 0,0 )*rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NX1,index2*(NVARS2)+NX1+NX2 ) );
 		loop2.addStatement( rk_A.getSubMatrix( tmp_index,tmp_index+1,0,NX2 ) += rk_diffsTemp2.getSubMatrix( indexDiffs,indexDiffs+1,index2*(NVARS2)+NVARS2-NX2,index2*(NVARS2)+NVARS2 ) );
 	}
 	if( NXA > 0 ) {
@@ -352,16 +352,16 @@ returnValue DiagonallyImplicitRKExport::evaluateStatesImplicitSystem( ExportStat
 	ExportForLoop loop1( i, 0, NX1+NX2 );
 	loop1.addStatement( rk_xxx.getCol( i ) == rk_eta.getCol( i ) );
 	ExportForLoop loop2( j, 0, stage+1 );
-	loop2.addStatement( rk_xxx.getCol( i ) += Ah.getSubMatrix(stage,stage+1,j,j+1)*rk_kkk.getSubMatrix( i,i+1,j,j+1 ) );
+	loop2.addStatement( rk_xxx.getCol( i ) += Ah.getElement(stage,j)*rk_kkk.getElement( i,j ) );
 	loop1.addStatement( loop2 );
 	block->addStatement( loop1 );
 
 	ExportForLoop loop3( i, 0, NXA );
-	loop3.addStatement( rk_xxx.getCol( NX+i ) == rk_kkk.getSubMatrix( NX+i,NX+i+1,stage,stage+1 ) );
+	loop3.addStatement( rk_xxx.getCol( NX+i ) == rk_kkk.getElement( NX+i,stage ) );
 	block->addStatement( loop3 );
 
 	ExportForLoop loop4( i, 0, NDX2 );
-	loop4.addStatement( rk_xxx.getCol( inputDim-diffsDim+i ) == rk_kkk.getSubMatrix( i,i+1,stage,stage+1 ) );
+	loop4.addStatement( rk_xxx.getCol( inputDim-diffsDim+i ) == rk_kkk.getElement( i,stage ) );
 	block->addStatement( loop4 );
 
 	if( C.getDim() > 0 ) {	// There is a time dependence, so it must be set
@@ -398,7 +398,7 @@ returnValue DiagonallyImplicitRKExport::solveOutputSystem( ExportStatementBlock*
 		evaluateStatesOutputSystem( &loop, Ah, index1 );
 		ExportForLoop loop01( index2,NX1+NX2,NX );
 		ExportForLoop loop02( index3,0,index1 );
-		loop02.addStatement( rk_xxx.getCol( index2 ) += Ah.getSubMatrix(index1,index1+1,index3,index3+1)*rk_kkk.getSubMatrix(index2,index2+1,index3,index3+1) );
+		loop02.addStatement( rk_xxx.getCol( index2 ) += Ah.getElement(index1,index3)*rk_kkk.getElement(index2,index3) );
 		loop01.addStatement( loop02 );
 		loop.addStatement( loop01 );
 		loop.addFunctionCall( getNameOutputRHS(), rk_xxx, rk_b.getAddress(0,0) );
@@ -406,9 +406,9 @@ returnValue DiagonallyImplicitRKExport::solveOutputSystem( ExportStatementBlock*
 
 		ExportForLoop loop5( index2,0,NX3 );
 		loop5.addStatement( tmp_index == index1*NX3+index2 );
-		loop5.addStatement( rk_kkk.getSubMatrix(NX1+NX2+index2,NX1+NX2+index2+1,index1,index1+1) == rk_mat3.getSubMatrix(tmp_index,tmp_index+1,0,1)*rk_b.getRow(0) );
+		loop5.addStatement( rk_kkk.getElement(NX1+NX2+index2,index1) == rk_mat3.getElement(tmp_index,0)*rk_b.getRow(0) );
 		ExportForLoop loop6( index3,1,NX3 );
-		loop6.addStatement( rk_kkk.getSubMatrix(NX1+NX2+index2,NX1+NX2+index2+1,index1,index1+1) += rk_mat3.getSubMatrix(tmp_index,tmp_index+1,index3,index3+1)*rk_b.getRow(index3) );
+		loop6.addStatement( rk_kkk.getElement(NX1+NX2+index2,index1) += rk_mat3.getElement(tmp_index,index3)*rk_b.getRow(index3) );
 		loop5.addStatement(loop6);
 		loop.addStatement(loop5);
 		block->addStatement(loop);
@@ -427,13 +427,13 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStateme
 			ExportForLoop loop2( index3,0,NX1 );
 			loop2.addStatement( std::string(rk_rhsTemp.get( index3,0 )) + " = (" + index3.getName() + " == " + index1.getName() + ");\n" );
 			for( i = 0; i < numStages; i++ ) {
-				loop2.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getSubMatrix( index3,index3+1,i,i+1 )*Ah.getSubMatrix(index2,index2+1,i,i+1) );
+				loop2.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getElement( index3,i )*Ah.getElement(index2,i) );
 			}
 			loop1.addStatement( loop2 );
 			ExportForLoop loop3( index3,NX1,NX1+NX2 );
 			loop3.addStatement( rk_rhsTemp.getRow( index3 ) == 0.0 );
 			for( i = 0; i < numStages; i++ ) {
-				loop3.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getSubMatrix( index3,index3+1,i,i+1 )*Ah.getSubMatrix(index2,index2+1,i,i+1) );
+				loop3.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getElement( index3,i )*Ah.getElement(index2,i) );
 			}
 			loop1.addStatement( loop3 );
 			ExportForLoop loop4( index3,0,NX3 );
@@ -450,7 +450,7 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStateme
 			ExportForLoop loop3( index3,NX1,NX1+NX2 );
 			loop3.addStatement( std::string(rk_rhsTemp.get( index3,0 )) + " = (" + index3.getName() + " == " + index1.getName() + ");\n" );
 			for( i = 0; i < numStages; i++ ) {
-				loop3.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getSubMatrix( index3,index3+1,i,i+1 )*Ah.getSubMatrix(index2,index2+1,i,i+1) );
+				loop3.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getElement( index3,i )*Ah.getElement(index2,i) );
 			}
 			loop1.addStatement( loop3 );
 			ExportForLoop loop4( index3,0,NX3 );
@@ -465,20 +465,20 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStateme
 		}
 		else if( !STATES ) {
 			ExportForLoop loop2( index3,0,NX1 );
-			loop2.addStatement( rk_rhsTemp.getRow( index3 ) == rk_diffK.getSubMatrix( index3,index3+1,0,1 )*Ah.getSubMatrix(index2,index2+1,0,1) );
+			loop2.addStatement( rk_rhsTemp.getRow( index3 ) == rk_diffK.getElement( index3,0 )*Ah.getElement(index2,0) );
 			for( i = 1; i < numStages; i++ ) {
-				loop2.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getSubMatrix( index3,index3+1,i,i+1 )*Ah.getSubMatrix(index2,index2+1,i,i+1) );
+				loop2.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getElement( index3,i )*Ah.getElement(index2,i) );
 			}
 			loop1.addStatement( loop2 );
 			ExportForLoop loop3( index3,NX1,NX1+NX2 );
-			loop3.addStatement( rk_rhsTemp.getRow( index3 ) == rk_diffK.getSubMatrix( index3,index3+1,0,1 )*Ah.getSubMatrix(index2,index2+1,0,1) );
+			loop3.addStatement( rk_rhsTemp.getRow( index3 ) == rk_diffK.getElement( index3,0 )*Ah.getElement(index2,0) );
 			for( i = 1; i < numStages; i++ ) {
-				loop3.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getSubMatrix( index3,index3+1,i,i+1 )*Ah.getSubMatrix(index2,index2+1,i,i+1) );
+				loop3.addStatement( rk_rhsTemp.getRow( index3 ) += rk_diffK.getElement( index3,i )*Ah.getElement(index2,i) );
 			}
 			loop1.addStatement( loop3 );
 			ExportForLoop loop4( index3,0,NX3 );
 			loop4.addStatement( tmp_index2 == index1+index3*(NVARS3) );
-			loop4.addStatement( rk_b.getRow( index3 ) == rk_diffsTemp3.getSubMatrix( index2,index2+1,tmp_index2+NX1+NX2+NXA3,tmp_index2+NX1+NX2+NXA3+1 ) );
+			loop4.addStatement( rk_b.getRow( index3 ) == rk_diffsTemp3.getElement( index2,tmp_index2+NX1+NX2+NXA3 ) );
 			loop4.addStatement( rk_b.getRow( index3 ) += rk_diffsTemp3.getSubMatrix( index2,index2+1,index3*(NVARS3),index3*(NVARS3)+NX1+NX2 )*rk_rhsTemp.getRows(0,NX1+NX2) );
 			if( NXA3 > 0 ) {
 				loop4.addStatement( rk_b.getRow( index3 ) += rk_diffsTemp3.getSubMatrix( index2,index2+1,index3*(NVARS3)+NX1+NX2,index3*(NVARS3)+NX1+NX2+NXA )*rk_diffK.getSubMatrix( NX,NX+NXA,index2,index2+1 ) );
@@ -507,9 +507,9 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStateme
 		else {
 			ExportForLoop loop5( index3,0,NX3 );
 			loop5.addStatement( tmp_index1 == index2*NX3+index3 );
-			loop5.addStatement( rk_diffK.getSubMatrix(NX1+NX2+index3,NX1+NX2+index3+1,index2,index2+1) == rk_mat3.getSubMatrix(tmp_index1,tmp_index1+1,0,1)*rk_b.getRow(0) );
+			loop5.addStatement( rk_diffK.getElement(NX1+NX2+index3,index2) == rk_mat3.getElement(tmp_index1,0)*rk_b.getRow(0) );
 			ExportForLoop loop6( index4,1,NX3 );
-			loop6.addStatement( rk_diffK.getSubMatrix(NX1+NX2+index3,NX1+NX2+index3+1,index2,index2+1) += rk_mat3.getSubMatrix(tmp_index1,tmp_index1+1,index4,index4+1)*rk_b.getRow(index4) );
+			loop6.addStatement( rk_diffK.getElement(NX1+NX2+index3,index2) += rk_mat3.getElement(tmp_index1,index4)*rk_b.getRow(index4) );
 			loop5.addStatement(loop6);
 			loop1.addStatement(loop5);
 			block->addStatement( loop1 );
@@ -519,9 +519,9 @@ returnValue DiagonallyImplicitRKExport::sensitivitiesOutputSystem( ExportStateme
 		ExportForLoop loop8( index2,0,NX3 );
 		if( STATES && number == 3 ) loop8.addStatement( std::string(rk_diffsNew3.get( index2,index1 )) + " = (" + index2.getName() + " == " + index1.getName() + "-" + toString(NX1+NX2) + ");\n" );
 
-		if( STATES && number == 3 ) loop8.addStatement( rk_diffsNew3.getSubMatrix( index2,index2+1,index1,index1+1 ) += rk_diffK.getRow( NX1+NX2+index2 )*Bh );
-		else if( STATES )	loop8.addStatement( rk_diffsNew3.getSubMatrix( index2,index2+1,index1,index1+1 ) == rk_diffK.getRow( NX1+NX2+index2 )*Bh );
-		else		 		loop8.addStatement( rk_diffsNew3.getSubMatrix( index2,index2+1,index1+NX,index1+NX+1 ) == rk_diffK.getRow( NX1+NX2+index2 )*Bh );
+		if( STATES && number == 3 ) loop8.addStatement( rk_diffsNew3.getElement( index2,index1 ) += rk_diffK.getRow( NX1+NX2+index2 )*Bh );
+		else if( STATES )	loop8.addStatement( rk_diffsNew3.getElement( index2,index1 ) == rk_diffK.getRow( NX1+NX2+index2 )*Bh );
+		else		 		loop8.addStatement( rk_diffsNew3.getElement( index2,index1+NX ) == rk_diffK.getRow( NX1+NX2+index2 )*Bh );
 		block->addStatement( loop8 );
 		if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) block->addStatement( std::string( "}\n" ) );
 	}

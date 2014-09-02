@@ -633,6 +633,14 @@ protected:
                                   int            &nNewHIS  , /**< the number of newHIS  */
                                   TreeProjection ***newHIS   /**< the new HIS-pointer   */ );
 
+    //
+    //  PROTECTED MEMBERS:
+    //
+
+    protected:
+
+      	BooleanType  initialized;
+
 
 };
 

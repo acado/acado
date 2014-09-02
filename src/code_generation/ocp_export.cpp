@@ -33,6 +33,7 @@
 #include <acado/code_generation/export_nlp_solver.hpp>
 #include <acado/code_generation/export_simulink_interface.hpp>
 #include <acado/code_generation/export_auxiliary_functions.hpp>
+#include <acado/code_generation/export_hessian_regularization.hpp>
 #include <acado/code_generation/export_common_header.hpp>
 
 #include <acado/code_generation/templates/templates.hpp>
@@ -169,6 +170,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 
 			default:
 				ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "Makefile is not yet available.");
+				break;
 		}
 	}
 
@@ -186,18 +188,30 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	//
 	int generateMexInterface;
 	get(GENERATE_MATLAB_INTERFACE, generateMexInterface);
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
 	if ( (bool)generateMexInterface == true )
 	{
 		str = dirName + "/" + moduleName + "_solver_mex.c";
 
-		acadoCopyTempateFile(SOLVER_MEX, str, "", true);
+		if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+			acadoCopyTempateFile(EH_SOLVER_MEX, str, "", true);
+		}
+		else {
+			acadoCopyTempateFile(SOLVER_MEX, str, "", true);
+		}
 
 		str = dirName + "/make_" + moduleName + "_solver.m";
 
 		switch ( (QPSolverName)qpSolver )
 		{
 		case QP_QPOASES:
-			acadoCopyTempateFile(MAKE_MEX_QPOASES, str, "%", true);
+			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+				acadoCopyTempateFile(MAKE_MEX_EH_QPOASES, str, "%", true);
+			}
+			else {
+				acadoCopyTempateFile(MAKE_MEX_QPOASES, str, "%", true);
+			}
 			break;
 
 		case QP_FORCES:
@@ -207,9 +221,12 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 		case QP_QPDUNES:
 			acadoCopyTempateFile(MAKE_MEX_QPDUNES, str, "%", true);
 			break;
+			
+		case QP_QPDUNES2:
 
 		default:
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface is not yet available.");
+			break;
 		}
 	}
 
@@ -266,6 +283,20 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 
 			esi.exportCode();
 		}
+	}
+
+	//
+	// Generate Symmetric EVD code
+	//
+	if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+//		LOG( LVL_DEBUG ) << "Exporting Hessian regularization code... " << endl;
+		ExportHessianRegularization evd(
+				dirName + string("/") + moduleName + "_hessian_regularization.c",
+				moduleName
+		);
+		evd.configure( ocp.getNX()+ocp.getNU(), 1e-12 );
+		if ( evd.exportCode() != SUCCESSFUL_RETURN )
+			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 	}
 
     return SUCCESSFUL_RETURN;
@@ -329,6 +360,8 @@ returnValue OCPexport::setup( )
 	get(QP_SOLVER, qpSolver);
 	int qpSolution;
 	get(SPARSE_QP_SOLUTION, qpSolution);
+	int hessianApproximation;
+ 	get( HESSIAN_APPROXIMATION, hessianApproximation );
 
 	// TODO Extend ExportNLPSolver ctor to accept OCP reference.
 
@@ -363,8 +396,18 @@ returnValue OCPexport::setup( )
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
 					"For condensed solution only qpOASES QP solver is supported");
 
-		solver = ExportNLPSolverPtr(
-				NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_CN2_NEW));
+		if ( (HessianApproximationMode)hessianApproximation == GAUSS_NEWTON ) {
+			solver = ExportNLPSolverPtr(
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_CN2_NEW));
+		}
+		else if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+			solver = ExportNLPSolverPtr(
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, EXACT_HESSIAN_CN2_NEW));
+		}
+		else {
+			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
+					"Only Gauss-Newton and Exact Hessian methods are currently supported");
+		}
 
 		break;
 
@@ -380,7 +423,7 @@ returnValue OCPexport::setup( )
 			break;
 
 	case SPARSE_SOLVER:
-		if ((QPSolverName)qpSolver != QP_FORCES && (QPSolverName)qpSolver != QP_QPDUNES && (QPSolverName)qpSolver != QP_HPMPC)
+		if ((QPSolverName)qpSolver != QP_FORCES && (QPSolverName)qpSolver != QP_QPDUNES && (QPSolverName)qpSolver != QP_QPDUNES2 && (QPSolverName)qpSolver != QP_HPMPC)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
 					"For sparse solution FORCES and qpDUNES QP solvers are supported");
 		if ( (QPSolverName)qpSolver == QP_FORCES)
@@ -389,6 +432,9 @@ returnValue OCPexport::setup( )
 		else if ((QPSolverName)qpSolver == QP_QPDUNES)
 			solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_QPDUNES));
+		else if ((QPSolverName)qpSolver == QP_QPDUNES2)
+			solver = ExportNLPSolverPtr(
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_QPDUNES2));
 		else if ((QPSolverName)qpSolver == QP_HPMPC)
 			solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_HPMPC));
@@ -432,9 +478,23 @@ returnValue OCPexport::checkConsistency( ) const
 	//
 	// Consistency checks:
 	//
+	Objective objective;
+	ocp.getObjective( objective );
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
 
- 	if ( ocp.hasObjective( ) == true )
+ 	if ( ocp.hasObjective( ) == true && !((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN &&
+ 			(objective.getNumMayerTerms() == 1 || objective.getNumLagrangeTerms() == 1)) ) { // for Exact Hessian RTI
  		return ACADOERROR( RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT );
+ 	}
+
+
+	int sensitivityProp;
+	get(DYNAMIC_SENSITIVITY, sensitivityProp);
+
+ 	if( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN && (ExportSensitivityType) sensitivityProp != THREE_SWEEPS ) {
+ 		return ACADOERROR( RET_INVALID_OPTION );
+ 	}
 
  	DifferentialEquation f;
  	ocp.getModel( f );
@@ -449,9 +509,7 @@ returnValue OCPexport::checkConsistency( ) const
  		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
  				"Free parameters are not supported. For the old functionality use OnlineData class.");
 
- 	int hessianApproximation;
- 	get( HESSIAN_APPROXIMATION, hessianApproximation );
- 	if ( (HessianApproximationMode)hessianApproximation != GAUSS_NEWTON )
+ 	if ( (HessianApproximationMode)hessianApproximation != GAUSS_NEWTON && (HessianApproximationMode)hessianApproximation != EXACT_HESSIAN )
  		return ACADOERROR( RET_INVALID_OPTION );
 
  	int discretizationType;

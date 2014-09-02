@@ -158,3 +158,4 @@ ENDFOREACH( DIR ${EXAMPLE_DIRS} )
 # Build code generation examples
 #
 ADD_SUBDIRECTORY( ./code_generation/mpc_mhe )
+ADD_SUBDIRECTORY( ./code_generation/empc )

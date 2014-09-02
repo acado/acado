@@ -12,15 +12,19 @@ real_t* getAcadoVariablesU( )
 	return acadoVariables.u;
 }
 
+#if ACADO_NY > 0
 real_t* getAcadoVariablesY( )
 {
 	return acadoVariables.y;
 }
+#endif
 
+#if ACADO_NYN > 0
 real_t* getAcadoVariablesYN( )
 {
 	return acadoVariables.yN;
 }
+#endif
 
 real_t* getAcadoVariablesX0( )
 {

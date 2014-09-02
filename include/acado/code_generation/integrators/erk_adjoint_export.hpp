@@ -124,7 +124,7 @@ class AdjointERKExport : public ExplicitRungeKuttaExport
     protected:
 
 		ExportVariable rk_forward_sweep;				/**< Variable containing intermediate results of a forward sweep of the RK integrator. */
-		ExportVariable seed_backward;					/**< Variable containing the seed for a backward propagation of the RK integrator. */
+//		ExportVariable seed_backward;					/**< Variable containing the seed for a backward propagation of the RK integrator. */
 
 };
 

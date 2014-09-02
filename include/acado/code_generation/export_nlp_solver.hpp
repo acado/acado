@@ -154,6 +154,8 @@ public:
 	 *			RET_INVALID_ARGUMENTS
 	 * */
 	returnValue setObjective(const Objective& _objective);
+	returnValue setLSQObjective(const Objective& _objective);
+	returnValue setGeneralObjective(const Objective& _objective);
 
 	/** Set the "complex" path and point constraints
 	 *  \return SUCCESSFUL_RETURN
@@ -206,6 +208,9 @@ protected:
 	/** Setup of functions for evaluation of auxiliary functions. */
 	returnValue setupAuxiliaryFunctions();
 
+	/** Setup the function for evaluating the actual objective value. */
+	virtual returnValue setupGetObjective();
+
 	/** Setup of functions and variables for evaluation of arrival cost. */
 	returnValue setupArrivalCostCalculation();
 
@@ -242,8 +247,12 @@ protected:
 
 	ExportVariable y, yN, Dy, DyN;
 
+	// lagrange multipliers
+	ExportVariable mu;
+
 	ExportVariable objS, objSEndTerm;
 	ExportVariable objEvFx, objEvFu, objEvFxEnd; // aliasing
+	ExportVariable objEvFxx, objEvFxu, objEvFuu, objEvFxxEnd; // aliasing
 
 	ExportVariable objAuxVar, objValueIn, objValueOut;
 	ExportAcadoFunction evaluateLSQ;
@@ -330,9 +339,11 @@ enum ExportNLPType
 	GAUSS_NEWTON_CONDENSED,
 	GAUSS_NEWTON_CN2,
 	GAUSS_NEWTON_CN2_NEW,
+	EXACT_HESSIAN_CN2_NEW,
 	GAUSS_NEWTON_CN2_FACTORIZATION,
 	GAUSS_NEWTON_FORCES,
 	GAUSS_NEWTON_QPDUNES,
+	GAUSS_NEWTON_QPDUNES2,
 	GAUSS_NEWTON_HPMPC
 };
 

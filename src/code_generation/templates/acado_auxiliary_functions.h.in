@@ -16,11 +16,15 @@ real_t* getAcadoVariablesX( );
 /** Get pointer to the matrix with control variables. */
 real_t* getAcadoVariablesU( );
 
+#if ACADO_NY > 0
 /** Get pointer to the matrix with references/measurements. */
 real_t* getAcadoVariablesY( );
+#endif
 
+#if ACADO_NYN > 0
 /** Get pointer to the vector with references/measurement on the last node. */
 real_t* getAcadoVariablesYN( );
+#endif
 
 /** Get pointer to the current state feedback vector. Only applicable for NMPC. */
 real_t* getAcadoVariablesX0( );

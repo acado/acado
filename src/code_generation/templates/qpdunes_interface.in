@@ -24,12 +24,12 @@ int initializeQpDunes( void )
 	qpOptions.regParam = 1.e-6;
 	qpOptions.newtonHessDiagRegTolerance  = 1.e-8;
 	qpOptions.lsType            = QPDUNES_LS_ACCELERATED_GRADIENT_BISECTION_LS;
-//	qpOptions.lsType			= QPDUNES_LS_BACKTRACKING_LS;
+/*	qpOptions.lsType			= QPDUNES_LS_BACKTRACKING_LS; */
 	qpOptions.lineSearchReductionFactor	= 0.1;
 	qpOptions.lineSearchMaxStepSize	= 1.;
 	qpOptions.maxNumLineSearchIterations            = 25;
 	qpOptions.maxNumLineSearchRefinementIterations  = 25;
-//	qpOptions.regType            = QPDUNES_REG_SINGULAR_DIRECTIONS;
+/*	qpOptions.regType            = QPDUNES_REG_SINGULAR_DIRECTIONS; */
 	qpOptions.regType            = QPDUNES_REG_LEVENBERG_MARQUARDT;
 
 	qpDUNES_setup(&qpData, ACADO_N, ACADO_NX, ACADO_NU, nD, &( qpOptions ));

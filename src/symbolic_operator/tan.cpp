@@ -116,7 +116,8 @@ Operator* Tan::clone() const{
 
 returnValue Tan::initDerivative() {
 
-	if( derivative != 0 && derivative2 != 0 ) return SUCCESSFUL_RETURN;
+	if( initialized ) return SUCCESSFUL_RETURN;
+	initialized = BT_TRUE;
 
 	derivative = convert2TreeProjection(new Quotient( new DoubleConstant( 1.0 , NE_ONE ), new Power_Int( new Cos( argument->clone() ), 2 ) ));
 	derivative2 = convert2TreeProjection(new Quotient(    new Product(

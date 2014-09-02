@@ -201,7 +201,7 @@ returnValue ThreeSweepsERKExport::setup( )
 
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim );
-	seed_backward.setup( "seed", 1, NX );
+//	seed_backward.setup( "seed", 1, NX );
 
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
@@ -231,7 +231,7 @@ returnValue ThreeSweepsERKExport::setup( )
 	ExportIndex run( "run1" );
 
 	// setup INTEGRATE function
-	integrate = ExportFunction( "integrate", rk_eta, reset_int, seed_backward );
+	integrate = ExportFunction( "integrate", rk_eta, reset_int );
 	integrate.setReturnValue( error_code );
 	rk_eta.setDoc( "Working array to pass the input values and return the results." );
 	reset_int.setDoc( "The internal memory of the integrator can be reset." );
@@ -244,7 +244,7 @@ returnValue ThreeSweepsERKExport::setup( )
 
 	if( inputDim > rhsDim ) {
 		// initialize sensitivities:
-		integrate.addStatement( rk_eta.getCols( NX,2*NX ) == seed_backward );
+//		integrate.addStatement( rk_eta.getCols( NX,2*NX ) == seed_backward );
 		DMatrix idX    = eye<double>( NX );
 		DMatrix zeroXU = zeros<double>( NX,NU );
 		integrate.addStatement( rk_eta.getCols( 2*NX,NX*(2+NX) ) == idX.makeVector().transpose() );
