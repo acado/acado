@@ -35,6 +35,7 @@
 #define ACADO_TOOLKIT_EVALUATION_TEMPLATE_HPP
 
 #include <acado/symbolic_operator/symbolic_operator_fwd.hpp>
+#include <acado/symbolic_operator/evaluation_base.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

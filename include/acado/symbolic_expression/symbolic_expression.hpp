@@ -49,6 +49,8 @@
 
 #include <acado/symbolic_expression/constraint_component.hpp>
 
+#include <acado/symbolic_operator/symbolic_operator.hpp>
+
 
 // 	BEGIN_NAMESPACE_ACADO
 // 

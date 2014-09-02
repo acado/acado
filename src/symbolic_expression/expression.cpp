@@ -36,6 +36,8 @@
 #include <acado/symbolic_expression/acado_syntax.hpp>
 #include <acado/symbolic_expression/constraint_component.hpp>
 #include <acado/function/function.hpp>
+#include <acado/variables_grid/variables_grid.hpp>
+#include <acado/symbolic_operator/symbolic_operator.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -1646,7 +1648,9 @@ Expression& Expression::assignmentSetup( const Expression &arg ){
 				else
 					tmpName << name;
 			}
-			element[i] = (arg.getTreeProjection(i, tmpName.str())).clone();
+			TreeProjection tmp( tmpName.str() );
+			tmp.operator=( *(arg.element[ i ]) );
+			element[i] = tmp.clone();
 		}
     }
     return *this;
@@ -1710,6 +1714,16 @@ BooleanType Expression::isDependingOn( const Expression &e ) const{
 
     if( fabs(sum(0) - EPS) > 0 ) return BT_TRUE;
     return BT_FALSE;
+}
+
+Operator* Expression::getOperatorClone( uint idx ) const{
+
+    ASSERT( idx < getDim() );
+
+    Operator *tmp = element[idx]->passArgument();
+    if( tmp == 0 ) tmp = element[idx];
+
+    return tmp->clone();
 }
 
 

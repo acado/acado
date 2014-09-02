@@ -36,6 +36,7 @@
 
 
 #include <acado/symbolic_expression/symbolic_expression.hpp>
+#include <acado/variables_grid/variables_grid.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

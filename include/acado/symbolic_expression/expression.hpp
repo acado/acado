@@ -36,12 +36,12 @@
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
-#include <acado/variables_grid/variables_grid.hpp>
-#include <acado/symbolic_operator/symbolic_operator.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
 class ConstraintComponent;
+class Operator;
+class VariablesGrid;
 
 /**
  *  \brief Base class for all variables within the symbolic expressions family.
@@ -383,7 +383,7 @@ class Expression{
 
         /** Returns a clone of the operator with index idx.
          *  \return A clone of the requested operator. */
-         inline Operator* getOperatorClone( uint idx ) const;
+         Operator* getOperatorClone( uint idx ) const;
 
 
 
@@ -405,13 +405,6 @@ class Expression{
         Expression convert( const double      & arg ) const;
         Expression convert( const DVector      & arg ) const;
         Expression convert( const DMatrix      & arg ) const;
-
-
-
-        /** Returns a tree projection with respect to the specified index. */
-        inline TreeProjection getTreeProjection( const uint &idx, const std::string& name_ ) const;
-
-
 
     // PROTECTED FUNCTIONS:
     // ---------------------------------------------------------------

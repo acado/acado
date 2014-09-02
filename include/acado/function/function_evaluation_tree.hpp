@@ -35,6 +35,8 @@
 #define ACADO_TOOLKIT_FUNCTION_EVALUATION_TREE_HPP
 
 #include <acado/symbolic_expression/symbolic_expression.hpp>
+#include <acado/symbolic_operator/symbolic_index_list.hpp>
+#include <acado/symbolic_operator/evaluation_template.hpp>
 
 BEGIN_NAMESPACE_ACADO
 

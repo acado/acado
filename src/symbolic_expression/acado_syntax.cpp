@@ -31,6 +31,7 @@
 
 #include <acado/symbolic_expression/acado_syntax.hpp>
 #include <acado/symbolic_expression/intermediate_state.hpp>
+#include <acado/symbolic_operator/operator.hpp>
 
 USING_NAMESPACE_ACADO
 

@@ -43,6 +43,7 @@ BEGIN_NAMESPACE_ACADO
 
 class Expression;
 class ConstraintComponent;
+class EvaluationBase;
 
 
 /**
