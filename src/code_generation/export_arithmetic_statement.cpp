@@ -579,7 +579,7 @@ returnValue ExportArithmeticStatement::exportCodeAssign(	std::ostream& stream,
 					stream << lhs->get(i, j) << " " << _op << " ";
 					if (rhs1->isGiven() == true)
 					{
-						if (lhs->getType() == REAL or lhs->getType() == STATIC_CONST_REAL)
+						if (lhs->getType() == REAL || lhs->getType() == STATIC_CONST_REAL)
 							stream << scientific << rhs1(i, j);
 						else
 							stream << (int)rhs1(i, j);

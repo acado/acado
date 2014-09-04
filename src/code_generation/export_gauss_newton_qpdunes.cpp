@@ -208,7 +208,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
 
-	if (S1.isGiven() == false or S1.getGivenMatrix().isZero() == false)
+	if (S1.isGiven() == false || S1.getGivenMatrix().isZero() == false)
 		ACADOWARNINGTEXT(RET_INVALID_ARGUMENTS,
 				"Mixed control-state terms in the objective function are not supported at the moment.");
 

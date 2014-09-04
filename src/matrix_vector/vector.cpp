@@ -77,20 +77,16 @@ T GenericVector< T >::getNorm(	VectorNorm _norm,
 		const GenericVector< T >& _scale
 ) const
 {
-	GenericVector foo( getDim() );
-
 	switch( _norm )
 	{
 	case VN_L1:
-		foo = Base::cwiseQuotient( _scale );
-		return foo.getAbsolute().sum();
+		return GenericVector<T>(this->cwiseQuotient( _scale )).getAbsolute().sum();
 
 	case VN_L2:
 		return Base::norm();
 
 	case VN_LINF:
-		foo = Base::cwiseQuotient( _scale );
-		return foo.getAbsolute().getMax();
+		return GenericVector<T>(this->cwiseQuotient(_scale)).getAbsolute().getMax();
 
 	default:
 		return T( -1 );

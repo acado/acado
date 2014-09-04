@@ -645,7 +645,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		{
 			condensePrep.addFunctionCall(mult_BT_T1, evGu.getAddress(row * NX), T1, ExportIndex( row ));
 
-			if ((S1.isGiven() and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+			if ((S1.isGiven() && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 			{
 				ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(row * NX) : S1;
 				condensePrep.addFunctionCall(mac_ST_C, S1Call, C.getAddress((row - 1) * NX));
@@ -658,7 +658,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		}
 
 		condensePrep.addFunctionCall(mult_BT_T1, evGu.getAddress( 0 ), T1, ExportIndex( 0 ));
-		if ((S1.isGiven() and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+		if ((S1.isGiven() && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 		{
 			condensePrep.addStatement(
 					H.getSubMatrix(NX, NX + NU, 0, NX) += S1.getSubMatrix(0, NX, 0, NU).getTranspose()
@@ -769,7 +769,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 						ExportIndex( row ), ExportIndex( col )
 				);
 
-				if ((S1.isGiven() and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+				if ((S1.isGiven() && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 				{
 					ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(row * NX) : S1;
 
@@ -833,7 +833,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				row, col
 		);
 
-		if ((S1.isGiven() and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+		if ((S1.isGiven() && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 		{
 			ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(row * NX) : S1;
 
@@ -924,7 +924,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	{
 		ExportArgument R2Call = R2.isGiven() == true ? R2 : R2.getAddress(run1 * NU, 0);
 		ExportArgument SluCall =
-				objSlu.isGiven() == true or variableObjS == false ? objSlu : objSlu.getAddress(run1 * NU, 0);
+				objSlu.isGiven() == true || variableObjS == false ? objSlu : objSlu.getAddress(run1 * NU, 0);
 		condenseFdb.addFunctionCall(
 				multRDy, R2Call, Dy.getAddress(run1 * NY, 0), SluCall, g.getAddress(offset + run1 * NU, 0)
 		);
@@ -936,13 +936,13 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	{
 		ExportArgument Q2Call = Q2.isGiven() == true ? Q2 : Q2.getAddress(run1 * NX);
 		ExportArgument SlxCall =
-				objSlx.isGiven() == true or variableObjS == false ? objSlx : objSlx.getAddress(run1 * NX, 0);
+				objSlx.isGiven() == true || variableObjS == false ? objSlx : objSlx.getAddress(run1 * NX, 0);
 		condenseFdb.addFunctionCall(
 				multQDy, Q2Call, Dy.getAddress(run1 * NY), SlxCall, QDy.getAddress(run1 * NX) );
 	}
 	condenseFdb.addLinebreak();
 	ExportVariable SlxCall =
-				objSlx.isGiven() == true or variableObjS == false ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
+				objSlx.isGiven() == true || variableObjS == false ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
 	condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) == SlxCall + QN2 * DyN );
 	condenseFdb.addLinebreak();
 
@@ -1013,7 +1013,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				macBTw1, evGu.getAddress(i * NX), w1, g.getAddress(i * NU)
 		);
 
-		if ((S1.isGiven() == true and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+		if ((S1.isGiven() == true && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 		{
 			ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(i * NX) : S1;
 			condenseFdb.addFunctionCall(macS1TSbar, S1Call, sbar.getAddress(i * NX), g.getAddress(i * NU));
@@ -1031,7 +1031,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	condenseFdb.addFunctionCall(
 			macBTw1, evGu.getAddress( 0 ), w1, g.getAddress( 0 )
 	);
-	if ((S1.isGiven() == true and S1.getGivenMatrix().isZero() == false) or S1.isGiven() == false)
+	if ((S1.isGiven() == true && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 	{
 		condenseFdb.addFunctionCall(macS1TSbar, S1, x0, g);
 	}
@@ -1336,12 +1336,12 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	);
 
 	ExportVariable S11 = zeros<double>(NX, NU);
-	if (S1.isGiven() == true and S1.getGivenMatrix().isZero() == false)
+	if (S1.isGiven() == true && S1.getGivenMatrix().isZero() == false)
 		S11 = S1;
 	else if (S1.isGiven() == false)
 		S11 = Gu1;
 
-	if ((S11.isGiven() == true and S11.getGivenMatrix().isZero() == false) or S11.isGiven() == false)
+	if ((S11.isGiven() == true && S11.getGivenMatrix().isZero() == false) || S11.isGiven() == false)
 	{
 		mac_S1T_E.setup("mac_S1T_E", S11, Gu2, iRow, iCol);
 		mac_S1T_E.addStatement(
@@ -1360,7 +1360,7 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 		mult_BT_T1.setup("mult_BT_T1", Gu1, Gx1, iRow);
 		mult_BT_T1.addStatement( H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, 0, NX) == (Gu1 ^ Gx1) );
 
-		if ((S11.isGiven() == true and S11.getGivenMatrix().isZero() == false) or S11.isGiven() == false)
+		if ((S11.isGiven() == true && S11.getGivenMatrix().isZero() == false) || S11.isGiven() == false)
 		{
 			mac_ST_C.setup("mac_ST_C", S11, Gx1, iRow);
 			mac_ST_C.addStatement( H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, 0, NX) += (S11 ^ Gx1) );

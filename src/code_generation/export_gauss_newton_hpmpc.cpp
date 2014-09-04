@@ -181,7 +181,7 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
 
-	if (S1.isGiven() == false or S1.getGivenMatrix().isZero() == false)
+	if (S1.isGiven() == false || S1.getGivenMatrix().isZero() == false)
 		ACADOWARNINGTEXT(RET_INVALID_ARGUMENTS,
 				"Mixed control-state terms in the objective function are not supported at the moment.");
 
@@ -449,7 +449,7 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 	qpR.setup("qpR", N * NU, NU, REAL, ACADO_WORKSPACE);
 	qpS.setup("qpS", N * NX, NU, REAL, ACADO_WORKSPACE);
 
-	ASSERT(Q1.isGiven() == true and QN1.isGiven() == true);
+	ASSERT(Q1.isGiven() == true && QN1.isGiven() == true);
 	ASSERT(R1.isGiven() == true);
 
 	for (unsigned blk = 0; blk < N; ++blk)

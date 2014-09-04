@@ -30,6 +30,7 @@
  *    \date   2013
  */
 
+#include <algorithm>
 
 BEGIN_NAMESPACE_ACADO
 
