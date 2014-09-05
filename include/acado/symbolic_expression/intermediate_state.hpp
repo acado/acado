@@ -80,32 +80,6 @@ public:
     /** Destructor. */
     virtual ~IntermediateState();
 
-    Expression & operator=( const double      & arg );
-    Expression & operator=( const DVector      & arg );
-    Expression & operator=( const DMatrix      & arg );
-    Expression & operator=( const Expression  & arg );
-
-
-    Expression& operator+=( const double      & arg );
-    Expression& operator+=( const DVector      & arg );
-    Expression& operator+=( const DMatrix      & arg );
-    Expression& operator+=( const Expression  & arg );
-
-    Expression& operator-=( const double      & arg );
-    Expression& operator-=( const DVector      & arg );
-    Expression& operator-=( const DMatrix      & arg );
-    Expression& operator-=( const Expression  & arg );
-
-    Expression& operator*=( const double      & arg );
-    Expression& operator*=( const DVector      & arg );
-    Expression& operator*=( const DMatrix      & arg );
-    Expression& operator*=( const Expression  & arg );
-
-    Expression& operator/=( const double      & arg );
-    Expression& operator/=( const Expression  & arg );
-
-
-
      /** Provides a deep copy of the expression. \n
       *  \return a clone of the expression.      \n
       */
