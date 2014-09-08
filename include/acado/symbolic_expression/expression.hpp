@@ -36,12 +36,12 @@
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
-#include <acado/variables_grid/variables_grid.hpp>
-#include <acado/symbolic_operator/symbolic_operator.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
 class ConstraintComponent;
+class Operator;
+class VariablesGrid;
 
 /**
  *  \brief Base class for all variables within the symbolic expressions family.
@@ -103,12 +103,10 @@ class Expression{
         						);
 
         /** Copy constructor (deep copy). */
-        Expression( const double      & rhs );
+        Expression( const double& rhs );
         Expression( const DVector      & rhs );
         Expression( const DMatrix      & rhs );
-
         Expression( const Expression  & rhs );
-
 
         /** Destructor. */
         virtual ~Expression( );
@@ -116,27 +114,6 @@ class Expression{
         /** Function for cloning. */
         virtual Expression* clone() const
         { return new Expression( *this ); }
-
-        /** Assignment Operator.                                             \n
-         *                                                                   \n
-         *  \param arg  the double value to be assigned to the expression.   \n
-         */
-        Expression& operator=( const double& arg );
-
-
-        /** Assignment Operator.                                       \n
-         *                                                             \n
-         *  \param arg  the vector to be assigned to the expression.   \n
-         */
-        Expression& operator=( const DVector& arg );
-
-
-        /** Assignment Operator.                                       \n
-         *                                                             \n
-         *  \param arg  the matrix to be assigned to the expression.   \n
-         */
-        Expression& operator=( const DMatrix& arg );
-
 
         /** Assignment Operator.                         \n
          *                                               \n
@@ -178,51 +155,19 @@ class Expression{
         Operator& operator()( uint idx                 );
         Operator& operator()( uint rowIdx, uint colIdx );
 
-
-        Expression operator+( const double      & arg ) const;
-        Expression operator+( const DVector      & arg ) const;
-        Expression operator+( const DMatrix      & arg ) const;
-        Expression operator+( const Expression  & arg ) const;
-
-        friend Expression operator+( const double       & arg1, const Expression& arg2 );
-        friend Expression operator+( const DVector       & arg1, const Expression& arg2 );
-        friend Expression operator+( const DMatrix       & arg1, const Expression& arg2 );
-
-
-        Expression operator-( const double      & arg ) const;
-        Expression operator-( const DVector      & arg ) const;
-        Expression operator-( const DMatrix      & arg ) const;
-        Expression operator-( const Expression  & arg ) const;
-
+        friend Expression operator+( const Expression  & arg1, const Expression  & arg2 );
+        friend Expression operator-( const Expression  & arg1, const Expression  & arg2 );
         Expression operator-( ) const;
+        friend Expression operator*( const Expression  & arg1, const Expression  & arg2 );
+        friend Expression operator/( const Expression  & arg1, const Expression  & arg2 );
 
-        friend Expression operator-( const double       & arg1, const Expression& arg2 );
-        friend Expression operator-( const DVector       & arg1, const Expression& arg2 );
-        friend Expression operator-( const DMatrix       & arg1, const Expression& arg2 );
-
-
-
-        Expression operator*( const double      & arg ) const;
-        Expression operator*( const DVector      & arg ) const;
-        Expression operator*( const DMatrix      & arg ) const;
-        Expression operator*( const Expression  & arg ) const;
-
-        friend Expression operator*( const double       & arg1, const Expression& arg2 );
-        friend Expression operator*( const DVector       & arg1, const Expression& arg2 );
-        friend Expression operator*( const DMatrix       & arg1, const Expression& arg2 );
-
-
-        Expression operator/( const double      & arg ) const;
-        Expression operator/( const Expression  & arg ) const;
-
-        friend Expression operator/( const double       & arg1, const Expression& arg2 );
-        friend Expression operator/( const DVector       & arg1, const Expression& arg2 );
-        friend Expression operator/( const DMatrix       & arg1, const Expression& arg2 );
-
+        Expression& operator+=(const Expression &arg);
+        Expression& operator-=(const Expression &arg);
+        Expression& operator*=(const Expression &arg);
+        Expression& operator/=(const Expression &arg);
 
         std::ostream& print( std::ostream &stream ) const;
         friend std::ostream& operator<<( std::ostream& stream, const Expression &arg );
-
 
         /** Returns the symbolic inverse of a matrix (only for square matrices) */
         Expression getInverse( ) const;
@@ -386,7 +331,7 @@ class Expression{
 
         /** Returns a clone of the operator with index idx.
          *  \return A clone of the requested operator. */
-         inline Operator* getOperatorClone( uint idx ) const;
+         Operator* getOperatorClone( uint idx ) const;
 
 
 
@@ -409,12 +354,10 @@ class Expression{
         Expression convert( const DVector      & arg ) const;
         Expression convert( const DMatrix      & arg ) const;
 
-
-
-        /** Returns a tree projection with respect to the specified index. */
-        inline TreeProjection getTreeProjection( const uint &idx, const std::string& name_ ) const;
-
-
+        Expression add(const Expression& arg) const;
+        Expression sub(const Expression& arg) const;
+        Expression mul(const Expression& arg) const;
+        Expression div(const Expression& arg) const;
 
     // PROTECTED FUNCTIONS:
     // ---------------------------------------------------------------

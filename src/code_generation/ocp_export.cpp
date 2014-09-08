@@ -38,6 +38,9 @@
 
 #include <acado/code_generation/templates/templates.hpp>
 
+#include <acado/objective/objective.hpp>
+#include <acado/ocp/ocp.hpp>
+
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO

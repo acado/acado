@@ -156,6 +156,9 @@ bool ExportArgumentInternal::isGiven( ) const
 	if ( getDim() == 0 )
 		return true;
 
+	if (getType() == STATIC_CONST_INT || getType() == STATIC_CONST_REAL)
+		return false;
+
 	for (uint i = 0; i < getNumRows(); ++i)
 		for (uint j = 0; j < getNumCols(); ++j)
 			if (acadoIsEqual(data->operator()(i, j), undefinedEntry) == true)
@@ -223,7 +226,18 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	std::ostream& stream,
 
 	if ( isGiven() == false )
 	{
-		stream << ";\n\n";
+		if (getType() == STATIC_CONST_INT)
+		{
+			stream << " = " << endl;
+			IMatrix( data->cast<int>() ).print(stream, "", "{ ", " };\n", 5, 0, ", ", ", \n");
+		}
+		else if (getType() == STATIC_CONST_REAL)
+		{
+			stream << " = " << endl;
+			data->print(stream, "", "{ ", " };\n", 1, 16, ", ", ", \n");
+		}
+		else
+			stream << ";\n\n";
 	}
 	else
 	{
@@ -232,12 +246,12 @@ returnValue ExportArgumentInternal::exportDataDeclaration(	std::ostream& stream,
 		switch ( getType() )
 		{
 		case INT:
-		case STATIC_CONST_INT:
-			data->print(stream, "", "{ ", " };\n", 5, 0, ", ", ", \n");
+//		case STATIC_CONST_INT:
+			IMatrix( data->cast<int>() ).print(stream, "", "{ ", " };\n", 5, 0, ", ", ", \n");
 			break;
 
 		case REAL:
-		case STATIC_CONST_REAL:
+//		case STATIC_CONST_REAL:
 			data->print(stream, "", "{ ", " };\n", 1, 16, ", ", ", \n");
 			break;
 

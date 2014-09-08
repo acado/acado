@@ -26,7 +26,7 @@
 /**
  *    \file src/code_generation/export_gauss_newton_forces.cpp
  *    \author Milan Vukov
- *    \date 2012 - 2013
+ *    \date 2012 - 2014
  */
 
 #include <acado/code_generation/export_gauss_newton_forces.hpp>
@@ -36,8 +36,6 @@
 #include <acado/code_generation/export_forces_generator.hpp>
 
 #include <acado/code_generation/templates/templates.hpp>
-
-#include <sstream>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -180,6 +178,8 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
+	int forceDiagHessian;
+	get(CG_FORCE_DIAGONAL_HESSIAN, forceDiagHessian);
 
 	if (S1.isGiven() == false || S1.getGivenMatrix().isZero() == false)
 		ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
@@ -191,14 +191,14 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	unsigned dimHCols = NX + NU;
 	unsigned dimHNRows = NX;
 	unsigned dimHNCols = NX;
-	if (objS.isGiven() == true)
+	if (objS.isGiven() == true || forceDiagHessian == true)
 		if (objS.getGivenMatrix().isDiagonal())
 		{
 			diagH = true;
 			dimHCols = 1;
 		}
 
-	if (objSEndTerm.isGiven() == true)
+	if (objSEndTerm.isGiven() == true || forceDiagHessian == true)
 		if (objSEndTerm.getGivenMatrix().isDiagonal() == true)
 		{
 			diagHN = true;
@@ -446,9 +446,17 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	setStageH.setup("setStageH", stageH, index);
 
 	if (Q1.isGiven() == false)
-		setStageH.addStatement(
-				stageH.getSubMatrix(0, NX, 0, NX) == Q1.getSubMatrix(index * NX, (index + 1) * NX, 0, NX) + evLmX
-		);
+	{
+		if (diagH == false)
+			setStageH.addStatement(
+					stageH.getSubMatrix(0, NX, 0, NX) == Q1.getSubMatrix(index * NX, (index + 1) * NX, 0, NX) + evLmX
+			);
+		else
+			for (unsigned el = 0; el < NX; ++el)
+				setStageH.addStatement(
+						stageH.getElement(el, 0) == Q1.getElement(index * NX + el, el)
+				);
+	}
 	else
 	{
 		setStageH << index.getFullName() << " = " << index.getFullName() << ";\n";
@@ -468,9 +476,17 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	setStageH.addLinebreak();
 
 	if (R1.isGiven() == false)
-		setStageH.addStatement(
-				stageH.getSubMatrix(NX, NX + NU, NX, NX + NU) == R1.getSubMatrix(index * NU, (index + 1) * NU, 0, NU) + evLmU
-		);
+	{
+		if (diagH == false)
+			setStageH.addStatement(
+					stageH.getSubMatrix(NX, NX + NU, NX, NX + NU) == R1.getSubMatrix(index * NU, (index + 1) * NU, 0, NU) + evLmU
+			);
+		else
+			for (unsigned el = 0; el < NU; ++el)
+				setStageH.addStatement(
+						stageH.getElement(NX + el, 0) == R1.getElement(index * NU + el, el)
+				);
+	}
 	else
 	{
 		if (diagH == false)
@@ -510,9 +526,15 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 		for (unsigned i = 0; i < N; ++i)
 			evaluateObjective.addFunctionCall(setStageH, objHessians[ i ], ExportIndex(i));
 		evaluateObjective.addLinebreak();
-		evaluateObjective.addStatement(
+		if (diagHN == false)
+			evaluateObjective.addStatement(
 				objHessians[ N ] == QN1 + evLmX
-		);
+			);
+		else
+			for (unsigned el = 0; el < NX; ++el)
+				evaluateObjective.addStatement(
+						objHessians[ N ].getElement(el, 0) == QN1.getElement(el, el) + evLmX.getElement(el, el)
+				);
 	}
 
 	//
@@ -999,7 +1021,7 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 	);
 
 	//
-	// Configure and export QP generator
+	// Configure and export MATLAB QP generator
 	//
 
 	string folderName;
@@ -1034,7 +1056,35 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			qpModuleName,
 			(PrintLevel)printLevel == HIGH ? 2 : 0,
 			maxNumQPiterations,
-			useOMP
+			useOMP,
+			true
+	);
+
+	qpGenerator->exportCode();
+
+	//
+	// Export Python generator
+	//
+
+	outFile = folderName + "/acado_forces_generator.py";
+
+	qpGenerator = std::tr1::shared_ptr< ExportForcesGenerator >(new ExportForcesGenerator(FORCES_GENERATOR_PYTHON, outFile, "", "real_t", "int", 16, "#"));
+
+	qpGenerator->configure(
+			NX,
+			NU,
+			N,
+			conLBIndices,
+			conUBIndices,
+			(Q1.isGiven() == true && R1.isGiven() == true) ? 1 : 0, // TODO Remove this one
+			diagH,
+			diagHN,
+			true, // TODO enable MHE
+			qpModuleName,
+			(PrintLevel)printLevel == HIGH ? 2 : 0,
+			maxNumQPiterations,
+			useOMP,
+			false
 	);
 
 	qpGenerator->exportCode();

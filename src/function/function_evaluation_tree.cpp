@@ -32,8 +32,8 @@
  */
 
 
-#include <acado/utils/acado_utils.hpp>
 #include <acado/function/function_evaluation_tree.hpp>
+#include <acado/symbolic_expression/symbolic_expression.hpp>
 
 using namespace std;
 

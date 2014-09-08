@@ -261,6 +261,41 @@ returnValue GenericMatrix< T >::print(	std::ostream& _stream,
 										const std::string& _rowSeparator
 										) const
 {
+	if (_name.size())
+		_stream << _name << " = ";
+
+	_stream << _startString;
+
+	for (unsigned r = 0; r < Base::rows(); ++r)
+	{
+		for (unsigned c = 0; c < Base::cols(); ++c)
+		{
+			_stream << Base::operator()(r, c);
+
+			if (c < (Base::cols() - 1))
+				_stream << _colSeparator;
+		}
+
+		if (r < (Base::rows() - 1))
+			_stream << _rowSeparator;
+	}
+
+	_stream << _endString;
+
+	return SUCCESSFUL_RETURN;
+}
+
+template<>
+returnValue GenericMatrix< double >::print(	std::ostream& _stream,
+											const std::string& _name,
+											const std::string& _startString,
+											const std::string& _endString,
+											uint _width,
+											uint _precision,
+											const std::string& _colSeparator,
+											const std::string& _rowSeparator
+											) const
+{
 	IoFormatter iof( _stream );
 
 	if (_name.size())
@@ -268,8 +303,9 @@ returnValue GenericMatrix< T >::print(	std::ostream& _stream,
 
 	_stream << _startString;
 
-	iof.set(_precision > 0 ? _precision :
-			iof.precision, _width, _precision > 0 ? ios::scientific | ios::right : ios::fixed);
+	iof.set(_precision,
+			_width,
+			_precision > 0 ? ios::scientific | ios::right : ios::fixed);
 
 	for (unsigned r = 0; r < Base::rows(); ++r)
 	{
@@ -418,37 +454,6 @@ returnValue GenericMatrix< T >::read(const std::string& _filename)
 
 	return status;
 }
-
-//template<typename T>
-//GenericMatrix< T > ones(	unsigned _nRows,
-//							unsigned _nCols
-//							)
-//{
-//	GenericMatrix< T > foo(_nRows, _nCols);
-//	foo.setOnes();
-//	return foo;
-//}
-
-///** Create a square matrix with all T( 0 ) elements. */
-//template<typename T>
-//GenericMatrix< T > zeros(	unsigned _nRows,
-//							unsigned _nCols
-//							)
-//{
-//	GenericMatrix< T > foo(_nRows, _nCols);
-//	foo.setZeros();
-//	return foo;
-//}
-
-///** Create an identity matrix. */
-//template<typename T>
-//GenericMatrix< T > eye(	unsigned _dim
-//						)
-//{
-//	GenericMatrix< T > foo(_dim, _dim);
-//	foo.setIdentity();
-//	return foo;
-//}
 
 //
 // Explicit instantiation of templates.

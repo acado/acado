@@ -82,26 +82,6 @@ inline BooleanType Expression::isVariable( ) const{
     return BT_TRUE;
 }
 
-
-inline Operator* Expression::getOperatorClone( uint idx ) const{
-
-    ASSERT( idx < getDim() );
-
-    Operator *tmp = element[idx]->passArgument();
-    if( tmp == 0 ) tmp = element[idx];
-
-    return tmp->clone();
-}
-
-
-inline TreeProjection Expression::getTreeProjection( const uint &idx, const std::string& name_ ) const{
-
-    TreeProjection tmp( name_ );
-    tmp.operator=( *element[idx] );
-    return tmp;
-}
-
-
 CLOSE_NAMESPACE_ACADO
 
 // end of file.

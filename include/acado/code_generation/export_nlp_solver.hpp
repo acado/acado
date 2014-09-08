@@ -34,9 +34,7 @@
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
-#include <acado/function/function.hpp>
-#include <acado/objective/objective.hpp>
-#include <acado/ocp/ocp.hpp>
+
 #include <acado/code_generation/export_algorithm_factory.hpp>
 #include <acado/code_generation/integrators/integrator_export.hpp>
 
@@ -44,6 +42,9 @@
 #include <acado/code_generation/linear_solvers/householder_qr_export.hpp>
 
 BEGIN_NAMESPACE_ACADO
+
+class OCP;
+class Objective;
 
 /** 
  *	\brief Base class for export of NLP/OCP solvers.

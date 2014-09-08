@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* ACADO auto-generated header */
-#include "acado_common.h"
 /* HPMPC configuration */
 #include "hpmpc/target.h"
 #include "hpmpc/block_size.h"
@@ -29,27 +27,22 @@
 #define NB NU+NX
 
 // ip method: 1 primal-dual, 2 predictor-corrector primal-dual
-#define IP 2
+#define IP 1
 
 // warm-start with user-provided solution (otherwise initialize x and u with 0 or something feasible)
-#define WARM_START 0
-
-// double/single ('d'/'s') precision
-#define PREC 's'
+#define WARM_START @WARM_START@
 
 // number of iterations of IP method
-#define K_MAX 100
+#define K_MAX @MAX_ITER@
 
 // tolerance in the duality measure
 #define TOL 1e-4
 
-/*// threshold in the duality measure to switch from single to double precision*/
-/*#define SP_THR 1e5*/
+// single or double precision: 0 - double, 1 - single
+#define prec @PRECISION@
 
 // Debug flag
-#ifndef PC_DEBUG
-#define PC_DEBUG 0
-#endif /* PC_DEBUG */
+#define PC_DEBUG @PRINT_LEVEL@
 
 int acado_hpmpc_ip_wrapper(	unsigned N, unsigned nx, unsigned nu, double* A, double* B,
                             double* b, double* Q, double* Qf, double* S, double* R, double* q,
@@ -57,404 +50,355 @@ int acado_hpmpc_ip_wrapper(	unsigned N, unsigned nx, unsigned nu, double* A, dou
                             int* nIt
                           )
 {
+#if prec == 0
 
-    char prec = PREC;
+	/*** DOUBLE PRECISION ***/
 
-    if(prec=='d')
-    {
-        /*	double sp_thr = SP_THR; // threshold to switch between double and single precision*/
-        int k_max = K_MAX; // maximum number of iterations in the IP method
-        double tol = TOL; // tolerance in the duality measure
-        static double sigma_par[] = {0.4, 0.1, 0.001}; // control primal-dual IP behaviour
-        static double stat[5*K_MAX]; // statistics from the IP routine
-        static double work0[8 + (NN+1)*PNZ*PNZ + NN*PNZ*PNZ + 5*(NN+1)*PNZ + (NN+1)*2*PNZ + 3*((NN+1)*(PNZ*PNZ+PNZ+4*2*NB)+2*PNZ*PNZ)];
-        int warm_start = WARM_START;
-        int compute_mult = 1; // compute multipliers
+	int k_max = K_MAX; // maximum number of iterations in the IP method
+	double tol = TOL; // tolerance in the duality measure
+	static double sigma_par[] = {0.4, 0.1, 0.001}; // control primal-dual IP behaviour
+	static double stat[5*K_MAX]; // statistics from the IP routine
+	static double work0[8 + (NN+1)*PNZ*PNZ + NN*PNZ*PNZ + 5*(NN+1)*PNZ + (NN+1)*2*PNZ + 3*((NN+1)*(PNZ*PNZ+PNZ+4*2*NB)+2*PNZ*PNZ)];
+	int warm_start = WARM_START;
+	int compute_mult = 1; // compute multipliers
 
-        int info = 0;
+	int info = 0;
 
-        int i, ii, jj, ll;
+	int i, ii, jj, ll;
 
-        const int bs = d_get_mr();
-        /*		const int sbs = s_get_mr();*/
+	const int bs = d_get_mr();
+	/*		const int sbs = s_get_mr(); */
 
-        int nz = nx + nu + 1;
-        int pnz = bs * ((nz + bs - nu % bs + bs - 1) / bs);
+	int nz = nx + nu + 1;
+	int pnz = bs * ((nz + bs - nu % bs + bs - 1) / bs);
 
-        int nb = nu + nx; // number of box constraints
+	int nb = nu + nx; // number of box constraints
 
-        /* align work space */
-        size_t align = 64;
-        size_t addr = (size_t) work0;
-        size_t offset = addr % 64;
-        double *work = work0 + offset / 8;
+	/* align work space */
+	size_t align = 64;
+	size_t addr = (size_t) work0;
+	size_t offset = addr % 64;
+	double *work = work0 + offset / 8;
 
-        /* array or pointers */
-        double *(hpBAbt[N]);
-        double *(hpQ[N + 1]);
-        double *(hux[N + 1]);
-        double *(hlb[N + 1]);
-        double *(hub[N + 1]);
-        double *(hpi[N + 1]);
-        double *(hlam[N + 1]);
-        double *(ht[N + 1]);
+	/* array or pointers */
+	double *(hpBAbt[N]);
+	double *(hpQ[N + 1]);
+	double *(hux[N + 1]);
+	double *(hlb[N + 1]);
+	double *(hub[N + 1]);
+	double *(hpi[N + 1]);
+	double *(hlam[N + 1]);
+	double *(ht[N + 1]);
 
-        double *ptr = work;
-        for (ii = 0; ii < N; ii++)
-        {
-            hpBAbt[ii] = ptr;
-            ptr += pnz * pnz;
-        }
+	double *ptr = work;
+	for (ii = 0; ii < N; ii++)
+	{
+		hpBAbt[ii] = ptr;
+		ptr += pnz * pnz;
+	}
 
-        for (ii = 0; ii < N; ii++) // time variant and copied again internally in the IP !!!
-        {
-            hpQ[ii] = ptr;
-            ptr += pnz * pnz;
-        }
-        hpQ[N] = ptr;
-        ptr += pnz * pnz;
+	for (ii = 0; ii < N; ii++) // time variant and copied again internally in the IP !!!
+	{
+		hpQ[ii] = ptr;
+		ptr += pnz * pnz;
+	}
+	hpQ[N] = ptr;
+	ptr += pnz * pnz;
 
-        for (ii = 0; ii <= N; ii++)
-        {
-            hux[ii] = ptr;
-            ptr += pnz;
-        }
+	for (ii = 0; ii <= N; ii++)
+	{
+		hux[ii] = ptr;
+		ptr += pnz;
+	}
 
-        for (ii = 0; ii <= N; ii++) // time Variant box constraints
-        {
-            hlb[ii] = ptr;
-            ptr += pnz; //nb; // for alignment of ptr
-        }
-        for (ii = 0; ii <= N; ii++) // time Variant box constraints
-        {
-            hub[ii] = ptr;
-            ptr += pnz; //nb; // for alignment of ptr
-        }
-        for (ii = 0; ii <= N; ii++) // time Variant box constraints
-        {
-            hpi[ii] = ptr;
-            ptr += pnz; // for alignment of ptr
-        }
-        for (ii = 0; ii <= N; ii++) // time Variant box constraints
-        {
-            hlam[ii] = ptr;
-            ptr += 2*pnz; //nb; // for alignment of ptr
-        }
-        for (ii = 0; ii <= N; ii++) // time Variant box constraints
-        {
-            ht[ii] = ptr;
-            ptr += 2*pnz; //nb; // for alignment of ptr
-        }
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		hlb[ii] = ptr;
+		ptr += pnz; //nb; // for alignment of ptr
+	}
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		hub[ii] = ptr;
+		ptr += pnz; //nb; // for alignment of ptr
+	}
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		hpi[ii] = ptr;
+		ptr += pnz; // for alignment of ptr
+	}
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		hlam[ii] = ptr;
+		ptr += 2*pnz; //nb; // for alignment of ptr
+	}
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		ht[ii] = ptr;
+		ptr += 2*pnz; //nb; // for alignment of ptr
+	}
 
-        /* pack matrices 	*/
+	/* pack matrices 	*/
 
-        // dynamic system
-        for(ii = 0; ii < N; ii++)
-        {
-            d_cvt_mat2pmat(nu, nx, 0, bs, B+ii*nu*nx, nu, hpBAbt[ii], pnz);
-            d_cvt_mat2pmat(nx, nx, nu, bs, A+ii*nx*nx, nx, hpBAbt[ii]+nu/bs*pnz*bs+nu%bs, pnz);
-            for (jj = 0; jj<nx; jj++)
-                hpBAbt[ii][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+jj*bs] = b[ii*nx+jj];
-        }
+	// dynamic system
+	for(ii = 0; ii < N; ii++)
+	{
+		d_cvt_mat2pmat(nu, nx, 0, bs, B+ii*nu*nx, nu, hpBAbt[ii], pnz);
+		d_cvt_mat2pmat(nx, nx, nu, bs, A+ii*nx*nx, nx, hpBAbt[ii]+nu/bs*pnz*bs+nu%bs, pnz);
+		for (jj = 0; jj<nx; jj++)
+			hpBAbt[ii][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+jj*bs] = b[ii*nx+jj];
+	}
 
-        // cost function
-        for(jj = 0; jj < N; jj++)
-        {
-            d_cvt_mat2pmat(nu, nu, 0, bs, R+jj*nu*nu, nu, hpQ[jj], pnz);
-            d_cvt_mat2pmat(nx, nu, nu, bs, S+jj*nx*nu, nx, hpQ[jj]+nu/bs*pnz*bs+nu%bs, pnz);
-            d_cvt_mat2pmat(nx, nx, nu, bs, Q+jj*nx*nx, nx, hpQ[jj]+nu/bs*pnz*bs+nu%bs+nu*bs, pnz);
-            for(ii = 0; ii<nu; ii++)
-                hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+ii*bs] = r[ii+jj*nu];
-            for(ii = 0; ii<nx; ii++)
-                hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nu+ii)*bs] = q[ii+nx*jj];
-            hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nx+nu)*bs] = 1e35;
-        }
+	// cost function
+	for(jj = 0; jj < N; jj++)
+	{
+		d_cvt_mat2pmat(nu, nu, 0, bs, R+jj*nu*nu, nu, hpQ[jj], pnz);
+		d_cvt_mat2pmat(nx, nu, nu, bs, S+jj*nx*nu, nx, hpQ[jj]+nu/bs*pnz*bs+nu%bs, pnz);
+		d_cvt_mat2pmat(nx, nx, nu, bs, Q+jj*nx*nx, nx, hpQ[jj]+nu/bs*pnz*bs+nu%bs+nu*bs, pnz);
+		for(ii = 0; ii<nu; ii++)
+			hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+ii*bs] = r[ii+jj*nu];
+		for(ii = 0; ii<nx; ii++)
+			hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nu+ii)*bs] = q[ii+nx*jj];
+		hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nx+nu)*bs] = 1e35;
+	}
 
-        for(jj=0; jj<nu; jj++)
-            for(ii=0; ii<nz; ii+=bs)
-                for(i=0; i<bs; i++)
-                    hpQ[N][ii*pnz+i+jj*bs] = 0.0;
-        for(jj=0; jj<nu; jj++)
-            hpQ[N][jj/bs*pnz*bs+jj%bs+jj*bs] = 1.0;
-        d_cvt_mat2pmat(nx, nx, nu, bs, Q, nx, hpQ[N]+nu/bs*pnz*bs+nu%bs+nu*bs, pnz);
-        for(jj=0; jj<nx; jj++)
-            hpQ[N][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nu+jj)*bs] = q[jj];
-        hpQ[N][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nx+nu)*bs] = 1e35;
+	for(jj=0; jj<nu; jj++)
+		for(ii=0; ii<nz; ii+=bs)
+			for(i=0; i<bs; i++)
+				hpQ[N][ii*pnz+i+jj*bs] = 0.0;
+	for(jj=0; jj<nu; jj++)
+		hpQ[N][jj/bs*pnz*bs+jj%bs+jj*bs] = 1.0;
+	d_cvt_mat2pmat(nx, nx, nu, bs, Q, nx, hpQ[N]+nu/bs*pnz*bs+nu%bs+nu*bs, pnz);
+	for(jj=0; jj<nx; jj++)
+		hpQ[N][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nu+jj)*bs] = q[jj];
+	hpQ[N][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nx+nu)*bs] = 1e35;
+	
+	// input constraints
+	for (jj = 0; jj < N; jj++)
+	{
+		for (ii = 0; ii < nu; ii++)
+		{
+			hlb[jj][ii] = lb[ii + nu * jj]; //if(hlb[jj][ii]<-1e2) hlb[jj][ii] = -1e2;
+			hub[jj][ii] = ub[ii + nu * jj]; //if(hub[jj][ii]>1e2) hub[jj][ii] = 1e2;
+		}
+	}
 
-        /*		d_print_pmat(nz, nx, bs, hpQ[0], pnz);*/
-        /*		d_print_pmat(nz, nx, bs, hpQ[1], pnz);*/
-        /*		d_print_pmat(nz, nx, bs, hpQ[2], pnz);*/
-        /*		d_print_pmat(nz, nx, bs, hpQ[N], pnz);*/
-        /*		exit(1);*/
+	// state constraints
+	for (jj = 0; jj < N; jj++)
+	{
+		for (ii = 0; ii < nx; ii++)
+		{
+			hlb[jj + 1][nu + ii] = lb[N * nu + ii + nx * jj]; //if(hlb[jj+1][ii]<-1e2) hlb[jj+1][ii] = -1e2;
+			hub[jj + 1][nu + ii] = ub[N * nu + ii + nx * jj]; //if(hub[jj+1][ii]>1e2) hub[jj+1][ii] = 1e2;
+		}
+	}
 
-        // input constraints
-        for (jj = 0; jj < N; jj++)
-        {
-            for (ii = 0; ii < nu; ii++)
-            {
-                hlb[jj][ii] = lb[ii + nu * jj]; //if(hlb[jj][ii]<-1e2) hlb[jj][ii] = -1e2;
-                hub[jj][ii] = ub[ii + nu * jj]; //if(hub[jj][ii]>1e2) hub[jj][ii] = 1e2;
-            }
-        }
+	// initial guess
+	for (jj = 0; jj < N; jj++)
+		for (ii = 0; ii < nu; ii++)
+			hux[jj][ii] = u[ii + nu * jj];
 
-        // state constraints
-        for (jj = 0; jj < N; jj++)
-        {
-            for (ii = 0; ii < nx; ii++)
-            {
-                hlb[jj + 1][nu + ii] = lb[N * nu + ii + nx * jj]; //if(hlb[jj+1][ii]<-1e2) hlb[jj+1][ii] = -1e2;
-                hub[jj + 1][nu + ii] = ub[N * nu + ii + nx * jj]; //if(hub[jj+1][ii]>1e2) hub[jj+1][ii] = 1e2;
-            }
-        }
+	for (jj = 0; jj <= N; jj++)
+		for (ii = 0; ii < nx; ii++)
+			hux[0][nu + ii] = x[ii];
 
-        // initial guess
-        for (jj = 0; jj < N; jj++)
-            for (ii = 0; ii < nu; ii++)
-                hux[jj][ii] = u[ii + nu * jj];
+	// call the IP solver
+#if IP == 1
+		d_ip_box(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hlb, hub, hux, compute_mult, hpi, hlam, ht, ptr, &info);
+#else
+		d_ip2_box(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hlb, hub, hux, compute_mult, hpi, hlam, ht, ptr, &info);
+#endif /* IP */
 
-        for (jj = 0; jj <= N; jj++)
-            for (ii = 0; ii < nx; ii++)
-                hux[0][nu + ii] = x[ii];
+	if(info != 0)
+		return 1;
+	
+	// copy back inputs and states
+	for (jj = 0; jj < N; jj++)
+		for (ii = 0; ii < nu; ii++)
+			u[ii + nu * jj] = hux[jj][ii];
 
-        // call the IP solver
-        if(IP==1)
-            d_ip_box(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hlb, hub, hux, compute_mult, hpi, hlam, ht, ptr, &info);
-        else
-            d_ip2_box(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hlb, hub, hux, compute_mult, hpi, hlam, ht, ptr, &info);
+	for (jj = 1; jj <= N; jj++)
+		for (ii = 0; ii < nx; ii++)
+			x[ii + nx * jj] = hux[jj][nu + ii];
 
-        if(info!=0)
-            printf("\nHessian not positive definite.\n");
+#elif prec == 1
 
+	/*** SINGLE PRECISION ***/
 
-        /*#if PC_DEBUG == 1*/
+	int k_max = K_MAX; // maximum number of iterations in the IP method
+	float tol = TOL; // tolerance in the duality measure
+	static float sigma_par[] = {0.4, 0.1, 0.001}; // control primal-dual IP behaviour
+	static float stat[5*K_MAX]; // statistics from the IP routine
+	static float work0[8 + (NN+1)*PNZ*PNZ + NN*PNZ*PNZ + 5*(NN+1)*PNZ + (NN+1)*2*PNZ + 3*((NN+1)*(PNZ*PNZ+PNZ+4*2*NB)+2*PNZ*PNZ)];
+	int warm_start = WARM_START;
+	int compute_mult = 1; // compute multipliers
 
-        /*	printf("\n%d\n", *nIt);*/
-        /*	d_print_mat_e(1, nx+nu, hux[0], 1);*/
-        /*	d_print_mat_e(1, nx+nu, hux[1], 1);*/
-        /*	d_print_mat_e(1, nx+nu, hux[N-1], 1);*/
-        /*	d_print_mat_e(1, nx+nu, hux[N], 1);*/
-        /*	exit(2);*/
+	int info = 0;
 
-        /*#endif // PC_DEBUG == 1 */
+	int i, ii, jj, ll;
 
-        // copy back inputs and states
-        for (jj = 0; jj < N; jj++)
-            for (ii = 0; ii < nu; ii++)
-                u[ii + nu * jj] = hux[jj][ii];
+	const int bs = s_get_mr();
 
-        for (jj = 1; jj <= N; jj++)
-            for (ii = 0; ii < nx; ii++)
-                x[ii + nx * jj] = hux[jj][nu + ii];
+	int nz = nx + nu + 1;
+	int pnz = bs * ((nz + bs - nu % bs + bs - 1) / bs);
 
-#if PC_DEBUG == 1
-        for (jj = 0; jj < *nIt; jj++)
-            printf("k = %d\tsigma = %f\talpha = %f\tmu = %f\t\tmu = %e\n", jj,
-                   stat[5 * jj], stat[5 * jj + 1], stat[5 * jj + 2],
-                   stat[5 * jj + 2]);
-        printf("\n");
-#endif /* PC_DEBUG == 1 */
+	int nb = nu + nx; // number of box constraints
 
-    }
-    else if(prec=='s')
-    {
+	/* align work space */
+	size_t align = 64;
+	size_t addr = (size_t) work0;
+	size_t offset = addr % 64;
+	float *work = work0 + offset / 4;
 
-        /*	char prec = 'd';*/
-        /*	double sp_thr = SP_THR; // threshold to switch between double and single precision*/
-        int k_max = K_MAX; // maximum number of iterations in the IP method
-        float tol = TOL; // tolerance in the duality measure
-        static float sigma_par[] = {0.4, 0.1, 0.001}; // control primal-dual IP behaviour
-        static float stat[5*K_MAX]; // statistics from the IP routine
-        static float work0[8 + (NN+1)*PNZ*PNZ + NN*PNZ*PNZ + 5*(NN+1)*PNZ + (NN+1)*2*PNZ + 3*((NN+1)*(PNZ*PNZ+PNZ+4*2*NB)+2*PNZ*PNZ)];
-        int warm_start = WARM_START;
-        int compute_mult = 1; // compute multipliers
+	/* array or pointers */
+	float *(hpBAbt[N]);
+	float *(hpQ[N + 1]);
+	float *(hux[N + 1]);
+	float *(hlb[N + 1]);
+	float *(hub[N + 1]);
+	float *(hpi[N + 1]);
+	float *(hlam[N + 1]);
+	float *(ht[N + 1]);
 
-        int info = 0;
+	float *ptr = work;
+	for (ii = 0; ii < N; ii++)
+	{
+		hpBAbt[ii] = ptr;
+		ptr += pnz * pnz;
+	}
 
-        int i, ii, jj, ll;
+	for (ii = 0; ii < N; ii++) // time variant and copied again internally in the IP !!!
+	{
+		hpQ[ii] = ptr;
+		ptr += pnz * pnz;
+	}
+	hpQ[N] = ptr;
+	ptr += pnz * pnz;
 
-        const int bs = s_get_mr();
+	for (ii = 0; ii <= N; ii++)
+	{
+		hux[ii] = ptr;
+		ptr += pnz;
+	}
 
-        int nz = nx + nu + 1;
-        int pnz = bs * ((nz + bs - nu % bs + bs - 1) / bs);
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		hlb[ii] = ptr;
+		ptr += pnz; //nb; // for alignment of ptr
+	}
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		hub[ii] = ptr;
+		ptr += pnz; //nb; // for alignment of ptr
+	}
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		hpi[ii] = ptr;
+		ptr += pnz; // for alignment of ptr
+	}
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		hlam[ii] = ptr;
+		ptr += 2*pnz; //nb; // for alignment of ptr
+	}
+	for (ii = 0; ii <= N; ii++) // time Variant box constraints
+	{
+		ht[ii] = ptr;
+		ptr += 2*pnz; //nb; // for alignment of ptr
+	}
 
-        int nb = nu + nx; // number of box constraints
+	/* pack matrices 	*/
 
-        /* align work space */
-        size_t align = 64;
-        size_t addr = (size_t) work0;
-        size_t offset = addr % 64;
-        float *work = work0 + offset / 4;
+	// dynamic system
+	for(ii = 0; ii < N; ii++)
+	{
+		cvt_d2s_mat2pmat(nu, nx, 0, bs, B+ii*nu*nx, nu, hpBAbt[ii], pnz);
+		cvt_d2s_mat2pmat(nx, nx, nu, bs, A+ii*nx*nx, nx, hpBAbt[ii]+nu/bs*pnz*bs + nu%bs, pnz);
+		for (jj = 0; jj < nx; jj++)
+			hpBAbt[ii][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+jj*bs] = (float) b[ii*nx+jj];
+	}
 
-        /* array or pointers */
-        float *(hpBAbt[N]);
-        float *(hpQ[N + 1]);
-        float *(hux[N + 1]);
-        float *(hlb[N + 1]);
-        float *(hub[N + 1]);
-        float *(hpi[N + 1]);
-        float *(hlam[N + 1]);
-        float *(ht[N + 1]);
+	// cost function
+	for(jj = 0; jj < N; jj++)
+	{
+		cvt_d2s_mat2pmat(nu, nu, 0, bs, R+jj*nu*nu, nu, hpQ[jj], pnz);
+		cvt_d2s_mat2pmat(nx, nu, nu, bs, S+jj*nx*nu, nx, hpQ[jj]+nu/bs*pnz*bs+nu%bs, pnz);
+		cvt_d2s_mat2pmat(nx, nx, nu, bs, Q+jj*nx*nx, nx, hpQ[jj]+nu/bs*pnz*bs+nu%bs+nu*bs, pnz);
+		for(ii = 0; ii<nu; ii++)
+			hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+ii*bs] = (float) r[ii+jj*nu];
+		for(ii = 0; ii<nx; ii++)
+			hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nu+ii)*bs] = (float) q[ii+nx*jj];
+		hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nx+nu)*bs] = 1e35;
+	}
 
-        float *ptr = work;
-        for (ii = 0; ii < N; ii++)
-        {
-            hpBAbt[ii] = ptr;
-            ptr += pnz * pnz;
-        }
+	for(jj=0; jj<nu; jj++)
+		for(ii=0; ii<nz; ii+=bs)
+			for(i=0; i<bs; i++)
+				hpQ[N][ii*pnz+i+jj*bs] = 0.0;
+	for(jj=0; jj<nu; jj++)
+		hpQ[N][jj/bs*pnz*bs+jj%bs+jj*bs] = 1.0;
+	cvt_d2s_mat2pmat(nx, nx, nu, bs, Q, nx, hpQ[N]+nu/bs*pnz*bs+nu%bs+nu*bs, pnz);
+	for(jj=0; jj<nx; jj++)
+		hpQ[N][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nu+jj)*bs] = (float) q[jj];
+	hpQ[N][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nx+nu)*bs] = 1e35;
+	
+	// input constraints
+	for(jj=0; jj<N; jj++)
+	{
+		for(ii=0; ii<nu; ii++)
+		{
+			hlb[jj][ii] = (float) lb[ii+nu*jj]; //if(hlb[jj][ii]<-1e2) hlb[jj][ii] = -1e2;
+			hub[jj][ii] = (float) ub[ii+nu*jj]; //if(hub[jj][ii]>1e2) hub[jj][ii] = 1e2;
+		}
+	}
 
-        for (ii = 0; ii < N; ii++) // time variant and copied again internally in the IP !!!
-        {
-            hpQ[ii] = ptr;
-            ptr += pnz * pnz;
-        }
-        hpQ[N] = ptr;
-        ptr += pnz * pnz;
+	// state constraints
+	for(jj=0; jj<N; jj++)
+	{
+		for(ii=0; ii<nx; ii++)
+		{
+			hlb[jj+1][nu+ii] = (float) lb[N*nu+ii+nx*jj]; //if(hlb[jj+1][ii]<-1e2) hlb[jj+1][ii] = -1e2;
+			hub[jj+1][nu+ii] = (float) ub[N*nu+ii+nx*jj]; //if(hub[jj+1][ii]>1e2) hub[jj+1][ii] = 1e2;
+		}
+	}
 
-        for (ii = 0; ii <= N; ii++)
-        {
-            hux[ii] = ptr;
-            ptr += pnz;
-        }
+	// initial guess
+	for (jj = 0; jj < N; jj++)
+		for (ii = 0; ii < nu; ii++)
+			hux[jj][ii] = (float) u[ii + nu * jj];
 
-        for (ii = 0; ii <= N; ii++) // time Variant box constraints
-        {
-            hlb[ii] = ptr;
-            ptr += pnz; //nb; // for alignment of ptr
-        }
-        for (ii = 0; ii <= N; ii++) // time Variant box constraints
-        {
-            hub[ii] = ptr;
-            ptr += pnz; //nb; // for alignment of ptr
-        }
-        for (ii = 0; ii <= N; ii++) // time Variant box constraints
-        {
-            hpi[ii] = ptr;
-            ptr += pnz; // for alignment of ptr
-        }
-        for (ii = 0; ii <= N; ii++) // time Variant box constraints
-        {
-            hlam[ii] = ptr;
-            ptr += 2*pnz; //nb; // for alignment of ptr
-        }
-        for (ii = 0; ii <= N; ii++) // time Variant box constraints
-        {
-            ht[ii] = ptr;
-            ptr += 2*pnz; //nb; // for alignment of ptr
-        }
+	for (jj = 0; jj <= N; jj++)
+		for (ii = 0; ii < nx; ii++)
+			hux[0][nu + ii] = (float) x[ii];
 
-        /* pack matrices 	*/
+	// call the IP solver
+#if IP == 1
+		s_ip_box(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hlb, hub, hux, compute_mult, hpi, hlam, ht, ptr, &info);
+#else
+		s_ip2_box(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hlb, hub, hux, compute_mult, hpi, hlam, ht, ptr, &info);
+#endif /* IP */
 
-        // dynamic system
-        for(ii = 0; ii < N; ii++)
-        {
-            cvt_d2s_mat2pmat(nu, nx, 0, bs, B+ii*nu*nx, nu, hpBAbt[ii], pnz);
-            cvt_d2s_mat2pmat(nx, nx, nu, bs, A+ii*nx*nx, nx, hpBAbt[ii]+nu/bs*pnz*bs + nu%bs, pnz);
-            for (jj = 0; jj < nx; jj++)
-                hpBAbt[ii][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+jj*bs] = (float) b[ii*nx+jj];
-        }
+	if (info != 0)
+		return 1;
 
-        // cost function
-        for(jj = 0; jj < N; jj++)
-        {
-            cvt_d2s_mat2pmat(nu, nu, 0, bs, R+jj*nu*nu, nu, hpQ[jj], pnz);
-            cvt_d2s_mat2pmat(nx, nu, nu, bs, S+jj*nx*nu, nx, hpQ[jj]+nu/bs*pnz*bs+nu%bs, pnz);
-            cvt_d2s_mat2pmat(nx, nx, nu, bs, Q+jj*nx*nx, nx, hpQ[jj]+nu/bs*pnz*bs+nu%bs+nu*bs, pnz);
-            for(ii = 0; ii<nu; ii++)
-                hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+ii*bs] = (float) r[ii+jj*nu];
-            for(ii = 0; ii<nx; ii++)
-                hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nu+ii)*bs] = (float) q[ii+nx*jj];
-            hpQ[jj][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nx+nu)*bs] = 1e35;
-        }
+	// copy back inputs and states
+	for (jj = 0; jj < N; jj++)
+		for (ii = 0; ii < nu; ii++)
+			u[ii + nu * jj] = (double) hux[jj][ii];
 
-        for(jj=0; jj<nu; jj++)
-            for(ii=0; ii<nz; ii+=bs)
-                for(i=0; i<bs; i++)
-                    hpQ[N][ii*pnz+i+jj*bs] = 0.0;
-        for(jj=0; jj<nu; jj++)
-            hpQ[N][jj/bs*pnz*bs+jj%bs+jj*bs] = 1.0;
-        cvt_d2s_mat2pmat(nx, nx, nu, bs, Q, nx, hpQ[N]+nu/bs*pnz*bs+nu%bs+nu*bs, pnz);
-        for(jj=0; jj<nx; jj++)
-            hpQ[N][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nu+jj)*bs] = (float) q[jj];
-        hpQ[N][(nx+nu)/bs*pnz*bs+(nx+nu)%bs+(nx+nu)*bs] = 1e35;
+	for (jj = 1; jj <= N; jj++)
+		for (ii = 0; ii < nx; ii++)
+			x[ii + nx * jj] = (double) hux[jj][nu + ii];
 
-        /*		s_print_pmat(nz, nx, bs, hpQ[0], pnz);*/
-        /*		s_print_pmat(nz, nx, bs, hpQ[1], pnz);*/
-        /*		s_print_pmat(nz, nx, bs, hpQ[2], pnz);*/
-        /*		s_print_pmat(nz, nx, bs, hpQ[N], pnz);*/
-        /*		exit(1);*/
-
-        // input constraints
-        for(jj=0; jj<N; jj++)
-        {
-            for(ii=0; ii<nu; ii++)
-            {
-                hlb[jj][ii] = (float) lb[ii+nu*jj]; //if(hlb[jj][ii]<-1e2) hlb[jj][ii] = -1e2;
-                hub[jj][ii] = (float) ub[ii+nu*jj]; //if(hub[jj][ii]>1e2) hub[jj][ii] = 1e2;
-            }
-        }
-
-        // state constraints
-        for(jj=0; jj<N; jj++)
-        {
-            for(ii=0; ii<nx; ii++)
-            {
-                hlb[jj+1][nu+ii] = (float) lb[N*nu+ii+nx*jj]; //if(hlb[jj+1][ii]<-1e2) hlb[jj+1][ii] = -1e2;
-                hub[jj+1][nu+ii] = (float) ub[N*nu+ii+nx*jj]; //if(hub[jj+1][ii]>1e2) hub[jj+1][ii] = 1e2;
-            }
-        }
-
-        // initial guess
-        for (jj = 0; jj < N; jj++)
-            for (ii = 0; ii < nu; ii++)
-                hux[jj][ii] = (float) u[ii + nu * jj];
-
-        for (jj = 0; jj <= N; jj++)
-            for (ii = 0; ii < nx; ii++)
-                hux[0][nu + ii] = (float) x[ii];
-
-        // call the IP solver
-        if(IP==1)
-            s_ip_box(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hlb, hub, hux, compute_mult, hpi, hlam, ht, ptr, &info);
-        else
-            s_ip2_box(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hlb, hub, hux, compute_mult, hpi, hlam, ht, ptr, &info);
-
-        if(info!=0)
-            printf("\nHessian not positive definite %d.\n", info);
-
-
-        /*#if PC_DEBUG == 1*/
-
-        /*	printf("\n%d\n", *nIt);*/
-        /*	d_print_mat_e(1, nx+nu, hux[0], 1);*/
-        /*	d_print_mat_e(1, nx+nu, hux[1], 1);*/
-        /*	d_print_mat_e(1, nx+nu, hux[N-1], 1);*/
-        /*	d_print_mat_e(1, nx+nu, hux[N], 1);*/
-        /*	exit(2);*/
-
-        /*#endif // PC_DEBUG == 1 */
-
-        // copy back inputs and states
-        for (jj = 0; jj < N; jj++)
-            for (ii = 0; ii < nu; ii++)
-                u[ii + nu * jj] = (double) hux[jj][ii];
-
-        for (jj = 1; jj <= N; jj++)
-            for (ii = 0; ii < nx; ii++)
-                x[ii + nx * jj] = (double) hux[jj][nu + ii];
+#else
+#error "Impossible happened!"
+#endif /* precision */
 
 #if PC_DEBUG == 1
-        for (jj = 0; jj < *nIt; jj++)
-            printf("k = %d\tsigma = %f\talpha = %f\tmu = %f\t\tmu = %e\talpha = %f\tmu = %f\t\tmu = %e\n", jj,
-                   stat[5*jj+0], stat[5*jj+1], stat[5*jj+2], stat[5*jj+2], stat[5*jj+3], stat[5*jj+4], stat[5*jj+4]);
-        printf("\n");
+	for (jj = 0; jj < *nIt; jj++)
+		printf("k = %d\tsigma = %f\talpha = %f\tmu = %f\t\tmu = %e\talpha = %f\tmu = %f\t\tmu = %e\n", jj,
+			   stat[5*jj+0], stat[5*jj+1], stat[5*jj+2], stat[5*jj+2], stat[5*jj+3], stat[5*jj+4], stat[5*jj+4]);
+	printf("\n");
 #endif /* PC_DEBUG == 1 */
-
-    }
-    else
-    {
-        printf("precision not supported");
-        exit(1);
-    }
 
     return 0;
 }

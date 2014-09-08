@@ -26,7 +26,7 @@
 /**
  *    \file src/code_generation/export_forces_generator.cpp
  *    \author Milan Vukov
- *    \date 2012
+ *    \date 2012 - 2014
  */
 
 #include <acado/code_generation/export_forces_generator.hpp>
@@ -57,7 +57,8 @@ returnValue ExportForcesGenerator::configure(	const unsigned _nx,
 												const std::string& _solverName,
 												const unsigned _printLevel,
 												const unsigned _maxIterations,
-												const unsigned _parallel
+												const unsigned _parallel,
+												bool matlabGenerator
 												)
 {
 	stringstream s;
@@ -78,38 +79,73 @@ returnValue ExportForcesGenerator::configure(	const unsigned _nx,
 	dictionary[ "@N@" ] =  s.str();
 
 	s.str(std::string());
-	for (unsigned i = 0; i < _lbIdx.size(); ++i)
-	{
-		if ( i )
-			s << ", ..." << endl << "\t";
-
-		s << "{";
-		for (unsigned j = 0; j < _lbIdx[ i ].size(); ++j)
+	if (matlabGenerator == true)
+		for (unsigned i = 0; i < _lbIdx.size(); ++i)
 		{
-			if ( j )
-				s << ", ";
-			s << _lbIdx[ i ][ j ] + 1;
+			if ( i )
+				s << ", ..." << endl << "\t";
+
+			s << "{";
+			for (unsigned j = 0; j < _lbIdx[ i ].size(); ++j)
+			{
+				if ( j )
+					s << ", ";
+				s << _lbIdx[ i ][ j ] + 1;
+			}
+			s << "}";
 		}
-		s << "}";
-	}
+	else
+		// Python generator
+		for (unsigned i = 0; i < _lbIdx.size(); ++i)
+		{
+			if ( i )
+				s << ", " << endl << "\t";
+
+			s << "[";
+			for (unsigned j = 0; j < _lbIdx[ i ].size(); ++j)
+			{
+				if ( j )
+					s << ", ";
+				s << _lbIdx[ i ][ j ] + 1;
+			}
+			s << "]";
+		}
 
 	dictionary[ "@LB_IDX@" ] =  s.str();
 
 	s.str(std::string());
-	for (unsigned i = 0; i < _ubIdx.size(); ++i)
-	{
-		if ( i )
-			s << ", ..." << endl << "\t";
-
-		s << "{";
-		for (unsigned j = 0; j < _ubIdx[ i ].size(); ++j)
+	if (matlabGenerator == true)
+		for (unsigned i = 0; i < _ubIdx.size(); ++i)
 		{
-			if ( j )
-				s << ", ";
-			s << _ubIdx[ i ][ j ] + 1;
+			if ( i )
+				s << ", ..." << endl << "\t";
+
+			s << "{";
+			for (unsigned j = 0; j < _ubIdx[ i ].size(); ++j)
+			{
+				if ( j )
+					s << ", ";
+				s << _ubIdx[ i ][ j ] + 1;
+			}
+			s << "}";
 		}
-		s << "}";
-	}
+	else
+		// Python generator
+		for (unsigned i = 0; i < _ubIdx.size(); ++i)
+		{
+			if ( i )
+				s << ", " << endl << "\t";
+
+			s << "[";
+			for (unsigned j = 0; j < _ubIdx[ i ].size(); ++j)
+			{
+				if ( j )
+					s << ", ";
+				s << _ubIdx[ i ][ j ] + 1;
+			}
+			s << "]";
+		}
+
 	dictionary[ "@UB_IDX@" ] =  s.str();
 
 	s.str(std::string());

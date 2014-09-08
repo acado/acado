@@ -90,7 +90,7 @@ int main( ){
     integrator.set(MAX_NUM_INTEGRATOR_STEPS, 2000  );
    // integrator.set(MAX_INTEGRATOR_STEPSIZE, 1e-3  );
 
-    integrator.set( LINEAR_ALGEBRA_SOLVER , SPARSE_LU );
+//    integrator.set( LINEAR_ALGEBRA_SOLVER , SPARSE_LU );
 
 
     // DEFINE INITIAL VALUES:

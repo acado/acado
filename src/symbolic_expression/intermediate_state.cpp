@@ -34,20 +34,15 @@
 
 #include <acado/symbolic_expression/intermediate_state.hpp>
 
-
-
 BEGIN_NAMESPACE_ACADO
 
-
 int IntermediateState::count = 0;
-
 
 IntermediateState::IntermediateState()
 	: Expression("", 1, 1, VT_INTERMEDIATE_STATE, count)
 {
     count++;
 }
-
 
 IntermediateState::IntermediateState(const std::string& name_, uint nRows_, uint nCols_)
 	: Expression(name_, nRows_, nCols_, VT_INTERMEDIATE_STATE, count)
@@ -70,102 +65,41 @@ IntermediateState::IntermediateState( unsigned nRows_, unsigned nCols_)
 IntermediateState::IntermediateState( int nRows_, int nCols_)
 	: Expression("", nRows_, nCols_, VT_INTERMEDIATE_STATE, count)
 {
-
 	count++;
 }
 
-IntermediateState::IntermediateState( const double& arg ):Expression()
-{
-    nRows = 1;
-    nCols = 1;
-    operator=(arg);
-}
+IntermediateState::IntermediateState( const double& arg )
+	: Expression( arg )
+{}
 
+IntermediateState::IntermediateState( const DVector& arg )
+	: Expression( arg )
+{}
 
-IntermediateState::IntermediateState( const DVector& arg ):Expression()
-{
-    nRows = arg.getDim();
-    nCols = 1;
-    operator=(arg);
-}
+IntermediateState::IntermediateState( const DMatrix& arg )
+	: Expression( arg )
+{}
 
+IntermediateState::IntermediateState( const Operator& arg )
+	: Expression( arg )
+{}
 
-IntermediateState::IntermediateState( const DMatrix& arg ):Expression(){
-
-    nRows = arg.getNumRows();
-    nCols = arg.getNumCols();
-    operator=(arg);
-}
-
-
-IntermediateState::IntermediateState( const Operator& arg ):Expression(){
-
-    nRows = 1;
-    nCols = 1;
-    operator=( Expression(arg) );
-}
-
-
-IntermediateState::IntermediateState( const Expression& arg ):Expression(){
-
-    nRows = arg.getNumRows();
-    nCols = arg.getNumCols();
-    operator=(arg);
-}
-
-
+IntermediateState::IntermediateState(const Expression& arg)
+	: Expression( arg )
+{}
 
 IntermediateState::~IntermediateState(){ }
 
-
-Expression& IntermediateState::operator= ( const double & arg ){
-
-    return operator= ( convert(arg)  );
-}
-
-
-
-Expression& IntermediateState::operator= ( const DVector & arg ){ return operator= ( convert(arg)  ); }
-Expression& IntermediateState::operator= ( const DMatrix & arg ){ return operator= ( convert(arg)  ); }
-
-Expression& IntermediateState::operator=( const Expression &arg ){     nRows = arg.getNumRows();nCols = arg.getNumCols();return assignmentSetup( arg ); }
-
-
-
-Expression& IntermediateState::operator+=( const double      & arg ){ return operator=( this->operator+(arg) ); }
-Expression& IntermediateState::operator+=( const DVector      & arg ){ return operator=( this->operator+(arg) ); }
-Expression& IntermediateState::operator+=( const DMatrix      & arg ){ return operator=( this->operator+(arg) ); }
-Expression& IntermediateState::operator+=( const Expression  & arg ){ return operator=( this->operator+(arg) ); }
-
-Expression& IntermediateState::operator-=( const double      & arg ){ return operator=( this->operator-(arg) ); }
-Expression& IntermediateState::operator-=( const DVector      & arg ){ return operator=( this->operator-(arg) ); }
-Expression& IntermediateState::operator-=( const DMatrix      & arg ){ return operator=( this->operator-(arg) ); }
-Expression& IntermediateState::operator-=( const Expression  & arg ){ return operator=( this->operator-(arg) ); }
-
-Expression& IntermediateState::operator*=( const double      & arg ){ return operator=( this->operator*(arg) ); }
-Expression& IntermediateState::operator*=( const DVector      & arg ){ return operator=( this->operator*(arg) ); }
-Expression& IntermediateState::operator*=( const DMatrix      & arg ){ return operator=( this->operator*(arg) ); }
-Expression& IntermediateState::operator*=( const Expression  & arg ){ return operator=( this->operator*(arg) ); }
-
-Expression& IntermediateState::operator/=( const double      & arg ){ return operator=( this->operator/(arg) ); }
-Expression& IntermediateState::operator/=( const Expression  & arg ){ return operator=( this->operator/(arg) ); }
-
-
-
-
-Expression* IntermediateState::clone() const{
-
+Expression* IntermediateState::clone() const
+{
     return new Expression(*this);
 }
 
-
-returnValue IntermediateState::clearStaticCounters(){
-
+returnValue IntermediateState::clearStaticCounters()
+{
     count = 0;
     return SUCCESSFUL_RETURN;
 }
-
-
 
 CLOSE_NAMESPACE_ACADO
 
