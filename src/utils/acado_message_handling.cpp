@@ -524,7 +524,7 @@ returnValue::~returnValue() {
 			}
 
 #ifdef ACADO_WITH_TESTING
-			if (level == LVL_FATAL or level == LVL_ERROR)
+			if (level == LVL_FATAL || level == LVL_ERROR)
 #else
 			if (level == LVL_FATAL)
 #endif
