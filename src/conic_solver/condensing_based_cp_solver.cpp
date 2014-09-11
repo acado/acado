@@ -387,7 +387,7 @@ returnValue CondensingBasedCPsolver::projectHessian( DMatrix &H_, double damping
 returnValue CondensingBasedCPsolver::solveCPsubproblem( )
 {
 	if( denseCP.isQP() == BT_FALSE )
-		return ACADOINFO( RET_QP_SOLVER_CAN_ONLY_SOLVE_QP );
+		return ACADOERROR( RET_QP_SOLVER_CAN_ONLY_SOLVE_QP );
 
     returnValue returnvalue;
 
