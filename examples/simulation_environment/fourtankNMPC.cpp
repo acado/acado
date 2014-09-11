@@ -119,6 +119,7 @@ int main( )
     RealTimeAlgorithm algorithm(ocp,samplingTime);
 //     algorithm.set( USE_REALTIME_ITERATIONS, YES );
     algorithm.set( MAX_NUM_ITERATIONS, 2 );
+	algorithm.set(LEVENBERG_MARQUARDT, 1e-5);
 
     StaticReferenceTrajectory zeroReference;
 
