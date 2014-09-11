@@ -349,11 +349,6 @@ class Expression{
          */
         returnValue substitute( int idx, const Expression &arg ) const;
 
-
-        Expression convert( const double      & arg ) const;
-        Expression convert( const DVector      & arg ) const;
-        Expression convert( const DMatrix      & arg ) const;
-
         Expression add(const Expression& arg) const;
         Expression sub(const Expression& arg) const;
         Expression mul(const Expression& arg) const;
