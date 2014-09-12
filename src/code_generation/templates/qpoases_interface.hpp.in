@@ -7,6 +7,12 @@
 
 #include <math.h>
 
+#ifdef __cplusplus
+#define EXTERNC extern "C"
+#else
+#define EXTERNC
+#endif
+
 /*
  * A set of options for qpOASES
  */
@@ -29,10 +35,10 @@ typedef @REAL_T@ real_t;
  */
 
 /** A function that calls the QP solver */
-int @PREFIX@solve( void );
+EXTERNC int @PREFIX@solve( void );
 
 /** Get the number of active set changes */
-int @PREFIX@getNWSR( void );
+EXTERNC int @PREFIX@getNWSR( void );
 
 /** Get the error string. */
 const char* getErrorString(int error);

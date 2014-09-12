@@ -203,7 +203,7 @@ unsigned ExportGaussNewtonQpDunes::getNumQPvars( ) const
 
 returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 {
-	if (S1.isGiven() == false or S1.getGivenMatrix().isZero() == false)
+	if (S1.isGiven() == false || S1.getGivenMatrix().isZero() == false)
 		ACADOWARNINGTEXT(RET_INVALID_ARGUMENTS,
 				"Mixed control-state terms in the objective function are not supported at the moment.");
 

@@ -845,7 +845,7 @@ returnValue SCPmethod::printIteration( )
 
 	if ( (PrintLevel)printLevel >= MEDIUM ) 
 	{
-		if (numberOfSteps == 1 or (numberOfSteps % 10) == 0)
+		if (numberOfSteps == 1 || (numberOfSteps % 10) == 0)
 			cout	<< "sqp it | "
 					<< "qp its | "
 					<< "      kkt tol | "

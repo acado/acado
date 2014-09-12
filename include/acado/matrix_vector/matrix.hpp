@@ -57,7 +57,7 @@ public:
 
 	/** Handy typedef for the base matrix class. */
 	typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor | Eigen::AutoAlign> Base;
-	using Base::operator=;
+
 
 	/** Constructor from any other Eigen::MatrixBase derived class. */
 	template<typename OtherDerived>

@@ -61,7 +61,6 @@ public:
 
 	/** Handy typedef for the base vector class. */
 	typedef Eigen::Matrix<T, Eigen::Dynamic, 1> Base;
-	using Base::operator=;
 
 	/** Constructor from any other Eigen::MatrixBase derived class. */
 	template<typename OtherDerived>

@@ -181,7 +181,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	int forceDiagHessian;
 	get(CG_FORCE_DIAGONAL_HESSIAN, forceDiagHessian);
 
-	if (S1.isGiven() == false or S1.getGivenMatrix().isZero() == false)
+	if (S1.isGiven() == false || S1.getGivenMatrix().isZero() == false)
 		ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
 				"Mixed control-state terms in the objective function are not supported at the moment.");
 
@@ -191,14 +191,14 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	unsigned dimHCols = NX + NU;
 	unsigned dimHNRows = NX;
 	unsigned dimHNCols = NX;
-	if (objS.isGiven() == true or forceDiagHessian == true)
+	if (objS.isGiven() == true || forceDiagHessian == true)
 		if (objS.getGivenMatrix().isDiagonal())
 		{
 			diagH = true;
 			dimHCols = 1;
 		}
 
-	if (objSEndTerm.isGiven() == true or forceDiagHessian == true)
+	if (objSEndTerm.isGiven() == true || forceDiagHessian == true)
 		if (objSEndTerm.getGivenMatrix().isDiagonal() == true)
 		{
 			diagHN = true;

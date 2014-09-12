@@ -240,7 +240,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	get(GENERATE_SIMULINK_INTERFACE, generateSimulinkInterface);
 	if ((bool) generateSimulinkInterface == true)
 	{
-		if (!((QPSolverName)qpSolver == QP_QPOASES or (QPSolverName)qpSolver == QP_QPDUNES))
+		if (!((QPSolverName)qpSolver == QP_QPOASES || (QPSolverName)qpSolver == QP_QPDUNES))
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
 					"At the moment, Simulink interface is available only with qpOASES and qpDUNES based OCP solvers.");
 		else

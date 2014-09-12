@@ -905,13 +905,13 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 	{
 		S1 = objEvFx.getGivenMatrix().transpose() * objS.getGivenMatrix() * objEvFu.getGivenMatrix();
 	}
-	else if (Fu.isOneOrZero() == NE_ZERO or Fx.isOneOrZero() == NE_ZERO)
+	else if (Fu.isOneOrZero() == NE_ZERO || Fx.isOneOrZero() == NE_ZERO)
 	{
 		S1 = zeros<double>(NX, NU);
 	}
 	else
 	{
-		if (objS.isGiven() == true or objS.isDiagonal() == true)
+		if (objS.isGiven() == true || objS.isDiagonal() == true)
 		{
 			// Dependency pattern of Fx
 			DMatrix depFx = objEvFx.isGiven() == true ? objEvFx.getGivenMatrix() : expFx.getSparsityPattern();
@@ -1419,7 +1419,7 @@ bool ExportNLPSolver::initialStateFixed() const
 
 bool ExportNLPSolver::usingLinearTerms() const
 {
-	if (objSlx.isGiven() == false and objSlu.isGiven() == false)
+	if (objSlx.isGiven() == false && objSlu.isGiven() == false)
 		return true;
 	// Otherwise they are hard-coded and we don't need this indicator
 	return false;
