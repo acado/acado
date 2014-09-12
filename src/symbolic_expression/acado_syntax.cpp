@@ -59,7 +59,7 @@ IntermediateState pow( const Expression &arg1, const Expression &arg2 ){
 
 IntermediateState pow( const double &arg1, const Expression &arg2 ){
   
-  return arg2.convert(arg1).getPow(arg2);
+  return Expression( arg1 ).getPow( arg2 );
 }
 
 IntermediateState pow( const Expression &arg1, const double &arg2 ){
@@ -72,7 +72,7 @@ IntermediateState pow( const Expression &arg1, const double &arg2 ){
         int intarg = (int) ceil(arg2);
         return arg1.getPowInt( intarg );
     }
-    return arg1.getPow(arg1.convert(arg2));
+    return arg1.getPow( arg2 );
 }
 
 

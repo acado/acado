@@ -443,6 +443,7 @@ int main( )
 	algorithm.set( GLOBALIZATION_STRATEGY,GS_FULLSTEP );
 // 	algorithm.set( USE_IMMEDIATE_FEEDBACK, YES );
 	algorithm.set( USE_REALTIME_SHIFTS, YES );
+	algorithm.set(LEVENBERG_MARQUARDT, 1e-5);
 
 
     DVector x0(10);
@@ -466,7 +467,7 @@ int main( )
     // SETTING UP THE SIMULATION ENVIRONMENT,  RUN THE EXAMPLE...
     // ----------------------------------------------------------
     double simulationStart =  0.0;
-    double simulationEnd   =  90.0;
+    double simulationEnd   =  10.0;
 
     SimulationEnvironment sim( simulationStart, simulationEnd, process, controller );
 

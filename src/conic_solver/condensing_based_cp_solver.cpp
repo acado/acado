@@ -394,7 +394,7 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
 	// ensure that Hessian matrix is symmetric
 	if ( denseCP.H.isSymmetric( ) == BT_FALSE )
 	{
-		ACADOWARNING( RET_NONSYMMETRIC_HESSIAN_MATRIX );
+		ACADOINFO( RET_NONSYMMETRIC_HESSIAN_MATRIX );
 		denseCP.H.symmetrize();
 	}
 

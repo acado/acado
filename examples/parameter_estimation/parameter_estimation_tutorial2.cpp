@@ -141,6 +141,7 @@ int main( ){
 
 	algorithm << window;
     algorithm.initializeDifferentialStates( "parameter_estimation_data2.txt" );
+	algorithm.set(LEVENBERG_MARQUARDT, 1e-5);
 
     algorithm.solve();
 
