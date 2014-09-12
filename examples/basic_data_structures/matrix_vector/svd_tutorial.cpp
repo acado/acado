@@ -67,7 +67,7 @@ int main( ){
 //  matrix.
 //  ----------------------------------------------
 
-    JacobiSVD< DMatrix > svdA(A, ComputeThinU | ComputeThinV );
+    JacobiSVD< MatrixXd > svdA(A, ComputeThinU | ComputeThinV );
 
     DMatrix U = svdA.matrixU();
     DMatrix V = svdA.matrixV();
@@ -95,7 +95,7 @@ int main( ){
 //  matrix.
 //  ----------------------------------------------
 
-    JacobiSVD< Eigen::MatrixXd > svdB(B, ComputeThinU | ComputeThinV);
+    JacobiSVD< MatrixXd > svdB(B, ComputeThinU | ComputeThinV);
 
     U = svdB.matrixU();
     V = svdB.matrixV();
