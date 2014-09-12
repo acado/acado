@@ -194,8 +194,8 @@ Operator& TreeProjection::operator=( const double& arg ){
 
     scale = arg;
 
-    Expression tmp;
-    return this->operator=( tmp.convert(arg) );
+    Expression tmp( arg );
+    return this->operator=( tmp );
 }
 
 

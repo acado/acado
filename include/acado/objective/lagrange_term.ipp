@@ -51,7 +51,7 @@ inline const Grid& LagrangeTerm::getGrid() const{
 inline returnValue LagrangeTerm::addLagrangeTerm( const Expression& arg ){
 
     if( lagrangeFcn != 0 ){
-        *lagrangeFcn[0] = lagrangeFcn[0]->operator+(arg);
+        *lagrangeFcn[0] += arg;
     }
     else{
         nLagrangeTerms = 1;

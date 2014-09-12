@@ -99,87 +99,39 @@ Expression::Expression(const Operator &tree_)
 // ---------------------------------------------------------------------------------------------------
 
 
-   Expression::Expression( const double& rhs ){
+Expression::Expression( const double& rhs )
+{
+	construct(VT_UNKNOWN, 0, 1, 1, "");
+	delete element[ 0 ];
+	element[ 0 ] = new DoubleConstant(rhs, NE_NEITHER_ONE_NOR_ZERO);
+}
 
-       nRows   = 1;
-       nCols   = 1;
-       dim     = 0;
-       element = 0;
-       assignmentSetup( convert(rhs) );
-   }
+Expression::Expression( const DVector& rhs )
+{
+	construct(VT_UNKNOWN, 0, rhs.getDim(), 1, "");
+	for(unsigned el = 0; el < rhs.getDim(); el++ )
+	{
+		delete element[ el ];
+		element[ el ] = new DoubleConstant(rhs( el ), NE_NEITHER_ONE_NOR_ZERO);
+	}
+}
 
-   Expression::Expression( const DVector& rhs ){
+Expression::Expression( const DMatrix& rhs )
+{
+	construct(VT_UNKNOWN, 0, rhs.getNumRows(), rhs.getNumCols(), "");
+	for(unsigned run1 = 0; run1 < rhs.getNumRows(); run1++ )
+	{
+		for(unsigned run2 = 0; run2 < rhs.getNumCols(); run2++ )
+		{
+			delete element[rhs.getNumCols() * run1 + run2];
+			element[rhs.getNumCols() * run1 + run2] = 
+				new DoubleConstant(rhs(run1, run2), NE_NEITHER_ONE_NOR_ZERO);
+		}
+	}
+}
 
-       nRows   = rhs.getDim();
-       nCols   = 1;
-       dim     = 0;
-       element = 0;
-       assignmentSetup( convert(rhs) );
-   }
-
-   Expression::Expression( const DMatrix& rhs ){
-
-       nRows   = rhs.getNumRows();
-       nCols   = rhs.getNumCols();
-       dim     = 0;
-       element = 0;
-       assignmentSetup( convert(rhs) );
-   }
-
-   Expression:: Expression( const Expression& rhs ){ copy     ( rhs ); }
-   Expression::~Expression(                       ){ deleteAll(     ); }
-
-
-
-// ---------------------------------------------------------------------------------------------------
-//               IMPLEMENTATION OF ELEMENTARY OPERATORS ON DOUBLE, VECTOR, AND MATRIX:
-// ---------------------------------------------------------------------------------------------------
-
-
-Expression&  Expression::operator= ( const double & arg )      { return operator= ( convert(arg)  ); }
-Expression&  Expression::operator= ( const DVector & arg )      { return operator= ( convert(arg)  ); }
-Expression&  Expression::operator= ( const DMatrix & arg )      { return operator= ( convert(arg)  ); }
-
-Expression&  Expression::operator<<( const double & arg )      { return operator<<( convert(arg)  ); }
-Expression&  Expression::operator<<( const DVector & arg )      { return operator<<( convert(arg)  ); }
-Expression&  Expression::operator<<( const DMatrix & arg )      { return operator<<( convert(arg)  ); }
-
-Expression   Expression::operator+ ( const double & arg ) const{ return operator+ ( convert(arg)  ); }
-Expression   Expression::operator+ ( const DVector & arg ) const{ return operator+ ( convert(arg)  ); }
-Expression   Expression::operator+ ( const DMatrix & arg ) const{ return operator+ ( convert(arg)  ); }
-
-Expression   Expression::operator- ( const double & arg ) const{ return operator- ( convert(arg)  ); }
-Expression   Expression::operator- ( const DVector & arg ) const{ return operator- ( convert(arg)  ); }
-Expression   Expression::operator- ( const DMatrix & arg ) const{ return operator- ( convert(arg)  ); }
-
-Expression   Expression::operator* ( const double & arg ) const{ return operator* ( convert(arg)  ); }
-Expression   Expression::operator* ( const DVector & arg ) const{ return operator* ( convert(arg)  ); }
-Expression   Expression::operator* ( const DMatrix & arg ) const{ return operator* ( convert(arg)  ); }
-
-Expression   Expression::operator/ ( const double & arg ) const{ return operator/ ( convert(arg)  ); }
-
-
-// -------------------------------------------------------------------------------------------------------------
-//                                 IMPLEMENTATION OF FREIND OPERATORS:
-// -------------------------------------------------------------------------------------------------------------
-
-Expression operator+( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
-Expression operator+( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
-Expression operator+( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator+(arg2); }
-
-Expression operator-( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
-Expression operator-( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
-Expression operator-( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator-(arg2); }
-
-Expression operator*( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
-Expression operator*( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
-Expression operator*( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator*(arg2); }
-
-Expression operator/( const double& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
-Expression operator/( const DVector& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
-Expression operator/( const DMatrix& arg1, const Expression& arg2 ){ return arg2.convert(arg1).operator/(arg2); }
-
-
+Expression:: Expression( const Expression& rhs ){ copy     ( rhs ); }
+Expression::~Expression(                       ){ deleteAll(     ); }
 
 ConstraintComponent Expression::operator<=( const double& ub ) const{
 
@@ -467,8 +419,28 @@ Operator& Expression::operator()( uint rowIdx, uint colIdx ){
 }
 
 
+Expression operator+( const Expression  & arg1, const Expression  & arg2 )
+{return arg1.add(arg2);}
+Expression operator-( const Expression  & arg1, const Expression  & arg2 )
+{return arg1.sub(arg2);}
+Expression operator*( const Expression  & arg1, const Expression  & arg2 )
+{return arg1.mul(arg2);}
+Expression operator/( const Expression  & arg1, const Expression  & arg2 )
+{return arg1.div(arg2);}
 
-Expression Expression::operator+( const Expression& arg ) const{
+Expression& Expression::operator+=(const Expression &arg)
+{return static_cast<Expression&>(*this) = static_cast<Expression*>(this)->add(arg);}
+
+Expression& Expression::operator-=(const Expression &arg)
+{return static_cast<Expression&>(*this) = static_cast<Expression*>(this)->sub(arg);}
+
+Expression& Expression::operator*=(const Expression &arg)
+{return static_cast<Expression&>(*this) = static_cast<Expression*>(this)->mul(arg);}
+
+Expression& Expression::operator/=(const Expression &arg)
+{return static_cast<Expression&>(*this) = static_cast<Expression*>(this)->div(arg);}
+
+Expression Expression::add( const Expression& arg ) const{
 
     ASSERT( getNumRows() == arg.getNumRows() );
     ASSERT( getNumCols() == arg.getNumCols() );
@@ -499,7 +471,7 @@ Expression Expression::operator+( const Expression& arg ) const{
 }
 
 
-Expression Expression::operator-( const Expression& arg ) const{
+Expression Expression::sub( const Expression& arg ) const{
 
     ASSERT( getNumRows() == arg.getNumRows() );
     ASSERT( getNumCols() == arg.getNumCols() );
@@ -561,7 +533,7 @@ Operator* Expression::product( const Operator *a, const Operator *b ) const{
 
 
 
-Expression Expression::operator*( const Expression& arg ) const{
+Expression Expression::mul( const Expression& arg ) const{
     if (getDim()==0 || arg.getDim()==0) return Expression();
     // uninitialized expressions yield uninitialized results
 
@@ -623,7 +595,7 @@ Expression Expression::operator*( const Expression& arg ) const{
 }
 
 
-Expression Expression::operator/( const Expression& arg ) const{
+Expression Expression::div( const Expression& arg ) const{
 
     ASSERT( arg.getNumRows() == 1 );
     ASSERT( arg.getNumCols() == 1 );
@@ -638,8 +610,6 @@ Expression Expression::operator/( const Expression& arg ) const{
     }
     return tmp;
 }
-
-
 
 Expression Expression::getInverse() const{
 
@@ -983,7 +953,7 @@ Expression Expression::getSumSquare( ) const{
 
     uint run1;
 
-    Expression result = transpose().operator*(*this);
+    Expression result = operator*(transpose(), *this);
 
     CurvatureType c = CT_CONSTANT;
     CurvatureType cc;
@@ -1715,45 +1685,6 @@ Expression& Expression::assignmentSetup( const Expression &arg ){
     }
     return *this;
 }
-
-
-Expression Expression::convert( const double& arg ) const{
-
-     Expression tmp("", 1, 1);
-     delete tmp.element[0];
-
-     tmp.element[0] = new DoubleConstant( arg, NE_NEITHER_ONE_NOR_ZERO );
-     return tmp;
-}
-
-
-Expression Expression::convert( const DVector& arg ) const{
-
-     uint run1;
-     Expression tmp("", arg.getDim(), 1);
-
-     for( run1 = 0; run1 < arg.getDim(); run1++ ){
-         delete tmp.element[run1];
-         tmp.element[run1] = new DoubleConstant( arg(run1), NE_NEITHER_ONE_NOR_ZERO );
-     }
-     return tmp;
-}
-
-
-Expression Expression::convert( const DMatrix& arg ) const{
-
-     uint run1,run2;
-	Expression tmp("", arg.getNumRows(), arg.getNumCols());
-
-     for( run1 = 0; run1 < arg.getNumRows(); run1++ ){
-         for( run2 = 0; run2 < arg.getNumCols(); run2++ ){
-             delete tmp.element[arg.getNumCols()*run1+run2];
-             tmp.element[arg.getNumCols()*run1+run2] = new DoubleConstant( arg(run1,run2), NE_NEITHER_ONE_NOR_ZERO );
-         }
-     }
-     return tmp;
-}
-
 
 BooleanType Expression::isDependingOn( VariableType type ) const{
 
