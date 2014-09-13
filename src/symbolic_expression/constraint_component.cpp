@@ -165,6 +165,115 @@ ConstraintComponent operator>=( VariablesGrid ub_, const ConstraintComponent &ar
     return tmp;
 }
 
+ConstraintComponent operator<=( const Expression& arg, const double& ub ) {
+
+    DVector ub_(arg.getDim());
+    ub_.setAll(ub);
+
+    return operator<=(arg, ub_);
+}
+
+ConstraintComponent operator>=( const Expression& arg, const double& lb ) {
+
+    DVector lb_(arg.getDim());
+    lb_.setAll(lb);
+
+    return operator>=(arg, lb_);
+}
+
+ConstraintComponent operator==( const Expression& arg, const double& b ) {
+
+    DVector b_(arg.getDim());
+    b_.setAll(b);
+
+    return operator==(arg, b_);
+}
+
+
+
+ConstraintComponent operator<=( const Expression& arg, const DVector& ub ) {
+
+    ConstraintComponent tmp;
+
+    DVector lb = ub;
+    lb.setAll(-INFTY);
+
+    tmp.initialize( lb, arg, ub );
+
+    return tmp;
+}
+
+
+ConstraintComponent operator>=( const Expression& arg, const DVector& lb ) {
+
+    ConstraintComponent tmp;
+
+    DVector ub = lb;
+    ub.setAll(INFTY);
+
+    tmp.initialize( lb, arg, ub );
+
+    return tmp;
+}
+
+
+ConstraintComponent operator==( const Expression& arg, const DVector& b ) {
+
+    ConstraintComponent tmp;
+
+    tmp.initialize( b, arg, b );
+    return tmp;
+}
+
+
+
+ConstraintComponent operator<=( const Expression& arg, const VariablesGrid& ub ) {
+
+    ConstraintComponent tmp;
+
+    VariablesGrid lb = ub;
+    lb.setAll(-INFTY);
+
+    tmp.initialize( lb, arg, ub );
+
+    return tmp;
+}
+
+
+ConstraintComponent operator>=( const Expression& arg, const VariablesGrid& lb ) {
+
+    ConstraintComponent tmp;
+
+    VariablesGrid ub = lb;
+    ub.setAll(INFTY);
+
+    tmp.initialize( lb, arg, ub );
+
+    return tmp;
+}
+
+
+ConstraintComponent operator==( const Expression& arg, const VariablesGrid& b ) {
+
+    ConstraintComponent tmp;
+
+    tmp.initialize( b, arg, b );
+    return tmp;
+}
+
+
+ConstraintComponent operator<=( double lb, const Expression &arg ){ return ( arg >= lb ); }
+ConstraintComponent operator>=( double ub, const Expression &arg ){ return ( arg <= ub ); }
+ConstraintComponent operator==( double  b, const Expression &arg ){ return ( arg == b  ); }
+
+ConstraintComponent operator<=( DVector lb, const Expression &arg ){ return ( arg >= lb ); }
+ConstraintComponent operator>=( DVector ub, const Expression &arg ){ return ( arg <= ub ); }
+ConstraintComponent operator==( DVector  b, const Expression &arg ){ return ( arg == b  ); }
+
+ConstraintComponent operator<=( VariablesGrid lb, const Expression &arg ){ return ( arg >= lb ); }
+ConstraintComponent operator>=( VariablesGrid ub, const Expression &arg ){ return ( arg <= ub ); }
+ConstraintComponent operator==( VariablesGrid b , const Expression &arg ){ return ( arg == b  ); }
+
 
 CLOSE_NAMESPACE_ACADO
 

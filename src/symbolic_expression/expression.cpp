@@ -34,9 +34,7 @@
 #include <acado/symbolic_expression/expression.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/symbolic_expression/acado_syntax.hpp>
-#include <acado/symbolic_expression/constraint_component.hpp>
 #include <acado/function/function.hpp>
-#include <acado/variables_grid/variables_grid.hpp>
 #include <acado/symbolic_operator/symbolic_operator.hpp>
 
 BEGIN_NAMESPACE_ACADO
@@ -133,114 +131,7 @@ Expression::Expression( const DMatrix& rhs )
 Expression:: Expression( const Expression& rhs ){ copy     ( rhs ); }
 Expression::~Expression(                       ){ deleteAll(     ); }
 
-ConstraintComponent Expression::operator<=( const double& ub ) const{
 
-    DVector ub_(getDim());
-    ub_.setAll(ub);
-
-    return operator<=(ub_);
-}
-
-ConstraintComponent Expression::operator>=( const double& lb ) const{
-
-    DVector lb_(getDim());
-    lb_.setAll(lb);
-
-    return operator>=(lb_);
-}
-
-ConstraintComponent Expression::operator==( const double& b ) const{
-
-    DVector b_(getDim());
-    b_.setAll(b);
-
-    return operator==(b_);
-}
-
-
-
-ConstraintComponent Expression::operator<=( const DVector& ub ) const{
-
-    ConstraintComponent tmp;
-
-    DVector lb = ub;
-    lb.setAll(-INFTY);
-
-    tmp.initialize( lb, *this, ub );
-
-    return tmp;
-}
-
-
-ConstraintComponent Expression::operator>=( const DVector& lb ) const{
-
-    ConstraintComponent tmp;
-
-    DVector ub = lb;
-    ub.setAll(INFTY);
-
-    tmp.initialize( lb, *this, ub );
-
-    return tmp;
-}
-
-
-ConstraintComponent Expression::operator==( const DVector& b ) const{
-
-    ConstraintComponent tmp;
-
-    tmp.initialize( b, *this, b );
-    return tmp;
-}
-
-
-
-ConstraintComponent Expression::operator<=( const VariablesGrid& ub ) const{
-
-    ConstraintComponent tmp;
-
-    VariablesGrid lb = ub;
-    lb.setAll(-INFTY);
-
-    tmp.initialize( lb, *this, ub );
-
-    return tmp;
-}
-
-
-ConstraintComponent Expression::operator>=( const VariablesGrid& lb ) const{
-
-    ConstraintComponent tmp;
-
-    VariablesGrid ub = lb;
-    ub.setAll(INFTY);
-
-    tmp.initialize( lb, *this, ub );
-
-    return tmp;
-}
-
-
-ConstraintComponent Expression::operator==( const VariablesGrid& b ) const{
-
-    ConstraintComponent tmp;
-
-    tmp.initialize( b, *this, b );
-    return tmp;
-}
-
-
-ConstraintComponent operator<=( double lb, const Expression &arg ){ return ( arg >= lb ); }
-ConstraintComponent operator>=( double ub, const Expression &arg ){ return ( arg <= ub ); }
-ConstraintComponent operator==( double  b, const Expression &arg ){ return ( arg == b  ); }
-
-ConstraintComponent operator<=( DVector lb, const Expression &arg ){ return ( arg >= lb ); }
-ConstraintComponent operator>=( DVector ub, const Expression &arg ){ return ( arg <= ub ); }
-ConstraintComponent operator==( DVector  b, const Expression &arg ){ return ( arg == b  ); }
-
-ConstraintComponent operator<=( VariablesGrid lb, const Expression &arg ){ return ( arg >= lb ); }
-ConstraintComponent operator>=( VariablesGrid ub, const Expression &arg ){ return ( arg <= ub ); }
-ConstraintComponent operator==( VariablesGrid b , const Expression &arg ){ return ( arg == b  ); }
 
 
 
@@ -336,8 +227,6 @@ std::ostream& operator<<( std::ostream& stream, const Expression &arg )
 {
     return arg.print(stream);
 }
-
-
 
 Expression Expression::operator()( uint idx ) const{
 

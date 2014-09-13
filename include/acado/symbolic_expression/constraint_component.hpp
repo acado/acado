@@ -157,12 +157,32 @@ protected:
     VariablesGrid  ubGrid      ;
 };
 
+ConstraintComponent operator<=( const Expression& arg, const double& ub );
+ConstraintComponent operator>=( const Expression& arg, const double& lb );
+ConstraintComponent operator==( const Expression& arg, const double&  b );
+
+ConstraintComponent operator<=( const Expression& arg, const DVector& ub );
+ConstraintComponent operator>=( const Expression& arg, const DVector& lb );
+ConstraintComponent operator==( const Expression& arg, const DVector&  b );
+
+ConstraintComponent operator<=( const Expression& arg, const VariablesGrid& ub );
+ConstraintComponent operator>=( const Expression& arg, const VariablesGrid& lb );
+ConstraintComponent operator==( const Expression& arg, const VariablesGrid&  b );
+
+ConstraintComponent operator<=( double lb, const Expression &arg );
+ConstraintComponent operator==( double  b, const Expression &arg );
+ConstraintComponent operator>=( double ub, const Expression &arg );
+
+ConstraintComponent operator<=( DVector lb, const Expression &arg );
+ConstraintComponent operator==( DVector  b, const Expression &arg );
+ConstraintComponent operator>=( DVector ub, const Expression &arg );
+
+ConstraintComponent operator<=( VariablesGrid lb, const Expression &arg );
+ConstraintComponent operator==( VariablesGrid  b, const Expression &arg );
+ConstraintComponent operator>=( VariablesGrid ub, const Expression &arg );
 
 CLOSE_NAMESPACE_ACADO
-
-
 
 #include <acado/symbolic_expression/constraint_component.ipp>
 
 #endif
-

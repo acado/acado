@@ -39,9 +39,7 @@
 
 BEGIN_NAMESPACE_ACADO
 
-class ConstraintComponent;
 class Operator;
-class VariablesGrid;
 
 /**
  *  \brief Base class for all variables within the symbolic expressions family.
@@ -55,165 +53,146 @@ class VariablesGrid;
  *
  *  \author Boris Houska, Hans Joachim Ferreau, Milan Vukov
  */
+class Expression
+{
+	friend class COperator;
+	friend class CFunction;
+	friend class FunctionEvaluationTree;
 
+public:
+	/** Default constructor. */
+	Expression( );
 
-class Expression{
+	/** Casting constructor. */
+	Expression( const Operator &tree_ );
 
+	/** Casting constructor. */
+	explicit Expression(	const std::string& name_
+							);
 
-    friend class COperator;
-    friend class CFunction;
-    friend class FunctionEvaluationTree;
+	/** Constructor which takes the arguments. */
+	explicit Expression(	const std::string&  name_,							/**< the name                */
+							uint          		nRows_,							/**< number of rows          */
+							uint          		nCols_,							/**< number of columns       */
+							VariableType  		variableType_  = VT_UNKNOWN,	/**< the variable type       */
+							uint          		globalTypeID   = 0				/**< the global type ID      */
+							);
 
-    //
-    // PUBLIC MEMBER FUNCTIONS:
-    //
+	/** Constructor which takes the arguments. */
+	explicit Expression(	int          nRows_                     ,  /**< number of rows          */
+							int          nCols_         = 1         ,  /**< number of columns       */
+							VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
+							int          globalTypeID   = 0            /**< the global type ID      */
+							);
 
-    public:
+	/** Constructor which takes the arguments. */
+	explicit Expression(	uint         nRows_                     ,  /**< number of rows          */
+							uint         nCols_         = 1         ,  /**< number of columns       */
+							VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
+							uint         globalTypeID   = 0            /**< the global type ID      */
+							);
 
-        /** Default constructor. */
-        Expression( );
+	/** Copy constructor (deep copy). */
+	Expression( const double& rhs );
+	Expression( const DVector      & rhs );
+	Expression( const DMatrix      & rhs );
+	Expression( const Expression  & rhs );
 
-        /** Casting constructor. */
-        Expression( const Operator &tree_ );
+	/** Destructor. */
+	virtual ~Expression( );
 
-        /** Casting constructor. */
-        explicit Expression(	const std::string& name_
-        						);
+	/** Function for cloning. */
+	virtual Expression* clone() const
+	{ return new Expression( *this ); }
 
-        /** Constructor which takes the arguments. */
-        explicit Expression(	const std::string&  name_,							/**< the name                */
-        						uint          		nRows_,							/**< number of rows          */
-        						uint          		nCols_,							/**< number of columns       */
-        						VariableType  		variableType_  = VT_UNKNOWN,	/**< the variable type       */
-        						uint          		globalTypeID   = 0				/**< the global type ID      */
-        						);
+	/** Assignment Operator.                         \n
+	 *                                               \n
+	 *  \param arg  the Expression to be assigned.   \n
+	 */
+	Expression& operator=( const Expression& arg );
 
-        /** Constructor which takes the arguments. */
-        explicit Expression(	int          nRows_                     ,  /**< number of rows          */
-        						int          nCols_         = 1         ,  /**< number of columns       */
-        						VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
-        						int          globalTypeID   = 0            /**< the global type ID      */
-        						);
+	Expression& operator<<( const double      & arg );
+	Expression& operator<<( const DVector      & arg );
+	Expression& operator<<( const DMatrix      & arg );
+	Expression& operator<<( const Expression  & arg );
 
-        /** Constructor which takes the arguments. */
-        explicit Expression(	uint         nRows_                     ,  /**< number of rows          */
-        						uint         nCols_         = 1         ,  /**< number of columns       */
-        						VariableType variableType_  = VT_UNKNOWN,  /**< the variable type       */
-        						uint         globalTypeID   = 0            /**< the global type ID      */
-        						);
-
-        /** Copy constructor (deep copy). */
-        Expression( const double& rhs );
-        Expression( const DVector      & rhs );
-        Expression( const DMatrix      & rhs );
-        Expression( const Expression  & rhs );
-
-        /** Destructor. */
-        virtual ~Expression( );
-
-        /** Function for cloning. */
-        virtual Expression* clone() const
-        { return new Expression( *this ); }
-
-        /** Assignment Operator.                         \n
-         *                                               \n
-         *  \param arg  the Expression to be assigned.   \n
-         */
-        Expression& operator=( const Expression& arg );
-
-        Expression& operator<<( const double      & arg );
-        Expression& operator<<( const DVector      & arg );
-        Expression& operator<<( const DMatrix      & arg );
-        Expression& operator<<( const Expression  & arg );
-
-	/**
-	Appends an Expression matrix (n x m)
+	/** Appends an Expression matrix (n x m)
 	with an argument matrix (s x m) in the row direction,
 	such that the result is ( (n + s) x m).
 	
 	As a special case, when applied on an empty Expression,
-	the Expression will be assigned the argument.
-	
-	
-	*/
+	the Expression will be assigned the argument. */
 	Expression&  appendRows(const Expression& arg);
 	
-	/**
-	Appends an Expression matrix (n x m)
+	/** Appends an Expression matrix (n x m)
 	with an argument matrix (n x s) in the column direction,
 	such that the result is ( n x (m + s) ).
 	
 	As a special case, when applied on an empty Expression,
-	the Expression will be assigned the argument.
-	
-	*/
+	the Expression will be assigned the argument. */
 	Expression&  appendCols(const Expression& arg);
 
-        Expression operator()( uint idx                 ) const;
-        Expression operator()( uint rowIdx, uint colIdx ) const;
+	Expression operator()( uint idx                 ) const;
+	Expression operator()( uint rowIdx, uint colIdx ) const;
 
-        Operator& operator()( uint idx                 );
-        Operator& operator()( uint rowIdx, uint colIdx );
+	Operator& operator()( uint idx                 );
+	Operator& operator()( uint rowIdx, uint colIdx );
 
-        friend Expression operator+( const Expression  & arg1, const Expression  & arg2 );
-        friend Expression operator-( const Expression  & arg1, const Expression  & arg2 );
-        Expression operator-( ) const;
-        friend Expression operator*( const Expression  & arg1, const Expression  & arg2 );
-        friend Expression operator/( const Expression  & arg1, const Expression  & arg2 );
+	friend Expression operator+( const Expression  & arg1, const Expression  & arg2 );
+	friend Expression operator-( const Expression  & arg1, const Expression  & arg2 );
+	Expression operator-( ) const;
+	friend Expression operator*( const Expression  & arg1, const Expression  & arg2 );
+	friend Expression operator/( const Expression  & arg1, const Expression  & arg2 );
 
-        Expression& operator+=(const Expression &arg);
-        Expression& operator-=(const Expression &arg);
-        Expression& operator*=(const Expression &arg);
-        Expression& operator/=(const Expression &arg);
+	Expression& operator+=(const Expression &arg);
+	Expression& operator-=(const Expression &arg);
+	Expression& operator*=(const Expression &arg);
+	Expression& operator/=(const Expression &arg);
 
-        std::ostream& print( std::ostream &stream ) const;
-        friend std::ostream& operator<<( std::ostream& stream, const Expression &arg );
+	std::ostream& print( std::ostream &stream ) const;
+	friend std::ostream& operator<<( std::ostream& stream, const Expression &arg );
 
-        /** Returns the symbolic inverse of a matrix (only for square matrices) */
-        Expression getInverse( ) const;
-
-        Expression getRow( const uint& rowIdx ) const;
-        Expression getRows( const uint& rowIdx1, const uint& rowIdx2 ) const;
-        Expression getCol( const uint& colIdx ) const;
-        Expression getCols( const uint& colIdx1, const uint& colIdx2 ) const;
-        Expression getSubMatrix( const uint& rowIdx1, const uint& rowIdx2, const uint& colIdx1, const uint& colIdx2 ) const;
+	/** Returns the symbolic inverse of a matrix (only for square matrices) */
+	Expression getInverse( ) const;
 	
+	Expression getRow( const uint& rowIdx ) const;
+	Expression getRows( const uint& rowIdx1, const uint& rowIdx2 ) const;
+	Expression getCol( const uint& colIdx ) const;
+	Expression getCols( const uint& colIdx1, const uint& colIdx2 ) const;
+	Expression getSubMatrix( const uint& rowIdx1, const uint& rowIdx2, const uint& colIdx1, const uint& colIdx2 ) const;
 	
-        /**
-	* When operated on an n x 1 Expression, returns an m x n DMatrix.
+	/** When operated on an n x 1 Expression, returns an m x n DMatrix.
 	* The element (i,j) of this matrix is zero when this(i) does not depend on arg(j)
 	* \param arg m x 1 Expression
 	*/
-        DMatrix getDependencyPattern( const Expression& arg ) const;
+	DMatrix getDependencyPattern( const Expression& arg ) const;
 
-        DMatrix getSparsityPattern() const;
+	DMatrix getSparsityPattern() const;
 
-        Expression getSin    ( ) const;
-        Expression getCos    ( ) const;
-        Expression getTan    ( ) const;
-        Expression getAsin   ( ) const;
-        Expression getAcos   ( ) const;
-        Expression getAtan   ( ) const;
-        Expression getExp    ( ) const;
-        Expression getSqrt   ( ) const;
-        Expression getLn     ( ) const;
+	Expression getSin    ( ) const;
+	Expression getCos    ( ) const;
+	Expression getTan    ( ) const;
+	Expression getAsin   ( ) const;
+	Expression getAcos   ( ) const;
+	Expression getAtan   ( ) const;
+	Expression getExp    ( ) const;
+	Expression getSqrt   ( ) const;
+	Expression getLn     ( ) const;
 
-        Expression getPow   ( const Expression &arg ) const;
-        Expression getPowInt( const int        &arg ) const;
+	Expression getPow   ( const Expression &arg ) const;
+	Expression getPowInt( const int        &arg ) const;
 
-        Expression getSumSquare    ( ) const;
-        Expression getLogSumExp    ( ) const;
-        Expression getEuclideanNorm( ) const;
-        Expression getEntropy      ( ) const;
+	Expression getSumSquare    ( ) const;
+	Expression getLogSumExp    ( ) const;
+	Expression getEuclideanNorm( ) const;
+	Expression getEntropy      ( ) const;
 
-        Expression getDot          ( ) const;
-        Expression getNext         ( ) const;
+	Expression getDot          ( ) const;
+	Expression getNext         ( ) const;
 
-
-        Expression ADforward  ( const Expression &arg ) const;
-        Expression ADforward  ( const VariableType &varType_, const int *arg, int nV ) const;
-        Expression ADbackward ( const Expression &arg ) const;
-	
+	Expression ADforward  ( const Expression &arg ) const;
+	Expression ADforward  ( const VariableType &varType_, const int *arg, int nV ) const;
+	Expression ADbackward ( const Expression &arg ) const;
 	
 	/** Second order symmetric AD routine returning \n
 	 *  S^T*(l^T*f'')*S  with f'' being the second  \n
@@ -232,14 +211,13 @@ class Expression{
 	 * forward differentiation may be more          \n
 	 * efficient.                                   \n
 	 */
-	Expression ADsymmetric( const Expression &arg, /** argument      */
-				 const Expression &S  , /** forward seed  */
-				 const Expression &l  , /** backward seed */
-				 Expression *dfS = 0,    /** first order forward  result */
-				 Expression *ldf = 0    /** first order backward result */
-			       ) const;
+	Expression ADsymmetric(	const Expression &arg, /** argument      */
+				 	 	 	const Expression &S  , /** forward seed  */
+				 	 	 	const Expression &l  , /** backward seed */
+				 	 	 	Expression *dfS = 0,    /** first order forward  result */
+				 	 	 	Expression *ldf = 0    /** first order backward result */
+							) const;
 	
-	       
 	/** Second order symmetric AD routine returning \n
 	 *  l^T*f''  with f'' being the second          \n
 	 * order derivative of the current expression.  \n
@@ -258,145 +236,96 @@ class Expression{
 	 * efficient.                                   \n
 	 */
 	Expression ADsymmetric( const Expression &arg, /** argument      */
-				 const Expression &l  , /** backward seed */
-				 Expression *dfS = 0,    /** first order forward  result */
-				 Expression *ldf = 0    /** first order backward result */
-			       ) const;
-	
+							const Expression &l  , /** backward seed */
+							Expression *dfS = 0,    /** first order forward  result */
+							Expression *ldf = 0    /** first order backward result */
+							) const;
 	
 	Expression getODEexpansion( const int &order, const int *arg ) const;
 
-        Expression ADforward ( const Expression &arg, const Expression &seed ) const;
-        Expression ADforward ( const VariableType &varType_, const int *arg, const Expression &seed ) const;
-        Expression ADforward ( const VariableType *varType_, const int *arg, const Expression &seed ) const;
-        Expression ADbackward( const Expression &arg, const Expression &seed ) const;
+	Expression ADforward ( const Expression &arg, const Expression &seed ) const;
+	Expression ADforward ( const VariableType &varType_, const int *arg, const Expression &seed ) const;
+	Expression ADforward ( const VariableType *varType_, const int *arg, const Expression &seed ) const;
+	Expression ADbackward( const Expression &arg, const Expression &seed ) const;
+
+	/** Returns the transpose of this expression.
+	 *  \return The transposed expression. */
+	Expression transpose( ) const;
+
+	/** Returns dimension of vector space.
+	 *  \return Dimension of vector space. */
+	inline uint getDim( ) const;
 
 
-        ConstraintComponent operator<=( const double& ub ) const;
-        ConstraintComponent operator>=( const double& lb ) const;
-        ConstraintComponent operator==( const double&  b ) const;
-
-        ConstraintComponent operator<=( const DVector& ub ) const;
-        ConstraintComponent operator>=( const DVector& lb ) const;
-        ConstraintComponent operator==( const DVector&  b ) const;
-
-        ConstraintComponent operator<=( const VariablesGrid& ub ) const;
-        ConstraintComponent operator>=( const VariablesGrid& lb ) const;
-        ConstraintComponent operator==( const VariablesGrid&  b ) const;
-
-        friend ConstraintComponent operator<=( double lb, const Expression &arg );
-        friend ConstraintComponent operator==( double  b, const Expression &arg );
-        friend ConstraintComponent operator>=( double ub, const Expression &arg );
-
-        friend ConstraintComponent operator<=( DVector lb, const Expression &arg );
-        friend ConstraintComponent operator==( DVector  b, const Expression &arg );
-        friend ConstraintComponent operator>=( DVector ub, const Expression &arg );
-
-        friend ConstraintComponent operator<=( VariablesGrid lb, const Expression &arg );
-        friend ConstraintComponent operator==( VariablesGrid  b, const Expression &arg );
-        friend ConstraintComponent operator>=( VariablesGrid ub, const Expression &arg );
+	/** Returns the number of rows.
+	 *  \return The number of rows. */
+	inline uint getNumRows( ) const;
 
 
-
-        /** Returns the transpose of this expression.
-         *  \return The transposed expression. */
-         Expression transpose( ) const;
-
+	/** Returns the number of columns.
+	 *  \return The number of columns. */
+	inline uint getNumCols( ) const;
 
 
-        /** Returns dimension of vector space.
-         *  \return Dimension of vector space. */
-         inline uint getDim( ) const;
+	/** Returns the global type idea of the idx-component.
+	 *  \return The global type ID. */
+	inline uint getComponent( const unsigned int idx ) const;
 
 
-        /** Returns the number of rows.
-         *  \return The number of rows. */
-         inline uint getNumRows( ) const;
+	/** Returns the number of columns.
+	 *  \return The number of columns. */
+	inline BooleanType isVariable( ) const;
 
 
-        /** Returns the number of columns.
-         *  \return The number of columns. */
-         inline uint getNumCols( ) const;
+	/** Returns a clone of the operator with index idx.
+	 *  \return A clone of the requested operator. */
+	Operator* getOperatorClone( uint idx ) const;
 
+	/** Returns the variable type
+	 *  \return The the variable type. */
+	inline VariableType getVariableType( ) const;
 
-        /** Returns the global type idea of the idx-component.
-         *  \return The global type ID. */
-         inline uint getComponent( const unsigned int idx ) const;
+	BooleanType isDependingOn( VariableType type ) const;
+	BooleanType isDependingOn(const  Expression &e ) const;
 
+	/** Substitutes a given variable with an expression.
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	returnValue substitute( int idx, const Expression &arg ) const;
 
-        /** Returns the number of columns.
-         *  \return The number of columns. */
-         inline BooleanType isVariable( ) const;
+protected:
 
+	Expression add(const Expression& arg) const;
+	Expression sub(const Expression& arg) const;
+	Expression mul(const Expression& arg) const;
+	Expression div(const Expression& arg) const;
 
-        /** Returns a clone of the operator with index idx.
-         *  \return A clone of the requested operator. */
-         Operator* getOperatorClone( uint idx ) const;
+	/** Generic constructor (protected, only for internal use). */
+	void construct( VariableType  variableType_,  /**< The variable type.     */
+					uint          globalTypeID_,  /**< the global type ID     */
+					uint                 nRows_,  /**< The number of rows.    */
+					uint                 nCols_,  /**< The number of columns. */
+					const std::string&   name_    /**< The name               */ );
 
+	/** Generic copy routine (protected, only for internal use). */
+	void copy( const Expression &rhs );
 
+	/** Generic destructor (protected, only for internal use). */
+	void deleteAll( );
 
-        /** Returns the variable type
-         *  \return The the variable type. */
-         inline VariableType getVariableType( ) const;
+	/** Generic copy routine (protected, only for internal use).
+	 */
+	Expression& assignmentSetup( const Expression &arg );
 
+	/** Internal product routine (protected, only for internal use). */
+	Operator* product( const Operator *a, const Operator *b ) const;
 
-         BooleanType isDependingOn( VariableType type ) const;
-         BooleanType isDependingOn(const  Expression &e ) const;
-
-
-        /** Substitutes a given variable with an expression.
-         *  \return SUCCESSFUL_RETURN
-         */
-        returnValue substitute( int idx, const Expression &arg ) const;
-
-        Expression add(const Expression& arg) const;
-        Expression sub(const Expression& arg) const;
-        Expression mul(const Expression& arg) const;
-        Expression div(const Expression& arg) const;
-
-    // PROTECTED FUNCTIONS:
-    // ---------------------------------------------------------------
-    protected:
-
-
-        /** Generic constructor (protected, only for internal use).
-         */
-        void construct( VariableType  variableType_,  /**< The variable type.     */
-                        uint          globalTypeID_,  /**< the global type ID     */
-                        uint                 nRows_,  /**< The number of rows.    */
-                        uint                 nCols_,  /**< The number of columns. */
-                        const std::string&   name_    /**< The name               */ );
-
-
-        /** Generic copy routine (protected, only for internal use).
-         */
-        void copy( const Expression &rhs );
-
-
-        /** Generic destructor (protected, only for internal use).
-         */
-        void deleteAll( );
-
-
-        /** Generic copy routine (protected, only for internal use).
-         */
-        Expression& assignmentSetup( const Expression &arg );
-
-
-        /** Internal product routine (protected, only for internal use). */
-        Operator* product( const Operator *a, const Operator *b ) const;
-
-
-    // PROTECTED DATA MEMBERS:
-    // ---------------------------------------------------------------
-    protected:
-
-        Operator**         element     ;   /**< Element of vector space.   */
-        uint               dim         ;   /**< DVector space dimension.    */
-        uint               nRows, nCols;   /**< DMatrix dimension.          */
-        VariableType       variableType;   /**< Variable type.             */
-        uint               component   ;   /**< The expression component   */
-        std::string             name   ;   /**< The name of the expression */
+	Operator**         element     ;   /**< Element of vector space.   */
+	uint               dim         ;   /**< DVector space dimension.    */
+	uint               nRows, nCols;   /**< DMatrix dimension.          */
+	VariableType       variableType;   /**< Variable type.             */
+	uint               component   ;   /**< The expression component   */
+	std::string             name   ;   /**< The name of the expression */
 };
 
 CLOSE_NAMESPACE_ACADO
@@ -491,7 +420,3 @@ unsigned ExpressionType<Derived, Type, AllowCounter>::count( 0 );
 CLOSE_NAMESPACE_ACADO
 
 #endif  // ACADO_TOOLKIT_EXPRESSION_HPP
-
-/*
- *   end of file.
- */
