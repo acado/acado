@@ -180,6 +180,56 @@ public:
 	TIME() : Base() {}
 };
 
+/** Intermediate variable. */
+class IntermediateState : public ExpressionType<IntermediateState, VT_INTERMEDIATE_STATE>
+{
+	typedef ExpressionType<IntermediateState, VT_INTERMEDIATE_STATE> Base;
+
+public:
+	IntermediateState() : Base() {}
+
+	/** Default constructor */
+	explicit IntermediateState(const std::string& _name, uint _nRows, uint _nCols)
+		: Base(_name, _nRows, _nCols)
+	{}
+
+	/** Default constructor */
+	explicit IntermediateState(const std::string& _name)
+		: Base(_name, 1, 1)
+	{}
+
+	/** Default constructor */
+	explicit IntermediateState( unsigned _nRows, unsigned _nCols = 1)
+		: Base("", _nRows, _nCols)
+	{}
+
+	/** Default constructor */
+	explicit IntermediateState( int _nRows, int _nCols = 1)
+		: Base("", _nRows, _nCols)
+	{}
+
+	/** Copy constructor (deep copy). */
+	IntermediateState( const double& _arg )
+		: Base( _arg )
+	{}
+
+	IntermediateState( const DVector& _arg )
+		: Base( _arg )
+	{}
+
+	IntermediateState( const DMatrix& _arg )
+		: Base( _arg )
+	{}
+
+	IntermediateState( const Operator& _arg )
+		: Base( _arg )
+	{}
+
+	IntermediateState( const Expression& _arg )
+		: Base( _arg )
+	{}
+};
+
 CLOSE_NAMESPACE_ACADO
 
 #endif // ACADO_TOOLKIT_VARIABLE_TYPES_HPP

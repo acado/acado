@@ -36,7 +36,6 @@
 
 #include <acado/symbolic_expression/expression.hpp>
 #include <acado/symbolic_expression/variable_types.hpp>
-#include <acado/symbolic_expression/intermediate_state.hpp>
 
 /** Syntax of the ACADO toolkit symbolic core.
  *

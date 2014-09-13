@@ -450,6 +450,26 @@ public:
 			count++;
 	}
 
+	/** The constructor from a scalar number. */
+	ExpressionType( const double& _arg )
+		: Expression( _arg )
+	{}
+
+	/** The constructor from a vector. */
+	ExpressionType( const DVector& _arg )
+		: Expression( _arg )
+	{}
+
+	/** The constructor from a matrix. */
+	ExpressionType( const DMatrix& _arg )
+		: Expression( _arg )
+	{}
+
+	/** The constructor from an operator. */
+	ExpressionType( const Operator& _arg )
+		: Expression( _arg )
+	{}
+
 	/** Destructor. */
 	virtual ~ExpressionType() {}
 
