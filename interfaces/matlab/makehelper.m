@@ -225,7 +225,7 @@ PARALLEL = 0;
                 
             end
         end
-		ACADOLIB = [pwd filesep 'bin/src/*.obj ' pwd filesep 'bin/qpOASES/*.obj'];
+		ACADOLIB = [pwd filesep 'bin/src/*' ext ' ' pwd filesep 'bin/qpOASES/*' ext];
 
 
         % Mex files
