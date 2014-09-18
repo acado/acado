@@ -105,15 +105,10 @@ public:
 	virtual Expression* clone() const
 	{ return new Expression( *this ); }
 
-	/** Assignment Operator.                         \n
-	 *                                               \n
-	 *  \param arg  the Expression to be assigned.   \n
-	 */
+	/** Assignment Operator. */
 	Expression& operator=( const Expression& arg );
 
-	Expression& operator<<( const double      & arg );
-	Expression& operator<<( const DVector      & arg );
-	Expression& operator<<( const DMatrix      & arg );
+	/** An operator for adding elements. */
 	Expression& operator<<( const Expression  & arg );
 
 	/** Appends an Expression matrix (n x m)
@@ -256,26 +251,21 @@ public:
 	 *  \return Dimension of vector space. */
 	inline uint getDim( ) const;
 
-
 	/** Returns the number of rows.
 	 *  \return The number of rows. */
 	inline uint getNumRows( ) const;
-
 
 	/** Returns the number of columns.
 	 *  \return The number of columns. */
 	inline uint getNumCols( ) const;
 
-
 	/** Returns the global type idea of the idx-component.
 	 *  \return The global type ID. */
 	inline uint getComponent( const unsigned int idx ) const;
 
-
 	/** Returns the number of columns.
 	 *  \return The number of columns. */
 	inline BooleanType isVariable( ) const;
-
 
 	/** Returns a clone of the operator with index idx.
 	 *  \return A clone of the requested operator. */
@@ -288,9 +278,7 @@ public:
 	BooleanType isDependingOn( VariableType type ) const;
 	BooleanType isDependingOn(const  Expression &e ) const;
 
-	/** Substitutes a given variable with an expression.
-	 *  \return SUCCESSFUL_RETURN
-	 */
+	/** Substitutes a given variable with an expression. */
 	returnValue substitute( int idx, const Expression &arg ) const;
 
 protected:
