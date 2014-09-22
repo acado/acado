@@ -9,6 +9,10 @@ input
 	grid2: ...
 	grid3: ...
 	grid4: ...
+	reset: optional
+		0: reset nothing and reuse factorization
+		1: keep memory but recompute the factorization; default behaviour (!!)
+		2: reset all memory + recompute the factorization
 }
 
 output: states
@@ -163,6 +167,7 @@ void setArray( 	mxArray* destination,
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     int error, reset, c, i, j, k;
+	double tmp[ 1 ];
 	const mxArray* src = prhs[ 0 ];
     real_t *xnext, *sensX, *sensU, *sens2, *grid, *mat;
     real_t x[ACADO_NX+ACADO_NXA];
@@ -269,7 +274,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		#endif  
     #endif     
     
-    reset = 1;
+	/* Get the reset flag. */
+	if (getArray(0, src, 0, "reset", tmp, 1, 1) == 0)
+		reset = (unsigned)tmp[ 0 ];
+	else
+		reset = 1;
+    
+    if reset > 1
+		memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));
+    end
     
     #if SENS_PROP == 3
 		for( i = 0; i < ACADO_NX; ++i ) {
