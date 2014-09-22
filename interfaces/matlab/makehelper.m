@@ -133,7 +133,7 @@ PARALLEL = 0;
         CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -O ' ];    
     elseif (ismac)
         % Other compilers
-        CPPFLAGS  = [ IFLAGS, ' CXXFLAGS=''\$CXXFLAGS -fPIC'' -DLINUX -D__cpluplus -D__MATLAB__ -O ' ];
+        CPPFLAGS  = [ IFLAGS, ' LDFLAGS=''\$LDFLAGS -stdlib=libstdc++'' CXXFLAGS=''\$CXXFLAGS -fPIC -stdlib=libstdc++'' -DLINUX -D__cpluplus -D__MATLAB__ -O ' ];
     else
         % Other compilers
         CPPFLAGS  = [ IFLAGS, ' CXXFLAGS=''\$CXXFLAGS -fPIC -Wno-c++11-compat -Wno-unused-comparison'' -DLINUX -D__cpluplus -D__MATLAB__ -O ' ];
