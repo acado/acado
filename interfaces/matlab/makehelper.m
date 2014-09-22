@@ -193,10 +193,14 @@ PARALLEL = 0;
         addTemplates;
         
         % C++ files
+        CBINFILES = [];
         nFiles = length(SRC);
         progressInPercent = 10;
         
         if PARALLEL 
+            for i = 1:nFiles
+                CBINFILES = [CBINFILES ' ' '''' pwd filesep BIN_FOLDER BINFOLDER{i} BIN{i} ext ''''];
+            end
             parfor i = 1:nFiles
                 force_compilation = check_to_compile (SRC{i}, [BIN_FOLDER, BINFOLDER{i} BIN{i}, ext], FORCE) ;
                 if (force_compilation)
@@ -223,10 +227,14 @@ PARALLEL = 0;
                     progressInPercent = progressInPercent+10 ;
                 end
                 
+                CBINFILES = [CBINFILES ' ' '''' pwd filesep BIN_FOLDER BINFOLDER{i} BIN{i} ext ''''];
             end
         end
-		ACADOLIB = [pwd filesep 'bin/src/*' ext ' ' pwd filesep 'bin/qpOASES/*' ext];
-
+        if ispc
+            ACADOLIB = [pwd filesep 'bin/src/*' ext ' ' pwd filesep 'bin/qpOASES/*' ext];
+        else
+            ACADOLIB = CBINFILES;
+        end
 
         % Mex files
         for i = 1:length (SRCMEX)
