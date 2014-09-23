@@ -49,53 +49,43 @@ Expression::Expression()
 	construct(VT_UNKNOWN, 0, 0, 0, "");
 }
 
-Expression::Expression(	const std::string& name_,
-						uint nRows_,
-						uint nCols_,
-						VariableType variableType_,
-						uint globalTypeID)
+Expression::Expression(const std::string& name_, uint nRows_, uint nCols_, VariableType variableType_, uint globalTypeID)
 {
 	construct(variableType_, globalTypeID, nRows_, nCols_, name_);
 }
 
-Expression::Expression( const std::string &name_ )
+Expression::Expression(const std::string &name_)
 {
 	construct(VT_UNKNOWN, 0, 0, 0, name_);
 }
 
-Expression::Expression( uint nRows_, uint nCols_, VariableType variableType_, uint globalTypeID){
+Expression::Expression(uint nRows_, uint nCols_, VariableType variableType_, uint globalTypeID)
+{
+	construct(variableType_, globalTypeID, nRows_, nCols_, "");
+}
 
-       construct( variableType_, globalTypeID, nRows_, nCols_, "" );
-   }
-
-Expression::Expression( int nRows_, int nCols_, VariableType variableType_, int globalTypeID){
-
-       construct( variableType_, globalTypeID, nRows_, nCols_, "" );
-   }
+Expression::Expression(int nRows_, int nCols_, VariableType variableType_, int globalTypeID)
+{
+	construct(variableType_, globalTypeID, nRows_, nCols_, "");
+}
 
 Expression::Expression(const Operator &tree_)
 {
 	VariableType tmpType;
 	int tmpComp;
 
-	if (tree_.isVariable(tmpType, tmpComp) == BT_TRUE) {
-
+	if (tree_.isVariable(tmpType, tmpComp) == BT_TRUE)
+	{
 		construct(tmpType, tmpComp, 1, 1, "");
-	} else {
-
+	}
+	else
+	{
 		construct(VT_UNKNOWN, 0, 1, 1, "");
 	}
 
 	delete element[0];
 	element[0] = tree_.clone();
 }
-
-
-
-// ---------------------------------------------------------------------------------------------------
-//                                 IMPLEMENTATION OF THE CONSTRUCTORS:
-// ---------------------------------------------------------------------------------------------------
-
 
 Expression::Expression( const double& rhs )
 {
@@ -128,27 +118,24 @@ Expression::Expression( const DMatrix& rhs )
 	}
 }
 
-Expression:: Expression( const Expression& rhs ){ copy     ( rhs ); }
-Expression::~Expression(                       ){ deleteAll(     ); }
+Expression::Expression(const Expression& rhs)
+{
+	copy(rhs);
+}
 
+Expression::~Expression()
+{
+	deleteAll();
+}
 
-
-
-
-Expression& Expression::operator=( const Expression& rhs ){
-
-    if( this != &rhs ){
-
-        deleteAll();
-        copy(rhs);
-    }
-    return *this;
-
-//     if( dim == 0 ){
-//         nRows = rhs.getNumRows();
-//         nCols = rhs.getNumCols();
-//     }
-//     return assignmentSetup( rhs );
+Expression& Expression::operator=( const Expression& rhs )
+{
+	if (this != &rhs)
+	{
+		deleteAll();
+		copy(rhs);
+	}
+	return *this;
 }
 
 Expression&  Expression::appendRows(const Expression& arg) {
@@ -1506,23 +1493,62 @@ void Expression::construct( VariableType variableType_, uint globalTypeID, uint 
 }
 
 
-void Expression::copy( const Expression &rhs ){
+void Expression::copy(const Expression &rhs)
+{
+	nRows = rhs.nRows;
+	nCols = rhs.nCols;
+	dim = rhs.dim;
+	variableType = rhs.variableType;
+	component = rhs.component;
 
-    nRows        = rhs.nRows       ;
-    nCols        = rhs.nCols       ;
-    dim          = rhs.dim         ;
-    variableType = rhs.variableType;
-    component    = rhs.component   ;
-    
-    uint i;
-    element = (Operator**)calloc(dim,sizeof(Operator*));
+	uint i;
+	element = (Operator**) calloc(dim, sizeof(Operator*));
 
-    for( i = 0; i < dim; i++ ){
-         if( rhs.element[i] != 0 )  element[i] = rhs.element[i]->clone();
-         else                       element[i] = 0;
-    }
-	
+	for (i = 0; i < dim; i++)
+	{
+		if (rhs.element[i] != 0)
+			element[i] = rhs.element[i]->clone();
+		else
+			element[i] = 0;
+	}
+
 	// Name not copied?
+}
+
+Expression& Expression::assignmentSetup(const Expression &arg)
+{
+	deleteAll();
+	nRows = arg.getNumRows();
+	nCols = arg.getNumCols();
+	dim = nRows * nCols;
+	variableType = VT_INTERMEDIATE_STATE;
+
+	element = (Operator**) calloc(dim, sizeof(Operator*));
+
+	VariableType tt = VT_UNKNOWN;
+	int comp = 0;
+
+	for (uint i = 0; i < dim; i++)
+	{
+		arg.element[i]->isVariable(tt, comp);
+		if (tt == VT_INTERMEDIATE_STATE)
+			element[i] = arg.element[i]->clone();
+		else
+		{
+			std::stringstream tmpName;
+			if (name.empty() == false)
+			{
+				if (dim > 1)
+					tmpName << name << "[" << i << "]";
+				else
+					tmpName << name;
+			}
+			TreeProjection tmp(tmpName.str());
+			tmp.operator=(*(arg.element[i]));
+			element[i] = tmp.clone();
+		}
+	}
+	return *this;
 }
 
 
@@ -1538,42 +1564,7 @@ void Expression::deleteAll( ){
 }
 
 
-Expression& Expression::assignmentSetup( const Expression &arg ){
 
-    ASSERT( nRows == arg.getNumRows() && nCols == arg.getNumCols() );
-
-    deleteAll();
-    nRows        = arg.getNumRows()     ;
-    nCols        = arg.getNumCols()     ;
-    dim          = nRows*nCols          ;
-    variableType = VT_INTERMEDIATE_STATE;
-
-    element = (Operator**)calloc(dim,sizeof(Operator*));
-
-    VariableType tt = VT_UNKNOWN; int comp = 0;
-
-    for( uint i = 0; i < dim; i++ ){
-
-		arg.element[i]->isVariable(tt, comp);
-		if (tt == VT_INTERMEDIATE_STATE)
-			element[i] = arg.element[i]->clone();
-		else
-		{
-			std::stringstream tmpName;
-			if (name.empty() == false)
-			{
-				if (dim > 1)
-					tmpName << name << "[" << i << "]";
-				else
-					tmpName << name;
-			}
-			TreeProjection tmp( tmpName.str() );
-			tmp.operator=( *(arg.element[ i ]) );
-			element[i] = tmp.clone();
-		}
-    }
-    return *this;
-}
 
 BooleanType Expression::isDependingOn( VariableType type ) const{
 
