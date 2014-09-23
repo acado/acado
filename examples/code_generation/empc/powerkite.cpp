@@ -1,5 +1,5 @@
 
-#include <acado_toolkit.hpp>
+#include <acado_code_generation.hpp>
 
 USING_NAMESPACE_ACADO
 
