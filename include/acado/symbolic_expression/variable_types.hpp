@@ -210,24 +210,34 @@ public:
 
 	/** Copy constructor (deep copy). */
 	IntermediateState( const double& _arg )
-		: Base( _arg )
-	{}
+		: Base( )
+	{
+		assignmentSetup( _arg );
+	}
 
 	IntermediateState( const DVector& _arg )
-		: Base( _arg )
-	{}
+		: Base( )
+	{
+		assignmentSetup( _arg );
+	}
 
 	IntermediateState( const DMatrix& _arg )
-		: Base( _arg )
-	{}
+		: Base( )
+	{
+		assignmentSetup( _arg );
+	}
 
 	IntermediateState( const Operator& _arg )
-		: Base( _arg )
-	{}
+		: Base( )
+	{
+		assignmentSetup( _arg );
+	}
 
 	IntermediateState( const Expression& _arg )
-		: Base( _arg )
-	{}
+		: Base( )
+	{
+		assignmentSetup( _arg );
+	}
 };
 
 CLOSE_NAMESPACE_ACADO
