@@ -133,7 +133,7 @@ PARALLEL = 0;
         CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -O ' ];    
     elseif (ismac)
         % Other compilers
-        CPPFLAGS  = [ IFLAGS, ' CXXFLAGS=''\$CXXFLAGS -fPIC'' -DLINUX -D__cpluplus -D__MATLAB__ -O ' ];
+        CPPFLAGS  = [ IFLAGS, ' LDFLAGS=''\$LDFLAGS -stdlib=libstdc++'' CXXFLAGS=''\$CXXFLAGS -fPIC -stdlib=libstdc++'' -DLINUX -D__cpluplus -D__MATLAB__ -O ' ];
     else
         % Other compilers
         CPPFLAGS  = [ IFLAGS, ' CXXFLAGS=''\$CXXFLAGS -fPIC -Wno-c++11-compat -Wno-unused-comparison'' -DLINUX -D__cpluplus -D__MATLAB__ -O ' ];
@@ -230,15 +230,18 @@ PARALLEL = 0;
                 CBINFILES = [CBINFILES ' ' '''' pwd filesep BIN_FOLDER BINFOLDER{i} BIN{i} ext ''''];
             end
         end
-
-
+        if ispc
+            ACADOLIB = [pwd filesep 'bin/src/*' ext ' ' pwd filesep 'bin/qpOASES/*' ext];
+        else
+            ACADOLIB = CBINFILES;
+        end
 
         % Mex files
         for i = 1:length (SRCMEX)
             force_compilation = check_to_compile (SRCMEX{i}, [BINFOLDERMEX{i}, BINMEX{i}, extmex], FORCE) ;
             if (force_compilation || counter > 0 || strcmp(BINMEX{i}, 'ACADOintegrators'))  
                 cmd = sprintf ('mex -O %s %s %s %s -outdir %s -output %s', ...
-                    DEBUGFLAGS, CPPFLAGS, SRCMEX{i}, CBINFILES, BINFOLDERMEX{i}, [BINMEX{i}, extmex]) ;
+                    DEBUGFLAGS, CPPFLAGS, SRCMEX{i}, ACADOLIB, BINFOLDERMEX{i}, [BINMEX{i}, extmex]) ;
                 execute_command (cmd, DEBUG, SRCMEX{i}, ~PARALLEL) ;
                 counter = counter + 1 ;
             end
@@ -248,7 +251,7 @@ PARALLEL = 0;
         % Compile option files with "makemex"
         if (~isempty(optmake) && ~isempty(optmake.mexfile) && ~isempty(optmake.outputname))
             cmd = sprintf ('mex -O %s %s %s %s -outdir %s -output %s', ...
-                DEBUGFLAGS, CPPFLAGS, optmake.mexfile, CBINFILES, optmake.outputdir, [optmake.outputname, extmex]) ;
+                DEBUGFLAGS, CPPFLAGS, optmake.mexfile, ACADOLIB, optmake.outputdir, [optmake.outputname, extmex]) ;
             execute_command (cmd, DEBUG, optmake.mexfile, ~PARALLEL) ;
             counter = counter + 1 ;
         end
@@ -261,7 +264,7 @@ PARALLEL = 0;
         fprintf(file,'\nACADO_.problemname = '''';');
         fprintf(file,'\nACADO_.modelactive = 0;');
         fprintf(file,sprintf('\nACADO_.mexcall = ''mex -O %s %s %s %s -output %s'';', ...
-            DEBUGFLAGS, regexprep(regexprep(CPPFLAGS, '\\', '\\\\'), '''', ''''''), '%%s', regexprep(regexprep(CBINFILES, '\\', '\\\\'), '''', ''''''), ['%%s', extmex]));
+            DEBUGFLAGS, regexprep(regexprep(CPPFLAGS, '\\', '\\\\'), '''', ''''''), '%%s', regexprep(regexprep(ACADOLIB, '\\', '\\\\'), '''', ''''''), ['%%s', extmex]));
         
         fclose(file);
         
