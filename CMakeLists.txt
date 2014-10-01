@@ -126,19 +126,19 @@ ENDIF( NOT CMAKE_BUILD_TYPE )
 #
 # Installation folders
 #
-SET( INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib CACHE PATH
+SET( INSTALL_LIB_DIR lib CACHE PATH
 	"Installation directory for libraries"
 )
-SET( INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin CACHE PATH
+SET( INSTALL_BIN_DIR bin CACHE PATH
 	"Installation directory for executables"
 )
-SET( INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/acado CACHE PATH
+SET( INSTALL_INCLUDE_DIR include/acado CACHE PATH
 	"Installation directory for header files"
 )
-SET( INSTALL_DATA_DIR ${CMAKE_INSTALL_PREFIX}/share/acado CACHE PATH
+SET( INSTALL_DATA_DIR share/acado CACHE PATH
 	"Installation directory for data files"
 )
-SET( INSTALL_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/share/acado/cmake CACHE PATH
+SET( INSTALL_CMAKE_DIR share/acado/cmake CACHE PATH
 	"Installation directory for CMake files"
 )
 
@@ -275,16 +275,16 @@ INSTALL(
 # Configure and install CMake package configuration file
 #
 SET( ACADO_INSTALL_INCLUDE_DIRS
-	${INSTALL_INCLUDE_DIR}
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_INCLUDE_DIR}
 )
 SET( ACADO_INSTALL_LIBRARY_DIRS
-	${INSTALL_LIB_DIR}
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}
 )
 SET( ACADO_INSTALL_EXTERNAL_PACKAGES_DIR
-	${INSTALL_DATA_DIR}/external_packages
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages
 )
 SET( ACADO_INSTALL_CMAKE_DIR
-	${INSTALL_CMAKE_DIR}
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}
 )
 
 IF ( ACADO_BUILD_STATIC )
@@ -300,21 +300,21 @@ IF ( ACADO_BUILD_SHARED )
 ENDIF()
 
 SET( ACADO_INSTALL_QPOASES_EMBEDDED_SOURCES
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Bounds.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/CyclingManager.cpp 
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/MessageHandling.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/QProblem.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Utils.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Constraints.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Indexlist.cpp	     
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/QProblemB.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/SubjectTo.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/EXTRAS/SolutionAnalysis.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Bounds.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/CyclingManager.cpp 
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/MessageHandling.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/QProblem.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Utils.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Constraints.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Indexlist.cpp	     
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/QProblemB.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/SubjectTo.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/EXTRAS/SolutionAnalysis.cpp
 )
 SET( ACADO_INSTALL_QPOASES_EMBEDDED_INC_DIRS
-	${INSTALL_DATA_DIR}/external_packages/qpoases/
-	${INSTALL_DATA_DIR}/external_packages/qpoases/INCLUDE
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/INCLUDE
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC
 )
 
 CONFIGURE_FILE(

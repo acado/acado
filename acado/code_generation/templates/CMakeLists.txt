@@ -62,7 +62,7 @@ SET( HPMPC_INTERFACE acado_hpmpc_interface.c.in)
 #
 
 SET( INSTALL_TEMPLATE_PATH
-	${INSTALL_INCLUDE_DIR}/acado/code_generation/templates
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_INCLUDE_DIR}/code_generation/templates
 )
 
 SET( TEMPLATE_PATHS ${CMAKE_CURRENT_SOURCE_DIR} ${INSTALL_TEMPLATE_PATH} )
