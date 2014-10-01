@@ -179,7 +179,6 @@ INCLUDE_DIRECTORIES(
 	${PROJECT_SOURCE_DIR}
 	${PROJECT_SOURCE_DIR}/acado
 	${PROJECT_SOURCE_DIR}/external_packages
-	${PROJECT_SOURCE_DIR}/external_packages/eigen3
 	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
 	${PROJECT_BINARY_DIR}
 )
@@ -253,15 +252,21 @@ INSTALL(
 )
 
 #
-# Install (parts of) external packages and interfaces to those packages
+# Install Eigen3
 #
-SET( EXTERNAL_PACKAGES_DIRS
-	external_packages/qpoases
-	external_packages/eigen3
-)	
 INSTALL(
 	DIRECTORY
-		${EXTERNAL_PACKAGES_DIRS}
+		external_packages/eigen3
+	DESTINATION
+		${INSTALL_INCLUDE_DIR}/external_packages
+)
+
+#
+# Install qpOASES embedded
+#
+INSTALL(
+	DIRECTORY
+		external_packages/qpoases
 	DESTINATION
 		${INSTALL_DATA_DIR}/external_packages
 )
@@ -271,8 +276,6 @@ INSTALL(
 #
 SET( ACADO_INSTALL_INCLUDE_DIRS
 	${INSTALL_INCLUDE_DIR}
-	${INSTALL_DATA_DIR}/external_packages
-	${INSTALL_DATA_DIR}/external_packages/eigen3
 )
 SET( ACADO_INSTALL_LIBRARY_DIRS
 	${INSTALL_LIB_DIR}
@@ -328,6 +331,7 @@ INSTALL(
 INSTALL(
 	FILES
 		${PROJECT_SOURCE_DIR}/cmake/FindACADO.cmake
+		${PROJECT_SOURCE_DIR}/cmake/UseACADO.cmake
 	DESTINATION
 		${INSTALL_CMAKE_DIR}
 )
@@ -374,10 +378,8 @@ SET( ACADO_INCLUDE_DIRS
 	${PROJECT_SOURCE_DIR}
 	${PROJECT_SOURCE_DIR}/acado
 	${PROJECT_SOURCE_DIR}/external_packages
-	${PROJECT_SOURCE_DIR}/external_packages/csparse/
 	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
-	${PROJECT_SOURCE_DIR}/external_packages/eigen3
-	${PROJECT_BINARY_DIR}/include
+	${PROJECT_BINARY_DIR}
 )
 
 SET( ACADO_LIBRARY_DIRS

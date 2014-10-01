@@ -36,7 +36,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wfloat-equal"
-#include <Eigen/Dense>
+#include <external_packages/eigen3/Eigen/Dense>
 #pragma GCC diagnostic pop
 
 #endif // ACADO_TOOLKIT_MATRIX_VECTOR_TOOLS_HPP
