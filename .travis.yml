@@ -1,5 +1,6 @@
 language: cpp
 os:
+ # Multi OS support
  - linux
  - osx
 compiler:
