@@ -26,13 +26,11 @@
 /**
  *    \file src/code_generation/export_qpdunes_interface.cpp
  *    \author Milan Vukov
- *    \date 2013
+ *    \date 2013 - 2014
  */
 
 #include <acado/code_generation/export_qpdunes_interface.hpp>
 #include <acado/code_generation/templates/templates.hpp>
-
-#include <sstream>
 
 using namespace std;
 
@@ -51,6 +49,7 @@ returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 												const unsigned _printLevel,
 												const std::string& _HH,
 												const std::string& _g,
+												const std::string& _gN,
 												const std::string& _CC,
 												const std::string& _c,
 												const std::string& _DD,
@@ -63,7 +62,10 @@ returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 												const std::string& _primal,
 												const std::string& _lambda,
 												const std::string& _mu,
-												const std::vector< unsigned >& conDim
+												const std::vector< unsigned >& conDim,
+												const std::string& _initialStateFixed,
+												const std::string& _diagH,
+												const std::string& _diagHN
 )
 {
 	stringstream ss;
@@ -79,6 +81,7 @@ returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 
 	dictionary[ "@QP_H@" ] =  _HH;
 	dictionary[ "@QP_G@" ] =  _g;
+	dictionary[ "@QP_G_N@" ] =  _gN;
 	dictionary[ "@QP_C@" ] =  _CC;
 	dictionary[ "@QP_c@" ] =  _c;
 
@@ -114,6 +117,11 @@ returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 	dictionary[ "@QP_PRIMAL@" ] =  _primal;
 	dictionary[ "@QP_LAMBDA@" ] =  _lambda;
 	dictionary[ "@QP_MU@" ] =  _mu;
+
+	dictionary[ "@INITIAL_STATE_FIXED@" ] = _initialStateFixed;
+
+	dictionary[ "@DIAG_H@" ] = _diagH;
+	dictionary[ "@DIAG_HN@" ] = _diagHN;
 
 	// And then fill a template file
 	fillTemplate();

@@ -1114,6 +1114,7 @@ returnValue ExportGaussNewtonQpDunes2::setupQPInterface( )
 			printLevel,
 			qpH.getFullName(),
 			qpg.getFullName(),
+			" 0 ",
 			qpC.getFullName(),
 			qpc.getFullName(),
 			qpA.getFullName(),
@@ -1126,7 +1127,10 @@ returnValue ExportGaussNewtonQpDunes2::setupQPInterface( )
 			qpPrimal.getFullName(),
 			qpLambda.getFullName(),
 			qpMu.getFullName(),
-			qpConDim
+			qpConDim,
+			"1",
+			"1",
+			"1"
 	);
 
 	return SUCCESSFUL_RETURN;

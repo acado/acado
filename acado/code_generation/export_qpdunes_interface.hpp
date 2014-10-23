@@ -26,7 +26,7 @@
 /**
  *    \file include/acado/code_generation/export_qpdunes_interface.hpp
  *    \author Milan Vukov
- *    \date 2013
+ *    \date 2013 - 2014
  */
 
 #ifndef ACADO_TOOLKIT_EXPORT_QPDUNES_INTERFACE_HPP
@@ -78,6 +78,7 @@ public:
 							const unsigned _printLevel,
 							const std::string& _HH,
 							const std::string& _g,
+							const std::string& _gN,
 							const std::string& _CC,
 							const std::string& _c,
 							const std::string& _DD,
@@ -90,7 +91,10 @@ public:
 							const std::string& _primal,
 							const std::string& _lambda,
 							const std::string& _mu,
-							const std::vector< unsigned >& conDim
+							const std::vector< unsigned >& conDim,
+							const std::string& _initialStateFixed,
+							const std::string& _diagH,
+							const std::string& _diagHN
 							);
 };
 

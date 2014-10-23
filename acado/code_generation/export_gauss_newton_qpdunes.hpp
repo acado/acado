@@ -154,6 +154,7 @@ private:
 	/** @{ */
 	ExportVariable qpH;
 	ExportVariable qpg;
+	ExportVariable qpgN;
 
 	ExportVariable qpC;
 	ExportVariable qpc;
@@ -176,6 +177,8 @@ private:
 	ExportFunction setObjQ1Q2;
 	ExportFunction setObjR1R2;
 	ExportFunction setObjQN1QN2;
+
+	bool diagH, diagHN;
 	/** @} */
 
 	/** \name Constraint evaluation */
