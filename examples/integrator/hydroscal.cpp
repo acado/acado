@@ -37,7 +37,7 @@
 
 #include <acado_integrators.hpp>
 #include "hydroscal_model.hpp"
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 void ffcn_model( double *x, double *f, void *user_data ){

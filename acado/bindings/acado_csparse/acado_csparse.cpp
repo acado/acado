@@ -29,7 +29,7 @@
  *    \date   2009
  */
 
-#include <include/acado_csparse/acado_csparse.hpp>
+#include <acado/bindings/acado_csparse/acado_csparse.hpp>
 
 #ifndef __MATLAB__
 

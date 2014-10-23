@@ -31,7 +31,7 @@
  */
 
 #include <acado/conic_solver/condensing_based_cp_solver.hpp>
-#include <include/acado_qpoases/qp_solver_qpoases.hpp>
+#include <acado/bindings/acado_qpoases/qp_solver_qpoases.hpp>
 
 using namespace Eigen;
 using namespace std;

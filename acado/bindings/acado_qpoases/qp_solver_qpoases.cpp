@@ -31,7 +31,7 @@
  */
 
 
-#include <include/acado_qpoases/qp_solver_qpoases.hpp>
+#include <acado/bindings/acado_qpoases/qp_solver_qpoases.hpp>
 #include <qpOASES-3.0beta/include/qpOASES.hpp>
 
 BEGIN_NAMESPACE_ACADO

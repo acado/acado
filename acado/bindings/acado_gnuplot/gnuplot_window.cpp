@@ -31,7 +31,7 @@
  */
 
 
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado/bindings/acado_gnuplot/gnuplot_window.hpp>
 
 #ifdef WIN32
 #include <windows.h>

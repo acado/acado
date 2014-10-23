@@ -208,7 +208,7 @@ class QPsolver_qpOASES : public DenseQPsolver
 CLOSE_NAMESPACE_ACADO
 
 
-#include <include/acado_qpoases/qp_solver_qpoases.ipp>
+#include <acado/bindings/acado_qpoases/qp_solver_qpoases.ipp>
 
 
 #endif  // ACADO_TOOLKIT_QP_SOLVER_QPOASES_HPP

@@ -33,7 +33,7 @@
 
 
 #include <acado_integrators.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 const double k10 =  1.287e12;

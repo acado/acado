@@ -33,7 +33,7 @@
 
 #include <acado/nlp_solver/scp_step.hpp>
 #include <acado/curve/curve.hpp>
-#include <include/acado_qpoases/qp_solver_qpoases.hpp>
+#include <acado/bindings/acado_qpoases/qp_solver_qpoases.hpp>
 
 
 BEGIN_NAMESPACE_ACADO

@@ -24,43 +24,10 @@
  */
 
 
+/**
+ *    \file include/acado_gnuplot.hpp
+ *    \author Milan Vukov
+ *    \date 2014
+ */
 
- /**
-  *    \file   examples/nlp/getting_started.cpp
-  *    \author Boris Houska, Hans Joachim Ferreau
-  *    \date   2009
-  */
-
-
-#include <acado_optimal_control.hpp>
-#include <acado_gnuplot.hpp>
-
-
-int main( ){
-
-    USING_NAMESPACE_ACADO
-
-    // INTRODUCE THE VARIABLES:
-    // -------------------------
-    Parameter x, y, z;
-
-    // DEFINE AN OPTIMAL CONTROL PROBLEM:
-    // ----------------------------------
-    NLP nlp;
-    nlp.minimize (  x*y + y*z               );
-    nlp.subjectTo(  x*x - y*y + z*z >= 2.0  );
-    nlp.subjectTo(  x*x + y*y + z*z <= 10.0 );
-    nlp.subjectTo(  x >= 0.01 );
-    nlp.subjectTo(  y >= 0.01 );
-    nlp.subjectTo(  z >= 0.01 );
-
-    // DEFINE AN OPTIMIZATION ALGORITHM AND SOLVE THE NLP:
-    // ---------------------------------------------------
-    OptimizationAlgorithm algorithm(nlp);
-    algorithm.solve();
-
-    return 0;
-}
-
-
-
+#include <acado/bindings/acado_gnuplot/gnuplot_window.hpp>

@@ -47,7 +47,7 @@
 // ---------------
 
 #include <acado_optimal_control.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 /* >>> start tutorial code >>> */
