@@ -1,8 +1,7 @@
 language: cpp
 os:
- # Multi OS support
  - linux
- - osx
+# - osx
 compiler:
  - gcc
  - clang
