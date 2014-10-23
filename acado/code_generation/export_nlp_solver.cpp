@@ -923,7 +923,6 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 
 	if (depS.isZero() == true)
 	{
-		cout << "OVAJ!" << endl;
 		S1 = zeros<double>(NX, NU);
 	}
 	if (objS.isGiven() == true && objEvFu.isGiven() == true && objEvFx.isGiven() == true)
