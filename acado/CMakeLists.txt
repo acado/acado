@@ -48,8 +48,8 @@ IF (NOT ACADO_BUILD_CGT_ONLY)
 		set_arithmetics
 		validated_integrator
 		sparse_solver
-		${PROJECT_SOURCE_DIR}/external_packages/src/acado_csparse
-		${PROJECT_SOURCE_DIR}/external_packages/src/acado_gnuplot
+		bindings/acado_csparse
+		bindings/acado_gnuplot
 	)
 ENDIF()
 	
@@ -70,7 +70,7 @@ IF (NOT ACADO_BUILD_CGT_ONLY)
 		nlp_solver
 		nlp_derivative_approximation
 		optimization_algorithm
-		${PROJECT_SOURCE_DIR}/external_packages/src/acado_qpoases
+		bindings/acado_qpoases
 	)
 ENDIF()
 
