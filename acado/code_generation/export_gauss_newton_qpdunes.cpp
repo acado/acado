@@ -249,11 +249,9 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	ExportVariable tmpObjS, tmpFx, tmpFu;
 	ExportVariable tmpFxEnd, tmpObjSEndTerm;
 
+	tmpObjS.setup("tmpObjS", NY, NY, REAL, ACADO_LOCAL);
 	if (objS.isGiven() == true)
 		tmpObjS = objS;
-	else
-		tmpObjS.setup("tmpObjS", objS.getSubMatrix(0, NY, 0, NY).getGivenMatrix(),
-				REAL, ACADO_LOCAL, false, "", false);
 	tmpFx.setup("tmpFx", NY, NX, REAL, ACADO_LOCAL);
 	if (objEvFx.isGiven() == true)
 		tmpFx = objEvFx;
@@ -263,11 +261,9 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	tmpFxEnd.setup("tmpFx", NYN, NX, REAL, ACADO_LOCAL);
 	if (objEvFxEnd.isGiven() == true)
 		tmpFxEnd = objEvFxEnd;
+	tmpObjSEndTerm.setup("tmpObjSEndTerm", NYN, NYN, REAL, ACADO_LOCAL);
 	if (objSEndTerm.isGiven() == true)
 		tmpObjSEndTerm = objSEndTerm;
-	else
-		tmpObjSEndTerm.setup("tmpObjSEndTerm", objSEndTerm.getGivenMatrix(),
-				REAL, ACADO_LOCAL, false, "", false);
 
 	unsigned indexX = getNY();
 	ExportArgument tmpFxCall = tmpFx;

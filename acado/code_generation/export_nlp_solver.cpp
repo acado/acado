@@ -756,12 +756,10 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 	{
 		if ( variableObjS == YES )
 		{
-			// We allow user to define different w. matrix on every node,
-			// but we preserve given sparsity.
-			DMatrix foo(N * NY, NY);
-			for (unsigned blk = 0; blk < N; ++ blk)
-				foo.block(blk * NY, 0, NY, NY) = lsqElements[ 0 ].W;
-			objS.setup("W", foo, REAL, ACADO_VARIABLES, false, "", false);
+			// TODO Sparsity of this guy should be done in an efficient way one day,
+			//      most probably after isolating objective handling in a separate
+			//      class.
+			objS.setup("W", N * NY, NY, REAL, ACADO_VARIABLES);
 		}
 		else
 		{
@@ -925,6 +923,7 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 
 	if (depS.isZero() == true)
 	{
+		cout << "OVAJ!" << endl;
 		S1 = zeros<double>(NX, NU);
 	}
 	if (objS.isGiven() == true && objEvFu.isGiven() == true && objEvFx.isGiven() == true)
@@ -1034,6 +1033,8 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 	DMatrix depFxEnd = objEvFxEnd.isGiven() == true ? objEvFxEnd.getGivenMatrix() : expFEndTermX.getSparsityPattern();
 	DMatrix depQN = depFxEnd.transpose() * lsqEndTermElements[ 0 ].W * depFxEnd;
 	diagonalHN = depQN.isDiagonal() ? true : false;
+
+	LOG( LVL_DEBUG ) << "diag H_{0: N-1}: " << diagonalH << ", diag H_N: " << diagonalHN << endl;
 
 	// Both are given or none is given; otherwise give an error.
 	if (getNYN() && (objS.isGiven() ^ objSEndTerm.isGiven()))
