@@ -266,6 +266,8 @@ protected:
 
 	ExportVariable objSlx, objSlu;
 
+	bool diagonalH, diagonalHN;
+
 	/** @} */
 
 	/** \name Evaluation of box constraints*/

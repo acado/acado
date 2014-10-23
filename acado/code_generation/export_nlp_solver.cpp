@@ -665,7 +665,10 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 		objSEndTerm.setup("WN", lsqExternEndTermElements[ 0 ].W,
 				REAL, ACADO_VARIABLES, false, "", lsqExternEndTermElements[ 0 ].givenW);
 
-		// ExportVariable objEvFx, objEvFu, objEvFxEnd; // aliasing
+		int forceDiagHessian;
+		get(CG_FORCE_DIAGONAL_HESSIAN, forceDiagHessian);
+
+		diagonalH = diagonalHN = forceDiagHessian ? true : false;
 
 		objEvFx.setup("evFx", NY, NX, REAL, ACADO_WORKSPACE);
 		objEvFu.setup("evFu", NY, NU, REAL, ACADO_WORKSPACE);
@@ -753,8 +756,12 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 	{
 		if ( variableObjS == YES )
 		{
-			// We allow user to define different w. matrix on every node
-			objS.setup("W", N * NY, NY, REAL, ACADO_VARIABLES, false);
+			// We allow user to define different w. matrix on every node,
+			// but we preserve given sparsity.
+			DMatrix foo(N * NY, NY);
+			for (unsigned blk = 0; blk < N; ++ blk)
+				foo.block(blk * NY, 0, NY, NY) = lsqElements[ 0 ].W;
+			objS.setup("W", foo, REAL, ACADO_VARIABLES, false, "", false);
 		}
 		else
 		{
@@ -901,42 +908,32 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 		R2.setup("R2", NU * N, NY, REAL, ACADO_WORKSPACE);
 	}
 
+	// Check for sparsity of the stage Hessian
+	// Dependency pattern of Fx
+	DMatrix depFx = objEvFx.isGiven() == true ? objEvFx.getGivenMatrix() : expFx.getSparsityPattern();
+	// Dependency pattern of Fu
+	DMatrix depFu = objEvFu.isGiven() == true ? objEvFu.getGivenMatrix() : expFu.getSparsityPattern();
+
+	DMatrix depQ = depFx.transpose() * lsqElements[ 0 ].W * depFx;
+	DMatrix depR = depFu.transpose() * lsqElements[ 0 ].W * depFu;
+	DMatrix depS = depFx.transpose() * lsqElements[ 0 ].W * depFu;
+
+	if (depQ.isDiagonal() && depR.isDiagonal() && depS.isZero())
+		diagonalH = true;
+	else
+		diagonalH = false;
+
+	if (depS.isZero() == true)
+	{
+		S1 = zeros<double>(NX, NU);
+	}
 	if (objS.isGiven() == true && objEvFu.isGiven() == true && objEvFx.isGiven() == true)
 	{
 		S1 = objEvFx.getGivenMatrix().transpose() * objS.getGivenMatrix() * objEvFu.getGivenMatrix();
 	}
-	else if (Fu.isOneOrZero() == NE_ZERO || Fx.isOneOrZero() == NE_ZERO)
-	{
-		S1 = zeros<double>(NX, NU);
-	}
 	else
 	{
-		if (objS.isGiven() == true || objS.isDiagonal() == true)
-		{
-			// Dependency pattern of Fx
-			DMatrix depFx = objEvFx.isGiven() == true ? objEvFx.getGivenMatrix() : expFx.getSparsityPattern();
-			// Dependency pattern of Fx
-			DMatrix depFu = objEvFu.isGiven() == true ? objEvFu.getGivenMatrix() : expFu.getSparsityPattern();
-
-//			cout << depFx << endl;
-//			cout << expFx << endl;
-//			cout << depFu << endl;
-//			cout << expFu << endl;
-
-			// The sparsity of the weighting matrix
-			DMatrix depS  = objS.isGiven() == true ? objS.getGivenMatrix() : eye<double>( objS.getNumRows() );
-
-			// Mutiply sparsities to check if S1 is indeed zero in the end.
-			DMatrix dep = depFx.transpose() * depS * depFu;
-			if (dep.isZero() == true)
-				S1 = zeros<double>(NX, NU);
-			else
-				S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
-		}
-		else
-		{
-			S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
-		}
+		S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
 	}
 
 	////////////////////////////////////////////////////////////////////////////
@@ -1033,6 +1030,10 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 		QN1.setup("QN1", NX, NX, REAL, ACADO_WORKSPACE);
 		QN2.setup("QN2", NX, NYN, REAL, ACADO_WORKSPACE);
 	}
+
+	DMatrix depFxEnd = objEvFxEnd.isGiven() == true ? objEvFxEnd.getGivenMatrix() : expFEndTermX.getSparsityPattern();
+	DMatrix depQN = depFxEnd.transpose() * lsqEndTermElements[ 0 ].W * depFxEnd;
+	diagonalHN = depQN.isDiagonal() ? true : false;
 
 	// Both are given or none is given; otherwise give an error.
 	if (getNYN() && (objS.isGiven() ^ objSEndTerm.isGiven()))
