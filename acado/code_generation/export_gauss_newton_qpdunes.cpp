@@ -213,7 +213,7 @@ unsigned ExportGaussNewtonQpDunes::getNumQPvars( ) const
 
 returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 {
-	if (S1.isGiven() == false || S1.getGivenMatrix().isZero() == false)
+	if (S1.getGivenMatrix().isZero() == false)
 		ACADOWARNINGTEXT(RET_INVALID_ARGUMENTS,
 				"Mixed control-state terms in the objective function are not supported at the moment.");
 
@@ -930,6 +930,10 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	feedback.doc( "Feedback/estimation step of the RTI scheme." );
 	feedback.setReturnValue( returnValueFeedbackPhase );
 
+	qpPrimal.setup("qpPrimal", N * (NX + NU) + NX, 1, REAL, ACADO_WORKSPACE);
+	qpLambda.setup("qpLambda", N * NX, 1, REAL, ACADO_WORKSPACE);
+	qpMu.setup("qpMu", 2 * N * (NX + NU) + 2 * NX, 1, REAL, ACADO_WORKSPACE);
+
 	//
 	// Calculate objective residuals and call the QP solver
 	//
@@ -964,10 +968,6 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	// Here we have to accumulate the differences.
 	//
 
-	qpPrimal.setup("qpPrimal", N * (NX + NU) + NX, 1, REAL, ACADO_WORKSPACE);
-	qpLambda.setup("qpLambda", N * NX, 1, REAL, ACADO_WORKSPACE);
-	qpMu.setup("qpMu", 2 * N * (NX + NU) + 2 * NX, 1, REAL, ACADO_WORKSPACE);
-
 	ExportVariable stageOut("stageOut", 1, NX + NU, REAL, ACADO_LOCAL);
 	ExportIndex index( "index" );
 	acc.setup("accumulate", stageOut, index);
@@ -997,17 +997,74 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 
 	////////////////////////////////////////////////////////////////////////////
 	//
-	// TODO Setup evaluation of KKT
+	// Setup evaluation of the KKT tolerance
 	//
 	////////////////////////////////////////////////////////////////////////////
 	ExportVariable kkt("kkt", 1, 1, REAL, ACADO_LOCAL, true);
+	ExportVariable prd("prd", 1, 1, REAL, ACADO_LOCAL, true);
+	ExportIndex index2( "index2" );
 
 	getKKT.setup( "getKKT" );
-	getKKT.doc( "Get the KKT tolerance of the current iterate. Under development." );
-	kkt.setDoc( "1.0." );
+	getKKT.doc( "Get the KKT tolerance of the current iterate." );
+	kkt.setDoc( "KKT tolerance." );
 	getKKT.setReturnValue( kkt );
+	getKKT.addVariable( prd );
+	getKKT.addIndex( index );
+	getKKT.addIndex( index2 );
 
-	getKKT.addStatement( kkt == 1.0 );
+	getKKT.addStatement( kkt == (qpg ^ qpPrimal) );
+	getKKT << kkt.getFullName() << " = fabs( " << kkt.getFullName() << " );\n";
+
+	ExportForLoop lamLoop(index, 0, N * NX);
+	lamLoop << kkt.getFullName() << "+= fabs( " << d.get(index, 0) << " * " << qpLambda.get(index, 0) << ");\n";
+	getKKT.addStatement( lamLoop );
+
+	/*
+
+	lambda are the multipliers of the coupling constraints
+	i.e. lambda_i for x_{i+1} = A * x_i + B * u_i + c
+	mu correspond to the bounds
+	in the fashion
+	mu = mu_0 … mu_N
+	i.e. major ordering by the stages
+	within each stage i
+	i.e. within mu_i
+	we have the minor ordering( I drop the i here)
+	lb z_0, ub z_0, lb z_1, ub z_1, … lb z_nZ, ub z_nZ
+	where z are the stage variables in the ordering z = [x u]
+	signs are positive if active, zero if inactive
+
+	 */
+
+	if (initialStateFixed() == true)
+	{
+		for (unsigned el = 0; el < NX + NU; ++el)
+			getKKT << kkt.getFullName() << " += fabs("
+				   << qpLb0.get(0, el) << " * " << qpMu.get(el, 0)  << ");\n";
+		for (unsigned el = 0; el < NX + NU; ++el)
+			getKKT << kkt.getFullName() << " += fabs("
+				   << qpUb0.get(0, el) << " * " << qpMu.get((NX + NU) + el, 0)  << ");\n";
+	}
+
+	ExportForLoop bndLoop(index, initialStateFixed() ? 1 : 0, N);
+	ExportForLoop bndLLoop(index2, 0, NX + NU);
+	ExportForLoop bndULoop(index2, 0, NX + NU);
+	bndLLoop << kkt.getFullName() << " += fabs("
+			 << qpLb.get(0, index * (NX + NU) + index2) << " * " << qpMu.get(index * 2 * (NX + NU) + index2, 0)  << ");\n";
+	bndULoop << kkt.getFullName() << " += fabs("
+			 << qpUb.get(0, index * (NX + NU) + index2) << " * " << qpMu.get(index * 2 * (NX + NU) + (NX + NU) + index2, 0)  << ");\n";
+	bndLoop.addStatement( bndLLoop );
+	bndLoop.addStatement( bndULoop );
+	getKKT.addStatement( bndLoop );
+
+	for (unsigned el = 0; el < NX; ++el)
+		getKKT << kkt.getFullName() << " += fabs("
+			   << qpLb.get(0, N * (NX + NU) + el) << " * " << qpMu.get(N * 2 * (NX + NU) + el, 0)  << ");\n";
+	for (unsigned el = 0; el < NX; ++el)
+		getKKT << kkt.getFullName() << " += fabs("
+			   << qpUb.get(0, N * (NX + NU) + el) << " * " << qpMu.get(N * 2 * (NX + NU) + (NX) + el, 0)  << ");\n";
+
+	// TODO Add contribution of the affine stage constraints
 
 	return SUCCESSFUL_RETURN;
 }
