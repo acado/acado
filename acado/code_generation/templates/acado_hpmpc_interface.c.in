@@ -84,6 +84,7 @@ int acado_hpmpc_ip_wrapper(
                             double* q, double* qf, double* r, 
                             double* lb, double* ub, 
                             double* x, double* u,
+                            double* lambda, double* mu, double* slacks,
                             int* nIt )
 
 	{
@@ -92,8 +93,11 @@ int acado_hpmpc_ip_wrapper(
 
 #if prec == 0
 
-	/*** DOUBLE PRECISION ***/
-	    
+	/*************************************************************************************
+	 * 
+	 * DOUBLE PRECISION
+	 *
+	 ************************************************************************************/
 	     nx = NX;
 	     nu = NU;
 	     N = NN;
@@ -129,12 +133,13 @@ int acado_hpmpc_ip_wrapper(
 
         int i, ii, jj, ll;
 
-
         /* align work space */
         size_t align = 64;
         size_t addr = (size_t) work0;
-        size_t offset = addr % 64;
-        double *ptr = work0 + offset / 8;
+        size_t lamOffset = addr % 64;
+        double *ptr = work0 + lamOffset / 8;
+        
+        unsigned lamlamOffset;
 
         /* array or pointers */
         double *(hpBAbt[N]);
@@ -330,7 +335,47 @@ int acado_hpmpc_ip_wrapper(
 					}
 				}
 			}
-
+		
+		// Copy back lambda (pi) multipliers, MPC case only!	
+		for(ii=0; ii < N; ii++)
+			for (jj = 0; jj < nx; jj++)
+				lambda[ii * nx + jj] = hpi[ii + 1][ jj ];
+		
+		
+		// Copy back mu (lambda) multipliers, MPC case only!
+		lamOffset = 0;
+		for (ii = 0; ii < N; ii++)
+			for (jj = 0; jj < nu; jj++)
+				mu[lamOffset + ii * nu + jj] = hlam[ ii ][2 * jj + 0];
+		lamOffset += N * nu;
+		for (ii = 0; ii < N; ii++)
+			for (jj = 0; jj < nx; jj++)
+				mu[lamOffset + ii * nx + jj] = hlam[ii + 1][2 * (jj + nu)+ 0];
+		lamOffset += N * nx;
+		for (ii = 0; ii < N; ii++)
+			for (jj = 0; jj < nu; jj++)
+				mu[lamOffset + ii * nu + jj] = hlam[ ii ][2 * jj + 1];
+		lamOffset += N * nu;
+		for (ii = 0; ii < N; ii++)
+			for (jj = 0; jj < nx; jj++)
+				mu[lamOffset + ii * nx + jj] = hlam[ii + 1][2 * (jj + nu) + 1];
+		
+		lamOffset = 0;
+		for (ii = 0; ii < N; ii++)
+			for (jj = 0; jj < nu; jj++)
+				slacks[lamOffset + ii * nu + jj] = ht[ ii ][2 * jj + 0];
+		lamOffset += N * nu;
+		for (ii = 0; ii < N; ii++)
+			for (jj = 0; jj < nx; jj++)
+				slacks[lamOffset + ii * nx + jj] = ht[ii + 1][2 * (jj + nu)+ 0];
+		lamOffset += N * nx;
+		for (ii = 0; ii < N; ii++)
+			for (jj = 0; jj < nu; jj++)
+				slacks[lamOffset + ii * nu + jj] = ht[ ii ][2 * jj + 1];
+		lamOffset += N * nu;
+		for (ii = 0; ii < N; ii++)
+			for (jj = 0; jj < nx; jj++)
+				slacks[lamOffset + ii * nx + jj] = ht[ii + 1][2 * (jj + nu) + 1];
 
 #if PC_DEBUG == 1
         for (jj = 0; jj < *nIt; jj++)
@@ -344,7 +389,11 @@ int acado_hpmpc_ip_wrapper(
 
 #elif prec == 1
 
-	/*** SINGLE PRECISION ***/
+	/*************************************************************************************
+	 * 
+	 * SINGLE PRECISION
+	 *
+	 ************************************************************************************/
 	    
 
 
@@ -387,8 +436,8 @@ int acado_hpmpc_ip_wrapper(
         /* align work space */
         size_t align = 64;
         size_t addr = (size_t) work0;
-        size_t offset = addr % 64;
-        float *ptr = work0 + offset / 4;
+        size_t lamOffset = addr % 64;
+        float *ptr = work0 + lamOffset / 4;
 
         /* array or pointers */
         float *(hpBAbt[N]);

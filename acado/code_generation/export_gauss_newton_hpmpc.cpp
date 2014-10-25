@@ -92,6 +92,10 @@ returnValue ExportGaussNewtonHpmpc::getDataDeclarations(	ExportStatementBlock& d
 	declarations.addDeclaration(qpLb, dataStruct);
 	declarations.addDeclaration(qpUb, dataStruct);
 
+	declarations.addDeclaration(qpLambda, dataStruct);
+	declarations.addDeclaration(qpMu, dataStruct);
+	declarations.addDeclaration(qpSlacks, dataStruct);
+
 	declarations.addDeclaration(nIt, dataStruct);
 
 	return SUCCESSFUL_RETURN;
@@ -124,7 +128,9 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 	// Forward declaration, same as in the template file.
 	code << "#ifdef __cplusplus\n";
 	code << "extern \"C\"{\n";
-	code << "int acado_hpmpc_ip_wrapper(unsigned N, unsigned nx, unsigned nu, double* A, double* B, double* d, double* Q, double* Qf, double* S, double* R, double* q, double* qf, double* r, double* lb, double* ub, double* x, double* u, int* nIt);\n";
+	code << "#endif\n";
+	code << "int acado_hpmpc_ip_wrapper(unsigned N, unsigned nx, unsigned nu, double* A, double* B, double* d, double* Q, double* Qf, double* S, double* R, double* q, double* qf, double* r, double* lb, double* ub, double* x, double* u, double* lambda, double* mu, double* slacks, int* nIt);\n";
+	code << "#ifdef __cplusplus\n";
 	code << "}\n";
 	code << "#endif\n";
 
@@ -485,7 +491,7 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 
 	DVector lbValues, ubValues;
 
-	for(unsigned node = 0; node < N; ++node)
+	for (unsigned node = 0; node < N; ++node)
 	{
 		lbTmp = uBounds.getLowerBounds( node );
 		if ( !lbTmp.getDim() )
@@ -587,6 +593,10 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 	qpqf.setup("qpqf", NX, 1, REAL, ACADO_WORKSPACE);
 	qpr.setup("qpr", NU * N, 1, REAL, ACADO_WORKSPACE);
 
+	qpLambda.setup("qpLambda", N * NX, 1, REAL, ACADO_WORKSPACE);
+	qpMu.setup("qpMu", 2 * N * (NX + NU), 1, REAL, ACADO_WORKSPACE);
+	qpSlacks.setup("qpSlacks", 2 * N * (NX + NU), 1, REAL, ACADO_WORKSPACE);
+
 	nIt.setup("nIt", 1, 1, INT, ACADO_WORKSPACE);
 
 	// State feedback
@@ -635,6 +645,10 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 		<< qpx.getAddressString( true ) << ", "
 		<< qpu.getAddressString( true ) << ", "
 
+		<< qpLambda.getAddressString( true ) << ", "
+		<< qpMu.getAddressString( true ) << ", "
+		<< qpSlacks.getAddressString( true ) << ", "
+
 		<< nIt.getAddressString( true )
 		<< ");\n";
 
@@ -644,18 +658,43 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 
 	////////////////////////////////////////////////////////////////////////////
 	//
-	// TODO Setup evaluation of KKT
+	// Setup evaluation of the KKT tolerance
 	//
 	////////////////////////////////////////////////////////////////////////////
+
 	ExportVariable kkt("kkt", 1, 1, REAL, ACADO_LOCAL, true);
+	ExportVariable tmp("tmp", 1, 1, REAL, ACADO_LOCAL, true);
+	ExportIndex index( "index" );
 
 	getKKT.setup( "getKKT" );
-	getKKT.doc( "Get the KKT tolerance of the current iterate. Under development." );
-//	kkt.setDoc( "The KKT tolerance value." );
-	kkt.setDoc( "0." );
+	getKKT.doc( "Get the KKT tolerance of the current iterate." );
+	kkt.setDoc( "The KKT tolerance value." );
 	getKKT.setReturnValue( kkt );
+	getKKT.addVariable( tmp );
+	getKKT.addIndex( index );
 
-	getKKT.addStatement( kkt == 0 );
+	getKKT.addStatement( kkt == 0.0 );
+
+	// XXX At the moment this is very very specific for the NMPC case
+
+	getKKT.addStatement( tmp == (qpq ^ qpx.getRows(0, N * NX)) );
+	getKKT << kkt.getFullName() << " += fabs( " << tmp.getFullName() << " );\n";
+	getKKT.addStatement( tmp == (qpqf ^ qpx.getRows(N * NX, (N + 1) * NX)) );
+	getKKT << kkt.getFullName() << " += fabs( " << tmp.getFullName() << " );\n";
+	getKKT.addStatement( tmp == (qpr ^ qpu) );
+	getKKT << kkt.getFullName() << " += fabs( " << tmp.getFullName() << " );\n";
+
+	ExportForLoop lamLoop(index, 0, N * NX);
+	lamLoop << kkt.getFullName() << "+= fabs( " << d.get(index, 0) << " * " << qpLambda.get(index, 0) << ");\n";
+	getKKT.addStatement( lamLoop );
+
+	ExportForLoop lbLoop(index, 0, N * NU + N * NX);
+	lbLoop << kkt.getFullName() << "+= fabs( " << qpLb.get(index, 0) << " * " << qpMu.get(index, 0) << ");\n";
+	ExportForLoop ubLoop(index, 0, N * NU + N * NX);
+	ubLoop << kkt.getFullName() << "+= fabs( " << qpUb.get(index, 0) << " * " << qpMu.get(index + N * NU + N * NX, 0) << ");\n";
+
+	getKKT.addStatement( lbLoop );
+	getKKT.addStatement( ubLoop );
 
 	return SUCCESSFUL_RETURN;
 }
