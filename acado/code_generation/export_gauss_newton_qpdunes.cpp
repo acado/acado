@@ -1036,35 +1036,40 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 
 	 */
 
+	if ( getNumComplexConstraints() )
+	{
+		ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
+				"KKT Tolerance with affine stage constraints is under development");
+		return SUCCESSFUL_RETURN;
+	}
+
 	if (initialStateFixed() == true)
 	{
 		for (unsigned el = 0; el < NX + NU; ++el)
+		{
 			getKKT << kkt.getFullName() << " += fabs("
-				   << qpLb0.get(0, el) << " * " << qpMu.get(el, 0)  << ");\n";
-		for (unsigned el = 0; el < NX + NU; ++el)
+				   << qpLb0.get(0, el) << " * " << qpMu.get(2 * el + 0, 0)  << ");\n";
 			getKKT << kkt.getFullName() << " += fabs("
-				   << qpUb0.get(0, el) << " * " << qpMu.get((NX + NU) + el, 0)  << ");\n";
+				   << qpUb0.get(0, el) << " * " << qpMu.get(2 * el + 1, 0)  << ");\n";
+		}
 	}
 
 	ExportForLoop bndLoop(index, initialStateFixed() ? 1 : 0, N);
-	ExportForLoop bndLLoop(index2, 0, NX + NU);
-	ExportForLoop bndULoop(index2, 0, NX + NU);
-	bndLLoop << kkt.getFullName() << " += fabs("
-			 << qpLb.get(0, index * (NX + NU) + index2) << " * " << qpMu.get(index * 2 * (NX + NU) + index2, 0)  << ");\n";
-	bndULoop << kkt.getFullName() << " += fabs("
-			 << qpUb.get(0, index * (NX + NU) + index2) << " * " << qpMu.get(index * 2 * (NX + NU) + (NX + NU) + index2, 0)  << ");\n";
-	bndLoop.addStatement( bndLLoop );
-	bndLoop.addStatement( bndULoop );
+	ExportForLoop bndInLoop(index2, 0, NX + NU);
+	bndInLoop << kkt.getFullName() << " += fabs("
+			 << qpLb.get(0, index * (NX + NU) + index2) << " * " << qpMu.get(index * 2 * (NX + NU) + 2 * index2 + 0, 0)  << ");\n";
+	bndInLoop << kkt.getFullName() << " += fabs("
+			 << qpUb.get(0, index * (NX + NU) + index2) << " * " << qpMu.get(index * 2 * (NX + NU) + 2 * index2 + 1, 0)  << ");\n";
+	bndLoop.addStatement( bndInLoop );
 	getKKT.addStatement( bndLoop );
 
 	for (unsigned el = 0; el < NX; ++el)
+	{
 		getKKT << kkt.getFullName() << " += fabs("
-			   << qpLb.get(0, N * (NX + NU) + el) << " * " << qpMu.get(N * 2 * (NX + NU) + el, 0)  << ");\n";
-	for (unsigned el = 0; el < NX; ++el)
+			   << qpLb.get(0, N * (NX + NU) + el) << " * " << qpMu.get(N * 2 * (NX + NU) + 2 * el + 0, 0)  << ");\n";
 		getKKT << kkt.getFullName() << " += fabs("
-			   << qpUb.get(0, N * (NX + NU) + el) << " * " << qpMu.get(N * 2 * (NX + NU) + (NX) + el, 0)  << ");\n";
-
-	// TODO Add contribution of the affine stage constraints
+			   << qpUb.get(0, N * (NX + NU) + el) << " * " << qpMu.get(N * 2 * (NX + NU) + 2 * el + 1, 0)  << ");\n";
+	}
 
 	return SUCCESSFUL_RETURN;
 }
