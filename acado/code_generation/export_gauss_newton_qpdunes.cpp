@@ -1008,7 +1008,7 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	getKKT.doc( "Get the KKT tolerance of the current iterate." );
 	kkt.setDoc( "KKT tolerance." );
 	getKKT.setReturnValue( kkt );
-	getKKT.addVariable( prd );
+//	getKKT.addVariable( prd );
 	getKKT.addIndex( index );
 	getKKT.addIndex( index2 );
 
