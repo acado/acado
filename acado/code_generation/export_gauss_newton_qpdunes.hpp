@@ -33,9 +33,10 @@
 #define ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_QPDUNES_HPP
 
 #include <acado/code_generation/export_nlp_solver.hpp>
-#include <acado/code_generation/export_qpdunes_interface.hpp>
 
 BEGIN_NAMESPACE_ACADO
+
+class ExportQpDunesInterface;
 
 /**
  *	\brief A class for export of an OCP solver using sparse QP solver qpDUNES

@@ -30,6 +30,7 @@
  */
 
 #include <acado/code_generation/export_gauss_newton_qpdunes.hpp>
+#include <acado/code_generation/export_qpdunes_interface.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
