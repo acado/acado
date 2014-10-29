@@ -129,7 +129,7 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 	code << "#ifdef __cplusplus\n";
 	code << "extern \"C\"{\n";
 	code << "#endif\n";
-	code << "int acado_hpmpc_ip_wrapper(unsigned N, unsigned nx, unsigned nu, double* A, double* B, double* d, double* Q, double* Qf, double* S, double* R, double* q, double* qf, double* r, double* lb, double* ub, double* x, double* u, double* lambda, double* mu, double* slacks, int* nIt);\n";
+	code << "int acado_hpmpc_ip_wrapper(real_t* A, real_t* B, real_t* d, real_t* Q, real_t* Qf, real_t* S, real_t* R, real_t* q, real_t* qf, real_t* r, real_t* lb, real_t* ub, real_t* x, real_t* u, real_t* lambda, real_t* mu, real_t* slacks, int* nIt);\n";
 	code << "#ifdef __cplusplus\n";
 	code << "}\n";
 	code << "#endif\n";
@@ -394,7 +394,7 @@ returnValue ExportGaussNewtonHpmpc::setupObjectiveEvaluation( void )
 		);
 	else
 	{
-		setStagef.addStatement( index == index );
+		setStagef << "(void)" << index.getFullName() << ";\n";
 		setStagef.addStatement(
 				qq == Q2 * Dy.getRows(index * NY, (index + 1) * NY)
 		);
@@ -623,8 +623,6 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 	// Call the solver
 	feedback
 		<< returnValueFeedbackPhase.getFullName() << " = " << "acado_hpmpc_ip_wrapper("
-
-		<< toString( N ) << ", " << toString( NX ) << ", " << toString( NU ) << ", "
 
 		<< evGx.getAddressString( true ) << ", "
 		<< evGu.getAddressString( true ) << ", "
