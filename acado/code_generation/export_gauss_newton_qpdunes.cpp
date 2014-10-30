@@ -504,7 +504,6 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 
 	DVector lbXInf( NX );
 	lbXInf.setAll( -INFTY );
-
 	DVector ubXInf( NX );
 	ubXInf.setAll( INFTY );
 
@@ -529,16 +528,27 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	ExportVariable evLbXValues("lbXValues", lbXValues, STATIC_CONST_REAL, ACADO_LOCAL);
 	ExportVariable evUbXValues("ubXValues", ubXValues, STATIC_CONST_REAL, ACADO_LOCAL);
 
+	DVector lbUInf( NU );
+	lbUInf.setAll( -INFTY );
+	DVector ubUInf( NU );
+	ubUInf.setAll( INFTY );
+
 	//
 	// Stack control constraints
 	//
 	for (unsigned i = 0; i < N; ++i)
 	{
 		lbTmp = uBounds.getLowerBounds( i );
-		lbUValues.append( lbTmp );
+		if ( !lbTmp.getDim() )
+			lbUValues.append( lbUInf );
+		else
+			lbUValues.append( lbTmp );
 
 		ubTmp = uBounds.getUpperBounds( i );
-		ubUValues.append( ubTmp );
+		if ( !ubTmp.getDim() )
+			ubUValues.append( ubUInf );
+		else
+			ubUValues.append( ubTmp );
 	}
 
 	ExportVariable evLbUValues("lbUValues", lbUValues, STATIC_CONST_REAL, ACADO_LOCAL);
