@@ -925,7 +925,7 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 	{
 		S1 = zeros<double>(NX, NU);
 	}
-	if (objS.isGiven() == true && objEvFu.isGiven() == true && objEvFx.isGiven() == true)
+	else if (objS.isGiven() == true && objEvFu.isGiven() == true && objEvFx.isGiven() == true)
 	{
 		S1 = objEvFx.getGivenMatrix().transpose() * objS.getGivenMatrix() * objEvFu.getGivenMatrix();
 	}
