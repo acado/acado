@@ -155,6 +155,7 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 	code.addFunction( evaluateLSQEndTerm );
 	code.addFunction( setObjQ1Q2 );
 	code.addFunction( setObjR1R2 );
+	code.addFunction( setObjS1 );
 	code.addFunction( setObjQN1QN2 );
 	code.addFunction( setStagef );
 	code.addFunction( evaluateObjective );
