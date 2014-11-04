@@ -43,7 +43,7 @@
 #define K_MAX @MAX_ITER@
 
 // tolerance in the duality measure
-#define TOL 1e-4
+#define TOL 1e-6
 
 /*// threshold in the duality measure to switch from single to double precision TODO not implemented */
 /*#define SP_THR 1e5*/
