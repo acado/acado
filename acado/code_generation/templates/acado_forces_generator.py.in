@@ -51,7 +51,7 @@ class MultistageProblem( object ):
             'accuracy':
             {'mu': 1.e-06, 'ineq': 1.e-06, 'eq': 1.e-06, 'rdgap': 1.e-04},
             'printlevel': 0,
-            'init': 0,
+            'init': 1,
             'optlevel': 1,
             'overwrite': 1,
             'timing': 1,
