@@ -51,13 +51,14 @@ class MultistageProblem( object ):
             'accuracy':
             {'mu': 1.e-06, 'ineq': 1.e-06, 'eq': 1.e-06, 'rdgap': 1.e-04},
             'printlevel': 0,
-            'init': 1,
+            'init': 0,
             'optlevel': 1,
             'overwrite': 1,
             'timing': 1,
             'floattype': 'double',
-            'parallel': 1,
-            'clversion': 1}
+            'parallel': 0,
+            'clversion': 1,
+            'mu0': 1.0}
         
     def setDims(self, stage, n, r, l, u, p, q):
         if (stage < 0) or (stage > self.N - 1):
@@ -106,9 +107,9 @@ class MultistageProblem( object ):
         self.exportOutputs = np.array(self.outputs,
             dtype = [('name', 'S10'), ('fromStage', 'd'), ('idxWithinStage', 'O')])
         
-        # Max dim of all strings is set to 10   
+        # Max dim of all strings is set to 10
         self.exportOptions = np.array([tuple(self.codeoptions.values())],
-            dtype = zip(self.codeoptions.keys(), ('d', 'd', 'd', 'O', 'd', 'd', 
+            dtype = zip(self.codeoptions.keys(), ('d', 'd', 'd', 'O', 'd', 'd', 'd', 
                                                   'S10', 'S10', 'd', 'd', 'd', 'O')))
 
         # Pack shit and save it to a file which we are gonna send to FORCES server
