@@ -43,7 +43,10 @@
 #define K_MAX @MAX_ITER@
 
 // tolerance in the duality measure
-#define TOL 1e-6
+#define MU_TOL 1e-6
+
+// minimum accepted step length
+#define ALPHA_MIN 1e-8
 
 /*// threshold in the duality measure to switch from single to double precision TODO not implemented */
 /*#define SP_THR 1e5*/
@@ -121,12 +124,16 @@ int acado_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b,
                             real_t* lambda, real_t* mu, real_t* slacks,
                             int* nIt )
 {
+
+	int hpmpc_status = -1;
+
 	/*	double sp_thr = SP_THR; // threshold to switch between double and single precision*/
 	int k_max = K_MAX; // maximum number of iterations in the IP method
-	double tol = TOL; // tolerance in the duality measure
+	double mu_tol = MU_TOL; // tolerance in the duality measure
+	double alpha_min = ALPHA_MIN; // minimum accepted step length
 	static real_t sigma_par[] = {0.4, 0.1, 0.001}; // control primal-dual IP behaviour
 	static real_t stat[5*K_MAX]; // statistics from the IP routine
-	static real_t work0[8 + (N+1)*(PNZ*CNX + PNZ*CNZ + PNZ*CNL + 5*ANZ + 2*ANX + 7*ANB) + 3*ANZ];
+	static real_t work0[16 + (N+1)*(PNZ*CNX + PNZ*CNZ + PNZ*CNL + 5*ANZ + 3*ANX + 7*ANB) + 3*ANZ];
 	int warm_start = WARM_START;
 	int compute_mult = 1; // compute multipliers
 
@@ -269,14 +276,14 @@ int acado_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b,
 		{
 #if prec == 0
 		if(IP==1)
-			d_ip_box_mpc(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
+			hpmpc_status = d_ip_box_mpc(nIt, k_max, mu_tol, alpha_min, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
 		else
-			d_ip2_box_mpc(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
+			hpmpc_status = d_ip2_box_mpc(nIt, k_max, mu_tol, alpha_min, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
 #else
 		if(IP==1)
-			s_ip_box_mpc(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
+			hpmpc_status = s_ip_box_mpc(nIt, k_max, mu_tol, alpha_min, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
 		else
-			s_ip2_box_mpc(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
+			hpmpc_status = s_ip2_box_mpc(nIt, k_max, mu_tol, alpha_min, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
 
 #endif // prec == 0
 		}
@@ -284,14 +291,14 @@ int acado_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b,
 		{
 #if prec == 0
 		if(IP==1)
-			d_ip_box_mhe(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
+			hpmpc_status = d_ip_box_mhe(nIt, k_max, mu_tol, alpha_min, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
 		else
-			d_ip2_box_mhe(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
+			hpmpc_status = d_ip2_box_mhe(nIt, k_max, mu_tol, alpha_min, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
 #else
 		if(IP==1)
-			s_ip_box_mhe(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
+			hpmpc_status = s_ip_box_mhe(nIt, k_max, mu_tol, alpha_min, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
 		else
-			s_ip2_box_mhe(nIt, k_max, tol, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
+			hpmpc_status = s_ip2_box_mhe(nIt, k_max, mu_tol, alpha_min, warm_start, sigma_par, stat, nx, nu, N, nb, hpBAbt, hpQ, hdb, hux, compute_mult, hpi, hlam, ht, ptr);
 #endif // prec == 0
 		}
 
@@ -364,8 +371,6 @@ int acado_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b,
 	printf("\n");
 #endif /* PC_DEBUG == 1 */
 
-	if (*nIt == K_MAX)
-		return 1;
+    return hpmpc_status;
 
-    return 0;
 }
