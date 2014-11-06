@@ -1000,6 +1000,9 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 
+	int hotstartQP;
+	get(HOTSTART_QP, hotstartQP);
+
 	qpGenerator->configure(
 			NX,
 			NU,
@@ -1014,7 +1017,8 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			(PrintLevel)printLevel == HIGH ? 2 : 0,
 			maxNumQPiterations,
 			useOMP,
-			true
+			true,
+			hotstartQP
 	);
 
 	qpGenerator->exportCode();
@@ -1041,7 +1045,8 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			(PrintLevel)printLevel == HIGH ? 2 : 0,
 			maxNumQPiterations,
 			useOMP,
-			false
+			false,
+			hotstartQP
 	);
 
 	qpGenerator->exportCode();

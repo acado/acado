@@ -58,7 +58,8 @@ returnValue ExportForcesGenerator::configure(	const unsigned _nx,
 												const unsigned _printLevel,
 												const unsigned _maxIterations,
 												const unsigned _parallel,
-												bool matlabGenerator
+												bool matlabGenerator,
+												bool warmStart
 												)
 {
 	stringstream s;
@@ -177,6 +178,8 @@ returnValue ExportForcesGenerator::configure(	const unsigned _nx,
 	s.str(std::string());
 	s << _parallel;
 	dictionary[ "@PARALLEL@" ] =  s.str();
+
+	dictionary[ "@WARM_START@" ] =  warmStart ? "2" : "0";
 
 	// And then fill a template file
 	fillTemplate();

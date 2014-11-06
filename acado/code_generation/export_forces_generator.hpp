@@ -89,7 +89,8 @@ public:
 							const unsigned _printLevel,
 							const unsigned _maxIterations,
 							const unsigned _parallel,
-							bool matlabGenerator = true
+							bool matlabGenerator,
+							bool warmStart
 							);
 };
 
