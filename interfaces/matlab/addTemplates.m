@@ -41,11 +41,11 @@ templates = {'INTEGRATOR_MEX_TEMPLATE', 'RHS_MEX_TEMPLATE', 'FORCES_TEMPLATE', .
     'MAKEFILE_SFUN_QPOASES', 'SOLVER_SFUN_SOURCE', 'SOLVER_SFUN_HEADER', 'DUMMY_TEST_FILE', 'COMMON_HEADER_TEMPLATE', ...
     'HPMPC_INTERFACE', 'MAKEFILE_QPDUNES', 'MAKEFILE_HPMPC', 'MAKE_MEX_QPDUNES', 'HESSIAN_REG_SOURCE'};
 
-fid = fopen('./bin/include/acado/code_generation/templates/templates.hpp', 'w+');
+fid = fopen('./bin/acado/code_generation/templates/templates.hpp', 'w+');
 
 fprintf(fid, '%s \n', ' #ifndef ACADO_TOOLKIT_TEMPLATES_HPP');
 fprintf(fid, '%s \n\n', ' #define ACADO_TOOLKIT_TEMPLATES_HPP');
-tempString = sprintf('%s "%s/../../src/code_generation/templates" \n\n', ' #define TEMPLATE_PATHS', pwd);
+tempString = sprintf('%s "%s/../../acado/code_generation/templates" \n\n', ' #define TEMPLATE_PATHS', pwd);
 if ispc
     tempString = regexprep( tempString, '\', '/' );
 end
