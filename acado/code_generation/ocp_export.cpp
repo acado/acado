@@ -405,7 +405,7 @@ returnValue OCPexport::setup( )
 		}
 		else if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
 			solver = ExportNLPSolverPtr(
-					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, EXACT_HESSIAN_CN2_NEW));
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, EXACT_HESSIAN_CN2));
 		}
 		else {
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,

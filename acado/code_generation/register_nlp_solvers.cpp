@@ -33,7 +33,7 @@
 
 #include <acado/code_generation/export_gauss_newton_cn2.hpp>
 #include <acado/code_generation/export_gauss_newton_cn2_new.hpp>
-#include <acado/code_generation/export_exact_hessian_cn2_new.hpp>
+#include <acado/code_generation/export_exact_hessian_cn2.hpp>
 #include <acado/code_generation/export_gauss_newton_cn2_factorization.hpp>
 #include <acado/code_generation/export_gauss_newton_condensed.hpp>
 #include <acado/code_generation/export_gauss_newton_forces.hpp>
@@ -61,11 +61,11 @@ ExportNLPSolver* createGaussNewtonCN2New(	UserInteraction* _userInteraction,
 	return new ExportGaussNewtonCN2New(_userInteraction, _commonHeaderName);
 }
 
-ExportNLPSolver* createExactHessianCN2New(	UserInteraction* _userInteraction,
+ExportNLPSolver* createExactHessianCN2(	UserInteraction* _userInteraction,
 											const std::string& _commonHeaderName
 											)
 {
-	return new ExportExactHessianCN2New(_userInteraction, _commonHeaderName);
+	return new ExportExactHessianCN2(_userInteraction, _commonHeaderName);
 }
 
 ExportNLPSolver* createGaussNewtonCn2Factorization(	UserInteraction* _userInteraction,
@@ -114,7 +114,7 @@ RegisterNlpSolvers::RegisterNlpSolvers()
 {
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2, createGaussNewtonCN2);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2_NEW, createGaussNewtonCN2New);
-	NLPSolverFactory::instance().registerAlgorithm(EXACT_HESSIAN_CN2_NEW, createExactHessianCN2New);
+	NLPSolverFactory::instance().registerAlgorithm(EXACT_HESSIAN_CN2, createExactHessianCN2);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2_FACTORIZATION, createGaussNewtonCn2Factorization);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CONDENSED, createGaussNewtonCondensed);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_FORCES, createGaussNewtonForces);

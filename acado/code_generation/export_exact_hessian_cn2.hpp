@@ -24,13 +24,13 @@
  */
 
 /**
- *    \file include/acado/code_generation/export_exact_hessian_cn2_new.hpp
+ *    \file include/acado/code_generation/export_exact_hessian_cn2.hpp
  *    \authors Rien Quirynen
  *    \date 2014
  */
 
-#ifndef ACADO_TOOLKIT_EXPORT_EXACT_HESSIAN_CN2_NEW_HPP
-#define ACADO_TOOLKIT_EXPORT_EXACT_HESSIAN_CN2_NEW_HPP
+#ifndef ACADO_TOOLKIT_EXPORT_EXACT_HESSIAN_CN2_HPP
+#define ACADO_TOOLKIT_EXPORT_EXACT_HESSIAN_CN2_HPP
 
 #include <acado/code_generation/export_nlp_solver.hpp>
 #include <acado/code_generation/export_gauss_newton_cn2_new.hpp>
@@ -46,7 +46,7 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\note Early experimental implementation
  */
-class ExportExactHessianCN2New : public ExportGaussNewtonCN2New
+class ExportExactHessianCN2 : public ExportGaussNewtonCN2New
 {
 public:
 
@@ -55,12 +55,12 @@ public:
 	 *	@param[in] _userInteraction		Pointer to corresponding user interface.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
-	ExportExactHessianCN2New(	UserInteraction* _userInteraction = 0,
+	ExportExactHessianCN2(	UserInteraction* _userInteraction = 0,
 								const std::string& _commonHeaderName = ""
 								);
 
 	/** Destructor. */
-	virtual ~ExportExactHessianCN2New( )
+	virtual ~ExportExactHessianCN2( )
 	{}
 
 	/** Initializes export of an algorithm.
@@ -125,4 +125,4 @@ protected:
 
 CLOSE_NAMESPACE_ACADO
 
-#endif  // ACADO_TOOLKIT_EXPORT_EXACT_HESSIAN_CN2_NEW_HPP
+#endif  // ACADO_TOOLKIT_EXPORT_EXACT_HESSIAN_CN2_HPP

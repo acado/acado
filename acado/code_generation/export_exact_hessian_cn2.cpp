@@ -24,24 +24,24 @@
  */
 
 /**
- *    \file src/code_generation/export_exact_hessian_cn2_new.cpp
+ *    \file src/code_generation/export_exact_hessian_cn2.cpp
  *    \author Rien Quirynen
  *    \date 2014
  */
 
-#include <acado/code_generation/export_exact_hessian_cn2_new.hpp>
+#include <acado/code_generation/export_exact_hessian_cn2.hpp>
 #include <acado/code_generation/export_qpoases_interface.hpp>
 
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
 
-ExportExactHessianCN2New::ExportExactHessianCN2New(	UserInteraction* _userInteraction,
+ExportExactHessianCN2::ExportExactHessianCN2(	UserInteraction* _userInteraction,
 											const std::string& _commonHeaderName
 											) : ExportGaussNewtonCN2New( _userInteraction,_commonHeaderName )
 {}
 
-returnValue ExportExactHessianCN2New::setup( )
+returnValue ExportExactHessianCN2::setup( )
 {
 	std::cout << "NOTE: You are using the new (unstable) N2 condensing feature for exact Hessian based RTI..\n";
 
@@ -93,7 +93,7 @@ returnValue ExportExactHessianCN2New::setup( )
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportExactHessianCN2New::getFunctionDeclarations(	ExportStatementBlock& declarations
+returnValue ExportExactHessianCN2::getFunctionDeclarations(	ExportStatementBlock& declarations
 															) const
 {
 	ExportGaussNewtonCN2New::getFunctionDeclarations( declarations );
@@ -103,7 +103,7 @@ returnValue ExportExactHessianCN2New::getFunctionDeclarations(	ExportStatementBl
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportExactHessianCN2New::getCode(	ExportStatementBlock& code
+returnValue ExportExactHessianCN2::getCode(	ExportStatementBlock& code
 											)
 {
 	LOG( LVL_DEBUG ) << "Solver: getting code... " << endl;
@@ -213,7 +213,7 @@ returnValue ExportExactHessianCN2New::getCode(	ExportStatementBlock& code
 // PROTECTED FUNCTIONS:
 //
 
-returnValue ExportExactHessianCN2New::setupObjectiveEvaluation( void )
+returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 {
 	evaluateObjective.setup("evaluateObjective");
 
@@ -319,7 +319,7 @@ returnValue ExportExactHessianCN2New::setupObjectiveEvaluation( void )
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportExactHessianCN2New::setupGetObjective() {
+returnValue ExportExactHessianCN2::setupGetObjective() {
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Objective value calculation
@@ -367,7 +367,7 @@ returnValue ExportExactHessianCN2New::setupGetObjective() {
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportExactHessianCN2New::setupHessianRegularization( )
+returnValue ExportExactHessianCN2::setupHessianRegularization( )
 {
 	ExportVariable block( "hessian_block", NX+NU, NX+NU );
 	regularization = ExportFunction( "acado_regularize", block );
@@ -392,7 +392,7 @@ returnValue ExportExactHessianCN2New::setupHessianRegularization( )
 	return SUCCESSFUL_RETURN;
 }
 
-returnValue ExportExactHessianCN2New::setupEvaluation( )
+returnValue ExportExactHessianCN2::setupEvaluation( )
 {
 	////////////////////////////////////////////////////////////////////////////
 	//
