@@ -882,6 +882,57 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	feedback.addLinebreak();
 
 	//
+	// Configure output variables
+	//
+	std::vector< ExportVariable > vecQPVars;
+
+	vecQPVars.clear();
+	vecQPVars.resize(N + 1);
+	for (unsigned i = 0; i < N; ++i)
+		vecQPVars[ i ].setup(string("out") + toString(i + 1), NX + NU, 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
+	vecQPVars[ N ].setup(string("out") + toString(N + 1), NX, 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
+
+	//
+	// In case warm starting is enabled, give an initial guess, based on the old solution
+	//
+	int hotstartQP;
+	get(HOTSTART_QP, hotstartQP);
+
+	if ( hotstartQP )
+	{
+		std::vector< ExportVariable > zInit;
+
+		zInit.clear();
+		zInit.resize(N + 1);
+		for (unsigned i = 0; i < N; ++i)
+		{
+			string name = "z_init_";
+			name = name + (i < 10 ? "0" : "") + toString( i );
+			zInit[ i ].setup(name, NX + NU, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
+		}
+		string name = "z_init_";
+		name = name + (N < 10 ? "0" : "") + toString( N );
+		zInit[ N ].setup(name, NX, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
+
+		// TODO This should be further investigated.
+
+		//
+		// 1) Just use the old solution
+		//
+//		for (unsigned blk = 0; blk < N + 1; blk++)
+//			feedback.addStatement(zInit[ blk ] == vecQPVars[ blk ] );
+
+		//
+		// 2) Initialization by shifting
+		//
+
+//		for (unsigned blk = 0; blk < N - 1; blk++)
+//			feedback.addStatement( zInit[ blk ] == vecQPVars[blk + 1] );
+//		for (unsigned el = 0; el < NX; el++)
+//			feedback.addStatement( zInit[N - 1].getElement(el, 0) == vecQPVars[ N ].getElement(el, 0) );
+	}
+
+	//
 	// Call a QP solver
 	// NOTE: we need two prefixes:
 	// 1. module prefix
@@ -901,14 +952,6 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	//
 	// Here we have to add the differences....
 	//
-
-	std::vector< ExportVariable > vecQPVars;
-
-	vecQPVars.clear();
-	vecQPVars.resize(N + 1);
-	for (unsigned i = 0; i < N; ++i)
-		vecQPVars[ i ].setup(string("out") + toString(i + 1), NX + NU, 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
-	vecQPVars[ N ].setup(string("out") + toString(N + 1), NX, 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
 
 	ExportVariable stageOut("stageOut", 1, NX + NU, REAL, ACADO_LOCAL);
 	ExportIndex index( "index" );
@@ -1000,6 +1043,9 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 
+	int hotstartQP;
+	get(HOTSTART_QP, hotstartQP);
+
 	qpGenerator->configure(
 			NX,
 			NU,
@@ -1014,7 +1060,8 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			(PrintLevel)printLevel == HIGH ? 2 : 0,
 			maxNumQPiterations,
 			useOMP,
-			true
+			true,
+			hotstartQP
 	);
 
 	qpGenerator->exportCode();
@@ -1041,7 +1088,8 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			(PrintLevel)printLevel == HIGH ? 2 : 0,
 			maxNumQPiterations,
 			useOMP,
-			false
+			false,
+			hotstartQP
 	);
 
 	qpGenerator->exportCode();

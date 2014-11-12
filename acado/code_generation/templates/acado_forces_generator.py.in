@@ -305,6 +305,7 @@ stages.codeoptions["overwrite"]  = 1 # Always overwrite the existing code
 stages.codeoptions["printlevel"] = @PRINT_LEVEL@
 stages.codeoptions["maxit"]      = @MAX_ITERATIONS@
 stages.codeoptions["parallel"]   = @PARALLEL@
+stages.codeoptions["init"]       = @WARM_START@
 
 ## Generate code
 import os

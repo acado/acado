@@ -188,6 +188,8 @@ codeoptions.overwrite	= 1; % Always overwrite the existing code
 codeoptions.printlevel	= @PRINT_LEVEL@;
 codeoptions.maxit		= @MAX_ITERATIONS@;
 codeoptions.parallel	= @PARALLEL@;
+codeoptions.init	    = @WARM_START@;
+codeoption.mu0          = 1.0;
 
 
 %% Generate code
