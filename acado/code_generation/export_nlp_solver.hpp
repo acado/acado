@@ -212,6 +212,12 @@ protected:
 	/** Setup the function for evaluating the actual objective value. */
 	virtual returnValue setupGetObjective();
 
+	/** Setup the function for evaluating the actual LSQ objective value. */
+	virtual returnValue setupGetLSQObjective();
+
+	/** Setup the function for evaluating the actual objective value. */
+	virtual returnValue setupGetGeneralObjective();
+
 	/** Setup of functions and variables for evaluation of arrival cost. */
 	returnValue setupArrivalCostCalculation();
 
@@ -256,8 +262,8 @@ protected:
 	ExportVariable objEvFxx, objEvFxu, objEvFuu, objEvFxxEnd; // aliasing
 
 	ExportVariable objAuxVar, objValueIn, objValueOut;
-	ExportAcadoFunction evaluateLSQ;
-	ExportAcadoFunction evaluateLSQEndTerm;
+	ExportAcadoFunction evaluateStageCost;
+	ExportAcadoFunction evaluateTerminalCost;
 
 	ExportVariable Q1, Q2;
 	ExportVariable R1, R2;
@@ -329,6 +335,9 @@ protected:
 
 	// Older stuff; TODO make this more unique
 	ExportVariable SAC, xAC, DxAC;
+
+	ExportFunction regularizeHessian;
+	ExportFunction regularization;
 	/** @} */
 
 private:
@@ -343,6 +352,7 @@ enum ExportNLPType
 	GAUSS_NEWTON_CN2,
 	GAUSS_NEWTON_CN2_NEW,
 	EXACT_HESSIAN_CN2,
+	EXACT_HESSIAN_QPDUNES,
 	GAUSS_NEWTON_CN2_FACTORIZATION,
 	GAUSS_NEWTON_FORCES,
 	GAUSS_NEWTON_QPDUNES,

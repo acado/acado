@@ -146,7 +146,7 @@ protected:
 	/** Setup of the glue code for the QP solver interaction. */
 	virtual returnValue setupQPInterface( );
 
-private:
+protected:
 
 	/** Current state feedback. */
 	ExportVariable x0;

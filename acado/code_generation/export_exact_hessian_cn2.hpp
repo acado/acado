@@ -100,26 +100,11 @@ protected:
 	 */
 	virtual returnValue setupObjectiveEvaluation( void );
 
-	/** Setting up of a hessian regularization:
-	 *
-	 *   \return SUCCESSFUL_RETURN
-	 */
+	/** Setting up of a Hessian regularization routine */
 	virtual returnValue setupHessianRegularization( void );
-
-	/** Setup the function for evaluating the actual objective value. */
-	virtual returnValue setupGetObjective();
-
-	/** Exports source code containing the evaluation routines of the algorithm.
-	 *
-	 *	\return SUCCESSFUL_RETURN
-	 */
-	virtual returnValue setupEvaluation( );
 
 protected:
 
-	ExportFunction regularizeHessian;
-	ExportFunction regularization;
-	ExportFunction evaluateObjective;
 
 };
 

@@ -432,9 +432,16 @@ returnValue OCPexport::setup( )
 		if ( (QPSolverName)qpSolver == QP_FORCES)
 			solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_FORCES));
-		else if ((QPSolverName)qpSolver == QP_QPDUNES)
-			solver = ExportNLPSolverPtr(
+		else if ((QPSolverName)qpSolver == QP_QPDUNES) {
+			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+				solver = ExportNLPSolverPtr(
+									NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, EXACT_HESSIAN_QPDUNES));
+			}
+			else {
+				solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_QPDUNES));
+			}
+		}
 		else if ((QPSolverName)qpSolver == QP_QPDUNES2)
 			solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_QPDUNES2));

@@ -105,8 +105,8 @@ returnValue ExportGaussNewtonForces::getFunctionDeclarations(	ExportStatementBlo
 	declarations.addDeclaration( getKKT );
 	declarations.addDeclaration( getObjective );
 
-	declarations.addDeclaration( evaluateLSQ );
-	declarations.addDeclaration( evaluateLSQEndTerm );
+	declarations.addDeclaration( evaluateStageCost );
+	declarations.addDeclaration( evaluateTerminalCost );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -134,8 +134,8 @@ returnValue ExportGaussNewtonForces::getCode(	ExportStatementBlock& code
 
 	code.addFunction( modelSimulation );
 
-	code.addFunction( evaluateLSQ );
-	code.addFunction( evaluateLSQEndTerm );
+	code.addFunction( evaluateStageCost );
+	code.addFunction( evaluateTerminalCost );
 	code.addFunction( setObjQ1Q2 );
 	code.addFunction( setObjR1R2 );
 	code.addFunction( setObjQN1QN2 );
@@ -253,7 +253,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
+	loopObjective.addFunctionCall(evaluateStageCost, objValueIn, objValueOut);
 
 	// Stack the measurement function value
 	loopObjective.addStatement(
@@ -402,7 +402,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
 	// Evaluate the objective function
-	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
+	evaluateObjective.addFunctionCall(evaluateTerminalCost, objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
 	evaluateObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) );

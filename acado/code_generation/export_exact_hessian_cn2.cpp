@@ -126,8 +126,8 @@ returnValue ExportExactHessianCN2::getCode(	ExportStatementBlock& code
 
 	code.addFunction( modelSimulation );
 
-	code.addFunction( evaluateLSQ );
-	code.addFunction( evaluateLSQEndTerm );
+	code.addFunction( evaluateStageCost );
+	code.addFunction( evaluateTerminalCost );
 
 	code.addFunction( setObjQ1Q2 );
 	code.addFunction( setObjR1R2 );
@@ -225,14 +225,14 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 
 	evaluateObjective.addIndex( runObj );
 
-	if( evaluateLSQ.getFunctionDim() > 0 ) {
+	if( evaluateStageCost.getFunctionDim() > 0 ) {
 		loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( runObj ) );
 		loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( runObj ) );
 		loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
 		loopObjective.addLinebreak( );
 
 		// Evaluate the objective function
-		loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
+		loopObjective.addFunctionCall(evaluateStageCost, objValueIn, objValueOut);
 		loopObjective.addLinebreak( );
 
 		ExportVariable tmpFxx, tmpFxu, tmpFuu;
@@ -281,12 +281,12 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 	//
 	// Evaluate the quadratic Mayer term
 	//
-	if( evaluateLSQEndTerm.getFunctionDim() > 0 ) {
+	if( evaluateTerminalCost.getFunctionDim() > 0 ) {
 		evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
 		evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
 
 		// Evaluate the objective function, last node.
-		evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
+		evaluateObjective.addFunctionCall(evaluateTerminalCost, objValueIn, objValueOut);
 		evaluateObjective.addLinebreak( );
 
 		ExportVariable tmpFxxEnd;
@@ -310,58 +310,10 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 	}
 	else {
 		DMatrix hess(NX,NX); hess.setAll(0);
-		loopObjective.addStatement(objSEndTerm == hess);
+		evaluateObjective.addStatement(objSEndTerm == hess);
 
 		DMatrix Dx(NX,1); Dx.setAll(0);
 		evaluateObjective.addStatement( QDy.getRows(N * NX, (N + 1) * NX) == Dx );
-	}
-
-	return SUCCESSFUL_RETURN;
-}
-
-returnValue ExportExactHessianCN2::setupGetObjective() {
-	////////////////////////////////////////////////////////////////////////////
-	//
-	// Objective value calculation
-	//
-	////////////////////////////////////////////////////////////////////////////
-
-	getObjective.setup( "getObjective" );
-	getObjective.doc( "Calculate the objective value." );
-	ExportVariable objVal("objVal", 1, 1, REAL, ACADO_LOCAL, true);
-	objVal.setDoc( "Value of the objective function." );
-	getObjective.setReturnValue( objVal );
-
-	ExportIndex oInd;
-	getObjective.acquire( oInd );
-
-	// Recalculate objective
-	getObjective.addStatement( objVal == 0 );
-
-	if( evaluateLSQ.getFunctionDim() > 0 ) {
-		ExportForLoop loopObjective(oInd, 0, N);
-
-		loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( oInd ) );
-		loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( oInd ) );
-		loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( oInd ) );
-		loopObjective.addLinebreak( );
-
-		// Evaluate the objective function
-		loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
-
-		// Stack the measurement function value
-		loopObjective.addStatement( objVal += objValueOut.getCol(0) );
-
-		getObjective.addStatement( loopObjective );
-	}
-	if( evaluateLSQEndTerm.getFunctionDim() > 0 ) {
-		getObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
-		getObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
-
-		// Evaluate the objective function
-		getObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
-
-		getObjective.addStatement( objVal += objValueOut.getCol(0) );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -388,98 +340,6 @@ returnValue ExportExactHessianCN2::setupHessianRegularization( )
 	regularizeHessian.addStatement( loopObjective );
 
 	regularizeHessian.addStatement( QN1 == objSEndTerm );
-
-	return SUCCESSFUL_RETURN;
-}
-
-returnValue ExportExactHessianCN2::setupEvaluation( )
-{
-	////////////////////////////////////////////////////////////////////////////
-	//
-	// Preparation phase
-	//
-	////////////////////////////////////////////////////////////////////////////
-
-	preparation.setup( "preparationStep" );
-	preparation.doc( "Preparation step of the RTI scheme." );
-	ExportVariable retSim("ret", 1, 1, INT, ACADO_LOCAL, true);
-	retSim.setDoc("Status of the integration module. =0: OK, otherwise the error code.");
-	preparation.setReturnValue(retSim, false);
-
-	preparation	<< retSim.getFullName() << " = " << modelSimulation.getName() << "();\n";
-
-	preparation.addFunctionCall( evaluateObjective );
-	preparation.addFunctionCall( regularizeHessian );
-	preparation.addFunctionCall( condensePrep );
-
-	////////////////////////////////////////////////////////////////////////////
-	//
-	// Feedback phase
-	//
-	////////////////////////////////////////////////////////////////////////////
-
-	ExportVariable tmp("tmp", 1, 1, INT, ACADO_LOCAL, true);
-	tmp.setDoc( "Status code of the qpOASES QP solver." );
-
-	ExportFunction solve("solve");
-	solve.setReturnValue( tmp );
-
-	feedback.setup("feedbackStep");
-	feedback.doc( "Feedback/estimation step of the RTI scheme." );
-	feedback.setReturnValue( tmp );
-
-	feedback.addFunctionCall( condenseFdb );
-	feedback.addLinebreak();
-
-	stringstream s;
-	s << tmp.getName() << " = " << solve.getName() << "( );" << endl;
-	feedback <<  s.str();
-	feedback.addLinebreak();
-
-	feedback.addFunctionCall( expand );
-
-	////////////////////////////////////////////////////////////////////////////
-	//
-	// Setup evaluation of the KKT tolerance
-	//
-	////////////////////////////////////////////////////////////////////////////
-
-	ExportVariable kkt("kkt", 1, 1, REAL, ACADO_LOCAL, true);
-	ExportVariable prd("prd", 1, 1, REAL, ACADO_LOCAL, true);
-	ExportIndex index( "index" );
-
-	getKKT.setup( "getKKT" );
-	getKKT.doc( "Get the KKT tolerance of the current iterate." );
-	kkt.setDoc( "The KKT tolerance value." );
-	getKKT.setReturnValue( kkt );
-	getKKT.addVariable( prd );
-	getKKT.addIndex( index );
-
-	// ACC = |\nabla F^T * xVars|
-	getKKT.addStatement( kkt == (g ^ xVars) );
-	getKKT << kkt.getFullName() << " = fabs( " << kkt.getFullName() << " );\n";
-
-	ExportForLoop bLoop(index, 0, getNumQPvars());
-
-	bLoop.addStatement( prd == yVars.getRow( index ) );
-	bLoop << "if (" << prd.getFullName() << " > " << toString(1.0 / INFTY) << ")\n";
-	bLoop << kkt.getFullName() << " += fabs(" << lb.get(index, 0) << " * " << prd.getFullName() << ");\n";
-	bLoop << "else if (" << prd.getFullName() << " < " << toString(-1.0 / INFTY) << ")\n";
-	bLoop << kkt.getFullName() << " += fabs(" << ub.get(index, 0) << " * " << prd.getFullName() << ");\n";
-	getKKT.addStatement( bLoop );
-
-	if ((getNumStateBounds() + getNumComplexConstraints())> 0)
-	{
-		ExportForLoop cLoop(index, 0, getNumStateBounds() + getNumComplexConstraints());
-
-		cLoop.addStatement( prd == yVars.getRow( getNumQPvars() + index ));
-		cLoop << "if (" << prd.getFullName() << " > " << toString(1.0 / INFTY) << ")\n";
-		cLoop << kkt.getFullName() << " += fabs(" << lbA.get(index, 0) << " * " << prd.getFullName() << ");\n";
-		cLoop << "else if (" << prd.getFullName() << " < " << toString(-1.0 / INFTY) << ")\n";
-		cLoop << kkt.getFullName() << " += fabs(" << ubA.get(index, 0) << " * " << prd.getFullName() << ");\n";
-
-		getKKT.addStatement( cLoop );
-	}
 
 	return SUCCESSFUL_RETURN;
 }

@@ -394,6 +394,9 @@ returnValue ExportNLPSolver::setGeneralObjective(const Objective& _objective)
 	DifferentialState vX("", NX, 1);
 	Control vU("", NU, 1);
 
+	diagonalH = false;
+	diagonalHN = false;
+
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );
 	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
@@ -528,9 +531,9 @@ returnValue ExportNLPSolver::setGeneralObjective(const Objective& _objective)
 
 		// Set the separate aux variable for the evaluation of the objective.
 		objAuxVar.setup("objAuxVar", objF.getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
-		evaluateLSQ.init(objF, "evaluateLagrange", NX, 0, NU);
-		evaluateLSQ.setGlobalExportVariable( objAuxVar );
-		evaluateLSQ.setPrivate( true );
+		evaluateStageCost.init(objF, "evaluateLagrange", NX, 0, NU);
+		evaluateStageCost.setGlobalExportVariable( objAuxVar );
+		evaluateStageCost.setPrivate( true );
 
 		objValueOut.setup("objValueOut", 1, objF.getDim(), REAL, ACADO_WORKSPACE);
 	}
@@ -602,9 +605,9 @@ returnValue ExportNLPSolver::setGeneralObjective(const Objective& _objective)
 			objAuxVar.setup("objAuxVar", objFEndTermSize, 1, REAL, ACADO_WORKSPACE);
 		}
 
-		evaluateLSQEndTerm.init(objFEndTerm, "evaluateMayer", NX, 0, 0);
-		evaluateLSQEndTerm.setGlobalExportVariable( objAuxVar );
-		evaluateLSQEndTerm.setPrivate( true );
+		evaluateTerminalCost.init(objFEndTerm, "evaluateMayer", NX, 0, 0);
+		evaluateTerminalCost.setGlobalExportVariable( objAuxVar );
+		evaluateTerminalCost.setPrivate( true );
 
 		if (objFEndTerm.getDim() > objF.getDim())
 		{
@@ -690,8 +693,8 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 		objValueOut.setup("objValueOut", 1,
 				NY < NYN ? NYN * (1 + NX + NU): NY * (1 + NX + NU), REAL, ACADO_WORKSPACE);
 
-		evaluateLSQ = ExportAcadoFunction(lsqExternElements[ 0 ].h);
-		evaluateLSQEndTerm = ExportAcadoFunction(lsqExternEndTermElements[ 0 ].h);
+		evaluateStageCost = ExportAcadoFunction(lsqExternElements[ 0 ].h);
+		evaluateTerminalCost = ExportAcadoFunction(lsqExternEndTermElements[ 0 ].h);
 
 		setupObjectiveLinearTerms( _objective );
 
@@ -831,9 +834,9 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 	// Set the separate aux variable for the evaluation of the objective.
 
 	objAuxVar.setup("objAuxVar", objF.getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
-	evaluateLSQ.init(objF, "evaluateLSQ", NX, 0, NU);
-	evaluateLSQ.setGlobalExportVariable( objAuxVar );
-	evaluateLSQ.setPrivate( true );
+	evaluateStageCost.init(objF, "evaluateLSQ", NX, 0, NU);
+	evaluateStageCost.setGlobalExportVariable( objAuxVar );
+	evaluateStageCost.setPrivate( true );
 
 	objValueIn.setup("objValueIn", 1, NX + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
 	objValueOut.setup("objValueOut", 1, objF.getDim(), REAL, ACADO_WORKSPACE);
@@ -994,9 +997,9 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 		objAuxVar.setup(objAuxVar.getName(), objFEndTermSize, 1, REAL, objAuxVar.getDataStruct());
 	}
 
-	evaluateLSQEndTerm.init(objFEndTerm, "evaluateLSQEndTerm", NX, 0, 0);
-	evaluateLSQEndTerm.setGlobalExportVariable( objAuxVar );
-	evaluateLSQEndTerm.setPrivate( true );
+	evaluateTerminalCost.init(objFEndTerm, "evaluateLSQEndTerm", NX, 0, 0);
+	evaluateTerminalCost.setGlobalExportVariable( objAuxVar );
+	evaluateTerminalCost.setPrivate( true );
 
 	if (objFEndTerm.getDim() > objF.getDim())
 	{
@@ -1581,7 +1584,19 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	return setupGetObjective();
 }
 
-returnValue ExportNLPSolver::setupGetObjective() {
+
+returnValue ExportNLPSolver::setupGetObjective(  )
+{
+	if( getNY() > 0 || getNYN() > 0 ) {
+		return setupGetLSQObjective( );
+	}
+	else {
+		return setupGetGeneralObjective( );
+	}
+}
+
+
+returnValue ExportNLPSolver::setupGetLSQObjective() {
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Objective value calculation
@@ -1614,7 +1629,7 @@ returnValue ExportNLPSolver::setupGetObjective() {
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
+	loopObjective.addFunctionCall(evaluateStageCost, objValueIn, objValueOut);
 
 	// Stack the measurement function value
 	loopObjective.addStatement(
@@ -1628,7 +1643,7 @@ returnValue ExportNLPSolver::setupGetObjective() {
 	getObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
 	// Evaluate the objective function
-	getObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
+	getObjective.addFunctionCall(evaluateTerminalCost, objValueIn, objValueOut);
 
 	getObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) - yN.getTranspose() );
 
@@ -1665,6 +1680,54 @@ returnValue ExportNLPSolver::setupGetObjective() {
 	getObjective.addLinebreak( );
 
 	getObjective.addStatement( "objVal *= 0.5;\n" );
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue ExportNLPSolver::setupGetGeneralObjective() {
+	////////////////////////////////////////////////////////////////////////////
+	//
+	// Objective value calculation
+	//
+	////////////////////////////////////////////////////////////////////////////
+
+	getObjective.setup( "getObjective" );
+	getObjective.doc( "Calculate the objective value." );
+	ExportVariable objVal("objVal", 1, 1, REAL, ACADO_LOCAL, true);
+	objVal.setDoc( "Value of the objective function." );
+	getObjective.setReturnValue( objVal );
+
+	ExportIndex oInd;
+	getObjective.acquire( oInd );
+
+	// Recalculate objective
+	getObjective.addStatement( objVal == 0 );
+
+	if( evaluateStageCost.getFunctionDim() > 0 ) {
+		ExportForLoop loopObjective(oInd, 0, N);
+
+		loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( oInd ) );
+		loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( oInd ) );
+		loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( oInd ) );
+		loopObjective.addLinebreak( );
+
+		// Evaluate the objective function
+		loopObjective.addFunctionCall(evaluateStageCost, objValueIn, objValueOut);
+
+		// Stack the measurement function value
+		loopObjective.addStatement( objVal += objValueOut.getCol(0) );
+
+		getObjective.addStatement( loopObjective );
+	}
+	if( evaluateTerminalCost.getFunctionDim() > 0 ) {
+		getObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
+		getObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
+
+		// Evaluate the objective function
+		getObjective.addFunctionCall(evaluateTerminalCost, objValueIn, objValueOut);
+
+		getObjective.addStatement( objVal += objValueOut.getCol(0) );
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -1777,7 +1840,7 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	updateArrivalCost.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( 0 ) );
 	updateArrivalCost.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( 0 ) );
 
-	updateArrivalCost.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
+	updateArrivalCost.addFunctionCall(evaluateStageCost, objValueIn, objValueOut);
 	updateArrivalCost.addLinebreak( );
 
 	//

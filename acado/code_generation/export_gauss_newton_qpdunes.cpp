@@ -134,8 +134,8 @@ returnValue ExportGaussNewtonQpDunes::getFunctionDeclarations(	ExportStatementBl
 	declarations.addDeclaration( cleanup );
 	declarations.addDeclaration( shiftQpData );
 
-	declarations.addDeclaration( evaluateLSQ );
-	declarations.addDeclaration( evaluateLSQEndTerm );
+	declarations.addDeclaration( evaluateStageCost );
+	declarations.addDeclaration( evaluateTerminalCost );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -163,8 +163,8 @@ returnValue ExportGaussNewtonQpDunes::getCode(	ExportStatementBlock& code
 
 	code.addFunction( modelSimulation );
 
-	code.addFunction( evaluateLSQ );
-	code.addFunction( evaluateLSQEndTerm );
+	code.addFunction( evaluateStageCost );
+	code.addFunction( evaluateTerminalCost );
 	code.addFunction( setObjQ1Q2 );
 	code.addFunction( setObjR1R2 );
 	code.addFunction( setObjQN1QN2 );
@@ -237,7 +237,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	loopObjective.addLinebreak( );
 
 	// Evaluate the objective function
-	loopObjective.addFunctionCall(evaluateLSQ, objValueIn, objValueOut);
+	loopObjective.addFunctionCall(evaluateStageCost, objValueIn, objValueOut);
 
 	// Stack the measurement function value
 	loopObjective.addStatement(
@@ -332,7 +332,7 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
 	// Evaluate the objective function, last node.
-	evaluateObjective.addFunctionCall(evaluateLSQEndTerm, objValueIn, objValueOut);
+	evaluateObjective.addFunctionCall(evaluateTerminalCost, objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
 	evaluateObjective.addStatement( DyN.getTranspose() == objValueOut.getCols(0, NYN) );
@@ -927,6 +927,7 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	preparation	<< retSim.getFullName() << " = " << modelSimulation.getName() << "();\n";
 
 	preparation.addFunctionCall( evaluateObjective );
+	preparation.addFunctionCall( regularizeHessian );
 	preparation.addFunctionCall( evaluateConstraints );
 
 	////////////////////////////////////////////////////////////////////////////
@@ -948,15 +949,23 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	//
 	// Calculate objective residuals and call the QP solver
 	//
-	feedback.addStatement( Dy -= y );
-	feedback.addLinebreak();
-	feedback.addStatement( DyN -= yN );
-	feedback.addLinebreak();
+	if( getNY() > 0 || getNYN() > 0 ) {
+		feedback.addStatement( Dy -= y );
+		feedback.addLinebreak();
+		feedback.addStatement( DyN -= yN );
+		feedback.addLinebreak();
 
-	for (unsigned i = 0; i < N; ++i)
-		feedback.addFunctionCall(setStagef, qpg.getAddress(i * (NX + NU)), ExportIndex( i ));
-	feedback.addStatement( qpg.getRows(N * (NX + NU), N * (NX + NU) + NX) == QN2 * DyN );
-	feedback.addLinebreak();
+		for (unsigned i = 0; i < N; ++i)
+			feedback.addFunctionCall(setStagef, qpg.getAddress(i * (NX + NU)), ExportIndex( i ));
+		feedback.addStatement( qpg.getRows(N * (NX + NU), N * (NX + NU) + NX) == QN2 * DyN );
+		feedback.addLinebreak();
+	}
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	if( secondOrder ) {
+
+	}
 
 	if (initialStateFixed() == true)
 	{
