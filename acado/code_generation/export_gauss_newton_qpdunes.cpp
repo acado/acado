@@ -115,6 +115,9 @@ returnValue ExportGaussNewtonQpDunes::getDataDeclarations(	ExportStatementBlock&
 	declarations.addDeclaration(qpLambda, dataStruct);
 	declarations.addDeclaration(qpMu, dataStruct);
 
+	// lagrange multipliers
+	declarations.addDeclaration(mu, dataStruct);
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -960,12 +963,6 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 		feedback.addStatement( qpg.getRows(N * (NX + NU), N * (NX + NU) + NX) == QN2 * DyN );
 		feedback.addLinebreak();
 	}
-	int hessianApproximation;
-	get( HESSIAN_APPROXIMATION, hessianApproximation );
-	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
-	if( secondOrder ) {
-
-	}
 
 	if (initialStateFixed() == true)
 	{
@@ -1002,6 +999,14 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 			x.getRow( N ) += qpPrimal.getTranspose().getCols(N * (NX + NU), N * (NX + NU) + NX)
 	);
 	feedback.addLinebreak();
+
+	//
+	// Pass the multipliers of the dynamic constraints in case of exact Hessian SQP.
+	//
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	if( secondOrder )	feedback.addStatement( mu.makeColVector() == qpLambda );
 
 	////////////////////////////////////////////////////////////////////////////
 	//
