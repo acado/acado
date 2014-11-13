@@ -156,19 +156,19 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 		switch ( (QPSolverName)qpSolver )
 		{
 			case QP_QPOASES:
-				acadoCopyTempateFile(MAKEFILE_QPOASES, str, "#", true);
+				acadoCopyTemplateFile(MAKEFILE_QPOASES, str, "#", true);
 				break;
 
 			case QP_FORCES:
-				acadoCopyTempateFile(MAKEFILE_FORCES, str, "#", true);
+				acadoCopyTemplateFile(MAKEFILE_FORCES, str, "#", true);
 				break;
 
 			case QP_QPDUNES:
-				acadoCopyTempateFile(MAKEFILE_QPDUNES, str, "#", true);
+				acadoCopyTemplateFile(MAKEFILE_QPDUNES, str, "#", true);
 				break;
 
 			case QP_HPMPC:
-				acadoCopyTempateFile(MAKEFILE_HPMPC, str, "#", true);
+				acadoCopyTemplateFile(MAKEFILE_HPMPC, str, "#", true);
 				break;
 
 			default:
@@ -184,7 +184,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	get(GENERATE_TEST_FILE, generateTestFile);
 	string testFileName = dirName + "/test.c";
 	if ((bool) generateTestFile == true)
-		acadoCopyTempateFile(DUMMY_TEST_FILE, testFileName, "", true);
+		acadoCopyTemplateFile(DUMMY_TEST_FILE, testFileName, "", true);
 
 	//
 	// Generate MATLAB MEX interface
@@ -198,10 +198,10 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 		str = dirName + "/" + moduleName + "_solver_mex.c";
 
 		if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
-			acadoCopyTempateFile(EH_SOLVER_MEX, str, "", true);
+			acadoCopyTemplateFile(EH_SOLVER_MEX, str, "", true);
 		}
 		else {
-			acadoCopyTempateFile(SOLVER_MEX, str, "", true);
+			acadoCopyTemplateFile(SOLVER_MEX, str, "", true);
 		}
 
 		str = dirName + "/make_" + moduleName + "_solver.m";
@@ -210,19 +210,24 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 		{
 		case QP_QPOASES:
 			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
-				acadoCopyTempateFile(MAKE_MEX_EH_QPOASES, str, "%", true);
+				acadoCopyTemplateFile(MAKE_MEX_EH_QPOASES, str, "%", true);
 			}
 			else {
-				acadoCopyTempateFile(MAKE_MEX_QPOASES, str, "%", true);
+				acadoCopyTemplateFile(MAKE_MEX_QPOASES, str, "%", true);
 			}
 			break;
 
 		case QP_FORCES:
-			acadoCopyTempateFile(MAKE_MEX_FORCES, str, "%", true);
+			acadoCopyTemplateFile(MAKE_MEX_FORCES, str, "%", true);
 			break;
 
 		case QP_QPDUNES:
-			acadoCopyTempateFile(MAKE_MEX_QPDUNES, str, "%", true);
+			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+				acadoCopyTemplateFile(MAKE_MEX_EH_QPDUNES, str, "%", true);
+			}
+			else {
+				acadoCopyTemplateFile(MAKE_MEX_QPDUNES, str, "%", true);
+			}
 			break;
 			
 		case QP_QPDUNES2:

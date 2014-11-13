@@ -92,7 +92,7 @@ returnValue acadoCopyFile(	const std::string& source,
 							);
 
 /** A function for copying of template files. */
-returnValue acadoCopyTempateFile(	const std::string& source,
+returnValue acadoCopyTemplateFile(	const std::string& source,
 									const std::string& destination,
 									const std::string& commentString,
 									bool printCodegenNotice = false

@@ -159,7 +159,7 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 			exportMexFun.exportCode();
 
 			integrateInterface = dirName + std::string("/make_acado_integrator.m");
-			acadoCopyTempateFile(MAKE_MEX_INTEGRATOR, integrateInterface, "%", true);
+			acadoCopyTemplateFile(MAKE_MEX_INTEGRATOR, integrateInterface, "%", true);
 
 			// NOT SUPPORTED ANYMORE:
 //			std::string rhsInterface = dirName;
@@ -852,7 +852,7 @@ returnValue SIMexport::exportMakefile(	const std::string& _dirName,
 	std::string fileName( _dirName );
 	fileName += "/" + _fileName;
 
-	acadoCopyTempateFile(MAKEFILE_INTEGRATOR, fileName, "#", true);
+	acadoCopyTemplateFile(MAKEFILE_INTEGRATOR, fileName, "#", true);
 
 	return SUCCESSFUL_RETURN;
 }
