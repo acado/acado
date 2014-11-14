@@ -404,10 +404,14 @@ returnValue ExportNLPSolver::setGeneralObjective(const Objective& _objective)
 		objS.setup("EH", N * (NX + NU), NX + NU, REAL, ACADO_WORKSPACE);  // EXACT HESSIAN
 	}
 
-	S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
-	Q1.setup("Q1", NX * N, NX, REAL, ACADO_WORKSPACE);
-	R1.setup("R1", NU * N, NU, REAL, ACADO_WORKSPACE);
-	QN1.setup("QN1", NX, NX, REAL, ACADO_WORKSPACE);
+	int qpSolution;
+	get( SPARSE_QP_SOLUTION, qpSolution );
+	if( (SparseQPsolutionMethods)qpSolution != SPARSE_SOLVER ) {
+		S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
+		Q1.setup("Q1", NX * N, NX, REAL, ACADO_WORKSPACE);
+		R1.setup("R1", NU * N, NU, REAL, ACADO_WORKSPACE);
+		QN1.setup("QN1", NX, NX, REAL, ACADO_WORKSPACE);
+	}
 
 	objValueIn.setup("objValueIn", 1, NX + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
 	// -----------------

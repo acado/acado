@@ -277,7 +277,7 @@ returnValue ExportExactHessianQpDunes::setupHessianRegularization( )
 
 	ExportForLoop loopObjective(oInd, 0, N);
 	loopObjective.addFunctionCall( regularization, objS.getAddress(oInd*(NX+NU),0) );
-	for( uint row; row < NX+NU; row++ ) {
+	for( uint row = 0; row < NX+NU; row++ ) {
 		loopObjective.addStatement( qpH.getRows((oInd*(NX+NU)+row)*(NX+NU),(oInd*(NX+NU)+row+1)*(NX+NU)) == objS.getRow(oInd*(NX+NU)+row).getTranspose() );
 	}
 	regularizeHessian.addStatement( loopObjective );

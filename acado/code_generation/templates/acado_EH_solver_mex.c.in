@@ -293,6 +293,12 @@ void mexFunction(	int nlhs,
 
 #endif /* (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPOASES) */
 
+#if (ACADO_QP_SOLVER == ACADO_QPDUNES)
+	if (!initialized) {
+		initializeSolver();
+	}
+#endif
+
 #if ACADO_USE_ARRIVAL_COST == 1
 	getArray(1, src, 0, "xAC", acadoVariables.xAC, ACADO_NX, 1);
 	getArray(1, src, 0, "SAC", acadoVariables.SAC, ACADO_NX, ACADO_NX);
