@@ -1690,14 +1690,11 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	if (useArrivalCost == NO)
 		return SUCCESSFUL_RETURN;
 
-	if ( useArrivalCost )
-	{
-		SAC.setup("SAC", NX, NX, REAL, ACADO_VARIABLES);
-		SAC.setDoc("Arrival cost term: inverse of the covariance matrix.");
-		xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
-		xAC.setDoc("Arrival cost term: a priori state estimate.");
-		DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
-	}
+	SAC.setup("SAC", NX, NX, REAL, ACADO_VARIABLES);
+	SAC.setDoc("Arrival cost term: inverse of the covariance matrix.");
+	xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
+	xAC.setDoc("Arrival cost term: a priori state estimate.");
+	DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
 
 	ExportVariable evRet("ret", 1, 1, INT, ACADO_LOCAL, true);
 
@@ -1885,11 +1882,13 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	 */
 
 	updateArrivalCost
-		<< (acXTilde == state.getTranspose().getRows(0, NX) - acXx * x.getRow( 0 ).getTranspose())
+		<< (acXTilde == state.getTranspose().getRows(0, NX))
+		<< (acXTilde -= acXx * x.getRow( 0 ).getTranspose())
 		<< (acXTilde -= acXu * u.getRow( 0 ).getTranspose());
 
 	updateArrivalCost
-		<< (acHTilde == y.getRows(0, NY) - objValueOut.getTranspose().getRows(0, NY))
+		<< (acHTilde == y.getRows(0, NY))
+		<< (acHTilde -= objValueOut.getTranspose().getRows(0, NY))
 		<< (acHTilde += acHx * x.getRow( 0 ).getTranspose())
 		<< (acHTilde += acHu * u.getRow( 0 ).getTranspose());
 
