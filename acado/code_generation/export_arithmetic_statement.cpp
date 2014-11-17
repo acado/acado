@@ -220,22 +220,22 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 						continue;
 				}
 
-				stream << lhs.get(i, j) << " " << getAssignString() << " ";
+				stream << lhs.get(i, j) << " " << getAssignString();
 
 				if ( rhs1->isZero(i, j) == false )
 				{
-					stream << rhs1->get(i, j);
+					stream  << " " << rhs1->get(i, j);
 					if ( rhs2->isZero(i,j) == false )
-						stream << _sign << " " << rhs2->get(i, j) << ";\n";
+						stream  << " " << _sign << " " << rhs2->get(i, j) << ";\n";
 					else
 						stream << ";" << endl;
 				}
 				else
 				{
 					if (rhs2->isZero(i, j) == false)
-						stream << _sign << " " << rhs2->get(i, j) << ";\n";
+						stream  << " " << _sign << " " << rhs2->get(i, j) << ";\n";
 					else
-						stream << "0.0;\n";
+						stream << " 0.0;\n";
 				}
 			}
 	}
@@ -251,7 +251,7 @@ returnValue ExportArithmeticStatement::exportCodeAddSubtract(	std::ostream& stre
 		for(unsigned j = 0; j < getNumCols( ); ++j)
 		{
 			stream << lhs->get(ii, j) << " " << getAssignString();
-			stream << _sign << " " << rhs2->get(ii, j) << ";\n";
+			stream  << " " << _sign << " " << rhs2->get(ii, j) << ";\n";
 		}
 
 		stream << "\n{\n";
@@ -359,7 +359,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 			{
 				allZero = true;
 
-				stream << lhs->get(ii,j) <<  " " << getAssignString() << " ";
+				stream << lhs->get(ii,j) <<  " " << getAssignString();
 
 				for(uint k = 0; k < nColsRhs1; ++k)
 				{
@@ -382,7 +382,7 @@ returnValue ExportArithmeticStatement::exportCodeMultiply(	std::ostream& stream,
 
 						if ( rhs1->isOne(iiRhs1,kkRhs1) == false )
 						{
-							stream << sign << " " << rhs1->get(iiRhs1,kkRhs1);
+							stream << " " << sign << " " << rhs1->get(iiRhs1,kkRhs1);
 
 							if ( rhs2->isOne(kk,j) == false )
 								stream << "*" << rhs2->get(kk, j);
