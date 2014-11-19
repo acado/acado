@@ -22,7 +22,7 @@ int initializeQpDunes( void )
 	qpOptions.stationarityTolerance = 1.e-6;
 	qpOptions.regParam = 1.e-6;
 	qpOptions.newtonHessDiagRegTolerance  = 1.e-8;
-	qpOptions.lsType            = QPDUNES_LS_ACCELERATED_GRADIENT_BISECTION_LS;
+	qpOptions.lsType            = @DIAG_H@ ? QPDUNES_LS_ACCELERATED_GRADIENT_BISECTION_LS : QPDUNES_LS_HOMOTOPY_GRID_SEARCH;
 /*	qpOptions.lsType			= QPDUNES_LS_BACKTRACKING_LS; */
 	qpOptions.lineSearchReductionFactor	= 0.1;
 	qpOptions.lineSearchMaxStepSize	= 1.;
