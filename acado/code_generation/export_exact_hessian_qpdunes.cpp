@@ -184,6 +184,27 @@ returnValue ExportExactHessianQpDunes::setupObjectiveEvaluation( void )
 	qpH.setup("qpH", N * (NX + NU) * (NX + NU) + NX * NX, 1, REAL, ACADO_WORKSPACE);   // --> to be used only after regularization to pass to qpDUNES
 	qpg.setup("qpG", N * (NX + NU) + NX, 1, REAL, ACADO_WORKSPACE);
 
+	initialize.addLinebreak();
+	DMatrix init_ones = ones<double>( N*(NX + NU)*(NX + NU),1 );
+	initialize.addStatement( qpH.getRows(0,N*(NX + NU)*(NX + NU)) == init_ones );
+
+	// LM regularization preparation
+
+	ExportVariable evLmX = zeros<double>(NX, NX);
+	ExportVariable evLmU = zeros<double>(NU, NU);
+
+	if  (levenbergMarquardt > 0.0)
+	{
+		DMatrix lmX = eye<double>( NX );
+		lmX *= levenbergMarquardt;
+
+		DMatrix lmU = eye<double>( NU );
+		lmU *= levenbergMarquardt;
+
+		evLmX = lmX;
+		evLmU = lmU;
+	}
+
 	ExportIndex index( "index" );
 	ExportVariable stagef;
 	stagef.setup("stagef", NX + NU, 1, REAL, ACADO_LOCAL);
@@ -209,10 +230,10 @@ returnValue ExportExactHessianQpDunes::setupObjectiveEvaluation( void )
 		tmpFuu.setup("tmpFuu", NU, NU, REAL, ACADO_LOCAL);
 
 		setStageH.setup("addObjTerm", tmpFxx, tmpFxu, tmpFuu, stageH);
-		setStageH.addStatement( stageH.getSubMatrix(0,NX,0,NX) += tmpFxx );
+		setStageH.addStatement( stageH.getSubMatrix(0,NX,0,NX) += tmpFxx + evLmX );
 		setStageH.addStatement( stageH.getSubMatrix(0,NX,NX,NX+NU) += tmpFxu );
 		setStageH.addStatement( stageH.getSubMatrix(NX,NX+NU,0,NX) += tmpFxu.getTranspose() );
-		setStageH.addStatement( stageH.getSubMatrix(NX,NX+NU,NX,NX+NU) += tmpFuu );
+		setStageH.addStatement( stageH.getSubMatrix(NX,NX+NU,NX,NX+NU) += tmpFuu + evLmU );
 
 		loopObjective.addFunctionCall(
 				setStageH, objValueOut.getAddress(0, 1+NX+NU), objValueOut.getAddress(0, 1+NX+NU+NX*NX),
@@ -229,6 +250,13 @@ returnValue ExportExactHessianQpDunes::setupObjectiveEvaluation( void )
 		loopObjective.addLinebreak( );
 	}
 	else {
+		if(levenbergMarquardt > 0.0) {
+			setStageH.setup("addObjTerm", stageH);
+			setStageH.addStatement( stageH.getSubMatrix(0,NX,0,NX) += evLmX );
+			setStageH.addStatement( stageH.getSubMatrix(NX,NX+NU,NX,NX+NU) += evLmU );
+
+			loopObjective.addFunctionCall( setStageH, objS.getAddress(runObj*(NX+NU), 0) );
+		}
 		DMatrix D(NX+NU,1); D.setAll(0);
 		loopObjective.addStatement( qpg.getRows(runObj*(NX+NU), runObj*(NX+NU)+NX+NU) == D );
 	}
@@ -246,14 +274,19 @@ returnValue ExportExactHessianQpDunes::setupObjectiveEvaluation( void )
 		evaluateObjective.addFunctionCall(evaluateTerminalCost, objValueIn, objValueOut);
 		evaluateObjective.addLinebreak( );
 
-		evaluateObjective.addStatement( objSEndTerm.makeRowVector() == objValueOut.getCols(1+NX,1+NX+NX*NX) );
+		evaluateObjective.addStatement( objSEndTerm.makeRowVector() == objValueOut.getCols(1+NX,1+NX+NX*NX) + evLmX.makeRowVector() );
 		evaluateObjective.addStatement( qpg.getRows(N * NX, (N + 1) * NX) == objValueOut.getCols(1,1+NX).getTranspose() );
 
 		evaluateObjective.addLinebreak( );
 	}
 	else {
-		DMatrix hess(NX,NX); hess.setAll(0);
-		evaluateObjective.addStatement( objSEndTerm == hess );
+		if(levenbergMarquardt > 0.0) {
+			evaluateObjective.addStatement( objSEndTerm == evLmX );
+		}
+		else {
+			DMatrix hess(NX,NX); hess.setAll(0);
+			evaluateObjective.addStatement( objSEndTerm == hess );
+		}
 
 		DMatrix Dx(NX,1); Dx.setAll(0);
 		evaluateObjective.addStatement( qpg.getRows(N*NX, (N+1)*NX) == Dx );
