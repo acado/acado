@@ -395,7 +395,7 @@ returnValue ExportNLPSolver::setGeneralObjective(const Objective& _objective)
 	Control vU("", NU, 1);
 
 	diagonalH = false;
-	diagonalHN = true;
+	diagonalHN = false;
 
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );

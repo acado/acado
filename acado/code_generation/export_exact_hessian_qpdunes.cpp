@@ -49,8 +49,7 @@ returnValue ExportExactHessianQpDunes::setup( )
 	//
 	// Add QP initialization call to the initialization
 	//
-	initialize << "for( ret = 0; ret < ACADO_N*(ACADO_NX+ACADO_NU)*(ACADO_NX+ACADO_NU); ret++ )  acadoWorkspace.qpH[ret] = 1.0;\n";  // TODO: this is added because of a bug in qpDUNES !!
-	initialize << "for( ret = 0; ret < ACADO_NX; ret++ )  acadoWorkspace.qpH[ACADO_N*(ACADO_NX+ACADO_NU)*(ACADO_NX+ACADO_NU)+ret*ACADO_NX+ret] = 1.0;\n";  // TODO: this is added because of a bug in qpDUNES !!
+	initialize << "for( ret = 0; ret < ACADO_N*(ACADO_NX+ACADO_NU)*(ACADO_NX+ACADO_NU)+ACADO_NX*ACADO_NX; ret++ )  acadoWorkspace.qpH[ret] = 1.0;\n";  // TODO: this is added because of a bug in qpDUNES !!
 	ExportFunction initializeQpDunes( "initializeQpDunes" );
 	initialize
 		<< "ret = (int)initializeQpDunes();\n"
