@@ -49,6 +49,8 @@ returnValue ExportExactHessianQpDunes::setup( )
 	//
 	// Add QP initialization call to the initialization
 	//
+	initialize << "for( ret = 0; ret < ACADO_N*(ACADO_NX+ACADO_NU)*(ACADO_NX+ACADO_NU); ret++ )  acadoWorkspace.qpH[ret] = 1.0;\n";  // TODO: this is added because of a bug in qpDUNES !!
+	initialize << "for( ret = 0; ret < ACADO_NX; ret++ )  acadoWorkspace.qpH[ACADO_N*(ACADO_NX+ACADO_NU)*(ACADO_NX+ACADO_NU)+ret*ACADO_NX+ret] = 1.0;\n";  // TODO: this is added because of a bug in qpDUNES !!
 	ExportFunction initializeQpDunes( "initializeQpDunes" );
 	initialize
 		<< "ret = (int)initializeQpDunes();\n"
@@ -184,10 +186,6 @@ returnValue ExportExactHessianQpDunes::setupObjectiveEvaluation( void )
 	qpH.setup("qpH", N * (NX + NU) * (NX + NU) + NX * NX, 1, REAL, ACADO_WORKSPACE);   // --> to be used only after regularization to pass to qpDUNES
 	qpg.setup("qpG", N * (NX + NU) + NX, 1, REAL, ACADO_WORKSPACE);
 
-	initialize.addLinebreak();
-	DMatrix init_ones = ones<double>( N*(NX + NU)*(NX + NU),1 );
-	initialize.addStatement( qpH.getRows(0,N*(NX + NU)*(NX + NU)) == init_ones );
-
 	// LM regularization preparation
 
 	ExportVariable evLmX = zeros<double>(NX, NX);
@@ -205,14 +203,11 @@ returnValue ExportExactHessianQpDunes::setupObjectiveEvaluation( void )
 		evLmU = lmU;
 	}
 
-	ExportIndex index( "index" );
 	ExportVariable stagef;
 	stagef.setup("stagef", NX + NU, 1, REAL, ACADO_LOCAL);
-	setStagef.setup("setStagef", stagef, index);
 
 	ExportVariable stageH;
 	stageH.setup("stageH", NX + NU, NX + NU, REAL, ACADO_LOCAL);
-	setStageH.setup("setStageH", stageH, index);
 
 	if( evaluateStageCost.getFunctionDim() > 0 ) {
 		loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( runObj ) );
