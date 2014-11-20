@@ -1465,7 +1465,7 @@ returnValue ExportGaussNewtonCN2New::setupEvaluation( )
 	preparation	<< retSim.getFullName() << " = " << modelSimulation.getName() << "();\n";
 
 	preparation.addFunctionCall( evaluateObjective );
-	preparation.addFunctionCall( regularizeHessian );
+	if( regularizeHessian.isDefined() ) preparation.addFunctionCall( regularizeHessian );
 	preparation.addFunctionCall( condensePrep );
 
 	////////////////////////////////////////////////////////////////////////////
