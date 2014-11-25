@@ -9,6 +9,10 @@
 qpData_t    qpData;
 qpOptions_t qpOptions;
 
+#if @DIAG_H@
+#define QPDUNES_LS_HOMOTOPY_GRID_SEARCH 0
+#endif
+
 int initializeQpDunes( void )
 {
 	return_t statusFlag;
