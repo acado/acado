@@ -33,7 +33,7 @@
 #define ACADO_TOOLKIT_EXPORT_EXACT_HESSIAN_CN2_HPP
 
 #include <acado/code_generation/export_nlp_solver.hpp>
-#include <acado/code_generation/export_gauss_newton_cn2_new.hpp>
+#include <acado/code_generation/export_gauss_newton_cn2.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -46,7 +46,7 @@ BEGIN_NAMESPACE_ACADO
  *
  *	\note Early experimental implementation
  */
-class ExportExactHessianCN2 : public ExportGaussNewtonCN2New
+class ExportExactHessianCN2 : public ExportGaussNewtonCN2
 {
 public:
 
@@ -68,17 +68,6 @@ public:
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	virtual returnValue setup( );
-
-
-	/** Exports source code of the auto-generated condensing algorithm
-	 *  into the given directory.
-	 *
-	 *	@param[in] code				Code block containing the auto-generated condensing algorithm.
-	 *
-	 *	\return SUCCESSFUL_RETURN
-	 */
-	virtual returnValue getCode(	ExportStatementBlock& code
-									);
 
 	/** Adds all function (forward) declarations of the auto-generated condensing algorithm
 	 *	to given list of declarations.

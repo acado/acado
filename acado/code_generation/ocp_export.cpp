@@ -388,17 +388,7 @@ returnValue OCPexport::setup( )
 		break;
 
 	case FULL_CONDENSING_N2:
-
-		if ((QPSolverName)qpSolver != QP_QPOASES)
-			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-					"For condensed solution only qpOASES QP solver is supported");
-
-		solver = ExportNLPSolverPtr(
-				NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_CN2));
-
-		break;
-
-	case FULL_CONDENSING_N2_NEW:
+	case CONDENSING_N2:
 
 		if ((QPSolverName)qpSolver != QP_QPOASES)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
@@ -406,15 +396,14 @@ returnValue OCPexport::setup( )
 
 		if ( (HessianApproximationMode)hessianApproximation == GAUSS_NEWTON ) {
 			solver = ExportNLPSolverPtr(
-					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_CN2_NEW));
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_CN2));
 		}
 		else if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
 			solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, EXACT_HESSIAN_CN2));
 		}
 		else {
-			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-					"Only Gauss-Newton and Exact Hessian methods are currently supported");
+			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Only Gauss-Newton and Exact Hessian methods are currently supported");
 		}
 
 		break;

@@ -234,6 +234,9 @@ protected:
 	ExportFunction macATw1QDy, macBTw1, macQSbarW2, macASbar, macS1TSbar;
 	ExportFunction expansionStep;
 
+	// lagrange multipliers
+	ExportFunction expansionStep2;
+
 	// H00 and H10 computations
 	ExportFunction mult_BT_T1, mac_ST_C, multGxTGx, macGxTGx;
 };

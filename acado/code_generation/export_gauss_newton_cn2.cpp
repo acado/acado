@@ -43,7 +43,9 @@ ExportGaussNewtonCN2::ExportGaussNewtonCN2(	UserInteraction* _userInteraction,
 
 returnValue ExportGaussNewtonCN2::setup( )
 {
-	if (performFullCondensing() == false || initialStateFixed() == false || getNumComplexConstraints() > 0)
+	if (performFullCondensing() == false && initialStateFixed() == true)
+		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+	if (getNumComplexConstraints() > 0)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 	if (performsSingleShooting() == true)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -124,6 +126,9 @@ returnValue ExportGaussNewtonCN2::getDataDeclarations(	ExportStatementBlock& dec
 	declarations.addDeclaration(xVars, dataStruct);
 	declarations.addDeclaration(yVars, dataStruct);
 
+	// lagrange multipliers
+	declarations.addDeclaration(mu, dataStruct);
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -177,6 +182,8 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 	code.addFunction( setObjQN1QN2 );
 	code.addFunction( evaluateObjective );
 
+	code.addFunction( regularizeHessian );
+
 	code.addFunction( multGxGu );
 	code.addFunction( moveGuE );
 
@@ -192,6 +199,8 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 	code.addFunction( macQSbarW2 );
 	code.addFunction( macASbar );
 	code.addFunction( expansionStep );
+
+	code.addFunction( expansionStep2 );
 
 	code.addFunction( copyHTH );
 
@@ -1057,14 +1066,6 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		s_{k + 1}  += Ds_{k + 1};
 	}
 
-	// TODO Calculation of multipliers
-
-	mu_N = lambda_N + Q_N^T * s_N
-	for i = N - 1: 1
-		mu_k = lambda_k + Q_k^T * s_k + A_k^T * mu_{k + 1} + q_k
-
-	mu_0 = Q_0^T s_0 + A_0^T * mu_1 + q_0
-
 	 */
 
 	LOG( LVL_DEBUG ) << "Setup condensing: create expand routine" << endl;
@@ -1093,6 +1094,45 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		);
 
 	expand.addStatement( x.makeColVector() += sbar );
+
+	// !! Calculation of multipliers: !!
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	if( secondOrder ) {
+		//	mu_N = lambda_N + q_N + Q_N^T * Ds_N  --> wrong in Joel's paper !!
+		//		for i = N - 1: 1
+		//			mu_k = Q_k^T * Ds_k + A_k^T * mu_{k + 1} + S_k * Du_k + q_k
+
+		for (uint j = 0; j < NX; j++ ) {
+			uint item = N*NX+j;
+			uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
+			if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
+				expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == yVars.getRow(getNumQPvars()+IdxF) );
+			}
+			else { // INDEX NOT FOUND
+				expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == 0.0 );
+			}
+		}
+		expand.addStatement( mu.getRow(N-1) += sbar.getRows(N*NX,(N+1)*NX).getTranspose()*QN1 );
+		expand.addStatement( mu.getRow(N-1) += QDy.getRows(N*NX,(N+1)*NX).getTranspose() );
+		for (int i = N - 1; i >= 1; i--) {
+			for (uint j = 0; j < NX; j++ ) {
+				uint item = i*NX+j;
+				uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
+				if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
+					expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == yVars.getRow(getNumQPvars()+IdxF) );
+				}
+				else { // INDEX NOT FOUND
+					expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == 0.0 );
+				}
+			}
+			expand.addFunctionCall(
+					expansionStep2, QDy.getAddress(i*NX), Q1.getAddress(i * NX), sbar.getAddress(i*NX),
+					S1.getAddress(i * NX), xVars.getAddress(i * NU), evGx.getAddress(i * NX),
+					mu.getAddress(i-1), mu.getAddress(i) );
+		}
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -1353,6 +1393,20 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 		macS1TSbar.addStatement( U1 == (S11 ^ w11) );
 	}
 
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	if( secondOrder ) {
+		ExportVariable mu1; mu1.setup("mu1", 1, NX, REAL, ACADO_LOCAL);
+		ExportVariable mu2; mu2.setup("mu2", 1, NX, REAL, ACADO_LOCAL);
+
+		expansionStep2.setup("expansionStep2", QDy1, Q11, w11, S11, U1, Gx1, mu1, mu2);
+		expansionStep2.addStatement( mu1 += QDy1.getTranspose() );
+		expansionStep2.addStatement( mu1 += w11 ^ Q11.getTranspose() );
+		expansionStep2.addStatement( mu1 += U1 ^ S11.getTranspose() );
+		expansionStep2.addStatement( mu1 += mu2*Gx1 );
+	}
+
 	if (performFullCondensing() == false)
 	{
 		// ExportFunction mult_BT_T1, mac_ST_C, multGxTGx, macGxTGx;
@@ -1530,7 +1584,7 @@ bool ExportGaussNewtonCN2::performFullCondensing() const
 	int sparseQPsolution;
 	get(SPARSE_QP_SOLUTION, sparseQPsolution);
 
-	if ((SparseQPsolutionMethods)sparseQPsolution == CONDENSING)
+	if ((SparseQPsolutionMethods)sparseQPsolution == CONDENSING || (SparseQPsolutionMethods)sparseQPsolution == CONDENSING_N2)
 		return false;
 
 	return true;

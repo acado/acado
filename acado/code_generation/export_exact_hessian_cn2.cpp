@@ -38,14 +38,14 @@ BEGIN_NAMESPACE_ACADO
 
 ExportExactHessianCN2::ExportExactHessianCN2(	UserInteraction* _userInteraction,
 											const std::string& _commonHeaderName
-											) : ExportGaussNewtonCN2New( _userInteraction,_commonHeaderName )
+											) : ExportGaussNewtonCN2( _userInteraction,_commonHeaderName )
 {}
 
 returnValue ExportExactHessianCN2::setup( )
 {
 	std::cout << "NOTE: You are using the new (unstable) N2 condensing feature for exact Hessian based RTI..\n";
 
-	if (performFullCondensing() == false || initialStateFixed() == false || getNumComplexConstraints() > 0)
+	if (getNumComplexConstraints() > 0)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 	if (performsSingleShooting() == true)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -96,115 +96,9 @@ returnValue ExportExactHessianCN2::setup( )
 returnValue ExportExactHessianCN2::getFunctionDeclarations(	ExportStatementBlock& declarations
 															) const
 {
-	ExportGaussNewtonCN2New::getFunctionDeclarations( declarations );
+	ExportGaussNewtonCN2::getFunctionDeclarations( declarations );
 
 	declarations.addDeclaration( regularization );
-
-	return SUCCESSFUL_RETURN;
-}
-
-returnValue ExportExactHessianCN2::getCode(	ExportStatementBlock& code
-											)
-{
-	LOG( LVL_DEBUG ) << "Solver: getting code... " << endl;
-	setupQPInterface();
-
-	code.addLinebreak( 2 );
-	code.addStatement( "/******************************************************************************/\n" );
-	code.addStatement( "/*                                                                            */\n" );
-	code.addStatement( "/* ACADO code generation                                                      */\n" );
-	code.addStatement( "/*                                                                            */\n" );
-	code.addStatement( "/******************************************************************************/\n" );
-	code.addLinebreak( 2 );
-
-	int useOMP;
-	get(CG_USE_OPENMP, useOMP);
-	if ( useOMP )
-	{
-		code.addDeclaration( state );
-	}
-
-	code.addFunction( modelSimulation );
-
-	code.addFunction( evaluateStageCost );
-	code.addFunction( evaluateTerminalCost );
-
-	code.addFunction( setObjQ1Q2 );
-	code.addFunction( setObjR1R2 );
-	code.addFunction( setObjQN1QN2 );
-	code.addFunction( evaluateObjective );
-
-	code.addFunction( regularizeHessian );
-
-//	code.addFunction( multGxd );
-//	code.addFunction( moveGxT );
-//	code.addFunction( multGxGx );
-	code.addFunction( multGxGu );
-	code.addFunction( moveGuE );
-
-	code.addFunction( multBTW1 );
-	code.addFunction( macBTW1_R1 );
-	code.addFunction( multGxTGu );
-	code.addFunction( macQEW2 );
-
-//	ExportFunction multATw1Q, macBTw1, macQSbarW2, macASbarD;
-
-	code.addFunction( macATw1QDy );
-	code.addFunction( macBTw1 );
-	code.addFunction( macQSbarW2 );
-	code.addFunction( macASbar );
-//	code.addFunction( macASbarD2 );
-	code.addFunction( expansionStep );
-
-	code.addFunction( expansionStep2 );
-
-//	code.addFunction( setBlockH11 );
-//	code.addFunction( zeroBlockH11 );
-	code.addFunction( copyHTH );
-//	code.addFunction( multQ1d );
-//	code.addFunction( multQN1d );
-//	code.addFunction( multRDy );
-//	code.addFunction( multQDy );
-//	code.addFunction( multEQDy );
-//	code.addFunction( multQETGx );
-//	code.addFunction( zeroBlockH10 );
-//	code.addFunction( multEDu );
-//	code.addFunction( multQ1Gx );
-//	code.addFunction( multQN1Gx );
-//	code.addFunction( multQ1Gu );
-	code.addFunction( multQN1Gu );
-//	code.addFunction( zeroBlockH00 );
-//	code.addFunction( multCTQC );
-
-	code.addFunction( multHxC );
-	code.addFunction( multHxE );
-	code.addFunction( macHxd );
-
-	code.addFunction( evaluatePathConstraints );
-
-	for (unsigned i = 0; i < evaluatePointConstraints.size(); ++i)
-	{
-		if (evaluatePointConstraints[ i ] == 0)
-			continue;
-		code.addFunction( *evaluatePointConstraints[ i ] );
-	}
-
-	code.addFunction( macCTSlx );
-	code.addFunction( macETSlu );
-
-	code.addFunction( condensePrep );
-	code.addFunction( condenseFdb );
-	code.addFunction( expand );
-
-	code.addFunction( preparation );
-	code.addFunction( feedback );
-
-	code.addFunction( initialize );
-	code.addFunction( initializeNodes );
-	code.addFunction( shiftStates );
-	code.addFunction( shiftControls );
-	code.addFunction( getKKT );
-	code.addFunction( getObjective );
 
 	return SUCCESSFUL_RETURN;
 }
