@@ -1033,7 +1033,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	);
 	if ((S1.isGiven() == true && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 	{
-		condenseFdb.addFunctionCall(macS1TSbar, S1, x0, g);
+		condenseFdb.addFunctionCall(macS1TSbar, S1, sbar.getAddress(0), g);
 	}
 	condenseFdb.addLinebreak();
 
@@ -1350,7 +1350,7 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 		);
 
 		macS1TSbar.setup("macS1TSbar", S11, w11, U1);
-		macS1TSbar.addStatement( U1 == (S11 ^ w11) );
+		macS1TSbar.addStatement( U1 += (S11 ^ w11) );
 	}
 
 	if (performFullCondensing() == false)
