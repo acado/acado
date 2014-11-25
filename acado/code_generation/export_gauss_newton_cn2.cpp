@@ -657,7 +657,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 			if ((S1.isGiven() && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 			{
 				ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(row * NX) : S1;
-				condensePrep.addFunctionCall(mac_ST_C, S1Call, C.getAddress((row - 1) * NX));
+				condensePrep.addFunctionCall(mac_ST_C, S1Call, C.getAddress((row - 1) * NX), ExportIndex( row ));
 			}
 
 			condensePrep.addFunctionCall(multGxTGx, evGx.getAddress(row * NX), T1, T2);
@@ -1179,7 +1179,7 @@ returnValue ExportGaussNewtonCN2::setupVariables( )
 
 	if (performFullCondensing() == false)
 	{
-		C.setup("C", N, NX, REAL, ACADO_WORKSPACE);
+		C.setup("C", N*NX, NX, REAL, ACADO_WORKSPACE);
 	}
 	E.setup("E", N * (N + 1) / 2 * NX, NU, REAL, ACADO_WORKSPACE);
 
