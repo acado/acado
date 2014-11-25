@@ -45,6 +45,8 @@ returnValue ExportExactHessianCN2::setup( )
 {
 	std::cout << "NOTE: You are using the new (unstable) N2 condensing feature for exact Hessian based RTI..\n";
 
+	if (performFullCondensing() == false && initialStateFixed() == true)
+		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 	if (getNumComplexConstraints() > 0)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 	if (performsSingleShooting() == true)
