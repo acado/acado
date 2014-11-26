@@ -698,6 +698,9 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		condensePrep.addStatement(
 				H.getSubMatrix(0, NX, 0, NX) == Q1.getSubMatrix(0, NX, 0, NX) + (evGx.getSubMatrix(0, NX, 0, NX).getTranspose() * T1) + mRegH00
 		);
+		condensePrep.addStatement(
+				H.getSubMatrix(0, NX, 0, NX) += mRegH00
+		);
 	}
 
 	////////////////////////////////////////////////////////////////////////////
