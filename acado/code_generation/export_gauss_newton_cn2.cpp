@@ -637,6 +637,8 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
+	DMatrix mRegH00 = eye<double>( getNX() );
+	mRegH00 *= levenbergMarquardt;
 	if (performFullCondensing() == false)
 	{
 		LOG( LVL_DEBUG ) << "Setup condensing: H00, H10 and C" << endl;
@@ -694,7 +696,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 		// H00 Block
 		condensePrep.addStatement(
-				H.getSubMatrix(0, NX, 0, NX) == Q1.getSubMatrix(0, NX, 0, NX) + (evGx.getSubMatrix(0, NX, 0, NX).getTranspose() * T1)
+				H.getSubMatrix(0, NX, 0, NX) == Q1.getSubMatrix(0, NX, 0, NX) + (evGx.getSubMatrix(0, NX, 0, NX).getTranspose() * T1) + mRegH00
 		);
 	}
 
@@ -1407,10 +1409,7 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	//
 	// Define LM regularization terms
 	//
-	DMatrix mRegH00 = eye<double>( getNX() );
 	DMatrix mRegH11 = eye<double>( getNU() );
-
-	mRegH00 *= levenbergMarquardt;
 	mRegH11 *= levenbergMarquardt;
 
 	ExportVariable R11 = R1.isGiven() == true ? R1 : ExportVariable("R11", NU, NU, REAL, ACADO_LOCAL);
