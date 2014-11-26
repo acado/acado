@@ -530,10 +530,10 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		{
 			for(unsigned row = 0; row < getNumStateBounds( ); ++row)
 			{
-				if( initialStateFixed( ) == false ) {
-					condensePrep.addStatement( A.getSubMatrix(row, row + 1, 0, NX ) == C.getRow( xBoundsIdx[ row ] ) );
-				}
 				unsigned conIdx = xBoundsIdx[ row ] - NX;
+				if( initialStateFixed( ) == false ) {
+					condensePrep.addStatement( A.getSubMatrix(row, row + 1, 0, NX ) == C.getRow( conIdx ) );
+				}
 
 				unsigned blk = conIdx / NX + 1;
 				for (unsigned col = 0; col < blk; ++col)
@@ -567,7 +567,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 			lRow << conIdx.getFullName() << " = " << evXBounds.getFullName() << "[ " << row.getFullName() << " ] - " << toString(NX) << ";\n";
 
 			if( initialStateFixed( ) == false ) {
-				lRow.addStatement( A.getSubMatrix(row, row + 1, 0, NX ) == C.getRow( conIdx+NX ) );
+				lRow.addStatement( A.getSubMatrix(row, row + 1, 0, NX ) == C.getRow( conIdx ) );
 			}
 
 			lRow.addStatement( blk == conIdx / NX + 1 );
@@ -576,7 +576,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 
 			lCol.addStatement( blkRow == (col * (2 * N - col - 1) / 2 + blk - 1) * NX + conIdx % NX );
 			lCol.addStatement(
-					A.getSubMatrix(row, row + 1, col * NU, (col + 1) * NU ) == E.getRow( blkRow ) );
+					A.getSubMatrix(row, row + 1, offsetBounds + col * NU, offsetBounds + (col + 1) * NU ) == E.getRow( blkRow ) );
 
 			lRow.addStatement( lCol );
 			condensePrep.addStatement( lRow );
