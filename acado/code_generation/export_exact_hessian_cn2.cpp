@@ -121,6 +121,8 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 
 	evaluateObjective.addIndex( runObj );
 
+	unsigned offset = performFullCondensing() == true ? 0 : NX;
+
 	if( evaluateStageCost.getFunctionDim() > 0 ) {
 		loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( runObj ) );
 		loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( runObj ) );
@@ -161,14 +163,14 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 		setObjR1R2.addStatement( tmpDu == tmpDF.getRows(NX,NX+NU) );
 
 		loopObjective.addFunctionCall(
-				setObjR1R2, QDy.getAddress(runObj * NX), g.getAddress(runObj * NU, 0), objValueOut.getAddress(0, 1) );
+				setObjR1R2, QDy.getAddress(runObj * NX), g.getAddress(offset+runObj * NU, 0), objValueOut.getAddress(0, 1) );
 
 		loopObjective.addLinebreak( );
 	}
 	else {
 		DMatrix Du(NU,1); Du.setAll(0);
 		DMatrix Dx(NX,1); Dx.setAll(0);
-		loopObjective.addStatement( g.getRows(runObj*NU, runObj*NU+NU) == Du );
+		loopObjective.addStatement( g.getRows(offset+runObj*NU, offset+runObj*NU+NU) == Du );
 		loopObjective.addStatement( QDy.getRows(runObj*NX, runObj*NX+NX) == Dx );
 	}
 

@@ -207,6 +207,7 @@ protected:
 	ExportFunction multGxGu;
 	ExportFunction moveGuE;
 	ExportFunction copyHTH;
+	ExportFunction copyHTH1;
 	ExportFunction multQ1d;
 	ExportFunction multQN1d;
 	ExportFunction multRDy;

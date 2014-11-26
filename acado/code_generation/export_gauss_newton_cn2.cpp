@@ -184,6 +184,8 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 
 	code.addFunction( regularizeHessian );
 
+	code.addFunction( moveGxT );
+	code.addFunction( multGxGx );
 	code.addFunction( multGxGu );
 	code.addFunction( moveGuE );
 
@@ -202,11 +204,18 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 
 	code.addFunction( expansionStep2 );
 
+	code.addFunction( mult_BT_T1 );
+	code.addFunction( mac_ST_C );
+	code.addFunction( multGxTGx );
+	code.addFunction( macGxTGx );
+
 	code.addFunction( copyHTH );
+	code.addFunction( copyHTH1 );
 
 	code.addFunction( multRDy );
 	code.addFunction( multQDy );
 
+	code.addFunction( multQN1Gx );
 	code.addFunction( multQN1Gu );
 
 	code.addFunction( evaluatePathConstraints );
@@ -639,7 +648,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		 	H_{i + 1, 0} =  B_i^T * T1
 		 	H_{i + 1, 0} += S_i^T * C_{i - 1}
 
-			T2 = A_i^T1 * T1
+			T2 = A_i^T * T1
 			T1 = T2 + Q_i * C_{i - 1}
 
 		H_{1, 0} =  B_0^T * T1
@@ -648,6 +657,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 		 */
 
+		// H10 Block
 		ExportFunction* QN1Call = QN1.isGiven() == true ? &multQN1Gx : &multGxGx;
 		condensePrep.addFunctionCall(*QN1Call, QN1, C.getAddress((N - 1) * NX), T1);
 		for (unsigned row = N - 1; row > 0; --row)
@@ -662,7 +672,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 			condensePrep.addFunctionCall(multGxTGx, evGx.getAddress(row * NX), T1, T2);
 
-			ExportArgument Q1Call;
+			ExportArgument Q1Call = Q1.isGiven() == true ? Q1 : Q1.getAddress(row * NX);
 			condensePrep.addFunctionCall(macGxTGx, T2, Q1Call, C.getAddress((row - 1) * NX), T1);
 		}
 
@@ -881,13 +891,18 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	LOG( LVL_DEBUG ) << "---> Copy H11 lower part" << endl;
 
 	// Copy to H11 upper lower part to upper triangular part
-	// XXX Copy H10 to H01
 	if (N <= 20)
 	{
 		for (unsigned ii = 0; ii < N; ++ii)
 			for(unsigned jj = 0; jj < ii; ++jj)
 				condensePrep.addFunctionCall(
 						copyHTH, ExportIndex( jj ), ExportIndex( ii ));
+
+		// Copy H10 to H01
+		if( performFullCondensing() == false) {
+			for (unsigned ii = 0; ii < N; ++ii)
+				condensePrep.addFunctionCall( copyHTH1, ExportIndex( ii ) );
+		}
 	}
 	else
 	{
@@ -902,6 +917,13 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		eLoopJ.addFunctionCall(copyHTH, jj, ii);
 		eLoopI.addStatement( eLoopJ );
 		condensePrep.addStatement( eLoopI );
+
+		// Copy H10 to H01
+		if( performFullCondensing() == false) {
+			ExportForLoop eLoopK(ii, 0, N);
+			eLoopK.addFunctionCall(copyHTH1, ii);
+			condensePrep.addStatement( eLoopK );
+		}
 
 		condensePrep.release( ii );
 		condensePrep.release( jj );
@@ -959,16 +981,17 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		condenseFdb.addStatement(g.getRows(0, NX) == QDy.getRows(0, NX));
 
 	/*
-
 	if partial condensing:
 		g0 = q_0
 
 	for k = 0: N - 1
 		g1_k = r_k
 
-	*** MPC case: (full condensing)
+	if partial condensing:
+		sbar_0 = 0;
+	else:
+		sbar_0 = Dx_0;
 
-	sbar_0 = Dx_0;
 	sbar(1: N) = d;
 
 	for k = 0: N - 1
@@ -984,27 +1007,23 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	}
 
 	g1_0 += B_0^T * w1;
-	g1_0 += S^0^T * x0;
-
-	*** MHE case: (partial condensing)
-
-	w1 = q_N + Q_N * g_{N-1}
-	h_N += B_{N - 1}^T * w1
-	for k = N - 1: 1
-		h_{k + 1} += S_k^T * g_{k-1}
-		w2 = A_k^T * w + q_k
-		w1 = Q_k * g_{k - 1} + w2
-		h_k += B_{k - 1}^T * w1
-
-	h_0 += A_0^T * w1
+	if partial condensing:
+		g_0 += A_0^T * w1
+	else:
+		g1_0 += S^0^T * x0;
 
 	*/
 
-	sbar.setup("sbar", (N + 1) * NX, 1, REAL, ACADO_WORKSPACE);
 	w1.setup("w1", NX, 1, REAL, ACADO_WORKSPACE);
 	w2.setup("w2", NX, 1, REAL, ACADO_WORKSPACE);
+	sbar.setup("sbar", (N + 1) * NX, 1, REAL, ACADO_WORKSPACE);
 
-	condenseFdb.addStatement( sbar.getRows(0, NX) == Dx0 );
+	if( performFullCondensing() == true ) {
+		condenseFdb.addStatement( sbar.getRows(0, NX) == Dx0 );
+	}
+	else {
+		condenseFdb.addStatement( sbar.getRows(0, NX) == zeros<double>(NX,1) );  // Dx0 is now a variable as well !!
+	}
 	condensePrep.addStatement( sbar.getRows(NX, (N + 1) * NX) == d );
 
 	for (unsigned i = 0; i < N; ++i)
@@ -1019,13 +1038,13 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	for (unsigned i = N - 1; 0 < i; --i)
 	{
 		condenseFdb.addFunctionCall(
-				macBTw1, evGu.getAddress(i * NX), w1, g.getAddress(i * NU)
+				macBTw1, evGu.getAddress(i * NX), w1, g.getAddress(offset + i * NU)
 		);
 
 		if ((S1.isGiven() == true && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 		{
 			ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress(i * NX) : S1;
-			condenseFdb.addFunctionCall(macS1TSbar, S1Call, sbar.getAddress(i * NX), g.getAddress(i * NU));
+			condenseFdb.addFunctionCall(macS1TSbar, S1Call, sbar.getAddress(i * NX), g.getAddress(offset + i * NU));
 		}
 
 		condenseFdb.addFunctionCall(
@@ -1038,13 +1057,19 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				macQSbarW2, Q1Call, sbar.getAddress(i * NX), w2, w1);
 	}
 	condenseFdb.addFunctionCall(
-			macBTw1, evGu.getAddress( 0 ), w1, g.getAddress( 0 )
+			macBTw1, evGu.getAddress( 0 ), w1, g.getAddress( offset + 0 )
 	);
-	if ((S1.isGiven() == true && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
-	{
-		condenseFdb.addFunctionCall(macS1TSbar, S1, sbar.getAddress(0), g);
+	if( performFullCondensing() == true ) {
+		if ((S1.isGiven() == true && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
+		{
+			condenseFdb.addFunctionCall(macS1TSbar, S1, sbar.getAddress(0), g);
+		}
+	}
+	else {
+		condenseFdb.addStatement(g.getRows(0, NX) += evGx.getRows(0, NX).getTranspose() * w1);
 	}
 	condenseFdb.addLinebreak();
+
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -1078,18 +1103,21 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	}
 	else
 	{
-		expand.addStatement( x.makeColVector().getRows(0, NX) += xVars.getRows(0, NX) );
-		expand.addLinebreak();
 		expand.addStatement( u.makeColVector() += xVars.getRows(NX, getNumQPvars()) );
 	}
 
-	expand.addStatement( sbar.getRows(0, NX) == Dx0 );
+	if( performFullCondensing() == true ) {
+		expand.addStatement( sbar.getRows(0, NX) == Dx0 );
+	}
+	else {
+		expand.addStatement( sbar.getRows(0, NX) == xVars.getRows(0, NX) );
+	}
 	expand.addStatement( sbar.getRows(NX, (N + 1) * NX) == d );
 
 	for (unsigned row = 0; row < N; ++row )
 		expand.addFunctionCall(
 				expansionStep, evGx.getAddress(row * NX), evGu.getAddress(row * NX),
-				xVars.getAddress(row * NU), sbar.getAddress(row * NX),
+				xVars.getAddress(offset + row * NU), sbar.getAddress(row * NX),
 				sbar.getAddress((row + 1) * NX)
 		);
 
@@ -1129,7 +1157,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 			}
 			expand.addFunctionCall(
 					expansionStep2, QDy.getAddress(i*NX), Q1.getAddress(i * NX), sbar.getAddress(i*NX),
-					S1.getAddress(i * NX), xVars.getAddress(i * NU), evGx.getAddress(i * NX),
+					S1.getAddress(i * NX), xVars.getAddress(offset + i * NU), evGx.getAddress(i * NX),
 					mu.getAddress(i-1), mu.getAddress(i) );
 		}
 	}
@@ -1239,12 +1267,16 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	// multGxd; // d_k += Gx_k * d_{k-1}
 	multGxd.setup("multGxd", dp, Gx1, dn);
 	multGxd.addStatement( dn += Gx1 * dp );
-	// moveGxT
-	moveGxT.setup("moveGxT", Gx1, Gx2);
-	moveGxT.addStatement( Gx2 == Gx1 );
-	// multGxGx
-	multGxGx.setup("multGxGx", Gx1, Gx2, Gx3);
-	multGxGx.addStatement( Gx3 == Gx1 * Gx2 );
+
+	if( performFullCondensing() == false ) {
+		// moveGxT
+		moveGxT.setup("moveGxT", Gx1, Gx2);
+		moveGxT.addStatement( Gx2 == Gx1 );
+		// multGxGx
+		multGxGx.setup("multGxGx", Gx1, Gx2, Gx3);
+		multGxGx.addStatement( Gx3 == Gx1 * Gx2 );
+	}
+
 	// multGxGu
 	multGxGu.setup("multGxGu", Gx1, Gu1, Gu2);
 	multGxGu.addStatement( Gu2 == Gx1 * Gu1 );
@@ -1260,6 +1292,15 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 			H.getSubMatrix(offset + iRow * NU, offset + (iRow + 1) * NU, offset + iCol * NU, offset + (iCol + 1) * NU) ==
 					H.getSubMatrix(offset + iCol * NU, offset + (iCol + 1) * NU, offset + iRow * NU, offset + (iRow + 1) * NU).getTranspose()
 	);
+
+	if( performFullCondensing() == false ) {
+		// copyHTH1
+		copyHTH1.setup("copyHTH1", iCol);
+		copyHTH1.addStatement(
+				H.getSubMatrix(0, NX, offset + iCol * NU, offset + (iCol + 1) * NU) ==
+						H.getSubMatrix(offset + iCol * NU, offset + (iCol + 1) * NU, 0, NX).getTranspose()
+		);
+	}
 	// multRDy
 	ExportVariable SluCall = objSlu.isGiven() == true ? objSlu : ExportVariable("Slu", NU, 1, REAL, ACADO_LOCAL);
 	multRDy.setup("multRDy", R22, Dy1, SluCall, RDy1);
@@ -1424,7 +1465,7 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 		multGxTGx.addStatement( Gx3 == (Gx1 ^ Gx2) );
 
 		macGxTGx.setup("macGxTGx", Gx1, Gx2, Gx3, Gx4);
-		macGxTGx.addStatement( Gx4 == Gx1 + (Gx2 ^ Gx3) );
+		macGxTGx.addStatement( Gx4 == Gx1 + (Gx2 * Gx3) );
 	}
 
 	return SUCCESSFUL_RETURN;
