@@ -162,9 +162,11 @@ end;
 
 % link against some libs maybe
 ldFlags = '';
-%if (isunix() && ~ismac())
-%	ldFlags = [ldFlags ' -lrt'];
-%end;
+if (isunix() && ~ismac())
+	ldFlags = [ldFlags ' -lrt'];
+elsif (ispc)
+    ldFlags = [ldFlags ' -DWIN32'];
+end;
 
 % Add an extra option for qpOASES
 iFlags = '';

@@ -24,6 +24,8 @@ function make_acado_integrator( name, extern )
 	ldFlags = '';
 	if (isunix() && ~ismac())
 		ldFlags = '-lrt';
+    elsif (ispc)
+        ldFlags = '-DWIN32';
 	end;
 
 	% Recipe for compilation
