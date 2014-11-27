@@ -125,7 +125,7 @@ template<typename Derived>
 inline typename NumTraits<typename internal::traits<Derived>::Scalar>::Real MatrixBase<Derived>::norm() const
 {
   using std::sqrt;
-  return sqrt(squaredNorm());
+  return sqrt((double)squaredNorm());
 }
 
 /** \returns an expression of the quotient of *this by its own norm.

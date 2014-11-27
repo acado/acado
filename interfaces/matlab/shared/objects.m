@@ -60,7 +60,7 @@ function [HEADER_PATHS, SRC, BIN, BINFOLDER, SRCMEX, BINMEX, BINFOLDERMEX] = obj
 
 %% SETTINGS
 
-HEADER_PATHS = sprintf('-I''%s/bin'' -I''%s/../../'' -I''%s/../../acado'' -I''%s/../../external_packages'' -I''%s/../../external_packages/qpOASES-3.0beta/include'' -I''%s/../../external_packages/eigen3'' -I''%s''', pwd,pwd,pwd,pwd,pwd,pwd,pwd);
+HEADER_PATHS = sprintf('-I''%s/bin'' -I''%s/../../'' -I''%s/../../acado'' -I''%s/../../external_packages'' -I''%s/../../external_packages/qpOASES-3.0beta/include'' -I''%s/../../external_packages/qpOASES-3.0beta/include/qpOASES/extras'' -I''%s/../../external_packages/eigen3'' -I''%s''', pwd,pwd,pwd,pwd,pwd,pwd,pwd,pwd);
 %% C++ SRC ACADO OBJECTS
 
 SRC = {};
@@ -203,7 +203,7 @@ if (returnlist == 0 || returnlist == 2 || returnlist == 3)
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'qpOASES/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/qpOASES/'}, length( fl ), 1)];
 
 	[fl, ol] = getFilesAndObjectNames('../../acado/nlp_solver');
 
@@ -233,7 +233,7 @@ if (returnlist == 0 || returnlist == 2 || returnlist == 3)
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/casadi/'}, length( fl ), 1)];
 	
 end;
 

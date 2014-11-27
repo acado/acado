@@ -171,8 +171,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	const mxArray* src = prhs[ 0 ];
     real_t *xnext, *sensX, *sensU, *sens2, *grid, *mat;
     real_t x[ACADO_NX+ACADO_NXA];
+    #if ACADO_NU > 0
     real_t u[ACADO_NU];
+    #endif
+    #if ACADO_NOD > 0
     real_t od[ACADO_NOD];
+    #endif
 	#if SENS_PROP == 2 || SENS_PROP == 3 || SENS_PROP == 4
 		real_t seed[ACADO_NX];
 	#endif
@@ -307,6 +311,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			next[ACADO_NX+ACADO_NXA+i] = u[i];
 		#endif
     }
+    #if ACADO_NOD > 0
     for( i = 0; i < ACADO_NOD; ++i ) {
 		#if SENS_PROP == 1
 			next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+ACADO_NU+i] = od[i];
@@ -320,6 +325,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			next[ACADO_NX+ACADO_NXA+ACADO_NU+i] = od[i];
 		#endif
     }
+    #endif
     
     tic(&tmr);
     for( c = 0; c < CALLS_TIMING; ++c ) {

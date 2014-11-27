@@ -31,6 +31,7 @@ extern "C"
  */
 typedef struct ACADOvariables_
 {
+int dummy;
 @VARIABLES_DECLARATION@
 } ACADOvariables;
 
