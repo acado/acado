@@ -637,8 +637,6 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	DMatrix mRegH00 = eye<double>( getNX() );
-	mRegH00 *= levenbergMarquardt;
 	if (performFullCondensing() == false)
 	{
 		LOG( LVL_DEBUG ) << "Setup condensing: H00, H10 and C" << endl;
@@ -695,12 +693,12 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		}
 
 		// H00 Block
+		DMatrix mRegH00 = eye<double>( getNX() );
+		mRegH00 *= levenbergMarquardt;
 		condensePrep.addStatement(
-				H.getSubMatrix(0, NX, 0, NX) == Q1.getSubMatrix(0, NX, 0, NX) + (evGx.getSubMatrix(0, NX, 0, NX).getTranspose() * T1) + mRegH00
+				H.getSubMatrix(0, NX, 0, NX) == Q1.getSubMatrix(0, NX, 0, NX) + (evGx.getSubMatrix(0, NX, 0, NX).getTranspose() * T1)
 		);
-		condensePrep.addStatement(
-				H.getSubMatrix(0, NX, 0, NX) += mRegH00
-		);
+		condensePrep.addStatement( H.getSubMatrix(0, NX, 0, NX) += mRegH00 );
 	}
 
 	////////////////////////////////////////////////////////////////////////////
