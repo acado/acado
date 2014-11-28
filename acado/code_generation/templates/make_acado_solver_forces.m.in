@@ -30,7 +30,7 @@ function make_acado_solver( name )
 	ldFlags = '';
 	if (isunix() && ~ismac())
 		ldFlags = '-lrt';
-    elsif (ispc)
+    elseif (ispc)
         ldFlags = '-DWIN32';
 	end;
 
