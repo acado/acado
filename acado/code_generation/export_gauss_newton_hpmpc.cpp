@@ -92,6 +92,8 @@ returnValue ExportGaussNewtonHpmpc::getDataDeclarations(	ExportStatementBlock& d
 	declarations.addDeclaration(qpLb, dataStruct);
 	declarations.addDeclaration(qpUb, dataStruct);
 
+	declarations.addDeclaration(sigmaN, dataStruct);
+
 	declarations.addDeclaration(qpLambda, dataStruct);
 	declarations.addDeclaration(qpMu, dataStruct);
 	declarations.addDeclaration(qpSlacks, dataStruct);
@@ -133,6 +135,18 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 	code << "#ifdef __cplusplus\n";
 	code << "}\n";
 	code << "#endif\n";
+
+	if (initialStateFixed() == false)
+	{
+		// MHE case, we use a wrapper directly from the NMPC
+		code << "#define NX " << toString( NX ) << "\n";
+		code << "#define NU " << toString( NU ) << "\n";
+		code << "#define NW " << toString( NU ) << "\n";
+		code << "#define NY " << toString( NY ) << "\n";
+		code << "#define NN " << toString( N  ) << "\n";
+
+		code << "#include <hpmpc/c_interface.h>\n\n";
+	}
 
 	code.addLinebreak( 2 );
 	code.addStatement( "/******************************************************************************/\n" );
@@ -180,6 +194,9 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 
 unsigned ExportGaussNewtonHpmpc::getNumQPvars( ) const
 {
+	if (initialStateFixed() == true)
+		return N * NX + N * NU;
+
 	return (N + 1) * NX + N * NU;
 }
 
@@ -547,6 +564,13 @@ returnValue ExportGaussNewtonHpmpc::setupVariables( )
 		x0.setup("x0",  NX, 1, REAL, ACADO_VARIABLES);
 		x0.setDoc( "Current state feedback vector." );
 	}
+	else
+	{
+		xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
+		DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
+		SAC.setup("SAC", NX, NX, REAL, ACADO_VARIABLES);
+		sigmaN.setup("sigmaN", NX, NX, REAL, ACADO_VARIABLES);
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -600,8 +624,17 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 
 	nIt.setup("nIt", 1, 1, INT, ACADO_WORKSPACE);
 
-	// State feedback
-	feedback.addStatement( qpx.getRows(0, NX) == x0 - x.getRow( 0 ).getTranspose() );
+
+	if (initialStateFixed() == false)
+	{
+		// Temporary hack for the workspace
+		feedback << "static real_t qpWork[ HPMPC_RIC_MHE_IF_DP_WORK_SPACE ];\n";
+	}
+	else
+	{
+		// State feedback
+		feedback.addStatement( qpx.getRows(0, NX) == x0 - x.getRow( 0 ).getTranspose() );
+	}
 
 	//
 	// Calculate objective residuals
@@ -618,42 +651,105 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 	feedback.addLinebreak();
 
 	//
+	// Arrival cost in the MHE case
+	//
+	if (initialStateFixed() == false)
+	{
+		// It is assumed this is the shifted version from the previous time step!
+		feedback.addStatement( DxAC == xAC - x.getRow( 0 ).getTranspose() );
+	}
+
+	//
 	// Here we have to add the differences....
 	//
 
 	// Call the solver
-	feedback
-		<< returnValueFeedbackPhase.getFullName() << " = " << "acado_hpmpc_ip_wrapper("
+	if (initialStateFixed() == true)
+		feedback
+			<< returnValueFeedbackPhase.getFullName() << " = " << "acado_hpmpc_ip_wrapper("
 
-		<< evGx.getAddressString( true ) << ", "
-		<< evGu.getAddressString( true ) << ", "
-		<< d.getAddressString( true ) << ", "
+			<< evGx.getAddressString( true ) << ", "
+			<< evGu.getAddressString( true ) << ", "
+			<< d.getAddressString( true ) << ", "
 
-		<< qpQ.getAddressString( true ) << ", "
-		<< qpQf.getAddressString( true ) << ", "
-		<< qpS.getAddressString( true ) << ", "
-		<< qpR.getAddressString( true ) << ", "
+			<< qpQ.getAddressString( true ) << ", "
+			<< qpQf.getAddressString( true ) << ", "
+			<< qpS.getAddressString( true ) << ", "
+			<< qpR.getAddressString( true ) << ", "
 
-		<< qpq.getAddressString( true ) << ", "
-		<< qpqf.getAddressString( true ) << ", "
-		<< qpr.getAddressString( true ) << ", "
+			<< qpq.getAddressString( true ) << ", "
+			<< qpqf.getAddressString( true ) << ", "
+			<< qpr.getAddressString( true ) << ", "
 
-		<< qpLb.getAddressString( true ) << ", "
-		<< qpUb.getAddressString( true ) << ", "
+			<< qpLb.getAddressString( true ) << ", "
+			<< qpUb.getAddressString( true ) << ", "
 
-		<< qpx.getAddressString( true ) << ", "
-		<< qpu.getAddressString( true ) << ", "
+			<< qpx.getAddressString( true ) << ", "
+			<< qpu.getAddressString( true ) << ", "
 
-		<< qpLambda.getAddressString( true ) << ", "
-		<< qpMu.getAddressString( true ) << ", "
-		<< qpSlacks.getAddressString( true ) << ", "
+			<< qpLambda.getAddressString( true ) << ", "
+			<< qpMu.getAddressString( true ) << ", "
+			<< qpSlacks.getAddressString( true ) << ", "
 
-		<< nIt.getAddressString( true )
-		<< ");\n";
+			<< nIt.getAddressString( true )
+			<< ");\n";
+
+	else
+		feedback
+			<< returnValueFeedbackPhase.getFullName() << " = " << "c_order_riccati_mhe_if('d', 2, "
+			<< toString( NX ) << ", "
+			<< toString( NU ) << ", "
+			<< toString( NY ) << ", "
+			<< toString( N ) << ", "
+
+			<< evGx.getAddressString( true ) << ", "
+			<< evGu.getAddressString( true ) << ", "
+			<< "0, " // C
+			<< d.getAddressString( true ) << ", "
+
+			<< qpR.getAddressString( true ) << ", "
+			<< qpQ.getAddressString( true ) << ", "
+			<< qpQf.getAddressString( true ) << ", "
+//			<< qpS.getAddressString( true ) << ", "
+
+			<< qpr.getAddressString( true ) << ", "
+			<< qpq.getAddressString( true ) << ", "
+			<< qpqf.getAddressString( true ) << ", "
+			<< "0, " // y
+
+			<< DxAC.getAddressString( true ) << ", "
+			<< SAC.getAddressString( true ) << ", "
+
+			<< qpx.getAddressString( true ) << ", "
+			<< sigmaN.getAddressString( true ) << ", "
+			<< qpu.getAddressString( true ) << ", "
+
+			<< qpLambda.getAddressString( true ) << ", "
+
+			<< "qpWork);\n";
+
+	/*
+	int c_order_riccati_mhe_if( char prec, int alg,
+	int nx, int nw, int ny, int N,
+	double *A, double *G, double *C, double *f,
+	double *R, double *Q, double *Qf,
+	double *r, double *q, double *qf, double *y,
+	double *x0, double *L0,
+	double *xe, double *Le, double *w,
+	double *lam, double *work0 );
+	*/
+
+	// XXX Not 100% sure about this one
 
 	// Accumulate the solution, i.e. perform full Newton step
 	feedback.addStatement( x.makeColVector() += qpx );
 	feedback.addStatement( u.makeColVector() += qpu );
+
+	if (initialStateFixed() == false)
+	{
+		// This is the arrival cost for the next time step!
+		feedback.addStatement( xAC == x.getRow( 1 ).getTranspose() + DxAC );
+	}
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -674,7 +770,7 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 
 	getKKT.addStatement( kkt == 0.0 );
 
-	// XXX At the moment this is very very specific for the NMPC case
+	// XXX This is still probably relevant for the NMPC case
 
 	getKKT.addStatement( tmp == (qpq ^ qpx.getRows(0, N * NX)) );
 	getKKT << kkt.getFullName() << " += fabs( " << tmp.getFullName() << " );\n";
@@ -687,13 +783,18 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 	lamLoop << kkt.getFullName() << "+= fabs( " << d.get(index, 0) << " * " << qpLambda.get(index, 0) << ");\n";
 	getKKT.addStatement( lamLoop );
 
-	ExportForLoop lbLoop(index, 0, N * NU + N * NX);
-	lbLoop << kkt.getFullName() << "+= fabs( " << qpLb.get(index, 0) << " * " << qpMu.get(index, 0) << ");\n";
-	ExportForLoop ubLoop(index, 0, N * NU + N * NX);
-	ubLoop << kkt.getFullName() << "+= fabs( " << qpUb.get(index, 0) << " * " << qpMu.get(index + N * NU + N * NX, 0) << ");\n";
+	if (initialStateFixed() == true)
+	{
+		// XXX This is because the MHE does not support inequality constraints at the moment
 
-	getKKT.addStatement( lbLoop );
-	getKKT.addStatement( ubLoop );
+		ExportForLoop lbLoop(index, 0, N * NU + N * NX);
+		lbLoop << kkt.getFullName() << "+= fabs( " << qpLb.get(index, 0) << " * " << qpMu.get(index, 0) << ");\n";
+		ExportForLoop ubLoop(index, 0, N * NU + N * NX);
+		ubLoop << kkt.getFullName() << "+= fabs( " << qpUb.get(index, 0) << " * " << qpMu.get(index + N * NU + N * NX, 0) << ");\n";
+
+		getKKT.addStatement( lbLoop );
+		getKKT.addStatement( ubLoop );
+	}
 
 	return SUCCESSFUL_RETURN;
 }
