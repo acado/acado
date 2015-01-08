@@ -34,7 +34,8 @@ if (get == 'FB')
     % This is NOT executed for mex inputs
     
     dlmwrite(sprintf('%s_data_%s.txt', cppobj.problemname, obj.name), obj.items, 'delimiter', '\t', 'precision', '%.12e');
-    fprintf(cppobj.fileMEX,sprintf('    Matrix %s(readFromFile( "%s_data_%s.txt" ));\n', obj.name, cppobj.problemname, obj.name));
+    
+    fprintf(cppobj.fileMEX,sprintf('    DMatrix %s;\n    %s.read( "%s_data_%s.txt" );\n', obj.name, obj.name, cppobj.problemname, obj.name));
 
 
 end 

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,7 +33,7 @@
 
 //#include <acado_optimal_control.hpp>
 #include <acado_toolkit.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 USING_NAMESPACE_ACADO
 
@@ -71,10 +71,10 @@ int main( )
     Function h;
     h << h1;
     h << h2;
-    Matrix Q(2,2);
+    DMatrix Q(2,2);
     Q.setIdentity();
 
-    Vector r(2);
+    DVector r(2);
     r(0)=x_ss1;
     r(1)=x_ss2;
 
@@ -119,6 +119,7 @@ int main( )
     RealTimeAlgorithm algorithm(ocp,samplingTime);
 //     algorithm.set( USE_REALTIME_ITERATIONS, YES );
     algorithm.set( MAX_NUM_ITERATIONS, 2 );
+	algorithm.set(LEVENBERG_MARQUARDT, 1e-5);
 
     StaticReferenceTrajectory zeroReference;
 
@@ -132,7 +133,7 @@ int main( )
     double simEndTime = 1200.0;
     SimulationEnvironment sim(simStartTime,simEndTime,process,controller);
 
-    Vector x0(4);
+    DVector x0(4);
     x0.setZero( );
     x0(0)=0.1;
     x0(1)=0.1;
@@ -157,7 +158,7 @@ int main( )
 	window.addSubplot( feedbackControl(1), "F2");
     window.plot();
     
-	diffStates.printToFile("result.txt","diffstates",PS_MATLAB);
+	diffStates.print("result.txt","diffstates",PS_MATLAB);
 
     //algorithm.set( HESSIAN_APPROXIMATION, EXACT_HESSIAN );
     

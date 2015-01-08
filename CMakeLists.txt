@@ -1,7 +1,7 @@
 ################################################################################
 #
 # Description:
-#	CMake script for building ACADO static and shared libraries, etc.
+#	Main build system script for the ACADO toolkit.
 #
 # Authors:
 #	Joel Andersson
@@ -9,7 +9,7 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2011 - 2013.
+#	2011 - 2014.
 #
 # Usage:
 #	- Linux, OS X, Windows: more info can be found on www.acadotoolkit.org
@@ -50,12 +50,7 @@ SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
 #
 # Folder path for generated libraries
 #
-SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/libs )
-
-#
-# Folder path for testing
-#
-SET( TESTING_OUTPUT_PATH ${PROJECT_BINARY_DIR}/testing/automatic_testing )
+SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 
 #
 # CMake module(s) path
@@ -79,14 +74,14 @@ ENDIF( NOT CMAKE_VERBOSE_MAKEFILE )
 #
 # Enable building of shared and static libraries
 #
-IF ( MSVC OR CYGWIN )
+IF ( MSVC OR CYGWIN OR MINGW )
 	# All Windows builds that we currently support
 	SET( ACADO_BUILD_SHARED OFF )
 	SET( ACADO_BUILD_STATIC ON )
 ELSE()
 	# Linux or OS X
 	OPTION( ACADO_BUILD_SHARED "Build shared libraries" ON )
-	OPTION( ACADO_BUILD_STATIC "Build static libraries" OFF )	
+	OPTION( ACADO_BUILD_STATIC "Build static libraries" OFF )
 ENDIF()
 
 IF((NOT ACADO_BUILD_SHARED) AND (NOT ACADO_BUILD_STATIC))
@@ -114,6 +109,11 @@ OPTION ( ACADO_DEVELOPER "Choose developer/user building mode" OFF )
 OPTION( ACADO_INTERNAL "Select building of ACADO internal stuff" OFF )
 
 #
+# Compile only the code generation tool
+#
+OPTION( ACADO_BUILD_CGT_ONLY "Build only the code generation tool" OFF )
+
+#
 # Build type
 #
 IF( NOT CMAKE_BUILD_TYPE )
@@ -124,16 +124,8 @@ IF( NOT CMAKE_BUILD_TYPE )
 ENDIF( NOT CMAKE_BUILD_TYPE )
 
 #
-# Offer the user the choice of overriding the installation directories
+# Installation folders
 #
-IF ( ${CMAKE_SYSTEM_NAME} MATCHES Windows )
-	SET( LIB_DIR "lib/acado" )
-#	SET( SHARE_DIR "" )
-ELSE( )
-	SET( LIB_DIR "lib" )
-#	SET( SHARE_DIR "share" )
-ENDIF( )
-
 SET( INSTALL_LIB_DIR lib CACHE PATH
 	"Installation directory for libraries"
 )
@@ -143,30 +135,12 @@ SET( INSTALL_BIN_DIR bin CACHE PATH
 SET( INSTALL_INCLUDE_DIR include/acado CACHE PATH
 	"Installation directory for header files"
 )
-
-IF ( SHARE_DIR )
-	SET( INSTALL_DATA_DIR ${SHARE_DIR}/acado CACHE PATH
-		"Installation directory for data files"
-	)
-	SET( INSTALL_CMAKE_DIR ${SHARE_DIR}/acado/cmake CACHE PATH
-		"Installation directory for CMake files"
-	)
-ELSE( SHARE_DIR )
-	SET( INSTALL_DATA_DIR acado CACHE PATH
-		"Installation directory for data files"
-	)
-	SET( INSTALL_CMAKE_DIR acado/cmake CACHE PATH
-		"Installation directory for CMake files"
-	)
-ENDIF( SHARE_DIR )
-
-# Make relative installation paths absolute (needed later on)
-FOREACH( p LIB BIN INCLUDE DATA CMAKE )
-  SET( var INSTALL_${p}_DIR )
-  IF( NOT IS_ABSOLUTE "${${var}}" )
-    SET( ${var} "${CMAKE_INSTALL_PREFIX}/${${var}}" )
-  ENDIF()
-ENDFOREACH()
+SET( INSTALL_DATA_DIR share/acado CACHE PATH
+	"Installation directory for data files"
+)
+SET( INSTALL_CMAKE_DIR share/acado/cmake CACHE PATH
+	"Installation directory for CMake files"
+)
 
 ################################################################################
 #
@@ -182,61 +156,18 @@ FIND_PACKAGE( Doxygen )
 #
 ################################################################################
 
+# Suppressing some stupid warnings from CMake 3.0
+IF (POLICY CMP0026)
+	CMAKE_POLICY(SET CMP0026 OLD)
+ENDIF( )
+IF (POLICY CMP0042)
+	CMAKE_POLICY(SET CMP0042 OLD)
+ENDIF( )
+
 #
 # Compiler options are in separate file
 #
 INCLUDE( CompilerOptions )
-
-################################################################################
-#
-# Libraries - lists of source folders
-#
-################################################################################
-
-SET( ACADO_SOURCE_DIRS
-	# Integrators source folders
-	./src/utils
-	./src/clock
-	./src/matrix_vector
-	./src/set_arithmetics
-	./src/variables_grid
-	./src/curve
-	./src/user_interaction
-	./src/symbolic_operator
-	./src/symbolic_expression
-	./src/function
-	./src/integrator
-	./src/validated_integrator
-	./src/sparse_solver
-	./external_packages/src/acado_csparse
-	./external_packages/src/acado_gnuplot
-	
-	# Optimal Control source folders
-	./src/code_generation
-	./src/code_generation/integrators
-	./src/code_generation/linear_solvers
-	./src/dynamic_system
-	./src/dynamic_discretization
-	./src/objective
-	./src/constraint
-	./src/ocp
-	./src/conic_program
-	./src/conic_solver
-	./src/nlp_solver
-	./src/nlp_derivative_approximation
-	./src/optimization_algorithm
-	./external_packages/src/acado_qpoases
-	
-	# Simulation source folders
-	./src/process
-	./src/noise
-	./src/transfer_device
-	./src/controller
-	./src/control_law
-	./src/estimator
-	./src/reference_trajectory
-	./src/simulation_environment
-)
 
 ################################################################################
 #
@@ -245,56 +176,20 @@ SET( ACADO_SOURCE_DIRS
 ################################################################################
 
 INCLUDE_DIRECTORIES(
-	${PROJECT_SOURCE_DIR}/include
+	${PROJECT_SOURCE_DIR}
+	${PROJECT_SOURCE_DIR}/acado
 	${PROJECT_SOURCE_DIR}/external_packages
 	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
-	${PROJECT_BINARY_DIR}/include
+	${PROJECT_BINARY_DIR}
 )
 
 ################################################################################
 #
-# Configure templates
+# Build the ACADO toolkit library
 #
 ################################################################################
 
-ADD_SUBDIRECTORY( ./src/code_generation/templates )
-
-################################################################################
-#
-# Building of stand-alone libraries
-#
-################################################################################
-
-#
-# Build ACADO Toolkit library
-#
-UNSET( ACADO_SOURCES )
-
-FOREACH( DIR ${ACADO_SOURCE_DIRS} )
-	FILE( GLOB SRC ${DIR}/*.cpp )
-	SET( ACADO_SOURCES ${ACADO_SOURCES} ${SRC} )
-ENDFOREACH( DIR ${ACADO_SOURCE_DIRS} )
-
-IF ( ACADO_BUILD_STATIC )	
-	ADD_LIBRARY( acado_toolkit STATIC ${ACADO_SOURCES} )
-	TARGET_LINK_LIBRARIES(
-		acado_toolkit
-		acado_qpOASESextras acado_csparse acado_casadi
-	)
-ENDIF ( ACADO_BUILD_STATIC )
-
-IF( ACADO_BUILD_SHARED )
-	ADD_LIBRARY( acado_toolkit_s SHARED ${ACADO_SOURCES} )
-	SET_TARGET_PROPERTIES( acado_toolkit_s
-		PROPERTIES
-			VERSION ${ACADO_VERSION_STRING}
-			SOVERSION ${ACADO_VERSION_MAJOR}
-	)
-	TARGET_LINK_LIBRARIES(
-		acado_toolkit_s
-		acado_qpOASESextras acado_csparse acado_casadi
-	)
-ENDIF( ACADO_BUILD_SHARED )
+ADD_SUBDIRECTORY( acado )
 
 ################################################################################
 #
@@ -302,15 +197,17 @@ ENDIF( ACADO_BUILD_SHARED )
 #
 ################################################################################
 
-#
-# Build qpOASES library
-#
-ADD_SUBDIRECTORY( ./external_packages/qpOASES-3.0beta )
-
-#
-# Build csparse library
-#
-ADD_SUBDIRECTORY( ./external_packages/csparse )
+IF (NOT ACADO_BUILD_CGT_ONLY)
+	#
+	# Build qpOASES library
+	#
+	ADD_SUBDIRECTORY( ./external_packages/qpOASES-3.0beta )
+	
+	#
+	# Build csparse library
+	#
+	ADD_SUBDIRECTORY( ./external_packages/csparse )
+ENDIF()
 
 #
 # Build (a part of) CasADi library
@@ -332,51 +229,44 @@ ENDIF( ACADO_WITH_TESTING )
 
 ################################################################################
 #
-# Installation rules
+# Some global installation rules
 #
 ################################################################################
 
 #
-# Install ACADO Toolkit libs
-#
-IF ( ACADO_BUILD_STATIC )
-	INSTALL(
-		TARGETS
-			acado_toolkit
-		DESTINATION
-			${INSTALL_LIB_DIR}
-	)
-ENDIF()
-
-IF( ACADO_BUILD_SHARED )
-	INSTALL(
-		TARGETS
-			acado_toolkit_s
-		DESTINATION
-			${INSTALL_LIB_DIR}
-	)
-ENDIF()
-
-#
-# Install ACADO include folder
+# Install ACADO headers
 #
 INSTALL(
 	DIRECTORY
-		include/
+		acado/
 	DESTINATION
 		${INSTALL_INCLUDE_DIR}
+	FILES_MATCHING PATTERN "*.hpp"
+)
+INSTALL(
+	DIRECTORY
+		acado/
+	DESTINATION
+		${INSTALL_INCLUDE_DIR}
+	FILES_MATCHING PATTERN "*.ipp"
 )
 
 #
-# Install (parts of) external packages and interfaces to those packages
+# Install Eigen3
 #
-SET( EXTERNAL_PACKAGES_DIRS
-	external_packages/include
-	external_packages/qpoases
-)	
 INSTALL(
 	DIRECTORY
-		${EXTERNAL_PACKAGES_DIRS}
+		external_packages/eigen3
+	DESTINATION
+		${INSTALL_INCLUDE_DIR}/external_packages
+)
+
+#
+# Install qpOASES embedded
+#
+INSTALL(
+	DIRECTORY
+		external_packages/qpoases
 	DESTINATION
 		${INSTALL_DATA_DIR}/external_packages
 )
@@ -385,19 +275,16 @@ INSTALL(
 # Configure and install CMake package configuration file
 #
 SET( ACADO_INSTALL_INCLUDE_DIRS
-	${INSTALL_INCLUDE_DIR}
-	${INSTALL_DATA_DIR}/external_packages
-	${INSTALL_DATA_DIR}/external_packages/csparse/
-	${INSTALL_DATA_DIR}/external_packages/qpOASES-3.0beta/include
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_INCLUDE_DIR}
 )
 SET( ACADO_INSTALL_LIBRARY_DIRS
-	${INSTALL_LIB_DIR}
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_LIB_DIR}
 )
 SET( ACADO_INSTALL_EXTERNAL_PACKAGES_DIR
-	${INSTALL_DATA_DIR}/external_packages
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages
 )
 SET( ACADO_INSTALL_CMAKE_DIR
-	${INSTALL_CMAKE_DIR}
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}
 )
 
 IF ( ACADO_BUILD_STATIC )
@@ -413,21 +300,21 @@ IF ( ACADO_BUILD_SHARED )
 ENDIF()
 
 SET( ACADO_INSTALL_QPOASES_EMBEDDED_SOURCES
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Bounds.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/CyclingManager.cpp 
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/MessageHandling.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/QProblem.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Utils.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Constraints.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Indexlist.cpp	     
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/QProblemB.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/SubjectTo.cpp
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/EXTRAS/SolutionAnalysis.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Bounds.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/CyclingManager.cpp 
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/MessageHandling.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/QProblem.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Utils.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Constraints.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/Indexlist.cpp	     
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/QProblemB.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/SubjectTo.cpp
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC/EXTRAS/SolutionAnalysis.cpp
 )
 SET( ACADO_INSTALL_QPOASES_EMBEDDED_INC_DIRS
-	${INSTALL_DATA_DIR}/external_packages/qpoases/
-	${INSTALL_DATA_DIR}/external_packages/qpoases/INCLUDE
-	${INSTALL_DATA_DIR}/external_packages/qpoases/SRC
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/INCLUDE
+	${CMAKE_INSTALL_PREFIX}/${INSTALL_DATA_DIR}/external_packages/qpoases/SRC
 )
 
 CONFIGURE_FILE(
@@ -438,6 +325,13 @@ CONFIGURE_FILE(
 INSTALL(
 	FILES
 		${PROJECT_BINARY_DIR}/ACADOConfig.cmake
+	DESTINATION
+		${INSTALL_CMAKE_DIR}
+)
+INSTALL(
+	FILES
+		${PROJECT_SOURCE_DIR}/cmake/FindACADO.cmake
+		${PROJECT_SOURCE_DIR}/cmake/UseACADO.cmake
 	DESTINATION
 		${INSTALL_CMAKE_DIR}
 )
@@ -481,11 +375,11 @@ ENDIF( DOXYGEN_FOUND )
 ################################################################################
 
 SET( ACADO_INCLUDE_DIRS
-	${PROJECT_SOURCE_DIR}/include
+	${PROJECT_SOURCE_DIR}
+	${PROJECT_SOURCE_DIR}/acado
 	${PROJECT_SOURCE_DIR}/external_packages
-	${PROJECT_SOURCE_DIR}/external_packages/csparse/
 	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
-	${PROJECT_BINARY_DIR}/include
+	${PROJECT_BINARY_DIR}
 )
 
 SET( ACADO_LIBRARY_DIRS
@@ -539,44 +433,6 @@ CONFIGURE_FILE(
 
 ################################################################################
 #
-# Configure include.mk script for backward compatibility
-#
-################################################################################
-
-SET( INCLUDE_MK_CPP_EXE
-	${CMAKE_CXX_COMPILER}
-)
-
-STRING(REPLACE ";" " " INCLUDE_MK_CPP_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
-
-STRING(REPLACE ";" " -I" INCLUDE_MK_INCLUDE_DIRS "${ACADO_INCLUDE_DIRS}")
-SET( INCLUDE_MK_INCLUDE_DIRS 
-	"-I${INCLUDE_MK_INCLUDE_DIRS}"
-)
-
-STRING(REPLACE ";" " -L" INCLUDE_MK_LIBRARY_DIRS "${ACADO_LIBRARY_DIRS}")
-SET( INCLUDE_MK_LIBRARY_DIRS
-	"-L${INCLUDE_MK_LIBRARY_DIRS}"
-)
-
-# The following code favors shared libraries.
-IF ( ACADO_BUILD_SHARED )
-	STRING(REPLACE ";" " -l" INCLUDE_MK_LIBS "${ACADO_SHARED_LIBRARIES}")
-ELSEIF ( ACADO_BUILD_STATIC )
-	STRING(REPLACE ";" " -l" INCLUDE_MK_LIBS "${ACADO_STATIC_LIBRARIES}")
-ENDIF()
-SET( INCLUDE_MK_LIBS
-	"-l${INCLUDE_MK_LIBS}"
-)
-
-CONFIGURE_FILE(
-	"${PROJECT_SOURCE_DIR}/cmake/include.mk.in"
-	"${PROJECT_BINARY_DIR}/include.mk"
-	@ONLY
-)
-
-################################################################################
-#
 # Configure pkg-config script
 #
 ################################################################################
@@ -585,16 +441,24 @@ SET( PC_VERSION
 	${ACADO_VERSION_STRING}
 )
 
+STRING(REPLACE ";" " -I" PC_INCLUDE_DIRS "${ACADO_INCLUDE_DIRS}")
 SET( PC_INCLUDE_DIRS 
-	${INCLUDE_MK_INCLUDE_DIRS}
+	"-I${PC_INCLUDE_DIRS}"
 )
 
+STRING(REPLACE ";" " -L" PC_LIBRARY_DIRS "${ACADO_LIBRARY_DIRS}")
 SET( PC_LIBRARY_DIRS
-	${INCLUDE_MK_LIBRARY_DIRS}
+	"-L${PC_LIBRARY_DIRS}"
 )
 
+# The following code favors shared libraries.
+IF ( ACADO_BUILD_SHARED )
+	STRING(REPLACE ";" " -l" PC_LIBS "${ACADO_SHARED_LIBRARIES}")
+ELSEIF ( ACADO_BUILD_STATIC )
+	STRING(REPLACE ";" " -l" PC_LIBS "${ACADO_STATIC_LIBRARIES}")
+ENDIF()
 SET( PC_LIBS
-	${INCLUDE_MK_LIBS}
+	"-l${PC_LIBS}"
 )
 
 STRING(REPLACE ";" " -I" PC_QPOASES_EMBEDDED_INC_DIRS "${ACADO_QPOASES_EMBEDDED_INC_DIRS}")
@@ -617,8 +481,18 @@ CONFIGURE_FILE(
 ################################################################################
 
 IF( ACADO_WITH_EXAMPLES )
-	ADD_SUBDIRECTORY( ./examples )
+	ADD_SUBDIRECTORY( examples )
 ENDIF( ACADO_WITH_EXAMPLES )
+
+################################################################################
+#
+# Unit tests
+#
+################################################################################
+
+IF( ACADO_WITH_TESTING )
+	ADD_SUBDIRECTORY( tests )
+ENDIF( ACADO_WITH_TESTING )
 
 ################################################################################
 #
@@ -627,5 +501,5 @@ ENDIF( ACADO_WITH_EXAMPLES )
 ################################################################################
 
 IF( ACADO_INTERNAL )
-	ADD_SUBDIRECTORY( ./experimental )
+	ADD_SUBDIRECTORY( experimental )
 ENDIF( ACADO_INTERNAL )

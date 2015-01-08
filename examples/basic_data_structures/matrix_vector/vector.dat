@@ -3,14 +3,12 @@
 // VECTOR READING EXAMPLE:
 // 
 
--0.5,     seperators like , are ignored
+-0.5     No separators other than space or tab are allowed!
 .2e+3     anything that looks like a number will be read
 -3+3      this will be interpreted as two separate numbers
 
-// caution: numbers in comments are also read: 333
-
-nan  will also be detected ( = infinity )
-NAN and  NaN  will be detected.
+// TODO nan  will also be detected ( = infinity )
+// TODO NAN and  NaN  will be detected.
 
 /* <<< end tutorial code <<< */
 

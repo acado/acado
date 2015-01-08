@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,14 +32,16 @@
  */
 
 
-#include <acado_toolkit.hpp>
+#include <acado_optimal_control.hpp>
+#include <acado_gnuplot.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
-
-    USING_NAMESPACE_ACADO
-
+int main( )
+{
     // DEFINE A RIGHT-HAND-SIDE:
     // -------------------------
     DifferentialState         x;
@@ -55,13 +57,13 @@ int main( ){
     // DEFINE INITIAL VALUES:
     // ----------------------
 
-    Vector xStart( 1 );
+    DVector xStart( 1 );
 	xStart(0) = 1.0;
     
-	Vector zStart( 1 );
+	DVector zStart( 1 );
 	zStart(0) = 1.0;
 
-	Vector pp( 2 );
+	DVector pp( 2 );
 	pp(0) = 1.0;
 	pp(1) = 1.0;
 	
@@ -94,13 +96,12 @@ int main( ){
     VariablesGrid differentialStates;
     VariablesGrid algebraicStates   ;
 
-//     intAlg.getX ( differentialStates );
+//    intAlg.getX ( differentialStates );
     intAlg.getLast( LOG_DIFFERENTIAL_STATES,differentialStates );
     intAlg.getXA( algebraicStates    );
 
-	differentialStates.print( "x" );
-	algebraicStates.print( "z" );
-
+    cout << "x = " << endl << differentialStates << endl;
+    cout << "z = " << endl << algebraicStates << endl;
 
     return 0;
 }

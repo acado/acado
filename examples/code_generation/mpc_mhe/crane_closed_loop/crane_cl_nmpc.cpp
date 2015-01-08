@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -28,7 +28,7 @@
  *    \date   2011-2013
  */
 
-#include <acado_toolkit.hpp>
+#include <acado_code_generation.hpp>
 
 int main( )
 {
@@ -57,9 +57,8 @@ int main( )
 	h << p << v << phi << omega << a;
 	hN << p << v << phi << omega;
 
-	// Or:
-	ExportVariable W(h.getDim(), h.getDim());
-	ExportVariable WN(hN.getDim(), hN.getDim());
+	BMatrix W = eye<bool>( h.getDim() );
+	BMatrix WN = eye<bool>( hN.getDim() );
 
 	//
 	// Optimal Control Problem
@@ -82,15 +81,20 @@ int main( )
 	mpc.set( INTEGRATOR_TYPE, INT_RK4 );
 	mpc.set( NUM_INTEGRATOR_STEPS, 30 );
 
+	mpc.set( SPARSE_QP_SOLUTION, CONDENSING );
 	mpc.set( QP_SOLVER, QP_QPOASES );
+	
+// 	mpc.set( SPARSE_QP_SOLUTION, SPARSE_SOLVER );
+// 	mpc.set( QP_SOLVER, QP_QPDUNES );
+	
 	mpc.set( HOTSTART_QP, YES );
 	mpc.set( GENERATE_TEST_FILE, NO);
 	mpc.set( GENERATE_MAKE_FILE, NO );
 	mpc.set( GENERATE_MATLAB_INTERFACE, NO );
 	mpc.set( GENERATE_SIMULINK_INTERFACE, YES );
 
-	// Set custom module name:
-	mpc.setName("nmpc");
+	// Optionally set custom module name:
+	mpc.set( CG_MODULE_NAME, "nmpc" );
 
 	if (mpc.exportCode( "crane_cl_nmpc_export" ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );

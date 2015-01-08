@@ -33,7 +33,7 @@ if (get == 'FB')
     
     % This is NOT executed for mex inputs
         
-    fprintf(cppobj.fileMEX,sprintf('    Vector %s(%d);\n', obj.name, length(obj.items)));
+    fprintf(cppobj.fileMEX,sprintf('    DVector %s(%d);\n', obj.name, length(obj.items)));
 
     for i=1:length(obj.items)
         fprintf(cppobj.fileMEX,sprintf('    %s(%d) = %s;\n', obj.name, i-1, stringIntDouble(obj.items(i))));

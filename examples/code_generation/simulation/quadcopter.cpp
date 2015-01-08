@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -22,12 +22,14 @@
  *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
-#include <acado_toolkit.hpp>
 
+#include <acado_code_generation.hpp>
+
+using namespace std;
 USING_NAMESPACE_ACADO
 
-int main( ){
-	
+int main( )
+{
 	// Define variables, functions and constants:
 	// ----------------------------------------------------------
     DifferentialState   dT1;
@@ -126,10 +128,10 @@ int main( ){
 	// ----------------------------------------------------------
 	
 	// LINEAR INPUT SYSTEM (STAGE 1):
-	Matrix M1, A1, B1;
-	M1 = eye(12);
-	A1 = zeros(12,12);
-	B1 = zeros(12,4);
+	DMatrix M1, A1, B1;
+	M1 = eye<double>(12);
+	A1 = zeros<double>(12,12);
+	B1 = zeros<double>(12,4);
 	
 	A1(4,0) = 1.0;
 	A1(5,1) = 1.0;
@@ -158,9 +160,9 @@ int main( ){
 	f2 << (A*Cl*rho*(W1*W1 + W2*W2 + W3*W3 + W4*W4)*(q1*q1 - q2*q2 - q3*q3 + q4*q4))/(2*m) - g; 
 	
 	// LINEAR OUTPUT SYSTEM (STAGE 3):
-	Matrix M3, A3;
-	M3 = eye(6);
-	A3 = zeros(6,6);
+	DMatrix M3, A3;
+	M3 = eye<double>(6);
+	A3 = zeros<double>(6,6);
 	
 	A3(3,0) = 1.0;
 	A3(4,1) = 1.0;
@@ -186,7 +188,7 @@ int main( ){
 	sim1.set( NUM_INTEGRATOR_STEPS, 50 );
 	sim1.setTimingSteps( 10000 );
 	
-	acadoPrintf( "-----------------------------------------------------------\n  Using a QuadCopter ODE model in fully nonlinear form:\n-----------------------------------------------------------\n" );
+	cout << "-----------------------------------------------------------\n  Using a QuadCopter ODE model in fully nonlinear form:\n-----------------------------------------------------------\n";
 	sim1.exportAndRun( "quadcopter_export", "init_quadcopter.txt", "controls_quadcopter.txt" );
 
 
@@ -202,9 +204,8 @@ int main( ){
 	sim2.set( NUM_INTEGRATOR_STEPS, 50 );
 	sim2.setTimingSteps( 10000 );
 	
-	acadoPrintf( "-----------------------------------------------------------\n  Using a QuadCopter ODE model in 3-stage format:\n-----------------------------------------------------------\n" );
+	cout << "-----------------------------------------------------------\n  Using a QuadCopter ODE model in 3-stage format:\n-----------------------------------------------------------\n";
 	sim2.exportAndRun( "quadcopter_export", "init_quadcopter.txt", "controls_quadcopter.txt" );
-
 
 	return 0;
 }

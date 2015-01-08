@@ -111,6 +111,32 @@ class QProblemB
 							);
 
 
+		/** Initialises a QProblemB with given QP data and solves it
+		 *	using an initial homotopy with empty working set (at most nWSR iterations).
+		 *	\return SUCCESSFUL_RETURN \n
+					RET_INIT_FAILED \n
+					RET_INIT_FAILED_CHOLESKY \n
+					RET_INIT_FAILED_HOTSTART \n
+					RET_INIT_FAILED_INFEASIBILITY \n
+					RET_INIT_FAILED_UNBOUNDEDNESS \n
+					RET_MAX_NWSR_REACHED \n
+					RET_INVALID_ARGUMENTS \n
+					RET_INACCURATE_SOLUTION \n
+		 			RET_NO_SOLUTION */
+		returnValue init(	const real_t* const _H, 		/**< Hessian matrix. */
+							const real_t* const _R, 		/**< Cholesky factorization of the Hessian matrix. */
+							const real_t* const _g,			/**< Gradient vector. */
+							const real_t* const _lb,		/**< Lower bounds (on variables). \n
+																If no lower bounds exist, a NULL pointer can be passed. */
+							const real_t* const _ub,		/**< Upper bounds (on variables). \n
+																If no upper bounds exist, a NULL pointer can be passed. */
+							int& nWSR, 						/**< Input: Maximum number of working set recalculations when using initial homotopy. \n
+																Output: Number of performed working set recalculations. */
+							const real_t* const yOpt = 0,	/**< Initial guess for dual solution vector. */
+				 			real_t* const cputime = 0		/**< Output: CPU time required to initialise QP. */
+							);
+
+
 		/** Solves an initialised QProblemB using online active set strategy.
 		 *	\return SUCCESSFUL_RETURN \n
 					RET_MAX_NWSR_REACHED \n
@@ -420,6 +446,7 @@ class QProblemB
 		 *	\return SUCCESSFUL_RETURN \n
 					RET_INVALID_ARGUMENTS */
 		returnValue setupQPdata(	const real_t* const _H, 	/**< Hessian matrix. */
+									const real_t* const _R, 	/**< Cholesky factorization of the Hessian matrix. */
 									const real_t* const _g,		/**< Gradient vector. */
 									const real_t* const _lb,	/**< Lower bounds (on variables). \n
 																	 If no lower bounds exist, a NULL pointer can be passed. */
@@ -562,6 +589,8 @@ class QProblemB
 	 */
 	protected:
 		real_t H[NVMAX*NVMAX];		/**< Hessian matrix. */
+		BooleanType hasHessian;		/**< Flag indicating whether H contains Hessian or corresponding Cholesky factor R; \sa init. */
+
 		real_t g[NVMAX];			/**< Gradient. */
 		real_t lb[NVMAX];			/**< Lower bound vector (on variables). */
 		real_t ub[NVMAX];			/**< Upper bound vector (on variables). */
@@ -569,6 +598,7 @@ class QProblemB
 		Bounds bounds;				/**< Data structure for problem's bounds. */
 
 		real_t R[NVMAX*NVMAX];		/**< Cholesky decomposition of H (i.e. H = R^T*R). */
+		BooleanType hasCholesky;	/**< Flag indicating whether Cholesky decomposition has already been setup. */
 
 		real_t x[NVMAX];			/**< Primal solution vector. */
 		real_t y[NVMAX+NCMAX];		/**< Dual solution vector. */

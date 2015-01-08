@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -35,15 +35,17 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 
+using namespace std;
+using namespace Eigen;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
 int main( ){
 
-    USING_NAMESPACE_ACADO
-
     // DEFINE A MATRIX:
     // ----------------
-    Matrix A(3,3);
+    DMatrix A(3,3);
 
     A(0,0) = 1.0;  A(0,1) = 0.0;  A(0,2) = 0.0;
     A(1,0) = 0.0;  A(1,1) = 3.0;  A(1,2) = 2.0;
@@ -54,19 +56,11 @@ int main( ){
 //  Just printing the Eigenvalues:
 //  ----------------------------------------
 
-    printf("\nEigenvalues of the matrix A: \n");
-    A.printEigenvalues();
+    EigenSolver< DMatrix > es( A );
 
-
-//  --------------------------------------------
-//  Obtaining the eigenvalues and eigenvectors:
-//  --------------------------------------------
-
-    Vector  eigenvalues;
-    Matrix eigenvectors;
-
-    eigenvalues = A.getEigenvalues( eigenvectors );
-
+    cout << "A = " << A << endl;
+    cout << "Eigenvalues:  " << endl << es.eigenvalues() << endl << endl;
+    cout << "Eigenvectors: " << endl << es.eigenvectors() << endl;
 
     return 0;
 }

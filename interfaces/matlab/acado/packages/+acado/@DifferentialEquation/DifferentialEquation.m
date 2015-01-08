@@ -122,21 +122,21 @@ classdef DifferentialEquation < acado.Function
             noDots = isempty(ACADO_.helper.dx);
             if isa(rhs, 'cell')
                 for i = 1:length(indices)
-                    if (isa(rhs{i}, 'acado.Equals'))
+                    if (~isa(rhs{i}, 'acado.Expression'))
+                        error('ERROR: Invalid DifferentialEquation.add call. <a href="matlab: help acado.DifferentialEquation.add">help acado.DifferentialEquation.add</a>');
+                    elseif (isa(rhs{i}.getExpression, 'acado.Equals'))
                         obj.differentialList{indices(i)} = rhs{i};
-                    elseif (isa(rhs{i}, 'acado.Expression'))
+                    else
                         if(noDots && indices(i) <= length(ACADO_.helper.x))
                             obj.differentialList{indices(i)} = acado.Equals(acado.Dot(ACADO_.helper.x{indices(i)}), rhs{i});
                         else
                             obj.differentialList{indices(i)} = acado.Equals(acado.DoubleConstant(0), rhs{i});
                         end
-                    else
-                        error('ERROR: Invalid DifferentialEquation.add call. <a href="matlab: help acado.DifferentialEquation.add">help acado.DifferentialEquation.add</a>');
                     end
                 end
             elseif isa(rhs, 'acado.Expression')
                 for i = 1:length(indices)
-                    if isa(rhs(i), 'acado.Equals')
+                    if isa(rhs(i).getExpression, 'acado.Equals')
                         obj.differentialList{indices(i)} = rhs(i);
                     else
                         if(noDots && indices(i) <= length(ACADO_.helper.x))

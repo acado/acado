@@ -637,10 +637,10 @@ classdef Expression < handle
             out = acado.Expression(acado.IntermediateState(obj));
         end
         
-        function out = eval(obj, varargin) % x, u, z, dx, p, w, t
+        function out = eval(obj, varargin) % x, u, z, dx, od, p, w, t
             global ACADO_;
             if ~isempty(ACADO_)
-                t = []; x = []; z = []; dx = []; u = []; p = []; w = [];
+                t = []; x = []; z = []; dx = []; u = []; od = []; p = []; w = [];
                 if nargin > 1
                     x = varargin{1};
                     if nargin > 2
@@ -650,11 +650,14 @@ classdef Expression < handle
                             if nargin > 4
                                 dx = varargin{4};
                                 if nargin > 5
-                                    p = varargin{5};
+                                    od = varargin{5};
                                     if nargin > 6
-                                        w = varargin{6};
+                                        p = varargin{6};
                                         if nargin > 7
-                                            t = varargin{7};
+                                            w = varargin{7};
+                                            if nargin > 8
+                                                t = varargin{8};
+                                            end
                                         end
                                     end
                                 end
@@ -662,7 +665,7 @@ classdef Expression < handle
                         end
                     end
                 end
-                ACADO_.helper.setValues(t, x, z, dx, u, p, w);
+                ACADO_.helper.setValues(t, x, z, dx, u, od, p, w);
                 for i = 1:size(obj,1)
                     for j = 1:size(obj,2)
                         out(i,j) = evalin('base', obj(i,j).toString);

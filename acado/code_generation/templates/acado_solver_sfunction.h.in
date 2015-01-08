@@ -1,0 +1,95 @@
+/*
+ * ACADO OCP solver wrapper header.
+ */
+ 
+#ifndef @MODULE_NAME@_SOLVER_SFUNCTION
+#define @MODULE_NAME@_SOLVER_SFUNCTION
+
+/* Include the common header. */
+#include "@MODULE_NAME@_common.h"
+
+/** Internal data structure for communicating with the solver
+  * NOTE: Do not change order of the fields here
+  */
+typedef struct
+{
+	real_t x[(ACADO_N + 1) * ACADO_NX];
+	real_t u[ACADO_N * ACADO_NU];
+	
+#if ACADO_NXA
+	real_t z[ACADO_N * ACADO_NXA];
+#endif
+
+#if ACADO_NOD
+	real_t od[(ACADO_N + 1) * ACADO_NOD];
+#endif
+
+	real_t y[ACADO_N * ACADO_NY];
+	real_t yN[ACADO_NYN];
+	
+#if ACADO_WEIGHTING_MATRICES_TYPE == 1
+	real_t W[ACADO_NY * ACADO_NY];
+	real_t WN[ACADO_NYN * ACADO_NYN];
+#elif ACADO_WEIGHTING_MATRICES_TYPE == 2
+	real_t W[ACADO_N * ACADO_NY * ACADO_NY];
+	real_t WN[ACADO_NYN * ACADO_NYN];
+#endif
+
+#if ACADO_USE_ARRIVAL_COST == 1
+	real_t xAC[ ACADO_NX ];
+	real_t SAC[ACADO_NX * ACADO_NX];
+	real_t WL[ACADO_NX * ACADO_NX];
+#endif
+	
+#if ACADO_INITIAL_STATE_FIXED
+	real_t x0[ ACADO_NX ];
+#endif /* #if ACADO_INITIAL_STATE_FIXED */
+
+#if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
+	real_t sigmaN[ACADO_NX * ACADO_NX];
+#endif
+
+} @MODULE_NAME@data;
+
+/** Input data structure for the ACADO OCP solver. */
+typedef struct
+{
+	int control;			/**< Control flag. */
+	int shifting; 			/**< Shifting strategy. */
+	int initialization;		/**< Initialization flag. */
+	@MODULE_NAME@data data;	        /**< Input data. */
+} @MODULE_NAME@input;
+
+/** Output data structure for the ACADO OCP solver. */
+typedef struct
+{
+	int status;				/**< Status (ATM from the QP solver). */
+	int nIterations;        /**< @ iteration of the QP solver. */
+	real_t kktValue;		/**< KKT value. */
+	real_t objValue;		/**< Objective value. */
+	real_t execTime;		/**< Execution time. */
+	@MODULE_NAME@data data;	        /**< Output data. */
+} @MODULE_NAME@output;
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
+/** The step function of the solver. */
+void @MODULE_NAME@_step(
+	@MODULE_NAME@input*  inData,	/**< Input data. */
+	@MODULE_NAME@output* outData	/**< Output data. */
+	);
+
+/** Initialization of the solver. */
+void @MODULE_NAME@_initialize( void );
+
+/** Cleanup of the solver. */
+void @MODULE_NAME@_cleanup( void );
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif /* __cplusplus */
+
+#endif /* @MODULE_NAME@_SOLVER_SFUNCTION */

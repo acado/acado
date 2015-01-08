@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,7 +33,7 @@
 
 
 #include <acado_optimal_control.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 int main( ){
@@ -82,7 +82,7 @@ int main( ){
 
    // DEFINE THE INVERSE OF THE VARIANCE-COVARIANCE MATRIX OF THE MEASUREMENTS:
    // -------------------------------------------------------------------------
-    Matrix S(1,1);
+    DMatrix S(1,1);
     S(0,0) = 1.0/pow(0.1,2);  // (1 over the variance of the measurement)
                               // HERE: the standard deviation of the measurement is
                               // assumed to be 0.1, thus S = 1/(0.1)^2.
@@ -92,7 +92,7 @@ int main( ){
     // --------------------------------------
 
     VariablesGrid measurements;
-    measurements = readFromFile( "parameter_estimation_data2.txt" );
+    measurements.read( "parameter_estimation_data2.txt" );
 
     if( measurements.isEmpty() == BT_TRUE )
         printf("The file \"parameter_estimation_data2.txt\" can't be opened.");
@@ -103,7 +103,7 @@ int main( ){
     // ----------------------------------------
 
     VariablesGrid F_reference;
-    F_reference = readFromFile( "parameter_estimation_controls.txt" );
+    F_reference.read( "parameter_estimation_controls.txt" );
 
     if( F_reference.isEmpty() == BT_TRUE )
         printf("The file \"parameter_estimation_controls.txt\" can't be opened.");
@@ -141,6 +141,7 @@ int main( ){
 
 	algorithm << window;
     algorithm.initializeDifferentialStates( "parameter_estimation_data2.txt" );
+	algorithm.set(LEVENBERG_MARQUARDT, 1e-5);
 
     algorithm.solve();
 

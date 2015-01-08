@@ -37,8 +37,7 @@ if (get == 'FB')
     fprintf(cppobj.fileMEX,sprintf('      mexErrMsgTxt("Input %d must be a noncomplex double vector of dimension XxY.");\n', obj.counter));
     fprintf(cppobj.fileMEX,sprintf('    } \n'));
     fprintf(cppobj.fileMEX,sprintf('    %s_temp = mxGetPr(prhs[%d]); \n', obj.name, obj.counter));
-
-    fprintf(cppobj.fileMEX,sprintf('    Matrix %s(mxGetM(prhs[%d]), mxGetN(prhs[%d]));\n', obj.name, obj.counter, obj.counter));
+    fprintf(cppobj.fileMEX,sprintf('    DMatrix %s(mxGetM(prhs[%d]), mxGetN(prhs[%d]));\n', obj.name, obj.counter, obj.counter))
 
     % Mex stored all cols after each other. So first loop over cols,
     % then loop over rows.

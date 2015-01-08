@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,7 +32,7 @@
 
 
 #include <acado_optimal_control.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 /* >>> start tutorial code >>> */
@@ -92,10 +92,7 @@ int main( ){
     //window.addSubplot3D( paretoFront, "Pareto Front y1 vs y2 vs y3","y1","y2", PM_POINTS );
     //window.plot( );
 
-    FILE *file = fopen("scalar3_nnc_pareto.txt","w");
     paretoFront.print();
-    file << paretoFront;
-    fclose(file);
 
 
     // PRINT INFORMATION ABOUT THE ALGORITHM:

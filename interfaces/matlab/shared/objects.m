@@ -60,8 +60,7 @@ function [HEADER_PATHS, SRC, BIN, BINFOLDER, SRCMEX, BINMEX, BINFOLDERMEX] = obj
 
 %% SETTINGS
 
-% HEADER_PATHS = '-I../../include -I../../external_packages -I../../external_packages/include  -I../../external_packages/qpOASES-2.0/INCLUDE';
-HEADER_PATHS = sprintf('-I''%s/bin/include'' -I''%s/../../include'' -I''%s/../../external_packages'' -I''%s/../../external_packages/include''  -I''%s/../../external_packages/qpOASES-3.0beta/include'' -I''%s''', pwd,pwd,pwd,pwd,pwd,pwd);
+HEADER_PATHS = sprintf('-I''%s/bin'' -I''%s/../../'' -I''%s/../../acado'' -I''%s/../../external_packages'' -I''%s/../../external_packages/qpOASES-3.0beta/include'' -I''%s/../../external_packages/qpOASES-3.0beta/include/qpOASES/extras'' -I''%s/../../external_packages/eigen3'' -I''%s''', pwd,pwd,pwd,pwd,pwd,pwd,pwd,pwd);
 %% C++ SRC ACADO OBJECTS
 
 SRC = {};
@@ -70,171 +69,171 @@ BINFOLDER = {};
 
 %% INTEGRATOR
 
-[fl, ol] = getFilesAndObjectNames('../../src/utils');
+[fl, ol] = getFilesAndObjectNames('../../acado/utils');
 
 SRC = [SRC; fl];
 BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER repmat({'src/'}, length( fl ), 1)];
+BINFOLDER = [BINFOLDER repmat({'acado/'}, length( fl ), 1)];
 
-[fl, ol] = getFilesAndObjectNames('../../src/clock');
-
-SRC = [SRC; fl];
-BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
-
-[fl, ol] = getFilesAndObjectNames('../../src/user_interaction');
+[fl, ol] = getFilesAndObjectNames('../../acado/clock');
 
 SRC = [SRC; fl];
 BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 
-[fl, ol] = getFilesAndObjectNames('../../src/variables_grid');
+[fl, ol] = getFilesAndObjectNames('../../acado/user_interaction');
 
 SRC = [SRC; fl];
 BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
+
+[fl, ol] = getFilesAndObjectNames('../../acado/variables_grid');
+
+SRC = [SRC; fl];
+BIN = [BIN; ol'];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 
 
 % TODO remove this file and patch acado_csparse.cpp
-[fl, ol] = getFilesAndObjectNames('../../external_packages/src/acado_csparse/');
+[fl, ol] = getFilesAndObjectNames('../../acado/bindings/acado_csparse/');
 SRC = [SRC; fl];
 BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 
-[fl, ol] = getFilesAndObjectNames('../../src/matrix_vector');
-
-SRC = [SRC; fl];
-BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
-
-[fl, ol] = getFilesAndObjectNames('../../src/sparse_solver');
+[fl, ol] = getFilesAndObjectNames('../../acado/matrix_vector');
 
 SRC = [SRC; fl];
 BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 
-[fl, ol] = getFilesAndObjectNames('../../src/symbolic_operator');
-
-SRC = [SRC; fl];
-BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
-
-[fl, ol] = getFilesAndObjectNames('../../src/symbolic_expression');
+[fl, ol] = getFilesAndObjectNames('../../acado/sparse_solver');
 
 SRC = [SRC; fl];
 BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 
-[fl, ol] = getFilesAndObjectNames('../../src/function');
-
-SRC = [SRC; fl];
-BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
-
-[fl, ol] = getFilesAndObjectNames('../../src/modeling_tools');
+[fl, ol] = getFilesAndObjectNames('../../acado/symbolic_operator');
 
 SRC = [SRC; fl];
 BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 
-[fl, ol] = getFilesAndObjectNames('../../src/integrator');
-
-SRC = [SRC; fl];
-BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
-
-[fl, ol] = getFilesAndObjectNames('../../src/curve');
+[fl, ol] = getFilesAndObjectNames('../../acado/symbolic_expression');
 
 SRC = [SRC; fl];
 BIN = [BIN; ol'];
-BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
+
+[fl, ol] = getFilesAndObjectNames('../../acado/function');
+
+SRC = [SRC; fl];
+BIN = [BIN; ol'];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
+
+[fl, ol] = getFilesAndObjectNames('../../acado/modeling_tools');
+
+SRC = [SRC; fl];
+BIN = [BIN; ol'];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
+
+[fl, ol] = getFilesAndObjectNames('../../acado/integrator');
+
+SRC = [SRC; fl];
+BIN = [BIN; ol'];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
+
+[fl, ol] = getFilesAndObjectNames('../../acado/curve');
+
+SRC = [SRC; fl];
+BIN = [BIN; ol'];
+BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 
 
 %% OPTIMAL CONTROL
 if (returnlist == 0 || returnlist == 2 || returnlist == 3)
-	[fl, ol] = getFilesAndObjectNames('../../src/code_generation');
+	[fl, ol] = getFilesAndObjectNames('../../acado/code_generation');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/dynamic_system');
+	[fl, ol] = getFilesAndObjectNames('../../acado/dynamic_system');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/objective');
+	[fl, ol] = getFilesAndObjectNames('../../acado/objective');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/constraint');
+	[fl, ol] = getFilesAndObjectNames('../../acado/constraint');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/conic_program');
+	[fl, ol] = getFilesAndObjectNames('../../acado/conic_program');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/conic_solver');
+	[fl, ol] = getFilesAndObjectNames('../../acado/conic_solver');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/ocp');
+	[fl, ol] = getFilesAndObjectNames('../../acado/ocp');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/dynamic_discretization');
+	[fl, ol] = getFilesAndObjectNames('../../acado/dynamic_discretization');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
 	[fl, ol] = getFilesAndObjectNames('../../external_packages/qpOASES-3.0beta/src');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'qpOASES/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/qpOASES/'}, length( fl ), 1)];
 
-	[fl, ol] = getFilesAndObjectNames('../../src/nlp_solver');
+	[fl, ol] = getFilesAndObjectNames('../../acado/nlp_solver');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../external_packages/src/acado_qpoases');
+	[fl, ol] = getFilesAndObjectNames('../../acado/bindings/acado_qpoases');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/nlp_derivative_approximation');
+	[fl, ol] = getFilesAndObjectNames('../../acado/nlp_derivative_approximation');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/optimization_algorithm');
+	[fl, ol] = getFilesAndObjectNames('../../acado/optimization_algorithm');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
     
 	[fl, ol] = getFilesAndObjectNames('../../external_packages/casadi/symbolic');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/casadi/'}, length( fl ), 1)];
 	
 end;
 
@@ -243,53 +242,53 @@ end;
 if (returnlist == 0 || returnlist == 3)  
     % curve already set in ocp
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/controller');
+	[fl, ol] = getFilesAndObjectNames('../../acado/controller');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/reference_trajectory');
+	[fl, ol] = getFilesAndObjectNames('../../acado/reference_trajectory');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/estimator');
+	[fl, ol] = getFilesAndObjectNames('../../acado/estimator');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/control_law');
+	[fl, ol] = getFilesAndObjectNames('../../acado/control_law');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/noise');
+	[fl, ol] = getFilesAndObjectNames('../../acado/noise');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/transfer_device');
+	[fl, ol] = getFilesAndObjectNames('../../acado/transfer_device');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/process');
+	[fl, ol] = getFilesAndObjectNames('../../acado/process');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 	
-	[fl, ol] = getFilesAndObjectNames('../../src/simulation_environment');
+	[fl, ol] = getFilesAndObjectNames('../../acado/simulation_environment');
 
 	SRC = [SRC; fl];
 	BIN = [BIN; ol'];
-	BINFOLDER = [BINFOLDER; repmat({'src/'}, length( fl ), 1)];
+	BINFOLDER = [BINFOLDER; repmat({'acado/'}, length( fl ), 1)];
 end;
     
 
@@ -324,55 +323,3 @@ end
 end
 
 
-    % SRC{k} = '../../external_packages/src/acado_csparse/acado_csparse.cpp';  BIN{k} ='acado_csparse';                      BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_add.c';                  BIN{k} ='cs_add';                               BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_amd.c';                  BIN{k} ='cs_amd';                               BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_chol.c';                 BIN{k} ='cs_chol';                              BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_cholsol.c';              BIN{k} ='cs_cholsol';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_counts.c';               BIN{k} ='cs_counts';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_cumsum.c';               BIN{k} ='cs_cumsum';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_droptol.c';                  BIN{k} ='cs_droptol';                               BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_dropzeros.c';                  BIN{k} ='cs_dropzeros';                               BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_dupl.c';                 BIN{k} ='cs_dupl';                              BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_entry.c';              BIN{k} ='cs_entry';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_etree.c';               BIN{k} ='cs_etree';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_fkeep.c';               BIN{k} ='cs_fkeep';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_gaxpy.c';                 BIN{k} ='cs_gaxpy';                              BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_happly.c';              BIN{k} ='cs_happly';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_house.c';               BIN{k} ='cs_house';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_ipvec.c';               BIN{k} ='cs_ipvec';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_lsolve.c';               BIN{k} ='cs_lsolve';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_ltsolve.c';               BIN{k} ='cs_ltsolve';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_lu.c';                 BIN{k} ='cs_lu';                              BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_lusol.c';              BIN{k} ='cs_lusol';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_util.c';               BIN{k} ='cs_util';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_multiply.c';               BIN{k} ='cs_multiply';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_permute.c';               BIN{k} ='cs_permute';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_pinv.c';               BIN{k} ='cs_pinv';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_post.c';                 BIN{k} ='cs_post';                              BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_pvec.c';              BIN{k} ='cs_pvec';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_qr.c';               BIN{k} ='cs_qr';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_qrsol.c';               BIN{k} ='cs_qrsol';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_scatter.c';               BIN{k} ='cs_scatter';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_schol.c';               BIN{k} ='cs_schol';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_sqr.c';                 BIN{k} ='cs_sqr';                              BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_symperm.c';              BIN{k} ='cs_symperm';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_tdfs.c';               BIN{k} ='cs_tdfs';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_malloc.c';               BIN{k} ='cs_malloc';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_transpose.c';               BIN{k} ='cs_transpose';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_compress.c';               BIN{k} ='cs_compress';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_usolve.c';                 BIN{k} ='cs_usolve';                              BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_utsolve.c';              BIN{k} ='cs_utsolve';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_scc.c';               BIN{k} ='cs_scc';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_maxtrans.c';               BIN{k} ='cs_maxtrans';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_dmperm.c';               BIN{k} ='cs_dmperm';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_updown.c';               BIN{k} ='cs_updown';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_print.c';                 BIN{k} ='cs_print';                              BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_norm.c';              BIN{k} ='cs_norm';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_load.c';               BIN{k} ='cs_load';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_dfs.c';               BIN{k} ='cs_dfs';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_reach.c';               BIN{k} ='cs_reach';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_spsolve.c';                 BIN{k} ='cs_spsolve';                              BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_ereach.c';              BIN{k} ='cs_ereach';                           BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_leaf.c';               BIN{k} ='cs_leaf';                            BINFOLDER{k} = 'csparse/'; k=k+1;
-    % SRC{k} = '../../external_packages/csparse/SRC/cs_randperm.c';               BIN{k} ='cs_randperm';                           BINFOLDER{k} = 'csparse/'; k=k+1;

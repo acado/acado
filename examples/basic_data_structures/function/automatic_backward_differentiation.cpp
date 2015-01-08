@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,65 +31,58 @@
  *    \date 2008
  */
 
-#include <time.h>
+#include <acado_integrators.hpp>
 
-#include <acado/utils/acado_utils.hpp>
-#include <acado/user_interaction/user_interaction.hpp>
-#include <acado/symbolic_expression/symbolic_expression.hpp>
-#include <acado/function/function.hpp>
-
+using namespace std;
 
 USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
+int main()
+{
+	USING_NAMESPACE_ACADO
 
-    USING_NAMESPACE_ACADO
+	// DEFINE VALRIABLES:
+	// ---------------------------
+	DifferentialState	x,y;
 
-    // DEFINE VALRIABLES:
-    // ---------------------------
-    DifferentialState x,y;
-   
- Function f;
+	Function f;
 
-    f << (x+1)*(y+1) + y*x*y; //pow(y,3);
-    f << x           ;
-    f << y           ;
+	f << (x+1)*(y+1) + y*x*y;//pow(y,3);
+	f << x;
+	f << y;
 
+	// EVALUATE THE FUNCTION f:
+	// ------------------------
+	EvaluationPoint z(f);
 
-    // EVALUATE THE FUNCTION f:
-    // ------------------------
-    EvaluationPoint z(f);
+	DVector diffState(2);
 
-    Vector diffState(2);
+	diffState(0) = 1.0;
+	diffState(1) = 2.0;
 
-    diffState(0) = 1.0;
-    diffState(1) = 2.0;
+	z.setX( diffState );
 
-    z.setX( diffState );
+	DVector ff = f(z);
 
-    Vector ff = f(z);
+	ff.print();
 
-    ff.print();
+	// COMPUTE THE BACKWARD DERIVATIVE:
+	// --------------------------------
 
+	DVector seed(f.getDim());
 
-    // COMPUTE THE BACKWARD DERIVATIVE:
-    // --------------------------------
+	seed(0) = 1.0;
+	seed(1) = 0.0;
+	seed(2) = 0.0;
 
-    Vector seed(f.getDim());
+	EvaluationPoint df(f);
 
-    seed(0) = 1.0;
-    seed(1) = 0.0;
-    seed(2) = 0.0;
+	f.AD_backward( seed, df );
 
-    EvaluationPoint df(f);
+	df.getX().print(cout, "df");
 
-    f.AD_backward( seed, df );
-
-    (df.getX()).print("df");
-
-
-    return 0;
+	return 0;
 }
 /* <<< end tutorial code <<< */
 

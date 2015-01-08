@@ -7,7 +7,7 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2012 - 2013.
+#	2012 - 2014.
 #
 # NOTE:
 #	- It is assumed that one executable has only one source (.cpp) file.
@@ -39,7 +39,7 @@ IF( NOT ACADO_DEVELOPER )
 ENDIF( NOT ACADO_DEVELOPER )
 	
 #
-# Temporary patch: remove closed loop examples
+# Temporary patch: remove closed loop examples and test files
 #
 FILE( GLOB CLOSED_LOOP_SOURCES ./*_closed_loop.cpp )
 FILE( GLOB CLOSED_LOOP_SOURCES ./*_test.cpp )
@@ -52,44 +52,8 @@ ENDIF ( CLOSED_LOOP_SOURCES )
 #
 FOREACH( SRC ${SOURCES} )
 	GET_FILENAME_COMPONENT( EXEC_NAME ${SRC} NAME_WE )
-
 	SET( CURR_EXE code_generation_${EXEC_NAME} )
-
-	ADD_EXECUTABLE( ${CURR_EXE} ${SRC} )
-
-	IF (ACADO_BUILD_SHARED)
-		TARGET_LINK_LIBRARIES(
-			${CURR_EXE}
-			${ACADO_SHARED_LIBRARIES}
-		)
-	ELSE()
-		TARGET_LINK_LIBRARIES(
-			${CURR_EXE}
-			${ACADO_STATIC_LIBRARIES}
-		)
-	ENDIF()
-		
-	SET_TARGET_PROPERTIES(
-		${CURR_EXE}
-		PROPERTIES
-			OUTPUT_NAME "${EXEC_NAME}"
-			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-			# This one is Visual Studio specific
-			FOLDER "examples"
-	)
-	
-	IF ( ACADO_WITH_TESTING )
-			
-		ADD_TEST(
-			NAME
-				${CURR_EXE}_test
-			WORKING_DIRECTORY
-				"${CMAKE_CURRENT_SOURCE_DIR}"
-			COMMAND
-				${CURR_EXE}
-			)
-	ENDIF()
-
+	ACADO_APPLICATION( ${CURR_EXE} ${SRC} )
 ENDFOREACH( SRC ${SOURCES} )
 
 ################################################################################
@@ -107,7 +71,11 @@ ACADO_GENERATE_COMPILE(
 	crane_kul_mhe_test.cpp
 )
 
-ACADO_GENERATE_COMPILE( code_generation_pendulum_dae_nmpc pendulum_dae_nmpc_export pendulum_dae_nmpc_test.cpp )
+ACADO_GENERATE_COMPILE(
+	code_generation_pendulum_dae_nmpc
+	pendulum_dae_nmpc_export
+	pendulum_dae_nmpc_test.cpp
+)
 
 ################################################################################
 #

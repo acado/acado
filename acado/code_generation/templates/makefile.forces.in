@@ -1,0 +1,49 @@
+UNAME := $(shell uname)
+
+LDLIBS = -lm -lstdc++
+ifeq ($(UNAME), Linux)
+	LDLIBS += -lrt
+endif
+
+CCACHE_APP := $(shell which ccache 2>/dev/null)
+
+CFLAGS = -O3 -finline-functions -I./forces/include
+CXXFLAGS = -O3 -finline-functions -I./forces/include
+CC     = $(CCACHE_APP) gcc
+CXX    = $(CCACHE_APP) g++
+
+FORCES_SOURCES = \
+	./forces/src/forces.c \
+	./forces/include/forces.h
+
+OBJECTS = \
+	./forces/src/forces.o \
+	acado_integrator.o \
+	acado_solver.o \
+	acado_auxiliary_functions.o
+
+.PHONY: all
+all: libacado_exported_rti.a
+
+test: ${OBJECTS} test.o
+
+$(FORCES_SOURCES): acado_forces_generator.py
+	python acado_forces_generator.py
+
+./forces/src/forces.o       : ./forces/include/forces.h
+acado_solver.o              : acado_common.h
+acado_integrator.o          : acado_common.h
+acado_auxiliary_functions.o : acado_common.h \
+                              acado_auxiliary_functions.h
+test.o                      : acado_common.h \
+                              ./forces/include/forces.h \
+                              acado_auxiliary_functions.h
+
+libacado_exported_rti.a: ${OBJECTS}
+	ar r $@ $?
+
+${OBJECTS} : acado_common.h
+
+.PHONY : clean
+clean :
+	-rm -rf *.o *.a ./forces

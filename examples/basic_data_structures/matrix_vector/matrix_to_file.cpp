@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -35,22 +35,24 @@
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
+int main( )
+{
+	ofstream stream( "matrix_output.dat" );
 
-    USING_NAMESPACE_ACADO
+	DMatrix A(3, 3);
 
-    FILE *file = fopen("matrix_output.dat", "w");
+	A.setIdentity();
 
-    Matrix A(3,3);
-    A.setIdentity();
+	stream << A;
 
-    file << A;
+	stream.close();
 
-    fclose(file);
-
-    return 0;
+	return 0;
 }
 /* <<< end tutorial code <<< */
 

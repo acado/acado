@@ -336,6 +336,8 @@ class MessageHandling
 		inline returnValue setErrorCount(	int _errorCount	/**< New error count value. */
 											);
 
+		/** Return the error code string. */
+		static const char* getErrorString(int error);
 
 	/*
 	 *	PROTECTED MEMBER FUNCTIONS

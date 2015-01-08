@@ -1,0 +1,51 @@
+extern "C"
+{
+#include <@ACADO_COMMON_HEADER@>
+}
+
+#include "INCLUDE/@SOLVER_NAME@.hpp"
+
+#if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
+#include "INCLUDE/EXTRAS/SolutionAnalysis.hpp"
+#endif // ACADO_COMPUTE_COVARIANCE_MATRIX
+
+static int @PREFIX@nWSR;
+
+@USE_NAMESPACE@
+
+#if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
+static SolutionAnalysis sa;
+#endif // ACADO_COMPUTE_COVARIANCE_MATRIX
+
+int @PREFIX@solve( void )
+{
+	@PREFIX@nWSR = QPOASES_NWSRMAX;
+
+	@CTOR@;
+	
+	returnValue retVal = qp.init(@CALL_SOLVER@);
+
+	qp.getPrimalSolution( @PRIMAL_SOLUTION@ );
+	qp.getDualSolution( @DUAL_SOLUTION@ );
+	
+#if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
+
+	if (retVal != SUCCESSFUL_RETURN)
+		return (int)retVal;
+		
+	retVal = sa.getHessianInverse(&qp, @SIGMA@);
+
+#endif // ACADO_COMPUTE_COVARIANCE_MATRIX
+
+	return (int)retVal;
+}
+
+int @PREFIX@getNWSR( void )
+{
+	return nWSR;
+}
+
+const char* @PREFIX@getErrorString(int error)
+{
+	return MessageHandling::getErrorString( error );
+}

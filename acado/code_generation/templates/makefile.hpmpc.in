@@ -1,0 +1,26 @@
+UNAME := $(shell uname)
+
+LDLIBS = -lm -lstdc++ -lhpmpc
+ifeq ($(UNAME), Linux)
+	LDLIBS += -lrt
+endif
+
+CCACHE_APP := $(shell which ccache 2>/dev/null)
+
+CFLAGS = -O3 -finline-functions -I/usr/local/include
+CXXFLAGS = -O3 -finline-functions
+CC     = $(CCACHE_APP) gcc
+CXX    = $(CCACHE_APP) g++
+
+OBJECTS = acado_integrator.o acado_solver.o acado_auxiliary_functions.o acado_hpmpc_interface.o
+
+.PHONY: all
+all: libacado_exported_rti.a  test
+
+test: ${OBJECTS} test.o
+
+libacado_exported_rti.a: ${OBJECTS}
+	ar r $@ $?
+
+clean:
+	rm -f *.o libacado_exported_rti.a test

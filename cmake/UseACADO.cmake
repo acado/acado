@@ -7,7 +7,7 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2013
+#	2013 - 2014
 #
 # NOTE:
 #
@@ -22,7 +22,7 @@ MACRO( ACADO_GENERATE_COMPILE generator exportFolder testFile )
 	#               names are supported
 	# testFile:     C/C++ source name of a test file
 	
-	# NOTE: work only with qpOASES based OCP solvers
+	# NOTE: works only with qpOASES based OCP solvers
 	
 	IF (NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.10"))
 	
@@ -104,8 +104,57 @@ MACRO( ACADO_GENERATE_COMPILE generator exportFolder testFile )
 		ENDIF()
 		
 	ELSE(NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.10"))
-		MESSAGE( WARNING "Your CMake is old, thus we cannot generate and compile the code.")
+		MESSAGE( WARNING "Your CMake is old, thus we cannot generate and compile the code with a macro -- i.e. you have to do it by hand.")
 	
 	ENDIF (NOT ("${CMAKE_VERSION}" VERSION_LESS "2.8.10"))
 	
+ENDMACRO()
+
+MACRO( ACADO_APPLICATION name )
+	# name: Name of the application (target)
+	# NOTE: All other arguments are considered as source files
+
+	ADD_EXECUTABLE( ${name} ${ARGN} )
+	IF ( ACADO_BUILD_SHARED )
+		TARGET_LINK_LIBRARIES(
+			${name}
+			${ACADO_SHARED_LIBRARIES}
+		)
+	ELSE()
+		TARGET_LINK_LIBRARIES(
+			${name}
+			${ACADO_STATIC_LIBRARIES}
+		)
+	ENDIF()
+	
+	SET_TARGET_PROPERTIES(
+		${name}
+		PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+			# This one is Visual Studio specific
+			FOLDER "examples"
+	)
+	
+	IF ( ACADO_WITH_TESTING )
+		ADD_TEST(
+			NAME
+				${name}_test
+			WORKING_DIRECTORY
+				"${CMAKE_CURRENT_SOURCE_DIR}"
+			COMMAND
+				${name}
+		)
+	ENDIF()
+ENDMACRO()
+
+MACRO( ACADO_COPY_QPOASES_EMBEDDED folder )
+	# folder: A folder (relative path) where to copy the qpOASES embedded source
+
+	FILE( MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${folder} )
+	FILE(
+		COPY
+			${ACADO_QPOASES_EMBEDDED_FOLDER}
+		DESTINATION
+			${CMAKE_CURRENT_SOURCE_DIR}/${folder}
+	)
 ENDMACRO()

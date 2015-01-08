@@ -169,6 +169,7 @@ PARALLEL = 0;
         delete([BIN_FOLDER 'qpOASES' filesep '*' ext]);
         delete([BIN_FOLDER 'src' filesep '*' ext]);
         delete([BIN_FOLDER 'csparse' filesep '*' ext]);
+        delete([BIN_FOLDER 'acado' filesep '*' ext]);
         delete(['integrator' filesep '*' extmex '*']);
         %delete(['acado' filesep '*' extmex '*']);
         
@@ -231,7 +232,7 @@ PARALLEL = 0;
             end
         end
         if ispc
-            ACADOLIB = [pwd filesep 'bin/src/*' ext ' ' pwd filesep 'bin/qpOASES/*' ext];
+            ACADOLIB = [pwd filesep 'bin/acado/*' ext ' ' pwd filesep 'bin/acado/casadi/*' ext ' ' pwd filesep 'bin/acado/qpOASES/*' ext];
         else
             ACADOLIB = CBINFILES;
         end

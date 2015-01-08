@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,7 +33,7 @@
 
 
 #include <acado_toolkit.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 int main( )
@@ -77,14 +77,14 @@ int main( )
     h << vW;
 	h << F;
 
-    Matrix Q = zeros(5,5); // LSQ coefficient matrix
+    DMatrix Q = zeros<double>(5,5); // LSQ coefficient matrix
 	Q(0,0) = 10.0;
 	Q(1,1) = 10.0;
 	Q(2,2) = 1.0;
 	Q(3,3) = 1.0;
 	Q(4,4) = 1.0e-8;
 
-    Vector r(5); // Reference
+    DVector r(5); // Reference
     r.setAll( 0.0 );
 
 
@@ -111,7 +111,7 @@ int main( )
 
 	Process process( dynamicSystem,INT_RK45 );
 
-	VariablesGrid disturbance = readFromFile( "road.txt" );
+	VariablesGrid disturbance; disturbance.read( "road.txt" );
 	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
 		return EXIT_FAILURE;
 
@@ -132,13 +132,13 @@ int main( )
 	double startTime = 0.0;
 	double endTime   = 2.5;
 	
-	Vector x0(4);
+	DVector x0(4);
 	x0.setZero();
 
 	// 	hand-coding call to 
 	//	sim.init( x0 )
 
-	Vector uCon;
+	DVector uCon;
 	VariablesGrid ySim;
 	
 	if (controller.init( startTime,x0 ) != SUCCESSFUL_RETURN)
@@ -158,7 +158,7 @@ int main( )
 
 	while ( currentTime <= endTime )
 	{
-		acadoPrintf( "\n*** Simulation Loop No. %d (starting at time %.3f) ***\n",nSteps,currentTime );
+		printf( "\n*** Simulation Loop No. %d (starting at time %.3f) ***\n",nSteps,currentTime );
 
 		double t = acadoGetTime();
 		if (controller.feedbackStep( currentTime,ySim.getLastVector() ) != SUCCESSFUL_RETURN)
@@ -180,7 +180,7 @@ int main( )
 //     // ----------------------------------------------------------
 // 	SimulationEnvironment sim( 0.0,3.0,process,controller );
 // 
-// 	Vector x0(4);
+// 	DVector x0(4);
 // 	x0.setZero();
 // 
 // 	sim.init( x0 );

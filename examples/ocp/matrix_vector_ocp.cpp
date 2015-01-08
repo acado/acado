@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,7 +33,7 @@
 
 
 #include <acado_optimal_control.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 /* >>> start tutorial code >>> */
@@ -43,9 +43,9 @@ int main( ){
 
     // INTRODUCE THE VARIABLES:
     // ----------------------------
-    DifferentialState    x(10);    // a differential state vector with dimension 10. (vector)
+    DifferentialState    x("", 10, 1);    // a differential state vector with dimension 10. (vector)
     DifferentialState    y    ;    // another differential state y                   (scalar)
-    Control              u(2 );    // a control input with dimension 2.              (vector)
+    Control              u("", 2, 1);    // a control input with dimension 2.              (vector)
     Parameter            p    ;    // a parameter (here a scalar).                   (scalar)
 
     DifferentialEquation f    ;    // the differential equation
@@ -56,13 +56,13 @@ int main( ){
 
     // READ A MATRIX "A" FROM A FILE:
     // ------------------------------
-    Matrix A = readFromFile( "matrix_vector_ocp_A.txt" );
-    Matrix B = readFromFile( "matrix_vector_ocp_B.txt" );
+    DMatrix A; A.read( "matrix_vector_ocp_A.txt" );
+    DMatrix B; B.read( "matrix_vector_ocp_B.txt" );
 
 
     // READ A VECTOR "x0" FROM A FILE:
     // -------------------------------
-    Vector x0 = readFromFile( "matrix_vector_ocp_x0.txt" );
+    DVector x0; x0.read( "matrix_vector_ocp_x0.txt" );
 
 
     // DEFINE A DIFFERENTIAL EQUATION:

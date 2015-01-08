@@ -1,4 +1,7 @@
-language: c++
+language: cpp
+os:
+ - linux
+# - osx
 compiler:
  - gcc
  - clang
@@ -16,9 +19,8 @@ script:
  - cd build
  - cmake -DCMAKE_BUILD_TYPE=Debug -DACADO_WITH_TESTING=ON ..
  - make
-after_success:
- # Run the tests, allowed to fail
  - make test
+after_success:
  # Deploy the source code
  - cd ..
  - "./misc/deploy_code.sh"

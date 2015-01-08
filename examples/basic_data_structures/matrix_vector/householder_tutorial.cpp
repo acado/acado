@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,43 +32,34 @@
  *
  *    This tutorial example explains how to compute
  *    QR factorizations with the ACADO
- *    Matrix class.
+ *    DMatrix class.
  */
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
 int main( ){
 
-    USING_NAMESPACE_ACADO
-
     // DEFINE A MATRIX:
     // ----------------
-    Matrix A(2,2);
+    DMatrix A(2,2);
 
     A(0,0) = 3.0;  A(0,1) = 0.5;
     A(1,0) = 1.0;  A(1,1) = 3.0;
 
-    Vector b(2);
+    DVector b(2);
     b(0) = 1.0;
     b(1) = 0.0;
-    Matrix B = A;
 
-    A.computeQRdecomposition();
-    Vector x = A.solveQR(b);
+    DVector x = A.fullPivHouseholderQr().solve( b );
 
-    x.print("x");
- 
-    (B*x).print("A*x");
-
-    Vector y = A.solveTransposeQR(b);
-
-    y.print("y");
- 
-    (B^y).print("A^y");
+    cout << "A = " << endl << A << endl << endl;
+    cout << "b = " << endl << b << endl << endl;
+    cout << "x = " << endl << x << endl << endl;
 
     return 0;
 }

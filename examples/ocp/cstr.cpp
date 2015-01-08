@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,7 +33,7 @@
 
 
 #include <acado_optimal_control.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 
@@ -103,7 +103,7 @@ int main( ){
     // -------------------------
 
     DifferentialState cA, cB, theta, thetaK;
-	Control u(2);
+	Control u("", 2, 1);
 
     DifferentialEquation f;
 
@@ -131,8 +131,8 @@ int main( ){
 	h << u(0);
 	h << u(1);
 
-    Matrix S = eye(6);
-    Vector r = zeros(6);
+    DMatrix S = eye<double>(6);
+    DVector r = zeros<double>(6);
 
 	S(0,0) = 0.2;
 	S(1,1) = 1.0;
@@ -193,8 +193,11 @@ int main( ){
 	ocp.subjectTo( -9000.0 <= u(1) <= 0.0 );
 
 	
-	VariablesGrid cstr75states( "cstr75_states.txt" );
-	VariablesGrid cstr75controls( "cstr75_controls.txt" );
+	VariablesGrid cstr75states;
+	VariablesGrid cstr75controls;
+
+	cstr75states.read( "cstr75_states.txt" );
+	cstr75controls.read( "cstr75_controls.txt" );
 
     // Additionally, flush a plotting object
     GnuplotWindow window1;

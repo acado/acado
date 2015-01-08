@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,44 +31,39 @@
  *    \date 2008
  */
 
-#include <time.h>
-
 #include <acado/utils/acado_utils.hpp>
 #include <acado/user_interaction/user_interaction.hpp>
 #include <acado/symbolic_expression/symbolic_expression.hpp>
 #include <acado/function/function.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
+int main( )
+{
+	// DEFINE VALRIABLES:
+	// ---------------------------
+	DifferentialState x("",2,1);
 
-    USING_NAMESPACE_ACADO
+	Function f;
 
-    // DEFINE VALRIABLES:
-    // ---------------------------
-    DifferentialState x(2);
-    DifferentialState y(2);
+	// DEFINE A TEST FUNCTION:
+	// -----------------------
 
-    Function             f;
+	IntermediateState ff;
+	IntermediateState a;
+	ff = sin(x(0)*x(1));
 
-    // DEFINE A TEST FUNCTION:
-    // -----------------------
+	f << ff;
+	f << forwardDerivative(ff,x);
 
-    IntermediateState ff;
-    ff = sin(x(0)*x(1));
+	ofstream stream( "symbolic_differentiation3_output.txt" );
+	stream << f;
+	stream.close();
 
-    f <<     forwardDerivative(  ff + x(0)   , x(0) );
-    f <<     forwardDerivative(  x(1) + ff  , x(1) );
-    f <<     forwardDerivative(  ff + ff  , x );
-    f <<     forwardDerivative(  ff + ff  , x, y );
-    f <<     forwardDerivative(  ff + ff  , x, dot(x) );
-    //f << dot(sin(x(0)*x(1)));
-
-    FILE *file = fopen("symbolic_differentiation3_output.txt", "w" );
-    file << f;
-    fclose(file);
-
-    return 0;
+	return 0;
 }
 /* <<< end tutorial code <<< */
 

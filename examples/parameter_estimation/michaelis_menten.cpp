@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -36,7 +36,7 @@
 
 
 #include <acado_optimal_control.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 int main( ){
@@ -51,7 +51,7 @@ int main( ){
 
     // READ THE MEASUREMENT FROM A DATA FILE:
     // --------------------------------------
-    Matrix m = readFromFile( "michaelis_menten_data.txt" );
+    DMatrix m; m.read( "michaelis_menten_data.txt" );
 
 
     // DEFINE A MEASUREMENT FUNCTION:
@@ -85,7 +85,7 @@ int main( ){
 	
     // GET THE VARIANCE COVARIANCE IN THE SOLUTION:
     // ---------------------------------------------
-    Matrix var;
+    DMatrix var;
     algorithm.getParameterVarianceCovariance( var );
 
     double LSSE = 2.0*algorithm.getObjectiveValue();

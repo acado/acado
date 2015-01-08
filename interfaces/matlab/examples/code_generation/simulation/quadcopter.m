@@ -66,7 +66,6 @@ if EXPORT
     
     cd quadcopter_export
     make_acado_integrator('../integrate_quadcopter')
-    make_acado_model('../rhs_quadcopter')
     cd ..
 end
 
@@ -126,7 +125,6 @@ if EXPORT
     
     cd quadcopter_export
     make_acado_integrator('../integrate_quadcopter2')
-    make_acado_model('../rhs_quadcopter2')
     cd ..
 end
 
@@ -134,28 +132,27 @@ end
 %% Timing results:
 load controller_quadcopter.mat P X0
 T = 500; U = -P.K*(X0 - P.Xref);
+input.u = U;
+input.x = X0;
 tic
 for i = 1:T
-    states = integrate_quadcopter(X0', U);
+    states = integrate_quadcopter(input);
 end
 time = toc/T;
 tic
 for i = 1:T
-    states2 = integrate_quadcopter2(X0', U);
+    states2 = integrate_quadcopter2(input);
 end
 time2 = toc/T;
 
-states = integrate_quadcopter(X0', U);
-f = rhs_quadcopter(0, X0', U);
+states = integrate_quadcopter(input);
 
-states2 = integrate_quadcopter2(X0', U);
-f2 = rhs_quadcopter2(0, X0', U);
+states2 = integrate_quadcopter2(input);
 
 err_int = max(abs(states.value-states2.value)) + max(max(abs(states.sensX-states2.sensX))) + ...
     max(max(abs(states.sensU-states2.sensU)));
-err_rhs = max(abs(f-f2));
 
-if( (err_int+err_rhs) > 1e-6 )
+if( err_int > 1e-6 )
     error('Unusual mismatch between nonlinear and 3-stage model !')
 else
     disp('Small, numerically justifiable mismatch between nonlinear and 3-stage model !')
@@ -173,7 +170,9 @@ for i = 1:N
     state = xs(end,:)';
     U = -P.K*(state - P.Xref);
     
-    states = integrate_quadcopter(state, U);
+    input.x = state;
+    input.u = U;
+    states = integrate_quadcopter(input);
     
     xs = [xs; states.value'];
     controls = [controls; U'];
@@ -208,9 +207,9 @@ for k = 1:length(time)
     R(3,3) =q1*q1 - q2*q2 - q3*q3 + q4*q4; 
     
     widths = [1.8 1.8 1];
-    ls = 0.3.*[1 1 0.3];
+    lengths = 0.3.*[1 1 0.3];
     for vec = 1:3
-        L2 = ls(vec)*L;
+        L2 = lengths(vec)*L;
         line([x-L2*R(vec,1) x+L2*R(vec,1)],[y-L2*R(vec,2) y+L2*R(vec,2)],[z-L2*R(vec,3) z+L2*R(vec,3)],'color','b','linewidth',widths(vec));hold on
     end
     plot3(x,y,z,'ks','MarkerFaceColor','k','MarkerSize',8)

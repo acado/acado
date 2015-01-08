@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,80 +31,72 @@
  *    \date 2010
  */
 
+#include <acado_optimal_control.hpp>
+#include <acado_gnuplot.hpp>
 
+using namespace std;
 
-#include <acado_toolkit.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
-
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
+int main( )
+{
+	// Define a Right-Hand-Side:
+	// -------------------------
+	DifferentialState x;
+	DifferentialEquation f;
+	TIME t;
 
+	f << dot(x) == -x + sin(0.01 * t);
 
-    USING_NAMESPACE_ACADO
+	// Define an initial value:
+	// ------------------------
 
-    // Define a Right-Hand-Side:
-    // -------------------------
-    DifferentialState     x;
-    DifferentialEquation  f;
-    TIME t;
-
-    f << dot(x) == -x + sin(0.01*t);
-
-
-    // Define an initial value:
-    // ------------------------
-
-	Vector xStart( 1 );
+	DVector xStart(1);
 	xStart(0) = 1.0;
 
-    double tStart    =   0.0;
-    double tEnd      =   1000.0;
+	double tStart = 0.0;
+	double tEnd = 1000.0;
 
-	Grid timeHorizon( tStart,tEnd,2 );
-	Grid timeGrid( tStart,tEnd,20 );
+	Grid timeHorizon(tStart, tEnd, 2);
+	Grid timeGrid(tStart, tEnd, 20);
 
-
-    // Define an integration algorithm:
-    // --------------------------------
+	// Define an integration algorithm:
+	// --------------------------------
 
 	IntegrationAlgorithm intAlg;
-	
-	intAlg.addStage( f, timeHorizon );
 
-	intAlg.set( INTEGRATOR_TYPE, INT_BDF );
-    intAlg.set( INTEGRATOR_PRINTLEVEL, MEDIUM );
-    intAlg.set( INTEGRATOR_TOLERANCE, 1.0e-3 );
-	intAlg.set( PRINT_INTEGRATOR_PROFILE, YES );
-	intAlg.set( PLOT_RESOLUTION, HIGH );
+	intAlg.addStage(f, timeHorizon);
 
+	intAlg.set(INTEGRATOR_TYPE, INT_BDF);
+	intAlg.set(INTEGRATOR_PRINTLEVEL, MEDIUM);
+	intAlg.set(INTEGRATOR_TOLERANCE, 1.0e-3);
+	intAlg.set(PRINT_INTEGRATOR_PROFILE, YES);
+	intAlg.set(PLOT_RESOLUTION, HIGH);
 
 	GnuplotWindow window;
-	window.addSubplot( x,"x" );
-	
+	window.addSubplot(x, "x");
+
 	intAlg << window;
 
+	// START THE INTEGRATION
+	// ----------------------
 
-    // START THE INTEGRATION
-    // ----------------------
+	intAlg.integrate(timeHorizon, xStart);
 
-    intAlg.integrate( timeHorizon, xStart );
-
-
-    // GET THE RESULTS
-    // ---------------
+	// GET THE RESULTS
+	// ---------------
 
 	VariablesGrid differentialStates;
-	intAlg.getX( differentialStates );
-	
-	differentialStates.print( "x" );
+	intAlg.getX(differentialStates);
 
-	Vector xEnd;
-	intAlg.getX( xEnd );
-	
-	xEnd.print( "xEnd" );
+	cout << "x = " << endl << differentialStates << endl;
 
+	DVector xEnd;
+	intAlg.getX(xEnd);
 
-    return 0;
+	cout << "xEnd = " << endl << xEnd << endl;
+
+	return 0;
 }
 /* <<< end tutorial code <<< */

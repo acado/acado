@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -28,7 +28,7 @@
  *    \date   2013
  */
 
-#include <acado_toolkit.hpp>
+#include <acado_code_generation.hpp>
 
 int main()
 {
@@ -57,8 +57,8 @@ int main()
 	h << p << phi << a;
 	hN << p << phi;
 
-	ExportVariable W(h.getDim(), h.getDim());
-	ExportVariable WN(hN.getDim(), hN.getDim());
+	BMatrix W = eye<bool>( h.getDim() );
+	BMatrix WN = eye<bool>( hN.getDim() );
 
 	//
 	// Optimal Control Problem
@@ -92,8 +92,8 @@ int main()
 
 //	mpc.set( USE_SINGLE_PRECISION, YES );
 
-	// Set custom module name:
-	mhe.setName("mhe");
+	// Optionally set custom module name:
+	mhe.set( CG_MODULE_NAME, "mhe" );
 
 	if (mhe.exportCode( "crane_cl_mhe_export" ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );

@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,7 +33,7 @@
 
 
 #include <acado_toolkit.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 int main( ){
@@ -63,10 +63,10 @@ int main( ){
     h << x;
     h << u;
 
-    Matrix Q(2,2);
+    DMatrix Q(2,2);
     Q.setIdentity();
 
-    Vector r(2);
+    DVector r(2);
     r.setAll( 0.0 );
 
 
@@ -90,7 +90,7 @@ int main( ){
     Process process( dynamicSystem,INT_RK45 );
 
 
-	VariablesGrid disturbance = fopen( "my_disturbance.txt", "r" );
+	VariablesGrid disturbance; disturbance.read( "my_disturbance.txt" );
 
 // 	GnuplotWindow window2;
 // 		window2.addSubplot( disturbance, "my disturbance"   );
@@ -120,7 +120,7 @@ int main( ){
 // 	algorithm.set( PRINTLEVEL,HIGH );
 
 
-    Vector x0(1);
+    DVector x0(1);
     x0(0)  = 1.0;
 
 // // 	algorithm.solve( x0 );
@@ -136,7 +136,7 @@ int main( ){
     // SETTING UP THE NMPC CONTROLLER:
     // -------------------------------
 
-    VariablesGrid myReference = fopen( "my_reference.txt", "r" );
+    VariablesGrid myReference; myReference.read( "my_reference.txt" );
     PeriodicReferenceTrajectory reference( myReference );
 
 // 	GnuplotWindow window3;

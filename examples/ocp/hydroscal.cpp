@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -52,7 +52,7 @@
 
 
 #include <acado_optimal_control.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 #include "../integrator/hydroscal_model.hpp"     // MODEL FILE
 
 #include <time.h>
@@ -94,10 +94,10 @@ int main( ){
 	int    i;
 
 	TIME t;
-	DifferentialState 		x(NXD);
-	AlgebraicState 			z(NXA);
-	Control 				u(NU);
-	Parameter 				p(NP);
+	DifferentialState 		x("", NXD, 1);
+	AlgebraicState 			z("", NXA, 1);
+	Control 				u("", NU, 1);
+	Parameter 				p("", NP, 1);
 	IntermediateState 		is(1+NXD+NXA+NU+NP);
 
 	                        is(0)              = t;
@@ -225,8 +225,8 @@ int main( ){
 						1.8760537088149468E+02    // (not in use?)
 		             };
 
-	Vector x0(NXD, xd);
-	Vector p0(NP,  pd);
+	DVector x0(NXD, xd);
+	DVector p0(NP,  pd);
 
 
 	// DEFINE AN OPTIMAL CONTROL PROBLEM:
@@ -295,15 +295,15 @@ int main( ){
 	// ---------------------------------------------------
 	VariablesGrid out_states;
 	algorithm.getDifferentialStates( out_states );
-	out_states.printToFile( "OUT_states.m","STATES",PS_MATLAB );
+	out_states.print( "OUT_states.m","STATES",PS_MATLAB );
 
 	VariablesGrid out_controls;
 	algorithm.getControls( out_controls );
-	out_controls.printToFile( "OUT_controls.m","CONTROLS",PS_MATLAB );
+	out_controls.print( "OUT_controls.m","CONTROLS",PS_MATLAB );
 
 	VariablesGrid out_algstates;
 	algorithm.getAlgebraicStates( out_algstates );
-	out_algstates.printToFile( "OUT_algstates.m","ALGSTATES",PS_MATLAB );
+	out_algstates.print( "OUT_algstates.m","ALGSTATES",PS_MATLAB );
 
 	GnuplotWindow window;
 	window.addSubplot( out_algstates(94),  "Temperature tray 14" );

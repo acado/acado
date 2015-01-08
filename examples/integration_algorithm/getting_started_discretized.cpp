@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,9 +31,7 @@
  *    \date 2008
  */
 
-
-#include <acado_toolkit.hpp>
-
+#include <acado_optimal_control.hpp>
 
 /* >>> start tutorial code >>> */
 int main( ){
@@ -69,13 +67,13 @@ int main( ){
     // Define an initial value:
     // ------------------------
 
-    Vector xStart( 1 );
+    DVector xStart( 1 );
 	xStart(0) = 1.0;
     
-	Vector uStart( 1 );
+	DVector uStart( 1 );
 	uStart(0) = 1.0;
 
-	Vector xaStart, pStart;
+	DVector xaStart, pStart;
 
 
     // START THE INTEGRATION
@@ -84,7 +82,7 @@ int main( ){
     intAlg.integrate( timeHorizon, xStart, xaStart, pStart, uStart );
 
     // ----------------------
-//     Vector seed(1);
+//     DVector seed(1);
 //     seed(0) = 1.0;
 // 
 //     integrator.setForwardSeed( 1, emptyVector, emptyVector, seed );
@@ -100,7 +98,7 @@ int main( ){
 // 	VariablesGrid differentialStates;
 // 	integrator.getX( differentialStates );
 // 
-// 	Vector Dx( 1 );
+// 	DVector Dx( 1 );
 // 	integrator.getForwardSensitivities( Dx,1 );
 // 	
 // 	differentialStates.print( "x" );

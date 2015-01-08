@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -34,7 +34,7 @@
 
 
 #include <acado_toolkit.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 int main( )
@@ -76,7 +76,7 @@ int main( )
 
     // SETUP THE PROCESS:
     // ------------------
-	Vector mean( 1 ), amplitude( 1 );
+	DVector mean( 1 ), amplitude( 1 );
 	mean.setZero( );
 	amplitude.setAll( 50.0 );
 
@@ -113,7 +113,7 @@ int main( )
 	myProcess.setActuator( myActuator );
 	myProcess.setSensor( mySensor );
 
-	Vector x0( 4 );
+	DVector x0( 4 );
 	x0.setZero( );
 	x0( 0 ) = 0.01;
 
@@ -151,10 +151,10 @@ int main( )
 	u( 4,0 ) = 0.0;
 	u( 5,0 ) = 0.0;
 
-	Vector p( 1 );
+	DVector p( 1 );
 	p(0) = 350.0;
 
-	Vector pInit( 1 );
+	DVector pInit( 1 );
 	pInit(0) = 300.0;
 
 	myProcess.init( 0.0,x0,u.getFirstVector(),pInit );

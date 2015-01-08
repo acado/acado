@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -23,7 +23,7 @@
  *
  */
 
-#include <acado_toolkit.hpp>
+#include <acado_code_generation.hpp>
 
 USING_NAMESPACE_ACADO
 
@@ -100,7 +100,7 @@ int main( void )
 	h << xT << xL << phi << uT << uL << duT << duL;
 
 	// Weighting matrices and measurement functions
-	Matrix W = eye( 7 );
+	DMatrix W = eye<double>( 7 );
 //	W(0,0) = 16.5;
 //	W(1,1) = 23.9;
 //	W(2,2) = 25.1;
@@ -113,7 +113,7 @@ int main( void )
 	Function hN;
 	hN << xT << xL << phi << uT << uL;
 
-	Matrix WN = eye( 5 );
+	DMatrix WN = eye<double>( 5 );
 	WN(0, 0) = W(0, 0);
 	WN(1, 1) = W(1, 1);
 	WN(2, 2) = W(2, 2);

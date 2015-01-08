@@ -1,0 +1,58 @@
+function make_acado_solver( name )
+
+	% Output file name, and also function name
+	if (nargin == 1)
+		fileOut = name;
+	else
+		fileOut = 'acado_solver';
+	end;
+		
+	% Root folder of code generation
+	CGRoot = '.';	
+	
+	% qpOASES embedded source files
+	qpDUNESSources = [ ...
+		'CGRoot/qpdunes/src/dual_qp.c ' ...
+		'CGRoot/qpdunes/src/matrix_vector.c ' ...
+		'CGRoot/qpdunes/src/setup_qp.c ' ...
+		'CGRoot/qpdunes/src/stage_qp_solver_clipping.c ' ...
+		'CGRoot/qpdunes/src/qpdunes_utils.c ' ...
+		];
+		
+	% Auto-generated files
+	CGSources = [ ...
+		'CGRoot/acado_solver_mex.c ' ...
+		'CGRoot/acado_solver.c ' ...
+		'CGRoot/acado_integrator.c ' ...
+		'CGRoot/acado_auxiliary_functions.c ' ...
+		];
+		
+	% Adding additional linker flags for Linux
+	ldFlags = '';
+	if (isunix() && ~ismac())
+		ldFlags = '-lrt';
+    elseif (ispc)
+        ldFlags = '-DWIN32';
+	end;
+
+	% Recipe for compilation
+	CGRecipe = [ ...
+		'mex -O' ...
+		' -I. -I''CGRoot''  -I''CGRoot/qpdunes/include'' ' ...
+		' ldFlags CFLAGS="$CFLAGS -std=c99"' ...
+		' -D__MATLAB__ -D__SIMPLE_BOUNDS_ONLY__ -O CGSources qpDUNESSources -output %s.%s' ...
+		];
+
+% Compilation
+qpDUNESSources = regexprep(qpDUNESSources, 'CGRoot', CGRoot);
+CGSources = regexprep(CGSources, 'CGRoot', CGRoot);
+
+CGRecipe = regexprep(CGRecipe, 'CGRoot', CGRoot);
+CGRecipe = regexprep(CGRecipe, 'CGSources', CGSources);
+CGRecipe = regexprep(CGRecipe, 'qpDUNESSources', qpDUNESSources);
+CGRecipe = regexprep(CGRecipe, 'ldFlags', ldFlags);
+
+% disp( sprintf( CGRecipe, fileOut, mexext ) ); 
+fprintf( 'compiling... ' );
+eval( sprintf(CGRecipe, fileOut, mexext) );
+fprintf( ['done! --> ' fileOut '.' mexext '\n'] );

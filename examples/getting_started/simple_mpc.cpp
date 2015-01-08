@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,14 +33,14 @@
 
 
 #include <acado_toolkit.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
-
-int main( ){
+using namespace std;
 
 USING_NAMESPACE_ACADO
 
-
+int main( )
+{
     // INTRODUCE THE VARIABLES:
     // -------------------------
 	DifferentialState xB;
@@ -76,12 +76,12 @@ USING_NAMESPACE_ACADO
 	h << vB;
     h << vW;
 
-    Matrix Q(4,4);
+    DMatrix Q(4,4);
     Q.setIdentity();
 	Q(0,0) = 10.0;
 	Q(1,1) = 10.0;
 
-    Vector r(4);
+    DVector r(4);
     r.setAll( 0.0 );
 
 
@@ -122,7 +122,7 @@ USING_NAMESPACE_ACADO
     // ----------------------------------------------------------
 	SimulationEnvironment sim( 0.0,3.0,process,controller );
 
-	Vector x0(4);
+	DVector x0(4);
 	x0(0) = 0.01;
 	x0(1) = 0.0;
 	x0(2) = 0.0;

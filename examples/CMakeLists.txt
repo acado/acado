@@ -9,7 +9,7 @@
 #	Milan Vukov, milan.vukov@esat.kuleuven.be
 #
 # Year:
-#	2011 - 2013
+#	2011 - 2014
 #
 # NOTE:
 #	- It is assumed that one executable has only one source (.cpp) file.
@@ -22,81 +22,6 @@
 
 ################################################################################
 #
-# Project settings
-#
-################################################################################
-
-#
-# Minimum required version of cmake 
-#
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
-
-#
-# Project name and programming languages used
-#
-PROJECT( ACADO_EXAMPLES CXX C )
-
-#
-# Folder path for generated executables
-#
-SET( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
-
-#
-# Folder path for generated libraries
-#
-SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
-
-#
-# CMake module(s) path
-#
-SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR} )
-
-################################################################################
-#
-# Prerequisites
-#
-################################################################################
-
-IF ( NOT ACADO_BUILD )
-	FIND_PACKAGE( ACADO REQUIRED )
-
-	SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$ENV{ACADO_ENV_CMAKE_DIR}" )
-
-	INCLUDE( CompilerOptions )
-	
-	IF( ACADO_WITH_TESTING )
-		ENABLE_TESTING()
-	ENDIF( ACADO_WITH_TESTING )
-ENDIF()
-
-################################################################################
-#
-# User configuration
-#
-################################################################################
-
-IF( NOT CMAKE_VERBOSE_MAKEFILE )
-	SET( CMAKE_VERBOSE_MAKEFILE OFF )
-ENDIF( NOT CMAKE_VERBOSE_MAKEFILE )
-
-################################################################################
-#
-# Compiler settings
-#
-################################################################################
-
-#
-# Build type
-#
-IF( NOT CMAKE_BUILD_TYPE )
-	SET(CMAKE_BUILD_TYPE Debug CACHE STRING
-		"Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-		FORCE
-	)
-ENDIF( NOT CMAKE_BUILD_TYPE )
-
-################################################################################
-#
 # List of source folders
 #
 ################################################################################
@@ -104,36 +29,31 @@ ENDIF( NOT CMAKE_BUILD_TYPE )
 #
 # Folders
 #
-SET( EXAMPLE_DIRS
-	basic_data_structures/curve
-	basic_data_structures/function
-	basic_data_structures/matrix_vector
-	basic_data_structures/symbolics
-	basic_data_structures/variables_grid
+IF (NOT ACADO_BUILD_CGT_ONLY)
+	SET( EXAMPLE_DIRS
+		basic_data_structures/curve
+		basic_data_structures/function
+		basic_data_structures/matrix_vector
+		basic_data_structures/symbolics
+		basic_data_structures/variables_grid
+		controller
+		getting_started
+		integration_algorithm
+		integrator
+		validated_integrator
+		multi_objective
+		nlp
+		ocp
+		parameter_estimation
+		process
+		simulation_environment
+	)
+ENDIF()
+SET( EXAMPLE_DIRS ${EXAMPLE_DIRS}
 	code_generation/simulation
-	controller
-	getting_started
-	integration_algorithm
-	integrator
-	validated_integrator
-	multi_objective
 	my_examples
-	nlp
-	ocp
-	parameter_estimation
-	process
-	simulation_environment
 )
 
-################################################################################
-#
-# Include directories
-#
-################################################################################
-
-IF ( NOT ACADO_BUILD )
-	INCLUDE_DIRECTORIES( . ${ACADO_INCLUDE_DIRS} )
-ENDIF( )
 
 ################################################################################
 #
@@ -238,3 +158,4 @@ ENDFOREACH( DIR ${EXAMPLE_DIRS} )
 # Build code generation examples
 #
 ADD_SUBDIRECTORY( ./code_generation/mpc_mhe )
+ADD_SUBDIRECTORY( ./code_generation/empc )

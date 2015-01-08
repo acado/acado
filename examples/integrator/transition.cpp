@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -77,20 +77,20 @@ int main( ){
     integrator.freezeAll();
     integrator.integrate( t_start, t_end, x_start );
 
-    Vector xEnd;
+    DVector xEnd;
     integrator.getX(xEnd);
 
     xEnd.print();
 
 
-    Vector seed(1);
+    DVector seed(1);
     seed(0) = 1.0;
 
     integrator.setBackwardSeed( 1, seed );
 
     integrator.integrateSensitivities();
 
-    Vector dX(1), dP, dU, dW;
+    DVector dX(1), dP, dU, dW;
 
     integrator.getBackwardSensitivities( dX, dP, dU, dW, 1 );
 

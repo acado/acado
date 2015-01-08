@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,7 +33,7 @@
 
 
 #include <acado_integrators.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 const double k10 =  1.287e12;
@@ -105,12 +105,12 @@ int main( ){
 
     // Define a Right-Hand-Side:
     // -------------------------
-    DifferentialState x(4), P(4,4);
-    Control           u(2);
+    DifferentialState x("", 4, 1), P("", 4, 4);
+    Control           u("", 2, 1);
 
     IntermediateState rhs = cstrModel( x, u );
 
-    Matrix Q = zeros(4,4);
+    DMatrix Q = zeros<double>(4,4);
 
     Q(0,0) = 0.2;
     Q(1,1) = 1.0;
@@ -118,7 +118,7 @@ int main( ){
     Q(3,3) = 0.2;
 
 
-    Matrix R = zeros(2,2);
+    DMatrix R = zeros<double>(2,2);
 
     R(0,0) = 0.5;
     R(1,1) = 5e-7;
@@ -159,12 +159,12 @@ int main( ){
     VariablesGrid differentialStates;
     integrator.getX( differentialStates );
 
-	Vector PP = differentialStates.getLastVector();
-	Matrix PPP(4,4);
+	DVector PP = differentialStates.getLastVector();
+	DMatrix PPP(4,4);
 	for( int i=0; i<4; ++i )
 		for( int j=0; j<4; ++j )
 			PPP(i,j) = PP(4+i*4+j);
-	PPP.printToFile( "P1.txt","",PS_PLAIN );
+	PPP.print( "P1.txt","",PS_PLAIN );
 //	PPP.printToFile( "P2.txt","",PS_PLAIN );
 
     GnuplotWindow window;

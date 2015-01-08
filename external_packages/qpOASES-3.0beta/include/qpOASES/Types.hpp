@@ -148,6 +148,10 @@ typedef double real_t;
 
 
 /** Summarises all possible logical values. */
+#if defined( BT_FALSE ) && defined( BT_TRUE )
+#undef BT_FALSE
+#undef BT_TRUE
+#endif /* defined( BT_TRUE ) && defined( BT_FALSE ) */
 enum BooleanType
 {
 	BT_FALSE,					/**< Logical value for "false". */

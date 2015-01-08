@@ -1,25 +1,3 @@
-#
-# This file is part of ACADO Toolkit.
-#
-# ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
-# Copyright (C) 2008-2011 by Boris Houska and Hans Joachim Ferreau.
-# All rights reserved.
-#
-# ACADO Toolkit is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 3 of the License, or (at your option) any later version.
-#
-# ACADO Toolkit is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with ACADO Toolkit; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
-#
-
 ################################################################################
 #
 # Description:
@@ -34,7 +12,7 @@
 #	Enrico Bertolazzi, Universita` degli Studi di Trento
 #
 # Year:
-#	2011 - 2013
+#	2011 - 2014
 #
 # Usage:
 #	- /
@@ -47,15 +25,26 @@
 #
 ################################################################################
 
-#
-# ACADO build flag
-#
-SET( ACADO_BUILD ON )
+INCLUDE( CheckCXXCompilerFlag )
 
 #
-# Temporary patch, needed for compilation of the qpOASES embedded (at least)
+# ACADO build flags, used internally for conditional code compilation
 #
+SET( ACADO_BUILD ON )
 ADD_DEFINITIONS( -DACADO_CMAKE_BUILD )
+
+# Define __DEBUG__ for debug builds
+SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D__DEBUG__")
+SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D__DEBUG__")
+
+#
+# Define a testing flag and turn off the plotting functionality
+#
+IF ( ACADO_WITH_TESTING )
+	ADD_DEFINITIONS( -DACADO_WITH_TESTING )
+	ADD_DEFINITIONS( -D__NO_PIPES__ )
+	ADD_DEFINITIONS( -D__NO_PLOTTING__ )
+ENDIF()
 
 #
 # CMake RPATH handling, http://www.cmake.org/Wiki/CMake_RPATH_handling
@@ -81,53 +70,32 @@ IF("${isSystemDir}" STREQUAL "-1")
    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 ENDIF("${isSystemDir}" STREQUAL "-1")
 
-#
-# Includes
-#
-INCLUDE( CompilerOptionsSSE )
-
-# define __DEBUG__ for debug builds
-SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D__DEBUG__")
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D__DEBUG__")
-
 ################################################################################
 #
 # Compiler settings - GCC/G++; Linux, Apple
 #
 ################################################################################
-IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-
-	#
-	# Compiler options from original Makefiles
-	#
+IF (    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
+     OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
+     OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel" )
 	
 	# Cygwin complains in about the -fPIC flag...
-	IF( NOT CYGWIN )
+	IF( NOT (CYGWIN OR WIN32) )
 		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
 		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC" )
-	ENDIF( NOT CYGWIN )
+	ENDIF( )
 	
 	SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
 	SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -Wfloat-equal -Wshadow -DLINUX" )
 	
-	IF( ACADO_DEVELOPER )
-#		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline" )
-#		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Winline" )
-	ELSE()
+	IF( NOT ACADO_DEVELOPER )
 		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual" )
 	ENDIF()
 
-	#
-	# Some common stuff...
-	#
-	SET(CMAKE_CXX_FLAGS_DEBUG			"${CMAKE_CXX_FLAGS_DEBUG}")
-	SET(CMAKE_CXX_FLAGS_MINSIZEREL		"${CMAKE_CXX_FLAGS_MINSIZEREL} ")
-	SET(CMAKE_CXX_FLAGS_RELEASE			"${CMAKE_CXX_FLAGS_RELEASE} -O3")
-	SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO	"${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG -O3")
-	SET(CMAKE_C_FLAGS_DEBUG				"${CMAKE_C_FLAGS_DEBUG}")
-	SET(CMAKE_C_FLAGS_MINSIZEREL		"${CMAKE_C_FLAGS_MINSIZEREL} ")
-	SET(CMAKE_C_FLAGS_RELEASE			"${CMAKE_C_FLAGS_RELEASE} -O3")
-	SET(CMAKE_C_FLAGS_RELWITHDEBINFO	"${CMAKE_C_FLAGS_RELWITHDEBINFO} -DNDEBUG -O3")
+	IF (NOT (APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") AND (NOT MINGW))
+		SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
+		SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=native")
+	ENDIF()
 	
 	IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-comparison" )
@@ -137,32 +105,45 @@ IF( CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER
 	# Apple specifics
 	#
 	IF( APPLE )
-		SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
-		SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
-		
-#		SET( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -funroll-loops -ftree-vectorize  -pthtread" )
-#		SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -ftree-vectorize -gstabs+ -pthtread" )
-
 		# Build only for 64-bit arch. This requires (at least) OS X version >= 10.7.
 		IF ( NOT CMAKE_OSX_ARCHITECTURES ) 
 			SET( CMAKE_OSX_ARCHITECTURES "x86_64;" )
 		ENDIF()
+		
+		IF ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++" )
+		ENDIF()
 
 	ENDIF( APPLE )
-
-	#
-	# Adding SSE compilation flags
-	#
-	SET( CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} ${SSE_FLAGS}" )
-	SET( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  ${SSE_FLAGS}" )
 	
 	#
-	# If we are running test suite, then turn off plotting
+	# Check for C++11/C++0x support
+	# NOTE: This is only done in the case when we don't use OSX with Clang
+	#       (version >= 4.0) since there are namespace problems (std::tr1 is removed).
 	#
-	IF( ACADO_WITH_TESTING )
-		ADD_DEFINITIONS( -D__NO_PIPES__ )
-		ADD_DEFINITIONS( -D__NO_PLOTTING__ )
+	IF ( NOT (APPLE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") )
+		CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11 )
+		CHECK_CXX_COMPILER_FLAG(-std=gnu++11 COMPILER_SUPPORTS_GNU11)
+		CHECK_CXX_COMPILER_FLAG(-std=c++0x COMPILER_SUPPORTS_CXX0X)
+		CHECK_CXX_COMPILER_FLAG(-std=gnu++0x COMPILER_SUPPORTS_GNU0X)
+
+		IF( COMPILER_SUPPORTS_CXX11 )
+			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -DACADO_HAS_CXX11" )
+		ELSEIF( COMPILER_SUPPORTS_GNU11 )
+			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -DACADO_HAS_CXX11" )
+		ELSEIF( COMPILER_SUPPORTS_CXX0X)
+			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -DACADO_HAS_CXX0X" )
+		ELSEIF( COMPILER_SUPPORTS_GNU0X)
+			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x -DACADO_HAS_CXX0X" )
+		ENDIF()
 	ENDIF()
+
+	IF ( MINGW )
+        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
+		SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static -s")
+		SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static -s")
+	ENDIF( )
 
 ################################################################################
 #
@@ -176,7 +157,7 @@ ELSEIF( MSVC )
 	# Check for Gnuplot installation
 	#
 	SET(GNUPLOT_EXECUTABLE_PATH "C:/gnuplot/bin" CACHE STRING
-		"Abosulute path of the Gnuplot executable."
+		"Absolute path of the Gnuplot executable."
 	)
 	FIND_PROGRAM( GNUPLOT_EXECUTABLE
 		NAMES gnuplot
@@ -199,7 +180,9 @@ ELSEIF( MSVC )
 	ADD_DEFINITIONS( -Dusleep=Sleep )
 	ADD_DEFINITIONS( -Dsleep=Sleep )
 	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+	ADD_DEFINITIONS( -D_SCL_SECURE_NO_WARNINGS )
 	ADD_DEFINITIONS( -D__NO_PIPES__ )
+	ADD_DEFINITIONS( "/wd4068")
 	
 	IF( GNUPLOT_EXECUTABLE )
 		ADD_DEFINITIONS( -DGNUPLOT_EXECUTABLE="${GNUPLOT_EXECUTABLE}" )

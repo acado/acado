@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -32,22 +32,26 @@
  *
  *    This tutorial example explains how to compute
  *    singular value decompositions with the ACADO
- *    Matrix class.
+ *    DMatrix class.
  */
 
 
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 
+using namespace std;
+using namespace Eigen;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
 int main( ){
 
-    USING_NAMESPACE_ACADO
+
 
     // DEFINE A MATRIX:
     // ----------------
-    Matrix A(3,2);
+    DMatrix A(3,2);
 
     A(0,0) = 1.0;  A(0,1) = 0.0;
     A(1,0) = 0.0;  A(1,1) = 3.0;
@@ -63,21 +67,20 @@ int main( ){
 //  matrix.
 //  ----------------------------------------------
 
-    Matrix U,V;
-    Vector D;
+    JacobiSVD< MatrixXd > svdA(A, ComputeThinU | ComputeThinV );
 
-    A.getSingularValueDecomposition( U, D, V );
+    DMatrix U = svdA.matrixU();
+    DMatrix V = svdA.matrixV();
+    DVector D = svdA.singularValues();
 
-    printf("\nSVD of the matrix A: \n");
-
-    U.print("U");
-    D.print("D");
-    V.print("V");
+    cout << "U = " << endl << U << endl;
+    cout << "D = " << endl << D << endl;
+    cout << "V = " << endl << V << endl;
 
 
     // DEFINE ANOTHER MATRIX:
     // ----------------------
-    Matrix B(2,3);
+    DMatrix B(2,3);
 
     B(0,0) = 1.0;   B(0,1) = 0.0;  B(0,2) = 0.0;
     B(1,0) = 0.0;   B(1,1) = 3.0;  B(1,2) = 2.0;
@@ -92,13 +95,17 @@ int main( ){
 //  matrix.
 //  ----------------------------------------------
 
-    B.getSingularValueDecomposition( U, D, V );
+    JacobiSVD< MatrixXd > svdB(B, ComputeThinU | ComputeThinV);
 
-    printf("\n\nSVD of the matrix B: \n");
+    U = svdB.matrixU();
+    V = svdB.matrixV();
+    D = svdB.singularValues();
 
-    U.print("U");
-    D.print("D");
-    V.print("V");
+    cout << "\n\nSVD of the matrix B: \n";
+
+    cout << "U = " << endl << U << endl;
+    cout << "D = " << endl << D << endl;
+    cout << "V = " << endl << V << endl;
 
     return 0;
 }

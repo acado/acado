@@ -1,4 +1,4 @@
-# ACADO Toolkit [![Build Status](https://travis-ci.org/acado/acado.png?branch=stable, master)](https://travis-ci.org/acado/acado) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/acado/acado/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+# ACADO Toolkit [![Build Status](https://travis-ci.org/acado/acado.png?branch=stable, master)](https://travis-ci.org/acado/acado) [![Build status](https://ci.appveyor.com/api/projects/status/fai4cc4kavjv4nq8)](https://ci.appveyor.com/project/mvukov/acado)
 
 > Toolkit for Automatic Control and Dynamic Optimization
 

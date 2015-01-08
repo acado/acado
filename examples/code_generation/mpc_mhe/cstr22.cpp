@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -30,7 +30,7 @@
  */
 
 
-#include <acado_toolkit.hpp>
+#include <acado_code_generation.hpp>
 
 const double k10 =  1.287e12;
 const double k20 =  1.287e12;
@@ -94,7 +94,7 @@ int main()
 
 	// Define a Right-Hand-Side:
 	DifferentialState cA, cB, theta, thetaK;
-	Control           u( 2 );
+	Control           u("", 2, 1);
 
 	DifferentialEquation f;
 
@@ -114,8 +114,8 @@ int main()
 	h << cA << cB << theta << thetaK << u;
 	hN << cA << cB << theta << thetaK;
 
-	Matrix W = eye( h.getDim() );
-	Matrix WN = eye( hN.getDim() );
+	DMatrix W = eye<double>( h.getDim() );
+	DMatrix WN = eye<double>( hN.getDim() );
 
 	W(0, 0) = WN(0, 0) = sqrt(0.2);
 	W(1, 1) = WN(1, 1) = sqrt(1.0);

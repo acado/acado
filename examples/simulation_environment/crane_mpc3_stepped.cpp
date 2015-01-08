@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -34,7 +34,7 @@
 
 
 #include <acado_toolkit.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 int main( ){
@@ -83,10 +83,10 @@ int main( ){
     h << phi;
     h << dphi;
 
-    Matrix Q(4,4); // LSQ coefficient matrix
+    DMatrix Q(4,4); // LSQ coefficient matrix
     Q.setIdentity();
 
-    Vector r(4); // Reference
+    DVector r(4); // Reference
 
 
     // DEFINE AN OPTIMAL CONTROL PROBLEM:
@@ -108,7 +108,7 @@ int main( ){
 
 	Process process( dynamicSystem,INT_RK45 );
 
-	VariablesGrid disturbance = readFromFile( "dist.txt" );
+	VariablesGrid disturbance; disturbance.read( "dist.txt" );
 	if (process.setProcessDisturbance( disturbance ) != SUCCESSFUL_RETURN)
 		exit( EXIT_FAILURE );
 
@@ -123,7 +123,7 @@ int main( ){
 
 	Controller controller( alg, zeroReference );
 	
-	Vector x0(4);
+	DVector x0(4);
 	x0.setZero();
 	x0(3) = 1.0;
 
@@ -131,7 +131,7 @@ int main( ){
 	double endTime   = 20.0;
 
 
-	Vector uCon;
+	DVector uCon;
 	VariablesGrid ySim;
 	
 	if (controller.init( startTime,x0 ) != SUCCESSFUL_RETURN)
@@ -151,7 +151,7 @@ int main( ){
 
 	while ( currentTime <= endTime )
 	{
-		acadoPrintf( "\n*** Simulation Loop No. %d (starting at time %.3f) ***\n",nSteps,currentTime );
+		printf( "\n*** Simulation Loop No. %d (starting at time %.3f) ***\n",nSteps,currentTime );
 	
 		if (controller.step( currentTime,ySim.getLastVector() ) != SUCCESSFUL_RETURN)
 			exit( EXIT_FAILURE );

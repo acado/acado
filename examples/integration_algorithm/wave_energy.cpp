@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -31,14 +31,15 @@
  */
 
 
-#include <acado_toolkit.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_optimal_control.hpp>
+#include <acado_gnuplot.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 int main( )
 {
-	USING_NAMESPACE_ACADO;
-
 	// Parameters
 	double h_hw = 10;    // water level
 	double A_hw = 1.0;   // amplitude of the waves
@@ -69,13 +70,12 @@ int main( )
 
 	// Define an initial value:
 	// ------------------------
-	Vector xStart( 3 );
+	DVector xStart( 3 );
 	xStart(0) = h_hw - 2.0*A_hw;
 	xStart(1) = 0.0;
 	xStart(2) = 0.0;
 
 	Grid timeHorizon( 0.0,25.0 );
-
 
     // DEFINE AN INTEGRATOR:
     // ---------------------
@@ -95,12 +95,10 @@ int main( )
 	
 	intAlg << window;
 
-
 	// START THE INTEGRATION:
     // ----------------------
 
 	intAlg.integrate( timeHorizon, xStart );
-
 
 	return 0;
 }

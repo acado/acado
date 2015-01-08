@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -28,52 +28,44 @@
  /**
  *    \file examples/matrix_vector/cholesky_tutorial.cpp
  *    \author Boris Houska, Hans Joachim Ferreau
- *    \date 2008
+ *    \date 2008 - 2013
  *
  *    This tutorial example explains how to compute
- *    cholesky factorization with the ACADO
- *    Matrix class.
+ *    Cholesky factorization with the ACADO
+ *    DMatrix class.
  */
 
-
-#include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector.hpp>
 
+using namespace std;
+
+USING_NAMESPACE_ACADO
 
 /* >>> start tutorial code >>> */
-int main( ){
+int main( )
+{
+	// DEFINE A MATRIX:
+	// ----------------
+	DMatrix A(2, 2);
 
-    USING_NAMESPACE_ACADO
+	A(0,0) = 3.0;  A(0,1) = 0.5;
+	A(1,0) = 1.0;  A(1,1) = 3.0;
 
-    // DEFINE A MATRIX:
-    // ----------------
-    Matrix A(2,2);
-
-    A(0,0) = 3.0;  A(0,1) = 0.5;
-    A(1,0) = 1.0;  A(1,1) = 3.0;
-
+	cout << "A = " << endl << A << endl << endl;
 
     // COMPUTE THE CHOLESKY FACTORISATION OF A:
     // ----------------------------------------
 
-    Matrix L;
-    L = A.getCholeskyDecomposition();
+    DMatrix L = A.llt().matrixL();
 
-    L.print("L");
-
+    cout << "L = " << endl << L << endl << endl;
 
     // COMPUTE THE INVERSE OF A:
     // -------------------------
 
-    Matrix A_;  // invers of A
-    A_ = A.getCholeskyInverse();
+    DMatrix A_ = A.inverse();
 
-    A_.print("A_");
-
-
-    // CHECK THE ACCURACY OF THE INVERSE:
-    // ----------------------------------
-    (A*A_).print("A*A_");
+    cout << "inv( A ) = " << endl << A_ << endl;
 
     return 0;
 }

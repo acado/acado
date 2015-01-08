@@ -2,7 +2,7 @@
  *    This file is part of ACADO Toolkit.
  *
  *    ACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.
- *    Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,
+ *    Copyright (C) 2008-2014 by Boris Houska, Hans Joachim Ferreau,
  *    Milan Vukov, Rien Quirynen, KU Leuven.
  *    Developed within the Optimization in Engineering Center (OPTEC)
  *    under supervision of Moritz Diehl. All rights reserved.
@@ -33,7 +33,7 @@
 
 
 #include <acado_toolkit.hpp>
-#include <include/acado_gnuplot/gnuplot_window.hpp>
+#include <acado_gnuplot.hpp>
 
 
 int main( )
@@ -45,13 +45,13 @@ int main( )
     // -----------------------------------
 	PIDcontroller pid( 4,1,0.01 );
 
-	Vector pWeights( 4 );
+	DVector pWeights( 4 );
 	pWeights(0) = 1000.0;
 	pWeights(1) = -1000.0;
 	pWeights(2) = 1000.0;
 	pWeights(3) = -1000.0;
 
-	Vector dWeights( 4 );
+	DVector dWeights( 4 );
 	dWeights(0) = 0.0;
 	dWeights(1) = 0.0;
 	dWeights(2) = 20.0;
@@ -64,7 +64,7 @@ int main( )
 	pid.setControlUpperLimit( 0, 200.0 );
 
 
-// 	Matrix K( 1,4 );
+// 	DMatrix K( 1,4 );
 // 	K(0,0) = -3.349222044080232e+04;
 // 	K(0,1) = -3.806600292165519e+03;
 // 	K(0,2) =  9.999999999999985e+02;
@@ -84,7 +84,7 @@ int main( )
 
 	// INITIALIZE CONTROLLER AND PERFORM A STEP:
 	// -----------------------------------------
-	Vector y( 4 );
+	DVector y( 4 );
 	y.setZero( );
 	y(0) = 0.01;
 
@@ -92,7 +92,7 @@ int main( )
 	controller.step( 0.0,y );
 
 
-	Vector u;
+	DVector u;
 	controller.getU( u );
 	u.print( "Feedback control" );
 
