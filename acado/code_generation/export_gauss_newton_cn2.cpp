@@ -1636,7 +1636,7 @@ bool ExportGaussNewtonCN2::performFullCondensing() const
 	int sparseQPsolution;
 	get(SPARSE_QP_SOLUTION, sparseQPsolution);
 
-	if ((SparseQPsolutionMethods)sparseQPsolution == CONDENSING || (SparseQPsolutionMethods)sparseQPsolution == CONDENSING_N2 || (SparseQPsolutionMethods)sparseQPsolution == BLOCK_CONDENSING_N2)
+	if ((SparseQPsolutionMethods)sparseQPsolution == CONDENSING || (SparseQPsolutionMethods)sparseQPsolution == CONDENSING_N2)
 		return false;
 
 	return true;
