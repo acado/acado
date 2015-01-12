@@ -25,7 +25,7 @@
 
 /**
  *    \file src/code_generation/export_gauss_newton_cn2.cpp
- *    \author Milan Vukov, Joel Andersson
+ *    \author Milan Vukov, Joel Andersson, Rien Quirynen
  *    \date 2013 - 2014
  */
 
@@ -962,6 +962,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
 
 	// Compute RDy
+	if( getNY() > 0 || getNYN() ) {
 	for(unsigned run1 = 0; run1 < N; ++run1)
 	{
 		ExportArgument R2Call = R2.isGiven() == true ? R2 : R2.getAddress(run1 * NU, 0);
@@ -987,6 +988,8 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				objSlx.isGiven() == true || variableObjS == false ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
 	condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) == SlxCall + QN2 * DyN );
 	condenseFdb.addLinebreak();
+	}
+
 
 	if (performFullCondensing() == false)
 		condenseFdb.addStatement(g.getRows(0, NX) == QDy.getRows(0, NX));
