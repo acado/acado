@@ -618,7 +618,12 @@ returnValue ExportNLPSolver::setGeneralObjective(const Objective& _objective)
 			objValueOut.setup("objValueOut", 1, objFEndTerm.getDim(), REAL, ACADO_WORKSPACE);
 		}
 
+
 //		setupObjectiveLinearTerms( _objective );
+		objSlx = zeros<double>(NX, 1);
+		objSlu = zeros<double>(NU, 1);
+		objSlx.setDoc("Linear term weighting vector for states.");
+		objSlu.setDoc("Linear term weighting vector for controls.");
 //
 //		setupResidualVariables();
 	}
