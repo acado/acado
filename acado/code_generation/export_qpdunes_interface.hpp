@@ -94,7 +94,10 @@ public:
 							const std::vector< unsigned >& conDim,
 							const std::string& _initialStateFixed,
 							const std::string& _diagH,
-							const std::string& _diagHN
+							const std::string& _diagHN,
+							const unsigned _N,
+							const unsigned _NX,
+							const unsigned _NU
 							);
 };
 

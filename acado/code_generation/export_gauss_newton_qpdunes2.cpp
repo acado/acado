@@ -1130,7 +1130,8 @@ returnValue ExportGaussNewtonQpDunes2::setupQPInterface( )
 			qpConDim,
 			"1",
 			"1",
-			"1"
+			"1",
+			N, NX, NU
 	);
 
 	return SUCCESSFUL_RETURN;

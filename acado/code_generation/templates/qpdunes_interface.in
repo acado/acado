@@ -35,13 +35,13 @@ int initializeQpDunes( void )
 /*	qpOptions.regType            = QPDUNES_REG_SINGULAR_DIRECTIONS; */
 	qpOptions.regType            = QPDUNES_REG_LEVENBERG_MARQUARDT;
 
-	qpDUNES_setup(&qpData, ACADO_N, ACADO_NX, ACADO_NU, nD, &( qpOptions ));
+	qpDUNES_setup(&qpData, @ACADO_N@, @ACADO_NX@, @ACADO_NU@, nD, &( qpOptions ));
 	
-	for (kk = 0; kk < ACADO_N; ++kk)
+	for (kk = 0; kk < @ACADO_N@; ++kk)
 	{
 		qpData.intervals[ kk ]->H.sparsityType = @DIAG_H@ ? QPDUNES_DIAGONAL : QPDUNES_DENSE;
 	}
-	qpData.intervals[ ACADO_N ]->H.sparsityType = @DIAG_HN@ ? QPDUNES_DIAGONAL : QPDUNES_DENSE;
+	qpData.intervals[ @ACADO_N@ ]->H.sparsityType = @DIAG_HN@ ? QPDUNES_DIAGONAL : QPDUNES_DENSE;
 	
 	statusFlag = qpDUNES_init(&qpData, @QP_H@, @QP_G@, @QP_C@, @QP_c@, @QP_LB@, @QP_UB@, @QP_D@, @QP_LBA@, @QP_UBA@);
 	
@@ -64,7 +64,7 @@ int solveQpDunes( void )
 	if ( @INITIAL_STATE_FIXED@ )
 		statusFlag = qpDUNES_updateIntervalData(&qpData, qpData.intervals[ 0 ], 0, 0, 0, 0, @QP_LB_0@, @QP_UB_0@, 0, 0, 0, 0);
 	else
-		statusFlag = qpDUNES_updateIntervalData(&qpData, qpData.intervals[ ACADO_N ], 0, @QP_G_N@, 0, 0, 0, 0, 0, 0, 0, 0);
+		statusFlag = qpDUNES_updateIntervalData(&qpData, qpData.intervals[ @ACADO_N@ ], 0, @QP_G_N@, 0, 0, 0, 0, 0, 0, 0, 0);
 	if (statusFlag != QPDUNES_OK)
 		return (int)statusFlag;
 

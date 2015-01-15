@@ -1143,7 +1143,8 @@ returnValue ExportGaussNewtonQpDunes::setupQPInterface( )
 			qpConDim,
 			initialStateFixed() ? "1" : "0",
 			diagonalH ? "1" : "0",
-			diagonalHN ? "1" : "0"
+			diagonalHN ? "1" : "0",
+			N, NX, NU
 	);
 
 	return SUCCESSFUL_RETURN;
