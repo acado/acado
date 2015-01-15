@@ -133,9 +133,6 @@ returnValue ExportGaussNewtonBlockCN2::getDataDeclarations(	ExportStatementBlock
 	declarations.addDeclaration(qpc, dataStruct);
 	declarations.addDeclaration(qpH, dataStruct);
 
-	declarations.addDeclaration( cleanup );
-	declarations.addDeclaration( shiftQpData );
-
 	declarations.addDeclaration(qpLambda, dataStruct);
 	declarations.addDeclaration(qpMu, dataStruct);
 
@@ -149,6 +146,9 @@ returnValue ExportGaussNewtonBlockCN2::getFunctionDeclarations(	ExportStatementB
 	status = ExportGaussNewtonCN2::getFunctionDeclarations(declarations);
 	if (status != SUCCESSFUL_RETURN)
 		return status;
+
+	declarations.addDeclaration( cleanup );
+	declarations.addDeclaration( shiftQpData );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -987,6 +987,7 @@ returnValue ExportGaussNewtonBlockCN2::setupVariables( )
 	ubA.setup("ubA", getNumberOfBlocks()*getNumStateBoundsPerBlock() + getNumComplexConstraints(), 1, REAL, ACADO_WORKSPACE);
 
 	xVars.setup("x", getNumQPvars(), 1, REAL, ACADO_WORKSPACE);
+	yVars.setup("",0,0); // NOT USED
 	qpLambda.setup("qpLambda", getNumberOfBlocks()*NX, 1, REAL, ACADO_WORKSPACE);
 	qpMu.setup("qpMu", 2*getNumberOfBlocks()*NX + 2*N*NU + 2*NX, 1, REAL, ACADO_WORKSPACE);
 
@@ -1142,36 +1143,33 @@ returnValue ExportGaussNewtonBlockCN2::setupEvaluation( )
 		return SUCCESSFUL_RETURN;
 	}
 
-	// TODO: TOT HIER NU RIEN
-		return SUCCESSFUL_RETURN;
+	if (initialStateFixed() == true)
+	{
+		for (unsigned el = 0; el < getNumBlockVariables(); ++el)
+		{
+			getKKT << kkt.getFullName() << " += fabs("
+					<< qpLb0.get(0, el) << " * " << qpMu.get(2 * el + 0, 0)  << ");\n";
+			getKKT << kkt.getFullName() << " += fabs("
+					<< qpUb0.get(0, el) << " * " << qpMu.get(2 * el + 1, 0)  << ");\n";
+		}
+	}
 
-//	if (initialStateFixed() == true)
-//	{
-//		for (unsigned el = 0; el < NX + NU; ++el)
-//		{
-//			getKKT << kkt.getFullName() << " += fabs("
-//					<< qpLb0.get(0, el) << " * " << qpMu.get(2 * el + 0, 0)  << ");\n";
-//			getKKT << kkt.getFullName() << " += fabs("
-//					<< qpUb0.get(0, el) << " * " << qpMu.get(2 * el + 1, 0)  << ");\n";
-//		}
-//	}
-//
-//	ExportForLoop bndLoop(index, initialStateFixed() ? 1 : 0, N);
-//	ExportForLoop bndInLoop(index2, 0, NX + NU);
-//	bndInLoop << kkt.getFullName() << " += fabs("
-//			<< qpLb.get(0, index * (NX + NU) + index2) << " * " << qpMu.get(index * 2 * (NX + NU) + 2 * index2 + 0, 0)  << ");\n";
-//	bndInLoop << kkt.getFullName() << " += fabs("
-//			<< qpUb.get(0, index * (NX + NU) + index2) << " * " << qpMu.get(index * 2 * (NX + NU) + 2 * index2 + 1, 0)  << ");\n";
-//	bndLoop.addStatement( bndInLoop );
-//	getKKT.addStatement( bndLoop );
-//
-//	for (unsigned el = 0; el < NX; ++el)
-//	{
-//		getKKT << kkt.getFullName() << " += fabs("
-//				<< qpLb.get(0, N * (NX + NU) + el) << " * " << qpMu.get(N * 2 * (NX + NU) + 2 * el + 0, 0)  << ");\n";
-//		getKKT << kkt.getFullName() << " += fabs("
-//				<< qpUb.get(0, N * (NX + NU) + el) << " * " << qpMu.get(N * 2 * (NX + NU) + 2 * el + 1, 0)  << ");\n";
-//	}
+	ExportForLoop bndLoop(index, initialStateFixed() ? 1 : 0, getNumberOfBlocks());
+	ExportForLoop bndInLoop(index2, 0, getNumBlockVariables());
+	bndInLoop << kkt.getFullName() << " += fabs("
+			<< lb.get(index * getNumBlockVariables() + index2, 0) << " * " << qpMu.get(index * 2 * getNumBlockVariables() + 2 * index2 + 0, 0)  << ");\n";
+	bndInLoop << kkt.getFullName() << " += fabs("
+			<< ub.get(index * getNumBlockVariables() + index2, 0) << " * " << qpMu.get(index * 2 * getNumBlockVariables() + 2 * index2 + 1, 0)  << ");\n";
+	bndLoop.addStatement( bndInLoop );
+	getKKT.addStatement( bndLoop );
+
+	for (unsigned el = 0; el < NX; ++el)
+	{
+		getKKT << kkt.getFullName() << " += fabs("
+				<< lb.get(getNumberOfBlocks() * getNumBlockVariables() + el, 0) << " * " << qpMu.get(2 * getNumberOfBlocks() * getNumBlockVariables() + 2 * el + 0, 0)  << ");\n";
+		getKKT << kkt.getFullName() << " += fabs("
+				<< ub.get(getNumberOfBlocks() * getNumBlockVariables() + el, 0) << " * " << qpMu.get(2 * getNumberOfBlocks() * getNumBlockVariables() + 2 * el + 1, 0)  << ");\n";
+	}
 
 	return SUCCESSFUL_RETURN;
 }
