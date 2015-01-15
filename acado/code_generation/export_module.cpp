@@ -72,6 +72,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	5				);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS_INIT, 0			);
 	addOption( SPARSE_QP_SOLUTION,          FULL_CONDENSING );
+	addOption( CONDENSING_BLOCK_SIZE,       0 				);
 	addOption( FIX_INITIAL_STATE,           true         	);
 	addOption( QP_SOLVER,                   QP_QPOASES      );
 	addOption( MAX_NUM_QP_ITERATIONS,       -1              );

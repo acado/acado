@@ -32,14 +32,15 @@
 #include <acado/code_generation/register_nlp_solvers.hpp>
 
 #include <acado/code_generation/export_gauss_newton_cn2.hpp>
-#include <acado/code_generation/export_exact_hessian_cn2.hpp>
-#include <acado/code_generation/export_exact_hessian_qpdunes.hpp>
+#include <acado/code_generation/export_gauss_newton_block_cn2.hpp>
 #include <acado/code_generation/export_gauss_newton_cn2_factorization.hpp>
 #include <acado/code_generation/export_gauss_newton_condensed.hpp>
 #include <acado/code_generation/export_gauss_newton_forces.hpp>
 #include <acado/code_generation/export_gauss_newton_qpdunes.hpp>
 #include <acado/code_generation/export_gauss_newton_qpdunes2.hpp>
 #include <acado/code_generation/export_gauss_newton_hpmpc.hpp>
+#include <acado/code_generation/export_exact_hessian_cn2.hpp>
+#include <acado/code_generation/export_exact_hessian_qpdunes.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -54,18 +55,11 @@ ExportNLPSolver* createGaussNewtonCN2(	UserInteraction* _userInteraction,
 	return new ExportGaussNewtonCN2(_userInteraction, _commonHeaderName);
 }
 
-ExportNLPSolver* createExactHessianCN2(	UserInteraction* _userInteraction,
-											const std::string& _commonHeaderName
-											)
+ExportNLPSolver* createGaussNewtonBlockCN2(	UserInteraction* _userInteraction,
+										const std::string& _commonHeaderName
+										)
 {
-	return new ExportExactHessianCN2(_userInteraction, _commonHeaderName);
-}
-
-ExportNLPSolver* createExactHessianQpDunes(	UserInteraction* _userInteraction,
-											const std::string& _commonHeaderName
-											)
-{
-	return new ExportExactHessianQpDunes(_userInteraction, _commonHeaderName);
+	return new ExportGaussNewtonBlockCN2(_userInteraction, _commonHeaderName);
 }
 
 ExportNLPSolver* createGaussNewtonCn2Factorization(	UserInteraction* _userInteraction,
@@ -110,17 +104,32 @@ ExportNLPSolver* createGaussNewtonHpmpc(	UserInteraction* _userInteraction,
 	return new ExportGaussNewtonHpmpc(_userInteraction, _commonHeaderName);
 }
 
+ExportNLPSolver* createExactHessianCN2(	UserInteraction* _userInteraction,
+											const std::string& _commonHeaderName
+											)
+{
+	return new ExportExactHessianCN2(_userInteraction, _commonHeaderName);
+}
+
+ExportNLPSolver* createExactHessianQpDunes(	UserInteraction* _userInteraction,
+											const std::string& _commonHeaderName
+											)
+{
+	return new ExportExactHessianQpDunes(_userInteraction, _commonHeaderName);
+}
+
 RegisterNlpSolvers::RegisterNlpSolvers()
 {
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2, createGaussNewtonCN2);
-	NLPSolverFactory::instance().registerAlgorithm(EXACT_HESSIAN_CN2, createExactHessianCN2);
-	NLPSolverFactory::instance().registerAlgorithm(EXACT_HESSIAN_QPDUNES, createExactHessianQpDunes);
+	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_BLOCK_CN2, createGaussNewtonBlockCN2);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CN2_FACTORIZATION, createGaussNewtonCn2Factorization);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_CONDENSED, createGaussNewtonCondensed);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_FORCES, createGaussNewtonForces);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES, createGaussNewtonQpDunes);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES2, createGaussNewtonQpDunes2);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_HPMPC, createGaussNewtonHpmpc);
+	NLPSolverFactory::instance().registerAlgorithm(EXACT_HESSIAN_CN2, createExactHessianCN2);
+	NLPSolverFactory::instance().registerAlgorithm(EXACT_HESSIAN_QPDUNES, createExactHessianQpDunes);
 }
 
 CLOSE_NAMESPACE_ACADO

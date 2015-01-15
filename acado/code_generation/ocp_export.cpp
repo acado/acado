@@ -189,6 +189,8 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	//
 	// Generate MATLAB MEX interface
 	//
+	int qpSolution;
+	get(SPARSE_QP_SOLUTION, qpSolution);
 	int generateMexInterface;
 	get(GENERATE_MATLAB_INTERFACE, generateMexInterface);
 	int hessianApproximation;
@@ -224,6 +226,9 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 		case QP_QPDUNES:
 			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
 				acadoCopyTemplateFile(MAKE_MEX_EH_QPDUNES, str, "%", true);
+			}
+			else if ( (SparseQPsolutionMethods)qpSolution == BLOCK_CONDENSING_N2 ) {
+				acadoCopyTemplateFile(MAKE_MEX_BLOCK_QPDUNES, str, "%", true);
 			}
 			else {
 				acadoCopyTemplateFile(MAKE_MEX_QPDUNES, str, "%", true);
@@ -404,6 +409,22 @@ returnValue OCPexport::setup( )
 		}
 		else {
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Only Gauss-Newton and Exact Hessian methods are currently supported");
+		}
+
+		break;
+
+	case BLOCK_CONDENSING_N2:
+
+		if ((QPSolverName)qpSolver != QP_QPDUNES)
+			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
+					"For block condensed solution only qpDUNES QP solver is currently supported");
+
+		if ( (HessianApproximationMode)hessianApproximation == GAUSS_NEWTON ) {
+			solver = ExportNLPSolverPtr(
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_BLOCK_CN2));
+		}
+		else {
+			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Only Gauss-Newton methods are currently supported in combination with block condensing.");
 		}
 
 		break;

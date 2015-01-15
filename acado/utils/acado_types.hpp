@@ -340,6 +340,7 @@ enum OptionsName
 	IMPLICIT_INTEGRATOR_NUM_ITS,				/**< This is the performed number of Newton iterations in the implicit integrator. */
 	IMPLICIT_INTEGRATOR_NUM_ITS_INIT,			/**< This is the performed number of Newton iterations in the implicit integrator for the initialization of the first step. */
 	UNROLL_LINEAR_SOLVER,						/**< This option of the boolean type determines the unrolling of the linear solver (no unrolling recommended for larger systems). */
+	CONDENSING_BLOCK_SIZE,						/**< Defines the block size used in a block based condensing approach for code generated RTI. */
 	INTEGRATOR_DEBUG_MODE,
 	OPT_UNKNOWN,
 	MAX_NUM_INTEGRATOR_STEPS,
@@ -741,6 +742,7 @@ enum SparseQPsolutionMethods
 	FULL_CONDENSING,
 	FULL_CONDENSING_N2,
 	CONDENSING_N2,
+	BLOCK_CONDENSING_N2,
 	FULL_CONDENSING_N2_FACTORIZATION
 };
 
