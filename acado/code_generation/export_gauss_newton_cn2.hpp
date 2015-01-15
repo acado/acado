@@ -25,7 +25,7 @@
 
 /**
  *    \file include/acado/code_generation/export_gauss_newton_cn2.hpp
- *    \authors Milan Vukov, Joel Andersson
+ *    \authors Milan Vukov, Joel Andersson, Rien Quirynen
  *    \date 2013 - 2014
  */
 

@@ -1036,7 +1036,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		condenseFdb.addStatement( sbar.getRows(0, NX) == Dx0 );
 	}
 	else {
-		condenseFdb.addStatement( sbar.getRows(0, NX) == zeros<double>(NX,1) );  // Dx0 is now a variable as well !!
+		condensePrep.addStatement( sbar.getRows(0, NX) == zeros<double>(NX,1) );  // Dx0 is now a variable as well !!
 	}
 	condensePrep.addStatement( sbar.getRows(NX, (N + 1) * NX) == d );
 
@@ -1475,8 +1475,8 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 		multGxTGx.setup("multGxTGx", Gx1, Gx2, Gx3);
 		multGxTGx.addStatement( Gx3 == (Gx1 ^ Gx2) );
 
-		macGxTGx.setup("macGxTGx", Gx1, Gx2, Gx3, Gx4);
-		macGxTGx.addStatement( Gx4 == Gx1 + (Gx2 * Gx3) );
+		macGxTGx.setup("macGxTGx", Gx1, Q11, Gx3, Gx4);
+		macGxTGx.addStatement( Gx4 == Gx1 + (Q11 * Gx3) );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -1636,7 +1636,7 @@ bool ExportGaussNewtonCN2::performFullCondensing() const
 	int sparseQPsolution;
 	get(SPARSE_QP_SOLUTION, sparseQPsolution);
 
-	if ((SparseQPsolutionMethods)sparseQPsolution == CONDENSING || (SparseQPsolutionMethods)sparseQPsolution == CONDENSING_N2)
+	if ((SparseQPsolutionMethods)sparseQPsolution == CONDENSING || (SparseQPsolutionMethods)sparseQPsolution == CONDENSING_N2 || (SparseQPsolutionMethods)sparseQPsolution == BLOCK_CONDENSING_N2)
 		return false;
 
 	return true;
