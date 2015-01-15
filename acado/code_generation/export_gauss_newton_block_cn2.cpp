@@ -271,8 +271,11 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 	}
 	for (unsigned j = 1; j < getBlockSize(); ++j) {
 		while( index < xBoundsIdx.size() && xBoundsIdx[index] < (1+j)*NX ) {
-			condensePrep.addStatement( lbA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) == evLbXAValues.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) - sbar.getRow(xBoundsIdx[index]) );
-			condensePrep.addStatement( ubA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) == evUbXAValues.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) - sbar.getRow(xBoundsIdx[index]) );
+			condensePrep.addStatement( lbA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) == evLbXAValues.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) - x.getElement( blockI*getBlockSize()+j, xBoundsIdx[index]-j*NX ) );
+			condensePrep.addStatement( lbA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) -= sbar.getRow(xBoundsIdx[index]) );
+
+			condensePrep.addStatement( ubA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) == evUbXAValues.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) - x.getElement( blockI*getBlockSize()+j, xBoundsIdx[index]-j*NX ) );
+			condensePrep.addStatement( ubA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) -= sbar.getRow(xBoundsIdx[index]) );
 
 			condensePrep.addStatement( A.getSubMatrix(blockI*getNumStateBoundsPerBlock()+numStateBounds,blockI*getNumStateBoundsPerBlock()+numStateBounds+1,0,NX) == C.getRow(xBoundsIdx[index]-NX) );
 
