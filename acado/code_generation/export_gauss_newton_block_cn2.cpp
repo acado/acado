@@ -907,7 +907,9 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 	expand.addStatement( sbar.getRows(0, NX) == xVars.getRows(blockI*getNumBlockVariables(), blockI*getNumBlockVariables()+NX) );
 	expand.addStatement( (x.getRow(blockI*getBlockSize())).getTranspose() += sbar.getRows(0, NX) );
 //	}
-	expand.addStatement( sbar.getRows(NX, getBlockSize()*NX) == d.getRows(blockI*getBlockSize()*NX,(blockI+1)*getBlockSize()*NX-NX) );
+	if( getBlockSize() > 1 ) {
+		expand.addStatement( sbar.getRows(NX, getBlockSize()*NX) == d.getRows(blockI*getBlockSize()*NX,(blockI+1)*getBlockSize()*NX-NX) );
+	}
 
 	for (unsigned row = 0; row < getBlockSize()-1; ++row ) {
 		expand.addFunctionCall(
