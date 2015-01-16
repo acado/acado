@@ -1087,6 +1087,8 @@ returnValue ExportGaussNewtonBlockCN2::setupEvaluation( )
 	expandLoop.addFunctionCall( expand, index );
 	feedback.addStatement( expandLoop );
 
+	feedback.addStatement( (x.getRow(getNumberOfBlocks()*getBlockSize())).getTranspose() += xVars.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumberOfBlocks()*getNumBlockVariables()+NX) );
+
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Shifting of QP data
