@@ -994,7 +994,7 @@ returnValue ExportGaussNewtonBlockCN2::setupVariables( )
 	xVars.setup("x", getNumQPvars(), 1, REAL, ACADO_WORKSPACE);
 	yVars.setup("",0,0); // NOT USED
 	qpLambda.setup("qpLambda", getNumberOfBlocks()*NX, 1, REAL, ACADO_WORKSPACE);
-	qpMu.setup("qpMu", 2*getNumberOfBlocks()*NX + 2*N*NU + 2*NX, 1, REAL, ACADO_WORKSPACE);
+	qpMu.setup("qpMu", 2*getNumberOfBlocks()*NX + 2*N*NU + 2*NX + 2*getNumberOfBlocks()*getNumStateBoundsPerBlock(), 1, REAL, ACADO_WORKSPACE);
 
 	return SUCCESSFUL_RETURN;
 }
