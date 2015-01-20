@@ -185,6 +185,7 @@ returnValue ExportGaussNewtonQpDunes::getCode(	ExportStatementBlock& code
 	}
 
 	code.addFunction( setStagePac );
+
 	code.addFunction( evaluateConstraints );
 
 	code.addFunction( acc );
@@ -528,8 +529,8 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 			ubXValues.append( ubTmp );
 	}
 
-	ExportVariable evLbXValues("lbXValues", lbXValues, STATIC_CONST_REAL, ACADO_LOCAL);
-	ExportVariable evUbXValues("ubXValues", ubXValues, STATIC_CONST_REAL, ACADO_LOCAL);
+	ExportVariable evLbXValues("lbXValues", lbXValues, STATIC_CONST_REAL);
+	ExportVariable evUbXValues("ubXValues", ubXValues, STATIC_CONST_REAL);
 
 	DVector lbUInf( NU );
 	lbUInf.setAll( -INFTY );
@@ -554,8 +555,8 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 			ubUValues.append( ubTmp );
 	}
 
-	ExportVariable evLbUValues("lbUValues", lbUValues, STATIC_CONST_REAL, ACADO_LOCAL);
-	ExportVariable evUbUValues("ubUValues", ubUValues, STATIC_CONST_REAL, ACADO_LOCAL);
+	ExportVariable evLbUValues("lbUValues", lbUValues, STATIC_CONST_REAL);
+	ExportVariable evUbUValues("ubUValues", ubUValues, STATIC_CONST_REAL);
 
 	//
 	// Export evaluation of simple box constraints
@@ -705,8 +706,8 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	lbAValues.append( pocLbStack[ N ] );
 	ubAValues.append( pocUbStack[ N ] );
 
-	ExportVariable evLbAValues("lbAValues", lbAValues, STATIC_CONST_REAL, ACADO_LOCAL);
-	ExportVariable evUbAValues("ubAValues", ubAValues, STATIC_CONST_REAL, ACADO_LOCAL);
+	ExportVariable evLbAValues("lbAValues", lbAValues, STATIC_CONST_REAL);
+	ExportVariable evUbAValues("ubAValues", ubAValues, STATIC_CONST_REAL);
 
 	evaluateConstraints.addVariable( evLbAValues );
 	evaluateConstraints.addVariable( evUbAValues );
@@ -839,7 +840,7 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 		<< (qpUbA.getRows(offsetPac, offsetPac + dimPacH) == tUbAValues - pacEvH.getRows(indPac * dimPacH, indPac * dimPacH + dimPacH));
 
 	ExportVariable tPocA;
-	tPocA.setup("tPocA", conValueOut.getDim(), NX + NU, REAL, ACADO_LOCAL);
+	tPocA.setup("tPocA", conValueOut.getDim(), NX + NU, REAL);
 	if ( dimPocH )
 		evaluateConstraints.addVariable( tPocA );
 

@@ -258,8 +258,8 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 
 	ASSERT( numStateBounds == getNumStateBoundsPerBlock()*getNumberOfBlocks() );
 
-	ExportVariable evLbXAValues("lbXAValues", lbXAValues, STATIC_CONST_REAL, ACADO_LOCAL);
-	ExportVariable evUbXAValues("ubXAValues", ubXAValues, STATIC_CONST_REAL, ACADO_LOCAL);
+	ExportVariable evLbXAValues("lbXAValues", lbXAValues, STATIC_CONST_REAL);
+	ExportVariable evUbXAValues("ubXAValues", ubXAValues, STATIC_CONST_REAL);
 	condensePrep.addVariable( evLbXAValues );
 	condensePrep.addVariable( evUbXAValues );
 
@@ -294,8 +294,8 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 	ASSERT( numStateBounds == getNumStateBoundsPerBlock() );
 
 
-	ExportVariable evLbXValues("lbXValues", lbXValues, STATIC_CONST_REAL, ACADO_LOCAL);
-	ExportVariable evUbXValues("ubXValues", ubXValues, STATIC_CONST_REAL, ACADO_LOCAL);
+	ExportVariable evLbXValues("lbXValues", lbXValues, STATIC_CONST_REAL);
+	ExportVariable evUbXValues("ubXValues", ubXValues, STATIC_CONST_REAL);
 
 	DVector lbUInf( NU );
 	lbUInf.setAll( -INFTY );
@@ -320,8 +320,8 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 			ubUValues.append( ubTmp );
 	}
 
-	ExportVariable evLbUValues("lbUValues", lbUValues, STATIC_CONST_REAL, ACADO_LOCAL);
-	ExportVariable evUbUValues("ubUValues", ubUValues, STATIC_CONST_REAL, ACADO_LOCAL);
+	ExportVariable evLbUValues("lbUValues", lbUValues, STATIC_CONST_REAL);
+	ExportVariable evUbUValues("ubUValues", ubUValues, STATIC_CONST_REAL);
 
 	//
 	// Export evaluation of simple box constraints
