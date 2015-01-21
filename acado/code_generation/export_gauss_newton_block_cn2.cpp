@@ -1199,7 +1199,7 @@ returnValue ExportGaussNewtonBlockCN2::setupQPInterface( )
 		int printLevel;
 		get(PRINTLEVEL, printLevel);
 
-		if ( (PrintLevel)printLevel >= HIGH )
+		if ( (PrintLevel)printLevel >= MEDIUM )
 			printLevel = 2;
 		else
 			printLevel = 0;
