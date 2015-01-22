@@ -660,11 +660,11 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	else {
 		evaluateConstraints.addStatement(
 				qpLb.getCols(N * (NX + NU), N * (NX + NU) + NX) ==
-						lbValues.getCols(N * NX, (N + 1) * NX) - x.getRow( N )
+						lbValues.getCols(N * (NX + NU), N * (NX + NU) + NX) - x.getRow( N )
 		);
 		evaluateConstraints.addStatement(
 				qpUb.getCols(N * (NX + NU), N * (NX + NU) + NX) ==
-						ubValues.getCols(N * NX, (N + 1) * NX) - x.getRow( N )
+						ubValues.getCols(N * (NX + NU), N * (NX + NU) + NX) - x.getRow( N )
 		);
 	}
 	evaluateConstraints.addLinebreak();
