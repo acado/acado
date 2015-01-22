@@ -99,12 +99,6 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 			ss << "typedef double real_t;\n";
 
 		break;
-
-	case QP_QPDUNES2:
-		ss << "#define ACADO_QP_SOLVER ACADO_QPDUNES\n" << endl;
-		ss << "#include \"qpDUNES.h\"\n";
-
-		break;
 	
 	case QP_NONE:
 		ss << "/** Definition of the floating point data type. */\n";

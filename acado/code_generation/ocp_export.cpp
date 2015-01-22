@@ -234,8 +234,6 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 				acadoCopyTemplateFile(MAKE_MEX_QPDUNES, str, "%", true);
 			}
 			break;
-			
-		case QP_QPDUNES2:
 
 		default:
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface is not yet available.");
@@ -441,7 +439,7 @@ returnValue OCPexport::setup( )
 			break;
 
 	case SPARSE_SOLVER:
-		if ((QPSolverName)qpSolver != QP_FORCES && (QPSolverName)qpSolver != QP_QPDUNES && (QPSolverName)qpSolver != QP_QPDUNES2 && (QPSolverName)qpSolver != QP_HPMPC)
+		if ((QPSolverName)qpSolver != QP_FORCES && (QPSolverName)qpSolver != QP_QPDUNES && (QPSolverName)qpSolver != QP_HPMPC)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
 					"For sparse solution FORCES and qpDUNES QP solvers are supported");
 		if ( (QPSolverName)qpSolver == QP_FORCES)
@@ -457,9 +455,6 @@ returnValue OCPexport::setup( )
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_QPDUNES));
 			}
 		}
-		else if ((QPSolverName)qpSolver == QP_QPDUNES2)
-			solver = ExportNLPSolverPtr(
-					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_QPDUNES2));
 		else if ((QPSolverName)qpSolver == QP_HPMPC)
 			solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_HPMPC));
