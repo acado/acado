@@ -494,13 +494,14 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
+	int hardcodeConstraintValues;
+	get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
+
 	if (initialStateFixed() == true)
 	{
 		qpLb0.setup("qpLb0", 1, NX + NU, REAL, ACADO_WORKSPACE);
 		qpUb0.setup("qpUb0", 1, NX + NU, REAL, ACADO_WORKSPACE);
 	}
-	qpLb.setup("qpLb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
-	qpUb.setup("qpUb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
 
 	DVector lbTmp, ubTmp;
 	DVector lbXValues, ubXValues;
@@ -562,12 +563,23 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	// Export evaluation of simple box constraints
 	//
 	evaluateConstraints.setup("evaluateConstraints");
-	evaluateConstraints.addVariable( evLbXValues );
-	evaluateConstraints.addVariable( evUbXValues );
-	evaluateConstraints.addVariable( evLbUValues );
-	evaluateConstraints.addVariable( evUbUValues );
+	if( hardcodeConstraintValues == YES ) {
+		evaluateConstraints.addVariable( evLbXValues );
+		evaluateConstraints.addVariable( evUbXValues );
+		evaluateConstraints.addVariable( evLbUValues );
+		evaluateConstraints.addVariable( evUbUValues );
 
-	if (initialStateFixed() == true)
+		qpLb.setup("qpLb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
+		qpUb.setup("qpUb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
+	}
+	else {
+		qpLb.setup("lbValues", 1, N * (NX + NU) + NX, REAL, ACADO_VARIABLES);
+		qpLb.setDoc( "Lower bounds values." );
+		qpUb.setup("ubValues", 1, N * (NX + NU) + NX, REAL, ACADO_VARIABLES);
+		qpUb.setDoc( "Upper bounds values." );
+	}
+
+	if (initialStateFixed() == true && hardcodeConstraintValues == YES)
 	{
 		evaluateConstraints.addStatement(
 				qpLb0.getCols(NX, NX + NU) == evLbUValues.getTranspose().getCols(0, NU) - u.getRow( 0 )
@@ -576,42 +588,54 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 				qpUb0.getCols(NX, NX + NU) == evUbUValues.getTranspose().getCols(0, NU) - u.getRow( 0 )
 		);
 	}
+	else if (initialStateFixed() == true) {
+		evaluateConstraints.addStatement(
+				qpLb0.getCols(NX, NX + NU) == qpLb.getTranspose().getCols(NX, NX + NU) - u.getRow( 0 )
+		);
+		evaluateConstraints.addStatement(
+				qpUb0.getCols(NX, NX + NU) == qpUb.getTranspose().getCols(NX, NX + NU) - u.getRow( 0 )
+		);
+	}
 
 	ExportIndex ind( "ind" );
 	evaluateConstraints.addIndex( ind );
 	ExportForLoop lbLoop(ind, 0, N);
 	ExportForLoop ubLoop(ind, 0, N);
 
-	lbLoop.addStatement(
-			qpLb.getCols(ind * (NX + NU), ind * (NX + NU) + NX) ==
-					evLbXValues.getTranspose().getCols(ind * NX, (ind + 1) * NX) - x.getRow( ind )
-	);
-	lbLoop.addStatement(
-			qpLb.getCols(ind * (NX + NU) + NX, (ind + 1) * (NX + NU)) ==
-					evLbUValues.getTranspose().getCols(ind * NU, (ind + 1) * NU) - u.getRow( ind )
-	);
+	if( hardcodeConstraintValues == YES ) {
+		lbLoop.addStatement(
+				qpLb.getCols(ind * (NX + NU), ind * (NX + NU) + NX) ==
+						evLbXValues.getTranspose().getCols(ind * NX, (ind + 1) * NX) - x.getRow( ind )
+		);
+		lbLoop.addStatement(
+				qpLb.getCols(ind * (NX + NU) + NX, (ind + 1) * (NX + NU)) ==
+						evLbUValues.getTranspose().getCols(ind * NU, (ind + 1) * NU) - u.getRow( ind )
+		);
 
-	ubLoop.addStatement(
-			qpUb.getCols(ind * (NX + NU), ind * (NX + NU) + NX) ==
-					evUbXValues.getTranspose().getCols(ind * NX, (ind + 1) * NX) - x.getRow( ind )
-	);
-	ubLoop.addStatement(
-			qpUb.getCols(ind * (NX + NU) + NX, (ind + 1) * (NX + NU)) ==
-					evUbUValues.getTranspose().getCols(ind * NU, (ind + 1) * NU) - u.getRow( ind )
-	);
+		ubLoop.addStatement(
+				qpUb.getCols(ind * (NX + NU), ind * (NX + NU) + NX) ==
+						evUbXValues.getTranspose().getCols(ind * NX, (ind + 1) * NX) - x.getRow( ind )
+		);
+		ubLoop.addStatement(
+				qpUb.getCols(ind * (NX + NU) + NX, (ind + 1) * (NX + NU)) ==
+						evUbUValues.getTranspose().getCols(ind * NU, (ind + 1) * NU) - u.getRow( ind )
+		);
+	}
 
 	evaluateConstraints.addStatement( lbLoop );
 	evaluateConstraints.addStatement( ubLoop );
 	evaluateConstraints.addLinebreak();
 
-	evaluateConstraints.addStatement(
-			qpLb.getCols(N * (NX + NU), N * (NX + NU) + NX) ==
-					evLbXValues.getTranspose().getCols(N * NX, (N + 1) * NX) - x.getRow( N )
-	);
-	evaluateConstraints.addStatement(
-			qpUb.getCols(N * (NX + NU), N * (NX + NU) + NX) ==
-					evUbXValues.getTranspose().getCols(N * NX, (N + 1) * NX) - x.getRow( N )
-	);
+	if( hardcodeConstraintValues == YES ) {
+		evaluateConstraints.addStatement(
+				qpLb.getCols(N * (NX + NU), N * (NX + NU) + NX) ==
+						evLbXValues.getTranspose().getCols(N * NX, (N + 1) * NX) - x.getRow( N )
+		);
+		evaluateConstraints.addStatement(
+				qpUb.getCols(N * (NX + NU), N * (NX + NU) + NX) ==
+						evUbXValues.getTranspose().getCols(N * NX, (N + 1) * NX) - x.getRow( N )
+		);
+	}
 	evaluateConstraints.addLinebreak();
 
 	////////////////////////////////////////////////////////////////////////////
@@ -655,6 +679,8 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 
 	if (getNumComplexConstraints() == 0)
 		return SUCCESSFUL_RETURN;
+	else if(hardcodeConstraintValues == YES)
+		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 	unsigned dimLbA  = N * dimPacH;
 	unsigned dimConA = dimLbA * (NX + NU);
