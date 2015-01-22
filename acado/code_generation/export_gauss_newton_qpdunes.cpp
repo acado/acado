@@ -579,6 +579,16 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 		lbValues.setDoc( "Lower bounds values." );
 		ubValues.setup("ubValues", 1, N * (NX + NU) + NX, REAL, ACADO_VARIABLES);
 		ubValues.setDoc( "Upper bounds values." );
+
+		for( uint i = 0; i < N; i++ ) {
+			initialize.addStatement(lbValues.getCols(i * (NX + NU), i * (NX + NU) + NX) == evLbXValues.getTranspose().getCols(i * NX, (i + 1) * NX));
+			initialize.addStatement(ubValues.getCols(i * (NX + NU), i * (NX + NU) + NX) == evUbXValues.getTranspose().getCols(i * NX, (i + 1) * NX));
+
+			initialize.addStatement(lbValues.getCols(i * (NX + NU) + NX, (i+1) * (NX + NU)) == evLbUValues.getTranspose().getCols(i * NU, (i + 1) * NU));
+			initialize.addStatement(ubValues.getCols(i * (NX + NU) + NX, (i+1) * (NX + NU)) == evUbUValues.getTranspose().getCols(i * NU, (i + 1) * NU));
+		}
+		initialize.addStatement(lbValues.getCols(N * (NX + NU),N * (NX + NU) + NX) == evLbXValues.getTranspose().getCols(N * NX, (N + 1) * NX));
+		initialize.addStatement(ubValues.getCols(N * (NX + NU),N * (NX + NU) + NX) == evUbXValues.getTranspose().getCols(N * NX, (N + 1) * NX));
 	}
 
 	if (initialStateFixed() == true && hardcodeConstraintValues == YES)
