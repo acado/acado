@@ -162,6 +162,8 @@ protected:
 	ExportVariable qpLb0, qpUb0;
 	ExportVariable qpLb, qpUb;
 
+	ExportVariable lbValues, ubValues;
+
 	ExportVariable qpA;
 	ExportVariable qpLbA, qpUbA;
 

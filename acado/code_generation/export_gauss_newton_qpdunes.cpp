@@ -104,6 +104,8 @@ returnValue ExportGaussNewtonQpDunes::getDataDeclarations(	ExportStatementBlock&
 	declarations.addDeclaration(qpUb0, dataStruct);
 	declarations.addDeclaration(qpLb, dataStruct);
 	declarations.addDeclaration(qpUb, dataStruct);
+	declarations.addDeclaration(lbValues, dataStruct);
+	declarations.addDeclaration(ubValues, dataStruct);
 	declarations.addDeclaration(qpC, dataStruct);
 	declarations.addDeclaration(qpc, dataStruct);
 
@@ -502,6 +504,8 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 		qpLb0.setup("qpLb0", 1, NX + NU, REAL, ACADO_WORKSPACE);
 		qpUb0.setup("qpUb0", 1, NX + NU, REAL, ACADO_WORKSPACE);
 	}
+	qpLb.setup("qpLb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
+	qpUb.setup("qpUb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
 
 	DVector lbTmp, ubTmp;
 	DVector lbXValues, ubXValues;
@@ -569,14 +573,12 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 		evaluateConstraints.addVariable( evLbUValues );
 		evaluateConstraints.addVariable( evUbUValues );
 
-		qpLb.setup("qpLb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
-		qpUb.setup("qpUb", 1, N * (NX + NU) + NX, REAL, ACADO_WORKSPACE);
 	}
 	else {
-		qpLb.setup("lbValues", 1, N * (NX + NU) + NX, REAL, ACADO_VARIABLES);
-		qpLb.setDoc( "Lower bounds values." );
-		qpUb.setup("ubValues", 1, N * (NX + NU) + NX, REAL, ACADO_VARIABLES);
-		qpUb.setDoc( "Upper bounds values." );
+		lbValues.setup("lbValues", 1, N * (NX + NU) + NX, REAL, ACADO_VARIABLES);
+		lbValues.setDoc( "Lower bounds values." );
+		ubValues.setup("ubValues", 1, N * (NX + NU) + NX, REAL, ACADO_VARIABLES);
+		ubValues.setDoc( "Upper bounds values." );
 	}
 
 	if (initialStateFixed() == true && hardcodeConstraintValues == YES)
@@ -590,10 +592,10 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	}
 	else if (initialStateFixed() == true) {
 		evaluateConstraints.addStatement(
-				qpLb0.getCols(NX, NX + NU) == qpLb.getTranspose().getCols(NX, NX + NU) - u.getRow( 0 )
+				qpLb0.getCols(NX, NX + NU) == lbValues.getCols(NX, NX + NU) - u.getRow( 0 )
 		);
 		evaluateConstraints.addStatement(
-				qpUb0.getCols(NX, NX + NU) == qpUb.getTranspose().getCols(NX, NX + NU) - u.getRow( 0 )
+				qpUb0.getCols(NX, NX + NU) == ubValues.getCols(NX, NX + NU) - u.getRow( 0 )
 		);
 	}
 
@@ -621,6 +623,25 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 						evUbUValues.getTranspose().getCols(ind * NU, (ind + 1) * NU) - u.getRow( ind )
 		);
 	}
+	else {
+		lbLoop.addStatement(
+				qpLb.getCols(ind * (NX + NU), ind * (NX + NU) + NX) ==
+						lbValues.getCols(ind * (NX + NU), ind * (NX + NU) + NX) - x.getRow( ind )
+		);
+		lbLoop.addStatement(
+				qpLb.getCols(ind * (NX + NU) + NX, (ind + 1) * (NX + NU)) ==
+						lbValues.getCols(ind * (NX + NU) + NX, (ind + 1) * (NX + NU)) - u.getRow( ind )
+		);
+
+		ubLoop.addStatement(
+				qpUb.getCols(ind * (NX + NU), ind * (NX + NU) + NX) ==
+						ubValues.getCols(ind * (NX + NU), ind * (NX + NU) + NX) - x.getRow( ind )
+		);
+		ubLoop.addStatement(
+				qpUb.getCols(ind * (NX + NU) + NX, (ind + 1) * (NX + NU)) ==
+						ubValues.getCols(ind * (NX + NU) + NX, (ind + 1) * (NX + NU)) - u.getRow( ind )
+		);
+	}
 
 	evaluateConstraints.addStatement( lbLoop );
 	evaluateConstraints.addStatement( ubLoop );
@@ -634,6 +655,16 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 		evaluateConstraints.addStatement(
 				qpUb.getCols(N * (NX + NU), N * (NX + NU) + NX) ==
 						evUbXValues.getTranspose().getCols(N * NX, (N + 1) * NX) - x.getRow( N )
+		);
+	}
+	else {
+		evaluateConstraints.addStatement(
+				qpLb.getCols(N * (NX + NU), N * (NX + NU) + NX) ==
+						lbValues.getCols(N * NX, (N + 1) * NX) - x.getRow( N )
+		);
+		evaluateConstraints.addStatement(
+				qpUb.getCols(N * (NX + NU), N * (NX + NU) + NX) ==
+						ubValues.getCols(N * NX, (N + 1) * NX) - x.getRow( N )
 		);
 	}
 	evaluateConstraints.addLinebreak();
