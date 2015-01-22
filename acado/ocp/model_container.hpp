@@ -368,6 +368,11 @@ public:
     returnValue setN( const uint N_ );
 
 
+    returnValue setNU( const uint NU_ );
+    returnValue setNP( const uint NP_ );
+    returnValue setNOD( const uint NOD_ );
+
+
     /** Returns the dimensions of the different output functions.
      *
      *  \return dimensions of the different output functions.
@@ -411,6 +416,10 @@ public:
     // DATA MEMBERS:
     //
     protected:
+
+    	 uint NU;										/**< Number of control inputs. */
+    	 uint NP;										/**< Number of parameters. */
+    	 uint NOD;										/**< Number of online data values. */
 
      	 ModelData modelData;			/**< The model data. */
 };

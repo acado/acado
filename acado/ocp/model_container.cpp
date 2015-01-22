@@ -43,6 +43,9 @@ BEGIN_NAMESPACE_ACADO
 
 
 ModelContainer::ModelContainer() {
+	NU = 0;
+	NP = 0;
+	NOD = 0;
 }
 
 
@@ -231,17 +234,20 @@ uint ModelContainer::getNXA( ) const
 
 uint ModelContainer::getNU( ) const
 {
+	if( NU > 0 ) return NU;
 	return modelData.getNU();
 }
 
 
 uint ModelContainer::getNP( ) const
 {
+	if( NP > 0 ) return NP;
 	return modelData.getNP();
 }
 
 uint ModelContainer::getNOD( ) const
 {
+	if( NOD > 0 ) return NOD;
 	return modelData.getNOD();
 }
 
@@ -256,6 +262,21 @@ returnValue ModelContainer::setN( const uint N_ )
 {
 	modelData.setN( N_ );
 	return SUCCESSFUL_RETURN;
+}
+
+returnValue ModelContainer::setNU( const uint NU_ )
+{
+	NU = NU_;
+}
+
+returnValue ModelContainer::setNP( const uint NP_ )
+{
+	NP = NP_;
+}
+
+returnValue ModelContainer::setNOD( const uint NOD_ )
+{
+	NOD = NOD_;
 }
 
 
