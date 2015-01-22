@@ -313,6 +313,12 @@ void mexFunction(	int nlhs,
 	}
 #endif
 
+#if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPDUNES)
+	/* Bounds */
+	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_N * (ACADO_NX+ACADO_NU) + ACADO_NX, 1);
+	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_N * (ACADO_NX+ACADO_NU) + ACADO_NX, 1);
+#endif /* (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPDUNES) */
+
 #if ACADO_USE_ARRIVAL_COST == 1
 	getArray(1, src, 0, "xAC", acadoVariables.xAC, ACADO_NX, 1);
 	getArray(1, src, 0, "SAC", acadoVariables.SAC, ACADO_NX, ACADO_NX);
