@@ -267,16 +267,19 @@ returnValue ModelContainer::setN( const uint N_ )
 returnValue ModelContainer::setNU( const uint NU_ )
 {
 	NU = NU_;
+	return SUCCESSFUL_RETURN;
 }
 
 returnValue ModelContainer::setNP( const uint NP_ )
 {
 	NP = NP_;
+	return SUCCESSFUL_RETURN;
 }
 
 returnValue ModelContainer::setNOD( const uint NOD_ )
 {
 	NOD = NOD_;
+	return SUCCESSFUL_RETURN;
 }
 
 
