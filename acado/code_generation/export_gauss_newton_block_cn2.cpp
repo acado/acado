@@ -260,8 +260,19 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 
 	ExportVariable evLbXAValues("lbXAValues", lbXAValues, STATIC_CONST_REAL);
 	ExportVariable evUbXAValues("ubXAValues", ubXAValues, STATIC_CONST_REAL);
-	condensePrep.addVariable( evLbXAValues );
-	condensePrep.addVariable( evUbXAValues );
+	if( hardcodeConstraintValues == YES ) {
+		condensePrep.addVariable( evLbXAValues );
+		condensePrep.addVariable( evUbXAValues );
+	}
+	else {
+		lbAValues.setup("lbAValues", 1, lbXAValues.getDim(), REAL, ACADO_VARIABLES);
+		lbAValues.setDoc( "Lower state bounds values." );
+		ubAValues.setup("ubAValues", 1, ubXAValues.getDim(), REAL, ACADO_VARIABLES);
+		ubAValues.setDoc( "Upper state bounds values." );
+
+		initialize.addStatement(lbAValues == lbXAValues.transpose());
+		initialize.addStatement(ubAValues == ubXAValues.transpose());
+	}
 
 	// Add the contraint evaluations to the condensePrep function
 	index = 0;
@@ -271,10 +282,20 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 	}
 	for (unsigned j = 1; j < getBlockSize(); ++j) {
 		while( index < xBoundsIdx.size() && xBoundsIdx[index] < (1+j)*NX ) {
-			condensePrep.addStatement( lbA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) == evLbXAValues.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) - x.getElement( blockI*getBlockSize()+j, xBoundsIdx[index]-j*NX ) );
+			if( hardcodeConstraintValues == YES ) {
+				condensePrep.addStatement( lbA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) == evLbXAValues.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) - x.getElement( blockI*getBlockSize()+j, xBoundsIdx[index]-j*NX ) );
+			}
+			else {
+				condensePrep.addStatement( lbA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) == lbAValues.getCol(blockI*getNumStateBoundsPerBlock()+numStateBounds) - x.getElement( blockI*getBlockSize()+j, xBoundsIdx[index]-j*NX ) );
+			}
 			condensePrep.addStatement( lbA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) -= sbar.getRow(xBoundsIdx[index]) );
 
-			condensePrep.addStatement( ubA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) == evUbXAValues.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) - x.getElement( blockI*getBlockSize()+j, xBoundsIdx[index]-j*NX ) );
+			if( hardcodeConstraintValues == YES ) {
+				condensePrep.addStatement( ubA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) == evUbXAValues.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) - x.getElement( blockI*getBlockSize()+j, xBoundsIdx[index]-j*NX ) );
+			}
+			else {
+				condensePrep.addStatement( ubA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) == ubAValues.getCol(blockI*getNumStateBoundsPerBlock()+numStateBounds) - x.getElement( blockI*getBlockSize()+j, xBoundsIdx[index]-j*NX ) );
+			}
 			condensePrep.addStatement( ubA.getRow(blockI*getNumStateBoundsPerBlock()+numStateBounds) -= sbar.getRow(xBoundsIdx[index]) );
 
 			condensePrep.addStatement( A.getSubMatrix(blockI*getNumStateBoundsPerBlock()+numStateBounds,blockI*getNumStateBoundsPerBlock()+numStateBounds+1,0,NX) == C.getRow(xBoundsIdx[index]-NX) );
@@ -327,16 +348,45 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 	// Export evaluation of simple box constraints
 	//
 	evaluateConstraints.setup("evaluateConstraints");
-	evaluateConstraints.addVariable( evLbXValues );
-	evaluateConstraints.addVariable( evUbXValues );
-	evaluateConstraints.addVariable( evLbUValues );
-	evaluateConstraints.addVariable( evUbUValues );
+	if( hardcodeConstraintValues == YES ) {
+		evaluateConstraints.addVariable( evLbXValues );
+		evaluateConstraints.addVariable( evUbXValues );
+		evaluateConstraints.addVariable( evLbUValues );
+		evaluateConstraints.addVariable( evUbUValues );
+	}
+	else {
+		lbValues.setup("lbValues", 1, lbXValues.getDim()+lbUValues.getDim(), REAL, ACADO_VARIABLES);
+		lbValues.setDoc( "Lower bounds values." );
+		ubValues.setup("ubValues", 1, ubXValues.getDim()+ubUValues.getDim(), REAL, ACADO_VARIABLES);
+		ubValues.setDoc( "Upper bounds values." );
+
+		for( uint i = 0; i < getNumberOfBlocks(); i++ ) {
+			for( uint j = 0; j < NX; j++ ) {
+				initialize.addStatement(lbValues.getCol(i * getNumBlockVariables() + j) == lbXValues(i * NX + j));
+				initialize.addStatement(ubValues.getCol(i * getNumBlockVariables() + j) == ubXValues(i * NX + j));
+			}
+			for( uint j = 0; j < getBlockSize()*NU; j++ ) {
+				initialize.addStatement(lbValues.getCol(i * getNumBlockVariables() + NX + j) == lbUValues(i * getBlockSize()*NU + j));
+				initialize.addStatement(ubValues.getCol(i * getNumBlockVariables() + NX + j) == ubUValues(i * getBlockSize()*NU + j));
+			}
+		}
+		for( uint j = 0; j < NX; j++ ) {
+			initialize.addStatement(lbValues.getCol(getNumberOfBlocks()*getNumBlockVariables() + j) == lbXValues(getNumberOfBlocks() * NX + j));
+			initialize.addStatement(ubValues.getCol(getNumberOfBlocks()*getNumBlockVariables() + j) == ubXValues(getNumberOfBlocks() * NX + j));
+		}
+	}
 
 	if (initialStateFixed() == true)
 	{
 		for (unsigned i = 0; i < getBlockSize(); ++i) {
-			evaluateConstraints.addStatement( qpLb0.getCols(NX + i*NU, NX + (i+1)*NU) == evLbUValues.getTranspose().getCols(i*NU, (i+1)*NU) - u.getRow( i ) );
-			evaluateConstraints.addStatement( qpUb0.getCols(NX + i*NU, NX + (i+1)*NU) == evUbUValues.getTranspose().getCols(i*NU, (i+1)*NU) - u.getRow( i ) );
+			if( hardcodeConstraintValues == YES ) {
+				evaluateConstraints.addStatement( qpLb0.getCols(NX + i*NU, NX + (i+1)*NU) == evLbUValues.getTranspose().getCols(i*NU, (i+1)*NU) - u.getRow( i ) );
+				evaluateConstraints.addStatement( qpUb0.getCols(NX + i*NU, NX + (i+1)*NU) == evUbUValues.getTranspose().getCols(i*NU, (i+1)*NU) - u.getRow( i ) );
+			}
+			else {
+				evaluateConstraints.addStatement( qpLb0.getCols(NX + i*NU, NX + (i+1)*NU) == lbValues.getCols(NX + i*NU, NX + (i+1)*NU) - u.getRow( i ) );
+				evaluateConstraints.addStatement( qpUb0.getCols(NX + i*NU, NX + (i+1)*NU) == ubValues.getCols(NX + i*NU, NX + (i+1)*NU) - u.getRow( i ) );
+			}
 		}
 	}
 
@@ -345,41 +395,79 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 	evaluateConstraints.addIndex( iBlock );
 	evaluateConstraints.addIndex( uInd );
 	evaluateConstraints.addIndex( offset1 );
-	evaluateConstraints.addIndex( offset2 );
+	if( hardcodeConstraintValues == YES ) evaluateConstraints.addIndex( offset2 );
 	ExportForLoop blockLoop(iBlock, 0, getNumberOfBlocks());
 	ExportForLoop uLoop(uInd, 0, getBlockSize());
 
-	blockLoop.addStatement(
-			lb.getRows(iBlock*getNumBlockVariables(), iBlock*getNumBlockVariables()+NX) ==
-					evLbXValues.getRows(iBlock*NX, (iBlock + 1) * NX) - x.getRow( iBlock*getBlockSize() ).getTranspose()
-	);
-	blockLoop.addStatement(
-			ub.getRows(iBlock*getNumBlockVariables(), iBlock*getNumBlockVariables()+NX) ==
-					evUbXValues.getRows(iBlock*NX, (iBlock + 1) * NX) - x.getRow( iBlock*getBlockSize() ).getTranspose()
-	);
+	if( hardcodeConstraintValues == YES ) {
+		blockLoop.addStatement(
+				lb.getRows(iBlock*getNumBlockVariables(), iBlock*getNumBlockVariables()+NX) ==
+						evLbXValues.getRows(iBlock*NX, (iBlock + 1) * NX) - x.getRow( iBlock*getBlockSize() ).getTranspose()
+		);
+		blockLoop.addStatement(
+				ub.getRows(iBlock*getNumBlockVariables(), iBlock*getNumBlockVariables()+NX) ==
+						evUbXValues.getRows(iBlock*NX, (iBlock + 1) * NX) - x.getRow( iBlock*getBlockSize() ).getTranspose()
+		);
+	}
+	else {
+		blockLoop.addStatement(
+				lb.getRows(iBlock*getNumBlockVariables(), iBlock*getNumBlockVariables()+NX) ==
+						lbValues.getTranspose().getRows(iBlock*getNumBlockVariables(), iBlock*getNumBlockVariables()+NX) - x.getRow( iBlock*getBlockSize() ).getTranspose()
+		);
+		blockLoop.addStatement(
+				ub.getRows(iBlock*getNumBlockVariables(), iBlock*getNumBlockVariables()+NX) ==
+						ubValues.getTranspose().getRows(iBlock*getNumBlockVariables(), iBlock*getNumBlockVariables()+NX) - x.getRow( iBlock*getBlockSize() ).getTranspose()
+		);
+	}
+
 	uLoop.addStatement( offset1 == iBlock*getNumBlockVariables()+uInd*NU+NX );
-	uLoop.addStatement( offset2 == iBlock*getBlockSize()*NU+uInd*NU );
-	uLoop.addStatement(
-			lb.getRows(offset1, offset1+NU) ==
-					evLbUValues.getRows(offset2, offset2+NU) - u.getRow( iBlock*getBlockSize()+uInd ).getTranspose()
-	);
-	uLoop.addStatement(
-			ub.getRows(offset1, offset1+NU) ==
-					evUbUValues.getRows(offset2, offset2+NU) - u.getRow( iBlock*getBlockSize()+uInd ).getTranspose()
-	);
+
+	if( hardcodeConstraintValues == YES ) {
+		uLoop.addStatement( offset2 == iBlock*getBlockSize()*NU+uInd*NU );
+		uLoop.addStatement(
+				lb.getRows(offset1, offset1+NU) ==
+						evLbUValues.getRows(offset2, offset2+NU) - u.getRow( iBlock*getBlockSize()+uInd ).getTranspose()
+		);
+		uLoop.addStatement(
+				ub.getRows(offset1, offset1+NU) ==
+						evUbUValues.getRows(offset2, offset2+NU) - u.getRow( iBlock*getBlockSize()+uInd ).getTranspose()
+		);
+	}
+	else {
+		uLoop.addStatement(
+				lb.getRows(offset1, offset1+NU) ==
+						lbValues.getTranspose().getRows(offset1, offset1+NU) - u.getRow( iBlock*getBlockSize()+uInd ).getTranspose()
+		);
+		uLoop.addStatement(
+				ub.getRows(offset1, offset1+NU) ==
+						ubValues.getTranspose().getRows(offset1, offset1+NU) - u.getRow( iBlock*getBlockSize()+uInd ).getTranspose()
+		);
+	}
 
 	blockLoop.addStatement( uLoop );
 	evaluateConstraints.addStatement( blockLoop );
 	evaluateConstraints.addLinebreak();
 
-	evaluateConstraints.addStatement(
-			lb.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumberOfBlocks()*getNumBlockVariables()+NX) ==
-					evLbXValues.getRows(getNumberOfBlocks()*NX, (getNumberOfBlocks() + 1) * NX) - x.getRow( N ).getTranspose()
-	);
-	evaluateConstraints.addStatement(
-			ub.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumberOfBlocks()*getNumBlockVariables()+NX) ==
-					evUbXValues.getRows(getNumberOfBlocks()*NX, (getNumberOfBlocks() + 1) * NX) - x.getRow( N ).getTranspose()
-	);
+	if( hardcodeConstraintValues == YES ) {
+		evaluateConstraints.addStatement(
+				lb.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumberOfBlocks()*getNumBlockVariables()+NX) ==
+						evLbXValues.getRows(getNumberOfBlocks()*NX, (getNumberOfBlocks() + 1) * NX) - x.getRow( N ).getTranspose()
+		);
+		evaluateConstraints.addStatement(
+				ub.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumberOfBlocks()*getNumBlockVariables()+NX) ==
+						evUbXValues.getRows(getNumberOfBlocks()*NX, (getNumberOfBlocks() + 1) * NX) - x.getRow( N ).getTranspose()
+		);
+	}
+	else {
+		evaluateConstraints.addStatement(
+				lb.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumberOfBlocks()*getNumBlockVariables()+NX) ==
+						lbValues.getTranspose().getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumberOfBlocks()*getNumBlockVariables()+NX) - x.getRow( N ).getTranspose()
+		);
+		evaluateConstraints.addStatement(
+				ub.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumberOfBlocks()*getNumBlockVariables()+NX) ==
+						ubValues.getTranspose().getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumberOfBlocks()*getNumBlockVariables()+NX) - x.getRow( N ).getTranspose()
+		);
+	}
 	evaluateConstraints.addLinebreak();
 
 	////////////////////////////////////////////////////////////////////////////

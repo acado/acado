@@ -572,7 +572,6 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 		evaluateConstraints.addVariable( evUbXValues );
 		evaluateConstraints.addVariable( evLbUValues );
 		evaluateConstraints.addVariable( evUbUValues );
-
 	}
 	else {
 		lbValues.setup("lbValues", 1, N * (NX + NU) + NX, REAL, ACADO_VARIABLES);
