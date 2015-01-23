@@ -283,13 +283,14 @@ void mexFunction(	int nlhs,
 	getArray(1, src, 0, "WN", acadoVariables.WN, ACADO_NYN, ACADO_NYN);
 #endif /* ACADO_WEIGHTING_MATRICES_TYPE */
 
-#if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPOASES)
-
+#if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0)
 	if (!initialized)
 	{
 		initializeSolver();
 	}
-	
+#endif
+
+#if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPOASES)
 	/* Bounds */
 #if ACADO_INITIAL_STATE_FIXED == 1
 	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_N * ACADO_NU, 1);
@@ -305,26 +306,19 @@ void mexFunction(	int nlhs,
 	getArray(1, src, 0, "ubAValues", acadoVariables.ubAValues, QPOASES_NCMAX, 1);
 #endif /* QPOASES_NCMAX > 0 */
 
-#endif /* (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPOASES) */
-
-#if (ACADO_QP_SOLVER == ACADO_QPDUNES)
-	if (!initialized) {
-		initializeSolver();
-	}
-#endif
-
-#if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPDUNES) && !ACADO_BLOCK_CONDENSING
+#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPDUNES) && !ACADO_BLOCK_CONDENSING
 	/* Bounds */
 	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_QP_NV, 1);
 	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_QP_NV, 1);
-#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPDUNES) && ACADO_BLOCK_CONDENSING
+	
+#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && ACADO_BLOCK_CONDENSING
 	/* Bounds */
 	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_QP_NV, 1);
 	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_QP_NV, 1);
 	/* Affine bounds */
 	getArray(1, src, 0, "lbAValues", acadoVariables.lbAValues, ACADO_QP_NCA, 1);
 	getArray(1, src, 0, "ubAValues", acadoVariables.ubAValues, ACADO_QP_NCA, 1);
-#endif /* (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPDUNES) */
+#endif
 
 #if ACADO_USE_ARRIVAL_COST == 1
 	getArray(1, src, 0, "xAC", acadoVariables.xAC, ACADO_NX, 1);
