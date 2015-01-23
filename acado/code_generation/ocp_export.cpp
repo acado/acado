@@ -35,6 +35,7 @@
 #include <acado/code_generation/export_auxiliary_functions.hpp>
 #include <acado/code_generation/export_hessian_regularization.hpp>
 #include <acado/code_generation/export_common_header.hpp>
+#include <acado/code_generation/export_gauss_newton_block_cn2.hpp>
 
 #include <acado/code_generation/templates/templates.hpp>
 
@@ -620,6 +621,26 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 			make_pair(toString( useAC ), "Providing interface for arrival cost.");
 	options[ "ACADO_COMPUTE_COVARIANCE_MATRIX" ] =
 			make_pair(toString( covCalc ), "Compute covariance matrix of the last state estimate.");
+	options[ "ACADO_QP_NV" ] =
+			make_pair(toString( solver->getNumQPvars() ), "Total number of QP optimization variables.");
+
+
+	// QPDunes block based condensing:
+	int qpSolution;
+	get(SPARSE_QP_SOLUTION, qpSolution);
+	if ( (SparseQPsolutionMethods)qpSolution == BLOCK_CONDENSING_N2 ) {
+		ExportGaussNewtonBlockCN2 *blockSolver = static_cast<ExportGaussNewtonBlockCN2*>(solver.get());
+
+		options[ "ACADO_BLOCK_CONDENSING" ] =
+				make_pair(toString( 1 ), "User defined block based condensing.");
+		options[ "ACADO_QP_NCA" ] =
+				make_pair(toString( blockSolver->getNumStateBoundsPerBlock()*blockSolver->getNumberOfBlocks() ), "Total number of QP affine constraints.");
+	}
+	else {
+		options[ "ACADO_BLOCK_CONDENSING" ] =
+						make_pair(toString( 0 ), "User defined block based condensing.");
+	}
+
 
 	//
 	// ACADO variables and workspace

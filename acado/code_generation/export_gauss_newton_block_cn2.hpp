@@ -109,6 +109,15 @@ public:
 	 */
 	unsigned getNumQPvars( ) const;
 
+	uint getBlockSize( ) const;
+
+	uint getNumberOfBlocks( ) const;
+
+	uint getNumBlockVariables( ) const;
+
+	virtual unsigned getNumStateBoundsPerBlock( ) const;
+
+
 protected:
 
 	/** Set-up evaluation of constraints
@@ -139,11 +148,6 @@ protected:
 	virtual returnValue setupQPInterface( );
 
 	virtual returnValue setupCondensing( );
-
-	uint getBlockSize( ) const;
-	uint getNumberOfBlocks( ) const;
-	uint getNumBlockVariables( ) const;
-	virtual unsigned getNumStateBoundsPerBlock( ) const;
 
 protected:
 
