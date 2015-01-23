@@ -113,6 +113,10 @@ public:
 	 */
 	unsigned getNumQPvars( ) const;
 
+	unsigned getNumLowerBounds( ) const;
+
+	unsigned getNumUpperBounds( ) const;
+
 protected:
 
 	/** Setting up of an objective evaluation:
@@ -177,6 +181,9 @@ private:
 	std::vector< ExportVariable > conLB;
 	std::vector< ExportVariable > conUB;
 	ExportVariable lbValues, ubValues;
+
+	unsigned numLB;
+	unsigned numUB;
 
 	std::vector< std::vector< unsigned > > conLBIndices, conUBIndices;
 	std::vector< std::vector< double > > conLBValues, conUBValues;

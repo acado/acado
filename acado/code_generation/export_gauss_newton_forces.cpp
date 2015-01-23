@@ -48,6 +48,9 @@ ExportGaussNewtonForces::ExportGaussNewtonForces(	UserInteraction* _userInteract
 	qpObjPrefix = "acadoForces";
 	qpModuleName = "forces";
 	diagH = diagHN = false;
+
+	numLB = 0;
+	numUB = 0;
 }
 
 returnValue ExportGaussNewtonForces::setup( )
@@ -166,6 +169,16 @@ returnValue ExportGaussNewtonForces::getCode(	ExportStatementBlock& code
 unsigned ExportGaussNewtonForces::getNumQPvars( ) const
 {
 	return (N + 1) * NX + N * NU;
+}
+
+unsigned ExportGaussNewtonForces::getNumLowerBounds( ) const
+{
+	return numLB;
+}
+
+unsigned ExportGaussNewtonForces::getNumUpperBounds( ) const
+{
+	return numUB;
 }
 
 //
@@ -607,8 +620,6 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 	//
 	// Stack state constraints
 	//
-	unsigned numLB = 0;
-	unsigned numUB = 0;
 	for (unsigned i = 0; i < xBounds.getNumPoints(); ++i)
 	{
 		lbTmp = xBounds.getLowerBounds( i );

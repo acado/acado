@@ -35,7 +35,9 @@
 #include <acado/code_generation/export_auxiliary_functions.hpp>
 #include <acado/code_generation/export_hessian_regularization.hpp>
 #include <acado/code_generation/export_common_header.hpp>
+
 #include <acado/code_generation/export_gauss_newton_block_cn2.hpp>
+#include <acado/code_generation/export_gauss_newton_forces.hpp>
 
 #include <acado/code_generation/templates/templates.hpp>
 
@@ -624,6 +626,13 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	options[ "ACADO_QP_NV" ] =
 			make_pair(toString( solver->getNumQPvars() ), "Total number of QP optimization variables.");
 
+	if( (QPSolverName)qpSolver == QP_FORCES ) {
+		ExportGaussNewtonForces *blockSolver = static_cast<ExportGaussNewtonForces*>(solver.get());
+		options[ "ACADO_QP_NLB" ] =
+				make_pair(toString( blockSolver->getNumLowerBounds() ), "Total number of QP lower bound values.");
+		options[ "ACADO_QP_NUB" ] =
+				make_pair(toString( blockSolver->getNumUpperBounds() ), "Total number of QP upper bound values.");
+	}
 
 	// QPDunes block based condensing:
 	int qpSolution;
