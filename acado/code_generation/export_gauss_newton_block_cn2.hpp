@@ -33,6 +33,7 @@
 #define ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_BLOCK_CN2_HPP
 
 #include <acado/code_generation/export_gauss_newton_cn2.hpp>
+#include <acado/code_generation/export_split_qpdunes_interface.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -165,7 +166,7 @@ protected:
 	std::vector< unsigned > qpConDim;
 
 	/** qpDUNES interface object. */
-	std::tr1::shared_ptr< ExportQpDunesInterface > qpInterface;
+	std::tr1::shared_ptr< ExportSplitQpDunesInterface > qpInterface;
 
 	ExportFunction cleanup;
 	ExportFunction shiftQpData;

@@ -30,7 +30,6 @@
  */
 
 #include <acado/code_generation/export_gauss_newton_block_cn2.hpp>
-#include <acado/code_generation/export_qpdunes_interface.hpp>
 
 using namespace std;
 
@@ -67,7 +66,6 @@ returnValue ExportGaussNewtonBlockCN2::setup( )
 	// Add QP initialization call to the initialization
 	//
 	ExportFunction initializeQpDunes( "initializeQpDunes" );
-	initialize << "preparationStep( );\n";
 	stringstream ss;
 	ss.str( string() );
 	ss << "for( ret = 0; ret < " << getNumberOfBlocks()*getNumBlockVariables()*getNumBlockVariables()+NX*NX << "; ret++ )  acadoWorkspace.qpH[ret] += 1e-8;\n";  // TODO: this is added because of a bug in qpDUNES !!
@@ -485,7 +483,6 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 {
 	condensePrep.setup("condensePrep", blockI);
-	condenseFdb.setup( "condenseFdb", blockI );
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -824,11 +821,11 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 		ExportArgument R2Call = R2.isGiven() == true ? R2 : R2.getAddress((blockI*getBlockSize()+run1) * NU, 0);
 		ExportArgument SluCall =
 				objSlu.isGiven() == true || variableObjS == false ? objSlu : objSlu.getAddress((blockI*getBlockSize()+run1) * NU, 0);
-		condenseFdb.addFunctionCall(
+		condensePrep.addFunctionCall(
 				multRDy, R2Call, Dy.getAddress((blockI*getBlockSize()+run1) * NY, 0), SluCall, g.getAddress(blockI*getNumBlockVariables() + offset + run1 * NU, 0)
 		);
 	}
-	condenseFdb.addLinebreak();
+	condensePrep.addLinebreak();
 
 	// Compute QDy
 	for(unsigned run1 = 0; run1 < getBlockSize(); run1++ )
@@ -836,13 +833,13 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 		ExportArgument Q2Call = Q2.isGiven() == true ? Q2 : Q2.getAddress((blockI*getBlockSize()+run1) * NX);
 		ExportArgument SlxCall =
 				objSlx.isGiven() == true || variableObjS == false ? objSlx : objSlx.getAddress((blockI*getBlockSize()+run1) * NX, 0);
-		condenseFdb.addFunctionCall(
+		condensePrep.addFunctionCall(
 				multQDy, Q2Call, Dy.getAddress((blockI*getBlockSize()+run1) * NY), SlxCall, QDy.getAddress(run1 * NX) );
 	}
-	condenseFdb.addLinebreak();
+	condensePrep.addLinebreak();
 
 	if (performFullCondensing() == false)
-		condenseFdb.addStatement(g.getRows(blockI*getNumBlockVariables(), blockI*getNumBlockVariables()+NX) == QDy.getRows(0, NX));
+		condensePrep.addStatement(g.getRows(blockI*getNumBlockVariables(), blockI*getNumBlockVariables()+NX) == QDy.getRows(0, NX));
 
 	/*
 	if partial condensing:
@@ -896,29 +893,29 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 		);
 	condensePrep.addLinebreak();
 
-	condenseFdb.addStatement( w1 == zeros<double>(NX,1) );
+	condensePrep.addStatement( w1 == zeros<double>(NX,1) );
 	for (unsigned i = getBlockSize() - 1; 0 < i; --i)
 	{
-		condenseFdb.addFunctionCall(
+		condensePrep.addFunctionCall(
 				macBTw1, evGu.getAddress((blockI*getBlockSize()+i) * NX), w1, g.getAddress(blockI*getNumBlockVariables() + offset + i * NU)
 		);
 
 		if ((S1.isGiven() == true && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 		{
 			ExportArgument S1Call = S1.isGiven() == false ? S1.getAddress((blockI*getBlockSize()+i) * NX) : S1;
-			condenseFdb.addFunctionCall(macS1TSbar, S1Call, sbar.getAddress(i * NX), g.getAddress(blockI*getNumBlockVariables() + offset + i * NU));
+			condensePrep.addFunctionCall(macS1TSbar, S1Call, sbar.getAddress(i * NX), g.getAddress(blockI*getNumBlockVariables() + offset + i * NU));
 		}
 
-		condenseFdb.addFunctionCall(
+		condensePrep.addFunctionCall(
 				// TODO Check indexing for QDy
 				macATw1QDy, evGx.getAddress((blockI*getBlockSize()+i) * NX), w1, QDy.getAddress(i * NX), w2
 		);
 
 		ExportArgument Q1Call = Q1.isGiven() == true ? Q1 : Q1.getAddress((blockI*getBlockSize()+i) * NX);
-		condenseFdb.addFunctionCall(
+		condensePrep.addFunctionCall(
 				macQSbarW2, Q1Call, sbar.getAddress(i * NX), w2, w1);
 	}
-	condenseFdb.addFunctionCall(
+	condensePrep.addFunctionCall(
 			macBTw1, evGu.getAddress( blockI*getBlockSize()*NX ), w1, g.getAddress( blockI*getNumBlockVariables() + offset )
 	);
 //	if( performFullCondensing() == true ) {
@@ -928,9 +925,9 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 //		}
 //	}
 //	else {
-	condenseFdb.addStatement(g.getRows(blockI*getNumBlockVariables(), blockI*getNumBlockVariables()+NX) += evGx.getRows(blockI*getBlockSize()*NX, blockI*getBlockSize()*NX+NX).getTranspose() * w1);
+	condensePrep.addStatement(g.getRows(blockI*getNumBlockVariables(), blockI*getNumBlockVariables()+NX) += evGx.getRows(blockI*getBlockSize()*NX, blockI*getBlockSize()*NX+NX).getTranspose() * w1);
 //	}
-	condenseFdb.addLinebreak();
+	condensePrep.addLinebreak();
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -1114,6 +1111,10 @@ returnValue ExportGaussNewtonBlockCN2::setupEvaluation( )
 	if( regularizeHessian.isDefined() ) preparation.addFunctionCall( regularizeHessian );
 	preparation.addFunctionCall( evaluateConstraints );
 
+	preparation.addLinebreak();
+	preparation << (Dy -= y) << (DyN -= yN);
+	preparation.addLinebreak();
+
 	ExportForLoop condensePrepLoop( index, 0, getNumberOfBlocks() );
 	condensePrepLoop.addFunctionCall( condensePrep, index );
 	preparation.addStatement( condensePrepLoop );
@@ -1124,6 +1125,20 @@ returnValue ExportGaussNewtonBlockCN2::setupEvaluation( )
 			preparation.addStatement( qpH.getElement(getNumberOfBlocks()*getNumBlockVariables()*getNumBlockVariables()+i*NX+i,0) += levenbergMarquardt );
 		}
 	}
+	preparation.addLinebreak();
+
+	preparation.addStatement( g.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumQPvars()) == QN2 * DyN );
+	int variableObjS;
+	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
+	ExportVariable SlxCall =
+				objSlx.isGiven() == true || variableObjS == false ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
+	preparation.addStatement( g.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumQPvars()) += SlxCall );
+	preparation.addLinebreak();
+
+	stringstream prep;
+	prep << retSim.getName() << " = prepareQpDunes( );" << endl;
+	preparation << prep.str();
+	preparation.addLinebreak();
 
 	////////////////////////////////////////////////////////////////////////////
 	//
@@ -1138,22 +1153,6 @@ returnValue ExportGaussNewtonBlockCN2::setupEvaluation( )
 	feedback.doc( "Feedback/estimation step of the RTI scheme." );
 	feedback.setReturnValue( tmp );
 	feedback.addIndex( index );
-
-	feedback << (Dy -= y) << (DyN -= yN);
-	feedback.addLinebreak();
-
-	ExportForLoop condenseFdbLoop( index, 0, getNumberOfBlocks() );
-	condenseFdbLoop.addFunctionCall( condenseFdb, index );
-	feedback.addStatement( condenseFdbLoop );
-	feedback.addLinebreak();
-
-	feedback.addStatement( g.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumQPvars()) == QN2 * DyN );
-	int variableObjS;
-	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
-	ExportVariable SlxCall =
-				objSlx.isGiven() == true || variableObjS == false ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
-	feedback.addStatement( g.getRows(getNumberOfBlocks()*getNumBlockVariables(), getNumQPvars()) += SlxCall );
-	feedback.addLinebreak();
 
 	if (initialStateFixed() == true)
 	{
@@ -1275,7 +1274,7 @@ returnValue ExportGaussNewtonBlockCN2::setupQPInterface( )
 		// Configure and export QP interface
 		//
 
-		qpInterface = std::tr1::shared_ptr< ExportQpDunesInterface >(new ExportQpDunesInterface("", commonHeaderName));
+		qpInterface = std::tr1::shared_ptr< ExportSplitQpDunesInterface >(new ExportSplitQpDunesInterface("", commonHeaderName));
 
 		int maxNumQPiterations;
 		get(MAX_NUM_QP_ITERATIONS, maxNumQPiterations);

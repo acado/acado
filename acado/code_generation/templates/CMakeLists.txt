@@ -28,6 +28,7 @@ SET( FORCES_GENERATOR_PYTHON acado_forces_generator.py.in)
 SET( QPOASES_HEADER qpoases_interface.hpp.in)
 SET( QPOASES_SOURCE qpoases_interface.cpp.in)
 SET( QPDUNES_TEMPLATE qpdunes_interface.in)
+SET( QPDUNES_SPLIT_TEMPLATE qpdunes_split_interface.in)
 
 SET( AUXILIARY_FUNCTIONS_HEADER acado_auxiliary_functions.h.in)
 SET( AUXILIARY_FUNCTIONS_SOURCE acado_auxiliary_functions.c.in)
