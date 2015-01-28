@@ -14,7 +14,7 @@ qpOptions_t qpOptions;
 #endif
 
 #include "acado_auxiliary_functions.h"
-real_t prepareQPtime, solveQPtime;
+real_t prepareQPtime, updateQPtime, solveQPtime;
 
 int initializeQpDunes( void )
 {
@@ -82,7 +82,9 @@ int solveQpDunes( void )
 		statusFlag = qpDUNES_updateIntervalData(&qpData, qpData.intervals[ @ACADO_N@ ], 0, @QP_G_N@, 0, 0, 0, 0, 0, 0, 0, 0);
 	if (statusFlag != QPDUNES_OK)
 		return (int)statusFlag;
+	updateQPtime = toc( &tmr );
 
+	tic( &tmr );
 	statusFlag = qpDUNES_solve( &qpData );
 	
 	qpDUNES_getPrimalSol(&qpData, @QP_PRIMAL@);
