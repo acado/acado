@@ -326,6 +326,16 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	}
 	integrate.addLinebreak( );
 
+	if( NXA > 0 ) {
+		integrate.addStatement( std::string( "if( " ) + reset_int.getFullName() + " ) {\n" );
+		for( run5 = 0; run5 < NXA; run5++ ) {
+			for( uint iStage = 0; iStage < numStages; iStage++ ) {
+				integrate.addStatement( rk_kkk.getElement(NX+run5,iStage) == rk_eta.getCol(NX+run5) );
+			}
+		}
+		integrate.addStatement( std::string( "}\n" ) );
+	}
+
     // integrator loop:
 	ExportForLoop tmpLoop( run, 0, grid.getNumIntervals() );
 	ExportStatementBlock *loop;
