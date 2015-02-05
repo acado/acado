@@ -43,6 +43,7 @@ void printHeader();
  * providing us with the following timing routines.
  */
 
+#if !(defined _DSPACE)
 #if (defined WIN32 || defined _WIN64) && !(defined __MINGW32__ || defined __MINGW64__)
 
 /* Use Windows QueryPerformanceCounter for timing. */
@@ -106,6 +107,8 @@ void tic(timer* t);
 
 /** A function which returns the elapsed time. */
 real_t toc(timer* t);
+
+#endif
 
 #ifndef __MATLAB__
 #ifdef __cplusplus
