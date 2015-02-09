@@ -67,7 +67,8 @@ enum ExportSensitivityType{
     FORWARD,    					/**< Sensitivities are computed in forward mode.                             */
     BACKWARD,    					/**< Sensitivities are computed in backward mode.                            */
     FORWARD_OVER_BACKWARD,         	/**< Sensitivities (first and second order) are computed.					 */
-    THREE_SWEEPS         			/**< Sensitivities (first and second order) are computed.					 */
+    THREE_SWEEPS,         			/**< Sensitivities (first and second order) are computed.					 */
+    INEXACT         				/**< Inexact sensitivities are computed by Newton iterations.				 */
 };
 
 CLOSE_NAMESPACE_ACADO

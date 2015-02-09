@@ -231,6 +231,7 @@ class DiagonallyImplicitRKExport : public ForwardIRKExport
 										const ExportIndex& index1,
 										const ExportIndex& index2,
 										const ExportIndex& tmp_index,
+										const ExportVariable& _rk_A,
 										const ExportVariable& Ah,
 										const ExportVariable& C,
 										bool evaluateB,
