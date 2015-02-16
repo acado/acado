@@ -51,20 +51,24 @@ classdef Function < handle
                 
                 obj.name = ['"' varargin{1} '"'];
                 
-            elseif (nargin == 1  )
+            else
                 
                 global ACADO_;
                 ACADO_.count_function = ACADO_.count_function+1;
                 obj.name = strcat('acadodata_f', num2str(ACADO_.count_function));
-                f = varargin{1};
                 
-                for i=1:length(f)
-                    obj.items{i} = f(i);
+                if (nargin == 1  )
+                    f = varargin{1};
+                    
+                    for i=1:length(f)
+                        obj.items{i} = f(i);
+                    end
                 end
                 
                 ACADO_.helper.addInstruction(obj);  %also called by OutputFcn and DifferentialEquation!!
                 
             end
+           
         end 
         
         function s = toString(obj)
