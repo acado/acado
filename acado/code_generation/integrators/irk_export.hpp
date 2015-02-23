@@ -96,6 +96,13 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		virtual returnValue setup( );
 
 
+		/** This routine sets the eigenvalues of the inverse of the AA matrix. */
+        returnValue setEigenvalues( const DMatrix& _eig );
+
+		/** This routine sets the transformation matrices, defined by the inverse of the AA matrix. */
+        returnValue setTransformations( const DMatrix& _transf1, const DMatrix& _transf2 );
+
+
 		/** Assigns Differential Equation to be used by the integrator.
 		 *
 		 *	@param[in] rhs		Right-hand side expression.
@@ -558,6 +565,10 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 		ExportVariable 	rk_diffK;
 		ExportVariable	debug_mat;
+
+		DMatrix eig;
+		DMatrix transf1;
+		DMatrix transf2;
 
 };
 

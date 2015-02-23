@@ -1175,20 +1175,64 @@ returnValue ImplicitRungeKuttaExport::setup( )
 		switch( (LinearAlgebraSolver) solverType ) {
 		case GAUSS_LU:
 			solver = new ExportGaussElim( userInteraction,commonHeaderName );
+			if( (ImplicitIntegratorMode) intMode == LIFTED ) {
+				solver->init( (NX2+NXA)*numStages, NX+NU+1 );
+			}
+			else {
+				solver->init( (NX2+NXA)*numStages );
+			}
+			solver->setReuse( true ); 	// IFTR method
+			solver->setup();
+			rk_auxSolver = solver->getGlobalExportVariable( 1 );
+			break;
+		case IRK_SOLVER:
+			if( numStages == 3 ) {
+				solver = new ExportIRK3StageSolver( userInteraction,commonHeaderName );
+				solver->init( NX2+NXA, NX+NU+1 );
+				solver->setReuse( true ); 	// IFTR method
+				solver->setup();
+				rk_auxSolver = solver->getGlobalExportVariable( 2 );
+
+				ExportIRK3StageSolver* IRKsolver = dynamic_cast<ExportIRK3StageSolver *>(solver);
+				IRKsolver->setEigenvalues(eig);
+				IRKsolver->setTransformations(transf1, transf2);
+
+				double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
+				IRKsolver->setStepSize(h);
+			}
+			else {
+				return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+			}
 			break;
 		case HOUSEHOLDER_QR:
 			solver = new ExportHouseholderQR( userInteraction,commonHeaderName );
+			solver->init( (NX2+NXA)*numStages );
+			solver->setReuse( true ); 	// IFTR method
+			solver->setup();
+			rk_auxSolver = solver->getGlobalExportVariable( 1 );
+			if( (ImplicitIntegratorMode) intMode == LIFTED ) return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 			break;
 		default:
 			return ACADOERROR( RET_INVALID_OPTION );
 		}
-		solver->setReuse( true ); 	// IFTR method
-		solver->init( (NX2+NXA)*numStages );
-		solver->setup();
-		rk_auxSolver = solver->getGlobalExportVariable( 1 );
 	}
 
     return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ImplicitRungeKuttaExport::setEigenvalues( const DMatrix& _eig ) {
+	eig = _eig;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ImplicitRungeKuttaExport::setTransformations( const DMatrix& _transf1, const DMatrix& _transf2 ) {
+	transf1 = _transf1;
+	transf2 = _transf2;
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -1476,6 +1520,10 @@ returnValue ImplicitRungeKuttaExport::copy(	const ImplicitRungeKuttaExport& arg
 	DD = arg.DD;
 	coeffs = arg.coeffs;
 	
+	eig = arg.eig;
+	transf1 = arg.transf1;
+	transf2 = arg.transf2;
+
 	return SUCCESSFUL_RETURN;
 }
 
