@@ -130,6 +130,16 @@ class ExportGaussElim : public ExportLinearSolver
     //
     protected:
 
+		virtual returnValue setupSolveUpperTriangular( ExportFunction& _solveTriangular );
+
+		virtual returnValue setupSolve(	ExportFunction& _solve, ExportFunction& _solveTriangular, ExportVariable& _swap, ExportVariable& _determinant, const std::string& absF );
+
+		virtual returnValue setupFactorization(	ExportFunction& _solve, ExportVariable& _swap, ExportVariable& _determinant, const std::string& absF );
+
+		virtual returnValue setupSolveReuse(	ExportFunction& _solveReuse, ExportFunction& _solveTriangular, ExportVariable& _bPerm );
+
+		virtual returnValue setupSolveReuseComplete(	ExportFunction& _solveReuse, ExportVariable& _bPerm );
+
 
     protected:
 		

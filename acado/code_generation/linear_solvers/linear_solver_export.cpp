@@ -48,7 +48,7 @@ ExportLinearSolver::ExportLinearSolver(	UserInteraction* _userInteraction,
 {
 	REUSE = true;
 	UNROLLING = false;
-	dim = nRows = nCols = nBacksolves = 0;
+	dim = nRows = nCols = nBacksolves = nRightHandSides = 0;
 
 	determinant = ExportVariable("det", 1, 1, REAL, ACADO_LOCAL, true);
 }
@@ -63,7 +63,16 @@ returnValue ExportLinearSolver::init(	const uint newDim,
 										const bool& unrolling
 										)
 {
-	return init(newDim, newDim, newDim, reuse, unrolling, std::string( "dim" ) + toString( newDim ) + "_");
+	return init(newDim, newDim, newDim, 0, reuse, unrolling, std::string( "dim" ) + toString( newDim ) + "_");
+}
+
+returnValue ExportLinearSolver::init(	const unsigned newDim,
+										const unsigned _nRightHandSides,
+										const bool& reuse,
+										const bool& unroll
+										)
+{
+	return init(newDim, newDim, newDim, _nRightHandSides, reuse, unroll, std::string( "dim" ) + toString( newDim ) + "_");
 }
 
 
@@ -73,7 +82,7 @@ returnValue ExportLinearSolver::init(	const uint newDim,
 										const std::string& newId
 										)
 {
-	return init(newDim, newDim, newDim, reuse, unrolling, newId);
+	return init(newDim, newDim, newDim, 0, reuse, unrolling, newId);
 }
 
 returnValue ExportLinearSolver::init(	unsigned _nRows,
@@ -84,12 +93,26 @@ returnValue ExportLinearSolver::init(	unsigned _nRows,
 										const std::string& _id
 										)
 {
+	return init(_nRows, _nCols, _nBacksolves, 0, _reuse, _unroll, _id);
+}
+
+returnValue ExportLinearSolver::init(	unsigned _nRows,
+										unsigned _nCols,
+										unsigned _nBacksolves,
+										unsigned _nRightHandSides,
+										bool _reuse,
+										bool _unroll,
+										const std::string& _id
+										)
+{
 	ASSERT_RETURN(_nRows >= _nCols);
 	ASSERT_RETURN(_nBacksolves <= _nCols);
+	ASSERT_RETURN(_nRightHandSides >= 0);
 
 	nRows = _nRows;
 	nCols = _nCols;
 	nBacksolves = _nBacksolves;
+	nRightHandSides = _nRightHandSides;
 	REUSE = _reuse;
 	UNROLLING = _unroll;
 	identifier = _id;

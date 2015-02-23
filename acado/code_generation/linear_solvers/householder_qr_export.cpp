@@ -308,6 +308,9 @@ returnValue ExportHouseholderQR::setup( )
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
 
+	if (nRightHandSides > 0)
+		return RET_NOT_IMPLEMENTED_YET;
+
 	A = ExportVariable("A", nRows, nCols, REAL);
 	b = ExportVariable("b", nRows, 1, REAL);
 	rk_temp = ExportVariable("rk_temp", 1, nRows + 1, REAL);

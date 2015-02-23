@@ -779,6 +779,7 @@ enum ExportType
 {
 	INT,
 	REAL,
+	COMPLEX,
 	STATIC_CONST_INT,
 	STATIC_CONST_REAL
 };
