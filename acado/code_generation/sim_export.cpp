@@ -837,7 +837,7 @@ returnValue SIMexport::exportAcadoHeader(	const std::string& _dirName,
 	functionsBlock.exportCode(functions, _realString);
 
 	ExportCommonHeader ech(fileName, "", _realString, _intString, _precision);
-	ech.configure( moduleName, useSinglePrecision, (QPSolverName)qpSolver,
+	ech.configure( moduleName, useSinglePrecision, false, (QPSolverName)qpSolver,
 			options, variables.str(), workspace.str(), functions.str());
 
 	return ech.exportCode();

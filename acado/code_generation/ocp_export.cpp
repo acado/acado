@@ -599,6 +599,12 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	int covCalc;
 	get(CG_COMPUTE_COVARIANCE_MATRIX, covCalc);
 
+	int linSolver;
+	get(LINEAR_ALGEBRA_SOLVER, linSolver);
+	bool useComplexArithmetic = false;
+
+	if( (LinearAlgebraSolver)linSolver == IRK_SOLVER ) useComplexArithmetic = true;
+
 	string fileName;
 	fileName = _dirName + "/" + _fileName;
 
@@ -686,7 +692,7 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	functionsBlock.exportCode(functions, _realString);
 
 	ExportCommonHeader ech(fileName, "", _realString, _intString, _precision);
-	ech.configure( moduleName, useSinglePrecision, (QPSolverName)qpSolver,
+	ech.configure( moduleName, useSinglePrecision, useComplexArithmetic, (QPSolverName)qpSolver,
 			options, variables.str(), workspace.str(), functions.str());
 
 	return ech.exportCode();
