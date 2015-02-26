@@ -47,6 +47,8 @@ SET( MAKE_MEX_MODEL make_acado_model.m.in)
 SET( MAKEFILE_FORCES makefile.forces.in)
 SET( MAKEFILE_QPOASES makefile.qpoases.in)
 SET( MAKEFILE_QPDUNES makefile.qpdunes.in)
+SET( MAKEFILE_EH_QPOASES makefile.EH_qpoases.in)
+SET( MAKEFILE_EH_QPDUNES makefile.EH_qpdunes.in)
 SET( MAKEFILE_HPMPC makefile.hpmpc.in)
 SET( MAKEFILE_INTEGRATOR makefile.integrator.in)
 
