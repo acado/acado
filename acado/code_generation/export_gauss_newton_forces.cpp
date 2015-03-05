@@ -141,6 +141,7 @@ returnValue ExportGaussNewtonForces::getCode(	ExportStatementBlock& code
 	code.addFunction( evaluateTerminalCost );
 	code.addFunction( setObjQ1Q2 );
 	code.addFunction( setObjR1R2 );
+	code.addFunction( setObjS1 );
 	code.addFunction( setObjQN1QN2 );
 	code.addFunction( setStageH );
 	code.addFunction( setStagef );
@@ -271,6 +272,9 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	loopObjective.addLinebreak( );
 
 	// Optionally compute derivatives
+	unsigned indexX = getNY();
+	//	unsigned indexG = indexX;
+
 	ExportVariable tmpObjS, tmpFx, tmpFu;
 	ExportVariable tmpFxEnd, tmpObjSEndTerm;
 	tmpObjS.setup("tmpObjS", NY, NY, REAL, ACADO_LOCAL);
@@ -289,22 +293,6 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	if (objSEndTerm.isGiven() == true)
 		tmpObjSEndTerm = objSEndTerm;
 
-	unsigned indexX = getNY();
-	ExportArgument tmpFxCall = tmpFx;
-	if (tmpFx.isGiven() == false)
-	{
-		tmpFxCall = objValueOut.getAddress(0, indexX);
-		indexX += objEvFx.getDim();
-	}
-
-	ExportArgument tmpFuCall = tmpFu;
-	if (tmpFu.isGiven() == false)
-	{
-		tmpFuCall = objValueOut.getAddress(0, indexX);
-	}
-
-	ExportArgument objSCall = variableObjS == true ? objS.getAddress(runObj * NY, 0) : objS;
-
 	//
 	// Optional computation of Q1, Q2
 	//
@@ -318,11 +306,47 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 		setObjQ1Q2.addStatement( tmpQ2 == (tmpFx ^ tmpObjS) );
 		setObjQ1Q2.addStatement( tmpQ1 == tmpQ2 * tmpFx );
 
-		loopObjective.addFunctionCall(
-				setObjQ1Q2,
-				tmpFxCall, objSCall,
-				Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
-		);
+		if (tmpFx.isGiven() == true)
+		{
+			if (variableObjS == YES)
+			{
+				loopObjective.addFunctionCall(
+						setObjQ1Q2,
+						tmpFx, objS.getAddress(runObj * NY, 0),
+						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+				);
+			}
+			else
+			{
+				loopObjective.addFunctionCall(
+						setObjQ1Q2,
+						tmpFx, objS,
+						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+				);
+			}
+		}
+		else
+		{
+			if (variableObjS == YES)
+			{
+				if (objEvFx.isGiven() == true)
+
+					loopObjective.addFunctionCall(
+							setObjQ1Q2,
+							objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
+							Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+					);
+			}
+			else
+			{
+				loopObjective.addFunctionCall(
+						setObjQ1Q2,
+						objValueOut.getAddress(0, indexX), objS,
+						Q1.getAddress(runObj * NX, 0), Q2.getAddress(runObj * NX, 0)
+				);
+			}
+			indexX += objEvFx.getDim();
+		}
 
 		loopObjective.addLinebreak( );
 	}
@@ -337,15 +361,63 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 		setObjR1R2.addStatement( tmpR2 == (tmpFu ^ tmpObjS) );
 		setObjR1R2.addStatement( tmpR1 == tmpR2 * tmpFu );
 
-		loopObjective.addFunctionCall(
-				setObjR1R2,
-				tmpFuCall, objSCall,
-				R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
-		);
+		if (tmpFu.isGiven() == true)
+		{
+			if (variableObjS == YES)
+			{
+				loopObjective.addFunctionCall(
+						setObjR1R2,
+						tmpFu, objS.getAddress(runObj * NY, 0),
+						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
+				);
+			}
+			else
+			{
+				loopObjective.addFunctionCall(
+						setObjR1R2,
+						tmpFu, objS,
+						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
+				);
+			}
+		}
+		else
+		{
+			if (variableObjS == YES)
+			{
+				loopObjective.addFunctionCall(
+						setObjR1R2,
+						objValueOut.getAddress(0, indexX), objS.getAddress(runObj * NY, 0),
+						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
+				);
+			}
+			else
+			{
+				loopObjective.addFunctionCall(
+						setObjR1R2,
+						objValueOut.getAddress(0, indexX), objS,
+						R1.getAddress(runObj * NU, 0), R2.getAddress(runObj * NU, 0)
+				);
+			}
+		}
 
 		loopObjective.addLinebreak( );
 	}
 
+	indexX = getNY();
+	ExportArgument tmpFxCall = tmpFx;
+	if (tmpFx.isGiven() == false)
+	{
+		tmpFxCall = objValueOut.getAddress(0, indexX);
+		indexX += objEvFx.getDim();
+	}
+
+	ExportArgument tmpFuCall = tmpFu;
+	if (tmpFu.isGiven() == false)
+	{
+		tmpFuCall = objValueOut.getAddress(0, indexX);
+	}
+
+	ExportArgument objSCall = variableObjS == true ? objS.getAddress(runObj * NY, 0) : objS;
 	if (S1.isGiven() == false)
 	{
 		ExportVariable tmpS1;
@@ -374,7 +446,7 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 	evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
 	evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
-	// Evaluate the objective function, last node.
+	// Evaluate the objective function
 	evaluateObjective.addFunctionCall(evaluateTerminalCost, objValueIn, objValueOut);
 	evaluateObjective.addLinebreak( );
 
@@ -383,6 +455,8 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 
 	if (QN1.isGiven() == false)
 	{
+		indexX = getNYN();
+
 		ExportVariable tmpQN1, tmpQN2;
 		tmpQN1.setup("tmpQN1", NX, NX, REAL, ACADO_LOCAL);
 		tmpQN2.setup("tmpQN2", NX, NYN, REAL, ACADO_LOCAL);
@@ -391,14 +465,18 @@ returnValue ExportGaussNewtonForces::setupObjectiveEvaluation( void )
 		setObjQN1QN2.addStatement( tmpQN2 == (tmpFxEnd ^ tmpObjSEndTerm) );
 		setObjQN1QN2.addStatement( tmpQN1 == tmpQN2 * tmpFxEnd );
 
-		indexX = getNYN();
-		ExportArgument tmpFxEndCall = tmpFxEnd.isGiven() == true ? tmpFxEnd  : objValueOut.getAddress(0, indexX);
-
-		evaluateObjective.addFunctionCall(
-				setObjQN1QN2,
-				tmpFxEndCall, objSEndTerm,
-				QN1.getAddress(0, 0), QN2.getAddress(0, 0)
-		);
+		if (tmpFxEnd.isGiven() == true)
+			evaluateObjective.addFunctionCall(
+					setObjQN1QN2,
+					tmpFxEnd, objSEndTerm,
+					QN1.getAddress(0, 0), QN2.getAddress(0, 0)
+			);
+		else
+			evaluateObjective.addFunctionCall(
+					setObjQN1QN2,
+					objValueOut.getAddress(0, indexX), objSEndTerm,
+					QN1.getAddress(0, 0), QN2.getAddress(0, 0)
+			);
 
 		evaluateObjective.addLinebreak( );
 	}
