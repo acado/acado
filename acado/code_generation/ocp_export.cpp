@@ -428,13 +428,17 @@ returnValue OCPexport::setup( )
 
 	case BLOCK_CONDENSING_N2:
 
-		if ((QPSolverName)qpSolver != QP_QPDUNES)
+		if ((QPSolverName)qpSolver != QP_QPDUNES || (QPSolverName)qpSolver != QP_FORCES)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
 					"For block condensed solution only qpDUNES QP solver is currently supported");
 
-		if ( (HessianApproximationMode)hessianApproximation == GAUSS_NEWTON ) {
+		if ( (HessianApproximationMode)hessianApproximation == GAUSS_NEWTON && (QPSolverName)qpSolver == QP_QPDUNES ) {
 			solver = ExportNLPSolverPtr(
-					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_BLOCK_CN2));
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_BLOCK_QPDUNES));
+		}
+		else if ( (HessianApproximationMode)hessianApproximation == GAUSS_NEWTON && (QPSolverName)qpSolver == QP_FORCES ) {
+			solver = ExportNLPSolverPtr(
+					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_BLOCK_FORCES));
 		}
 		else {
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Only Gauss-Newton methods are currently supported in combination with block condensing.");
