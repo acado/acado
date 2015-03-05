@@ -193,9 +193,13 @@ private:
 	ExportVariable evLbValues, evUbValues;
 	ExportVariable qpLb, qpUb;
 
+	ExportVariable sigmaN;
+
 	ExportVariable qpLambda, qpMu, qpSlacks;
 
 	ExportVariable nIt;
+
+//	ExportVariable qpWork;
 
 	std::tr1::shared_ptr< ExportHpmpcInterface > qpInterface;
 	/** @} */
