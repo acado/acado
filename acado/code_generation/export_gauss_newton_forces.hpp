@@ -171,6 +171,7 @@ private:
 	ExportFunction setObjQ1Q2;
 	ExportFunction setObjR1R2;
 	ExportFunction setObjQN1QN2;
+	ExportFunction setObjS1;
 
 	bool diagH;
 	bool diagHN;
