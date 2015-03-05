@@ -121,6 +121,9 @@ std::string ExportDataInternal::getTypeString(	const std::string& _realString,
 	case REAL:
 		return _realString;
 
+	case COMPLEX:
+		return std::string("double complex");
+
 	case STATIC_CONST_INT:
 		return std::string("static const ") + _intString;
 

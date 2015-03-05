@@ -289,11 +289,18 @@ returnValue ExportNLPSolver::setupSimulation( void )
 
 	// Integrate the model
 	// TODO make that function calls can accept constant defined scalars
+	int intMode;
+	get( IMPLICIT_INTEGRATOR_MODE, intMode );
 	if ( integrator->equidistantControlGrid() )
 	{
-		if (performsSingleShooting() == false)
+		if( (ImplicitIntegratorMode)intMode == LIFTED ) {
+			loop	<< retSim.getFullName() << " = "
+					<< "integrate" << "(" << state.getFullName()
+					<< ", " << run.getFullName() << ");\n";
+		}
+		else if (performsSingleShooting() == false)
 			loop 	<< retSim.getFullName() << " = "
-				 	 << "integrate" << "(" << state.getFullName() << ", 1);\n";
+				 	<< "integrate" << "(" << state.getFullName() << ", 1);\n";
 		else
 			loop 	<< retSim.getFullName() << " = " << "integrate"
 					<< "(" << state.getFullName() << ", "

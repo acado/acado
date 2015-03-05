@@ -35,6 +35,7 @@
 #ifndef ACADO_TOOLKIT_VECTOR_HPP
 #define ACADO_TOOLKIT_VECTOR_HPP
 
+#include <complex>
 #include <acado/utils/acado_utils.hpp>
 #include <acado/matrix_vector/matrix_vector_tools.hpp>
 

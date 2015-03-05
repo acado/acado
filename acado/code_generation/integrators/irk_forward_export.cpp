@@ -386,7 +386,7 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	solveInputSystem( loop, i, run1, j, tmp_index1, Ah );
 
 	// PART 2: The fully implicit system
-	solveImplicitSystem( loop, i, run1, j, tmp_index1, Ah, C, determinant, true );
+	solveImplicitSystem( loop, i, run1, j, tmp_index1, ExportIndex(0), Ah, C, determinant, true );
 
 	// PART 3: The linear output system
 	prepareOutputSystem( code );
@@ -448,11 +448,15 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	}
 	if( NXA > 0) {
 		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ) );
-		loop->addStatement( std::string("if( run == 0 ) {\n") );
+		if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
+			loop->addStatement( std::string("if( run == 0 ) {\n") );
+		}
 		for( run5 = 0; run5 < NXA; run5++ ) {
 			loop->addStatement( rk_eta.getCol( NX+run5 ) == rk_kkk.getRow( NX+run5 )*tempCoefs );
 		}
-		loop->addStatement( std::string("}\n") );
+		if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
+			loop->addStatement( std::string("}\n") );
+		}
 	}
 
 
@@ -812,12 +816,16 @@ returnValue ForwardIRKExport::sensitivitiesImplicitSystem( ExportStatementBlock*
 		else		 		loop3.addStatement( rk_diffsNew2.getElement( index2,index1+NX1+NX2 ) == rk_diffK.getRow( NX1+index2 )*Bh );
 		block->addStatement( loop3 );
 		if( NXA > 0 ) {
-			block->addStatement( std::string("if( run == 0 ) {\n") );
+			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
+				block->addStatement( std::string("if( run == 0 ) {\n") );
+			}
 			ExportForLoop loop4( index2,0,NXA );
 			if( STATES ) loop4.addStatement( rk_diffsNew2.getElement( index2+NX2,index1 ) == rk_diffK.getRow( NX+index2 )*tempCoefs );
 			else 		 loop4.addStatement( rk_diffsNew2.getElement( index2+NX2,index1+NX1+NX2 ) == rk_diffK.getRow( NX+index2 )*tempCoefs );
 			block->addStatement( loop4 );
-			block->addStatement( std::string("}\n") );
+			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
+				block->addStatement( std::string("}\n") );
+			}
 		}
 	}
 

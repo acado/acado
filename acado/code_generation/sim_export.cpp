@@ -310,7 +310,9 @@ returnValue SIMexport::checkConsistency( ) const
 		 /*( f.getNP( ) > 0 ) ||*/ ( f.getNPI( ) > 0 ) || ( f.getNW( ) > 0 ) )
 		return ACADOERROR( RET_ONLY_STATES_AND_CONTROLS_FOR_CODE_EXPORT );
 
-	// only equidistant evaluation grids supported!
+	int mode;
+    get( IMPLICIT_INTEGRATOR_MODE, mode );
+    if( (ImplicitIntegratorMode) mode == LIFTED ) return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -835,7 +837,7 @@ returnValue SIMexport::exportAcadoHeader(	const std::string& _dirName,
 	functionsBlock.exportCode(functions, _realString);
 
 	ExportCommonHeader ech(fileName, "", _realString, _intString, _precision);
-	ech.configure( moduleName, useSinglePrecision, (QPSolverName)qpSolver,
+	ech.configure( moduleName, useSinglePrecision, false, (QPSolverName)qpSolver,
 			options, variables.str(), workspace.str(), functions.str());
 
 	return ech.exportCode();

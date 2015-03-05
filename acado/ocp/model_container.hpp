@@ -284,6 +284,15 @@ public:
 						const uint numberMeasurements, const std::string& colInd, const std::string& rowPtr	);
 
 
+    /** Gets integration grid.
+     *
+     *	@param[in] _grid	Integration grid.
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue getIntegrationGrid(  Grid& _grid	) const;
+
+
     /** Sets integration grid.
      *
      *	@param[in] _ocpGrid		Evaluation grid for optimal control.

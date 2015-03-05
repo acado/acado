@@ -96,6 +96,13 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		virtual returnValue setup( );
 
 
+		/** This routine sets the eigenvalues of the inverse of the AA matrix. */
+        returnValue setEigenvalues( const DMatrix& _eig );
+
+		/** This routine sets the transformation matrices, defined by the inverse of the AA matrix. */
+        returnValue setTransformations( const DMatrix& _transf1, const DMatrix& _transf2 );
+
+
 		/** Assigns Differential Equation to be used by the integrator.
 		 *
 		 *	@param[in] rhs		Right-hand side expression.
@@ -192,17 +199,6 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 
 	protected:
-		
-		
-		/** Returns the index corresponding Compressed Row Storage (CRS) for the dependency matrix of a specific output function.
-		 *
-		 * @param[in] output	The number of the output function.
-		 * @param[in] row		The number of the row, corresponding the element of interest.
-		 * @param[in] col		The number of the column, corresponding the element of interest.
-		 *
-		 *	\return The CRS index.
-		 */
-		returnValue getCRSIndex( uint output, ExportIndex row, ExportIndex col );
 
 
 		/** Initializes the matrix DD, which is used to extrapolate the variables of the IRK method to the next step.
@@ -365,6 +361,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 											const ExportIndex& index2,
 											const ExportIndex& index3,
 											const ExportIndex& tmp_index,
+											const ExportIndex& k_index,
 											const ExportVariable& Ah,
 											const ExportVariable& C,
 											const ExportVariable& det,
@@ -397,11 +394,12 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue evaluateStatesImplicitSystem( 	ExportStatementBlock* block,
+											const ExportIndex& k_index,
 											const ExportVariable& Ah,
 											const ExportVariable& C,
 											const ExportIndex& stage,
 											const ExportIndex& i,
-											const ExportIndex& j );
+											const ExportIndex& tmp_index );
 
 
 		/** Exports the evaluation of the states at a specific stage.
@@ -425,6 +423,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue evaluateRhsImplicitSystem( 	ExportStatementBlock* block,
+														const ExportIndex& k_index,
 														const ExportIndex& stage );
 
 
@@ -443,6 +442,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 										const ExportIndex& index1,
 										const ExportIndex& index2,
 										const ExportIndex& tmp_index,
+										const ExportIndex& k_index,
+										const ExportVariable& _rk_A,
 										const ExportVariable& Ah,
 										const ExportVariable& C,
 										bool evaluateB,
@@ -565,12 +566,17 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportVariable 	rk_diffK;
 		ExportVariable	debug_mat;
 
+		DMatrix eig;
+		DMatrix transf1;
+		DMatrix transf2;
+
 };
 
 
 CLOSE_NAMESPACE_ACADO
 
 
+#include <acado/code_generation/integrators/irk_lifted_forward_export.hpp>
 #include <acado/code_generation/integrators/irk_forward_export.hpp>
 #include <acado/code_generation/integrators/irk_export.ipp>
 

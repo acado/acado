@@ -212,7 +212,7 @@ class IntegratorExport : public ExportAlgorithm
 		virtual returnValue propagateImplicitSystem( 	ExportStatementBlock* block,
 														const ExportIndex& index1,
 														const ExportIndex& index2,
-														const ExportIndex& index3,
+														const ExportIndex& _index3,
 														const ExportIndex& tmp_index  	);
 
 

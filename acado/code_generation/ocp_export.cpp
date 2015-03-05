@@ -41,6 +41,8 @@
 
 #include <acado/code_generation/templates/templates.hpp>
 
+#include <acado/code_generation/integrators/rk_export.hpp>
+
 #include <acado/objective/objective.hpp>
 #include <acado/ocp/ocp.hpp>
 
@@ -607,6 +609,12 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	int covCalc;
 	get(CG_COMPUTE_COVARIANCE_MATRIX, covCalc);
 
+	int linSolver;
+	get(LINEAR_ALGEBRA_SOLVER, linSolver);
+	bool useComplexArithmetic = false;
+
+	if( (LinearAlgebraSolver)linSolver == IRK_SOLVER ) useComplexArithmetic = true;
+
 	string fileName;
 	fileName = _dirName + "/" + _fileName;
 
@@ -620,6 +628,14 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	options[ "ACADO_NOD" ]  = make_pair(toString( ocp.getNOD() ),  "Number of online data values.");
 	options[ "ACADO_NY" ]  = make_pair(toString( solver->getNY() ),  "Number of references/measurements per node on the first N nodes.");
 	options[ "ACADO_NYN" ] = make_pair(toString( solver->getNYN() ), "Number of references/measurements on the last (N + 1)st node.");
+
+	Grid integrationGrid;
+	ocp.getIntegrationGrid(integrationGrid);
+	uint NIS = integrationGrid.getNumIntervals();
+	if( ocp.hasEquidistantControlGrid() ) options[ "ACADO_RK_NIS" ] = make_pair(toString( NIS ),   "Number of integration steps per shooting interval.");
+
+	RungeKuttaExport *rk_integrator = static_cast<RungeKuttaExport *>(integrator.get());  // Note: As long as only Runge-Kutta type methods are exported.
+	options[ "ACADO_RK_NSTAGES" ] = make_pair(toString( rk_integrator->getNumStages() ),   "Number of Runge-Kutta stages per integration step.");
 
 	options[ "ACADO_INITIAL_STATE_FIXED" ] =
 			make_pair(toString( fixInitialState ), "Indicator for fixed initial state.");
@@ -686,7 +702,7 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	functionsBlock.exportCode(functions, _realString);
 
 	ExportCommonHeader ech(fileName, "", _realString, _intString, _precision);
-	ech.configure( moduleName, useSinglePrecision, (QPSolverName)qpSolver,
+	ech.configure( moduleName, useSinglePrecision, useComplexArithmetic, (QPSolverName)qpSolver,
 			options, variables.str(), workspace.str(), functions.str());
 
 	return ech.exportCode();

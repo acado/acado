@@ -75,6 +75,7 @@ public:
 	 */
 	returnValue configure(	const std::string& _moduleName,
 							bool _useSinglePrecision,
+							bool _useComplexArithmetic,
 							QPSolverName _qpSolver,
 							const std::map<std::string, std::pair<std::string, std::string> >& _options,
 							const std::string& _variables,

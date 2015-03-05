@@ -101,6 +101,12 @@ class ExportLinearSolver : public ExportAlgorithm
 							const bool& unrolling = false
 							);
 
+		returnValue init(	const uint newDim,
+							const uint _nRightHandSides,
+							const bool& reuse = true,
+							const bool& unrolling = false
+							);
+
 
 		/** Initializes the different parameters of the linear solver that will be exported.
 		 *
@@ -124,6 +130,16 @@ class ExportLinearSolver : public ExportAlgorithm
 		returnValue init(	unsigned _nRows,
 							unsigned _nCols,
 							unsigned _nBacksolves,
+							bool _reuse,
+							bool _unroll,
+							const std::string& _id
+							);
+
+		/** \todo DOC */
+		returnValue init(	unsigned _nRows,
+							unsigned _nCols,
+							unsigned _nBacksolves,
+							unsigned _nRightHandSides,
 							bool _reuse,
 							bool _unroll,
 							const std::string& _id
@@ -251,6 +267,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		unsigned nRows;								/**< Number of rows of matrix A. */
 		unsigned nCols;								/**< Number of columns of matrix A. */
 		unsigned nBacksolves;						/**< Number of back-solves. */
+		unsigned nRightHandSides;					/**< Number of back-solves. */
 
 		// DEFINITION OF THE EXPORTVARIABLES
 		ExportVariable A;							/**< Variable containing the matrix of the linear system. */

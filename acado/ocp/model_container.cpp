@@ -166,6 +166,11 @@ uint ModelContainer::addOutput( const std::string& output, const std::string& di
 }
 
 
+returnValue ModelContainer::getIntegrationGrid( Grid& _grid ) const {
+	return modelData.getIntegrationGrid( _grid );
+}
+
+
 returnValue ModelContainer::setIntegrationGrid( const Grid& _ocpGrid, const uint _numSteps ) {
 	return modelData.setIntegrationGrid( _ocpGrid, _numSteps );
 }
