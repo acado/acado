@@ -126,7 +126,7 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 	if( evaluateStageCost.getFunctionDim() > 0 ) {
 		loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( runObj ) );
 		loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( runObj ) );
-		loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
+		loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( runObj ) );
 		loopObjective.addLinebreak( );
 
 		// Evaluate the objective function

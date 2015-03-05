@@ -821,11 +821,18 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 //		);
 //		evaluateConstraints.addLinebreak();
 
-	start = initialStateFixed() == true ? 1 : 0;
-	for (unsigned i = start; i < dNum; ++i)
-		evaluateConstraints.addFunctionCall(
-				conSetd, cond[ i ], ExportIndex(i - 1)
-		);
+	if( initialStateFixed() ) {
+		for (unsigned i = 1; i < dNum; ++i)
+			evaluateConstraints.addFunctionCall(
+					conSetd, cond[ i ], ExportIndex(i - 1)
+			);
+	}
+	else {
+		for (unsigned i = 0; i < dNum; ++i)
+			evaluateConstraints.addFunctionCall(
+					conSetd, cond[ i ], ExportIndex(i)
+			);
+	}
 
 	return SUCCESSFUL_RETURN;
 }
