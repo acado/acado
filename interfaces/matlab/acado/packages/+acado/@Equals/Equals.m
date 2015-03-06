@@ -44,7 +44,7 @@ classdef Equals < acado.BooleanVariable
                 obj.obj1 = obj.checkDoubleVectorMatrix(obj1);
                 obj.obj2 = obj.checkDoubleVectorMatrix(obj2);
                 
-                if( isa(obj.obj1, 'acado.Disturbance') && isa(obj.obj2, 'acado.Matrix') )   % EXCEPTION
+                if( isa(obj1, 'acado.Variable') && length(obj1) == 1 && size(obj2,2) == 2 && isa(obj.obj2, 'acado.Matrix') )   % special case of a VariablesGrid
                    obj.obj2 = acado.VariablesGrid(obj.obj2); 
                 end
             end
