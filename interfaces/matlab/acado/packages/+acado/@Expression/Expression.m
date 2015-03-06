@@ -238,7 +238,7 @@ classdef Expression < handle
             elseif isnumeric(obj2) && length(obj2) == 1
                 obj2 = obj2*ones(size(obj1));
             end
-            if isa(obj1, 'acado.Disturbance') % special case
+            if isa(obj1, 'acado.Variable') && length(obj1) == 1 && size(obj2,2) == 2  % special case of a VariablesGrid
                 r = acado.Equals(obj1,obj2);
             else
                 if size(obj1,1) ~= size(obj2,1) || size(obj1,2) ~= size(obj2,2)

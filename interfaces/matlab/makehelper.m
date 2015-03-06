@@ -32,6 +32,7 @@ function [ ] = makehelper( type, optmake, varargin )
 % 
 
 PARALLEL = 0;
+VERBOSE = 0;
 
 %% SETTINGS
     if (nargin == 2)
@@ -51,6 +52,20 @@ PARALLEL = 0;
         CLEANUP = 0;
         MAKE = 1;
         FORCE = 0;
+        
+    elseif (nargin == 3 && length(varargin{1}) == 1 && strcmp(varargin{1}{1}, 'verbose'))
+        DEBUG = 0;
+        VERBOSE = 1;
+        CLEANUP = 0;
+        MAKE = 1;
+        FORCE = 0;
+        
+    elseif (nargin == 3 && length(varargin{1}) == 2 && strcmp(varargin{1}{1}, 'all') && strcmp(varargin{1}{2}, 'verbose'))
+        DEBUG = 0;
+        VERBOSE = 1;
+        CLEANUP = 0;
+        MAKE = 1;
+        FORCE = 1;
         
     elseif (nargin == 3 && length(varargin{1}) == 1 && strcmp(varargin{1}{1}, 'all'))
         DEBUG = 0;
@@ -149,6 +164,8 @@ PARALLEL = 0;
        else
            DEBUGFLAGS = '-g CXXDEBUGFLAGS=''\$CXXDEBUGFLAGS -Wall -pedantic -Wfloat-equal -Wshadow';
        end
+    elseif ( VERBOSE == 1 )
+        DEBUGFLAGS = '-v';
     end
           
     

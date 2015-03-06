@@ -45,6 +45,9 @@
 
 classdef OCPexport < acado.ExportModule
     properties (GetAccess = 'public', SetAccess = 'protected')
+        
+        userName;
+        
         % public read access, but private write access.
         Tc;
         Ncvp;
@@ -74,6 +77,11 @@ classdef OCPexport < acado.ExportModule
                 error('Unsupported use of the OCPexport constructor.')
             end
             
+        end
+        
+        
+        function setName(obj, name)
+            obj.userName = name;
         end
         
         
@@ -107,6 +115,11 @@ classdef OCPexport < acado.ExportModule
                     fprintf(cppobj.fileMEX,sprintf('    OCPexport %s( %s );\n', obj.name, obj.ocp.name));
                 else
                     error('Unable to export a RTI algorithm without an OCP formulation.');
+                end
+                
+                % SET USER SPECIFIED NAME
+                if ~isempty(obj.userName)
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setName( "%s" );\n', obj.name, obj.userName));
                 end
                 
                 % OPTIONS
