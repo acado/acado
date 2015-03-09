@@ -376,7 +376,9 @@ returnValue OCPexport::setup( )
 
 	ocp.setNumberIntegrationSteps( numSteps );
 	// NOTE: This function internally calls setup() function
-	integrator->setModelData( ocp.getModelData() );
+	returnvalue = integrator->setModelData( ocp.getModelData() );
+ 	if ( returnvalue != SUCCESSFUL_RETURN )
+ 		return returnvalue;
 
 	//
 	// Prepare solver export
