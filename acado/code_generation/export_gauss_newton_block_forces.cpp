@@ -31,6 +31,8 @@
 
 #include <acado/code_generation/export_gauss_newton_block_forces.hpp>
 
+#include <acado/code_generation/templates/templates.hpp>
+
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
@@ -38,7 +40,10 @@ BEGIN_NAMESPACE_ACADO
 ExportGaussNewtonBlockForces::ExportGaussNewtonBlockForces(	UserInteraction* _userInteraction,
 											const std::string& _commonHeaderName
 											) : ExportGaussNewtonBlockCN2( _userInteraction,_commonHeaderName )
-{}
+{
+	qpObjPrefix = "acadoForces";
+	qpModuleName = "forces";
+}
 
 returnValue ExportGaussNewtonBlockForces::setup( )
 {
@@ -48,20 +53,9 @@ returnValue ExportGaussNewtonBlockForces::setup( )
 	return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 	LOG( LVL_DEBUG ) << "Solver: setup extra initialization... " << endl;
-	//
 	// Add QP initialization call to the initialization
-	//
-	ExportFunction initializeQpDunes( "initializeQpDunes" );
-	stringstream ss;
-	ss.str( string() );
-	ss << "for( ret = 0; ret < " << getNumberOfBlocks()*getNumBlockVariables()*getNumBlockVariables()+NX*NX << "; ret++ )  acadoWorkspace.qpH[ret] += 1e-8;\n";  // TODO: this is added because of a bug in qpDUNES !!
-	initialize << ss.str();
-	initialize << "ret = (int)initializeQpDunes();\n"
-	<< "if ((return_t)ret != QPDUNES_OK) return ret;\n";
-
-	cleanup.setup( "cleanupSolver" );
-	ExportFunction cleanupQpDunes( "cleanupQpDunes" );
-	cleanup.addFunctionCall( cleanupQpDunes );
+	ExportFunction initializeForces( "initializeForces" );
+	initialize.addFunctionCall( initializeForces );
 	LOG( LVL_DEBUG ) << "done!" << endl;
 
 	return SUCCESSFUL_RETURN;
@@ -170,145 +164,108 @@ returnValue ExportGaussNewtonBlockForces::setupEvaluation( )
 
 	////////////////////////////////////////////////////////////////////////////
 	//
-	// Shifting of QP data
-	//
-	////////////////////////////////////////////////////////////////////////////
-
-	stringstream ss;
-	shiftQpData.setup( "shiftQpData" );
-	ss.str( string() );
-	ss	<< "qpDUNES_shiftLambda( &qpData );" << endl
-		<< "qpDUNES_shiftIntervals( &qpData );" << endl;
-	shiftQpData.addStatement( ss.str().c_str() );
-
-	////////////////////////////////////////////////////////////////////////////
-	//
 	// Setup evaluation of the KKT tolerance
 	//
 	////////////////////////////////////////////////////////////////////////////
+
 	ExportVariable kkt("kkt", 1, 1, REAL, ACADO_LOCAL, true);
-	ExportVariable prd("prd", 1, 1, REAL, ACADO_LOCAL, true);
-	ExportIndex index2( "index2" );
 
 	getKKT.setup( "getKKT" );
-	getKKT.doc( "Get the KKT tolerance of the current iterate." );
-	kkt.setDoc( "KKT tolerance." );
+	getKKT.doc( "Get the KKT tolerance of the current iterate. Under development." );
+	//	kkt.setDoc( "The KKT tolerance value." );
+	kkt.setDoc( "1e-15." );
 	getKKT.setReturnValue( kkt );
-	//	getKKT.addVariable( prd );
-	getKKT.addIndex( index );
-	getKKT.addIndex( index2 );
 
-	getKKT.addStatement( kkt == (g ^ xVars) );
-	getKKT << kkt.getFullName() << " = fabs( " << kkt.getFullName() << " );\n";
-
-	ExportForLoop lamLoop(index, 0, getNumberOfBlocks() * NX);
-	lamLoop << kkt.getFullName() << "+= fabs( " << qpc.get(index, 0) << " * " << qpLambda.get(index, 0) << ");\n";
-	getKKT.addStatement( lamLoop );
-
-	/*
-
-		lambda are the multipliers of the coupling constraints
-		i.e. lambda_i for x_{i+1} = A * x_i + B * u_i + c
-		mu correspond to the bounds
-		in the fashion
-		mu = mu_0 … mu_N
-		i.e. major ordering by the stages
-		within each stage i
-		i.e. within mu_i
-		we have the minor ordering( I drop the i here)
-		lb z_0, ub z_0, lb z_1, ub z_1, … lb z_nZ, ub z_nZ
-		where z are the stage variables in the ordering z = [x u]
-		signs are positive if active, zero if inactive
-
-	 */
-
-	if ( getNumComplexConstraints() )
-	{
-		ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
-				"KKT Tolerance with affine stage constraints is under development");
-		return SUCCESSFUL_RETURN;
-	}
-
-	if (initialStateFixed() == true)
-	{
-		for (unsigned el = 0; el < getNumBlockVariables(); ++el)
-		{
-			getKKT << kkt.getFullName() << " += fabs("
-					<< qpLb0.get(0, el) << " * " << qpMu.get(2 * el + 0, 0)  << ");\n";
-			getKKT << kkt.getFullName() << " += fabs("
-					<< qpUb0.get(0, el) << " * " << qpMu.get(2 * el + 1, 0)  << ");\n";
-		}
-	}
-
-	ExportForLoop bndLoop(index, initialStateFixed() ? 1 : 0, getNumberOfBlocks());
-	ExportForLoop bndInLoop(index2, 0, getNumBlockVariables());
-	bndInLoop << kkt.getFullName() << " += fabs("
-			<< lb.get(index * getNumBlockVariables() + index2, 0) << " * " << qpMu.get(index * 2 * getNumBlockVariables() + 2 * index2 + 0, 0)  << ");\n";
-	bndInLoop << kkt.getFullName() << " += fabs("
-			<< ub.get(index * getNumBlockVariables() + index2, 0) << " * " << qpMu.get(index * 2 * getNumBlockVariables() + 2 * index2 + 1, 0)  << ");\n";
-	bndLoop.addStatement( bndInLoop );
-	getKKT.addStatement( bndLoop );
-
-	for (unsigned el = 0; el < NX; ++el)
-	{
-		getKKT << kkt.getFullName() << " += fabs("
-				<< lb.get(getNumberOfBlocks() * getNumBlockVariables() + el, 0) << " * " << qpMu.get(2 * getNumberOfBlocks() * getNumBlockVariables() + 2 * el + 0, 0)  << ");\n";
-		getKKT << kkt.getFullName() << " += fabs("
-				<< ub.get(getNumberOfBlocks() * getNumBlockVariables() + el, 0) << " * " << qpMu.get(2 * getNumberOfBlocks() * getNumBlockVariables() + 2 * el + 1, 0)  << ");\n";
-	}
+	getKKT.addStatement( kkt == 1e-15 );
 
 	return SUCCESSFUL_RETURN;
 }
 
 returnValue ExportGaussNewtonBlockForces::setupQPInterface( )
 {
-		//
-		// Configure and export QP interface
-		//
+	//
+	// Configure and export QP interface
+	//
 
-		qpInterface = std::tr1::shared_ptr< ExportForcesInterface >(new ExportForcesInterface("", commonHeaderName));
+	qpInterface = std::tr1::shared_ptr< ExportForcesInterface >(new ExportForcesInterface(FORCES_TEMPLATE, "", commonHeaderName));
 
-		int maxNumQPiterations;
-		get(MAX_NUM_QP_ITERATIONS, maxNumQPiterations);
+	ExportVariable tmp1("tmp", 1, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
+	ExportVariable tmp2("tmp", 1, 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
+	ExportVariable tmp3("tmp", 1, 1, REAL, FORCES_INFO, false, qpObjPrefix);
 
-		// XXX If not specified, use default value
-		if ( maxNumQPiterations <= 0 )
-			maxNumQPiterations = getNumQPvars();
+	string params = qpModuleName + "_params";
 
-		int printLevel;
-		get(PRINTLEVEL, printLevel);
+	string output = qpModuleName + "_output";
 
-		if ( (PrintLevel)printLevel >= MEDIUM )
-			printLevel = 2;
-		else
-			printLevel = 0;
+	string info = qpModuleName + "_info";
 
-//		qpInterface->configure(
-//				maxNumQPiterations,
-//				printLevel,
-//				qpH.getFullName(),
-//				g.getFullName(),
-//				initialStateFixed() ? "0" : qpgN.getFullName(),
-//				qpC.getFullName(),
-//				qpc.getFullName(),
-//				A.getFullName(),
-//				initialStateFixed() ? qpLb0.getFullName() : "0",
-//				initialStateFixed() ? qpUb0.getFullName() : "0",
-//				lb.getFullName(),
-//				ub.getFullName(),
-//				lbA.getFullName(),
-//				ubA.getFullName(),
-//				xVars.getFullName(),
-//				qpLambda.getFullName(),
-//				qpMu.getFullName(),
-//				qpConDim,
-//				initialStateFixed() ? "1" : "0",
-//				diagonalH ? "1" : "0",
-//				diagonalHN ? "1" : "0",
-//				getNumberOfBlocks(),
-//				NX,
-//				getBlockSize()*NU
-//		);
+	string header = qpModuleName + ".h";
+
+	qpInterface->configure(
+			header,
+
+			params,
+			tmp1.getDataStructString(),
+
+			output,
+			tmp2.getDataStructString(),
+
+			info,
+			tmp3.getDataStructString()
+	);
+
+	//
+	// Configure and export MATLAB QP generator
+	//
+
+	string folderName;
+	get(CG_EXPORT_FOLDER_NAME, folderName);
+	string outFile = folderName + "/acado_forces_generator.m";
+
+	qpGenerator = std::tr1::shared_ptr< ExportForcesGenerator >(new ExportForcesGenerator(FORCES_GENERATOR, outFile, "", "real_t", "int", 16, "%"));
+
+	int maxNumQPiterations;
+	get( MAX_NUM_QP_ITERATIONS,maxNumQPiterations );
+
+	int printLevel;
+	get(PRINTLEVEL, printLevel);
+
+	// if not specified, use default value
+	if ( maxNumQPiterations <= 0 )
+		maxNumQPiterations = 3 * getNumQPvars();
+
+	int useOMP;
+	get(CG_USE_OPENMP, useOMP);
+
+	int hotstartQP;
+	get(HOTSTART_QP, hotstartQP);
+
+//	qpGenerator->configure(
+//			NX,
+//			NU,
+//			N,
+//			conLBIndices,
+//			conUBIndices,
+//			conABIndices,
+//			(Q1.isGiven() == true && R1.isGiven() == true) ? 1 : 0,
+//					diagonalH,
+//					diagonalHN,
+//					initialStateFixed(),
+//					qpModuleName,
+//					(PrintLevel)printLevel == HIGH ? 2 : 0,
+//							maxNumQPiterations,
+//							useOMP,
+//							true,
+//							hotstartQP
+//	);
+
+	qpGenerator->exportCode();
+
+	//
+	// Export Python generator
+	//
+	ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
+			"A python code generator interface for block condensing with FORCES is under development.");
 
 	return SUCCESSFUL_RETURN;
 }

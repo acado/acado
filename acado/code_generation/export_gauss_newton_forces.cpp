@@ -663,6 +663,9 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 	conUBIndices.clear();
 	conUBIndices.resize(N + 1);
 
+	conABIndices.clear();
+	conABIndices.resize(N + 1);
+
 	conLBValues.clear();
 	conLBValues.resize(N + 1);
 
@@ -1124,6 +1127,7 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			N,
 			conLBIndices,
 			conUBIndices,
+			conABIndices,
 			(Q1.isGiven() == true && R1.isGiven() == true) ? 1 : 0,
 					diagH,
 					diagHN,
@@ -1152,6 +1156,7 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			N,
 			conLBIndices,
 			conUBIndices,
+			conABIndices,
 			(Q1.isGiven() == true && R1.isGiven() == true) ? 1 : 0, // TODO Remove this one
 					diagH,
 					diagHN,

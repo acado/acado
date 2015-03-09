@@ -186,7 +186,7 @@ private:
 	unsigned numLB;
 	unsigned numUB;
 
-	std::vector< std::vector< unsigned > > conLBIndices, conUBIndices;
+	std::vector< std::vector< unsigned > > conLBIndices, conUBIndices, conABIndices;
 	std::vector< std::vector< double > > conLBValues, conUBValues;
 
 	ExportFunction evaluateConstraints;
