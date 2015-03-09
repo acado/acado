@@ -318,16 +318,17 @@ end
 
 function [force_compilation] = check_to_compile (src, bin, force_make)
 
+    force_compilation = 1;
     d_bin = dir (bin);
     if (force_make || isempty (d_bin))  
         force_compilation = 1;
     else
         d_src = dir (src);
         try
+          force_compilation = (d_bin.datenum < d_src.datenum);
           force_compilation = (datenum(d_bin.date) < datenum(d_src.date)) ;
         catch
-          force_compilation = 1;
-          disp('Warning: datenum is not working on your system. See http://www.acadotoolkit.org/matlab/faq/datenum.php');
+%           disp('Warning: datenum is not working on your system. See http://www.acadotoolkit.org/matlab/faq/datenum.php');
         end
     end
     

@@ -39,7 +39,7 @@ BEGIN_NAMESPACE_ACADO
 class ExportQpDunesInterface;
 
 /**
- *	\brief An OCP solver based on the block N^2 condensing algorithm, in combination with qpDUNES as the QP solver.
+ *	\brief An OCP solver based on the block N^2 condensing algorithm.
  *
  *	\ingroup NumericalAlgorithms
  *
@@ -100,7 +100,7 @@ public:
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	virtual returnValue getCode(	ExportStatementBlock& code
-									);
+									) = 0;
 
 
 	/** Returns number of variables in underlying QP.
@@ -143,15 +143,17 @@ protected:
 	 *
 	 *	\return SUCCESSFUL_RETURN
 	 */
-	virtual returnValue setupEvaluation( );
+	virtual returnValue setupEvaluation( ) = 0;
 
-	virtual returnValue setupQPInterface( );
+	virtual returnValue setupQPInterface( ) = 0;
 
 	virtual returnValue setupCondensing( );
 
 protected:
 
 	ExportIndex blockI;
+
+	std::vector< unsigned > qpConDim;
 
 	ExportVariable qpgN;
 
@@ -161,11 +163,6 @@ protected:
 	ExportVariable qpLb0, qpUb0;
 
 	ExportVariable qpLambda, qpMu;
-
-	std::vector< unsigned > qpConDim;
-
-	/** qpDUNES interface object. */
-	std::tr1::shared_ptr< ExportQpDunesInterface > qpInterface;
 
 	ExportFunction cleanup;
 	ExportFunction shiftQpData;
