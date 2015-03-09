@@ -428,7 +428,7 @@ returnValue OCPexport::setup( )
 
 	case BLOCK_CONDENSING_N2:
 
-		if ((QPSolverName)qpSolver != QP_QPDUNES || (QPSolverName)qpSolver != QP_FORCES)
+		if ((QPSolverName)qpSolver != QP_QPDUNES && (QPSolverName)qpSolver != QP_FORCES)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
 					"For block condensed solution only qpDUNES QP solver is currently supported");
 
@@ -460,7 +460,7 @@ returnValue OCPexport::setup( )
 	case SPARSE_SOLVER:
 		if ((QPSolverName)qpSolver != QP_FORCES && (QPSolverName)qpSolver != QP_QPDUNES && (QPSolverName)qpSolver != QP_HPMPC)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-					"For sparse solution FORCES and qpDUNES QP solvers are supported");
+					"For sparse solution FORCES, qpDUNES and HPMPC QP solvers are supported");
 		if ( (QPSolverName)qpSolver == QP_FORCES)
 			solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_FORCES));
