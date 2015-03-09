@@ -115,7 +115,9 @@ classdef OCPexport < acado.ExportModule
                 
                 % EXPORT
                 if ~isempty(obj.dir)
-                    fprintf(cppobj.fileMEX,sprintf('    %s.exportCode( "%s" );\n', obj.name, obj.dir));
+                    fprintf(cppobj.fileMEX,'    uint export_flag;\n');
+                    fprintf(cppobj.fileMEX,sprintf('    export_flag = %s.exportCode( "%s" );\n', obj.name, obj.dir));
+                    fprintf(cppobj.fileMEX,'    if(export_flag != 0) mexErrMsgTxt(\"ACADO export failed because of the above error(s)!\");\n');
                 end
                 
                 % PRINT DIMENSIONS QP
