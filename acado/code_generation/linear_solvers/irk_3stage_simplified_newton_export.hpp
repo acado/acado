@@ -26,13 +26,13 @@
 
 
 /**
- *    \file include/acado/code_generation/irk_3stage_solver_export.hpp
+ *    \file include/acado/code_generation/irk_3stage_simplified_newton_export.hpp
  *    \author Rien Quirynen
  */
 
 
-#ifndef ACADO_TOOLKIT_EXPORT_IRK_3STAGE_SOLVER_HPP
-#define ACADO_TOOLKIT_EXPORT_IRK_3STAGE_SOLVER_HPP
+#ifndef ACADO_TOOLKIT_EXPORT_IRK_3STAGE_SIMPLIFIED_SOLVER_HPP
+#define ACADO_TOOLKIT_EXPORT_IRK_3STAGE_SIMPLIFIED_SOLVER_HPP
 
 #include <acado/code_generation/linear_solvers/gaussian_elimination_export.hpp>
 
@@ -51,7 +51,7 @@ BEGIN_NAMESPACE_ACADO
  *	\author Rien Quirynen
  */
 
-class ExportIRK3StageSolver : public ExportGaussElim
+class ExportIRK3StageSimplifiedNewton : public ExportGaussElim
 {
     //
     // PUBLIC MEMBER FUNCTIONS:
@@ -63,12 +63,12 @@ class ExportIRK3StageSolver : public ExportGaussElim
 		 *	@param[in] _userInteraction		Pointer to corresponding user interface.
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
 		 */
-        ExportIRK3StageSolver(	UserInteraction* _userInteraction = 0,
+        ExportIRK3StageSimplifiedNewton(	UserInteraction* _userInteraction = 0,
 							const std::string& _commonHeaderName = ""
 							);
 
         /** Destructor. */
-        virtual ~ExportIRK3StageSolver( );
+        virtual ~ExportIRK3StageSimplifiedNewton( );
 
 
 		/** Initializes code export into given file.
@@ -198,6 +198,6 @@ class ExportIRK3StageSolver : public ExportGaussElim
 CLOSE_NAMESPACE_ACADO
 
 
-#endif  // ACADO_TOOLKIT_EXPORT_IRK_3STAGE_SOLVER_HPP
+#endif  // ACADO_TOOLKIT_EXPORT_IRK_3STAGE_SIMPLIFIED_SOLVER_HPP
 
 // end of file.

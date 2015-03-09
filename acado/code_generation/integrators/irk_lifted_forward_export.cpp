@@ -622,7 +622,7 @@ returnValue ForwardLiftedIRKExport::solveImplicitSystem( ExportStatementBlock* b
 			evaluateStatesImplicitSystem( block, k_index, Ah, C, ExportIndex(0), index3, tmp_index );
 			block->addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsTemp2 );
 			// evaluate rk_J (only explicit ODE for now!)
-			if( (LinearAlgebraSolver) linSolver == IRK_SOLVER ) {
+			if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
 				ExportForLoop loop0( index2,0,NX2 );
 				loop0.addStatement( rk_A.getRow( index2 ) == rk_diffsTemp2.getSubMatrix( index2,index2+1,NX1,NX1+NX2 ) );
 				block->addStatement( loop0 );
@@ -695,7 +695,7 @@ returnValue ForwardLiftedIRKExport::evaluateInexactMatrix( ExportStatementBlock*
 	int linSolver;
 	get( LINEAR_ALGEBRA_SOLVER, linSolver );
 
-	if( (LinearAlgebraSolver) linSolver != IRK_SOLVER ) {
+	if( (LinearAlgebraSolver) linSolver != SIMPLIFIED_IRK_NEWTON && (LinearAlgebraSolver) linSolver != SINGLE_IRK_NEWTON ) {
 		ExportForLoop loop2( index2,0,NX2+NXA );
 		loop2.addStatement( tmp_index == index1*(NX2+NXA)+index2 );
 		for( i = 0; i < numStages; i++ ) { // differential states
@@ -1125,7 +1125,7 @@ returnValue ForwardLiftedIRKExport::setup( )
 
 	int linSolver;
 	get( LINEAR_ALGEBRA_SOLVER, linSolver );
-	if( (LinearAlgebraSolver) linSolver == IRK_SOLVER ) {
+	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
 		rk_A = ExportVariable( "rk_J", NX2+NXA, NX2+NXA, REAL, structWspace );
 	}
 	rk_b = ExportVariable( "rk_b", numStages*(NX+NXA), 1+NX+NU, REAL, structWspace );

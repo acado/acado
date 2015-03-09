@@ -603,7 +603,7 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	get(LINEAR_ALGEBRA_SOLVER, linSolver);
 	bool useComplexArithmetic = false;
 
-	if( (LinearAlgebraSolver)linSolver == IRK_SOLVER ) useComplexArithmetic = true;
+	if( (LinearAlgebraSolver)linSolver == SIMPLIFIED_IRK_NEWTON ) useComplexArithmetic = true;
 
 	string fileName;
 	fileName = _dirName + "/" + _fileName;
