@@ -225,28 +225,6 @@ class ForwardLiftedIRKExport : public ForwardIRKExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue inexactAllSensitivitiesImplicitSystem( 	ExportStatementBlock* block,
-													const ExportIndex& index1,
-													const ExportIndex& index2,
-													const ExportIndex& index3,
-													const ExportIndex& tmp_index1,
-													const ExportIndex& tmp_index2,
-													const ExportIndex& tmp_index3,
-													const ExportIndex& k_index,
-													const ExportVariable& Bh );
-
-
-		/** Exports the code needed to compute the sensitivities of the states defined by the nonlinear, fully implicit system.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *	@param[in] Ah				The variable containing the internal coefficients of the RK method, multiplied with the step size.
-		 *	@param[in] Bh				The variable containing the weights of the RK method, multiplied with the step size.
-		 *	@param[in] det				The variable that holds the determinant of the matrix in the linear system.
-		 *	@param[in] STATES			True if the sensitivities with respect to a state are needed, false otherwise.
-		 *	@param[in] number			This number defines the stage of the state with respect to which the sensitivities are computed.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
 		virtual returnValue evaluateRhsInexactSensitivities( 	ExportStatementBlock* block,
 													const ExportIndex& index1,
 													const ExportIndex& index2,
@@ -311,7 +289,9 @@ class ForwardLiftedIRKExport : public ForwardIRKExport
 													const ExportIndex& tmp_index1,
 													const ExportIndex& tmp_index2,
 													const ExportIndex& tmp_index3,
-													const ExportVariable& Bh );
+													const ExportIndex& k_index,
+													const ExportVariable& Bh,
+													bool update );
 
 
 		virtual returnValue evaluateRhsSensitivities( 	ExportStatementBlock* block,
