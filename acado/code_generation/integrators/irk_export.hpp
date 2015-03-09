@@ -100,7 +100,10 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
         returnValue setEigenvalues( const DMatrix& _eig );
 
 		/** This routine sets the transformation matrices, defined by the inverse of the AA matrix. */
-        returnValue setTransformations( const DMatrix& _transf1, const DMatrix& _transf2 );
+        returnValue setSimplifiedTransformations( const DMatrix& _transf1, const DMatrix& _transf2 );
+
+		/** This routine sets the transformation matrices, defined by the inverse of the AA matrix. */
+        returnValue setSingleTransformations( const double _tau, const DVector& _low_tria, const DMatrix& _transf1, const DMatrix& _transf2 );
 
 
 		/** Assigns Differential Equation to be used by the integrator.
@@ -567,8 +570,13 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		ExportVariable	debug_mat;
 
 		DMatrix eig;
-		DMatrix transf1;
-		DMatrix transf2;
+		DMatrix simplified_transf1;
+		DMatrix simplified_transf2;
+
+		double tau;
+		DVector low_tria;
+		DMatrix single_transf1;
+		DMatrix single_transf2;
 
 };
 

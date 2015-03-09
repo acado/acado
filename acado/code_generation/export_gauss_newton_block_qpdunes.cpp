@@ -49,7 +49,6 @@ returnValue ExportGaussNewtonBlockQpDunes::setup( )
 	//
 	// Add QP initialization call to the initialization
 	//
-	ExportFunction initializeQpDunes( "initializeQpDunes" );
 	stringstream ss;
 	ss.str( string() );
 	ss << "for( ret = 0; ret < " << getNumberOfBlocks()*getNumBlockVariables()*getNumBlockVariables()+NX*NX << "; ret++ )  acadoWorkspace.qpH[ret] += 1e-8;\n";  // TODO: this is added because of a bug in qpDUNES !!

@@ -1195,17 +1195,35 @@ returnValue ImplicitRungeKuttaExport::setup( )
 			solver->setup();
 			rk_auxSolver = solver->getGlobalExportVariable( 1 );
 			break;
-		case IRK_SOLVER:
+		case SIMPLIFIED_IRK_NEWTON:
 			if( numStages == 3 ) {
-				solver = new ExportIRK3StageSolver( userInteraction,commonHeaderName );
+				solver = new ExportIRK3StageSimplifiedNewton( userInteraction,commonHeaderName );
 				solver->init( NX2+NXA, NX+NU+1 );
 				solver->setReuse( true ); 	// IFTR method
 				solver->setup();
 				rk_auxSolver = solver->getGlobalExportVariable( 2 );
 
-				ExportIRK3StageSolver* IRKsolver = dynamic_cast<ExportIRK3StageSolver *>(solver);
+				ExportIRK3StageSimplifiedNewton* IRKsolver = dynamic_cast<ExportIRK3StageSimplifiedNewton *>(solver);
 				IRKsolver->setEigenvalues(eig);
-				IRKsolver->setTransformations(transf1, transf2);
+				IRKsolver->setTransformations(simplified_transf1, simplified_transf2);
+
+				double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
+				IRKsolver->setStepSize(h);
+			}
+			else {
+				return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+			}
+			break;
+		case SINGLE_IRK_NEWTON:
+			if( numStages == 3 ) {
+				solver = new ExportIRK3StageSingleNewton( userInteraction,commonHeaderName );
+				solver->init( NX2+NXA, NX+NU+1 );
+				solver->setReuse( true ); 	// IFTR method
+				solver->setup();
+				rk_auxSolver = solver->getGlobalExportVariable( 1 );
+
+				ExportIRK3StageSingleNewton* IRKsolver = dynamic_cast<ExportIRK3StageSingleNewton *>(solver);
+				IRKsolver->setTransformations(tau, low_tria, single_transf1, single_transf2);
 
 				double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 				IRKsolver->setStepSize(h);
@@ -1238,9 +1256,19 @@ returnValue ImplicitRungeKuttaExport::setEigenvalues( const DMatrix& _eig ) {
 }
 
 
-returnValue ImplicitRungeKuttaExport::setTransformations( const DMatrix& _transf1, const DMatrix& _transf2 ) {
-	transf1 = _transf1;
-	transf2 = _transf2;
+returnValue ImplicitRungeKuttaExport::setSimplifiedTransformations( const DMatrix& _transf1, const DMatrix& _transf2 ) {
+	simplified_transf1 = _transf1;
+	simplified_transf2 = _transf2;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ImplicitRungeKuttaExport::setSingleTransformations( const double _tau, const DVector& _low_tria, const DMatrix& _transf1, const DMatrix& _transf2 ) {
+	tau = _tau;
+	low_tria = _low_tria;
+	single_transf1 = _transf1;
+	single_transf2 = _transf2;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -1531,8 +1559,13 @@ returnValue ImplicitRungeKuttaExport::copy(	const ImplicitRungeKuttaExport& arg
 	coeffs = arg.coeffs;
 	
 	eig = arg.eig;
-	transf1 = arg.transf1;
-	transf2 = arg.transf2;
+	simplified_transf1 = arg.simplified_transf1;
+	simplified_transf2 = arg.simplified_transf2;
+
+	tau = arg.tau;
+	low_tria = arg.low_tria;
+	single_transf1 = arg.single_transf1;
+	single_transf2 = arg.single_transf2;
 
 	return SUCCESSFUL_RETURN;
 }

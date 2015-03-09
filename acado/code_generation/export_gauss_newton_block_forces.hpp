@@ -34,6 +34,7 @@
 
 #include <acado/code_generation/export_gauss_newton_block_cn2.hpp>
 #include <acado/code_generation/export_forces_interface.hpp>
+#include <acado/code_generation/export_forces_generator.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -95,8 +96,15 @@ protected:
 
 protected:
 
-	/** qpDUNES interface object. */
+	/** \name QP interface */
+	/** @{ */
+	std::string qpModuleName;
+	std::string qpObjPrefix;
+	/** @} */
+
+	/** FORCES interface object. */
 	std::tr1::shared_ptr< ExportForcesInterface > qpInterface;
+	std::tr1::shared_ptr< ExportForcesGenerator > qpGenerator;
 
 };
 

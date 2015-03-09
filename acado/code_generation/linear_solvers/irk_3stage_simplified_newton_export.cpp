@@ -26,12 +26,12 @@
 
 
 /**
- *    \file src/code_generation/linear_solvers/irk_3stage_solver_export.cpp
+ *    \file src/code_generation/linear_solvers/irk_3stage_simplified_newton_export.cpp
  *    \author Rien Quirynen
  *    \date 2015
  */
 
-#include <acado/code_generation/linear_solvers/irk_3stage_solver_export.hpp>
+#include <acado/code_generation/linear_solvers/irk_3stage_simplified_newton_export.hpp>
 
 using namespace std;
 
@@ -41,17 +41,17 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportIRK3StageSolver::ExportIRK3StageSolver( UserInteraction* _userInteraction,
+ExportIRK3StageSimplifiedNewton::ExportIRK3StageSimplifiedNewton( UserInteraction* _userInteraction,
 									const std::string& _commonHeaderName
 									) : ExportGaussElim( _userInteraction,_commonHeaderName )
 {
 	stepsize = 0;
 }
 
-ExportIRK3StageSolver::~ExportIRK3StageSolver( )
+ExportIRK3StageSimplifiedNewton::~ExportIRK3StageSimplifiedNewton( )
 {}
 
-returnValue ExportIRK3StageSolver::getDataDeclarations(	ExportStatementBlock& declarations,
+returnValue ExportIRK3StageSimplifiedNewton::getDataDeclarations(	ExportStatementBlock& declarations,
 														ExportStruct dataStruct
 														) const
 {
@@ -70,7 +70,7 @@ returnValue ExportIRK3StageSolver::getDataDeclarations(	ExportStatementBlock& de
 }
 
 
-returnValue ExportIRK3StageSolver::getFunctionDeclarations(	ExportStatementBlock& declarations
+returnValue ExportIRK3StageSimplifiedNewton::getFunctionDeclarations(	ExportStatementBlock& declarations
 															) const
 {
 	ExportGaussElim::getFunctionDeclarations( declarations );
@@ -89,7 +89,7 @@ returnValue ExportIRK3StageSolver::getFunctionDeclarations(	ExportStatementBlock
 }
 
 
-returnValue ExportIRK3StageSolver::getCode(	ExportStatementBlock& code
+returnValue ExportIRK3StageSimplifiedNewton::getCode(	ExportStatementBlock& code
 											)
 {
 	if( eig.isEmpty() || transf1.isEmpty() || transf2.isEmpty() || fabs(stepsize) <= ZERO_EPS ) return ACADOERROR(RET_INVALID_OPTION);
@@ -158,7 +158,7 @@ returnValue ExportIRK3StageSolver::getCode(	ExportStatementBlock& code
 }
 
 
-returnValue ExportIRK3StageSolver::transformRightHandSide(	ExportStatementBlock& code, const ExportIndex& index )
+returnValue ExportIRK3StageSimplifiedNewton::transformRightHandSide(	ExportStatementBlock& code, const ExportIndex& index )
 {
 	uint i, j;
 
@@ -195,7 +195,7 @@ returnValue ExportIRK3StageSolver::transformRightHandSide(	ExportStatementBlock&
 }
 
 
-returnValue ExportIRK3StageSolver::transformSolution(	ExportStatementBlock& code, const ExportIndex& index )
+returnValue ExportIRK3StageSimplifiedNewton::transformSolution(	ExportStatementBlock& code, const ExportIndex& index )
 {
 	uint j;
 	ExportVariable transf2_var( transf2 );
@@ -225,7 +225,7 @@ returnValue ExportIRK3StageSolver::transformSolution(	ExportStatementBlock& code
 }
 
 
-returnValue ExportIRK3StageSolver::appendVariableNames( stringstream& string ) {
+returnValue ExportIRK3StageSimplifiedNewton::appendVariableNames( stringstream& string ) {
 
 	ExportGaussElim::appendVariableNames( string );
 	string << ", " << rk_swap_complex.getFullName();
@@ -238,7 +238,7 @@ returnValue ExportIRK3StageSolver::appendVariableNames( stringstream& string ) {
 }
 
 
-returnValue ExportIRK3StageSolver::setup( )
+returnValue ExportIRK3StageSimplifiedNewton::setup( )
 {
 	ExportGaussElim::setup( );
 
@@ -295,7 +295,7 @@ returnValue ExportIRK3StageSolver::setup( )
 }
 
 
-returnValue ExportIRK3StageSolver::setEigenvalues( const DMatrix& _eig ) {
+returnValue ExportIRK3StageSimplifiedNewton::setEigenvalues( const DMatrix& _eig ) {
 	eig = _eig;
 
 	if( _eig.getNumRows() != 2 || _eig.getNumCols() != 2 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
@@ -307,7 +307,7 @@ returnValue ExportIRK3StageSolver::setEigenvalues( const DMatrix& _eig ) {
 }
 
 
-returnValue ExportIRK3StageSolver::setTransformations( const DMatrix& _transf1, const DMatrix& _transf2 ) {
+returnValue ExportIRK3StageSimplifiedNewton::setTransformations( const DMatrix& _transf1, const DMatrix& _transf2 ) {
 	transf1 = _transf1;
 	transf2 = _transf2;
 
@@ -319,32 +319,32 @@ returnValue ExportIRK3StageSolver::setTransformations( const DMatrix& _transf1, 
 }
 
 
-returnValue ExportIRK3StageSolver::setStepSize( double _stepsize ) {
+returnValue ExportIRK3StageSimplifiedNewton::setStepSize( double _stepsize ) {
 	stepsize = _stepsize;
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-const std::string ExportIRK3StageSolver::getNameSolveRealFunction() {
+const std::string ExportIRK3StageSimplifiedNewton::getNameSolveRealFunction() {
 
 	return string( "solve_real_" ) + identifier + "system";
 }
 
 
-const std::string ExportIRK3StageSolver::getNameSolveRealReuseFunction() {
+const std::string ExportIRK3StageSimplifiedNewton::getNameSolveRealReuseFunction() {
 
 	return string( "solve_real_" ) + identifier + "system_reuse";
 }
 
 
-const std::string ExportIRK3StageSolver::getNameSolveComplexFunction() {
+const std::string ExportIRK3StageSimplifiedNewton::getNameSolveComplexFunction() {
 
 	return string( "solve_complex_" ) + identifier + "system";
 }
 
 
-const std::string ExportIRK3StageSolver::getNameSolveComplexReuseFunction() {
+const std::string ExportIRK3StageSimplifiedNewton::getNameSolveComplexReuseFunction() {
 
 	return string( "solve_complex_" ) + identifier + "system_reuse";
 }
