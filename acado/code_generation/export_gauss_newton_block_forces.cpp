@@ -78,13 +78,38 @@ returnValue ExportGaussNewtonBlockForces::setupCondensing( void )
 	returnValue status = ExportGaussNewtonBlockCN2::setupCondensing();
 	if( status != SUCCESSFUL_RETURN ) return status;
 
-	// TODO: REWRITE EXPAND ROUTINE + SET HESSIAN AND GRADIENT INFORMATION
 	objHessians.clear();
 	objHessians.resize(getNumberOfBlocks() + 1);
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
+	{
+		objHessians[ i ].setup(string("H") + toString(i + 1), getNumBlockVariables(), getNumBlockVariables(), REAL, FORCES_PARAMS, false, qpObjPrefix);
+	}
+	objHessians[ getNumberOfBlocks() ].setup(string("H") + toString(getNumberOfBlocks() + 1), NX, NX, REAL, FORCES_PARAMS, false, qpObjPrefix);
+
 
 	objGradients.clear();
 	objGradients.resize(getNumberOfBlocks() + 1);
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
+	{
+		objGradients[ i ].setup(string("f") + toString(i + 1), getNumBlockVariables(), 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
+	}
+	objGradients[ getNumberOfBlocks() ].setup(string("f") + toString(getNumberOfBlocks() + 1), NX, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
 
+
+	conC.clear();
+	conC.resize( getNumberOfBlocks() );
+	// XXX FORCES works with column major format
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
+		conC[ i ].setup(string("C") + toString(i + 1), getNumBlockVariables(), NX, REAL, FORCES_PARAMS, false, qpObjPrefix);
+
+	cond.clear();
+	unsigned dNum = initialStateFixed() == true ? getNumberOfBlocks() + 1 : getNumberOfBlocks();
+	cond.resize(dNum);
+	for (unsigned i = 0; i < dNum; ++i)
+		cond[ i ].setup(string("d") + toString(i + 1), NX, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
+
+
+	// TODO: SET HESSIAN AND GRADIENT INFORMATION
 	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
 		condensePrep.addStatement(objHessians[ i ].makeColVector() == qpH.getRows(i*getNumBlockVariables()*getNumBlockVariables(),(i+1)*getNumBlockVariables()*getNumBlockVariables()));
 	condensePrep.addLinebreak();
@@ -93,28 +118,48 @@ returnValue ExportGaussNewtonBlockForces::setupCondensing( void )
 		condensePrep.addStatement(objGradients[ i ] == g.getRows(i*getNumBlockVariables(),(i+1)*getNumBlockVariables()));
 	condensePrep.addLinebreak();
 
-//	LOG( LVL_DEBUG ) << "Setup condensing: rewrite expand routine" << endl;
-//	expand.setup( "expand", blockI );
-//
-//	for (unsigned i = 0; i < getBlockSize(); ++i ) {
-//		expand.addStatement( (u.getRow(blockI*getBlockSize()+i)).getTranspose() += xVars.getRows(blockI*getNumBlockVariables()+NX+i*NU, blockI*getNumBlockVariables()+NX+(i+1)*NU) );
-//	}
-//
-//	expand.addStatement( sbar.getRows(0, NX) == xVars.getRows(blockI*getNumBlockVariables(), blockI*getNumBlockVariables()+NX) );
-//	expand.addStatement( (x.getRow(blockI*getBlockSize())).getTranspose() += sbar.getRows(0, NX) );
-//	//	}
-//	if( getBlockSize() > 1 ) {
-//		expand.addStatement( sbar.getRows(NX, getBlockSize()*NX) == d.getRows(blockI*getBlockSize()*NX,(blockI+1)*getBlockSize()*NX-NX) );
-//	}
-//
-//	for (unsigned row = 0; row < getBlockSize()-1; ++row ) {
-//		expand.addFunctionCall(
-//				expansionStep, evGx.getAddress((blockI*getBlockSize()+row) * NX), evGu.getAddress((blockI*getBlockSize()+row) * NX),
-//				xVars.getAddress(blockI*getNumBlockVariables()+offset + row * NU), sbar.getAddress(row * NX),
-//				sbar.getAddress((row + 1) * NX)
-//		);
-//		expand.addStatement( (x.getRow(blockI*getBlockSize()+row+1)).getTranspose() += sbar.getRows((row+1)*NX, (row+2)*NX) );
-//	}
+
+	// TODO: SET EQUALITY CONSTRAINT VALUES
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
+		condensePrep.addStatement(conC[ i ] == qpC.getRows(i*NX,(i+1)*NX).getTranspose());
+	condensePrep.addLinebreak();
+
+	if( initialStateFixed() ) {
+		for (unsigned i = 1; i < dNum; ++i)
+			condensePrep.addStatement(cond[ i ] == zeros<double>(NX,1) - qpc.getRows((i-1)*NX,i*NX)); // TODO:CHECK THE SIGN
+	}
+	else {
+		for (unsigned i = 0; i < dNum; ++i)
+			condensePrep.addStatement(cond[ i ] == zeros<double>(NX,1) - qpc.getRows(i*NX,(i+1)*NX)); // TODO:CHECK THE SIGN
+	}
+	condensePrep.addLinebreak();
+
+
+	// TODO: REWRITE EXPAND ROUTINE
+	unsigned offset = performFullCondensing() == true ? 0 : NX;
+	LOG( LVL_DEBUG ) << "Setup condensing: rewrite expand routine" << endl;
+	ExportVariable stageOut("stageOut", getNumBlockVariables(), 1, REAL, ACADO_LOCAL);
+	expand = ExportFunction( "expand", stageOut, blockI );
+
+	for (unsigned i = 0; i < getBlockSize(); ++i ) {
+		expand.addStatement( (u.getRow(blockI*getBlockSize()+i)).getTranspose() += stageOut.getRows(NX+i*NU, NX+(i+1)*NU) );
+	}
+
+	expand.addStatement( sbar.getRows(0, NX) == stageOut.getRows(0, NX) );
+	expand.addStatement( (x.getRow(blockI*getBlockSize())).getTranspose() += sbar.getRows(0, NX) );
+
+	if( getBlockSize() > 1 ) {
+		expand.addStatement( sbar.getRows(NX, getBlockSize()*NX) == d.getRows(blockI*getBlockSize()*NX,(blockI+1)*getBlockSize()*NX-NX) );
+	}
+
+	for (unsigned row = 0; row < getBlockSize()-1; ++row ) {
+		expand.addFunctionCall(
+				expansionStep, evGx.getAddress((blockI*getBlockSize()+row) * NX), evGu.getAddress((blockI*getBlockSize()+row) * NX),
+				stageOut.getAddress(offset + row * NU), sbar.getAddress(row * NX),
+				sbar.getAddress((row + 1) * NX)
+		);
+		expand.addStatement( (x.getRow(blockI*getBlockSize()+row+1)).getTranspose() += sbar.getRows((row+1)*NX, (row+2)*NX) );
+	}
 
 	// !! TODO: Calculation of multipliers: !!
 
@@ -147,10 +192,6 @@ returnValue ExportGaussNewtonBlockForces::setupConstraintsEvaluation( void )
 
 	conABIndices.clear();
 	conABIndices.resize(getNumberOfBlocks() + 1);
-
-	cond.clear();
-	unsigned dNum = initialStateFixed() == true ? getNumberOfBlocks() + 1 : getNumberOfBlocks();
-	cond.resize(dNum);
 
 //	DVector lbTmp, ubTmp;
 //
@@ -275,101 +316,18 @@ returnValue ExportGaussNewtonBlockForces::setupConstraintsEvaluation( void )
 //				evaluateConstraints << u.getFullName() << "[ " << toString(i * NU + conUBIndices[ i ][ j ] - NX) << " ];\n";
 //		}
 //	evaluateConstraints.addLinebreak();
-//
-//	////////////////////////////////////////////////////////////////////////////
-//	//
-//	// Evaluation of the equality constraints
-//	//  - system dynamics only
-//	//
-//	////////////////////////////////////////////////////////////////////////////
-//
-//	conC.clear();
-//	conC.resize( N );
-//
-//	// XXX FORCES works with column major format
-//	//	if (initialStateFixed() == true)
-//	//		conC[ 0 ].setup("C1", NX + NU, 2 * NX, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//	//	else
-//	//		conC[ 0 ].setup("C1", NX + NU, NX, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//
-//	//	for (unsigned i = 1; i < N; ++i)
-//	for (unsigned i = 0; i < N; ++i)
-//		conC[ i ].setup(string("C") + toString(i + 1), NX + NU, NX, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//
-//	ExportIndex index( "index" );
-//	conStageC.setup("conStageC", NX + NU, NX, REAL);
-//	conSetGxGu.setup("conSetGxGu", conStageC, index);
-//
-//	conSetGxGu.addStatement(
-//			conStageC.getSubMatrix(0, NX, 0, NX) ==
-//					evGx.getSubMatrix(index * NX, (index + 1) * NX, 0, NX).getTranspose()
-//	);
-//	conSetGxGu.addLinebreak();
-//	conSetGxGu.addStatement(
-//			conStageC.getSubMatrix(NX, NX + NU, 0, NX) ==
-//					evGu.getSubMatrix(index * NX, (index + 1) * NX, 0, NU).getTranspose()
-//	);
-//
-//	//	if (initialStateFixed() == true)
-//	//	{
-//	//		initialize.addStatement(
-//	//				conC[ 0 ].getSubMatrix(0, NX, 0, NX) == eye( NX )
-//	//		);
-//	//		evaluateConstraints.addLinebreak();
-//	//		evaluateConstraints.addStatement(
-//	//				conC[ 0 ].getSubMatrix(0, NX, NX, 2 * NX) == evGx.getSubMatrix(0, NX, 0, NX).getTranspose()
-//	//		);
-//	//		evaluateConstraints.addLinebreak();
-//	//		evaluateConstraints.addStatement(
-//	//				conC[ 0 ].getSubMatrix(NX, NX + NU, NX, 2 * NX) == evGu.getSubMatrix(0, NX, 0, NU).getTranspose()
-//	//		);
-//	//		evaluateConstraints.addLinebreak();
-//	//	}
-//
-//	unsigned start = 0; //initialStateFixed() == true ? 1 : 0;
-//	for (unsigned i = start; i < N; ++i)
-//		evaluateConstraints.addFunctionCall(conSetGxGu, conC[ i ], ExportIndex( i ));
-//	evaluateConstraints.addLinebreak();
-//
-//	cond.clear();
-//
-//	unsigned dNum = initialStateFixed() == true ? N + 1 : N;
-//	cond.resize(dNum);
-//
-//	//	if (initialStateFixed() == true)
-//	//		cond[ 0 ].setup("d1", 2 * NX, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//	//	else
-//	//		cond[ 0 ].setup("d1", NX, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//
-//	for (unsigned i = 0; i < dNum; ++i)
-//		cond[ i ].setup(string("d") + toString(i + 1), NX, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//
-//	ExportVariable staged, stagedNew;
-//
-//	staged.setup("staged", NX, 1, REAL, ACADO_LOCAL);
-//	stagedNew.setup("stagedNew", NX, 1, REAL, ACADO_LOCAL);
-//	conSetd.setup("conSetd", stagedNew, index);
-//	conSetd.addStatement(
-//			stagedNew == zeros<double>(NX, 1) - d.getRows(index * NX, (index + 1) * NX)
-//	);
-//
-//	//		evaluateConstraints.addStatement(
-//	//				cond[ 0 ].getRows(NX, 2 * NX) == dummyZero - d.getRows(0, NX)
-//	//		);
-//	//		evaluateConstraints.addLinebreak();
-//
-//	if( initialStateFixed() ) {
-//		for (unsigned i = 1; i < dNum; ++i)
-//			evaluateConstraints.addFunctionCall(
-//					conSetd, cond[ i ], ExportIndex(i - 1)
-//			);
-//	}
-//	else {
-//		for (unsigned i = 0; i < dNum; ++i)
-//			evaluateConstraints.addFunctionCall(
-//					conSetd, cond[ i ], ExportIndex(i)
-//			);
-//	}
+
+
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue ExportGaussNewtonBlockForces::setupVariables( )
+{
+	returnValue status = ExportGaussNewtonBlockCN2::setupVariables();
+	if( status != SUCCESSFUL_RETURN ) return status;
+
+	xVars.setup("x", getNumQPvars(), 1, REAL, ACADO_LOCAL); // NOT USED
+	yVars.setup("",0,0); // NOT USED
 
 	return SUCCESSFUL_RETURN;
 }
@@ -477,9 +435,9 @@ returnValue ExportGaussNewtonBlockForces::setupEvaluation( )
 	<< "&" << qpObjPrefix << "_" << "info" << " );\n";
 	feedback.addLinebreak();
 
-	ExportForLoop expandLoop( index, 0, getNumberOfBlocks() );
-	expandLoop.addFunctionCall( expand, index );
-	feedback.addStatement( expandLoop );
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i) {
+		feedback.addFunctionCall( expand, vecQPVars[i], ExportIndex(i) );
+	}
 
 	feedback.addStatement( x.getRow( N ) += vecQPVars[ getNumberOfBlocks() ].getTranspose() );
 	feedback.addLinebreak();

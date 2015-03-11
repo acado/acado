@@ -95,6 +95,12 @@ protected:
 	 */
 	virtual returnValue setupConstraintsEvaluation( void );
 
+	/** Initialization of all member variables.
+	 *
+	 *	\return SUCCESSFUL_RETURN
+	 */
+	virtual returnValue setupVariables( );
+
 	/** Exports source code containing the evaluation routines of the algorithm.
 	 *
 	 *	\return SUCCESSFUL_RETURN
