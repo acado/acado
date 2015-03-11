@@ -44,6 +44,7 @@ returnValue ExportGaussNewtonBlockQpDunes::setup( )
 {
 
 	returnValue status = ExportGaussNewtonBlockCN2::setup();
+	if( status != SUCCESSFUL_RETURN ) return status;
 
 	LOG( LVL_DEBUG ) << "Solver: setup extra initialization... " << endl;
 	//

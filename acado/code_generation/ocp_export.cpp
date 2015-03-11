@@ -506,7 +506,10 @@ returnValue OCPexport::setup( )
 
 	solver->setLevenbergMarquardt( levenbergMarquardt );
 
-	solver->setup( );
+	returnValue statusSetup;
+	statusSetup = solver->setup( );
+	if (statusSetup != SUCCESSFUL_RETURN)
+		return ACADOERRORTEXT(status, "Error in setting up solver.");
 
 	setStatus( BS_READY );
 

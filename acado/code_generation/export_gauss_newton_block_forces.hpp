@@ -86,6 +86,15 @@ public:
 
 protected:
 
+	virtual returnValue setupCondensing( );
+
+	/** Set-up evaluation of constraints
+	 *   - box constraints on states and controls
+	 *
+	 *  \return SUCCESSFUL_RETURN
+	 */
+	virtual returnValue setupConstraintsEvaluation( void );
+
 	/** Exports source code containing the evaluation routines of the algorithm.
 	 *
 	 *	\return SUCCESSFUL_RETURN
@@ -101,6 +110,17 @@ protected:
 	std::string qpModuleName;
 	std::string qpObjPrefix;
 	/** @} */
+
+	std::vector< ExportVariable > objHessians;
+	std::vector< ExportVariable > objGradients;
+
+	std::vector< ExportVariable > conLB;
+	std::vector< ExportVariable > conUB;
+	std::vector< ExportVariable > conAB;
+	std::vector< std::vector< unsigned > > conLBIndices, conUBIndices, conABIndices;
+
+	std::vector< ExportVariable > conC;
+	std::vector< ExportVariable > cond;
 
 	/** FORCES interface object. */
 	std::tr1::shared_ptr< ExportForcesInterface > qpInterface;
