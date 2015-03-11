@@ -79,80 +79,37 @@ returnValue ExportGaussNewtonBlockForces::setupCondensing( void )
 	if( status != SUCCESSFUL_RETURN ) return status;
 
 	// TODO: REWRITE EXPAND ROUTINE + SET HESSIAN AND GRADIENT INFORMATION
+	objHessians.clear();
+	objHessians.resize(N + 1);
 
-	LOG( LVL_DEBUG ) << "Setup condensing: rewrite expand routine" << endl;
-	expand.setup( "expand", blockI );
+	objGradients.clear();
+	objGradients.resize(N + 1);
 
-	//	if (performFullCondensing() == true)
-	//	{
-	//		expand.addStatement( u.makeRowVector() += xVars.getTranspose() );
-	//	}
-	//	else
-	//	{
-	for (unsigned i = 0; i < getBlockSize(); ++i ) {
-		expand.addStatement( (u.getRow(blockI*getBlockSize()+i)).getTranspose() += xVars.getRows(blockI*getNumBlockVariables()+NX+i*NU, blockI*getNumBlockVariables()+NX+(i+1)*NU) );
-	}
-	//	}
+//	LOG( LVL_DEBUG ) << "Setup condensing: rewrite expand routine" << endl;
+//	expand.setup( "expand", blockI );
+//
+//	for (unsigned i = 0; i < getBlockSize(); ++i ) {
+//		expand.addStatement( (u.getRow(blockI*getBlockSize()+i)).getTranspose() += xVars.getRows(blockI*getNumBlockVariables()+NX+i*NU, blockI*getNumBlockVariables()+NX+(i+1)*NU) );
+//	}
+//
+//	expand.addStatement( sbar.getRows(0, NX) == xVars.getRows(blockI*getNumBlockVariables(), blockI*getNumBlockVariables()+NX) );
+//	expand.addStatement( (x.getRow(blockI*getBlockSize())).getTranspose() += sbar.getRows(0, NX) );
+//	//	}
+//	if( getBlockSize() > 1 ) {
+//		expand.addStatement( sbar.getRows(NX, getBlockSize()*NX) == d.getRows(blockI*getBlockSize()*NX,(blockI+1)*getBlockSize()*NX-NX) );
+//	}
+//
+//	for (unsigned row = 0; row < getBlockSize()-1; ++row ) {
+//		expand.addFunctionCall(
+//				expansionStep, evGx.getAddress((blockI*getBlockSize()+row) * NX), evGu.getAddress((blockI*getBlockSize()+row) * NX),
+//				xVars.getAddress(blockI*getNumBlockVariables()+offset + row * NU), sbar.getAddress(row * NX),
+//				sbar.getAddress((row + 1) * NX)
+//		);
+//		expand.addStatement( (x.getRow(blockI*getBlockSize()+row+1)).getTranspose() += sbar.getRows((row+1)*NX, (row+2)*NX) );
+//	}
 
-	//	if( performFullCondensing() == true ) {
-	//		expand.addStatement( sbar.getRows(0, NX) == Dx0 );
-	//	}
-	//	else {
-	expand.addStatement( sbar.getRows(0, NX) == xVars.getRows(blockI*getNumBlockVariables(), blockI*getNumBlockVariables()+NX) );
-	expand.addStatement( (x.getRow(blockI*getBlockSize())).getTranspose() += sbar.getRows(0, NX) );
-	//	}
-	if( getBlockSize() > 1 ) {
-		expand.addStatement( sbar.getRows(NX, getBlockSize()*NX) == d.getRows(blockI*getBlockSize()*NX,(blockI+1)*getBlockSize()*NX-NX) );
-	}
+	// !! TODO: Calculation of multipliers: !!
 
-	for (unsigned row = 0; row < getBlockSize()-1; ++row ) {
-		expand.addFunctionCall(
-				expansionStep, evGx.getAddress((blockI*getBlockSize()+row) * NX), evGu.getAddress((blockI*getBlockSize()+row) * NX),
-				xVars.getAddress(blockI*getNumBlockVariables()+offset + row * NU), sbar.getAddress(row * NX),
-				sbar.getAddress((row + 1) * NX)
-		);
-		expand.addStatement( (x.getRow(blockI*getBlockSize()+row+1)).getTranspose() += sbar.getRows((row+1)*NX, (row+2)*NX) );
-	}
-
-	// !! Calculation of multipliers: !!
-	int hessianApproximation;
-	get( HESSIAN_APPROXIMATION, hessianApproximation );
-	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
-	if( secondOrder ) {
-		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
-		//	mu_N = lambda_N + q_N + Q_N^T * Ds_N  --> wrong in Joel's paper !!
-		//		for i = N - 1: 1
-		//			mu_k = Q_k^T * Ds_k + A_k^T * mu_{k + 1} + S_k * Du_k + q_k
-
-		for (uint j = 0; j < NX; j++ ) {
-			uint item = N*NX+j;
-			uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
-			if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
-				expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == yVars.getRow(getNumQPvars()+IdxF) );
-			}
-			else { // INDEX NOT FOUND
-				expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == 0.0 );
-			}
-		}
-		expand.addStatement( mu.getRow(N-1) += sbar.getRows(N*NX,(N+1)*NX).getTranspose()*QN1 );
-		expand.addStatement( mu.getRow(N-1) += QDy.getRows(N*NX,(N+1)*NX).getTranspose() );
-		for (int i = N - 1; i >= 1; i--) {
-			for (uint j = 0; j < NX; j++ ) {
-				uint item = i*NX+j;
-				uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
-				if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
-					expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == yVars.getRow(getNumQPvars()+IdxF) );
-				}
-				else { // INDEX NOT FOUND
-					expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == 0.0 );
-				}
-			}
-			expand.addFunctionCall(
-					expansionStep2, QDy.getAddress(i*NX), Q1.getAddress(i * NX), sbar.getAddress(i*NX),
-					S1.getAddress(i * NX), xVars.getAddress(offset + i * NU), evGx.getAddress(i * NX),
-					mu.getAddress(i-1), mu.getAddress(i) );
-		}
-	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -168,27 +125,21 @@ returnValue ExportGaussNewtonBlockForces::setupConstraintsEvaluation( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-//	conLB.clear();
-//	conLB.resize(N + 1);
-//
-//	conUB.clear();
-//	conUB.resize(N + 1);
-//
-//	conLBIndices.clear();
-//	conLBIndices.resize(N + 1);
-//
-//	conUBIndices.clear();
-//	conUBIndices.resize(N + 1);
-//
-//	conABIndices.clear();
-//	conABIndices.resize(N + 1);
-//
-//	conLBValues.clear();
-//	conLBValues.resize(N + 1);
-//
-//	conUBValues.clear();
-//	conUBValues.resize(N + 1);
-//
+	conLB.clear();
+	conLB.resize(N + 1);
+
+	conUB.clear();
+	conUB.resize(N + 1);
+
+	conLBIndices.clear();
+	conLBIndices.resize(N + 1);
+
+	conUBIndices.clear();
+	conUBIndices.resize(N + 1);
+
+	conABIndices.clear();
+	conABIndices.resize(N + 1);
+
 //	DVector lbTmp, ubTmp;
 //
 //	//
