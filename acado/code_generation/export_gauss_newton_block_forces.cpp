@@ -85,6 +85,14 @@ returnValue ExportGaussNewtonBlockForces::setupCondensing( void )
 	objGradients.clear();
 	objGradients.resize(getNumberOfBlocks() + 1);
 
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
+		condensePrep.addStatement(objHessians[ i ].makeColVector() == qpH.getRows(i*getNumBlockVariables()*getNumBlockVariables(),(i+1)*getNumBlockVariables()*getNumBlockVariables()));
+	condensePrep.addLinebreak();
+
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
+		condensePrep.addStatement(objGradients[ i ] == g.getRows(i*getNumBlockVariables(),(i+1)*getNumBlockVariables()));
+	condensePrep.addLinebreak();
+
 //	LOG( LVL_DEBUG ) << "Setup condensing: rewrite expand routine" << endl;
 //	expand.setup( "expand", blockI );
 //
