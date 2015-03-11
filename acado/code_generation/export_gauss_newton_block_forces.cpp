@@ -578,8 +578,8 @@ returnValue ExportGaussNewtonBlockForces::setupQPInterface( )
 	//
 	// Export Python generator
 	//
-	ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
-			"A python code generator interface for block condensing with FORCES is under development.");
+//	ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
+//			"A python code generator interface for block condensing with FORCES is under development.");
 
 	return SUCCESSFUL_RETURN;
 }
