@@ -103,9 +103,20 @@ classdef OCPexport < acado.ExportModule
         end
         
         
+        function setDebugMode(obj)
+            obj.debugMode = 1;
+        end
+        
+        
         function getInstructions(obj, cppobj, get)
             
-            if (get == 'B')
+                
+            if (get == 'FB')
+                % SET LOGGER TO LVL_DEBUG
+                if obj.debugMode
+                    fprintf(cppobj.fileMEX,'    Logger::instance().setLogLevel( LVL_DEBUG );\n');
+                end
+            elseif (get == 'B')
                 
                 % HEADER
                 if ~isempty(obj.ocp)

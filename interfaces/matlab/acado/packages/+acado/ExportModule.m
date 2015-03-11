@@ -52,6 +52,7 @@ classdef ExportModule < acado.UserInteraction
         run;
         
         timingCalls = 0;
+        debugMode = 0;
     end
     
     methods
