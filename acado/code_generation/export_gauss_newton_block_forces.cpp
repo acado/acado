@@ -80,10 +80,10 @@ returnValue ExportGaussNewtonBlockForces::setupCondensing( void )
 
 	// TODO: REWRITE EXPAND ROUTINE + SET HESSIAN AND GRADIENT INFORMATION
 	objHessians.clear();
-	objHessians.resize(N + 1);
+	objHessians.resize(getNumberOfBlocks() + 1);
 
 	objGradients.clear();
-	objGradients.resize(N + 1);
+	objGradients.resize(getNumberOfBlocks() + 1);
 
 //	LOG( LVL_DEBUG ) << "Setup condensing: rewrite expand routine" << endl;
 //	expand.setup( "expand", blockI );
@@ -126,19 +126,23 @@ returnValue ExportGaussNewtonBlockForces::setupConstraintsEvaluation( void )
 	////////////////////////////////////////////////////////////////////////////
 
 	conLB.clear();
-	conLB.resize(N + 1);
+	conLB.resize(getNumberOfBlocks() + 1);
 
 	conUB.clear();
-	conUB.resize(N + 1);
+	conUB.resize(getNumberOfBlocks() + 1);
 
 	conLBIndices.clear();
-	conLBIndices.resize(N + 1);
+	conLBIndices.resize(getNumberOfBlocks() + 1);
 
 	conUBIndices.clear();
-	conUBIndices.resize(N + 1);
+	conUBIndices.resize(getNumberOfBlocks() + 1);
 
 	conABIndices.clear();
-	conABIndices.resize(N + 1);
+	conABIndices.resize(getNumberOfBlocks() + 1);
+
+	cond.clear();
+	unsigned dNum = initialStateFixed() == true ? getNumberOfBlocks() + 1 : getNumberOfBlocks();
+	cond.resize(dNum);
 
 //	DVector lbTmp, ubTmp;
 //
@@ -392,18 +396,18 @@ returnValue ExportGaussNewtonBlockForces::setupEvaluation( )
 	condensePrepLoop.addFunctionCall( condensePrep, index );
 	preparation.addStatement( condensePrepLoop );
 
-	preparation.addStatement( objHessians[N] == QN1 );
+	preparation.addStatement( objHessians[getNumberOfBlocks()] == QN1 );
 	DMatrix mReg = eye<double>( getNX() );
 	mReg *= levenbergMarquardt;
-	preparation.addStatement( objHessians[N] += mReg );
+	preparation.addStatement( objHessians[getNumberOfBlocks()] += mReg );
 	preparation.addLinebreak();
 
-	preparation.addStatement( objGradients[ N ] == QN2 * DyN );
+	preparation.addStatement( objGradients[ getNumberOfBlocks() ] == QN2 * DyN );
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
 	ExportVariable SlxCall =
 				objSlx.isGiven() == true || variableObjS == false ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
-	preparation.addStatement( objGradients[ N ] += SlxCall );
+	preparation.addStatement( objGradients[ getNumberOfBlocks() ] += SlxCall );
 	preparation.addLinebreak();
 
 	////////////////////////////////////////////////////////////////////////////
@@ -432,10 +436,10 @@ returnValue ExportGaussNewtonBlockForces::setupEvaluation( )
 	std::vector< ExportVariable > vecQPVars;
 
 	vecQPVars.clear();
-	vecQPVars.resize(N + 1);
-	for (unsigned i = 0; i < N; ++i)
-		vecQPVars[ i ].setup(string("out") + toString(i + 1), NX + NU, 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
-	vecQPVars[ N ].setup(string("out") + toString(N + 1), NX, 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
+	vecQPVars.resize(getNumberOfBlocks() + 1);
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
+		vecQPVars[ i ].setup(string("out") + toString(i + 1), getNumBlockVariables(), 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
+	vecQPVars[ getNumberOfBlocks() ].setup(string("out") + toString(getNumberOfBlocks() + 1), NX, 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
 
 	//
 	// In case warm starting is enabled, give an initial guess, based on the old solution
@@ -445,36 +449,7 @@ returnValue ExportGaussNewtonBlockForces::setupEvaluation( )
 
 	if ( hotstartQP )
 	{
-		std::vector< ExportVariable > zInit;
-
-		zInit.clear();
-		zInit.resize(N + 1);
-		for (unsigned i = 0; i < N; ++i)
-		{
-			string name = "z_init_";
-			name = name + (i < 10 ? "0" : "") + toString( i );
-			zInit[ i ].setup(name, NX + NU, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
-		}
-		string name = "z_init_";
-		name = name + (N < 10 ? "0" : "") + toString( N );
-		zInit[ N ].setup(name, NX, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
-
-		// TODO This should be further investigated.
-
-		//
-		// 1) Just use the old solution
-		//
-		//		for (unsigned blk = 0; blk < N + 1; blk++)
-		//			feedback.addStatement(zInit[ blk ] == vecQPVars[ blk ] );
-
-		//
-		// 2) Initialization by shifting
-		//
-
-		//		for (unsigned blk = 0; blk < N - 1; blk++)
-		//			feedback.addStatement( zInit[ blk ] == vecQPVars[blk + 1] );
-		//		for (unsigned el = 0; el < NX; el++)
-		//			feedback.addStatement( zInit[N - 1].getElement(el, 0) == vecQPVars[ N ].getElement(el, 0) );
+		return ACADOERROR(RET_NOT_IMPLEMENTED_YET);
 	}
 
 	//
@@ -498,7 +473,7 @@ returnValue ExportGaussNewtonBlockForces::setupEvaluation( )
 	expandLoop.addFunctionCall( expand, index );
 	feedback.addStatement( expandLoop );
 
-	feedback.addStatement( x.getRow( N ) += vecQPVars[ N ].getTranspose() );
+	feedback.addStatement( x.getRow( N ) += vecQPVars[ getNumberOfBlocks() ].getTranspose() );
 	feedback.addLinebreak();
 
 	////////////////////////////////////////////////////////////////////////////
@@ -581,8 +556,8 @@ returnValue ExportGaussNewtonBlockForces::setupQPInterface( )
 
 	qpGenerator->configure(
 			NX,
-			NU,
-			N,
+			getBlockSize()*NU,
+			getNumberOfBlocks(),
 			conLBIndices,
 			conUBIndices,
 			conABIndices,
