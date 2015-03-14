@@ -661,7 +661,9 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	options[ "ACADO_QP_NV" ] =
 			make_pair(toString( solver->getNumQPvars() ), "Total number of QP optimization variables.");
 
-	if( (QPSolverName)qpSolver == QP_FORCES ) {
+	int qpSolution;
+	get(SPARSE_QP_SOLUTION, qpSolution);
+	if( (QPSolverName)qpSolver == QP_FORCES && (SparseQPsolutionMethods)qpSolution != BLOCK_CONDENSING_N2 ) {
 		ExportGaussNewtonForces *blockSolver = static_cast<ExportGaussNewtonForces*>(solver.get());
 		options[ "ACADO_QP_NLB" ] =
 				make_pair(toString( blockSolver->getNumLowerBounds() ), "Total number of QP lower bound values.");
@@ -670,8 +672,6 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	}
 
 	// QPDunes block based condensing:
-	int qpSolution;
-	get(SPARSE_QP_SOLUTION, qpSolution);
 	if ( (SparseQPsolutionMethods)qpSolution == BLOCK_CONDENSING_N2 ) {
 		ExportGaussNewtonBlockCN2 *blockSolver = static_cast<ExportGaussNewtonBlockCN2*>(solver.get());
 

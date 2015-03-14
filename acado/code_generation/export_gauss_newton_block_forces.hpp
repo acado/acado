@@ -122,8 +122,11 @@ protected:
 
 	std::vector< ExportVariable > conLB;
 	std::vector< ExportVariable > conUB;
-	std::vector< ExportVariable > conAB;
-	std::vector< std::vector< unsigned > > conLBIndices, conUBIndices, conABIndices;
+	std::vector< std::vector< unsigned > > conLBIndices, conUBIndices;
+
+	std::vector< ExportVariable > conA, conAB;
+	ExportFunction evaluateAffineConstraints;
+	std::vector< unsigned > conABDimensions;
 
 	std::vector< ExportVariable > conC;
 	std::vector< ExportVariable > cond;

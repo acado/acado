@@ -69,6 +69,7 @@ returnValue ExportGaussNewtonBlockForces::getCode(	ExportStatementBlock& code
 	code.addFunction( shiftQpData );
 
 	code.addFunction( evaluateConstraints );
+	code.addFunction( evaluateAffineConstraints );
 
 	return ExportGaussNewtonCN2::getCode( code );
 }
@@ -184,139 +185,148 @@ returnValue ExportGaussNewtonBlockForces::setupConstraintsEvaluation( void )
 	conUB.clear();
 	conUB.resize(getNumberOfBlocks() + 1);
 
+	conA.clear();
+	conA.resize(getNumberOfBlocks());
+
+	conAB.clear();
+	conAB.resize(getNumberOfBlocks());
+
 	conLBIndices.clear();
 	conLBIndices.resize(getNumberOfBlocks() + 1);
 
 	conUBIndices.clear();
 	conUBIndices.resize(getNumberOfBlocks() + 1);
 
-	conABIndices.clear();
-	conABIndices.resize(getNumberOfBlocks() + 1);
+	conABDimensions.clear();
+	conABDimensions.resize(getNumberOfBlocks() + 1);
 
-//	DVector lbTmp, ubTmp;
-//
-//	//
-//	// Stack state constraints
-//	//
-//	for (unsigned i = 0; i < xBounds.getNumPoints(); ++i)
-//	{
-//		lbTmp = xBounds.getLowerBounds( i );
-//		ubTmp = xBounds.getUpperBounds( i );
-//
-//		if (isFinite( lbTmp ) == false && isFinite( ubTmp ) == false)
-//			continue;
-//
-//		for (unsigned j = 0; j < lbTmp.getDim(); ++j)
-//		{
-//			if (acadoIsFinite( lbTmp( j ) ) == true)
-//			{
-//				conLBIndices[ i ].push_back( j );
-//				conLBValues[ i ].push_back( lbTmp( j ) );
-//				numLB++;
-//			}
-//
-//			if (acadoIsFinite( ubTmp( j ) ) == true)
-//			{
-//				conUBIndices[ i ].push_back( j );
-//				conUBValues[ i ].push_back( ubTmp( j ) );
-//				numUB++;
-//			}
-//		}
-//	}
-//
-//	//
-//	// Stack control constraints
-//	//
-//	for (unsigned i = 0; i < uBounds.getNumPoints() && i < N; ++i)
-//	{
-//		lbTmp = uBounds.getLowerBounds( i );
-//		ubTmp = uBounds.getUpperBounds( i );
-//
-//		if (isFinite( lbTmp ) == false && isFinite( ubTmp ) == false)
-//			continue;
-//
-//		for (unsigned j = 0; j < lbTmp.getDim(); ++j)
-//		{
-//			if (acadoIsFinite( lbTmp( j ) ) == true)
-//			{
-//				conLBIndices[ i ].push_back(NX + j);
-//				conLBValues[ i ].push_back( lbTmp( j ) );
-//				numLB++;
-//			}
-//
-//			if (acadoIsFinite( ubTmp( j ) ) == true)
-//			{
-//				conUBIndices[ i ].push_back(NX + j);
-//				conUBValues[ i ].push_back( ubTmp( j ) );
-//				numUB++;
-//			}
-//		}
-//	}
-//
-//	//
-//	// Setup variables
-//	//
-//	for (unsigned i = 0; i < N + 1; ++i)
-//	{
-//		conLB[ i ].setup(string("lb") + toString(i + 1), conLBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//		conUB[ i ].setup(string("ub") + toString(i + 1), conUBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
-//	}
-//
-//	int hardcodeConstraintValues;
-//	get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
-//	uint numBounds = numLB+numUB;
-//	if (!hardcodeConstraintValues && numBounds > 0)
-//	{
-//		lbValues.setup("lbValues", numLB, 1, REAL, ACADO_VARIABLES);
-//		lbValues.setDoc( "Lower bounds values." );
-//		ubValues.setup("ubValues", numUB, 1, REAL, ACADO_VARIABLES);
-//		ubValues.setDoc( "Upper bounds values." );
-//	}
-//
-//	evaluateConstraints.setup("evaluateConstraints");
-//
-//	//
-//	// Export evaluation of simple box constraints
-//	//
-//	uint indexB = 0;
-//	for (unsigned i = 0; i < N + 1; ++i) {
-//		for (unsigned j = 0; j < conLBIndices[ i ].size(); ++j)
-//		{
-//			if( hardcodeConstraintValues ) {
-//				evaluateConstraints << conLB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << toString(conLBValues[ i ][ j ]) << " - ";
-//			}
-//			else {
-//				evaluateConstraints << conLB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << lbValues.get( indexB,0 ) << " - ";
-//			}
-//			indexB++;
-//
-//			if (conLBIndices[ i ][ j ] < NX)
-//				evaluateConstraints << x.getFullName() << "[ " << toString(i * NX + conLBIndices[ i ][ j ]) << " ];\n";
-//			else
-//				evaluateConstraints << u.getFullName() << "[ " << toString(i * NU + conLBIndices[ i ][ j ] - NX) << " ];\n";
-//		}
-//	}
-//	evaluateConstraints.addLinebreak();
-//
-//	indexB = 0;
-//	for (unsigned i = 0; i < N + 1; ++i)
-//		for (unsigned j = 0; j < conUBIndices[ i ].size(); ++j)
-//		{
-//			if( hardcodeConstraintValues ) {
-//				evaluateConstraints << conUB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << toString(conUBValues[ i ][ j ]) << " - ";
-//			}
-//			else {
-//				evaluateConstraints << conUB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << ubValues.get( indexB,0 ) << " - ";
-//			}
-//			indexB++;
-//
-//			if (conUBIndices[ i ][ j ] < NX)
-//				evaluateConstraints << x.getFullName() << "[ " << toString(i * NX + conUBIndices[ i ][ j ]) << " ];\n";
-//			else
-//				evaluateConstraints << u.getFullName() << "[ " << toString(i * NU + conUBIndices[ i ][ j ] - NX) << " ];\n";
-//		}
-//	evaluateConstraints.addLinebreak();
+	DVector lbTmp, ubTmp;
 
+	//
+	// Stack state constraints
+	//
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
+	{
+		for (unsigned k = 0; k < getBlockSize(); ++k)
+		{
+			lbTmp = xBounds.getLowerBounds( i*getBlockSize()+k );
+			ubTmp = xBounds.getUpperBounds( i*getBlockSize()+k );
+
+			if (isFinite( lbTmp ) == false && isFinite( ubTmp ) == false)
+				continue;
+
+			for (unsigned j = 0; j < lbTmp.getDim(); ++j)
+			{
+				if (acadoIsFinite( lbTmp( j ) ) == true)
+				{
+					if( k == 0 ) {
+						conLBIndices[ i ].push_back( j );
+					}
+				}
+
+				if (acadoIsFinite( ubTmp( j ) ) == true)
+				{
+					if( k == 0 ) {
+						conUBIndices[ i ].push_back( j );
+					}
+				}
+			}
+		}
+		conABDimensions[ i ] = 2*getNumStateBoundsPerBlock();
+	}
+	conABDimensions[ getNumberOfBlocks() ] = 0;
+
+	lbTmp = xBounds.getLowerBounds( N );
+	ubTmp = xBounds.getUpperBounds( N );
+	for (unsigned j = 0; j < lbTmp.getDim(); ++j)
+	{
+		if (acadoIsFinite( lbTmp( j ) ) == true)
+		{
+			conLBIndices[ getNumberOfBlocks() ].push_back( j );
+		}
+
+		if (acadoIsFinite( ubTmp( j ) ) == true)
+		{
+			conUBIndices[ getNumberOfBlocks() ].push_back( j );
+		}
+	}
+
+	//
+	// Stack control constraints
+	//
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
+	{
+		for (unsigned k = 0; k < getBlockSize(); ++k)
+		{
+			lbTmp = uBounds.getLowerBounds( i*getBlockSize()+k );
+			ubTmp = uBounds.getUpperBounds( i*getBlockSize()+k );
+
+			if (isFinite( lbTmp ) == false && isFinite( ubTmp ) == false)
+				continue;
+
+			for (unsigned j = 0; j < lbTmp.getDim(); ++j)
+			{
+				if (acadoIsFinite( lbTmp( j ) ) == true)
+				{
+					conLBIndices[ i ].push_back(NX + k*NU + j);
+				}
+
+				if (acadoIsFinite( ubTmp( j ) ) == true)
+				{
+					conUBIndices[ i ].push_back(NX + k*NU + j);
+				}
+			}
+		}
+	}
+
+	//
+	// Setup variables
+	//
+	for (unsigned i = 0; i < getNumberOfBlocks() + 1; ++i)
+	{
+		conLB[ i ].setup(string("lb") + toString(i + 1), conLBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
+		conUB[ i ].setup(string("ub") + toString(i + 1), conUBIndices[ i ].size(), 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
+	}
+
+	//
+	// FORCES evaluation of simple box constraints
+	//
+	for (unsigned i = 0; i < getNumberOfBlocks() + 1; ++i) {
+		for (unsigned j = 0; j < conLBIndices[ i ].size(); ++j)
+		{
+			evaluateConstraints << conLB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << lb.get( i*getNumBlockVariables()+conLBIndices[ i ][ j ],0 ) << ";\n";
+		}
+	}
+	evaluateConstraints.addLinebreak();
+
+	for (unsigned i = 0; i < getNumberOfBlocks() + 1; ++i)
+		for (unsigned j = 0; j < conUBIndices[ i ].size(); ++j)
+		{
+			evaluateConstraints << conUB[ i ].getFullName() << "[ " << toString(j) << " ]" << " = " << ub.get( i*getNumBlockVariables()+conUBIndices[ i ][ j ],0 ) << ";\n";
+		}
+	evaluateConstraints.addLinebreak();
+
+	//
+	// Setup variables
+	//
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i)
+	{
+		conA[ i ].setup(string("A") + toString(i + 1), getNumBlockVariables(), conABDimensions[ i ], REAL, FORCES_PARAMS, false, qpObjPrefix);	// XXX FORCES works with column major format
+		conAB[ i ].setup(string("Ab") + toString(i + 1), conABDimensions[ i ], 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
+	}
+
+
+	evaluateAffineConstraints.setup("evaluateAffineConstraints");
+	//
+	// FORCES evaluation for the affine constraints after condensing
+	//
+	for (unsigned i = 0; i < getNumberOfBlocks(); ++i) {
+		evaluateAffineConstraints.addStatement( conA[ i ].getCols(0,getNumStateBoundsPerBlock()) == A.getRows(i*getNumStateBoundsPerBlock(),(i+1)*getNumStateBoundsPerBlock()).getTranspose() );
+		evaluateAffineConstraints.addStatement( conA[ i ].getCols(getNumStateBoundsPerBlock(),conABDimensions[ i ]) == zeros<double>(getNumBlockVariables(),getNumStateBoundsPerBlock())-A.getRows(i*getNumStateBoundsPerBlock(),(i+1)*getNumStateBoundsPerBlock()).getTranspose() );
+
+		evaluateAffineConstraints.addStatement( conAB[ i ].getRows(0,getNumStateBoundsPerBlock()) == ubA.getRows(i*getNumStateBoundsPerBlock(),(i+1)*getNumStateBoundsPerBlock()) );
+		evaluateAffineConstraints.addStatement( conAB[ i ].getRows(getNumStateBoundsPerBlock(),conABDimensions[ i ]) == zeros<double>(getNumStateBoundsPerBlock(),1)-lbA.getRows(i*getNumStateBoundsPerBlock(),(i+1)*getNumStateBoundsPerBlock()) );
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -361,6 +371,8 @@ returnValue ExportGaussNewtonBlockForces::setupEvaluation( )
 	ExportForLoop condensePrepLoop( index, 0, getNumberOfBlocks() );
 	condensePrepLoop.addFunctionCall( condensePrep, index );
 	preparation.addStatement( condensePrepLoop );
+
+	preparation.addFunctionCall( evaluateAffineConstraints );
 
 	preparation.addStatement( objHessians[getNumberOfBlocks()] == QN1 );
 	DMatrix mReg = eye<double>( getNX() );
@@ -526,7 +538,7 @@ returnValue ExportGaussNewtonBlockForces::setupQPInterface( )
 			getNumberOfBlocks(),
 			conLBIndices,
 			conUBIndices,
-			conABIndices,
+			conABDimensions,
 			(Q1.isGiven() == true && R1.isGiven() == true) ? 1 : 0,
 					diagonalH,
 					diagonalHN,

@@ -22,8 +22,8 @@ ubIdx = { ...
 };
 
 % Polytopic constraints (A_i*z_i <= b_i) on stage variables, for all N stages
-AbIdx = { ...
-	@AB_IDX@ ...
+AbDim = { ...
+	@AB_DIM@ ...
 };
 	
 % Constant Hessian
@@ -50,7 +50,7 @@ for i = 1: N
 		stages(i).dims.r = nx;						% number of equality constraints
         stages(i).dims.l = length( lbIdx{ i } );	% number of lower bounds
         stages(i).dims.u = length( ubIdx{ i } );	% number of upper bounds
-        stages(i).dims.p = length( AbIdx{ i } );	% number of polytopic constraints
+        stages(i).dims.p = AbDim{ i };				% number of polytopic constraints
         stages(i).dims.q = 0;						% number of quadratic constraints
         
         % Cost
@@ -82,8 +82,8 @@ for i = 1: N
 		end;
         
         % Polytopic constraints
-        stages(i).ineq.p.bidx = cell2mat( AbIdx{ i } );
-        if (~isempty( AbIdx{ i } ))
+        % stages(i).ineq.p.bidx = cell2mat( AbIdx{ i } );
+        if (AbDim{ i } ~= 0)
 			params(end + 1) = newParam(sprintf('%s%d', 'Ab', i), i, 'ineq.p.b');
 			params(end + 1) = newParam(sprintf('%s%d', 'A', i), i, 'ineq.p.A');
         end
@@ -107,7 +107,7 @@ for i = 1: N
         stages(i).dims.r = nx;						% number of equality constraints        
         stages(i).dims.l = length( lbIdx{ i } );	% number of lower bounds
         stages(i).dims.u = length( ubIdx{ i } );	% number of upper bounds
-        stages(i).dims.p = length( AbIdx{ i } );	% number of polytopic constraints
+        stages(i).dims.p = AbDim{ i };				% number of polytopic constraints
         stages(i).dims.q = 0;						% number of quadratic constraints
         
         % Cost
@@ -133,8 +133,8 @@ for i = 1: N
 		end;
         
         % Polytopic constraints
-        stages(i).ineq.p.bidx = cell2mat( AbIdx{ i } );
-        if (~isempty( AbIdx{ i } ))
+        % stages(i).ineq.p.bidx = cell2mat( AbIdx{ i } );
+        if (AbDim{ i } ~= 0)
 			params(end + 1) = newParam(sprintf('%s%d', 'Ab', i), i, 'ineq.p.b');
 			params(end + 1) = newParam(sprintf('%s%d', 'A', i), i, 'ineq.p.A');
         end
@@ -162,7 +162,7 @@ for i = 1: N
         
         stages(i).dims.l = length( lbIdx{ i } );    % number of lower bounds
         stages(i).dims.u = length( ubIdx{ i } );    % number of upper bounds
-        stages(i).dims.p = length( AbIdx{ i } );	% number of polytopic constraints
+        stages(i).dims.p = AbDim{ i };				% number of polytopic constraints
         stages(i).dims.q = 0;						% number of quadratic constraints
         
         % Cost
@@ -186,8 +186,8 @@ for i = 1: N
 		end;
         
         % Polytopic constraints
-        stages(i).ineq.p.bidx = cell2mat( AbIdx{ i } );
-        if (~isempty( AbIdx{ i } ))
+        % stages(i).ineq.p.bidx = cell2mat( AbIdx{ i } );
+        if (AbDim{ i } ~= 0)
 			params(end + 1) = newParam(sprintf('%s%d', 'Ab', i), i, 'ineq.p.b');
 			params(end + 1) = newParam(sprintf('%s%d', 'A', i), i, 'ineq.p.A');
         end

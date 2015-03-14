@@ -50,7 +50,7 @@ returnValue ExportForcesGenerator::configure(	const unsigned _nx,
 												const unsigned _NN,
 												const std::vector< std::vector< unsigned > >& _lbIdx,
 												const std::vector< std::vector< unsigned > >& _ubIdx,
-												const std::vector< std::vector< unsigned > >& _AbIdx,
+												const std::vector< unsigned >& _AbDim,
 												const bool _constHessian,
 												const bool _diagHessian,
 												const bool _diagHessianN,
@@ -152,25 +152,23 @@ returnValue ExportForcesGenerator::configure(	const unsigned _nx,
 
 	s.str(std::string());
 	if (matlabGenerator == true)
-		for (unsigned i = 0; i < _AbIdx.size(); ++i)
+		for (unsigned i = 0; i < _NN + 1; ++i)
 		{
 			if ( i )
 				s << ", ..." << endl << "\t";
 
-			s << "{";
-			for (unsigned j = 0; j < _AbIdx[ i ].size(); ++j)
-			{
-				if ( j )
-					s << ", ";
-				s << _AbIdx[ i ][ j ] + 1;
+			if( i >= _AbDim.size() ) {
+				s << 0;
 			}
-			s << "}";
+			else {
+				s << _AbDim[ i ];
+			}
 		}
 //	else
 //		// Python generator
 //		return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 
-	dictionary[ "@AB_IDX@" ] =  s.str();
+	dictionary[ "@AB_DIM@" ] =  s.str();
 
 	s.str(std::string());
 	s << (_constHessian == true ? 1 : 0);
