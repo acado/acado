@@ -27,26 +27,12 @@ function getCPPbody(obj)
 %    Date: 2010-2013
 % 
     
-fprintf(obj.fileMEX,'#include <iostream>\n');
 fprintf(obj.fileMEX,'#include <mex.h>\n');
-fprintf(obj.fileMEX,'\n');
-fprintf(obj.fileMEX,'class MyStreamBuf : public std::basic_streambuf<char>\n');
-fprintf(obj.fileMEX,'{\n');
-fprintf(obj.fileMEX,'protected:\n');
-fprintf(obj.fileMEX,'    int_type overflow( int_type ch = traits_type::eof() )\n');
-fprintf(obj.fileMEX,'    {\n');
-fprintf(obj.fileMEX,'        if (!traits_type::eq_int_type(ch, traits_type::eof()))\n');
-fprintf(obj.fileMEX,'            return mexPrintf("%%c", traits_type::to_char_type(ch)) > 0 ? 0 : traits_type::eof();\n');
-fprintf(obj.fileMEX,'\n');
-fprintf(obj.fileMEX,'        return 0;\n');
-fprintf(obj.fileMEX,'    }\n');
-fprintf(obj.fileMEX,'};\n');
-
 fprintf(obj.fileMEX,'\n\n');
 fprintf(obj.fileMEX,'void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] ) \n ');
 fprintf(obj.fileMEX,'{ \n \n');
-fprintf(obj.fileMEX,'    MyStreamBuf mybuf;\n');
-fprintf(obj.fileMEX,'    std::cout.rdbuf(&mybuf);\n');
+fprintf(obj.fileMEX,'    MatlabConsoleStreamBuf mybuf;\n');
+fprintf(obj.fileMEX,'    RedirectStream redirect(std::cout, mybuf);\n');
 fprintf(obj.fileMEX,'    clearAllStaticCounters( ); \n \n');
 
 fprintf(obj.fileMEX,'    mexPrintf("\\nACADO Toolkit for Matlab - Developed by David Ariens and Rien Quirynen, 2009-2013 \\n"); \n');
@@ -55,6 +41,5 @@ fprintf(obj.fileMEX,'    mexPrintf("Support available at http://www.acadotoolkit
 fprintf(obj.fileMEX,sprintf('    if (nrhs != %d){ \n', length(obj.in)));
 fprintf(obj.fileMEX,sprintf('      mexErrMsgTxt("This problem expects %d right hand side argument(s) since you have defined %d MexInput(s)");\n', length(obj.in), length(obj.in)));
 fprintf(obj.fileMEX,'    } \n \n');      
-
 
 end

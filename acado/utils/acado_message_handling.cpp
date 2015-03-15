@@ -32,10 +32,6 @@
 
 #include <string.h>
 
-#ifdef __MATLAB__
- #include"mex.h"
-#endif
-
 #include <acado/utils/acado_message_handling.hpp>
 #include <acado/utils/acado_utils.hpp>
 
