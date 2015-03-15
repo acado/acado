@@ -473,8 +473,10 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 	{
 		LOG( LVL_DEBUG ) << "Setup condensing: H00, H10 and C" << endl;
 
-		T1.setup("T1", NX, NX, REAL, ACADO_WORKSPACE);
-		T2.setup("T2", NX, NX, REAL, ACADO_WORKSPACE);
+		if( getBlockSize() > 1 ) {
+			T1.setup("T1", NX, NX, REAL, ACADO_WORKSPACE);
+			T2.setup("T2", NX, NX, REAL, ACADO_WORKSPACE);
+		}
 
 		condensePrep.addFunctionCall(moveGxT, evGx.getAddress(blockI*getBlockSize()*NX), C.getAddress(0, 0));
 		for (unsigned row = 1; row < getBlockSize(); ++row)
@@ -517,7 +519,9 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 			condensePrep.addFunctionCall(macGxTGx, T2, Q1Call, C.getAddress((row - 1) * NX), T1);
 		}
 
-		condensePrep.addFunctionCall(mult_BT_T1, evGu.getAddress( blockI*getBlockSize()*NX ), T1, ExportIndex( 0 ));
+		if( getBlockSize() > 1 ) {
+			condensePrep.addFunctionCall(mult_BT_T1, evGu.getAddress( blockI*getBlockSize()*NX ), T1, ExportIndex( 0 ));
+		}
 		if ((S1.isGiven() && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 		{
 			condensePrep.addStatement(
@@ -529,9 +533,13 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 		DMatrix mRegH00 = eye<double>( getNX() );
 		mRegH00 *= levenbergMarquardt;
 		ExportVariable Q1Var = Q1.isGiven() == true ? Q1 : Q1.getSubMatrix(blockI*getBlockSize()*NX, blockI*getBlockSize()*NX+NX, 0, NX);
-		condensePrep.addStatement(
-				H.getSubMatrix(0, NX, 0, NX) == Q1Var + (evGx.getSubMatrix(blockI*getBlockSize()*NX, blockI*getBlockSize()*NX+NX, 0, NX).getTranspose() * T1)
-		);
+
+		if( getBlockSize() > 1 ) {
+			condensePrep.addStatement( H.getSubMatrix(0, NX, 0, NX) == Q1Var + (evGx.getSubMatrix(blockI*getBlockSize()*NX, blockI*getBlockSize()*NX+NX, 0, NX).getTranspose() * T1) );
+		}
+		else {
+			condensePrep.addStatement( H.getSubMatrix(0, NX, 0, NX) == Q1Var );
+		}
 		condensePrep.addStatement( H.getSubMatrix(0, NX, 0, NX) += mRegH00 );
 	}
 
@@ -600,8 +608,10 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 
 	 */
 
-	W1.setup("W1", NX, NU, REAL, ACADO_WORKSPACE);
-	W2.setup("W2", NX, NU, REAL, ACADO_WORKSPACE);
+	if( getBlockSize() > 1 ) {
+		W1.setup("W1", NX, NU, REAL, ACADO_WORKSPACE);
+		W2.setup("W2", NX, NU, REAL, ACADO_WORKSPACE);
+	}
 
 	if (getBlockSize() <= 15)
 	{
@@ -652,11 +662,19 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 				);
 			}
 
-			ExportArgument R1Call = R1.isGiven() == true ? R1 : R1.getAddress((blockI*getBlockSize()+col) * NU);
-			condensePrep.addFunctionCall(
+			if( getBlockSize() > 1 ) {
+				ExportArgument R1Call = R1.isGiven() == true ? R1 : R1.getAddress((blockI*getBlockSize()+col) * NU);
+				condensePrep.addFunctionCall(
 					macBTW1_R1, R1Call, evGu.getAddress((blockI*getBlockSize()+col) * NX), W1,
-					ExportIndex( col )
-			);
+					ExportIndex( col ) );
+			}
+			else {
+				ExportVariable R1Var = R1.isGiven() == true ? R1 : R1.getRows((blockI*getBlockSize()) * NU, (blockI*getBlockSize()+1) * NU);
+				DMatrix mRegH11 = eye<double>( getNU() );
+				mRegH11 *= levenbergMarquardt;
+				condensePrep.addStatement( H.getSubMatrix(NX, NX+NU, NX, NX+NU) == R1Var + mRegH11 );
+			}
+
 
 			condensePrep.addLinebreak();
 		}
@@ -846,8 +864,11 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 
 	*/
 
-	w1.setup("w1", NX, 1, REAL, ACADO_WORKSPACE);
-	w2.setup("w2", NX, 1, REAL, ACADO_WORKSPACE);
+	if( getBlockSize() > 1 ) {
+		w1.setup("w1", NX, 1, REAL, ACADO_WORKSPACE);
+		w2.setup("w2", NX, 1, REAL, ACADO_WORKSPACE);
+	}
+
 	sbar.setup("sbar", (getBlockSize()+1)*NX, 1, REAL, ACADO_WORKSPACE);
 
 //	if( performFullCondensing() == true ) {
@@ -858,7 +879,7 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 //	}
 	condensePrep.addStatement( sbar.getRows(NX, (getBlockSize() + 1) * NX) == d.getRows(blockI*getBlockSize()*NX,(blockI+1)*getBlockSize()*NX) );
 
-	for (unsigned i = 0; i < getBlockSize(); ++i)
+	for (unsigned i = 1; i < getBlockSize(); ++i)
 		condensePrep.addFunctionCall(
 				macASbar, evGx.getAddress((blockI*getBlockSize()+i) * NX), sbar.getAddress(i * NX), sbar.getAddress((i + 1) * NX)
 		);
@@ -886,9 +907,9 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 		condensePrep.addFunctionCall(
 				macQSbarW2, Q1Call, sbar.getAddress(i * NX), w2, w1);
 	}
-	condensePrep.addFunctionCall(
-			macBTw1, evGu.getAddress( blockI*getBlockSize()*NX ), w1, g.getAddress( blockI*getNumBlockVariables() + offset )
-	);
+	if( getBlockSize() > 1 ) {
+		condensePrep.addFunctionCall(
+			macBTw1, evGu.getAddress( blockI*getBlockSize()*NX ), w1, g.getAddress( blockI*getNumBlockVariables() + offset ) );
 //	if( performFullCondensing() == true ) {
 //		if ((S1.isGiven() == true && S1.getGivenMatrix().isZero() == false) || S1.isGiven() == false)
 //		{
@@ -896,8 +917,9 @@ returnValue ExportGaussNewtonBlockCN2::setupCondensing( void )
 //		}
 //	}
 //	else {
-	condensePrep.addStatement(g.getRows(blockI*getNumBlockVariables(), blockI*getNumBlockVariables()+NX) += evGx.getRows(blockI*getBlockSize()*NX, blockI*getBlockSize()*NX+NX).getTranspose() * w1);
+		condensePrep.addStatement(g.getRows(blockI*getNumBlockVariables(), blockI*getNumBlockVariables()+NX) += evGx.getRows(blockI*getBlockSize()*NX, blockI*getBlockSize()*NX+NX).getTranspose() * w1);
 //	}
+	}
 	condensePrep.addLinebreak();
 
 	////////////////////////////////////////////////////////////////////////////
