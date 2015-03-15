@@ -306,7 +306,7 @@ void mexFunction(	int nlhs,
 	getArray(1, src, 0, "ubAValues", acadoVariables.ubAValues, QPOASES_NCMAX, 1);
 #endif /* QPOASES_NCMAX > 0 */
 
-#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_FORCES)
+#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_FORCES) && !ACADO_BLOCK_CONDENSING
 	/* Bounds */
 	#if (ACADO_QP_NLB > 0)
 	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_QP_NLB, 1);
