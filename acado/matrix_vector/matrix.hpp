@@ -461,7 +461,7 @@ GenericMatrix< T > eye(	unsigned _dim
 typedef GenericMatrix< double > DMatrix;
 /** Type definition of the matrix of integers. */
 typedef GenericMatrix< int > IMatrix;
-/** Type definition of the matrix of integers. */
+/** Type definition of the matrix of booleans. */
 typedef GenericMatrix< bool > BMatrix;
 /** Shared pointer to a matrix of doubles. */
 typedef std::tr1::shared_ptr< GenericMatrix< double > > DMatrixPtr;
