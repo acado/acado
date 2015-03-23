@@ -95,6 +95,9 @@ ACADOworkspace acadoWorkspace;
 #if ACADO_QP_SOLVER == ACADO_FORCES
 #include "forces.h"
 extern forces_info acadoForces_info;
+#elif ACADO_QP_SOLVER == ACADO_QPDUNES
+#include <qpDUNES.h>
+extern qpData_t    qpData;
 #endif
 
 /** A bit more advanced printing function. */
@@ -410,6 +413,8 @@ void mexFunction(	int nlhs,
 			nIterations = (double)getNWSR();
 #elif ACADO_QP_SOLVER == ACADO_FORCES
 			nIterations = acadoForces_info.it;
+#elif ACADO_QP_SOLVER == ACADO_QPDUNES
+			nIterations = qpData.log.numIter;
 #endif /* ACADO_QP_SOLVER */
 			
 			break;
