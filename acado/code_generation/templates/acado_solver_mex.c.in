@@ -92,6 +92,14 @@ ACADOvariables acadoVariables;
 /** Instance of the private workspace structure. */
 ACADOworkspace acadoWorkspace;
 
+#if ACADO_QP_SOLVER == ACADO_FORCES
+#include "forces.h"
+extern forces_info acadoForces_info;
+#elif ACADO_QP_SOLVER == ACADO_QPDUNES
+#include <qpDUNES.h>
+extern qpData_t    qpData;
+#endif
+
 /** A bit more advanced printing function. */
 void mexErrMsgTxtAdv(	char* string,
 						...
@@ -403,7 +411,11 @@ void mexFunction(	int nlhs,
 
 #if ACADO_QP_SOLVER == ACADO_QPOASES
 			nIterations = (double)getNWSR();
-#endif /* ACADO_QP_SOLVER == ACADO_QPOASES */
+#elif ACADO_QP_SOLVER == ACADO_FORCES
+			nIterations = acadoForces_info.it;
+#elif ACADO_QP_SOLVER == ACADO_QPDUNES
+			nIterations = qpData.log.numIter;
+#endif /* ACADO_QP_SOLVER */
 			
 			break;
 		
@@ -442,7 +454,9 @@ void mexFunction(	int nlhs,
 			
 #if ACADO_QP_SOLVER == ACADO_QPOASES
 			nIterations = (double)getNWSR();
-#endif /* ACADO_QP_SOLVER == ACADO_QPOASES */
+#elif ACADO_QP_SOLVER == ACADO_FORCES
+			nIterations = acadoForces_info.it;
+#endif /* ACADO_QP_SOLVER */
 			
 			break;
 		
@@ -491,10 +505,7 @@ void mexFunction(	int nlhs,
 	setArray(info, 0, "cpuTime", &cpuTime, 1, 1);
 	setArray(info, 0, "kktValue", &kktValue, 1, 1);
 	setArray(info, 0, "objValue", &objValue, 1, 1);
-	
-#if ACADO_QP_SOLVER == ACADO_QPOASES
 	setArray(info, 0, "nIterations", &nIterations, 1, 1);
-#endif /* ACADO_QP_SOLVER == ACADO_QPOASES */
 		
 	mxSetField(plhs[ 0 ], 0, "info", info);
 	
