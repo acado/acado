@@ -158,7 +158,7 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 			ExportForLoop loop22( j, 0, dim );
 			ExportForLoop loop2( i, 0, dim );
 			for( k = 0; k < nRightHandSides; k++ ) {
-				loop2.addStatement( b_mem.get(dim+i,k) + " += " + low_tria_var.get(0,0) + "*" + I_full.get(j,i) + "*" + b_mem.get(i,k) + ";\n" );
+				loop2.addStatement( b_mem.get(dim+j,k) + " += " + low_tria_var.get(0,0) + "*" + I_full.get(j,i) + "*" + b_mem.get(i,k) + ";\n" );
 			}
 			loop22.addStatement( loop2 );
 			solveReuse_full.addStatement( loop22 );
@@ -167,7 +167,7 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 			ExportForLoop loop33( j, 0, dim );
 			ExportForLoop loop3( i, 0, dim );
 			for( k = 0; k < nRightHandSides; k++ ) {
-				loop3.addStatement( b_mem.get(2*dim+i,k) + " += " + low_tria_var.get(1,0) + "*" + I_full.get(j,i) + "*" + b_mem.get(i,k) + ";\n" );
+				loop3.addStatement( b_mem.get(2*dim+j,k) + " += " + low_tria_var.get(1,0) + "*" + I_full.get(j,i) + "*" + b_mem.get(i,k) + ";\n" );
 			}
 			loop33.addStatement( loop3 );
 			solveReuse_full.addStatement( loop33 );
@@ -175,7 +175,7 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 			ExportForLoop loop44( j, 0, dim );
 			ExportForLoop loop4( i, 0, dim );
 			for( k = 0; k < nRightHandSides; k++ ) {
-				loop4.addStatement( b_mem.get(2*dim+i,k) + " += " + low_tria_var.get(2,0) + "*" + I_full.get(j,i) + "*" + b_mem.get(dim+i,k) + ";\n" );
+				loop4.addStatement( b_mem.get(2*dim+j,k) + " += " + low_tria_var.get(2,0) + "*" + I_full.get(j,i) + "*" + b_mem.get(dim+i,k) + ";\n" );
 			}
 			loop44.addStatement( loop4 );
 			solveReuse_full.addStatement( loop44 );
