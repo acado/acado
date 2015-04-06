@@ -46,6 +46,7 @@ ExportIRK3StageSimplifiedNewton::ExportIRK3StageSimplifiedNewton( UserInteractio
 									) : ExportGaussElim( _userInteraction,_commonHeaderName )
 {
 	stepsize = 0;
+	implicit = false;
 }
 
 ExportIRK3StageSimplifiedNewton::~ExportIRK3StageSimplifiedNewton( )
@@ -122,14 +123,28 @@ returnValue ExportIRK3StageSimplifiedNewton::getCode(	ExportStatementBlock& code
 
 	// form the real and complex linear system matrices
 	solve_full.addStatement( A_mem_complex == A_full );
-	ExportForLoop loop1( i, 0, dim );
-	loop1 << A_mem_complex.getFullName() << "[i*" << toString(dim) << "+i] -= (" << eig_var.get(0,0) << "+" << eig_var.get(0,1) << "*I);\n";
-	solve_full.addStatement( loop1 );
+	if( implicit ) {
+		ExportForLoop loop1( i, 0, dim*dim );
+		loop1 << A_mem_complex.getFullName() << "[i] += (" << eig_var.get(0,0) << "+" << eig_var.get(0,1) << "*I)*" << I_full.getFullName() << "[i];\n";
+		solve_full.addStatement( loop1 );
+	}
+	else {
+		ExportForLoop loop1( i, 0, dim );
+		loop1 << A_mem_complex.getFullName() << "[i*" << toString(dim) << "+i] -= (" << eig_var.get(0,0) << "+" << eig_var.get(0,1) << "*I);\n";
+		solve_full.addStatement( loop1 );
+	}
 
 	solve_full.addStatement( A_mem_real == A_full );
-	ExportForLoop loop2( i, 0, dim );
-	loop2 << A_mem_real.getFullName() << "[i*" << toString(dim) << "+i] -= " << eig_var.get(1,0) << ";\n";
-	solve_full.addStatement( loop2 );
+	if( implicit ) {
+		ExportForLoop loop2( i, 0, dim*dim );
+		loop2 << A_mem_real.getFullName() << "[i] += " << eig_var.get(1,0) << "*" << I_full.getFullName() << "[i];\n";
+		solve_full.addStatement( loop2 );
+	}
+	else {
+		ExportForLoop loop2( i, 0, dim );
+		loop2 << A_mem_real.getFullName() << "[i*" << toString(dim) << "+i] -= " << eig_var.get(1,0) << ";\n";
+		solve_full.addStatement( loop2 );
+	}
 
 	// factorize the real and complex linear systems
 	solve_full.addFunctionCall(getNameSolveComplexFunction(),A_mem_complex,rk_perm_full.getAddress(0,0));
@@ -280,14 +295,25 @@ returnValue ExportIRK3StageSimplifiedNewton::setup( )
 	}
 
 	A_full = ExportVariable( "A", dim, dim, REAL );
+	I_full = ExportVariable( "A_I", dim, dim, REAL );
 	b_full = ExportVariable( "b", 3*dim, nRightHandSides, REAL );
 	rk_perm_full = ExportVariable( "rk_perm", 2, dim, INT );
 
-	solve_full = ExportFunction( getNameSolveFunction(), A_full, rk_perm_full );   // Only perform the LU factorization!
+	if( implicit ) {
+		solve_full = ExportFunction( getNameSolveFunction(), A_full, I_full, rk_perm_full );   // Only perform the LU factorization!
+	}
+	else {
+		solve_full = ExportFunction( getNameSolveFunction(), A_full, rk_perm_full );   // Only perform the LU factorization!
+	}
 	solve_full.setReturnValue( determinant, false );
 	solve_full.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	if( REUSE ) {
-		solveReuse_full = ExportFunction( getNameSolveReuseFunction(), A_full, b_full, rk_perm_full );
+		if( implicit ) {
+			solveReuse_full = ExportFunction( getNameSolveReuseFunction(), A_full, I_full, b_full, rk_perm_full );
+		}
+		else {
+			solveReuse_full = ExportFunction( getNameSolveReuseFunction(), A_full, b_full, rk_perm_full );
+		}
 		solveReuse_full.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	}
 
@@ -349,6 +375,12 @@ const std::string ExportIRK3StageSimplifiedNewton::getNameSolveComplexReuseFunct
 	return string( "solve_complex_" ) + identifier + "system_reuse";
 }
 
+returnValue ExportIRK3StageSimplifiedNewton::setImplicit( BooleanType _implicit ) {
+
+	implicit = _implicit;
+
+	return SUCCESSFUL_RETURN;
+}
 
 //
 // PROTECTED MEMBER FUNCTIONS:

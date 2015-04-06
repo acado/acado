@@ -146,6 +146,9 @@ class ExportIRK3StageSimplifiedNewton : public ExportGaussElim
 		returnValue appendVariableNames( std::stringstream& string );
 
 
+		returnValue setImplicit( BooleanType _implicit );
+
+
 	//
     // PROTECTED MEMBER FUNCTIONS:
     //
@@ -161,6 +164,7 @@ class ExportIRK3StageSimplifiedNewton : public ExportGaussElim
 
     protected:
 
+		BooleanType implicit;
 		double stepsize;
 		DMatrix eig;
 		DMatrix transf1;
@@ -180,6 +184,7 @@ class ExportIRK3StageSimplifiedNewton : public ExportGaussElim
 
 
 		ExportVariable A_full;						/**< Variable containing the matrix for the complete linear system. */
+		ExportVariable I_full;						/**< Variable containing the matrix for the complete linear system. */
 		ExportVariable b_full;						/**< Variable containing the right-hand side of the complete linear system and it will also contain the solution. */
 		ExportVariable rk_perm_full;				/**< Variable containing the order of the rows. */
 

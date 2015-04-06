@@ -379,6 +379,9 @@ class ForwardLiftedIRKExport : public ForwardIRKExport
     protected:
 
 		ExportAcadoFunction diffs_sweep;		/**< Module to export the evaluation of a forward sweep of the derivatives of the ordinary differential equations. */
+		ExportVariable 	rk_diffSweep;
+		ExportVariable 	rk_I;
+
 		ExportVariable 	rk_seed;				/**< Variable containing the forward seed. */
 		ExportVariable 	rk_stageValues;			/**< Variable containing the evaluated stage values. */
 

@@ -1209,6 +1209,10 @@ returnValue ImplicitRungeKuttaExport::setup( )
 
 				double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 				IRKsolver->setStepSize(h);
+				if( NDX2 > 0 || NXA > 0 ) {
+					IRKsolver->setImplicit( true );
+					solver->setup();
+				}
 			}
 			else {
 				return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -1227,6 +1231,10 @@ returnValue ImplicitRungeKuttaExport::setup( )
 
 				double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 				IRKsolver->setStepSize(h);
+				if( NDX2 > 0 || NXA > 0 ) {
+					IRKsolver->setImplicit( true );
+					solver->setup();
+				}
 			}
 			else {
 				return ACADOERROR( RET_NOT_IMPLEMENTED_YET );

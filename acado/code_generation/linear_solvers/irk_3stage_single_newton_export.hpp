@@ -124,6 +124,9 @@ class ExportIRK3StageSingleNewton : public ExportGaussElim
 										);
 
 
+		returnValue setImplicit( BooleanType _implicit );
+
+
 	//
     // PROTECTED MEMBER FUNCTIONS:
     //
@@ -136,6 +139,7 @@ class ExportIRK3StageSingleNewton : public ExportGaussElim
 
     protected:
 
+		BooleanType implicit;
 		double stepsize;
 		double tau;
 		DVector low_tria;
@@ -144,6 +148,7 @@ class ExportIRK3StageSingleNewton : public ExportGaussElim
 
 		// DEFINITION OF THE EXPORTVARIABLES
 		ExportVariable A_full;						/**< Variable containing the matrix for the complete linear system. */
+		ExportVariable I_full;						/**< Variable containing the matrix for the complete linear system. */
 		ExportVariable b_full;						/**< Variable containing the right-hand side of the complete linear system and it will also contain the solution. */
 		ExportVariable rk_perm_full;				/**< Variable containing the order of the rows. */
 

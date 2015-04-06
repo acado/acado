@@ -119,6 +119,8 @@ returnValue ForwardLiftedIRKExport::getDataDeclarations(	ExportStatementBlock& d
 	ForwardIRKExport::getDataDeclarations( declarations, dataStruct );
 	
 	declarations.addDeclaration( rk_seed,dataStruct );
+	declarations.addDeclaration( rk_I,dataStruct );
+	declarations.addDeclaration( rk_diffSweep,dataStruct );
 	declarations.addDeclaration( rk_stageValues,dataStruct );
 
 	declarations.addDeclaration( rk_Xprev,dataStruct );
@@ -181,19 +183,31 @@ returnValue ForwardLiftedIRKExport::setDifferentialEquation(	const Expression& r
 		DifferentialEquation h;
 		if( (ExportSensitivityType)sensGen == INEXACT ) {
 			DifferentialState sX("", NX,NX+NU);
+			DifferentialState dKX("", NDX2,NX+NU);
+			DifferentialState dKZ("", NXA,NX+NU);
 
-			Expression tmp = zeros<double>(NX,NX);
+			Expression tmp = zeros<double>(NX+NXA,NX);
 			tmp.appendCols(forwardDerivative( rhs_, u ));
 
+			if(NXA > 0 && NDX2 == 0) return ACADOERROR(RET_NOT_YET_IMPLEMENTED);
+
 			// forward sweep
-			h << multipleForwardDerivative( rhs_, x, sX ) - tmp;
+			if(NXA == 0 && NDX2 == 0) {
+				h << multipleForwardDerivative( rhs_, x, sX ) - tmp;
+			}
+			else {
+				Expression tmp2 = tmp + multipleForwardDerivative( rhs_, dx, dKX );
+				Expression tmp3 = tmp2 + multipleForwardDerivative( rhs_, z, dKZ );
+				h << multipleForwardDerivative( rhs_, x, sX ) - tmp3;
+			}
+
 		}
 
 		if( f.getNT() > 0 ) timeDependant = true;
 
 		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX,NOD ) &
 				diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX,NOD ) &
-				diffs_sweep.init( h,"acado_diff_sweep",NX+NX*(NX+NU),NXA,NU,NP,NDX,NOD ) );
+				diffs_sweep.init( h,"acado_diff_sweep",NX+(NX+NDX2+NXA)*(NX+NU),NXA,NU,NP,NDX,NOD ) );
 	}
 	return SUCCESSFUL_RETURN;
 }
@@ -212,7 +226,7 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	if( liftMode > 4 || liftMode == 2 || liftMode < 1 ) ACADOERROR( RET_INVALID_OPTION );
 	if( (ExportSensitivityType)sensGen == INEXACT && liftMode != 4 ) ACADOERROR( RET_INVALID_OPTION );
 
-	if( CONTINUOUS_OUTPUT || NX1 > 0 || NX3 > 0 || !equidistantControlGrid() || NDX2 > 0 || NXA > 0 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+	if( CONTINUOUS_OUTPUT || NX1 > 0 || NX3 > 0 || !equidistantControlGrid() ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
@@ -395,7 +409,7 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	if( (inputDim-diffsDim) > NX+NXA ) {
 		integrate.addStatement( rk_xxx.getCols( NX+NXA,inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
 		if( (ExportSensitivityType)sensGen == INEXACT ) {
-			integrate.addStatement( rk_seed.getCols( NX+NXA+NX*(NX+NU),NX*(NX+NU)+inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
+			integrate.addStatement( rk_seed.getCols( NX+NXA+(NX+NDX2+NXA)*(NX+NU),(NX+NDX2+NXA)*(NX+NU)+inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
 		}
 	}
 	integrate.addLinebreak( );
@@ -484,13 +498,25 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		allSensitivitiesImplicitSystem( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, k_index, Bh, true );
 	}
 
+	int linSolver;
+	get( LINEAR_ALGEBRA_SOLVER, linSolver );
 	// update rk_kkk:
 	ExportForLoop loopTemp( j,0,numStages );
 	for( run5 = 0; run5 < NX2; run5++ ) {
-		loopTemp.addStatement( rk_kkk.getElement( k_index+NX1+run5,j ) += rk_b.getElement( j*NX2+run5,0 ) );		// differential states
+		if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
+			loopTemp.addStatement( rk_kkk.getElement( k_index+NX1+run5,j ) += rk_b.getElement( j*(NX2+NXA)+run5,0 ) );		// differential states
+		}
+		else {
+			loopTemp.addStatement( rk_kkk.getElement( k_index+NX1+run5,j ) += rk_b.getElement( j*NX2+run5,0 ) );			// differential states
+		}
 	}
 	for( run5 = 0; run5 < NXA; run5++ ) {
-		loopTemp.addStatement( rk_kkk.getElement( k_index+NX+run5,j ) += rk_b.getElement( numStages*NX2+j*NXA+run5,0 ) );		// differential states
+		if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
+			loopTemp.addStatement( rk_kkk.getElement( k_index+NX+run5,j ) += rk_b.getElement( j*(NX2+NXA)+NX2+run5,0 ) );		// algebraic states
+		}
+		else {
+			loopTemp.addStatement( rk_kkk.getElement( k_index+NX+run5,j ) += rk_b.getElement( numStages*NX2+j*NXA+run5,0 ) );	// algebraic states
+		}
 	}
 	loop->addStatement( loopTemp );
 
@@ -624,24 +650,43 @@ returnValue ForwardLiftedIRKExport::solveImplicitSystem( ExportStatementBlock* b
 				block->addStatement( "if( run == 0 ) {\n" );
 			}
 
-			evaluateStatesImplicitSystem( block, k_index, Ah, C, ExportIndex(0), index3, tmp_index );
-			block->addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsTemp2 );
 			// evaluate rk_J (only explicit ODE for now!)
 			if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
-				ExportForLoop loop0( index2,0,NX2 );
-				loop0.addStatement( rk_A.getRow( index2 ) == rk_diffsTemp2.getSubMatrix( index2,index2+1,NX1,NX1+NX2 ) );
+				evaluateStatesImplicitSystem( block, k_index, Ah, C, ExportIndex(0), index3, tmp_index );
+				block->addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsTemp2 );
+
+				DMatrix zeroZ = zeros<double>(1,NXA);
+				ExportForLoop loop0( index2,0,NX+NXA );
+				loop0.addStatement( rk_A.getSubMatrix( index2,index2+1,0,NX ) == rk_diffsTemp2.getSubMatrix( index2,index2+1,NX1,NX1+NX2 ) );
+				loop0.addStatement( rk_A.getSubMatrix( index2,index2+1,NX,NX+NXA ) == zeroZ );
 				block->addStatement( loop0 );
+
+				if( NDX2 > 0 ) {
+					ExportForLoop loop01( index2,0,NX+NXA );
+					loop01.addStatement( rk_I.getSubMatrix( index2,index2+1,0,NX ) == rk_diffsTemp2.getSubMatrix( index2,index2+1,NX+NXA+NU,NVARS2 ) );
+					loop01.addStatement( rk_I.getSubMatrix( index2,index2+1,NX,NX+NXA ) == rk_diffsTemp2.getSubMatrix( index2,index2+1,NX,NX+NXA ) );
+					block->addStatement( loop01 );
+				}
+
+				ExportForLoop loop01( index2,0,numStages );
+				evaluateInexactMatrix( &loop01, index2, index3, tmp_index, k_index, rk_A, Ah, C, true, DERIVATIVES );
+				block->addStatement( loop01 );
+
+				if( NDX2 > 0 ) {
+					block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_I.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+				}
+				else {
+					block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+				}
+			}
+			else {
+				ExportForLoop loop01( index2,0,numStages );
+				evaluateMatrix( &loop01, index2, index3, tmp_index, k_index, rk_A, Ah, C, true, false );
+				block->addStatement( loop01 );
+
+				block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 			}
 
-			ExportForLoop loop01( index2,0,numStages );
-			evaluateInexactMatrix( &loop01, index2, index3, tmp_index, k_index, rk_A, Ah, C, true, DERIVATIVES );
-			block->addStatement( loop01 );
-//			ExportForLoop loop2( index2,0,numStages*(NX2+NXA) );
-//			ExportForLoop loop3( index3,0,numStages*(NX2+NXA) );
-//			loop3.addStatement( rk_A_or.getElement(index2,index3) == rk_A.getElement(index2,index3) );
-//			loop2.addStatement( loop3 );
-//			block->addStatement( loop2 );
-			block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
 				block->addStatement( "}\n else {\n" );
 				ExportForLoop loop02( index2,0,numStages );
@@ -652,22 +697,23 @@ returnValue ForwardLiftedIRKExport::solveImplicitSystem( ExportStatementBlock* b
 			}
 		}
 		else if( liftMode == 4 ) {
-			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
-				block->addStatement( "if( run == 0 ) {\n" );
-			}
-			ExportForLoop loop01( index2,0,numStages );
-			evaluateMatrix( &loop01, index2, index3, tmp_index, k_index, rk_A, Ah, C, true, DERIVATIVES );
-			block->addStatement( loop01 );
-			block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
-			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
-				block->addStatement( "}\n else {\n" );
-				ExportForLoop loop02( index2,0,numStages );
-				evaluateStatesImplicitSystem( &loop02, k_index, Ah, C, index2, index3, tmp_index );
-				loop02.addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsTemp2.getAddress(index2,0) );
-				evaluateRhsImplicitSystem( &loop02, k_index, index2 );
-				block->addStatement( loop02 );
-				block->addStatement( "}\n" );
-			}
+			return ACADOERROR(RET_INVALID_OPTION);
+//			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
+//				block->addStatement( "if( run == 0 ) {\n" );
+//			}
+//			ExportForLoop loop01( index2,0,numStages );
+//			evaluateMatrix( &loop01, index2, index3, tmp_index, k_index, rk_A, Ah, C, true, DERIVATIVES );
+//			block->addStatement( loop01 );
+//			block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+//			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
+//				block->addStatement( "}\n else {\n" );
+//				ExportForLoop loop02( index2,0,numStages );
+//				evaluateStatesImplicitSystem( &loop02, k_index, Ah, C, index2, index3, tmp_index );
+//				loop02.addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsTemp2.getAddress(index2,0) );
+//				evaluateRhsImplicitSystem( &loop02, k_index, index2 );
+//				block->addStatement( loop02 );
+//				block->addStatement( "}\n" );
+//			}
 		}
 		else {
 			ExportForLoop loop1( index2,0,numStages );
@@ -839,10 +885,10 @@ returnValue ForwardLiftedIRKExport::evaluateRhsInexactSensitivities( ExportState
 		eyeM.appendCols( zeros<double>(NX,NU) );
 
 		ExportForLoop loop1( index2,0,numStages );
-		loop1.addStatement( rk_seed.getCols(0,NX) == rk_stageValues.getCols(index2*(NX+NXA),index2*(NX+NXA)+NX+NXA) );
+		loop1.addStatement( rk_seed.getCols(0,NX) == rk_stageValues.getCols(index2*(NX+NXA),index2*(NX+NXA)+NX) );
 		loop1.addStatement( rk_seed.getCols(NX,NX+NX*(NX+NU)) == eyeM.makeVector().transpose() );
 
-		ExportForLoop loop2( index3,0,NX2+NXA );
+		ExportForLoop loop2( index3,0,NX2 );
 		loop2.addStatement( tmp_index1 == k_index + index3 );
 		ExportForLoop loop3( index1,0,NX2 );
 		loop3.addStatement( tmp_index2 == tmp_index1*(NX+NU) + index1 );
@@ -859,21 +905,55 @@ returnValue ForwardLiftedIRKExport::evaluateRhsInexactSensitivities( ExportState
 		loop2.addStatement( loop4 );
 		loop1.addStatement( loop2 );
 
-		loop1.addFunctionCall( diffs_sweep.getName(), rk_seed, rk_diffsTemp2 );
+		if( NDX2 > 0 ) {
+			ExportForLoop loop5( index3,0,NDX2 );
+			loop5.addStatement( tmp_index1 == k_index + index3 );
+			ExportForLoop loop51( index1,0,NX2 );
+			loop51.addStatement( tmp_index2 == tmp_index1*(NX+NU) + index1 );
+			loop51.addStatement( rk_seed.getCol( NX+(NX+index3)*(NX+NU)+index1 ) == rk_diffK.getElement(tmp_index2,index2) );
+			loop5.addStatement( loop51 );
+
+			ExportForLoop loop52( index1,0,NU );
+			loop52.addStatement( tmp_index2 == tmp_index1*(NX+NU) + NX + index1 );
+			loop52.addStatement( rk_seed.getCol( NX+(NX+index3)*(NX+NU)+NX+index1 ) == rk_diffK.getElement(tmp_index2,index2) );
+			loop5.addStatement( loop52 );
+			loop1.addStatement( loop5 );
+
+			loop1.addStatement( rk_seed.getCols(NX+(NX+NDX2+NXA)*(NX+NU)+NXA+NU+NOD,rk_seed.getNumCols()) == rk_stageValues.getCols(index2*(NX+NXA),index2*(NX+NXA)+NX) );
+		}
+
+		if( NXA > 0 ) {
+			ExportForLoop loop6( index3,0,NXA );
+			loop6.addStatement( tmp_index1 == k_index + NX + index3 );
+			ExportForLoop loop61( index1,0,NX2 );
+			loop61.addStatement( tmp_index2 == tmp_index1*(NX+NU) + index1 );
+			loop61.addStatement( rk_seed.getCol( NX+(NX+NDX2+index3)*(NX+NU)+index1 ) == rk_diffK.getElement(tmp_index2,index2) );
+			loop6.addStatement( loop61 );
+
+			ExportForLoop loop62( index1,0,NU );
+			loop62.addStatement( tmp_index2 == tmp_index1*(NX+NU) + NX + index1 );
+			loop62.addStatement( rk_seed.getCol( NX+(NX+NDX2+index3)*(NX+NU)+NX+index1 ) == rk_diffK.getElement(tmp_index2,index2) );
+			loop6.addStatement( loop62 );
+			loop1.addStatement( loop6 );
+
+			loop1.addStatement( rk_seed.getCols(NX+(NX+NDX2+NXA)*(NX+NU),NX+(NX+NDX2+NXA)*(NX+NU)+NXA) == rk_stageValues.getCols(index2*(NX+NXA)+NX,index2*(NX+NXA)+NX+NXA) );
+		}
+
+		loop1.addFunctionCall( diffs_sweep.getName(), rk_seed, rk_diffSweep );
 
 		ExportForLoop loop02( index3,0,NX2+NXA );
 		loop02.addStatement( tmp_index1 == k_index + index3 );
 		loop02.addStatement( tmp_index3 == index2*(NX2+NXA)+index3 );
 		ExportForLoop loop03( index1,0,NX2 );
 		loop03.addStatement( tmp_index2 == tmp_index1*(NX+NU) + index1 );
-		loop03.addStatement( rk_b.getElement( tmp_index3,1+index1 ) == rk_diffsTemp2.getElement( index3,index1 ) );
-		loop03.addStatement( rk_b.getElement( tmp_index3,1+index1 ) += rk_diffK.getElement(tmp_index2,index2) );
+		loop03.addStatement( rk_b.getElement( tmp_index3,1+index1 ) == rk_diffSweep.getElement( index3,index1 ) );
+		if( NDX2 == 0 ) loop03.addStatement( rk_b.getElement( tmp_index3,1+index1 ) += rk_diffK.getElement(tmp_index2,index2) );
 		loop02.addStatement( loop03 );
 
 		ExportForLoop loop04( index1,0,NU );
 		loop04.addStatement( tmp_index2 == tmp_index1*(NX+NU) + NX + index1 );
-		loop04.addStatement( rk_b.getElement( tmp_index3,1+NX+index1 ) == rk_diffsTemp2.getElement( index3,NX+index1 ) );
-		loop04.addStatement( rk_b.getElement( tmp_index3,1+NX+index1 ) += rk_diffK.getElement(tmp_index2,index2) );
+		loop04.addStatement( rk_b.getElement( tmp_index3,1+NX+index1 ) == rk_diffSweep.getElement( index3,NX+index1 ) );
+		if( NDX2 == 0 ) loop04.addStatement( rk_b.getElement( tmp_index3,1+NX+index1 ) += rk_diffK.getElement(tmp_index2,index2) );
 		loop02.addStatement( loop04 );
 		loop1.addStatement( loop02 );
 		block->addStatement( loop1 );
@@ -886,16 +966,28 @@ returnValue ForwardLiftedIRKExport::evaluateRhsInexactSensitivities( ExportState
 returnValue ForwardLiftedIRKExport::allSensitivitiesImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportIndex& tmp_index3, const ExportIndex& k_index, const ExportVariable& Bh, bool update )
 {
 	if( NX2 > 0 ) {
+		int linSolver;
+		get( LINEAR_ALGEBRA_SOLVER, linSolver );
 		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ) );  // We compute the algebraic variables at the beginning of the shooting interval !
 
 		// call the linear solver:
-		block->addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
+		if( NDX2 > 0 ) {
+			block->addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_I.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
+		}
+		else {
+			block->addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
+		}
 
 		// update rk_diffK with the new sensitivities:
 		ExportForLoop loop20( index2,0,numStages );
 		ExportForLoop loop21( index3,0,NX2 );
 		loop21.addStatement( tmp_index1 == (k_index + NX1 + index3)*(NX+NU) );
-		loop21.addStatement( tmp_index3 == index2*NX2+index3 );
+		if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
+			loop21.addStatement( tmp_index3 == index2*(NX2+NXA)+index3 );
+		}
+		else {
+			loop21.addStatement( tmp_index3 == index2*NX2+index3 );
+		}
 		ExportForLoop loop22( index1,0,NX2 );
 		loop22.addStatement( tmp_index2 == tmp_index1+index1 );
 		if( update ) {
@@ -919,7 +1011,12 @@ returnValue ForwardLiftedIRKExport::allSensitivitiesImplicitSystem( ExportStatem
 		if( NXA > 0 ) {
 			ExportForLoop loop24( index3,0,NXA );
 			loop24.addStatement( tmp_index1 == (k_index + NX + index3)*(NX+NU) );
-			loop24.addStatement( tmp_index3 == numStages*NX2+index2*NXA+index3 );
+			if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
+				loop24.addStatement( tmp_index3 == index2*(NX2+NXA)+NX2+index3 );
+			}
+			else {
+				loop24.addStatement( tmp_index3 == numStages*NX2+index2*NXA+index3 );
+			}
 			ExportForLoop loop25( index1,0,NX2 );
 			loop25.addStatement( tmp_index2 == tmp_index1+index1 );
 			if( update ) {
@@ -1047,8 +1144,9 @@ returnValue ForwardLiftedIRKExport::setup( )
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY, sensGen);
 	if( (ExportSensitivityType)sensGen == INEXACT ) {
-		rk_seed = ExportVariable( "rk_seed", 1, NX+NX*(NX+NU)+NXA+NU+NOD+NDX+timeDep, REAL, structWspace );
+		rk_seed = ExportVariable( "rk_seed", 1, NX+(NX+NDX2+NXA)*(NX+NU)+NXA+NU+NOD+NDX+timeDep, REAL, structWspace );
 		rk_diffsTemp2 = ExportVariable( "rk_diffsTemp2", NX2+NXA, NVARS2, REAL, structWspace );
+		rk_diffSweep = ExportVariable( "rk_diffSweep", NX2+NXA, NX+NU, REAL, structWspace );
 	}
 
 	rk_stageValues = ExportVariable( "rk_stageValues", 1, numStages*(NX+NXA), REAL, structWspace );
@@ -1072,6 +1170,7 @@ returnValue ForwardLiftedIRKExport::setup( )
 	get( LINEAR_ALGEBRA_SOLVER, linSolver );
 	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
 		rk_A = ExportVariable( "rk_J", NX2+NXA, NX2+NXA, REAL, structWspace );
+		if(NDX2 > 0) rk_I = ExportVariable( "rk_I", NX2+NXA, NX2+NXA, REAL, structWspace );
 	}
 	rk_b = ExportVariable( "rk_b", numStages*(NX+NXA), 1+NX+NU, REAL, structWspace );
 

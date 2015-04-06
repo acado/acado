@@ -46,6 +46,7 @@ ExportIRK3StageSingleNewton::ExportIRK3StageSingleNewton( UserInteraction* _user
 									) : ExportGaussElim( _userInteraction,_commonHeaderName )
 {
 	stepsize = 0;
+	implicit = false;
 	tau = 0;
 }
 
@@ -103,12 +104,20 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 	// form the linear subsystem matrix
 	ExportForLoop loop01( i, 0, dim );
 	ExportForLoop loop02( j, 0, dim );
-	loop02.addStatement( A_mem.getElement(i,j) == tau_var*A_full.getElement(i,j) );
+	if( implicit ) {
+		loop02.addStatement( A_mem.getElement(i,j) == tau_var*A_full.getElement(i,j) );
+		loop02.addStatement( A_mem.getElement(i,j) += I_full.getElement(i,j) );
+	}
+	else {
+		loop02.addStatement( A_mem.getElement(i,j) == tau_var*A_full.getElement(i,j) );
+	}
 	loop01.addStatement( loop02 );
 	solve_full.addStatement( loop01 );
-	ExportForLoop loop1( i, 0, dim );
-	loop1.addStatement( A_mem.getElement(i,i) -= 1.0 );
-	solve_full.addStatement( loop1 );
+	if( !implicit ) {
+		ExportForLoop loop1( i, 0, dim );
+		loop1.addStatement( A_mem.getElement(i,i) -= 1.0 );
+		solve_full.addStatement( loop1 );
+	}
 
 	// factorize the real and complex linear systems
 	solve_full.addFunctionCall(getNameSubSolveFunction(),A_mem,rk_perm_full);
@@ -118,6 +127,7 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 	// SETUP solveReuse_full
 	if( REUSE ) {
 		solveReuse_full.addIndex(i);
+		solveReuse_full.addIndex(j);
 
 		ExportVariable transf1_var( transf1 );
 		ExportVariable transf2_var( transf2 );
@@ -129,18 +139,48 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 		// solveReuse the real and complex linear systems
 		solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(0,0),rk_perm_full);
 
-		ExportForLoop loop2( i, 0, dim );
-		loop2.addStatement( b_mem.getRow(dim+i) -= low_tria_var.getElement(0,0)*b_mem.getRow(i) );
-		solveReuse_full.addStatement( loop2 );
-		solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(dim,0),rk_perm_full);
+		if( !implicit ) {
+			ExportForLoop loop2( i, 0, dim );
+			loop2.addStatement( b_mem.getRow(dim+i) -= low_tria_var.getElement(0,0)*b_mem.getRow(i) );
+			solveReuse_full.addStatement( loop2 );
+			solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(dim,0),rk_perm_full);
 
-		ExportForLoop loop3( i, 0, dim );
-		loop3.addStatement( b_mem.getRow(2*dim+i) -= low_tria_var.getElement(1,0)*b_mem.getRow(i) );
-		solveReuse_full.addStatement( loop3 );
-		ExportForLoop loop4( i, 0, dim );
-		loop4.addStatement( b_mem.getRow(2*dim+i) -= low_tria_var.getElement(2,0)*b_mem.getRow(dim+i) );
-		solveReuse_full.addStatement( loop4 );
-		solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(2*dim,0),rk_perm_full);
+			ExportForLoop loop3( i, 0, dim );
+			loop3.addStatement( b_mem.getRow(2*dim+i) -= low_tria_var.getElement(1,0)*b_mem.getRow(i) );
+			solveReuse_full.addStatement( loop3 );
+			ExportForLoop loop4( i, 0, dim );
+			loop4.addStatement( b_mem.getRow(2*dim+i) -= low_tria_var.getElement(2,0)*b_mem.getRow(dim+i) );
+			solveReuse_full.addStatement( loop4 );
+			solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(2*dim,0),rk_perm_full);
+		}
+		else {
+			uint k;
+			ExportForLoop loop22( j, 0, dim );
+			ExportForLoop loop2( i, 0, dim );
+			for( k = 0; k < nRightHandSides; k++ ) {
+				loop2.addStatement( b_mem.get(dim+i,k) + " += " + low_tria_var.get(0,0) + "*" + I_full.get(j,i) + "*" + b_mem.get(i,k) + ";\n" );
+			}
+			loop22.addStatement( loop2 );
+			solveReuse_full.addStatement( loop22 );
+			solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(dim,0),rk_perm_full);
+
+			ExportForLoop loop33( j, 0, dim );
+			ExportForLoop loop3( i, 0, dim );
+			for( k = 0; k < nRightHandSides; k++ ) {
+				loop3.addStatement( b_mem.get(2*dim+i,k) + " += " + low_tria_var.get(1,0) + "*" + I_full.get(j,i) + "*" + b_mem.get(i,k) + ";\n" );
+			}
+			loop33.addStatement( loop3 );
+			solveReuse_full.addStatement( loop33 );
+
+			ExportForLoop loop44( j, 0, dim );
+			ExportForLoop loop4( i, 0, dim );
+			for( k = 0; k < nRightHandSides; k++ ) {
+				loop4.addStatement( b_mem.get(2*dim+i,k) + " += " + low_tria_var.get(2,0) + "*" + I_full.get(j,i) + "*" + b_mem.get(dim+i,k) + ";\n" );
+			}
+			loop44.addStatement( loop4 );
+			solveReuse_full.addStatement( loop44 );
+			solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(2*dim,0),rk_perm_full);
+		}
 
 		// transform back to the solution
 		performTransformation( solveReuse_full, b_mem, b_full, transf2_var, i );
@@ -208,14 +248,25 @@ returnValue ExportIRK3StageSingleNewton::setup( )
 	}
 
 	A_full = ExportVariable( "A", dim, dim, REAL );
+	I_full = ExportVariable( "A_I", dim, dim, REAL );
 	b_full = ExportVariable( "b", 3*dim, nRightHandSides, REAL );
 	rk_perm_full = ExportVariable( "rk_perm", 1, dim, INT );
 
-	solve_full = ExportFunction( getNameSolveFunction(), A_full, rk_perm_full );   // Only perform the LU factorization!
+	if( implicit ) {
+		solve_full = ExportFunction( getNameSolveFunction(), A_full, I_full, rk_perm_full );   // Only perform the LU factorization!
+	}
+	else {
+		solve_full = ExportFunction( getNameSolveFunction(), A_full, rk_perm_full );   // Only perform the LU factorization!
+	}
 	solve_full.setReturnValue( determinant, false );
 	solve_full.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	if( REUSE ) {
-		solveReuse_full = ExportFunction( getNameSolveReuseFunction(), A_full, b_full, rk_perm_full );
+		if( implicit ) {
+			solveReuse_full = ExportFunction( getNameSolveReuseFunction(), A_full, I_full, b_full, rk_perm_full );
+		}
+		else {
+			solveReuse_full = ExportFunction( getNameSolveReuseFunction(), A_full, b_full, rk_perm_full );
+		}
 		solveReuse_full.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	}
 
@@ -255,6 +306,13 @@ const std::string ExportIRK3StageSingleNewton::getNameSubSolveFunction() {
 const std::string ExportIRK3StageSingleNewton::getNameSubSolveReuseFunction() {
 
 	return string( "solve_" ) + identifier + "sub_system_reuse";
+}
+
+returnValue ExportIRK3StageSingleNewton::setImplicit( BooleanType _implicit ) {
+
+	implicit = _implicit;
+
+	return SUCCESSFUL_RETURN;
 }
 
 
