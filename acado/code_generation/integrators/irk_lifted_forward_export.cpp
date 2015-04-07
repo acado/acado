@@ -919,7 +919,8 @@ returnValue ForwardLiftedIRKExport::evaluateRhsInexactSensitivities( ExportState
 			loop5.addStatement( loop52 );
 			loop1.addStatement( loop5 );
 
-			loop1.addStatement( rk_seed.getCols(NX+(NX+NDX2+NXA)*(NX+NU)+NXA+NU+NOD,rk_seed.getNumCols()) == rk_stageValues.getCols(index2*(NX+NXA),index2*(NX+NXA)+NX) );
+			loop1.addStatement( rk_seed.getCols(NX+(NX+NDX2+NXA)*(NX+NU)+NXA+NU+NOD,rk_seed.getNumCols()) == rk_kkk.getSubMatrix( k_index,k_index+NX,index2,index2+1 ).getTranspose() );
+
 		}
 
 		if( NXA > 0 ) {
