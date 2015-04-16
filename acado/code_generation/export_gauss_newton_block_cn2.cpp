@@ -357,7 +357,10 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 				evaluateConstraints.addStatement( qpUb0.getCols(NX + i*NU, NX + (i+1)*NU) == ubValues.getCols(NX + i*NU, NX + (i+1)*NU) - u.getRow( i ) );
 			}
 		}
+		evaluateConstraints.addStatement( lb.getRows(0,getNumBlockVariables()) == qpLb0.getTranspose() );
+		evaluateConstraints.addStatement( ub.getRows(0,getNumBlockVariables()) == qpUb0.getTranspose() );
 	}
+	uint firstBlock = (initialStateFixed() == true) ? 1 : 0;
 
 	ExportIndex iBlock( "iBlock" );
 	ExportIndex uInd( "uInd" ), offset1( "offset1" ), offset2( "offset2" );
@@ -365,7 +368,7 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 	evaluateConstraints.addIndex( uInd );
 	evaluateConstraints.addIndex( offset1 );
 	if( hardcodeConstraintValues == YES ) evaluateConstraints.addIndex( offset2 );
-	ExportForLoop blockLoop(iBlock, 0, getNumberOfBlocks());
+	ExportForLoop blockLoop(iBlock, firstBlock, getNumberOfBlocks());
 	ExportForLoop uLoop(uInd, 0, getBlockSize());
 
 	if( hardcodeConstraintValues == YES ) {
