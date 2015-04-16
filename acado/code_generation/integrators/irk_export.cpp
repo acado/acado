@@ -1196,22 +1196,37 @@ returnValue ImplicitRungeKuttaExport::setup( )
 			rk_auxSolver = solver->getGlobalExportVariable( 1 );
 			break;
 		case SIMPLIFIED_IRK_NEWTON:
-			if( numStages == 3 ) {
-				solver = new ExportIRK3StageSimplifiedNewton( userInteraction,commonHeaderName );
+			if( numStages == 3 || numStages == 4 ) {
+				if( numStages == 3 ) solver = new ExportIRK3StageSimplifiedNewton( userInteraction,commonHeaderName );
+				if( numStages == 4 ) solver = new ExportIRK4StageSimplifiedNewton( userInteraction,commonHeaderName );
 				solver->init( NX2+NXA, NX+NU+1 );
 				solver->setReuse( true ); 	// IFTR method
 				solver->setup();
 				rk_auxSolver = solver->getGlobalExportVariable( 2 );
 
-				ExportIRK3StageSimplifiedNewton* IRKsolver = dynamic_cast<ExportIRK3StageSimplifiedNewton *>(solver);
-				IRKsolver->setEigenvalues(eig);
-				IRKsolver->setTransformations(simplified_transf1, simplified_transf2);
+				if( numStages == 3 ){
+					ExportIRK3StageSimplifiedNewton* IRKsolver = dynamic_cast<ExportIRK3StageSimplifiedNewton *>(solver);
+					IRKsolver->setEigenvalues(eig);
+					IRKsolver->setTransformations(simplified_transf1, simplified_transf2);
 
-				double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-				IRKsolver->setStepSize(h);
-				if( NDX2 > 0 || NXA > 0 ) {
-					IRKsolver->setImplicit( true );
-					solver->setup();
+					double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
+					IRKsolver->setStepSize(h);
+					if( NDX2 > 0 || NXA > 0 ) {
+						IRKsolver->setImplicit( true );
+						solver->setup();
+					}
+				}
+				else if( numStages == 4 ) {
+					ExportIRK4StageSimplifiedNewton* IRKsolver = dynamic_cast<ExportIRK4StageSimplifiedNewton *>(solver);
+					IRKsolver->setEigenvalues(eig);
+					IRKsolver->setTransformations(simplified_transf1, simplified_transf2);
+
+					double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
+					IRKsolver->setStepSize(h);
+					if( NDX2 > 0 || NXA > 0 ) {
+						IRKsolver->setImplicit( true );
+						solver->setup();
+					}
 				}
 			}
 			else {
@@ -1219,21 +1234,35 @@ returnValue ImplicitRungeKuttaExport::setup( )
 			}
 			break;
 		case SINGLE_IRK_NEWTON:
-			if( numStages == 3 ) {
-				solver = new ExportIRK3StageSingleNewton( userInteraction,commonHeaderName );
+			if( numStages == 3 || numStages == 4 ) {
+				if( numStages == 3 ) solver = new ExportIRK3StageSingleNewton( userInteraction,commonHeaderName );
+				if( numStages == 4 ) solver = new ExportIRK4StageSingleNewton( userInteraction,commonHeaderName );
 				solver->init( NX2+NXA, NX+NU+1 );
 				solver->setReuse( true ); 	// IFTR method
 				solver->setup();
 				rk_auxSolver = solver->getGlobalExportVariable( 1 );
 
-				ExportIRK3StageSingleNewton* IRKsolver = dynamic_cast<ExportIRK3StageSingleNewton *>(solver);
-				IRKsolver->setTransformations(tau, low_tria, single_transf1, single_transf2);
+				if( numStages == 3 ) {
+					ExportIRK3StageSingleNewton* IRKsolver = dynamic_cast<ExportIRK3StageSingleNewton *>(solver);
+					IRKsolver->setTransformations(tau, low_tria, single_transf1, single_transf2);
 
-				double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
-				IRKsolver->setStepSize(h);
-				if( NDX2 > 0 || NXA > 0 ) {
-					IRKsolver->setImplicit( true );
-					solver->setup();
+					double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
+					IRKsolver->setStepSize(h);
+					if( NDX2 > 0 || NXA > 0 ) {
+						IRKsolver->setImplicit( true );
+						solver->setup();
+					}
+				}
+				else if( numStages == 4 ) {
+					ExportIRK4StageSingleNewton* IRKsolver = dynamic_cast<ExportIRK4StageSingleNewton *>(solver);
+					IRKsolver->setTransformations(tau, low_tria, single_transf1, single_transf2);
+
+					double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
+					IRKsolver->setStepSize(h);
+					if( NDX2 > 0 || NXA > 0 ) {
+						IRKsolver->setImplicit( true );
+						solver->setup();
+					}
 				}
 			}
 			else {

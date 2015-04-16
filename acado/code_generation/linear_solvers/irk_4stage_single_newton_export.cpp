@@ -26,12 +26,12 @@
 
 
 /**
- *    \file src/code_generation/linear_solvers/irk_3stage_single_newton_export.cpp
+ *    \file src/code_generation/linear_solvers/irk_4stage_single_newton_export.cpp
  *    \author Rien Quirynen
  *    \date 2015
  */
 
-#include <acado/code_generation/linear_solvers/irk_3stage_single_newton_export.hpp>
+#include <acado/code_generation/linear_solvers/irk_4stage_single_newton_export.hpp>
 
 using namespace std;
 
@@ -41,7 +41,7 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportIRK3StageSingleNewton::ExportIRK3StageSingleNewton( UserInteraction* _userInteraction,
+ExportIRK4StageSingleNewton::ExportIRK4StageSingleNewton( UserInteraction* _userInteraction,
 									const std::string& _commonHeaderName
 									) : ExportGaussElim( _userInteraction,_commonHeaderName )
 {
@@ -50,10 +50,10 @@ ExportIRK3StageSingleNewton::ExportIRK3StageSingleNewton( UserInteraction* _user
 	tau = 0;
 }
 
-ExportIRK3StageSingleNewton::~ExportIRK3StageSingleNewton( )
+ExportIRK4StageSingleNewton::~ExportIRK4StageSingleNewton( )
 {}
 
-returnValue ExportIRK3StageSingleNewton::getDataDeclarations(	ExportStatementBlock& declarations,
+returnValue ExportIRK4StageSingleNewton::getDataDeclarations(	ExportStatementBlock& declarations,
 														ExportStruct dataStruct
 														) const
 {
@@ -66,7 +66,7 @@ returnValue ExportIRK3StageSingleNewton::getDataDeclarations(	ExportStatementBlo
 }
 
 
-returnValue ExportIRK3StageSingleNewton::getFunctionDeclarations(	ExportStatementBlock& declarations
+returnValue ExportIRK4StageSingleNewton::getFunctionDeclarations(	ExportStatementBlock& declarations
 															) const
 {
 	ExportGaussElim::getFunctionDeclarations( declarations );
@@ -80,7 +80,7 @@ returnValue ExportIRK3StageSingleNewton::getFunctionDeclarations(	ExportStatemen
 }
 
 
-returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
+returnValue ExportIRK4StageSingleNewton::getCode(	ExportStatementBlock& code
 											)
 {
 	if( fabs(tau) <= ZERO_EPS || transf1.isEmpty() || transf2.isEmpty() || fabs(stepsize) <= ZERO_EPS ) return ACADOERROR(RET_INVALID_OPTION);
@@ -152,6 +152,17 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 			loop4.addStatement( b_mem.getRow(2*dim+i) -= low_tria_var.getElement(2,0)*b_mem.getRow(dim+i) );
 			solveReuse_full.addStatement( loop4 );
 			solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(2*dim,0),rk_perm_full);
+
+			ExportForLoop loop5( i, 0, dim );
+			loop5.addStatement( b_mem.getRow(3*dim+i) -= low_tria_var.getElement(3,0)*b_mem.getRow(i) );
+			solveReuse_full.addStatement( loop5 );
+			ExportForLoop loop6( i, 0, dim );
+			loop6.addStatement( b_mem.getRow(3*dim+i) -= low_tria_var.getElement(4,0)*b_mem.getRow(dim+i) );
+			solveReuse_full.addStatement( loop6 );
+			ExportForLoop loop7( i, 0, dim );
+			loop7.addStatement( b_mem.getRow(3*dim+i) -= low_tria_var.getElement(5,0)*b_mem.getRow(2*dim+i) );
+			solveReuse_full.addStatement( loop7 );
+			solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(3*dim,0),rk_perm_full);
 		}
 		else {
 			ExportVariable b_tmp( "b_tmp", 1, nRightHandSides, REAL, ACADO_LOCAL );
@@ -165,6 +176,7 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 			loop22.addStatement( loop21 );
 			loop22.addStatement( b_mem.getRow(dim+j) += low_tria_var.getElement(0,0)*b_tmp );
 			loop22.addStatement( b_mem.getRow(2*dim+j) += low_tria_var.getElement(1,0)*b_tmp );
+			loop22.addStatement( b_mem.getRow(3*dim+j) += low_tria_var.getElement(3,0)*b_tmp );
 			solveReuse_full.addStatement( loop22 );
 			solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(dim,0),rk_perm_full);
 
@@ -174,8 +186,18 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 			loop31.addStatement( b_tmp += I_full.getElement(j,i) * b_mem.getRow(dim+i) );
 			loop32.addStatement( loop31 );
 			loop32.addStatement( b_mem.getRow(2*dim+j) += low_tria_var.getElement(2,0)*b_tmp );
+			loop32.addStatement( b_mem.getRow(3*dim+j) += low_tria_var.getElement(4,0)*b_tmp );
 			solveReuse_full.addStatement( loop32 );
 			solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(2*dim,0),rk_perm_full);
+
+			ExportForLoop loop42( j, 0, dim );
+			loop42.addStatement( b_tmp == zeros<double>(1,nRightHandSides) );
+			ExportForLoop loop41( i, 0, dim );
+			loop41.addStatement( b_tmp += I_full.getElement(j,i) * b_mem.getRow(2*dim+i) );
+			loop42.addStatement( loop41 );
+			loop42.addStatement( b_mem.getRow(3*dim+j) += low_tria_var.getElement(5,0)*b_tmp );
+			solveReuse_full.addStatement( loop42 );
+			solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(3*dim,0),rk_perm_full);
 		}
 
 		// transform back to the solution
@@ -188,11 +210,11 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 }
 
 
-returnValue ExportIRK3StageSingleNewton::performTransformation(	ExportStatementBlock& code, const ExportVariable& from, const ExportVariable& to, const ExportVariable& transf, const ExportIndex& index )
+returnValue ExportIRK4StageSingleNewton::performTransformation(	ExportStatementBlock& code, const ExportVariable& from, const ExportVariable& to, const ExportVariable& transf, const ExportIndex& index )
 {
 	uint i, j;
 
-	ExportForLoop loop0( index, 0, 3*dim );
+	ExportForLoop loop0( index, 0, 4*dim );
 	for( j = 0; j < nRightHandSides; j++ ) {
 		loop0.addStatement( to.getElement(index,j) == 0.0 );
 	}
@@ -201,16 +223,20 @@ returnValue ExportIRK3StageSingleNewton::performTransformation(	ExportStatementB
 	ExportForLoop loop1( index, 0, dim );
 	for( j = 0; j < nRightHandSides; j++ ) {
 
-		for( i = 0; i < 3; i++ ) {
+		for( i = 0; i < 4; i++ ) {
 			if( !transf.isZero(0,i) ) loop1.addStatement( to.getElement(index,j) += transf.getElement(0,i)*from.getElement(index+i*dim,j) );
 		}
 
-		for( i = 0; i < 3; i++ ) {
+		for( i = 0; i < 4; i++ ) {
 			if( !transf.isZero(1,i) ) loop1.addStatement( to.getElement(dim+index,j) += transf.getElement(1,i)*from.getElement(index+i*dim,j) );
 		}
 
-		for( i = 0; i < 3; i++ ) {
+		for( i = 0; i < 4; i++ ) {
 			if( !transf.isZero(2,i) ) loop1.addStatement( to.getElement(2*dim+index,j) += transf.getElement(2,i)*from.getElement(index+i*dim,j) );
+		}
+
+		for( i = 0; i < 4; i++ ) {
+			if( !transf.isZero(3,i) ) loop1.addStatement( to.getElement(3*dim+index,j) += transf.getElement(3,i)*from.getElement(index+i*dim,j) );
 		}
 	}
 	code.addStatement( loop1 );
@@ -219,7 +245,7 @@ returnValue ExportIRK3StageSingleNewton::performTransformation(	ExportStatementB
 }
 
 
-returnValue ExportIRK3StageSingleNewton::setup( )
+returnValue ExportIRK4StageSingleNewton::setup( )
 {
 	ExportGaussElim::setup( );
 
@@ -232,7 +258,7 @@ returnValue ExportIRK3StageSingleNewton::setup( )
 	structWspace = useOMP ? ACADO_LOCAL : ACADO_WORKSPACE;
 
 	A_mem = ExportVariable( std::string( "rk_mem_" ) + identifier + "A", dim, dim, REAL, structWspace );
-	b_mem = ExportVariable( std::string( "rk_mem_" ) + identifier + "b", 3*dim, nRightHandSides, REAL, structWspace );
+	b_mem = ExportVariable( std::string( "rk_mem_" ) + identifier + "b", 4*dim, nRightHandSides, REAL, structWspace );
 
 	solve = ExportFunction( getNameSubSolveFunction(), A, rk_perm );
 	solve.setReturnValue( determinant, false );
@@ -245,7 +271,7 @@ returnValue ExportIRK3StageSingleNewton::setup( )
 
 	A_full = ExportVariable( "A", dim, dim, REAL );
 	I_full = ExportVariable( "A_I", dim, dim, REAL );
-	b_full = ExportVariable( "b", 3*dim, nRightHandSides, REAL );
+	b_full = ExportVariable( "b", 4*dim, nRightHandSides, REAL );
 	rk_perm_full = ExportVariable( "rk_perm", 1, dim, INT );
 
 	if( implicit ) {
@@ -270,41 +296,41 @@ returnValue ExportIRK3StageSingleNewton::setup( )
 }
 
 
-returnValue ExportIRK3StageSingleNewton::setTransformations( const double _tau, const DVector& _low_tria, const DMatrix& _transf1, const DMatrix& _transf2 ) {
+returnValue ExportIRK4StageSingleNewton::setTransformations( const double _tau, const DVector& _low_tria, const DMatrix& _transf1, const DMatrix& _transf2 ) {
 	tau = _tau;
 	low_tria = _low_tria;
 	transf1 = _transf1;
 	transf2 = _transf2;
 
 	if( _tau <= 0 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
-	if( _transf1.getNumRows() != 3 || _transf1.getNumCols() != 3 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
-	if( _transf2.getNumRows() != 3 || _transf2.getNumCols() != 3 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
-	if( _low_tria.getDim() != 3 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
+	if( _transf1.getNumRows() != 4 || _transf1.getNumCols() != 4 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
+	if( _transf2.getNumRows() != 4 || _transf2.getNumCols() != 4 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
+	if( _low_tria.getDim() != 6 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
 	if( _transf1.isZero() || _transf2.isZero() || _low_tria.isZero() ) return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ExportIRK3StageSingleNewton::setStepSize( double _stepsize ) {
+returnValue ExportIRK4StageSingleNewton::setStepSize( double _stepsize ) {
 	stepsize = _stepsize;
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-const std::string ExportIRK3StageSingleNewton::getNameSubSolveFunction() {
+const std::string ExportIRK4StageSingleNewton::getNameSubSolveFunction() {
 
 	return string( "solve_" ) + identifier + "sub_system";
 }
 
 
-const std::string ExportIRK3StageSingleNewton::getNameSubSolveReuseFunction() {
+const std::string ExportIRK4StageSingleNewton::getNameSubSolveReuseFunction() {
 
 	return string( "solve_" ) + identifier + "sub_system_reuse";
 }
 
-returnValue ExportIRK3StageSingleNewton::setImplicit( BooleanType _implicit ) {
+returnValue ExportIRK4StageSingleNewton::setImplicit( BooleanType _implicit ) {
 
 	implicit = _implicit;
 
