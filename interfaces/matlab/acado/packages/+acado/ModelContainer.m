@@ -265,6 +265,15 @@ classdef ModelContainer < handle
                         fprintf(cppobj.fileMEX,sprintf('    %s.setLinearInput( %s, %s );\n', obj.name, obj.A1.name, obj.B1.name));
                     end
                 end
+                if (~isempty(obj.NOD))
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setNOD( %s );\n', obj.name, num2str(obj.NOD)));
+                end
+                if (~isempty(obj.NP))
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setNP( %s );\n', obj.name, num2str(obj.NP)));
+                end
+                if (~isempty(obj.NU))
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setNU( %s );\n', obj.name, num2str(obj.NU)));
+                end
                 if (~isempty(obj.model))
                     if (~isempty(obj.model))
                         fprintf(cppobj.fileMEX,sprintf('    %s.setModel( %s );\n', obj.name, obj.model.name));
@@ -283,15 +292,6 @@ classdef ModelContainer < handle
                     % The model should then be defined elsewhere, e.g. with
                     % subjectTo in OCP
 %                     error('ERROR: Invalid ModelContainer object in getInstructions !\n');
-                end
-                if (~isempty(obj.NOD))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setNOD( %s );\n', obj.name, num2str(obj.NOD)));
-                end
-                if (~isempty(obj.NP))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setNP( %s );\n', obj.name, num2str(obj.NP)));
-                end
-                if (~isempty(obj.NU))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.setNU( %s );\n', obj.name, num2str(obj.NU)));
                 end
                 if obj.linearOutput
                     obj.fun3.getInstructions(cppobj, get);
