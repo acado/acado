@@ -247,8 +247,8 @@ returnValue SCPmethod::init(	VariablesGrid* x_init ,
 	// freeze condensing in case OCP is QP -- isCP is a bit misleading...
 	if ( ( isCP == BT_TRUE ) && ( eval->hasLSQobjective( ) == BT_TRUE ) )
 	{
-// 		bandedCPsolver->freezeCondensing( );
-// 		eval->freezeSensitivities( );
+ 		// bandedCPsolver->freezeCondensing( );
+ 		// eval->freezeSensitivities( );
 	}
 
 	status = BS_READY;
