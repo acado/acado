@@ -40,6 +40,11 @@
 #include <vector>
 #include <string>
 
+#ifdef __MATLAB__
+ #include <mex.h>
+ #include <iostream>
+#endif
+
 BEGIN_NAMESPACE_ACADO
 
 /** Defines visibility status of a message. */
@@ -188,6 +193,44 @@ private:
 #define LOG( level ) \
 		if (level < Logger::instance().getLogLevel()); \
 		else Logger::instance().get( level )
+
+
+
+#ifdef __MATLAB__
+// Writes character stream to MATLAB console.
+class MatlabConsoleStreamBuf : public std::basic_streambuf<char>
+{
+protected:
+    int_type overflow( int_type ch = traits_type::eof() )
+    {
+        if (!traits_type::eq_int_type(ch, traits_type::eof()))
+            return mexPrintf("%c", traits_type::to_char_type(ch)) > 0 ? 0 : traits_type::eof();
+
+        return 0;
+    }
+};
+
+// Automatically restores previous rdbuf() when goes out of scope.
+class RedirectStream
+{
+public:
+    RedirectStream(std::ostream& stream, std::streambuf& new_streambuf)
+    :   _stream(stream)
+    ,   _old_streambuf(stream.rdbuf())
+    {
+        _stream.rdbuf(&new_streambuf);
+    }
+
+    ~RedirectStream()
+    {
+        _stream.rdbuf(_old_streambuf);
+    }
+
+private:
+    std::ostream& _stream;
+    std::streambuf * _old_streambuf;
+};
+#endif
 
 CLOSE_NAMESPACE_ACADO
 

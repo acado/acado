@@ -419,20 +419,23 @@ returnValue CondensingBasedCPsolver::solveCPsubproblem( )
     if( levenbergMarquard > EPS )
     	denseCP.H += eye<double>( denseCP.H.rows() ) * levenbergMarquard;
 
-	// Check condition number of the condensed Hessian.
-    double denseHConditionNumber = denseCP.H.getConditionNumber();
-    if (denseHConditionNumber > 1.0e16)
+    if ( LVL_WARNING < Logger::instance().getLogLevel() )
     {
-    	LOG( LVL_WARNING )
-    			<< "Condition number of the condensed Hessian is quite high: log_10(kappa( H )) = "
-    			<< log10( denseHConditionNumber ) << endl;
-    	ACADOWARNING( RET_ILLFORMED_HESSIAN_MATRIX );
-    }
-    // Check for max and min entry in the condensed Hessian:
-    if (denseCP.H.getMin() < -1.0e16 || denseCP.H.getMax() > 1.0e16)
-    {
-    	LOG( LVL_WARNING ) << "Ill formed condensed Hessian: min(.) < -1e16 or max(.) > 1e16" << endl;
-    	ACADOWARNING( RET_ILLFORMED_HESSIAN_MATRIX );
+      // Check condition number of the condensed Hessian.
+      double denseHConditionNumber = denseCP.H.getConditionNumber();
+      if (denseHConditionNumber > 1.0e16)
+      {
+        LOG( LVL_WARNING )
+            << "Condition number of the condensed Hessian is quite high: log_10(kappa( H )) = "
+            << log10( denseHConditionNumber ) << endl;
+        ACADOWARNING( RET_ILLFORMED_HESSIAN_MATRIX );
+      }
+      // Check for max and min entry in the condensed Hessian:
+      if (denseCP.H.getMin() < -1.0e16 || denseCP.H.getMax() > 1.0e16)
+      {
+        LOG( LVL_WARNING ) << "Ill formed condensed Hessian: min(.) < -1e16 or max(.) > 1e16" << endl;
+        ACADOWARNING( RET_ILLFORMED_HESSIAN_MATRIX );
+      }
     }
 
     // SOLVE QP ALLOWING THE GIVEN NUMBER OF ITERATIONS:
