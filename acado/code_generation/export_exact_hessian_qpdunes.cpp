@@ -262,7 +262,7 @@ returnValue ExportExactHessianQpDunes::setupObjectiveEvaluation( void )
 	//
 	if( evaluateTerminalCost.getFunctionDim() > 0 ) {
 		evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
-		evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
+		evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
 		// Evaluate the objective function, last node.
 		evaluateObjective.addFunctionCall(evaluateTerminalCost, objValueIn, objValueOut);
