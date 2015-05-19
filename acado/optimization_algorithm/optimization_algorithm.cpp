@@ -112,9 +112,18 @@ returnValue OptimizationAlgorithm::solve( ){
         returnvalue != CONVERGENCE_ACHIEVED )
 	{
 		if ( returnvalue == RET_MAX_NUMBER_OF_STEPS_EXCEEDED)
-			return ACADOERROR( RET_MAX_NUMBER_OF_STEPS_EXCEEDED );
+    {
+      int PrintLevel; 
+      get( PRINTLEVEL, PrintLevel ); 
+      if (PrintLevel != NONE)
+      {
+  			return ACADOERROR( RET_MAX_NUMBER_OF_STEPS_EXCEEDED );
+      }
+    }
 		else
+    {
 			return ACADOERROR( RET_OPTALG_SOLVE_FAILED );
+    }
 	}
     return SUCCESSFUL_RETURN;
 }
