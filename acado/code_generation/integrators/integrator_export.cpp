@@ -307,6 +307,15 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	if( exportRhs ) {
 		DifferentialEquation f;
 		data.getModel(f);
+		if(f.getNDX() == 0) {
+			DVector order = f.getDifferentialStateComponents();
+			for( uint i = 0; i < order.getDim(); i++ ) {
+				if( i != order(i) ) {
+					return ACADOERRORTEXT(RET_NOT_IMPLEMENTED_YET, "The order of defined state variables should correspond to that of an explicit system of differential equations!");
+				}
+			}
+		}
+
 		OutputFcn f3;
 		data.getLinearOutput( M3, A3, f3 );
 		DMatrix parms;
