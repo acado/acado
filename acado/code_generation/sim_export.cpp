@@ -275,7 +275,9 @@ returnValue SIMexport::setup( )
 
 	Grid grid( 0.0, T, modelData.getN()+1 );
 	modelData.setIntegrationGrid( grid, numSteps );
-	integrator->setModelData( modelData );
+	returnvalue = integrator->setModelData( modelData );
+ 	if ( returnvalue != SUCCESSFUL_RETURN )
+ 		return returnvalue;
 	
 	if( modelData.hasOutputs() ) {
 		uint i;
