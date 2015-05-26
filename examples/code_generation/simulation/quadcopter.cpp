@@ -94,35 +94,34 @@ int main( )
 
 	// Define the quadcopter ODE model in fully nonlinear form:
 	// ----------------------------------------------------------
-	f1 << U1*gain; 
-	f1 << U2*gain; 
-	f1 << U3*gain; 
-	f1 << U4*gain; 
-	f1 << dT1; 
-	f1 << dT2; 
-	f1 << dT3; 
-	f1 << dT4; 
-	f1 << (T1 - W1*xi)/Jp; 
-	f1 << (T2 - W2*xi)/Jp; 
-	f1 << (T3 - W3*xi)/Jp; 
-	f1 << (T4 - W4*xi)/Jp; 
-	f1 << - (Omega1*q2)/2 - (Omega2*q3)/2 - (Omega3*q4)/2 - (alpha*q1*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
-	f1 << (Omega1*q1)/2 - (Omega3*q3)/2 + (Omega2*q4)/2 - (alpha*q2*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
-	f1 << (Omega2*q1)/2 + (Omega3*q2)/2 - (Omega1*q4)/2 - (alpha*q3*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
-	f1 << (Omega3*q1)/2 - (Omega2*q2)/2 + (Omega1*q3)/2 - (alpha*q4*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
-	f1 << (J3*Omega2*Omega3 - J2*Omega2*Omega3 + (A*Cl*L*rho*(W2*W2 - W4*W4))/2)/J1; 
-	f1 << -(J3*Omega1*Omega3 - J1*Omega1*Omega3 + (A*Cl*L*rho*(W1*W1 - W3*W3))/2)/J2; 
-	f1 << (J2*Omega1*Omega2 - J1*Omega1*Omega2 + (A*Cd*rho*(W1*W1 - W2*W2 + W3*W3 - W4*W4))/2)/J3; 
-	f1 << (A*Cl*rho*(2*q1*q3 + 2*q2*q4)*(W1*W1 + W2*W2 + W3*W3 + W4*W4))/(2*m); 
-	f1 << -(A*Cl*rho*(2*q1*q2 - 2*q3*q4)*(W1*W1 + W2*W2 + W3*W3 + W4*W4))/(2*m); 
-	f1 << (A*Cl*rho*(W1*W1 + W2*W2 + W3*W3 + W4*W4)*(q1*q1 - q2*q2 - q3*q3 + q4*q4))/(2*m) - g; 
-	f1 << V1; 
-	f1 << V2; 
-	f1 << V3; 
-	f1 << P1; 
-	f1 << P2; 
-	f1 << P3; 
-
+	f1 << dot(dT1) == U1*gain; 
+	f1 << dot(dT2) == U2*gain; 
+	f1 << dot(dT3) == U3*gain; 
+	f1 << dot(dT4) == U4*gain; 
+	f1 << dot(T1) == dT1; 
+	f1 << dot(T2) == dT2; 
+	f1 << dot(T3) == dT3; 
+	f1 << dot(T4) == dT4; 
+	f1 << dot(W1) == (T1 - W1*xi)/Jp; 
+	f1 << dot(W2) == (T2 - W2*xi)/Jp; 
+	f1 << dot(W3) == (T3 - W3*xi)/Jp; 
+	f1 << dot(W4) == (T4 - W4*xi)/Jp; 
+	f1 << dot(q1) == - (Omega1*q2)/2 - (Omega2*q3)/2 - (Omega3*q4)/2 - (alpha*q1*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
+	f1 << dot(q2) == (Omega1*q1)/2 - (Omega3*q3)/2 + (Omega2*q4)/2 - (alpha*q2*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
+	f1 << dot(q3) == (Omega2*q1)/2 + (Omega3*q2)/2 - (Omega1*q4)/2 - (alpha*q3*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
+	f1 << dot(q4) == (Omega3*q1)/2 - (Omega2*q2)/2 + (Omega1*q3)/2 - (alpha*q4*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
+	f1 << dot(Omega1) == (J3*Omega2*Omega3 - J2*Omega2*Omega3 + (A*Cl*L*rho*(W2*W2 - W4*W4))/2)/J1; 
+	f1 << dot(Omega2) == -(J3*Omega1*Omega3 - J1*Omega1*Omega3 + (A*Cl*L*rho*(W1*W1 - W3*W3))/2)/J2; 
+	f1 << dot(Omega3) == (J2*Omega1*Omega2 - J1*Omega1*Omega2 + (A*Cd*rho*(W1*W1 - W2*W2 + W3*W3 - W4*W4))/2)/J3; 
+	f1 << dot(V1) == (A*Cl*rho*(2*q1*q3 + 2*q2*q4)*(W1*W1 + W2*W2 + W3*W3 + W4*W4))/(2*m); 
+	f1 << dot(V2) == -(A*Cl*rho*(2*q1*q2 - 2*q3*q4)*(W1*W1 + W2*W2 + W3*W3 + W4*W4))/(2*m); 
+	f1 << dot(V3) == (A*Cl*rho*(W1*W1 + W2*W2 + W3*W3 + W4*W4)*(q1*q1 - q2*q2 - q3*q3 + q4*q4))/(2*m) - g; 
+	f1 << dot(P1) == V1; 
+	f1 << dot(P2) == V2; 
+	f1 << dot(P3) == V3; 
+	f1 << dot(IP1) == P1; 
+	f1 << dot(IP2) == P2; 
+	f1 << dot(IP3) == P3; 
 
 	// Define the quadcopter ODE model in 3-stage format:
 	// ----------------------------------------------------------
@@ -148,16 +147,16 @@ int main( )
 	B1(3,3) = gain;
 	
 	// NONLINEAR SYSTEM (STAGE 2):
-	f2 << - (Omega1*q2)/2 - (Omega2*q3)/2 - (Omega3*q4)/2 - (alpha*q1*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
-	f2 << (Omega1*q1)/2 - (Omega3*q3)/2 + (Omega2*q4)/2 - (alpha*q2*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
-	f2 << (Omega2*q1)/2 + (Omega3*q2)/2 - (Omega1*q4)/2 - (alpha*q3*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
-	f2 << (Omega3*q1)/2 - (Omega2*q2)/2 + (Omega1*q3)/2 - (alpha*q4*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
-	f2 << (J3*Omega2*Omega3 - J2*Omega2*Omega3 + (A*Cl*L*rho*(W2*W2 - W4*W4))/2)/J1; 
-	f2 << -(J3*Omega1*Omega3 - J1*Omega1*Omega3 + (A*Cl*L*rho*(W1*W1 - W3*W3))/2)/J2; 
-	f2 << (J2*Omega1*Omega2 - J1*Omega1*Omega2 + (A*Cd*rho*(W1*W1 - W2*W2 + W3*W3 - W4*W4))/2)/J3; 
-	f2 << (A*Cl*rho*(2*q1*q3 + 2*q2*q4)*(W1*W1 + W2*W2 + W3*W3 + W4*W4))/(2*m); 
-	f2 << -(A*Cl*rho*(2*q1*q2 - 2*q3*q4)*(W1*W1 + W2*W2 + W3*W3 + W4*W4))/(2*m); 
-	f2 << (A*Cl*rho*(W1*W1 + W2*W2 + W3*W3 + W4*W4)*(q1*q1 - q2*q2 - q3*q3 + q4*q4))/(2*m) - g; 
+	f2 << dot(q1) == - (Omega1*q2)/2 - (Omega2*q3)/2 - (Omega3*q4)/2 - (alpha*q1*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
+	f2 << dot(q2) == (Omega1*q1)/2 - (Omega3*q3)/2 + (Omega2*q4)/2 - (alpha*q2*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
+	f2 << dot(q3) == (Omega2*q1)/2 + (Omega3*q2)/2 - (Omega1*q4)/2 - (alpha*q3*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
+	f2 << dot(q4) == (Omega3*q1)/2 - (Omega2*q2)/2 + (Omega1*q3)/2 - (alpha*q4*(q1*q1 + q2*q2 + q3*q3 + q4*q4 - 1))/(q1*q1 + q2*q2 + q3*q3 + q4*q4); 
+	f2 << dot(Omega1) == (J3*Omega2*Omega3 - J2*Omega2*Omega3 + (A*Cl*L*rho*(W2*W2 - W4*W4))/2)/J1; 
+	f2 << dot(Omega2) == -(J3*Omega1*Omega3 - J1*Omega1*Omega3 + (A*Cl*L*rho*(W1*W1 - W3*W3))/2)/J2; 
+	f2 << dot(Omega3) == (J2*Omega1*Omega2 - J1*Omega1*Omega2 + (A*Cd*rho*(W1*W1 - W2*W2 + W3*W3 - W4*W4))/2)/J3; 
+	f2 << dot(V1) == (A*Cl*rho*(2*q1*q3 + 2*q2*q4)*(W1*W1 + W2*W2 + W3*W3 + W4*W4))/(2*m); 
+	f2 << dot(V2) == -(A*Cl*rho*(2*q1*q2 - 2*q3*q4)*(W1*W1 + W2*W2 + W3*W3 + W4*W4))/(2*m); 
+	f2 << dot(V3) == (A*Cl*rho*(W1*W1 + W2*W2 + W3*W3 + W4*W4)*(q1*q1 - q2*q2 - q3*q3 + q4*q4))/(2*m) - g; 
 	
 	// LINEAR OUTPUT SYSTEM (STAGE 3):
 	DMatrix M3, A3;
