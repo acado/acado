@@ -299,7 +299,7 @@ protected:
 	/** \name Evaluation of point constraints */
 	/** @{ */
 	unsigned dimPocH;
-	std::vector< std::tr1::shared_ptr< ExportAcadoFunction > > evaluatePointConstraints;
+	std::vector< std::shared_ptr< ExportAcadoFunction > > evaluatePointConstraints;
 	DVector lbPointConValues, ubPointConValues;
 
 	std::vector< DVector > pocLbStack, pocUbStack;
@@ -364,7 +364,7 @@ enum ExportNLPType
 typedef ExportAlgorithmFactory<ExportNLPSolver, ExportNLPType> NLPSolverFactory;
 
 /** Shared pointer to an NLP solver. */
-typedef std::tr1::shared_ptr< ExportNLPSolver > ExportNLPSolverPtr;
+typedef std::shared_ptr< ExportNLPSolver > ExportNLPSolverPtr;
 
 CLOSE_NAMESPACE_ACADO
 

@@ -42,11 +42,7 @@
 #include <acado/code_generation/export_statement_string.hpp>
 #include <acado/code_generation/memory_allocator.hpp>
 
-#ifdef _WIN32
-    #include <memory>
-#else
-    #include <tr1/memory>
-#endif
+#include <memory>
 
 BEGIN_NAMESPACE_ACADO
 

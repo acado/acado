@@ -489,7 +489,7 @@ class IntegratorExport : public ExportAlgorithm
 typedef ExportAlgorithmFactory<IntegratorExport, ExportIntegratorType> IntegratorExportFactory;
 
 /** Shared pointer to an integrator. */
-typedef std::tr1::shared_ptr< IntegratorExport > IntegratorExportPtr;
+typedef std::shared_ptr< IntegratorExport > IntegratorExportPtr;
 
 CLOSE_NAMESPACE_ACADO
 

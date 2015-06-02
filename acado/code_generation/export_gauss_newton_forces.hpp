@@ -217,8 +217,8 @@ private:
 	std::string qpModuleName;
 	std::string qpObjPrefix;
 
-	std::tr1::shared_ptr< ExportForcesInterface > qpInterface;
-	std::tr1::shared_ptr< ExportForcesGenerator > qpGenerator;
+	std::shared_ptr< ExportForcesInterface > qpInterface;
+	std::shared_ptr< ExportForcesGenerator > qpGenerator;
 	/** @} */
 };
 

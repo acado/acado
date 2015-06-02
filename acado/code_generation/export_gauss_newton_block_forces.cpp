@@ -479,7 +479,7 @@ returnValue ExportGaussNewtonBlockForces::setupQPInterface( )
 	// Configure and export QP interface
 	//
 
-	qpInterface = std::tr1::shared_ptr< ExportForcesInterface >(new ExportForcesInterface(FORCES_TEMPLATE, "", commonHeaderName));
+	qpInterface = std::shared_ptr< ExportForcesInterface >(new ExportForcesInterface(FORCES_TEMPLATE, "", commonHeaderName));
 
 	ExportVariable tmp1("tmp", 1, 1, REAL, FORCES_PARAMS, false, qpObjPrefix);
 	ExportVariable tmp2("tmp", 1, 1, REAL, FORCES_OUTPUT, false, qpObjPrefix);
@@ -514,7 +514,7 @@ returnValue ExportGaussNewtonBlockForces::setupQPInterface( )
 	get(CG_EXPORT_FOLDER_NAME, folderName);
 	string outFile = folderName + "/acado_forces_generator.m";
 
-	qpGenerator = std::tr1::shared_ptr< ExportForcesGenerator >(new ExportForcesGenerator(FORCES_GENERATOR, outFile, "", "real_t", "int", 16, "%"));
+	qpGenerator = std::shared_ptr< ExportForcesGenerator >(new ExportForcesGenerator(FORCES_GENERATOR, outFile, "", "real_t", "int", 16, "%"));
 
 	int maxNumQPiterations;
 	get( MAX_NUM_QP_ITERATIONS,maxNumQPiterations );

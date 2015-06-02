@@ -809,7 +809,7 @@ returnValue ExportGaussNewtonHpmpc::setupQPInterface( )
 	get(CG_EXPORT_FOLDER_NAME, folderName);
 	string outFile = folderName + "/acado_hpmpc_interface.c";
 
-	qpInterface = std::tr1::shared_ptr< ExportHpmpcInterface >(new ExportHpmpcInterface(outFile, commonHeaderName));
+	qpInterface = std::shared_ptr< ExportHpmpcInterface >(new ExportHpmpcInterface(outFile, commonHeaderName));
 
 	int maxNumQPiterations;
 	get(MAX_NUM_QP_ITERATIONS, maxNumQPiterations);

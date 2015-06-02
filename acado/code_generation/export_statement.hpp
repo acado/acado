@@ -37,11 +37,7 @@
 
 #include <acado/utils/acado_utils.hpp>
 
-#ifdef _WIN32
-    #include <memory>
-#else
-    #include <tr1/memory>
-#endif
+#include <memory>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -68,13 +64,13 @@ class ExportStatement
     public:
 
 		/** Shared pointer to a statement. */
-		typedef std::tr1::shared_ptr< ExportStatement > StatementPtr;
+		typedef std::shared_ptr< ExportStatement > StatementPtr;
 
 		/** A vector of shared pointer statements. */
 		typedef std::vector< StatementPtr > StatementPtrArray;
 
 		/** Shared pointer to a memory allocator */
-		typedef std::tr1::shared_ptr< MemoryAllocator > MemoryAllocatorPtr;
+		typedef std::shared_ptr< MemoryAllocator > MemoryAllocatorPtr;
 
 		/** Default constructor. */
         ExportStatement( );

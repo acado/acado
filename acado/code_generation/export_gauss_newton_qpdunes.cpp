@@ -1177,7 +1177,7 @@ returnValue ExportGaussNewtonQpDunes::setupQPInterface( )
 	// Configure and export QP interface
 	//
 
-	qpInterface = std::tr1::shared_ptr< ExportQpDunesInterface >(new ExportQpDunesInterface("", commonHeaderName));
+	qpInterface = std::shared_ptr< ExportQpDunesInterface >(new ExportQpDunesInterface("", commonHeaderName));
 
 	int maxNumQPiterations;
 	get(MAX_NUM_QP_ITERATIONS, maxNumQPiterations);

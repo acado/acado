@@ -1343,7 +1343,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 			}
 
 			// Stack the new function
-			evaluatePointConstraints[ i ] = std::tr1::shared_ptr< ExportAcadoFunction >(new ExportAcadoFunction);
+			evaluatePointConstraints[ i ] = std::shared_ptr< ExportAcadoFunction >(new ExportAcadoFunction);
 
 			std::string pocFName;
 

@@ -96,7 +96,7 @@ protected:
 protected:
 
 	/** qpDUNES interface object. */
-	std::tr1::shared_ptr< ExportSplitQpDunesInterface > qpInterface;
+	std::shared_ptr< ExportSplitQpDunesInterface > qpInterface;
 
 };
 

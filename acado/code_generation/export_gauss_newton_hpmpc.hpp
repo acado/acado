@@ -201,7 +201,7 @@ private:
 
 //	ExportVariable qpWork;
 
-	std::tr1::shared_ptr< ExportHpmpcInterface > qpInterface;
+	std::shared_ptr< ExportHpmpcInterface > qpInterface;
 	/** @} */
 };
 

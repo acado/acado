@@ -393,11 +393,11 @@ protected:
 	void setupGrid( const DVector& times );
 
 	/** Common discretization grid. */
-	std::tr1::shared_ptr<Grid> grid;
+	std::shared_ptr<Grid> grid;
 	/** The Objective. */
-	std::tr1::shared_ptr<Objective> objective;
+	std::shared_ptr<Objective> objective;
 	/** The Constraints. */
-	std::tr1::shared_ptr<Constraint> constraint;
+	std::shared_ptr<Constraint> constraint;
 };
 
 CLOSE_NAMESPACE_ACADO

@@ -159,10 +159,10 @@ protected:
 									int _precision = 16) const;
 
 	/** Shared pointer to a tailored integrator. */
-	std::tr1::shared_ptr< IntegratorExport > integrator;
+	std::shared_ptr< IntegratorExport > integrator;
 
 	/** Shared pointer to an NLP solver. */
-	std::tr1::shared_ptr< ExportNLPSolver > solver;
+	std::shared_ptr< ExportNLPSolver > solver;
 
 	/** Internal copy of the OCP object. */
 	OCP ocp;

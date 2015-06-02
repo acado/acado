@@ -214,7 +214,7 @@ protected:
 	/** @} */
 
 	/** qpDUNES interface object. */
-	std::tr1::shared_ptr< ExportQpDunesInterface > qpInterface;
+	std::shared_ptr< ExportQpDunesInterface > qpInterface;
 };
 
 CLOSE_NAMESPACE_ACADO
