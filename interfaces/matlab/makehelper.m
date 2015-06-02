@@ -145,13 +145,13 @@ VERBOSE = 0;
     %COMPILER FLAGS
     if (ispc)
         % Microsoft Visual C++ (express) compiler
-        CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -O ' ];    
+        CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -Dregister="" -O ' ];    
     elseif (ismac)
         % Other compilers
-        CPPFLAGS  = [ IFLAGS, ' LDFLAGS=''\$LDFLAGS -stdlib=libstdc++'' CXXFLAGS=''\$CXXFLAGS -fPIC -stdlib=libstdc++'' -DLINUX -D__cpluplus -D__MATLAB__ -O ' ];
+        CPPFLAGS  = [ IFLAGS, ' LDFLAGS=''\$LDFLAGS -stdlib=libc++'' CXXFLAGS=''\$CXXFLAGS -fPIC -stdlib=libc++ -std=c++11'' -DLINUX -D__cpluplus -D__MATLAB__ -Dregister="" -O ' ]
     else
         % Other compilers
-        CPPFLAGS  = [ IFLAGS, ' CXXFLAGS=''\$CXXFLAGS -fPIC -Wno-c++11-compat -Wno-unused-comparison'' -DLINUX -D__cpluplus -D__MATLAB__ -O ' ];
+        CPPFLAGS  = [ IFLAGS, ' CXXFLAGS=''\$CXXFLAGS -fPIC -std=c++11 -Wno-unused-comparison'' -DLINUX -D__cpluplus -D__MATLAB__ -Dregister="" -O ' ];
     end
     counter = 0 ;
     
