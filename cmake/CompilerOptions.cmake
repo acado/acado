@@ -98,7 +98,7 @@ IF (    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
 	ENDIF()
 	
 	IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-comparison" )
+		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-comparison -Dregister=''" )
 	ENDIF()
 
 	#
@@ -111,7 +111,7 @@ IF (    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
 		ENDIF()
 		
 		IF ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -Dregister=''" )
+			SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
 		ENDIF()
 
 	ENDIF( APPLE )
