@@ -311,7 +311,7 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 			DVector order = f.getDifferentialStateComponents();
 			for( uint i = 0; i < order.getDim(); i++ ) {
 //				std::cout << "NX1+i: " << NX1+i << ", order(i): " << order(i) << std::endl;
-				if( (NX1+i) != order(i) ) {
+				if( (NX1+i) != (uint)order(i) ) {
 					return ACADOERRORTEXT(RET_NOT_IMPLEMENTED_YET, "The order of defined state variables should correspond to that of an explicit system of differential equations!");
 				}
 			}

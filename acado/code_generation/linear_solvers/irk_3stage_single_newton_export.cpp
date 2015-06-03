@@ -157,7 +157,6 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 			ExportVariable b_tmp( "b_tmp", 1, nRightHandSides, REAL, ACADO_LOCAL );
 			solveReuse_full.addVariable(b_tmp);
 
-			uint k;
 			ExportForLoop loop22( j, 0, dim );
 			loop22.addStatement( b_tmp == zeros<double>(1,nRightHandSides) );
 			ExportForLoop loop21( i, 0, dim );
