@@ -220,6 +220,18 @@ protected:
 	ExportFunction multQ1Gu;
 	ExportFunction multQN1Gu;
 
+	ExportFunction multHxC;
+	ExportFunction multHxE;
+	ExportFunction macHxd;
+
+	/** \name Contraint evaluation variables */
+	/** @{ */
+	ExportVariable A10;
+	ExportVariable A20;
+	ExportVariable pacA01Dx0;
+	ExportVariable pocA02Dx0;
+	/** @} */
+
 	ExportFunction preparation;
 	ExportFunction feedback;
 

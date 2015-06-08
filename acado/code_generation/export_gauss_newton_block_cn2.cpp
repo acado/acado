@@ -1053,7 +1053,7 @@ returnValue ExportGaussNewtonBlockCN2::setupVariables( )
 	qpC.setup("qpC", getNumberOfBlocks()*NX, getNumBlockVariables(), REAL, ACADO_WORKSPACE);
 	qpc.setup("qpc", getNumberOfBlocks()*NX, 1, REAL, ACADO_WORKSPACE);
 
-	if (performFullCondensing() == false)
+	if (performFullCondensing() == false || getNumComplexConstraints() > 0)
 	{
 		C.setup("C", getBlockSize()*NX, NX, REAL, ACADO_WORKSPACE);
 	}
