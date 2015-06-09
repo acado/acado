@@ -1225,6 +1225,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	constraints.getPathConstraints(pacH, pacLBMatrix, pacUBMatrix);
 
 	dimPacH = pacH.getDim();
+//	std::cout << "pacH.getDim(): " << pacH.getDim() << std::endl;
 
 	if (dimPacH != 0)
 	{
@@ -1299,9 +1300,6 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	Function pocH;
-	Expression expPocH, expPocHx, expPocHu;
-	DMatrix pocLBMatrix, pocUBMatrix;
 
 	evaluatePointConstraints.resize(N + 1);
 
@@ -1313,25 +1311,42 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	// Setup the point constraints
 	for (unsigned i = 0; i < N + 1; ++i)
 	{
+		Function pocH, pocH2;
+		Expression expPocH, expPocH2, expPocHx, expPocHu;
+		DMatrix pocLBMatrix, pocUBMatrix, pocLBMatrix2, pocUBMatrix2;
+
 		// Get the point constraint
-		constraints.getPointConstraint(i, pocH, pocLBMatrix, pocUBMatrix);
+		constraints.getPointConstraint(i, pocH2, pocLBMatrix2, pocUBMatrix2);
 
 		// Extract and stack the point constraint if it exists
-		if ( pocH.getDim() )
+		if ( pocH2.getDim() )
 		{
-			if (pocH.getNU() > 0 && i == N)
+//			std::cout << "i: " << i << ", pocH.getDim(): " << pocH2.getDim() << std::endl;
+			if (pocH2.getNU() > 0 && i == N)
 			{
 				return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "The terminal (point) constraint must not depend on controls.");
 			}
 
 			// Extract the function expression and stack its Jacobians w.r.t.
 			// x and u
-			pocH.getExpression( expPocH );
+			pocH2.getExpression( expPocH2 );
 
 			// XXX AFAIK, this is not bullet-proof!
-//			if (expPocH.getVariableType() != VT_INTERMEDIATE_STATE)
-			if (expPocH.getVariableType() != VT_UNKNOWN && expPocH.getVariableType() != VT_INTERMEDIATE_STATE)
-				continue;
+			for (unsigned j = 0; j < (uint)pocH2.getDim(); ++j) {
+				expPocH2 = Expression(*pocH2.getExpression(j));
+				VariableType tmpType = expPocH2.getVariableType();
+//				std::cout << "j: " << j << ", tmpType: " << tmpType << std::endl;
+				if( tmpType == VT_UNKNOWN || tmpType == VT_INTERMEDIATE_STATE ) {
+					expPocH << expPocH2;
+					pocLBMatrix.appendCols(pocLBMatrix2.getCol(j));
+					pocUBMatrix.appendCols(pocUBMatrix2.getCol(j));
+				}
+			}
+//			std::cout << "expPocH.getDim(): " << expPocH.getDim() << std::endl;
+			if( expPocH.getDim() == 0 ) continue;
+			else {
+				pocH << expPocH;
+			}
 
 			expPocHx = forwardDerivative(expPocH, vX);
 			pocH << expPocHx;
