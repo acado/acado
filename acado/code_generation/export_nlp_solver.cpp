@@ -646,6 +646,12 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 	int useArrivalCost;
 	get(CG_USE_ARRIVAL_COST, useArrivalCost);
 
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	if((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN) {
+		return ACADOERRORTEXT(RET_NOT_YET_IMPLEMENTED, "The Exact Hessian based RTI solver is not yet implemented for least squares objectives (use lagrange and mayer terms instead)!");
+	}
+
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Check first if we are dealing with external functions
