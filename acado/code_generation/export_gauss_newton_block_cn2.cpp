@@ -243,7 +243,7 @@ returnValue ExportGaussNewtonBlockCN2::setupConstraintsEvaluation( void )
 		initialize.addStatement(ubAValues == ubXAValues.transpose());
 	}
 
-	// Add the contraint evaluations to the condensePrep function
+	// Add the constraint evaluations to the condensePrep function
 	index = 0;
 	numStateBounds = 0;
 	while( index < xBoundsIdx.size() && xBoundsIdx[index] < NX ) {
