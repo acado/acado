@@ -164,7 +164,7 @@ end;
 ldFlags = '';
 if (isunix() && ~ismac())
 	ldFlags = [ldFlags ' -lrt'];
-elsif (ispc)
+elseif (ispc)
     ldFlags = [ldFlags ' -DWIN32'];
 end;
 
