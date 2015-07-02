@@ -52,7 +52,7 @@ returnValue LSQTerm::setGrid( const Grid &grid_ ){
              S_temp->init( tmp,grid );
          }
          else{
-              printf("%d  %d  \n", grid.getNumPoints(), S_temp->getNumPoints() );
+              //printf("%d  %d  \n", grid.getNumPoints(), S_temp->getNumPoints() );
               ASSERT( grid.getNumPoints() == S_temp->getNumPoints() );
          }
     }
