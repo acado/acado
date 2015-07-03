@@ -103,9 +103,20 @@ classdef OCPexport < acado.ExportModule
         end
         
         
+        function setDebugMode(obj)
+            obj.debugMode = 1;
+        end
+        
+        
         function getInstructions(obj, cppobj, get)
             
-            if (get == 'B')
+                
+            if (get == 'FB')
+                % SET LOGGER TO LVL_DEBUG
+                if obj.debugMode
+                    fprintf(cppobj.fileMEX,'    Logger::instance().setLogLevel( LVL_DEBUG );\n');
+                end
+            elseif (get == 'B')
                 
                 % HEADER
                 if ~isempty(obj.ocp)
@@ -128,7 +139,9 @@ classdef OCPexport < acado.ExportModule
                 
                 % EXPORT
                 if ~isempty(obj.dir)
-                    fprintf(cppobj.fileMEX,sprintf('    %s.exportCode( "%s" );\n', obj.name, obj.dir));
+                    fprintf(cppobj.fileMEX,'    uint export_flag;\n');
+                    fprintf(cppobj.fileMEX,sprintf('    export_flag = %s.exportCode( "%s" );\n', obj.name, obj.dir));
+                    fprintf(cppobj.fileMEX,'    if(export_flag != 0) mexErrMsgTxt(\"ACADO export failed because of the above error(s)!\");\n');
                 end
                 
                 % PRINT DIMENSIONS QP

@@ -1,6 +1,6 @@
 extern "C"
 {
-#include <@ACADO_COMMON_HEADER@>
+#include "@ACADO_COMMON_HEADER@"
 }
 
 #include "INCLUDE/@SOLVER_NAME@.hpp"

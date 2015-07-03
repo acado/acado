@@ -249,7 +249,7 @@ TaylorModel<T>::_display
   }
   os << std::endl;
 
-  if( os == std::cout || os == std::cerr ) pause();
+  if( &os == &std::cout || &os == &std::cerr ) pause();
 }
 
 template <typename T> void

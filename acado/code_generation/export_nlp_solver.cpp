@@ -289,11 +289,18 @@ returnValue ExportNLPSolver::setupSimulation( void )
 
 	// Integrate the model
 	// TODO make that function calls can accept constant defined scalars
+	int intMode;
+	get( IMPLICIT_INTEGRATOR_MODE, intMode );
 	if ( integrator->equidistantControlGrid() )
 	{
-		if (performsSingleShooting() == false)
+		if( (ImplicitIntegratorMode)intMode == LIFTED ) {
+			loop	<< retSim.getFullName() << " = "
+					<< "integrate" << "(" << state.getFullName()
+					<< ", " << run.getFullName() << ");\n";
+		}
+		else if (performsSingleShooting() == false)
 			loop 	<< retSim.getFullName() << " = "
-				 	 << "integrate" << "(" << state.getFullName() << ", 1);\n";
+				 	<< "integrate" << "(" << state.getFullName() << ", 1);\n";
 		else
 			loop 	<< retSim.getFullName() << " = " << "integrate"
 					<< "(" << state.getFullName() << ", "
@@ -639,6 +646,12 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 	int useArrivalCost;
 	get(CG_USE_ARRIVAL_COST, useArrivalCost);
 
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	if((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN) {
+		return ACADOERRORTEXT(RET_NOT_YET_IMPLEMENTED, "The Exact Hessian based RTI solver is not yet implemented for least squares objectives (use lagrange and mayer terms instead)!");
+	}
+
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Check first if we are dealing with external functions
@@ -692,8 +705,7 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 		R1.setup("R1", NU * N, NU, REAL, ACADO_WORKSPACE);
 		R2.setup("R2", NU * N, NY, REAL, ACADO_WORKSPACE);
 
-//		S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
-		S1 = zeros<double>(NX, NU);
+		S1.setup("S1", NX * N, NU, REAL, ACADO_WORKSPACE);
 
 		QN1.setup("QN1", NX, NX, REAL, ACADO_WORKSPACE);
 		QN2.setup("QN2", NX, NYN, REAL, ACADO_WORKSPACE);
@@ -1219,6 +1231,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	constraints.getPathConstraints(pacH, pacLBMatrix, pacUBMatrix);
 
 	dimPacH = pacH.getDim();
+//	std::cout << "pacH.getDim(): " << pacH.getDim() << std::endl;
 
 	if (dimPacH != 0)
 	{
@@ -1293,9 +1306,6 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	Function pocH;
-	Expression expPocH, expPocHx, expPocHu;
-	DMatrix pocLBMatrix, pocUBMatrix;
 
 	evaluatePointConstraints.resize(N + 1);
 
@@ -1307,25 +1317,42 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	// Setup the point constraints
 	for (unsigned i = 0; i < N + 1; ++i)
 	{
+		Function pocH, pocH2;
+		Expression expPocH, expPocH2, expPocHx, expPocHu;
+		DMatrix pocLBMatrix, pocUBMatrix, pocLBMatrix2, pocUBMatrix2;
+
 		// Get the point constraint
-		constraints.getPointConstraint(i, pocH, pocLBMatrix, pocUBMatrix);
+		constraints.getPointConstraint(i, pocH2, pocLBMatrix2, pocUBMatrix2);
 
 		// Extract and stack the point constraint if it exists
-		if ( pocH.getDim() )
+		if ( pocH2.getDim() )
 		{
-			if (pocH.getNU() > 0 && i == N)
+//			std::cout << "i: " << i << ", pocH.getDim(): " << pocH2.getDim() << std::endl;
+			if (pocH2.getNU() > 0 && i == N)
 			{
 				return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "The terminal (point) constraint must not depend on controls.");
 			}
 
 			// Extract the function expression and stack its Jacobians w.r.t.
 			// x and u
-			pocH.getExpression( expPocH );
+			pocH2.getExpression( expPocH2 );
 
 			// XXX AFAIK, this is not bullet-proof!
-//			if (expPocH.getVariableType() != VT_INTERMEDIATE_STATE)
-			if (expPocH.getVariableType() != VT_UNKNOWN && expPocH.getVariableType() != VT_INTERMEDIATE_STATE)
-				continue;
+			for (unsigned j = 0; j < (uint)pocH2.getDim(); ++j) {
+				expPocH2 = Expression(*pocH2.getExpression(j));
+				VariableType tmpType = expPocH2.getVariableType();
+//				std::cout << "j: " << j << ", tmpType: " << tmpType << std::endl;
+				if( tmpType == VT_UNKNOWN || tmpType == VT_INTERMEDIATE_STATE ) {
+					expPocH << expPocH2;
+					pocLBMatrix.appendCols(pocLBMatrix2.getCol(j));
+					pocUBMatrix.appendCols(pocUBMatrix2.getCol(j));
+				}
+			}
+//			std::cout << "expPocH.getDim(): " << expPocH.getDim() << std::endl;
+			if( expPocH.getDim() == 0 ) continue;
+			else {
+				pocH << expPocH;
+			}
 
 			expPocHx = forwardDerivative(expPocH, vX);
 			pocH << expPocHx;
@@ -1337,7 +1364,7 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 			}
 
 			// Stack the new function
-			evaluatePointConstraints[ i ] = std::tr1::shared_ptr< ExportAcadoFunction >(new ExportAcadoFunction);
+			evaluatePointConstraints[ i ] = std::shared_ptr< ExportAcadoFunction >(new ExportAcadoFunction);
 
 			std::string pocFName;
 
@@ -1762,14 +1789,11 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	if (useArrivalCost == NO)
 		return SUCCESSFUL_RETURN;
 
-	if ( useArrivalCost )
-	{
-		SAC.setup("SAC", NX, NX, REAL, ACADO_VARIABLES);
-		SAC.setDoc("Arrival cost term: inverse of the covariance matrix.");
-		xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
-		xAC.setDoc("Arrival cost term: a priori state estimate.");
-		DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
-	}
+	SAC.setup("SAC", NX, NX, REAL, ACADO_VARIABLES);
+	SAC.setDoc("Arrival cost term: inverse of the covariance matrix.");
+	xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
+	xAC.setDoc("Arrival cost term: a priori state estimate.");
+	DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
 
 	ExportVariable evRet("ret", 1, 1, INT, ACADO_LOCAL, true);
 
@@ -1957,11 +1981,13 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	 */
 
 	updateArrivalCost
-		<< (acXTilde == state.getTranspose().getRows(0, NX) - acXx * x.getRow( 0 ).getTranspose())
+		<< (acXTilde == state.getTranspose().getRows(0, NX))
+		<< (acXTilde -= acXx * x.getRow( 0 ).getTranspose())
 		<< (acXTilde -= acXu * u.getRow( 0 ).getTranspose());
 
 	updateArrivalCost
-		<< (acHTilde == y.getRows(0, NY) - objValueOut.getTranspose().getRows(0, NY))
+		<< (acHTilde == y.getRows(0, NY))
+		<< (acHTilde -= objValueOut.getTranspose().getRows(0, NY))
 		<< (acHTilde += acHx * x.getRow( 0 ).getTranspose())
 		<< (acHTilde += acHu * u.getRow( 0 ).getTranspose());
 

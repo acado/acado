@@ -299,7 +299,7 @@ protected:
 	/** \name Evaluation of point constraints */
 	/** @{ */
 	unsigned dimPocH;
-	std::vector< std::tr1::shared_ptr< ExportAcadoFunction > > evaluatePointConstraints;
+	std::vector< std::shared_ptr< ExportAcadoFunction > > evaluatePointConstraints;
 	DVector lbPointConValues, ubPointConValues;
 
 	std::vector< DVector > pocLbStack, pocUbStack;
@@ -350,21 +350,21 @@ enum ExportNLPType
 {
 	GAUSS_NEWTON_CONDENSED,
 	GAUSS_NEWTON_CN2,
-	GAUSS_NEWTON_CN2_NEW,
-	EXACT_HESSIAN_CN2,
-	EXACT_HESSIAN_QPDUNES,
+	GAUSS_NEWTON_BLOCK_QPDUNES,
+	GAUSS_NEWTON_BLOCK_FORCES,
 	GAUSS_NEWTON_CN2_FACTORIZATION,
 	GAUSS_NEWTON_FORCES,
 	GAUSS_NEWTON_QPDUNES,
-	GAUSS_NEWTON_QPDUNES2,
-	GAUSS_NEWTON_HPMPC
+	GAUSS_NEWTON_HPMPC,
+	EXACT_HESSIAN_CN2,
+	EXACT_HESSIAN_QPDUNES
 };
 
 /** Factory for creation of exported NLP/OCP solvers. */
 typedef ExportAlgorithmFactory<ExportNLPSolver, ExportNLPType> NLPSolverFactory;
 
 /** Shared pointer to an NLP solver. */
-typedef std::tr1::shared_ptr< ExportNLPSolver > ExportNLPSolverPtr;
+typedef std::shared_ptr< ExportNLPSolver > ExportNLPSolverPtr;
 
 CLOSE_NAMESPACE_ACADO
 

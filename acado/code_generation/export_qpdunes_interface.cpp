@@ -65,7 +65,10 @@ returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 												const std::vector< unsigned >& conDim,
 												const std::string& _initialStateFixed,
 												const std::string& _diagH,
-												const std::string& _diagHN
+												const std::string& _diagHN,
+												const unsigned _N,
+												const unsigned _NX,
+												const unsigned _NU
 )
 {
 	stringstream ss;
@@ -78,6 +81,18 @@ returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 	ss.str( string() );
 	ss << _printLevel;
 	dictionary[ "@PRINT_LEVEL@" ] =  ss.str();
+
+	ss.str( string() );
+	ss << _N;
+	dictionary[ "@ACADO_N@" ] =  ss.str();
+
+	ss.str( string() );
+	ss << _NX;
+	dictionary[ "@ACADO_NX@" ] =  ss.str();
+
+	ss.str( string() );
+	ss << _NU;
+	dictionary[ "@ACADO_NU@" ] =  ss.str();
 
 	dictionary[ "@QP_H@" ] =  _HH;
 	dictionary[ "@QP_G@" ] =  _g;
@@ -98,7 +113,9 @@ returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 		dictionary[ "@QP_UBA@" ] =  _ubA;
 
 		ss.str( string() );
-		ss << "const unsigned int nD[ACADO_N + 1] = {";
+		ss << "unsigned int nD[";
+		ss << _N;
+		ss << " + 1] = {";
 		for (unsigned i = 0; i < conDim.size(); ++i)
 		{
 			ss << conDim[ i ];
@@ -111,7 +128,13 @@ returnValue ExportQpDunesInterface::configure(	const unsigned _maxIter,
 	else
 	{
 		dictionary[ "@QP_D@" ] = dictionary[ "@QP_LBA@" ] = dictionary[ "@QP_UBA@" ] = "0";
-		dictionary[ "@QP_ND_ARRAY@" ] = "unsigned int nD[ACADO_N + 1]; for (kk = 0; kk < ACADO_N + 1; nD[ kk++ ] = 0);";
+		ss.str( string() );
+		ss << "unsigned int nD[";
+		ss << _N;
+		ss << " + 1]; for (kk = 0; kk < ";
+		ss << _N;
+		ss << " + 1; nD[ kk++ ] = 0);";
+		dictionary[ "@QP_ND_ARRAY@" ] = ss.str();
 	}
 
 	dictionary[ "@QP_PRIMAL@" ] =  _primal;

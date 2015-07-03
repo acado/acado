@@ -43,6 +43,9 @@ BEGIN_NAMESPACE_ACADO
 
 
 ModelContainer::ModelContainer() {
+	NU = 0;
+	NP = 0;
+	NOD = 0;
 }
 
 
@@ -163,6 +166,11 @@ uint ModelContainer::addOutput( const std::string& output, const std::string& di
 }
 
 
+returnValue ModelContainer::getIntegrationGrid( Grid& _grid ) const {
+	return modelData.getIntegrationGrid( _grid );
+}
+
+
 returnValue ModelContainer::setIntegrationGrid( const Grid& _ocpGrid, const uint _numSteps ) {
 	return modelData.setIntegrationGrid( _ocpGrid, _numSteps );
 }
@@ -231,17 +239,20 @@ uint ModelContainer::getNXA( ) const
 
 uint ModelContainer::getNU( ) const
 {
+	if( NU > 0 ) return NU;
 	return modelData.getNU();
 }
 
 
 uint ModelContainer::getNP( ) const
 {
+	if( NP > 0 ) return NP;
 	return modelData.getNP();
 }
 
 uint ModelContainer::getNOD( ) const
 {
+	if( NOD > 0 ) return NOD;
 	return modelData.getNOD();
 }
 
@@ -255,6 +266,24 @@ uint ModelContainer::getN( ) const
 returnValue ModelContainer::setN( const uint N_ )
 {
 	modelData.setN( N_ );
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue ModelContainer::setNU( const uint NU_ )
+{
+	NU = NU_;
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue ModelContainer::setNP( const uint NP_ )
+{
+	NP = NP_;
+	return SUCCESSFUL_RETURN;
+}
+
+returnValue ModelContainer::setNOD( const uint NOD_ )
+{
+	NOD = NOD_;
 	return SUCCESSFUL_RETURN;
 }
 

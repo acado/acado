@@ -298,6 +298,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	#endif
 		
+	#if ACADO_NU > 0	
     for( i = 0; i < ACADO_NU; ++i ) {
 		#if SENS_PROP == 1
 			next[(ACADO_NX+ACADO_NXA)*(1+ACADO_NX+ACADO_NU)+i] = u[i];
@@ -311,6 +312,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			next[ACADO_NX+ACADO_NXA+i] = u[i];
 		#endif
     }
+    #endif
     #if ACADO_NOD > 0
     for( i = 0; i < ACADO_NOD; ++i ) {
 		#if SENS_PROP == 1

@@ -212,7 +212,7 @@ class IntegratorExport : public ExportAlgorithm
 		virtual returnValue propagateImplicitSystem( 	ExportStatementBlock* block,
 														const ExportIndex& index1,
 														const ExportIndex& index2,
-														const ExportIndex& index3,
+														const ExportIndex& _index3,
 														const ExportIndex& tmp_index  	);
 
 
@@ -489,7 +489,7 @@ class IntegratorExport : public ExportAlgorithm
 typedef ExportAlgorithmFactory<IntegratorExport, ExportIntegratorType> IntegratorExportFactory;
 
 /** Shared pointer to an integrator. */
-typedef std::tr1::shared_ptr< IntegratorExport > IntegratorExportPtr;
+typedef std::shared_ptr< IntegratorExport > IntegratorExportPtr;
 
 CLOSE_NAMESPACE_ACADO
 

@@ -81,6 +81,7 @@ public:
 							const unsigned _NN,
 							const std::vector< std::vector< unsigned > >& _lbIdx,
 							const std::vector< std::vector< unsigned > >& _ubIdx,
+							const std::vector< unsigned >& _AbDim,
 							const bool _constHessian,
 							const bool _diagHessian,
 							const bool _diagHessianN,

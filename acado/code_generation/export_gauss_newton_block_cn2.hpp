@@ -24,31 +24,30 @@
  */
 
 /**
- *    \file include/acado/code_generation/export_gauss_newton_qpdunes.hpp
- *    \author Milan Vukov
- *    \date 2013
+ *    \file include/acado/code_generation/export_gauss_newton_block_cn2.hpp
+ *    \authors Rien Quirynen
+ *    \date 2014
  */
 
-#ifndef ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_QPDUNES2_HPP
-#define ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_QPDUNES2_HPP
+#ifndef ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_BLOCK_CN2_HPP
+#define ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_BLOCK_CN2_HPP
 
-#include <acado/code_generation/export_nlp_solver.hpp>
-#include <acado/code_generation/export_qpdunes_interface.hpp>
+#include <acado/code_generation/export_gauss_newton_cn2.hpp>
 
 BEGIN_NAMESPACE_ACADO
 
+class ExportQpDunesInterface;
+
 /**
- *	\brief A class for export of an OCP solver using sparse QP solver qpDUNES
+ *	\brief An OCP solver based on the block N^2 condensing algorithm.
  *
  *	\ingroup NumericalAlgorithms
  *
- *	The class ExportGaussNewtonQpDunes2 allows export of and OCP solver using
- *	the generalized Gauss-Newton method. The underlying QP is solved using the
- *	structured sparse QP solver qpDUNES.
+ *	\authors Rien Quirynen
  *
- *	\author Milan Vukov
+ *	\note Still a limited experimental version
  */
-class ExportGaussNewtonQpDunes2 : public ExportNLPSolver
+class ExportGaussNewtonBlockCN2 : public ExportGaussNewtonCN2
 {
 public:
 
@@ -57,13 +56,12 @@ public:
 	 *	@param[in] _userInteraction		Pointer to corresponding user interface.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 */
-	ExportGaussNewtonQpDunes2(	UserInteraction* _userInteraction = 0,
-								const std::string& _commonHeaderName = ""
-								);
+	ExportGaussNewtonBlockCN2(	UserInteraction* _userInteraction = 0,
+							const std::string& _commonHeaderName = ""
+							);
 
-	/** Destructor.
-	*/
-	virtual ~ExportGaussNewtonQpDunes2( )
+	/** Destructor. */
+	virtual ~ExportGaussNewtonBlockCN2( )
 	{}
 
 	/** Initializes export of an algorithm.
@@ -102,7 +100,8 @@ public:
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	virtual returnValue getCode(	ExportStatementBlock& code
-									);
+									) = 0;
+
 
 	/** Returns number of variables in underlying QP.
 	 *
@@ -110,15 +109,16 @@ public:
 	 */
 	unsigned getNumQPvars( ) const;
 
-protected:
+	uint getBlockSize( ) const;
 
-	/** Setting up of an objective evaluation:
-	 *   - functions and derivatives evaulation
-	 *   - creating Hessians and gradients
-	 *
-	 *   \return SUCCESSFUL_RETURN
-	 */
-	virtual returnValue setupObjectiveEvaluation( void );
+	uint getNumberOfBlocks( ) const;
+
+	uint getNumBlockVariables( ) const;
+
+	virtual unsigned getNumStateBoundsPerBlock( ) const;
+
+
+protected:
 
 	/** Set-up evaluation of constraints
 	 *   - box constraints on states and controls
@@ -139,78 +139,38 @@ protected:
 	 */
 	virtual returnValue setupMultiplicationRoutines( );
 
-	/** Exports source code containing the evaluation routines of the algorithm. */
-	virtual returnValue setupEvaluation( );
+	/** Exports source code containing the evaluation routines of the algorithm.
+	 *
+	 *	\return SUCCESSFUL_RETURN
+	 */
+	virtual returnValue setupEvaluation( ) = 0;
 
-	/** Setup of the glue code for the QP solver interaction. */
-	virtual returnValue setupQPInterface( );
+	virtual returnValue setupQPInterface( ) = 0;
+
+	virtual returnValue setupCondensing( );
 
 protected:
 
-	/** Current state feedback. */
-	ExportVariable x0;
+	ExportIndex blockI;
 
-	/** \name QP interface variables */
-	/** @{ */
+	std::vector< unsigned > qpConDim;
+
+	ExportVariable qpgN;
+
 	ExportVariable qpH;
-	ExportVariable qpg;
-
 	ExportVariable qpC;
 	ExportVariable qpc;
 	ExportVariable qpLb0, qpUb0;
-	ExportVariable qpLb, qpUb;
 
-	ExportVariable qpA;
-	ExportVariable qpLbA, qpUbA;
+	ExportVariable qpLambda, qpMu;
 
-	ExportVariable qpPrimal, qpLambda, qpMu;
-	/** @} */
-
-	/** \name Objective evaluation. */
-	/** @{ */
-	ExportFunction evaluateObjective;
-
-	ExportFunction setStageH;
-	ExportFunction setStagef;
-
-	ExportFunction setObjQ1Q2;
-	ExportFunction setObjR1R2;
-	ExportFunction setObjQN1QN2;
-	/** @} */
-
-	/** \name Constraint evaluation */
-	/** @{ */
-	ExportFunction evaluateConstraints;
-	ExportFunction setStagePac;
-	std::vector< unsigned > qpConDim;
-	/** @} */
-
-	/** \name RTI related */
-	/** @{ */
-	ExportFunction preparation;
-	ExportFunction feedback;
-	/** @} */
-
-	/** \name qpDUNES interface functions */
-	/** @{ */
 	ExportFunction cleanup;
 	ExportFunction shiftQpData;
-	/** @} */
 
-	/** \name Auxiliary functions */
-	/** @{ */
-	ExportFunction getKKT;
-	/** @} */
+	ExportFunction evaluateConstraints;
 
-	/** \name Helper functions */
-	/** @{ */
-	ExportFunction acc;
-	/** @} */
-
-	/** qpDUNES interface object. */
-	std::tr1::shared_ptr< ExportQpDunesInterface > qpInterface;
 };
 
 CLOSE_NAMESPACE_ACADO
 
-#endif  // ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_QPDUNES2_HPP
+#endif  // ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_BLOCK_CN2_HPP

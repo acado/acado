@@ -193,7 +193,7 @@ protected:
 	/** The number of "online data" objects. */
 	unsigned numOD;
 	/** ACADO function to be exported. */
-	std::tr1::shared_ptr< Function > f;
+	std::shared_ptr< Function > f;
 	/** A variable that holds intermediate values. */
 	ExportVariable globalVar;
 	/** Flag indicating whether the symbolic function is external or not. */

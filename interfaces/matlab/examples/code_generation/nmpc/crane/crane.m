@@ -72,6 +72,10 @@ WN = acado.BMatrix(WN_mat);
 ocp.minimizeLSQ( W, h );
 ocp.minimizeLSQEndTerm( WN, hN );
 
+Slx = [0 0 0 0 0 0 0.01 0];
+Slu = [0 0];
+ocp.minimizeLSQLinearTerms( Slx, Slu );
+
 ocp.subjectTo( -10.0 <= [uC;uL] <= 10.0 );
 ocp.subjectTo( -100.0 <= [duC;duL] <= 100.0 );
 ocp.subjectTo( -0.3 <= vC <= 0.3 );
@@ -90,8 +94,8 @@ mpc.set( 'LEVENBERG_MARQUARDT', 		 1e-10				);
 % mpc.set( 'GENERATE_SIMULINK_INTERFACE', 'YES'               );
 
 if EXPORT
-    copyfile('../../../../../../external_packages/qpoases', 'export_MPC/qpoases')
     mpc.exportCode( 'export_MPC' );
+    copyfile('../../../../../../external_packages/qpoases', 'export_MPC/qpoases')
     
     cd export_MPC
     make_acado_solver('../acado_MPCstep')

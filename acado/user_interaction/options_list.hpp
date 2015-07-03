@@ -35,11 +35,7 @@
 #include <acado/utils/acado_utils.hpp>
 
 #include <map>
-#ifdef _WIN32
-    #include <memory>
-#else
-    #include <tr1/memory>
-#endif
+#include <memory>
 
 BEGIN_NAMESPACE_ACADO
 
@@ -213,7 +209,7 @@ class OptionsList
 		};
 
 		/** Type for options items. */
-		typedef std::map<std::pair<OptionsName, OptionsItemType>, std::tr1::shared_ptr< OptionValueBase > > OptionItems;
+		typedef std::map<std::pair<OptionsName, OptionsItemType>, std::shared_ptr< OptionValueBase > > OptionItems;
 		/** Option items. */
 		OptionItems items;
 		/** A helper function to determine type of an option. */
@@ -246,7 +242,7 @@ inline returnValue OptionsList::add(	OptionsName name,
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 	items[ std::make_pair(name, getType< T >()) ] =
-			std::tr1::shared_ptr< OptionValue< T > > (new OptionValue< T >( value ));
+			std::shared_ptr< OptionValue< T > > (new OptionValue< T >( value ));
 
 	return SUCCESSFUL_RETURN;
 }
@@ -262,8 +258,8 @@ inline returnValue OptionsList::get(	OptionsName name,
 	OptionItems::const_iterator it = items.find(std::make_pair(name, getType< T >()));
 	if (it != items.end())
 	{
-		std::tr1::shared_ptr< OptionValue< T > > ptr;
-		ptr = std::tr1::static_pointer_cast< OptionValue< T > >(it->second);
+		std::shared_ptr< OptionValue< T > > ptr;
+		ptr = std::static_pointer_cast< OptionValue< T > >(it->second);
 		value = ptr->value;
 		return SUCCESSFUL_RETURN;
 	}
@@ -283,7 +279,7 @@ inline returnValue OptionsList::set(	OptionsName name,
 	if (it != items.end())
 	{
 		items[ std::make_pair(name, getType< T >()) ] =
-				std::tr1::shared_ptr< OptionValue< T > > (new OptionValue< T >( value ));
+				std::shared_ptr< OptionValue< T > > (new OptionValue< T >( value ));
 
 		optionsHaveChanged = BT_TRUE;
 

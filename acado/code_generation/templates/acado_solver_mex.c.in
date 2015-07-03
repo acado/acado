@@ -92,6 +92,14 @@ ACADOvariables acadoVariables;
 /** Instance of the private workspace structure. */
 ACADOworkspace acadoWorkspace;
 
+#if ACADO_QP_SOLVER == ACADO_FORCES
+#include "forces.h"
+extern forces_info acadoForces_info;
+#elif ACADO_QP_SOLVER == ACADO_QPDUNES
+#include <qpDUNES.h>
+extern qpData_t    qpData;
+#endif
+
 /** A bit more advanced printing function. */
 void mexErrMsgTxtAdv(	char* string,
 						...
@@ -283,13 +291,14 @@ void mexFunction(	int nlhs,
 	getArray(1, src, 0, "WN", acadoVariables.WN, ACADO_NYN, ACADO_NYN);
 #endif /* ACADO_WEIGHTING_MATRICES_TYPE */
 
-#if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPOASES)
-
+#if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0)
 	if (!initialized)
 	{
 		initializeSolver();
 	}
-	
+#endif
+
+#if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPOASES)
 	/* Bounds */
 #if ACADO_INITIAL_STATE_FIXED == 1
 	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_N * ACADO_NU, 1);
@@ -305,12 +314,29 @@ void mexFunction(	int nlhs,
 	getArray(1, src, 0, "ubAValues", acadoVariables.ubAValues, QPOASES_NCMAX, 1);
 #endif /* QPOASES_NCMAX > 0 */
 
-#endif /* (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPOASES) */
+#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_FORCES) && !ACADO_BLOCK_CONDENSING
+	/* Bounds */
+	#if (ACADO_QP_NLB > 0)
+	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_QP_NLB, 1);
+	#endif
+	#if (ACADO_QP_NUB > 0)
+	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_QP_NUB, 1);
+	#endif
 
-#if (ACADO_QP_SOLVER == ACADO_QPDUNES)
-	if (!initialized) {
-		initializeSolver();
-	}
+#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPDUNES) && !ACADO_BLOCK_CONDENSING
+	/* Bounds */
+	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_QP_NV, 1);
+	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_QP_NV, 1);
+	
+#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && ACADO_BLOCK_CONDENSING
+	/* Bounds */
+	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_QP_NV, 1);
+	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_QP_NV, 1);
+	#if (ACADO_QP_NCA > 0)
+	/* Affine bounds */
+	getArray(1, src, 0, "lbAValues", acadoVariables.lbAValues, ACADO_QP_NCA, 1);
+	getArray(1, src, 0, "ubAValues", acadoVariables.ubAValues, ACADO_QP_NCA, 1);
+	#endif
 #endif
 
 #if ACADO_USE_ARRIVAL_COST == 1
@@ -385,7 +411,11 @@ void mexFunction(	int nlhs,
 
 #if ACADO_QP_SOLVER == ACADO_QPOASES
 			nIterations = (double)getNWSR();
-#endif /* ACADO_QP_SOLVER == ACADO_QPOASES */
+#elif ACADO_QP_SOLVER == ACADO_FORCES
+			nIterations = acadoForces_info.it;
+#elif ACADO_QP_SOLVER == ACADO_QPDUNES
+			nIterations = qpData.log.numIter;
+#endif /* ACADO_QP_SOLVER */
 			
 			break;
 		
@@ -424,7 +454,9 @@ void mexFunction(	int nlhs,
 			
 #if ACADO_QP_SOLVER == ACADO_QPOASES
 			nIterations = (double)getNWSR();
-#endif /* ACADO_QP_SOLVER == ACADO_QPOASES */
+#elif ACADO_QP_SOLVER == ACADO_FORCES
+			nIterations = acadoForces_info.it;
+#endif /* ACADO_QP_SOLVER */
 			
 			break;
 		
@@ -473,10 +505,7 @@ void mexFunction(	int nlhs,
 	setArray(info, 0, "cpuTime", &cpuTime, 1, 1);
 	setArray(info, 0, "kktValue", &kktValue, 1, 1);
 	setArray(info, 0, "objValue", &objValue, 1, 1);
-	
-#if ACADO_QP_SOLVER == ACADO_QPOASES
 	setArray(info, 0, "nIterations", &nIterations, 1, 1);
-#endif /* ACADO_QP_SOLVER == ACADO_QPOASES */
 		
 	mxSetField(plhs[ 0 ], 0, "info", info);
 	

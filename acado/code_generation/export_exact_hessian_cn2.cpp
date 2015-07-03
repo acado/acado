@@ -45,9 +45,9 @@ returnValue ExportExactHessianCN2::setup( )
 {
 	std::cout << "NOTE: You are using the new (unstable) N2 condensing feature for exact Hessian based RTI..\n";
 
+	if (performFullCondensing() == true && initialStateFixed() == false)
+		return ACADOERRORTEXT( RET_INVALID_OPTION, "Impossible to perform full condensing, when the initial state is not fixed. You can use regular condensing instead." );
 	if (performFullCondensing() == false && initialStateFixed() == true)
-		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
-	if (getNumComplexConstraints() > 0)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 	if (performsSingleShooting() == true)
 		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -126,7 +126,7 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 	if( evaluateStageCost.getFunctionDim() > 0 ) {
 		loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( runObj ) );
 		loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( runObj ) );
-		loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od );
+		loopObjective.addStatement( objValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( runObj ) );
 		loopObjective.addLinebreak( );
 
 		// Evaluate the objective function
@@ -181,7 +181,7 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 	//
 	if( evaluateTerminalCost.getFunctionDim() > 0 ) {
 		evaluateObjective.addStatement( objValueIn.getCols(0, NX) == x.getRow( N ) );
-		evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od );
+		evaluateObjective.addStatement( objValueIn.getCols(NX, NX + NOD) == od.getRow( N ) );
 
 		// Evaluate the objective function, last node.
 		evaluateObjective.addFunctionCall(evaluateTerminalCost, objValueIn, objValueOut);

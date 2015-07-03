@@ -57,6 +57,7 @@ class GaussLegendre6Export : public ImplicitRungeKuttaExport
     // PUBLIC MEMBER FUNCTIONS:
     //
 
+
     private:
 
 		/** Default constructor. 
@@ -78,6 +79,9 @@ class GaussLegendre6Export : public ImplicitRungeKuttaExport
         /** Destructor. 
 		 */
         virtual ~GaussLegendre6Export( );
+
+    protected:
+
 
     protected:
 

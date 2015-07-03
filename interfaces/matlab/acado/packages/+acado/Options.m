@@ -75,21 +75,22 @@ classdef Options < handle
         
         function getOptions(obj, cppobj)
             
+            fprintf(cppobj.fileMEX,'    uint options_flag;\n');
             for i=1:length(obj.set_n)
                 
                 if(ischar(obj.set_n{i}) && ischar(obj.set_v{i}))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.set( %s, %s );\n', obj.name, obj.set_n{i}, obj.set_v{i}));
+                    fprintf(cppobj.fileMEX,sprintf('    options_flag = %s.set( %s, %s );\n', obj.name, obj.set_n{i}, obj.set_v{i}));
                     
                 elseif(ischar(obj.set_n{i}) && isnumeric(obj.set_v{i}))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.set( %s, %s );\n', obj.name, obj.set_n{i}, stringIntDouble(obj.set_v{i})));
+                    fprintf(cppobj.fileMEX,sprintf('    options_flag = %s.set( %s, %s );\n', obj.name, obj.set_n{i}, stringIntDouble(obj.set_v{i})));
                     
                 elseif(ischar(obj.set_n{i}) && isa(obj.set_v{i}, 'acado.MexInput'))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.set( %s, (int)%s );\n', obj.name, obj.set_n{i}, obj.set_v{i}.name));
+                    fprintf(cppobj.fileMEX,sprintf('    options_flag = %s.set( %s, (int)%s );\n', obj.name, obj.set_n{i}, obj.set_v{i}.name));
                     
                 else
                     error('ERROR: Invalid option given.');
                 end
-                
+                fprintf(cppobj.fileMEX,['    if(options_flag != 0) mexErrMsgTxt(\"ACADO export failed when setting the following option: ' obj.set_n{i} '\");\n']);
             end
         end
         

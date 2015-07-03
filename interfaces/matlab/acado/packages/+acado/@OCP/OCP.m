@@ -86,6 +86,10 @@ classdef OCP < acado.MultiObjectiveFunctionality & acado.ModelContainer
         
         minLSQTermQ;
         minLSQTermR;
+        
+        minLSQTermSlx = {};
+        minLSQTermSlu = {};
+        
 
         minLSQEndTermS = {};
         minLSQEndTermh = {};
@@ -124,7 +128,13 @@ classdef OCP < acado.MultiObjectiveFunctionality & acado.ModelContainer
                     obj.tEnd = acado.DoubleConstant(varargin{2});    
                 end
                 
-                obj.N = acado.DoubleConstant(varargin{3});
+                if( length(varargin{3}) == 1 )
+                    obj.N = acado.DoubleConstant(varargin{3});
+                elseif( length(varargin{3}) > 1 && sum(varargin{3}==round(varargin{3})) < length(varargin{3}) )
+                    error('Error: the provided number of steps should be integer');
+                else
+                    obj.N = obj.checkVectorMatrix(varargin{3});
+                end
             
             elseif (nargin == 1)  %OCP(timepoints)
                 obj.grid = acado.Vector(varargin{1});
@@ -134,6 +144,23 @@ classdef OCP < acado.MultiObjectiveFunctionality & acado.ModelContainer
 
             ACADO_.helper.addInstruction(obj);
             
+        end
+        
+        
+        function minimizeLSQLinearTerms(obj, varargin)
+            
+            index = length(obj.minLSQTermSlx);
+            
+            if (length(varargin) == 2 && ((isa(varargin{1}, 'acado.BVector') && isa(varargin{2}, 'acado.BVector')) || (isnumeric(varargin{1}) && isnumeric(varargin{2}))))
+                
+                obj.minLSQTermSlx{index+1} = obj.checkVectorMatrix(varargin{1});
+                obj.minLSQTermSlu{index+1} = obj.checkVectorMatrix(varargin{2});
+                
+            else %error
+                error('ERROR: Invalid minimizeLSQLinearTerms call. <a href="matlab: help acado.OCP.minimizeLSQLinearTerms">help acado.OCP.minimizeLSQLinearTerms</a>');
+            end
+
+
         end
         
         

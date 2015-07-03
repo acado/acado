@@ -17,7 +17,7 @@ OBJECTS = \
 	./qpdunes/src/matrix_vector.o \
 	./qpdunes/src/setup_qp.o \
 	./qpdunes/src/stage_qp_solver_clipping.o \
-	./qpdunes/src/utils.o \
+	./qpdunes/src/qpdunes_utils.o \
 	acado_integrator.o \
 	acado_solver.o \
 	acado_auxiliary_functions.o

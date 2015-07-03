@@ -20,6 +20,11 @@ lbIdx = { ...
 ubIdx = { ...
 	@UB_IDX@ ...
 };
+
+% Polytopic constraints (A_i*z_i <= b_i) on stage variables, for all N stages
+AbDim = { ...
+	@AB_DIM@ ...
+};
 	
 % Constant Hessian
 constHessian = @CONST_HESSIAN@;
@@ -45,7 +50,7 @@ for i = 1: N
 		stages(i).dims.r = nx;						% number of equality constraints
         stages(i).dims.l = length( lbIdx{ i } );	% number of lower bounds
         stages(i).dims.u = length( ubIdx{ i } );	% number of upper bounds
-        stages(i).dims.p = 0;						% number of polytopic constraints
+        stages(i).dims.p = AbDim{ i };				% number of polytopic constraints
         stages(i).dims.q = 0;						% number of quadratic constraints
         
         % Cost
@@ -76,6 +81,13 @@ for i = 1: N
 			params(end + 1) = newParam(sprintf('%s%d', 'ub', i), i, 'ineq.b.ub');
 		end;
         
+        % Polytopic constraints
+        % stages(i).ineq.p.bidx = cell2mat( AbIdx{ i } );
+        if (AbDim{ i } ~= 0)
+			params(end + 1) = newParam(sprintf('%s%d', 'Ab', i), i, 'ineq.p.b');
+			params(end + 1) = newParam(sprintf('%s%d', 'A', i), i, 'ineq.p.A');
+        end
+        
         % equality constraints
 		params(end + 1) = newParam('C1', 1, 'eq.C');
 		params(end + 1) = newParam('d1', 1, 'eq.c');
@@ -95,7 +107,7 @@ for i = 1: N
         stages(i).dims.r = nx;						% number of equality constraints        
         stages(i).dims.l = length( lbIdx{ i } );	% number of lower bounds
         stages(i).dims.u = length( ubIdx{ i } );	% number of upper bounds
-        stages(i).dims.p = 0;						% number of polytopic constraints
+        stages(i).dims.p = AbDim{ i };				% number of polytopic constraints
         stages(i).dims.q = 0;						% number of quadratic constraints
         
         % Cost
@@ -120,6 +132,13 @@ for i = 1: N
 			params(end + 1) = newParam(sprintf('%s%d', 'ub', i), i, 'ineq.b.ub');
 		end;
         
+        % Polytopic constraints
+        % stages(i).ineq.p.bidx = cell2mat( AbIdx{ i } );
+        if (AbDim{ i } ~= 0)
+			params(end + 1) = newParam(sprintf('%s%d', 'Ab', i), i, 'ineq.p.b');
+			params(end + 1) = newParam(sprintf('%s%d', 'A', i), i, 'ineq.p.A');
+        end
+        
         % Equality constraints		
 		params(end + 1) = newParam(sprintf('%s%d', 'C', i), i, 'eq.C');
 		params(end + 1) = newParam(sprintf('%s%d', 'd', i), i, 'eq.c');
@@ -143,7 +162,7 @@ for i = 1: N
         
         stages(i).dims.l = length( lbIdx{ i } );    % number of lower bounds
         stages(i).dims.u = length( ubIdx{ i } );    % number of upper bounds
-        stages(i).dims.p = 0;						% number of polytopic constraints
+        stages(i).dims.p = AbDim{ i };				% number of polytopic constraints
         stages(i).dims.q = 0;						% number of quadratic constraints
         
         % Cost
@@ -165,6 +184,13 @@ for i = 1: N
 		if (~isempty( ubIdx{ i } ))
 			params(end + 1) = newParam(sprintf('%s%d', 'ub', i), i, 'ineq.b.ub');
 		end;
+        
+        % Polytopic constraints
+        % stages(i).ineq.p.bidx = cell2mat( AbIdx{ i } );
+        if (AbDim{ i } ~= 0)
+			params(end + 1) = newParam(sprintf('%s%d', 'Ab', i), i, 'ineq.p.b');
+			params(end + 1) = newParam(sprintf('%s%d', 'A', i), i, 'ineq.p.A');
+        end
         
         % Equality constraints        
         stages(i).eq.D = -eye(nx);
@@ -189,7 +215,6 @@ codeoptions.printlevel	= @PRINT_LEVEL@;
 codeoptions.maxit		= @MAX_ITERATIONS@;
 codeoptions.parallel	= @PARALLEL@;
 codeoptions.init	    = @WARM_START@;
-codeoption.mu0          = 1.0;
 
 
 %% Generate code

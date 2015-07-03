@@ -51,7 +51,7 @@ ExportAcadoFunction::ExportAcadoFunction( ) : ExportFunction( )
 	numDX = 0;
 	numOD = 0;
 
-	f = std::tr1::shared_ptr< Function >(new Function( ));
+	f = std::shared_ptr< Function >(new Function( ));
 
 	external = false;
 }
@@ -97,7 +97,7 @@ returnValue ExportAcadoFunction::init(	const Function& _f,
 	numDX = _numDX;
 	numOD = _numOD;
 
-	f = std::tr1::shared_ptr< Function >(new Function( _f ));
+	f = std::shared_ptr< Function >(new Function( _f ));
 
 	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
 	f->setGlobalExportVariableName( globalVar.getFullName() );

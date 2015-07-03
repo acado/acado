@@ -220,7 +220,7 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	// add usual ODE
 	f_ODE << rhs_;
 	if( f_ODE.getNDX() > 0 ) {
-		return ACADOERROR( RET_INVALID_OPTION );
+		return ACADOERRORTEXT( RET_INVALID_OPTION, "No implicit systems supported when using an explicit integration method!");
 	}
 
 	if( (ExportSensitivityType)sensGen == FORWARD ) {

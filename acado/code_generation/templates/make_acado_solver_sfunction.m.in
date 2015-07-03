@@ -163,7 +163,7 @@ end;
 % link against some libs maybe
 ldFlags = '';
 if (isunix() && ~ismac())
-	ldFlags = [ldFlags ' -lrt'];
+%	ldFlags = [ldFlags ' -lrt'];
 elseif (ispc)
     ldFlags = [ldFlags ' -DWIN32'];
 end;

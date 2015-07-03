@@ -14,11 +14,12 @@
 typedef struct
 {
 	real_t x[(ACADO_N + 1) * ACADO_NX];
-	real_t u[ACADO_N * ACADO_NU];
 	
 #if ACADO_NXA
 	real_t z[ACADO_N * ACADO_NXA];
 #endif
+
+	real_t u[ACADO_N * ACADO_NU];
 
 #if ACADO_NOD
 	real_t od[(ACADO_N + 1) * ACADO_NOD];

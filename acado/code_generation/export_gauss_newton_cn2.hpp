@@ -25,7 +25,7 @@
 
 /**
  *    \file include/acado/code_generation/export_gauss_newton_cn2.hpp
- *    \authors Milan Vukov, Joel Andersson
+ *    \authors Milan Vukov, Joel Andersson, Rien Quirynen
  *    \date 2013 - 2014
  */
 
@@ -219,6 +219,18 @@ protected:
 	ExportFunction multQN1Gx;
 	ExportFunction multQ1Gu;
 	ExportFunction multQN1Gu;
+
+	ExportFunction multHxC;
+	ExportFunction multHxE;
+	ExportFunction macHxd;
+
+	/** \name Contraint evaluation variables */
+	/** @{ */
+	ExportVariable A10;
+	ExportVariable A20;
+	ExportVariable pacA01Dx0;
+	ExportVariable pocA02Dx0;
+	/** @} */
 
 	ExportFunction preparation;
 	ExportFunction feedback;

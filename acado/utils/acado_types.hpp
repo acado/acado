@@ -146,6 +146,8 @@ enum LinearAlgebraSolver{
 
 	HOUSEHOLDER_QR,
 	GAUSS_LU,
+	SIMPLIFIED_IRK_NEWTON,
+	SINGLE_IRK_NEWTON,
     HOUSEHOLDER_METHOD,
 	SPARSE_LU,
     LAS_UNKNOWN
@@ -156,7 +158,8 @@ enum LinearAlgebraSolver{
 enum ImplicitIntegratorMode{
 
 	IFTR,			/**< With the reuse of the matrix evaluation and factorization from the previous step (1 evaluation and factorization per integration step). */
-	IFT				/**< Without the reuse of the matrix from the previous step (2 evaluations and factorizations per integration step). */
+	IFT,				/**< Without the reuse of the matrix from the previous step (2 evaluations and factorizations per integration step). */
+	LIFTED
 };
 
 
@@ -337,9 +340,11 @@ enum OptionsName
 	CG_COMPUTE_COVARIANCE_MATRIX,				/**< Enable computation of the variance-covariance matrix for the last estimate. */
 	CG_HARDCODE_CONSTRAINT_VALUES,				/**< Enable/disable hard-coding of the constraint values. */
 	IMPLICIT_INTEGRATOR_MODE,					/**< This determines the mode of the implicit integrator (see enum ImplicitIntegratorMode). */
+	LIFTED_INTEGRATOR_MODE,						/**< This determines the mode of lifting of the implicit integrator. */
 	IMPLICIT_INTEGRATOR_NUM_ITS,				/**< This is the performed number of Newton iterations in the implicit integrator. */
 	IMPLICIT_INTEGRATOR_NUM_ITS_INIT,			/**< This is the performed number of Newton iterations in the implicit integrator for the initialization of the first step. */
 	UNROLL_LINEAR_SOLVER,						/**< This option of the boolean type determines the unrolling of the linear solver (no unrolling recommended for larger systems). */
+	CONDENSING_BLOCK_SIZE,						/**< Defines the block size used in a block based condensing approach for code generated RTI. */
 	INTEGRATOR_DEBUG_MODE,
 	OPT_UNKNOWN,
 	MAX_NUM_INTEGRATOR_STEPS,
@@ -618,7 +623,6 @@ enum QPSolverName
 	QP_QPOASES3,
 	QP_FORCES,
 	QP_QPDUNES,
-	QP_QPDUNES2,
 	QP_HPMPC,
 	QP_NONE
 };
@@ -741,6 +745,7 @@ enum SparseQPsolutionMethods
 	FULL_CONDENSING,
 	FULL_CONDENSING_N2,
 	CONDENSING_N2,
+	BLOCK_CONDENSING_N2,
 	FULL_CONDENSING_N2_FACTORIZATION
 };
 
@@ -775,6 +780,7 @@ enum ExportType
 {
 	INT,
 	REAL,
+	COMPLEX,
 	STATIC_CONST_INT,
 	STATIC_CONST_REAL
 };

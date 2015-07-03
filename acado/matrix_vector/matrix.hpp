@@ -34,11 +34,7 @@
 #ifndef ACADO_TOOLKIT_MATRIX_HPP
 #define ACADO_TOOLKIT_MATRIX_HPP
 
-#ifdef _WIN32
-    #include <memory>
-#else
-    #include <tr1/memory>
-#endif
+#include <memory>
 
 #include <acado/matrix_vector/vector.hpp>
 
@@ -461,10 +457,10 @@ GenericMatrix< T > eye(	unsigned _dim
 typedef GenericMatrix< double > DMatrix;
 /** Type definition of the matrix of integers. */
 typedef GenericMatrix< int > IMatrix;
-/** Type definition of the matrix of integers. */
+/** Type definition of the matrix of booleans. */
 typedef GenericMatrix< bool > BMatrix;
 /** Shared pointer to a matrix of doubles. */
-typedef std::tr1::shared_ptr< GenericMatrix< double > > DMatrixPtr;
+typedef std::shared_ptr< GenericMatrix< double > > DMatrixPtr;
 
 static       DMatrix emptyMatrix;
 static const DMatrix emptyConstMatrix;

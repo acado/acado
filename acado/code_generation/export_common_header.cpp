@@ -49,6 +49,7 @@ ExportCommonHeader::ExportCommonHeader(	const std::string& _fileName,
 
 returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 											bool _useSinglePrecision,
+											bool _useComplexArithmetic,
 											QPSolverName _qpSolver,
 											const std::map<std::string, std::pair<std::string, std::string> >& _options,
 											const std::string& _variables,
@@ -62,6 +63,8 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 	dictionary[ "@MODULE_NAME@" ] = foo;
 
 	stringstream ss;
+	if( _useComplexArithmetic ) ss << "\n#include <complex.h>\n" << endl;
+
 	ss 	<< "/** qpOASES QP solver indicator. */" << endl
 		<< "#define ACADO_QPOASES 0" << endl
 		<< "/** FORCES QP solver indicator.*/" << endl
@@ -97,12 +100,6 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 			ss << "typedef float real_t;\n";
 		else
 			ss << "typedef double real_t;\n";
-
-		break;
-
-	case QP_QPDUNES2:
-		ss << "#define ACADO_QP_SOLVER ACADO_QPDUNES\n" << endl;
-		ss << "#include \"qpDUNES.h\"\n";
 
 		break;
 	

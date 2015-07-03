@@ -38,6 +38,10 @@
 // -----------------------------------------------------
 
    #include <acado/code_generation/linear_solvers/linear_solver_export.hpp>
+   #include <acado/code_generation/linear_solvers/irk_3stage_simplified_newton_export.hpp>
+   #include <acado/code_generation/linear_solvers/irk_4stage_simplified_newton_export.hpp>
+   #include <acado/code_generation/linear_solvers/irk_3stage_single_newton_export.hpp>
+   #include <acado/code_generation/linear_solvers/irk_4stage_single_newton_export.hpp>
    #include <acado/code_generation/linear_solvers/gaussian_elimination_export.hpp>
    #include <acado/code_generation/linear_solvers/householder_qr_export.hpp>
 

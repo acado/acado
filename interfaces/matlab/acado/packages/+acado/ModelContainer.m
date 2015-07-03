@@ -218,6 +218,27 @@ classdef ModelContainer < handle
             
         end
         
+        function setNOD(obj, NOD)
+            if( ~isnumeric(NOD) || NOD < 0 )
+                error('ERROR: Invalid call to setNOD.');
+            end
+           obj.NOD = NOD; 
+        end
+        
+        function setNP(obj, NP)
+            if( ~isnumeric(NP) || NP < 0 )
+                error('ERROR: Invalid call to setNP.');
+            end
+           obj.NP = NP; 
+        end
+        
+        function setNU(obj, NU)
+            if( ~isnumeric(NU) || NU < 0 )
+                error('ERROR: Invalid call to setNU.');
+            end
+           obj.NU = NU; 
+        end
+        
         
         function setIntegrationGrid(obj, varargin)
            
@@ -243,6 +264,15 @@ classdef ModelContainer < handle
                     else
                         fprintf(cppobj.fileMEX,sprintf('    %s.setLinearInput( %s, %s );\n', obj.name, obj.A1.name, obj.B1.name));
                     end
+                end
+                if (~isempty(obj.NOD))
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setNOD( %s );\n', obj.name, num2str(obj.NOD)));
+                end
+                if (~isempty(obj.NP))
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setNP( %s );\n', obj.name, num2str(obj.NP)));
+                end
+                if (~isempty(obj.NU))
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setNU( %s );\n', obj.name, num2str(obj.NU)));
                 end
                 if (~isempty(obj.model))
                     if (~isempty(obj.model))

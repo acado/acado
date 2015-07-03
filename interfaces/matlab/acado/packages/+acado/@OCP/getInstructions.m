@@ -96,6 +96,14 @@ if (get == 'B')
         end
     end
     
+    if ~isempty(obj.minLSQTermSlx) && ~isempty(obj.minLSQTermSlu)
+       if length(obj.minLSQTermSlx) > 1 || length(obj.minLSQTermSlu) > 1
+           error('linear terms are define more than once!');
+       else
+           fprintf(cppobj.fileMEX,sprintf('    %s.minimizeLSQLinearTerms(%s, %s);\n', obj.name, obj.minLSQTermSlx{1}.name, obj.minLSQTermSlu{1}.name));
+       end
+    end
+    
     if ~isempty(obj.minLSQEndTermQ)
         if isempty(obj.minLSQEndTermR)
             fprintf(cppobj.fileMEX,sprintf('    %s.minimizeLSQEndTerm(%s);\n', obj.name, obj.minLSQEndTermQ.name));

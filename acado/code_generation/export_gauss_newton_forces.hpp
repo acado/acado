@@ -113,6 +113,10 @@ public:
 	 */
 	unsigned getNumQPvars( ) const;
 
+	unsigned getNumLowerBounds( ) const;
+
+	unsigned getNumUpperBounds( ) const;
+
 protected:
 
 	/** Setting up of an objective evaluation:
@@ -167,6 +171,7 @@ private:
 	ExportFunction setObjQ1Q2;
 	ExportFunction setObjR1R2;
 	ExportFunction setObjQN1QN2;
+	ExportFunction setObjS1;
 
 	bool diagH;
 	bool diagHN;
@@ -178,7 +183,11 @@ private:
 	std::vector< ExportVariable > conUB;
 	ExportVariable lbValues, ubValues;
 
+	unsigned numLB;
+	unsigned numUB;
+
 	std::vector< std::vector< unsigned > > conLBIndices, conUBIndices;
+	std::vector< unsigned > conABDimensions;
 	std::vector< std::vector< double > > conLBValues, conUBValues;
 
 	ExportFunction evaluateConstraints;
@@ -208,8 +217,8 @@ private:
 	std::string qpModuleName;
 	std::string qpObjPrefix;
 
-	std::tr1::shared_ptr< ExportForcesInterface > qpInterface;
-	std::tr1::shared_ptr< ExportForcesGenerator > qpGenerator;
+	std::shared_ptr< ExportForcesInterface > qpInterface;
+	std::shared_ptr< ExportForcesGenerator > qpGenerator;
 	/** @} */
 };
 

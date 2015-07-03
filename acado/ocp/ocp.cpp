@@ -333,12 +333,12 @@ returnValue OCP::getConstraint( Constraint& constraint_) const{ constraint_ = *c
 
 returnValue OCP::setObjective ( const Objective & objective_  )
 {
-	objective   = std::tr1::shared_ptr<Objective> (new Objective( objective_ ));
+	objective   = std::shared_ptr<Objective> (new Objective( objective_ ));
 	return SUCCESSFUL_RETURN;
 }
 returnValue OCP::setConstraint( const Constraint& constraint_ )
 {
-	constraint = std::tr1::shared_ptr<Constraint> (new Constraint( constraint_ ));;
+	constraint = std::shared_ptr<Constraint> (new Constraint( constraint_ ));;
 	return SUCCESSFUL_RETURN;
 }
 

@@ -158,7 +158,12 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
         
         function getInstructions(obj, cppobj, get)
             
-            if (get == 'B')
+            if (get == 'FB')
+                % SET LOGGER TO LVL_DEBUG
+                if obj.debugMode
+                    fprintf(cppobj.fileMEX,'    Logger::instance().setLogLevel( LVL_DEBUG );\n');
+                end
+            elseif (get == 'B')
                 
                 % HEADER
                 if (~isempty(obj.totalTime))
@@ -231,16 +236,18 @@ classdef SIMexport < acado.ExportModule & acado.ModelContainer
                 end
                 
                 % EXPORT (AND RUN)
+                fprintf(cppobj.fileMEX,'    uint export_flag = 0;\n');
                 if (obj.run == 1 & ~isempty(obj.dir))
-                    fprintf(cppobj.fileMEX,sprintf('    %s.exportAndRun( "%s" );\n', obj.name, obj.dir));
+                    fprintf(cppobj.fileMEX,sprintf('    export_flag = %s.exportAndRun( "%s" );\n', obj.name, obj.dir));
                     
                 elseif (~isempty(obj.dir))
                     % SET TIMING CALLS
                     fprintf(cppobj.fileMEX,sprintf('    %s.setTimingSteps( %s );\n', obj.name, num2str(obj.timingCalls)));
                     
-                    fprintf(cppobj.fileMEX,sprintf('    %s.exportCode( "%s" );\n', obj.name, obj.dir));
+                    fprintf(cppobj.fileMEX,sprintf('    export_flag = %s.exportCode( "%s" );\n', obj.name, obj.dir));
                     
                 end
+                fprintf(cppobj.fileMEX,'    if(export_flag != 0) mexErrMsgTxt(\"ACADO export failed because of the above error(s)!\");\n');
                 
                 fprintf(cppobj.fileMEX,'\n');
             end
