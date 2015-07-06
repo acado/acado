@@ -145,7 +145,7 @@ VERBOSE = 0;
     %COMPILER FLAGS
     if (ispc)
         % Microsoft Visual C++ (express) compiler
-        CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -Dregister="" -O ' ];    
+        CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -O ' ];    
     elseif (ismac)
         % Other compilers
         CPPFLAGS  = [ IFLAGS, ' LDFLAGS=''\$LDFLAGS -stdlib=libc++'' CXXFLAGS=''\$CXXFLAGS -fPIC -stdlib=libc++ -std=c++11'' -DLINUX -D__cpluplus -D__MATLAB__ -Dregister="" -O ' ]
