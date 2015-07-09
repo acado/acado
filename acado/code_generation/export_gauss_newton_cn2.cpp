@@ -2157,7 +2157,7 @@ bool ExportGaussNewtonCN2::performFullCondensing() const
 	if ((SparseQPsolutionMethods)sparseQPsolution == CONDENSING || (SparseQPsolutionMethods)sparseQPsolution == CONDENSING_N2 || (SparseQPsolutionMethods)sparseQPsolution == BLOCK_CONDENSING_N2)
 		return false;
 
-	return true;
+	return (initialStateFixed() == true);
 }
 
 CLOSE_NAMESPACE_ACADO
