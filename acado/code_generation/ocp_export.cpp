@@ -536,9 +536,9 @@ returnValue OCPexport::checkConsistency( ) const
 	int sensitivityProp;
 	get(DYNAMIC_SENSITIVITY, sensitivityProp);
 
- 	if( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN && (ExportSensitivityType) sensitivityProp != THREE_SWEEPS ) {
- 		return ACADOERROR( RET_INVALID_OPTION );
- 	}
+// 	if( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN && (ExportSensitivityType) sensitivityProp != THREE_SWEEPS ) {
+// 		return ACADOERROR( RET_INVALID_OPTION );
+// 	}
 
  	DifferentialEquation f;
  	ocp.getModel( f );
