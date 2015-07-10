@@ -224,10 +224,9 @@ returnValue ExportNLPSolver::setupSimulation( void )
 		d.setup("d", getN() * getNX(), 1, REAL, ACADO_WORKSPACE);
 	}
 
-	uint symH;
+	uint symH = 0;
 	if( (ExportSensitivityType) sensitivityProp == THREE_SWEEPS ) symH = (NX+NU)*(NX+NU+1)/2;
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) symH = NX*(NX+NU)+NU*NU;
-	else return ACADOERRORTEXT(RET_INVALID_OPTION, "Only THREE_SWEEPS or FORWARD_OVER_BACKWARD options supported for Exact Hessian based RTI.");
 
 	evGx.setup("evGx", N * NX, NX, REAL, ACADO_WORKSPACE);
 	evGu.setup("evGu", N * NX, NU, REAL, ACADO_WORKSPACE);
@@ -388,7 +387,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 			}
 		}
 	}
-	else return ACADOERRORTEXT(RET_INVALID_OPTION, "Only THREE_SWEEPS or FORWARD_OVER_BACKWARD options supported for Exact Hessian based RTI.");
+	else if( secondOrder ) return ACADOERRORTEXT(RET_INVALID_OPTION, "Only THREE_SWEEPS or FORWARD_OVER_BACKWARD options supported for Exact Hessian based RTI.");
 
 	// XXX This should be revisited at some point
 	//	modelSimulation.release( run );
@@ -1549,10 +1548,9 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	int sensitivityProp;
 	get( DYNAMIC_SENSITIVITY, sensitivityProp );
-	uint symH;
+	uint symH = 0;
 	if( (ExportSensitivityType) sensitivityProp == THREE_SWEEPS ) symH = (NX+NU)*(NX+NU+1)/2;
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) symH = NX*(NX+NU)+NU*NU;
-	else return ACADOERRORTEXT(RET_INVALID_OPTION, "Only THREE_SWEEPS or FORWARD_OVER_BACKWARD options supported for Exact Hessian based RTI.");
 
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );
