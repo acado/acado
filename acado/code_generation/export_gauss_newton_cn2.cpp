@@ -525,11 +525,16 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
+	DVector lbTmp; DVector ubTmp;
+	unsigned numStateBounds = getNumStateBounds();
+	unsigned numPathCon = N * dimPacH;
+	unsigned numPointCon = dimPocH;
 	if( getNumStateBounds() )
 	{
 		condenseFdb.addVariable( tmp );
 
-		DVector lbTmp( getNumStateBounds( )), ubTmp( getNumStateBounds( ) );
+		lbTmp = DVector( getNumStateBounds( ));
+		ubTmp = DVector( getNumStateBounds( ) );
 		for(unsigned i = 0; i < xBoundsIdx.size(); ++i)
 		{
 			lbTmp( i ) = xBounds.getLowerBound( xBoundsIdx[ i ] / NX, xBoundsIdx[ i ] % NX );
@@ -561,10 +566,9 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		}
 		else
 		{
-			unsigned nXBounds = getNumStateBounds( );
 
-			DMatrix vXBoundIndices(1, nXBounds);
-			for (unsigned i = 0; i < nXBounds; ++i)
+			DMatrix vXBoundIndices(1, numStateBounds);
+			for (unsigned i = 0; i < numStateBounds; ++i)
 				vXBoundIndices(0, i) = xBoundsIdx[ i ];
 			ExportVariable evXBounds("xBoundIndices", vXBoundIndices, STATIC_CONST_INT, ACADO_LOCAL, false);
 
@@ -574,7 +578,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 
 			condensePrep.acquire( row ).acquire( col ).acquire( conIdx ).acquire( blk ).acquire( blkRow );
 
-			ExportForLoop lRow(row, 0, nXBounds);
+			ExportForLoop lRow(row, 0, numStateBounds);
 
 			lRow << conIdx.getFullName() << " = " << evXBounds.getFullName() << "[ " << row.getFullName() << " ] - " << toString(NX) << ";\n";
 
@@ -596,7 +600,8 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 			condensePrep.release( row ).release( col ).release( conIdx ).release( blk ).release( blkRow );
 		}
 		condensePrep.addLinebreak( );
-
+	}
+	if( getNumStateBounds() + getNumComplexConstraints()) {
 
 		lbTmp.append( lbPathConValues );
 		ubTmp.append( ubPathConValues );
@@ -604,7 +609,6 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		lbTmp.append( lbPointConValues );
 		ubTmp.append( ubPointConValues );
 
-		unsigned nXBounds = getNumStateBounds( );
 		if (hardcodeConstraintValues == YES)
 		{
 			lbAValues.setup("lbAValues", lbTmp, REAL, ACADO_VARIABLES);
@@ -612,9 +616,9 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		}
 		else
 		{
-			lbAValues.setup("lbAValues", nXBounds, 1, REAL, ACADO_VARIABLES);
+			lbAValues.setup("lbAValues", numStateBounds+numPathCon+numPointCon, 1, REAL, ACADO_VARIABLES);
 			lbAValues.setDoc( "Lower bounds values for affine constraints." );
-			ubAValues.setup("ubAValues", nXBounds, 1, REAL, ACADO_VARIABLES);
+			ubAValues.setup("ubAValues", numStateBounds+numPathCon+numPointCon, 1, REAL, ACADO_VARIABLES);
 			ubAValues.setDoc( "Upper bounds values for affine constraints." );
 
 			initialize.addStatement(lbAValues == lbTmp);
@@ -640,9 +644,6 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
-	unsigned numStateBounds = getNumStateBounds();
-	unsigned numPathCon = N * dimPacH;
-	unsigned numPointCon = dimPocH;
 	if ( numPathCon )
 	{
 		unsigned rowOffset = numStateBounds;
