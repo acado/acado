@@ -17,7 +17,7 @@ B1(1,2) = 0.5;
 B1(2,1) = 1.0/base;
 B1(2,2) = -1.0/base;
 
-f = [ v*cos(theta); v*sin(theta) ];
+f = [ dot(xC) == v*cos(theta); dot(yC) == v*sin(theta) ];
 
 %% SIMexport
 fprintf('----------------------------\n         SIMexport         \n----------------------------\n');
