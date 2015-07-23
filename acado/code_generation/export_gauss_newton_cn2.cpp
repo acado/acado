@@ -783,7 +783,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 			{
 				for (unsigned col = 0; col <= row; ++col)
 				{
-					unsigned blk = (row + 1) * row / 2 + col;
+					unsigned blk = (col * (2 * N - col - 1) / 2 + row);
 					unsigned row2 = row + 1;
 
 					if (pacEvHx.isGiven() == true)
@@ -816,7 +816,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 			ExportForLoop eLoopI(row, 0, N - 1);
 			ExportForLoop eLoopJ(col, 0, row + 1);
 
-			eLoopJ.addStatement( blk == (row + 1) * row / 2 + col );
+			eLoopJ.addStatement( blk == (col * (2 * N - col - 1) / 2 + row) );
 			eLoopJ.addStatement( row2 == row + 1 );
 
 			if (pacEvHx.isGiven() == true)
@@ -1063,7 +1063,7 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 				ExportForLoop eLoop(iCol, 0, row);
 
 				// row - 1, col -> blk
-				eLoop.addStatement( iBlk == row * (row - 1) / 2 + iCol );
+				eLoop.addStatement( iBlk == (iCol * (2 * N - iCol - 1) / 2 + row-1) );
 				eLoop.addStatement(
 						A.getSubMatrix(rowOffset + intRowOffset, rowOffset + intRowOffset + dim,
 								colOffset + iCol * NU, colOffset + (iCol + 1) * NU) ==
