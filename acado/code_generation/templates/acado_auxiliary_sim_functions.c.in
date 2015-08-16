@@ -20,7 +20,7 @@ void printHeader()
 	);
 }
 
-#if (defined WIN32 || _WIN64)
+#if (defined _WIN32 || _WIN64)
 
 void tic(timer* t)
 {
@@ -88,4 +88,4 @@ real_t toc(timer* t)
 	return (real_t)temp.tv_sec + (real_t)temp.tv_usec / 1e6;
 }
 
-#endif /* (defined WIN32 || _WIN64) */
+#endif /* (defined _WIN32 || _WIN64) */
