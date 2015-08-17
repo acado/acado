@@ -19,7 +19,7 @@ void printHeader();
  * providing us with the following timing routines.
  */
 
-#if (defined WIN32 || defined _WIN64)
+#if (defined _WIN32 || defined _WIN64)
 
 /* Use Windows QueryPerformanceCounter for timing. */
 #include <Windows.h>
@@ -60,7 +60,7 @@ typedef struct timer
 	struct timeval toc;
 } timer;
 
-#endif /* (defined WIN32 || defined _WIN64) */
+#endif /* (defined _WIN32 || defined _WIN64) */
 
 /** A function for measurement of the current time. */
 void tic(timer* t);
