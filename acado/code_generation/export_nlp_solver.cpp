@@ -225,7 +225,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	}
 
 	uint symH = 0;
-	if( (ExportSensitivityType) sensitivityProp == THREE_SWEEPS ) symH = (NX+NU)*(NX+NU+1)/2;
+	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC ) symH = (NX+NU)*(NX+NU+1)/2;
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) symH = NX*(NX+NU)+NU*NU;
 
 	evGx.setup("evGx", N * NX, NX, REAL, ACADO_WORKSPACE);
@@ -359,7 +359,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	);
 
 	// TODO: write this in exported loops (RIEN)
-	if( secondOrder && (ExportSensitivityType) sensitivityProp == THREE_SWEEPS ) {
+	if( secondOrder && (ExportSensitivityType) sensitivityProp == SYMMETRIC ) {
 		for( uint i = 0; i < NX+NU; i++ ) {
 			for( uint j = 0; j <= i; j++ ) {
 				loop.addStatement( objS.getElement(run*(NX+NU)+i,j) == -1.0*state.getCol(indexGzu + i*(i+1)/2+j) );
@@ -1549,7 +1549,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	int sensitivityProp;
 	get( DYNAMIC_SENSITIVITY, sensitivityProp );
 	uint symH = 0;
-	if( (ExportSensitivityType) sensitivityProp == THREE_SWEEPS ) symH = (NX+NU)*(NX+NU+1)/2;
+	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC ) symH = (NX+NU)*(NX+NU+1)/2;
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) symH = NX*(NX+NU)+NU*NU;
 
 	int hessianApproximation;

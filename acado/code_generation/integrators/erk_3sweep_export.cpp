@@ -101,7 +101,7 @@ returnValue ThreeSweepsERKExport::setDifferentialEquation(	const Expression& rhs
 	uint numX = NX*(NX+1)/2.0;
 	uint numU = NU*(NU+1)/2.0;
 	uint numZ = (NX+NU)*(NX+NU+1)/2.0;
-	if( (ExportSensitivityType)sensGen == THREE_SWEEPS ) {
+	if( (ExportSensitivityType)sensGen == SYMMETRIC ) {
 		// SWEEP 1:
 		// ---------
 		f << rhs_;
@@ -177,7 +177,7 @@ returnValue ThreeSweepsERKExport::setup( )
 {
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY,sensGen );
-	if ( (ExportSensitivityType)sensGen != THREE_SWEEPS ) ACADOERROR( RET_INVALID_OPTION );
+	if ( (ExportSensitivityType)sensGen != SYMMETRIC ) ACADOERROR( RET_INVALID_OPTION );
 
 	// NOT SUPPORTED: since the forward sweep needs to be saved
 	if( !equidistantControlGrid() ) 	ACADOERROR( RET_INVALID_OPTION );

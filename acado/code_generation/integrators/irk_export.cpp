@@ -1187,6 +1187,9 @@ returnValue ImplicitRungeKuttaExport::setup( )
 			solver = new ExportGaussElim( userInteraction,commonHeaderName );
 			if( (ImplicitIntegratorMode) intMode == LIFTED ) {
 				solver->init( (NX2+NXA)*numStages, NX+NU+1 );
+				int sensGen;
+				get( DYNAMIC_SENSITIVITY, sensGen );
+				if( (ExportSensitivityType)sensGen == SYMMETRIC || (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) solver->setTranspose( true ); // BACKWARD propagation
 			}
 			else {
 				solver->init( (NX2+NXA)*numStages );
