@@ -140,6 +140,8 @@ class ExportGaussElim : public ExportLinearSolver
 
 		virtual returnValue setupSolveReuseComplete(	ExportFunction& _solveReuse, ExportVariable& _bPerm );
 
+		virtual returnValue setupSolveReuseTranspose(	ExportFunction& _solveReuse, ExportVariable& _bPerm );
+
 
     protected:
 		
@@ -147,6 +149,9 @@ class ExportGaussElim : public ExportLinearSolver
 		ExportVariable rk_swap;						/**< Variable that is used to swap rows for pivoting. */
 		ExportVariable rk_bPerm;					/**< Variable containing the reordered right-hand side. */
 		ExportVariable rk_perm;						/**< Variable containing the order of the rows. */
+
+		ExportVariable rk_bPerm_trans;				/**< Variable containing ... */
+		ExportVariable b_trans;						/**< Variable containing ... */
 
 };
 

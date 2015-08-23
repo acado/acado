@@ -85,6 +85,8 @@ returnValue ExportIRK4StageSingleNewton::getCode(	ExportStatementBlock& code
 {
 	if( fabs(tau) <= ZERO_EPS || transf1.isEmpty() || transf2.isEmpty() || fabs(stepsize) <= ZERO_EPS ) return ACADOERROR(RET_INVALID_OPTION);
 
+	if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+
 	setupFactorization( solve, rk_swap, determinant, string("fabs") );
 	code.addFunction( solve );
 

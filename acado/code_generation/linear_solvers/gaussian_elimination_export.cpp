@@ -57,6 +57,9 @@ returnValue ExportGaussElim::getDataDeclarations(	ExportStatementBlock& declarat
 	declarations.addDeclaration( rk_swap,dataStruct );			// needed for the row swaps
 	if( REUSE ) {
 		declarations.addDeclaration( rk_bPerm,dataStruct );		// reordered right-hand side
+		if( TRANSPOSE ) {
+			declarations.addDeclaration( rk_bPerm_trans,dataStruct );
+		}
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -88,6 +91,11 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 
 		setupSolveReuseComplete( solveReuse, rk_bPerm );
 		code.addFunction( solveReuse );
+
+		if( TRANSPOSE ) {
+			setupSolveReuseTranspose( solveReuseTranspose, rk_bPerm_trans );
+			code.addFunction( solveReuseTranspose );
+		}
 	}
 	else {
 		setupSolveUpperTriangular( solveTriangular );
@@ -101,6 +109,7 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 			setupSolveReuse( solveReuse, solveTriangular, rk_bPerm );
 			code.addFunction( solveReuse );
 		}
+		if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -439,24 +448,62 @@ returnValue ExportGaussElim::setupSolveReuseComplete( ExportFunction& _solveReus
 
 
 	// Solve the upper triangular system of equations:
-	ExportForLoop loop4( run1, dim, 0, -1 );
-	loop4.addStatement( tmp_index1 == (run1-1)*nRightHandSides );
-	ExportForLoop loop5( run2, dim-1, run1-1, -1 );
+	ExportForLoop loop4( run1, dim-1, -1, -1 );
+	loop4.addStatement( tmp_index1 == run1*nRightHandSides );
+	ExportForLoop loop5( run2, dim-1, run1, -1 );
 	loop5.addStatement( tmp_index2 == run2*nRightHandSides );
-	loop5.addStatement( tmp == A.getElement( (run1-1),run2 ) );
+	loop5.addStatement( tmp == A.getElement( run1,run2 ) );
 	for( run3 = 0; run3 < nRightHandSides; run3++ ) {
-//		loop5.addStatement( _bPerm.getElement( run1-1,run3 ) -= tmp * _bPerm.getElement( run2,run3 ) );
+//		loop5.addStatement( _bPerm.getElement( run1,run3 ) -= tmp * _bPerm.getElement( run2,run3 ) );
 		loop5 << _bPerm.getFullName() << "[" << tmp_index1.getName() << "+" << toString(run3) << "] -= " << tmp.getName() << "*" << _bPerm.getFullName() << "[" << tmp_index2.getName() << "+" << toString(run3) << "];\n";
 	}
 	loop4.addStatement( loop5 );
-	loop4 << tmp.getName() << " = 1.0/A[" << run1.getName() << "*" << toString(dim+1) << "-" << toString(dim+1) << "];\n";
+	loop4 << tmp.getName() << " = 1.0/A[" << run1.getName() << "*" << toString(dim+1) << "];\n";
 	for( run3 = 0; run3 < nRightHandSides; run3++ ) {
-//		loop4 << _bPerm.get( run1-1,run3 ) << " = " << _bPerm.get( run1-1,run3 ) << "*" << tmp.getName() << ";\n";
+//		loop4 << _bPerm.get( run1,run3 ) << " = " << _bPerm.get( run1,run3 ) << "*" << tmp.getName() << ";\n";
 		loop4 << _bPerm.getFullName() << "[" << tmp_index1.getName() << "+" << toString(run3) << "] = " << tmp.getName() << "*" << _bPerm.getFullName() << "[" << tmp_index1.getName() << "+" << toString(run3) << "];\n";
 	}
 	_solveReuse.addStatement( loop4 );
 
 	_solveReuse.addStatement( b == _bPerm );
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ExportGaussElim::setupSolveReuseTranspose( ExportFunction& _solveReuse, ExportVariable& _bPerm ) {
+
+	ExportIndex run1( "i" );
+	ExportIndex run2( "j" );
+	ExportVariable tmp( "tmp_var", 1, 1, _bPerm.getType(), ACADO_LOCAL, true );
+	_solveReuse.addIndex( run1 );
+	_solveReuse.addIndex( run2 );
+	_solveReuse.addDeclaration(tmp);
+
+	_solveReuse.addStatement( _bPerm == b_trans );
+
+	ExportForLoop loop2( run2, 0, dim );	// row run2
+	ExportForLoop loop3( run1, 0, run2 );	// column run1
+	loop3.addStatement( _bPerm.getRow(run2) -= A.getElement(run1,run2)*_bPerm.getRow(run1) );
+	loop2.addStatement( loop3 );
+	loop2 << tmp.getName() << " = 1.0/A[" << run2.getName() << "*" << toString(dim+1) << "];\n";
+	loop2.addStatement( _bPerm.getRow(run2) == _bPerm.getRow(run2)*tmp );
+	_solveReuse.addStatement( loop2 );
+
+
+	// Solve the upper triangular system of equations:
+	ExportForLoop loop4( run1, dim-1, -1, -1 );
+	ExportForLoop loop5( run2, dim-1, run1, -1 );
+	loop5.addStatement( _bPerm.getRow(run1) += A.getElement(run2,run1)*_bPerm.getRow(run2) );
+	loop4.addStatement( loop5 );
+	_solveReuse.addStatement( loop4 );
+
+
+	// The permutation now happens HERE!
+	ExportForLoop loop1( run1, 0, dim );
+	loop1 << run2.getName() << " = " << rk_perm.getFullName() << "[" << run1.getName() << "];\n";
+	loop1.addStatement( b_trans.getRow(run2) == _bPerm.getRow(run1) );
+	_solveReuse.addStatement( loop1 );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -507,6 +554,12 @@ returnValue ExportGaussElim::setup( )
 	if( REUSE ) {
 		solveReuse = ExportFunction( getNameSolveReuseFunction(), A, b, rk_perm );
 		solveReuse.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
+		if( TRANSPOSE ) {
+			b_trans = ExportVariable( "b", dim, 1, REAL );
+			rk_bPerm_trans = ExportVariable( std::string( "rk_" ) + identifier + "bPerm_trans", dim, 1, REAL, structWspace );
+			solveReuseTranspose = ExportFunction( getNameSolveTransposeReuseFunction(), A, b, rk_perm );
+			solveReuseTranspose.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
+		}
 	}
 	
 	int unrollOpt;

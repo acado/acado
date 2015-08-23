@@ -47,6 +47,7 @@ ExportLinearSolver::ExportLinearSolver(	UserInteraction* _userInteraction,
 										) : ExportAlgorithm(_userInteraction, _commonHeaderName)
 {
 	REUSE = true;
+	TRANSPOSE = false;
 	UNROLLING = false;
 	dim = nRows = nCols = nBacksolves = nRightHandSides = 0;
 
@@ -143,6 +144,20 @@ returnValue ExportLinearSolver::setReuse( const bool& reuse ) {
 } 
 
 
+bool ExportLinearSolver::getTranspose() const {
+
+	return TRANSPOSE;
+}
+
+
+returnValue ExportLinearSolver::setTranspose( const bool& transpose ) {
+
+	TRANSPOSE = transpose;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 bool ExportLinearSolver::getUnrolling() const {
 	
 	return UNROLLING;
@@ -166,6 +181,12 @@ const std::string ExportLinearSolver::getNameSolveFunction() {
 const std::string ExportLinearSolver::getNameSolveReuseFunction() {
 	
 	return string( "solve_" ) + identifier + "system_reuse";
+}
+
+
+const std::string ExportLinearSolver::getNameSolveTransposeReuseFunction() {
+
+	return string( "solve_" ) + identifier + "transpose_reuse";
 }
 
 ExportVariable ExportLinearSolver::getGlobalExportVariable( const uint factor ) const

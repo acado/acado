@@ -215,6 +215,22 @@ class ExportLinearSolver : public ExportAlgorithm
 		returnValue setReuse( const bool& reuse );
 		
 		
+		/** Returns a boolean that is true when an extra algorithm will be exported for solving a transposed linear system based on reuse.
+		 *
+		 *  \return A boolean that is true when an extra algorithm will be exported for solving a transposed linear system based on reuse.
+		 */
+		bool getTranspose() const;
+
+
+		/** Sets the boolean that is true when an extra algorithm will be exported for solving a transposed linear system based on reuse.
+		 *
+		 * 	@param[in] transpose		The new value of this boolean.
+		 *
+		 *  \return SUCCESSFUL_RETURN
+		 */
+		returnValue setTranspose( const bool& transpose );
+
+
 		/** Returns a boolean that is true when the exported code for the linear solver needs to be unrolled
 		 * 	completely.
 		 *
@@ -248,7 +264,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		 * 			the reuse of previous results.
 		 */
 		const std::string getNameSolveReuseFunction(); 
-
+		const std::string getNameSolveTransposeReuseFunction();
 
 	//
     // PROTECTED MEMBER FUNCTIONS:
@@ -262,6 +278,7 @@ class ExportLinearSolver : public ExportAlgorithm
     
 		bool UNROLLING;						/**< The boolean that defines the unrolling. */
 		bool REUSE;							/**< The boolean that defines the reuse. */
+		bool TRANSPOSE;
 		uint dim;									/**< The dimensions of the linear system. */
 		
 		unsigned nRows;								/**< Number of rows of matrix A. */
@@ -276,6 +293,7 @@ class ExportLinearSolver : public ExportAlgorithm
 		ExportFunction solve;						/**< Function that solves the linear system. */
 		ExportFunction solveTriangular;				/**< Function that solves the upper-triangular system. */
 		ExportFunction solveReuse;					/**< Function that solves a linear system with the same matrix, reusing previous results. */
+		ExportFunction solveReuseTranspose;			/**< Function that solves a transposed linear system with the same matrix, reusing previous results. */
 
 		ExportVariable determinant;					/**< Variable containing the matrix determinant. */
 };

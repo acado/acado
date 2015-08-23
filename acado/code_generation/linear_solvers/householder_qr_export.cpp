@@ -79,6 +79,7 @@ returnValue ExportHouseholderQR::getCode(	ExportStatementBlock& code
 {
 	unsigned run1, run2, run3;
 
+	if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 	//
 	// Solve the upper triangular system of equations:
 	//

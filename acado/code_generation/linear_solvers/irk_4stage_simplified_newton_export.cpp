@@ -96,6 +96,8 @@ returnValue ExportIRK4StageSimplifiedNewton::getCode(	ExportStatementBlock& code
 {
 	if( eig.isEmpty() || transf1.isEmpty() || transf2.isEmpty() || fabs(stepsize) <= ZERO_EPS ) return ACADOERROR(RET_INVALID_OPTION);
 
+	if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+
 	setupFactorization( solve_complex, rk_swap_complex, determinant_complex, string("cabs") );
 	code.addFunction( solve_complex );
 

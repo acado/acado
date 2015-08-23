@@ -74,6 +74,7 @@ returnValue ExportCholeskySolver::setup()
 
 	if (REUSE == true)
 		return RET_NOT_IMPLEMENTED_YET;
+	if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 
 	if (nRightHandSides > 0)
 		return RET_NOT_IMPLEMENTED_YET;
