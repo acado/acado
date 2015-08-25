@@ -380,7 +380,7 @@ int main( ){
 	mpc.set( GENERATE_MAKE_FILE,          NO            		);
 	mpc.set( GENERATE_MATLAB_INTERFACE,   YES            		);
 	mpc.set( SPARSE_QP_SOLUTION, 		  FULL_CONDENSING_N2	);
-	mpc.set( DYNAMIC_SENSITIVITY, 		  THREE_SWEEPS			);
+	mpc.set( DYNAMIC_SENSITIVITY, 		  SYMMETRIC				);
 	mpc.set( CG_HARDCODE_CONSTRAINT_VALUES, NO 					);
 	mpc.set( CG_USE_VARIABLE_WEIGHTING_MATRIX, YES 				);
 
