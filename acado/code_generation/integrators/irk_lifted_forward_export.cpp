@@ -645,7 +645,7 @@ returnValue ForwardLiftedIRKExport::solveImplicitSystem( ExportStatementBlock* b
 		get( LIFTED_INTEGRATOR_MODE, liftMode );
 
 		// Perform iteration by system solve:
-		if( liftMode == 4 && (ExportSensitivityType)sensGen == INEXACT ) {
+		if( liftMode == 4 ) {
 			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
 				block->addStatement( "if( run == 0 ) {\n" );
 			}
@@ -695,25 +695,6 @@ returnValue ForwardLiftedIRKExport::solveImplicitSystem( ExportStatementBlock* b
 				block->addStatement( loop02 );
 				block->addStatement( "}\n" );
 			}
-		}
-		else if( liftMode == 4 ) {
-			return ACADOERROR(RET_INVALID_OPTION);
-//			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
-//				block->addStatement( "if( run == 0 ) {\n" );
-//			}
-//			ExportForLoop loop01( index2,0,numStages );
-//			evaluateMatrix( &loop01, index2, index3, tmp_index, k_index, rk_A, Ah, C, true, DERIVATIVES );
-//			block->addStatement( loop01 );
-//			block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
-//			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
-//				block->addStatement( "}\n else {\n" );
-//				ExportForLoop loop02( index2,0,numStages );
-//				evaluateStatesImplicitSystem( &loop02, k_index, Ah, C, index2, index3, tmp_index );
-//				loop02.addFunctionCall( getNameDiffsRHS(), rk_xxx, rk_diffsTemp2.getAddress(index2,0) );
-//				evaluateRhsImplicitSystem( &loop02, k_index, index2 );
-//				block->addStatement( loop02 );
-//				block->addStatement( "}\n" );
-//			}
 		}
 		else {
 			ExportForLoop loop1( index2,0,numStages );
@@ -1154,14 +1135,14 @@ returnValue ForwardLiftedIRKExport::setup( )
 	rk_kkk = ExportVariable( "rk_Ktraj", N*grid.getNumIntervals()*(NX+NXA), numStages, REAL, ACADO_VARIABLES );
 	int liftMode;
 	get( LIFTED_INTEGRATOR_MODE, liftMode );
-	if( liftMode == 1 || (ExportSensitivityType)sensGen == INEXACT ) {
+	if( liftMode == 1 || liftMode == 4 ) {
 		rk_diffK = ExportVariable( "rk_diffKtraj", N*grid.getNumIntervals()*(NX+NXA)*(NX+NU), numStages, REAL, ACADO_VARIABLES );
 	}
 	else {
 		rk_diffK = ExportVariable( "rk_diffK", (NX+NXA)*(NX+NU), numStages, REAL, structWspace );
 	}
 
-	if( liftMode == 1 || (liftMode == 4 && (ExportSensitivityType)sensGen == INEXACT) ) {
+	if( liftMode == 1 || liftMode == 4 ) {
 		rk_Xprev = ExportVariable( "rk_Xprev", N*grid.getNumIntervals(), NX, REAL, ACADO_VARIABLES );
 		rk_Uprev = ExportVariable( "rk_Uprev", N, NU, REAL, ACADO_VARIABLES );
 		rk_delta = ExportVariable( "rk_delta", 1, NX+NU, REAL, ACADO_WORKSPACE );
