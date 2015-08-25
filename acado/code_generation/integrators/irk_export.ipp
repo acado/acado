@@ -52,6 +52,9 @@ inline ImplicitRungeKuttaExport* createImplicitRungeKuttaExport(	UserInteraction
 	else if ( (ImplicitIntegratorMode)liftedGen == LIFTED && (ExportSensitivityType)sensGen == SYMMETRIC ) {
 		return new SymmetricLiftedIRKExport(_userInteraction, _commonHeaderName);
 	}
+	else if ( (ImplicitIntegratorMode)liftedGen == LIFTED && (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+		return new ForwardBackwardLiftedIRKExport(_userInteraction, _commonHeaderName);
+	}
 	else if ( (ExportSensitivityType)sensGen == FORWARD ) {
 		return new ForwardIRKExport(_userInteraction, _commonHeaderName);
 	}
