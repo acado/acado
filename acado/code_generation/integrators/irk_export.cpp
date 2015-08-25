@@ -1173,6 +1173,8 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	fullRhs.doc( "Evaluates the right-hand side of the full model." );
 	fullRhs.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY, sensGen );
 	if( NX2 > 0 || NXA > 0 ) {
 		// setup linear solver:
 		int solverType;
@@ -1187,8 +1189,6 @@ returnValue ImplicitRungeKuttaExport::setup( )
 			solver = new ExportGaussElim( userInteraction,commonHeaderName );
 			if( (ImplicitIntegratorMode) intMode == LIFTED ) {
 				solver->init( (NX2+NXA)*numStages, NX+NU+1 );
-				int sensGen;
-				get( DYNAMIC_SENSITIVITY, sensGen );
 				if( (ExportSensitivityType)sensGen == SYMMETRIC || (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) solver->setTranspose( true ); // BACKWARD propagation
 			}
 			else {
@@ -1241,6 +1241,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 				if( numStages == 3 ) solver = new ExportIRK3StageSingleNewton( userInteraction,commonHeaderName );
 				if( numStages == 4 ) solver = new ExportIRK4StageSingleNewton( userInteraction,commonHeaderName );
 				solver->init( NX2+NXA, NX+NU+1 );
+				if( (ExportSensitivityType)sensGen == SYMMETRIC || (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) solver->setTranspose( true ); // BACKWARD propagation
 				solver->setReuse( true ); 	// IFTR method
 				solver->setup();
 				rk_auxSolver = solver->getGlobalExportVariable( 1 );
@@ -1258,7 +1259,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 				}
 				else if( numStages == 4 ) {
 					ExportIRK4StageSingleNewton* IRKsolver = dynamic_cast<ExportIRK4StageSingleNewton *>(solver);
-					IRKsolver->setTransformations(tau, low_tria, single_transf1, single_transf2);
+					IRKsolver->setTransformations(tau, low_tria, single_transf1, single_transf2, single_transf1_T, single_transf2_T);
 
 					double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 					IRKsolver->setStepSize(h);
@@ -1309,6 +1310,18 @@ returnValue ImplicitRungeKuttaExport::setSingleTransformations( const double _ta
 	low_tria = _low_tria;
 	single_transf1 = _transf1;
 	single_transf2 = _transf2;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ImplicitRungeKuttaExport::setSingleTransformations( const double _tau, const DVector& _low_tria, const DMatrix& _transf1, const DMatrix& _transf2, const DMatrix& _transf1_T, const DMatrix& _transf2_T ) {
+	tau = _tau;
+	low_tria = _low_tria;
+	single_transf1 = _transf1;
+	single_transf2 = _transf2;
+	single_transf1_T = _transf1_T;
+	single_transf2_T = _transf2_T;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -1606,6 +1619,8 @@ returnValue ImplicitRungeKuttaExport::copy(	const ImplicitRungeKuttaExport& arg
 	low_tria = arg.low_tria;
 	single_transf1 = arg.single_transf1;
 	single_transf2 = arg.single_transf2;
+	single_transf1_T = arg.single_transf1_T;
+	single_transf2_T = arg.single_transf2_T;
 
 	return SUCCESSFUL_RETURN;
 }
