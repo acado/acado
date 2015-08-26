@@ -126,6 +126,16 @@ IntegratorExport* createGaussLegendre6Export(	UserInteraction* _userInteraction,
 	_single_transf2(1,0) = 0.0; 		_single_transf2(1,1) = 1.0; 				_single_transf2(1,2) = -0.019264171041652;
 	_single_transf2(2,0) = 0.0; 		_single_transf2(2,1) = 0.0; 				_single_transf2(2,2) = 1.0;
 
+	DMatrix _single_transf1_T(3,3);
+	_single_transf1_T(0,0) = 1.517302006625726e+00; 	_single_transf1_T(0,1) = -1.318747024436147e+00; 	_single_transf1_T(0,2) = 1.430998974529736e+00;
+	_single_transf1_T(1,0) = -4.390769920057278e-01; 	_single_transf1_T(1,1) = 1.040610225761180e+00; 	_single_transf1_T(1,2) = -2.108070244672127e+00;
+	_single_transf1_T(2,0) = 3.844252968887955e-02; 	_single_transf1_T(2,1) = -1.926417104165177e-02; 	_single_transf1_T(2,2) = 1.000000000000000e+00;
+
+	DMatrix _single_transf2_T(3,3);
+	_single_transf2_T(0,0) = 1.0; 							_single_transf2_T(0,1) = 0.0; 					_single_transf2_T(0,2) = 0.0;
+	_single_transf2_T(1,0) = 3.580374390386760e-01; 		_single_transf2_T(1,1) = 1.0; 					_single_transf2_T(1,2) = 0.0;
+	_single_transf2_T(2,0) = -3.154523522392352e-02; 		_single_transf2_T(2,1) = 1.926417104165177e-02; _single_transf2_T(2,2) = 1.0;
+
 
 	ImplicitRungeKuttaExport* integrator = createImplicitRungeKuttaExport(_userInteraction, _commonHeaderName);
 	integrator->initializeButcherTableau(AA, bb, cc);
@@ -133,7 +143,7 @@ IntegratorExport* createGaussLegendre6Export(	UserInteraction* _userInteraction,
 	integrator->setEigenvalues(_eig);
 	integrator->setSimplifiedTransformations(_simplified_transf1, _simplified_transf2);
 
-	integrator->setSingleTransformations(_single_tau, _lower_triang, _single_transf1, _single_transf2);
+	integrator->setSingleTransformations(_single_tau, _lower_triang, _single_transf1, _single_transf2, _single_transf1_T, _single_transf2_T);
 
 	return integrator;
 }

@@ -321,7 +321,9 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 			}
 		}
 	}
-	if( NX2 > 0 || NXA > 0 ) solver->getCode( code );
+	returnValue ret;
+	if( NX2 > 0 || NXA > 0 ) ret = solver->getCode( code );
+	if( ret != SUCCESSFUL_RETURN ) return ret;
 	code.addLinebreak(2);
 
 	int measGrid;
@@ -1248,7 +1250,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 
 				if( numStages == 3 ) {
 					ExportIRK3StageSingleNewton* IRKsolver = dynamic_cast<ExportIRK3StageSingleNewton *>(solver);
-					IRKsolver->setTransformations(tau, low_tria, single_transf1, single_transf2);
+					IRKsolver->setTransformations(tau, low_tria, single_transf1, single_transf2, single_transf1_T, single_transf2_T);
 
 					double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 					IRKsolver->setStepSize(h);

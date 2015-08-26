@@ -62,6 +62,10 @@ returnValue ExportIRK3StageSingleNewton::getDataDeclarations(	ExportStatementBlo
 	declarations.addDeclaration( A_mem,dataStruct );
 	declarations.addDeclaration( b_mem,dataStruct );
 
+	if( TRANSPOSE ) {
+		declarations.addDeclaration( b_mem_trans,dataStruct );
+	}
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -83,9 +87,7 @@ returnValue ExportIRK3StageSingleNewton::getFunctionDeclarations(	ExportStatemen
 returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 											)
 {
-	if( fabs(tau) <= ZERO_EPS || transf1.isEmpty() || transf2.isEmpty() || fabs(stepsize) <= ZERO_EPS ) return ACADOERROR(RET_INVALID_OPTION);
-
-	if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+	if( fabs(tau) <= ZERO_EPS || transf1.isEmpty() || transf2.isEmpty() || transf1_T.isEmpty() || transf2_T.isEmpty() || fabs(stepsize) <= ZERO_EPS ) return ACADOERROR(RET_INVALID_OPTION);
 
 	setupFactorization( solve, rk_swap, determinant, string("fabs") );
 	code.addFunction( solve );
@@ -93,6 +95,11 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 	if( REUSE ) { // Also export the extra function which reuses the factorization of the matrix A
 		setupSolveReuseComplete( solveReuse, rk_bPerm );
 		code.addFunction( solveReuse );
+
+		if( TRANSPOSE ) {
+			setupSolveReuseTranspose( solveReuseTranspose, rk_bPerm_trans );
+			code.addFunction( solveReuseTranspose );
+		}
 	}
 	
 	ExportVariable tau_var( stepsize*tau );
@@ -156,6 +163,8 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 			solveReuse_full.addFunctionCall(getNameSubSolveReuseFunction(),A_mem,b_mem.getAddress(2*dim,0),rk_perm_full);
 		}
 		else {
+			if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+
 			ExportVariable b_tmp( "b_tmp", 1, nRightHandSides, REAL, ACADO_LOCAL );
 			solveReuse_full.addVariable(b_tmp);
 
@@ -183,6 +192,47 @@ returnValue ExportIRK3StageSingleNewton::getCode(	ExportStatementBlock& code
 		performTransformation( solveReuse_full, b_mem, b_full, transf2_var, i );
 
 		code.addFunction( solveReuse_full );
+
+		if( TRANSPOSE ) {
+			uint NUM_RHS = nRightHandSides;
+			nRightHandSides = 1;
+			solveReuseTranspose_full.addIndex(i);
+			solveReuseTranspose_full.addIndex(j);
+
+			ExportVariable transf1_T_var( transf1_T );
+			ExportVariable transf2_T_var( transf2_T );
+
+			// transform the right-hand side
+			performTransformation( solveReuseTranspose_full, b_full_trans, b_mem_trans, transf1_T_var, i );
+
+			// solveReuse the real and complex linear systems
+			solveReuseTranspose_full.addFunctionCall(getNameSubSolveTransposeReuseFunction(),A_mem,b_mem_trans.getAddress(2*dim,0),rk_perm_full);
+
+			if( !implicit ) {
+
+				ExportForLoop loop2( i, 0, dim );
+				loop2.addStatement( b_mem_trans.getRow(dim+i) -= low_tria_var.getElement(2,0)*b_mem_trans.getRow(2*dim+i) );
+				solveReuseTranspose_full.addStatement( loop2 );
+				solveReuseTranspose_full.addFunctionCall(getNameSubSolveTransposeReuseFunction(),A_mem,b_mem_trans.getAddress(dim,0),rk_perm_full);
+
+				ExportForLoop loop3( i, 0, dim );
+				loop3.addStatement( b_mem_trans.getRow(i) -= low_tria_var.getElement(1,0)*b_mem_trans.getRow(2*dim+i) );
+				solveReuseTranspose_full.addStatement( loop3 );
+				ExportForLoop loop4( i, 0, dim );
+				loop4.addStatement( b_mem_trans.getRow(i) -= low_tria_var.getElement(0,0)*b_mem_trans.getRow(dim+i) );
+				solveReuseTranspose_full.addStatement( loop4 );
+				solveReuseTranspose_full.addFunctionCall(getNameSubSolveTransposeReuseFunction(),A_mem,b_mem_trans.getAddress(0,0),rk_perm_full);
+			}
+			else {
+				return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+			}
+
+			// transform back to the solution
+			performTransformation( solveReuseTranspose_full, b_mem_trans, b_full_trans, transf2_T_var, i );
+
+			code.addFunction( solveReuseTranspose_full );
+			nRightHandSides = NUM_RHS;
+		}
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -242,6 +292,11 @@ returnValue ExportIRK3StageSingleNewton::setup( )
 	if( REUSE ) {
 		solveReuse = ExportFunction( getNameSubSolveReuseFunction(), A, b, rk_perm );
 		solveReuse.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
+		if( TRANSPOSE ) {
+			b_mem_trans = ExportVariable( std::string( "rk_mem_trans_" ) + identifier + "b", 4*dim, 1, REAL, structWspace );
+			solveReuseTranspose = ExportFunction( getNameSubSolveTransposeReuseFunction(), A, b_trans, rk_perm );
+			solveReuseTranspose.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
+		}
 	}
 
 	A_full = ExportVariable( "A", dim, dim, REAL );
@@ -260,9 +315,14 @@ returnValue ExportIRK3StageSingleNewton::setup( )
 	if( REUSE ) {
 		if( implicit ) {
 			solveReuse_full = ExportFunction( getNameSolveReuseFunction(), A_full, I_full, b_full, rk_perm_full );
+			if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 		}
 		else {
 			solveReuse_full = ExportFunction( getNameSolveReuseFunction(), A_full, b_full, rk_perm_full );
+			if( TRANSPOSE ) {
+				b_full_trans = ExportVariable( "b", 4*dim, 1, REAL );
+				solveReuseTranspose_full = ExportFunction( getNameSolveTransposeReuseFunction(), A_full, b_full_trans, rk_perm_full );
+			}
 		}
 		solveReuse_full.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	}
@@ -271,17 +331,21 @@ returnValue ExportIRK3StageSingleNewton::setup( )
 }
 
 
-returnValue ExportIRK3StageSingleNewton::setTransformations( const double _tau, const DVector& _low_tria, const DMatrix& _transf1, const DMatrix& _transf2 ) {
+returnValue ExportIRK3StageSingleNewton::setTransformations( const double _tau, const DVector& _low_tria, const DMatrix& _transf1, const DMatrix& _transf2, const DMatrix& _transf1_T, const DMatrix& _transf2_T ) {
 	tau = _tau;
 	low_tria = _low_tria;
 	transf1 = _transf1;
 	transf2 = _transf2;
+	transf1_T = _transf1_T;
+	transf2_T = _transf2_T;
 
 	if( _tau <= 0 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
 	if( _transf1.getNumRows() != 3 || _transf1.getNumCols() != 3 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
 	if( _transf2.getNumRows() != 3 || _transf2.getNumCols() != 3 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
+	if( _transf1_T.getNumRows() != 3 || _transf1_T.getNumCols() != 3 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
+	if( _transf2_T.getNumRows() != 3 || _transf2_T.getNumCols() != 3 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
 	if( _low_tria.getDim() != 3 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
-	if( _transf1.isZero() || _transf2.isZero() || _low_tria.isZero() ) return ACADOERROR( RET_INVALID_ARGUMENTS );
+	if( _transf1.isZero() || _transf2.isZero() || _transf1_T.isZero() || _transf2_T.isZero() || _low_tria.isZero() ) return ACADOERROR( RET_INVALID_ARGUMENTS );
 
 	return SUCCESSFUL_RETURN;
 }
@@ -304,6 +368,13 @@ const std::string ExportIRK3StageSingleNewton::getNameSubSolveReuseFunction() {
 
 	return string( "solve_" ) + identifier + "sub_system_reuse";
 }
+
+
+const std::string ExportIRK3StageSingleNewton::getNameSubSolveTransposeReuseFunction() {
+
+	return string( "solve_" ) + identifier + "sub_transpose_reuse";
+}
+
 
 returnValue ExportIRK3StageSingleNewton::setImplicit( BooleanType _implicit ) {
 

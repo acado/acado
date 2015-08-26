@@ -78,7 +78,7 @@ class ExportIRK3StageSingleNewton : public ExportGaussElim
 		virtual returnValue setup( );
 
 		/** This routine sets the transformation matrices, defined by the inverse of the AA matrix. */
-        returnValue setTransformations( const double _tau, const DVector& _low_tria, const DMatrix& _transf1, const DMatrix& _transf2 );
+        returnValue setTransformations( const double _tau, const DVector& _low_tria, const DMatrix& _transf1, const DMatrix& _transf2, const DMatrix& _transf1_T, const DMatrix& _transf2_T );
 
 		/** This routine sets the step size used in the IRK method. */
         returnValue setStepSize( double _stepsize );
@@ -135,6 +135,7 @@ class ExportIRK3StageSingleNewton : public ExportGaussElim
 
 		const std::string getNameSubSolveFunction();
 		const std::string getNameSubSolveReuseFunction();
+		const std::string getNameSubSolveTransposeReuseFunction();
 
 
     protected:
@@ -145,6 +146,8 @@ class ExportIRK3StageSingleNewton : public ExportGaussElim
 		DVector low_tria;
 		DMatrix transf1;
 		DMatrix transf2;
+		DMatrix transf1_T;
+		DMatrix transf2_T;
 
 		// DEFINITION OF THE EXPORTVARIABLES
 		ExportVariable A_full;						/**< Variable containing the matrix for the complete linear system. */
@@ -155,6 +158,9 @@ class ExportIRK3StageSingleNewton : public ExportGaussElim
 		ExportFunction solve_full;					/**< Function that solves the complete linear system. */
 		ExportFunction solveReuse_full;				/**< Function that solves a complete linear system with the same matrix, reusing previous results. */
 
+		ExportFunction solveReuseTranspose_full;	/**< Function that solves a complete linear system with the same matrix, reusing previous results. */
+		ExportVariable b_full_trans;				/**< Variable containing the right-hand side of the complete linear system and it will also contain the solution. */
+		ExportVariable b_mem_trans;					/**< Variable containing the right-hand side for the linear subsystems. */
 
 		ExportVariable A_mem;					/**< Variable containing the factorized matrix of the linear subsystems. */
 		ExportVariable b_mem;					/**< Variable containing the right-hand side for the linear subsystems. */
