@@ -325,12 +325,12 @@ returnValue ExportNLPSolver::setupSimulation( void )
 					<< ", " << run.getFullName() << ");\n";
 	}
 	loop.addLinebreak( );
-	if (useOMP == 0)
-	{
-		// TODO In case we use OpenMP more sophisticated solution has to be found.
-		loop << "if (" << retSim.getFullName() << " != 0) return " << retSim.getFullName() << ";";
-		loop.addLinebreak( );
-	}
+//	if (useOMP == 0)
+//	{
+//		// TODO In case we use OpenMP more sophisticated solution has to be found.
+//		loop << "if (" << retSim.getFullName() << " != 0) return " << retSim.getFullName() << ";";
+//		loop.addLinebreak( );
+//	}
 
 	if ( performsSingleShooting() == true )
 	{
