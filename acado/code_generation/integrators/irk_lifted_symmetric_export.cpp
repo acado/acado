@@ -393,20 +393,20 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( std::string("if( run > 0 ) {\n") );
 		if( NX1 > 0 ) {
 			ExportForLoop loopTemp1( i,0,NX1 );
-			loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,0,NX1 ) == rk_eta.getCols( i*NX+NX+NXA,i*NX+NX+NXA+NX1 ) );
-			if( NU > 0 ) loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,NX1,NX1+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1),i*NU+(NX+NXA)*(NX+1)+NU ) );
+			loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,0,NX1 ) == rk_eta.getCols( i*NX+2*NX+NXA,i*NX+2*NX+NXA+NX1 ) );
+			if( NU > 0 ) loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,NX1,NX1+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+NX,i*NU+(NX+NXA)*(NX+1)+NX+NU ) );
 			loop->addStatement( loopTemp1 );
 		}
 		if( NX2 > 0 ) {
 			ExportForLoop loopTemp2( i,0,NX2 );
-			loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,0,NX1+NX2 ) == rk_eta.getCols( i*NX+NX+NXA+NX1*NX,i*NX+NX+NXA+NX1*NX+NX1+NX2 ) );
-			if( NU > 0 ) loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,NX1+NX2,NX1+NX2+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+NX1*NU,i*NU+(NX+NXA)*(NX+1)+NX1*NU+NU ) );
+			loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,0,NX1+NX2 ) == rk_eta.getCols( i*NX+2*NX+NXA+NX1*NX,i*NX+2*NX+NXA+NX1*NX+NX1+NX2 ) );
+			if( NU > 0 ) loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,NX1+NX2,NX1+NX2+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+NX1*NU+NX,i*NU+(NX+NXA)*(NX+1)+NX1*NU+NU+NX ) );
 			loop->addStatement( loopTemp2 );
 		}
 		if( NX3 > 0 ) {
 			ExportForLoop loopTemp3( i,0,NX3 );
-			loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,0,NX ) == rk_eta.getCols( i*NX+NX+NXA+(NX1+NX2)*NX,i*NX+NX+NXA+(NX1+NX2)*NX+NX ) );
-			if( NU > 0 ) loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,NX,NX+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU,i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU+NU ) );
+			loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,0,NX ) == rk_eta.getCols( i*NX+2*NX+NXA+(NX1+NX2)*NX,i*NX+2*NX+NXA+(NX1+NX2)*NX+NX ) );
+			if( NU > 0 ) loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,NX,NX+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU+NX,i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU+NU+NX ) );
 			loop->addStatement( loopTemp3 );
 		}
 		loop->addStatement( std::string("}\nelse{\n") );
@@ -542,7 +542,7 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	for( run5 = 0; run5 < numStages; run5++ ) {
 		DMatrix zeroV = zeros<double>(1,NX);
 		loop2->addStatement( rk_b_trans.getCols(run5*NX,(run5+1)*NX) == zeroV );
-		loop2->addStatement( rk_b_trans.getCols(run5*NX,(run5+1)*NX) -= Bh.getRow(run5)*rk_eta.getCols(NX*(1+NX+NU),NX*(2+NX+NU)) );
+		loop2->addStatement( rk_b_trans.getCols(run5*NX,(run5+1)*NX) -= Bh.getRow(run5)*rk_eta.getCols(NX,2*NX) );
 	}
 	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
 		loop2->addStatement( tmp_index1 == shooting_index*grid.getNumIntervals()+run );
@@ -580,7 +580,7 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		loop2->addStatement( rk_seed.getCols(NX,NX*(1+NX+NU)) == rk_diffsPrev2.makeRowVector() );
 		loop2->addStatement( rk_seed.getCols(NX*(1+NX+NU),NX*(2+NX+NU)) == rk_b_trans.getCols(run5*NX,(run5+1)*NX) );
 		loop2->addFunctionCall( adjoint_sweep.getName(), rk_seed, rk_adj_diffs_tmp.getAddress(0,0) );
-		loop2->addStatement( rk_eta.getCols(NX*(1+NX+NU),NX*(2+NX+NU)) += rk_adj_diffs_tmp.getCols(0,NX) );
+		loop2->addStatement( rk_eta.getCols(NX,2*NX) += rk_adj_diffs_tmp.getCols(0,NX) );
 		loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) += rk_adj_diffs_tmp.getCols(NX,NX+numX+numU+NX*NU) );
 	}
 
@@ -593,18 +593,44 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
     	integrate.addStatement( *loop2 );
     }
 
-    integrate.addStatement( std::string( "if( " ) + determinant.getFullName() + " < 1e-12 ) {\n" );
-    integrate.addStatement( error_code == 2 );
-    integrate.addStatement( std::string( "} else if( " ) + determinant.getFullName() + " < 1e-6 ) {\n" );
-    integrate.addStatement( error_code == 1 );
-    integrate.addStatement( std::string( "} else {\n" ) );
+//    integrate.addStatement( std::string( "if( " ) + determinant.getFullName() + " < 1e-12 ) {\n" );
+//    integrate.addStatement( error_code == 2 );
+//    integrate.addStatement( std::string( "} else if( " ) + determinant.getFullName() + " < 1e-6 ) {\n" );
+//    integrate.addStatement( error_code == 1 );
+//    integrate.addStatement( std::string( "} else {\n" ) );
     integrate.addStatement( error_code == 0 );
-    integrate.addStatement( std::string( "}\n" ) );
+//    integrate.addStatement( std::string( "}\n" ) );
 
 	code.addFunction( integrate );
     code.addLinebreak( 2 );
 
     return SUCCESSFUL_RETURN;
+}
+
+
+returnValue SymmetricLiftedIRKExport::updateImplicitSystem(	ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index )
+{
+	if( NX2 > 0 ) {
+		ExportForLoop loop01( index1,NX1,NX1+NX2 );
+		ExportForLoop loop02( index2,0,NX1+NX2 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+2*NX+NXA ) == rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,index2,index2+1 ) );
+		loop01.addStatement( loop02 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop03( index2,0,NU );
+			loop03.addStatement( tmp_index == index2+index1*NU );
+			loop03.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX)+NX ) == rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,NX1+NX2+index2,NX1+NX2+index2+1 ) );
+			loop01.addStatement( loop03 );
+		}
+		block->addStatement( loop01 );
+	}
+	// ALGEBRAIC STATES
+	if( NXA > 0 ) {
+		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+	}
+
+	return SUCCESSFUL_RETURN;
 }
 
 

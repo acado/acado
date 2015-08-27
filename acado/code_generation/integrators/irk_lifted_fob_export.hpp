@@ -137,6 +137,13 @@ class ForwardBackwardLiftedIRKExport : public ForwardLiftedIRKExport
 
 	protected:
 
+
+		virtual returnValue updateImplicitSystem( 	ExportStatementBlock* block,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& tmp_index  	);
+
+
 		Expression returnLowerTriangular( const Expression& expr );
 
 
