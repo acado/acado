@@ -618,13 +618,13 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		integrate.addStatement( rk_Uprev.getRow(shooting_index) == rk_eta.getCols( NX+NXA+diffsDim,NX+NXA+diffsDim+NU ) );
 	}
 
-    integrate.addStatement( std::string( "if( " ) + determinant.getFullName() + " < 1e-12 ) {\n" );
-    integrate.addStatement( error_code == 2 );
-    integrate.addStatement( std::string( "} else if( " ) + determinant.getFullName() + " < 1e-6 ) {\n" );
-    integrate.addStatement( error_code == 1 );
-    integrate.addStatement( std::string( "} else {\n" ) );
+//    integrate.addStatement( std::string( "if( " ) + determinant.getFullName() + " < 1e-12 ) {\n" );
+//    integrate.addStatement( error_code == 2 );
+//    integrate.addStatement( std::string( "} else if( " ) + determinant.getFullName() + " < 1e-6 ) {\n" );
+//    integrate.addStatement( error_code == 1 );
+//    integrate.addStatement( std::string( "} else {\n" ) );
     integrate.addStatement( error_code == 0 );
-    integrate.addStatement( std::string( "}\n" ) );
+//    integrate.addStatement( std::string( "}\n" ) );
 
 	code.addFunction( integrate );
     code.addLinebreak( 2 );
