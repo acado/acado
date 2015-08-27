@@ -155,6 +155,8 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	get(GENERATE_MAKE_FILE, generateMakeFile);
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	int hessianRegularization;
+	get( HESSIAN_REGULARIZATION, hessianRegularization );
 
 	if ( (bool)generateMakeFile == true )
 	{
@@ -314,13 +316,30 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	//
 	// Generate Symmetric EVD code
 	//
-	if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+	if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN && (HessianRegularizationMode)hessianRegularization == BLOCK_REG ) {
 //		LOG( LVL_DEBUG ) << "Exporting Hessian regularization code... " << endl;
 		ExportHessianRegularization evd(
 				dirName + string("/") + moduleName + "_hessian_regularization.c",
 				moduleName
 		);
 		evd.configure( ocp.getNX()+ocp.getNU(), 1e-12 );
+		if ( evd.exportCode() != SUCCESSFUL_RETURN )
+			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
+	}
+	else if( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN && (HessianRegularizationMode)hessianRegularization == CONDENSED_REG ) {
+		//		LOG( LVL_DEBUG ) << "Exporting Hessian regularization code... " << endl;
+		ExportHessianRegularization evd(
+				dirName + string("/") + moduleName + "_hessian_regularization.c",
+				moduleName
+		);
+		int fixInitialState;
+		get(FIX_INITIAL_STATE, fixInitialState);
+		if( (bool)fixInitialState == 1 ) {
+			evd.configure( ocp.getN()*ocp.getNU(), 1e-12 );
+		}
+		else {
+			evd.configure( ocp.getNX()+ocp.getN()*ocp.getNU(), 1e-12 );
+		}
 		if ( evd.exportCode() != SUCCESSFUL_RETURN )
 			return ACADOERROR( RET_UNABLE_TO_EXPORT_CODE );
 	}

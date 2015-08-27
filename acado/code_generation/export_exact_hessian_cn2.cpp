@@ -227,11 +227,16 @@ returnValue ExportExactHessianCN2::setupHessianRegularization( )
 	regularizeHessian.setup( "regularizeHessian" );
 	regularizeHessian.doc( "Regularization procedure of the computed exact Hessian." );
 
+	int hessianRegularization;
+	get( HESSIAN_REGULARIZATION, hessianRegularization );
+
 	ExportIndex oInd;
 	regularizeHessian.acquire( oInd );
 
 	ExportForLoop loopObjective(oInd, 0, N);
-	loopObjective.addFunctionCall( regularization, objS.getAddress(oInd*(NX+NU),0) );
+	if( (HessianRegularizationMode) hessianRegularization == BLOCK_REG ) {
+		loopObjective.addFunctionCall( regularization, objS.getAddress(oInd*(NX+NU),0) );
+	}
 	loopObjective.addStatement( Q1.getRows(oInd*NX, oInd*NX+NX) == objS.getSubMatrix(oInd*(NX+NU), oInd*(NX+NU)+NX, 0, NX) );
 	loopObjective.addStatement( S1.getRows(oInd*NX, oInd*NX+NX) == objS.getSubMatrix(oInd*(NX+NU), oInd*(NX+NU)+NX, NX, NX+NU) );
 	loopObjective.addStatement( R1.getRows(oInd*NU, oInd*NU+NU) == objS.getSubMatrix(oInd*(NX+NU)+NX, oInd*(NX+NU)+NX+NU, NX, NX+NU) );

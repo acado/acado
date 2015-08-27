@@ -59,6 +59,7 @@ ExportModule::~ExportModule( )
 returnValue ExportModule::setupOptions( )
 {
 	addOption( HESSIAN_APPROXIMATION,       GAUSS_NEWTON    );
+	addOption( HESSIAN_REGULARIZATION, 		BLOCK_REG 		);
 	addOption( CG_CONDENSED_HESSIAN_CHOLESKY, EXTERNAL		);
 	addOption( DISCRETIZATION_TYPE,         MULTIPLE_SHOOTING );
 	addOption( INTEGRATOR_TYPE,             INT_RK4         );

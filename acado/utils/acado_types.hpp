@@ -371,6 +371,7 @@ enum OptionsName
 	PRINTLEVEL,
 	PRINT_COPYRIGHT,
 	HESSIAN_APPROXIMATION,
+	HESSIAN_REGULARIZATION,
 	DYNAMIC_HESSIAN_APPROXIMATION,
 	HESSIAN_PROJECTION_FACTOR,
 	DYNAMIC_SENSITIVITY,
@@ -614,6 +615,15 @@ enum HessianApproximationMode{
     GAUSS_NEWTON_WITH_BLOCK_BFGS,
     EXACT_HESSIAN,
     DEFAULT_HESSIAN_APPROXIMATION
+};
+
+
+
+/** Definition of several Hessian regularization modes. */
+enum HessianRegularizationMode{
+
+    BLOCK_REG, // = 0
+	CONDENSED_REG
 };
 
 

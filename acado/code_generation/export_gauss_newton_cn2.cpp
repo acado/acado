@@ -1505,7 +1505,8 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	condenseFdb.addLinebreak();
 	ExportVariable SlxCall =
 				objSlx.isGiven() == true || variableObjS == false ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
-	condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) == SlxCall + QN2 * DyN );
+	condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) == QN2 * DyN );
+	condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) += SlxCall );
 	condenseFdb.addLinebreak();
 	}
 
@@ -2003,6 +2004,8 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 
 returnValue ExportGaussNewtonCN2::setupEvaluation( )
 {
+	int hessianRegularization;
+	get( HESSIAN_REGULARIZATION, hessianRegularization );
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Preparation phase
@@ -2018,8 +2021,13 @@ returnValue ExportGaussNewtonCN2::setupEvaluation( )
 	preparation	<< retSim.getFullName() << " = " << modelSimulation.getName() << "();\n";
 
 	preparation.addFunctionCall( evaluateObjective );
-	if( regularizeHessian.isDefined() ) preparation.addFunctionCall( regularizeHessian );
+	if( regularizeHessian.isDefined() ) { // ALSO IN THE CASE OF CONDENSED REGULARIZATION, THIS IS CURRENTLY NECESSARY:
+		preparation.addFunctionCall( regularizeHessian );
+	}
 	preparation.addFunctionCall( condensePrep );
+	if( regularizeHessian.isDefined() && (HessianRegularizationMode)hessianRegularization == CONDENSED_REG ) {
+		preparation.addFunctionCall( regularization, H );
+	}
 
 	////////////////////////////////////////////////////////////////////////////
 	//
