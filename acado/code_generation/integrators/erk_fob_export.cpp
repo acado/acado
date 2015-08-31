@@ -122,15 +122,31 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 
 
 		DifferentialState lx("", NX,1);
+		Expression arg;
+		arg << x;
+		arg << u;
+		Expression S_tmp = Gx;
+		S_tmp.appendCols( Gu );
+		S_tmp.appendRows(zeros<double>(NU,NX).appendCols(eye<double>(NU)));
 
-		Expression tmp = backwardDerivative(rhs_, x, lx);
-		g << tmp;
+		Expression tmp = backwardDerivative( rhs_, arg, lx );
+
+		g << tmp.getRows(0,NX);
+
+		Expression tmp2 = multipleForwardDerivative( tmp, arg, S_tmp );
 
 		DifferentialState Sxx("", NX,NX), Sux("", NU,NX), Suu("", NU,NU);
+		Expression SS_tmp = Sxx;
+		SS_tmp.appendCols( Sux.transpose() );
+		Expression tmp3 = multipleBackwardDerivative( rhs_, arg, SS_tmp );
 
-		g << multipleForwardDerivative(tmp, x, Gx) + multipleBackwardDerivative(rhs_, x, Sxx);
-		g << multipleBackwardDerivative(tmp, x, Gu).transpose() + forwardDerivative(tmp, u).transpose() + multipleBackwardDerivative(rhs_, x, Sux.transpose()).transpose();
-		g << forwardDerivative(backwardDerivative(rhs_, u, lx), u) + multipleBackwardDerivative(tmp, u, Gu) + multipleBackwardDerivative(rhs_, u, Sux.transpose());
+		g << tmp2.getSubMatrix(0,NX,0,NX) + tmp3.getSubMatrix(0,NX,0,NX);
+		g << tmp2.getSubMatrix(0,NX,NX,NX+NU).transpose() + tmp3.getSubMatrix(0,NX,NX,NX+NU).transpose();
+		g << tmp2.getSubMatrix(NX,NX+NU,NX,NX+NU) + tmp3.getSubMatrix(NX,NX+NU,NX,NX+NU);
+
+//		g << multipleForwardDerivative(tmp, x, Gx) + multipleBackwardDerivative(rhs_, x, Sxx);
+//		g << multipleBackwardDerivative(tmp, x, Gu).transpose() + forwardDerivative(tmp, u).transpose() + multipleBackwardDerivative(rhs_, x, Sux.transpose()).transpose();
+//		g << forwardDerivative(backwardDerivative(rhs_, u, lx), u) + multipleBackwardDerivative(tmp, u, Gu) + multipleBackwardDerivative(rhs_, u, Sux.transpose());
 	}
 	else {
 		return ACADOERROR( RET_INVALID_OPTION );
