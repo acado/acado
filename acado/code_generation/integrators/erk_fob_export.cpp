@@ -208,15 +208,16 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	
 	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 
-	if( inputDim > rhsDim ) {
-		// initialize sensitivities:
-		DMatrix idX    = eye<double>( NX );
-		DMatrix zeroXU = zeros<double>( NX,NU );
-		integrate.addStatement( rk_eta.getCols( NX,NX*(1+NX) ) == idX.makeVector().transpose() );
-		integrate.addStatement( rk_eta.getCols( NX*(1+NX),NX*(1+NX+NU) ) == zeroXU.makeVector().transpose() );
+
+	// initialize sensitivities:
+	DMatrix idX    = eye<double>( NX );
+	DMatrix zeroXU = zeros<double>( NX,NU );
+	integrate.addStatement( rk_eta.getCols( 2*NX,NX*(2+NX) ) == idX.makeVector().transpose() );
+	integrate.addStatement( rk_eta.getCols( NX*(2+NX),NX*(2+NX+NU) ) == zeroXU.makeVector().transpose() );
 
 //		integrate.addStatement( rk_eta.getCols( NX*(1+NX+NU),NX*(2+NX+NU) ) == seed_backward );
-		integrate.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) == zeros<double>( 1,NX*NX+NX*NU+NU*NU ) );
+	integrate.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) == zeros<double>( 1,NX*NX+NX*NU+NU*NU ) );
+	if( inputDim > rhsDim ) {
 		// FORWARD SWEEP FIRST
 		integrate.addStatement( rk_xxx.getCols( NX*(1+NX+NU),NX*(1+NX+NU)+NU+NOD ) == rk_eta.getCols( rhsDim,inputDim ) );
 	}
@@ -226,13 +227,15 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	ExportForLoop loop = ExportForLoop( run, 0, grid.getNumIntervals() );
 	for( uint run1 = 0; run1 < rkOrder; run1++ )
 	{
-		loop.addStatement( rk_xxx.getCols( 0,NX*(1+NX+NU) ) == rk_eta.getCols( 0,NX*(1+NX+NU) ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX*(1+NX+NU) ) );
+		loop.addStatement( rk_xxx.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) + Ah.getRow(run1)*rk_kkk.getCols( 0,NX ) );
+		loop.addStatement( rk_xxx.getCols( NX,NX*(1+NX+NU) ) == rk_eta.getCols( 2*NX,NX*(2+NX+NU) ) + Ah.getRow(run1)*rk_kkk.getCols( NX,NX*(1+NX+NU) ) );
 		// save forward trajectory
 		loop.addStatement( rk_forward_sweep.getCols( run*rkOrder*NX*(1+NX+NU)+run1*NX*(1+NX+NU),run*rkOrder*NX*(1+NX+NU)+(run1+1)*NX*(1+NX+NU) ) == rk_xxx.getCols( 0,NX*(1+NX+NU) ) );
 		if( timeDependant ) loop.addStatement( rk_xxx.getCol( NX*(NX+NU+1)+NU+NOD ) == rk_ttt + ((double)cc(run1))/grid.getNumIntervals() );
 		loop.addFunctionCall( getNameRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
-	loop.addStatement( rk_eta.getCols( 0,NX*(1+NX+NU) ) += b4h^rk_kkk.getCols( 0,NX*(1+NX+NU) ) );
+	loop.addStatement( rk_eta.getCols( 0,NX ) += b4h^rk_kkk.getCols( 0,NX ) );
+	loop.addStatement( rk_eta.getCols( NX*2,NX*(2+NX+NU) ) += b4h^rk_kkk.getCols( NX,NX*(1+NX+NU) ) );
 	loop.addStatement( rk_ttt += DMatrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop: FORWARD SWEEP
 	integrate.addStatement( loop );
@@ -247,11 +250,13 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	{
 		// load forward trajectory
 		loop2.addStatement( rk_xxx.getCols( 0,NX*(1+NX+NU) ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX*(1+NX+NU)-(run1+1)*NX*(1+NX+NU),(grid.getNumIntervals()-run)*rkOrder*NX*(1+NX+NU)-run1*NX*(1+NX+NU) ) );
-		loop2.addStatement( rk_xxx.getCols( NX*(1+NX+NU),rhsDim ) == rk_eta.getCols( NX*(1+NX+NU),rhsDim ) + Ah.getRow(run1)*rk_kkk );
+		loop2.addStatement( rk_xxx.getCols( NX*(1+NX+NU),NX*(2+NX+NU) ) == rk_eta.getCols( NX,NX*2 ) + Ah.getRow(run1)*rk_kkk.getCols(0,NX) );
+		loop2.addStatement( rk_xxx.getCols( NX*(2+NX+NU),rhsDim ) == rk_eta.getCols( NX*(2+NX+NU),rhsDim ) + Ah.getRow(run1)*rk_kkk.getCols(NX,rk_kkk.getNumCols()) );
 		if( timeDependant ) loop2.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt - ((double)cc(run1))/grid.getNumIntervals() );
 		loop2.addFunctionCall( getNameDiffsRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
-	loop2.addStatement( rk_eta.getCols( NX*(1+NX+NU),rhsDim ) += b4h^rk_kkk );
+	loop2.addStatement( rk_eta.getCols( NX,2*NX ) += b4h^rk_kkk.getCols(0,NX) );
+	loop2.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) += b4h^rk_kkk.getCols(NX,rk_kkk.getNumCols()) );
 	loop2.addStatement( rk_ttt -= DMatrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop: BACKWARD SWEEP
 	integrate.addStatement( loop2 );
