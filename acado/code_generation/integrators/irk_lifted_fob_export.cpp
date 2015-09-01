@@ -206,7 +206,7 @@ returnValue ForwardBackwardLiftedIRKExport::setDifferentialEquation(	const Expre
 		// FIRST ORDER ADJOINT SWEEP:
 		DifferentialState lambda("", NX,1);
 		DifferentialEquation backward, adj_update;
-		backward << backwardDerivative( rhs_, x, lambda );
+//		backward << backwardDerivative( rhs_, x, lambda );
 		adj_update << backwardDerivative( rhs_, x, lambda );
 
 		// SECOND ORDER ADJOINT SWEEP:
@@ -218,6 +218,7 @@ returnValue ForwardBackwardLiftedIRKExport::setDifferentialEquation(	const Expre
 
 		if( NDX2 > 0 || NXA > 0 ) return ACADOERROR(RET_NOT_YET_IMPLEMENTED);
 		Expression tmp = backwardDerivative( rhs_, arg, lambda );
+		backward << tmp.getRows(0,NX);
 		backward << multipleForwardDerivative( tmp, arg, S_tmp );
 
 		if( f.getNT() > 0 ) timeDependant = true;
