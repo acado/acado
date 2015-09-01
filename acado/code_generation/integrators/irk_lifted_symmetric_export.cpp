@@ -202,7 +202,7 @@ returnValue SymmetricLiftedIRKExport::setDifferentialEquation(	const Expression&
 		// FIRST ORDER ADJOINT SWEEP:
 		DifferentialState lambda("", NX,1);
 		DifferentialEquation backward, adj_update;
-		backward << backwardDerivative( rhs_, x, lambda );
+//		backward << backwardDerivative( rhs_, x, lambda );
 		adj_update << backwardDerivative( rhs_, x, lambda );
 
 		// SECOND ORDER ADJOINT SWEEP:
@@ -213,7 +213,9 @@ returnValue SymmetricLiftedIRKExport::setDifferentialEquation(	const Expression&
 		S_tmp.appendRows(zeros<double>(NU,NX).appendCols(eye<double>(NU)));
 
 		if( NDX2 > 0 || NXA > 0 ) return ACADOERROR(RET_NOT_YET_IMPLEMENTED);
-		Expression symmetric = symmetricDerivative( rhs_, arg, S_tmp, lambda );
+		Expression dfS, dfL;
+		Expression symmetric = symmetricDerivative( rhs_, arg, S_tmp, lambda, &dfS, &dfL );
+		backward << dfL;
 		backward << returnLowerTriangular( symmetric );
 
 		if( f.getNT() > 0 ) timeDependant = true;
