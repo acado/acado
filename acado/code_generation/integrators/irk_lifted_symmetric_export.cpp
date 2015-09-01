@@ -215,7 +215,7 @@ returnValue SymmetricLiftedIRKExport::setDifferentialEquation(	const Expression&
 		if( NDX2 > 0 || NXA > 0 ) return ACADOERROR(RET_NOT_YET_IMPLEMENTED);
 		Expression dfS, dfL;
 		Expression symmetric = symmetricDerivative( rhs_, arg, S_tmp, lambda, &dfS, &dfL );
-		backward << dfL;
+		backward << dfL.getRows(0,NX);
 		backward << returnLowerTriangular( symmetric );
 
 		if( f.getNT() > 0 ) timeDependant = true;
