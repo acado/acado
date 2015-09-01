@@ -107,13 +107,22 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 		/*	if ( f.getDim() != f.getNX() )
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
+		Expression arg;
+		arg << x;
+		arg << u;
+		Expression S_tmp = Gx;
+		S_tmp.appendCols( Gu );
+		S_tmp.appendRows(zeros<double>(NU,NX).appendCols(eye<double>(NU)));
+		Expression dfS = multipleForwardDerivative( rhs_, arg, S_tmp );
 		// add VDE for differential states
-		f << multipleForwardDerivative( rhs_, x, Gx );
+		f << dfS.getCols(0,NX);
+//		f << multipleForwardDerivative( rhs_, x, Gx );
 		/*	if ( f.getDim() != f.getNX() )
 		return ACADOERROR( RET_ILLFORMED_ODE );*/
 
 		// add VDE for control inputs
-		f << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
+		f << dfS.getCols(NX,NX+NU);
+//		f << multipleForwardDerivative( rhs_, x, Gu ) + forwardDerivative( rhs_, u );
 		// 	if ( f.getDim() != f.getNX() )
 		// 		return ACADOERROR( RET_ILLFORMED_ODE );
 
@@ -122,12 +131,6 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 
 
 		DifferentialState lx("", NX,1);
-		Expression arg;
-		arg << x;
-		arg << u;
-		Expression S_tmp = Gx;
-		S_tmp.appendCols( Gu );
-		S_tmp.appendRows(zeros<double>(NU,NX).appendCols(eye<double>(NU)));
 
 		Expression tmp = backwardDerivative( rhs_, arg, lx );
 
