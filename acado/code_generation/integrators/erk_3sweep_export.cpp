@@ -132,16 +132,8 @@ returnValue ThreeSweepsERKExport::setDifferentialEquation(	const Expression& rhs
 
 		Expression dfS;
 		Expression h_tmp = symmetricDerivative( rhs_, arg, S_tmp, lx, &dfS );
-		Expression VDE_X;
-		Expression VDE_U;
-		for( uint i = 0; i < NX; i++ ) {
-			VDE_X.appendCols(dfS.getCol(i));
-		}
-		for( uint i = NX; i < NX+NU; i++ ) {
-			VDE_U.appendCols(dfS.getCol(i));
-		}
-		h << VDE_X;
-		h << VDE_U;
+		h << dfS.getCols(0,NX);
+		h << dfS.getCols(NX,NX+NU);
 		h << returnLowerTriangular( h_tmp );
 
 		// OLD VERSION:
