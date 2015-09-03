@@ -119,11 +119,11 @@ returnValue ForwardIRKExport::getDataDeclarations(	ExportStatementBlock& declara
 
 	declarations.addDeclaration( rk_diffsTemp3,dataStruct );
 
-	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
+//	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
 		declarations.addDeclaration( rk_diffsPrev1,dataStruct );
 		declarations.addDeclaration( rk_diffsPrev2,dataStruct );
 		declarations.addDeclaration( rk_diffsPrev3,dataStruct );
-	}
+//	}
 
 	declarations.addDeclaration( rk_diffsNew1,dataStruct );
 	declarations.addDeclaration( rk_diffsNew2,dataStruct );
