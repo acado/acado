@@ -201,6 +201,8 @@ class ForwardBackwardLiftedIRKExport : public ForwardLiftedIRKExport
 
 		ExportVariable  rk_adj_diffs_tmp;
 
+		ExportVariable  rk_Khat_traj;
+
 		ExportVariable	rk_xxx_traj;			/**< Variable containing the forward trajectory of the state values. */
 		ExportVariable	rk_adj_traj;			/**< Variable containing the adjoint trajectory of the lambda_hat values. */
 		ExportVariable	rk_S_traj;				/**< Variable containing the forward trajectory of the first order sensitivities. */
