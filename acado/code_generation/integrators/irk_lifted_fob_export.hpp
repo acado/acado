@@ -138,6 +138,23 @@ class ForwardBackwardLiftedIRKExport : public ForwardLiftedIRKExport
 	protected:
 
 
+		/** Exports the evaluation of the states at all stages.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *	@param[in] Ah				The matrix A of the IRK method, multiplied by the step size h.
+		 *	@param[in] index			The loop index, defining the stage.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue evaluateAllStatesImplicitSystem( 	ExportStatementBlock* block,
+											const ExportIndex& k_index,
+											const ExportVariable& Ah,
+											const ExportVariable& C,
+											const ExportIndex& stage,
+											const ExportIndex& i,
+											const ExportIndex& tmp_index );
+
+
 		virtual returnValue updateImplicitSystem( 	ExportStatementBlock* block,
 													const ExportIndex& index1,
 													const ExportIndex& index2,
@@ -202,6 +219,9 @@ class ForwardBackwardLiftedIRKExport : public ForwardLiftedIRKExport
 		ExportVariable  rk_adj_diffs_tmp;
 
 		ExportVariable  rk_Khat_traj;
+		ExportVariable  rk_Xhat_traj;
+
+		ExportVariable  rk_xxx_lin;
 
 		ExportVariable	rk_xxx_traj;			/**< Variable containing the forward trajectory of the state values. */
 		ExportVariable	rk_adj_traj;			/**< Variable containing the adjoint trajectory of the lambda_hat values. */

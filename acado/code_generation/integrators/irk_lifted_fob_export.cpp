@@ -128,12 +128,15 @@ returnValue ForwardBackwardLiftedIRKExport::getDataDeclarations(	ExportStatement
 	declarations.addDeclaration( rk_S_traj,dataStruct );
 	declarations.addDeclaration( rk_xxx_traj,dataStruct );
 
+	declarations.addDeclaration( rk_xxx_lin,dataStruct );
+
 	declarations.addDeclaration( rk_b_trans,dataStruct );
 
 	declarations.addDeclaration( rk_adj_traj,dataStruct );
 
 	declarations.addDeclaration( rk_adj_diffs_tmp,dataStruct );
 	declarations.addDeclaration( rk_Khat_traj,dataStruct );
+	declarations.addDeclaration( rk_Xhat_traj,dataStruct );
 
 	declarations.addDeclaration( rk_hess_tmp1,dataStruct );
 	declarations.addDeclaration( rk_hess_tmp2,dataStruct );
@@ -403,6 +406,7 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
 		integrate.addStatement( rk_delta.getCols( NX,NX+NU ) == rk_eta.getCols( NX+NXA+diffsDim,NX+NXA+diffsDim+NU ) - rk_Uprev.getRow(shooting_index) );
 		integrate.addStatement( rk_Uprev.getRow(shooting_index) == rk_eta.getCols( NX+NXA+diffsDim,NX+NXA+diffsDim+NU ) );
 	}
+	integrate.addStatement( rk_xxx_lin == rk_eta.getCols(0,NX) );
 
     // integrator FORWARD loop:
 	integrate.addComment("------------ Forward loop ------------:");
@@ -456,6 +460,24 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
 
 	solveImplicitSystem( loop, i, run1, j, tmp_index1, k_index, Ah, C, determinant, true );
 
+	// NEW: UPDATE RK_B WITH THE CONSTANT COMING FROM THE PREVIOUS INTEGRATION STEP
+	if( (LinearAlgebraSolver) linSolver != SIMPLIFIED_IRK_NEWTON && (LinearAlgebraSolver) linSolver != SINGLE_IRK_NEWTON && gradientUpdate) { // EXACT LIFTING with GRADIENT UPDATE
+		loop->addStatement( std::string("if( run > 0 ) {\n") );
+		loop->addStatement( rk_Xhat_traj.getRows(run*NX,(run+1)*NX) == rk_Xhat_traj.getRows((run-1)*NX,run*NX) );
+		for( run5 = 0; run5 < numStages; run5++ ) {
+			loop->addStatement( rk_Xhat_traj.getRows(run*NX,(run+1)*NX) += rk_Khat_traj.getSubMatrix( run-1,run,run5*(NX2+NXA),(run5+1)*(NX2+NXA) ).getTranspose()*Bh.getElement(run5,0) );
+		}
+		ExportForLoop deltaLoop( i,0,numStages );
+		ExportForLoop deltaLoop2( j,0,NX );
+		deltaLoop2.addStatement( tmp_index1 == i*(NX2+NXA)+j );
+		deltaLoop2.addStatement( rk_b.getElement(tmp_index1,0) -= rk_diffsTemp2.getSubMatrix(i,i+1,j*NVARS2,j*NVARS2+NX)*rk_Xhat_traj.getRows(run*NX,(run+1)*NX) );
+		deltaLoop.addStatement( deltaLoop2 );
+		loop->addStatement( deltaLoop );
+		loop->addStatement( std::string("}\nelse{\n") );
+		loop->addStatement( rk_Xhat_traj.getRows(0,NX) == zeros<double>(NX,1) );
+		loop->addStatement( std::string("}\n") );
+	}
+
 	// SAVE rk_A in the rk_A_traj variable:
 	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
 		loop->addStatement( rk_A_traj.getRows(run*(NX2+NXA),(run+1)*(NX2+NXA)) == rk_A );
@@ -483,6 +505,11 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
 		allSensitivitiesImplicitSystem( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, k_index, Bh, true );
 	}
 	else return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+
+	// !!! update rk_xxx_lin (YOU NEED TO UPDATE THE LINEARIZATION POINT BEFORE YOU UPDATE RK_KKK): !!!
+	for( run5 = 0; run5 < NX; run5++ ) {
+		loop->addStatement( rk_xxx_lin.getCol( run5 ) += rk_kkk.getRow( k_index+run5 )*Bh );
+	}
 
 	// update rk_kkk:
 	ExportForLoop loopTemp( j,0,numStages );
@@ -523,7 +550,6 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
 			loop->addStatement( std::string("}\n") );
 		}
 	}
-
 
 	// Computation of the sensitivities using the CHAIN RULE:
 	updateImplicitSystem(loop, i, j, tmp_index2);
@@ -603,7 +629,7 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
 		loop2->addStatement( rk_seed.getCols(NX,NX*(1+NX+NU)) == rk_diffsPrev2.makeRowVector() );
 		loop2->addStatement( rk_seed.getCols(NX*(1+NX+NU),NX*(2+NX+NU)) == rk_b_trans.getCols(run5*NX,(run5+1)*NX) );
 		if( gradientUpdate ) {
-			loop2->addStatement( rk_seed.getCols(NX*(2+NX+NU),NX*(3+NX+NU)) == zeros<double>(1,NX) );
+			loop2->addStatement( rk_seed.getCols(NX*(2+NX+NU),NX*(3+NX+NU)) == rk_Xhat_traj.getRows(run*NX,(run+1)*NX).getTranspose() );
 			ExportForLoop gradLoop( i, 0, numStages );
 			gradLoop.addStatement( rk_seed.getCols(NX*(2+NX+NU),NX*(3+NX+NU)) += Ah.getElement(run5,i)*rk_Khat_traj.getSubMatrix( run,run+1,i*(NX2+NXA),(i+1)*(NX2+NXA) ) );
 			loop2->addStatement( gradLoop );
@@ -673,6 +699,27 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
     code.addLinebreak( 2 );
 
     return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ForwardBackwardLiftedIRKExport::evaluateAllStatesImplicitSystem( ExportStatementBlock* block, const ExportIndex& k_index, const ExportVariable& Ah, const ExportVariable& C, const ExportIndex& stage, const ExportIndex& i, const ExportIndex& tmp_index )
+{
+	ExportForLoop loop0( stage,0,numStages );
+	ExportForLoop loop1( i, 0, NX1+NX2 );
+	loop1.addStatement( rk_stageValues.getCol( stage*(NX+NXA)+i ) == rk_xxx_lin.getCol( i ) );
+	loop1.addStatement( tmp_index == k_index + i );
+	for( uint j = 0; j < numStages; j++ ) {
+		loop1.addStatement( rk_stageValues.getCol( stage*(NX+NXA)+i ) += Ah.getElement(stage,j)*rk_kkk.getElement( tmp_index,j ) );
+	}
+	loop0.addStatement( loop1 );
+
+	ExportForLoop loop3( i, 0, NXA );
+	loop3.addStatement( tmp_index == k_index + i + NX );
+	loop3.addStatement( rk_stageValues.getCol( stage*(NX+NXA)+NX+i ) == rk_kkk.getElement( tmp_index,stage ) );
+	loop0.addStatement( loop3 );
+	block->addStatement( loop0 );
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -926,6 +973,7 @@ returnValue ForwardBackwardLiftedIRKExport::setup( )
 	rk_diffsPrev2 = ExportVariable( "rk_diffsPrev2", NX, NX+NU, REAL, structWspace );
 
 	rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
+	rk_xxx_lin = ExportVariable( "rk_xxx_lin", 1, NX, REAL, structWspace );
 
 	rk_b_trans = ExportVariable( "rk_b_trans", 1, numStages*(NX+NXA), REAL, structWspace );
 
@@ -933,6 +981,8 @@ returnValue ForwardBackwardLiftedIRKExport::setup( )
 	if( gradientUpdate ) {
 		rk_adj_diffs_tmp = ExportVariable( "rk_adjoint", 1, NX + (NX+NU)*(NX+NU) + NX+NU, REAL, structWspace );
 		rk_Khat_traj = ExportVariable( "rk_Khat", grid.getNumIntervals(), numStages*(NX+NXA), REAL, structWspace );
+
+		rk_Xhat_traj = ExportVariable( "rk_Xhat", grid.getNumIntervals()*NX, 1, REAL, structWspace );
 	}
 
 	rk_seed = ExportVariable( "rk_seed", 1, NX+NX*(NX+NU)+NX+NU+NOD+timeDep, REAL, structWspace );

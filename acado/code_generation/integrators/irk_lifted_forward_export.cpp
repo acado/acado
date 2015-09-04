@@ -500,7 +500,7 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 
 	int linSolver;
 	get( LINEAR_ALGEBRA_SOLVER, linSolver );
-	// update rk_kkk:
+	// update rk_kkk (TODO: YOU SHOULD DO THIS AFTER YOU COMPUTE THE NEXT LINEARIZATION POINT IF YOU WANT TO BE FULLY EQUIVALENT WITH DIRECT COLLOCATION, see SYMMETRIC AND FOB VERSIONS):
 	ExportForLoop loopTemp( j,0,numStages );
 	for( run5 = 0; run5 < NX2; run5++ ) {
 		if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
