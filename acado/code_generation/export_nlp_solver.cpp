@@ -105,6 +105,7 @@ returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarat
 	declarations.addDeclaration(evGx, dataStruct);
 	declarations.addDeclaration(evGu, dataStruct);
 
+	declarations.addDeclaration(objg, dataStruct);
 	declarations.addDeclaration(objS, dataStruct);
 	declarations.addDeclaration(objSEndTerm, dataStruct);
 	declarations.addDeclaration(objSlx, dataStruct);
@@ -224,22 +225,29 @@ returnValue ExportNLPSolver::setupSimulation( void )
 		d.setup("d", getN() * getNX(), 1, REAL, ACADO_WORKSPACE);
 	}
 
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
+
 	uint symH = 0;
 	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC ) symH = (NX+NU)*(NX+NU+1)/2;
+	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD && gradientUpdate ) symH = (NX+NU)*(NX+NU); // TODO: this is a quick fix for the dimensions in case of FOB lifted collocation integrators
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) symH = NX*(NX+NU)+NU*NU;
 
 	evGx.setup("evGx", N * NX, NX, REAL, ACADO_WORKSPACE);
 	evGu.setup("evGu", N * NX, NU, REAL, ACADO_WORKSPACE);
-
-	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
 
 	if( secondOrder ) mu.setup("mu", N, NX, REAL, ACADO_VARIABLES);
 
 	ExportStruct dataStructWspace;
 	dataStructWspace = (useOMP && performsSingleShooting() == false) ? ACADO_LOCAL : ACADO_WORKSPACE;
 	state.setup("state", 1, (getNX() + getNXA()) * (getNX() + getNU() + 1) + getNU() + getNOD(), REAL, dataStructWspace);
-	if( secondOrder ) {
+	if( secondOrder && !gradientUpdate ) {
 		state.setup("state", 1, (getNX() + getNXA()) * (getNX() + getNU() + 1) + getNX() + symH + getNU() + getNOD(), REAL, dataStructWspace);
+	}
+	else if( secondOrder && gradientUpdate ) {
+		state.setup("state", 1, (getNX() + getNXA()) * (getNX() + getNU() + 1) + getNX() + symH + getNX() + getNU() + getNU() + getNOD(), REAL, dataStructWspace);
 	}
 
 	unsigned indexZ   = NX + NXA;
@@ -250,7 +258,9 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	unsigned indexGzu = indexGxu + NXA * NU;
 	unsigned indexH = indexGzu;
 	if( secondOrder ) indexH = indexGzu + symH; 	// because of the second order derivatives
-	unsigned indexU   = indexH + NU;
+	unsigned indexG = indexH;
+	if( secondOrder && gradientUpdate ) indexG = indexH + NX+NU;
+	unsigned indexU   = indexG + NU;
 	unsigned indexOD   = indexU + NOD;
 
 	////////////////////////////////////////////////////////////////////////////
@@ -262,7 +272,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	{
 		modelSimulation.addStatement( state.getCols(0, NX)				== x.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(NX, NX + NXA)		== z.getRow( 0 ) );
-		modelSimulation.addStatement( state.getCols(indexH, indexU)	== u.getRow( 0 ) );
+		modelSimulation.addStatement( state.getCols(indexG, indexU)	== u.getRow( 0 ) );
 		modelSimulation.addStatement( state.getCols(indexU, indexOD)	== od.getRow( 0 ) );
 		modelSimulation.addLinebreak( );
 	}
@@ -287,7 +297,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	if( secondOrder ) {
 		loop.addStatement( state.getCols(NX+NXA, 2*NX+NXA)	== mu.getRow( run ) );
 	}
-	loop.addStatement( state.getCols(indexH, indexU)	== u.getRow( run ) );
+	loop.addStatement( state.getCols(indexG, indexU)	== u.getRow( run ) );
 	loop.addStatement( state.getCols(indexU, indexOD)	== od.getRow( run ) );
 	loop.addLinebreak( );
 
@@ -369,6 +379,13 @@ returnValue ExportNLPSolver::setupSimulation( void )
 			}
 		}
 	}
+	else if( secondOrder && (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD && gradientUpdate ) {
+		for( uint i = 0; i < NX+NU; i++ ) {
+			for( uint j = 0; j < NX+NU; j++ ) {
+				loop.addStatement( objS.getElement(run*(NX+NU)+i,j) == -1.0*state.getCol(indexGzu + i*(NX+NU)+j) );
+			}
+		}
+	}
 	else if( secondOrder && (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) {
 		for( uint i = 0; i < NX; i++ ) {
 			for( uint j = 0; j < NX; j++ ) {
@@ -388,6 +405,13 @@ returnValue ExportNLPSolver::setupSimulation( void )
 		}
 	}
 	else if( secondOrder ) return ACADOERRORTEXT(RET_INVALID_OPTION, "Only THREE_SWEEPS or FORWARD_OVER_BACKWARD options supported for Exact Hessian based RTI.");
+
+	// GRADIENT UPDATE: in case of lifted collocation integrators
+	if( secondOrder && gradientUpdate ) {
+		for( uint i = 0; i < NX+NU; i++ ) {
+			loop.addStatement( objg.getRow(run*(NX+NU)+i) == -1.0*state.getCol(indexH+i) );
+		}
+	}
 
 	// XXX This should be revisited at some point
 	//	modelSimulation.release( run );
@@ -427,11 +451,18 @@ returnValue ExportNLPSolver::setGeneralObjective(const Objective& _objective)
 	diagonalH = false;
 	diagonalHN = false;
 
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );
 	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
 	if( secondOrder ) {
 		objS.setup("EH", N * (NX + NU), NX + NU, REAL, ACADO_WORKSPACE);  // EXACT HESSIAN
+
+		if( gradientUpdate ) {
+			objg.setup("Eg", N * (NX + NU), 1, REAL, ACADO_WORKSPACE);  // GRADIENT CONTRIBUTION
+		}
 	}
 
 	int qpSolution;
@@ -1546,10 +1577,15 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	shiftStates.addStatement( "}\n" );
 	shiftStates.addStatement( "else if (strategy == 2) \n{\n" );
 
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
+
 	int sensitivityProp;
 	get( DYNAMIC_SENSITIVITY, sensitivityProp );
 	uint symH = 0;
 	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC ) symH = (NX+NU)*(NX+NU+1)/2;
+	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD && gradientUpdate ) symH = (NX+NU)*(NX+NU); // TODO: this is a quick fix for the dimensions in case of FOB lifted collocation integrators
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) symH = NX*(NX+NU)+NU*NU;
 
 	int hessianApproximation;
@@ -1564,16 +1600,18 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	unsigned indexGzu = indexGxu + NXA * NU;
 	unsigned indexH = indexGzu;
 	if( secondOrder ) indexH = indexGzu + symH; 	// because of the second order derivatives
-	unsigned indexU   = indexH + NU;
+	unsigned indexG = indexH;
+	if( secondOrder && gradientUpdate ) indexG = indexH + NX+NU;
+	unsigned indexU   = indexG + NU;
 	unsigned indexOD   = indexU + NOD;
 
 	shiftStates.addStatement( state.getCols(0, NX) == x.getRow( N ) );
 	shiftStates.addStatement( state.getCols(NX, NX + NXA) == z.getRow(N - 1) );
 	shiftStates.addStatement( "if (uEnd != 0)\n{\n" );
-	shiftStates.addStatement( state.getCols(indexH, indexU) == uEnd.getTranspose() );
+	shiftStates.addStatement( state.getCols(indexG, indexU) == uEnd.getTranspose() );
 	shiftStates.addStatement( "}\n" );
 	shiftStates.addStatement( "else\n{\n" );
-	shiftStates.addStatement( state.getCols(indexH, indexU) == u.getRow(N - 1) );
+	shiftStates.addStatement( state.getCols(indexG, indexU) == u.getRow(N - 1) );
 	shiftStates.addStatement( "}\n" );
 	shiftStates.addStatement( state.getCols(indexU, indexOD) == od.getRow( N ) );
 	shiftStates.addLinebreak( );
@@ -1617,7 +1655,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 		iLoop.addStatement( state.getCols(NX, NX + NXA)	== z.getRow(index - 1) );
 		iLoop << std::string("}\n");
 	}
-	iLoop.addStatement( state.getCols(indexH, indexU)	== u.getRow( index ) );
+	iLoop.addStatement( state.getCols(indexG, indexU)	== u.getRow( index ) );
 	iLoop.addStatement( state.getCols(indexU, indexOD)	== od.getRow( index ) );
 	iLoop.addLinebreak( );
 

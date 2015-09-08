@@ -257,7 +257,7 @@ protected:
 	// lagrange multipliers
 	ExportVariable mu;
 
-	ExportVariable objS, objSEndTerm;
+	ExportVariable objg, objS, objSEndTerm;
 	ExportVariable objEvFx, objEvFu, objEvFxEnd; // aliasing
 	ExportVariable objEvFxx, objEvFxu, objEvFuu, objEvFxxEnd; // aliasing
 

@@ -113,6 +113,10 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 {
 	evaluateObjective.setup("evaluateObjective");
 
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
+
 	//
 	// A loop the evaluates objective and corresponding gradients
 	//
@@ -162,6 +166,9 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 		setObjR1R2.addStatement( tmpDx == tmpDF.getRows(0,NX) );
 		setObjR1R2.addStatement( tmpDu == tmpDF.getRows(NX,NX+NU) );
 
+		if( gradientUpdate ) {
+			loopObjective.addStatement( objValueOut.getCols(1,1+NX+NU) += objg.getRows(runObj*(NX+NU),(runObj+1)*(NX+NU)).getTranspose() );
+		}
 		loopObjective.addFunctionCall(
 				setObjR1R2, QDy.getAddress(runObj * NX), g.getAddress(offset+runObj * NU, 0), objValueOut.getAddress(0, 1) );
 
