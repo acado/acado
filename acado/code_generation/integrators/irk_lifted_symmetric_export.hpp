@@ -218,6 +218,8 @@ class SymmetricLiftedIRKExport : public ForwardLiftedIRKExport
 		ExportVariable  rk_Khat_traj;
 		ExportVariable  rk_Xhat_traj;
 
+		ExportVariable 	rk_diffK_local;
+
 		ExportVariable  rk_xxx_lin;
 
 		ExportVariable	rk_xxx_traj;			/**< Variable containing the forward trajectory of the state values. */

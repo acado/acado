@@ -138,6 +138,8 @@ returnValue SymmetricLiftedIRKExport::getDataDeclarations(	ExportStatementBlock&
 	declarations.addDeclaration( rk_Khat_traj,dataStruct );
 	declarations.addDeclaration( rk_Xhat_traj,dataStruct );
 
+	declarations.addDeclaration( rk_diffK_local,dataStruct );
+
     return SUCCESSFUL_RETURN;
 }
 
@@ -300,8 +302,10 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 				code.addFunction( diffs_sweep );
 				code.addStatement( "\n\n" );
 			}
-			code.addFunction( forward_sweep );
-			code.addStatement( "\n\n" );
+			if( liftMode == 4 ) { // ONLY for the inexact Newton based schemes
+				code.addFunction( forward_sweep );
+				code.addStatement( "\n\n" );
+			}
 			code.addFunction( adjoint_sweep );
 			code.addStatement( "\n\n" );
 		}
@@ -492,13 +496,15 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	}
 
 	if( liftMode == 1 ) {
-		// Evaluate sensitivities:
-		// !! NEW !! Let us propagate the forward sensitivities as in a VDE system
-		loop->addStatement( rk_seed.getCols(NX,NX+NX*(NX+NU)) == rk_diffsPrev2.makeRowVector() );
-		ExportForLoop loop_sens( i,0,numStages );
-		loop_sens.addStatement( rk_seed.getCols(0,NX) == rk_stageValues.getCols(i*(NX+NXA),i*(NX+NXA)+NX) );
-		loop_sens.addFunctionCall( forward_sweep.getName(), rk_seed, rk_diffsTemp2.getAddress(i,0) );
-		loop->addStatement( loop_sens );
+//		// Evaluate sensitivities:
+//		// !! NEW !! Let us propagate the forward sensitivities as in a VDE system
+//		loop->addStatement( rk_seed.getCols(NX,NX+NX*(NX+NU)) == rk_diffsPrev2.makeRowVector() );
+//		ExportForLoop loop_sens( i,0,numStages );
+//		loop_sens.addStatement( rk_seed.getCols(0,NX) == rk_stageValues.getCols(i*(NX+NXA),i*(NX+NXA)+NX) );
+//		loop_sens.addFunctionCall( forward_sweep.getName(), rk_seed, rk_diffsTemp2.getAddress(i,0) );
+//		loop->addStatement( loop_sens );
+
+		// Let us reuse the derivatives computed to form the linear system (in rk_diffsTemp2) !!
 
 		evaluateRhsSensitivities( loop, run1, i, j, tmp_index1, tmp_index2 );
 		allSensitivitiesImplicitSystem( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, k_index, Bh, false );
@@ -733,67 +739,56 @@ returnValue SymmetricLiftedIRKExport::allSensitivitiesImplicitSystem( ExportStat
 			block->addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
 		}
 
-		// update rk_diffK with the new sensitivities:
+		// update rk_diffK_local with the new sensitivities:
 		ExportForLoop loop20( index2,0,numStages );
 		ExportForLoop loop21( index3,0,NX2 );
-		loop21.addStatement( tmp_index1 == (k_index + NX1 + index3)*(NX+NU) );
-		if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
-			loop21.addStatement( tmp_index3 == index2*(NX2+NXA)+index3 );
-		}
-		else {
-			loop21.addStatement( tmp_index3 == index2*NX2+index3 );
-		}
+		loop21.addStatement( tmp_index1 == (NX1 + index3)*(NX+NU) );
+		loop21.addStatement( tmp_index3 == index2*NX2+index3 );
 		ExportForLoop loop22( index1,0,NX2 );
 		loop22.addStatement( tmp_index2 == tmp_index1+index1 );
 		if( update ) {
-			loop22.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+index1) );
+			loop22.addStatement( rk_diffK_local.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+index1) );
 		}
 		else {
-			loop22.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+index1) );
+			loop22.addStatement( rk_diffK_local.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+index1) );
 		}
 		loop21.addStatement( loop22 );
 
 		ExportForLoop loop23( index1,0,NU );
 		loop23.addStatement( tmp_index2 == tmp_index1+NX+index1 );
 		if( update ) {
-			loop23.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+NX+index1) );
+			loop23.addStatement( rk_diffK_local.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+NX+index1) );
 		}
 		else {
-			loop23.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+NX+index1) );
+			loop23.addStatement( rk_diffK_local.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+NX+index1) );
 		}
 		loop21.addStatement( loop23 );
 		loop20.addStatement( loop21 );
-		if( NXA > 0 ) {
-			ExportForLoop loop24( index3,0,NXA );
-			loop24.addStatement( tmp_index1 == (k_index + NX + index3)*(NX+NU) );
-			if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
-				loop24.addStatement( tmp_index3 == index2*(NX2+NXA)+NX2+index3 );
-			}
-			else {
-				loop24.addStatement( tmp_index3 == numStages*NX2+index2*NXA+index3 );
-			}
-			ExportForLoop loop25( index1,0,NX2 );
-			loop25.addStatement( tmp_index2 == tmp_index1+index1 );
-			if( update ) {
-				loop25.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+index1) );
-			}
-			else {
-				loop25.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+index1) );
-			}
-			loop24.addStatement( loop25 );
-
-			ExportForLoop loop26( index1,0,NU );
-			loop26.addStatement( tmp_index2 == tmp_index1+NX+index1 );
-			if( update ) {
-				loop26.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+NX+index1) );
-			}
-			else {
-				loop26.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+NX+index1) );
-			}
-			loop24.addStatement( loop26 );
-			loop20.addStatement( loop24 );
-		}
 		block->addStatement( loop20 );
+
+		// update rk_diffK USING RK_DIFFK_LOCAL !! (PROPAGATION OF SENSITIVITIES)
+		ExportForLoop loop40( index2,0,numStages );
+		ExportForLoop loop41( index3,0,NX2 );
+		loop41.addStatement( tmp_index1 == (k_index + NX1 + index3)*(NX+NU) );
+		loop41.addStatement( tmp_index3 == (NX1 + index3)*(NX+NU) );
+		ExportForLoop loop42( index1,0,NX );
+		loop42.addStatement( tmp_index2 == tmp_index1+index1 );
+		loop42.addStatement( rk_diffK.getElement(tmp_index2,index2) == 0.0 );
+		for( uint loop_i = 0; loop_i < NX; loop_i++ ) {
+			loop42.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_diffK_local.getElement(tmp_index3+loop_i,index2)*rk_diffsPrev2.getElement(loop_i,index1) );
+		}
+		loop41.addStatement( loop42 );
+		ExportForLoop loop43( index1,0,NU );
+		loop43.addStatement( tmp_index2 == tmp_index1+NX+index1 );
+		loop43.addStatement( tmp_index3 == (NX1 + index3)*(NX+NU)+NX+index1 );
+		loop43.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_diffK_local.getElement(tmp_index3,index2) );
+		loop43.addStatement( tmp_index3 == (NX1 + index3)*(NX+NU) );
+		for( uint loop_i = 0; loop_i < NX; loop_i++ ) {
+			loop43.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_diffK_local.getElement(tmp_index3+loop_i,index2)*rk_diffsPrev2.getElement(loop_i,NX+index1) );
+		}
+		loop41.addStatement( loop43 );
+		loop40.addStatement( loop41 );
+		block->addStatement( loop40 );
 
 		// update rk_diffsNew with the new sensitivities:
 		ExportForLoop loop3( index2,0,NX2 );
@@ -812,29 +807,130 @@ returnValue SymmetricLiftedIRKExport::allSensitivitiesImplicitSystem( ExportStat
 		block->addStatement( loop3 );
 		if( NXA > 0 ) {
 			ACADOERROR( RET_NOT_IMPLEMENTED_YET );
-//			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
-//				block->addStatement( std::string("if( run == 0 ) {\n") );
-//			}
-//			ExportForLoop loop4( index2,0,NXA );
-//			loop4.addStatement( tmp_index1 == (k_index + NX + index2)*(NX+NU) );
-//			ExportForLoop loop41( index1,0,NX2 );
-//			loop41.addStatement( tmp_index2 == tmp_index1+index1 );
-//			loop41.addStatement( rk_diffsNew2.getElement( index2+NX2,index1 ) == rk_diffK.getRow( tmp_index2 )*tempCoefs );
-//			loop4.addStatement( loop41 );
-//
-//			ExportForLoop loop42( index1,0,NU );
-//			loop42.addStatement( tmp_index2 == tmp_index1+NX+index1 );
-//			loop42.addStatement( rk_diffsNew2.getElement( index2+NX2,NX+index1 ) == rk_diffK.getRow( tmp_index2 )*tempCoefs );
-//			loop4.addStatement( loop42 );
-//			block->addStatement( loop4 );
-//			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
-//				block->addStatement( std::string("}\n") );
-//			}
 		}
 	}
 
 	return SUCCESSFUL_RETURN;
 }
+
+
+//returnValue SymmetricLiftedIRKExport::allSensitivitiesImplicitSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportIndex& tmp_index3, const ExportIndex& k_index, const ExportVariable& Bh, bool update )
+//{
+//	if( NX2 > 0 ) {
+//		int linSolver;
+//		get( LINEAR_ALGEBRA_SOLVER, linSolver );
+//		DMatrix tempCoefs( evaluateDerivedPolynomial( 0.0 ) );  // We compute the algebraic variables at the beginning of the shooting interval !
+//
+//		// call the linear solver:
+//		if( NDX2 > 0 ) {
+//			block->addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_I.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
+//		}
+//		else {
+//			block->addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
+//		}
+//
+//		// update rk_diffK with the new sensitivities:
+//		ExportForLoop loop20( index2,0,numStages );
+//		ExportForLoop loop21( index3,0,NX2 );
+//		loop21.addStatement( tmp_index1 == (k_index + NX1 + index3)*(NX+NU) );
+//		if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
+//			loop21.addStatement( tmp_index3 == index2*(NX2+NXA)+index3 );
+//		}
+//		else {
+//			loop21.addStatement( tmp_index3 == index2*NX2+index3 );
+//		}
+//		ExportForLoop loop22( index1,0,NX2 );
+//		loop22.addStatement( tmp_index2 == tmp_index1+index1 );
+//		if( update ) {
+//			loop22.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+index1) );
+//		}
+//		else {
+//			loop22.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+index1) );
+//		}
+//		loop21.addStatement( loop22 );
+//
+//		ExportForLoop loop23( index1,0,NU );
+//		loop23.addStatement( tmp_index2 == tmp_index1+NX+index1 );
+//		if( update ) {
+//			loop23.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+NX+index1) );
+//		}
+//		else {
+//			loop23.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+NX+index1) );
+//		}
+//		loop21.addStatement( loop23 );
+//		loop20.addStatement( loop21 );
+//		if( NXA > 0 ) {
+//			ExportForLoop loop24( index3,0,NXA );
+//			loop24.addStatement( tmp_index1 == (k_index + NX + index3)*(NX+NU) );
+//			if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
+//				loop24.addStatement( tmp_index3 == index2*(NX2+NXA)+NX2+index3 );
+//			}
+//			else {
+//				loop24.addStatement( tmp_index3 == numStages*NX2+index2*NXA+index3 );
+//			}
+//			ExportForLoop loop25( index1,0,NX2 );
+//			loop25.addStatement( tmp_index2 == tmp_index1+index1 );
+//			if( update ) {
+//				loop25.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+index1) );
+//			}
+//			else {
+//				loop25.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+index1) );
+//			}
+//			loop24.addStatement( loop25 );
+//
+//			ExportForLoop loop26( index1,0,NU );
+//			loop26.addStatement( tmp_index2 == tmp_index1+NX+index1 );
+//			if( update ) {
+//				loop26.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+NX+index1) );
+//			}
+//			else {
+//				loop26.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+NX+index1) );
+//			}
+//			loop24.addStatement( loop26 );
+//			loop20.addStatement( loop24 );
+//		}
+//		block->addStatement( loop20 );
+//
+//		// update rk_diffsNew with the new sensitivities:
+//		ExportForLoop loop3( index2,0,NX2 );
+//		loop3.addStatement( tmp_index1 == (k_index + NX1 + index2)*(NX+NU) );
+//		ExportForLoop loop31( index1,0,NX2 );
+//		loop31.addStatement( tmp_index2 == tmp_index1+index1 );
+//		loop31.addStatement( rk_diffsNew2.getElement( index2,index1 ) == rk_diffsPrev2.getElement( index2,index1 ) );
+//		loop31.addStatement( rk_diffsNew2.getElement( index2,index1 ) += rk_diffK.getRow( tmp_index2 )*Bh );
+//		loop3.addStatement( loop31 );
+//
+//		ExportForLoop loop32( index1,0,NU );
+//		loop32.addStatement( tmp_index2 == tmp_index1+NX+index1 );
+//		loop32.addStatement( rk_diffsNew2.getElement( index2,NX+index1 ) == rk_diffsPrev2.getElement( index2,NX+index1 ) );
+//		loop32.addStatement( rk_diffsNew2.getElement( index2,NX+index1 ) += rk_diffK.getRow( tmp_index2 )*Bh );
+//		loop3.addStatement( loop32 );
+//		block->addStatement( loop3 );
+//		if( NXA > 0 ) {
+//			ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+////			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
+////				block->addStatement( std::string("if( run == 0 ) {\n") );
+////			}
+////			ExportForLoop loop4( index2,0,NXA );
+////			loop4.addStatement( tmp_index1 == (k_index + NX + index2)*(NX+NU) );
+////			ExportForLoop loop41( index1,0,NX2 );
+////			loop41.addStatement( tmp_index2 == tmp_index1+index1 );
+////			loop41.addStatement( rk_diffsNew2.getElement( index2+NX2,index1 ) == rk_diffK.getRow( tmp_index2 )*tempCoefs );
+////			loop4.addStatement( loop41 );
+////
+////			ExportForLoop loop42( index1,0,NU );
+////			loop42.addStatement( tmp_index2 == tmp_index1+NX+index1 );
+////			loop42.addStatement( rk_diffsNew2.getElement( index2+NX2,NX+index1 ) == rk_diffK.getRow( tmp_index2 )*tempCoefs );
+////			loop4.addStatement( loop42 );
+////			block->addStatement( loop4 );
+////			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
+////				block->addStatement( std::string("}\n") );
+////			}
+//		}
+//	}
+//
+//	return SUCCESSFUL_RETURN;
+//}
 
 
 returnValue SymmetricLiftedIRKExport::evaluateRhsInexactSensitivities( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportIndex& tmp_index3, const ExportIndex& k_index, const ExportVariable& Ah )
@@ -981,6 +1077,7 @@ returnValue SymmetricLiftedIRKExport::setup( )
 
 		rk_adj_traj = ExportVariable( "rk_adj_traj", N*grid.getNumIntervals(), numStages*(NX+NXA), REAL, ACADO_VARIABLES );
 	}
+	rk_diffK_local = ExportVariable( "rk_diffKtraj_aux", (NX+NXA)*(NX+NU), numStages, REAL, structWspace );
 
     return SUCCESSFUL_RETURN;
 }
