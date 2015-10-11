@@ -171,7 +171,7 @@ end;
 % Add an extra option for qpOASES
 iFlags = '';
 if (~strcmp(aSfunName, 'acado_solver_sfun')) && (strcmp(@MODULE_NAME@_QP_SOLVER, 'QPOASES'))
-    iFlags = '-DQPOASES_CUSTOM_INTERFACE=\\\"@MODULE_NAME@_qpoases_interface.hpp\\\"';    
+    iFlags = '-DQPOASES_CUSTOM_INTERFACE=\"@MODULE_NAME@_qpoases_interface.hpp\"';    
 end;
 if strcmp(@MODULE_NAME@_QP_SOLVER, 'QPDUNES')
 	iFlags = '-D__SIMPLE_BOUNDS_ONLY__';
