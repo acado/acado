@@ -309,11 +309,8 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 {
 	declarations.addDeclaration( integrate );
 
-	int matlabInterface;
-	userInteraction->get( GENERATE_MATLAB_INTERFACE, matlabInterface );
-	if (matlabInterface) {
-		declarations.addDeclaration( rhs );
-	}
+	declarations.addDeclaration( rhs );
+	declarations.addDeclaration( diffs_rhs );
 
 	return SUCCESSFUL_RETURN;
 }

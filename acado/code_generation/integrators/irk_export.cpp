@@ -247,7 +247,8 @@ returnValue ImplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 	declarations.addDeclaration( integrate );
 
 	if( NX2 != NX ) 	declarations.addDeclaration( fullRhs );
-	else				declarations.addDeclaration( rhs );
+	declarations.addDeclaration( rhs );
+	declarations.addDeclaration( diffs_rhs );
 
     return SUCCESSFUL_RETURN;
 }
