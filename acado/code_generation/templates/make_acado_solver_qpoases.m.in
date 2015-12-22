@@ -1,7 +1,7 @@
-function make_acado_solver( name )
+function make_acado_solver( name, extern )
 
 	% Output file name, and also function name
-	if (nargin == 1)
+	if (nargin > 0)
 		fileOut = name;
 	else
 		fileOut = 'acado_solver';
@@ -32,6 +32,9 @@ function make_acado_solver( name )
 		'CGRoot/acado_auxiliary_functions.c ' ...
 		'CGRoot/acado_qpoases_interface.cpp ' ...
 		];
+	if (nargin > 1)
+		CGSources = [CGSources extern];
+	end
 		
 	% Adding additional linker flags for Linux
 	ldFlags = '';
