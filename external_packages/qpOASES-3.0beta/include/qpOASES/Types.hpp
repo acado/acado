@@ -83,7 +83,8 @@
 
 
 /* Work-around for Microsoft compilers. */
-#ifdef _MSC_VER
+#if (_MSC_VER < 1900)
+/* Work-around for Microsoft compilers with version older than 2015. */
   #define snprintf _snprintf
 #endif
 
