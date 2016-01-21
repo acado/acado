@@ -87,8 +87,8 @@ ExportVariable ForwardLiftedIRKExport::getAuxVariable() const
 		if( diffs_rhs.getGlobalExportVariable().getDim() >= max.getDim() ) {
 			max = diffs_rhs.getGlobalExportVariable();
 		}
-		if( diffs_sweep.getGlobalExportVariable().getDim() >= max.getDim() ) {
-			max = diffs_sweep.getGlobalExportVariable();
+		if( forward_sweep.getGlobalExportVariable().getDim() >= max.getDim() ) {
+			max = forward_sweep.getGlobalExportVariable();
 		}
 	}
 	if( NX3 > 0 ) {
@@ -126,6 +126,12 @@ returnValue ForwardLiftedIRKExport::getDataDeclarations(	ExportStatementBlock& d
 	declarations.addDeclaration( rk_Xprev,dataStruct );
 	declarations.addDeclaration( rk_Uprev,dataStruct );
 	declarations.addDeclaration( rk_delta,dataStruct );
+
+	declarations.addDeclaration( rk_xxx_lin,dataStruct );
+	declarations.addDeclaration( rk_Khat_traj,dataStruct );
+	declarations.addDeclaration( rk_Xhat_traj,dataStruct );
+
+	declarations.addDeclaration( rk_diffK_local,dataStruct );
 
     return SUCCESSFUL_RETURN;
 }
@@ -183,7 +189,7 @@ returnValue ForwardLiftedIRKExport::setDifferentialEquation(	const Expression& r
 		}
 
 		DifferentialEquation h;
-		if( (ExportSensitivityType)sensGen == INEXACT ) {
+		if( (ExportSensitivityType)sensGen == INEXACT ) { // ONLY FOR INEXACT LIFTING
 			DifferentialState sX("", NX,NX+NU);
 			DifferentialState dKX("", NDX2,NX+NU);
 			DifferentialState dKZ("", NXA,NX+NU);
@@ -195,12 +201,12 @@ returnValue ForwardLiftedIRKExport::setDifferentialEquation(	const Expression& r
 
 			// forward sweep
 			if(NXA == 0 && NDX2 == 0) {
-				h << multipleForwardDerivative( rhs_, x, sX ) - tmp;
+				h << multipleForwardDerivative( rhs_, x, sX ) + tmp;
 			}
 			else {
 				Expression tmp2 = tmp + multipleForwardDerivative( rhs_, dx, dKX );
 				Expression tmp3 = tmp2 + multipleForwardDerivative( rhs_, z, dKZ );
-				h << multipleForwardDerivative( rhs_, x, sX ) - tmp3;
+				h << multipleForwardDerivative( rhs_, x, sX ) + tmp3;
 			}
 
 		}
@@ -209,7 +215,7 @@ returnValue ForwardLiftedIRKExport::setDifferentialEquation(	const Expression& r
 
 		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX,NOD ) &
 				diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX,NOD ) &
-				diffs_sweep.init( h,"acado_diff_sweep",NX+(NX+NDX2+NXA)*(NX+NU),NXA,NU,NP,NDX,NOD ) );
+				forward_sweep.init( h,"acado_forward",NX+(NX+NDX2+NXA)*(NX+NU),NXA,NU,NP,NDX,NOD ) );
 	}
 	return SUCCESSFUL_RETURN;
 }
@@ -225,7 +231,7 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	get( LIFTED_INTEGRATOR_MODE, liftMode );
 	if ( (ExportSensitivityType)sensGen != FORWARD && (ExportSensitivityType)sensGen != INEXACT ) ACADOERROR( RET_INVALID_OPTION );
 	if( (ImplicitIntegratorMode)mode != LIFTED ) ACADOERROR( RET_INVALID_OPTION );
-	if( liftMode > 4 || liftMode == 2 || liftMode < 1 ) ACADOERROR( RET_INVALID_OPTION );
+	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 	if( (ExportSensitivityType)sensGen == INEXACT && liftMode != 4 ) ACADOERROR( RET_INVALID_OPTION );
 
 	if( CONTINUOUS_OUTPUT || NX1 > 0 || NX3 > 0 || !equidistantControlGrid() ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -239,7 +245,7 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		if( NX2 > 0 || NXA > 0 ) {
 			rhs.setGlobalExportVariable( max );
 			diffs_rhs.setGlobalExportVariable( max );
-			diffs_sweep.setGlobalExportVariable( max );
+			forward_sweep.setGlobalExportVariable( max );
 		}
 		if( NX3 > 0 ) {
 			rhs3.setGlobalExportVariable( max );
@@ -293,7 +299,7 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 			code.addStatement( "\n\n" );
 			code.addFunction( diffs_rhs );
 			code.addStatement( "\n\n" );
-			code.addFunction( diffs_sweep );
+			code.addFunction( forward_sweep );
 			code.addStatement( "\n\n" );
 		}
 
@@ -415,9 +421,14 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		}
 	}
 	integrate.addLinebreak( );
-	if( liftMode == 1 || (liftMode == 4 && (ExportSensitivityType)sensGen == INEXACT) ) {
+	if( liftMode == 1 || liftMode == 4 ) {
+		integrate.addStatement( rk_delta.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) - rk_Xprev.getRow(shooting_index) );
+		integrate.addStatement( rk_Xprev.getRow(shooting_index) == rk_eta.getCols( 0,NX ) );
+
 		integrate.addStatement( rk_delta.getCols( NX,NX+NU ) == rk_eta.getCols( NX+NXA+diffsDim,NX+NXA+diffsDim+NU ) - rk_Uprev.getRow(shooting_index) );
+		integrate.addStatement( rk_Uprev.getRow(shooting_index) == rk_eta.getCols( NX+NXA+diffsDim,NX+NXA+diffsDim+NU ) );
 	}
+	integrate.addStatement( rk_xxx_lin == rk_eta.getCols(0,NX) );
 
     // integrator loop:
 	ExportForLoop tmpLoop( run, 0, grid.getNumIntervals() );
@@ -440,32 +451,33 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		}
 	}
 
-	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		// Set rk_diffsPrev:
-		loop->addStatement( std::string("if( run > 0 ) {\n") );
-		if( NX1 > 0 ) {
-			ExportForLoop loopTemp1( i,0,NX1 );
-			loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,0,NX1 ) == rk_eta.getCols( i*NX+NX+NXA,i*NX+NX+NXA+NX1 ) );
-			if( NU > 0 ) loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,NX1,NX1+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1),i*NU+(NX+NXA)*(NX+1)+NU ) );
-			loop->addStatement( loopTemp1 );
-		}
-		if( NX2 > 0 ) {
-			ExportForLoop loopTemp2( i,0,NX2 );
-			loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,0,NX1+NX2 ) == rk_eta.getCols( i*NX+NX+NXA+NX1*NX,i*NX+NX+NXA+NX1*NX+NX1+NX2 ) );
-			if( NU > 0 ) loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,NX1+NX2,NX1+NX2+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+NX1*NU,i*NU+(NX+NXA)*(NX+1)+NX1*NU+NU ) );
-			loop->addStatement( loopTemp2 );
-		}
-		if( NX3 > 0 ) {
-			ExportForLoop loopTemp3( i,0,NX3 );
-			loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,0,NX ) == rk_eta.getCols( i*NX+NX+NXA+(NX1+NX2)*NX,i*NX+NX+NXA+(NX1+NX2)*NX+NX ) );
-			if( NU > 0 ) loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,NX,NX+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU,i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU+NU ) );
-			loop->addStatement( loopTemp3 );
-		}
-		loop->addStatement( std::string("}\n") );
+	//	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
+	// Set rk_diffsPrev:
+	loop->addStatement( std::string("if( run > 0 ) {\n") );
+//	if( NX1 > 0 ) {
+//		ExportForLoop loopTemp1( i,0,NX1 );
+//		loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,0,NX1 ) == rk_eta.getCols( i*NX+2*NX+NXA,i*NX+2*NX+NXA+NX1 ) );
+//		if( NU > 0 ) loopTemp1.addStatement( rk_diffsPrev1.getSubMatrix( i,i+1,NX1,NX1+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+NX,i*NU+(NX+NXA)*(NX+1)+NX+NU ) );
+//		loop->addStatement( loopTemp1 );
+//	}
+	if( NX2 > 0 ) {
+		ExportForLoop loopTemp2( i,0,NX2 );
+		loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,0,NX1+NX2 ) == rk_eta.getCols( i*NX+NX+NXA+NX1*NX,i*NX+NX+NXA+NX1*NX+NX1+NX2 ) );
+		if( NU > 0 ) loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,NX1+NX2,NX1+NX2+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+NX1*NU,i*NU+(NX+NXA)*(NX+1)+NX1*NU+NU ) );
+		loop->addStatement( loopTemp2 );
 	}
-	if( liftMode == 1 || (liftMode == 4 && (ExportSensitivityType)sensGen == INEXACT) ) {
-		loop->addStatement( rk_delta.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) - rk_Xprev.getRow(shooting_index*grid.getNumIntervals()+run) );
-	}
+//	if( NX3 > 0 ) {
+//		ExportForLoop loopTemp3( i,0,NX3 );
+//		loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,0,NX ) == rk_eta.getCols( i*NX+2*NX+NXA+(NX1+NX2)*NX,i*NX+2*NX+NXA+(NX1+NX2)*NX+NX ) );
+//		if( NU > 0 ) loopTemp3.addStatement( rk_diffsPrev3.getSubMatrix( i,i+1,NX,NX+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU+NX,i*NU+(NX+NXA)*(NX+1)+(NX1+NX2)*NU+NU+NX ) );
+//		loop->addStatement( loopTemp3 );
+//	}
+	loop->addStatement( std::string("}\nelse{\n") );
+	DMatrix eyeM = eye<double>(NX);
+	eyeM.appendCols(zeros<double>(NX,NU));
+	loop->addStatement( rk_diffsPrev2 == eyeM );
+	loop->addStatement( std::string("}\n") );
+	//	}
 
 	loop->addStatement( k_index == (shooting_index*grid.getNumIntervals()+run)*(NX+NXA) );
 
@@ -485,6 +497,33 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 
 	solveImplicitSystem( loop, i, run1, j, tmp_index1, k_index, Ah, C, determinant, true );
 
+	int linSolver;
+	get( LINEAR_ALGEBRA_SOLVER, linSolver );
+	// NEW: UPDATE RK_B WITH THE CONSTANT COMING FROM THE PREVIOUS INTEGRATION STEP
+	if( liftMode == 1 ) { // EXACT LIFTING
+		loop->addStatement( std::string("if( run > 0 ) {\n") );
+		loop->addStatement( rk_Xhat_traj.getRows(run*NX,(run+1)*NX) == rk_Xhat_traj.getRows((run-1)*NX,run*NX) );
+		for( run5 = 0; run5 < numStages; run5++ ) {
+			loop->addStatement( rk_Xhat_traj.getRows(run*NX,(run+1)*NX) += rk_Khat_traj.getSubMatrix( run-1,run,run5*(NX2+NXA),run5*(NX2+NXA)+NX2 ).getTranspose()*Bh.getElement(run5,0) );
+		}
+		ExportForLoop deltaLoop( i,0,numStages );
+		ExportForLoop deltaLoop2( j,0,NX );
+		if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
+			deltaLoop2.addStatement( tmp_index1 == i*(NX2+NXA)+j );
+			deltaLoop2.addStatement( rk_b.getElement(tmp_index1,0) -= rk_diffsTemp2.getSubMatrix(i,i+1,j*NVARS2,j*NVARS2+NX)*rk_Xhat_traj.getRows(run*NX,(run+1)*NX) );
+		}
+		else {
+			deltaLoop2.addStatement( tmp_index1 == i*NX2+j );
+			deltaLoop2.addStatement( rk_b.getElement(tmp_index1,0) -= rk_diffsTemp2.getSubMatrix(i,i+1,j*NVARS2,j*NVARS2+NX)*rk_Xhat_traj.getRows(run*NX,(run+1)*NX) );
+		}
+		deltaLoop.addStatement( deltaLoop2 );
+		loop->addStatement( deltaLoop );
+		loop->addStatement( std::string("}\nelse{\n") );
+		loop->addStatement( rk_Xhat_traj.getRows(0,NX) == zeros<double>(NX,1) );
+		loop->addStatement( std::string("}\n") );
+	}
+
+
 	// Evaluate sensitivities:
 	if( (ExportSensitivityType)sensGen != INEXACT ) {
 		evaluateRhsSensitivities( loop, run1, i, j, tmp_index1, tmp_index2 );
@@ -499,10 +538,14 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		evaluateRhsInexactSensitivities( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, k_index, Ah );
 		allSensitivitiesImplicitSystem( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, k_index, Bh, true );
 	}
+	if( liftMode == 1 ) { // EXACT LIFTING
+		// !!! update rk_xxx_lin (YOU NEED TO UPDATE THE LINEARIZATION POINT BEFORE YOU UPDATE RK_KKK): !!!
+		// (YOU SHOULD DO THIS AFTER YOU COMPUTE THE NEXT LINEARIZATION POINT IF YOU WANT TO BE FULLY EQUIVALENT WITH DIRECT COLLOCATION, see SYMMETRIC AND FOB VERSIONS):
+		for( run5 = 0; run5 < NX; run5++ ) {
+			loop->addStatement( rk_xxx_lin.getCol( run5 ) += rk_kkk.getRow( k_index+run5 )*Bh );
+		}
+	}
 
-	int linSolver;
-	get( LINEAR_ALGEBRA_SOLVER, linSolver );
-	// update rk_kkk (TODO: YOU SHOULD DO THIS AFTER YOU COMPUTE THE NEXT LINEARIZATION POINT IF YOU WANT TO BE FULLY EQUIVALENT WITH DIRECT COLLOCATION, see SYMMETRIC AND FOB VERSIONS):
 	ExportForLoop loopTemp( j,0,numStages );
 	for( run5 = 0; run5 < NX2; run5++ ) {
 		if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
@@ -521,10 +564,20 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		}
 	}
 	loop->addStatement( loopTemp );
-
-	if( liftMode == 1 || (liftMode == 4 && (ExportSensitivityType)sensGen == INEXACT) ) {
-		loop->addStatement( rk_Xprev.getRow(shooting_index*grid.getNumIntervals()+run) == rk_eta.getCols( 0,NX ) );
+	if( liftMode == 1 ) {	// EXACT LIFTING
+		if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
+			loop->addStatement( rk_Khat_traj.getRow(run) == rk_b.getCol(0).getTranspose() );
+		}
+		else {
+			for( run5 = 0; run5 < numStages; run5++ ) {
+				loop->addStatement( rk_Khat_traj.getSubMatrix(run,run+1,run5*(NX2+NXA),run5*(NX2+NXA)+NX2) == rk_b.getSubMatrix(run5*NX2,run5*NX2+NX2,0,1).getTranspose() );
+			}
+			for( run5 = 0; run5 < numStages; run5++ ) {
+				loop->addStatement( rk_Khat_traj.getSubMatrix(run,run+1,run5*(NX2+NXA)+NX2,(run5+1)*(NX2+NXA)) == rk_b.getSubMatrix(numStages*NX2+run5*NXA,numStages*NX2+run5*NXA+NXA,0,1).getTranspose() );
+			}
+		}
 	}
+
 	// update rk_eta:
 	for( run5 = 0; run5 < NX; run5++ ) {
 		loop->addStatement( rk_eta.getCol( run5 ) += rk_kkk.getRow( k_index+run5 )*Bh );
@@ -541,12 +594,16 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 			loop->addStatement( std::string("}\n") );
 		}
 	}
-
-
-	// Computation of the sensitivities using the CHAIN RULE:
-	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( std::string( "if( run == 0 ) {\n" ) );
+	if( liftMode != 1 ) { // INEXACT LIFTING
+		// !!! update rk_xxx_lin (YOU NEED TO UPDATE THE LINEARIZATION POINT AFTER YOU UPDATE RK_KKK): !!!
+		loop->addStatement( rk_xxx_lin == rk_eta.getCols(0,NX) );
 	}
+
+
+//	// Computation of the sensitivities using the CHAIN RULE:
+//	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
+//		loop->addStatement( std::string( "if( run == 0 ) {\n" ) );
+//	}
 //	// PART 1
 //	updateInputSystem(loop, i, j, tmp_index2);
 
@@ -556,26 +613,26 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 //	// PART 3
 //	updateOutputSystem(loop, i, j, tmp_index2);
 
-	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( std::string( "}\n" ) );
-		loop->addStatement( std::string( "else {\n" ) );
-//		// PART 1
-//		propagateInputSystem(loop, i, j, k, tmp_index2);
+//	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
+//		loop->addStatement( std::string( "}\n" ) );
+//		loop->addStatement( std::string( "else {\n" ) );
+////		// PART 1
+////		propagateInputSystem(loop, i, j, k, tmp_index2);
+//
+//		// PART 2
+//		propagateImplicitSystem(loop, i, j, k, tmp_index2);
+//
+////		// PART 3
+////		propagateOutputSystem(loop, i, j, k, tmp_index2);
+//	}
+//
+//	if( rk_outputs.size() > 0 && (grid.getNumIntervals() > 1 || !equidistantControlGrid()) ) {
+//		propagateOutputs( loop, run, run1, i, j, k, tmp_index1, tmp_index2, tmp_index3, tmp_index4, tmp_meas );
+//	}
 
-		// PART 2
-		propagateImplicitSystem(loop, i, j, k, tmp_index2);
-
-//		// PART 3
-//		propagateOutputSystem(loop, i, j, k, tmp_index2);
-	}
-
-	if( rk_outputs.size() > 0 && (grid.getNumIntervals() > 1 || !equidistantControlGrid()) ) {
-		propagateOutputs( loop, run, run1, i, j, k, tmp_index1, tmp_index2, tmp_index3, tmp_index4, tmp_meas );
-	}
-
-	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
-		loop->addStatement( std::string( "}\n" ) );
-	}
+//	if( grid.getNumIntervals() > 1 || !equidistantControlGrid() ) {
+//		loop->addStatement( std::string( "}\n" ) );
+//	}
 
 //	loop->addStatement( std::string( reset_int.get(0,0) ) + " = 0;\n" );
 
@@ -615,10 +672,6 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
     	loop3.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1+NX2,i*NX+NX+NXA+NX ) == zeroR );
     	integrate.addStatement( loop3 );
     }
-
-	if( liftMode == 1 || (liftMode == 4 && (ExportSensitivityType)sensGen == INEXACT) ) {
-		integrate.addStatement( rk_Uprev.getRow(shooting_index) == rk_eta.getCols( NX+NXA+diffsDim,NX+NXA+diffsDim+NU ) );
-	}
 
 //    integrate.addStatement( std::string( "if( " ) + determinant.getFullName() + " < 1e-12 ) {\n" );
 //    integrate.addStatement( error_code == 2 );
@@ -698,7 +751,7 @@ returnValue ForwardLiftedIRKExport::solveImplicitSystem( ExportStatementBlock* b
 				block->addStatement( "}\n" );
 			}
 		}
-		else {
+		else { // EXACT LIFTING
 			ExportForLoop loop1( index2,0,numStages );
 			evaluateMatrix( &loop1, index2, index3, tmp_index, k_index, rk_A, Ah, C, true, DERIVATIVES );
 //			if( liftMode == 1 ) {  // Right-hand side term from update optimization variables:
@@ -800,7 +853,7 @@ returnValue ForwardLiftedIRKExport::evaluateAllStatesImplicitSystem( ExportState
 {
 	ExportForLoop loop0( stage,0,numStages );
 	ExportForLoop loop1( i, 0, NX1+NX2 );
-	loop1.addStatement( rk_stageValues.getCol( stage*(NX+NXA)+i ) == rk_eta.getCol( i ) );
+	loop1.addStatement( rk_stageValues.getCol( stage*(NX+NXA)+i ) == rk_xxx_lin.getCol( i ) );
 	loop1.addStatement( tmp_index == k_index + i );
 	for( uint j = 0; j < numStages; j++ ) {
 		loop1.addStatement( rk_stageValues.getCol( stage*(NX+NXA)+i ) += Ah.getElement(stage,j)*rk_kkk.getElement( tmp_index,j ) );
@@ -864,26 +917,24 @@ returnValue ForwardLiftedIRKExport::evaluateRhsInexactSensitivities( ExportState
 {
 	if( NX2 > 0 ) {
 		uint j;
-		DMatrix eyeM = -1.0*eye<double>(NX);
-		eyeM.appendCols( zeros<double>(NX,NU) );
 
 		ExportForLoop loop1( index2,0,numStages );
 		loop1.addStatement( rk_seed.getCols(0,NX) == rk_stageValues.getCols(index2*(NX+NXA),index2*(NX+NXA)+NX) );
-		loop1.addStatement( rk_seed.getCols(NX,NX+NX*(NX+NU)) == eyeM.makeVector().transpose() );
+		loop1.addStatement( rk_seed.getCols(NX,NX+NX*(NX+NU)) == rk_diffsPrev2.makeRowVector() );
 
 		ExportForLoop loop2( index3,0,NX2 );
 		loop2.addStatement( tmp_index1 == k_index + index3 );
 		ExportForLoop loop3( index1,0,NX2 );
 		loop3.addStatement( tmp_index2 == tmp_index1*(NX+NU) + index1 );
 		for( j = 0; j < numStages; j++ ) {
-			loop3.addStatement( rk_seed.getCol( NX+index3*(NX+NU)+index1 ) -= Ah.getElement(index2,j)*rk_diffK.getElement(tmp_index2,j) );
+			loop3.addStatement( rk_seed.getCol( NX+index3*(NX+NU)+index1 ) += Ah.getElement(index2,j)*rk_diffK.getElement(tmp_index2,j) );
 		}
 		loop2.addStatement( loop3 );
 
 		ExportForLoop loop4( index1,0,NU );
 		loop4.addStatement( tmp_index2 == tmp_index1*(NX+NU) + NX + index1 );
 		for( j = 0; j < numStages; j++ ) {
-			loop4.addStatement( rk_seed.getCol( NX+index3*(NX+NU)+NX+index1 ) -= Ah.getElement(index2,j)*rk_diffK.getElement(tmp_index2,j) );
+			loop4.addStatement( rk_seed.getCol( NX+index3*(NX+NU)+NX+index1 ) += Ah.getElement(index2,j)*rk_diffK.getElement(tmp_index2,j) );
 		}
 		loop2.addStatement( loop4 );
 		loop1.addStatement( loop2 );
@@ -903,7 +954,6 @@ returnValue ForwardLiftedIRKExport::evaluateRhsInexactSensitivities( ExportState
 			loop1.addStatement( loop5 );
 
 			loop1.addStatement( rk_seed.getCols(NX+(NX+NDX2+NXA)*(NX+NU)+NXA+NU+NOD,rk_seed.getNumCols()) == rk_kkk.getSubMatrix( k_index,k_index+NX,index2,index2+1 ).getTranspose() );
-
 		}
 
 		if( NXA > 0 ) {
@@ -923,21 +973,23 @@ returnValue ForwardLiftedIRKExport::evaluateRhsInexactSensitivities( ExportState
 			loop1.addStatement( rk_seed.getCols(NX+(NX+NDX2+NXA)*(NX+NU),NX+(NX+NDX2+NXA)*(NX+NU)+NXA) == rk_stageValues.getCols(index2*(NX+NXA)+NX,index2*(NX+NXA)+NX+NXA) );
 		}
 
-		loop1.addFunctionCall( diffs_sweep.getName(), rk_seed, rk_diffSweep );
+		loop1.addFunctionCall( forward_sweep.getName(), rk_seed, rk_diffSweep );
 
 		ExportForLoop loop02( index3,0,NX2+NXA );
 		loop02.addStatement( tmp_index1 == k_index + index3 );
 		loop02.addStatement( tmp_index3 == index2*(NX2+NXA)+index3 );
 		ExportForLoop loop03( index1,0,NX2 );
 		loop03.addStatement( tmp_index2 == tmp_index1*(NX+NU) + index1 );
-		loop03.addStatement( rk_b.getElement( tmp_index3,1+index1 ) == rk_diffSweep.getElement( index3,index1 ) );
+		loop03.addStatement( rk_b.getElement( tmp_index3,1+index1 ) == 0.0 - rk_diffSweep.getElement( index3,index1 ) );
 		if( NDX2 == 0 ) loop03.addStatement( rk_b.getElement( tmp_index3,1+index1 ) += rk_diffK.getElement(tmp_index2,index2) );
+//		else return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 		loop02.addStatement( loop03 );
 
 		ExportForLoop loop04( index1,0,NU );
 		loop04.addStatement( tmp_index2 == tmp_index1*(NX+NU) + NX + index1 );
-		loop04.addStatement( rk_b.getElement( tmp_index3,1+NX+index1 ) == rk_diffSweep.getElement( index3,NX+index1 ) );
+		loop04.addStatement( rk_b.getElement( tmp_index3,1+NX+index1 ) == 0.0 - rk_diffSweep.getElement( index3,NX+index1 ) );
 		if( NDX2 == 0 ) loop04.addStatement( rk_b.getElement( tmp_index3,1+NX+index1 ) += rk_diffK.getElement(tmp_index2,index2) );
+//		else return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 		loop02.addStatement( loop04 );
 		loop1.addStatement( loop02 );
 		block->addStatement( loop1 );
@@ -965,7 +1017,12 @@ returnValue ForwardLiftedIRKExport::allSensitivitiesImplicitSystem( ExportStatem
 		// update rk_diffK with the new sensitivities:
 		ExportForLoop loop20( index2,0,numStages );
 		ExportForLoop loop21( index3,0,NX2 );
-		loop21.addStatement( tmp_index1 == (k_index + NX1 + index3)*(NX+NU) );
+		if( update ) {
+			loop21.addStatement( tmp_index1 == (k_index + NX1 + index3)*(NX+NU) );
+		}
+		else {
+			loop21.addStatement( tmp_index1 == (NX1 + index3)*(NX+NU) );
+		}
 		if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
 			loop21.addStatement( tmp_index3 == index2*(NX2+NXA)+index3 );
 		}
@@ -978,7 +1035,7 @@ returnValue ForwardLiftedIRKExport::allSensitivitiesImplicitSystem( ExportStatem
 			loop22.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+index1) );
 		}
 		else {
-			loop22.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+index1) );
+			loop22.addStatement( rk_diffK_local.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+index1) );
 		}
 		loop21.addStatement( loop22 );
 
@@ -988,13 +1045,18 @@ returnValue ForwardLiftedIRKExport::allSensitivitiesImplicitSystem( ExportStatem
 			loop23.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+NX+index1) );
 		}
 		else {
-			loop23.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+NX+index1) );
+			loop23.addStatement( rk_diffK_local.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+NX+index1) );
 		}
 		loop21.addStatement( loop23 );
 		loop20.addStatement( loop21 );
 		if( NXA > 0 ) {
 			ExportForLoop loop24( index3,0,NXA );
-			loop24.addStatement( tmp_index1 == (k_index + NX + index3)*(NX+NU) );
+			if( update ) {
+				loop24.addStatement( tmp_index1 == (k_index + NX + index3)*(NX+NU) );
+			}
+			else {
+				loop24.addStatement( tmp_index1 == (NX + index3)*(NX+NU) );
+			}
 			if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
 				loop24.addStatement( tmp_index3 == index2*(NX2+NXA)+NX2+index3 );
 			}
@@ -1007,7 +1069,7 @@ returnValue ForwardLiftedIRKExport::allSensitivitiesImplicitSystem( ExportStatem
 				loop25.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+index1) );
 			}
 			else {
-				loop25.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+index1) );
+				loop25.addStatement( rk_diffK_local.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+index1) );
 			}
 			loop24.addStatement( loop25 );
 
@@ -1017,47 +1079,65 @@ returnValue ForwardLiftedIRKExport::allSensitivitiesImplicitSystem( ExportStatem
 				loop26.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_b.getElement(tmp_index3,1+NX+index1) );
 			}
 			else {
-				loop26.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+NX+index1) );
+				loop26.addStatement( rk_diffK_local.getElement(tmp_index2,index2) == rk_b.getElement(tmp_index3,1+NX+index1) );
 			}
 			loop24.addStatement( loop26 );
 			loop20.addStatement( loop24 );
 		}
 		block->addStatement( loop20 );
 
+		// update rk_diffK USING RK_DIFFK_LOCAL !! (PROPAGATION OF SENSITIVITIES)
+		if( !update ) {
+			ExportForLoop loop40( index2,0,numStages );
+			ExportForLoop loop41( index3,0,NX2+NXA );
+			loop41.addStatement( tmp_index1 == (k_index + NX1 + index3)*(NX+NU) );
+			loop41.addStatement( tmp_index3 == (NX1 + index3)*(NX+NU) );
+			ExportForLoop loop42( index1,0,NX );
+			loop42.addStatement( tmp_index2 == tmp_index1+index1 );
+			loop42.addStatement( rk_diffK.getElement(tmp_index2,index2) == 0.0 );
+			for( uint loop_i = 0; loop_i < NX; loop_i++ ) {
+				loop42.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_diffK_local.getElement(tmp_index3+loop_i,index2)*rk_diffsPrev2.getElement(loop_i,index1) );
+			}
+			loop41.addStatement( loop42 );
+			ExportForLoop loop43( index1,0,NU );
+			loop43.addStatement( tmp_index2 == tmp_index1+NX+index1 );
+			loop43.addStatement( tmp_index3 == (NX1 + index3)*(NX+NU)+NX+index1 );
+			loop43.addStatement( rk_diffK.getElement(tmp_index2,index2) == rk_diffK_local.getElement(tmp_index3,index2) );
+			loop43.addStatement( tmp_index3 == (NX1 + index3)*(NX+NU) );
+			for( uint loop_i = 0; loop_i < NX; loop_i++ ) {
+				loop43.addStatement( rk_diffK.getElement(tmp_index2,index2) += rk_diffK_local.getElement(tmp_index3+loop_i,index2)*rk_diffsPrev2.getElement(loop_i,NX+index1) );
+			}
+			loop41.addStatement( loop43 );
+			loop40.addStatement( loop41 );
+			block->addStatement( loop40 );
+		}
+
 		// update rk_diffsNew with the new sensitivities:
 		ExportForLoop loop3( index2,0,NX2 );
 		loop3.addStatement( tmp_index1 == (k_index + NX1 + index2)*(NX+NU) );
-		ExportForLoop loop31( index1,0,NX2 );
+		ExportForLoop loop31( index1,0,NX2+NU );
 		loop31.addStatement( tmp_index2 == tmp_index1+index1 );
-		loop31.addStatement( std::string(rk_diffsNew2.get( index2,index1 )) + " = (" + index2.getName() + " == " + index1.getName() + "-" + toString(NX1) + ");\n" );
+		loop31.addStatement( rk_diffsNew2.getElement( index2,index1 ) == rk_diffsPrev2.getElement( index2,index1 ) );
 		loop31.addStatement( rk_diffsNew2.getElement( index2,index1 ) += rk_diffK.getRow( tmp_index2 )*Bh );
 		loop3.addStatement( loop31 );
-
-		ExportForLoop loop32( index1,0,NU );
-		loop32.addStatement( tmp_index2 == tmp_index1+NX+index1 );
-		loop32.addStatement( rk_diffsNew2.getElement( index2,NX+index1 ) == rk_diffK.getRow( tmp_index2 )*Bh );
-		loop3.addStatement( loop32 );
 		block->addStatement( loop3 );
+
 		if( NXA > 0 ) {
 			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
 				block->addStatement( std::string("if( run == 0 ) {\n") );
 			}
-			ExportForLoop loop4( index2,0,NXA );
-			loop4.addStatement( tmp_index1 == (k_index + NX + index2)*(NX+NU) );
-			ExportForLoop loop41( index1,0,NX2 );
-			loop41.addStatement( tmp_index2 == tmp_index1+index1 );
-			loop41.addStatement( rk_diffsNew2.getElement( index2+NX2,index1 ) == rk_diffK.getRow( tmp_index2 )*tempCoefs );
-			loop4.addStatement( loop41 );
-
-			ExportForLoop loop42( index1,0,NU );
-			loop42.addStatement( tmp_index2 == tmp_index1+NX+index1 );
-			loop42.addStatement( rk_diffsNew2.getElement( index2+NX2,NX+index1 ) == rk_diffK.getRow( tmp_index2 )*tempCoefs );
-			loop4.addStatement( loop42 );
-			block->addStatement( loop4 );
+			ExportForLoop loop5( index2,0,NXA );
+			loop5.addStatement( tmp_index1 == (k_index + NX + index2)*(NX+NU) );
+			ExportForLoop loop51( index1,0,NX2+NU );
+			loop51.addStatement( tmp_index2 == tmp_index1+index1 );
+			loop51.addStatement( rk_diffsNew2.getElement( index2+NX2,index1 ) == rk_diffK.getRow( tmp_index2 )*tempCoefs );
+			loop5.addStatement( loop51 );
+			block->addStatement( loop5 );
 			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
 				block->addStatement( std::string("}\n") );
 			}
 		}
+		// TODO: The computation of these derivatives for the algebraic variables should be based on the diffK_local variable !!!
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -1125,9 +1205,13 @@ returnValue ForwardLiftedIRKExport::setup( )
 	uint timeDep = 0;
 	if( timeDependant ) timeDep = 1;
 
+	rk_diffsPrev2 = ExportVariable( "rk_diffsPrev2", NX, NX+NU, REAL, structWspace );
+
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY, sensGen);
-	if( (ExportSensitivityType)sensGen == INEXACT ) {
+	int liftMode;
+	get( LIFTED_INTEGRATOR_MODE, liftMode );
+	if( (ExportSensitivityType)sensGen == INEXACT || liftMode == 4 ) {
 		rk_seed = ExportVariable( "rk_seed", 1, NX+(NX+NDX2+NXA)*(NX+NU)+NXA+NU+NOD+NDX+timeDep, REAL, structWspace );
 		rk_diffsTemp2 = ExportVariable( "rk_diffsTemp2", NX2+NXA, NVARS2, REAL, structWspace );
 		rk_diffSweep = ExportVariable( "rk_diffSweep", NX2+NXA, NX+NU, REAL, structWspace );
@@ -1135,8 +1219,6 @@ returnValue ForwardLiftedIRKExport::setup( )
 
 	rk_stageValues = ExportVariable( "rk_stageValues", 1, numStages*(NX+NXA), REAL, structWspace );
 	rk_kkk = ExportVariable( "rk_Ktraj", N*grid.getNumIntervals()*(NX+NXA), numStages, REAL, ACADO_VARIABLES );
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
 	if( liftMode == 1 || liftMode == 4 ) {
 		rk_diffK = ExportVariable( "rk_diffKtraj", N*grid.getNumIntervals()*(NX+NXA)*(NX+NU), numStages, REAL, ACADO_VARIABLES );
 	}
@@ -1144,11 +1226,9 @@ returnValue ForwardLiftedIRKExport::setup( )
 		rk_diffK = ExportVariable( "rk_diffK", (NX+NXA)*(NX+NU), numStages, REAL, structWspace );
 	}
 
-	if( liftMode == 1 || liftMode == 4 ) {
-		rk_Xprev = ExportVariable( "rk_Xprev", N*grid.getNumIntervals(), NX, REAL, ACADO_VARIABLES );
-		rk_Uprev = ExportVariable( "rk_Uprev", N, NU, REAL, ACADO_VARIABLES );
-		rk_delta = ExportVariable( "rk_delta", 1, NX+NU, REAL, ACADO_WORKSPACE );
-	}
+	rk_Xprev = ExportVariable( "rk_Xprev", N, NX, REAL, ACADO_VARIABLES );
+	rk_Uprev = ExportVariable( "rk_Uprev", N, NU, REAL, ACADO_VARIABLES );
+	rk_delta = ExportVariable( "rk_delta", 1, NX+NU, REAL, ACADO_WORKSPACE );
 
 	int linSolver;
 	get( LINEAR_ALGEBRA_SOLVER, linSolver );
@@ -1157,6 +1237,17 @@ returnValue ForwardLiftedIRKExport::setup( )
 		if(NDX2 > 0) rk_I = ExportVariable( "rk_I", NX2+NXA, NX2+NXA, REAL, structWspace );
 	}
 	rk_b = ExportVariable( "rk_b", numStages*(NX+NXA), 1+NX+NU, REAL, structWspace );
+
+	rk_xxx_lin = ExportVariable( "rk_xxx_lin", 1, NX, REAL, structWspace );
+
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
+	if( liftMode == 1 || gradientUpdate ) {
+		rk_Khat_traj = ExportVariable( "rk_Khat", grid.getNumIntervals(), numStages*(NX+NXA), REAL, structWspace );
+		rk_Xhat_traj = ExportVariable( "rk_Xhat", grid.getNumIntervals()*NX, 1, REAL, structWspace );
+	}
+	if( liftMode == 1 ) rk_diffK_local = ExportVariable( "rk_diffKtraj_aux", (NX+NXA)*(NX+NU), numStages, REAL, structWspace );
 
     return SUCCESSFUL_RETURN;
 }
