@@ -206,7 +206,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		ExportVariable getAuxVariable() const;
+		virtual ExportVariable getAuxVariable() const;
 
 
     protected:
@@ -217,6 +217,7 @@ class ExplicitRungeKuttaExport : public RungeKuttaExport
 CLOSE_NAMESPACE_ACADO
 
 
+#include <acado/code_generation/integrators/lifted_erk_export.hpp>
 #include <acado/code_generation/integrators/erk_adjoint_export.hpp>
 #include <acado/code_generation/integrators/erk_fob_export.hpp>
 #include <acado/code_generation/integrators/erk_3sweep_export.hpp>
