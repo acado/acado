@@ -1226,9 +1226,11 @@ returnValue ForwardLiftedIRKExport::setup( )
 		rk_diffK = ExportVariable( "rk_diffK", (NX+NXA)*(NX+NU), numStages, REAL, structWspace );
 	}
 
-	rk_Xprev = ExportVariable( "rk_Xprev", N, NX, REAL, ACADO_VARIABLES );
-	rk_Uprev = ExportVariable( "rk_Uprev", N, NU, REAL, ACADO_VARIABLES );
-	rk_delta = ExportVariable( "rk_delta", 1, NX+NU, REAL, ACADO_WORKSPACE );
+	if( (ExportSensitivityType)sensGen != BACKWARD ) {
+		rk_Xprev = ExportVariable( "rk_Xprev", N, NX, REAL, ACADO_VARIABLES );
+		rk_Uprev = ExportVariable( "rk_Uprev", N, NU, REAL, ACADO_VARIABLES );
+		rk_delta = ExportVariable( "rk_delta", 1, NX+NU, REAL, ACADO_WORKSPACE );
+	}
 
 	int linSolver;
 	get( LINEAR_ALGEBRA_SOLVER, linSolver );

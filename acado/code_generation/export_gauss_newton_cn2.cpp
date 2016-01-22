@@ -1479,6 +1479,9 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
+	int sensitivityProp;
+	get( DYNAMIC_SENSITIVITY, sensitivityProp );
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
 
 	// Compute RDy
 	if( getNY() > 0 || getNYN() ) {
@@ -1486,7 +1489,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	{
 		ExportArgument R2Call = R2.isGiven() == true ? R2 : R2.getAddress(run1 * NU, 0);
 		ExportArgument SluCall =
-				objSlu.isGiven() == true || variableObjS == false ? objSlu : objSlu.getAddress(run1 * NU, 0);
+				objSlu.isGiven() == true || (variableObjS == false && !adjoint) ? objSlu : objSlu.getAddress(run1 * NU, 0);
 		condenseFdb.addFunctionCall(
 				multRDy, R2Call, Dy.getAddress(run1 * NY, 0), SluCall, g.getAddress(offset + run1 * NU, 0)
 		);
@@ -1498,13 +1501,13 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	{
 		ExportArgument Q2Call = Q2.isGiven() == true ? Q2 : Q2.getAddress(run1 * NX);
 		ExportArgument SlxCall =
-				objSlx.isGiven() == true || variableObjS == false ? objSlx : objSlx.getAddress(run1 * NX, 0);
+				objSlx.isGiven() == true || (variableObjS == false && !adjoint) ? objSlx : objSlx.getAddress(run1 * NX, 0);
 		condenseFdb.addFunctionCall(
 				multQDy, Q2Call, Dy.getAddress(run1 * NY), SlxCall, QDy.getAddress(run1 * NX) );
 	}
 	condenseFdb.addLinebreak();
 	ExportVariable SlxCall =
-				objSlx.isGiven() == true || variableObjS == false ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
+				objSlx.isGiven() == true || (variableObjS == false && !adjoint) ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
 	condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) == QN2 * DyN );
 	condenseFdb.addStatement( QDy.getRows(N * NX, (N + 1) * NX) += SlxCall );
 	condenseFdb.addLinebreak();
@@ -1661,7 +1664,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );
 	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
-	if( secondOrder ) {
+	if( secondOrder || adjoint ) {
 		//	mu_N = lambda_N + q_N + Q_N^T * Ds_N  --> wrong in Joel's paper !!
 		//		for i = N - 1: 1
 		//			mu_k = Q_k^T * Ds_k + A_k^T * mu_{k + 1} + S_k * Du_k + q_k
@@ -1968,7 +1971,10 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );
 	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
-	if( secondOrder ) {
+	int sensitivityProp;
+	get( DYNAMIC_SENSITIVITY, sensitivityProp );
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
+	if( secondOrder || adjoint ) {
 		ExportVariable mu1; mu1.setup("mu1", 1, NX, REAL, ACADO_LOCAL);
 		ExportVariable mu2; mu2.setup("mu2", 1, NX, REAL, ACADO_LOCAL);
 

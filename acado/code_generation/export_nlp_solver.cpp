@@ -226,6 +226,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	}
 
 	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
 	int gradientUp;
 	get( LIFTED_GRADIENT_UPDATE, gradientUp );
 	bool gradientUpdate = (bool) gradientUp;
@@ -238,7 +239,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	evGx.setup("evGx", N * NX, NX, REAL, ACADO_WORKSPACE);
 	evGu.setup("evGu", N * NX, NU, REAL, ACADO_WORKSPACE);
 
-	if( secondOrder ) mu.setup("mu", N, NX, REAL, ACADO_VARIABLES);
+	if( secondOrder || adjoint ) mu.setup("mu", N, NX, REAL, ACADO_VARIABLES);
 
 	ExportStruct dataStructWspace;
 	dataStructWspace = (useOMP && performsSingleShooting() == false) ? ACADO_LOCAL : ACADO_WORKSPACE;
@@ -249,9 +250,12 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	else if( secondOrder && gradientUpdate ) {
 		state.setup("state", 1, (getNX() + getNXA()) * (getNX() + getNU() + 1) + getNX() + symH + getNX() + getNU() + getNU() + getNOD(), REAL, dataStructWspace);
 	}
+	else if( adjoint ) {
+		state.setup("state", 1, (getNX() + getNXA()) * (getNX() + getNU() + 1) + getNX() + getNX() + getNU() + getNU() + getNOD(), REAL, dataStructWspace);
+	}
 
 	unsigned indexZ   = NX + NXA;
-	if( secondOrder ) indexZ = indexZ + NX; 	// because of the first order adjoint direction
+	if( secondOrder || adjoint ) indexZ = indexZ + NX; 	// because of the first order adjoint direction
 	unsigned indexGxx = indexZ + NX * NX;
 	unsigned indexGzx = indexGxx + NXA * NX;
 	unsigned indexGxu = indexGzx + NX * NU;
@@ -259,7 +263,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	unsigned indexH = indexGzu;
 	if( secondOrder ) indexH = indexGzu + symH; 	// because of the second order derivatives
 	unsigned indexG = indexH;
-	if( secondOrder && gradientUpdate ) indexG = indexH + NX+NU;
+	if( (secondOrder && gradientUpdate) || adjoint ) indexG = indexH + NX+NU;
 	unsigned indexU   = indexG + NU;
 	unsigned indexOD   = indexU + NOD;
 
@@ -294,7 +298,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	loop.addLinebreak( );
 
 	// Fill in the input vector
-	if( secondOrder ) {
+	if( secondOrder || adjoint ) {
 		loop.addStatement( state.getCols(NX+NXA, 2*NX+NXA)	== mu.getRow( run ) );
 	}
 	loop.addStatement( state.getCols(indexG, indexU)	== u.getRow( run ) );
@@ -412,6 +416,14 @@ returnValue ExportNLPSolver::setupSimulation( void )
 			loop.addStatement( objg.getRow(run*(NX+NU)+i) == -1.0*state.getCol(indexH+i) );
 		}
 	}
+	else if( adjoint ) {
+		for( uint i = 0; i < NX; i++ ) {
+			loop.addStatement( objSlx.getRow(run*NX+i) == -1.0*state.getCol(indexH+i) );
+		}
+		for( uint i = 0; i < NU; i++ ) {
+			loop.addStatement( objSlu.getRow(run*NU+i) == -1.0*state.getCol(indexH+NX+i) );
+		}
+	}
 
 	// XXX This should be revisited at some point
 	//	modelSimulation.release( run );
@@ -459,10 +471,9 @@ returnValue ExportNLPSolver::setGeneralObjective(const Objective& _objective)
 	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
 	if( secondOrder ) {
 		objS.setup("EH", N * (NX + NU), NX + NU, REAL, ACADO_WORKSPACE);  // EXACT HESSIAN
-
-		if( gradientUpdate ) {
-			objg.setup("Eg", N * (NX + NU), 1, REAL, ACADO_WORKSPACE);  // GRADIENT CONTRIBUTION
-		}
+	}
+	if( secondOrder && gradientUpdate ) {
+		objg.setup("Eg", N * (NX + NU), 1, REAL, ACADO_WORKSPACE);  // GRADIENT CONTRIBUTION
 	}
 
 	int qpSolution;
@@ -1170,6 +1181,14 @@ returnValue ExportNLPSolver::setupObjectiveLinearTerms(const Objective& _objecti
 		objSlu = zeros<double>(NU, 1);
 	}
 
+	int sensitivityProp;
+	get( DYNAMIC_SENSITIVITY, sensitivityProp );
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
+	if( adjoint ) {
+		objSlx.setup("Wlx", (N+1) * NX, 1, REAL, ACADO_WORKSPACE);
+		objSlu.setup("Wlu", N * NU, 1, REAL, ACADO_WORKSPACE);
+	}
+
 	objSlx.setDoc("Linear term weighting vector for states.");
 	objSlu.setDoc("Linear term weighting vector for controls.");
 
@@ -1591,9 +1610,10 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );
 	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
 
 	unsigned indexZ   = NX + NXA;
-	if( secondOrder ) indexZ = indexZ + NX; 	// because of the first order adjoint direction
+	if( secondOrder || adjoint ) indexZ = indexZ + NX; 	// because of the first order adjoint direction
 	unsigned indexGxx = indexZ + NX * NX;
 	unsigned indexGzx = indexGxx + NXA * NX;
 	unsigned indexGxu = indexGzx + NX * NU;
@@ -1601,7 +1621,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	unsigned indexH = indexGzu;
 	if( secondOrder ) indexH = indexGzu + symH; 	// because of the second order derivatives
 	unsigned indexG = indexH;
-	if( secondOrder && gradientUpdate ) indexG = indexH + NX+NU;
+	if( (secondOrder && gradientUpdate) || adjoint ) indexG = indexH + NX+NU;
 	unsigned indexU   = indexG + NU;
 	unsigned indexOD   = indexU + NOD;
 

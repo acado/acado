@@ -166,7 +166,10 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 		setObjR1R2.addStatement( tmpDx == tmpDF.getRows(0,NX) );
 		setObjR1R2.addStatement( tmpDu == tmpDF.getRows(NX,NX+NU) );
 
-		if( gradientUpdate ) {
+		int sensitivityProp;
+		get( DYNAMIC_SENSITIVITY, sensitivityProp );
+		bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
+		if( gradientUpdate || adjoint ) {
 			loopObjective.addStatement( objValueOut.getCols(1,1+NX+NU) += objg.getRows(runObj*(NX+NU),(runObj+1)*(NX+NU)).getTranspose() );
 		}
 		loopObjective.addFunctionCall(

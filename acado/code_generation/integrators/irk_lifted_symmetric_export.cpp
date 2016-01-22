@@ -574,8 +574,9 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 
 	// SAVE rk_A in the rk_A_traj variable:
 	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
-		loop->addStatement( rk_A_traj.getRows(run*(NX2+NXA),(run+1)*(NX2+NXA)) == rk_A );
-		loop->addStatement( rk_aux_traj.getRow(run) == rk_auxSolver.makeRowVector() );
+		// YOU DO NOT NEED TO SAVE THE TRAJECTORY FOR THE INEXACT NEWTON SCHEME !
+//		loop->addStatement( rk_A_traj.getRows(run*(NX2+NXA),(run+1)*(NX2+NXA)) == rk_A );
+//		loop->addStatement( rk_aux_traj.getRow(run) == rk_auxSolver.makeRowVector() );
 	}
 	else if( liftMode == 1 ) {
 		loop->addStatement( tmp_index1 == shooting_index*grid.getNumIntervals()+run );
@@ -583,6 +584,7 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( rk_aux_traj.getRow(tmp_index1) == rk_auxSolver.makeRowVector() );
 	}
 	else {
+		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 		loop->addStatement( rk_A_traj.getRows(run*numStages*(NX2+NXA),(run+1)*numStages*(NX2+NXA)) == rk_A );
 		loop->addStatement( rk_aux_traj.getRow(run) == rk_auxSolver.makeRowVector() );
 	}
@@ -712,7 +714,7 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 			}
 			loop2->addStatement( rk_b_trans.getCols(run5*NX,(run5+1)*NX) += rk_adj_traj.getSubMatrix(tmp_index1,tmp_index1+1,run5*(NX+NXA),(run5+1)*(NX+NXA)) ); // BECAUSE EXPLICIT ODE
 		}
-		loop2->addFunctionCall( solver->getNameSolveTransposeReuseFunction(),rk_A_traj.getAddress(run*(NX2+NXA),0),rk_b_trans.getAddress(0,0),rk_aux_traj.getAddress(run,0) );
+		loop2->addFunctionCall( solver->getNameSolveTransposeReuseFunction(),rk_A.getAddress(0,0),rk_b_trans.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
 		loop2->addStatement( rk_adj_traj.getRow(tmp_index1) += rk_b_trans );
 		loop2->addStatement( rk_b_trans == rk_adj_traj.getRow(tmp_index1) );
 	}
@@ -863,8 +865,8 @@ returnValue SymmetricLiftedIRKExport::setup( )
 
 	rk_seed = ExportVariable( "rk_seed", 1, NX+NX*(NX+NU)+NX+NU+NOD+timeDep, REAL, structWspace );
 	if( gradientUpdate ) rk_seed = ExportVariable( "rk_seed", 1, NX+NX*(NX+NU)+2*NX+NU+NOD+timeDep, REAL, structWspace );
-	rk_A_traj = ExportVariable( "rk_A_traj", grid.getNumIntervals()*numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, structWspace );
-	rk_aux_traj = ExportVariable( "rk_aux_traj", grid.getNumIntervals(), numStages*(NX2+NXA), INT, structWspace );
+//	rk_A_traj = ExportVariable( "rk_A_traj", grid.getNumIntervals()*numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, structWspace );
+//	rk_aux_traj = ExportVariable( "rk_aux_traj", grid.getNumIntervals(), numStages*(NX2+NXA), INT, structWspace );
 	if( liftMode == 1 ) {
 		rk_A_traj = ExportVariable( "rk_A_traj", N*grid.getNumIntervals()*numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, structWspace );
 		rk_aux_traj = ExportVariable( "rk_aux_traj", N*grid.getNumIntervals(), numStages*(NX2+NXA), INT, structWspace );
@@ -877,8 +879,8 @@ returnValue SymmetricLiftedIRKExport::setup( )
 	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
 //		rk_A = ExportVariable( "rk_J", NX2+NXA, NX2+NXA, REAL, structWspace );
 //		if(NDX2 > 0) rk_I = ExportVariable( "rk_I", NX2+NXA, NX2+NXA, REAL, structWspace );
-		rk_A_traj = ExportVariable( "rk_J_traj", grid.getNumIntervals()*(NX2+NXA), NX2+NXA, REAL, structWspace );
-		rk_aux_traj = ExportVariable( "rk_aux_traj", grid.getNumIntervals(), rk_auxSolver.getNumRows()*rk_auxSolver.getNumCols(), INT, structWspace );
+//		rk_A_traj = ExportVariable( "rk_J_traj", grid.getNumIntervals()*(NX2+NXA), NX2+NXA, REAL, structWspace );
+//		rk_aux_traj = ExportVariable( "rk_aux_traj", grid.getNumIntervals(), rk_auxSolver.getNumRows()*rk_auxSolver.getNumCols(), INT, structWspace );
 		rk_diffsTemp2 = ExportVariable( "rk_diffsTemp2", NX2+NXA, NVARS2, REAL, structWspace );
 	}
 	rk_adj_traj = ExportVariable( "rk_adj_traj", N*grid.getNumIntervals(), numStages*(NX+NXA), REAL, ACADO_VARIABLES );
