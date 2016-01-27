@@ -34,9 +34,9 @@
 #include <acado/code_generation/integrators/integrator_export.hpp>
 
 
+using namespace std;
 
 BEGIN_NAMESPACE_ACADO
-
 
 //
 // PUBLIC MEMBER FUNCTIONS:
@@ -109,6 +109,7 @@ returnValue IntegratorExport::setGrid(	const Grid& _grid )
 returnValue IntegratorExport::setLinearInput( const DMatrix& M1, const DMatrix& A1, const DMatrix& B1 )
 {
 	if( !A1.isEmpty() ) {
+		LOG( LVL_DEBUG ) << "Integrator: setLinearInput... " << endl;
 		if( A1.getNumRows() != M1.getNumRows() || A1.getNumRows() != B1.getNumRows() || A1.getNumRows() != A1.getNumCols() || M1.getNumRows() != M1.getNumCols() || B1.getNumCols() != NU) {
 			return RET_UNABLE_TO_EXPORT_CODE;
 		}
@@ -130,6 +131,7 @@ returnValue IntegratorExport::setLinearInput( const DMatrix& M1, const DMatrix& 
 		DifferentialEquation fun_input;
 		fun_input << A11*x+B11*u;
 		lin_input.init(fun_input, "acado_linear_input", NX, NXA, NU);
+		LOG( LVL_DEBUG ) << "done!" << endl;
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -250,6 +252,17 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 }
 
 
+returnValue IntegratorExport::setNonlinearFeedback( const DMatrix& C, const Expression& feedb )
+{
+	if( !C.isEmpty() ) {
+		return RET_NOT_IMPLEMENTED_YET;
+	}
+	else {
+		return SUCCESSFUL_RETURN;
+	}
+}
+
+
 returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix& A3, const std::string& _rhs3, const std::string& _diffs_rhs3 )
 {
 	if( !A3.isEmpty() ) {
@@ -288,6 +301,7 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 
 returnValue IntegratorExport::setModelData( const ModelData& data ) {
 
+	LOG( LVL_DEBUG ) << "Integrator: setup model data... " << endl;
 	setDimensions( data.getNX(),data.getNDX(),data.getNXA(),data.getNU(),data.getNP(),data.getN(), data.getNOD() );
 	NX1 = data.getNX1();
 	NX2 = data.getNX2();
@@ -307,7 +321,7 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	if( exportRhs ) {
 		DifferentialEquation f;
 		data.getModel(f);
-		if(f.getNDX() == 0) {
+		if(f.getDim() > 0 && f.getNDX() == 0) {
 			DVector order = f.getDifferentialStateComponents();
 			for( uint i = 0; i < order.getDim(); i++ ) {
 //				std::cout << "NX1+i: " << NX1+i << ", order(i): " << order(i) << std::endl;
@@ -327,11 +341,20 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 		f.getExpression( rhs_ );
 		f3.getExpression( rhs3_ );
 
+		// Nonlinear feedback function:
+		DMatrix C;
+		OutputFcn feedb;
+		data.getNonlinearFeedback( C, feedb );
+		Expression feedb_;
+		feedb.getExpression( feedb_ );
+
 		if ( f.getDim() > 0 && setDifferentialEquation( rhs_ ) != SUCCESSFUL_RETURN )
 			return RET_UNABLE_TO_EXPORT_CODE;
 		if ( !parms.isEmpty() && setNARXmodel( delay, parms ) != SUCCESSFUL_RETURN )
 			return RET_UNABLE_TO_EXPORT_CODE;
 		if ( M3.getNumRows() > 0 && setLinearOutput( M3, A3, rhs3_ ) != SUCCESSFUL_RETURN )
+			return RET_UNABLE_TO_EXPORT_CODE;
+		if ( C.getNumCols() > 0 && setNonlinearFeedback( C, feedb_ ) != SUCCESSFUL_RETURN )
 			return RET_UNABLE_TO_EXPORT_CODE;
 	}
 	else {
@@ -374,6 +397,7 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	}
 
 	setup( );
+	LOG( LVL_DEBUG ) << "done!" << endl;
 
 	return SUCCESSFUL_RETURN;
 }

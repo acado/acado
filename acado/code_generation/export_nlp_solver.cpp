@@ -25,7 +25,7 @@
 
 /**
  *    \file src/code_generation/export_nlp_solver.cpp
- *    \author Milan Vukov
+ *    \author Milan Vukov, Rien Quirynen
  *    \date 2012 - 2013
  */
 
@@ -311,7 +311,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	get( IMPLICIT_INTEGRATOR_MODE, intMode );
 	if ( integrator->equidistantControlGrid() )
 	{
-		if( (ImplicitIntegratorMode)intMode == LIFTED ) {
+		if( (ImplicitIntegratorMode)intMode == LIFTED || (ImplicitIntegratorMode)intMode == LIFTED_FEEDBACK ) {
 			loop	<< retSim.getFullName() << " = "
 					<< "integrate" << "(" << state.getFullName()
 					<< ", " << run.getFullName() << ");\n";

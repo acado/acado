@@ -122,6 +122,12 @@ returnValue ModelContainer::setLinearOutput( const DMatrix& A3_, const std::stri
 }
 
 
+returnValue ModelContainer::setNonlinearFeedback( const DMatrix& C_, const OutputFcn& feedb_ )
+{
+	return modelData.setNonlinearFeedback( C_, feedb_ );
+}
+
+
 uint ModelContainer::addOutput( const OutputFcn& outputEquation_, const DVector& measurements ) {
 	DVector newMeas(measurements);
 	newMeas.append( 1.0 );

@@ -159,7 +159,8 @@ enum ImplicitIntegratorMode{
 
 	IFTR,			/**< With the reuse of the matrix evaluation and factorization from the previous step (1 evaluation and factorization per integration step). */
 	IFT,				/**< Without the reuse of the matrix from the previous step (2 evaluations and factorizations per integration step). */
-	LIFTED
+	LIFTED,
+	LIFTED_FEEDBACK
 };
 
 

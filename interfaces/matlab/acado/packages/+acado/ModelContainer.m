@@ -78,6 +78,11 @@ classdef ModelContainer < handle
         A3;
         fun3;
         linearOutput = 0;
+        
+        % Nonlinear feedback system
+        C;
+        phi;
+        nonlinearFeedback = 0;
     end
     
     methods
@@ -173,6 +178,27 @@ classdef ModelContainer < handle
                 
             end
             obj.linearOutput = 1;
+        end
+        
+        
+        function setNonlinearFeedback(obj, varargin)
+            
+            global ACADO_;
+            if (nargin == 3 && isa(varargin{1}, 'numeric') && isa(varargin{2}, 'acado.Expression'))
+                if ~isvector(varargin{2})
+                    error('ERROR: Please provide a vector of expressions instead of a matrix.');
+                end
+                % setNonlinearFeedback( C, phi );
+                obj.C = acado.Matrix(varargin{1});
+                obj.phi = acado.OutputFcn();
+                ACADO_.helper.removeInstruction(obj.phi);
+                obj.phi(:) = varargin{2};
+                
+            else
+                error('ERROR: Invalid setNonlinearFeedback.');
+                
+            end
+            obj.nonlinearFeedback = 1;
         end
         
         
@@ -300,6 +326,10 @@ classdef ModelContainer < handle
                     else
                         fprintf(cppobj.fileMEX,sprintf('    %s.setLinearOutput( %s, %s );\n', obj.name, obj.A3.name, obj.fun3.name));
                     end
+                end
+                if obj.nonlinearFeedback
+                    obj.phi.getInstructions(cppobj, get);
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setNonlinearFeedback( %s, %s );\n', obj.name, obj.C.name, obj.phi.name));
                 end
                 
                 fprintf(cppobj.fileMEX,'\n');

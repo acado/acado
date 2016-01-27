@@ -201,7 +201,7 @@ returnValue ImplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 												ExportStruct dataStruct
 												) const
 {
-	if( NX2 > 0 || NXA > 0 ) solver->getDataDeclarations( declarations,dataStruct );
+	if( solver->getDim() ) solver->getDataDeclarations( declarations,dataStruct );
 	
 	if( NX1 > 0 || exportRhs ) {
 		ExportVariable max = getAuxVariable();

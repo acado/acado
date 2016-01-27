@@ -197,6 +197,15 @@ public:
     returnValue setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, const std::string& _rhs3, const std::string& _diffs_rhs3 );
 
 
+    /** .
+     *
+     *	@param[in] 		.
+     *
+     *	\return SUCCESSFUL_RETURN
+     */
+    returnValue setNonlinearFeedback( const DMatrix& C_, const OutputFcn& feedb_ );
+
+
     /** Assigns the model to be used by the integrator.
      *
      *	@param[in] _rhs_ODE				Name of the function, evaluating the ODE right-hand side.

@@ -234,6 +234,14 @@ returnValue ModelData::getLinearOutput( DMatrix& M3_, DMatrix& A3_, OutputFcn& r
 }
 
 
+returnValue ModelData::getNonlinearFeedback( DMatrix& C_, OutputFcn& feedb_ ) const {
+	C_ = C;
+	feedb_ = feedb;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 returnValue ModelData::getLinearOutput( DMatrix& M3_, DMatrix& A3_ ) const {
 	M3_ = M3;
 	A3_ = A3;
@@ -322,6 +330,18 @@ returnValue ModelData::setLinearOutput( const DMatrix& M3_, const DMatrix& A3_, 
 	if( NU == 0 ) NU = rhs3_.getNU();
 	if( NP == 0 ) NP = rhs3_.getNP();
 	if( NOD == 0 ) NOD = rhs3_.getNOD();
+
+	export_rhs = BT_TRUE;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ModelData::setNonlinearFeedback( const DMatrix& C_, const OutputFcn& feedb_ )
+{
+	C = C_;
+	feedb = feedb_;
+	if( feedb_.getNDX() > 0 || feedb_.getNU() > 0 || feedb_.getNP() > 0 || feedb_.getNOD() > 0 ) return RET_NOT_IMPLEMENTED_YET;
 
 	export_rhs = BT_TRUE;
 
