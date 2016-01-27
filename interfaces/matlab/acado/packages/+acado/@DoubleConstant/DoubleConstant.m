@@ -94,9 +94,9 @@ classdef DoubleConstant < acado.Operator
             if obj.callByValue
                 if ~isempty(ACADO_) && ACADO_.generatingCode
                     if obj.val < 0
-                        s = ['(' sprintf('%E', obj.val) ')'];
+                        s = ['(' sprintf('%0.20e', obj.val) ')'];
                     else
-                        s = sprintf('%E', obj.val);
+                        s = sprintf('%0.20e', obj.val);
                     end
                 else
                     if obj.val < 0
