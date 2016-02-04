@@ -329,7 +329,7 @@ function [] = execute_command (s, full_logging, shorthand, progress)
         %end
         fprintf (1, '*') ;
     end
-    eval (s) ;
+    eval(s);
 end
 
 

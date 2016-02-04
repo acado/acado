@@ -54,6 +54,7 @@ class ExportTemplatedFile : public ExportFile
 public:
 
 	friend class ExportQpOasesInterface;
+	friend class ExportQpOases3Interface;
 	friend class ExportSimulinkInterface;
 	friend class ExportAuxiliaryFunctions;
 	friend class ExportHessianRegularization;

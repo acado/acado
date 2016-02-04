@@ -1,14 +1,16 @@
-% A matrix built from standard Matlab matrix notations.
-% Stored both as a Matrix and as a VariablesGrid Object
+% A vector built from standard Matlab vector notations.
+% Stored both as a Vector and as a VariablesGrid Object
 %
 %  Usage:
-%    >> BVector([MATRIX]);
+%    >> BVector([VECTOR]);
 %
 %  Parameters:
-%    [MATRIX] a numeric  vector
+%    [VECTOR] a numeric vector
 %
 %
 %  Example:
+%    >> v = acado.BVector([1,2,3]);
+%    >> V = ones(3,1); v = acado.BVector(V);
 %
 %
 %  Licence:
@@ -33,10 +35,10 @@
 %    License along with ACADO Toolkit; if not, write to the Free Software
 %    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 %
-%    Author: Rien Quirynen
-%    Date: 2013
+%    Author: Rien Quirynen, Joachim Ferreau
+%    Date: 2013-2015
 %
-classdef BVector < acado.Matrix
+classdef BVector < acado.Vector
     properties
     end
     
@@ -46,8 +48,8 @@ classdef BVector < acado.Matrix
                 global ACADO_;
                 
                 if (isa(val, 'numeric'))
-                    ACADO_.count_matrix = ACADO_.count_matrix+1;
-                    obj.name = strcat('acadodata_M', num2str(ACADO_.count_matrix));
+                    ACADO_.count_vector = ACADO_.count_vector+1;
+                    obj.name = strcat('acadodata_V', num2str(ACADO_.count_vector));
                     
                     obj.items = val;
                     
@@ -56,13 +58,13 @@ classdef BVector < acado.Matrix
                 elseif (isa(val, 'acado.MexInput'))
                     
                     if (val.type ~= 2)
-                        error('MexInput should be in this case a vector, not a scalar or matrix.');
+                        error('MexInput should be in this case a vector, not a scalar or matrix.'); 
                     end
                     
                     obj.name = val.name;
                     
                 else
-                    error('Matrix expects a numeric value or a acado.MexInput');
+                    error('BVector expects a numeric value or a acado.MexInput');
                     
                 end
             end
@@ -84,4 +86,3 @@ classdef BVector < acado.Matrix
     end
     
 end
-

@@ -95,7 +95,7 @@ public:
 							const std::string& _initialStateFixed,
 							const std::string& _diagH,
 							const std::string& _diagHN,
-							const unsigned _N,
+							const unsigned _NI,
 							const unsigned _NX,
 							const unsigned _NU
 							);

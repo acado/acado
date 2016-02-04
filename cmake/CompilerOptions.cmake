@@ -80,6 +80,10 @@ IF (    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
      OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel" )
 	
 	# Cygwin complains in about the -fPIC flag...
+	IF( CYGWIN )
+		ADD_DEFINITIONS( -D__NO_PIPES__ )
+	ENDIF( )
+
 	IF( NOT (CYGWIN OR WIN32) )
 		SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC" )
 		SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC" )
