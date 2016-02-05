@@ -82,9 +82,6 @@ class GaussLegendre6Export : public ImplicitRungeKuttaExport
 
     protected:
 
-
-    protected:
-
 };
 
 IntegratorExport* createGaussLegendre6Export(	UserInteraction* _userInteraction,

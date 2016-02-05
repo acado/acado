@@ -37,6 +37,10 @@
 using namespace std;
 
 BEGIN_NAMESPACE_ACADO
+        
+ExportTemplatedFile::ExportTemplatedFile( ) : ExportFile( )
+{}
+
 
 ExportTemplatedFile::ExportTemplatedFile(	const std::string& _templateName,
 											const std::string& _fileName,
@@ -45,11 +49,29 @@ ExportTemplatedFile::ExportTemplatedFile(	const std::string& _templateName,
 											const std::string& _intString,
 											int _precision,
 											const std::string& _commentString
-						) : ExportFile(_fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
+						) : ExportFile( )
 {
+	setup( _templateName,_fileName,_commonHeaderName,_realString,_intString,_precision,_commentString );
+}
+                        
+                        
+returnValue ExportTemplatedFile::setup(	const std::string& _templateName,
+										const std::string& _fileName,
+										const std::string& _commonHeaderName,
+										const std::string& _realString,
+										const std::string& _intString,
+										int _precision,
+										const std::string& _commentString
+                                        )
+{
+    ExportFile::setup( _fileName, _commonHeaderName, _realString, _intString, _precision, _commentString );
+    
 	folders = TEMPLATE_PATHS;
 	templateName = _templateName;
+    
+    return SUCCESSFUL_RETURN;
 }
+
 
 returnValue ExportTemplatedFile::fillTemplate( )
 {

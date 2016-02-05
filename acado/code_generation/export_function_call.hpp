@@ -236,7 +236,7 @@ class ExportFunctionCall : public ExportStatement
 
     protected:
 
-		std::string name;								/**< Name of function to be called. */
+		std::string name;							/**< Name of function to be called. */
 		ExportArgumentList functionArguments;		/**< List of calling arguments. */
 };
 

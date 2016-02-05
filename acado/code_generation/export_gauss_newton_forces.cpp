@@ -42,8 +42,8 @@ BEGIN_NAMESPACE_ACADO
 using namespace std;
 
 ExportGaussNewtonForces::ExportGaussNewtonForces(	UserInteraction* _userInteraction,
-		const std::string& _commonHeaderName
-) : ExportNLPSolver( _userInteraction,_commonHeaderName )
+													const std::string& _commonHeaderName
+													) : ExportNLPSolver( _userInteraction,_commonHeaderName )
 {
 	qpObjPrefix = "acadoForces";
 	qpModuleName = "forces";
@@ -79,8 +79,8 @@ returnValue ExportGaussNewtonForces::setup( )
 }
 
 returnValue ExportGaussNewtonForces::getDataDeclarations(	ExportStatementBlock& declarations,
-		ExportStruct dataStruct
-) const
+															ExportStruct dataStruct
+															) const
 {
 	returnValue status;
 	status = ExportNLPSolver::getDataDeclarations(declarations, dataStruct);
@@ -96,7 +96,7 @@ returnValue ExportGaussNewtonForces::getDataDeclarations(	ExportStatementBlock& 
 }
 
 returnValue ExportGaussNewtonForces::getFunctionDeclarations(	ExportStatementBlock& declarations
-) const
+																) const
 {
 	declarations.addDeclaration( preparation );
 	declarations.addDeclaration( feedback );
@@ -115,7 +115,7 @@ returnValue ExportGaussNewtonForces::getFunctionDeclarations(	ExportStatementBlo
 }
 
 returnValue ExportGaussNewtonForces::getCode(	ExportStatementBlock& code
-)
+														)
 {
 	setupQPInterface();
 	code.addStatement( *qpInterface );
@@ -870,7 +870,7 @@ returnValue ExportGaussNewtonForces::setupConstraintsEvaluation( void )
 	stagedNew.setup("stagedNew", NX, 1, REAL, ACADO_LOCAL);
 	conSetd.setup("conSetd", stagedNew, index);
 	conSetd.addStatement(
-			stagedNew == zeros<double>(NX, 1) - d.getRows(index * NX, (index + 1) * NX)
+		stagedNew == zeros<double>(NX, 1) - d.getRows(index * NX, (index + 1) * NX)
 	);
 
 	//		evaluateConstraints.addStatement(
@@ -1129,15 +1129,15 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			conUBIndices,
 			conABDimensions,
 			(Q1.isGiven() == true && R1.isGiven() == true) ? 1 : 0,
-					diagH,
-					diagHN,
-					initialStateFixed(),
-					qpModuleName,
-					(PrintLevel)printLevel == HIGH ? 2 : 0,
-							maxNumQPiterations,
-							useOMP,
-							true,
-							hotstartQP
+			diagH,
+			diagHN,
+			initialStateFixed(),
+			qpModuleName,
+			(PrintLevel)printLevel == HIGH ? 2 : 0,
+			maxNumQPiterations,
+			useOMP,
+			true,
+			hotstartQP
 	);
 
 	qpGenerator->exportCode();
@@ -1158,15 +1158,15 @@ returnValue ExportGaussNewtonForces::setupQPInterface( )
 			conUBIndices,
 			conABDimensions,
 			(Q1.isGiven() == true && R1.isGiven() == true) ? 1 : 0, // TODO Remove this one
-					diagH,
-					diagHN,
-					initialStateFixed(),
-					qpModuleName,
-					(PrintLevel)printLevel == HIGH ? 2 : 0,
-							maxNumQPiterations,
-							useOMP,
-							false,
-							hotstartQP
+			diagH,
+			diagHN,
+			initialStateFixed(),
+			qpModuleName,
+			(PrintLevel)printLevel == HIGH ? 2 : 0,
+			maxNumQPiterations,
+			useOMP,
+			false,
+			hotstartQP
 	);
 
 	qpGenerator->exportCode();

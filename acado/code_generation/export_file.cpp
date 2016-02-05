@@ -41,6 +41,8 @@ BEGIN_NAMESPACE_ACADO
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
+ExportFile::ExportFile( ) : ExportStatementBlock( )
+{}
 
 ExportFile::ExportFile(	const std::string& _fileName,
 						const std::string& _commonHeaderName,
@@ -50,6 +52,21 @@ ExportFile::ExportFile(	const std::string& _fileName,
 						const std::string& _commentString
 						) : ExportStatementBlock( )
 {
+	setup( _fileName,_commonHeaderName,_realString,_intString,_precision,_commentString );
+}
+
+ExportFile::~ExportFile( )
+{}
+
+
+returnValue ExportFile::setup(	const std::string& _fileName,
+                                const std::string& _commonHeaderName,
+                                const std::string& _realString,
+                                const std::string& _intString,
+                                int _precision,
+                                const std::string& _commentString
+                                )
+{
 	fileName         = _fileName;
 	commonHeaderName = _commonHeaderName;
 	
@@ -57,10 +74,10 @@ ExportFile::ExportFile(	const std::string& _fileName,
 	intString     = _intString;
 	precision     = _precision;
 	commentString = _commentString;
+    
+    return SUCCESSFUL_RETURN;
 }
 
-ExportFile::~ExportFile( )
-{}
 
 returnValue ExportFile::exportCode( ) const
 {

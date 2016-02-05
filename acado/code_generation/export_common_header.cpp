@@ -83,6 +83,12 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 
 		break;
 
+	case QP_QPOASES3:
+		ss << "#define ACADO_QP_SOLVER ACADO_QPOASES3\n" << endl;
+		ss << "#include \"" << _moduleName << "_qpoases3_interface.h\"\n";
+
+		break;
+
 	case QP_FORCES:
 	case QP_HPMPC:
 	case QP_QPDUNES:

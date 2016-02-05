@@ -59,13 +59,13 @@ public:
 	 *	\return SUCCESSFUL_RETURN
 	 */
 	ExportHessianRegularization(	const std::string& _sourceFileName,
-								const std::string& _moduleName = "acado",
-								const std::string& _commonHeaderName = "",
-								const std::string& _realString = "double",
-								const std::string& _intString = "int",
-								int _precision = 16,
-								const std::string& _commentString = std::string()
-								);
+                                    const std::string& _moduleName = "acado",
+                                    const std::string& _commonHeaderName = "",
+                                    const std::string& _realString = "double",
+                                    const std::string& _intString = "int",
+                                    int _precision = 16,
+                                    const std::string& _commentString = std::string()
+                                    );
 
 	/** Destructor. */
 	virtual ~ExportHessianRegularization()

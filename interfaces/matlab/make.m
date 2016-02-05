@@ -71,7 +71,7 @@ function [ ] = make( varargin )
 % 
 
 if verLessThan('matlab', '7.6.0')
-    fprintf('\n--------------------------------------------------------\nWARNING: You are using a non supported Matlab version.\n-------------------------------------------------------- \n\nThe optimization interface (OCP, MPC, parameter estimation...) \nonly supports R2008a or newer. \nThe integrators can be ran on earlier versions. \nUse makeintegrators instead.\n\n');
+    fprintf('\n--------------------------------------------------------\nWARNING: You are using an unsupported Matlab version.\n-------------------------------------------------------- \n\nThe optimization interface (OCP, MPC, parameter estimation...) \nonly supports R2008a or newer. \nThe integrators can be ran on earlier versions. \nUse makeintegrators instead.\n\n');
     error('Stopping make...');
 end
 

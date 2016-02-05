@@ -32,6 +32,7 @@
 
 #include <string.h>
 
+
 #include <acado/utils/acado_message_handling.hpp>
 #include <acado/utils/acado_utils.hpp>
 

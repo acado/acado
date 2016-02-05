@@ -68,7 +68,7 @@ void printHeader()
 {
 	printf(
 		"\nACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.\n"
-		"Copyright (C) 2008-2013 by Boris Houska, Hans Joachim Ferreau,\n" 
+		"Copyright (C) 2008-2015 by Boris Houska, Hans Joachim Ferreau,\n" 
 		"Milan Vukov and Rien Quirynen, KU Leuven.\n"
 	);
 	

@@ -31,6 +31,7 @@
 
 #include <acado/code_generation/export_gauss_newton_cn2.hpp>
 #include <acado/code_generation/export_qpoases_interface.hpp>
+#include <acado/code_generation/export_qpoases3_interface.hpp>
 
 using namespace std;
 
@@ -1168,6 +1169,11 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		T1.setup("T1", NX, NX, REAL, ACADO_WORKSPACE);
 		T2.setup("T2", NX, NX, REAL, ACADO_WORKSPACE);
 
+		condensePrep.addFunctionCall(moveGxT, evGx.getAddress(0, 0), C.getAddress(0, 0));
+		for (unsigned row = 1; row < N; ++row)
+			condensePrep.addFunctionCall(
+					multGxGx, evGx.getAddress(row * NX), C.getAddress((row - 1) * NX), C.getAddress(row * NX));
+
 		/* Algorithm for computation of H10 and H00
 
 		T1 = Q_N * C_{N - 1}
@@ -2113,8 +2119,32 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 	get(CG_EXPORT_FOLDER_NAME, folderName);
 	string moduleName;
 	get(CG_MODULE_NAME, moduleName);
-	std::string sourceFile = folderName + "/" + moduleName + "_qpoases_interface.cpp";
-	std::string headerFile = folderName + "/" + moduleName + "_qpoases_interface.hpp";
+	int qpSolver;
+	get(QP_SOLVER, qpSolver);
+
+	std::string sourceFile, headerFile, solverDefine;
+	ExportQpOasesInterface* qpInterface = 0;
+
+	switch ( (QPSolverName)qpSolver )
+	{
+		case QP_QPOASES:
+			sourceFile = folderName + "/" + moduleName + "_qpoases_interface.cpp";
+			headerFile = folderName + "/" + moduleName + "_qpoases_interface.hpp";
+			solverDefine = "QPOASES_HEADER";
+			qpInterface = new ExportQpOasesInterface(headerFile, sourceFile, "");
+			break;
+
+		case QP_QPOASES3:
+			sourceFile = folderName + "/" + moduleName + "_qpoases3_interface.c";
+			headerFile = folderName + "/" + moduleName + "_qpoases3_interface.h";
+			solverDefine = "QPOASES3_HEADER";
+			qpInterface = new ExportQpOases3Interface(headerFile, sourceFile, "");
+			break;
+
+		default:
+			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
+					"For condensed solution only qpOASES and qpOASES3 QP solver are supported");
+	}
 
 	int useSinglePrecision;
 	get(USE_SINGLE_PRECISION, useSinglePrecision);
@@ -2132,11 +2162,12 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 	// Set up export of the source file
 	//
 
-	ExportQpOasesInterface qpInterface = ExportQpOasesInterface(headerFile, sourceFile, "");
+	if ( qpInterface == 0 )
+		return RET_UNKNOWN_BUG;
 
-	qpInterface.configure(
+	qpInterface->configure(
 			"",
-			"QPOASES_HEADER",
+			solverDefine,
 			getNumQPvars(),
 			getNumStateBounds() + getNumComplexConstraints(),
 			maxNumQPiterations,
@@ -2161,7 +2192,12 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 			ubA.getFullName()
 	);
 
-	return qpInterface.exportCode();
+	returnValue returnvalue = qpInterface->exportCode();
+
+	if ( qpInterface != 0 )
+		delete qpInterface;
+
+	return returnvalue;
 }
 
 bool ExportGaussNewtonCN2::performFullCondensing() const

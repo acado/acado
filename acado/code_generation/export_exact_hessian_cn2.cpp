@@ -31,6 +31,7 @@
 
 #include <acado/code_generation/export_exact_hessian_cn2.hpp>
 #include <acado/code_generation/export_qpoases_interface.hpp>
+#include <acado/code_generation/export_qpoases3_interface.hpp>
 
 using namespace std;
 

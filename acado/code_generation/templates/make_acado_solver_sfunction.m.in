@@ -132,6 +132,17 @@ if strcmp(@MODULE_NAME@_QP_SOLVER, 'QPOASES')
 	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases/SRC/Utils.cpp';
 	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases/SRC/MessageHandling.cpp';
 	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases/SRC/EXTRAS/SolutionAnalysis.cpp';
+elseif strcmp(@VARIABLE_PREFIX@_QP_SOLVER, 'QPOASES3')
+	@MODULE_NAME@Def.SourceFiles{end + 1} = '@MODULE_NAME@_qpoases3_interface.c';
+	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases3/src/Bounds.c';
+	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases3/src/Constraints.c';
+	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases3/src/Indexlist.c';
+	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases3/src/Matrices.c';
+	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases3/src/MessageHandling.c';
+	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases3/src/Options.c';
+	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases3/src/QProblem.c';
+	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases3/src/QProblemB.c';
+	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpoases3/src/Utils.c';
 elseif strcmp(@MODULE_NAME@_QP_SOLVER, 'QPDUNES')
 	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpdunes/src/dual_qp.c';
 	@MODULE_NAME@Def.SourceFiles{end + 1} = 'qpdunes/src/matrix_vector.c';
@@ -151,6 +162,12 @@ if strcmp(@MODULE_NAME@_QP_SOLVER, 'QPOASES')
     	'qpoases', ...
 		'qpoases/INCLUDE', ...
 		'qpoases/SRC' ...
+	};
+elseif strcmp(@MODULE_NAME@_QP_SOLVER, 'QPOASES3')
+	@MODULE_NAME@Def.IncPaths = { ...
+    	'qpoases3', ...
+		'qpoases3/include', ...
+		'qpoases3/src' ...
 	};
 elseif strcmp(@MODULE_NAME@_QP_SOLVER, 'QPDUNES')
 	@MODULE_NAME@Def.IncPaths = { ...
