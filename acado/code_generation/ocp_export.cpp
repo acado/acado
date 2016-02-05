@@ -174,6 +174,15 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 				}
 				break;
 
+			case QP_QPOASES3:
+				if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+					acadoCopyTemplateFile(MAKEFILE_EH_QPOASES3, str, "#", true);
+				}
+				else {
+					acadoCopyTemplateFile(MAKEFILE_QPOASES3, str, "#", true);
+				}
+				break;
+
 			case QP_FORCES:
 				acadoCopyTemplateFile(MAKEFILE_FORCES, str, "#", true);
 				break;
@@ -234,6 +243,15 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			}
 			else {
 				acadoCopyTemplateFile(MAKE_MEX_QPOASES, str, "%", true);
+			}
+			break;
+
+		case QP_QPOASES3:
+			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+				acadoCopyTemplateFile(MAKE_MEX_EH_QPOASES3, str, "%", true);
+			}
+			else {
+				acadoCopyTemplateFile(MAKE_MEX_QPOASES3, str, "%", true);
 			}
 			break;
 
