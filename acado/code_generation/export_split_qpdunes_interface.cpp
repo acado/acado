@@ -66,7 +66,7 @@ returnValue ExportSplitQpDunesInterface::configure(	const unsigned _maxIter,
 												const std::string& _initialStateFixed,
 												const std::string& _diagH,
 												const std::string& _diagHN,
-												const unsigned _N,
+												const unsigned _NI,
 												const unsigned _NX,
 												const unsigned _NU
 )
@@ -83,7 +83,7 @@ returnValue ExportSplitQpDunesInterface::configure(	const unsigned _maxIter,
 	dictionary[ "@PRINT_LEVEL@" ] =  ss.str();
 
 	ss.str( string() );
-	ss << _N;
+	ss << _NI;
 	dictionary[ "@ACADO_N@" ] =  ss.str();
 
 	ss.str( string() );
@@ -114,7 +114,7 @@ returnValue ExportSplitQpDunesInterface::configure(	const unsigned _maxIter,
 
 		ss.str( string() );
 		ss << "unsigned int nD[";
-		ss << _N;
+		ss << _NI;
 		ss << " + 1] = {";
 		for (unsigned i = 0; i < conDim.size(); ++i)
 		{
@@ -130,9 +130,9 @@ returnValue ExportSplitQpDunesInterface::configure(	const unsigned _maxIter,
 		dictionary[ "@QP_D@" ] = dictionary[ "@QP_LBA@" ] = dictionary[ "@QP_UBA@" ] = "0";
 		ss.str( string() );
 		ss << "unsigned int nD[";
-		ss << _N;
+		ss << _NI;
 		ss << " + 1]; for (kk = 0; kk < ";
-		ss << _N;
+		ss << _NI;
 		ss << " + 1; nD[ kk++ ] = 0);";
 		dictionary[ "@QP_ND_ARRAY@" ] = ss.str();
 	}

@@ -38,14 +38,14 @@ BEGIN_NAMESPACE_ACADO
 
 
 ExportAuxiliarySimFunctions::ExportAuxiliarySimFunctions(	const std::string& _headerFileName,
-													const std::string& _sourceFileName,
-													const std::string& _moduleName,
-													const std::string& _commonHeaderName,
-													const std::string& _realString,
-													const std::string& _intString,
-													int _precision,
-													const std::string& _commentString
-													)
+                                                            const std::string& _sourceFileName,
+                                                            const std::string& _moduleName,
+                                                            const std::string& _commonHeaderName,
+                                                            const std::string& _realString,
+                                                            const std::string& _intString,
+                                                            int _precision,
+                                                            const std::string& _commentString
+                                                            )
 	: source(AUXILIARY_SIM_FUNCTIONS_SOURCE, _sourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
 	  header(AUXILIARY_SIM_FUNCTIONS_HEADER, _headerFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
 	  moduleName( _moduleName )

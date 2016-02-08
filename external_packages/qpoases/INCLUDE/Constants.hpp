@@ -37,7 +37,9 @@
 #ifndef QPOASES_CUSTOM_INTERFACE
 #include "acado_qpoases_interface.hpp"
 #else
-#include QPOASES_CUSTOM_INTERFACE
+  #define XSTR(x) #x
+  #define STR(x) XSTR(x)
+  #include STR(QPOASES_CUSTOM_INTERFACE)
 #endif
 
 /** Maximum number of variables within a QP formulation.

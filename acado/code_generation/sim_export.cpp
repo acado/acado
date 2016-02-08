@@ -38,6 +38,7 @@
 #include <acado/code_generation/templates/templates.hpp>
 #include <acado/code_generation/integrators/export_auxiliary_sim_functions.hpp>
 #include <acado/code_generation/export_algorithm_factory.hpp>
+#include <acado/code_generation/export_data_internal.hpp>
 
 #ifdef WIN32
 #include <windows.h>
@@ -348,7 +349,7 @@ returnValue SIMexport::exportTest(	const std::string& _dirName,
 									const std::vector<std::string>& outputFiles,
 									const bool& TIMING,
 									const uint jumpReference
-											) const
+									) const
 {
 	int i;
 	int sensGen;

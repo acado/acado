@@ -239,7 +239,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	evGx.setup("evGx", N * NX, NX, REAL, ACADO_WORKSPACE);
 	evGu.setup("evGu", N * NX, NU, REAL, ACADO_WORKSPACE);
 
-	if( secondOrder || adjoint ) mu.setup("mu", N, NX, REAL, ACADO_VARIABLES);
+	if( secondOrder ) mu.setup("mu", N, NX, REAL, ACADO_VARIABLES);
 
 	ExportStruct dataStructWspace;
 	dataStructWspace = (useOMP && performsSingleShooting() == false) ? ACADO_LOCAL : ACADO_WORKSPACE;

@@ -64,7 +64,7 @@ classdef BMatrix < acado.Matrix
                     obj.name = val.name;
                     
                 else
-                    error('Matrix expects a numeric value or a acado.MexInput');
+                    error('BMatrix expects a numeric value or a acado.MexInput');
                     
                 end
             end

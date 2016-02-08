@@ -57,7 +57,11 @@ class ExportFile : public ExportStatementBlock
 
     public:
 
-		/** Default constructor. 
+        /** Default constructor. 
+		 */
+		ExportFile( );
+                
+		/** Standard constructor. 
 		 *
 		 *	@param[in] _fileName			Name of exported file.
 		 *	@param[in] _commonHeaderName	Name of common header file to be included.
@@ -65,8 +69,6 @@ class ExportFile : public ExportStatementBlock
 		 *	@param[in] _intString			std::string to be used to declare integer variables.
 		 *	@param[in] _precision			Number of digits to be used for exporting real values.
 		 *	@param[in] _commentString		std::string to be used for exporting comments.
-		 *
-		 *	\return SUCCESSFUL_RETURN
 		 */
 		ExportFile(	const std::string& _fileName,
 					const std::string& _commonHeaderName = "",
@@ -79,6 +81,27 @@ class ExportFile : public ExportStatementBlock
         /** Destructor. */
         virtual ~ExportFile( );
 
+        
+        /** Setup routine.
+		 *
+		 *	@param[in] _fileName			Name of exported file.
+		 *	@param[in] _commonHeaderName	Name of common header file to be included.
+		 *	@param[in] _realString			std::string to be used to declare real variables.
+		 *	@param[in] _intString			std::string to be used to declare integer variables.
+		 *	@param[in] _precision			Number of digits to be used for exporting real values.
+		 *	@param[in] _commentString		std::string to be used for exporting comments.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue setup(	const std::string& _fileName,
+                                    const std::string& _commonHeaderName = "",
+                                    const std::string& _realString = "real_t",
+                                    const std::string& _intString = "int",
+                                    int _precision = 16,
+                                    const std::string& _commentString = std::string()
+                                    );
+        
+        
 		/** Exports the file containing the auto-generated code.
 		 *
 		 *	\return SUCCESSFUL_RETURN

@@ -35,6 +35,7 @@
 #include <acado/code_generation/export_auxiliary_functions.hpp>
 #include <acado/code_generation/export_hessian_regularization.hpp>
 #include <acado/code_generation/export_common_header.hpp>
+#include <acado/code_generation/export_data_internal.hpp>
 
 #include <acado/code_generation/export_gauss_newton_block_cn2.hpp>
 #include <acado/code_generation/export_gauss_newton_forces.hpp>
@@ -173,6 +174,15 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 				}
 				break;
 
+			case QP_QPOASES3:
+				if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+					acadoCopyTemplateFile(MAKEFILE_EH_QPOASES3, str, "#", true);
+				}
+				else {
+					acadoCopyTemplateFile(MAKEFILE_QPOASES3, str, "#", true);
+				}
+				break;
+
 			case QP_FORCES:
 				acadoCopyTemplateFile(MAKEFILE_FORCES, str, "#", true);
 				break;
@@ -236,6 +246,15 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			}
 			break;
 
+		case QP_QPOASES3:
+			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+				acadoCopyTemplateFile(MAKE_MEX_EH_QPOASES3, str, "%", true);
+			}
+			else {
+				acadoCopyTemplateFile(MAKE_MEX_QPOASES3, str, "%", true);
+			}
+			break;
+
 		case QP_FORCES:
 			acadoCopyTemplateFile(MAKE_MEX_FORCES, str, "%", true);
 			break;
@@ -264,10 +283,10 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	int generateSimulinkInterface;
 	get(GENERATE_SIMULINK_INTERFACE, generateSimulinkInterface);
 	if ((bool) generateSimulinkInterface == true)
-	{
-		if (!((QPSolverName)qpSolver == QP_QPOASES || (QPSolverName)qpSolver == QP_QPDUNES))
+	{     
+		if (!((QPSolverName)qpSolver == QP_QPOASES || (QPSolverName)qpSolver == QP_QPOASES3 || (QPSolverName)qpSolver == QP_QPDUNES))
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
-					"At the moment, Simulink interface is available only with qpOASES and qpDUNES based OCP solvers.");
+					"At the moment, Simulink interface is available only with qpOASES, qpOASES3 and qpDUNES based OCP solvers.");
 		else
 		{
 			string makefileName = dirName + "/make_" + moduleName + "_solver_sfunction.m";
@@ -277,6 +296,8 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 
 			if ((QPSolverName)qpSolver == QP_QPOASES)
 				qpSolverString = "QPOASES";
+			else if ((QPSolverName)qpSolver == QP_QPOASES3)
+				qpSolverString = "QPOASES3";
 			else
 				qpSolverString = "QPDUNES";
 
@@ -417,9 +438,9 @@ returnValue OCPexport::setup( )
 	case FULL_CONDENSING:
 	case CONDENSING:
 
-		if ((QPSolverName)qpSolver != QP_QPOASES)
+		if ( ((QPSolverName)qpSolver != QP_QPOASES) && ((QPSolverName)qpSolver != QP_QPOASES3) )
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-					"For condensed solution only qpOASES QP solver is supported");
+					"For condensed solution only qpOASES and qpOASES3 QP solver are supported");
 
 		solver = ExportNLPSolverPtr(
 				NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_CONDENSED));
@@ -429,9 +450,9 @@ returnValue OCPexport::setup( )
 	case FULL_CONDENSING_N2:
 	case CONDENSING_N2:
 
-		if ((QPSolverName)qpSolver != QP_QPOASES)
+		if ( ((QPSolverName)qpSolver != QP_QPOASES) && ((QPSolverName)qpSolver != QP_QPOASES3) )
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-					"For condensed solution only qpOASES QP solver is supported");
+					"For condensed solution only qpOASES and qpOASES3 QP solver are supported");
 
 		if ( (HessianApproximationMode)hessianApproximation == GAUSS_NEWTON ) {
 			solver = ExportNLPSolverPtr(
@@ -469,9 +490,9 @@ returnValue OCPexport::setup( )
 
 	case FULL_CONDENSING_N2_FACTORIZATION:
 
-			if ((QPSolverName)qpSolver != QP_QPOASES)
+			if ( ((QPSolverName)qpSolver != QP_QPOASES) && ((QPSolverName)qpSolver != QP_QPOASES3) )
 				return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-						"For condensed solution only qpOASES QP solver is supported");
+						"For condensed solution only qpOASES and qpOASES3 QP solver are supported");
 
 			solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_CN2_FACTORIZATION));

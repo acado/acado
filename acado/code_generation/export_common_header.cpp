@@ -66,13 +66,14 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 	if( _useComplexArithmetic ) ss << "\n#include <complex.h>\n" << endl;
 
 	ss 	<< "/** qpOASES QP solver indicator. */" << endl
-		<< "#define ACADO_QPOASES 0" << endl
+		<< "#define ACADO_QPOASES  0" << endl
+		<< "#define ACADO_QPOASES3 1" << endl
 		<< "/** FORCES QP solver indicator.*/" << endl
-		<< "#define ACADO_FORCES  1" << endl
+		<< "#define ACADO_FORCES   2" << endl
 		<< "/** qpDUNES QP solver indicator.*/" << endl
-		<< "#define ACADO_QPDUNES 2" << endl
+		<< "#define ACADO_QPDUNES  3" << endl
 		<< "/** HPMPC QP solver indicator. */" << endl
-		<< "#define ACADO_HPMPC 3" << endl
+		<< "#define ACADO_HPMPC    4" << endl
 		<< "/** Indicator for determining the QP solver used by the ACADO solver code. */" << endl;
 
 	switch ( _qpSolver )
@@ -80,6 +81,12 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 	case QP_QPOASES:
 		ss << "#define ACADO_QP_SOLVER ACADO_QPOASES\n" << endl;
 		ss << "#include \"" << _moduleName << "_qpoases_interface.hpp\"\n";
+
+		break;
+
+	case QP_QPOASES3:
+		ss << "#define ACADO_QP_SOLVER ACADO_QPOASES3\n" << endl;
+		ss << "#include \"" << _moduleName << "_qpoases3_interface.h\"\n";
 
 		break;
 

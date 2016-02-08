@@ -104,9 +104,9 @@ public:
 							);
 
 	/** Export the interface. */
-	returnValue exportCode();
+	virtual returnValue exportCode();
 
-private:
+protected:
 
 	ExportTemplatedFile qpoHeader;
 	ExportTemplatedFile qpoSource;

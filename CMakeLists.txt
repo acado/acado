@@ -179,7 +179,7 @@ INCLUDE_DIRECTORIES(
 	${PROJECT_SOURCE_DIR}
 	${PROJECT_SOURCE_DIR}/acado
 	${PROJECT_SOURCE_DIR}/external_packages
-	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
+	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.2.0/include
 	${PROJECT_BINARY_DIR}
 )
 
@@ -201,7 +201,7 @@ IF (NOT ACADO_BUILD_CGT_ONLY)
 	#
 	# Build qpOASES library
 	#
-	ADD_SUBDIRECTORY( ./external_packages/qpOASES-3.0beta )
+	ADD_SUBDIRECTORY( ./external_packages/qpOASES-3.2.0 )
 	
 	#
 	# Build csparse library
@@ -378,7 +378,7 @@ SET( ACADO_INCLUDE_DIRS
 	${PROJECT_SOURCE_DIR}
 	${PROJECT_SOURCE_DIR}/acado
 	${PROJECT_SOURCE_DIR}/external_packages
-	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.0beta/include
+	${PROJECT_SOURCE_DIR}/external_packages/qpOASES-3.2.0/include
 	${PROJECT_BINARY_DIR}
 )
 

@@ -288,8 +288,8 @@ returnValue ExplicitRungeKuttaExport::setLinearOutput( const DMatrix& M3, const 
 
 
 returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock& declarations,
-													ExportStruct dataStruct
-													) const
+                                                            ExportStruct dataStruct
+                                                            ) const
 {
 	if( exportRhs ) {
 		declarations.addDeclaration( getAuxVariable(),dataStruct );
@@ -305,7 +305,7 @@ returnValue ExplicitRungeKuttaExport::getDataDeclarations(	ExportStatementBlock&
 
 
 returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBlock& declarations
-														) const
+                                                                ) const
 {
 	declarations.addDeclaration( integrate );
 
@@ -317,7 +317,7 @@ returnValue ExplicitRungeKuttaExport::getFunctionDeclarations(	ExportStatementBl
 
 
 returnValue ExplicitRungeKuttaExport::getCode(	ExportStatementBlock& code
-										)
+                                            	)
 {
 // 	int printLevel;
 // 	get( PRINTLEVEL,printLevel );
