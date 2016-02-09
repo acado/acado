@@ -109,8 +109,8 @@ returnValue AdjointERKExport::setDifferentialEquation(	const Expression& rhs_ )
 	}
 	if( f.getNT() > 0 ) timeDependant = true;
 
-	return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD)
-			& diffs_rhs.init(f, "acado_rhs_back", 2*NX + NU, 0, NU, NP, NDX, NOD);
+	return rhs.init(f_ODE, "rhs", NX, 0, NU, NP, NDX, NOD)
+			& diffs_rhs.init(f, "rhs_back", 2*NX + NU, 0, NU, NP, NDX, NOD);
 }
 
 

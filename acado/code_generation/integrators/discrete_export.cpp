@@ -92,8 +92,8 @@ returnValue DiscreteTimeExport::setDifferentialEquation(	const Expression& rhs_ 
 			// There are not supposed to be algebraic states or differential state derivatives !
 		}
 
-		return (rhs.init(f, "acado_rhs", NX, NXA, NU, NP, NDX, NOD) &
-				diffs_rhs.init(g, "acado_diffs", NX, NXA, NU, NP, NDX, NOD));
+		return (rhs.init(f, "rhs", NX, NXA, NU, NP, NDX, NOD) &
+				diffs_rhs.init(g, "diffs", NX, NXA, NU, NP, NDX, NOD));
 	}
 	return SUCCESSFUL_RETURN;
 }

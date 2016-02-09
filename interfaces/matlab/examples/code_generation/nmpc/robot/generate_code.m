@@ -88,8 +88,8 @@ mpc.set( 'INTEGRATOR_TYPE',             'INT_IRK_GL2'       );
 mpc.set( 'NUM_INTEGRATOR_STEPS',        N                   );
 
 if EXPORT
-    mpc.exportCode( 'export_mpc' );
     copyfile('../../../../../../external_packages/qpoases', 'export_mpc/qpoases')
+    mpc.exportCode( 'export_mpc' );
     
     cd export_mpc
     make_sfunction('../sfunction_robot')

@@ -35,12 +35,12 @@ typedef @REAL_T@ real_t;
  */
 
 /** A function that calls the QP solver */
-EXTERNC int @PREFIX@solve( void );
+EXTERNC int @MODULE_NAME@_@PREFIX@solve( void );
 
 /** Get the number of active set changes */
-EXTERNC int @PREFIX@getNWSR( void );
+EXTERNC int @MODULE_NAME@_@PREFIX@getNWSR( void );
 
 /** Get the error string. */
-const char* getErrorString(int error);
+const char* @MODULE_NAME@_getErrorString( int error );
 
 #endif /* @SOLVER_DEFINE@ */

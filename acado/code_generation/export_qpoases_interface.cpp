@@ -89,7 +89,7 @@ returnValue ExportQpOasesInterface::configure(	const std::string& _prefix,
 		if (_externalCholesky == false)
 			s << _qpR << ", ";
 		s	<< _qpg << ", " << _qpA << ", " << _qplb << ", " << _qpub << ", "
-			<< _qplbA << ", " << _qpubA << ", " << "nWSR";
+			<< _qplbA << ", " << _qpubA << ", " << ExportStatement::fcnPrefix << _prefix << "_nWSR";
 
 		if ( (bool)_hotstartQP == true )
 			s << ", " << _dualSolution;
@@ -103,7 +103,7 @@ returnValue ExportQpOasesInterface::configure(	const std::string& _prefix,
 		s	<< _qpH << ", ";
 		if (_externalCholesky == false)
 			s << _qpR << ", ";
-		s	<< _qpg << ", " << _qplb << ", " << _qpub << ", " << "nWSR";
+		s	<< _qpg << ", " << _qplb << ", " << _qpub << ", " << ExportStatement::fcnPrefix << _prefix << "_nWSR";
 
 		if ( (bool)_hotstartQP == true )
 			s << ", " << _dualSolution;
@@ -120,6 +120,8 @@ returnValue ExportQpOasesInterface::configure(	const std::string& _prefix,
 	qpoSource.dictionary[ "@DUAL_SOLUTION@" ] =  _dualSolution;
 	qpoSource.dictionary[ "@CTOR@" ] =  ctor.str();
 	qpoSource.dictionary[ "@SIGMA@" ] =  _sigma;
+    qpoSource.dictionary[ "@MODULE_NAME@" ] = ExportStatement::fcnPrefix;
+    qpoSource.dictionary[ "@MODULE_PREFIX@" ] = ExportStatement::varPrefix;
 
 	// And then fill a template file
 	qpoSource.fillTemplate();
@@ -129,6 +131,9 @@ returnValue ExportQpOasesInterface::configure(	const std::string& _prefix,
 	//
 
 	// Configure the dictionary
+    qpoHeader.dictionary[ "@MODULE_NAME@" ] = ExportStatement::fcnPrefix;
+    qpoHeader.dictionary[ "@MODULE_PREFIX@" ] = ExportStatement::varPrefix;
+    
 	qpoHeader.dictionary[ "@PREFIX@" ] =  _prefix;
 	qpoHeader.dictionary[ "@SOLVER_DEFINE@" ] =  _solverDefine;
 

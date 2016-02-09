@@ -1,17 +1,17 @@
-function make_acado_solver( name, extern )
+function make_@MODULE_NAME@_solver( name )
 
 	% Output file name, and also function name
 	if (nargin > 0)
 		fileOut = name;
 	else
-		fileOut = 'acado_solver';
+		fileOut = '@MODULE_NAME@_solver';
 	end;
 		
 	% Root folder of code generation
 	CGRoot = '.';
 	
 	% Call FORCES generator
-	acado_forces_generator;
+	@MODULE_NAME@_forces_generator;
 	
 	% FORCES source files
 	qpFORCESSources = [ ...
@@ -20,10 +20,10 @@ function make_acado_solver( name, extern )
 		
 	% Auto-generated files
 	CGSources = [ ...
-		'CGRoot/acado_solver_mex.c ' ...
-		'CGRoot/acado_solver.c ' ...
-		'CGRoot/acado_integrator.c ' ...
-		'CGRoot/acado_auxiliary_functions.c ' ...
+		'CGRoot/@MODULE_NAME@_solver_mex.c ' ...
+		'CGRoot/@MODULE_NAME@_solver.c ' ...
+		'CGRoot/@MODULE_NAME@_integrator.c ' ...
+		'CGRoot/@MODULE_NAME@_auxiliary_functions.c ' ...
 		];
 	if (nargin > 1)
 		CGSources = [CGSources extern];

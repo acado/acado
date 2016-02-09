@@ -7,21 +7,21 @@
 #include "@MODULE_NAME@_auxiliary_functions.h"
 
 /* Make instances of ACADO structures. */
-ACADOvariables acadoVariables;
-ACADOworkspace acadoWorkspace;
+@MODULE_PREFIX@variables @MODULE_NAME@Variables;
+@MODULE_PREFIX@workspace @MODULE_NAME@Workspace;
 
 /* Initialized indicator. */
 static unsigned initialized = 0;
 
-void @MODULE_NAME@_step(@MODULE_NAME@input* inData, @MODULE_NAME@output* outData)
+void @MODULE_NAME@_step(@MODULE_PREFIX@input* inData, @MODULE_PREFIX@output* outData)
 {
-	timer tmr;
+	@MODULE_NAME@_timer tmr;
 	
 	/* Start measuring time. */
-	tic( &tmr );
+	@MODULE_NAME@_tic( &tmr );
 	
 	/* Copy all outside world data here. */	
-	memcpy(&acadoVariables.x, &(inData->data), sizeof( @MODULE_NAME@data ));  /* offset necessary because of the dummy variable ! */
+	memcpy(&@MODULE_NAME@Variables, &(inData->data), sizeof( @MODULE_PREFIX@variables ));
 	
 	/* Call solver */
 	switch ( inData->control )
@@ -33,7 +33,7 @@ void @MODULE_NAME@_step(@MODULE_NAME@input* inData, @MODULE_NAME@output* outData
 			{				
 				if (inData->initialization == 1)
 				{
-					initializeNodesByForwardSimulation();
+					@MODULE_NAME@_initializeNodesByForwardSimulation();
 				}
 				
 				initialized = 1;
@@ -41,24 +41,24 @@ void @MODULE_NAME@_step(@MODULE_NAME@input* inData, @MODULE_NAME@output* outData
 			else if (inData->shifting == 1 || inData->shifting == 2)
 			{
 			
-#if ACADO_QP_SOLVER == ACADO_QPDUNES
-				shiftQpData();
+#if @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPDUNES
+				@MODULE_NAME@_shiftQpData();
 #endif
 			
-				shiftStates(inData->shifting, 0, 0);
-				shiftControls( 0 );
+				@MODULE_NAME@_shiftStates(inData->shifting, 0, 0);
+				@MODULE_NAME@_shiftControls( 0 );
 			}
 			
-			preparationStep();
+			@MODULE_NAME@_preparationStep();
 			
-			outData->status = feedbackStep();
+			outData->status = @MODULE_NAME@_feedbackStep();
 			
-			outData->kktValue = getKKT();
-			outData->objValue = getObjective();
+			outData->kktValue = @MODULE_NAME@_getKKT();
+			outData->objValue = @MODULE_NAME@_getObjective();
 			
-#if ACADO_QP_SOLVER == ACADO_QPOASES
- 			outData->nIterations = getNWSR();
-#endif /* ACADO_QP_SOLVER == ACADO_QPOASES */
+#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
+ 			outData->nIterations = @MODULE_NAME@_getNWSR();
+#endif /* ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) ) */
 			
 			break;
 		
@@ -67,7 +67,7 @@ void @MODULE_NAME@_step(@MODULE_NAME@input* inData, @MODULE_NAME@output* outData
 				
 			if (inData->initialization == 1)
 			{
-				initializeNodesByForwardSimulation();
+				@MODULE_NAME@_initializeNodesByForwardSimulation();
 			}
 			
 			initialized = 1;
@@ -77,33 +77,33 @@ void @MODULE_NAME@_step(@MODULE_NAME@input* inData, @MODULE_NAME@output* outData
 		case 2:
 			/* Preparation step */
 			
-			preparationStep();
+			@MODULE_NAME@_preparationStep();
 			
 			break;
 		
 		case 3:
 			/* Feedback step */
 			
-			outData->status = feedbackStep();
+			outData->status = @MODULE_NAME@_feedbackStep();
 			
-			outData->kktValue = getKKT();
-			outData->objValue = getObjective();
+			outData->kktValue = @MODULE_NAME@_getKKT();
+			outData->objValue = @MODULE_NAME@_getObjective();
 				
-#if ACADO_QP_SOLVER == ACADO_QPOASES
-			outData->nIterations = getNWSR();
-#endif /* ACADO_QP_SOLVER == ACADO_QPOASES */
+#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
+			outData->nIterations = @MODULE_NAME@_getNWSR();
+#endif /* ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) ) */
 						
 			break;
 		
 		case 4:
 			/* Shifting */
 			
-#if ACADO_QP_SOLVER == ACADO_QPDUNES
-			shiftQpData();
+#if @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPDUNES
+			@MODULE_NAME@_shiftQpData();
 #endif
 			
-			shiftStates(inData->shifting, 0, 0);
-			shiftControls( 0 );
+			@MODULE_NAME@_shiftStates(inData->shifting, 0, 0);
+			@MODULE_NAME@_shiftControls( 0 );
 			
 			break;
 			
@@ -113,23 +113,23 @@ void @MODULE_NAME@_step(@MODULE_NAME@input* inData, @MODULE_NAME@output* outData
 	}
 	
 	/* Copy the data to outside world. */
-	memcpy(&(outData->data), &acadoVariables.x, sizeof( @MODULE_NAME@data ));   /* offset necessary because of the dummy variable ! */
+	memcpy(&(outData->data), &@MODULE_NAME@Variables, sizeof( @MODULE_PREFIX@variables ));   /* offset necessary because of the dummy variable ! */
 	
 	/* Read the elapsed time. */
-	outData->execTime = toc( &tmr );
+	outData->execTime = @MODULE_NAME@_toc( &tmr );
 }
 
 void @MODULE_NAME@_initialize( void )
 {
-	memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));	
-	initializeSolver();
+	memset(&@MODULE_NAME@Workspace, 0, sizeof( @MODULE_NAME@Workspace ));	
+	@MODULE_NAME@_initializeSolver();
 	initialized = 0;
 }
 
 void @MODULE_NAME@_cleanup( void )
 {
-#if ACADO_QP_SOLVER == ACADO_QPDUNES
+#if @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPDUNES
 	/* Clean-up of the qpDUNES QP solver. */
-	cleanupSolver();
-#endif /* ACADO_QP_SOLVER == ACADO_QPDUNES */
+	@MODULE_NAME@_cleanupSolver();
+#endif /* @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPDUNES */
 }

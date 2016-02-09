@@ -50,6 +50,7 @@ public:
 	/** Default constructor.
 	 *
 	 *	@param[in] _moduleName		    Module name for customization.
+     *	@param[in] _modulePrefix	    Module name for customization.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 *	@param[in] _realString			std::string to be used to declare real variables.
 	 *	@param[in] _intString			std::string to be used to declare integer variables.
@@ -60,6 +61,7 @@ public:
 	 */
 	ExportHessianRegularization(	const std::string& _sourceFileName,
                                     const std::string& _moduleName = "acado",
+                                    const std::string& _modulePrefix = "ACADO",
                                     const std::string& _commonHeaderName = "",
                                     const std::string& _realString = "double",
                                     const std::string& _intString = "int",
@@ -80,6 +82,7 @@ public:
 private:
 
 	std::string moduleName;
+    std::string modulePrefix;
 
 };
 

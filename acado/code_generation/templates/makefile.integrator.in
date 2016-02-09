@@ -13,28 +13,28 @@ CC     = $(CCACHE_APP) gcc
 CXX    = $(CCACHE_APP) g++
 
 OBJECTS = 	\
-			acado_auxiliary_sim_functions.o \
-			acado_integrator.o 
+			@MODULE_NAME@_auxiliary_sim_functions.o \
+			@MODULE_NAME@_integrator.o 
 
 .PHONY: all
-all: acado_test acado_compare 
+all: @MODULE_NAME@_test @MODULE_NAME@_compare 
 
-acado_test: ${OBJECTS} acado_test.o
+@MODULE_NAME@_test: ${OBJECTS} @MODULE_NAME@_test.o
 
-acado_compare: ${OBJECTS} acado_compare.o
+@MODULE_NAME@_compare: ${OBJECTS} @MODULE_NAME@_compare.o
 
-acado_auxiliary_sim_functions.o          : 	acado_common.h \
-											acado_auxiliary_sim_functions.h
-acado_integrator.o          : 	acado_common.h \
-								acado_auxiliary_sim_functions.h
-acado_test.o                : 	acado_common.h \
-								acado_auxiliary_sim_functions.h
-acado_compare.o             : 	acado_common.h \
-								acado_auxiliary_sim_functions.h
+@MODULE_NAME@_auxiliary_sim_functions.o          : 	@MODULE_NAME@_common.h \
+											@MODULE_NAME@_auxiliary_sim_functions.h
+@MODULE_NAME@_integrator.o          : 	@MODULE_NAME@_common.h \
+								@MODULE_NAME@_auxiliary_sim_functions.h
+@MODULE_NAME@_test.o                : 	@MODULE_NAME@_common.h \
+								@MODULE_NAME@_auxiliary_sim_functions.h
+@MODULE_NAME@_compare.o             : 	@MODULE_NAME@_common.h \
+								@MODULE_NAME@_auxiliary_sim_functions.h
 
-${OBJECTS} : acado_auxiliary_sim_functions.h
+${OBJECTS} : @MODULE_NAME@_auxiliary_sim_functions.h
 
 .PHONY : clean
 clean :
-	-rm -f *.o *.a acado_test acado_compare
+	-rm -f *.o *.a @MODULE_NAME@_test @MODULE_NAME@_compare
 

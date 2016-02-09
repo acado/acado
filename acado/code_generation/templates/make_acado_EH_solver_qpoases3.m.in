@@ -1,10 +1,10 @@
-function make_acado_solver( name, extern )
+function make_@MODULE_NAME@_solver( name )
 
 	% Output file name, and also function name
 	if (nargin > 0)
 		fileOut = name;
 	else
-		fileOut = 'acado_solver';
+		fileOut = '@MODULE_NAME@_solver';
 	end;
 		
 	% Root folder of code generation
@@ -50,7 +50,7 @@ function make_acado_solver( name, extern )
 		'mex -O' ...
 		' -I. -I''CGRoot'' -I''CGRoot/qpoases3'' -I''CGRoot/qpoases3/include'' -I''CGRoot/qpoases3/src''' ...
 		' ldFlags' ...
-		' -D__MATLAB__ -D__CODE_GENERATION__ -Dinline="" -DQPOASES_CUSTOM_INTERFACE="acado_qpoases3_interface.h" -O CGSources qpOASESSources -output %s.%s' ...
+		' -D__MATLAB__ -D__CODE_GENERATION__ -Dinline="" -DQPOASES_CUSTOM_INTERFACE="@MODULE_NAME@_qpoases3_interface.h" -O CGSources qpOASESSources -output %s.%s' ...
 		];
 
 % Compilation

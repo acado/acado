@@ -43,6 +43,7 @@ ExportSimulinkInterface::ExportSimulinkInterface(	const std::string& _makefileNa
 													const std::string& _wrapperHeaderFileName,
 													const std::string& _wrapperSourceFileName,
 													const std::string& _moduleName,
+                                                    const std::string& _modulePrefix,
 													const std::string& _commonHeaderName,
 													const std::string& _realString,
 													const std::string& _intString,
@@ -52,7 +53,8 @@ ExportSimulinkInterface::ExportSimulinkInterface(	const std::string& _makefileNa
 	: makefile(MAKEFILE_SFUN_QPOASES, _makefileName, "", _realString, _intString, _precision, "%"),
 	  wrapperSource(SOLVER_SFUN_SOURCE, _wrapperSourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
 	  wrapperHeader(SOLVER_SFUN_HEADER, _wrapperHeaderFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
-	  moduleName( _moduleName )
+	  moduleName( _moduleName ),
+      modulePrefix( _modulePrefix )
 {}
 
 
@@ -77,6 +79,7 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 	//
 
 	wrapperSource.dictionary[ "@MODULE_NAME@" ] = moduleName;
+    wrapperSource.dictionary[ "@MODULE_PREFIX@" ] = modulePrefix;
 
 	wrapperSource.fillTemplate();
 
@@ -84,6 +87,7 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 	// Header file configuration
 	//
 	wrapperHeader.dictionary[ "@MODULE_NAME@" ] = moduleName;
+    wrapperHeader.dictionary[ "@MODULE_PREFIX@" ] = modulePrefix;
 
 	wrapperHeader.fillTemplate();
 
@@ -92,6 +96,8 @@ returnValue ExportSimulinkInterface::configure(	unsigned N,
 	//
 
 	makefile.dictionary[ "@MODULE_NAME@" ] = moduleName;
+    makefile.dictionary[ "@MODULE_PREFIX@" ] = modulePrefix;
+    
 	makefile.dictionary[ "@REAL_TYPE@" ] = makefile.realString;
 
 	makefile.dictionary[ "@N@" ] = toString( N );

@@ -148,6 +148,11 @@ class ExportStatement
 		{
 			return *this;
 		}
+        
+        
+    public:
+        static std::string fcnPrefix;
+        static std::string varPrefix;
 };
 
 

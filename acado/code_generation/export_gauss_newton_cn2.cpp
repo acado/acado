@@ -2117,9 +2117,11 @@ returnValue ExportGaussNewtonCN2::setupQPInterface( )
 {
 	string folderName;
 	get(CG_EXPORT_FOLDER_NAME, folderName);
-	string moduleName;
+	
+    string moduleName;
 	get(CG_MODULE_NAME, moduleName);
-	int qpSolver;
+	
+    int qpSolver;
 	get(QP_SOLVER, qpSolver);
 
 	std::string sourceFile, headerFile, solverDefine;

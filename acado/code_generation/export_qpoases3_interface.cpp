@@ -91,7 +91,7 @@ returnValue ExportQpOases3Interface::configure(	const std::string& _prefix,
 		{
 			s   << "initW( &qp, ";
 			s	<< _qpH << ", " << _qpg << ", " << _qpA << ", " << _qplb << ", " << _qpub << ", "
-				<< _qplbA << ", " << _qpubA << ", " << "&" << "nWSR,0";
+				<< _qplbA << ", " << _qpubA << ", " << "&" << ExportStatement::fcnPrefix << _prefix << "_nWSR,0";
 
 			if ( (bool)_hotstartQP == true )
 				s << ", 0," << _dualSolution << ", ";
@@ -107,7 +107,7 @@ returnValue ExportQpOases3Interface::configure(	const std::string& _prefix,
 		{
 			s   << "init( &qp, ";
 			s	<< _qpH << ", " << _qpg << ", " << _qpA << ", " << _qplb << ", " << _qpub << ", "
-				<< _qplbA << ", " << _qpubA << ", " << "&" << "nWSR,0";
+				<< _qplbA << ", " << _qpubA << ", " << "&" << ExportStatement::fcnPrefix << _prefix << "_nWSR,0";
 		}
 		s   << " );";
 
@@ -120,7 +120,7 @@ returnValue ExportQpOases3Interface::configure(	const std::string& _prefix,
 		if ( ( (bool)_hotstartQP == true ) || (_externalCholesky == false) )
 		{
 			s   << "initW( &qp, ";
-			s	<< _qpH << ", " << _qpg << ", " << _qplb << ", " << _qpub << ", " << "&" << "nWSR,0";
+			s	<< _qpH << ", " << _qpg << ", " << _qplb << ", " << _qpub << ", " << "&" << ExportStatement::fcnPrefix << _prefix << "_nWSR,0";
 
 			if ( (bool)_hotstartQP == true )
 				s << ", 0," << _dualSolution << ", ";
@@ -135,7 +135,7 @@ returnValue ExportQpOases3Interface::configure(	const std::string& _prefix,
 		else
 		{
 			s   << "init( &qp, ";
-			s	<< _qpH << ", " << _qpg << ", " << _qplb << ", " << _qpub << ", " << "&" << "nWSR,0";
+			s	<< _qpH << ", " << _qpg << ", " << _qplb << ", " << _qpub << ", " << "&" << ExportStatement::fcnPrefix << _prefix << "_nWSR,0";
 		}
 		s   << " );";
 
@@ -151,6 +151,8 @@ returnValue ExportQpOases3Interface::configure(	const std::string& _prefix,
 	qpoSource.dictionary[ "@DUAL_SOLUTION@" ] =  _dualSolution;
 	qpoSource.dictionary[ "@CTOR@" ] =  ctor.str();
 	qpoSource.dictionary[ "@SIGMA@" ] =  _sigma;
+    qpoSource.dictionary[ "@MODULE_NAME@" ] = ExportStatement::fcnPrefix;
+    qpoSource.dictionary[ "@MODULE_PREFIX@" ] = ExportStatement::varPrefix;
 
 	// And then fill a template file
 	qpoSource.fillTemplate();
@@ -160,6 +162,9 @@ returnValue ExportQpOases3Interface::configure(	const std::string& _prefix,
 	//
 
 	// Configure the dictionary
+    qpoHeader.dictionary[ "@MODULE_NAME@" ] = ExportStatement::fcnPrefix;
+    qpoHeader.dictionary[ "@MODULE_PREFIX@" ] = ExportStatement::varPrefix;
+	
     qpoHeader.dictionary[ "@PREFIX@" ] =  _prefix;
 	qpoHeader.dictionary[ "@SOLVER_DEFINE@" ] =  _solverDefine;
 

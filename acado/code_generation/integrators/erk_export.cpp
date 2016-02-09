@@ -255,14 +255,14 @@ returnValue ExplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 	int matlabInterface;
 	userInteraction->get(GENERATE_MATLAB_INTERFACE, matlabInterface);
 	if( matlabInterface && (ExportSensitivityType)sensGen == FORWARD ) {
-		return rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD)
-				& diffs_rhs.init(f, "acado_rhs_ext", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
+		return rhs.init(f_ODE, "rhs", NX, 0, NU, NP, NDX, NOD)
+				& diffs_rhs.init(f, "rhs_ext", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
 	}
 	else if( (ExportSensitivityType)sensGen == FORWARD ) {
-		return diffs_rhs.init(f, "acado_rhs_forw", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
+		return diffs_rhs.init(f, "rhs_forw", NX * (1 + NX + NU), 0, NU, NP, NDX, NOD);
 	}
 	else {
-		return diffs_rhs.init(f_ODE, "acado_rhs", NX, 0, NU, NP, NDX, NOD);
+		return diffs_rhs.init(f_ODE, "rhs", NX, 0, NU, NP, NDX, NOD);
 	}
 
 	return SUCCESSFUL_RETURN;

@@ -36,6 +36,9 @@
 
 BEGIN_NAMESPACE_ACADO
 
+std::string ExportStatement::fcnPrefix = "acado";
+std::string ExportStatement::varPrefix = "ACADO";
+        
 //
 // PUBLIC MEMBER FUNCTIONS:
 //

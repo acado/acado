@@ -1,5 +1,5 @@
-#ifndef ACADO_AUXILIARY_FUNCTIONS_H
-#define ACADO_AUXILIARY_FUNCTIONS_H
+#ifndef @MODULE_PREFIX@_AUXILIARY_FUNCTIONS_H
+#define @MODULE_PREFIX@_AUXILIARY_FUNCTIONS_H
 
 #include "@MODULE_NAME@_common.h"
 
@@ -11,32 +11,32 @@ extern "C"
 #endif /* __MATLAB__ */
 
 /** Get pointer to the matrix with differential variables. */
-real_t* getAcadoVariablesX( );
+real_t* @MODULE_NAME@_getVariablesX( );
 
 /** Get pointer to the matrix with control variables. */
-real_t* getAcadoVariablesU( );
+real_t* @MODULE_NAME@_getVariablesU( );
 
-#if ACADO_NY > 0
+#if @MODULE_PREFIX@_NY > 0
 /** Get pointer to the matrix with references/measurements. */
-real_t* getAcadoVariablesY( );
+real_t* @MODULE_NAME@_getVariablesY( );
 #endif
 
-#if ACADO_NYN > 0
+#if @MODULE_PREFIX@_NYN > 0
 /** Get pointer to the vector with references/measurement on the last node. */
-real_t* getAcadoVariablesYN( );
+real_t* @MODULE_NAME@_getVariablesYN( );
 #endif
 
 /** Get pointer to the current state feedback vector. Only applicable for NMPC. */
-real_t* getAcadoVariablesX0( );
+real_t* @MODULE_NAME@_getVariablesX0( );
 
 /** Print differential variables. */
-void printDifferentialVariables();
+void @MODULE_NAME@_printDifferentialVariables( );
 
 /** Print control variables. */
-void printControlVariables();
+void @MODULE_NAME@_printControlVariables( );
 
 /** Print ACADO code generation notice. */
-void printHeader();
+void @MODULE_NAME@_printHeader( );
 
 /*
  * A huge thanks goes to Alexander Domahidi from ETHZ, Switzerland, for 
@@ -50,12 +50,12 @@ void printHeader();
 #include <Windows.h>
 
 /** A structure for keeping internal timer data. */
-typedef struct timer
+typedef struct @MODULE_NAME@_timer_
 {
 	LARGE_INTEGER tic;
 	LARGE_INTEGER toc;
 	LARGE_INTEGER freq;
-} timer;
+} @MODULE_NAME@_timer;
 
 
 #elif (defined __APPLE__)
@@ -64,12 +64,12 @@ typedef struct timer
 #include <mach/mach_time.h>
 
 /** A structure for keeping internal timer data. */
-typedef struct timer
+typedef struct @MODULE_NAME@_timer_
 {
 	uint64_t tic;
 	uint64_t toc;
 	mach_timebase_info_data_t tinfo;
-} timer;
+} @MODULE_NAME@_timer;
 
 #else
 
@@ -82,31 +82,31 @@ typedef struct timer
 #include <sys/stat.h>
 #include <sys/time.h>
 
-typedef struct timer
+typedef struct @MODULE_NAME@_timer_
 {
 	struct timeval tic;
 	struct timeval toc;
-} timer;
+} @MODULE_NAME@_timer;
 
 #else
 /* ANSI C */
 
 /** A structure for keeping internal timer data. */
-typedef struct timer
+typedef struct @MODULE_NAME@_timer_
 {
 	struct timespec tic;
 	struct timespec toc;
-} timer;
+} @MODULE_NAME@_timer;
 
 #endif /* __STDC_VERSION__ >= 199901L */
 
 #endif /* (defined _WIN32 || defined _WIN64) */
 
 /** A function for measurement of the current time. */
-void tic(timer* t);
+void @MODULE_NAME@_tic( @MODULE_NAME@_timer* t );
 
 /** A function which returns the elapsed time. */
-real_t toc(timer* t);
+real_t @MODULE_NAME@_toc( @MODULE_NAME@_timer* t );
 
 #endif
 
@@ -116,4 +116,4 @@ real_t toc(timer* t);
 #endif /* __cplusplus */
 #endif /* __MATLAB__ */
 
-#endif /* ACADO_AUXILIARY_FUNCTIONS_H */
+#endif /* @MODULE_PREFIX@_AUXILIARY_FUNCTIONS_H */

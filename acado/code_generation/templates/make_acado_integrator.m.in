@@ -1,10 +1,10 @@
-function make_acado_integrator( name, extern )
+function make_@MODULE_NAME@_integrator( name, extern )
 
 	% Output file name, and also function name
 	if (nargin > 0)
 		fileOut = name;
 	else
-		fileOut = 'acado_integrator';
+		fileOut = '@MODULE_NAME@_integrator';
 	end;
 		
 	% Root folder of code generation
@@ -12,9 +12,9 @@ function make_acado_integrator( name, extern )
 		
 	% Auto-generated files
 	CGSources = [ ...
-		'acado_integrate.c ' ...
-		'acado_integrator.c ' ...
-		'acado_auxiliary_sim_functions.c ' ...
+		'@MODULE_NAME@_integrate.c ' ...
+		'@MODULE_NAME@_integrator.c ' ...
+		'@MODULE_NAME@_auxiliary_sim_functions.c ' ...
 		];
 	if (nargin > 1)
 		CGSources = [CGSources extern];

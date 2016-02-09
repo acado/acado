@@ -13,7 +13,7 @@ qpOptions_t qpOptions;
 #define QPDUNES_LS_HOMOTOPY_GRID_SEARCH 0
 #endif
 
-#include "acado_auxiliary_functions.h"
+#include "@MODULE_NAME@_auxiliary_functions.h"
 real_t prepareQPtime, updateQPtime, solveQPtime;
 
 int initializeQpDunes( void )

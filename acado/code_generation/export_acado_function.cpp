@@ -99,7 +99,7 @@ returnValue ExportAcadoFunction::init(	const Function& _f,
 
 	f = std::shared_ptr< Function >(new Function( _f ));
 
-	globalVar.setup("acado_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
+	globalVar.setup( "rhs_aux", f->getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
 	f->setGlobalExportVariableName( globalVar.getFullName() );
 
 	external = false;

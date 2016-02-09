@@ -74,6 +74,7 @@ public:
 	 *  \return SUCCESSFUL_RETURN
 	 */
 	returnValue configure(	const std::string& _moduleName,
+                            const std::string& _modulePrefix,
 							bool _useSinglePrecision,
 							bool _useComplexArithmetic,
 							QPSolverName _qpSolver,

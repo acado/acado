@@ -1,5 +1,5 @@
-#ifndef @MODULE_NAME@_COMMON_H
-#define @MODULE_NAME@_COMMON_H
+#ifndef @MODULE_PREFIX@_COMMON_H
+#define @MODULE_PREFIX@_COMMON_H
 
 #include <math.h>
 #include <string.h>
@@ -11,7 +11,7 @@ extern "C"
 #endif /* __cplusplus */
 #endif /* __MATLAB__ */
 
-/** \defgroup @MODULE_NAME@ ACADO CGT generated module. */
+/** \defgroup @MODULE_PREFIX@ ACADO CGT generated module. */
 /** @{ */
 
 @QP_SOLVER_INTERFACE@
@@ -29,11 +29,11 @@ extern "C"
  * 
  *  Via this structure the user "communicates" with the solver code.
  */
-typedef struct ACADOvariables_
+typedef struct @MODULE_PREFIX@variables_
 {
 int dummy;
 @VARIABLES_DECLARATION@
-} ACADOvariables;
+} @MODULE_PREFIX@variables;
 
 /** Private workspace used by the auto-generated code.
  * 
@@ -41,10 +41,10 @@ int dummy;
  *  In other words, the user code should not modify values of this 
  *  structure. 
  */
-typedef struct ACADOworkspace_
+typedef struct @MODULE_PREFIX@workspace_
 {
 @WORKSPACE_DECLARATION@
-} ACADOworkspace;
+} @MODULE_PREFIX@workspace;
 
 /* 
  * Forward function declarations. 
@@ -56,8 +56,8 @@ typedef struct ACADOworkspace_
  * Extern declarations. 
  */
 
-extern ACADOworkspace acadoWorkspace;
-extern ACADOvariables acadoVariables;
+extern @MODULE_PREFIX@workspace @MODULE_NAME@Workspace;
+extern @MODULE_PREFIX@variables @MODULE_NAME@Variables;
 
 /** @} */
 
@@ -67,4 +67,4 @@ extern ACADOvariables acadoVariables;
 #endif /* __cplusplus */
 #endif /* __MATLAB__ */
 
-#endif /* @MODULE_NAME@_COMMON_H */
+#endif /* @MODULE_PREFIX@_COMMON_H */
