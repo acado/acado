@@ -1169,11 +1169,6 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 		T1.setup("T1", NX, NX, REAL, ACADO_WORKSPACE);
 		T2.setup("T2", NX, NX, REAL, ACADO_WORKSPACE);
 
-		condensePrep.addFunctionCall(moveGxT, evGx.getAddress(0, 0), C.getAddress(0, 0));
-		for (unsigned row = 1; row < N; ++row)
-			condensePrep.addFunctionCall(
-					multGxGx, evGx.getAddress(row * NX), C.getAddress((row - 1) * NX), C.getAddress(row * NX));
-
 		/* Algorithm for computation of H10 and H00
 
 		T1 = Q_N * C_{N - 1}
