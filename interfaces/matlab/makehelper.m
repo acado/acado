@@ -144,8 +144,14 @@ VERBOSE = 0;
     
     %COMPILER FLAGS
     if (ispc)
+        comp = mex.getCompilerConfigurations('C++','Selected');
+        ver = comp.Version;
         % Microsoft Visual C++ (express) compiler
-        CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -O ' ];    
+        if( str2num(ver) < 14 )
+            CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dsnprintf=_snprintf -Dround=acadoRound -O ' ];
+        else 
+            CPPFLAGS  = [ IFLAGS, ' -DWIN32 -D__cpluplus -D__MATLAB__ -Dround=acadoRound -O ' ];
+        end
     elseif (ismac)
         % Other compilers
         CPPFLAGS  = [ IFLAGS, ' LDFLAGS=''\$LDFLAGS -stdlib=libc++'' CXXFLAGS=''\$CXXFLAGS -fPIC -stdlib=libc++ -std=c++11'' -DLINUX -D__cpluplus -D__MATLAB__ -Dregister="" -O ' ]
