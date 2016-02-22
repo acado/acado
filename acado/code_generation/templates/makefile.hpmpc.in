@@ -12,15 +12,15 @@ CXXFLAGS = -O3 -finline-functions
 CC     = $(CCACHE_APP) gcc
 CXX    = $(CCACHE_APP) g++
 
-OBJECTS = acado_integrator.o acado_solver.o acado_auxiliary_functions.o acado_hpmpc_interface.o
+OBJECTS = @MODULE_NAME@_integrator.o @MODULE_NAME@_solver.o @MODULE_NAME@_auxiliary_functions.o @MODULE_NAME@_hpmpc_interface.o
 
 .PHONY: all
-all: libacado_exported_rti.a  test
+all: lib@MODULE_NAME@_exported_rti.a  test
 
 test: ${OBJECTS} test.o
 
-libacado_exported_rti.a: ${OBJECTS}
+lib@MODULE_NAME@_exported_rti.a: ${OBJECTS}
 	ar r $@ $?
 
 clean:
-	rm -f *.o libacado_exported_rti.a test
+	rm -f *.o lib@MODULE_NAME@_exported_rti.a test

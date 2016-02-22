@@ -244,8 +244,8 @@ returnValue IntegratorExport::setLinearOutput( const DMatrix& M3, const DMatrix&
 		DMatrix A3_large = expandOutputMatrix(A3);
 		f_large << _rhs + A3_large*x;
 
-		return (rhs3.init(f_large, "acado_rhs3", NX, NXA, NU, NP, NDX, NOD) &
-				diffs_rhs3.init(g, "acado_diffs3", NX, NXA, NU, NP, NDX, NOD));
+		return (rhs3.init(f_large, "rhs3", NX, NXA, NU, NP, NDX, NOD) &
+				diffs_rhs3.init(g, "diffs3", NX, NXA, NU, NP, NDX, NOD));
 	}
 
 	return SUCCESSFUL_RETURN;

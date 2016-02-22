@@ -76,5 +76,6 @@ for i = 1:Nt
     statesOr = integrate_getting_started(input);
 end
 time = toc/Nt;
-disp(['average time per integration: ' num2str(round(time*10^6)) ' μs'])
+disp(['average time per integration: ' num2str(round(time*10^6)) ' µs'])
+
 

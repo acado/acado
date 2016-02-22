@@ -230,8 +230,11 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 
 returnValue ExportExactHessianCN2::setupHessianRegularization( )
 {
+    string moduleName;
+	get(CG_MODULE_NAME, moduleName);
+    
 	ExportVariable block( "hessian_block", NX+NU, NX+NU );
-	regularization = ExportFunction( "acado_regularize", block );
+	regularization = ExportFunction( moduleName + "_regularize", block );
 	regularization.doc( "EVD-based regularization of a Hessian block." );
 	regularization.addLinebreak();
 

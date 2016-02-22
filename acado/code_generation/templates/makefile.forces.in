@@ -18,31 +18,31 @@ FORCES_SOURCES = \
 
 OBJECTS = \
 	./forces/src/forces.o \
-	acado_integrator.o \
-	acado_solver.o \
-	acado_auxiliary_functions.o
+	@MODULE_NAME@_integrator.o \
+	@MODULE_NAME@_solver.o \
+	@MODULE_NAME@_auxiliary_functions.o
 
 .PHONY: all
-all: libacado_exported_rti.a
+all: lib@MODULE_NAME@_exported_rti.a
 
 test: ${OBJECTS} test.o
 
-$(FORCES_SOURCES): acado_forces_generator.py
-	python acado_forces_generator.py
+$(FORCES_SOURCES): @MODULE_NAME@_forces_generator.py
+	python @MODULE_NAME@_forces_generator.py
 
 ./forces/src/forces.o       : ./forces/include/forces.h
-acado_solver.o              : acado_common.h
-acado_integrator.o          : acado_common.h
-acado_auxiliary_functions.o : acado_common.h \
-                              acado_auxiliary_functions.h
-test.o                      : acado_common.h \
+@MODULE_NAME@_solver.o              : @MODULE_NAME@_common.h
+@MODULE_NAME@_integrator.o          : @MODULE_NAME@_common.h
+@MODULE_NAME@_auxiliary_functions.o : @MODULE_NAME@_common.h \
+                              @MODULE_NAME@_auxiliary_functions.h
+test.o                      : @MODULE_NAME@_common.h \
                               ./forces/include/forces.h \
-                              acado_auxiliary_functions.h
+                              @MODULE_NAME@_auxiliary_functions.h
 
-libacado_exported_rti.a: ${OBJECTS}
+lib@MODULE_NAME@_exported_rti.a: ${OBJECTS}
 	ar r $@ $?
 
-${OBJECTS} : acado_common.h
+${OBJECTS} : @MODULE_NAME@_common.h
 
 .PHONY : clean
 clean :

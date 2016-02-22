@@ -149,8 +149,8 @@ returnValue ImplicitRungeKuttaExport::setDifferentialEquation(	const Expression&
 
 		if( f.getNT() > 0 ) timeDependant = true;
 
-		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX,NOD ) &
-				diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX,NOD ) );
+		return (rhs.init( f,"rhs", NX,NXA,NU,NP,NDX,NOD ) &
+				diffs_rhs.init( g,"diffs", NX,NXA,NU,NP,NDX,NOD ) );
 	}
 	return SUCCESSFUL_RETURN;
 }
@@ -336,25 +336,28 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	
 	initializeDDMatrix();
 	initializeCoefficients();
+    
+    string moduleName;
+	get(CG_MODULE_NAME, moduleName);
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 	DMatrix tmp = AA;
-	ExportVariable Ah( "Ah_mat", tmp*=h, STATIC_CONST_REAL );
+	ExportVariable Ah( moduleName+"_Ah_mat", tmp*=h, STATIC_CONST_REAL );
 	code.addDeclaration( Ah );
 	code.addLinebreak( 2 );
 	// TODO: Ask Milan why this does NOT work properly !!
-	Ah = ExportVariable( "Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
+	Ah = ExportVariable( moduleName+"_Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 
 	DVector BB( bb );
-	ExportVariable Bh( "Bh_mat", DMatrix( BB*=h ) );
+	ExportVariable Bh( moduleName+"_Bh_mat", DMatrix( BB*=h ) );
 
 	DVector CC( cc );
 	ExportVariable C;
 	if( timeDependant ) {
-		C = ExportVariable( "C_mat", DMatrix( CC*=(1.0/grid.getNumIntervals()) ), STATIC_CONST_REAL );
+		C = ExportVariable( moduleName+"_C_mat", DMatrix( CC*=(1.0/grid.getNumIntervals()) ), STATIC_CONST_REAL );
 		code.addDeclaration( C );
 		code.addLinebreak( 2 );
-		C = ExportVariable( "C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
+		C = ExportVariable( moduleName+"_C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 	}
 
 	code.addComment(std::string("Fixed step size:") + toString(h));
@@ -373,9 +376,9 @@ returnValue ImplicitRungeKuttaExport::getCode(	ExportStatementBlock& code )
 	ExportIndex tmp_index4("tmp_index4");
 	ExportVariable tmp_meas("tmp_meas", 1, outputGrids.size(), INT, ACADO_LOCAL);
 
-	ExportVariable numInt( "numInts", 1, 1, INT );
+	ExportVariable numInt( moduleName+"_numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
-		ExportVariable numStepsV( "numSteps", numSteps, STATIC_CONST_INT );
+		ExportVariable numStepsV( moduleName+"_numSteps", numSteps, STATIC_CONST_INT );
 		code.addDeclaration( numStepsV );
 		code.addLinebreak( 2 );
 		integrate.addStatement( std::string( "int " ) + numInt.getName() + " = " + numStepsV.getName() + "[" + rk_index.getName() + "];\n" );
@@ -607,7 +610,7 @@ returnValue ImplicitRungeKuttaExport::solveImplicitSystem( ExportStatementBlock*
 		ExportForLoop loop11( index2,0,numStages );
 		evaluateMatrix( &loop11, index2, index3, tmp_index, k_index, rk_A, Ah, C, true, DERIVATIVES );
 		loop1.addStatement( loop11 );
-		loop1.addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_b.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+		loop1.addStatement( det.getFullName() + " = " + ExportStatement::fcnPrefix + "_" + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_b.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 		ExportForLoop loopTemp( index3,0,numStages );
 		loopTemp.addStatement( rk_kkk.getSubMatrix( k_index+NX1,k_index+NX1+NX2,index3,index3+1 ) += rk_b.getRows( index3*NX2,index3*NX2+NX2 ) );											// differential states
 		if(NXA > 0) loopTemp.addStatement( rk_kkk.getSubMatrix( k_index+NX,k_index+NX+NXA,index3,index3+1 ) += rk_b.getRows( index3*NXA+numStages*NX2,index3*NXA+numStages*NX2+NXA ) );		// algebraic states

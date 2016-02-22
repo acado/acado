@@ -2,69 +2,69 @@
 
 #include <stdio.h>
 
-real_t* getAcadoVariablesX( )
+real_t* @MODULE_NAME@_getVariablesX( )
 {
-	return acadoVariables.x;
+	return @MODULE_NAME@Variables.x;
 }
 
-real_t* getAcadoVariablesU( )
+real_t* @MODULE_NAME@_getVariablesU( )
 {
-	return acadoVariables.u;
+	return @MODULE_NAME@Variables.u;
 }
 
-#if ACADO_NY > 0
-real_t* getAcadoVariablesY( )
+#if @MODULE_PREFIX@_NY > 0
+real_t* @MODULE_NAME@_getVariablesY( )
 {
-	return acadoVariables.y;
-}
-#endif
-
-#if ACADO_NYN > 0
-real_t* getAcadoVariablesYN( )
-{
-	return acadoVariables.yN;
+	return @MODULE_NAME@Variables.y;
 }
 #endif
 
-real_t* getAcadoVariablesX0( )
+#if @MODULE_PREFIX@_NYN > 0
+real_t* @MODULE_NAME@_getVariablesYN( )
 {
-#if ACADO_INITIAL_VALUE_FIXED
-	return acadoVariables.x0;
+	return @MODULE_NAME@Variables.yN;
+}
+#endif
+
+real_t* @MODULE_NAME@_getVariablesX0( )
+{
+#if @MODULE_PREFIX@_INITIAL_VALUE_FIXED
+	return @MODULE_NAME@Variables.x0;
 #else
 	return 0;
 #endif
 }
 
 /** Print differential variables. */
-void printDifferentialVariables()
+void @MODULE_NAME@_printDifferentialVariables( )
 {
 	int i, j;
 	printf("\nDifferential variables:\n[\n");
-	for (i = 0; i < ACADO_N + 1; ++i)
+	for (i = 0; i < @MODULE_PREFIX@_N + 1; ++i)
 	{
-		for (j = 0; j < ACADO_NX; ++j)
-			printf("\t%e", acadoVariables.x[i * ACADO_NX + j]);
+		for (j = 0; j < @MODULE_PREFIX@_NX; ++j)
+			printf("\t%e", @MODULE_NAME@Variables.x[i * @MODULE_PREFIX@_NX + j]);
 		printf("\n");
 	}
 	printf("]\n\n");
 }
 
 /** Print control variables. */
-void printControlVariables()
+void @MODULE_NAME@_printControlVariables( )
 {
 	int i, j;
 	printf("\nControl variables:\n[\n");
-	for (i = 0; i < ACADO_N; ++i)
+	for (i = 0; i < @MODULE_PREFIX@_N; ++i)
 	{
-		for (j = 0; j < ACADO_NU; ++j)
-			printf("\t%e", acadoVariables.u[i * ACADO_NU + j]);
+		for (j = 0; j < @MODULE_PREFIX@_NU; ++j)
+			printf("\t%e", @MODULE_NAME@Variables.u[i * @MODULE_PREFIX@_NU + j]);
 		printf("\n");
 	}
 	printf("]\n\n");
 }
 
 /** Print ACADO code generation notice. */
-void printHeader()
+void @MODULE_NAME@_printHeader( )
 {
 	printf(
 		"\nACADO Toolkit -- A Toolkit for Automatic Control and Dynamic Optimization.\n"
@@ -86,13 +86,13 @@ void printHeader()
 #if !(defined _DSPACE)
 #if (defined _WIN32 || defined _WIN64) && !(defined __MINGW32__ || defined __MINGW64__)
 
-void tic(timer* t)
+void @MODULE_NAME@_tic( @MODULE_NAME@_timer* t )
 {
 	QueryPerformanceFrequency(&t->freq);
 	QueryPerformanceCounter(&t->tic);
 }
 
-real_t toc(timer* t)
+real_t @MODULE_NAME@_toc( @MODULE_NAME@_timer* t )
 {
 	QueryPerformanceCounter(&t->toc);
 	return ((t->toc.QuadPart - t->tic.QuadPart) / (real_t)t->freq.QuadPart);
@@ -101,13 +101,13 @@ real_t toc(timer* t)
 
 #elif (defined __APPLE__)
 
-void tic(timer* t)
+void @MODULE_NAME@_tic( @MODULE_NAME@_timer* t )
 {
     /* read current clock cycles */
     t->tic = mach_absolute_time();
 }
 
-real_t toc(timer* t)
+real_t @MODULE_NAME@_toc( @MODULE_NAME@_timer* t )
 {
 
     uint64_t duration; /* elapsed time in clock cycles*/
@@ -129,13 +129,13 @@ real_t toc(timer* t)
 /* C99 mode */
 
 /* read current time */
-void tic(timer* t)
+void @MODULE_NAME@_tic( @MODULE_NAME@_timer* t )
 {
 	gettimeofday(&t->tic, 0);
 }
 
 /* return time passed since last call to tic on this timer */
-real_t toc(timer* t)
+real_t @MODULE_NAME@_toc( @MODULE_NAME@_timer* t )
 {
 	struct timeval temp;
 	
@@ -159,14 +159,14 @@ real_t toc(timer* t)
 /* ANSI */
 
 /* read current time */
-void tic(timer* t)
+void @MODULE_NAME@_tic( @MODULE_NAME@_timer* t )
 {
 	clock_gettime(CLOCK_MONOTONIC, &t->tic);
 }
 
 
 /* return time passed since last call to tic on this timer */
-real_t toc(timer* t)
+real_t @MODULE_NAME@_toc( @MODULE_NAME@_timer* t )
 {
 	struct timespec temp;
     

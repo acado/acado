@@ -244,25 +244,28 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	
 	initializeDDMatrix();
 	initializeCoefficients();
+    
+    string moduleName;
+	get(CG_MODULE_NAME, moduleName);
 
 	double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 	DMatrix tmp = AA;
-	ExportVariable Ah( "Ah_mat", tmp*=h, STATIC_CONST_REAL );
+	ExportVariable Ah( moduleName+"_Ah_mat", tmp*=h, STATIC_CONST_REAL );
 	code.addDeclaration( Ah );
 	code.addLinebreak( 2 );
 	// TODO: Ask Milan why this does NOT work properly !!
-	Ah = ExportVariable( "Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
+	Ah = ExportVariable( moduleName+"_Ah_mat", numStages, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 
 	DVector BB( bb );
-	ExportVariable Bh( "Bh_mat", DMatrix( BB*=h ) );
+	ExportVariable Bh( moduleName+"_Bh_mat", DMatrix( BB*=h ) );
 
 	DVector CC( cc );
 	ExportVariable C;
 	if( timeDependant ) {
-		C = ExportVariable( "C_mat", DMatrix( CC*=(1.0/grid.getNumIntervals()) ), STATIC_CONST_REAL );
+		C = ExportVariable( moduleName+"_C_mat", DMatrix( CC*=(1.0/grid.getNumIntervals()) ), STATIC_CONST_REAL );
 		code.addDeclaration( C );
 		code.addLinebreak( 2 );
-		C = ExportVariable( "C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
+		C = ExportVariable( moduleName+"_C_mat", 1, numStages, STATIC_CONST_REAL, ACADO_LOCAL );
 	}
 
 	code.addComment(std::string("Fixed step size:") + toString(h));
@@ -281,9 +284,9 @@ returnValue ForwardIRKExport::getCode(	ExportStatementBlock& code )
 	ExportIndex tmp_index4("tmp_index4");
 	ExportVariable tmp_meas("tmp_meas", 1, outputGrids.size(), INT, ACADO_LOCAL);
 
-	ExportVariable numInt( "numInts", 1, 1, INT );
+	ExportVariable numInt( moduleName+"_numInts", 1, 1, INT );
 	if( !equidistantControlGrid() ) {
-		ExportVariable numStepsV( "numSteps", numSteps, STATIC_CONST_INT );
+		ExportVariable numStepsV( moduleName+"_numSteps", numSteps, STATIC_CONST_INT );
 		code.addDeclaration( numStepsV );
 		code.addLinebreak( 2 );
 		integrate.addStatement( std::string( "int " ) + numInt.getName() + " = " + numStepsV.getName() + "[" + rk_index.getName() + "];\n" );
@@ -797,7 +800,7 @@ returnValue ForwardIRKExport::sensitivitiesImplicitSystem( ExportStatementBlock*
 		block->addStatement( loop1 );
 		if( STATES && (number == 1 || NX1 == 0) ) {
 			block->addStatement( std::string( "if( 0 == " ) + index1.getName() + " ) {\n" );	// factorization of the new matrix rk_A not yet calculated!
-			block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_b.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+			block->addStatement( det.getFullName() + " = " + ExportStatement::fcnPrefix + "_" + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_b.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 			block->addStatement( std::string( "}\n else {\n" ) );
 		}
 		block->addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );

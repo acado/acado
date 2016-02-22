@@ -47,7 +47,7 @@ output
 }
 */
 
-/** MEX interface for the ACADO OCP solver
+/** MEX interface for the @MODULE_PREFIX@ OCP solver
  *
  *  \author Milan Vukov, milan.vukov@esat.kuleuven.be
  *
@@ -61,41 +61,41 @@ output
 #include <stdarg.h>
 
 #include "mex.h"
-#include "acado_common.h"
-#include "acado_auxiliary_functions.h"
+#include "@MODULE_NAME@_common.h"
+#include "@MODULE_NAME@_auxiliary_functions.h"
 
 #define FREE( mem ) { if( mem ) { mxFree( mem ); mem = NULL; } }
 
 /* Define number of outputs */
 #define NOO 3
 
-#if ACADO_NXA > 0
+#if @MODULE_PREFIX@_NXA > 0
 #define NOO_2 NOO + 1
 #else
 #define NOO_2 NOO
 #endif
 
-#if ACADO_USE_ARRIVAL_COST == 1
+#if @MODULE_PREFIX@_USE_ARRIVAL_COST == 1
 #define NOO_3 NOO_2 + 2
 #else
 #define NOO_3 NOO_2
 #endif
 
-#if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
+#if @MODULE_PREFIX@_COMPUTE_COVARIANCE_MATRIX == 1
 #define NOO_4 NOO_3 + 1
 #else
 #define NOO_4 NOO_3
 #endif
 
 /** Instance of the user data structure. */
-ACADOvariables acadoVariables;
+@MODULE_PREFIX@variables @MODULE_NAME@Variables;
 /** Instance of the private workspace structure. */
-ACADOworkspace acadoWorkspace;
+@MODULE_PREFIX@workspace @MODULE_NAME@Workspace;
 
-#if ACADO_QP_SOLVER == ACADO_FORCES
+#if @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_FORCES
 #include "forces.h"
-extern forces_info acadoForces_info;
-#elif ACADO_QP_SOLVER == ACADO_QPDUNES
+extern forces_info @MODULE_NAME@Forces_info;
+#elif @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPDUNES
 #include <qpDUNES.h>
 extern qpData_t    qpData;
 #endif
@@ -219,22 +219,22 @@ void mexFunction(	int nlhs,
 	double status, cpuTime, kktValue, objValue;
 	double tmp[ 1 ];
 	mxArray* shPtr;
-	timer tmr;
+	@MODULE_NAME@_timer tmr;
 	double nIterations = 0;
 	
 	const char *outNames[ NOO_4 ];
 	outNames[ 0 ] = "info";
 	outNames[ 1 ] = "x";
 	outNames[ 2 ] = "u";
-#if ACADO_NXA
+#if @MODULE_PREFIX@_NXA
 	outNames[ NOO ] = "z";
 #endif	
 		
-#if ACADO_USE_ARRIVAL_COST == 1
+#if @MODULE_PREFIX@_USE_ARRIVAL_COST == 1
 	outNames[ NOO_2 ] = "xAC";
 	outNames[NOO_2  + 1] = "SAC";
 #endif
-#if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
+#if @MODULE_PREFIX@_COMPUTE_COVARIANCE_MATRIX == 1
 	outNames[ NOO_3 ] = "sigmaN";
 #endif
 	
@@ -262,87 +262,88 @@ void mexFunction(	int nlhs,
 		initType = 0;
 		
 	/* Copy MATLAB arrays to C arrays. */
-	getArray(1, src, 0, "x", acadoVariables.x, ACADO_N + 1, ACADO_NX);
-	getArray(1, src, 0, "u", acadoVariables.u, ACADO_N, ACADO_NU);
+	getArray(1, src, 0, "x", @MODULE_NAME@Variables.x, @MODULE_PREFIX@_N + 1, @MODULE_PREFIX@_NX);
+	getArray(1, src, 0, "u", @MODULE_NAME@Variables.u, @MODULE_PREFIX@_N, @MODULE_PREFIX@_NU);
 	
-#if ACADO_NXA	
-	getArray(1, src, 0, "z", acadoVariables.z, ACADO_N, ACADO_NXA);
+#if @MODULE_PREFIX@_NXA	
+	getArray(1, src, 0, "z", @MODULE_NAME@Variables.z, @MODULE_PREFIX@_N, @MODULE_PREFIX@_NXA);
 #endif	
 	
-#if ACADO_NOD
-	getArray(1, src, 0, "od", acadoVariables.od, ACADO_N + 1, ACADO_NOD);
+#if @MODULE_PREFIX@_NOD
+	getArray(1, src, 0, "od", @MODULE_NAME@Variables.od, @MODULE_PREFIX@_N + 1, @MODULE_PREFIX@_NOD);
 #endif
 	
-	getArray(1, src, 0, "y", acadoVariables.y, ACADO_N, ACADO_NY);
+	getArray(1, src, 0, "y", @MODULE_NAME@Variables.y, @MODULE_PREFIX@_N, @MODULE_PREFIX@_NY);
 	
-#if ACADO_NYN
-	getArray(1, src, 0, "yN", acadoVariables.yN, ACADO_NYN, 1);
-#endif /* ACADO_NYN */
+#if @MODULE_PREFIX@_NYN
+	getArray(1, src, 0, "yN", @MODULE_NAME@Variables.yN, 1, @MODULE_PREFIX@_NYN);
+#endif /* @MODULE_PREFIX@_NYN */
 
-#if ACADO_INITIAL_STATE_FIXED
-	getArray(1, src, 0, "x0", acadoVariables.x0, ACADO_NX, 1);
-#endif /* ACADO_INITIAL_STATE_FIXED */
+#if @MODULE_PREFIX@_INITIAL_STATE_FIXED
+	getArray(1, src, 0, "x0", @MODULE_NAME@Variables.x0, 1, @MODULE_PREFIX@_NX);
+#endif /* @MODULE_PREFIX@_INITIAL_STATE_FIXED */
 
-#if ACADO_WEIGHTING_MATRICES_TYPE == 1
-	getArray(1, src, 0, "W", acadoVariables.W, ACADO_NY, ACADO_NY);
-	getArray(1, src, 0, "WN", acadoVariables.WN, ACADO_NYN, ACADO_NYN);
-#elif ACADO_WEIGHTING_MATRICES_TYPE == 2
-	getArray(1, src, 0, "W", acadoVariables.W, ACADO_N * ACADO_NY, ACADO_NY);
-	getArray(1, src, 0, "WN", acadoVariables.WN, ACADO_NYN, ACADO_NYN);
-#endif /* ACADO_WEIGHTING_MATRICES_TYPE */
+#if @MODULE_PREFIX@_WEIGHTING_MATRICES_TYPE == 1
+	getArray(1, src, 0, "W", @MODULE_NAME@Variables.W, @MODULE_PREFIX@_NY, @MODULE_PREFIX@_NY);
+	getArray(1, src, 0, "WN", @MODULE_NAME@Variables.WN, @MODULE_PREFIX@_NYN, @MODULE_PREFIX@_NYN);
+#elif @MODULE_PREFIX@_WEIGHTING_MATRICES_TYPE == 2
+	getArray(1, src, 0, "W", @MODULE_NAME@Variables.W, @MODULE_PREFIX@_N * @MODULE_PREFIX@_NY, @MODULE_PREFIX@_NY);
+	getArray(1, src, 0, "WN", @MODULE_NAME@Variables.WN, @MODULE_PREFIX@_NYN, @MODULE_PREFIX@_NYN);
+#endif /* @MODULE_PREFIX@_WEIGHTING_MATRICES_TYPE */
 
-#if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0)
+
+#if (@MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 0)
 	if (!initialized)
 	{
-		initializeSolver();
+		@MODULE_NAME@_initializeSolver();
 	}
 #endif
 
-#if (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPOASES)
+#if (@MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 0) && ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
 	/* Bounds */
-#if ACADO_INITIAL_STATE_FIXED == 1
-	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_N * ACADO_NU, 1);
-	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_N * ACADO_NU, 1);
+#if @MODULE_PREFIX@_INITIAL_STATE_FIXED == 1
+	getArray(1, src, 0, "lbValues", @MODULE_NAME@Variables.lbValues, @MODULE_PREFIX@_N * @MODULE_PREFIX@_NU, 1);
+	getArray(1, src, 0, "ubValues", @MODULE_NAME@Variables.ubValues, @MODULE_PREFIX@_N * @MODULE_PREFIX@_NU, 1);
 #else
-	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_NX + ACADO_N * ACADO_NU, 1);
-	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_NX + ACADO_N * ACADO_NU, 1);
-#endif /* ACADO_INITIAL_STATE_FIXED == 0 */
+	getArray(1, src, 0, "lbValues", @MODULE_NAME@Variables.lbValues, @MODULE_PREFIX@_NX + @MODULE_PREFIX@_N * @MODULE_PREFIX@_NU, 1);
+	getArray(1, src, 0, "ubValues", @MODULE_NAME@Variables.ubValues, @MODULE_PREFIX@_NX + @MODULE_PREFIX@_N * @MODULE_PREFIX@_NU, 1);
+#endif /* @MODULE_PREFIX@_INITIAL_STATE_FIXED == 0 */
 
 #if QPOASES_NCMAX > 0
 	/* Affine constraints */
-	getArray(1, src, 0, "lbAValues", acadoVariables.lbAValues, QPOASES_NCMAX, 1);
-	getArray(1, src, 0, "ubAValues", acadoVariables.ubAValues, QPOASES_NCMAX, 1);
+	getArray(1, src, 0, "lbAValues", @MODULE_NAME@Variables.lbAValues, QPOASES_NCMAX, 1);
+	getArray(1, src, 0, "ubAValues", @MODULE_NAME@Variables.ubAValues, QPOASES_NCMAX, 1);
 #endif /* QPOASES_NCMAX > 0 */
 
-#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_FORCES) && !ACADO_BLOCK_CONDENSING
+#elif (@MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 0) && (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_FORCES) && !@MODULE_PREFIX@_BLOCK_CONDENSING
 	/* Bounds */
-	#if (ACADO_QP_NLB > 0)
-	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_QP_NLB, 1);
+	#if (@MODULE_PREFIX@_QP_NLB > 0)
+	getArray(1, src, 0, "lbValues", @MODULE_NAME@Variables.lbValues, @MODULE_PREFIX@_QP_NLB, 1);
 	#endif
-	#if (ACADO_QP_NUB > 0)
-	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_QP_NUB, 1);
+	#if (@MODULE_PREFIX@_QP_NUB > 0)
+	getArray(1, src, 0, "ubValues", @MODULE_NAME@Variables.ubValues, @MODULE_PREFIX@_QP_NUB, 1);
 	#endif
 
-#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && (ACADO_QP_SOLVER == ACADO_QPDUNES) && !ACADO_BLOCK_CONDENSING
+#elif (@MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 0) && (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPDUNES) && !@MODULE_PREFIX@_BLOCK_CONDENSING
 	/* Bounds */
-	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_QP_NV, 1);
-	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_QP_NV, 1);
+	getArray(1, src, 0, "lbValues", @MODULE_NAME@Variables.lbValues, @MODULE_PREFIX@_QP_NV, 1);
+	getArray(1, src, 0, "ubValues", @MODULE_NAME@Variables.ubValues, @MODULE_PREFIX@_QP_NV, 1);
 	
-#elif (ACADO_HARDCODED_CONSTRAINT_VALUES == 0) && ACADO_BLOCK_CONDENSING
+#elif (@MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 0) && @MODULE_PREFIX@_BLOCK_CONDENSING
 	/* Bounds */
-	getArray(1, src, 0, "lbValues", acadoVariables.lbValues, ACADO_QP_NV, 1);
-	getArray(1, src, 0, "ubValues", acadoVariables.ubValues, ACADO_QP_NV, 1);
-	#if (ACADO_QP_NCA > 0)
+	getArray(1, src, 0, "lbValues", @MODULE_NAME@Variables.lbValues, @MODULE_PREFIX@_QP_NV, 1);
+	getArray(1, src, 0, "ubValues", @MODULE_NAME@Variables.ubValues, @MODULE_PREFIX@_QP_NV, 1);
+	#if (@MODULE_PREFIX@_QP_NCA > 0)
 	/* Affine bounds */
-	getArray(1, src, 0, "lbAValues", acadoVariables.lbAValues, ACADO_QP_NCA, 1);
-	getArray(1, src, 0, "ubAValues", acadoVariables.ubAValues, ACADO_QP_NCA, 1);
+	getArray(1, src, 0, "lbAValues", @MODULE_NAME@Variables.lbAValues, @MODULE_PREFIX@_QP_NCA, 1);
+	getArray(1, src, 0, "ubAValues", @MODULE_NAME@Variables.ubAValues, @MODULE_PREFIX@_QP_NCA, 1);
 	#endif
 #endif
 
-#if ACADO_USE_ARRIVAL_COST == 1
-	getArray(1, src, 0, "xAC", acadoVariables.xAC, ACADO_NX, 1);
-	getArray(1, src, 0, "SAC", acadoVariables.SAC, ACADO_NX, ACADO_NX);
-    getArray(1, src, 0, "WL", acadoVariables.WL, ACADO_NX, ACADO_NX);
+#if @MODULE_PREFIX@_USE_ARRIVAL_COST == 1
+	getArray(1, src, 0, "xAC", @MODULE_NAME@Variables.xAC, @MODULE_PREFIX@_NX, 1);
+	getArray(1, src, 0, "SAC", @MODULE_NAME@Variables.SAC, @MODULE_PREFIX@_NX, @MODULE_PREFIX@_NX);
+    getArray(1, src, 0, "WL",  @MODULE_NAME@Variables.WL,  @MODULE_PREFIX@_NX, @MODULE_PREFIX@_NX);
 #endif
 
 	/* Shifting strategy */
@@ -359,13 +360,13 @@ void mexFunction(	int nlhs,
 		if (strategy > 2)
 			mexErrMsgTxt("Valid options for the shifting strategy are 1 or 2.");
 	
-		getArray(0, shPtr, 0, "xEnd", xEnd, ACADO_NX, 1);
-		getArray(0, shPtr, 0, "uEnd", uEnd, ACADO_NU, 1);
+		getArray(0, shPtr, 0, "xEnd", xEnd, @MODULE_PREFIX@_NX, 1);
+		getArray(0, shPtr, 0, "uEnd", uEnd, @MODULE_PREFIX@_NU, 1);
 	}
 	else
 		strategy = 0;
 		
-	tic( &tmr );
+	@MODULE_NAME@_tic( &tmr );
 	
 	/* Call solver */
 	switch ( ctrl )
@@ -375,100 +376,102 @@ void mexFunction(	int nlhs,
 			
 			if ( !initialized )
 			{
-				memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));
+				memset(&@MODULE_NAME@Workspace, 0, sizeof( @MODULE_NAME@Workspace ));
 			
-#if ACADO_HARDCODED_CONSTRAINT_VALUES == 1
-				initializeSolver();
-#endif /* ACADO_HARDCODED_CONSTRAINT_VALUES == 1 */
+#if @MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 1
+				@MODULE_NAME@_initializeSolver();
+#endif /* @MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 1 */
 				
 				if (initType == 1)
 				{
-					initializeNodesByForwardSimulation();
+					@MODULE_NAME@_initializeNodesByForwardSimulation();
 				}
 				
-#if ACADO_USE_ARRIVAL_COST == 1 
-                	updateArrivalCost( 1 );
-#endif /* ACADO_USE_ARRIVAL_COST == 1 */
+#if @MODULE_PREFIX@_USE_ARRIVAL_COST == 1 
+                @MODULE_NAME@_updateArrivalCost( 1 );
+#endif /* @MODULE_PREFIX@_USE_ARRIVAL_COST == 1 */
 				
 				initialized = 1;
 			}
 			else if (strategy == 1 || strategy == 2)
 			{
-#if ACADO_USE_ARRIVAL_COST == 1 
-                updateArrivalCost( 0 );
-#endif /* ACADO_USE_ARRIVAL_COST == 1 */
+#if @MODULE_PREFIX@_USE_ARRIVAL_COST == 1 
+                @MODULE_NAME@_updateArrivalCost( 0 );
+#endif /* @MODULE_PREFIX@_USE_ARRIVAL_COST == 1 */
 				
-				shiftStates(strategy, xEnd, uEnd);
-				shiftControls(uEnd);
+				@MODULE_NAME@_shiftStates(strategy, xEnd, uEnd);
+				@MODULE_NAME@_shiftControls(uEnd);
 			}
 			
-			preparationStep();
+			@MODULE_NAME@_preparationStep();
 			
-			status = (double)feedbackStep();
+			status = (double)@MODULE_NAME@_feedbackStep();
 			
-			kktValue = getKKT();
-			objValue = getObjective();
+			kktValue = @MODULE_NAME@_getKKT();
+			objValue = @MODULE_NAME@_getObjective();
 
-#if ACADO_QP_SOLVER == ACADO_QPOASES
-			nIterations = (double)getNWSR();
-#elif ACADO_QP_SOLVER == ACADO_FORCES
-			nIterations = acadoForces_info.it;
-#elif ACADO_QP_SOLVER == ACADO_QPDUNES
+#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
+			nIterations = (double)@MODULE_NAME@_getNWSR();
+#elif @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_FORCES
+			nIterations = @MODULE_NAME@Forces_info.it;
+#elif @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPDUNES
 			nIterations = qpData.log.numIter;
-#endif /* ACADO_QP_SOLVER */
+#endif /* @MODULE_PREFIX@_QP_SOLVER */
 			
 			break;
 		
 		case 1:
 			/* Initialize */
 			
-			memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));
+			memset(&@MODULE_NAME@Workspace, 0, sizeof( @MODULE_NAME@Workspace ));
 			
-			initializeSolver();
+			@MODULE_NAME@_initializeSolver();
 				
 			if (initType == 1)
 			{
-				initializeNodesByForwardSimulation();
+				@MODULE_NAME@_initializeNodesByForwardSimulation();
 			}
 			
-#if ACADO_USE_ARRIVAL_COST == 1 
-                updateArrivalCost( 1 );
-#endif /* ACADO_USE_ARRIVAL_COST == 1 */			
+#if @MODULE_PREFIX@_USE_ARRIVAL_COST == 1 
+			@MODULE_NAME@_updateArrivalCost( 1 );
+#endif /* @MODULE_PREFIX@_USE_ARRIVAL_COST == 1 */
+
+			initialized = 1;
 			
 			break;
 		
 		case 2:
 			/* Preparation step */
 			
-			preparationStep();
+			@MODULE_NAME@_preparationStep();
 			
 			break;
 		
 		case 3:
 			/* Feedback step */
 			
-			status = (double)feedbackStep();
+			status = (double)@MODULE_NAME@_feedbackStep();
 			
-			kktValue = getKKT();
-			objValue = getObjective();
+			kktValue = @MODULE_NAME@_getKKT();
+			objValue = @MODULE_NAME@_getObjective();
 			
-#if ACADO_QP_SOLVER == ACADO_QPOASES
-			nIterations = (double)getNWSR();
-#elif ACADO_QP_SOLVER == ACADO_FORCES
-			nIterations = acadoForces_info.it;
-#endif /* ACADO_QP_SOLVER */
+#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
+			nIterations = (double)@MODULE_NAME@_getNWSR();
+#elif @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_FORCES
+			nIterations = @MODULE_NAME@Forces_info.it;
+#endif /* @MODULE_PREFIX@_QP_SOLVER */
 			
 			break;
 		
 		case 4:
 			/* Shifting */
 			
-#if ACADO_USE_ARRIVAL_COST == 1 
-                updateArrivalCost( 0 );
-#endif /* ACADO_USE_ARRIVAL_COST == 1 */			
+#if @MODULE_PREFIX@_USE_ARRIVAL_COST == 1 
+			@MODULE_NAME@_updateArrivalCost( 0 );
+#endif /* @MODULE_PREFIX@_USE_ARRIVAL_COST == 1 */			
 			
-			shiftStates(strategy, xEnd, uEnd);
-			shiftControls( uEnd );
+			@MODULE_NAME@_shiftStates(strategy, xEnd, uEnd);
+			@MODULE_NAME@_shiftControls( uEnd );
 			
 			break;
 			
@@ -477,26 +480,26 @@ void mexFunction(	int nlhs,
 			mexErrMsgTxt("Unknown control code.");
 	}
 	
-	cpuTime = toc( &tmr );
+	cpuTime = @MODULE_NAME@_toc( &tmr );
 	
 	/* Prepare return argument */
 	
 	plhs[ 0 ] = mxCreateStructMatrix(1, 1, NOO_4, outNames);
 		
-	setArray(plhs[ 0 ], 0, "x", acadoVariables.x, ACADO_N + 1, ACADO_NX);
-	setArray(plhs[ 0 ], 0, "u", acadoVariables.u, ACADO_N, ACADO_NU);
-#if ACADO_NXA > 0
-	setArray(plhs[ 0 ], 0, "z", acadoVariables.z, ACADO_N, ACADO_NXA);
+	setArray(plhs[ 0 ], 0, "x", @MODULE_NAME@Variables.x, @MODULE_PREFIX@_N + 1, @MODULE_PREFIX@_NX);
+	setArray(plhs[ 0 ], 0, "u", @MODULE_NAME@Variables.u, @MODULE_PREFIX@_N, @MODULE_PREFIX@_NU);
+#if @MODULE_PREFIX@_NXA > 0
+	setArray(plhs[ 0 ], 0, "z", @MODULE_NAME@Variables.z, @MODULE_PREFIX@_N, @MODULE_PREFIX@_NXA);
 #endif	
 		
-#if ACADO_USE_ARRIVAL_COST == 1
-	setArray(plhs[ 0 ], 0, "xAC", acadoVariables.xAC, ACADO_NX, 1);
-	setArray(plhs[ 0 ], 0, "SAC", acadoVariables.SAC, ACADO_NX, ACADO_NX);
-#endif /* ACADO_USE_ARRIVAL_COST */
+#if @MODULE_PREFIX@_USE_ARRIVAL_COST == 1
+	setArray(plhs[ 0 ], 0, "xAC", @MODULE_NAME@Variables.xAC, @MODULE_PREFIX@_NX, 1);
+	setArray(plhs[ 0 ], 0, "SAC", @MODULE_NAME@Variables.SAC, @MODULE_PREFIX@_NX, @MODULE_PREFIX@_NX);
+#endif /* @MODULE_PREFIX@_USE_ARRIVAL_COST */
 
-#if ACADO_COMPUTE_COVARIANCE_MATRIX == 1
-	setArray(plhs[ 0 ], 0, "sigmaN", acadoVariables.sigmaN, ACADO_NX, ACADO_NX);
-#endif /* ACADO_COMPUTE_COVARIANCE_MATRIX */
+#if @MODULE_PREFIX@_COMPUTE_COVARIANCE_MATRIX == 1
+	setArray(plhs[ 0 ], 0, "sigmaN", @MODULE_NAME@Variables.sigmaN, @MODULE_PREFIX@_NX, @MODULE_PREFIX@_NX);
+#endif /* @MODULE_PREFIX@_COMPUTE_COVARIANCE_MATRIX */
 
 	/* Create the info structure. */
 	info = mxCreateStructMatrix(1, 1, 5, infoNames);
@@ -505,7 +508,9 @@ void mexFunction(	int nlhs,
 	setArray(info, 0, "cpuTime", &cpuTime, 1, 1);
 	setArray(info, 0, "kktValue", &kktValue, 1, 1);
 	setArray(info, 0, "objValue", &objValue, 1, 1);
+#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
 	setArray(info, 0, "nIterations", &nIterations, 1, 1);
+#endif /* ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) ) */
 		
 	mxSetField(plhs[ 0 ], 0, "info", info);
 	

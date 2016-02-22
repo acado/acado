@@ -163,6 +163,9 @@ returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarat
 
 returnValue ExportNLPSolver::setupInitialization()
 {
+    string moduleName;
+	get(CG_MODULE_NAME, moduleName);
+    
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Setup the main initialization function.
@@ -180,8 +183,8 @@ returnValue ExportNLPSolver::setupInitialization()
 
 	initialize << (retInit == 0);
 	initialize.addLinebreak();
-	initialize	<< "memset(&acadoWorkspace, 0, sizeof( acadoWorkspace ));" << "\n";
-//	initialize	<< "memset(&acadoVariables, 0, sizeof( acadoVariables ));" << "\n";
+	initialize	<< "memset(&" << moduleName << "Workspace, 0, sizeof( " << moduleName << "Workspace ));" << "\n";
+//	initialize	<< "memset(&" << moduleName << "Variables, 0, sizeof( " << moduleName << "Variables ));" << "\n";
 
 	return SUCCESSFUL_RETURN;
 }
@@ -194,6 +197,9 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	// By default, here will be defined model simulation suitable for sparse QP solver.
 	// Condensing based QP solvers should redefine/extend model simulation
 	//
+    
+    string moduleName;
+	get(CG_MODULE_NAME, moduleName);
 
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );
@@ -318,9 +324,9 @@ returnValue ExportNLPSolver::setupSimulation( void )
 		}
 		else if (performsSingleShooting() == false)
 			loop 	<< retSim.getFullName() << " = "
-				 	<< "integrate" << "(" << state.getFullName() << ", 1);\n";
+				 	 << moduleName << "_integrate" << "(" << state.getFullName() << ", 1);\n";
 		else
-			loop 	<< retSim.getFullName() << " = " << "integrate"
+			loop 	<< retSim.getFullName() << " = " << moduleName << "_integrate"
 					<< "(" << state.getFullName() << ", "
 					<< run.getFullName() << " == 0"
 					<< ");\n";
@@ -329,11 +335,11 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	{
 		if (performsSingleShooting() == false)
 			loop 	<< retSim.getFullName() << " = "
-					<< "integrate"
+					<< moduleName << "_integrate"
 					<< "(" << state.getFullName() << ", 1, " << run.getFullName() << ");\n";
 		else
 			loop	<< retSim.getFullName() << " = "
-					<< "integrate"
+					<< moduleName << "_integrate"
 					<< "(" << state.getFullName() << ", "
 					<< run.getFullName() << " == 0"
 					<< ", " << run.getFullName() << ");\n";
@@ -1540,6 +1546,9 @@ bool ExportNLPSolver::usingLinearTerms() const
 
 returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 {
+    string moduleName;
+	get(CG_MODULE_NAME, moduleName);
+    
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Shift controls
@@ -1638,11 +1647,11 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	if ( integrator->equidistantControlGrid() )
 	{
-		shiftStates << "integrate" << "(" << state.getFullName() << ", 1);\n";
+		shiftStates << moduleName << "_integrate" << "(" << state.getFullName() << ", 1);\n";
 	}
 	else
 	{
-		shiftStates << "integrate" << "(" << state.getFullName() << ", 1, " << toString(N - 1) << ");\n";
+		shiftStates << moduleName << "_integrate" << "(" << state.getFullName() << ", 1, " << toString(N - 1) << ");\n";
 	}
 
 	shiftStates.addLinebreak( );
@@ -1681,14 +1690,14 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 
 	if ( integrator->equidistantControlGrid() )
 	{
-		iLoop << "integrate"
+		iLoop << moduleName << "_integrate"
 				<< "(" << state.getFullName() << ", "
 				<< index.getFullName() << " == 0"
 				<< ");\n";
 	}
 	else
 	{
-		iLoop << "integrate"
+		iLoop << moduleName << "_integrate"
 				<< "(" << state.getFullName() << ", "
 				<< index.getFullName() << " == 0"
 				<< ", " << index.getFullName() << ");\n";
@@ -1879,6 +1888,9 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	xAC.setup("xAC", NX, 1, REAL, ACADO_VARIABLES);
 	xAC.setDoc("Arrival cost term: a priori state estimate.");
 	DxAC.setup("DxAC", NX, 1, REAL, ACADO_WORKSPACE);
+    
+    string moduleName;
+	get(CG_MODULE_NAME, moduleName);
 
 	ExportVariable evRet("ret", 1, 1, INT, ACADO_LOCAL, true);
 
@@ -1945,9 +1957,9 @@ returnValue ExportNLPSolver::setupArrivalCostCalculation()
 	updateArrivalCost.addStatement( state.getCols(indexU, indexNOD) == od.getRow( 0 ) );
 
 	if (integrator->equidistantControlGrid())
-		updateArrivalCost << "integrate" << "(" << state.getFullName() << ", 1);\n";
+		updateArrivalCost << moduleName << "_integrate" << "(" << state.getFullName() << ", 1);\n";
 	else
-		updateArrivalCost << "integrate" << "(" << state.getFullName() << ", 1, " << toString(0) << ");\n";
+		updateArrivalCost << moduleName << "_integrate" << "(" << state.getFullName() << ", 1, " << toString(0) << ");\n";
 	updateArrivalCost.addLinebreak( );
 
 	//

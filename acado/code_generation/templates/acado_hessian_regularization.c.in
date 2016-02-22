@@ -1,6 +1,6 @@
 #include "@MODULE_NAME@_common.h"
 
-#define ACADO_EPS @MODULE_EPS@
+#define @MODULE_PREFIX@_EPS @MODULE_EPS@
 #define MIN(x,y) ( (x) < (y) ? (x) : (y) )
 #define MAX(x,y) ((x)>(y)?(x):(y))
 #define SIGN(a, b) ((b) >= 0.0 ? fabs(a) : -fabs(a))
@@ -267,7 +267,7 @@ void @MODULE_NAME@_reconstruct_A(real_t *A, real_t *V, real_t *d) {
   @MODULE_NAME@_eigen_decomposition(A, V, d);
   
   for (i = 0; i < DIM; i++) {
-    if( d[i] <= ACADO_EPS ) d[i] = ACADO_EPS;
+    if( d[i] <= @MODULE_PREFIX@_EPS ) d[i] = @MODULE_PREFIX@_EPS;
   }
   
   @MODULE_NAME@_reconstruct_A(A, V, d);
@@ -282,7 +282,7 @@ void @MODULE_NAME@_regularize(real_t *A) {
   @MODULE_NAME@_eigen_decomposition(A, V, d);
   
   for (i = 0; i < DIM; i++) {
-    if( d[i] >= -ACADO_EPS && d[i] <= ACADO_EPS ) d[i] = ACADO_EPS;
+    if( d[i] >= -@MODULE_PREFIX@_EPS && d[i] <= @MODULE_PREFIX@_EPS ) d[i] = @MODULE_PREFIX@_EPS;
     else if( d[i] < 0 ) d[i] = -d[i];
   }
   

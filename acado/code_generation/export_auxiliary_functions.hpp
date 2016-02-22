@@ -50,6 +50,7 @@ public:
 	/** Default constructor.
 	 *
 	 *	@param[in] _moduleName		    Module name for customization.
+     **	@param[in] _moduleName		    Module prefix for customization.
 	 *	@param[in] _commonHeaderName	Name of common header file to be included.
 	 *	@param[in] _realString			std::string to be used to declare real variables.
 	 *	@param[in] _intString			std::string to be used to declare integer variables.
@@ -61,6 +62,7 @@ public:
 	ExportAuxiliaryFunctions(	const std::string& _headerFileName,
 								const std::string& _sourceFileName,
 								const std::string& _moduleName = "acado",
+                                const std::string& _modulePrefix = "ACADO",
 								const std::string& _commonHeaderName = "",
 								const std::string& _realString = "double",
 								const std::string& _intString = "int",
@@ -86,6 +88,7 @@ private:
 	ExportTemplatedFile source;
 	ExportTemplatedFile header;
 	std::string moduleName;
+    std::string modulePrefix;
 };
 
 CLOSE_NAMESPACE_ACADO

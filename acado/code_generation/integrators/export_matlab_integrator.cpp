@@ -83,6 +83,8 @@ returnValue ExportMatlabIntegrator::configure(	const uint sensProp, const uint o
 	if( timingCalls > 1 ) 	dictionary[ "@CALLS_TIMING@" ] =  toString(timingCalls);
 	else 					dictionary[ "@CALLS_TIMING@" ] =  toString(1);
 	dictionary[ "@NUM_STAGES@" ] =  toString(numStages);
+	dictionary[ "@MODULE_NAME@" ] = ExportStatement::fcnPrefix;
+	dictionary[ "@MODULE_PREFIX@" ] = ExportStatement::varPrefix;
 	
 	// And then fill a template file
 	fillTemplate();

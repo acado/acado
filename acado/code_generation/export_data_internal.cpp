@@ -26,6 +26,9 @@
 
 BEGIN_NAMESPACE_ACADO
 
+std::string ExportDataInternal::fcnPrefix = "acado";
+
+        
 using namespace CasADi;
 
 
@@ -153,19 +156,19 @@ std::string ExportDataInternal::getDataStructString( ) const
 	switch ( dataStruct )
 	{
 		case ACADO_VARIABLES:
-			tmp << "acadoVariables";
+			tmp << fcnPrefix + "Variables";
 			break;
 
 		case ACADO_WORKSPACE:
-			tmp << "acadoWorkspace";
+			tmp << fcnPrefix + "Workspace";
 			break;
 
 		case ACADO_PARAMS:
-			tmp << "params";
+			tmp << fcnPrefix + "Params";
 			break;
 
 		case ACADO_VARS:
-			tmp << "vars";
+			tmp << fcnPrefix + "Vars";
 			break;
 
 		case FORCES_PARAMS:

@@ -190,6 +190,10 @@ protected:
 
 	/** Description of the variable */
 	std::string description;
+    
+    
+public:
+    static std::string fcnPrefix;
 };
 
 CLOSE_NAMESPACE_ACADO

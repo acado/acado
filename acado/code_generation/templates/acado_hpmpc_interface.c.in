@@ -5,12 +5,12 @@
 **************************************************************************************************/
 
 /* ACADO auto-generated header */
-#include "acado_common.h"
+#include "@MODULE_NAME@_common.h"
 
 // take problem size from ACADO macros
-#define NX ACADO_NX
-#define NU ACADO_NU
-#define NN ACADO_N
+#define NX @MODULE_PREFIX@_NX
+#define NU @MODULE_PREFIX@_NU
+#define NN @MODULE_PREFIX@_N
 
 // fix number of constraints
 #define NB (NU+NX) // number of box constraints
@@ -33,14 +33,14 @@
 
 
 
-int acado_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b, 
+int @MODULE_NAME@_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b, 
                             real_t* Q, real_t* Qf, real_t* S, real_t* R, 
                             real_t* q, real_t* qf, real_t* r, 
                             real_t* lb, real_t* ub, 
                             real_t* x, real_t* u,
                             real_t* lambda, real_t* mu, real_t* slacks,
                             int* nIt )
-	{
+{
 
 	// loop indeces
 	int ii, jj;
@@ -142,5 +142,4 @@ int acado_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b,
 	// return
 	return hpmpc_status;
 
-	}
-
+}

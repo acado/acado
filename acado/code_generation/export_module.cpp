@@ -101,6 +101,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( CG_FORCE_DIAGONAL_HESSIAN,        NO         );
 
 	addOption( CG_MODULE_NAME, "acado"						);
+    addOption( CG_MODULE_PREFIX, "ACADO"                	);
 	addOption( CG_EXPORT_FOLDER_NAME, "acado_export"		);
 
 	return SUCCESSFUL_RETURN;

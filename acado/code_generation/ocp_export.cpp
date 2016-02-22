@@ -73,8 +73,14 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 {
 	int qpSolver;
 	get(QP_SOLVER, qpSolver);
-	string moduleName;
+    
+	string moduleName, modulePrefix;
 	get(CG_MODULE_NAME, moduleName);
+    get(CG_MODULE_PREFIX, modulePrefix);
+    
+    ExportDataInternal::fcnPrefix = moduleName;
+    ExportStatement::fcnPrefix = moduleName;
+    ExportStatement::varPrefix = modulePrefix;
 
 	acadoPrintCopyrightNotice( "Code Generation Tool" );
 
@@ -144,7 +150,8 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	ExportAuxiliaryFunctions eaf(
 			dirName + string("/") + moduleName + "_auxiliary_functions.h",
 			dirName + string("/") + moduleName + "_auxiliary_functions.c",
-			moduleName
+			moduleName,
+            modulePrefix
 			);
 	eaf.configure();
 	eaf.exportCode();
@@ -161,6 +168,9 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 
 	if ( (bool)generateMakeFile == true )
 	{
+        ExportTemplatedFile makefile;
+        makefile.dictionary[ "@MODULE_NAME@" ] = moduleName;
+        makefile.dictionary[ "@MODULE_PREFIX@" ] = modulePrefix;
 		str = dirName + "/Makefile";
 
 		switch ( (QPSolverName)qpSolver )
@@ -184,7 +194,10 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 				break;
 
 			case QP_FORCES:
-				acadoCopyTemplateFile(MAKEFILE_FORCES, str, "#", true);
+				//acadoCopyTemplateFile(MAKEFILE_FORCES, str, "#", true);
+                makefile.setup( MAKEFILE_FORCES,str,"","real_t","int",16,"#" );
+                makefile.configure();
+                makefile.exportCode();
 				break;
 
 			case QP_QPDUNES:
@@ -197,7 +210,10 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 				break;
 
 			case QP_HPMPC:
-				acadoCopyTemplateFile(MAKEFILE_HPMPC, str, "#", true);
+				//acadoCopyTemplateFile(MAKEFILE_HPMPC, str, "#", true);
+                makefile.setup( MAKEFILE_HPMPC,str,"","real_t","int",16,"#" );
+                makefile.configure();
+                makefile.exportCode();
 				break;
 
 			default:
@@ -213,7 +229,16 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	get(GENERATE_TEST_FILE, generateTestFile);
 	string testFileName = dirName + "/test.c";
 	if ((bool) generateTestFile == true)
-		acadoCopyTemplateFile(DUMMY_TEST_FILE, testFileName, "", true);
+    {
+		//acadoCopyTemplateFile(DUMMY_TEST_FILE, testFileName, "", true);
+        ExportTemplatedFile testFile;
+        testFile.dictionary[ "@MODULE_NAME@" ] = moduleName;
+        testFile.dictionary[ "@MODULE_PREFIX@" ] = modulePrefix;
+
+        testFile.setup( DUMMY_TEST_FILE,testFileName );
+        testFile.configure();
+        testFile.exportCode();
+    }
 
 	//
 	// Generate MATLAB MEX interface
@@ -224,50 +249,83 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	get(GENERATE_MATLAB_INTERFACE, generateMexInterface);
 	if ( (bool)generateMexInterface == true )
 	{
+        ExportTemplatedFile mexInterface;
+        mexInterface.dictionary[ "@MODULE_NAME@" ] = moduleName;
+        mexInterface.dictionary[ "@MODULE_PREFIX@" ] = modulePrefix;
 		str = dirName + "/" + moduleName + "_solver_mex.c";
 
 		if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
-			acadoCopyTemplateFile(EH_SOLVER_MEX, str, "", true);
+            //acadoCopyTemplateFile(EH_SOLVER_MEX, str, "", true);
+            mexInterface.setup( EH_SOLVER_MEX,str  );
+            mexInterface.configure();
+            mexInterface.exportCode();
 		}
 		else {
-			acadoCopyTemplateFile(SOLVER_MEX, str, "", true);
+			//acadoCopyTemplateFile(SOLVER_MEX, str, "", true);
+            mexInterface.setup( SOLVER_MEX,str  );
+            mexInterface.configure();
+            mexInterface.exportCode();
 		}
 
+        ExportTemplatedFile mexInterfaceMake;
+        mexInterfaceMake.dictionary[ "@MODULE_NAME@" ] = moduleName;
+        mexInterfaceMake.dictionary[ "@MODULE_PREFIX@" ] = modulePrefix;
 		str = dirName + "/make_" + moduleName + "_solver.m";
 
 		switch ( (QPSolverName)qpSolver )
 		{
 		case QP_QPOASES:
 			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
-				acadoCopyTemplateFile(MAKE_MEX_EH_QPOASES, str, "%", true);
+				//acadoCopyTemplateFile(MAKE_MEX_EH_QPOASES, str, "%", true);
+                mexInterfaceMake.setup( MAKE_MEX_EH_QPOASES,str, "","real_t","int",16,"%" );
+                mexInterfaceMake.configure();
+                mexInterfaceMake.exportCode();
 			}
 			else {
-				acadoCopyTemplateFile(MAKE_MEX_QPOASES, str, "%", true);
+				//acadoCopyTemplateFile(MAKE_MEX_QPOASES, str, "%", true);
+                mexInterfaceMake.setup( MAKE_MEX_QPOASES,str, "","real_t","int",16,"%" );
+                mexInterfaceMake.configure();
+                mexInterfaceMake.exportCode();
 			}
 			break;
 
 		case QP_QPOASES3:
 			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
-				acadoCopyTemplateFile(MAKE_MEX_EH_QPOASES3, str, "%", true);
+				//acadoCopyTemplateFile(MAKE_MEX_EH_QPOASES3, str, "%", true);
+                mexInterfaceMake.setup( MAKE_MEX_EH_QPOASES3,str, "","real_t","int",16,"%" );
+                mexInterfaceMake.configure();
+                mexInterfaceMake.exportCode();
 			}
 			else {
-				acadoCopyTemplateFile(MAKE_MEX_QPOASES3, str, "%", true);
+				//acadoCopyTemplateFile(MAKE_MEX_QPOASES3, str, "%", true);
+                mexInterfaceMake.setup( MAKE_MEX_QPOASES3,str, "","real_t","int",16,"%" );
+                mexInterfaceMake.configure();
+                mexInterfaceMake.exportCode();
 			}
 			break;
 
 		case QP_FORCES:
-			acadoCopyTemplateFile(MAKE_MEX_FORCES, str, "%", true);
+			//acadoCopyTemplateFile(MAKE_MEX_FORCES, str, "%", true);
+            mexInterfaceMake.setup( MAKE_MEX_FORCES,str, "","real_t","int",16,"%" );
+            mexInterfaceMake.configure();
+            mexInterfaceMake.exportCode();
 			break;
 
 		case QP_QPDUNES:
 			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
-				acadoCopyTemplateFile(MAKE_MEX_EH_QPDUNES, str, "%", true);
+				//acadoCopyTemplateFile(MAKE_MEX_EH_QPDUNES, str, "%", true);
+                mexInterfaceMake.setup( MAKE_MEX_EH_QPDUNES,str, "","real_t","int",16,"%" );
+                mexInterfaceMake.configure();
+                mexInterfaceMake.exportCode();
 			}
 			else if ( (SparseQPsolutionMethods)qpSolution == BLOCK_CONDENSING_N2 ) {
 				acadoCopyTemplateFile(MAKE_MEX_BLOCK_QPDUNES, str, "%", true);
 			}
 			else {
-				acadoCopyTemplateFile(MAKE_MEX_QPDUNES, str, "%", true);
+				//acadoCopyTemplateFile(MAKE_MEX_QPDUNES, str, "%", true);
+                mexInterfaceMake.setup( MAKE_MEX_QPDUNES,str, "","real_t","int",16,"%" );
+                mexInterfaceMake.configure();
+                mexInterfaceMake.exportCode();
 			}
 			break;
 
@@ -639,8 +697,9 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 											int _precision
 											) const
 {
-	string moduleName;
+	string moduleName, modulePrefix;
 	get(CG_MODULE_NAME, moduleName);
+    get(CG_MODULE_PREFIX, modulePrefix);
 
 	int qpSolver;
 	get(QP_SOLVER, qpSolver);
@@ -669,45 +728,45 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 
 	map<string, pair<string, string> > options;
 
-	options[ "ACADO_N" ]   = make_pair(toString( ocp.getN() ),   "Number of control/estimation intervals.");
-	options[ "ACADO_NX" ]  = make_pair(toString( ocp.getNX() ),  "Number of differential variables.");
-	options[ "ACADO_NXD" ] = make_pair(toString( ocp.getNDX() ), "Number of differential derivative variables.");
-	options[ "ACADO_NXA" ] = make_pair(toString( ocp.getNXA() ), "Number of algebraic variables.");
-	options[ "ACADO_NU" ]  = make_pair(toString( ocp.getNU() ),  "Number of control variables.");
-	options[ "ACADO_NOD" ]  = make_pair(toString( ocp.getNOD() ),  "Number of online data values.");
-	options[ "ACADO_NY" ]  = make_pair(toString( solver->getNY() ),  "Number of references/measurements per node on the first N nodes.");
-	options[ "ACADO_NYN" ] = make_pair(toString( solver->getNYN() ), "Number of references/measurements on the last (N + 1)st node.");
+	options[ modulePrefix + "_N" ]   = make_pair(toString( ocp.getN() ),   "Number of control/estimation intervals.");
+	options[ modulePrefix + "_NX" ]  = make_pair(toString( ocp.getNX() ),  "Number of differential variables.");
+	options[ modulePrefix + "_NXD" ] = make_pair(toString( ocp.getNDX() ), "Number of differential derivative variables.");
+	options[ modulePrefix + "_NXA" ] = make_pair(toString( ocp.getNXA() ), "Number of algebraic variables.");
+	options[ modulePrefix + "_NU" ]  = make_pair(toString( ocp.getNU() ),  "Number of control variables.");
+	options[ modulePrefix + "_NOD" ]  = make_pair(toString( ocp.getNOD() ),  "Number of online data values.");
+	options[ modulePrefix + "_NY" ]  = make_pair(toString( solver->getNY() ),  "Number of references/measurements per node on the first N nodes.");
+	options[ modulePrefix + "_NYN" ] = make_pair(toString( solver->getNYN() ), "Number of references/measurements on the last (N + 1)st node.");
 
 	Grid integrationGrid;
 	ocp.getIntegrationGrid(integrationGrid);
 	uint NIS = integrationGrid.getNumIntervals();
-	if( ocp.hasEquidistantControlGrid() ) options[ "ACADO_RK_NIS" ] = make_pair(toString( NIS ),   "Number of integration steps per shooting interval.");
+	if( ocp.hasEquidistantControlGrid() ) options[ modulePrefix + "_RK_NIS" ] = make_pair(toString( NIS ),   "Number of integration steps per shooting interval.");
 
 	RungeKuttaExport *rk_integrator = static_cast<RungeKuttaExport *>(integrator.get());  // Note: As long as only Runge-Kutta type methods are exported.
-	options[ "ACADO_RK_NSTAGES" ] = make_pair(toString( rk_integrator->getNumStages() ),   "Number of Runge-Kutta stages per integration step.");
+	options[ modulePrefix + "_RK_NSTAGES" ] = make_pair(toString( rk_integrator->getNumStages() ),   "Number of Runge-Kutta stages per integration step.");
 
-	options[ "ACADO_INITIAL_STATE_FIXED" ] =
+	options[ modulePrefix + "_INITIAL_STATE_FIXED" ] =
 			make_pair(toString( fixInitialState ), "Indicator for fixed initial state.");
-	options[ "ACADO_WEIGHTING_MATRICES_TYPE" ] =
+	options[ modulePrefix + "_WEIGHTING_MATRICES_TYPE" ] =
 			make_pair(toString( (unsigned)solver->weightingMatricesType() ), "Indicator for type of fixed weighting matrices.");
-	options[ "ACADO_USE_LINEAR_TERMS" ] =
+	options[ modulePrefix + "_USE_LINEAR_TERMS" ] =
 				make_pair(toString( (unsigned)solver->usingLinearTerms() ), "Indicator for usage of non-hard-coded linear terms in the objective.");
-	options[ "ACADO_HARDCODED_CONSTRAINT_VALUES" ] =
+	options[ modulePrefix + "_HARDCODED_CONSTRAINT_VALUES" ] =
 			make_pair(toString( hardcodeConstraintValues ), "Flag indicating whether constraint values are hard-coded or not.");
-	options[ "ACADO_USE_ARRIVAL_COST" ] =
+	options[ modulePrefix + "_USE_ARRIVAL_COST" ] =
 			make_pair(toString( useAC ), "Providing interface for arrival cost.");
-	options[ "ACADO_COMPUTE_COVARIANCE_MATRIX" ] =
+	options[ modulePrefix + "_COMPUTE_COVARIANCE_MATRIX" ] =
 			make_pair(toString( covCalc ), "Compute covariance matrix of the last state estimate.");
-	options[ "ACADO_QP_NV" ] =
+	options[ modulePrefix + "_QP_NV" ] =
 			make_pair(toString( solver->getNumQPvars() ), "Total number of QP optimization variables.");
 
 	int qpSolution;
 	get(SPARSE_QP_SOLUTION, qpSolution);
 	if( (QPSolverName)qpSolver == QP_FORCES && (SparseQPsolutionMethods)qpSolution != BLOCK_CONDENSING_N2 ) {
 		ExportGaussNewtonForces *blockSolver = static_cast<ExportGaussNewtonForces*>(solver.get());
-		options[ "ACADO_QP_NLB" ] =
+		options[ modulePrefix + "_QP_NLB" ] =
 				make_pair(toString( blockSolver->getNumLowerBounds() ), "Total number of QP lower bound values.");
-		options[ "ACADO_QP_NUB" ] =
+		options[ modulePrefix + "_QP_NUB" ] =
 				make_pair(toString( blockSolver->getNumUpperBounds() ), "Total number of QP upper bound values.");
 	}
 
@@ -715,13 +774,13 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	if ( (SparseQPsolutionMethods)qpSolution == BLOCK_CONDENSING_N2 ) {
 		ExportGaussNewtonBlockCN2 *blockSolver = static_cast<ExportGaussNewtonBlockCN2*>(solver.get());
 
-		options[ "ACADO_BLOCK_CONDENSING" ] =
+		options[ modulePrefix + "_BLOCK_CONDENSING" ] =
 				make_pair(toString( 1 ), "User defined block based condensing.");
-		options[ "ACADO_QP_NCA" ] =
+		options[ modulePrefix + "_QP_NCA" ] =
 				make_pair(toString( blockSolver->getNumStateBoundsPerBlock()*blockSolver->getNumberOfBlocks() ), "Total number of QP affine constraints.");
 	}
 	else {
-		options[ "ACADO_BLOCK_CONDENSING" ] =
+		options[ modulePrefix + "_BLOCK_CONDENSING" ] =
 						make_pair(toString( 0 ), "User defined block based condensing.");
 	}
 
@@ -751,7 +810,7 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	functionsBlock.exportCode(functions, _realString);
 
 	ExportCommonHeader ech(fileName, "", _realString, _intString, _precision);
-	ech.configure( moduleName, useSinglePrecision, useComplexArithmetic, (QPSolverName)qpSolver,
+	ech.configure( moduleName, modulePrefix, useSinglePrecision, useComplexArithmetic, (QPSolverName)qpSolver,
 			options, variables.str(), workspace.str(), functions.str());
 
 	return ech.exportCode();

@@ -78,30 +78,29 @@ public:
 	 *
 	 *  \return SUCCESSFUL_RETURN
 	 */
-	returnValue configure(	const std::string& _prefix,
-							const std::string& _solverDefine,
-							const int nvmax,
-							const int ncmax,
-							const int nwsrmax,
-							const std::string& _printLevel,
-							bool _useSinglePrecision,
-
-							const std::string& _commonHeader,
-							const std::string& _namespace,
-							const std::string& _primalSolution,
-							const std::string& _dualSolution,
-							const std::string& _sigma,
-							bool _hotstartQP,
-							bool _externalCholesky,
-							const std::string& _qpH,
-							const std::string& _qpR,
-							const std::string& _qpg,
-							const std::string& _qpA,
-							const std::string& _qplb,
-							const std::string& _qpub,
-							const std::string& _qplbA,
-							const std::string& _qpubA
-							);
+	virtual returnValue configure(	const std::string& _prefix,
+									const std::string& _solverDefine,
+									const int nvmax,
+									const int ncmax,
+									const int nwsrmax,
+									const std::string& _printLevel,
+									bool _useSinglePrecision,
+									const std::string& _commonHeader,
+									const std::string& _namespace,
+									const std::string& _primalSolution,
+									const std::string& _dualSolution,
+									const std::string& _sigma,
+									bool _hotstartQP,
+									bool _externalCholesky,
+									const std::string& _qpH,
+									const std::string& _qpR,
+									const std::string& _qpg,
+									const std::string& _qpA,
+									const std::string& _qplb,
+									const std::string& _qpub,
+									const std::string& _qplbA,
+									const std::string& _qpubA
+									);
 
 	/** Export the interface. */
 	virtual returnValue exportCode();

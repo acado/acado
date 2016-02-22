@@ -88,7 +88,7 @@ returnValue ExportFunction::init(	const std::string& _name,
 	ExportStatementBlock::clear( );
 	clear( );
 
-	setName( _name );
+	setName( fcnPrefix + "_" + _name );
 
 	addArgument( 	_argument1,_argument2,_argument3,
 					_argument4,_argument5,_argument6,

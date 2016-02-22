@@ -48,6 +48,7 @@ ExportCommonHeader::ExportCommonHeader(	const std::string& _fileName,
 {}
 
 returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
+                                            const std::string& _modulePrefix,
 											bool _useSinglePrecision,
 											bool _useComplexArithmetic,
 											QPSolverName _qpSolver,
@@ -58,34 +59,33 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 											)
 {
 	// Configure the template
-	string foo = _moduleName;
-	transform(foo.begin(), foo.end(), foo.begin(), ::toupper);
-	dictionary[ "@MODULE_NAME@" ] = foo;
+	dictionary[ "@MODULE_NAME@" ] = _moduleName;
+    dictionary[ "@MODULE_PREFIX@" ] = _modulePrefix;
 
 	stringstream ss;
 	if( _useComplexArithmetic ) ss << "\n#include <complex.h>\n" << endl;
 
 	ss 	<< "/** qpOASES QP solver indicator. */" << endl
-		<< "#define ACADO_QPOASES  0" << endl
-		<< "#define ACADO_QPOASES3 1" << endl
+		<< "#define " << _modulePrefix << "_QPOASES  0" << endl
+        << "#define " << _modulePrefix << "_QPOASES3 1" << endl
 		<< "/** FORCES QP solver indicator.*/" << endl
-		<< "#define ACADO_FORCES   2" << endl
+		<< "#define " << _modulePrefix << "_FORCES   2" << endl
 		<< "/** qpDUNES QP solver indicator.*/" << endl
-		<< "#define ACADO_QPDUNES  3" << endl
+		<< "#define " << _modulePrefix << "_QPDUNES  3" << endl
 		<< "/** HPMPC QP solver indicator. */" << endl
-		<< "#define ACADO_HPMPC    4" << endl
+		<< "#define " << _modulePrefix << "_HPMPC    4" << endl << endl
 		<< "/** Indicator for determining the QP solver used by the ACADO solver code. */" << endl;
 
 	switch ( _qpSolver )
 	{
 	case QP_QPOASES:
-		ss << "#define ACADO_QP_SOLVER ACADO_QPOASES\n" << endl;
+		ss << "#define " << _modulePrefix << "_QP_SOLVER " << _modulePrefix << "_QPOASES\n" << endl;
 		ss << "#include \"" << _moduleName << "_qpoases_interface.hpp\"\n";
 
 		break;
 
 	case QP_QPOASES3:
-		ss << "#define ACADO_QP_SOLVER ACADO_QPOASES3\n" << endl;
+		ss << "#define " << _modulePrefix << "_QP_SOLVER " << _modulePrefix << "_QPOASES3\n" << endl;
 		ss << "#include \"" << _moduleName << "_qpoases3_interface.h\"\n";
 
 		break;
@@ -94,11 +94,11 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 	case QP_HPMPC:
 	case QP_QPDUNES:
 		if (_qpSolver == QP_FORCES)
-			ss << "#define ACADO_QP_SOLVER ACADO_FORCES\n" << endl;
+			ss << "#define " << _modulePrefix << "_QP_SOLVER " << _modulePrefix << "_FORCES\n" << endl;
 		else if (_qpSolver == QP_HPMPC)
-			ss << "#define ACADO_QP_SOLVER ACADO_HPMPC\n" << endl;
+			ss << "#define " << _modulePrefix << "_QP_SOLVER " << _modulePrefix << "_HPMPC\n" << endl;
 		else
-			ss << "#define ACADO_QP_SOLVER ACADO_QPDUNES\n" << endl;
+			ss << "#define " << _modulePrefix << "_QP_SOLVER " << _modulePrefix << "_QPDUNES\n" << endl;
 
 		ss << "\n#include <string.h>\n\n" << endl;
 

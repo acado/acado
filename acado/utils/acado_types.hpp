@@ -332,7 +332,8 @@ enum OptionsName
 {
 	CG_FORCE_DIAGONAL_HESSIAN,					/**< Force diagonal (stage) Hessian during the code export phase.*/
 	CG_CONDENSED_HESSIAN_CHOLESKY,				/**< Type of the Cholesky decomposition of the condensed Hessian. \sa CondensedHessianCholeskyDecomposition */
-	CG_MODULE_NAME,								/**< Name of the module, used as a prefix for the file-names and data structures. */
+	CG_MODULE_NAME,								/**< Name of the module, used as a prefix for the file-names and functions (shall be all lowercase). */
+    CG_MODULE_PREFIX,                           /**< Prefix used for all global variables (shall be all uppercase). */
 	CG_EXPORT_FOLDER_NAME,						/**< Export folder name. */
 	CG_USE_ARRIVAL_COST,						/**< Enable interface for arival cost calculation. */
 	CG_USE_OPENMP,								/**< Use OpenMP for parallelization in multiple shooting. */

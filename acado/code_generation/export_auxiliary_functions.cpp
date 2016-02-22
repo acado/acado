@@ -40,6 +40,7 @@ BEGIN_NAMESPACE_ACADO
 ExportAuxiliaryFunctions::ExportAuxiliaryFunctions(	const std::string& _headerFileName,
 													const std::string& _sourceFileName,
 													const std::string& _moduleName,
+                                                    const std::string& _modulePrefix,
 													const std::string& _commonHeaderName,
 													const std::string& _realString,
 													const std::string& _intString,
@@ -48,7 +49,8 @@ ExportAuxiliaryFunctions::ExportAuxiliaryFunctions(	const std::string& _headerFi
 													)
 	: source(AUXILIARY_FUNCTIONS_SOURCE, _sourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
 	  header(AUXILIARY_FUNCTIONS_HEADER, _headerFileName, _commonHeaderName, _realString, _intString, _precision, _commentString),
-	  moduleName( _moduleName )
+	  moduleName( _moduleName ),
+      modulePrefix( _modulePrefix )
 {}
 
 
@@ -59,6 +61,7 @@ returnValue ExportAuxiliaryFunctions::configure( )
 	//
 
 	source.dictionary[ "@MODULE_NAME@" ] = moduleName;
+    source.dictionary[ "@MODULE_PREFIX@" ] = modulePrefix;
 
 	source.fillTemplate();
 
@@ -66,6 +69,7 @@ returnValue ExportAuxiliaryFunctions::configure( )
 	// Header file configuration
 	//
 	header.dictionary[ "@MODULE_NAME@" ] = moduleName;
+    header.dictionary[ "@MODULE_PREFIX@" ] = modulePrefix;
 
 	header.fillTemplate();
 

@@ -128,7 +128,16 @@ returnValue ExportFunctionCall::init(	const std::string& _name,
 {
 	clear( );
 
-	setName( _name );
+	// only append fcnPrefix iff _name does not alreads start with it
+    if ( ( _name.length() > fcnPrefix.length() ) && 
+         ( _name.compare( 0,fcnPrefix.length(),fcnPrefix ) == 0 ) )
+    {
+        setName( _name );
+    }
+	else
+	{
+        setName( fcnPrefix + "_" + _name );
+    }
 
 	functionArguments.addArgument( 	_argument1,_argument2,_argument3,
 									_argument4,_argument5,_argument6,

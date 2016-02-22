@@ -52,7 +52,7 @@ ACADOworkspace acadoWorkspace;
 int main()
 {
 	unsigned  i, j, iter;
-	timer t;
+	acado_timer t;
 	real_t t1, t2;
 	real_t fdbSum = 0.0;
 	real_t prepSum = 0.0;
@@ -67,7 +67,7 @@ int main()
 	//
 	// Initialize the solver
 	//
-	initializeSolver();
+	acado_initializeSolver();
 
 	//
 	// Prepare a consistent initial guess
@@ -124,16 +124,16 @@ int main()
 	//
 	// Warm-up the solver
 	//
-	preparationStep();
+	acado_preparationStep();
 
 	//
 	// Real-time iterations loop
 	//
 	for( iter = 0; iter < NUM_STEPS; iter++ )
 	{
-		tic( &t );
-		status = feedbackStep( );
-		t2 = toc( &t );
+		acado_tic( &t );
+		status = acado_feedbackStep( );
+		t2 = acado_toc( &t );
 
 #if VERBOSE
 //		printDifferentialVariables();
@@ -160,14 +160,14 @@ int main()
 
 		log[ iter ][ i++ ] = t1;
 		log[ iter ][ i++ ] = t2;
-		log[ iter ][ i++ ] = getObjective();
-		log[ iter ][ i++ ] = getKKT();
-		log[ iter ][ i++ ] = getNWSR();
+		log[ iter ][ i++ ] = acado_getObjective();
+		log[ iter ][ i++ ] = acado_getKKT();
+		log[ iter ][ i++ ] = acado_getNWSR();
 
 #if VERBOSE
 		cout	<< "Iteration #" << setw( 4 ) << iter
-				<< ", KKT value: " << scientific << getKKT()
-				<< ", objective value: " << scientific << getObjective()
+				<< ", KKT value: " << scientific << acado_getKKT()
+				<< ", objective value: " << scientific << acado_getObjective()
 				<< endl;
 #endif // VERBOSE
 
@@ -181,12 +181,12 @@ int main()
 			acadoVariables.x0[ i ] = acadoVariables.x[NX + i];
 
 		// Shift states and control and prepare for the next iteration
-		shiftStates(2, 0, 0);
-		shiftControls( 0 );
+		acado_shiftStates(2, 0, 0);
+		acado_shiftControls( 0 );
 
-		tic( &t );
-		preparationStep();
-		t1 = toc( &t );
+		acado_tic( &t );
+		acado_preparationStep();
+		t1 = acado_toc( &t );
 
 		//
 		// More logging...

@@ -38,16 +38,18 @@ BEGIN_NAMESPACE_ACADO
 
 
 ExportHessianRegularization::ExportHessianRegularization(	const std::string& _sourceFileName,
-													const std::string& _moduleName,
-													const std::string& _commonHeaderName,
-													const std::string& _realString,
-													const std::string& _intString,
-													int _precision,
-													const std::string& _commentString
-													)
+                                                            const std::string& _moduleName,
+                                                            const std::string& _modulePrefix,
+                                                            const std::string& _commonHeaderName,
+                                                            const std::string& _realString,
+                                                            const std::string& _intString,
+                                                            int _precision,
+                                                            const std::string& _commentString
+                                                            )
 	: ExportTemplatedFile(HESSIAN_REG_SOURCE, _sourceFileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
 {
 	moduleName = _moduleName;
+    modulePrefix = _modulePrefix;
 }
 
 
@@ -59,6 +61,8 @@ returnValue ExportHessianRegularization::configure( uint DIM, double eps )
 	stringstream ss;
 
 	dictionary[ "@MODULE_NAME@" ] = moduleName;
+    dictionary[ "@MODULE_PREFIX@" ] = modulePrefix;
+    
 	ss << DIM;
 	dictionary[ "@MODULE_DIM@" ] = ss.str();
 
