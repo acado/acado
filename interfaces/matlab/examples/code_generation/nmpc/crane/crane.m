@@ -94,8 +94,8 @@ mpc.set( 'LEVENBERG_MARQUARDT', 		 1e-10				);
 % mpc.set( 'GENERATE_SIMULINK_INTERFACE', 'YES'               );
 
 if EXPORT
-    copyfile('../../../../../../external_packages/qpoases', 'export_MPC/qpoases', 'f')
     mpc.exportCode( 'export_MPC' );
+    copyfile('../../../../../../external_packages/qpoases', 'export_MPC/qpoases', 'f')
     
     cd export_MPC
     make_acado_solver('../acado_MPCstep')
