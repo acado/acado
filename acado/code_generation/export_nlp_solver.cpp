@@ -319,7 +319,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	{
 		if( (ImplicitIntegratorMode)intMode == LIFTED || (ImplicitIntegratorMode)intMode == LIFTED_FEEDBACK ) {
 			loop	<< retSim.getFullName() << " = "
-					<< "integrate" << "(" << state.getFullName()
+					<< moduleName << "_integrate" << "(" << state.getFullName()
 					<< ", " << run.getFullName() << ");\n";
 		}
 		else if (performsSingleShooting() == false)
