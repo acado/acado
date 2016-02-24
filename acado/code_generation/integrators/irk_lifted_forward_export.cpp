@@ -728,10 +728,10 @@ returnValue ForwardLiftedIRKExport::solveImplicitSystem( ExportStatementBlock* b
 				block->addStatement( loop01 );
 
 				if( NDX2 > 0 ) {
-					block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_I.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+					block->addStatement( det.getFullName() + " = " + ExportStatement::fcnPrefix + "_" + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_I.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 				}
 				else {
-					block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+					block->addStatement( det.getFullName() + " = " + ExportStatement::fcnPrefix + "_" + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 				}
 			}
 			else {
@@ -739,7 +739,7 @@ returnValue ForwardLiftedIRKExport::solveImplicitSystem( ExportStatementBlock* b
 				evaluateMatrix( &loop01, index2, index3, tmp_index, k_index, rk_A, Ah, C, true, false );
 				block->addStatement( loop01 );
 
-				block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+				block->addStatement( det.getFullName() + " = " + ExportStatement::fcnPrefix + "_" + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 			}
 
 			if( !equidistantControlGrid() || grid.getNumIntervals() > 1 ) {
@@ -761,7 +761,7 @@ returnValue ForwardLiftedIRKExport::solveImplicitSystem( ExportStatementBlock* b
 //				}
 //			}
 			block->addStatement( loop1 );
-			block->addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+			block->addStatement( det.getFullName() + " = " + ExportStatement::fcnPrefix + "_" + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 		}
 
 //		// IF DEBUG MODE:
