@@ -295,7 +295,7 @@ void mexFunction(	int nlhs,
 
 #if (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPDUNES)
 	if (!initialized) {
-		initializeSolver();
+		@MODULE_NAME@_initializeSolver();
 	}
 #endif
 
@@ -325,7 +325,7 @@ void mexFunction(	int nlhs,
 	else
 		strategy = 0;
 		
-	tic( &tmr );
+	@MODULE_NAME@_tic( &tmr );
 	
 	/* Call solver */
 	switch ( ctrl )
@@ -338,7 +338,7 @@ void mexFunction(	int nlhs,
 				memset(&@MODULE_NAME@Workspace, 0, sizeof( @MODULE_NAME@Workspace ));
 			
 #if @MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 1
-				initializeSolver();
+				@MODULE_NAME@_initializeSolver();
 #endif /* @MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 1 */
 				
 				if (initType == 1)
@@ -403,7 +403,7 @@ void mexFunction(	int nlhs,
 		case 3:
 			/* Feedback step */
 			
-			status = (double)f@MODULE_NAME@_eedbackStep();
+			status = (double)@MODULE_NAME@_feedbackStep();
 			
 			kktValue = @MODULE_NAME@_getKKT();
 			objValue = @MODULE_NAME@_getObjective();
@@ -431,7 +431,7 @@ void mexFunction(	int nlhs,
 			mexErrMsgTxt("Unknown control code.");
 	}
 	
-	cpuTime = toc( &tmr );
+	cpuTime = @MODULE_NAME@_toc( &tmr );
 	
 	/* Prepare return argument */
 	
