@@ -13,14 +13,14 @@ static real_t hypot2(real_t x, real_t y) {
   return sqrt(x*x+y*y);
 }
 
-// Symmetric Householder reduction to tridiagonal form.
+/* Symmetric Householder reduction to tridiagonal form. */
 
 static void @MODULE_NAME@_tred2(real_t *V, real_t *d, real_t *e) {
 
-//  This is derived from the Algol procedures tred2 by
-//  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
-//  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
-//  Fortran subroutine in EISPACK.
+/* This is derived from the Algol procedures tred2 by
+   Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
+   Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
+   Fortran subroutine in EISPACK. */
 
   int i,j,k;
   real_t f,g,h,hh;
@@ -28,11 +28,11 @@ static void @MODULE_NAME@_tred2(real_t *V, real_t *d, real_t *e) {
     d[j] = V[(DIM-1)*DIM+j];
   }
 
-  // Householder reduction to tridiagonal form.
+/* Householder reduction to tridiagonal form. */
 
   for (i = DIM-1; i > 0; i--) {
 
-    // Scale to avoid under/overflow.
+    /* Scale to avoid under/overflow. */
 
     real_t scale = 0.0;
     real_t h = 0.0;
@@ -48,7 +48,7 @@ static void @MODULE_NAME@_tred2(real_t *V, real_t *d, real_t *e) {
       }
     } else {
 
-      // Generate Householder vector.
+      /* Generate Householder vector. */
 
       for (k = 0; k < i; k++) {
         d[k] /= scale;
@@ -66,7 +66,7 @@ static void @MODULE_NAME@_tred2(real_t *V, real_t *d, real_t *e) {
         e[j] = 0.0;
       }
 
-      // Apply similarity transformation to remaining columns.
+      /* Apply similarity transformation to remaining columns. */
 
       for (j = 0; j < i; j++) {
         f = d[j];
@@ -100,7 +100,7 @@ static void @MODULE_NAME@_tred2(real_t *V, real_t *d, real_t *e) {
     d[i] = h;
   }
 
-  // Accumulate transformations.
+  /* Accumulate transformations. */
 
   for (i = 0; i < DIM-1; i++) {
     V[(DIM-1)*DIM+i] = V[i*DIM+i];
@@ -132,14 +132,14 @@ static void @MODULE_NAME@_tred2(real_t *V, real_t *d, real_t *e) {
   e[0] = 0.0;
 } 
 
-// Symmetric tridiagonal QL algorithm.
+/* Symmetric tridiagonal QL algorithm. */
 
 static void @MODULE_NAME@_tql2(real_t *V, real_t *d, real_t *e) {
 
-//  This is derived from the Algol procedures tql2, by
-//  Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
-//  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
-//  Fortran subroutine in EISPACK.
+/*  This is derived from the Algol procedures tql2, by
+   Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
+   Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
+   Fortran subroutine in EISPACK. */
 
   int i,j,m,l,k;
   real_t g,p,r,dl1,h,f,tst1,eps;
@@ -155,7 +155,7 @@ static void @MODULE_NAME@_tql2(real_t *V, real_t *d, real_t *e) {
   eps = pow(2.0,-52.0);
   for (l = 0; l < DIM; l++) {
 
-    // Find small subdiagonal element
+    /* Find small subdiagonal element */
 
     tst1 = MAX(tst1,fabs(d[l]) + fabs(e[l]));
     m = l;
@@ -166,14 +166,14 @@ static void @MODULE_NAME@_tql2(real_t *V, real_t *d, real_t *e) {
       m++;
     }
 
-    // If m == l, d[l] is an eigenvalue,
-    // otherwise, iterate.
+    /* If m == l, d[l] is an eigenvalue,
+       otherwise, iterate. */
 
     if (m > l) {
       int iter = 0;
       do {
         iter = iter + 1;
-        // Compute implicit shift
+        /* Compute implicit shift */
 
         g = d[l];
         p = (d[l+1] - g) / (2.0 * e[l]);
@@ -190,7 +190,7 @@ static void @MODULE_NAME@_tql2(real_t *V, real_t *d, real_t *e) {
         }
         f = f + h;
 
-        // Implicit QL transformation.
+        /* Implicit QL transformation. */
 
         p = d[m];
         c = 1.0;
@@ -212,7 +212,7 @@ static void @MODULE_NAME@_tql2(real_t *V, real_t *d, real_t *e) {
           p = c * d[i] - s * g;
           d[i+1] = h + s * (c * g + s * d[i]);
 
-          // Accumulate transformation.
+          /* Accumulate transformation. */
 
           for (k = 0; k < DIM; k++) {
             h = V[k*DIM+i+1];
@@ -224,9 +224,9 @@ static void @MODULE_NAME@_tql2(real_t *V, real_t *d, real_t *e) {
         e[l] = s * p;
         d[l] = c * p;
 
-        // Check for convergence.
+        /* Check for convergence. */
 
-      } while (fabs(e[l]) > eps*tst1 && iter < 20);  // (Check iteration count here.)
+      } while (fabs(e[l]) > eps*tst1 && iter < 20);  /* (Check iteration count here.) */
     }
     d[l] = d[l] + f;
     e[l] = 0.0;
@@ -258,8 +258,8 @@ void @MODULE_NAME@_reconstruct_A(real_t *A, real_t *V, real_t *d) {
   }
 }
 
-// cutting regularization
-/*void @MODULE_NAME@_regularize(real_t *A) {
+/* cutting regularization */
+void @MODULE_NAME@_regularize(real_t *A) {
   int i;
   real_t V[DIM*DIM];
   real_t d[DIM];
@@ -271,10 +271,10 @@ void @MODULE_NAME@_reconstruct_A(real_t *A, real_t *V, real_t *d) {
   }
   
   @MODULE_NAME@_reconstruct_A(A, V, d);
-}*/
+}
 
-// mirroring regularization
-void @MODULE_NAME@_regularize(real_t *A) {
+/* mirroring regularization */
+/*void @MODULE_NAME@_regularize(real_t *A) {
   int i;
   real_t V[DIM*DIM];
   real_t d[DIM];
@@ -287,4 +287,4 @@ void @MODULE_NAME@_regularize(real_t *A) {
   }
   
   @MODULE_NAME@_reconstruct_A(A, V, d);
-}
+}*/

@@ -197,7 +197,7 @@ void mexFunction(	int nlhs,
 {
 	static unsigned initialized = 0;
 	unsigned ctrl;
-	int ctrlIndex;
+	int ctrlIndex, i, j;
 	unsigned strategy;
 	unsigned initType;
 	real_t* xEnd = NULL;
@@ -266,7 +266,7 @@ void mexFunction(	int nlhs,
 #endif
 
 #if @MODULE_PREFIX@_INITIAL_STATE_FIXED
-	getArray(1, src, 0, "x0", @MODULE_NAME@Variables.x0, @MODULE_PREFIX@_NX, 1);
+	getArray(1, src, 0, "x0", @MODULE_NAME@Variables.x0, 1, @MODULE_PREFIX@_NX);
 #endif /* @MODULE_PREFIX@_INITIAL_STATE_FIXED */
 
 #if (@MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 0) && ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
@@ -340,6 +340,12 @@ void mexFunction(	int nlhs,
 #if @MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 1
 				@MODULE_NAME@_initializeSolver();
 #endif /* @MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 1 */
+                
+                /*for( i = 0; i < ACADO_N*ACADO_RK_NIS; i++ ) {
+                    for( j = 0; j < ACADO_RK_NSTAGES*(ACADO_NX+ACADO_NXA); j++ ) {
+                        acadoWorkspace.rk_A_traj[i*ACADO_RK_NSTAGES*(ACADO_NX+ACADO_NXA)*ACADO_RK_NSTAGES*(ACADO_NX+ACADO_NXA)+j*ACADO_RK_NSTAGES*(ACADO_NX+ACADO_NXA)+j] = 1.0;
+                    }
+                }*/
 				
 				if (initType == 1)
 				{
