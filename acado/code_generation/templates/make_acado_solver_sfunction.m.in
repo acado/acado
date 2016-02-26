@@ -188,23 +188,23 @@ end;
 
 % Add an extra option for qpOASES
 iFlags = '';
-if (~strcmp(aSfunName, 'acado_solver_sfun')) && (strcmp(@MODULE_NAME@_QP_SOLVER, 'QPOASES'))
+if (~strcmp(aSfunName, 'acado_solver_sfun')) && (strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPOASES'))
     iFlags = '-DQPOASES_CUSTOM_INTERFACE=\"@MODULE_NAME@_qpoases_interface.hpp\"';    
 end;
-if strcmp(@MODULE_NAME@_QP_SOLVER, 'QPDUNES')
+if strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPDUNES')
 	iFlags = '-D__SIMPLE_BOUNDS_ONLY__';
 end;
 
 % Define output function declaration
 @MODULE_PREFIX@Def.OutputFcnSpec = [ ...
-	'@MODULE_PREFIX@_step(' ... % Wrapper function name
+	'@MODULE_NAME@_step(' ... % Wrapper function name
 	'@MODULE_PREFIX@input u1[1], ' ...	% Input argument
 	'@MODULE_PREFIX@output y1[1])' ...	% Output argument
 	];
 % Define init function declaration
-@MODULE_PREFIX@Def.StartFcnSpec     = '@MODULE_PREFIX@_initialize( void )';
+@MODULE_PREFIX@Def.StartFcnSpec     = '@MODULE_NAME@_initialize( void )';
 % Define terminate function declaration
-@MODULE_PREFIX@Def.TerminateFcnSpec = '@MODULE_PREFIX@_cleanup( void )';
+@MODULE_PREFIX@Def.TerminateFcnSpec = '@MODULE_NAME@_cleanup( void )';
 
 %% Generate S-function source file
 legacy_code('sfcn_cmex_generate', @MODULE_PREFIX@Def);
