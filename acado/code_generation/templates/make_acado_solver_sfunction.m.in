@@ -141,6 +141,7 @@ elseif strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPOASES3')
 	@MODULE_PREFIX@Def.SourceFiles{end + 1} = 'qpoases3/src/Matrices.c';
 	@MODULE_PREFIX@Def.SourceFiles{end + 1} = 'qpoases3/src/MessageHandling.c';
 	@MODULE_PREFIX@Def.SourceFiles{end + 1} = 'qpoases3/src/Options.c';
+	@MODULE_PREFIX@Def.SourceFiles{end + 1} = 'qpoases3/src/Flipper.c';
 	@MODULE_PREFIX@Def.SourceFiles{end + 1} = 'qpoases3/src/QProblem.c';
 	@MODULE_PREFIX@Def.SourceFiles{end + 1} = 'qpoases3/src/QProblemB.c';
 	@MODULE_PREFIX@Def.SourceFiles{end + 1} = 'qpoases3/src/Utils.c';
@@ -190,6 +191,9 @@ end;
 iFlags = '';
 if (~strcmp(aSfunName, 'acado_solver_sfun')) && (strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPOASES'))
     iFlags = '-DQPOASES_CUSTOM_INTERFACE=\"@MODULE_NAME@_qpoases_interface.hpp\"';    
+end;
+if strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPOASES3')
+    iFlags = '-D__CODE_GENERATION__ -DQPOASES_CUSTOM_INTERFACE=\"@MODULE_NAME@_qpoases3_interface.h\"';    
 end;
 if strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPDUNES')
 	iFlags = '-D__SIMPLE_BOUNDS_ONLY__';

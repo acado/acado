@@ -21,7 +21,7 @@ void @MODULE_NAME@_step(@MODULE_PREFIX@input* inData, @MODULE_PREFIX@output* out
 	@MODULE_NAME@_tic( &tmr );
 	
 	/* Copy all outside world data here. */	
-	memcpy(&@MODULE_NAME@Variables, &(inData->data), sizeof( @MODULE_PREFIX@variables ));
+	memcpy(&@MODULE_NAME@Variables.x, &(inData->data), sizeof( @MODULE_PREFIX@data ));  /* offset necessary because of the dummy variable ! */
 	
 	/* Call solver */
 	switch ( inData->control )
@@ -113,7 +113,7 @@ void @MODULE_NAME@_step(@MODULE_PREFIX@input* inData, @MODULE_PREFIX@output* out
 	}
 	
 	/* Copy the data to outside world. */
-	memcpy(&(outData->data), &@MODULE_NAME@Variables, sizeof( @MODULE_PREFIX@variables ));   /* offset necessary because of the dummy variable ! */
+	memcpy(&(outData->data), &@MODULE_NAME@Variables.x, sizeof( @MODULE_PREFIX@data ));   /* offset necessary because of the dummy variable ! */
 	
 	/* Read the elapsed time. */
 	outData->execTime = @MODULE_NAME@_toc( &tmr );
