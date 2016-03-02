@@ -82,7 +82,7 @@ class ExportIRK4StageSimplifiedNewton : public ExportGaussElim
         returnValue setEigenvalues( const DMatrix& _eig );
 
 		/** This routine sets the transformation matrices, defined by the inverse of the AA matrix. */
-        returnValue setTransformations( const DMatrix& _transf1, const DMatrix& _transf2 );
+        returnValue setTransformations( const DMatrix& _transf1, const DMatrix& _transf2, const DMatrix& _transf1_T, const DMatrix& _transf2_T );
 
 		/** This routine sets the step size used in the IRK method. */
         returnValue setStepSize( double _stepsize );
@@ -94,7 +94,7 @@ class ExportIRK4StageSimplifiedNewton : public ExportGaussElim
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue transformRightHandSide(	ExportStatementBlock& code, const ExportIndex& index );
+		virtual returnValue transformRightHandSide(	ExportStatementBlock& code, const ExportVariable& b_mem1, const ExportVariable& b_mem2, const ExportVariable& b_full_, const ExportVariable& transf_, const ExportIndex& index, const bool transpose );
 
 
 		/** Exports source code of the auto-generated algorithm into the given directory.
@@ -103,7 +103,7 @@ class ExportIRK4StageSimplifiedNewton : public ExportGaussElim
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue transformSolution(	ExportStatementBlock& code, const ExportIndex& index );
+		virtual returnValue transformSolution(	ExportStatementBlock& code, const ExportVariable& b_mem1, const ExportVariable& b_mem2, const ExportVariable& b_full_, const ExportVariable& transf_, const ExportIndex& index, const bool transpose );
 
 
 		/** Adds all data declarations of the auto-generated algorithm to given list of declarations.
@@ -157,6 +157,7 @@ class ExportIRK4StageSimplifiedNewton : public ExportGaussElim
 
 		const std::string getNameSolveComplexFunction();
 		const std::string getNameSolveComplexReuseFunction();
+		const std::string getNameSolveComplexTransposeReuseFunction();
 
 
     protected:
@@ -166,33 +167,43 @@ class ExportIRK4StageSimplifiedNewton : public ExportGaussElim
 		DMatrix eig;
 		DMatrix transf1;
 		DMatrix transf2;
+		DMatrix transf1_T;
+		DMatrix transf2_T;
 
 		// DEFINITION OF THE EXPORTVARIABLES
 		ExportVariable determinant_complex;			/**< Variable containing the matrix determinant. */
 		ExportVariable rk_swap_complex;				/**< Variable that is used to swap rows for pivoting. */
 		ExportVariable rk_bPerm_complex;			/**< Variable containing the reordered right-hand side. */
+		ExportVariable rk_bPerm_complex_trans;		/**< Variable containing the reordered right-hand side. */
 
 		ExportVariable A_complex;					/**< Variable containing the matrix of the complex linear system. */
 		ExportVariable b_complex;					/**< Variable containing the right-hand side of the complex linear system and it will also contain the solution. */
+		ExportVariable b_complex_trans;				/**< Variable containing the right-hand side of the complex linear system and it will also contain the solution. */
 		ExportVariable rk_perm_complex;			/**< Variable containing the order of the rows. */
 		
 		ExportFunction solve_complex;				/**< Function that solves the complex linear system. */
 		ExportFunction solveReuse_complex;			/**< Function that solves a complex linear system with the same matrix, reusing previous results. */
+		ExportFunction solveReuse_complexTranspose;	/**< Function that solves a complex linear system with the same matrix, reusing previous results. */
 
 
 		ExportVariable A_full;						/**< Variable containing the matrix for the complete linear system. */
 		ExportVariable I_full;						/**< Variable containing the matrix for the complete linear system. */
 		ExportVariable b_full;						/**< Variable containing the right-hand side of the complete linear system and it will also contain the solution. */
+		ExportVariable b_full_trans;				/**< Variable containing the right-hand side of the complete linear system and it will also contain the solution. */
 		ExportVariable rk_perm_full;				/**< Variable containing the order of the rows. */
 
 		ExportFunction solve_full;					/**< Function that solves the complete linear system. */
 		ExportFunction solveReuse_full;				/**< Function that solves a complete linear system with the same matrix, reusing previous results. */
+		ExportFunction solveReuseTranspose_full;	/**< Function that solves a complete linear system with the same matrix, reusing previous results. */
 
 
 		ExportVariable A_mem_complex1;				/**< Variable containing the factorized matrix of the complex linear system. */
 		ExportVariable b_mem_complex1;				/**< Variable containing the right-hand side for the complex linear system. */
 		ExportVariable A_mem_complex2;				/**< Variable containing the factorized matrix of the complex linear system. */
 		ExportVariable b_mem_complex2;				/**< Variable containing the right-hand side for the complex linear system. */
+
+		ExportVariable b_mem_complex1_trans;		/**< Variable containing the right-hand side for the complex linear system. */
+		ExportVariable b_mem_complex2_trans;		/**< Variable containing the right-hand side for the complex linear system. */
 
 };
 

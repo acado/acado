@@ -122,6 +122,18 @@ IntegratorExport* createGaussLegendre8Export(	UserInteraction* _userInteraction,
 	_simplified_transf2(2,0) = -4.567693894474303e-02; 		_simplified_transf2(2,1) = 5.596900829318879e-03; 		_simplified_transf2(2,2) = -1.205649800968665e-02; 		_simplified_transf2(2,3) = 2.295382130562243e-02;
 	_simplified_transf2(3,0) = -9.275512157844222e-01; 		_simplified_transf2(3,1) = 0.0; 						_simplified_transf2(3,2) = 9.768864620884530e-01; 		_simplified_transf2(3,3) = 0.0;
 
+	DMatrix _simplified_transf1_T(4,4);
+	_simplified_transf1_T(0,0) = 6.714467192972491e-01; 		_simplified_transf1_T(0,1) = -2.182692704278241e+00; 		_simplified_transf1_T(0,2) = -1.624427092105129e-01; 			_simplified_transf1_T(0,3) = -3.902744826216674e+00;
+	_simplified_transf1_T(1,0) = -4.495608351940147e-01; 		_simplified_transf1_T(1,1) = -9.500648563729466e-01; 		_simplified_transf1_T(1,2) = 2.663148445406726e-01; 			_simplified_transf1_T(1,3) = 4.929782671143375e+00;
+	_simplified_transf1_T(2,0) = 1.818127385417024e-01; 		_simplified_transf1_T(2,1) = 1.228148321235627e+00; 		_simplified_transf1_T(2,2) = -3.002364028567489e-02; 			_simplified_transf1_T(2,3) = 5.658537858504520e+00;
+	_simplified_transf1_T(3,0) = 1.980161710480598e-02; 	_simplified_transf1_T(3,1) = 3.227701142228159e-01; 			_simplified_transf1_T(3,2) = 1.538698143800381e-01; 			_simplified_transf1_T(3,3) = -1.694378560034379e+00;
+
+	DMatrix _simplified_transf2_T(4,4);
+	_simplified_transf2_T(0,0) = 4.960593241309737e+00; 		_simplified_transf2_T(0,1) = 4.776070474379495e+00; 		_simplified_transf2_T(0,2) = 4.710070689435160e+00; 		_simplified_transf2_T(0,3) = 1.118073005316397e+01;
+	_simplified_transf2_T(1,0) = 4.556294554649469e-01; 		_simplified_transf2_T(1,1) = -2.292621287825622e+00; 		_simplified_transf2_T(1,2) = 4.326190112822336e-01; 		_simplified_transf2_T(1,3) = 1.692929579651415e+00;
+	_simplified_transf2_T(2,0) = -4.713659630803845e+00; 		_simplified_transf2_T(2,1) = 8.479584873656380e+00; 		_simplified_transf2_T(2,2) = -4.475607853136751e+00; 		_simplified_transf2_T(2,3) = 2.976737053733966e+01;
+	_simplified_transf2_T(3,0) = -2.832888732208244e-01; 		_simplified_transf2_T(3,1) = 3.891317146824644e-01; 		_simplified_transf2_T(3,2) = 7.546783478294038e-01; 		_simplified_transf2_T(3,3) = -2.622187436137307e-01;
+
 
 	// SINGLE NEWTON:
 	double _single_tau = 1.561969968460128e-01;
@@ -158,7 +170,7 @@ IntegratorExport* createGaussLegendre8Export(	UserInteraction* _userInteraction,
 	integrator->initializeButcherTableau(AA, bb, cc);
 
 	integrator->setEigenvalues(_eig);
-	integrator->setSimplifiedTransformations(_simplified_transf1, _simplified_transf2);
+	integrator->setSimplifiedTransformations(_simplified_transf1, _simplified_transf2,_simplified_transf1_T, _simplified_transf2_T);
 
 	integrator->setSingleTransformations(_single_tau, _lower_triang, _single_transf1, _single_transf2, _single_transf1_T, _single_transf2_T);
 

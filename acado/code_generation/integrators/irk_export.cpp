@@ -1209,6 +1209,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 				if( numStages == 3 ) solver = new ExportIRK3StageSimplifiedNewton( userInteraction,commonHeaderName );
 				if( numStages == 4 ) solver = new ExportIRK4StageSimplifiedNewton( userInteraction,commonHeaderName );
 				solver->init( NX2+NXA, NX+NU+1 );
+				if( (ExportSensitivityType)sensGen == SYMMETRIC || (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD || (ExportSensitivityType)sensGen == BACKWARD ) solver->setTranspose( true ); // BACKWARD propagation
 				solver->setReuse( true ); 	// IFTR method
 				solver->setup();
 				rk_auxSolver = solver->getGlobalExportVariable( 2 );
@@ -1216,7 +1217,8 @@ returnValue ImplicitRungeKuttaExport::setup( )
 				if( numStages == 3 ){
 					ExportIRK3StageSimplifiedNewton* IRKsolver = dynamic_cast<ExportIRK3StageSimplifiedNewton *>(solver);
 					IRKsolver->setEigenvalues(eig);
-					IRKsolver->setTransformations(simplified_transf1, simplified_transf2);
+//					IRKsolver->setTransformations(simplified_transf1, simplified_transf2);
+					IRKsolver->setTransformations(simplified_transf1, simplified_transf2, simplified_transf1_T, simplified_transf2_T);
 
 					double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 					IRKsolver->setStepSize(h);
@@ -1228,7 +1230,8 @@ returnValue ImplicitRungeKuttaExport::setup( )
 				else if( numStages == 4 ) {
 					ExportIRK4StageSimplifiedNewton* IRKsolver = dynamic_cast<ExportIRK4StageSimplifiedNewton *>(solver);
 					IRKsolver->setEigenvalues(eig);
-					IRKsolver->setTransformations(simplified_transf1, simplified_transf2);
+//					IRKsolver->setTransformations(simplified_transf1, simplified_transf2);
+					IRKsolver->setTransformations(simplified_transf1, simplified_transf2, simplified_transf1_T, simplified_transf2_T);
 
 					double h = (grid.getLastTime() - grid.getFirstTime())/grid.getNumIntervals();
 					IRKsolver->setStepSize(h);
@@ -1298,6 +1301,16 @@ returnValue ImplicitRungeKuttaExport::setup( )
 
 returnValue ImplicitRungeKuttaExport::setEigenvalues( const DMatrix& _eig ) {
 	eig = _eig;
+
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ImplicitRungeKuttaExport::setSimplifiedTransformations( const DMatrix& _transf1, const DMatrix& _transf2, const DMatrix& _transf1_T, const DMatrix& _transf2_T ) {
+	simplified_transf1 = _transf1;
+	simplified_transf2 = _transf2;
+	simplified_transf1_T = _transf1_T;
+	simplified_transf2_T = _transf2_T;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -1620,6 +1633,8 @@ returnValue ImplicitRungeKuttaExport::copy(	const ImplicitRungeKuttaExport& arg
 	eig = arg.eig;
 	simplified_transf1 = arg.simplified_transf1;
 	simplified_transf2 = arg.simplified_transf2;
+	simplified_transf1_T = arg.simplified_transf1_T;
+	simplified_transf2_T = arg.simplified_transf2_T;
 
 	tau = arg.tau;
 	low_tria = arg.low_tria;

@@ -101,6 +101,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 
 		/** This routine sets the transformation matrices, defined by the inverse of the AA matrix. */
         returnValue setSimplifiedTransformations( const DMatrix& _transf1, const DMatrix& _transf2 );
+        returnValue setSimplifiedTransformations( const DMatrix& _transf1, const DMatrix& _transf2, const DMatrix& _transf1_T, const DMatrix& _transf2_T );
 
 		/** This routine sets the transformation matrices, defined by the inverse of the AA matrix. */
         returnValue setSingleTransformations( const double _tau, const DVector& _low_tria, const DMatrix& _transf1, const DMatrix& _transf2 );
@@ -573,6 +574,8 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		DMatrix eig;
 		DMatrix simplified_transf1;
 		DMatrix simplified_transf2;
+		DMatrix simplified_transf1_T;
+		DMatrix simplified_transf2_T;
 
 		double tau;
 		DVector low_tria;

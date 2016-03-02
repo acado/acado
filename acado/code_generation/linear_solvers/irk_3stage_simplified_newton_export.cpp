@@ -67,6 +67,12 @@ returnValue ExportIRK3StageSimplifiedNewton::getDataDeclarations(	ExportStatemen
 	declarations.addDeclaration( b_mem_real,dataStruct );
 	declarations.addDeclaration( b_mem_complex,dataStruct );
 
+	if( TRANSPOSE ) {
+		declarations.addDeclaration( b_mem_real_trans,dataStruct );
+		declarations.addDeclaration( b_mem_complex_trans,dataStruct );
+		declarations.addDeclaration( rk_bPerm_complex_trans,dataStruct );
+	}
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -95,7 +101,7 @@ returnValue ExportIRK3StageSimplifiedNewton::getCode(	ExportStatementBlock& code
 {
 	if( eig.isEmpty() || transf1.isEmpty() || transf2.isEmpty() || fabs(stepsize) <= ZERO_EPS ) return ACADOERROR(RET_INVALID_OPTION);
 
-	if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+//	if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 
 	setupFactorization( solve, rk_swap, determinant, string("fabs") );
 	code.addFunction( solve );
@@ -103,6 +109,11 @@ returnValue ExportIRK3StageSimplifiedNewton::getCode(	ExportStatementBlock& code
 	if( REUSE ) { // Also export the extra function which reuses the factorization of the matrix A
 		setupSolveReuseComplete( solveReuse, rk_bPerm );
 		code.addFunction( solveReuse );
+
+		if( TRANSPOSE ) {
+			setupSolveReuseTranspose( solveReuseTranspose, rk_bPerm_trans );
+			code.addFunction( solveReuseTranspose );
+		}
 	}
 
 	setupFactorization( solve_complex, rk_swap_complex, determinant_complex, string("cabs") );
@@ -111,6 +122,11 @@ returnValue ExportIRK3StageSimplifiedNewton::getCode(	ExportStatementBlock& code
 	if( REUSE ) { // Also export the extra function which reuses the factorization of the matrix A
 		setupSolveReuseComplete( solveReuse_complex, rk_bPerm_complex );
 		code.addFunction( solveReuse_complex );
+
+		if( TRANSPOSE ) {
+			setupSolveReuseTranspose( solveReuse_complexTranspose, rk_bPerm_complex_trans );
+			code.addFunction( solveReuse_complexTranspose );
+		}
 	}
 	
 	ExportVariable eig_var( 1.0/stepsize*eig );
@@ -159,51 +175,71 @@ returnValue ExportIRK3StageSimplifiedNewton::getCode(	ExportStatementBlock& code
 		solveReuse_full.addIndex(i);
 
 		// transform the right-hand side
-		transformRightHandSide( solveReuse_full, i );
+		transformRightHandSide( solveReuse_full, b_mem_complex, b_mem_real, b_full, transf1, i, false );
 
 		// solveReuse the real and complex linear systems
 		solveReuse_full.addFunctionCall(getNameSolveComplexReuseFunction(),A_mem_complex,b_mem_complex,rk_perm_full.getAddress(0,0));
 		solveReuse_full.addFunctionCall(getNameSolveRealReuseFunction(),A_mem_real,b_mem_real,rk_perm_full.getAddress(1,0));
 
 		// transform back to the solution
-		transformSolution( solveReuse_full, i );
+		transformSolution( solveReuse_full, b_mem_complex, b_mem_real, b_full, transf2, i, false );
 
 		code.addFunction( solveReuse_full );
+
+		if( TRANSPOSE ) {
+			uint NUM_RHS = nRightHandSides;
+			nRightHandSides = 1;
+			solveReuseTranspose_full.addIndex(i);
+
+			// transform the right-hand side
+			transformRightHandSide( solveReuseTranspose_full, b_mem_complex_trans, b_mem_real_trans, b_full_trans, transf1_T, i, true );
+
+			// solveReuse the real and complex linear systems
+			solveReuseTranspose_full.addFunctionCall(getNameSolveComplexTransposeReuseFunction(),A_mem_complex,b_mem_complex_trans,rk_perm_full.getAddress(0,0));
+			solveReuseTranspose_full.addFunctionCall(getNameSolveRealTransposeReuseFunction(),A_mem_real,b_mem_real_trans,rk_perm_full.getAddress(1,0));
+
+			// transform back to the solution
+			transformSolution( solveReuseTranspose_full, b_mem_complex_trans, b_mem_real_trans, b_full_trans, transf2_T, i, true );
+
+			code.addFunction( solveReuseTranspose_full );
+			nRightHandSides = NUM_RHS;
+		}
 	}
 
 	return SUCCESSFUL_RETURN;
 }
 
 
-returnValue ExportIRK3StageSimplifiedNewton::transformRightHandSide(	ExportStatementBlock& code, const ExportIndex& index )
+returnValue ExportIRK3StageSimplifiedNewton::transformRightHandSide(	ExportStatementBlock& code, const ExportVariable& b_mem_complex_, const ExportVariable& b_mem_real_, const ExportVariable& b_full_, const ExportVariable& transf_, const ExportIndex& index, const bool transpose )
 {
 	uint i, j;
 
-	ExportVariable transf1_var( transf1 );
+	ExportVariable transf1_var( transf_ );
 	ExportVariable stepSizeV( 1.0/stepsize );
 
 	ExportForLoop loop1( index, 0, dim );
 	for( j = 0; j < nRightHandSides; j++ ) {
-		loop1.addStatement( b_mem_complex.getElement(index,j) == 0.0 );
+		loop1.addStatement( b_mem_complex_.getElement(index,j) == 0.0 );
 		for( i = 0; i < 3; i++ ) {
-			loop1.addStatement( b_mem_complex.getElement(index,j) += transf1_var.getElement(0,i)*b_full.getElement(index+i*dim,j) );
+			loop1.addStatement( b_mem_complex_.getElement(index,j) += transf1_var.getElement(0,i)*b_full_.getElement(index+i*dim,j) );
 		}
 		stringstream ss1;
-		ss1 << b_mem_complex.get(index,j) << " += (";
+		if( transpose ) ss1 << b_mem_complex_.get(index,j) << " -= (";
+		else 			ss1 << b_mem_complex_.get(index,j) << " += (";
 		for( i = 0; i < 3; i++ ) {
 			if( i > 0 ) ss1 << " + ";
-			ss1 << transf1_var.get(1,i) << "*" << b_full.get(index+i*dim,j);
+			ss1 << transf1_var.get(1,i) << "*" << b_full_.get(index+i*dim,j);
 		}
 		ss1 << ")*I;\n";
-		ss1 << b_mem_complex.get(index,j) << " *= " << stepSizeV.get(0,0) << ";\n";
+		ss1 << b_mem_complex_.get(index,j) << " *= " << stepSizeV.get(0,0) << ";\n";
 		loop1 << ss1.str();
 
-		loop1.addStatement( b_mem_real.getElement(index,j) == 0.0 );
+		loop1.addStatement( b_mem_real_.getElement(index,j) == 0.0 );
 		for( i = 0; i < 3; i++ ) {
-			loop1.addStatement( b_mem_real.getElement(index,j) += transf1_var.getElement(2,i)*b_full.getElement(index+i*dim,j) );
+			loop1.addStatement( b_mem_real_.getElement(index,j) += transf1_var.getElement(2,i)*b_full_.getElement(index+i*dim,j) );
 		}
 		stringstream ss2;
-		ss2 << b_mem_real.get(index,j) << " *= " << stepSizeV.get(0,0) << ";\n";
+		ss2 << b_mem_real_.get(index,j) << " *= " << stepSizeV.get(0,0) << ";\n";
 		loop1 << ss2.str();
 	}
 	code.addStatement( loop1 );
@@ -212,28 +248,31 @@ returnValue ExportIRK3StageSimplifiedNewton::transformRightHandSide(	ExportState
 }
 
 
-returnValue ExportIRK3StageSimplifiedNewton::transformSolution(	ExportStatementBlock& code, const ExportIndex& index )
+returnValue ExportIRK3StageSimplifiedNewton::transformSolution(	ExportStatementBlock& code, const ExportVariable& b_mem_complex_, const ExportVariable& b_mem_real_, const ExportVariable& b_full_, const ExportVariable& transf_, const ExportIndex& index, const bool transpose )
 {
 	uint j;
-	ExportVariable transf2_var( transf2 );
+	ExportVariable transf2_var( transf_ );
 
 	ExportForLoop loop1( index, 0, dim );
 	for( j = 0; j < nRightHandSides; j++ ) {
 		stringstream ss;
-		ss << b_full.get(index,j) << " = ";
-		ss << transf2_var.get(0,0) << "*creal(" << b_mem_complex.get(index,j) << ") + ";
-		ss << transf2_var.get(0,1) << "*cimag(" << b_mem_complex.get(index,j) << ") + ";
-		ss << transf2_var.get(0,2) << "*" << b_mem_real.get(index,j) << ";\n";
+		ss << b_full_.get(index,j) << " = ";
+		if( transpose ) ss << transf2_var.get(0,0) << "*creal(" << b_mem_complex_.get(index,j) << ") - ";
+		else 			ss << transf2_var.get(0,0) << "*creal(" << b_mem_complex_.get(index,j) << ") + ";
+		ss << transf2_var.get(0,1) << "*cimag(" << b_mem_complex_.get(index,j) << ") + ";
+		ss << transf2_var.get(0,2) << "*" << b_mem_real_.get(index,j) << ";\n";
 
-		ss << b_full.get(index+dim,j) << " = ";
-		ss << transf2_var.get(1,0) << "*creal(" << b_mem_complex.get(index,j) << ") + ";
-		ss << transf2_var.get(1,1) << "*cimag(" << b_mem_complex.get(index,j) << ") + ";
-		ss << transf2_var.get(1,2) << "*" << b_mem_real.get(index,j) << ";\n";
+		ss << b_full_.get(index+dim,j) << " = ";
+		if( transpose ) ss << transf2_var.get(1,0) << "*creal(" << b_mem_complex_.get(index,j) << ") - ";
+		else	 		ss << transf2_var.get(1,0) << "*creal(" << b_mem_complex_.get(index,j) << ") + ";
+		ss << transf2_var.get(1,1) << "*cimag(" << b_mem_complex_.get(index,j) << ") + ";
+		ss << transf2_var.get(1,2) << "*" << b_mem_real_.get(index,j) << ";\n";
 
-		ss << b_full.get(index+2*dim,j) << " = ";
-		ss << transf2_var.get(2,0) << "*creal(" << b_mem_complex.get(index,j) << ") + ";
-		ss << transf2_var.get(2,1) << "*cimag(" << b_mem_complex.get(index,j) << ") + ";
-		ss << transf2_var.get(2,2) << "*" << b_mem_real.get(index,j) << ";\n";
+		ss << b_full_.get(index+2*dim,j) << " = ";
+		if( transpose ) ss << transf2_var.get(2,0) << "*creal(" << b_mem_complex_.get(index,j) << ") - ";
+		else			ss << transf2_var.get(2,0) << "*creal(" << b_mem_complex_.get(index,j) << ") + ";
+		ss << transf2_var.get(2,1) << "*cimag(" << b_mem_complex_.get(index,j) << ") + ";
+		ss << transf2_var.get(2,2) << "*" << b_mem_real_.get(index,j) << ";\n";
 		loop1 << ss.str();
 	}
 	code.addStatement( loop1 );
@@ -294,6 +333,19 @@ returnValue ExportIRK3StageSimplifiedNewton::setup( )
 
 		solveReuse_complex = ExportFunction( getNameSolveComplexReuseFunction(), A_complex, b_complex, rk_perm_complex );
 		solveReuse_complex.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
+
+		if( TRANSPOSE ) {
+			b_complex_trans = ExportVariable( "b", dim, 1, COMPLEX );
+			rk_bPerm_complex_trans = ExportVariable( std::string( "rk_complex_trans_" ) + identifier + "bPerm", dim, 1, COMPLEX, structWspace );
+
+			b_mem_real_trans = ExportVariable( std::string( "rk_real_trans_" ) + identifier + "b", dim, 1, REAL, structWspace );
+			b_mem_complex_trans = ExportVariable( std::string( "rk_complex_trans_" ) + identifier + "b", dim, 1, COMPLEX, structWspace );
+			solveReuseTranspose = ExportFunction( getNameSolveRealTransposeReuseFunction(), A, b_trans, rk_perm );
+			solveReuseTranspose.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
+
+			solveReuse_complexTranspose = ExportFunction( getNameSolveComplexTransposeReuseFunction(), A_complex, b_complex_trans, rk_perm_complex );
+			solveReuse_complexTranspose.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
+		}
 	}
 
 	A_full = ExportVariable( "A", dim, dim, REAL );
@@ -312,9 +364,14 @@ returnValue ExportIRK3StageSimplifiedNewton::setup( )
 	if( REUSE ) {
 		if( implicit ) {
 			solveReuse_full = ExportFunction( getNameSolveReuseFunction(), A_full, I_full, b_full, rk_perm_full );
+			if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 		}
 		else {
 			solveReuse_full = ExportFunction( getNameSolveReuseFunction(), A_full, b_full, rk_perm_full );
+			if( TRANSPOSE ) {
+				b_full_trans = ExportVariable( "b", 3*dim, 1, REAL );
+				solveReuseTranspose_full = ExportFunction( getNameSolveTransposeReuseFunction(), A_full, b_full_trans, rk_perm_full );
+			}
 		}
 		solveReuse_full.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 	}
@@ -335,9 +392,12 @@ returnValue ExportIRK3StageSimplifiedNewton::setEigenvalues( const DMatrix& _eig
 }
 
 
-returnValue ExportIRK3StageSimplifiedNewton::setTransformations( const DMatrix& _transf1, const DMatrix& _transf2 ) {
+returnValue ExportIRK3StageSimplifiedNewton::setTransformations( const DMatrix& _transf1, const DMatrix& _transf2, const DMatrix& _transf1_T, const DMatrix& _transf2_T ) {
 	transf1 = _transf1;
 	transf2 = _transf2;
+
+	transf1_T = _transf1_T;
+	transf2_T = _transf2_T;
 
 	if( _transf1.getNumRows() != 3 || _transf1.getNumCols() != 3 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
 	if( _transf2.getNumRows() != 3 || _transf2.getNumCols() != 3 ) return ACADOERROR( RET_INVALID_ARGUMENTS );
@@ -366,6 +426,12 @@ const std::string ExportIRK3StageSimplifiedNewton::getNameSolveRealReuseFunction
 }
 
 
+const std::string ExportIRK3StageSimplifiedNewton::getNameSolveRealTransposeReuseFunction() {
+
+	return string( "solve_real_trans_" ) + identifier + "system_reuse";
+}
+
+
 const std::string ExportIRK3StageSimplifiedNewton::getNameSolveComplexFunction() {
 
 	return string( "solve_complex_" ) + identifier + "system";
@@ -375,6 +441,12 @@ const std::string ExportIRK3StageSimplifiedNewton::getNameSolveComplexFunction()
 const std::string ExportIRK3StageSimplifiedNewton::getNameSolveComplexReuseFunction() {
 
 	return string( "solve_complex_" ) + identifier + "system_reuse";
+}
+
+
+const std::string ExportIRK3StageSimplifiedNewton::getNameSolveComplexTransposeReuseFunction() {
+
+	return string( "solve_complex_trans_" ) + identifier + "system_reuse";
 }
 
 returnValue ExportIRK3StageSimplifiedNewton::setImplicit( BooleanType _implicit ) {

@@ -110,6 +110,16 @@ IntegratorExport* createGaussLegendre6Export(	UserInteraction* _userInteraction,
 	_simplified_transf2(1,0) = 0.050295169925554; 		_simplified_transf2(1,1) = 0.299699605816585; 		_simplified_transf2(1,2) = 0.117700617809852;
 	_simplified_transf2(2,0) = 0.947801449544836; 		_simplified_transf2(2,1) = 0.0; 					_simplified_transf2(2,2) = 0.990474321575646;
 
+	DMatrix _simplified_transf1_T(3,3);
+	_simplified_transf1_T(0,0) = -4.866177185043021e-01; 	_simplified_transf1_T(0,1) = 1.236550876742378e+00; 		_simplified_transf1_T(0,2) = 3.485838052042621e+00;
+	_simplified_transf1_T(1,0) = 6.393107026830797e-02; 	_simplified_transf1_T(1,1) = 9.257658225120670e-01; 		_simplified_transf1_T(1,2) = -3.325609633473744e+00;
+	_simplified_transf1_T(2,0) = 3.319078939559111e-01; 	_simplified_transf1_T(2,1) = 5.466453018169597e-01; 		_simplified_transf1_T(2,2) = 4.600129927392348e+00;
+
+	DMatrix _simplified_transf2_T(3,3);
+	_simplified_transf2_T(0,0) = -6.321680651380311e+00; 	_simplified_transf2_T(0,1) = -1.314846346969297e+00; 		_simplified_transf2_T(0,2) = 6.049321980812397e+00;
+	_simplified_transf2_T(1,0) = -1.201954582051780e+00; 	_simplified_transf2_T(1,1) = 3.086679860636697e+00; 		_simplified_transf2_T(1,2) = 1.150170448985970e+00;
+	_simplified_transf2_T(2,0) = 5.989523296137209e-01; 	_simplified_transf2_T(2,1) = -2.719295284863776e-01; 		_simplified_transf2_T(2,2) = 4.364697845938469e-01;
+
 
 	// SINGLE NEWTON:
 	double _single_tau = 0.202740066519113;
@@ -141,7 +151,7 @@ IntegratorExport* createGaussLegendre6Export(	UserInteraction* _userInteraction,
 	integrator->initializeButcherTableau(AA, bb, cc);
 
 	integrator->setEigenvalues(_eig);
-	integrator->setSimplifiedTransformations(_simplified_transf1, _simplified_transf2);
+	integrator->setSimplifiedTransformations(_simplified_transf1, _simplified_transf2, _simplified_transf1_T, _simplified_transf2_T);
 
 	integrator->setSingleTransformations(_single_tau, _lower_triang, _single_transf1, _single_transf2, _single_transf1_T, _single_transf2_T);
 
