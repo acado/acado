@@ -596,6 +596,7 @@ CLOSE_NAMESPACE_ACADO
 #include <acado/code_generation/integrators/irk_lifted_fob_export.hpp>
 #include <acado/code_generation/integrators/irk_lifted_forward_export.hpp>
 #include <acado/code_generation/integrators/irk_lifted_feedback_export.hpp>
+#include <acado/code_generation/integrators/irk_symmetric_export.hpp>
 #include <acado/code_generation/integrators/irk_forward_export.hpp>
 #include <acado/code_generation/integrators/irk_export.ipp>
 

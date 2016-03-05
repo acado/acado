@@ -109,7 +109,11 @@ returnValue ExportGaussElim::getCode(	ExportStatementBlock& code
 			setupSolveReuse( solveReuse, solveTriangular, rk_bPerm );
 			code.addFunction( solveReuse );
 		}
-		if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+//		if( TRANSPOSE ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+		if( TRANSPOSE ) {
+			setupSolveReuseTranspose( solveReuseTranspose, rk_bPerm_trans );
+			code.addFunction( solveReuseTranspose );
+		}
 	}
 
 	return SUCCESSFUL_RETURN;
