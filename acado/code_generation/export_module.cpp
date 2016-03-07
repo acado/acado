@@ -71,7 +71,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( INTEGRATOR_DEBUG_MODE, 		0				);
 	addOption( IMPLICIT_INTEGRATOR_MODE,	IFTR 			);
 	addOption( LIFTED_INTEGRATOR_MODE,		1 				);
-	addOption( LIFTED_GRADIENT_UPDATE, 		true			);
+	addOption( LIFTED_GRADIENT_UPDATE, 		false			);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS,	5				);
 	addOption( IMPLICIT_INTEGRATOR_NUM_ITS_INIT, 0			);
 	addOption( SPARSE_QP_SOLUTION,          FULL_CONDENSING );
