@@ -128,8 +128,6 @@ returnValue ForwardBackwardLiftedIRKExport::getDataDeclarations(	ExportStatement
 	declarations.addDeclaration( rk_S_traj,dataStruct );
 	declarations.addDeclaration( rk_xxx_traj,dataStruct );
 
-	declarations.addDeclaration( rk_xxx_lin,dataStruct );
-
 	declarations.addDeclaration( rk_b_trans,dataStruct );
 
 	declarations.addDeclaration( rk_adj_traj,dataStruct );
@@ -140,7 +138,6 @@ returnValue ForwardBackwardLiftedIRKExport::getDataDeclarations(	ExportStatement
 
 	declarations.addDeclaration( rk_hess_tmp1,dataStruct );
 	declarations.addDeclaration( rk_hess_tmp2,dataStruct );
-	declarations.addDeclaration( rk_diffK_local,dataStruct );
 
     return SUCCESSFUL_RETURN;
 }
@@ -570,8 +567,8 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
 	integrate.addComment("------------ BACKWARD loop ------------:");
     // set current Hessian to zero
 	DMatrix zeroM;
-	if( !gradientUpdate ) 	zeroM = zeros<double>(1,(NX+NU)*(NX+NU));
-	else 					zeroM = zeros<double>(1,(NX+NU)*(NX+NU)+NX+NU);
+	if( !gradientUpdate ) 	zeroM = zeros<double>(1,NX*(NX+NU)+NU*NU);
+	else 					zeroM = zeros<double>(1,NX*(NX+NU)+NU*NU+NX+NU);
     integrate.addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) == zeroM );
 	ExportForLoop tmpLoop2( run, grid.getNumIntervals()-1, -1, -1 );
 	ExportStatementBlock *loop2;
@@ -659,9 +656,18 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
 		updateHessianTerm( loop2, i, j );
 	}
 
-	for( run6 = 0; run6 < NX+NU; run6++ ) {
-		loop2->addStatement( rk_hess_tmp2.getRow(run6) == rk_eta.getCols(NX*(2+NX+NU)+run6*(NX+NU),NX*(2+NX+NU)+(run6+1)*(NX+NU)) );
+
+	for( run6 = 0; run6 < NX; run6++ ) {  // NX_NX
+		loop2->addStatement( rk_hess_tmp2.getSubMatrix(run6,run6+1,0,NX) == rk_eta.getCols(NX*(2+NX+NU)+run6*NX,NX*(2+NX+NU)+(run6+1)*NX)  );
 	}
+	for( run6 = 0; run6 < NX; run6++ ) {  // NX_NU
+		loop2->addStatement( rk_hess_tmp2.getSubMatrix(run6,run6+1,NX,NX+NU) == rk_eta.getCols(NX*(2+NX+NU)+NX*NX+run6*NU,NX*(2+NX+NU)+NX*NX+(run6+1)*NU) );
+		loop2->addStatement( rk_hess_tmp2.getSubMatrix(NX,NX+NU,run6,run6+1) == rk_hess_tmp2.getSubMatrix(run6,run6+1,NX,NX+NU).getTranspose() );
+	}
+	for( run6 = 0; run6 < NU; run6++ ) {  // NU_NU
+		loop2->addStatement( rk_hess_tmp2.getSubMatrix(NX+run6,NX+run6+1,NX,NX+NU) == rk_eta.getCols(NX*(2+NX+NU)+NX*(NX+NU)+run6*NU,NX*(2+NX+NU)+NX*(NX+NU)+(run6+1)*NU) );
+	}
+
 	// compute the local result derivatives in rk_diffsPrev2
 	loop2->addStatement( rk_diffsPrev2 == eyeM );
 	ExportForLoop diffLoop5( i, 0, NX );
@@ -674,8 +680,14 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
 	updateHessianTerm( loop2, i, j );
 
 	// UPDATE HESSIAN RESULT
-	for( run6 = 0; run6 < NX+NU; run6++ ) {
-		loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU)+run6*(NX+NU),NX*(2+NX+NU)+(run6+1)*(NX+NU)) == rk_hess_tmp1.getRow(run6) );
+	for( run6 = 0; run6 < NX; run6++ ) {  // NX_NX
+		loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU)+run6*NX,NX*(2+NX+NU)+(run6+1)*NX) == rk_hess_tmp1.getSubMatrix(run6,run6+1,0,NX) );
+	}
+	for( run6 = 0; run6 < NX; run6++ ) {  // NX_NU
+		loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU)+NX*NX+run6*NU,NX*(2+NX+NU)+NX*NX+(run6+1)*NU) == rk_hess_tmp1.getSubMatrix(run6,run6+1,NX,NX+NU) );
+	}
+	for( run6 = 0; run6 < NU; run6++ ) {  // NU_NU
+		loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU)+NX*(NX+NU)+run6*NU,NX*(2+NX+NU)+NX*(NX+NU)+(run6+1)*NU) == rk_hess_tmp1.getSubMatrix(NX+run6,NX+run6+1,NX,NX+NU) );
 	}
 
 	loop2->addStatement( rk_ttt -= DMatrix(1.0/grid.getNumIntervals()) );
@@ -958,7 +970,7 @@ returnValue ForwardBackwardLiftedIRKExport::setup( )
 	get( LIFTED_GRADIENT_UPDATE, gradientUp );
 	bool gradientUpdate = (bool) gradientUp;
 
-	diffsDim   = NX + NX*(NX+NU) + (NX+NU)*(NX+NU);
+	diffsDim   = NX + NX*(NX+NU) + NX*(NX+NU)+NU*NU;
 	if( gradientUpdate ) diffsDim += NX+NU;
 	inputDim = NX + diffsDim + NU + NOD;
 
