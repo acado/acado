@@ -59,6 +59,7 @@ returnValue ExportGaussNewtonForces::setup( )
 	setupInitialization();
 	// Add QP initialization call to the initialization
 	ExportFunction initializeForces( "initializeForces" );
+	initializeForces.setName( "initializeForces" );
 	initialize.addFunctionCall( initializeForces );
 
 	LOG( LVL_DEBUG ) << "done!" << endl;
@@ -1015,13 +1016,14 @@ returnValue ExportGaussNewtonForces::setupEvaluation( )
 	//
 	ExportFunction solveQP;
 	solveQP.setup("solve");
+	solveQP.setName( "solve" );
 
 	feedback
 	<< returnValueFeedbackPhase.getFullName() << " = "
 	<< qpModuleName << "_" << solveQP.getName() << "( "
 	<< "&" << qpObjPrefix << "_" << "params" << ", "
 	<< "&" << qpObjPrefix << "_" << "output" << ", "
-	<< "&" << qpObjPrefix << "_" << "info" << " );\n";
+	<< "&" << qpObjPrefix << "_" << "info" << " , NULL);\n";
 	feedback.addLinebreak();
 
 	//
