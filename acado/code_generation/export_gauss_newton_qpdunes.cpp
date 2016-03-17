@@ -56,6 +56,7 @@ returnValue ExportGaussNewtonQpDunes::setup( )
 
 	cleanup.setup( "cleanupSolver" );
 	ExportFunction cleanupQpDunes( "cleanupQpDunes" );
+	cleanupQpDunes.setName( "cleanupQpDunes" );
 	cleanup.addFunctionCall( cleanupQpDunes );
 	LOG( LVL_DEBUG ) << "done!" << endl;
 
