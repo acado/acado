@@ -3,10 +3,7 @@
 
 #define MDL_START
 
-
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 #include "acado_common.h"
 #include "acado_auxiliary_functions.h"
@@ -14,7 +11,6 @@ extern "C" {
 
 ACADOvariables acadoVariables;
 ACADOworkspace acadoWorkspace;
-
 
 static void mdlInitializeSizes (SimStruct *S)
 {
@@ -134,7 +130,7 @@ static void mdlStart(SimStruct *S)
         for( j=0; j < ACADO_NU; ++j ) acadoVariables.ubAValues[i*ACADO_NU+j] = ubAV[j];
     }
 
-    preparationStep( );
+    acado_preparationStep( );
 }
 
 
@@ -142,7 +138,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
 {
     int i, j, iter, error;
     double measurement[ACADO_NX];
-    timer t;
+    acado_timer t;
     double timeFdb, timePrep;
 
     InputRealPtrsType in_x, in_ref;
@@ -161,13 +157,13 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     for( i=0; i < ACADO_NYN; ++i ) acadoVariables.yN[i] = (double)(*in_ref[i]);
     
         
-    tic( &t );
-    error = feedbackStep( );
-    timeFdb = toc( &t );
+    acado_tic( &t );
+    error = acado_feedbackStep( );
+    timeFdb = acado_toc( &t );
     
-    tic( &t );
-    preparationStep( );
-    timePrep = toc( &t );
+    acado_tic( &t );
+    acado_preparationStep( );
+    timePrep = acado_toc( &t );
     
     printf("NMPC step (error value: %d):\n", error);
     printf("Timing RTI iteration:   %.3g ms   +   %.3g ms   =   %.3g ms \n", timeFdb*1e3, timePrep*1e3, (timeFdb+timePrep)*1e3);
@@ -178,7 +174,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     out_kktTol = ssGetOutputPortRealSignal(S, 1);
 
     for( i=0; i < ACADO_NU; ++i ) out_u0[i] = acadoVariables.u[i];
-    out_kktTol[0] = getKKT( );
+    out_kktTol[0] = acado_getKKT( );
 }
 
 
@@ -194,6 +190,4 @@ static void mdlTerminate(SimStruct *S)
 #endif
 
 
-#ifdef __cplusplus
 }
-#endif
