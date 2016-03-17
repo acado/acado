@@ -53,6 +53,7 @@ returnValue ExportGaussNewtonBlockForces::setup( )
 	LOG( LVL_DEBUG ) << "Solver: setup extra initialization... " << endl;
 	// Add QP initialization call to the initialization
 	ExportFunction initializeForces( "initializeForces" );
+	initializeForces.setName( "initializeForces" );
 	initialize.addFunctionCall( initializeForces );
 	LOG( LVL_DEBUG ) << "done!" << endl;
 
@@ -438,6 +439,7 @@ returnValue ExportGaussNewtonBlockForces::setupEvaluation( )
 	//
 	ExportFunction solveQP;
 	solveQP.setup("solve");
+	solveQP.setName( "solve" );
 
 	feedback
 	<< tmp.getFullName() << " = "
