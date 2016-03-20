@@ -133,6 +133,9 @@ returnValue SymmetricIRKExport::getDataDeclarations(	ExportStatementBlock& decla
 	declarations.addDeclaration( rk_seed,dataStruct );
 	declarations.addDeclaration( rk_adj_diffs_tmp,dataStruct );
 
+	declarations.addDeclaration( rk_hess_tmp1,dataStruct );
+	declarations.addDeclaration( rk_hess_tmp2,dataStruct );
+
 //	declarations.addDeclaration( rk_adj_traj,dataStruct );
 
 //	declarations.addDeclaration( rk_diff_mu,dataStruct );
@@ -198,17 +201,18 @@ returnValue SymmetricIRKExport::setDifferentialEquation(	const Expression& rhs_ 
 		DifferentialState sX("", NX,NX+NU);
 		Expression Gx = sX.getCols(0,NX);
 		Expression Gu = sX.getCols(NX,NX+NU);
-		DifferentialEquation forward;
-		for( uint i = 0; i < rhs_.getDim(); i++ ) {
-			// NOT YET IMPLEMENTED FOR DAES OR IMPLICIT ODES
-			if( NDX2 > 0 || NXA > 0 ) return ACADOERROR(RET_NOT_YET_IMPLEMENTED);
-			forward << multipleForwardDerivative( rhs_(i), x, Gx );
-			forward << multipleForwardDerivative( rhs_(i), x, Gu ) + forwardDerivative( rhs_(i), u );
-		}
+//		DifferentialEquation forward;
+//		for( uint i = 0; i < rhs_.getDim(); i++ ) {
+//			// NOT YET IMPLEMENTED FOR DAES OR IMPLICIT ODES
+//			if( NDX2 > 0 || NXA > 0 ) return ACADOERROR(RET_NOT_YET_IMPLEMENTED);
+//			forward << multipleForwardDerivative( rhs_(i), x, Gx );
+//			forward << multipleForwardDerivative( rhs_(i), x, Gu ) + forwardDerivative( rhs_(i), u );
+//		}
 
 		// FIRST ORDER ADJOINT SWEEP:
 		DifferentialState lambda("", NX,1);
-		DifferentialEquation backward, adj_update;
+		DifferentialEquation backward;
+//		, adj_update;
 //		backward << backwardDerivative( rhs_, x, lambda );
 //		adj_update << backwardDerivative( rhs_, x, lambda );
 
@@ -220,10 +224,20 @@ returnValue SymmetricIRKExport::setDifferentialEquation(	const Expression& rhs_ 
 		S_tmp.appendRows(zeros<double>(NU,NX).appendCols(eye<double>(NU)));
 
 		if( NDX2 > 0 || NXA > 0 ) return ACADOERROR(RET_NOT_YET_IMPLEMENTED);
-		Expression dfS, dfL;
-		Expression symmetric = symmetricDerivative( rhs_, arg, S_tmp, lambda, &dfS, &dfL );
-		backward << dfL.getRows(0,NX);
-		backward << returnLowerTriangular( symmetric );
+		if( (ExportSensitivityType)sensGen == SYMMETRIC ) {
+			Expression dfS, dfL;
+			Expression symmetric = symmetricDerivative( rhs_, arg, S_tmp, lambda, &dfS, &dfL );
+			backward << dfL.getRows(0,NX);
+			backward << returnLowerTriangular( symmetric );
+		}
+		else if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+			Expression tmp = backwardDerivative( rhs_, arg, lambda );
+			backward << tmp.getRows(0,NX);
+			backward << multipleForwardDerivative( tmp, arg, S_tmp );
+		}
+		else {
+			return ACADOERROR(RET_INVALID_OPTION);
+		}
 
 		// GRADIENT UPDATE:
 //	    int gradientUp;
@@ -241,7 +255,7 @@ returnValue SymmetricIRKExport::setDifferentialEquation(	const Expression& rhs_ 
 //		int linSolver;
 //		get( LINEAR_ALGEBRA_SOLVER, linSolver );
 //	    if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
-			adj_update << dfL.getRows(0,NX);
+//			adj_update << dfL.getRows(0,NX);
 //	    }
 //	    else if( gradientUpdate ) {
 //	    	adj_update << (forwardDerivative( dfL, x )).transpose();
@@ -281,7 +295,7 @@ returnValue SymmetricIRKExport::getCode(	ExportStatementBlock& code )
 	get( IMPLICIT_INTEGRATOR_MODE, mode );
 	int liftMode;
 	get( LIFTED_INTEGRATOR_MODE, liftMode );
-	if ( (ExportSensitivityType)sensGen != SYMMETRIC ) ACADOERROR( RET_INVALID_OPTION );
+	if ( (ExportSensitivityType)sensGen != SYMMETRIC && (ExportSensitivityType)sensGen != FORWARD_OVER_BACKWARD ) ACADOERROR( RET_INVALID_OPTION );
 	if( (ImplicitIntegratorMode)mode == LIFTED ) ACADOERROR( RET_INVALID_OPTION );
 //	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 	if( NXA > 0) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -542,7 +556,12 @@ returnValue SymmetricIRKExport::getCode(	ExportStatementBlock& code )
 	uint numX = NX*(NX+1)/2.0;
 	uint numU = NU*(NU+1)/2.0;
 	DMatrix zeroM;
-	zeroM = zeros<double>(1,numX+numU+NX*NU);
+	if( (ExportSensitivityType)sensGen == SYMMETRIC ) {
+		zeroM = zeros<double>(1,numX+numU+NX*NU);
+	}
+	else {
+		zeroM = zeros<double>(1,NX*(NX+NU)+NU*NU);
+	}
     integrate.addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) == zeroM );
 	ExportForLoop tmpLoop2( run, grid.getNumIntervals()-1, -1, -1 );
 	ExportStatementBlock *loop2;
@@ -563,7 +582,10 @@ returnValue SymmetricIRKExport::getCode(	ExportStatementBlock& code )
 	}
 	loop2->addFunctionCall( solver->getNameSolveTransposeReuseFunction(),rk_A_traj.getAddress(run*numStages*(NX+NXA),0),rk_b_trans.getAddress(0,0),rk_aux_traj.getAddress(run,0) );
 
-
+	if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+		zeroM = zeros<double>(NX+NU,NX+NU);
+		loop2->addStatement( rk_hess_tmp1 == zeroM );
+	}
 	for( run5 = 0; run5 < numStages; run5++ ) {
 		loop2->addStatement( rk_seed.getCols(0,NX) == rk_xxx_traj.getCols((run*numStages+run5)*(NX2+NXA),(run*numStages+run5+1)*(NX2+NXA)) );
 		loop2->addStatement( rk_diffsPrev2 == rk_S_traj.getRows(run*NX,(run+1)*NX) );
@@ -582,7 +604,63 @@ returnValue SymmetricIRKExport::getCode(	ExportStatementBlock& code )
 		loop2->addStatement( rk_seed.getCols(NX*(1+NX+NU),NX*(2+NX+NU)) == rk_b_trans.getCols(run5*NX,(run5+1)*NX) );
 		loop2->addFunctionCall( adjoint_sweep.getName(), rk_seed, rk_adj_diffs_tmp.getAddress(0,0) );
 		loop2->addStatement( rk_eta.getCols(NX,2*NX) += rk_adj_diffs_tmp.getCols(0,NX) );
-		loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) += rk_adj_diffs_tmp.getCols(NX,NX+numX+numU+NX*NU) );
+		if( (ExportSensitivityType)sensGen == SYMMETRIC ) {
+			loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) += rk_adj_diffs_tmp.getCols(NX,NX+numX+numU+NX*NU) );
+		}
+		else {
+			for( run6 = 0; run6 < NX+NU; run6++ ) {
+				loop2->addStatement( rk_hess_tmp2.getRow(run6) == rk_adj_diffs_tmp.getCols(NX+run6*(NX+NU),NX+(run6+1)*(NX+NU)) );
+			}
+			// compute the local derivatives in rk_diffsPrev2
+			loop2->addStatement( rk_diffsPrev2 == eyeM );
+			ExportForLoop diffLoop3( i, 0, NX );
+			diffLoop3.addStatement( tmp_index1 == (run*(NX+NXA)+i)*(NX+NU) );
+			ExportForLoop diffLoop4( j, 0, NX+NU );
+			diffLoop4.addStatement( tmp_index2 == tmp_index1+j );
+			for( run6 = 0; run6 < numStages; run6++ ) {
+				diffLoop4.addStatement( rk_diffsPrev2.getElement(i,j) += Ah.getElement(run5,run6)*rk_diffK.getElement( tmp_index2,run6 ) );
+			}
+			diffLoop3.addStatement( diffLoop4 );
+			loop2->addStatement( diffLoop3 );
+
+			// update of rk_hess_tmp2 from the left and add it to rk_hess_tmp1
+			updateHessianTerm( loop2, i, j );
+		}
+	}
+
+	if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+		for( run6 = 0; run6 < NX; run6++ ) {  // NX_NX
+			loop2->addStatement( rk_hess_tmp2.getSubMatrix(run6,run6+1,0,NX) == rk_eta.getCols(NX*(2+NX+NU)+run6*NX,NX*(2+NX+NU)+(run6+1)*NX)  );
+		}
+		for( run6 = 0; run6 < NX; run6++ ) {  // NX_NU
+			loop2->addStatement( rk_hess_tmp2.getSubMatrix(run6,run6+1,NX,NX+NU) == rk_eta.getCols(NX*(2+NX+NU)+NX*NX+run6*NU,NX*(2+NX+NU)+NX*NX+(run6+1)*NU) );
+			loop2->addStatement( rk_hess_tmp2.getSubMatrix(NX,NX+NU,run6,run6+1) == rk_hess_tmp2.getSubMatrix(run6,run6+1,NX,NX+NU).getTranspose() );
+		}
+		for( run6 = 0; run6 < NU; run6++ ) {  // NU_NU
+			loop2->addStatement( rk_hess_tmp2.getSubMatrix(NX+run6,NX+run6+1,NX,NX+NU) == rk_eta.getCols(NX*(2+NX+NU)+NX*(NX+NU)+run6*NU,NX*(2+NX+NU)+NX*(NX+NU)+(run6+1)*NU) );
+		}
+
+		// compute the local result derivatives in rk_diffsPrev2
+		loop2->addStatement( rk_diffsPrev2 == eyeM );
+		ExportForLoop diffLoop5( i, 0, NX );
+		diffLoop5.addStatement( tmp_index1 == (run*(NX+NXA)+i)*(NX+NU) );
+		ExportForLoop diffLoop6( j, 0, NX+NU );
+		diffLoop6.addStatement( tmp_index2 == tmp_index1+j );
+		diffLoop6.addStatement( rk_diffsPrev2.getElement(i,j) += rk_diffK.getRow( tmp_index2 )*Bh );
+		diffLoop5.addStatement( diffLoop6 );
+		loop2->addStatement( diffLoop5 );
+		updateHessianTerm( loop2, i, j );
+
+		// UPDATE HESSIAN RESULT
+		for( run6 = 0; run6 < NX; run6++ ) {  // NX_NX
+			loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU)+run6*NX,NX*(2+NX+NU)+(run6+1)*NX) == rk_hess_tmp1.getSubMatrix(run6,run6+1,0,NX) );
+		}
+		for( run6 = 0; run6 < NX; run6++ ) {  // NX_NU
+			loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU)+NX*NX+run6*NU,NX*(2+NX+NU)+NX*NX+(run6+1)*NU) == rk_hess_tmp1.getSubMatrix(run6,run6+1,NX,NX+NU) );
+		}
+		for( run6 = 0; run6 < NU; run6++ ) {  // NU_NU
+			loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU)+NX*(NX+NU)+run6*NU,NX*(2+NX+NU)+NX*(NX+NU)+(run6+1)*NU) == rk_hess_tmp1.getSubMatrix(NX+run6,NX+run6+1,NX,NX+NU) );
+		}
 	}
 
 	loop2->addStatement( rk_ttt -= DMatrix(1.0/grid.getNumIntervals()) );
@@ -606,6 +684,28 @@ returnValue SymmetricIRKExport::getCode(	ExportStatementBlock& code )
     code.addLinebreak( 2 );
 
     return SUCCESSFUL_RETURN;
+}
+
+
+returnValue SymmetricIRKExport::updateHessianTerm( ExportStatementBlock* block, const ExportIndex& i, const ExportIndex& j ) {
+	ExportForLoop loop1( i, 0, NX );
+	ExportForLoop loop2( j, 0, NX+NU );
+	for( uint index = 0; index < NX; index++ ) {
+		loop2.addStatement( rk_hess_tmp1.getElement(i,j) += rk_diffsPrev2.getElement(index,i)*rk_hess_tmp2.getElement(index,j) );
+	}
+	loop1.addStatement( loop2 );
+	block->addStatement( loop1 );
+
+	ExportForLoop loop3( i, 0, NU );
+	ExportForLoop loop4( j, 0, NX+NU );
+	loop4.addStatement( rk_hess_tmp1.getElement(NX+i,j) += rk_hess_tmp2.getElement(NX+i,j) );
+	for( uint index = 0; index < NX; index++ ) {
+		loop4.addStatement( rk_hess_tmp1.getElement(NX+i,j) += rk_diffsPrev2.getElement(index,NX+i)*rk_hess_tmp2.getElement(index,j) );
+	}
+	loop3.addStatement( loop4 );
+	block->addStatement( loop3 );
+
+	return SUCCESSFUL_RETURN;
 }
 
 
@@ -836,6 +936,8 @@ returnValue SymmetricIRKExport::sensitivitiesImplicitSystem( ExportStatementBloc
 returnValue SymmetricIRKExport::setup( )
 {
 	ForwardIRKExport::setup();
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY,sensGen );
 
 //	int gradientUp;
 //	get( LIFTED_GRADIENT_UPDATE, gradientUp );
@@ -843,7 +945,12 @@ returnValue SymmetricIRKExport::setup( )
 
 	uint numX = NX*(NX+1)/2.0;
 	uint numU = NU*(NU+1)/2.0;
-	diffsDim   = NX + NX*(NX+NU) + numX + NX*NU + numU;
+	if( (ExportSensitivityType)sensGen == SYMMETRIC ) {
+		diffsDim   = NX + NX*(NX+NU) + numX + NX*NU + numU;
+	}
+	else {
+		diffsDim   = NX + NX*(NX+NU) + NX*(NX+NU)+NU*NU;
+	}
 //	if( gradientUpdate ) diffsDim += NX+NU;
 	inputDim = NX + diffsDim + NU + NOD;
 
@@ -866,7 +973,12 @@ returnValue SymmetricIRKExport::setup( )
 	get( LIFTED_INTEGRATOR_MODE, liftMode );
 
 	rk_seed = ExportVariable( "rk_seed", 1, NX+NX*(NX+NU)+NX+NU+NOD+timeDep, REAL, structWspace );
-	rk_adj_diffs_tmp = ExportVariable( "rk_adjoint", 1, NX + numX + NX*NU + numU, REAL, structWspace );
+	if( (ExportSensitivityType)sensGen == SYMMETRIC ) {
+		rk_adj_diffs_tmp = ExportVariable( "rk_adjoint", 1, NX + numX + NX*NU + numU, REAL, structWspace );
+	}
+	else {
+		rk_adj_diffs_tmp = ExportVariable( "rk_adjoint", 1, NX + (NX+NU)*(NX+NU), REAL, structWspace );
+	}
 //	if( gradientUpdate ) rk_seed = ExportVariable( "rk_seed", 1, NX+NX*(NX+NU)+2*NX+NU+NOD+timeDep, REAL, structWspace );
 //	rk_A_traj = ExportVariable( "rk_A_traj", grid.getNumIntervals()*numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, structWspace );
 //	rk_aux_traj = ExportVariable( "rk_aux_traj", grid.getNumIntervals(), numStages*(NX2+NXA), INT, structWspace );
@@ -888,6 +1000,9 @@ returnValue SymmetricIRKExport::setup( )
 //		rk_diffsTemp2 = ExportVariable( "rk_diffsTemp2", NX2+NXA, NVARS2, REAL, structWspace );
 //	}
 //	rk_adj_traj = ExportVariable( "rk_adj_traj", N*grid.getNumIntervals(), numStages*(NX+NXA), REAL, ACADO_VARIABLES );
+
+	rk_hess_tmp1 = ExportVariable( "rk_hess1", NX+NU, NX+NU, REAL, structWspace );
+	rk_hess_tmp2 = ExportVariable( "rk_hess2", NX+NU, NX+NU, REAL, structWspace );
 
     return SUCCESSFUL_RETURN;
 }

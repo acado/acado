@@ -209,6 +209,9 @@ class SymmetricIRKExport : public ForwardIRKExport
 		Expression returnLowerTriangular( const Expression& expr );
 
 
+		returnValue updateHessianTerm( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2 );
+
+
 		/** Returns the largest global export variable.
 		 *
 		 *	\return SUCCESSFUL_RETURN
@@ -239,6 +242,8 @@ class SymmetricIRKExport : public ForwardIRKExport
 //		ExportVariable 	rk_lambda;				/**< The lambda variables over the shooting interval. */
 //		ExportVariable 	rk_b_mu;				/**< The lambda variables over the shooting interval. */
 
+		ExportVariable  rk_hess_tmp1;
+		ExportVariable  rk_hess_tmp2;
 };
 
 
