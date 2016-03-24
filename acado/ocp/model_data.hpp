@@ -354,18 +354,21 @@ public:
       *  \return Number of control inputs
       */
      uint getNU( ) const;
+     returnValue setNU( const uint NU_ );
 
      /** Returns number of parameters.
       *
       *  \return Number of parameters
       */
      uint getNP( ) const;
+     returnValue setNP( const uint NP_ );
 
      /** Returns number of parameters.
       *
       *  \return Number of parameters
       */
      uint getNOD( ) const;
+     returnValue setNOD( const uint NOD_ );
 
      /** Returns number of shooting intervals.
       *

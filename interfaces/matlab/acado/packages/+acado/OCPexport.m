@@ -110,6 +110,10 @@ classdef OCPexport < acado.ExportModule
         
         function getInstructions(obj, cppobj, get)
             
+            global ACADO_;
+            NU = numel(ACADO_.helper.u);
+            NP = numel(ACADO_.helper.p);
+            NOD = numel(ACADO_.helper.od);
                 
             if (get == 'FB')
                 % SET LOGGER TO LVL_DEBUG
@@ -123,6 +127,12 @@ classdef OCPexport < acado.ExportModule
                     if ~acadoDefined(obj.ocp)
                         obj.ocp.getInstructions(cppobj, get);
                     end
+                    
+                    % Set number of controls and online data:
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setNU( %s );\n', obj.ocp.name, num2str(NU)));
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setNP( %s );\n', obj.ocp.name, num2str(NP)));
+                    fprintf(cppobj.fileMEX,sprintf('    %s.setNOD( %s );\n', obj.ocp.name, num2str(NOD)));
+                    
                     fprintf(cppobj.fileMEX,sprintf('    OCPexport %s( %s );\n', obj.name, obj.ocp.name));
                 else
                     error('Unable to export a RTI algorithm without an OCP formulation.');

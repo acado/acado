@@ -567,6 +567,27 @@ returnValue ModelData::setN( const uint N_ )
 }
 
 
+returnValue ModelData::setNU( const uint NU_ )
+{
+	NU = NU_;
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ModelData::setNP( const uint NP_ )
+{
+	NP = NP_;
+	return SUCCESSFUL_RETURN;
+}
+
+
+returnValue ModelData::setNOD( const uint NOD_ )
+{
+	NOD = NOD_;
+	return SUCCESSFUL_RETURN;
+}
+
+
 DVector ModelData::getDimOutputs( ) const
 {
 	DVector nOutV( (uint)dim_outputs.size() );

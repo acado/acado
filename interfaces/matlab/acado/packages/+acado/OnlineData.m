@@ -52,7 +52,7 @@ classdef OnlineData < acado.Variable
                 
                 obj.name = name;
                 
-                ACADO_.helper.addP(obj);
+                ACADO_.helper.addOD(obj);
                 ACADO_.helper.addInstruction(obj);
             end
         end
