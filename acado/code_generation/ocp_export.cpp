@@ -359,7 +359,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			else
 				qpSolverString = "QPDUNES";
 
-			ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName);
+			ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName, modulePrefix);
 
 			// Get options
 			int useSinglePrecision;
