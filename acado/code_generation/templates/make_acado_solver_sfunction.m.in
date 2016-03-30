@@ -188,15 +188,15 @@ elseif (ispc)
 end;
 
 % Add an extra option for qpOASES
-iFlags = '';
+iFlags = {''};
 if (~strcmp(aSfunName, 'acado_solver_sfun')) && (strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPOASES'))
-    iFlags = '-DQPOASES_CUSTOM_INTERFACE=\"@MODULE_NAME@_qpoases_interface.hpp\"';    
+    iFlags = {'-DQPOASES_CUSTOM_INTERFACE="@MODULE_NAME@_qpoases_interface.hpp"'};    
 end;
 if strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPOASES3')
-    iFlags = '-D__CODE_GENERATION__ -DQPOASES_CUSTOM_INTERFACE=\"@MODULE_NAME@_qpoases3_interface.h\"';    
+    iFlags = {'-D__CODE_GENERATION__', '-DQPOASES_CUSTOM_INTERFACE="@MODULE_NAME@_qpoases3_interface.h"'};    
 end;
 if strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPDUNES')
-	iFlags = '-D__SIMPLE_BOUNDS_ONLY__';
+	iFlags = {'-D__SIMPLE_BOUNDS_ONLY__'};
 end;
 
 % Define output function declaration
@@ -214,7 +214,7 @@ end;
 legacy_code('sfcn_cmex_generate', @MODULE_PREFIX@Def);
 
 %% Compile the code
-legacy_code('compile', @MODULE_PREFIX@Def, {iFlags, ldFlags});
+legacy_code('compile', @MODULE_PREFIX@Def, {iFlags{:}, ldFlags});
 
 %% Generate a TLC file and simulation block
 legacy_code('slblock_generate', @MODULE_PREFIX@Def);
