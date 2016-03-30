@@ -31,6 +31,7 @@ void @MODULE_NAME@_step(@MODULE_PREFIX@input* inData, @MODULE_PREFIX@output* out
 			
 			if ( !initialized )
 			{				
+				@MODULE_NAME@_initialize( );
 				if (inData->initialization == 1)
 				{
 					@MODULE_NAME@_initializeNodesByForwardSimulation();
@@ -65,6 +66,7 @@ void @MODULE_NAME@_step(@MODULE_PREFIX@input* inData, @MODULE_PREFIX@output* out
 		case 1:
 			/* Initialize */
 				
+			@MODULE_NAME@_initialize( );
 			if (inData->initialization == 1)
 			{
 				@MODULE_NAME@_initializeNodesByForwardSimulation();
