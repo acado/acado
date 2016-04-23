@@ -1674,7 +1674,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 			uint item = N*NX+j;
 			uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
 			if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
-				expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == yVars.getRow(getNumQPvars()+IdxF) );
+				expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == -1.0*yVars.getRow(getNumQPvars()+IdxF) );
 			}
 			else { // INDEX NOT FOUND
 				expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == 0.0 );
@@ -1687,7 +1687,7 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				uint item = i*NX+j;
 				uint IdxF = std::find(xBoundsIdx.begin(), xBoundsIdx.end(), item) - xBoundsIdx.begin();
 				if( IdxF != xBoundsIdx.size() ) { // INDEX FOUND
-					expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == yVars.getRow(getNumQPvars()+IdxF) );
+					expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == -1.0*yVars.getRow(getNumQPvars()+IdxF) );
 				}
 				else { // INDEX NOT FOUND
 					expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == 0.0 );
