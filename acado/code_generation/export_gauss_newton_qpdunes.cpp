@@ -446,6 +446,9 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 	//
 	// Gradient setup
 	//
+	int sensitivityProp;
+	get( DYNAMIC_SENSITIVITY, sensitivityProp );
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
 
 	// Interface variable to qpDUNES
 	qpg.setup("qpG", N * (NX + NU) + NX, 1, REAL, ACADO_WORKSPACE);
@@ -467,6 +470,9 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 				Dy.getRows(index * NY, (index + 1) * NY)
 		);
 	}
+	if( adjoint ) {
+		setStagef.addStatement( stagef.getRows(0, NX) += objSlx.getRows( index*NX, index*NX+NX ) );
+	}
 	setStagef.addLinebreak();
 
 	if (R2.isGiven() == false)
@@ -480,6 +486,9 @@ returnValue ExportGaussNewtonQpDunes::setupObjectiveEvaluation( void )
 				stagef.getRows(NX, NX + NU) == R2 *
 				Dy.getRows(index * NY, (index + 1) * NY)
 		);
+	}
+	if( adjoint ) {
+		setStagef.addStatement( stagef.getRows(NX, NX+NU) += objSlu.getRows( index*NU, index*NU+NU ) );
 	}
 
 	// A buffer given to update the last node's gradient
@@ -1025,6 +1034,9 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 	//
 	// Calculate objective residuals and call the QP solver
 	//
+	int sensitivityProp;
+	get( DYNAMIC_SENSITIVITY, sensitivityProp );
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
 	if( getNY() > 0 || getNYN() > 0 ) {
 		feedback.addStatement( Dy -= y );
 		feedback.addLinebreak();
@@ -1034,6 +1046,7 @@ returnValue ExportGaussNewtonQpDunes::setupEvaluation( )
 		for (unsigned i = 0; i < N; ++i)
 			feedback.addFunctionCall(setStagef, qpg.getAddress(i * (NX + NU)), ExportIndex( i ));
 		feedback.addStatement( qpg.getRows(N * (NX + NU), N * (NX + NU) + NX) == QN2 * DyN );
+		if( adjoint ) feedback.addStatement( qpg.getRows(N * (NX + NU), N * (NX + NU) + NX) += objSlx.getRows(N*NX,N*NX+NX) );
 		feedback.addLinebreak();
 	}
 
