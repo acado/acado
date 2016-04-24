@@ -238,7 +238,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	bool gradientUpdate = (bool) gradientUp;
 
 	uint symH = 0;
-	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC ) symH = (NX+NU)*(NX+NU+1)/2;
+	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC || (secondOrder && (ExportSensitivityType) sensitivityProp == BACKWARD) ) symH = (NX+NU)*(NX+NU+1)/2;
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD && gradientUpdate ) symH = (NX+NU)*(NX+NU); // TODO: this is a quick fix for the dimensions in case of FOB lifted collocation integrators
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) symH = NX*(NX+NU)+NU*NU;
 
@@ -379,7 +379,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	);
 
 	// TODO: write this in exported loops (RIEN)
-	if( secondOrder && (ExportSensitivityType) sensitivityProp == SYMMETRIC ) {
+	if( secondOrder && ((ExportSensitivityType) sensitivityProp == SYMMETRIC || (ExportSensitivityType) sensitivityProp == BACKWARD) ) {
 		for( uint i = 0; i < NX+NU; i++ ) {
 			for( uint j = 0; j <= i; j++ ) {
 				loop.addStatement( objS.getElement(run*(NX+NU)+i,j) == -1.0*state.getCol(indexGzu + i*(i+1)/2+j) );
@@ -414,7 +414,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 			}
 		}
 	}
-	else if( secondOrder ) return ACADOERRORTEXT(RET_INVALID_OPTION, "Only THREE_SWEEPS or FORWARD_OVER_BACKWARD options supported for Exact Hessian based RTI.");
+	else if( secondOrder ) return ACADOERRORTEXT(RET_INVALID_OPTION, "Only SYMMETRIC or FORWARD_OVER_BACKWARD options supported for Exact Hessian based RTI.");
 
 	// GRADIENT UPDATE: in case of lifted collocation integrators
 	if( secondOrder && gradientUpdate ) {
@@ -1609,17 +1609,18 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	get( LIFTED_GRADIENT_UPDATE, gradientUp );
 	bool gradientUpdate = (bool) gradientUp;
 
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
 	int sensitivityProp;
 	get( DYNAMIC_SENSITIVITY, sensitivityProp );
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
+
 	uint symH = 0;
-	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC ) symH = (NX+NU)*(NX+NU+1)/2;
+	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC || (secondOrder && (ExportSensitivityType) sensitivityProp == BACKWARD) ) symH = (NX+NU)*(NX+NU+1)/2;
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD && gradientUpdate ) symH = (NX+NU)*(NX+NU); // TODO: this is a quick fix for the dimensions in case of FOB lifted collocation integrators
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) symH = NX*(NX+NU)+NU*NU;
 
-	int hessianApproximation;
-	get( HESSIAN_APPROXIMATION, hessianApproximation );
-	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
-	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
 
 	unsigned indexZ   = NX + NXA;
 	if( secondOrder || adjoint ) indexZ = indexZ + NX; 	// because of the first order adjoint direction

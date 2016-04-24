@@ -138,6 +138,9 @@ class AdjointLiftedIRKExport : public ForwardLiftedIRKExport
 	protected:
 
 
+		Expression returnLowerTriangular( const Expression& expr );
+
+
 		virtual returnValue evaluateRhsSensitivities( 	ExportStatementBlock* block,
 													const ExportIndex& index1,
 													const ExportIndex& index2,
@@ -172,6 +175,7 @@ class AdjointLiftedIRKExport : public ForwardLiftedIRKExport
 
 		ExportVariable	rk_xxx_traj;			/**< Variable containing the forward trajectory of the state values. */
 		ExportVariable	rk_adj_traj;			/**< Variable containing the adjoint trajectory of the lambda_hat values. */
+		ExportVariable	rk_S_traj;				/**< Variable containing the forward trajectory of the first order sensitivities. */
 //		ExportVariable	rk_A_traj;				/**< Variable containing the factorized matrix of the linear system over the forward trajectory. */
 //		ExportVariable	rk_aux_traj;			/**< Variable containing the factorized matrix of the linear system over the forward trajectory. */
 
