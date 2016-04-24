@@ -128,6 +128,10 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 
 	unsigned offset = performFullCondensing() == true ? 0 : NX;
 
+	int sensitivityProp;
+	get( DYNAMIC_SENSITIVITY, sensitivityProp );
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
+
 	if( evaluateStageCost.getFunctionDim() > 0 ) {
 		loopObjective.addStatement( objValueIn.getCols(0, getNX()) == x.getRow( runObj ) );
 		loopObjective.addStatement( objValueIn.getCols(NX, NX + NU) == u.getRow( runObj ) );
@@ -167,9 +171,6 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 		setObjR1R2.addStatement( tmpDx == tmpDF.getRows(0,NX) );
 		setObjR1R2.addStatement( tmpDu == tmpDF.getRows(NX,NX+NU) );
 
-		int sensitivityProp;
-		get( DYNAMIC_SENSITIVITY, sensitivityProp );
-		bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
 		if( gradientUpdate || adjoint ) {
 			loopObjective.addStatement( objValueOut.getCols(1,1+NX+NU) += objg.getRows(runObj*(NX+NU),(runObj+1)*(NX+NU)).getTranspose() );
 		}
@@ -177,6 +178,10 @@ returnValue ExportExactHessianCN2::setupObjectiveEvaluation( void )
 				setObjR1R2, QDy.getAddress(runObj * NX), g.getAddress(offset+runObj * NU, 0), objValueOut.getAddress(0, 1) );
 
 		loopObjective.addLinebreak( );
+	}
+	else if( gradientUpdate || adjoint ) {
+		loopObjective.addStatement( QDy.getRows(runObj*NX, runObj*NX+NX) == objg.getRows(runObj*(NX+NU),runObj*(NX+NU)+NX) );
+		loopObjective.addStatement( g.getRows(offset+runObj*NU, offset+runObj*NU+NU) == objg.getRows(runObj*(NX+NU)+NX,(runObj+1)*(NX+NU)) );
 	}
 	else {
 		DMatrix Du(NU,1); Du.setAll(0);
