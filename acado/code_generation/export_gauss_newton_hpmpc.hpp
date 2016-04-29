@@ -167,6 +167,8 @@ private:
 	/** \name Constraint evaluation */
 	/** @{ */
 	ExportFunction evaluateConstraints;
+	ExportFunction setStagePac;
+	std::vector< unsigned > qpConDim;
 	/** @} */
 
 	/** \name RTI related */
@@ -192,6 +194,9 @@ private:
 
 	ExportVariable evLbValues, evUbValues;
 	ExportVariable qpLb, qpUb;
+
+	ExportVariable qpA;
+	ExportVariable qpLbA, qpUbA;
 
 	ExportVariable sigmaN;
 

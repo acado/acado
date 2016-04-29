@@ -50,15 +50,54 @@ ExportHpmpcInterface::ExportHpmpcInterface(	const std::string& _fileName,
 returnValue ExportHpmpcInterface::configure(	const unsigned _maxIter,
 												const unsigned _printLevel,
 												bool _useSinglePrecision,
-												bool _warmStart
+												bool _warmStart,
+												const std::string& _DD,
+												const std::string& _lbA,
+												const std::string& _ubA,
+												const std::vector< unsigned >& conDim,
+												const unsigned _NI,
+												const unsigned _NX,
+												const unsigned _NU
 												)
 {
+	stringstream ss;
 	// Configure the dictionary
 	dictionary[ "@MAX_ITER@" ] =  toString( _maxIter );
 	dictionary[ "@PRINT_LEVEL@" ] =  _printLevel == 0 ? toString( 0 ) : toString( 1 );
 	dictionary[ "@PRECISION@" ] =  _useSinglePrecision == true ? "1" : "0";
 	dictionary[ "@WARM_START@" ] =  _warmStart == true ? "1" : "0";
 
+	if (conDim.size() > 0)
+	{
+		dictionary[ "@QP_D@" ]   =  _DD;
+		dictionary[ "@QP_LBA@" ] =  _lbA;
+		dictionary[ "@QP_UBA@" ] =  _ubA;
+
+		ss.str( string() );
+		ss << "unsigned int nD[";
+		ss << _NI;
+		ss << " + 1] = {";
+		for (unsigned i = 0; i < conDim.size(); ++i)
+		{
+			ss << conDim[ i ];
+			if (i < conDim.size() - 1)
+				ss << ", ";
+		}
+		ss << "};";
+		dictionary[ "@QP_ND_ARRAY@" ] = ss.str();
+	}
+	else
+	{
+		dictionary[ "@QP_D@" ] = dictionary[ "@QP_LBA@" ] = dictionary[ "@QP_UBA@" ] = "0";
+		ss.str( string() );
+		ss << "unsigned int nD[";
+		ss << _NI;
+		ss << " + 1]; for (kk = 0; kk < ";
+		ss << _NI;
+		ss << " + 1; nD[ kk++ ] = 0);";
+		dictionary[ "@QP_ND_ARRAY@" ] = ss.str();
+	}
+	
 	// And then fill a template file
 	fillTemplate();
 

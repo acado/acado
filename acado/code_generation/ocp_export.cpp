@@ -315,7 +315,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
 				//acadoCopyTemplateFile(MAKE_MEX_EH_QPDUNES, str, "%", true);
                 mexInterfaceMake.setup( MAKE_MEX_EH_QPDUNES,str, "","real_t","int",16,"%" );
-                mexInterfaceMake.configure();
+			mexInterfaceMake.configure();
                 mexInterfaceMake.exportCode();
 			}
 			else if ( (SparseQPsolutionMethods)qpSolution == BLOCK_CONDENSING_N2 ) {
@@ -329,6 +329,20 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			}
 			break;
 
+		
+		case QP_HPMPC:
+			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
+				//acadoCopyTemplateFile(MAKE_MEX_EH_QPDUNES, str, "%", true);
+				ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface for HMPC with exacat Hessians is not yet available.");
+			}
+			else {
+				//acadoCopyTemplateFile(MAKE_MEX_QPDUNES, str, "%", true);
+                	mexInterfaceMake.setup( MAKE_MEX_HPMPC,str, "","real_t","int",16,"%" );
+                	mexInterfaceMake.configure();
+                	mexInterfaceMake.exportCode();
+			}
+			break;
+		
 		default:
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface is not yet available.");
 			break;
@@ -390,8 +404,8 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 
 			esi.exportCode();
 		}
-	}
 
+}
 	//
 	// Generate Symmetric EVD code
 	//

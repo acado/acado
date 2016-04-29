@@ -92,6 +92,10 @@ returnValue ExportGaussNewtonHpmpc::getDataDeclarations(	ExportStatementBlock& d
 	declarations.addDeclaration(qpLb, dataStruct);
 	declarations.addDeclaration(qpUb, dataStruct);
 
+	declarations.addDeclaration(qpA, dataStruct);
+	declarations.addDeclaration(qpLbA, dataStruct);
+	declarations.addDeclaration(qpUbA, dataStruct);
+	
 	declarations.addDeclaration(sigmaN, dataStruct);
 
 	declarations.addDeclaration(qpLambda, dataStruct);
@@ -131,7 +135,7 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 	code << "#ifdef __cplusplus\n";
 	code << "extern \"C\"{\n";
 	code << "#endif\n";
-	code << "int acado_hpmpc_ip_wrapper(real_t* A, real_t* B, real_t* d, real_t* Q, real_t* Qf, real_t* S, real_t* R, real_t* q, real_t* qf, real_t* r, real_t* lb, real_t* ub, real_t* x, real_t* u, real_t* lambda, real_t* mu, real_t* slacks, int* nIt);\n";
+	code << "int acado_hpmpc_ip_wrapper(real_t* A, real_t* B, real_t* d, real_t* Q, real_t* Qf, real_t* S, real_t* R, real_t* q, real_t* qf, real_t* r, real_t* lb, real_t* ub, real_t* qpA, real_t* qpLbA, real_t* qpUbA, real_t* x, real_t* u, real_t* lambda, real_t* mu, real_t* slacks, int* nIt);\n";
 	code << "#ifdef __cplusplus\n";
 	code << "}\n";
 	code << "#endif\n";
@@ -174,8 +178,10 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 	code.addFunction( setStagef );
 	code.addFunction( evaluateObjective );
 
+	code.addFunction( evaluatePathConstraints );	
+	code.addFunction( setStagePac );
 	code.addFunction( evaluateConstraints );
-
+	
 	code.addFunction( acc );
 
 	code.addFunction( preparation );
@@ -491,6 +497,11 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 	//
 	////////////////////////////////////////////////////////////////////////////
 
+	
+	
+//	int hardcodeConstraintValues;
+//	get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
+
 	evaluateConstraints.setup("evaluateConstraints");
 
 	DVector lbTmp, ubTmp;
@@ -509,6 +520,9 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 
 	DVector lbValues, ubValues;
 
+	//
+	// Stack input bounds
+	//
 	for (unsigned node = 0; node < N; ++node)
 	{
 		lbTmp = uBounds.getLowerBounds( node );
@@ -524,6 +538,9 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 			ubValues.append( ubTmp );
 	}
 
+	//
+	// Stack state bounds
+	//
 	for (unsigned node = 1; node < N + 1; ++node)
 	{
 		lbTmp = xBounds.getLowerBounds( node );
@@ -554,8 +571,254 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 	evaluateConstraints.addStatement( qpLb.getRows(N * NU, N * NU + N * NX) == evLbValues.getRows(N * NU, N * NU + N * NX) - x.makeColVector().getRows(NX, NX * (N + 1)) );
 	evaluateConstraints.addStatement( qpUb.getRows(N * NU, N * NU + N * NX) == evUbValues.getRows(N * NU, N * NU + N * NX) - x.makeColVector().getRows(NX, NX * (N + 1)) );
 
+
+
+	////////////////////////////////////////////////////////////////////////////
+	//
+	// Setup evaluation of path and point constraints
+	//
+	////////////////////////////////////////////////////////////////////////////
+
+	unsigned dimLbA  = N * dimPacH;
+	unsigned dimConA = dimLbA * (NX + NU);
+
+	qpConDim.resize(N + 1, 0);
+	for (unsigned i = 0; i < N; ++i)
+		qpConDim[ i ] += dimPacH;
+
+	for (unsigned i = 0; i < N; ++i)
+		if (evaluatePointConstraints[ i ])
+		{
+			unsigned dim = evaluatePointConstraints[ i ]->getFunctionDim() / (1 + NX + NU);
+
+			dimLbA  += dim;
+			dimConA += dim * (NX + NU);
+
+			qpConDim[ i ] += dim;
+		}
+
+	if (evaluatePointConstraints[ N ])
+	{
+		unsigned dim = evaluatePointConstraints[ N ]->getFunctionDim() / (1 + NX);
+		dimLbA  += dim;
+		dimConA += dim * NX;
+
+		qpConDim[ N ] += dim;
+	}
+
+	qpA.setup("qpA", dimConA, 1, REAL, ACADO_WORKSPACE);
+	qpLbA.setup("qpLbA", dimLbA, 1, REAL, ACADO_WORKSPACE);
+	qpUbA.setup("qpUbA", dimLbA, 1, REAL, ACADO_WORKSPACE);
+
+	//
+	// Setup constraint values for the whole horizon.
+	//
+	DVector lbAValues;
+	DVector ubAValues;
+
+	for (unsigned i = 0; i < N; ++i)
+	{
+		if ( dimPacH )
+		{
+			lbAValues.append( lbPathConValues.block(i * NX, 0, NX, 1) );
+			ubAValues.append( ubPathConValues.block(i * NX, 0, NX, 1) );
+		}
+		lbAValues.append( pocLbStack[ i ] );
+		ubAValues.append( pocUbStack[ i ] );
+	}
+	lbAValues.append( pocLbStack[ N ] );
+	ubAValues.append( pocUbStack[ N ] );
+
+	ExportVariable evLbAValues("lbAValues", lbAValues, STATIC_CONST_REAL);
+	ExportVariable evUbAValues("ubAValues", ubAValues, STATIC_CONST_REAL);
+
+	evaluateConstraints.addVariable( evLbAValues );
+	evaluateConstraints.addVariable( evUbAValues );
+
+	//
+	// Evaluate path constraints
+	//
+
+	if ( dimPacH )
+	{
+		ExportIndex runPac;
+		evaluateConstraints.acquire( runPac );
+		ExportForLoop loopPac(runPac, 0, N);
+
+		loopPac.addStatement( conValueIn.getCols(0, NX) == x.getRow( runPac ) );
+		loopPac.addStatement( conValueIn.getCols(NX, NX + NU) == u.getRow( runPac ) );
+		loopPac.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( runPac ) );
+		loopPac.addFunctionCall( evaluatePathConstraints.getName(), conValueIn, conValueOut );
+
+		loopPac.addStatement( pacEvH.getRows( runPac * dimPacH, (runPac + 1) * dimPacH) ==
+				conValueOut.getTranspose().getRows(0, dimPacH) );
+		loopPac.addLinebreak( );
+
+		unsigned derOffset = dimPacH;
+
+		// Optionally store derivatives
+		if (pacEvHx.isGiven() == false)
+		{
+			loopPac.addStatement(
+					pacEvHx.makeRowVector().getCols(runPac * dimPacH * NX, (runPac + 1) * dimPacH * NX) ==
+							conValueOut.getCols(derOffset, derOffset + dimPacH * NX )
+			);
+
+			derOffset = derOffset + dimPacH * NX;
+		}
+		if (pacEvHu.isGiven() == false )
+		{
+			loopPac.addStatement(
+					pacEvHu.makeRowVector().getCols(runPac * dimPacH * NU, (runPac + 1) * dimPacH * NU) ==
+							conValueOut.getCols(derOffset, derOffset + dimPacH * NU )
+			);
+		}
+
+		// Add loop to the function.
+		evaluateConstraints.addStatement( loopPac );
+		evaluateConstraints.release( runPac );
+		evaluateConstraints.addLinebreak( );
+	}
+
+	//
+	// Evaluate point constraints
+	//
+
+	for (unsigned i = 0, intRowOffset = 0, dim = 0; i < N + 1; ++i)
+	{
+		if (evaluatePointConstraints[ i ] == 0)
+			continue;
+
+		evaluateConstraints.addComment(
+				string( "Evaluating constraint on node: #" ) + toString( i )
+		);
+
+		evaluateConstraints.addStatement(conValueIn.getCols(0, getNX()) == x.getRow( i ) );
+		if (i < N)
+		{
+			evaluateConstraints.addStatement( conValueIn.getCols(NX, NX + NU) == u.getRow( i ) );
+			evaluateConstraints.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( i ) );
+		}
+		else
+			evaluateConstraints.addStatement( conValueIn.getCols(NX, NX + NOD) == od.getRow( i ) );
+
+		evaluateConstraints.addFunctionCall(
+				evaluatePointConstraints[ i ]->getName(), conValueIn, conValueOut );
+		evaluateConstraints.addLinebreak();
+
+		if (i < N)
+			dim = evaluatePointConstraints[ i ]->getFunctionDim() / (1 + NX + NU);
+		else
+			dim = evaluatePointConstraints[ i ]->getFunctionDim() / (1 + NX);
+
+		// Fill pocEvH, pocEvHx, pocEvHu
+		evaluateConstraints.addStatement(
+				pocEvH.getRows(intRowOffset, intRowOffset + dim) ==
+						conValueOut.getTranspose().getRows(0, dim));
+		evaluateConstraints.addLinebreak();
+
+		evaluateConstraints.addStatement(
+				pocEvHx.makeRowVector().getCols(intRowOffset * NX, (intRowOffset + dim) * NX)
+						== conValueOut.getCols(dim, dim + dim * NX));
+		evaluateConstraints.addLinebreak();
+
+		if (i < N)
+		{
+			evaluateConstraints.addStatement(
+					pocEvHu.makeRowVector().getCols(intRowOffset * NU, (intRowOffset + dim) * NU)
+							== conValueOut.getCols(dim + dim * NX, dim + dim * NX + dim * NU));
+			evaluateConstraints.addLinebreak();
+		}
+
+		intRowOffset += dim;
+	}
+
+	//
+	// Copy data to QP solver structures
+	//
+
+	ExportVariable tLbAValues, tUbAValues, tPacA;
+	ExportIndex offsetPac("offset"), indPac( "ind" );
+
+	tLbAValues.setup("lbAValues", dimPacH, 1, REAL, ACADO_LOCAL);
+	tUbAValues.setup("ubAValues", dimPacH, 1, REAL, ACADO_LOCAL);
+	tPacA.setup("tPacA", dimPacH, NX + NU, REAL, ACADO_LOCAL);
+
+	setStagePac.setup("setStagePac", offsetPac, indPac, tPacA, tLbAValues, tUbAValues);
+
+	if (pacEvHx.isGiven() == true)
+		setStagePac << (tPacA.getSubMatrix(0, dimPacH, 0, NX) == pacEvHx);
+	else
+		setStagePac << (tPacA.getSubMatrix(0, dimPacH, 0, NX) ==
+				pacEvHx.getSubMatrix(indPac * dimPacH, indPac * dimPacH + dimPacH, 0 , NX));
+
+	if (pacEvHu.isGiven() == true)
+		setStagePac << (tPacA.getSubMatrix(0, dimPacH, NX, NX + NU) == pacEvHu);
+	else
+		setStagePac << (tPacA.getSubMatrix(0, dimPacH, NX, NX + NU) ==
+				pacEvHu.getSubMatrix(indPac * dimPacH, indPac * dimPacH + dimPacH, 0 , NU));
+
+	setStagePac
+		<< (qpLbA.getRows(offsetPac, offsetPac + dimPacH) == tLbAValues - pacEvH.getRows(indPac * dimPacH, indPac * dimPacH + dimPacH))
+		<< (qpUbA.getRows(offsetPac, offsetPac + dimPacH) == tUbAValues - pacEvH.getRows(indPac * dimPacH, indPac * dimPacH + dimPacH));
+
+	ExportVariable tPocA;
+	tPocA.setup("tPocA", conValueOut.getDim(), NX + NU, REAL);
+	if ( dimPocH )
+		evaluateConstraints.addVariable( tPocA );
+
+	unsigned offsetEval = 0;
+	unsigned offsetPoc = 0;
+	for (unsigned i = 0; i < N; ++i)
+	{
+		if ( dimPacH )
+		{
+			evaluateConstraints.addFunctionCall(
+					setStagePac,
+					ExportIndex( offsetEval ), ExportIndex( i ),
+					qpA.getAddress(offsetEval * (NX + NU)),
+					evLbAValues.getAddress( offsetEval ), evUbAValues.getAddress( offsetEval )
+			);
+
+			offsetEval += dimPacH;
+		}
+
+		if ( evaluatePointConstraints[ i ] )
+		{
+			unsigned dim = evaluatePointConstraints[ i ]->getFunctionDim() / (1 + NX + NU);
+
+			evaluateConstraints.addLinebreak();
+
+			evaluateConstraints
+				<< (tPocA.getSubMatrix(0, dim, 0, NX) == pocEvHx.getSubMatrix(offsetPoc, offsetPoc + dim, 0, NX))
+				<< (tPocA.getSubMatrix(0, dim, NX, NX + NU) == pocEvHu.getSubMatrix(offsetPoc, offsetPoc + dim, 0, NU))
+				<< (qpA.getRows(offsetEval * (NX + NU), (offsetEval + dim) * (NX + NU)) == tPocA.makeColVector().getRows(0, dim * (NX + NU)))
+				<< (qpLbA.getRows(offsetEval, offsetEval + dim) ==
+						evLbAValues.getRows(offsetEval, offsetEval + dim) - pocEvH.getRows(offsetPoc, offsetPoc + dim))
+				<< (qpUbA.getRows(offsetEval, offsetEval + dim) ==
+						evUbAValues.getRows(offsetEval, offsetEval + dim) - pocEvH.getRows(offsetPoc, offsetPoc + dim));
+
+			offsetEval += dim;
+			offsetPoc += dim;
+		}
+	}
+
+	if ( evaluatePointConstraints[ N ] )
+	{
+		unsigned dim = evaluatePointConstraints[ N ]->getFunctionDim() / (1 + NX);
+
+		evaluateConstraints
+			<< (qpA.getRows(offsetEval * (NX + NU), offsetEval * (NX + NU) + dim * NX) ==
+					pocEvHx.makeColVector().getRows(offsetPoc * (NX + NU), offsetPoc * (NX + NU) + dim * NX))
+			<< (qpLbA.getRows(offsetEval, offsetEval + dim) ==
+					evLbAValues.getRows(offsetEval, offsetEval + dim) - pocEvH.getRows(offsetPoc, offsetPoc + dim))
+			<< (qpUbA.getRows(offsetEval, offsetEval + dim) ==
+					evUbAValues.getRows(offsetEval, offsetEval + dim) - pocEvH.getRows(offsetPoc, offsetPoc + dim));
+	}
+	
 	return SUCCESSFUL_RETURN;
 }
+
 
 returnValue ExportGaussNewtonHpmpc::setupVariables( )
 {
@@ -619,8 +882,8 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 	qpr.setup("qpr", NU * N, 1, REAL, ACADO_WORKSPACE);
 
 	qpLambda.setup("qpLambda", N * NX, 1, REAL, ACADO_WORKSPACE);
-	qpMu.setup("qpMu", 2 * N * (NX + NU), 1, REAL, ACADO_WORKSPACE);
-	qpSlacks.setup("qpSlacks", 2 * N * (NX + NU), 1, REAL, ACADO_WORKSPACE);
+	qpMu.setup("qpMu", 2 * (N + 1) * (NX + NU), 1, REAL, ACADO_WORKSPACE);
+	qpSlacks.setup("qpSlacks", 2 * (N + 1) * N * (NX + NU), 1, REAL, ACADO_WORKSPACE);
 
 	nIt.setup("nIt", 1, 1, INT, ACADO_WORKSPACE);
 
@@ -684,6 +947,10 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 			<< qpLb.getAddressString( true ) << ", "
 			<< qpUb.getAddressString( true ) << ", "
 
+			<< qpA.getAddressString( true ) << ", "
+			<< qpLbA.getAddressString( true ) << ", "
+			<< qpUbA.getAddressString( true ) << ", "
+			
 			<< qpx.getAddressString( true ) << ", "
 			<< qpu.getAddressString( true ) << ", "
 
@@ -836,7 +1103,13 @@ returnValue ExportGaussNewtonHpmpc::setupQPInterface( )
 			maxNumQPiterations,
 			printLevel,
 			useSinglePrecision,
-			hotstartQP
+			hotstartQP,
+			qpA.getFullName(),
+			qpLbA.getFullName(),
+			qpUbA.getFullName(),
+			qpConDim,
+			N, NX, NU
+			
 	);
 
 	return SUCCESSFUL_RETURN;
