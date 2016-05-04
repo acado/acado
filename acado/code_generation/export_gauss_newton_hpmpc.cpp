@@ -606,10 +606,21 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 		qpConDim[ N ] += dim;
 	}
 
-	qpA.setup("qpA", dimConA, 1, REAL, ACADO_WORKSPACE);
-	qpLbA.setup("qpLbA", dimLbA, 1, REAL, ACADO_WORKSPACE);
-	qpUbA.setup("qpUbA", dimLbA, 1, REAL, ACADO_WORKSPACE);
-
+	
+	if (dimConA) 	// this is a bit of a hack...
+					// dummy qpA, qpUbA and qpLbA are created if there are no polytopic constraints
+	{
+		qpA.setup("qpA", dimConA, 1, REAL, ACADO_WORKSPACE);
+		qpLbA.setup("qpLbA", dimLbA, 1, REAL, ACADO_WORKSPACE);
+		qpUbA.setup("qpUbA", dimLbA, 1, REAL, ACADO_WORKSPACE);
+	}
+	else
+	{
+		qpA.setup("qpA", 1, 1, REAL, ACADO_WORKSPACE);
+		qpLbA.setup("qpLbA", 1, 1, REAL, ACADO_WORKSPACE);
+		qpUbA.setup("qpUbA", 1, 1, REAL, ACADO_WORKSPACE);
+	}
+	
 	//
 	// Setup constraint values for the whole horizon.
 	//
@@ -869,7 +880,7 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 	////////////////////////////////////////////////////////////////////////////
 	ExportVariable stateFeedback("stateFeedback", NX, 1, REAL, ACADO_LOCAL);
 	ExportVariable returnValueFeedbackPhase("retVal", 1, 1, INT, ACADO_LOCAL, true);
-	returnValueFeedbackPhase.setDoc( "Status code of the FORCES QP solver." );
+	returnValueFeedbackPhase.setDoc( "Status code of the HPMPC QP solver." );
 	feedback.setup("feedbackStep" );
 	feedback.doc( "Feedback/estimation step of the RTI scheme." );
 	feedback.setReturnValue( returnValueFeedbackPhase );
