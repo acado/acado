@@ -356,7 +356,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	get(GENERATE_SIMULINK_INTERFACE, generateSimulinkInterface);
 	if ((bool) generateSimulinkInterface == true)
 	{     
-		if (!((QPSolverName)qpSolver == QP_QPOASES || (QPSolverName)qpSolver == QP_QPOASES3 || (QPSolverName)qpSolver == QP_QPDUNES))
+		if (!((QPSolverName)qpSolver == QP_QPOASES || (QPSolverName)qpSolver == QP_QPOASES3 || (QPSolverName)qpSolver == QP_QPDUNES|| (QPSolverName)qpSolver == QP_HPMPC))
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
 					"At the moment, Simulink interface is available only with qpOASES, qpOASES3 and qpDUNES based OCP solvers.");
 		else
@@ -370,8 +370,11 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 				qpSolverString = "QPOASES";
 			else if ((QPSolverName)qpSolver == QP_QPOASES3)
 				qpSolverString = "QPOASES3";
-			else
+			else if ((QPSolverName)qpSolver == QP_QPDUNES)
 				qpSolverString = "QPDUNES";
+			else
+				qpSolverString = "HPMPC";
+
 
 			ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName);
 
