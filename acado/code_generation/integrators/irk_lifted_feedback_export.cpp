@@ -210,12 +210,12 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	get( DYNAMIC_SENSITIVITY, sensGen );
 	int mode;
 	get( IMPLICIT_INTEGRATOR_MODE, mode );
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+//	int liftMode;
+//	get( LIFTED_INTEGRATOR_MODE, liftMode );
 	if ( (ExportSensitivityType)sensGen != FORWARD && (ExportSensitivityType)sensGen != INEXACT ) ACADOERROR( RET_INVALID_OPTION );
 	if( (ImplicitIntegratorMode)mode != LIFTED_FEEDBACK ) ACADOERROR( RET_INVALID_OPTION );
-	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
-	if( (ExportSensitivityType)sensGen == INEXACT && liftMode != 4 ) ACADOERROR( RET_INVALID_OPTION );
+//	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+//	if( (ExportSensitivityType)sensGen == INEXACT && liftMode != 4 ) ACADOERROR( RET_INVALID_OPTION );
 
 	if( CONTINUOUS_OUTPUT || NX2 > 0 || NX3 > 0 || NXA > 0 || !equidistantControlGrid() ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
@@ -307,13 +307,13 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		integrate.addStatement( rk_seed.getCols( NX+NF+NX*(1+NX+NU+numStages*NF),NX+NF+NX*(1+NX+NU+numStages*NF)+NU+NOD ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
 	}
 	integrate.addLinebreak( );
-	if( liftMode == 1 || liftMode == 4 ) {
+//	if( liftMode == 1 || liftMode == 4 ) {
 		integrate.addStatement( rk_delta.getCols( 0,NX ) == rk_eta.getCols( 0,NX ) - rk_Xprev.getRow(shooting_index) );
 		integrate.addStatement( rk_Xprev.getRow(shooting_index) == rk_eta.getCols( 0,NX ) );
 
 		integrate.addStatement( rk_delta.getCols( NX,NX+NU ) == rk_eta.getCols( NX+NXA+diffsDim,NX+NXA+diffsDim+NU ) - rk_Uprev.getRow(shooting_index) );
 		integrate.addStatement( rk_Uprev.getRow(shooting_index) == rk_eta.getCols( NX+NXA+diffsDim,NX+NXA+diffsDim+NU ) );
-	}
+//	}
 
     // integrator loop:
 	ExportForLoop tmpLoop( run, 0, grid.getNumIntervals() );
@@ -345,7 +345,7 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	loop->addStatement( k_index == (shooting_index*grid.getNumIntervals()+run)*(NX+NF) );
 
 	// FIRST update using term from optimization variables:
-	if( liftMode == 1 || (liftMode == 4 && (ExportSensitivityType)sensGen == INEXACT) ) {
+//	if( liftMode == 1 || (liftMode == 4 && (ExportSensitivityType)sensGen == INEXACT) ) {
 		ExportForLoop loopTemp1( i,0,NX+NF );
 		loopTemp1.addStatement( j == k_index+i );
 		loopTemp1.addStatement( tmp_index1 == j*(NX+NU) );
@@ -353,7 +353,7 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		loopTemp2.addStatement( rk_kkk.getElement( j,run1 ) += rk_delta*rk_diffK.getSubMatrix( tmp_index1,tmp_index1+NX+NU,run1,run1+1 ) );
 		loopTemp1.addStatement( loopTemp2 );
 		loop->addStatement( loopTemp1 );
-	}
+//	}
 
 	// Evaluate all stage values for reuse:
 	evaluateAllStatesImplicitSystem( loop, k_index, Ah, C, run1, j, tmp_index1 );
@@ -535,8 +535,8 @@ returnValue FeedbackLiftedIRKExport::setup( )
 {
 	if( CONTINUOUS_OUTPUT ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+//	int liftMode;
+//	get( LIFTED_INTEGRATOR_MODE, liftMode );
 
 	NVARS2 = 0;
 	NVARS3 = 0;
@@ -595,12 +595,12 @@ returnValue FeedbackLiftedIRKExport::setup( )
 	rk_diffsTemp2 = ExportVariable( "rk_diffsTemp", numStages, NF*(1+NX+NU+numStages*NF), REAL, structWspace );
 	rk_stageValues = ExportVariable( "rk_stageValues", 1, numStages*(NX+NF), REAL, structWspace );
 	rk_kkk = ExportVariable( "rk_Ktraj", N*grid.getNumIntervals()*(NX+NF), numStages, REAL, ACADO_VARIABLES );
-	if( liftMode == 1 || liftMode == 4 ) {
+//	if( liftMode == 1 || liftMode == 4 ) {
 		rk_diffK = ExportVariable( "rk_diffKtraj", N*grid.getNumIntervals()*(NX+NF)*(NX+NU), numStages, REAL, ACADO_VARIABLES );
-	}
-	else {
-		return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
-	}
+//	}
+//	else {
+//		return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+//	}
 
 	rk_Xprev = ExportVariable( "rk_Xprev", N, NX, REAL, ACADO_VARIABLES );
 	rk_Uprev = ExportVariable( "rk_Uprev", N, NU, REAL, ACADO_VARIABLES );

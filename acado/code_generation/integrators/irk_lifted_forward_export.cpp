@@ -251,16 +251,20 @@ returnValue ForwardLiftedIRKExport::setDifferentialEquation(	const Expression& r
 
 returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 {
-	int sensGen;
-	get( DYNAMIC_SENSITIVITY, sensGen );
 	int mode;
 	get( IMPLICIT_INTEGRATOR_MODE, mode );
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+
+	int sensGen;
+	get( DYNAMIC_SENSITIVITY, sensGen );
+	int linSolver;
+	get( LINEAR_ALGEBRA_SOLVER, linSolver );
+	int liftMode = 1;
+	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) liftMode = 4;
+
 	if ( (ExportSensitivityType)sensGen != FORWARD && (ExportSensitivityType)sensGen != INEXACT ) ACADOERROR( RET_INVALID_OPTION );
 	if( (ImplicitIntegratorMode)mode != LIFTED ) ACADOERROR( RET_INVALID_OPTION );
-	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
-	if( (ExportSensitivityType)sensGen == INEXACT && liftMode != 4 ) ACADOERROR( RET_INVALID_OPTION );
+//	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+//	if( (ExportSensitivityType)sensGen == INEXACT && liftMode != 4 ) ACADOERROR( RET_INVALID_OPTION );
 
 	if( CONTINUOUS_OUTPUT || NX1 > 0 || NX3 > 0 || !equidistantControlGrid() ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
@@ -546,8 +550,6 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 
 	solveImplicitSystem( loop, i, run1, j, tmp_index1, k_index, Ah, C, determinant, true );
 
-	int linSolver;
-	get( LINEAR_ALGEBRA_SOLVER, linSolver );
 	// NEW: UPDATE RK_B WITH THE CONSTANT COMING FROM THE PREVIOUS INTEGRATION STEP
 	if( liftMode == 1 ) { // EXACT LIFTING
 		loop->addStatement( std::string("if( run > 0 ) {\n") );
@@ -817,9 +819,10 @@ returnValue ForwardLiftedIRKExport::solveImplicitSystem( ExportStatementBlock* b
 	int linSolver;
 	get( LINEAR_ALGEBRA_SOLVER, linSolver );
 
+	int liftMode = 1;
+	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) liftMode = 4;
+
 	if( NX2 > 0 || NXA > 0 ) {
-		int liftMode;
-		get( LIFTED_INTEGRATOR_MODE, liftMode );
 
 		// Perform iteration by system solve:
 		if( liftMode == 4 ) {
@@ -1376,8 +1379,11 @@ returnValue ForwardLiftedIRKExport::setup( )
 
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY, sensGen);
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+	int linSolver;
+	get( LINEAR_ALGEBRA_SOLVER, linSolver );
+	int liftMode = 1;
+	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) liftMode = 4;
+
 	if( (ExportSensitivityType)sensGen == INEXACT || liftMode == 4 ) {
 		rk_seed = ExportVariable( "rk_seed", 1, NX+(NX+NDX2+NXA)*(NX+NU)+NXA+NU+NOD+NDX+timeDep, REAL, structWspace );
 		rk_diffsTemp2 = ExportVariable( "rk_diffsTemp2", NX2+NXA, NVARS2, REAL, structWspace );
@@ -1399,8 +1405,6 @@ returnValue ForwardLiftedIRKExport::setup( )
 		rk_delta = ExportVariable( "rk_delta", 1, NX+NU, REAL, ACADO_WORKSPACE );
 	}
 
-	int linSolver;
-	get( LINEAR_ALGEBRA_SOLVER, linSolver );
 	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
 		rk_A = ExportVariable( "rk_J", NX2+NXA, NX2+NXA, REAL, structWspace );
 		if(NDX2 > 0) rk_I = ExportVariable( "rk_I", NX2+NXA, NX2+NXA, REAL, structWspace );

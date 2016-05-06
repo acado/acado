@@ -261,11 +261,11 @@ returnValue AdjointLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	get( DYNAMIC_SENSITIVITY, sensGen );
 	int mode;
 	get( IMPLICIT_INTEGRATOR_MODE, mode );
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+//	int liftMode;
+//	get( LIFTED_INTEGRATOR_MODE, liftMode );
 	if ( (ExportSensitivityType)sensGen != BACKWARD ) ACADOERROR( RET_INVALID_OPTION );
 	if( (ImplicitIntegratorMode)mode != LIFTED ) ACADOERROR( RET_INVALID_OPTION );
-	if( liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+//	if( liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 	if( NXA > 0) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
     int gradientUp;
@@ -304,10 +304,10 @@ returnValue AdjointLiftedIRKExport::getCode(	ExportStatementBlock& code )
 				code.addFunction( diffs_sweep );
 				code.addStatement( "\n\n" );
 //			}
-			if( liftMode == 4 ) { // ONLY for the inexact Newton based schemes
+//			if( liftMode == 4 ) { // ONLY for the inexact Newton based schemes
 				code.addFunction( forward_sweep );
 				code.addStatement( "\n\n" );
-			}
+//			}
 			code.addFunction( adjoint_sweep );
 			code.addStatement( "\n\n" );
 		}
@@ -454,7 +454,7 @@ returnValue AdjointLiftedIRKExport::getCode(	ExportStatementBlock& code )
 //		loop->addStatement( rk_aux_traj.getRow(run) == rk_auxSolver.makeRowVector() );
 	}
 
-	if( liftMode == 4 ) {
+//	if( liftMode == 4 ) {
 //		// NEW: more accurate approximation of the derivatives in the right-hand side
 //		for( run5 = 0; run5 < numStages; run5++ ) {
 //			evaluateStatesImplicitSystem( loop, k_index, Ah, C, run5, i, tmp_index1 );
@@ -467,8 +467,8 @@ returnValue AdjointLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		else {
 			allSensitivitiesImplicitSystem( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, ExportIndex(0), Bh, false );
 		}
-	}
-	else return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+//	}
+//	else return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 	// update rk_kkk:
 	ExportForLoop loopTemp( j,0,numStages );
@@ -506,10 +506,10 @@ returnValue AdjointLiftedIRKExport::getCode(	ExportStatementBlock& code )
 			loop->addStatement( std::string("}\n") );
 		}
 	}
-	if( liftMode != 1 ) { // INEXACT LIFTING
+//	if( liftMode != 1 ) { // INEXACT LIFTING
 		// !!! update rk_xxx_lin (YOU NEED TO UPDATE THE LINEARIZATION POINT AFTER YOU UPDATE RK_KKK): !!!
 		loop->addStatement( rk_xxx_lin == rk_eta.getCols(0,NX) );
-	}
+//	}
 
 	// Computation of the sensitivities using the CHAIN RULE:
 	updateImplicitSystem(loop, i, j, tmp_index2);
@@ -719,8 +719,8 @@ returnValue AdjointLiftedIRKExport::setup( )
 		rk_S_traj = ExportVariable( "rk_S_traj", grid.getNumIntervals()*NX, NX+NU, REAL, structWspace );
 	}
 
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+//	int liftMode;
+//	get( LIFTED_INTEGRATOR_MODE, liftMode );
 
 	rk_seed = ExportVariable( "rk_seed", 1, NX*(2+NX+NU)+NU+NOD+timeDep, REAL, structWspace );
 //	rk_A_traj = ExportVariable( "rk_A_traj", grid.getNumIntervals()*numStages*(NX2+NXA), numStages*(NX2+NXA), REAL, structWspace );

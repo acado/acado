@@ -342,7 +342,7 @@ enum OptionsName
 	CG_COMPUTE_COVARIANCE_MATRIX,				/**< Enable computation of the variance-covariance matrix for the last estimate. */
 	CG_HARDCODE_CONSTRAINT_VALUES,				/**< Enable/disable hard-coding of the constraint values. */
 	IMPLICIT_INTEGRATOR_MODE,					/**< This determines the mode of the implicit integrator (see enum ImplicitIntegratorMode). */
-	LIFTED_INTEGRATOR_MODE,						/**< This determines the mode of lifting of the implicit integrator. */
+//	LIFTED_INTEGRATOR_MODE,						/**< This determines the mode of lifting of the implicit integrator. */
 	LIFTED_GRADIENT_UPDATE,						/**< This determines whether the gradient will be updated, based on the lifted implicit integrator. */
 	IMPLICIT_INTEGRATOR_NUM_ITS,				/**< This is the performed number of Newton iterations in the implicit integrator. */
 	IMPLICIT_INTEGRATOR_NUM_ITS_INIT,			/**< This is the performed number of Newton iterations in the implicit integrator for the initialization of the first step. */

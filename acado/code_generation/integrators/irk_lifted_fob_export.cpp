@@ -267,11 +267,10 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
 	get( DYNAMIC_SENSITIVITY, sensGen );
 	int mode;
 	get( IMPLICIT_INTEGRATOR_MODE, mode );
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+//	get( LIFTED_INTEGRATOR_MODE, liftMode );
 	if ( (ExportSensitivityType)sensGen != FORWARD_OVER_BACKWARD ) ACADOERROR( RET_INVALID_OPTION );
 	if( (ImplicitIntegratorMode)mode != LIFTED ) ACADOERROR( RET_INVALID_OPTION );
-	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+//	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 	if( NXA > 0) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
     int gradientUp;
@@ -292,6 +291,8 @@ returnValue ForwardBackwardLiftedIRKExport::getCode(	ExportStatementBlock& code 
 
 	int linSolver;
 	get( LINEAR_ALGEBRA_SOLVER, linSolver );
+	int liftMode = 1;
+	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) liftMode = 4;
 	if( exportRhs ) {
 		if( NX2 > 0 || NXA > 0 ) {
 			code.addFunction( rhs );

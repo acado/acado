@@ -275,8 +275,10 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	get( DYNAMIC_SENSITIVITY, sensGen );
 	int mode;
 	get( IMPLICIT_INTEGRATOR_MODE, mode );
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+	int linSolver;
+	get( LINEAR_ALGEBRA_SOLVER, linSolver );
+	int liftMode = 1;
+	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) liftMode = 4;
 	if ( (ExportSensitivityType)sensGen != SYMMETRIC ) ACADOERROR( RET_INVALID_OPTION );
 	if( (ImplicitIntegratorMode)mode != LIFTED ) ACADOERROR( RET_INVALID_OPTION );
 	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -296,8 +298,6 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 
 	if( NX1 > 0 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
-	int linSolver;
-	get( LINEAR_ALGEBRA_SOLVER, linSolver );
 	if( exportRhs ) {
 		if( NX2 > 0 || NXA > 0 ) {
 			code.addFunction( rhs );
@@ -864,8 +864,10 @@ returnValue SymmetricLiftedIRKExport::setup( )
 		rk_Xhat_traj = ExportVariable( "rk_Xhat", grid.getNumIntervals()*NX, 1, REAL, structWspace );
 	}
 
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+	int linSolver;
+	get( LINEAR_ALGEBRA_SOLVER, linSolver );
+	int liftMode = 1;
+	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) liftMode = 4;
 
 	rk_seed = ExportVariable( "rk_seed", 1, NX+NX*(NX+NU)+NX+NU+NOD+timeDep, REAL, structWspace );
 	if( gradientUpdate ) rk_seed = ExportVariable( "rk_seed", 1, NX+NX*(NX+NU)+2*NX+NU+NOD+timeDep, REAL, structWspace );
@@ -878,8 +880,6 @@ returnValue SymmetricLiftedIRKExport::setup( )
 	rk_xxx_traj = ExportVariable( "rk_stageV_traj", 1, grid.getNumIntervals()*numStages*(NX+NXA), REAL, structWspace );
 	rk_S_traj = ExportVariable( "rk_S_traj", grid.getNumIntervals()*NX, NX+NU, REAL, structWspace );
 
-	int linSolver;
-	get( LINEAR_ALGEBRA_SOLVER, linSolver );
 	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) {
 //		rk_A = ExportVariable( "rk_J", NX2+NXA, NX2+NXA, REAL, structWspace );
 //		if(NDX2 > 0) rk_I = ExportVariable( "rk_I", NX2+NXA, NX2+NXA, REAL, structWspace );

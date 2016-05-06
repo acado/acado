@@ -73,10 +73,10 @@ returnValue LiftedERKExport::setDifferentialEquation(	const Expression& rhs_ )
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY,sensGen );
 
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+	int liftMode = 1;
 	// liftMode == 1 --> EXACT LIFTING
 	// liftMode == 2 --> INEXACT LIFTING
+	if( (ExportSensitivityType)sensGen == INEXACT ) liftMode = 2;
 
 	OnlineData        dummy0;
 	Control           dummy1;
@@ -117,7 +117,7 @@ returnValue LiftedERKExport::setDifferentialEquation(	const Expression& rhs_ )
 		return ACADOERRORTEXT( RET_INVALID_OPTION, "No implicit systems supported when using an explicit integration method!");
 	}
 
-	if( (ExportSensitivityType)sensGen == FORWARD ) {
+	if( (ExportSensitivityType)sensGen == FORWARD || (ExportSensitivityType)sensGen == INEXACT ) {
 		DifferentialState Gx("", NX,NX), Gu("", NX,NU);
 		AlgebraicState deltaZ("", NXA,1), Zx("", NXA,NX), Zu("", NXA,NU);
 		// no free parameters yet!
@@ -177,12 +177,12 @@ returnValue LiftedERKExport::setup( )
 
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY,sensGen );
-	if ( (ExportSensitivityType)sensGen != FORWARD && (ExportSensitivityType)sensGen != NO_SENSITIVITY ) ACADOERROR( RET_INVALID_OPTION );
+	if ( (ExportSensitivityType)sensGen != FORWARD && (ExportSensitivityType)sensGen != NO_SENSITIVITY && (ExportSensitivityType)sensGen != INEXACT ) ACADOERROR( RET_INVALID_OPTION );
 
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+	int liftMode = 1;
 	// liftMode == 1 --> EXACT LIFTING
 	// liftMode == 2 --> INEXACT LIFTING
+	if( (ExportSensitivityType)sensGen == INEXACT ) liftMode = 2;
 
 	bool DERIVATIVES = ((ExportSensitivityType)sensGen != NO_SENSITIVITY);
 

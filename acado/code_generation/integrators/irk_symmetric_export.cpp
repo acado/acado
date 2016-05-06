@@ -293,8 +293,8 @@ returnValue SymmetricIRKExport::getCode(	ExportStatementBlock& code )
 	get( DYNAMIC_SENSITIVITY, sensGen );
 	int mode;
 	get( IMPLICIT_INTEGRATOR_MODE, mode );
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+//	int liftMode;
+//	get( LIFTED_INTEGRATOR_MODE, liftMode );
 	if ( (ExportSensitivityType)sensGen != SYMMETRIC && (ExportSensitivityType)sensGen != FORWARD_OVER_BACKWARD ) ACADOERROR( RET_INVALID_OPTION );
 	if( (ImplicitIntegratorMode)mode == LIFTED ) ACADOERROR( RET_INVALID_OPTION );
 //	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -969,8 +969,8 @@ returnValue SymmetricIRKExport::setup( )
 	rk_seed = ExportVariable( "rk_seed", 1, NX+NX*(NX+NU)+NX+NU+NOD+timeDep, REAL, structWspace );
 	rk_b_trans = ExportVariable( "rk_b_trans", 1, numStages*(NX+NXA), REAL, structWspace );
 
-	int liftMode;
-	get( LIFTED_INTEGRATOR_MODE, liftMode );
+//	int liftMode;
+//	get( LIFTED_INTEGRATOR_MODE, liftMode );
 
 	rk_seed = ExportVariable( "rk_seed", 1, NX+NX*(NX+NU)+NX+NU+NOD+timeDep, REAL, structWspace );
 	if( (ExportSensitivityType)sensGen == SYMMETRIC ) {
