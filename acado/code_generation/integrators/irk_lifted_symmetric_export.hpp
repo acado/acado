@@ -158,14 +158,7 @@ class SymmetricLiftedIRKExport : public ForwardLiftedIRKExport
 
 
 		ExportAcadoFunction diffs_sweep;		/**< Module to export the evaluation of a forward sweep of the derivatives of the ordinary differential equations. */
-		ExportAcadoFunction adjoint_sweep;		/**< Module to export the evaluation of a forward sweep of the derivatives of the ordinary differential equations. */
 
-		ExportVariable  rk_b_trans;
-
-		ExportVariable  rk_adj_diffs_tmp;
-
-		ExportVariable	rk_xxx_traj;			/**< Variable containing the forward trajectory of the state values. */
-		ExportVariable	rk_adj_traj;			/**< Variable containing the adjoint trajectory of the lambda_hat values. */
 		ExportVariable	rk_S_traj;				/**< Variable containing the forward trajectory of the first order sensitivities. */
 		ExportVariable	rk_A_traj;				/**< Variable containing the factorized matrix of the linear system over the forward trajectory. */
 		ExportVariable	rk_aux_traj;			/**< Variable containing the factorized matrix of the linear system over the forward trajectory. */

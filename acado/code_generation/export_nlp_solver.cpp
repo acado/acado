@@ -231,11 +231,12 @@ returnValue ExportNLPSolver::setupSimulation( void )
 		d.setup("d", getN() * getNX(), 1, REAL, ACADO_WORKSPACE);
 	}
 
-	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
-	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
 	int gradientUp;
 	get( LIFTED_GRADIENT_UPDATE, gradientUp );
 	bool gradientUpdate = (bool) gradientUp;
+
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD || ((ExportSensitivityType) sensitivityProp == INEXACT && gradientUpdate));
 
 	uint symH = 0;
 	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC || (secondOrder && (ExportSensitivityType) sensitivityProp == BACKWARD) ) symH = (NX+NU)*(NX+NU+1)/2;
@@ -1187,9 +1188,13 @@ returnValue ExportNLPSolver::setupObjectiveLinearTerms(const Objective& _objecti
 		objSlu = zeros<double>(NU, 1);
 	}
 
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
+
 	int sensitivityProp;
 	get( DYNAMIC_SENSITIVITY, sensitivityProp );
-	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD || ((ExportSensitivityType) sensitivityProp == INEXACT && gradientUpdate));
 	if( adjoint ) {
 		objSlx.setup("Wlx", (N+1) * NX, 1, REAL, ACADO_WORKSPACE);
 		objSlu.setup("Wlu", N * NU, 1, REAL, ACADO_WORKSPACE);
@@ -1614,7 +1619,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	int sensitivityProp;
 	get( DYNAMIC_SENSITIVITY, sensitivityProp );
 	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
-	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD || ((ExportSensitivityType) sensitivityProp == INEXACT && gradientUpdate));
 
 	uint symH = 0;
 	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC || (secondOrder && (ExportSensitivityType) sensitivityProp == BACKWARD) ) symH = (NX+NU)*(NX+NU+1)/2;

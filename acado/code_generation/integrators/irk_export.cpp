@@ -1179,6 +1179,10 @@ returnValue ImplicitRungeKuttaExport::setup( )
 	fullRhs.doc( "Evaluates the right-hand side of the full model." );
 	fullRhs.addLinebreak( );	// FIX: TO MAKE SURE IT GETS EXPORTED
 
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
+
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY, sensGen );
 	if( NX2 > 0 || NXA > 0 ) {
@@ -1199,7 +1203,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 			else {
 				solver->init( (NX2+NXA)*numStages );
 			}
-			if( (ExportSensitivityType)sensGen == SYMMETRIC || (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD || (ExportSensitivityType)sensGen == BACKWARD ) solver->setTranspose( true ); // BACKWARD propagation
+			if( (ExportSensitivityType)sensGen == SYMMETRIC || (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD || (ExportSensitivityType)sensGen == BACKWARD || gradientUpdate ) solver->setTranspose( true ); // BACKWARD propagation
 			solver->setReuse( true ); 	// IFTR method
 			solver->setup();
 			rk_auxSolver = solver->getGlobalExportVariable( 1 );
@@ -1209,7 +1213,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 				if( numStages == 3 ) solver = new ExportIRK3StageSimplifiedNewton( userInteraction,commonHeaderName );
 				if( numStages == 4 ) solver = new ExportIRK4StageSimplifiedNewton( userInteraction,commonHeaderName );
 				solver->init( NX2+NXA, NX+NU+1 );
-				if( (ExportSensitivityType)sensGen == SYMMETRIC || (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD || (ExportSensitivityType)sensGen == BACKWARD ) solver->setTranspose( true ); // BACKWARD propagation
+				if( (ExportSensitivityType)sensGen == SYMMETRIC || (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD || (ExportSensitivityType)sensGen == BACKWARD || gradientUpdate ) solver->setTranspose( true ); // BACKWARD propagation
 				solver->setReuse( true ); 	// IFTR method
 				solver->setup();
 				rk_auxSolver = solver->getGlobalExportVariable( 2 );
@@ -1250,7 +1254,7 @@ returnValue ImplicitRungeKuttaExport::setup( )
 				if( numStages == 3 ) solver = new ExportIRK3StageSingleNewton( userInteraction,commonHeaderName );
 				if( numStages == 4 ) solver = new ExportIRK4StageSingleNewton( userInteraction,commonHeaderName );
 				solver->init( NX2+NXA, NX+NU+1 );
-				if( (ExportSensitivityType)sensGen == SYMMETRIC || (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD || (ExportSensitivityType)sensGen == BACKWARD ) solver->setTranspose( true ); // BACKWARD propagation
+				if( (ExportSensitivityType)sensGen == SYMMETRIC || (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD || (ExportSensitivityType)sensGen == BACKWARD || gradientUpdate ) solver->setTranspose( true ); // BACKWARD propagation
 				solver->setReuse( true ); 	// IFTR method
 				solver->setup();
 				rk_auxSolver = solver->getGlobalExportVariable( 1 );

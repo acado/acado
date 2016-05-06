@@ -127,13 +127,6 @@ returnValue SymmetricLiftedIRKExport::getDataDeclarations(	ExportStatementBlock&
 	declarations.addDeclaration( rk_A_traj,dataStruct );
 	declarations.addDeclaration( rk_aux_traj,dataStruct );
 	declarations.addDeclaration( rk_S_traj,dataStruct );
-	declarations.addDeclaration( rk_xxx_traj,dataStruct );
-
-	declarations.addDeclaration( rk_b_trans,dataStruct );
-
-	declarations.addDeclaration( rk_adj_traj,dataStruct );
-
-	declarations.addDeclaration( rk_adj_diffs_tmp,dataStruct );
 
 	declarations.addDeclaration( rk_kkk_prev,dataStruct );
 	declarations.addDeclaration( rk_kkk_delta,dataStruct );
@@ -485,6 +478,14 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		integrate.addStatement( lambdaLoop );
 	}
 
+	// set current Hessian to zero
+	uint numX = NX*(NX+1)/2.0;
+	uint numU = NU*(NU+1)/2.0;
+	DMatrix zeroM;
+	if( !gradientUpdate ) 	zeroM = zeros<double>(1,numX+numU+NX*NU);
+	else 					zeroM = zeros<double>(1,numX+numU+NX*NU+NX+NU);
+	integrate.addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) == zeroM );
+
     // integrator FORWARD loop:
 	integrate.addComment("------------ Forward loop ------------:");
 	ExportForLoop tmpLoop( run, 0, grid.getNumIntervals() );
@@ -605,6 +606,13 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	}
 	else if( liftMode == 4 ) {
 		evaluateRhsInexactSensitivities( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, k_index, Ah );
+
+		// GRADIENT UPDATE INIS SCHEME:
+		if( gradientUpdate ) {
+			loop->addStatement( tmp_index1 == shooting_index*grid.getNumIntervals()+run );
+			loop->addStatement( rk_eta.getCols(NX+diffsDim-NX-NU,NX+diffsDim) -= rk_adj_traj.getRow(tmp_index1)*rk_b.getCols(1,1+NX+NU) );
+		}
+
 		allSensitivitiesImplicitSystem( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, k_index, Bh, true );
 	}
 	else return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
@@ -677,13 +685,7 @@ returnValue SymmetricLiftedIRKExport::getCode(	ExportStatementBlock& code )
 
     // integrator BACKWARD loop:
 	integrate.addComment("------------ BACKWARD loop ------------:");
-    // set current Hessian to zero
-	uint numX = NX*(NX+1)/2.0;
-	uint numU = NU*(NU+1)/2.0;
-	DMatrix zeroM;
-	if( !gradientUpdate ) 	zeroM = zeros<double>(1,numX+numU+NX*NU);
-	else 					zeroM = zeros<double>(1,numX+numU+NX*NU+NX+NU);
-    integrate.addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) == zeroM );
+
 	ExportForLoop tmpLoop2( run, grid.getNumIntervals()-1, -1, -1 );
 	ExportStatementBlock *loop2;
 	if( equidistantControlGrid() ) {
@@ -858,6 +860,8 @@ returnValue SymmetricLiftedIRKExport::setup( )
 		else {
 			rk_adj_diffs_tmp = ExportVariable( "rk_adjoint", 1, NX*(NX+NU), REAL, structWspace );
 		}
+		rk_Khat_traj = ExportVariable( "rk_Khat", grid.getNumIntervals(), numStages*(NX+NXA), REAL, structWspace );
+		rk_Xhat_traj = ExportVariable( "rk_Xhat", grid.getNumIntervals()*NX, 1, REAL, structWspace );
 	}
 
 	int liftMode;

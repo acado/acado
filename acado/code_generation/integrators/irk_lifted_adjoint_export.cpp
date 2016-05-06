@@ -126,14 +126,9 @@ returnValue AdjointLiftedIRKExport::getDataDeclarations(	ExportStatementBlock& d
 
 //	declarations.addDeclaration( rk_A_traj,dataStruct );
 //	declarations.addDeclaration( rk_aux_traj,dataStruct );
-	declarations.addDeclaration( rk_xxx_traj,dataStruct );
 
-	declarations.addDeclaration( rk_b_trans,dataStruct );
-
-	declarations.addDeclaration( rk_adj_traj,dataStruct );
 	declarations.addDeclaration( rk_S_traj,dataStruct );
 
-	declarations.addDeclaration( rk_adj_diffs_tmp,dataStruct );
 //	declarations.addDeclaration( rk_diffsTemp2_full,dataStruct );
 
     return SUCCESSFUL_RETURN;

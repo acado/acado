@@ -1478,11 +1478,15 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 	condenseFdb << (Dy -= y) << (DyN -= yN);
 	condenseFdb.addLinebreak();
 
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
+
 	int variableObjS;
 	get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
 	int sensitivityProp;
 	get( DYNAMIC_SENSITIVITY, sensitivityProp );
-	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD || ((ExportSensitivityType) sensitivityProp == INEXACT && gradientUpdate));
 
 	// Compute RDy
 	if( getNY() > 0 || getNYN() ) {
@@ -1969,12 +1973,16 @@ returnValue ExportGaussNewtonCN2::setupMultiplicationRoutines( )
 		macS1TSbar.addStatement( U1 += (S11 ^ w11) );
 	}
 
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
+
 	int hessianApproximation;
 	get( HESSIAN_APPROXIMATION, hessianApproximation );
 	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
 	int sensitivityProp;
 	get( DYNAMIC_SENSITIVITY, sensitivityProp );
-	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD);
+	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD || ((ExportSensitivityType) sensitivityProp == INEXACT && gradientUpdate));
 	if( secondOrder || adjoint ) {
 		ExportVariable mu1; mu1.setup("mu1", 1, NX, REAL, ACADO_LOCAL);
 		ExportVariable mu2; mu2.setup("mu2", 1, NX, REAL, ACADO_LOCAL);

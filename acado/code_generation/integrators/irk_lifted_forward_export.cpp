@@ -90,6 +90,9 @@ ExportVariable ForwardLiftedIRKExport::getAuxVariable() const
 		if( forward_sweep.getGlobalExportVariable().getDim() >= max.getDim() ) {
 			max = forward_sweep.getGlobalExportVariable();
 		}
+		if( adjoint_sweep.getGlobalExportVariable().getDim() >= max.getDim() ) {
+			max = adjoint_sweep.getGlobalExportVariable();
+		}
 	}
 	if( NX3 > 0 ) {
 		if( rhs3.getGlobalExportVariable().getDim() >= max.getDim() ) {
@@ -132,6 +135,14 @@ returnValue ForwardLiftedIRKExport::getDataDeclarations(	ExportStatementBlock& d
 	declarations.addDeclaration( rk_Xhat_traj,dataStruct );
 
 	declarations.addDeclaration( rk_diffK_local,dataStruct );
+
+	declarations.addDeclaration( rk_b_trans,dataStruct );
+
+	declarations.addDeclaration( rk_adj_traj,dataStruct );
+
+	declarations.addDeclaration( rk_adj_diffs_tmp,dataStruct );
+	declarations.addDeclaration( rk_seed2,dataStruct );
+	declarations.addDeclaration( rk_xxx_traj,dataStruct );
 
     return SUCCESSFUL_RETURN;
 }
@@ -211,11 +222,28 @@ returnValue ForwardLiftedIRKExport::setDifferentialEquation(	const Expression& r
 
 		}
 
+		int gradientUp;
+		get( LIFTED_GRADIENT_UPDATE, gradientUp );
+		bool gradientUpdate = (bool) gradientUp;
+
+		DifferentialEquation backward;
+		if( gradientUpdate ) {
+			if(NXA > 0 || NDX2 > 0) return ACADOERROR(RET_NOT_YET_IMPLEMENTED);
+
+			Expression arg;
+			arg << x;
+			arg << u;
+
+			DifferentialState lambda("", NX,1);
+			backward << backwardDerivative( rhs_, arg, lambda );
+		}
+
 		if( f.getNT() > 0 ) timeDependant = true;
 
 		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX,NOD ) &
 				diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX,NOD ) &
-				forward_sweep.init( h,"acado_forward",NX+(NX+NDX2+NXA)*(NX+NU),NXA,NU,NP,NDX,NOD ) );
+				forward_sweep.init( h,"acado_forward",NX+(NX+NDX2+NXA)*(NX+NU),NXA,NU,NP,NDX,NOD ) &
+				adjoint_sweep.init( backward,"acado_backward",NX*(2+NX+NU),NXA,NU,NP,NDX,NOD ) );
 	}
 	return SUCCESSFUL_RETURN;
 }
@@ -235,6 +263,14 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	if( (ExportSensitivityType)sensGen == INEXACT && liftMode != 4 ) ACADOERROR( RET_INVALID_OPTION );
 
 	if( CONTINUOUS_OUTPUT || NX1 > 0 || NX3 > 0 || !equidistantControlGrid() ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+
+	uint grad = 0;
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
+	if( gradientUpdate ) grad = NX;
+
+	if( gradientUpdate && (ExportSensitivityType)sensGen != INEXACT ) ACADOERROR( RET_INVALID_OPTION );
 
 	int useOMP;
 	get(CG_USE_OPENMP, useOMP);
@@ -301,6 +337,8 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 			code.addStatement( "\n\n" );
 			code.addFunction( forward_sweep );
 			code.addStatement( "\n\n" );
+			code.addFunction( adjoint_sweep );
+			code.addStatement( "\n\n" );
 		}
 
 		if( NX3 > 0 ) {
@@ -327,7 +365,7 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	get( MEASUREMENT_GRID, measGrid );
 
 	// export RK scheme
-	uint run5;
+	uint run5, run6;
 	std::string tempString;
 	
 	initializeDDMatrix();
@@ -418,6 +456,9 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		integrate.addStatement( rk_xxx.getCols( NX+NXA,inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
 		if( (ExportSensitivityType)sensGen == INEXACT ) {
 			integrate.addStatement( rk_seed.getCols( NX+NXA+(NX+NDX2+NXA)*(NX+NU),(NX+NDX2+NXA)*(NX+NU)+inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
+			if( gradientUpdate ) {
+				integrate.addStatement( rk_seed2.getCols( 2*NX+NXA+(NX+NDX2+NXA)*(NX+NU),NX+(NX+NDX2+NXA)*(NX+NU)+inputDim-diffsDim ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
+			}
 		}
 	}
 	integrate.addLinebreak( );
@@ -429,6 +470,11 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		integrate.addStatement( rk_Uprev.getRow(shooting_index) == rk_eta.getCols( NX+NXA+diffsDim,NX+NXA+diffsDim+NU ) );
 	}
 	integrate.addStatement( rk_xxx_lin == rk_eta.getCols(0,NX) );
+
+	if( gradientUpdate ) {
+		    DMatrix zeroL = zeros<double>(1,NX+NU);
+		    integrate.addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) == zeroL );
+	}
 
     // integrator loop:
 	ExportForLoop tmpLoop( run, 0, grid.getNumIntervals() );
@@ -462,8 +508,8 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 //	}
 	if( NX2 > 0 ) {
 		ExportForLoop loopTemp2( i,0,NX2 );
-		loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,0,NX1+NX2 ) == rk_eta.getCols( i*NX+NX+NXA+NX1*NX,i*NX+NX+NXA+NX1*NX+NX1+NX2 ) );
-		if( NU > 0 ) loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,NX1+NX2,NX1+NX2+NU ) == rk_eta.getCols( i*NU+(NX+NXA)*(NX+1)+NX1*NU,i*NU+(NX+NXA)*(NX+1)+NX1*NU+NU ) );
+		loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,0,NX1+NX2 ) == rk_eta.getCols( i*NX+NX+grad+NXA+NX1*NX,i*NX+NX+grad+NXA+NX1*NX+NX1+NX2 ) );
+		if( NU > 0 ) loopTemp2.addStatement( rk_diffsPrev2.getSubMatrix( i,i+1,NX1+NX2,NX1+NX2+NU ) == rk_eta.getCols( i*NU+grad+(NX+NXA)*(NX+1)+NX1*NU,i*NU+grad+(NX+NXA)*(NX+1)+NX1*NU+NU ) );
 		loop->addStatement( loopTemp2 );
 	}
 //	if( NX3 > 0 ) {
@@ -494,6 +540,9 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 
 	// Evaluate all stage values for reuse:
 	evaluateAllStatesImplicitSystem( loop, k_index, Ah, C, run1, j, tmp_index1 );
+
+	// SAVE rk_stageValues in the rk_xxx_traj variable:
+	loop->addStatement( rk_xxx_traj.getCols(run*numStages*(NX2+NXA),(run+1)*numStages*(NX2+NXA)) == rk_stageValues );
 
 	solveImplicitSystem( loop, i, run1, j, tmp_index1, k_index, Ah, C, determinant, true );
 
@@ -536,6 +585,13 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	}
 	else {
 		evaluateRhsInexactSensitivities( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, k_index, Ah );
+
+		// GRADIENT UPDATE INIS SCHEME:
+		if( gradientUpdate ) {
+			loop->addStatement( tmp_index1 == shooting_index*grid.getNumIntervals()+run );
+			loop->addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) -= rk_adj_traj.getRow(tmp_index1)*rk_b.getCols(1,1+NX+NU) );
+		}
+
 		allSensitivitiesImplicitSystem( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, k_index, Bh, true );
 	}
 	if( liftMode == 1 ) { // EXACT LIFTING
@@ -653,23 +709,89 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
     else {
     	integrate.addStatement( *loop );
     }
+
+    if( gradientUpdate ) {
+    	// COMPUTE THE INEXACT ADJOINT BASED ON LAMBDA AND THE INEXACT SENSITIVITIES:
+//    	DMatrix zeroL = zeros<double>(1,NX+NU);
+//    	integrate.addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) == zeroL );
+//    	for( run5 = 0; run5 < NX; run5 ++ ) {
+//    		integrate.addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) += rk_eta.getCol(NX+run5)*rk_diffsNew2.getRow(run5) );
+//    	}
+//    	integrate.addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim-NU) -= rk_eta.getCols(NX,2*NX) );
+
+    	// integrator BACKWARD loop:
+    	integrate.addComment("------------ BACKWARD loop ------------:");
+    	ExportForLoop tmpLoop2( run, grid.getNumIntervals()-1, -1, -1 );
+    	ExportStatementBlock *loop2;
+    	if( equidistantControlGrid() ) {
+    		loop2 = &tmpLoop2;
+    	}
+    	else {
+    		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+    	}
+
+    	loop2->addStatement( k_index == run*(NX+NXA)*(NX+NU) );
+
+
+    	if( (LinearAlgebraSolver) linSolver == SIMPLIFIED_IRK_NEWTON || (LinearAlgebraSolver) linSolver == SINGLE_IRK_NEWTON ) { // INEXACT
+    		// Compute \hat{lambda}:
+    		// vec(j*NX+1:j*NX+NX) = -Bh_vec(j+1)*dir_tmp;
+    		for( run5 = 0; run5 < numStages; run5++ ) {
+    			DMatrix zeroV = zeros<double>(1,NX);
+    			loop2->addStatement( rk_b_trans.getCols(run5*NX,(run5+1)*NX) == zeroV );
+    			loop2->addStatement( rk_b_trans.getCols(run5*NX,(run5+1)*NX) -= Bh.getRow(run5)*rk_eta.getCols(NX,2*NX) );
+    		}
+    		loop2->addStatement( tmp_index1 == shooting_index*grid.getNumIntervals()+run );
+    		for( run5 = 0; run5 < numStages; run5++ ) {
+    			loop2->addStatement( rk_seed2.getCols(0,NX) == rk_xxx_traj.getCols((run*numStages+run5)*(NX2+NXA),(run*numStages+run5+1)*(NX2+NXA)) );
+    			loop2->addStatement( rk_seed2.getCols(NX,2*NX) == rk_adj_traj.getSubMatrix(tmp_index1,tmp_index1+1,run5*(NX+NXA),(run5+1)*(NX+NXA)) );
+    			loop2->addFunctionCall( adjoint_sweep.getName(), rk_seed2, rk_adj_diffs_tmp );
+    			for( run6 = 0; run6 < numStages; run6++ ) {
+    				loop2->addStatement( rk_b_trans.getCols(run6*NX,(run6+1)*NX) -= Ah.getElement(run5,run6)*rk_adj_diffs_tmp.getCols(0,NX) );
+    			}
+    			loop2->addStatement( rk_b_trans.getCols(run5*NX,(run5+1)*NX) += rk_adj_traj.getSubMatrix(tmp_index1,tmp_index1+1,run5*(NX+NXA),(run5+1)*(NX+NXA)) ); // BECAUSE EXPLICIT ODE
+    		}
+    		loop2->addFunctionCall( solver->getNameSolveTransposeReuseFunction(),rk_A.getAddress(0,0),rk_b_trans.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
+    		loop2->addStatement( rk_adj_traj.getRow(tmp_index1) += rk_b_trans );
+    		//		loop2->addStatement( rk_b_trans == rk_adj_traj.getRow(tmp_index1) );
+    	}
+    	else return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+
+    	for( run5 = 0; run5 < numStages; run5++ ) {
+    		loop2->addStatement( rk_seed2.getCols(0,NX) == rk_xxx_traj.getCols((run*numStages+run5)*(NX2+NXA),(run*numStages+run5+1)*(NX2+NXA)) );
+    		loop2->addStatement( rk_seed2.getCols(NX,2*NX) == rk_adj_traj.getSubMatrix(tmp_index1,tmp_index1+1,run5*NX,(run5+1)*NX) );
+    		loop2->addFunctionCall( adjoint_sweep.getName(), rk_seed2, rk_adj_diffs_tmp.getAddress(0,0) );
+    		loop2->addStatement( rk_eta.getCols(NX,2*NX) += rk_adj_diffs_tmp.getCols(0,NX) );
+//    		loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) -= rk_adj_diffs_tmp.getCols(0,NX+NU) );
+    	}
+
+    	loop2->addStatement( rk_ttt -= DMatrix(1.0/grid.getNumIntervals()) );
+    	// end of the backward integrator loop.
+    	if( !equidistantControlGrid() ) {
+    		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+    	}
+    	else {
+    		integrate.addStatement( *loop2 );
+    	}
+    }
+
     // PART 1
     if( NX1 > 0 ) {
     	DMatrix zeroR = zeros<double>(1, NX2+NX3);
     	ExportForLoop loop1( i,0,NX1 );
-    	loop1.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1,i*NX+NX+NXA+NX ) == zeroR );
+    	loop1.addStatement( rk_eta.getCols( i*NX+NX+grad+NXA+NX1,i*NX+NX+grad+NXA+NX ) == zeroR );
     	integrate.addStatement( loop1 );
     }
     // PART 2
     DMatrix zeroR = zeros<double>(1, NX3);
     if( NX2 > 0 && NX3 > 0 ) {
     	ExportForLoop loop2( i,NX1,NX1+NX2 );
-    	loop2.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1+NX2,i*NX+NX+NXA+NX ) == zeroR );
+    	loop2.addStatement( rk_eta.getCols( i*NX+NX+grad+NXA+NX1+NX2,i*NX+NX+grad+NXA+NX ) == zeroR );
     	integrate.addStatement( loop2 );
     }
     if( NXA > 0 && NX3 > 0 ) {
     	ExportForLoop loop3( i,NX,NX+NXA );
-    	loop3.addStatement( rk_eta.getCols( i*NX+NX+NXA+NX1+NX2,i*NX+NX+NXA+NX ) == zeroR );
+    	loop3.addStatement( rk_eta.getCols( i*NX+NX+grad+NXA+NX1+NX2,i*NX+NX+grad+NXA+NX ) == zeroR );
     	integrate.addStatement( loop3 );
     }
 
@@ -1167,6 +1289,50 @@ returnValue ForwardLiftedIRKExport::evaluateRhsSensitivities( ExportStatementBlo
 }
 
 
+returnValue ForwardLiftedIRKExport::updateImplicitSystem(	ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& tmp_index )
+{
+	uint grad = 0;
+	int gradientUp;
+	get( LIFTED_GRADIENT_UPDATE, gradientUp );
+	bool gradientUpdate = (bool) gradientUp;
+	if( gradientUpdate ) grad = NX;
+
+	if( NX2 > 0 ) {
+		ExportForLoop loop01( index1,NX1,NX1+NX2 );
+		ExportForLoop loop02( index2,0,NX1+NX2 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA+grad ) == rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,index2,index2+1 ) );
+		loop01.addStatement( loop02 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop03( index2,0,NU );
+			loop03.addStatement( tmp_index == index2+index1*NU );
+			loop03.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX)+grad ) == rk_diffsNew2.getSubMatrix( index1-NX1,index1-NX1+1,NX1+NX2+index2,NX1+NX2+index2+1 ) );
+			loop01.addStatement( loop03 );
+		}
+		block->addStatement( loop01 );
+	}
+	// ALGEBRAIC STATES
+	if( NXA > 0 ) {
+		ExportForLoop loop01( index1,NX,NX+NXA );
+		ExportForLoop loop02( index2,0,NX1+NX2 );
+		loop02.addStatement( tmp_index == index2+index1*NX );
+		loop02.addStatement( rk_eta.getCol( tmp_index+NX+NXA+grad ) == rk_diffsNew2.getSubMatrix( index1-NX1-NX3,index1-NX1-NX3+1,index2,index2+1 ) );
+		loop01.addStatement( loop02 );
+
+		if( NU > 0 ) {
+			ExportForLoop loop03( index2,0,NU );
+			loop03.addStatement( tmp_index == index2+index1*NU );
+			loop03.addStatement( rk_eta.getCol( tmp_index+(NX+NXA)*(1+NX)+grad ) == rk_diffsNew2.getSubMatrix( index1-NX1-NX3,index1-NX1-NX3+1,NX1+NX2+index2,NX1+NX2+index2+1 ) );
+			loop01.addStatement( loop03 );
+		}
+		block->addStatement( loop01 );
+	}
+
+	return SUCCESSFUL_RETURN;
+}
+
+
 returnValue ForwardLiftedIRKExport::sensitivitiesOutputSystem( ExportStatementBlock* block, const ExportIndex& index1, const ExportIndex& index2, const ExportIndex& index3, const ExportIndex& index4, const ExportIndex& tmp_index1, const ExportIndex& tmp_index2, const ExportVariable& Ah, const ExportVariable& Bh, bool STATES, uint number )
 {
 
@@ -1186,6 +1352,7 @@ returnValue ForwardLiftedIRKExport::sensitivitiesOutputs( ExportStatementBlock* 
 returnValue ForwardLiftedIRKExport::setup( )
 {
 	ForwardIRKExport::setup();
+
 
 	integrate = ExportFunction( "integrate", rk_eta );
 	uint i;
@@ -1245,7 +1412,23 @@ returnValue ForwardLiftedIRKExport::setup( )
 	int gradientUp;
 	get( LIFTED_GRADIENT_UPDATE, gradientUp );
 	bool gradientUpdate = (bool) gradientUp;
-	if( liftMode == 1 || gradientUpdate ) {
+
+	if( gradientUpdate ) {
+		diffsDim = NX + (NX+NXA)*(NX+NU) + NX+NU;
+		inputDim = NX + diffsDim + NU + NOD;
+		rk_eta = ExportVariable( "rk_eta", 1, inputDim, REAL );
+
+		rk_b_trans = ExportVariable( "rk_b_trans", 1, numStages*(NX+NXA), REAL, structWspace );
+		rk_adj_traj = ExportVariable( "rk_adj_traj", N*grid.getNumIntervals(), numStages*(NX+NXA), REAL, ACADO_VARIABLES );
+
+		rk_adj_diffs_tmp = ExportVariable( "rk_adjoint", 1, NX+NU, REAL, structWspace );
+
+		rk_seed2 = ExportVariable( "rk_seed_b", 1, NX*(2+NX+NU)+NU+NOD+timeDep, REAL, structWspace );
+
+		rk_xxx_traj = ExportVariable( "rk_stageV_traj", 1, grid.getNumIntervals()*numStages*(NX+NXA), REAL, structWspace );
+	}
+
+	if( liftMode == 1 ) {
 		rk_Khat_traj = ExportVariable( "rk_Khat", grid.getNumIntervals(), numStages*(NX+NXA), REAL, structWspace );
 		rk_Xhat_traj = ExportVariable( "rk_Xhat", grid.getNumIntervals()*NX, 1, REAL, structWspace );
 	}

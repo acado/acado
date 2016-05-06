@@ -302,6 +302,18 @@ class ForwardLiftedIRKExport : public ForwardIRKExport
 													const ExportIndex& tmp_index2 );
 
 
+		/** Exports the code needed to update the sensitivities of the states defined by the nonlinear, fully implicit system.
+		 *
+		 *	@param[in] block			The block to which the code will be exported.
+		 *
+		 *	\return SUCCESSFUL_RETURN
+		 */
+		virtual returnValue updateImplicitSystem( 	ExportStatementBlock* block,
+													const ExportIndex& index1,
+													const ExportIndex& index2,
+													const ExportIndex& tmp_index  	);
+
+
 		/** Exports the code needed to compute the sensitivities of the states, defined by the linear output system.
 		 *
 		 *	@param[in] block			The block to which the code will be exported.
@@ -379,6 +391,13 @@ class ForwardLiftedIRKExport : public ForwardIRKExport
     protected:
 
 		ExportAcadoFunction forward_sweep;		/**< Module to export the evaluation of a forward sweep of the derivatives of the ordinary differential equations. */
+		ExportAcadoFunction adjoint_sweep;		/**< Module to export the evaluation of an adjoint sweep of the derivatives of the ordinary differential equations. */
+		ExportVariable  rk_b_trans;
+		ExportVariable	rk_adj_traj;			/**< Variable containing the adjoint trajectory of the lambda_hat values. */
+		ExportVariable  rk_adj_diffs_tmp;
+		ExportVariable 	rk_seed2;
+		ExportVariable	rk_xxx_traj;			/**< Variable containing the forward trajectory of the state values. */
+
 		ExportVariable 	rk_diffSweep;
 		ExportVariable 	rk_I;
 
