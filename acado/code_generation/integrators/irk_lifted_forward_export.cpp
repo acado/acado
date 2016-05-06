@@ -591,7 +591,7 @@ returnValue ForwardLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		// GRADIENT UPDATE INIS SCHEME:
 		if( gradientUpdate ) {
 			loop->addStatement( tmp_index1 == shooting_index*grid.getNumIntervals()+run );
-			loop->addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) -= rk_adj_traj.getRow(tmp_index1)*rk_b.getCols(1,1+NX+NU) );
+			loop->addStatement( rk_eta.getCols(NX*(2+NX+NU),NX+diffsDim) += rk_adj_traj.getRow(tmp_index1)*rk_b.getCols(1,1+NX+NU) );
 		}
 
 		allSensitivitiesImplicitSystem( loop, run1, i, j, tmp_index1, tmp_index2, tmp_index3, k_index, Bh, true );
