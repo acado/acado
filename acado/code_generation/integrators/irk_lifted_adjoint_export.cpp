@@ -90,9 +90,9 @@ ExportVariable AdjointLiftedIRKExport::getAuxVariable() const
 		if( diffs_sweep.getGlobalExportVariable().getDim() >= max.getDim() ) {
 			max = diffs_sweep.getGlobalExportVariable();
 		}
-		if( forward_sweep.getGlobalExportVariable().getDim() >= max.getDim() ) {
-			max = forward_sweep.getGlobalExportVariable();
-		}
+//		if( forward_sweep.getGlobalExportVariable().getDim() >= max.getDim() ) {
+//			max = forward_sweep.getGlobalExportVariable();
+//		}
 		if( adjoint_sweep.getGlobalExportVariable().getDim() >= max.getDim() ) {
 			max = adjoint_sweep.getGlobalExportVariable();
 		}
@@ -229,19 +229,17 @@ returnValue AdjointLiftedIRKExport::setDifferentialEquation(	const Expression& r
 			adj_update << backwardDerivative( rhs_, x, lambda );
 	    }
 
-	    DifferentialEquation h;
 		Expression tmp = zeros<double>(NX,1);
 		tmp.appendRows(backwardDerivative( rhs_, u, lambda ));
-	    h << lambda.transpose()*multipleForwardDerivative( rhs_, x, sX ) + tmp.transpose();
+		backward << lambda.transpose()*multipleForwardDerivative( rhs_, x, sX ) + tmp.transpose();
 
 		if( f.getNT() > 0 ) timeDependant = true;
 
 		return (rhs.init( f,"acado_rhs",NX,NXA,NU,NP,NDX,NOD ) &
 				diffs_rhs.init( g,"acado_diffs",NX,NXA,NU,NP,NDX,NOD ) &
-				forward_sweep.init( h,"acado_forward",NX*(2+NX+NU),NXA,NU,NP,NDX,NOD ) &
 				adjoint_sweep.init( backward,"acado_backward",NX*(2+NX+NU),NXA,NU,NP,NDX,NOD ) &
 				diffs_sweep.init( adj_update,"acado_adjoint_update",NX*(2+NX+NU),NXA,NU,NP,NDX,NOD ));
-		//				forward_sweep.init( forward,"acado_forward",NX*(2+NX+NU),NXA,NU,NP,NDX,NOD ) &
+//		forward_sweep.init( h,"acado_forward",NX*(2+NX+NU),NXA,NU,NP,NDX,NOD ) &
 	}
 	return SUCCESSFUL_RETURN;
 }
@@ -609,8 +607,8 @@ returnValue AdjointLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		}
 
 		// >>>>>>>>>>>> GRADIENT CORRECTION
-		loop2->addFunctionCall( forward_sweep.getName(), rk_seed, rk_adj_diffs_tmp.getAddress(0,0) );
-		loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU)+symH,NX+diffsDim) -= rk_adj_diffs_tmp.getCols(0,NX+NU) );
+//		loop2->addFunctionCall( forward_sweep.getName(), rk_seed, rk_adj_diffs_tmp.getAddress(0,0) );
+		loop2->addStatement( rk_eta.getCols(NX*(2+NX+NU)+symH,NX+diffsDim) -= rk_adj_diffs_tmp.getCols(NX+NU+symH,NX+NU+symH+NX+NU) );
 		// GRADIENT CORRECTION <<<<<<<<<<
 	}
 
@@ -729,7 +727,7 @@ returnValue AdjointLiftedIRKExport::setup( )
 
 	rk_b_trans = ExportVariable( "rk_b_trans", 1, numStages*(NX+NXA), REAL, structWspace );
 
-	rk_adj_diffs_tmp = ExportVariable( "rk_adjoint", 1, NX+NU+symH, REAL, structWspace );
+	rk_adj_diffs_tmp = ExportVariable( "rk_adjoint", 1, NX+NU+symH+NX+NU, REAL, structWspace );
 
 //	if( secondOrder ) {
 		rk_S_traj = ExportVariable( "rk_S_traj", grid.getNumIntervals()*NX, NX+NU, REAL, structWspace );
