@@ -44,8 +44,6 @@ ExportExactHessianCN2::ExportExactHessianCN2(	UserInteraction* _userInteraction,
 
 returnValue ExportExactHessianCN2::setup( )
 {
-	std::cout << "NOTE: You are using the new (unstable) N2 condensing feature for exact Hessian based RTI..\n";
-
 	if (performFullCondensing() == true && initialStateFixed() == false)
 		return ACADOERRORTEXT( RET_INVALID_OPTION, "Impossible to perform full condensing, when the initial state is not fixed. You can use regular condensing instead." );
 	if (performFullCondensing() == false && initialStateFixed() == true)
