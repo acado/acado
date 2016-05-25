@@ -1,4 +1,4 @@
-/bin/bash: s: command not found
+################################################################################
 #
 # Description:
 #	Configuration of templates
