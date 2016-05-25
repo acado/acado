@@ -1,4 +1,4 @@
-################################################################################
+/bin/bash: s: command not found
 #
 # Description:
 #	Configuration of templates
@@ -40,6 +40,7 @@ SET( SOLVER_MEX acado_solver_mex.c.in)
 SET( EH_SOLVER_MEX acado_EH_solver_mex.c.in)
 SET( MAKE_MEX_FORCES make_acado_solver_forces.m.in)
 SET( MAKE_MEX_QPOASES make_acado_solver_qpoases.m.in)
+SET( MAKE_MEX_HPMPC make_acado_solver_hpmpc.m.in)
 SET( MAKE_MEX_EH_QPOASES make_acado_EH_solver_qpoases.m.in)
 SET( MAKE_MEX_QPOASES3 make_acado_solver_qpoases3.m.in)
 SET( MAKE_MEX_EH_QPOASES3 make_acado_EH_solver_qpoases3.m.in)

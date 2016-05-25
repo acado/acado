@@ -105,6 +105,8 @@ elseif strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPOASES3')
 	@MODULE_PREFIX@Def.Options.language = 'C';
 elseif strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPDUNES')
 	@MODULE_PREFIX@Def.Options.language = 'C';
+elseif strcmp(@MODULE_PREFIX@_QP_SOLVER, 'HPMPC')
+	@MODULE_PREFIX@Def.Options.language = 'C';
 else
 	error('Unknown QP solver')
 end;
@@ -151,6 +153,8 @@ elseif strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPDUNES')
 	@MODULE_PREFIX@Def.SourceFiles{end + 1} = 'qpdunes/src/setup_qp.c';
 	@MODULE_PREFIX@Def.SourceFiles{end + 1} = 'qpdunes/src/stage_qp_solver_clipping.c';
 	@MODULE_PREFIX@Def.SourceFiles{end + 1} = 'qpdunes/src/utils.c';
+elseif strcmp(@MODULE_PREFIX@_QP_SOLVER, 'HPMPC')
+	@MODULE_PREFIX@Def.SourceFiles{end + 1} = '@MODULE_NAME@_hpmpc_interface.c';
 else
 	error('Unknown QP solver')
 end;
@@ -175,6 +179,10 @@ elseif strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPDUNES')
 	@MODULE_PREFIX@Def.IncPaths = { ...
 		'qpdunes/include', ...
 	};
+elseif strcmp(@MODULE_PREFIX@_QP_SOLVER, 'HPMPC')
+	@MODULE_PREFIX@Def.IncPaths = { ...
+		'hpmpc/include', ...
+	};
 else
 	error('Unknown QP solver')
 end;
@@ -187,6 +195,11 @@ elseif (ispc)
     ldFlags = [ldFlags '-DWIN32'];
 end;
 
+%add Hpmpc static library
+if strcmp(ACADO_QP_SOLVER, 'HPMPC')
+    ACADODef.LibPaths = {'hpmpc'};
+    ACADODef.HostLibFiles = {'libhpmpc.a'};
+end
 % Add an extra option for qpOASES
 iFlags = {''};
 if (~strcmp(aSfunName, 'acado_solver_sfun')) && (strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPOASES'))
@@ -198,6 +211,9 @@ end;
 if strcmp(@MODULE_PREFIX@_QP_SOLVER, 'QPDUNES')
 	iFlags = {'-D__SIMPLE_BOUNDS_ONLY__'};
 end;
+if strcmp(ACADO_QP_SOLVER, 'HPMPC')
+	iFlags = '';
+end;i
 
 % Define output function declaration
 @MODULE_PREFIX@Def.OutputFcnSpec = [ ...
