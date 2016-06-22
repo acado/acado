@@ -74,6 +74,8 @@ returnValue ExportSplitQpDunesInterface::configure(	const unsigned _maxIter,
 	stringstream ss;
 
 	// Configure the dictionary
+    dictionary[ "@MODULE_NAME@" ] = ExportStatement::fcnPrefix;
+    dictionary[ "@MODULE_PREFIX@" ] = ExportStatement::varPrefix;
 
 	ss << _maxIter;
 	dictionary[ "@MAX_ITER@" ] =  ss.str();

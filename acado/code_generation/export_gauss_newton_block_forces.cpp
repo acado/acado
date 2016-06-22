@@ -446,7 +446,7 @@ returnValue ExportGaussNewtonBlockForces::setupEvaluation( )
 	<< qpModuleName << "_" << solveQP.getName() << "( "
 	<< "&" << qpObjPrefix << "_" << "params" << ", "
 	<< "&" << qpObjPrefix << "_" << "output" << ", "
-	<< "&" << qpObjPrefix << "_" << "info" << " );\n";
+	<< "&" << qpObjPrefix << "_" << "info" << " , NULL);\n";
 	feedback.addLinebreak();
 
 	for (unsigned i = 0; i < getNumberOfBlocks(); ++i) {
