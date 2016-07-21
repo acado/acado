@@ -375,12 +375,16 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			else
 				qpSolverString = "HPMPC";
 
-
-			ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName, modulePrefix);
-
 			// Get options
 			int useSinglePrecision;
 			get(USE_SINGLE_PRECISION, useSinglePrecision);
+
+			if( useSinglePrecision ) {
+				ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName, modulePrefix, "", "float");
+			}
+			else {
+				ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName, modulePrefix);
+			}
 
 			int hardcodeConstraintValues;
 			get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
