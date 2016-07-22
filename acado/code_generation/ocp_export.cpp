@@ -379,11 +379,9 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			int useSinglePrecision;
 			get(USE_SINGLE_PRECISION, useSinglePrecision);
 
+			ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName, modulePrefix);
 			if( useSinglePrecision ) {
-				ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName, modulePrefix, "", "float");
-			}
-			else {
-				ExportSimulinkInterface esi(makefileName, wrapperHeaderName, wrapperSourceName, moduleName, modulePrefix);
+				esi = ExportSimulinkInterface(makefileName, wrapperHeaderName, wrapperSourceName, moduleName, modulePrefix, "", "float");
 			}
 
 			int hardcodeConstraintValues;
