@@ -45,7 +45,7 @@ inline ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction
 	_userInteraction->get( DYNAMIC_SENSITIVITY, sensGen );
 	int liftedGen;
 	_userInteraction->get( IMPLICIT_INTEGRATOR_MODE, liftedGen );
-	if ( (ImplicitIntegratorMode)liftedGen == LIFTED && (ExportSensitivityType)sensGen == FORWARD ) {
+	if ( (ImplicitIntegratorMode)liftedGen == LIFTED && ((ExportSensitivityType)sensGen == FORWARD || (ExportSensitivityType)sensGen == INEXACT) ) {
 		return new LiftedERKExport(_userInteraction, _commonHeaderName);
 	}
 	else if ( (ExportSensitivityType)sensGen == FORWARD || (ExportSensitivityType)sensGen == NO_SENSITIVITY ) {

@@ -405,7 +405,7 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	loop->addStatement( loopF );
 
 	// call the linear solver:
-	loop->addStatement( determinant.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+	loop->addStatement( determinant.getFullName() + " = " + ExportStatement::fcnPrefix + "_" + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 	loop->addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
 
 	// update the F variables:
