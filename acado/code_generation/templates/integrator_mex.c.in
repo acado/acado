@@ -288,11 +288,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		memset(&@MODULE_NAME@Workspace, 0, sizeof( @MODULE_NAME@Workspace ));
     }
     
-    #if SENS_PROP == 3
-		for( i = 0; i < @MODULE_PREFIX@_NX; ++i ) {
-			next[(@MODULE_PREFIX@_NX+@MODULE_PREFIX@_NXA)*(1+@MODULE_PREFIX@_NX+@MODULE_PREFIX@_NU)+i] = seed[i];
-		}
-    #elif SENS_PROP == 2 || SENS_PROP == 4
+    #if SENS_PROP == 2 || SENS_PROP == 3 || SENS_PROP == 4
 		for( i = 0; i < @MODULE_PREFIX@_NX; ++i ) {
 			next[@MODULE_PREFIX@_NX+@MODULE_PREFIX@_NXA+i] = seed[i];
 		}
@@ -385,7 +381,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         xnext[i] = next[i];
     }
     
-    #if SENS_PROP == 1 || SENS_PROP == 3
+    #if SENS_PROP == 1
 	    /* NOTE: Matlab is column-major, while C is row-major order !! */
 	    for( i = 0; i < @MODULE_PREFIX@_NX+@MODULE_PREFIX@_NXA; ++i ) {
 	        for( j = 0; j < @MODULE_PREFIX@_NX; ++j ) {
@@ -404,7 +400,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	    for( j = 0; j < @MODULE_PREFIX@_NU; ++j ) {
 	        sensU[j] = next[@MODULE_PREFIX@_NX+@MODULE_PREFIX@_NXA+@MODULE_PREFIX@_NX+j];
 	    }
-    #elif SENS_PROP == 4
+    #elif SENS_PROP == 4 || SENS_PROP == 3
 	    /* NOTE: Matlab is column-major, while C is row-major order !! */
 	    for( i = 0; i < @MODULE_PREFIX@_NX+@MODULE_PREFIX@_NXA; ++i ) {
 	        for( j = 0; j < @MODULE_PREFIX@_NX; ++j ) {
