@@ -295,7 +295,7 @@ returnValue ExportExactHessianQpDunes::setupHessianRegularization( )
 	get(CG_MODULE_NAME, moduleName);
     
 	ExportVariable block( "hessian_block", NX+NU, NX+NU );
-	regularization = ExportFunction( moduleName + "_regularize", block );
+	regularization = ExportFunction( "regularize", block );
 	regularization.doc( "EVD-based regularization of a Hessian block." );
 	regularization.addLinebreak();
 
