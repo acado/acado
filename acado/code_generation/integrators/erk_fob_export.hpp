@@ -99,6 +99,8 @@ class ForwardOverBackwardERKExport : public AdjointERKExport
 
 	protected:
 
+		Expression returnLowerTriangular( const Expression& expr );
+
 
     protected:
 

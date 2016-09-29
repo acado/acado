@@ -54,7 +54,7 @@ inline ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction
 	else if( (ExportSensitivityType)sensGen == BACKWARD ) {
 		return new AdjointERKExport(_userInteraction, _commonHeaderName);
 	}
-	else if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+	else if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD || (ExportSensitivityType)sensGen == SYMMETRIC_FB ) {
 		return new ForwardOverBackwardERKExport(_userInteraction, _commonHeaderName);
 	}
 	else if( (ExportSensitivityType)sensGen == SYMMETRIC ) {
