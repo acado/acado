@@ -137,6 +137,7 @@ returnValue ExportNLPSolver::getDataDeclarations(	ExportStatementBlock& declarat
 	declarations.addDeclaration(pacEvH, dataStruct);
 	declarations.addDeclaration(pacEvHx, dataStruct);
 	declarations.addDeclaration(pacEvHu, dataStruct);
+	declarations.addDeclaration(pacEvDDH, dataStruct);
 	declarations.addDeclaration(pacEvHxd, dataStruct);
 
 	declarations.addDeclaration(pocEvH, dataStruct);
@@ -239,7 +240,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD || ((ExportSensitivityType) sensitivityProp == INEXACT && gradientUpdate));
 
 	uint symH = 0;
-	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC || (secondOrder && (ExportSensitivityType) sensitivityProp == BACKWARD) ) symH = (NX+NU)*(NX+NU+1)/2;
+	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC || (ExportSensitivityType) sensitivityProp == SYMMETRIC_FB || (secondOrder && (ExportSensitivityType) sensitivityProp == BACKWARD) ) symH = (NX+NU)*(NX+NU+1)/2;
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD && gradientUpdate ) symH = (NX+NU)*(NX+NU); // TODO: this is a quick fix for the dimensions in case of FOB lifted collocation integrators
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) symH = NX*(NX+NU)+NU*NU;
 
@@ -380,7 +381,7 @@ returnValue ExportNLPSolver::setupSimulation( void )
 	);
 
 	// TODO: write this in exported loops (RIEN)
-	if( secondOrder && ((ExportSensitivityType) sensitivityProp == SYMMETRIC || (ExportSensitivityType) sensitivityProp == BACKWARD) ) {
+	if( secondOrder && ((ExportSensitivityType) sensitivityProp == SYMMETRIC || (ExportSensitivityType) sensitivityProp == SYMMETRIC_FB || (ExportSensitivityType) sensitivityProp == BACKWARD) ) {
 		for( uint i = 0; i < NX+NU; i++ ) {
 			for( uint j = 0; j <= i; j++ ) {
 				loop.addStatement( objS.getElement(run*(NX+NU)+i,j) == -1.0*state.getCol(indexGzu + i*(i+1)/2+j) );
@@ -1300,6 +1301,10 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 	DifferentialState vX("", NX, 1);
 	Control vU("", NU, 1);
 
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Extract path constraints; pac prefix
@@ -1319,18 +1324,37 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 
 	if (dimPacH != 0)
 	{
+		DifferentialState lambda("", dimPacH, 1);
+
 		lbPathConValues = pacLBMatrix.getRows(0, N - 1).makeVector();
 		ubPathConValues = pacUBMatrix.getRows(0, N - 1).makeVector();
 
-		Expression expPacH, expPacHx, expPacHu;
+		Expression expPacH, expPacHx, expPacHu, expPacDH, expPacDDH;
 		pacH.getExpression( expPacH );
 
-		expPacHx = forwardDerivative(expPacH, vX);
-		expPacHu = forwardDerivative(expPacH, vU);
+		// FIRST ORDER DERIVATIVES
+		Expression S, arg, dl;
+		S = eye<double>(NX+NU);
+		arg << vX;
+		arg << vU;
 
-		Function pacHx, pacHu;
+		expPacDDH = symmetricDerivative( expPacH, arg, S, lambda, &expPacDH, &dl );
+
+		expPacHx = expPacDH.getCols(0, NX);
+		expPacHu = expPacDH.getCols(NX, NX+NU);
+
+//		expPacHx = forwardDerivative(expPacH, vX);
+//		expPacHu = forwardDerivative(expPacH, vU);
+
+//		expPacHxx = expPacDDH.getSubMatrix(0,NX,0,NX);
+//		expPacHxu = expPacDDH.getSubMatrix(0,NX,NX,NX+NU);
+//		expPacHuu = expPacDDH.getSubMatrix(NX,NX+NU,NX,NX+NU);
+
+		Function pacHx, pacHu, pacDDH;
 		pacHx << expPacHx;
 		pacHu << expPacHu;
+
+		pacDDH << expPacDDH;
 
 		// Set dimension of residual
 		pacEvH.setup("evH", N * dimPacH, 1, REAL, ACADO_WORKSPACE);
@@ -1371,16 +1395,36 @@ returnValue ExportNLPSolver::setConstraints(const OCP& _ocp)
 			pacEvHu.setup("evHu", N * dimPacH, NU, REAL, ACADO_WORKSPACE);
 		}
 
+		uint dimL = 0;
+		// Check second order derivatives of path constraints
+		if (pacDDH.isConstant())
+		{
+			EvaluationPoint epPacDDH( pacDDH );
+			DVector v = pacDDH.evaluate( epPacDDH );
+
+			if (v.isZero() == false)
+			{
+				pacEvDDH.setup("evDDH", Eigen::Map<DMatrix>(v.data(), (NX+NU), (NX+NU)), REAL, ACADO_WORKSPACE);
+			}
+		}
+		else if( secondOrder )
+		{
+			dimL = dimPacH;
+			pacH << expPacDDH;
+
+			pacEvDDH.setup("evDDH", (NX+NU), (NX+NU), REAL, ACADO_WORKSPACE);
+		}
+
 		if (performsSingleShooting() == false)
 		{
 			pacEvHxd.setup("evHxd", dimPacH, 1, REAL, ACADO_WORKSPACE);
 		}
 
 		conAuxVar.setup("conAuxVar", pacH.getGlobalExportVariableSize(), 1, REAL, ACADO_WORKSPACE);
-		conValueIn.setup("conValueIn", 1, NX + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
+		conValueIn.setup("conValueIn", 1, NX + dimL + 0 + NU + NOD, REAL, ACADO_WORKSPACE);
 		conValueOut.setup("conValueOut", 1, pacH.getDim(), REAL, ACADO_WORKSPACE);
 
-		evaluatePathConstraints.init(pacH, "evaluatePathConstraints", NX, 0, NU, NP, 0, NOD);
+		evaluatePathConstraints.init(pacH, "evaluatePathConstraints", NX+dimL, 0, NU, NP, 0, NOD);
 		evaluatePathConstraints.setGlobalExportVariable( conAuxVar );
 	}
 
@@ -1622,7 +1666,7 @@ returnValue ExportNLPSolver::setupAuxiliaryFunctions()
 	bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD || ((ExportSensitivityType) sensitivityProp == INEXACT && gradientUpdate));
 
 	uint symH = 0;
-	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC || (secondOrder && (ExportSensitivityType) sensitivityProp == BACKWARD) ) symH = (NX+NU)*(NX+NU+1)/2;
+	if( (ExportSensitivityType) sensitivityProp == SYMMETRIC || (ExportSensitivityType) sensitivityProp == SYMMETRIC_FB || (secondOrder && (ExportSensitivityType) sensitivityProp == BACKWARD) ) symH = (NX+NU)*(NX+NU+1)/2;
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD && gradientUpdate ) symH = (NX+NU)*(NX+NU); // TODO: this is a quick fix for the dimensions in case of FOB lifted collocation integrators
 	else if( (ExportSensitivityType) sensitivityProp == FORWARD_OVER_BACKWARD ) symH = NX*(NX+NU)+NU*NU;
 
