@@ -159,7 +159,7 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 			// SYMMETRIC DERIVATIVES
 			Expression dfS2, dfL;
 			Expression h_tmp = symmetricDerivative( rhs_, arg, S_tmp, lx, &dfS2, &dfL );
-			g << dfL;
+			g << dfL.getRows(0,NX);
 			g << returnLowerTriangular( h_tmp );
 		}
 
@@ -222,6 +222,7 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	
 	rk_xxx.setup("rk_xxx", 1, inputDim+timeDep, REAL, structWspace);
 	rk_kkk.setup("rk_kkk", rkOrder, NX+numX+NX*NU+numU, REAL, structWspace);
+	if(NX*(NX+NU) > numX+NX*NU+numU) rk_kkk.setup("rk_kkk", rkOrder, NX+NX*(NX+NU), REAL, structWspace);
 	rk_forward_sweep.setup("rk_sweep1", 1, grid.getNumIntervals()*rkOrder*NX*(NX+NU+1), REAL, structWspace);
 
 	if ( useOMP )
@@ -292,12 +293,12 @@ returnValue ForwardOverBackwardERKExport::setup( )
 		// load forward trajectory
 		loop2.addStatement( rk_xxx.getCols( 0,NX*(1+NX+NU) ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX*(1+NX+NU)-(run1+1)*NX*(1+NX+NU),(grid.getNumIntervals()-run)*rkOrder*NX*(1+NX+NU)-run1*NX*(1+NX+NU) ) );
 		loop2.addStatement( rk_xxx.getCols( NX*(1+NX+NU),NX*(2+NX+NU) ) == rk_eta.getCols( NX,NX*2 ) + Ah.getRow(run1)*rk_kkk.getCols(0,NX) );
-		loop2.addStatement( rk_xxx.getCols( NX*(2+NX+NU),rhsDim ) == rk_eta.getCols( NX*(2+NX+NU),rhsDim ) + Ah.getRow(run1)*rk_kkk.getCols(NX,rk_kkk.getNumCols()) );
+		loop2.addStatement( rk_xxx.getCols( NX*(2+NX+NU),rhsDim ) == rk_eta.getCols( NX*(2+NX+NU),rhsDim ) + Ah.getRow(run1)*rk_kkk.getCols(NX,NX+numX+NX*NU+numU) );
 		if( timeDependant ) loop2.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt - ((double)cc(run1))/grid.getNumIntervals() );
 		loop2.addFunctionCall( getNameDiffsRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop2.addStatement( rk_eta.getCols( NX,2*NX ) += b4h^rk_kkk.getCols(0,NX) );
-	loop2.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) += b4h^rk_kkk.getCols(NX,rk_kkk.getNumCols()) );
+	loop2.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) += b4h^rk_kkk.getCols(NX,NX+numX+NX*NU+numU) );
 	loop2.addStatement( rk_ttt -= DMatrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop: BACKWARD SWEEP
 	integrate.addStatement( loop2 );
