@@ -184,6 +184,15 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 	code.addFunction( evaluateStageCost );
 	code.addFunction( evaluateTerminalCost );
 
+	code.addFunction( evaluatePathConstraints );
+
+	for (unsigned i = 0; i < evaluatePointConstraints.size(); ++i)
+	{
+		if (evaluatePointConstraints[ i ] == 0)
+			continue;
+		code.addFunction( *evaluatePointConstraints[ i ] );
+	}
+
 	code.addFunction( setObjQ1Q2 );
 	code.addFunction( setObjR1R2 );
 	code.addFunction( setObjS1 );
@@ -229,15 +238,6 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 	code.addFunction( multHxC );
 	code.addFunction( multHxE );
 	code.addFunction( macHxd );
-
-	code.addFunction( evaluatePathConstraints );
-
-	for (unsigned i = 0; i < evaluatePointConstraints.size(); ++i)
-	{
-		if (evaluatePointConstraints[ i ] == 0)
-			continue;
-		code.addFunction( *evaluatePointConstraints[ i ] );
-	}
 
 	code.addFunction( condensePrep );
 	code.addFunction( condenseFdb );
