@@ -259,7 +259,7 @@ void @MODULE_NAME@_reconstruct_A(real_t *A, real_t *V, real_t *d) {
 }
 
 /* cutting regularization */
-void @MODULE_NAME@_regularize(real_t *A) {
+/*void @MODULE_NAME@_regularize(real_t *A) {
   int i;
   real_t V[DIM*DIM];
   real_t d[DIM];
@@ -271,10 +271,10 @@ void @MODULE_NAME@_regularize(real_t *A) {
   }
   
   @MODULE_NAME@_reconstruct_A(A, V, d);
-}
+}*/
 
 /* mirroring regularization */
-/*void @MODULE_NAME@_regularize(real_t *A) {
+void @MODULE_NAME@_regularize(real_t *A) {
   int i;
   real_t V[DIM*DIM];
   real_t d[DIM];
@@ -287,4 +287,4 @@ void @MODULE_NAME@_regularize(real_t *A) {
   }
   
   @MODULE_NAME@_reconstruct_A(A, V, d);
-}*/
+}
