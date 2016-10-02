@@ -225,6 +225,7 @@ class FeedbackLiftedIRKExport : public ForwardIRKExport
 		uint NF;
 
 		ExportVariable 	rk_kTemp;
+        ExportVariable  rk_dk1_tmp;
 
 };
 

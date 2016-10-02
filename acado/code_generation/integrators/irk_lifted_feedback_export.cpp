@@ -106,6 +106,8 @@ returnValue FeedbackLiftedIRKExport::getDataDeclarations(	ExportStatementBlock& 
 
 	declarations.addDeclaration( rk_kTemp,dataStruct );
 
+    declarations.addDeclaration( rk_dk1_tmp,dataStruct );
+
     return SUCCESSFUL_RETURN;
 }
 
@@ -217,6 +219,11 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 //	if( liftMode != 1 && liftMode != 4 ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 //	if( (ExportSensitivityType)sensGen == INEXACT && liftMode != 4 ) ACADOERROR( RET_INVALID_OPTION );
 
+    int liftMode = 1;
+    // liftMode == 1 --> EXACT LIFTING
+    // liftMode == 2 --> INEXACT LIFTING
+    if( (ExportSensitivityType)sensGen == INEXACT ) liftMode = 2;
+
 	if( CONTINUOUS_OUTPUT || NX2 > 0 || NX3 > 0 || NXA > 0 || !equidistantControlGrid() ) ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 	int useOMP;
@@ -236,7 +243,7 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	code.addLinebreak(2);
 
 	// export RK scheme
-	uint run5;
+	uint run5, run6;
 	std::string tempString;
 	
 	initializeDDMatrix();
@@ -371,9 +378,29 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	loopSens1.addStatement( loopSens2 );
 	loop->addStatement( loopSens1 );
 
+	// IF INEXACT: CONDENSE DIFFK INTO RK_DK1:
+	if( liftMode == 2 ) {
+	    ExportForLoop loopKsens0( i,0,NX );
+	    loopKsens0.addStatement( run1 == k_index+i );
+	    for( run5 = 0; run5 < numStages; run5++ ) {
+	        loopKsens0.addStatement( rk_dk1_tmp.getSubMatrix(run5*NX+i,run5*NX+i+1,0,NX+NU) == rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),run5,run5+1).getTranspose() );
+	        ExportForLoop loopKsens02( j,0,NF );
+	        loopKsens02.addStatement( tmp_index1 == (k_index+NX+j)*(NX+NU) );
+	        for( run6 = 0; run6 < numStages; run6++ ) {
+	            loopKsens02.addStatement( rk_dk1_tmp.getSubMatrix(run5*NX+i,run5*NX+i+1,0,NX+NU) += rk_dk1.getSubMatrix(run5*NX+i,run5*NX+i+1,NX+NU+run6*NF+j,NX+NU+run6*NF+j+1)*rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run6,run6+1).getTranspose() );
+	        }
+	        loopKsens0.addStatement( loopKsens02 );
+	    }
+	    loop->addStatement( loopKsens0 );
+	}
+
 	// PART 2: The static nonlinear system
+	if( liftMode == 2 ) {
+	    loop->addStatement( std::string("if(") + run.getName() + " == 0) {\n" );
+	}
 	DMatrix eyeMF = eye<double>(numStages*NF);
 	loop->addStatement( rk_A == eyeMF );
+	if( liftMode == 2 ) loop->addStatement( std::string("}\n") );
 	ExportForLoop loopF( i,0,numStages );
 	loopF.addStatement( rk_seed.getCols(0,NX+NF) == rk_stageValues.getCols(i*(NX+NF),(i+1)*(NX+NF)) );
 	DMatrix zeroV = zeros<double>(1,NX*(1+NX+NU+numStages*NF));
@@ -385,7 +412,11 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	ExportForLoop loopF1( j,0,NX );
 	loopF1.addStatement( run1 == k_index+j );
 	for( run5 = 0; run5 < numStages; run5++ ) {
-		loopF1.addStatement( rk_seed.getCols(2*NX+NF+j*(NX+NU),2*NX+NF+(j+1)*(NX+NU)) += Ah.getElement(i,run5)*(rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),run5,run5+1).getTranspose()) );
+	    if( liftMode == 1 ) {
+	        loopF1.addStatement( rk_seed.getCols(2*NX+NF+j*(NX+NU),2*NX+NF+(j+1)*(NX+NU)) += Ah.getElement(i,run5)*(rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),run5,run5+1).getTranspose()) );
+	    } else {
+	        loopF1.addStatement( rk_seed.getCols(2*NX+NF+j*(NX+NU),2*NX+NF+(j+1)*(NX+NU)) += Ah.getElement(i,run5)*rk_dk1_tmp.getSubMatrix(run5*NX+j,run5*NX+j+1,0,NX+NU) );
+	    }
 	}
 	loopF.addStatement( loopF1 );
 	ExportForLoop loopF2( j,0,NX );
@@ -399,13 +430,31 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		loopF.addStatement( rk_b.getRow(i*NF+run5) == rk_diffsTemp2.getSubMatrix(i,i+1,run5*(1+NX+NU+numStages*NF),run5*(1+NX+NU+numStages*NF)+1+NX+NU) );
 	}
 	loopF.addStatement( rk_b.getSubMatrix(i*NF,(i+1)*NF,0,1) -= rk_kkk.getSubMatrix(k_index+NX,k_index+NX+NF,i,i+1) );
-	for( run5 = 0; run5 < NF; run5++ ) {
-		loopF.addStatement( rk_A.getRow(i*NF+run5) -= rk_diffsTemp2.getSubMatrix(i,i+1,run5*(1+NX+NU+numStages*NF)+1+NX+NU,(run5+1)*(1+NX+NU+numStages*NF)) );
+
+	// INEXACT UPDATE OF RHS SENSITIVITIES
+	if( liftMode == 2 ) {
+	    ExportForLoop loopFsens( j,0,NF );
+	    loopFsens.addStatement( tmp_index1 == (k_index+NX+j)*(NX+NU) );
+        loopFsens.addStatement( tmp_index2 == i*NF+j );
+	    loopFsens.addStatement( rk_b.getSubMatrix(tmp_index2,tmp_index2+1,1,1+NX+NU) -= rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,i,i+1).getTranspose() );
+	    loopF.addStatement( loopFsens );
 	}
+
+	if( liftMode == 2 ) {
+	    loop->addStatement( std::string("if(") + run.getName() + " == 0) {\n" );
+	}
+	for( run5 = 0; run5 < NF; run5++ ) {
+	    loopF.addStatement( rk_A.getRow(i*NF+run5) -= rk_diffsTemp2.getSubMatrix(i,i+1,run5*(1+NX+NU+numStages*NF)+1+NX+NU,(run5+1)*(1+NX+NU+numStages*NF)) );
+	}
+	if( liftMode == 2 ) loop->addStatement( std::string("}\n") );
 	loop->addStatement( loopF );
 
 	// call the linear solver:
+	if( liftMode == 2 ) {
+	    loop->addStatement( std::string("if(") + run.getName() + " == 0) {\n" );
+	}
 	loop->addStatement( determinant.getFullName() + " = " + ExportStatement::fcnPrefix + "_" + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+	if( liftMode == 2 ) loop->addStatement( std::string("}\n") );
 	loop->addFunctionCall( solver->getNameSolveReuseFunction(),rk_A.getAddress(0,0),rk_b.getAddress(0,0),rk_auxSolver.getAddress(0,0) );
 
 	// update the F variables:
@@ -415,7 +464,11 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	ExportForLoop loopFsens( i,0,NF );
 	loopFsens.addStatement( tmp_index1 == (k_index+NX+i)*(NX+NU) );
 	for( run5 = 0; run5 < numStages; run5++ ) {
-		loopFsens.addStatement( rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run5,run5+1) == rk_b.getSubMatrix(run5*NF+i,run5*NF+i+1,1,1+NX+NU).getTranspose() );
+		if( liftMode == 1 ) {
+		    loopFsens.addStatement( rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run5,run5+1) == rk_b.getSubMatrix(run5*NF+i,run5*NF+i+1,1,1+NX+NU).getTranspose() );
+		} else {
+            loopFsens.addStatement( rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run5,run5+1) += rk_b.getSubMatrix(run5*NF+i,run5*NF+i+1,1,1+NX+NU).getTranspose() );
+        }
 	}
 	loop->addStatement( loopFsens );
 
@@ -429,7 +482,16 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	ExportForLoop loopKsens( i,0,NX );
 	loopKsens.addStatement( tmp_index1 == (k_index+i)*(NX+NU) );
 	for( run5 = 0; run5 < numStages; run5++ ) {
-		loopKsens.addStatement( rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run5,run5+1) += (rk_b.getCols(1,1+NX+NU).getTranspose())*(rk_dk1.getSubMatrix(run5*NX+i,run5*NX+i+1,NX+NU,NX+NU+numStages*NF).getTranspose()) );
+	    if( liftMode == 1 ) {
+	        loopKsens.addStatement( rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run5,run5+1) += (rk_b.getCols(1,1+NX+NU).getTranspose())*(rk_dk1.getSubMatrix(run5*NX+i,run5*NX+i+1,NX+NU,NX+NU+numStages*NF).getTranspose()) );
+	    } else {
+	        ExportForLoop loopKsens03( j,0,NF );
+	        loopKsens03.addStatement( tmp_index2 == (k_index+NX+j)*(NX+NU) );
+	        for( run6 = 0; run6 < numStages; run6++ ) {
+	            loopKsens03.addStatement( rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run5,run5+1) += rk_diffK.getSubMatrix(tmp_index2,tmp_index2+NX+NU,run6,run6+1)*rk_dk1.getElement(run5*NX+i,NX+NU+run6*NF+j) );
+	        }
+	        loopKsens.addStatement( loopKsens03 );
+	    }
 	}
 	loop->addStatement( loopKsens );
 	// update rk_diffsNew with the new sensitivities:
@@ -608,6 +670,15 @@ returnValue FeedbackLiftedIRKExport::setup( )
 
 	rk_A = ExportVariable( "rk_A", numStages*NF, numStages*NF, REAL, structWspace );
 	rk_b = ExportVariable( "rk_b", numStages*NF, 1+NX+NU, REAL, structWspace );
+
+    int liftMode = 1;
+    // liftMode == 1 --> EXACT LIFTING
+    // liftMode == 2 --> INEXACT LIFTING
+    int sensGen;
+    get( DYNAMIC_SENSITIVITY, sensGen );
+    if( (ExportSensitivityType)sensGen == INEXACT ) liftMode = 2;
+
+	if( liftMode == 2 ) rk_dk1_tmp = ExportVariable( "rk_dk1_tmp", numStages*NX1, NX+NU, REAL, ACADO_WORKSPACE );
 
 	return SUCCESSFUL_RETURN;
 }
