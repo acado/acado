@@ -144,7 +144,8 @@ class FeedbackLiftedIRKExport : public ForwardIRKExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		virtual returnValue prepareInputSystem(	ExportStatementBlock& code );
+		returnValue setInputSystem( );
+        returnValue prepareInputSystem( ExportStatementBlock& code );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the linear input system.
@@ -202,7 +203,7 @@ class FeedbackLiftedIRKExport : public ForwardIRKExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		ExportVariable getAuxVariable() const;
+		virtual ExportVariable getAuxVariable() const;
 
 
     protected:
@@ -226,6 +227,10 @@ class FeedbackLiftedIRKExport : public ForwardIRKExport
 
 		ExportVariable 	rk_kTemp;
         ExportVariable  rk_dk1_tmp;
+
+        ExportAcadoFunction sens_input;
+        ExportAcadoFunction sens_fdb;
+        ExportVariable  rk_sensF;
 
 };
 

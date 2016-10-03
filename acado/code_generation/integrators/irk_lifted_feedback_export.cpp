@@ -86,6 +86,12 @@ ExportVariable FeedbackLiftedIRKExport::getAuxVariable() const
 		if( feedb.getGlobalExportVariable().getDim() >= max.getDim() ) {
 			max = feedb.getGlobalExportVariable();
 		}
+        if( sens_input.getGlobalExportVariable().getDim() >= max.getDim() ) {
+            max = sens_input.getGlobalExportVariable();
+        }
+        if( sens_fdb.getGlobalExportVariable().getDim() >= max.getDim() ) {
+            max = sens_fdb.getGlobalExportVariable();
+        }
 	}
 	return max;
 }
@@ -108,6 +114,8 @@ returnValue FeedbackLiftedIRKExport::getDataDeclarations(	ExportStatementBlock& 
 
     declarations.addDeclaration( rk_dk1_tmp,dataStruct );
 
+    declarations.addDeclaration( rk_sensF,dataStruct );
+
     return SUCCESSFUL_RETURN;
 }
 
@@ -118,6 +126,8 @@ returnValue FeedbackLiftedIRKExport::getFunctionDeclarations(	ExportStatementBlo
 	ForwardIRKExport::getFunctionDeclarations( declarations );
 	declarations.addDeclaration( lin_input );
 	declarations.addDeclaration( feedb );
+    declarations.addDeclaration( sens_input );
+    declarations.addDeclaration( sens_fdb );
 
     return SUCCESSFUL_RETURN;
 }
@@ -168,12 +178,69 @@ returnValue FeedbackLiftedIRKExport::setNonlinearFeedback( const DMatrix& C, con
 }
 
 
-returnValue FeedbackLiftedIRKExport::prepareInputSystem(	ExportStatementBlock& code )
+returnValue FeedbackLiftedIRKExport::setInputSystem( )
 {
+    LOG( LVL_DEBUG ) << "Integrator: setInputSystem... " << endl;
+    if( NX1 > 0 ) {
+        DMatrix mat1 = formMatrix( M11, A11 );
+
+        uint j;
+        DMatrix Amat = A11;
+        for( j = 1; j < numStages; j++ ) {
+            Amat.appendRows(A11);
+        }
+        DMatrix sol = mat1*Amat;
+        DMatrix sens = sol;
+
+        DMatrix Bmat = B11;
+        for( j = 1; j < numStages; j++ ) {
+            Bmat.appendRows(B11);
+        }
+        DMatrix solb = mat1*Bmat;
+        sens.appendCols(solb);
+
+        for( j = 0; j < numStages; j++ ) {
+            DMatrix solc = mat1.getCols(j*NX1,(j+1)*NX1-1)*C11;
+            sens.appendCols(solc);
+        }
+
+        // SENS_INPUT:
+        DifferentialState dummy;
+        dummy.clearStaticCounters();
+
+        DifferentialState sX("", NX,NX+NU);
+
+        DMatrix u_mat = zeros<double>(numStages*NX,NX);
+        u_mat.appendCols(sens.getCols(NX,NX+NU-1));
+        OutputFcn sens_input_;
+        sens_input_ << sens.getCols(0,NX-1)*sX+u_mat;
+
+        sens_input.init(sens_input_, "acado_sens_input", NX*(NX+NU), NXA, NU);
+
+        // SENS_FEEDBACK:
+        DifferentialState dummy2;
+        dummy2.clearStaticCounters();
+
+        DifferentialState sF("", numStages*NF,NX+NU);
+
+        OutputFcn sens_fdb_;
+        sens_fdb_ << sens.getCols(NX+NU,NX+NU+numStages*NF-1)*sF;
+
+        sens_fdb.init(sens_fdb_, "acado_sens_fdb", numStages*NF*(NX+NU), NXA, NU);
+    }
+    LOG( LVL_DEBUG ) << "done!" << endl;
+
+    return SUCCESSFUL_RETURN;
+}
+
+
+returnValue FeedbackLiftedIRKExport::prepareInputSystem( ExportStatementBlock& code )
+{
+    LOG( LVL_DEBUG ) << "Integrator: prepareInputSystem... " << endl;
 	if( NX1 > 0 ) {
 		DMatrix mat1 = formMatrix( M11, A11 );
 		rk_mat1 = ExportVariable( "rk_mat1", mat1, STATIC_CONST_REAL );
-		code.addDeclaration( rk_mat1 );
+        code.addDeclaration( rk_mat1 );
 		// TODO: Ask Milan why this does NOT work properly !!
 		rk_mat1 = ExportVariable( "rk_mat1", numStages*NX1, numStages*NX1, STATIC_CONST_REAL, ACADO_LOCAL );
 
@@ -197,10 +264,11 @@ returnValue FeedbackLiftedIRKExport::prepareInputSystem(	ExportStatementBlock& c
 			sens.appendCols(solc);
 		}
 		rk_dk1 = ExportVariable( "rk_dk1", sens, STATIC_CONST_REAL );
-		code.addDeclaration( rk_dk1 );
+        code.addDeclaration( rk_dk1 );
 		// TODO: Ask Milan why this does NOT work properly !!
 		rk_dk1 = ExportVariable( "rk_dk1", numStages*NX1, NX1+NU+numStages*NF, STATIC_CONST_REAL, ACADO_LOCAL );
 	}
+    LOG( LVL_DEBUG ) << "done!" << endl;
 
 	return SUCCESSFUL_RETURN;
 }
@@ -367,31 +435,42 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 
 	// PART 1: The linear input system
 	prepareInputSystem( code );
+    code.addStatement( "\n\n" );
+    code.addFunction( sens_input );
+    code.addStatement( "\n\n" );
+    code.addFunction( sens_fdb );
+    code.addStatement( "\n\n" );
+
 	solveInputSystem( loop, i, run1, j, k_index, Ah );
 	// propagate sensitivities:
+    loop->addFunctionCall( sens_input.getName(), rk_diffsPrev1, rk_dk1_tmp );
 	ExportForLoop loopSens1( i,0,numStages );
 	ExportForLoop loopSens2( j,0,NX );
 	loopSens2.addStatement( run1 == k_index+j );
 	loopSens2.addStatement( tmp_index1 == i*NX+j );
-	loopSens2.addStatement( rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),i,i+1) == (rk_diffsPrev1.getTranspose())*(rk_dk1.getSubMatrix(tmp_index1,tmp_index1+1,0,NX).getTranspose()) );
-	loopSens2.addStatement( rk_diffK.getSubMatrix(run1*(NX+NU)+NX,run1*(NX+NU)+NX+NU,i,i+1) += rk_dk1.getSubMatrix(tmp_index1,tmp_index1+1,NX,NX+NU).getTranspose() );
+//	loopSens2.addStatement( rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),i,i+1) == (rk_diffsPrev1.getTranspose())*(rk_dk1.getSubMatrix(tmp_index1,tmp_index1+1,0,NX).getTranspose()) );
+//	loopSens2.addStatement( rk_diffK.getSubMatrix(run1*(NX+NU)+NX,run1*(NX+NU)+NX+NU,i,i+1) += rk_dk1.getSubMatrix(tmp_index1,tmp_index1+1,NX,NX+NU).getTranspose() );
+	loopSens2.addStatement( rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),i,i+1) == rk_dk1_tmp.getRow(tmp_index1).getTranspose() );
 	loopSens1.addStatement( loopSens2 );
 	loop->addStatement( loopSens1 );
 
 	// IF INEXACT: CONDENSE DIFFK INTO RK_DK1:
 	if( liftMode == 2 ) {
-	    ExportForLoop loopKsens0( i,0,NX );
-	    loopKsens0.addStatement( run1 == k_index+i );
-	    for( run5 = 0; run5 < numStages; run5++ ) {
-	        loopKsens0.addStatement( rk_dk1_tmp.getSubMatrix(run5*NX+i,run5*NX+i+1,0,NX+NU) == rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),run5,run5+1).getTranspose() );
-	        ExportForLoop loopKsens02( j,0,NF );
-	        loopKsens02.addStatement( tmp_index1 == (k_index+NX+j)*(NX+NU) );
-	        for( run6 = 0; run6 < numStages; run6++ ) {
-	            loopKsens02.addStatement( rk_dk1_tmp.getSubMatrix(run5*NX+i,run5*NX+i+1,0,NX+NU) += rk_dk1.getSubMatrix(run5*NX+i,run5*NX+i+1,NX+NU+run6*NF+j,NX+NU+run6*NF+j+1)*rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run6,run6+1).getTranspose() );
-	        }
-	        loopKsens0.addStatement( loopKsens02 );
+	    ExportForLoop loopKsens02( j,0,NF );
+	    loopKsens02.addStatement( tmp_index1 == (k_index+NX+j)*(NX+NU) );
+	    for( run6 = 0; run6 < numStages; run6++ ) {
+	        //	            loopKsens02.addStatement( rk_dk1_tmp.getSubMatrix(run5*NX+i,run5*NX+i+1,0,NX+NU) += rk_dk1.getSubMatrix(run5*NX+i,run5*NX+i+1,NX+NU+run6*NF+j,NX+NU+run6*NF+j+1)*rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run6,run6+1).getTranspose() );
+	        loopKsens02.addStatement( rk_sensF.getRow(run6*NF+j) == rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run6,run6+1).getTranspose() );
 	    }
-	    loop->addStatement( loopKsens0 );
+	    loop->addStatement( loopKsens02 );
+	    loop->addFunctionCall( sens_fdb.getName(), rk_sensF, rk_dk1_tmp );
+
+        ExportForLoop loopKsens04( i,0,NX );
+        loopKsens04.addStatement( run1 == k_index+i );
+        for( run5 = 0; run5 < numStages; run5++ ) {
+            loopKsens04.addStatement( rk_dk1_tmp.getSubMatrix(run5*NX+i,run5*NX+i+1,0,NX+NU) += rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),run5,run5+1).getTranspose() );
+        }
+        loop->addStatement( loopKsens04 );
 	}
 
 	// PART 2: The static nonlinear system
@@ -479,21 +558,23 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 		loop->addStatement( rk_kkk.getSubMatrix(k_index,k_index+NX,run5,run5+1) += rk_kTemp.getRows(run5*NX,(run5+1)*NX) );
 		loop->addStatement( rk_kkk.getSubMatrix(k_index,k_index+NX,run5,run5+1) += rk_dk1.getSubMatrix(run5*NX,(run5+1)*NX,NX+NU,NX+NU+numStages*NF)*rk_b.getCol(0) );
 	}
-	ExportForLoop loopKsens( i,0,NX );
-	loopKsens.addStatement( tmp_index1 == (k_index+i)*(NX+NU) );
-	for( run5 = 0; run5 < numStages; run5++ ) {
-	    if( liftMode == 1 ) {
-	        loopKsens.addStatement( rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run5,run5+1) += (rk_b.getCols(1,1+NX+NU).getTranspose())*(rk_dk1.getSubMatrix(run5*NX+i,run5*NX+i+1,NX+NU,NX+NU+numStages*NF).getTranspose()) );
-	    } else {
-	        ExportForLoop loopKsens03( j,0,NF );
-	        loopKsens03.addStatement( tmp_index2 == (k_index+NX+j)*(NX+NU) );
-	        for( run6 = 0; run6 < numStages; run6++ ) {
-	            loopKsens03.addStatement( rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run5,run5+1) += rk_diffK.getSubMatrix(tmp_index2,tmp_index2+NX+NU,run6,run6+1)*rk_dk1.getElement(run5*NX+i,NX+NU+run6*NF+j) );
-	        }
-	        loopKsens.addStatement( loopKsens03 );
-	    }
+
+	ExportForLoop loopKsens03( j,0,NF );
+	loopKsens03.addStatement( tmp_index2 == (k_index+NX+j)*(NX+NU) );
+	for( run6 = 0; run6 < numStages; run6++ ) {
+	    //	            loopKsens03.addStatement( rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run5,run5+1) += rk_diffK.getSubMatrix(tmp_index2,tmp_index2+NX+NU,run6,run6+1)*rk_dk1.getElement(run5*NX+i,NX+NU+run6*NF+j) );
+	    loopKsens03.addStatement( rk_sensF.getRow(run6*NF+j) == rk_diffK.getSubMatrix(tmp_index2,tmp_index2+NX+NU,run6,run6+1).getTranspose() );
 	}
-	loop->addStatement( loopKsens );
+	loop->addStatement( loopKsens03 );
+
+	loop->addFunctionCall( sens_fdb.getName(), rk_sensF, rk_dk1_tmp );
+    for( run5 = 0; run5 < numStages; run5++ ) {
+        ExportForLoop loopKsens( i,0,NX );
+        loopKsens.addStatement( tmp_index1 == (k_index+i)*(NX+NU) );
+        loopKsens.addStatement( rk_diffK.getSubMatrix(tmp_index1,tmp_index1+NX+NU,run5,run5+1) += rk_dk1_tmp.getRow(run5*NX+i).getTranspose() );
+        loop->addStatement( loopKsens );
+    }
+
 	// update rk_diffsNew with the new sensitivities:
 	ExportForLoop loopKsens1( i,0,NX );
 	loopKsens1.addStatement( tmp_index1 == (k_index+i)*(NX+NU) );
@@ -671,16 +752,11 @@ returnValue FeedbackLiftedIRKExport::setup( )
 	rk_A = ExportVariable( "rk_A", numStages*NF, numStages*NF, REAL, structWspace );
 	rk_b = ExportVariable( "rk_b", numStages*NF, 1+NX+NU, REAL, structWspace );
 
-    int liftMode = 1;
-    // liftMode == 1 --> EXACT LIFTING
-    // liftMode == 2 --> INEXACT LIFTING
-    int sensGen;
-    get( DYNAMIC_SENSITIVITY, sensGen );
-    if( (ExportSensitivityType)sensGen == INEXACT ) liftMode = 2;
+	rk_dk1_tmp = ExportVariable( "rk_dk1_tmp", numStages*NX1, NX+NU, REAL, ACADO_WORKSPACE );
 
-	if( liftMode == 2 ) rk_dk1_tmp = ExportVariable( "rk_dk1_tmp", numStages*NX1, NX+NU, REAL, ACADO_WORKSPACE );
+    rk_sensF = ExportVariable( "rk_sensF", numStages*NF, NX+NU, REAL, structWspace );
 
-	return SUCCESSFUL_RETURN;
+	return setInputSystem( );
 }
 
 
