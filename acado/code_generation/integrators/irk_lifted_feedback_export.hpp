@@ -145,7 +145,7 @@ class FeedbackLiftedIRKExport : public ForwardIRKExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue setInputSystem( );
-        returnValue prepareInputSystem( ExportStatementBlock& code );
+//        returnValue prepareInputSystem( ExportStatementBlock& code );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the linear input system.
@@ -224,6 +224,8 @@ class FeedbackLiftedIRKExport : public ForwardIRKExport
 		ExportAcadoFunction feedb;
 		DMatrix C11;
 		uint NF;
+
+        DMatrix mat1, sensMat;
 
 		ExportVariable 	rk_kTemp;
         ExportVariable  rk_dk1_tmp;

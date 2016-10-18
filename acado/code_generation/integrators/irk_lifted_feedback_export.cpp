@@ -158,6 +158,7 @@ returnValue FeedbackLiftedIRKExport::setNonlinearFeedback( const DMatrix& C, con
 
 	DifferentialEquation fun_input;
 	fun_input << A11*x+B11*u+C11*f;
+//    fun_input << A11*x+B11*u+C11*f - M11*;
 	lin_input.init(fun_input, "acado_linear_input", NX+NF, NXA, NU);
 
 	DifferentialState seed("", NX, 1);
@@ -182,7 +183,7 @@ returnValue FeedbackLiftedIRKExport::setInputSystem( )
 {
     LOG( LVL_DEBUG ) << "Integrator: setInputSystem... " << endl;
     if( NX1 > 0 ) {
-        DMatrix mat1 = formMatrix( M11, A11 );
+        mat1 = formMatrix( M11, A11 );
 
         uint j;
         DMatrix Amat = A11;
@@ -190,18 +191,18 @@ returnValue FeedbackLiftedIRKExport::setInputSystem( )
             Amat.appendRows(A11);
         }
         DMatrix sol = mat1*Amat;
-        DMatrix sens = sol;
+        sensMat = sol;
 
         DMatrix Bmat = B11;
         for( j = 1; j < numStages; j++ ) {
             Bmat.appendRows(B11);
         }
         DMatrix solb = mat1*Bmat;
-        sens.appendCols(solb);
+        sensMat.appendCols(solb);
 
         for( j = 0; j < numStages; j++ ) {
             DMatrix solc = mat1.getCols(j*NX1,(j+1)*NX1-1)*C11;
-            sens.appendCols(solc);
+            sensMat.appendCols(solc);
         }
 
         // SENS_INPUT:
@@ -211,9 +212,9 @@ returnValue FeedbackLiftedIRKExport::setInputSystem( )
         DifferentialState sX("", NX,NX+NU);
 
         DMatrix u_mat = zeros<double>(numStages*NX,NX);
-        u_mat.appendCols(sens.getCols(NX,NX+NU-1));
+        u_mat.appendCols(sensMat.getCols(NX,NX+NU-1));
         OutputFcn sens_input_;
-        sens_input_ << sens.getCols(0,NX-1)*sX+u_mat;
+        sens_input_ << sensMat.getCols(0,NX-1)*sX+u_mat;
 
         sens_input.init(sens_input_, "acado_sens_input", NX*(NX+NU), NXA, NU);
 
@@ -224,9 +225,11 @@ returnValue FeedbackLiftedIRKExport::setInputSystem( )
         DifferentialState sF("", numStages*NF,NX+NU);
 
         OutputFcn sens_fdb_;
-        sens_fdb_ << sens.getCols(NX+NU,NX+NU+numStages*NF-1)*sF;
+        sens_fdb_ << sensMat.getCols(NX+NU,NX+NU+numStages*NF-1)*sF;
 
         sens_fdb.init(sens_fdb_, "acado_sens_fdb", numStages*NF*(NX+NU), NXA, NU);
+
+        sensMat = sensMat.getCols(NX+NU,NX+NU+numStages*NF-1);
     }
     LOG( LVL_DEBUG ) << "done!" << endl;
 
@@ -234,44 +237,44 @@ returnValue FeedbackLiftedIRKExport::setInputSystem( )
 }
 
 
-returnValue FeedbackLiftedIRKExport::prepareInputSystem( ExportStatementBlock& code )
-{
-    LOG( LVL_DEBUG ) << "Integrator: prepareInputSystem... " << endl;
-	if( NX1 > 0 ) {
-		DMatrix mat1 = formMatrix( M11, A11 );
-		rk_mat1 = ExportVariable( "rk_mat1", mat1, STATIC_CONST_REAL );
-        code.addDeclaration( rk_mat1 );
-		// TODO: Ask Milan why this does NOT work properly !!
-		rk_mat1 = ExportVariable( "rk_mat1", numStages*NX1, numStages*NX1, STATIC_CONST_REAL, ACADO_LOCAL );
-
-		uint j;
-		DMatrix Amat = A11;
-		for( j = 1; j < numStages; j++ ) {
-			Amat.appendRows(A11);
-		}
-		DMatrix sol = mat1*Amat;
-		DMatrix sens = sol;
-
-		DMatrix Bmat = B11;
-		for( j = 1; j < numStages; j++ ) {
-			Bmat.appendRows(B11);
-		}
-		DMatrix solb = mat1*Bmat;
-		sens.appendCols(solb);
-
-		for( j = 0; j < numStages; j++ ) {
-			DMatrix solc = mat1.getCols(j*NX1,(j+1)*NX1-1)*C11;
-			sens.appendCols(solc);
-		}
-		rk_dk1 = ExportVariable( "rk_dk1", sens, STATIC_CONST_REAL );
-        code.addDeclaration( rk_dk1 );
-		// TODO: Ask Milan why this does NOT work properly !!
-		rk_dk1 = ExportVariable( "rk_dk1", numStages*NX1, NX1+NU+numStages*NF, STATIC_CONST_REAL, ACADO_LOCAL );
-	}
-    LOG( LVL_DEBUG ) << "done!" << endl;
-
-	return SUCCESSFUL_RETURN;
-}
+//returnValue FeedbackLiftedIRKExport::prepareInputSystem( ExportStatementBlock& code )
+//{
+//    LOG( LVL_DEBUG ) << "Integrator: prepareInputSystem... " << endl;
+//	if( NX1 > 0 ) {
+//		DMatrix mat1 = formMatrix( M11, A11 );
+//		rk_mat1 = ExportVariable( "rk_mat1", mat1, STATIC_CONST_REAL, ACADO_LOCAL, true );
+////        code.addDeclaration( rk_mat1 );
+////		// TODO: Ask Milan why this does NOT work properly !!
+////		rk_mat1 = ExportVariable( "rk_mat1", numStages*NX1, numStages*NX1, STATIC_CONST_REAL, ACADO_LOCAL );
+//
+//		uint j;
+//		DMatrix Amat = A11;
+//		for( j = 1; j < numStages; j++ ) {
+//			Amat.appendRows(A11);
+//		}
+//		DMatrix sol = mat1*Amat;
+//		DMatrix sens = sol;
+//
+//		DMatrix Bmat = B11;
+//		for( j = 1; j < numStages; j++ ) {
+//			Bmat.appendRows(B11);
+//		}
+//		DMatrix solb = mat1*Bmat;
+//		sens.appendCols(solb);
+//
+//		for( j = 0; j < numStages; j++ ) {
+//			DMatrix solc = mat1.getCols(j*NX1,(j+1)*NX1-1)*C11;
+//			sens.appendCols(solc);
+//		}
+//		rk_dk1 = ExportVariable( "rk_dk1", sens, STATIC_CONST_REAL, ACADO_LOCAL, true );
+////        code.addDeclaration( rk_dk1 );
+////		// TODO: Ask Milan why this does NOT work properly !!
+////		rk_dk1 = ExportVariable( "rk_dk1", numStages*NX1, NX1+NU+numStages*NF, STATIC_CONST_REAL, ACADO_LOCAL );
+//	}
+//    LOG( LVL_DEBUG ) << "done!" << endl;
+//
+//	return SUCCESSFUL_RETURN;
+//}
 
 
 returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
@@ -311,7 +314,7 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	code.addLinebreak(2);
 
 	// export RK scheme
-	uint run5, run6;
+	uint run5, run6, run7;
 	std::string tempString;
 	
 	initializeDDMatrix();
@@ -434,8 +437,8 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	evaluateAllStatesImplicitSystem( loop, k_index, Ah, C, run1, j, tmp_index1 );
 
 	// PART 1: The linear input system
-	prepareInputSystem( code );
-    code.addStatement( "\n\n" );
+//	prepareInputSystem( code );
+//    code.addStatement( "\n\n" );
     code.addFunction( sens_input );
     code.addStatement( "\n\n" );
     code.addFunction( sens_fdb );
@@ -498,12 +501,14 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	    }
 	}
 	loopF.addStatement( loopF1 );
-	ExportForLoop loopF2( j,0,NX );
-	for( run5 = 0; run5 < numStages; run5++ ) {
-		loopF2.addStatement( tmp_index1 == run5*NX+j );
-		loopF2.addStatement( rk_seed.getCols(2*NX+NF+NX*(NX+NU)+j*(numStages*NF),2*NX+NF+NX*(NX+NU)+(j+1)*(numStages*NF)) += Ah.getElement(i,run5)*rk_dk1.getSubMatrix(tmp_index1,tmp_index1+1,NX+NU,NX+NU+numStages*NF) );
+	for( run6 = 0; run6 < NX; run6++ ) {
+	    for( run5 = 0; run5 < numStages; run5++ ) {
+//	        loopF.addStatement( rk_seed.getCols(2*NX+NF+NX*(NX+NU)+run6*(numStages*NF),2*NX+NF+NX*(NX+NU)+(run6+1)*(numStages*NF)) += Ah.getElement(i,run5)*rk_dk1.getSubMatrix(run5*NX+run6,run5*NX+run6+1,NX+NU,NX+NU+numStages*NF) );
+	        for( run7 = 0; run7 < numStages*NF; run7++ ) {
+	            if( sensMat(run5*NX+run6,run7) != 0 ) loopF.addStatement( rk_seed.getCol(2*NX+NF+NX*(NX+NU)+run6*(numStages*NF)+run7) += sensMat(run5*NX+run6,run7)*Ah.getElement(i,run5) );
+	        }
+	    }
 	}
-	loopF.addStatement( loopF2 );
 	loopF.addFunctionCall( feedb.getName(), rk_seed, rk_diffsTemp2.getAddress(i,0) );
 	for( run5 = 0; run5 < NF; run5++ ) {
 		loopF.addStatement( rk_b.getRow(i*NF+run5) == rk_diffsTemp2.getSubMatrix(i,i+1,run5*(1+NX+NU+numStages*NF),run5*(1+NX+NU+numStages*NF)+1+NX+NU) );
@@ -556,7 +561,7 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	// update the K variables:
 	for( run5 = 0; run5 < numStages; run5++ ) {
 		loop->addStatement( rk_kkk.getSubMatrix(k_index,k_index+NX,run5,run5+1) += rk_kTemp.getRows(run5*NX,(run5+1)*NX) );
-		loop->addStatement( rk_kkk.getSubMatrix(k_index,k_index+NX,run5,run5+1) += rk_dk1.getSubMatrix(run5*NX,(run5+1)*NX,NX+NU,NX+NU+numStages*NF)*rk_b.getCol(0) );
+		loop->addStatement( rk_kkk.getSubMatrix(k_index,k_index+NX,run5,run5+1) += sensMat.getRows(run5*NX,(run5+1)*NX-1)*rk_b.getCol(0) );
 	}
 
 	ExportForLoop loopKsens03( j,0,NF );
@@ -623,11 +628,12 @@ returnValue FeedbackLiftedIRKExport::solveInputSystem( ExportStatementBlock* blo
 	if( NX1 > 0 ) {
 		ExportForLoop loop( index1,0,numStages );
 		loop.addStatement( rk_xxx.getCols(0,NX+NF) == rk_stageValues.getCols(index1*(NX+NF),(index1+1)*(NX+NF)) );
+//        loop.addStatement( rk_xxx.getCols(NX+NF,2*NX+NF) == rk_kkk.getSubMatrix(k_index,k_index+NX,index1,index1+1) );
 		loop.addFunctionCall( lin_input.getName(), rk_xxx, rk_rhsTemp.getAddress(index1*NX,0) );
 		loop.addStatement( rk_rhsTemp.getRows(index1*NX,(index1+1)*NX) -= rk_kkk.getSubMatrix(k_index,k_index+NX,index1,index1+1) );
 		block->addStatement(loop);
 
-		block->addStatement( rk_kTemp == rk_mat1*rk_rhsTemp );
+		block->addStatement( rk_kTemp == mat1*rk_rhsTemp );
 	}
 
 	return SUCCESSFUL_RETURN;
