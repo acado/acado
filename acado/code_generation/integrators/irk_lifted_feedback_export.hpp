@@ -145,7 +145,7 @@ class FeedbackLiftedIRKExport : public ForwardIRKExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		returnValue setInputSystem( );
-//        returnValue prepareInputSystem( ExportStatementBlock& code );
+        returnValue prepareInputSystem( ExportStatementBlock& code );
 
 
 		/** Exports the code needed to solve the system of collocation equations for the linear input system.
@@ -174,23 +174,6 @@ class FeedbackLiftedIRKExport : public ForwardIRKExport
 		 *	\return SUCCESSFUL_RETURN
 		 */
 		virtual returnValue evaluateAllStatesImplicitSystem( 	ExportStatementBlock* block,
-											const ExportIndex& k_index,
-											const ExportVariable& Ah,
-											const ExportVariable& C,
-											const ExportIndex& stage,
-											const ExportIndex& i,
-											const ExportIndex& tmp_index );
-
-
-		/** Exports the evaluation of the states at a specific stage.
-		 *
-		 *	@param[in] block			The block to which the code will be exported.
-		 *	@param[in] Ah				The matrix A of the IRK method, multiplied by the step size h.
-		 *	@param[in] index			The loop index, defining the stage.
-		 *
-		 *	\return SUCCESSFUL_RETURN
-		 */
-		virtual returnValue evaluateStatesImplicitSystem( 	ExportStatementBlock* block,
 											const ExportIndex& k_index,
 											const ExportVariable& Ah,
 											const ExportVariable& C,

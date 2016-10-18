@@ -141,8 +141,13 @@ returnValue FeedbackLiftedIRKExport::setNonlinearFeedback( const DMatrix& C, con
 	NF = C.getNumCols();
 	C11 = C;
 
-	OutputFcn fdb_;
-//	if( fdb_.getNDX() > 0 || fdb_.getNU() > 0 || fdb_.getNP() > 0 || fdb_.getNOD() > 0  || fdb_.getNXA() > 0 ) return RET_NOT_IMPLEMENTED_YET;
+	OutputFcn feedb_expr;
+	feedb_expr << feedb_;
+
+	if( feedb_expr.getNP() > 0 || feedb_expr.getNXA() > 0 ) return RET_NOT_IMPLEMENTED_YET;
+
+    NDX2 = feedb_expr.getNDX();
+    if( NDX2 > 0 ) NDX2 = NX;
 
 	OnlineData        dummy0;
 	Control           dummy1;
@@ -154,12 +159,17 @@ returnValue FeedbackLiftedIRKExport::setNonlinearFeedback( const DMatrix& C, con
 	u = Control("", NU, 1);
 	od = OnlineData("", NOD, 1);
 
+    DifferentialStateDerivative dummy4;
+    dummy4.clearStaticCounters();
+
+    dx = DifferentialStateDerivative("", NX, 1);
+
 	DifferentialState f("", NF, 1);
 
 	DifferentialEquation fun_input;
-	fun_input << A11*x+B11*u+C11*f;
-//    fun_input << A11*x+B11*u+C11*f - M11*;
-	lin_input.init(fun_input, "acado_linear_input", NX+NF, NXA, NU);
+//	fun_input << A11*x+B11*u+C11*f;
+    fun_input << A11*x+B11*u+C11*f - M11*dx;
+	lin_input.init(fun_input, "acado_linear_input", NX+NF, NXA, NU, 0, NX, NOD);
 
 	DifferentialState seed("", NX, 1);
 	DifferentialState sX("", NX,NX+NU);
@@ -167,15 +177,41 @@ returnValue FeedbackLiftedIRKExport::setNonlinearFeedback( const DMatrix& C, con
 	Expression Gx = sX.getCols(0,NX);
 	Expression Gu = sX.getCols(NX,NX+NU);
 
+	Expression seedK;
+    Expression GKf;
+    Expression GKx;
+    Expression GKu;
+
+	if( NDX2 > 0 ) {
+	    seedK = DifferentialState("", NDX2, 1);
+        DifferentialState sKX("", NDX2,NX+NU);
+        GKf = DifferentialState("", NDX2,numStages*NF);
+        GKx = sKX.getCols(0,NX);
+        GKu = sKX.getCols(NX,NX+NU);
+	}
+
+    OutputFcn fdb_;
 	for( uint i = 0; i < feedb_.getDim(); i++ ) {
-		fdb_ << feedb_(i) + forwardDerivative( feedb_(i), x, seed );
-		fdb_ << multipleForwardDerivative( feedb_(i), x, Gx );
-		fdb_ << multipleForwardDerivative( feedb_(i), x, Gu ) + forwardDerivative( feedb_(i), u );
-		fdb_ << multipleForwardDerivative( feedb_(i), x, Gf );
+	    if( NDX2 > 0 ) {
+	        fdb_ << feedb_(i) + forwardDerivative( feedb_(i), x, seed ) + forwardDerivative( feedb_(i), dx, seedK );
+		    fdb_ << multipleForwardDerivative( feedb_(i), x, Gx ) + multipleForwardDerivative( feedb_(i), dx, GKx );
+		    fdb_ << multipleForwardDerivative( feedb_(i), x, Gu ) + forwardDerivative( feedb_(i), u ) + multipleForwardDerivative( feedb_(i), dx, GKu );
+		    fdb_ << multipleForwardDerivative( feedb_(i), x, Gf ) + multipleForwardDerivative( feedb_(i), dx, GKf );
+	    }
+	    else {
+	        fdb_ << feedb_(i) + forwardDerivative( feedb_(i), x, seed );
+	        fdb_ << multipleForwardDerivative( feedb_(i), x, Gx );
+	        fdb_ << multipleForwardDerivative( feedb_(i), x, Gu ) + forwardDerivative( feedb_(i), u );
+	        fdb_ << multipleForwardDerivative( feedb_(i), x, Gf );
+	    }
 	}
 	LOG( LVL_DEBUG ) << "done!" << endl;
 
-	return feedb.init(fdb_, "acado_feedback", NX+NF+NX*(1+NX+NU+numStages*NF), NXA, NU, NP, NDX, NOD);
+	if( NDX2 == 0 ) {
+	    return feedb.init(fdb_, "acado_feedback", NX+NF+NX*(1+NX+NU+numStages*NF), NXA, NU, NP, NX, NOD);
+	} else {
+	    return feedb.init(fdb_, "acado_feedback", NX+NF+NX*(1+NX+NU+numStages*NF)+NDX2*(1+NX+NU+numStages*NF), NXA, NU, NP, NX, NOD);
+	}
 }
 
 
@@ -237,44 +273,46 @@ returnValue FeedbackLiftedIRKExport::setInputSystem( )
 }
 
 
-//returnValue FeedbackLiftedIRKExport::prepareInputSystem( ExportStatementBlock& code )
-//{
-//    LOG( LVL_DEBUG ) << "Integrator: prepareInputSystem... " << endl;
-//	if( NX1 > 0 ) {
-//		DMatrix mat1 = formMatrix( M11, A11 );
-//		rk_mat1 = ExportVariable( "rk_mat1", mat1, STATIC_CONST_REAL, ACADO_LOCAL, true );
-////        code.addDeclaration( rk_mat1 );
-////		// TODO: Ask Milan why this does NOT work properly !!
-////		rk_mat1 = ExportVariable( "rk_mat1", numStages*NX1, numStages*NX1, STATIC_CONST_REAL, ACADO_LOCAL );
-//
-//		uint j;
-//		DMatrix Amat = A11;
-//		for( j = 1; j < numStages; j++ ) {
-//			Amat.appendRows(A11);
-//		}
-//		DMatrix sol = mat1*Amat;
-//		DMatrix sens = sol;
-//
-//		DMatrix Bmat = B11;
-//		for( j = 1; j < numStages; j++ ) {
-//			Bmat.appendRows(B11);
-//		}
-//		DMatrix solb = mat1*Bmat;
-//		sens.appendCols(solb);
-//
-//		for( j = 0; j < numStages; j++ ) {
-//			DMatrix solc = mat1.getCols(j*NX1,(j+1)*NX1-1)*C11;
-//			sens.appendCols(solc);
-//		}
-//		rk_dk1 = ExportVariable( "rk_dk1", sens, STATIC_CONST_REAL, ACADO_LOCAL, true );
-////        code.addDeclaration( rk_dk1 );
-////		// TODO: Ask Milan why this does NOT work properly !!
-////		rk_dk1 = ExportVariable( "rk_dk1", numStages*NX1, NX1+NU+numStages*NF, STATIC_CONST_REAL, ACADO_LOCAL );
-//	}
-//    LOG( LVL_DEBUG ) << "done!" << endl;
-//
-//	return SUCCESSFUL_RETURN;
-//}
+returnValue FeedbackLiftedIRKExport::prepareInputSystem( ExportStatementBlock& code )
+{
+    LOG( LVL_DEBUG ) << "Integrator: prepareInputSystem... " << endl;
+	if( NX1 > 0 ) {
+		DMatrix mat1 = formMatrix( M11, A11 );
+//		rk_mat1 = ExportVariable( "rk_mat1", mat1, STATIC_CONST_REAL );
+//        code.addDeclaration( rk_mat1 );
+//		// TODO: Ask Milan why this does NOT work properly !!
+//		rk_mat1 = ExportVariable( "rk_mat1", numStages*NX1, numStages*NX1, STATIC_CONST_REAL, ACADO_LOCAL );
+
+		uint j;
+		DMatrix Amat = A11;
+		for( j = 1; j < numStages; j++ ) {
+			Amat.appendRows(A11);
+		}
+		DMatrix sol = mat1*Amat;
+		DMatrix sens = sol;
+
+		DMatrix Bmat = B11;
+		for( j = 1; j < numStages; j++ ) {
+			Bmat.appendRows(B11);
+		}
+		DMatrix solb = mat1*Bmat;
+		sens.appendCols(solb);
+
+		for( j = 0; j < numStages; j++ ) {
+			DMatrix solc = mat1.getCols(j*NX1,(j+1)*NX1-1)*C11;
+			sens.appendCols(solc);
+		}
+		if( NDX2 > 0 ) {
+		    rk_dk1 = ExportVariable( "rk_dk1", sens, STATIC_CONST_REAL );
+		    code.addDeclaration( rk_dk1 );
+		    // TODO: Ask Milan why this does NOT work properly !!
+		    rk_dk1 = ExportVariable( "rk_dk1", numStages*NX1, NX1+NU+numStages*NF, STATIC_CONST_REAL, ACADO_LOCAL );
+		}
+	}
+    LOG( LVL_DEBUG ) << "done!" << endl;
+
+	return SUCCESSFUL_RETURN;
+}
 
 
 returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
@@ -382,7 +420,7 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 	if( NU > 0 || NOD > 0 ) {
 		integrate.addStatement( rk_xxx.getCols( NX+NF,NX+NF+NU+NOD ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
-		integrate.addStatement( rk_seed.getCols( NX+NF+NX*(1+NX+NU+numStages*NF),NX+NF+NX*(1+NX+NU+numStages*NF)+NU+NOD ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
+		integrate.addStatement( rk_seed.getCols( NX+NF+(NX+NDX2)*(1+NX+NU+numStages*NF),NX+NF+(NX+NDX2)*(1+NX+NU+numStages*NF)+NU+NOD ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
 	}
 	integrate.addLinebreak( );
 //	if( liftMode == 1 || liftMode == 4 ) {
@@ -437,8 +475,8 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	evaluateAllStatesImplicitSystem( loop, k_index, Ah, C, run1, j, tmp_index1 );
 
 	// PART 1: The linear input system
-//	prepareInputSystem( code );
-//    code.addStatement( "\n\n" );
+	prepareInputSystem( code );
+    code.addStatement( "\n\n" );
     code.addFunction( sens_input );
     code.addStatement( "\n\n" );
     code.addFunction( sens_fdb );
@@ -485,7 +523,10 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	if( liftMode == 2 ) loop->addStatement( std::string("}\n") );
 	ExportForLoop loopF( i,0,numStages );
 	loopF.addStatement( rk_seed.getCols(0,NX+NF) == rk_stageValues.getCols(i*(NX+NF),(i+1)*(NX+NF)) );
-	DMatrix zeroV = zeros<double>(1,NX*(1+NX+NU+numStages*NF));
+
+	loopF.addStatement( rk_seed.getCols(NX+NF+(NX+NDX2)*(1+NX+NU+numStages*NF)+NU+NOD,NX+NF+(NX+NDX2)*(1+NX+NU+numStages*NF)+NU+NOD+NX) == rk_kkk.getSubMatrix(k_index,k_index+NX,i,i+1).getTranspose() );
+
+    DMatrix zeroV = zeros<double>(1,NX*(1+NX+NU+numStages*NF));
 	loopF.addStatement( rk_seed.getCols(NX+NF,NX+NF+NX*(1+NX+NU+numStages*NF)) == zeroV );
 	for( run5 = 0; run5 < numStages; run5++ ) {
 		loopF.addStatement( rk_seed.getCols(NX+NF,2*NX+NF) += Ah.getElement(i,run5)*(rk_kTemp.getRows(run5*NX,(run5+1)*NX).getTranspose()) );
@@ -509,6 +550,25 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	        }
 	    }
 	}
+
+	if( NDX2 > 0 ) {
+	    loopF.addStatement( rk_seed.getCols(NX+NF+NX*(1+NX+NU+numStages*NF),2*NX+NF+NX*(1+NX+NU+numStages*NF)) == rk_kTemp.getRows(i*NX,(i+1)*NX).getTranspose() );
+	    ExportForLoop loopF12( j,0,NX );
+	    loopF12.addStatement( run1 == k_index+j );
+	    if( liftMode == 1 ) {
+	        loopF12.addStatement( rk_seed.getCols(2*NX+NF+NX*(1+NX+NU+numStages*NF)+j*(NX+NU),2*NX+NF+NX*(1+NX+NU+numStages*NF)+(j+1)*(NX+NU)) == (rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),i,i+1).getTranspose()) );
+	    } else {
+	        loopF12.addStatement( tmp_index1 == i*NX+j );
+	        loopF12.addStatement( rk_seed.getCols(2*NX+NF+NX*(1+NX+NU+numStages*NF)+j*(NX+NU),2*NX+NF+NX*(1+NX+NU+numStages*NF)+(j+1)*(NX+NU)) == rk_dk1_tmp.getSubMatrix(tmp_index1,tmp_index1+1,0,NX+NU) );
+	    }
+	    loopF.addStatement( loopF12 );
+	    for( run6 = 0; run6 < NX; run6++ ) {
+	        for( run7 = 0; run7 < numStages*NF; run7++ ) {
+	            loopF.addStatement( rk_seed.getCol(2*NX+NF+NX*(1+NX+NU+numStages*NF)+NX*(NX+NU)+run6*(numStages*NF)+run7) == rk_dk1.getElement(i*NX+run6,NX+NU+run7) );
+	        }
+	    }
+	}
+
 	loopF.addFunctionCall( feedb.getName(), rk_seed, rk_diffsTemp2.getAddress(i,0) );
 	for( run5 = 0; run5 < NF; run5++ ) {
 		loopF.addStatement( rk_b.getRow(i*NF+run5) == rk_diffsTemp2.getSubMatrix(i,i+1,run5*(1+NX+NU+numStages*NF),run5*(1+NX+NU+numStages*NF)+1+NX+NU) );
@@ -628,9 +688,9 @@ returnValue FeedbackLiftedIRKExport::solveInputSystem( ExportStatementBlock* blo
 	if( NX1 > 0 ) {
 		ExportForLoop loop( index1,0,numStages );
 		loop.addStatement( rk_xxx.getCols(0,NX+NF) == rk_stageValues.getCols(index1*(NX+NF),(index1+1)*(NX+NF)) );
-//        loop.addStatement( rk_xxx.getCols(NX+NF,2*NX+NF) == rk_kkk.getSubMatrix(k_index,k_index+NX,index1,index1+1) );
+        loop.addStatement( rk_xxx.getCols(NX+NF+NU+NOD,2*NX+NF+NU+NOD) == rk_kkk.getSubMatrix(k_index,k_index+NX,index1,index1+1).getTranspose() );
 		loop.addFunctionCall( lin_input.getName(), rk_xxx, rk_rhsTemp.getAddress(index1*NX,0) );
-		loop.addStatement( rk_rhsTemp.getRows(index1*NX,(index1+1)*NX) -= rk_kkk.getSubMatrix(k_index,k_index+NX,index1,index1+1) );
+//		loop.addStatement( rk_rhsTemp.getRows(index1*NX,(index1+1)*NX) -= rk_kkk.getSubMatrix(k_index,k_index+NX,index1,index1+1) );
 		block->addStatement(loop);
 
 		block->addStatement( rk_kTemp == mat1*rk_rhsTemp );
@@ -661,25 +721,6 @@ returnValue FeedbackLiftedIRKExport::evaluateAllStatesImplicitSystem( ExportStat
 }
 
 
-returnValue FeedbackLiftedIRKExport::evaluateStatesImplicitSystem( ExportStatementBlock* block, const ExportIndex& k_index, const ExportVariable& Ah, const ExportVariable& C, const ExportIndex& stage, const ExportIndex& i, const ExportIndex& tmp_index )
-{
-	ExportForLoop loop( i, 0, NX+NXA );
-	loop.addStatement( rk_xxx.getCol( i ) == rk_stageValues.getCol( stage*(NX+NXA)+i ) );
-	block->addStatement( loop );
-
-	ExportForLoop loop4( i, 0, NDX2 );
-	loop4.addStatement( tmp_index == k_index + i );
-	loop4.addStatement( rk_xxx.getCol( inputDim-diffsDim+i ) == rk_kkk.getElement( tmp_index,stage ) );
-	block->addStatement( loop4 );
-
-	if( C.getDim() > 0 ) {	// There is a time dependence, so it must be set
-		block->addStatement( rk_xxx.getCol( inputDim-diffsDim+NDX ) == rk_ttt + C.getCol(stage) );
-	}
-
-	return SUCCESSFUL_RETURN;
-}
-
-
 returnValue FeedbackLiftedIRKExport::setup( )
 {
 	if( CONTINUOUS_OUTPUT ) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
@@ -701,7 +742,7 @@ returnValue FeedbackLiftedIRKExport::setup( )
 	if( timeDependant ) timeDep = 1;
 
 	rk_ttt = ExportVariable( "rk_ttt", 1, 1, REAL, structWspace, true );
-	rk_xxx = ExportVariable( "rk_xxx", 1, NX+NF+NU+NOD+timeDep, REAL, structWspace );
+	rk_xxx = ExportVariable( "rk_xxx", 1, NX+NF+NX+NU+NOD+timeDep, REAL, structWspace );
 	rk_rhsTemp = ExportVariable( "rk_rhsTemp", numStages*NX, 1, REAL, structWspace );
 	rk_kTemp = ExportVariable( "rk_kTemp", numStages*NX, 1, REAL, structWspace );
 	rk_index = ExportVariable( "rk_index", 1, 1, INT, ACADO_LOCAL, true );
@@ -740,7 +781,7 @@ returnValue FeedbackLiftedIRKExport::setup( )
 	rk_diffsPrev1 = ExportVariable( "rk_diffsPrev1", NX, NX+NU, REAL, structWspace );
 	rk_diffsNew1 = ExportVariable( "rk_diffsNew1", NX, NX+NU, REAL, structWspace );
 
-	rk_seed = ExportVariable( "rk_seed", 1, NX+NF+NX*(1+NX+NU+numStages*NF)+NU+NOD+timeDep, REAL, structWspace );
+	rk_seed = ExportVariable( "rk_seed", 1, 2*NX+NF+NX*(1+NX+NU+numStages*NF)+NDX2*(1+NX+NU+numStages*NF)+NU+NOD+timeDep, REAL, structWspace );
 	rk_diffsTemp2 = ExportVariable( "rk_diffsTemp", numStages, NF*(1+NX+NU+numStages*NF), REAL, structWspace );
 	rk_stageValues = ExportVariable( "rk_stageValues", 1, numStages*(NX+NF), REAL, structWspace );
 	rk_kkk = ExportVariable( "rk_Ktraj", N*grid.getNumIntervals()*(NX+NF), numStages, REAL, ACADO_VARIABLES );
