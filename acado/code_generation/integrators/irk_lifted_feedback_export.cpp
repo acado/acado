@@ -31,6 +31,7 @@
  *    \date 2016
  */
 
+#include <math.h>
 #include <acado/code_generation/integrators/irk_export.hpp>
 #include <acado/code_generation/integrators/irk_lifted_feedback_export.hpp>
 
@@ -146,6 +147,8 @@ returnValue FeedbackLiftedIRKExport::setNonlinearFeedback( const DMatrix& C, con
 
 	if( feedb_expr.getNP() > 0 || feedb_expr.getNXA() > 0 ) return RET_NOT_IMPLEMENTED_YET;
 
+    setInputSystem( );
+
     NDX2 = feedb_expr.getNDX();
     if( NDX2 > 0 ) NDX2 = NX;
 
@@ -173,7 +176,8 @@ returnValue FeedbackLiftedIRKExport::setNonlinearFeedback( const DMatrix& C, con
 
 	DifferentialState seed("", NX, 1);
 	DifferentialState sX("", NX,NX+NU);
-	DifferentialState Gf("", NX,numStages*NF);
+//	DifferentialState Gf("", NX,numStages*NF);
+	DifferentialState A_row("", numStages, 1);
 	Expression Gx = sX.getCols(0,NX);
 	Expression Gu = sX.getCols(NX,NX+NU);
 
@@ -190,8 +194,20 @@ returnValue FeedbackLiftedIRKExport::setNonlinearFeedback( const DMatrix& C, con
         GKu = sKX.getCols(NX,NX+NU);
 	}
 
+
+    Expression Gf(NX,numStages*NF);
+    for( uint j = 0; j < numStages; j++ ) {
+        Expression tmp = zeros<double>(NX,numStages*NF);
+        for( uint k1 = 0; k1 < NX; k1++ ) {
+            for( uint k2 = 0; k2 < numStages*NF; k2++ ) {
+                tmp(k1,k2) += sensMat(j*NX+k1,k2)*A_row.getRow(j);
+            }
+        }
+        Gf = Gf + tmp;
+    }
     OutputFcn fdb_;
 	for( uint i = 0; i < feedb_.getDim(); i++ ) {
+
 	    if( NDX2 > 0 ) {
 	        fdb_ << feedb_(i) + forwardDerivative( feedb_(i), x, seed ) + forwardDerivative( feedb_(i), dx, seedK );
 		    fdb_ << multipleForwardDerivative( feedb_(i), x, Gx ) + multipleForwardDerivative( feedb_(i), dx, GKx );
@@ -208,9 +224,9 @@ returnValue FeedbackLiftedIRKExport::setNonlinearFeedback( const DMatrix& C, con
 	LOG( LVL_DEBUG ) << "done!" << endl;
 
 	if( NDX2 == 0 ) {
-	    return feedb.init(fdb_, "acado_feedback", NX+NF+NX*(1+NX+NU+numStages*NF), NXA, NU, NP, NX, NOD);
+	    return feedb.init(fdb_, "acado_feedback", NX+NF+NX*(1+NX+NU)+numStages, NXA, NU, NP, NX, NOD);
 	} else {
-	    return feedb.init(fdb_, "acado_feedback", NX+NF+NX*(1+NX+NU+numStages*NF)+NDX2*(1+NX+NU+numStages*NF), NXA, NU, NP, NX, NOD);
+	    return feedb.init(fdb_, "acado_feedback", NX+NF+NX*(1+NX+NU)+numStages+NDX2*(1+NX+NU+numStages*NF), NXA, NU, NP, NX, NOD);
 	}
 }
 
@@ -221,7 +237,7 @@ returnValue FeedbackLiftedIRKExport::setInputSystem( )
     if( NX1 > 0 ) {
         mat1 = formMatrix( M11, A11 );
 
-        uint j;
+        uint i, j;
         DMatrix Amat = A11;
         for( j = 1; j < numStages; j++ ) {
             Amat.appendRows(A11);
@@ -239,6 +255,14 @@ returnValue FeedbackLiftedIRKExport::setInputSystem( )
         for( j = 0; j < numStages; j++ ) {
             DMatrix solc = mat1.getCols(j*NX1,(j+1)*NX1-1)*C11;
             sensMat.appendCols(solc);
+        }
+
+//        // sensMat: numStages*NX x NX+NU+numStages*NF
+//        sensMat.
+        for( i = 0; i < numStages*NX; i++ ) {
+            for( j = 0; j < NX+NU+numStages*NF; j++ ) {
+                if( fabs(sensMat(i,j)) < 1e-6 ) sensMat(i,j) = 0.0;
+            }
         }
 
         // SENS_INPUT:
@@ -420,7 +444,7 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	integrate.addStatement( rk_ttt == DMatrix(grid.getFirstTime()) );
 	if( NU > 0 || NOD > 0 ) {
 		integrate.addStatement( rk_xxx.getCols( NX+NF,NX+NF+NU+NOD ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
-		integrate.addStatement( rk_seed.getCols( NX+NF+(NX+NDX2)*(1+NX+NU+numStages*NF),NX+NF+(NX+NDX2)*(1+NX+NU+numStages*NF)+NU+NOD ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
+		integrate.addStatement( rk_seed.getCols( NX+NF+(NX+NDX2)*(1+NX+NU)+numStages+NDX2*(numStages*NF),NX+NF+(NX+NDX2)*(1+NX+NU)+numStages+NDX2*(numStages*NF)+NU+NOD ) == rk_eta.getCols( NX+NXA+diffsDim,inputDim ) );
 	}
 	integrate.addLinebreak( );
 //	if( liftMode == 1 || liftMode == 4 ) {
@@ -524,10 +548,10 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	ExportForLoop loopF( i,0,numStages );
 	loopF.addStatement( rk_seed.getCols(0,NX+NF) == rk_stageValues.getCols(i*(NX+NF),(i+1)*(NX+NF)) );
 
-	loopF.addStatement( rk_seed.getCols(NX+NF+(NX+NDX2)*(1+NX+NU+numStages*NF)+NU+NOD,NX+NF+(NX+NDX2)*(1+NX+NU+numStages*NF)+NU+NOD+NX) == rk_kkk.getSubMatrix(k_index,k_index+NX,i,i+1).getTranspose() );
+	loopF.addStatement( rk_seed.getCols(NX+NF+(NX+NDX2)*(1+NX+NU)+numStages+NDX2*(numStages*NF)+NU+NOD,NX+NF+(NX+NDX2)*(1+NX+NU)+numStages+NDX2*(numStages*NF)+NU+NOD+NX) == rk_kkk.getSubMatrix(k_index,k_index+NX,i,i+1).getTranspose() );
 
-    DMatrix zeroV = zeros<double>(1,NX*(1+NX+NU+numStages*NF));
-	loopF.addStatement( rk_seed.getCols(NX+NF,NX+NF+NX*(1+NX+NU+numStages*NF)) == zeroV );
+    DMatrix zeroV = zeros<double>(1,NX*(1+NX+NU));
+	loopF.addStatement( rk_seed.getCols(NX+NF,NX+NF+NX*(1+NX+NU)) == zeroV );
 	for( run5 = 0; run5 < numStages; run5++ ) {
 		loopF.addStatement( rk_seed.getCols(NX+NF,2*NX+NF) += Ah.getElement(i,run5)*(rk_kTemp.getRows(run5*NX,(run5+1)*NX).getTranspose()) );
 	}
@@ -542,29 +566,30 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	    }
 	}
 	loopF.addStatement( loopF1 );
-	for( run6 = 0; run6 < NX; run6++ ) {
+//	for( run6 = 0; run6 < NX; run6++ ) {
 	    for( run5 = 0; run5 < numStages; run5++ ) {
 //	        loopF.addStatement( rk_seed.getCols(2*NX+NF+NX*(NX+NU)+run6*(numStages*NF),2*NX+NF+NX*(NX+NU)+(run6+1)*(numStages*NF)) += Ah.getElement(i,run5)*rk_dk1.getSubMatrix(run5*NX+run6,run5*NX+run6+1,NX+NU,NX+NU+numStages*NF) );
-	        for( run7 = 0; run7 < numStages*NF; run7++ ) {
-	            if( sensMat(run5*NX+run6,run7) != 0 ) loopF.addStatement( rk_seed.getCol(2*NX+NF+NX*(NX+NU)+run6*(numStages*NF)+run7) += sensMat(run5*NX+run6,run7)*Ah.getElement(i,run5) );
-	        }
+//	        for( run7 = 0; run7 < numStages*NF; run7++ ) {
+//	            if( sensMat(run5*NX+run6,run7) != 0 ) loopF.addStatement( rk_seed.getCol(2*NX+NF+NX*(NX+NU)+run6*(numStages*NF)+run7) += sensMat(run5*NX+run6,run7)*Ah.getElement(i,run5) );
+                loopF.addStatement( rk_seed.getCol(2*NX+NF+NX*(NX+NU)+run5) == Ah.getElement(i,run5) );
+//	        }
 	    }
-	}
+//	}
 
 	if( NDX2 > 0 ) {
-	    loopF.addStatement( rk_seed.getCols(NX+NF+NX*(1+NX+NU+numStages*NF),2*NX+NF+NX*(1+NX+NU+numStages*NF)) == rk_kTemp.getRows(i*NX,(i+1)*NX).getTranspose() );
+	    loopF.addStatement( rk_seed.getCols(NX+NF+NX*(1+NX+NU)+numStages,2*NX+NF+NX*(1+NX+NU)+numStages) == rk_kTemp.getRows(i*NX,(i+1)*NX).getTranspose() );
 	    ExportForLoop loopF12( j,0,NX );
 	    loopF12.addStatement( run1 == k_index+j );
 	    if( liftMode == 1 ) {
-	        loopF12.addStatement( rk_seed.getCols(2*NX+NF+NX*(1+NX+NU+numStages*NF)+j*(NX+NU),2*NX+NF+NX*(1+NX+NU+numStages*NF)+(j+1)*(NX+NU)) == (rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),i,i+1).getTranspose()) );
+	        loopF12.addStatement( rk_seed.getCols(2*NX+NF+NX*(1+NX+NU)+numStages+j*(NX+NU),2*NX+NF+NX*(1+NX+NU)+numStages+(j+1)*(NX+NU)) == (rk_diffK.getSubMatrix(run1*(NX+NU),(run1+1)*(NX+NU),i,i+1).getTranspose()) );
 	    } else {
 	        loopF12.addStatement( tmp_index1 == i*NX+j );
-	        loopF12.addStatement( rk_seed.getCols(2*NX+NF+NX*(1+NX+NU+numStages*NF)+j*(NX+NU),2*NX+NF+NX*(1+NX+NU+numStages*NF)+(j+1)*(NX+NU)) == rk_dk1_tmp.getSubMatrix(tmp_index1,tmp_index1+1,0,NX+NU) );
+	        loopF12.addStatement( rk_seed.getCols(2*NX+NF+NX*(1+NX+NU)+numStages+j*(NX+NU),2*NX+NF+NX*(1+NX+NU)+numStages+(j+1)*(NX+NU)) == rk_dk1_tmp.getSubMatrix(tmp_index1,tmp_index1+1,0,NX+NU) );
 	    }
 	    loopF.addStatement( loopF12 );
 	    for( run6 = 0; run6 < NX; run6++ ) {
 	        for( run7 = 0; run7 < numStages*NF; run7++ ) {
-	            loopF.addStatement( rk_seed.getCol(2*NX+NF+NX*(1+NX+NU+numStages*NF)+NX*(NX+NU)+run6*(numStages*NF)+run7) == rk_dk1.getElement(i*NX+run6,NX+NU+run7) );
+	            loopF.addStatement( rk_seed.getCol(2*NX+NF+NX*(1+NX+NU)+numStages+NX*(NX+NU)+run6*(numStages*NF)+run7) == rk_dk1.getElement(i*NX+run6,NX+NU+run7) );
 	        }
 	    }
 	}
@@ -585,12 +610,12 @@ returnValue FeedbackLiftedIRKExport::getCode(	ExportStatementBlock& code )
 	}
 
 	if( liftMode == 2 ) {
-	    loop->addStatement( std::string("if(") + run.getName() + " == 0) {\n" );
+	    loopF.addStatement( std::string("if(") + run.getName() + " == 0) {\n" );
 	}
 	for( run5 = 0; run5 < NF; run5++ ) {
 	    loopF.addStatement( rk_A.getRow(i*NF+run5) -= rk_diffsTemp2.getSubMatrix(i,i+1,run5*(1+NX+NU+numStages*NF)+1+NX+NU,(run5+1)*(1+NX+NU+numStages*NF)) );
 	}
-	if( liftMode == 2 ) loop->addStatement( std::string("}\n") );
+	if( liftMode == 2 ) loopF.addStatement( std::string("}\n") );
 	loop->addStatement( loopF );
 
 	// call the linear solver:
@@ -781,7 +806,7 @@ returnValue FeedbackLiftedIRKExport::setup( )
 	rk_diffsPrev1 = ExportVariable( "rk_diffsPrev1", NX, NX+NU, REAL, structWspace );
 	rk_diffsNew1 = ExportVariable( "rk_diffsNew1", NX, NX+NU, REAL, structWspace );
 
-	rk_seed = ExportVariable( "rk_seed", 1, 2*NX+NF+NX*(1+NX+NU+numStages*NF)+NDX2*(1+NX+NU+numStages*NF)+NU+NOD+timeDep, REAL, structWspace );
+	rk_seed = ExportVariable( "rk_seed", 1, 2*NX+NF+NX*(1+NX+NU)+numStages+NDX2*(1+NX+NU+numStages*NF)+NU+NOD+timeDep, REAL, structWspace );
 	rk_diffsTemp2 = ExportVariable( "rk_diffsTemp", numStages, NF*(1+NX+NU+numStages*NF), REAL, structWspace );
 	rk_stageValues = ExportVariable( "rk_stageValues", 1, numStages*(NX+NF), REAL, structWspace );
 	rk_kkk = ExportVariable( "rk_Ktraj", N*grid.getNumIntervals()*(NX+NF), numStages, REAL, ACADO_VARIABLES );
@@ -803,7 +828,7 @@ returnValue FeedbackLiftedIRKExport::setup( )
 
     rk_sensF = ExportVariable( "rk_sensF", numStages*NF, NX+NU, REAL, structWspace );
 
-	return setInputSystem( );
+	return SUCCESSFUL_RETURN;
 }
 
 

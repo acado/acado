@@ -310,6 +310,11 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 	NXA3 = data.getNXA3();
 	exportRhs = data.exportRhs();
 
+    Grid integrationGrid;
+    data.getIntegrationGrid(integrationGrid);
+    grid = integrationGrid;
+    data.getNumSteps( numSteps );
+
 	DMatrix M1, A1, B1;
 	data.getLinearInput( M1, A1, B1 );
 	if ( M1.getNumRows() > 0 && setLinearInput( M1, A1, B1 ) != SUCCESSFUL_RETURN )
@@ -363,10 +368,6 @@ returnValue IntegratorExport::setModelData( const ModelData& data ) {
 		if ( setModel( data.getNameRhs(), data.getNameDiffsRhs() ) != SUCCESSFUL_RETURN )
 			return RET_UNABLE_TO_EXPORT_CODE;
 	}
-	Grid integrationGrid;
-	data.getIntegrationGrid(integrationGrid);
-	grid = integrationGrid;
-	data.getNumSteps( numSteps );
 
 	setup( );
 
