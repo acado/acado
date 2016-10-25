@@ -212,6 +212,7 @@ class FeedbackLiftedIRKExport : public ForwardIRKExport
 
         ExportVariable  rk_kTemp;
         ExportVariable  rk_dk1_tmp;
+        ExportVariable  rk_dk2_tmp;
 
         ExportAcadoFunction sens_input;
         ExportAcadoFunction sens_fdb;
