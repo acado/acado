@@ -947,17 +947,17 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 			<< qpUb.getAddressString( true ) << ", ";
 
 			if (qpDimH) {
-      				feedback << pacEvHx.getAddressString( true ) << ", "
-        				<< pacEvHu.getAddressString( true ) << ", ";
-    			} else {
-      				feedback << "0, 0, ";
-    			}
+				feedback << pacEvHx.getAddressString( true ) << ", "
+					<< pacEvHu.getAddressString( true ) << ", ";
+			} else {
+				feedback << "0, 0, ";
+			}
 
-    			feedback << qpLbA.getAddressString( true ) << ", "
+			feedback << qpLbA.getAddressString( true ) << ", "
 				<< qpUbA.getAddressString( true ) << ", ";
 
-    			if (qpDimHN) {
-      				feedback << pocEvHx.getAddressString( true ) << ", ";
+			if (qpDimHN) {
+				feedback << pocEvHx.getAddressString( true ) << ", ";
 			} else {
 				feedback << "0, ";
 			}
