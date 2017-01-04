@@ -25,7 +25,7 @@
 
 /**
  *    \file include/acado/code_generation/export_gauss_newton_hpmpc.hpp
- *    \author Milan Vukov
+ *    \author Milan Vukov (updated by Niels van Duijkeren)
  *    \date 2014
  */
 
@@ -38,13 +38,13 @@ BEGIN_NAMESPACE_ACADO
 
 class ExportHpmpcInterface;
 
-/** 
+/**
  *	\brief TBD
  *
  *	\ingroup NumericalAlgorithms
  *
  *  TBD
- * 
+ *
  *	\author Milan Vukov
  */
 class ExportGaussNewtonHpmpc : public ExportNLPSolver
@@ -168,6 +168,9 @@ private:
 	/** @{ */
 	ExportFunction evaluateConstraints;
 	ExportFunction setStagePac;
+  unsigned qpDimHtot;
+  unsigned qpDimH;
+  unsigned qpDimHN;
 	std::vector< unsigned > qpConDim;
 	/** @} */
 
@@ -195,7 +198,6 @@ private:
 	ExportVariable evLbValues, evUbValues;
 	ExportVariable qpLb, qpUb;
 
-	ExportVariable qpA;
 	ExportVariable qpLbA, qpUbA;
 
 	ExportVariable sigmaN;

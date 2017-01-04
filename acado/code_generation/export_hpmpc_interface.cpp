@@ -47,14 +47,16 @@ ExportHpmpcInterface::ExportHpmpcInterface(	const std::string& _fileName,
 						) : ExportTemplatedFile(HPMPC_INTERFACE, _fileName, _commonHeaderName, _realString, _intString, _precision, _commentString)
 {}
 
-returnValue ExportHpmpcInterface::configure(	const unsigned _maxIter,
+returnValue ExportHpmpcInterface::configure( const unsigned _maxIter,
 												const unsigned _printLevel,
 												bool _useSinglePrecision,
 												bool _warmStart,
-												const std::string& _DD,
+												const std::string& _Hx,
+												const std::string& _Hu,
 												const std::string& _lbA,
 												const std::string& _ubA,
-												const std::vector< unsigned >& conDim,
+                        const unsigned _DimH,
+												const std::vector< unsigned >& _conDim,
 												const unsigned _NI,
 												const unsigned _NX,
 												const unsigned _NU
@@ -66,10 +68,16 @@ returnValue ExportHpmpcInterface::configure(	const unsigned _maxIter,
 	dictionary[ "@PRINT_LEVEL@" ] =  _printLevel == 0 ? toString( 0 ) : toString( 1 );
 	dictionary[ "@PRECISION@" ] =  _useSinglePrecision == true ? "1" : "0";
 	dictionary[ "@WARM_START@" ] =  _warmStart == true ? "1" : "0";
+  dictionary[ "@MODULE_NAME@" ] = ExportStatement::fcnPrefix;
+  dictionary[ "@MODULE_PREFIX@" ] = ExportStatement::varPrefix;
+  dictionary[ "@QP_DIMMU@"] = toString( 2*(_NX+_NU)*(_NI+1) + 2*_DimH );
+  // Single precision is not supported yet!
+  if(_useSinglePrecision) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 
-	if (conDim.size() > 0)
+	if (_conDim.size() > 0)
 	{
-		dictionary[ "@QP_D@" ]   =  _DD;
+		dictionary[ "@QP_Hx@" ]   =  _Hx;
+		dictionary[ "@QP_Hu@" ]   =  _Hu;
 		dictionary[ "@QP_LBA@" ] =  _lbA;
 		dictionary[ "@QP_UBA@" ] =  _ubA;
 
@@ -77,10 +85,10 @@ returnValue ExportHpmpcInterface::configure(	const unsigned _maxIter,
 		ss << "unsigned int nD[";
 		ss << _NI;
 		ss << " + 1] = {";
-		for (unsigned i = 0; i < conDim.size(); ++i)
+		for (unsigned i = 0; i < _conDim.size(); ++i)
 		{
-			ss << conDim[ i ];
-			if (i < conDim.size() - 1)
+			ss << _conDim[ i ];
+			if (i < _conDim.size() - 1)
 				ss << ", ";
 		}
 		ss << "};";
@@ -97,7 +105,7 @@ returnValue ExportHpmpcInterface::configure(	const unsigned _maxIter,
 		ss << " + 1; nD[ kk++ ] = 0);";
 		dictionary[ "@QP_ND_ARRAY@" ] = ss.str();
 	}
-	
+
 	// And then fill a template file
 	fillTemplate();
 

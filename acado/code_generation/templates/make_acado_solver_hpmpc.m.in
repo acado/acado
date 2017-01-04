@@ -6,15 +6,15 @@ function make_@MODULE_NAME@_solver( name )
 	else
 		fileOut = '@MODULE_NAME@_solver';
 	end;
-		
+
 	% Root folder of code generation
 	CGRoot = '.';
-	
+
 	% HPMPC source files
 	qpHPMPCSources = [ ...
 		'' ...
 		];
-		
+
 	% Auto-generated files
 	CGSources = [ ...
 		'CGRoot/@MODULE_NAME@_solver_mex.c ' ...
@@ -26,20 +26,20 @@ function make_@MODULE_NAME@_solver( name )
 	if (nargin > 1)
 		CGSources = [CGSources extern];
 	end
-		
+
 	% Adding additional linker flags for Linux
 	ldFlags = '';
 	if (isunix() && ~ismac())
-		ldFlags = '-lhpmpc -lrt';
+		ldFlags = '-lblasfeo -lhpmpc -lrt';
     elseif (ispc)
-        ldFlags = '-lhpmpc -DWIN32';
+        ldFlags = '-lblasfeo -lhpmpc -DWIN32';
 	end;
 
 	% Recipe for compilation
 	CGRecipe = [ ...
 		'mex -O' ...
-		' -L./hpmpc'...
-		' -I. -I''CGRoot'' -I./hpmpc/include' ...
+        ' -L./hpmpc -L./blasfeo' ...
+		' -I. -I''CGRoot'' -I./blasfeo/include -I./hpmpc/include' ...
 		' ldFlags' ...
 		'  -D__MATLAB__ -DUSEMEXPRINTS -O CGSources qpHPMPCSources -output %s.%s' ...
 		];
@@ -53,7 +53,9 @@ CGRecipe = regexprep(CGRecipe, 'CGSources', CGSources);
 CGRecipe = regexprep(CGRecipe, 'qpHPMPCSources', qpHPMPCSources);
 CGRecipe = regexprep(CGRecipe, 'ldFlags', ldFlags);
 
-% disp( sprintf( CGRecipe, fileOut, mexext ) ); 
+CGRecipe
+
+% disp( sprintf( CGRecipe, fileOut, mexext ) );
 fprintf( 'compiling... ' );
 eval( sprintf(CGRecipe, fileOut, mexext) );
 fprintf( ['done! --> ' fileOut '.' mexext '\n'] );
