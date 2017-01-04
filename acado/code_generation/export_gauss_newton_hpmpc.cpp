@@ -25,7 +25,7 @@
 
 /**
  *    \file src/code_generation/export_gauss_newton_hpmpc.cpp
- *    \author Milan Vukov (updated by Niels van Duijkeren)
+ *    \author Milan Vukov, Niels van Duijkeren
  *    \date 2016
  */
 
@@ -178,12 +178,12 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 
 	code.addFunction( evaluatePathConstraints );
 
-  for (unsigned i = 0; i < evaluatePointConstraints.size(); ++i)
-  {
-    if (evaluatePointConstraints[ i ] == 0)
-      continue;
-    code.addFunction( *evaluatePointConstraints[ i ] );
-  }
+	for (unsigned i = 0; i < evaluatePointConstraints.size(); ++i)
+	{
+		if (evaluatePointConstraints[ i ] == 0)
+			continue;
+		code.addFunction( *evaluatePointConstraints[ i ] );
+	}
 
 	code.addFunction( setStagePac );
 	code.addFunction( evaluateConstraints );
@@ -587,7 +587,7 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 
 	qpDimHtot  = N * dimPacH;
 	qpDimH  = N * dimPacH;
-  qpDimHN = 0;
+	qpDimHN = 0;
 
 	qpConDim.resize(N + 1, 0);
 	for (unsigned i = 0; i < N; ++i)
@@ -619,13 +619,13 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 	{
 		qpLbA.setup("qpLbA", qpDimHtot, 1, REAL, ACADO_WORKSPACE);
 		qpUbA.setup("qpUbA", qpDimHtot, 1, REAL, ACADO_WORKSPACE);
-    qpMu.setup("qpMu", 2 * N * (NX + NU) + 2*qpDimHtot, 1, REAL, ACADO_WORKSPACE);
+		qpMu.setup("qpMu", 2 * N * (NX + NU) + 2*qpDimHtot, 1, REAL, ACADO_WORKSPACE);
 	}
 	else
 	{
 		qpLbA.setup("qpLbA", 1, 1, REAL, ACADO_WORKSPACE);
 		qpUbA.setup("qpUbA", 1, 1, REAL, ACADO_WORKSPACE);
-    qpMu.setup("qpMu", 2 * N * (NX + NU), 1, REAL, ACADO_WORKSPACE);
+		qpMu.setup("qpMu", 2 * N * (NX + NU), 1, REAL, ACADO_WORKSPACE);
 	}
 
 	//
@@ -946,23 +946,23 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 			<< qpLb.getAddressString( true ) << ", "
 			<< qpUb.getAddressString( true ) << ", ";
 
-    if (qpDimH) {
-      feedback << pacEvHx.getAddressString( true ) << ", "
-        << pacEvHu.getAddressString( true ) << ", ";
-    } else {
-      feedback << "0, 0, ";
-    }
+			if (qpDimH) {
+      				feedback << pacEvHx.getAddressString( true ) << ", "
+        				<< pacEvHu.getAddressString( true ) << ", ";
+    			} else {
+      				feedback << "0, 0, ";
+    			}
 
-    feedback << qpLbA.getAddressString( true ) << ", "
-			<< qpUbA.getAddressString( true ) << ", ";
+    			feedback << qpLbA.getAddressString( true ) << ", "
+				<< qpUbA.getAddressString( true ) << ", ";
 
-    if (qpDimHN) {
-      feedback << pocEvHx.getAddressString( true ) << ", ";
-    } else {
-      feedback << "0, ";
-    }
+    			if (qpDimHN) {
+      				feedback << pocEvHx.getAddressString( true ) << ", ";
+			} else {
+				feedback << "0, ";
+			}
 
-		feedback	<< qpx.getAddressString( true ) << ", "
+			feedback  << qpx.getAddressString( true ) << ", "
 			<< qpu.getAddressString( true ) << ", "
 
 			<< qpLambda.getAddressString( true ) << ", "
@@ -970,7 +970,7 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 
 			<< nIt.getAddressString( true )
 			<< ");\n";
-  }
+	}
 	else
 		feedback
 			<< returnValueFeedbackPhase.getFullName() << " = " << "c_order_riccati_mhe_if('d', 2, "
@@ -1068,15 +1068,15 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 		lbLoop << kkt.getFullName() << "+= fabs( " << qpLb.get(index, 0) << " * " << qpMu.get(index, 0) << ");\n";
 		ExportForLoop ubLoop(index, 0, N * NU + N * NX);
 		ubLoop << kkt.getFullName() << "+= fabs( " << qpUb.get(index, 0) << " * " << qpMu.get(index + N * NU + N * NX, 0) << ");\n";
-    ExportForLoop lgLoop(index, 0, qpDimHtot);
-    lgLoop << kkt.getFullName() << "+= fabs( " << qpLbA.get(index, 0) << " * " << qpMu.get(index + 2*N*(NU+NX), 0) << ");\n";
-    ExportForLoop ugLoop(index, 0, qpDimHtot);
-    ugLoop << kkt.getFullName() << "+= fabs( " << qpUbA.get(index, 0) << " * " << qpMu.get(index + 2*N*(NU+NX) + qpDimHtot, 0) << ");\n";
+		ExportForLoop lgLoop(index, 0, qpDimHtot);
+		lgLoop << kkt.getFullName() << "+= fabs( " << qpLbA.get(index, 0) << " * " << qpMu.get(index + 2*N*(NU+NX), 0) << ");\n";
+		ExportForLoop ugLoop(index, 0, qpDimHtot);
+		ugLoop << kkt.getFullName() << "+= fabs( " << qpUbA.get(index, 0) << " * " << qpMu.get(index + 2*N*(NU+NX) + qpDimHtot, 0) << ");\n";
 
 		getKKT.addStatement( lbLoop );
 		getKKT.addStatement( ubLoop );
-    getKKT.addStatement( lgLoop );
-    getKKT.addStatement( ugLoop );
+		getKKT.addStatement( lgLoop );
+		getKKT.addStatement( ugLoop );
 	}
 
 	return SUCCESSFUL_RETURN;
@@ -1091,8 +1091,8 @@ returnValue ExportGaussNewtonHpmpc::setupQPInterface( )
 	string folderName;
 	get(CG_EXPORT_FOLDER_NAME, folderName);
 
-  string moduleName;
-  get(CG_MODULE_NAME, moduleName);
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
 
 	string outFile = folderName + "/" + moduleName + "_hpmpc_interface.c";
 
@@ -1120,15 +1120,15 @@ returnValue ExportGaussNewtonHpmpc::setupQPInterface( )
 	get(HOTSTART_QP, hotstartQP);
 
 	qpInterface->configure(
-      maxNumQPiterations,
+			maxNumQPiterations,
 			printLevel,
 			useSinglePrecision,
 			hotstartQP,
-      pacEvHx.getFullName(),
-      pacEvHu.getFullName(),
+			pacEvHx.getFullName(),
+			pacEvHu.getFullName(),
 			qpLbA.getFullName(),
 			qpUbA.getFullName(),
-      qpDimHtot,
+			qpDimHtot,
 			qpConDim,
 			N, NX, NU
 

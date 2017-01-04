@@ -55,7 +55,7 @@ returnValue ExportHpmpcInterface::configure( const unsigned _maxIter,
 												const std::string& _Hu,
 												const std::string& _lbA,
 												const std::string& _ubA,
-                        const unsigned _DimH,
+												const unsigned _DimH,
 												const std::vector< unsigned >& _conDim,
 												const unsigned _NI,
 												const unsigned _NX,
@@ -68,11 +68,11 @@ returnValue ExportHpmpcInterface::configure( const unsigned _maxIter,
 	dictionary[ "@PRINT_LEVEL@" ] =  _printLevel == 0 ? toString( 0 ) : toString( 1 );
 	dictionary[ "@PRECISION@" ] =  _useSinglePrecision == true ? "1" : "0";
 	dictionary[ "@WARM_START@" ] =  _warmStart == true ? "1" : "0";
-  dictionary[ "@MODULE_NAME@" ] = ExportStatement::fcnPrefix;
-  dictionary[ "@MODULE_PREFIX@" ] = ExportStatement::varPrefix;
-  dictionary[ "@QP_DIMMU@"] = toString( 2*(_NX+_NU)*(_NI+1) + 2*_DimH );
-  // Single precision is not supported yet!
-  if(_useSinglePrecision) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
+	dictionary[ "@MODULE_NAME@" ] = ExportStatement::fcnPrefix;
+	dictionary[ "@MODULE_PREFIX@" ] = ExportStatement::varPrefix;
+	dictionary[ "@QP_DIMMU@"] = toString( 2*(_NX+_NU)*(_NI+1) + 2*_DimH );
+	// Single precision is not supported yet!
+	if(_useSinglePrecision) return ACADOERROR( RET_NOT_YET_IMPLEMENTED );
 
 	if (_conDim.size() > 0)
 	{

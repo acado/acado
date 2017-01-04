@@ -25,8 +25,8 @@
 
 /**
  *    \file include/acado/code_generation/export_gauss_newton_hpmpc.hpp
- *    \author Milan Vukov (updated by Niels van Duijkeren)
- *    \date 2014
+ *    \author Milan Vukov, Niels van Duijkeren
+ *    \date 2016
  */
 
 #ifndef ACADO_TOOLKIT_EXPORT_GAUSS_NEWTON_HPMPC_HPP
@@ -168,9 +168,9 @@ private:
 	/** @{ */
 	ExportFunction evaluateConstraints;
 	ExportFunction setStagePac;
-  unsigned qpDimHtot;
-  unsigned qpDimH;
-  unsigned qpDimHN;
+	unsigned qpDimHtot;
+	unsigned qpDimH;
+	unsigned qpDimHN;
 	std::vector< unsigned > qpConDim;
 	/** @} */
 

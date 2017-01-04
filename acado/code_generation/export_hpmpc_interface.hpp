@@ -82,7 +82,7 @@ public:
 							const std::string& _Hu,
 							const std::string& _lbA,
 							const std::string& _ubA,
-              const unsigned _DimH,
+							const unsigned _DimH,
 							const std::vector< unsigned >& _conDim,
 							const unsigned _NI,
 							const unsigned _NX,
