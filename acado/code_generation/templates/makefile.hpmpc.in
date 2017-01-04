@@ -7,8 +7,8 @@ endif
 
 CCACHE_APP := $(shell which ccache 2>/dev/null)
 
-CFLAGS = -g -finline-functions -I/usr/local/include -I./hpmpc/include -I./blasfeo/include
-CXXFLAGS = -g -finline-functions
+CFLAGS = -O3 -finline-functions -I/usr/local/include -I./hpmpc/include -I./blasfeo/include
+CXXFLAGS = -O3 -finline-functions
 CC     = $(CCACHE_APP) gcc
 CXX    = $(CCACHE_APP) g++
 
