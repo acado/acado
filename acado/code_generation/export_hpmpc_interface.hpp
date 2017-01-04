@@ -78,15 +78,17 @@ public:
 							const unsigned _printLevel,
 							bool _useSinglePrecision,
 							bool _warmStart,
-							const std::string& _DD,
+							const std::string& _Hx,
+							const std::string& _Hu,
 							const std::string& _lbA,
 							const std::string& _ubA,
-							const std::vector< unsigned >& conDim,
+							const unsigned _DimH,
+							const std::vector< unsigned >& _conDim,
 							const unsigned _NI,
 							const unsigned _NX,
 							const unsigned _NU
 												);
-							
+
 };
 
 CLOSE_NAMESPACE_ACADO
