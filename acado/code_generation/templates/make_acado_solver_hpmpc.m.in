@@ -7,19 +7,19 @@ function make_@MODULE_NAME@_solver( name )
 		fileOut = '@MODULE_NAME@_solver';
 	end;
 
-    % Check if BLASFEO and HPMPC are present
-    if ~exist('blasfeo','dir')
-        error('Directory blasfeo not found! Please download blasfeo and build shared library.');
-    end
-    if ~exist('hpmpc','dir')
-        error('Directory hpmpc not found! Please download hpmpc and build shared library.');
-    end
-    if ~(exist('blasfeo/libblasfeo.so','file') || exist('blasfeo/blasfeo.dll','file'))
-        error('Directory blasfeo is found, but the required shared library is not. Please build the shared library of blasfeo.');
-    end
-    if ~(exist('hpmpc/libhpmpc.so','file') || exist('hpmpc/hpmpc.dll','file'))
-        error('Directory hpmpc is found, but the required shared library is not. Please build the shared library of hpmpc.');
-    end
+	% Check if BLASFEO and HPMPC are present
+	if ~exist('blasfeo','dir')
+		error('Directory blasfeo not found! Please download blasfeo and build shared library.');
+	end
+	if ~exist('hpmpc','dir')
+		error('Directory hpmpc not found! Please download hpmpc and build shared library.');
+	end
+	if ~(exist('blasfeo/libblasfeo.so','file') || exist('blasfeo/blasfeo.dll','file'))
+		error('Directory blasfeo is found, but the required shared library is not. Please build the shared library of blasfeo.');
+	end
+	if ~(exist('hpmpc/libhpmpc.so','file') || exist('hpmpc/hpmpc.dll','file'))
+		error('Directory hpmpc is found, but the required shared library is not. Please build the shared library of hpmpc.');
+	end
 
 	% Root folder of code generation
 	CGRoot = '.';
@@ -45,14 +45,14 @@ function make_@MODULE_NAME@_solver( name )
 	ldFlags = '';
 	if (isunix() && ~ismac())
 		ldFlags = '''-lblasfeo -lhpmpc -lrt -Wl,-rpath=PWD/blasfeo,-rpath=PWD/hpmpc''';
-    elseif (ispc)
-        ldFlags = '-lblasfeo -lhpmpc -DWIN32';
+	elseif (ispc)
+		ldFlags = '-lblasfeo -lhpmpc -DWIN32';
 	end;
 
     % Recipe for compilation
 	CGRecipe = [ ...
 		'mex -O' ....
-        ' -L./hpmpc -L./blasfeo' ...
+		' -L./hpmpc -L./blasfeo' ...
 		' -I. -I''CGRoot'' -I./blasfeo/include -I./hpmpc/include' ...
 		' LDFLAGS=ldFlags' ...
 		'  -D__MATLAB__ -DUSEMEXPRINTS -O CGSources qpHPMPCSources -output %s.%s' ...
