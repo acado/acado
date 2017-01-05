@@ -129,8 +129,8 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 {
 	qpInterface->exportCode();
 
-  string moduleName;
-  get(CG_MODULE_NAME, moduleName);
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
 	// Forward declaration, same as in the template file.
 	code << "#ifdef __cplusplus\n";
 	code << "extern \"C\"{\n";
@@ -927,8 +927,8 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 	// Here we have to add the differences....
 	//
 
-  string moduleName;
-  get(CG_MODULE_NAME, moduleName);
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
 
 	// Call the solver
 	if (initialStateFixed() == true) {
