@@ -53,8 +53,6 @@ CGRecipe = regexprep(CGRecipe, 'CGSources', CGSources);
 CGRecipe = regexprep(CGRecipe, 'qpHPMPCSources', qpHPMPCSources);
 CGRecipe = regexprep(CGRecipe, 'ldFlags', ldFlags);
 
-CGRecipe
-
 % disp( sprintf( CGRecipe, fileOut, mexext ) );
 fprintf( 'compiling... ' );
 eval( sprintf(CGRecipe, fileOut, mexext) );
