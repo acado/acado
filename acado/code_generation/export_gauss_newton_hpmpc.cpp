@@ -129,11 +129,13 @@ returnValue ExportGaussNewtonHpmpc::getCode(	ExportStatementBlock& code
 {
 	qpInterface->exportCode();
 
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
 	// Forward declaration, same as in the template file.
 	code << "#ifdef __cplusplus\n";
 	code << "extern \"C\"{\n";
 	code << "#endif\n";
-	code << "int acado_hpmpc_wrapper(real_t* A, real_t* B, real_t* d, real_t* Q, real_t* Qf, real_t* S, real_t* R, real_t* q, real_t* qf, real_t* r, real_t* lb, real_t* ub, real_t* C, real_t* D, real_t* lbg, real_t* ubg, real_t* CN, real_t* x, real_t* u, real_t* lambda, real_t* mu, int* nIt);\n";
+	code << "int " << moduleName << "_hpmpc_wrapper(real_t* A, real_t* B, real_t* d, real_t* Q, real_t* Qf, real_t* S, real_t* R, real_t* q, real_t* qf, real_t* r, real_t* lb, real_t* ub, real_t* C, real_t* D, real_t* lbg, real_t* ubg, real_t* CN, real_t* x, real_t* u, real_t* lambda, real_t* mu, int* nIt);\n";
 	code << "#ifdef __cplusplus\n";
 	code << "}\n";
 	code << "#endif\n";
@@ -925,10 +927,13 @@ returnValue ExportGaussNewtonHpmpc::setupEvaluation( )
 	// Here we have to add the differences....
 	//
 
+	string moduleName;
+	get(CG_MODULE_NAME, moduleName);
+
 	// Call the solver
 	if (initialStateFixed() == true) {
 		feedback
-			<< returnValueFeedbackPhase.getFullName() << " = " << "acado_hpmpc_wrapper("
+			<< returnValueFeedbackPhase.getFullName() << " = " << moduleName << "_hpmpc_wrapper("
 
 			<< evGx.getAddressString( true ) << ", "
 			<< evGu.getAddressString( true ) << ", "
