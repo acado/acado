@@ -177,20 +177,28 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 		{
 			case QP_QPOASES:
 				if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
-					acadoCopyTemplateFile(MAKEFILE_EH_QPOASES, str, "#", true);
+					//acadoCopyTemplateFile(MAKEFILE_EH_QPOASES, str, "#", true);
+					makefile.setup( MAKEFILE_EH_QPOASES,str,"","real_t","int",16,"#" );
 				}
 				else {
-					acadoCopyTemplateFile(MAKEFILE_QPOASES, str, "#", true);
+					//acadoCopyTemplateFile(MAKEFILE_QPOASES, str, "#", true);
+					makefile.setup( MAKEFILE_QPOASES,str,"","real_t","int",16,"#" );
 				}
+                makefile.configure();
+                makefile.exportCode();
 				break;
 
 			case QP_QPOASES3:
 				if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
-					acadoCopyTemplateFile(MAKEFILE_EH_QPOASES3, str, "#", true);
+					//acadoCopyTemplateFile(MAKEFILE_EH_QPOASES3, str, "#", true);
+					makefile.setup( MAKEFILE_EH_QPOASES3,str,"","real_t","int",16,"#" );
 				}
 				else {
-					acadoCopyTemplateFile(MAKEFILE_QPOASES3, str, "#", true);
+					//acadoCopyTemplateFile(MAKEFILE_QPOASES3, str, "#", true);
+					makefile.setup( MAKEFILE_QPOASES3,str,"","real_t","int",16,"#" );
 				}
+                makefile.configure();
+                makefile.exportCode();
 				break;
 
 			case QP_FORCES:
@@ -202,11 +210,15 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 
 			case QP_QPDUNES:
 				if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
-					acadoCopyTemplateFile(MAKEFILE_EH_QPDUNES, str, "#", true);
+					//acadoCopyTemplateFile(MAKEFILE_EH_QPDUNES, str, "#", true);
+					makefile.setup( MAKEFILE_EH_QPDUNES,str,"","real_t","int",16,"#" );
 				}
 				else {
-					acadoCopyTemplateFile(MAKEFILE_QPDUNES, str, "#", true);
+					//acadoCopyTemplateFile(MAKEFILE_QPDUNES, str, "#", true);
+					makefile.setup( MAKEFILE_QPDUNES,str,"","real_t","int",16,"#" );
 				}
+                makefile.configure();
+                makefile.exportCode();
 				break;
 
 			case QP_HPMPC:

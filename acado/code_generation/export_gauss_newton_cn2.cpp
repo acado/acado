@@ -184,6 +184,15 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 	code.addFunction( evaluateStageCost );
 	code.addFunction( evaluateTerminalCost );
 
+	code.addFunction( evaluatePathConstraints );
+
+	for (unsigned i = 0; i < evaluatePointConstraints.size(); ++i)
+	{
+		if (evaluatePointConstraints[ i ] == 0)
+			continue;
+		code.addFunction( *evaluatePointConstraints[ i ] );
+	}
+
 	code.addFunction( setObjQ1Q2 );
 	code.addFunction( setObjR1R2 );
 	code.addFunction( setObjS1 );
@@ -229,15 +238,6 @@ returnValue ExportGaussNewtonCN2::getCode(	ExportStatementBlock& code
 	code.addFunction( multHxC );
 	code.addFunction( multHxE );
 	code.addFunction( macHxd );
-
-	code.addFunction( evaluatePathConstraints );
-
-	for (unsigned i = 0; i < evaluatePointConstraints.size(); ++i)
-	{
-		if (evaluatePointConstraints[ i ] == 0)
-			continue;
-		code.addFunction( *evaluatePointConstraints[ i ] );
-	}
 
 	code.addFunction( condensePrep );
 	code.addFunction( condenseFdb );
@@ -447,6 +447,10 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 	int hardcodeConstraintValues;
 	get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
 
+	int hessianApproximation;
+	get( HESSIAN_APPROXIMATION, hessianApproximation );
+	bool secondOrder = ((HessianApproximationMode)hessianApproximation == EXACT_HESSIAN);
+
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Setup the bounds on control variables
@@ -654,12 +658,24 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		// Setup evaluation
 		//
 		ExportIndex runPac;
-		condensePrep.acquire( runPac );
+		if( secondOrder ) {
+			evaluateObjective.acquire( runPac );
+		}
+		else {
+			condensePrep.acquire( runPac );
+		}
 		ExportForLoop loopPac(runPac, 0, N);
 
 		loopPac.addStatement( conValueIn.getCols(0, NX) == x.getRow( runPac ) );
-		loopPac.addStatement( conValueIn.getCols(NX, NX + NU) == u.getRow( runPac ) );
-		loopPac.addStatement( conValueIn.getCols(NX + NU, NX + NU + NOD) == od.getRow( runPac ) );
+
+		uint dimL = 0;
+		if ( secondOrder && pacEvDDH.isGiven() == false )	{
+			dimL = dimPacH;
+			loopPac.addStatement( conValueIn.getCols(NX, NX+dimPacH) == yVars.getRows(getNumQPvars()+getNumStateBounds()+runPac*dimPacH,getNumQPvars()+getNumStateBounds()+runPac*dimPacH+dimPacH).getTranspose() );
+		}
+
+		loopPac.addStatement( conValueIn.getCols(NX+dimL, NX+dimL + NU) == u.getRow( runPac ) );
+		loopPac.addStatement( conValueIn.getCols(NX+dimL + NU, NX+dimL + NU + NOD) == od.getRow( runPac ) );
 		loopPac.addFunctionCall( evaluatePathConstraints.getName(), conValueIn, conValueOut );
 
 		loopPac.addStatement( pacEvH.getRows( runPac * dimPacH, (runPac + 1) * dimPacH) ==
@@ -686,11 +702,26 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 					getCols(runPac * dimPacH * NU, (runPac + 1) * dimPacH * NU)
 					== conValueOut.getCols(derOffset, derOffset + dimPacH * NU )
 			);
+
+			derOffset = derOffset + dimPacH * NU;
+		}
+		if( secondOrder ) {
+			if (pacEvDDH.isGiven() == false )
+			{
+				loopPac.addStatement( pacEvDDH.makeRowVector() == conValueOut.getCols(derOffset, derOffset + (NX+NU)*(NX+NU) ) );
+			}
+			loopPac.addStatement( objS.getRows( runPac*(NX+NU), runPac*(NX+NU)+NX+NU ) += pacEvDDH );
 		}
 
 		// Add loop to the function.
-		condensePrep.addStatement( loopPac );
-		condensePrep.addLinebreak( );
+		if( secondOrder ) {
+			evaluateObjective.addStatement( loopPac );
+			evaluateObjective.addLinebreak( );
+		}
+		else {
+			condensePrep.addStatement( loopPac );
+			condensePrep.addLinebreak( );
+		}
 
 		// Define the multHxC multiplication routine
 		ExportVariable tmpA01, tmpHx, tmpGx;
@@ -948,6 +979,10 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		unsigned rowOffset = getNumStateBounds() + N * dimPacH;
 		unsigned colOffset = performFullCondensing() == true ? 0 : NX;
 		unsigned dim;
+
+		if( secondOrder ) {
+			return  ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+		}
 
 //		if (performFullCondensing() == true)
 //			A20.setup("A02", dimPocH, NX, REAL, ACADO_WORKSPACE);
@@ -1683,6 +1718,10 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 			else { // INDEX NOT FOUND
 				expand.addStatement( mu.getSubMatrix(N-1,N,j,j+1) == 0.0 );
 			}
+			if( getNumComplexConstraints() ) {
+				if( dimPocH > 0 ) return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+				// HERE: POINT CONSTRAINTS ON TERMINAL STATE??
+			}
 		}
 		expand.addStatement( mu.getRow(N-1) += sbar.getRows(N*NX,(N+1)*NX).getTranspose()*QN1 );
 		expand.addStatement( mu.getRow(N-1) += QDy.getRows(N*NX,(N+1)*NX).getTranspose() );
@@ -1695,6 +1734,15 @@ returnValue ExportGaussNewtonCN2::setupCondensing( void )
 				}
 				else { // INDEX NOT FOUND
 					expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) == 0.0 );
+				}
+				if( getNumComplexConstraints() ) {
+					if( dimPocH > 0 ) return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+					if( pacEvHx.isGiven() == false ) {
+						expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) -= yVars.getRows(getNumQPvars()+getNumStateBounds()+i*dimPacH,getNumQPvars()+getNumStateBounds()+i*dimPacH+dimPacH).getTranspose()*pacEvHx.getSubMatrix(i*dimPacH,i*dimPacH+dimPacH,j,j+1) );
+					}
+					else {
+						expand.addStatement( mu.getSubMatrix(i-1,i,j,j+1) -= yVars.getRows(getNumQPvars()+getNumStateBounds()+i*dimPacH,getNumQPvars()+getNumStateBounds()+i*dimPacH+dimPacH).getTranspose()*pacEvHx.getCol(j) );
+					}
 				}
 			}
 			expand.addFunctionCall(

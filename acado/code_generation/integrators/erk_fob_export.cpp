@@ -91,6 +91,13 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
+	uint numX = NX*(NX+1)/2.0;
+	uint numU = NU*(NU+1)/2.0;
+	if ( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+		numX = NX*NX;
+		numU = NU*NU;
+	}
+
 	DifferentialEquation f, g, f_ODE;
 	// add usual ODE
 	f_ODE << rhs_;
@@ -98,7 +105,7 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 		return ACADOERROR( RET_INVALID_OPTION );
 	}
 
-	if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+	if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD || (ExportSensitivityType)sensGen == SYMMETRIC_FB ) {
 		DifferentialState Gx("", NX,NX), Gu("", NX,NU);
 		// no free parameters yet!
 		// DifferentialState Gp(NX,NP);
@@ -132,20 +139,29 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 
 		DifferentialState lx("", NX,1);
 
-		Expression tmp = backwardDerivative( rhs_, arg, lx );
+		if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+			Expression tmp = backwardDerivative( rhs_, arg, lx );
 
-		g << tmp.getRows(0,NX);
+			g << tmp.getRows(0,NX);
 
-		Expression tmp2 = multipleForwardDerivative( tmp, arg, S_tmp );
+			Expression tmp2 = multipleForwardDerivative( tmp, arg, S_tmp );
 
-		DifferentialState Sxx("", NX,NX), Sux("", NU,NX), Suu("", NU,NU);
-		Expression SS_tmp = Sxx;
-		SS_tmp.appendCols( Sux.transpose() );
-		Expression tmp3 = multipleBackwardDerivative( rhs_, arg, SS_tmp );
+			DifferentialState Sxx("", NX,NX), Sux("", NU,NX), Suu("", NU,NU);
+			Expression SS_tmp = Sxx;
+			SS_tmp.appendCols( Sux.transpose() );
+			Expression tmp3 = multipleBackwardDerivative( rhs_, arg, SS_tmp );
 
-		g << tmp2.getSubMatrix(0,NX,0,NX) + tmp3.getSubMatrix(0,NX,0,NX);
-		g << tmp2.getSubMatrix(0,NX,NX,NX+NU).transpose() + tmp3.getSubMatrix(0,NX,NX,NX+NU).transpose();
-		g << tmp2.getSubMatrix(NX,NX+NU,NX,NX+NU) + tmp3.getSubMatrix(NX,NX+NU,NX,NX+NU);
+			g << tmp2.getSubMatrix(0,NX,0,NX) + tmp3.getSubMatrix(0,NX,0,NX);
+			g << tmp2.getSubMatrix(0,NX,NX,NX+NU).transpose() + tmp3.getSubMatrix(0,NX,NX,NX+NU).transpose();
+			g << tmp2.getSubMatrix(NX,NX+NU,NX,NX+NU) + tmp3.getSubMatrix(NX,NX+NU,NX,NX+NU);
+		}
+		else {
+			// SYMMETRIC DERIVATIVES
+			Expression dfS2, dfL;
+			Expression h_tmp = symmetricDerivative( rhs_, arg, S_tmp, lx, &dfS2, &dfL );
+			g << dfL.getRows(0,NX);
+			g << returnLowerTriangular( h_tmp );
+		}
 
 //		g << multipleForwardDerivative(tmp, x, Gx) + multipleBackwardDerivative(rhs_, x, Sxx);
 //		g << multipleBackwardDerivative(tmp, x, Gu).transpose() + forwardDerivative(tmp, u).transpose() + multipleBackwardDerivative(rhs_, x, Sux.transpose()).transpose();
@@ -157,7 +173,7 @@ returnValue ForwardOverBackwardERKExport::setDifferentialEquation(	const Express
 	if( f.getNT() > 0 ) timeDependant = true;
 
 	return rhs.init(f, "acado_forward", NX*(NX+NU+1), 0, NU, NP, NDX, NOD)
-				& diffs_rhs.init(g, "acado_backward", NX*(NX+NU+1) + NX + NX*NX + NX*NU + NU*NU, 0, NU, NP, NDX, NOD);
+				& diffs_rhs.init(g, "acado_backward", NX*(NX+NU+1) + NX + numX + NX*NU + numU, 0, NU, NP, NDX, NOD);
 }
 
 
@@ -165,7 +181,7 @@ returnValue ForwardOverBackwardERKExport::setup( )
 {
 	int sensGen;
 	get( DYNAMIC_SENSITIVITY,sensGen );
-	if ( (ExportSensitivityType)sensGen != FORWARD_OVER_BACKWARD ) ACADOERROR( RET_INVALID_OPTION );
+	if ( (ExportSensitivityType)sensGen != FORWARD_OVER_BACKWARD && (ExportSensitivityType)sensGen != SYMMETRIC_FB ) ACADOERROR( RET_INVALID_OPTION );
 
 	// NOT SUPPORTED: since the forward sweep needs to be saved
 	if( !equidistantControlGrid() ) 	ACADOERROR( RET_INVALID_OPTION );
@@ -176,7 +192,13 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	LOG( LVL_DEBUG ) << "Preparing to export ForwardOverBackwardERKExport... " << endl;
 
 	// export RK scheme
-	uint rhsDim   = NX*(NX+NU+1) + NX + NX*NX + NX*NU + NU*NU;
+	uint numX = NX*(NX+1)/2.0;
+	uint numU = NU*(NU+1)/2.0;
+	if ( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+		numX = NX*NX;
+		numU = NU*NU;
+	}
+	uint rhsDim   = NX*(NX+NU+1) + NX + numX + NX*NU + numU;
 	inputDim = rhsDim + NU + NOD;
 	const uint rkOrder  = getNumStages();
 
@@ -199,7 +221,8 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	if( timeDependant ) timeDep = 1;
 	
 	rk_xxx.setup("rk_xxx", 1, inputDim+timeDep, REAL, structWspace);
-	rk_kkk.setup("rk_kkk", rkOrder, NX+NX*NX+NX*NU+NU*NU, REAL, structWspace);
+	rk_kkk.setup("rk_kkk", rkOrder, NX+numX+NX*NU+numU, REAL, structWspace);
+	if(NX*(NX+NU) > numX+NX*NU+numU) rk_kkk.setup("rk_kkk", rkOrder, NX+NX*(NX+NU), REAL, structWspace);
 	rk_forward_sweep.setup("rk_sweep1", 1, grid.getNumIntervals()*rkOrder*NX*(NX+NU+1), REAL, structWspace);
 
 	if ( useOMP )
@@ -235,7 +258,7 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	integrate.addStatement( rk_eta.getCols( NX*(2+NX),NX*(2+NX+NU) ) == zeroXU.makeVector().transpose() );
 
 //		integrate.addStatement( rk_eta.getCols( NX*(1+NX+NU),NX*(2+NX+NU) ) == seed_backward );
-	integrate.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) == zeros<double>( 1,NX*NX+NX*NU+NU*NU ) );
+	integrate.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) == zeros<double>( 1,numX+NX*NU+numU ) );
 	if( inputDim > rhsDim ) {
 		// FORWARD SWEEP FIRST
 		integrate.addStatement( rk_xxx.getCols( NX*(1+NX+NU),NX*(1+NX+NU)+NU+NOD ) == rk_eta.getCols( rhsDim,inputDim ) );
@@ -270,12 +293,12 @@ returnValue ForwardOverBackwardERKExport::setup( )
 		// load forward trajectory
 		loop2.addStatement( rk_xxx.getCols( 0,NX*(1+NX+NU) ) == rk_forward_sweep.getCols( (grid.getNumIntervals()-run)*rkOrder*NX*(1+NX+NU)-(run1+1)*NX*(1+NX+NU),(grid.getNumIntervals()-run)*rkOrder*NX*(1+NX+NU)-run1*NX*(1+NX+NU) ) );
 		loop2.addStatement( rk_xxx.getCols( NX*(1+NX+NU),NX*(2+NX+NU) ) == rk_eta.getCols( NX,NX*2 ) + Ah.getRow(run1)*rk_kkk.getCols(0,NX) );
-		loop2.addStatement( rk_xxx.getCols( NX*(2+NX+NU),rhsDim ) == rk_eta.getCols( NX*(2+NX+NU),rhsDim ) + Ah.getRow(run1)*rk_kkk.getCols(NX,rk_kkk.getNumCols()) );
+		loop2.addStatement( rk_xxx.getCols( NX*(2+NX+NU),rhsDim ) == rk_eta.getCols( NX*(2+NX+NU),rhsDim ) + Ah.getRow(run1)*rk_kkk.getCols(NX,NX+numX+NX*NU+numU) );
 		if( timeDependant ) loop2.addStatement( rk_xxx.getCol( inputDim ) == rk_ttt - ((double)cc(run1))/grid.getNumIntervals() );
 		loop2.addFunctionCall( getNameDiffsRHS(),rk_xxx,rk_kkk.getAddress(run1,0) );
 	}
 	loop2.addStatement( rk_eta.getCols( NX,2*NX ) += b4h^rk_kkk.getCols(0,NX) );
-	loop2.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) += b4h^rk_kkk.getCols(NX,rk_kkk.getNumCols()) );
+	loop2.addStatement( rk_eta.getCols( NX*(2+NX+NU),rhsDim ) += b4h^rk_kkk.getCols(NX,NX+numX+NX*NU+numU) );
 	loop2.addStatement( rk_ttt -= DMatrix(1.0/grid.getNumIntervals()) );
     // end of integrator loop: BACKWARD SWEEP
 	integrate.addStatement( loop2 );
@@ -285,6 +308,20 @@ returnValue ForwardOverBackwardERKExport::setup( )
 	LOG( LVL_DEBUG ) << "done" << endl;
 
 	return SUCCESSFUL_RETURN;
+}
+
+
+Expression ForwardOverBackwardERKExport::returnLowerTriangular( const Expression& expr ) {
+//	std::cout << "returnLowerTriangular with " << expr.getNumRows() << " rows and " << expr.getNumCols() << " columns\n";
+	ASSERT( expr.getNumRows() == expr.getNumCols() );
+
+	Expression new_expr;
+	for( uint i = 0; i < expr.getNumRows(); i++ ) {
+		for( uint j = 0; j <= i; j++ ) {
+			new_expr << expr(i,j);
+		}
+	}
+	return new_expr;
 }
 
 

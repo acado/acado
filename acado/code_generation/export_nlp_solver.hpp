@@ -294,6 +294,7 @@ protected:
 
 	ExportVariable pacEvH;
 	ExportVariable pacEvHx, pacEvHu, pacEvHxd;
+	ExportVariable pacEvDDH;
 	/** @} */
 
 	/** \name Evaluation of point constraints */

@@ -1,13 +1,13 @@
 UNAME := $(shell uname)
 
-LDLIBS = -lm -lstdc++ -lhpmpc
+LDLIBS = -lm -lstdc++ -l:libhpmpc.a -l:libblasfeo.a -L./hpmpc -L./blasfeo
 ifeq ($(UNAME), Linux)
 	LDLIBS += -lrt
 endif
 
 CCACHE_APP := $(shell which ccache 2>/dev/null)
 
-CFLAGS = -O3 -finline-functions -I/usr/local/include
+CFLAGS = -O3 -finline-functions -I/usr/local/include -I./hpmpc/include -I./blasfeo/include
 CXXFLAGS = -O3 -finline-functions
 CC     = $(CCACHE_APP) gcc
 CXX    = $(CCACHE_APP) g++

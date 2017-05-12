@@ -349,7 +349,7 @@ returnValue LiftedERKExport::setup( )
 					loop.addStatement( rk_A.getElement(i,j) == rk_zTemp.getCol(NXA*(1+NX)+i*NXA+j) );
 				}
 			}
-			loop.addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+			loop.addStatement( det.getFullName() + " = " + ExportStatement::fcnPrefix + "_" +  solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 		}
 		else { // INEXACT
 			if( run1 == 0 ) {
@@ -359,7 +359,7 @@ returnValue LiftedERKExport::setup( )
 						loop.addStatement( rk_A.getElement(i,j) == rk_zTemp.getCol(NXA*(1+NX)+i*NXA+j) );
 					}
 				}
-				loop.addStatement( det.getFullName() + " = " + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
+				loop.addStatement( det.getFullName() + " = " + ExportStatement::fcnPrefix + "_" + solver->getNameSolveFunction() + "( " + rk_A.getFullName() + ", " + rk_auxSolver.getFullName() + " );\n" );
 				loop.addStatement( std::string("}\n") );
 			}
 		}

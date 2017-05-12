@@ -67,7 +67,7 @@ SET( DUMMY_TEST_FILE dummy_test_file.in)
 
 SET( COMMON_HEADER_TEMPLATE acado_common_header.h.in)
 
-SET( HPMPC_INTERFACE acado_hpmpc_interface.c.in)
+SET( HPMPC_INTERFACE hpmpc_interface.c.in)
 
 #
 # Template paths

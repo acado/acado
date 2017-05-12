@@ -45,7 +45,7 @@ inline ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction
 	_userInteraction->get( DYNAMIC_SENSITIVITY, sensGen );
 	int liftedGen;
 	_userInteraction->get( IMPLICIT_INTEGRATOR_MODE, liftedGen );
-	if ( (ImplicitIntegratorMode)liftedGen == LIFTED && (ExportSensitivityType)sensGen == FORWARD ) {
+	if ( (ImplicitIntegratorMode)liftedGen == LIFTED && ((ExportSensitivityType)sensGen == FORWARD || (ExportSensitivityType)sensGen == INEXACT) ) {
 		return new LiftedERKExport(_userInteraction, _commonHeaderName);
 	}
 	else if ( (ExportSensitivityType)sensGen == FORWARD || (ExportSensitivityType)sensGen == NO_SENSITIVITY ) {
@@ -54,7 +54,7 @@ inline ExplicitRungeKuttaExport* createExplicitRungeKuttaExport(	UserInteraction
 	else if( (ExportSensitivityType)sensGen == BACKWARD ) {
 		return new AdjointERKExport(_userInteraction, _commonHeaderName);
 	}
-	else if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD ) {
+	else if( (ExportSensitivityType)sensGen == FORWARD_OVER_BACKWARD || (ExportSensitivityType)sensGen == SYMMETRIC_FB ) {
 		return new ForwardOverBackwardERKExport(_userInteraction, _commonHeaderName);
 	}
 	else if( (ExportSensitivityType)sensGen == SYMMETRIC ) {

@@ -79,7 +79,7 @@ returnValue ExportModule::setupOptions( )
 	addOption( FIX_INITIAL_STATE,           true         	);
 	addOption( QP_SOLVER,                   QP_QPOASES      );
 	addOption( MAX_NUM_QP_ITERATIONS,       -1              );
-	addOption( HOTSTART_QP,                 false        	);
+	addOption( HOTSTART_QP,                 true        	);
 	addOption( LEVENBERG_MARQUARDT,         0.0             );
 	addOption( GENERATE_TEST_FILE,          true         	);
 	addOption( GENERATE_MAKE_FILE,          true         	);

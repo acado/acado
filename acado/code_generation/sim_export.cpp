@@ -151,6 +151,7 @@ returnValue SIMexport::exportCode(	const std::string& dirName,
 
 		int sensGen;
 		get( DYNAMIC_SENSITIVITY, sensGen );
+		if( (ExportSensitivityType)sensGen == SYMMETRIC_FB ) sensGen = SYMMETRIC;
 		int measGrid;
 		get( MEASUREMENT_GRID, measGrid );
 		int generateMatlabInterface;

@@ -270,7 +270,7 @@ class ForwardIRKExport : public ImplicitRungeKuttaExport, public RKSensitivities
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		ExportVariable getAuxVariable() const;
+		virtual ExportVariable getAuxVariable() const;
 
 
     protected:

@@ -511,7 +511,7 @@ class ImplicitRungeKuttaExport : public RungeKuttaExport
 		 *
 		 *	\return SUCCESSFUL_RETURN
 		 */
-		ExportVariable getAuxVariable() const;
+        virtual ExportVariable getAuxVariable() const;
 
 
     protected:
