@@ -817,6 +817,8 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 		return ACADOERRORTEXT(RET_INITIALIZE_FIRST,
 				"Current implementation of code generation module\n"
 				"supports only one LSQ term definition per one OCP." );
+	if (lsqElements[0].h.getDim() == 0)
+		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "Objective function must include cost elements.");
 
 	if (lsqElements[ 0 ].W.isSquare() == false)
 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Weighting matrices must be square.");
@@ -825,6 +827,8 @@ returnValue ExportNLPSolver::setLSQObjective(const Objective& _objective)
 
 	if ( lsqEndTermElements.size() == 0 )
 		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost must be defined");
+	if (lsqEndTermElements[0].h.getDim() == 0)
+		return ACADOERRORTEXT(RET_INVALID_OBJECTIVE_FOR_CODE_EXPORT, "The terminal cost must include cost elements.");
 
 	if (lsqEndTermElements[ 0 ].W.isSquare() == false)
 		return ACADOERRORTEXT(RET_INVALID_ARGUMENTS, "Weighting matrices must be square.");
