@@ -576,7 +576,7 @@ returnValue GnuplotWindow::sendDataToGnuplot( )
 		gnuPipe = 0;
 
 #if defined(GNUPLOT_EXECUTABLE) && defined(WIN32)
-		string tmp = string( GNUPLOT_EXECUTABLE ) + string(" -p acado2gnuplot_tmp.dat");
+		string tmp = string("\"") + string( GNUPLOT_EXECUTABLE ) + string("\" -p acado2gnuplot_tmp.dat");
 
 		if ( system( tmp.c_str() ) )
 			return RET_PLOTTING_FAILED;
