@@ -109,7 +109,8 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 			ss << "typedef double real_t;\n";
 
 		break;
-	
+
+    case QP_GENERIC:
 	case QP_NONE:
 		ss << "/** Definition of the floating point data type. */\n";
 		if (_useSinglePrecision == true)

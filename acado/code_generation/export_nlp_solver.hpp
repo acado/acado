@@ -168,6 +168,11 @@ public:
 	 * */
 	unsigned getNumComplexConstraints( void );
 
+    /** Get the number of path constraints.
+     *  \return Number of path constraints
+     * */
+    unsigned getNumPathConstraints( void );
+
 	/** Return type of weighting matrices.
 	 *  \return Type of weighting matrices. */
 	unsigned weightingMatricesType( void ) const;
@@ -357,6 +362,7 @@ enum ExportNLPType
 	GAUSS_NEWTON_FORCES,
 	GAUSS_NEWTON_QPDUNES,
 	GAUSS_NEWTON_HPMPC,
+    GAUSS_NEWTON_GENERIC,
 	EXACT_HESSIAN_CN2,
 	EXACT_HESSIAN_QPDUNES
 };

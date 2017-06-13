@@ -637,6 +637,7 @@ enum QPSolverName
 	QP_FORCES,
 	QP_QPDUNES,
 	QP_HPMPC,
+    QP_GENERIC,
 	QP_NONE
 };
 

@@ -1581,6 +1581,11 @@ unsigned ExportNLPSolver::getNumComplexConstraints( void )
 	return N * dimPacH + dimPocH;
 }
 
+unsigned ExportNLPSolver::getNumPathConstraints( void )
+{
+    return dimPacH;
+}
+
 bool ExportNLPSolver::initialStateFixed() const
 {
 	int fixInitialState;

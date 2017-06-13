@@ -39,6 +39,7 @@
 #include <acado/code_generation/export_gauss_newton_forces.hpp>
 #include <acado/code_generation/export_gauss_newton_qpdunes.hpp>
 #include <acado/code_generation/export_gauss_newton_hpmpc.hpp>
+#include <acado/code_generation/export_gauss_newton_generic.hpp>
 #include <acado/code_generation/export_exact_hessian_cn2.hpp>
 #include <acado/code_generation/export_exact_hessian_qpdunes.hpp>
 
@@ -104,6 +105,13 @@ ExportNLPSolver* createGaussNewtonHpmpc(	UserInteraction* _userInteraction,
 	return new ExportGaussNewtonHpmpc(_userInteraction, _commonHeaderName);
 }
 
+ExportNLPSolver* createGaussNewtonGeneric(    UserInteraction* _userInteraction,
+                                            const std::string& _commonHeaderName
+                                        )
+{
+    return new ExportGaussNewtonGeneric(_userInteraction, _commonHeaderName);
+}
+
 ExportNLPSolver* createExactHessianCN2(	UserInteraction* _userInteraction,
 											const std::string& _commonHeaderName
 											)
@@ -128,6 +136,7 @@ RegisterNlpSolvers::RegisterNlpSolvers()
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_FORCES, createGaussNewtonForces);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_QPDUNES, createGaussNewtonQpDunes);
 	NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_HPMPC, createGaussNewtonHpmpc);
+    NLPSolverFactory::instance().registerAlgorithm(GAUSS_NEWTON_GENERIC, createGaussNewtonGeneric);
 	NLPSolverFactory::instance().registerAlgorithm(EXACT_HESSIAN_CN2, createExactHessianCN2);
 	NLPSolverFactory::instance().registerAlgorithm(EXACT_HESSIAN_QPDUNES, createExactHessianQpDunes);
 }

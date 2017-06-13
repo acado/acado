@@ -345,7 +345,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 		case QP_HPMPC:
 			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
 				//acadoCopyTemplateFile(MAKE_MEX_EH_QPDUNES, str, "%", true);
-				ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface for HMPC with exacat Hessians is not yet available.");
+				ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface for HMPC with exact Hessians is not yet available.");
 			}
 			else {
 				//acadoCopyTemplateFile(MAKE_MEX_QPDUNES, str, "%", true);
@@ -589,7 +589,7 @@ returnValue OCPexport::setup( )
 			break;
 
 	case SPARSE_SOLVER:
-		if ((QPSolverName)qpSolver != QP_FORCES && (QPSolverName)qpSolver != QP_QPDUNES && (QPSolverName)qpSolver != QP_HPMPC)
+		if ((QPSolverName)qpSolver != QP_FORCES && (QPSolverName)qpSolver != QP_QPDUNES && (QPSolverName)qpSolver != QP_HPMPC && (QPSolverName)qpSolver != QP_GENERIC)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
 					"For sparse solution FORCES, qpDUNES and HPMPC QP solvers are supported");
 		if ( (QPSolverName)qpSolver == QP_FORCES)
@@ -608,6 +608,9 @@ returnValue OCPexport::setup( )
 		else if ((QPSolverName)qpSolver == QP_HPMPC)
 			solver = ExportNLPSolverPtr(
 					NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_HPMPC));
+        else if ((QPSolverName)qpSolver == QP_GENERIC)
+            solver = ExportNLPSolverPtr(
+                    NLPSolverFactory::instance().createAlgorithm(this, commonHeaderName, GAUSS_NEWTON_GENERIC));
 		break;
 
 	default:
@@ -767,6 +770,7 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	options[ modulePrefix + "_NOD" ]  = make_pair(toString( ocp.getNOD() ),  "Number of online data values.");
 	options[ modulePrefix + "_NY" ]  = make_pair(toString( solver->getNY() ),  "Number of references/measurements per node on the first N nodes.");
 	options[ modulePrefix + "_NYN" ] = make_pair(toString( solver->getNYN() ), "Number of references/measurements on the last (N + 1)st node.");
+    options[ modulePrefix + "_NPAC" ]  = make_pair(toString( solver->getNumPathConstraints() ),  "Number of path constraints.");
 
 	Grid integrationGrid;
 	ocp.getIntegrationGrid(integrationGrid);
