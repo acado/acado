@@ -84,7 +84,10 @@ class OptimizationAlgorithm : public OptimizationAlgorithmBase, public UserInter
         /** Starts execution. */
         virtual returnValue solve( );
 
-
+		returnValue getBandedCP(BandedCP& _bcp) const{
+			dynamic_cast<SCPmethod*>(nlpSolver)->getBandedCP(_bcp);
+			return SUCCESSFUL_RETURN;
+		};
 
     //
     // PROTECTED MEMBER FUNCTIONS:
