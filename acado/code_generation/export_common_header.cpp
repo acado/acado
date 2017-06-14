@@ -73,7 +73,8 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 		<< "/** qpDUNES QP solver indicator.*/" << endl
 		<< "#define " << _modulePrefix << "_QPDUNES  3" << endl
 		<< "/** HPMPC QP solver indicator. */" << endl
-		<< "#define " << _modulePrefix << "_HPMPC    4" << endl << endl
+		<< "#define " << _modulePrefix << "_HPMPC    4" << endl
+        << "#define " << _modulePrefix << "_GENERIC    5" << endl << endl
 		<< "/** Indicator for determining the QP solver used by the ACADO solver code. */" << endl;
 
 	switch ( _qpSolver )
@@ -111,6 +112,7 @@ returnValue ExportCommonHeader::configure(	const std::string& _moduleName,
 		break;
 
     case QP_GENERIC:
+        ss << "#define " << _modulePrefix << "_QP_SOLVER " << _modulePrefix << "_GENERIC\n" << endl;
 	case QP_NONE:
 		ss << "/** Definition of the floating point data type. */\n";
 		if (_useSinglePrecision == true)
