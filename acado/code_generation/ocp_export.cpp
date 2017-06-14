@@ -354,7 +354,9 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
                 	mexInterfaceMake.exportCode();
 			}
 			break;
-		
+
+        case QP_GENERIC:
+            break;
 		default:
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface is not yet available.");
 			break;
