@@ -338,6 +338,15 @@ void mexFunction(	int nlhs,
 	getArray(1, src, 0, "lbAValues", @MODULE_NAME@Variables.lbAValues, @MODULE_PREFIX@_QP_NCA, 1);
 	getArray(1, src, 0, "ubAValues", @MODULE_NAME@Variables.ubAValues, @MODULE_PREFIX@_QP_NCA, 1);
 	#endif
+#elif (@MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 0) && (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_GENERIC)
+	/* Bounds */
+	getArray(1, src, 0, "lbValues", @MODULE_NAME@Variables.lbValues, @MODULE_PREFIX@_N*(@MODULE_PREFIX@_NX+@MODULE_PREFIX@_NU), 1);
+	getArray(1, src, 0, "ubValues", @MODULE_NAME@Variables.ubValues, @MODULE_PREFIX@_N*(@MODULE_PREFIX@_NX+@MODULE_PREFIX@_NU), 1);
+	#if (@MODULE_PREFIX@_NPAC > 0)
+	/* Affine bounds */
+	getArray(1, src, 0, "lbAValues", @MODULE_NAME@Variables.lbAValues, @MODULE_PREFIX@_N*@MODULE_PREFIX@_NPAC, 1);
+	getArray(1, src, 0, "ubAValues", @MODULE_NAME@Variables.ubAValues, @MODULE_PREFIX@_N*@MODULE_PREFIX@_NPAC, 1);
+	#endif
 #endif
 
 #if @MODULE_PREFIX@_USE_ARRIVAL_COST == 1
