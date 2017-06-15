@@ -219,7 +219,9 @@ void mexFunction(	int nlhs,
 	double status, cpuTime, kktValue, objValue;
 	double tmp[ 1 ];
 	mxArray* shPtr;
+#ifndef _DSPACE
 	@MODULE_NAME@_timer tmr;
+#endif
 	double nIterations = 0;
 	
 	const char *outNames[ NOO_4 ];
@@ -375,7 +377,9 @@ void mexFunction(	int nlhs,
 	else
 		strategy = 0;
 		
+#ifndef _DSPACE
 	@MODULE_NAME@_tic( &tmr );
+#endif
 	
 	/* Call solver */
 	switch ( ctrl )
@@ -489,7 +493,9 @@ void mexFunction(	int nlhs,
 			mexErrMsgTxt("Unknown control code.");
 	}
 	
+#ifndef _DSPACE
 	cpuTime = @MODULE_NAME@_toc( &tmr );
+#endif
 	
 	/* Prepare return argument */
 	
