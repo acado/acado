@@ -752,6 +752,8 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 	get(CG_USE_ARRIVAL_COST, useAC);
 	int covCalc;
 	get(CG_COMPUTE_COVARIANCE_MATRIX, covCalc);
+    int singlePrec;
+    get(USE_SINGLE_PRECISION, singlePrec);
 
 	int linSolver;
 	get(LINEAR_ALGEBRA_SOLVER, linSolver);
@@ -794,6 +796,8 @@ returnValue OCPexport::exportAcadoHeader(	const std::string& _dirName,
 			make_pair(toString( useAC ), "Providing interface for arrival cost.");
 	options[ modulePrefix + "_COMPUTE_COVARIANCE_MATRIX" ] =
 			make_pair(toString( covCalc ), "Compute covariance matrix of the last state estimate.");
+    options[ modulePrefix + "_SINGLE_PRECISION" ] =
+            make_pair(toString( singlePrec ), "Single versus double precision data type representation.");
 	options[ modulePrefix + "_QP_NV" ] =
 			make_pair(toString( solver->getNumQPvars() ), "Total number of QP optimization variables.");
 
