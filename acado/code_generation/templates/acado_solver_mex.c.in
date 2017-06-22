@@ -217,12 +217,12 @@ void mexFunction(	int nlhs,
 	const char *infoNames[ 5 ] = {"status", "cpuTime", "kktValue", "objValue", "nIterations"};
 	mxArray* info;
 	real_t status, cpuTime, kktValue, objValue;
-	double tmp[ 1 ];
+	real_t tmp[ 1 ];
 	mxArray* shPtr;
 #ifndef _DSPACE
 	@MODULE_NAME@_timer tmr;
 #endif
-	double nIterations = 0;
+	real_t nIterations = 0;
 	
 	const char *outNames[ NOO_4 ];
 	outNames[ 0 ] = "info";
@@ -424,7 +424,7 @@ void mexFunction(	int nlhs,
 			objValue = @MODULE_NAME@_getObjective();
 
 #if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
-			nIterations = (double)@MODULE_NAME@_getNWSR();
+			nIterations = (real_t)@MODULE_NAME@_getNWSR();
 #elif @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_FORCES
 			nIterations = @MODULE_NAME@Forces_info.it;
 #elif @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPDUNES
@@ -469,7 +469,7 @@ void mexFunction(	int nlhs,
 			objValue = @MODULE_NAME@_getObjective();
 			
 #if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
-			nIterations = (double)@MODULE_NAME@_getNWSR();
+			nIterations = (real_t)@MODULE_NAME@_getNWSR();
 #elif @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_FORCES
 			nIterations = @MODULE_NAME@Forces_info.it;
 #endif /* @MODULE_PREFIX@_QP_SOLVER */
