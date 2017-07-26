@@ -92,6 +92,8 @@ output
 /** Instance of the private workspace structure. */
 @MODULE_PREFIX@workspace @MODULE_NAME@Workspace;
 
+real_t QP_violation = 0;
+
 #if @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_FORCES
 #include "forces.h"
 extern forces_info @MODULE_NAME@Forces_info;
@@ -167,7 +169,7 @@ int getArray(	const unsigned mandatory,
 		destination = (real_t*)mxCalloc(nRows * nCols, sizeof( real_t ));
 
 	if (nRows == 1 && nCols == 1)
-		*destination = *dPtr;
+		*destination = (real_t)*dPtr;
 	else
 		for (i = 0; i < nRows; ++i)
 			for (j = 0; j < nCols; ++j)
@@ -189,7 +191,7 @@ void setArray( 	mxArray* destination,
 	unsigned i, j;
 	
 	if (nRows == 1 && nCols == 1)
-		*dPtr = *source;
+		*dPtr = (double)*source;
 	else
 		for (i = 0; i < nRows; ++i)
 			for(j = 0; j < nCols; ++j)
@@ -214,7 +216,7 @@ void mexFunction(	int nlhs,
 	real_t* uEnd = NULL;
 	const mxArray* src = prhs[ 0 ];
 	
-	const char *infoNames[ 5 ] = {"status", "cpuTime", "kktValue", "objValue", "nIterations"};
+	const char *infoNames[ 6 ] = {"status", "cpuTime", "kktValue", "objValue", "QP_iter", "QP_violation"};
 	mxArray* info;
 	real_t status, cpuTime, kktValue, objValue;
 	real_t tmp[ 1 ];
@@ -423,7 +425,7 @@ void mexFunction(	int nlhs,
 			kktValue = @MODULE_NAME@_getKKT();
 			objValue = @MODULE_NAME@_getObjective();
 
-#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
+#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_GENERIC) )
 			nIterations = (real_t)@MODULE_NAME@_getNWSR();
 #elif @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_FORCES
 			nIterations = @MODULE_NAME@Forces_info.it;
@@ -468,7 +470,7 @@ void mexFunction(	int nlhs,
 			kktValue = @MODULE_NAME@_getKKT();
 			objValue = @MODULE_NAME@_getObjective();
 			
-#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
+#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_GENERIC) )
 			nIterations = (real_t)@MODULE_NAME@_getNWSR();
 #elif @MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_FORCES
 			nIterations = @MODULE_NAME@Forces_info.it;
@@ -517,14 +519,15 @@ void mexFunction(	int nlhs,
 #endif /* @MODULE_PREFIX@_COMPUTE_COVARIANCE_MATRIX */
 
 	/* Create the info structure. */
-	info = mxCreateStructMatrix(1, 1, 5, infoNames);
+	info = mxCreateStructMatrix(1, 1, 6, infoNames);
 		
 	setArray(info, 0, "status", &status, 1, 1);
 	setArray(info, 0, "cpuTime", &cpuTime, 1, 1);
 	setArray(info, 0, "kktValue", &kktValue, 1, 1);
 	setArray(info, 0, "objValue", &objValue, 1, 1);
-#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) )
-	setArray(info, 0, "nIterations", &nIterations, 1, 1);
+#if ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_GENERIC) )
+	setArray(info, 0, "QP_iter", &nIterations, 1, 1);
+	setArray(info, 0, "QP_violation", &QP_violation, 1, 1);
 #endif /* ( (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES) || (@MODULE_PREFIX@_QP_SOLVER == @MODULE_PREFIX@_QPOASES3) ) */
 		
 	mxSetField(plhs[ 0 ], 0, "info", info);
