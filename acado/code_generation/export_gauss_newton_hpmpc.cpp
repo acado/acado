@@ -71,6 +71,9 @@ returnValue ExportGaussNewtonHpmpc::getDataDeclarations(	ExportStatementBlock& d
 	if (status != SUCCESSFUL_RETURN)
 		return status;
 
+    int hardcodeConstraintValues;
+    get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
+
 	declarations.addDeclaration(x0, dataStruct);
 
 	if (Q1.isGiven() == true)
@@ -101,6 +104,14 @@ returnValue ExportGaussNewtonHpmpc::getDataDeclarations(	ExportStatementBlock& d
 	declarations.addDeclaration(qpMu, dataStruct);
 
 	declarations.addDeclaration(nIt, dataStruct);
+
+    if (hardcodeConstraintValues == NO) {
+        declarations.addDeclaration(evLbValues, dataStruct);
+        declarations.addDeclaration(evUbValues, dataStruct);
+
+        declarations.addDeclaration(evLbAValues, dataStruct);
+        declarations.addDeclaration(evUbAValues, dataStruct);
+    }
 
 	return SUCCESSFUL_RETURN;
 }
@@ -507,8 +518,8 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 
 
 
-//	int hardcodeConstraintValues;
-//	get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
+    int hardcodeConstraintValues;
+    get(CG_HARDCODE_CONSTRAINT_VALUES, hardcodeConstraintValues);
 
 	evaluateConstraints.setup("evaluateConstraints");
 
@@ -567,11 +578,22 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 	qpLb.setup("qpLb", N * NU + N * NX, 1, REAL, ACADO_WORKSPACE);
 	qpUb.setup("qpUb", N * NU + N * NX, 1, REAL, ACADO_WORKSPACE);
 
-	evLbValues.setup("evLbValues", lbValues, STATIC_CONST_REAL, ACADO_LOCAL);
-	evUbValues.setup("evUbValues", ubValues, STATIC_CONST_REAL, ACADO_LOCAL);
+	if( hardcodeConstraintValues == YES ) {
+	    evLbValues.setup("evLbValues", lbValues, STATIC_CONST_REAL, ACADO_LOCAL);
+	    evUbValues.setup("evUbValues", ubValues, STATIC_CONST_REAL, ACADO_LOCAL);
 
-	evaluateConstraints.addVariable( evLbValues );
-	evaluateConstraints.addVariable( evUbValues );
+	    evaluateConstraints.addVariable( evLbValues );
+	    evaluateConstraints.addVariable( evUbValues );
+	}
+	else {
+	    evLbValues.setup("lbValues", N * NU + N * NX, 1, REAL, ACADO_VARIABLES);
+	    evLbValues.setDoc( "Lower bounds values." );
+	    evUbValues.setup("ubValues", N * NU + N * NX, 1, REAL, ACADO_VARIABLES);
+	    evUbValues.setDoc( "Upper bounds values." );
+
+	    initialize.addStatement( evLbValues == lbValues );
+	    initialize.addStatement( evUbValues == ubValues );
+	}
 
 	evaluateConstraints.addStatement( qpLb.getRows(0, N * NU) == evLbValues.getRows(0, N * NU) - u.makeColVector() );
 	evaluateConstraints.addStatement( qpUb.getRows(0, N * NU) == evUbValues.getRows(0, N * NU) - u.makeColVector() );
@@ -649,11 +671,22 @@ returnValue ExportGaussNewtonHpmpc::setupConstraintsEvaluation( void )
 	lbAValues.append( pocLbStack[ N ] );
 	ubAValues.append( pocUbStack[ N ] );
 
-	ExportVariable evLbAValues("lbAValues", lbAValues, STATIC_CONST_REAL);
-	ExportVariable evUbAValues("ubAValues", ubAValues, STATIC_CONST_REAL);
+	if( hardcodeConstraintValues == YES || qpDimHtot == 0 ) {
+	    evLbAValues.setup("lbAValues", lbAValues, STATIC_CONST_REAL);
+	    evUbAValues.setup("ubAValues", ubAValues, STATIC_CONST_REAL);
 
-	evaluateConstraints.addVariable( evLbAValues );
-	evaluateConstraints.addVariable( evUbAValues );
+	    evaluateConstraints.addVariable( evLbAValues );
+	    evaluateConstraints.addVariable( evUbAValues );
+	}
+	else {
+	    evLbAValues.setup("lbAValues", qpDimHtot, 1, REAL, ACADO_VARIABLES);
+	    evLbAValues.setDoc( "Lower affine bounds values." );
+	    evUbAValues.setup("ubAValues", qpDimHtot, 1, REAL, ACADO_VARIABLES);
+	    evUbAValues.setDoc( "Upper affine bounds values." );
+
+	    initialize.addStatement( evLbAValues == lbAValues );
+	    initialize.addStatement( evUbAValues == ubAValues );
+	}
 
 	//
 	// Evaluate path constraints

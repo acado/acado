@@ -195,7 +195,8 @@ private:
 	ExportVariable qpq, qpqf, qpr;
 	ExportVariable qpx, qpu;
 
-	ExportVariable evLbValues, evUbValues;
+    ExportVariable evLbValues, evUbValues;
+    ExportVariable evLbAValues, evUbAValues;
 	ExportVariable qpLb, qpUb;
 
 	ExportVariable qpLbA, qpUbA;
