@@ -107,6 +107,8 @@ returnValue ExportGaussNewtonQpDunes::getDataDeclarations(	ExportStatementBlock&
 	declarations.addDeclaration(qpUb, dataStruct);
 	declarations.addDeclaration(lbValues, dataStruct);
 	declarations.addDeclaration(ubValues, dataStruct);
+    declarations.addDeclaration(evLbAValues, dataStruct);
+    declarations.addDeclaration(evUbAValues, dataStruct);
 	declarations.addDeclaration(qpC, dataStruct);
 	declarations.addDeclaration(qpc, dataStruct);
 
@@ -734,8 +736,8 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 
 	if (getNumComplexConstraints() == 0)
 		return SUCCESSFUL_RETURN;
-	else if(hardcodeConstraintValues == YES)
-		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
+//	else if(hardcodeConstraintValues == NO)
+//		return ACADOERROR( RET_NOT_IMPLEMENTED_YET );
 
 	unsigned dimLbA  = N * dimPacH;
 	unsigned dimConA = dimLbA * (NX + NU);
@@ -778,8 +780,8 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	{
 		if ( dimPacH )
 		{
-			lbAValues.append( lbPathConValues.block(i * NX, 0, NX, 1) );
-			ubAValues.append( ubPathConValues.block(i * NX, 0, NX, 1) );
+			lbAValues.append( lbPathConValues.block(i * dimPacH, 0, dimPacH, 1) );
+			ubAValues.append( ubPathConValues.block(i * dimPacH, 0, dimPacH, 1) );
 		}
 		lbAValues.append( pocLbStack[ i ] );
 		ubAValues.append( pocUbStack[ i ] );
@@ -787,11 +789,21 @@ returnValue ExportGaussNewtonQpDunes::setupConstraintsEvaluation( void )
 	lbAValues.append( pocLbStack[ N ] );
 	ubAValues.append( pocUbStack[ N ] );
 
-	ExportVariable evLbAValues("lbAValues", lbAValues, STATIC_CONST_REAL);
-	ExportVariable evUbAValues("ubAValues", ubAValues, STATIC_CONST_REAL);
+	if (hardcodeConstraintValues == YES  || dimLbA == 0) {
+	    evLbAValues.setup("lbAValues", lbAValues, STATIC_CONST_REAL);
+	    evUbAValues.setup("ubAValues", ubAValues, STATIC_CONST_REAL);
 
-	evaluateConstraints.addVariable( evLbAValues );
-	evaluateConstraints.addVariable( evUbAValues );
+	    evaluateConstraints.addVariable( evLbAValues );
+	    evaluateConstraints.addVariable( evUbAValues );
+	} else {
+        evLbAValues.setup("lbAValues", dimLbA, 1, REAL, ACADO_VARIABLES);
+        evLbAValues.setDoc( "Lower affine bounds values." );
+        evUbAValues.setup("ubAValues", dimLbA, 1, REAL, ACADO_VARIABLES);
+        evUbAValues.setDoc( "Upper affine bounds values." );
+
+        initialize.addStatement( evLbAValues == lbAValues );
+        initialize.addStatement( evUbAValues == ubAValues );
+	}
 
 	//
 	// Evaluate path constraints
