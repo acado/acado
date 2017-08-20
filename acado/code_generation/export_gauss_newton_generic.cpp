@@ -404,7 +404,11 @@ returnValue ExportGaussNewtonGeneric::setupObjectiveEvaluation( void )
 	ExportVariable qq, rr;
 	qq.setup("stageq", NX, 1, REAL, ACADO_LOCAL);
 	rr.setup("stager", NU, 1, REAL, ACADO_LOCAL);
-	setStagef.setup("setStagef", qq, rr, index);
+
+
+    ExportVariable SlxCall = objSlx.isGiven() == true ? objSlx : ExportVariable("Slx", NX, 1, REAL, ACADO_LOCAL);
+    ExportVariable SluCall = objSlu.isGiven() == true ? objSlu : ExportVariable("Slu", NU, 1, REAL, ACADO_LOCAL);
+	setStagef.setup("setStagef", qq, rr, SlxCall, SluCall, index);
 
 	if (Q2.isGiven() == false)
 		setStagef.addStatement(
@@ -417,6 +421,7 @@ returnValue ExportGaussNewtonGeneric::setupObjectiveEvaluation( void )
 				qq == Q2 * Dy.getRows(index * NY, (index + 1) * NY)
 		);
 	}
+    setStagef.addStatement( qq += SlxCall );
 	setStagef.addLinebreak();
 
 	if (R2.isGiven() == false)
@@ -429,6 +434,7 @@ returnValue ExportGaussNewtonGeneric::setupObjectiveEvaluation( void )
 				rr == R2 * Dy.getRows(index * NY, (index + 1) * NY)
 		);
 	}
+	setStagef.addStatement( rr += SluCall );
 
 	//
 	// Setup necessary QP variables
@@ -856,6 +862,16 @@ returnValue ExportGaussNewtonGeneric::setupMultiplicationRoutines( )
 
 returnValue ExportGaussNewtonGeneric::setupEvaluation( )
 {
+    int gradientUp;
+    get( LIFTED_GRADIENT_UPDATE, gradientUp );
+    bool gradientUpdate = (bool) gradientUp;
+
+    int variableObjS;
+    get(CG_USE_VARIABLE_WEIGHTING_MATRIX, variableObjS);
+    int sensitivityProp;
+    get( DYNAMIC_SENSITIVITY, sensitivityProp );
+    bool adjoint = ((ExportSensitivityType) sensitivityProp == BACKWARD || ((ExportSensitivityType) sensitivityProp == INEXACT && gradientUpdate));
+
 	////////////////////////////////////////////////////////////////////////////
 	//
 	// Setup preparation phase
@@ -914,10 +930,20 @@ returnValue ExportGaussNewtonGeneric::setupEvaluation( )
 	feedback.addStatement( DyN -= yN );
 	feedback.addLinebreak();
 
-	for (unsigned i = 0; i < N; ++i)
-		feedback.addFunctionCall(setStagef, qpq.getAddress(i * NX), qpr.getAddress(i * NU), ExportIndex( i ));
+	for (unsigned i = 0; i < N; ++i) {
+        ExportArgument SlxCall =
+                objSlx.isGiven() == true || (variableObjS == false && !adjoint) ? objSlx : objSlx.getAddress(i * NX, 0);
+        ExportArgument SluCall =
+                objSlu.isGiven() == true || (variableObjS == false && !adjoint) ? objSlu : objSlu.getAddress(i * NU, 0);
+
+		feedback.addFunctionCall(setStagef, qpq.getAddress(i * NX), qpr.getAddress(i * NU), SlxCall, SluCall, ExportIndex( i ));
+	}
 	feedback.addLinebreak();
+    ExportVariable SlxCall =
+                objSlx.isGiven() == true || (variableObjS == false && !adjoint) ? objSlx : objSlx.getRows(N * NX, (N + 1) * NX);
 	feedback.addStatement( qpqf == QN2 * DyN );
+    feedback.addStatement( qpqf += SlxCall );
+
 	feedback.addLinebreak();
 
 	//
