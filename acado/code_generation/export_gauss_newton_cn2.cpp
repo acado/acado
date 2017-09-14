@@ -687,21 +687,27 @@ returnValue ExportGaussNewtonCN2::setupConstraintsEvaluation( void )
 		// Optionally store derivatives
 		if ( pacEvHx.isGiven() == false )
 		{
-			loopPac.addStatement(
-					pacEvHx.makeRowVector().
-					getCols(runPac * dimPacH * NX, (runPac + 1) * dimPacH * NX)
-					== conValueOut.getCols(derOffset, derOffset + dimPacH * NX )
-			);
+			for (unsigned j1 = 0; j1 < dimPacH; ++j1) {
+			    for (unsigned j2 = 0; j2 < NX; ++j2) {
+			        loopPac.addStatement(
+			                pacEvHx.getElement(runPac * dimPacH + j1, j2) ==
+			                        conValueOut.getCol(derOffset + j1*NX+j2)
+			        );
+			    }
+			}
 
 			derOffset = derOffset + dimPacH * NX;
 		}
 		if (pacEvHu.isGiven() == false )
 		{
-			loopPac.addStatement(
-					pacEvHu.makeRowVector().
-					getCols(runPac * dimPacH * NU, (runPac + 1) * dimPacH * NU)
-					== conValueOut.getCols(derOffset, derOffset + dimPacH * NU )
-			);
+            for (unsigned j1 = 0; j1 < dimPacH; ++j1) {
+                for (unsigned j2 = 0; j2 < NU; ++j2) {
+                    loopPac.addStatement(
+                            pacEvHu.getElement(runPac * dimPacH + j1, j2) ==
+                                    conValueOut.getCol(derOffset + j1*NU+j2)
+                    );
+                }
+            }
 
 			derOffset = derOffset + dimPacH * NU;
 		}
