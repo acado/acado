@@ -29,8 +29,12 @@ function make_@MODULE_NAME@_solver( name )
 		
 	% Adding additional linker flags for Linux
 	ldFlags = '';
-	if (isunix() && ~ismac())
-		ldFlags = '-lhpmpc -lblasfeo -lrt';
+	if isunix()
+        if ismac()
+            ldFlags = '-lhpmpc -lblasfeo';
+        else
+            ldFlags = '-lhpmpc -lblasfeo -lrt';
+        end;
     elseif (ispc)
         ldFlags = '-lhpmpc -lblasfeo -DWIN32';
 	end;
