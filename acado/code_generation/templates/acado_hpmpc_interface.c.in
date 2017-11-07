@@ -14,14 +14,19 @@
 /* ACADO auto-generated header */
 #include "acado_common.h"
 /* HPMPC configuration */
+#if defined HPMPC_OLD
 #include "hpmpc_old/include/target.h"
 #include "hpmpc_old/include/block_size.h"
 #include "hpmpc_old/include/aux_d.h"
 #include "hpmpc_old/include/aux_s.h"
 #include "hpmpc_old/include/mpc_solvers.h"
-#if defined HPMPC_OLD
 #include "c_interface.h"
 #else
+#include "hpmpc/include/target.h"
+#include "hpmpc/include/block_size.h"
+#include "hpmpc/include/aux_d.h"
+#include "hpmpc/include/aux_s.h"
+#include "hpmpc/include/mpc_solvers.h"
 #include "hpmpc/include/c_interface.h"
 #endif
 
