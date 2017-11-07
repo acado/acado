@@ -4,6 +4,9 @@
 *                                                                                                 *
 **************************************************************************************************/
 
+// use hpmpc_old
+//#define HPMPC_OLD
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -11,21 +14,21 @@
 /* ACADO auto-generated header */
 #include "acado_common.h"
 /* HPMPC configuration */
-#include "hpmpc/include/target.h"
-#include "hpmpc/include/block_size.h"
-#include "hpmpc/include/aux_d.h"
-#include "hpmpc/include/aux_s.h"
-#include "hpmpc/include/mpc_solvers.h"
+#include "hpmpc_old/include/target.h"
+#include "hpmpc_old/include/block_size.h"
+#include "hpmpc_old/include/aux_d.h"
+#include "hpmpc_old/include/aux_s.h"
+#include "hpmpc_old/include/mpc_solvers.h"
+#if defined HPMPC_OLD
 #include "c_interface.h"
+#else
+#include "hpmpc/include/c_interface.h"
+#endif
 
 // problem size (states, inputs, horizon)
 #define NX ACADO_NX
 #define NU ACADO_NU
-#define N ACADO_N
 #define NN ACADO_N
-
-
-#define NZ (NX+NU+1)
 
 // number of inequality constraints
 #define NB (NU+NX)
@@ -47,152 +50,421 @@
 #define K_MAX @MAX_ITER@
 
 // tolerance in the duality measure
-#define MU_TOL 1e-6
+#define MU_TOL 1e-12
 
-// minimum accepted step length
-#define ALPHA_MIN 1e-8
+// print for debug
+//#define DEBUG_PRINT
 
-/*// threshold in the duality measure to switch from single to double precision TODO not implemented */
-/*#define SP_THR 1e5*/
 
-// Debug flag TODO
-#define PC_DEBUG @PRINT_LEVEL@
+// matrix-vector multiplication y = Ax(matrix assumed to be in c order)
+// z = beta*y + alpha*A*x
+void dgemv_n(int m, int n, double alpha, double *A, int lda, double *x, double beta, double *y, double *z)
+{
+	int ii, jj;
+	double temp;
 
-#if @PRECISION@ == 0
-
-// double constants
-
-#define MR D_MR
-#define NCL D_NCL
-
-#define NAL (MR*NCL)
-#define PNZ (MR*((NZ+MR-1)/MR))
-#define PNX (MR*((NX+MR-1)/MR))
-#define CNZ (NCL*((NZ+NCL-1)/NCL))
-#define CNX (NCL*((NX+NCL-1)/NCL))
-#define PNB (MR*((NB+MR-1)/MR))
-#define PAD ((NCL-NX%NCL)%NCL) // packing between BAbtL & P
-#define CNL (CNZ<CNX+NCL ? CNX+NCL : CNZ)
-
-#else
-
-// float constants
-
-#define MR S_MR
-#define NCL S_NCL
-
-#define NAL (MR*NCL)
-#define PNZ (MR*((NZ+MR-1)/MR))
-#define PNX (MR*((NX+MR-1)/MR))
-#define CNZ (NCL*((NZ+NCL-1)/NCL))
-#define CNX (NCL*((NX+NCL-1)/NCL))
-#define PNB (MR*((NB+MR-1)/MR))
-#define PAD ((NCL-NX%NCL)%NCL) // packing between BAbtL & P
-#define CNL (CNZ<CNX+NCL ? CNX+NCL : CNZ)
-
-#endif // @PRECISION@ == 0
-
-#define nx NX 
-#define nu NU 
-
-#define bs MR 
-#define ncl NCL 
-#define nal (MR * NCL)
-
-#define nz NZ 
-#define pnz PNZ 
-#define pnx PNX 
-#define cnz CNZ 
-#define cnx CNX 
-
-#define pad PAD  // packing between BAbtL & P
-#define cnl CNL 
-
-#define nb NB  // number of box constraints
-#define pnb PNB 
+	for(ii = 0; ii < m; ii++)
+	{
+		temp = 0.0;
+		for(jj = 0; jj < n; jj++)
+		{
+			temp += A[ii*lda + jj]*x[jj];
+		}
+		z[ii] = beta*y[ii] + alpha*temp;
+	}
+}
 
 /* version dealing with equality constraitns: is lb=ub, then fix the variable (corresponding column in A or B set to zero, and updated b) */
 int acado_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b,
-                            real_t* Q, real_t* Qf, real_t* S, real_t* R, 
-                            real_t* q, real_t* qf, real_t* r, 
-                            real_t* lb, real_t* ub, 
-                            real_t* qpA, real_t* lbA, real_t* ubA, 
+                            real_t* Q, real_t* Qf, real_t* S, real_t* R,
+                            real_t* q, real_t* qf, real_t* r,
+                            real_t* lb, real_t* ub,
+                            real_t* qpA, real_t* lbA, real_t* ubA,
                             real_t* x, real_t* u,
                             real_t* lambda, real_t* mu, real_t* slacks,
                             int* nIt )
-                            
-                           
+
+
 {
+
+    int ii, jj, kk;
 
     int hpmpc_status = -1;
 
     int k_max = K_MAX;                              // maximum number of iterations in the IP method
 	double mu_tol = MU_TOL;                         // tolerance in the duality measure
-	double alpha_min = ALPHA_MIN;                   // minimum accepted step length
-	static real_t sigma_par[] = {0.4, 0.1, 0.001};  // control primal-dual IP behaviour
+//
+	double mu0 = MU0;
+//	static real_t sigma_par[] = {0.4, 0.1, 0.001};  // control primal-dual IP behaviour
 	static real_t stat[5*K_MAX];                    // statistics from the IP routine
-	//static real_t work0[(@PRECISION@ == 0 ? 8 : 16) + (N+1)*(PNZ*CNX + PNZ*CNZ + PNZ*CNL + 5*PNZ + 3*PNX + 7*PNB) + 3*PNZ];
+	//static real_t work0[(0 == 0 ? 8 : 16) + (N+1)*(PNZ*CNX + PNZ*CNZ + PNZ*CNL + 5*PNZ + 3*PNX + 7*PNB) + 3*PNZ];
 	int warm_start = WARM_START;
-	int compute_mult = 0; // compute multipliers
-    
-    // TODO++: General constraints not supported yet!!
-    double *C   = 0;
-    double *D   = 0;
-    double *CN  = 0;
-    double *lgN  = 0;
-    double *ugN  = 0;
-   
-	@QP_ND_ARRAY@
- 
+	int compute_mult = 1; // compute multipliers
+	int free_x0 = FREE_X0;
+
+    int N   = NN;
+    int nx  = NX;
+    int nu  = NU;
+    int nb  = NB;
+
+    @QP_ND_ARRAY@
+
     int ngN     = 0;
-    int ng      = nD[0]; // assuming same number of constraints on every stage	
+    int ng      = nD[0]; // assuming same number of constraints on every stage
 
-	/* align work space */
-	static double work[HPMPC_IP_MPC_DP_WORK_SPACE_TV];
-  
-    
-    int i, j;
-        
 
-    real_t hpmpc_lb[(nx+nu)*(N+1)]; 
-    real_t hpmpc_ub[(nx+nu)*(N+1)];
-    real_t hpmpc_mu[(nx+nu)*(N+1)];
-    
-    // Sort bounds stage-wise
-    for (i=0; i<N; i++)
-    {
-        for(j=0; j<nu; j++)
+	double tmp0, tmp1;
+
+
+	// stage-varying problem size
+	int nx_v[N+1];
+	if(free_x0)
+		nx_v[0] = nx;
+	else
+		nx_v[0] = 0;
+	for(ii=1; ii<=N; ii++)
+		nx_v[ii] = nx;
+
+	int nu_v[N+1];
+	for(ii=0; ii<N; ii++)
+		nu_v[ii] = nu;
+	nu_v[N] = 0;
+
+	int nb_v[N+1];
+	if(free_x0)
+		nb_v[0] = nb;
+	else
+		nb_v[0] = nu<nb ? nu : nb;
+	for(ii=1; ii<N; ii++)
+		nb_v[ii] = nb;
+	nb_v[N] = nx;
+
+	int ng_v[N+1];
+	for(ii=0; ii<N; ii++)
+		ng_v[ii] = ng;
+	ng_v[N] = 0; // TODO
+
+#ifdef HPMPC_OLD // interface to hpmpc_old
+#else
+//	int idxb0[nb_v[0]];
+//	for(ii=0; ii<nb_v[0]; ii++)
+//		idxb0[ii] = ii;
+//	int idxb1[nb_v[1]];
+//	for(ii=0; ii<nb_v[1]; ii++)
+//		idxb1[ii] = ii;
+//	int idxbN[nb_v[N]];
+//	for(ii=0; ii<nb_v[N]; ii++)
+//		idxbN[ii] = ii;
+	int nbt = 0;
+	for(ii=0; ii<=N; ii++)
+		nbt += nb_v[ii];
+	int idxb[nbt];
+	int *hidxb[N+1];
+	int *iptr = idxb;
+	for(ii=0; ii<=N; ii++)
+		{
+		hidxb[ii] = iptr;
+		iptr += nb_v[ii];
+		for(jj=0; jj<nb_v[ii]; jj++)
+			hidxb[ii][jj] = jj;
+		}
+	int N2 = N/10;
+	N2 = 1>N2 ? 1 : N2;
+//	N2 = 1; // full condensing
+//	N2 = N; // no condensing
+#endif
+
+#ifdef DEBUG_PRINT
+	printf("\nnx = \n");
+	for(ii=0; ii<=N; ii++)
+		printf("%d\n", nx_v[ii]);
+	printf("\nnu = \n");
+	for(ii=0; ii<=N; ii++)
+		printf("%d\n", nu_v[ii]);
+	printf("\nnb = \n");
+	for(ii=0; ii<=N; ii++)
+		printf("%d\n", nb_v[ii]);
+	printf("\nng = \n");
+	for(ii=0; ii<=N; ii++)
+		printf("%d\n", ng_v[ii]);
+#ifdef HPMPC_OLD // interface to hpmpc_old
+#else
+	printf("\nidxb0 = \n");
+	for(ii=0; ii<nb_v[0]; ii++)
+		printf("%d\n", idxb0[ii]);
+	printf("\nidxb1 = \n");
+	for(ii=0; ii<nb_v[1]; ii++)
+		printf("%d\n", idxb1[ii]);
+	printf("\nidxbN = \n");
+	for(ii=0; ii<nb_v[N]; ii++)
+		printf("%d\n", idxbN[ii]);
+#endif
+#endif
+
+
+	// extra work space
+	int extra_work_space = N*(nx*ng + nu*ng + nx + 6*nb + 4*ng) + nx*ngN + 6*nb + 4*ngN;
+	if(free_x0) // MHE
+		extra_work_space += 0;
+	else // MPC
+		extra_work_space += nx + nu + 2*ng;
+
+#ifdef DEBUG_PRINT
+#ifdef HPMPC_OLD // interface to hpmpc_old
+	printf("\n%d %d\n", extra_work_space, hpmpc_d_ip_ocp_hard_tv_work_space_size_bytes(N, nx_v, nu_v, nb_v, ng_v) );
+#else
+	printf("\n%d %d\n", extra_work_space, hpmpc_d_ip_ocp_hard_tv_work_space_size_bytes(N, nx_v, nu_v, nb_v, hidxb, ng_v, N2) );
+#endif
+#endif
+
+	#define static_work_size_doubles 2500000
+	if(extra_work_space+hpmpc_d_ip_ocp_hard_tv_work_space_size_bytes(N, nx_v, nu_v, nb_v, hidxb, ng_v, N2) > static_work_size_doubles*8)
         {
-            hpmpc_lb[i*(nx + nu) + j] = lb[nu*i + j];
-            hpmpc_ub[i*(nx + nu) + j] = ub[nu*i + j];
+		printf("\n\n\nerror!!! not enough memory!!! %d > %d\n\n\n", extra_work_space+hpmpc_d_ip_ocp_hard_tv_work_space_size_bytes(N, nx_v, nu_v, nb_v, hidxb, ng_v, N2), static_work_size_doubles*8);
+        // exit(1);
         }
+	// (dynamic) memory allocation
+	//double *work0 = (double *) malloc( hpmpc_d_ip_ocp_hard_tv_work_space_size_bytes(N, nx_v, nu_v, nb_v, ng_v) + extra_work_space*sizeof(double) );
+	static double work0[static_work_size_doubles];
+    double *work = work0;
 
-        for(j=nu; j<nu+nx; j++)
-        {
-            hpmpc_lb[i*(nx + nu) + j] = lb[ nu*(N-1) + nx*i + j ];
-            hpmpc_ub[i*(nx + nu) + j] = ub[ nu*(N-1) + nx*i + j ];
+	/************************************************
+	* interface work space
+	************************************************/
 
-        }
-	}
-    
-	if(N>1) // adding bounds on the final stage
+	double *hA[N];
+	double *hB[N];
+	double *hb[N];
+	double *hQ[N+1];
+	double *hS[N];
+	double *hR[N];
+	double *hq[N+1];
+	double *hr[N];
+	double *hC[N+1];
+	double *hD[N+1];
+	double *hlb[N+1];
+	double *hub[N+1];
+	double *hlg[N+1];
+	double *hug[N+1];
+	double *hx[N+1];
+	double *hu[N];
+	double *hpi[N];
+	double *hlam[N+1];
+	double *ht[N+1];
+
+	// initial stage
+	hB[0] = &B[0*nx*nu];
+	hR[0] = &R[0*nu*nu];
+	hu[0] = &u[0*nu];
+
+	if(free_x0) //MHE
 	{
-		for(j=0; j<nu; j++)
-    	{
-			hpmpc_lb[N*(nx + nu) + j] = lb[nu*(N-1)  + j];  // "ghost" input bounds
-			hpmpc_ub[N*(nx + nu) + j] = ub[nu*(N-1)  + j];  // "ghost" input bounds
-    	}
-			
-		for(j=nu; j<nx+nu; j++)
-    	{
-            hpmpc_lb[N*(nx + nu) + j] = lb[nu*(N-1) + nx*(N-1)  + j ]; 
-			hpmpc_ub[N*(nx + nu) + j] = ub[nu*(N-1) + nx*(N-1)  + j ]; 
-    	}
+		hA[0] = &A[0*nx*nx];
+		hb[0] = &b[0*nx];
+		hQ[0] = &Q[0*nx*nx];
+		hS[0] = &S[0*nu*nx];
+		hq[0] = &q[0*nx];
+		hr[0] = &r[0*nu];
+		hx[0] = &x[0*nx];
+		hlg[0] = &lbA[0*ng]; // work; work += ng;
+		hug[0] = &ubA[0*ng]; // work; work += ng;
 	}
-    
+	else // MPC
+	{
+		hb[0] = work; work += nx;
+		hr[0] = work; work += nu;
+		hlg[0] = work; work += ng;
+		hug[0] = work; work += ng;
+	}
+	hlb[0] = work; work += nb;
+	hub[0] = work; work += nb;
+	hC[0] = work; work += nx*ng;
+	hD[0] = work; work += nu*ng;
+	hpi[0] = work; work += nx;
+	hlam[0] = work; work += 2*nb + 2*ng;
+	ht[0] = work; work += 2*nb + 2*ng;
+	// middle stage
+	for(ii=1; ii<N; ii++)
+	{
+		hB[ii] = &B[ii*nx*nu];
+		hR[ii] = &R[ii*nu*nu];
+		hA[ii] = &A[ii*nx*nx];
+		hb[ii] = &b[ii*nx];
+		hQ[ii] = &Q[ii*nx*nx];
+		hS[ii] = &S[ii*nu*nx];
+		hq[ii] = &q[ii*nx];
+		hr[ii] = &r[ii*nu];
+		hx[ii] = &x[ii*nx];
+		hu[ii] = &u[ii*nu];
+		hlb[ii] = work; work += nb;
+		hub[ii] = work; work += nb;
+		hC[ii] = work; work += nx*ng;
+		hD[ii] = work; work += nu*ng;
+		hlg[ii] = &lbA[ii*ng]; //work; work += ng;
+		hug[ii] = &ubA[ii*ng]; //work; work += ng;
+		hpi[ii] = work; work += nx;
+		hlam[ii] = work; work += 2*nb + 2*ng;
+		ht[ii] = work; work += 2*nb + 2*ng;
+	}
+	// middle stage
+	ii = N;
+	hQ[ii] = &Qf[0*nx*nx];
+	hq[ii] = &qf[0*nx];
+	hx[ii] = &x[ii*nx];
+	hlb[ii] = work; work += nb;
+	hub[ii] = work; work += nb;
+	hC[ii] = work; work += nx*ngN;
+//	hlg[ii] = work; work += ngN; // TODO
+//	hug[ii] = work; work += ngN; // TODO
+	hlam[ii] = work; work += 2*nb + 2*ngN;
+	ht[ii] = work; work += 2*nb + 2*ngN;
+
+
+
+	// copy data if needed
+	if(!free_x0) // MPC
+	{
+		dgemv_n(nx, nx, 1.0, &A[0*nx*nx], nx, &x[0*nx], 1.0, b, hb[0]);
+		dgemv_n(nu, nx, 1.0, &S[0*nu*nx], nx, &x[0*nx], 1.0, r, hr[0]); //TODO how is S defined in ACADO??
+		for(jj=0; jj<ng; jj++) hlg[0][jj] = lbA[jj];
+		for(jj=0; jj<ng; jj++) hug[0][jj] = ubA[jj];
+	}
+
+    // Sort bounds stage-wise
+	int jjj;
+	// XXX assumes that nb = nx+nu !!!!!
+	// first stage
+	for(jj=0; jj<nu; jj++)
+	{
+		hlb[0][jj] = lb[nu*0 + jj];
+		hub[0][jj] = ub[nu*0 + jj];
+	}
+	// middle stages
+    for (ii=1; ii<N; ii++)
+    {
+        for(jj=0; jj<nu; jj++)
+        {
+            hlb[ii][jj] = lb[nu*ii + jj];
+            hub[ii][jj] = ub[nu*ii + jj];
+        }
+		jjj = 0;
+        for(jj=0; jj<nx; jj++)
+        {
+#if 0
+            hlb[ii][nu+jj] = lb[ nu*N + nx*(ii-1) + jj ];
+            hub[ii][nu+jj] = ub[ nu*N + nx*(ii-1) + jj ];
+#else
+            tmp0 = lb[ nu*N + nx*(ii-1) + jj ];
+            tmp1 = ub[ nu*N + nx*(ii-1) + jj ];
+			if(tmp0<-1e10 && tmp1>1e10) // dummy state bound
+				{
+				for(kk=nu+jjj; kk<nb_v[ii]-1; kk++)
+					hidxb[ii][kk] = hidxb[ii][kk+1];
+					nb_v[ii] -= 1;
+				}
+			else // actuals state bound
+				{
+				hlb[ii][nu+jjj] = tmp0;
+				hub[ii][nu+jjj] = tmp1;
+				jjj++;
+				}
+#endif
+        }
+	}
+	// final stage
+	jjj = 0;
+	for(jj=0; jj<nx; jj++)
+        {
+#if 0
+		hlb[N][jj] = lb[ nu*N + nx*(N-1) + jj ];
+		hub[N][jj] = ub[ nu*N + nx*(N-1) + jj ];
+#else
+		tmp0 = lb[ nu*N + nx*(N-1) + jj ];
+		tmp1 = ub[ nu*N + nx*(N-1) + jj ];
+		if(tmp0<-1e10 && tmp1>1e10) // dummy state bound
+			{
+			for(kk=jjj; kk<nb_v[N]-1; kk++)
+				hidxb[N][kk] = hidxb[N][kk+1];
+				nb_v[N] -= 1;
+			}
+		else // actuals state bound
+			{
+			hlb[N][jjj] = tmp0;
+			hub[N][jjj] = tmp1;
+			jjj++;
+			}
+#endif
+        }
+
+ 	// Divide polytopic constraints into C and D lg <= Cx + Du <= ug
+	//initial stage
+	if(free_x0) // MHE
+	{
+		ii = 0;
+        for(jj = 0; jj<ng; jj++)
+        {
+			for(kk=0; kk<nx; kk++)
+			{
+				hC[ii][jj*nx+kk] = qpA[ii*ng*(nx + nu) + jj*(nx+nu) + kk];
+			}
+			for(kk=0; kk<nu; kk++)
+			{
+				hD[ii][jj*nu+kk] = qpA[ii*ng*(nx + nu) + jj*(nx+nu) + nu+kk];
+			}
+        }
+	}
+	else // MPC
+	{
+		ii = 0;
+        for(jj = 0; jj<ng; jj++)
+        {
+			for(kk=0; kk<nu; kk++)
+			{
+				hD[ii][jj*nu+kk] = qpA[ii*ng*(nx + nu) + jj*(nx+nu) + nx+kk];
+			}
+        }
+		// TODO copy constraints before modifying them !!!!!
+		dgemv_n(ng, nx, -1.0, &qpA[0], nx+nu, &x[0*nx], 1.0, hlg[0], hlg[0]);
+		dgemv_n(ng, nx, -1.0, &qpA[0], nx+nu, &x[0*nx], 1.0, hug[0], hug[0]);
+	}
+	// middle stages
+    for(ii=1; ii<N; ii++)
+    {
+        for(jj = 0; jj<ng; jj++)
+        {
+			for(kk=0; kk<nx; kk++)
+			{
+				hC[ii][jj*nx+kk] = qpA[ii*ng*(nx + nu) + jj*(nx+nu) + kk];
+			}
+			for(kk=0; kk<nu; kk++)
+			{
+				hD[ii][jj*nu+kk] = qpA[ii*ng*(nx + nu) + jj*(nx+nu) + nx+kk];
+			}
+        }
+    }
+	// final stage
+	// TODO
+
+
+
+
+
+
+
+
+
+
+
+//	unsigned int nD[10 + 1] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
+
+//    int ngN     = 0;
+//    int ng      = nD[0]; // assuming same number of constraints on every stage
+
+
+
     //for(i=0; i< (nx + nu)*N*2; i++)
     //    hpmpc_mu[i] = mu[i];
-    
+
     //for(i=0; i< nu; i++)
     //    hpmpc_mu[(nx + nu)*N*2 + i] = 0.0;                                       // lower "ghost" input bounds
 
@@ -204,35 +476,55 @@ int acado_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b,
 
     //for(i=0; i< nx; i++)
     //    hpmpc_mu[(nx + nu)*N*2 + 2*nu + nx + i] = mu[(nx + nu)*N*2 + nx + i];    // upper state bounds
-       
+
 
     //break polytopic contraints into C and D (dl <=  Cx + Du <= du)
-    
-    real_t hpmpc_C[nx*ng*N];
-    real_t hpmpc_D[nu*ng*N];
-    
-    for(i=0; i<N*ng; i++)
-    {   
-        for(j = 0; j<nx; j++)
-        {
-            hpmpc_C[ nx*i + j ] = qpA[i*(nx + nu) + j];
-        }
-        
-        for(j = 0; j<nu; j++)
-        {
-            hpmpc_D[ nu*i + j] = qpA[i*(nx + nu) + nx + j]; 
-        }
-    }
+
 
 	// call the IP solver
+
+	/************************************************
+	* solvers common stuff
+	************************************************/
+
     int compute_res = 1;
-    double inf_norm_res[4];
-    hpmpc_status = c_order_ip_hard_mpc_tv(nIt, k_max, MU0, MU_TOL, 'd', N, nx, nu, nb, ng, ngN, 0, A, B, b, Q, Qf, S, R, q, qf, r, hpmpc_lb, hpmpc_ub, hpmpc_C, hpmpc_D, lbA, ubA, CN, lgN, ugN, x, u, work, stat, compute_res, inf_norm_res, compute_mult, mu, lambda, slacks);
+	double inf_norm_res[5];
+
+	/************************************************
+	* call the solver (high-level interface)
+	************************************************/
+
+#ifdef DEBUG_PRINT
+printf("\nidxb\n");
+for(ii=0; ii<=N; ii++)
+	{
+	for(jj=0; jj<nb_v[ii]; jj++)
+		printf("\t%d", hidxb[ii][jj]);
+	printf("\n");
+	}
+printf("\nlb\n");
+for(ii=0; ii<=N; ii++)
+	d_print_mat(1, nb_v[ii], hlb[ii], 1);
+printf("\nub\n");
+for(ii=0; ii<=N; ii++)
+	d_print_mat(1, nb_v[ii], hub[ii], 1);
+#endif
+
+#ifdef HPMPC_OLD // interface to hpmpc_old
+
+	hpmpc_status = c_order_d_ip_ocp_hard_tv(&kk, k_max, mu0, mu_tol, N, nx_v, nu_v, nb_v, ng_v, warm_start, hA, hB, hb, hQ, hS, hR, hq, hr, hlb, hub, hC, hD, hlg, hug, hx, hu, hpi, hlam, ht, inf_norm_res, work, stat);
+
+#else
+
+	hpmpc_status = c_order_d_ip_ocp_hard_tv(&kk, k_max, mu0, mu_tol, N, nx_v, nu_v, nb_v, hidxb, ng_v, N2, warm_start, hA, hB, hb, hQ, hS, hR, hq, hr, hlb, hub, hC, hD, hlg, hug, hx, hu, hpi, hlam, inf_norm_res, work, stat);
+
+#endif
+
 
     // Copy multipliers back to workspace (skipping "ghost" multipliers)
     //for(i=0; i< (nx + nu)*N*2; i++)
     //    mu[i] = hpmpc_mu[i];
-    
+
 
     //for(i=0; i< nx; i++)
     //   mu[(nx + nu)*N*2 + i]  = hpmpc_mu[(nx + nu)*N*2 + nu + i];                // lower state bounds
@@ -242,7 +534,7 @@ int acado_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b,
     //    mu[(nx + nu)*N*2 + nx + i] = hpmpc_mu[(nx + nu)*N*2 + 2*nu + nx + i];    // upper state bounds
 
 
-#if PC_DEBUG == 1
+#if 0
 	for (jj = 0; jj < *nIt; jj++)
 		printf("k = %d\tsigma = %f\talpha = %f\tmu = %f\t\tmu = %e\talpha = %f\tmu = %f\t\tmu = %e\n", jj,
 			   stat[5*jj+0], stat[5*jj+1], stat[5*jj+2], stat[5*jj+2], stat[5*jj+3], stat[5*jj+4], stat[5*jj+4]);
@@ -251,6 +543,9 @@ int acado_hpmpc_ip_wrapper( real_t* A, real_t* B, real_t* b,
 
 //	if (*nIt == K_MAX)
 //		return 1;
+
+	// free memory
+	//free(work);
 
     return hpmpc_status;
 

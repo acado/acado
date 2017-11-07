@@ -1,6 +1,6 @@
 UNAME := $(shell uname)
 
-LDLIBS = -lm -lstdc++ -lhpmpc
+LDLIBS = -lm -lstdc++ -lhpmpc -lblasfeo
 ifeq ($(UNAME), Linux)
 	LDLIBS += -lrt
 endif
