@@ -78,6 +78,7 @@ public:
 							const unsigned _printLevel,
 							bool _useSinglePrecision,
 							bool _warmStart,
+							int _condensingBlockSize,
 							const std::string& _DD,
 							const std::string& _lbA,
 							const std::string& _ubA,
@@ -86,7 +87,7 @@ public:
 							const unsigned _NX,
 							const unsigned _NU
 												);
-							
+
 };
 
 CLOSE_NAMESPACE_ACADO

@@ -51,6 +51,7 @@ returnValue ExportHpmpcInterface::configure(	const unsigned _maxIter,
 												const unsigned _printLevel,
 												bool _useSinglePrecision,
 												bool _warmStart,
+												int _condensingBlockSize,
 												const std::string& _DD,
 												const std::string& _lbA,
 												const std::string& _ubA,
@@ -66,6 +67,14 @@ returnValue ExportHpmpcInterface::configure(	const unsigned _maxIter,
 	dictionary[ "@PRINT_LEVEL@" ] =  _printLevel == 0 ? toString( 0 ) : toString( 1 );
 	dictionary[ "@PRECISION@" ] =  _useSinglePrecision == true ? "1" : "0";
 	dictionary[ "@WARM_START@" ] =  _warmStart == true ? "1" : "0";
+	if ( _condensingBlockSize != 0 )
+	{
+		dictionary[ "@CONDENSING_BLOCK_SIZE@" ] =  toString( _condensingBlockSize );
+	}
+	else
+	{
+		dictionary[ "@CONDENSING_BLOCK_SIZE@" ] =  "";
+	}
 
 	if (conDim.size() > 0)
 	{
@@ -97,7 +106,7 @@ returnValue ExportHpmpcInterface::configure(	const unsigned _maxIter,
 		ss << " + 1; nD[ kk++ ] = 0);";
 		dictionary[ "@QP_ND_ARRAY@" ] = ss.str();
 	}
-	
+
 	// And then fill a template file
 	fillTemplate();
 

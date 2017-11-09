@@ -73,11 +73,11 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 {
 	int qpSolver;
 	get(QP_SOLVER, qpSolver);
-    
+
 	string moduleName, modulePrefix;
 	get(CG_MODULE_NAME, moduleName);
     get(CG_MODULE_PREFIX, modulePrefix);
-    
+
     ExportDataInternal::fcnPrefix = moduleName;
     ExportStatement::fcnPrefix = moduleName;
     ExportStatement::varPrefix = modulePrefix;
@@ -329,7 +329,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 			}
 			break;
 
-		
+
 		case QP_HPMPC:
 			if ( (HessianApproximationMode)hessianApproximation == EXACT_HESSIAN ) {
 				//acadoCopyTemplateFile(MAKE_MEX_EH_QPDUNES, str, "%", true);
@@ -342,7 +342,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
                 	mexInterfaceMake.exportCode();
 			}
 			break;
-		
+
 		default:
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET, "MEX interface is not yet available.");
 			break;
@@ -355,7 +355,7 @@ returnValue OCPexport::exportCode(	const std::string& dirName,
 	int generateSimulinkInterface;
 	get(GENERATE_SIMULINK_INTERFACE, generateSimulinkInterface);
 	if ((bool) generateSimulinkInterface == true)
-	{     
+	{
 		if (!((QPSolverName)qpSolver == QP_QPOASES || (QPSolverName)qpSolver == QP_QPOASES3 || (QPSolverName)qpSolver == QP_QPDUNES|| (QPSolverName)qpSolver == QP_HPMPC))
 			ACADOWARNINGTEXT(RET_NOT_IMPLEMENTED_YET,
 					"At the moment, Simulink interface is available only with qpOASES, qpOASES3 and qpDUNES based OCP solvers.");
@@ -547,7 +547,7 @@ returnValue OCPexport::setup( )
 
 		if ((QPSolverName)qpSolver != QP_QPDUNES && (QPSolverName)qpSolver != QP_FORCES)
 			return ACADOERRORTEXT(RET_INVALID_ARGUMENTS,
-					"For block condensed solution only qpDUNES QP solver is currently supported");
+					"For block condensed solution only qpDUNES, FORCES QP solvers are currently supported");
 
 		if ( (HessianApproximationMode)hessianApproximation == GAUSS_NEWTON && (QPSolverName)qpSolver == QP_QPDUNES ) {
 			solver = ExportNLPSolverPtr(
