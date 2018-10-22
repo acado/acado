@@ -295,6 +295,16 @@ void mexFunction(	int nlhs,
 	getArray(1, src, 0, "WN", @MODULE_NAME@Variables.WN, @MODULE_PREFIX@_NYN, @MODULE_PREFIX@_NYN);
 #endif /* @MODULE_PREFIX@_WEIGHTING_MATRICES_TYPE */
 
+#if @MODULE_PREFIX@_USE_LINEAR_TERMS == 1
+#if @MODULE_PREFIX@_WEIGHTING_MATRICES_TYPE == 1
+	getArray(1, src, 0, "Wlx", @MODULE_NAME@Variables.Wlx, @MODULE_PREFIX@_NX, 1);
+	getArray(1, src, 0, "Wlu", @MODULE_NAME@Variables.Wlu, @MODULE_PREFIX@_NU, 1);
+#elif @MODULE_PREFIX@_WEIGHTING_MATRICES_TYPE == 2
+	getArray(1, src, 0, "Wlx", @MODULE_NAME@Variables.Wlx, (@MODULE_PREFIX@_N+1) * @MODULE_PREFIX@_NX, 1);
+	getArray(1, src, 0, "Wlu", @MODULE_NAME@Variables.Wlu, @MODULE_PREFIX@_N * @MODULE_PREFIX@_NU, 1);
+#endif /* @MODULE_PREFIX@_WEIGHTING_MATRICES_TYPE */
+#endif /* @MODULE_PREFIX@_USE_LINEAR_TERMS */
+
 
 #if (@MODULE_PREFIX@_HARDCODED_CONSTRAINT_VALUES == 0)
 	if (!initialized)
