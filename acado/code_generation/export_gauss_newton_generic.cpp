@@ -56,6 +56,25 @@ returnValue ExportGaussNewtonGeneric::setup( )
 
 	setupAuxiliaryFunctions();
 
+	int useArrivalCost;
+	get(CG_USE_ARRIVAL_COST, useArrivalCost);
+	if (useArrivalCost == YES) {
+	    ExportVariable evRet("ret", 1, 1, INT, ACADO_LOCAL, true);
+
+	    ExportVariable evReset("reset", 1, 1, INT, ACADO_LOCAL, true);
+	    evReset.setDoc("Reset S_{AC}. Set it to 1 to initialize arrival cost calculation, "
+	            "and later should set it to 0.");
+
+	    updateArrivalCost.init("updateArrivalCost", evReset);
+	    updateArrivalCost.doc("Use this function to update the arrival cost.");
+	    updateArrivalCost.setReturnValue( evRet );
+	    updateArrivalCost << (evRet == 0);
+
+	    acWL.setup("WL", NX, NX, REAL, ACADO_VARIABLES);
+	    acWL.setDoc("Arrival cost term: Cholesky decomposition, lower triangular, "
+	                " of the inverse of the state noise covariance matrix.");
+	}
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -129,6 +148,8 @@ returnValue ExportGaussNewtonGeneric::getFunctionDeclarations(	ExportStatementBl
 	declarations.addDeclaration( evaluateStageCost );
 	declarations.addDeclaration( evaluateTerminalCost );
 
+    declarations.addDeclaration( updateArrivalCost );
+
 	return SUCCESSFUL_RETURN;
 }
 
@@ -187,6 +208,12 @@ returnValue ExportGaussNewtonGeneric::getCode(	ExportStatementBlock& code
 	code.addFunction( shiftControls );
 	code.addFunction( getKKT );
 	code.addFunction( getObjective );
+
+	int useArrivalCost;
+	get(CG_USE_ARRIVAL_COST, useArrivalCost);
+	if (useArrivalCost == YES) {
+	    code.addFunction( updateArrivalCost );
+	}
 
 	return SUCCESSFUL_RETURN;
 }
@@ -954,13 +981,21 @@ returnValue ExportGaussNewtonGeneric::setupEvaluation( )
 
 	feedback.addLinebreak();
 
-	//
-	// Arrival cost in the MHE case
-	//
-	if (initialStateFixed() == false)
+//	//
+//	// Arrival cost in the MHE case
+//	//
+//	if (initialStateFixed() == false)
+//	{
+//		// It is assumed this is the shifted version from the previous time step!
+//		feedback.addStatement( DxAC == xAC - x.getRow( 0 ).getTranspose() );
+//	}
+
+	if (SAC.getDim() > 0)
 	{
-		// It is assumed this is the shifted version from the previous time step!
-		feedback.addStatement( DxAC == xAC - x.getRow( 0 ).getTranspose() );
+	    // Include arrival cost
+	    feedback.addStatement( DxAC == x.getRow( 0 ).getTranspose() - xAC );
+        feedback.addStatement( Q1.getRows(0,NX) += SAC );
+	    feedback.addStatement( qpq.getRows(0,NX) += SAC*DxAC );
 	}
 
 	//
@@ -977,11 +1012,11 @@ returnValue ExportGaussNewtonGeneric::setupEvaluation( )
 	feedback.addStatement( x.makeColVector() += qpx );
 	feedback.addStatement( u.makeColVector() += qpu );
 
-	if (initialStateFixed() == false)
-	{
-		// This is the arrival cost for the next time step!
-		feedback.addStatement( xAC == x.getRow( 1 ).getTranspose() + DxAC );
-	}
+//	if (initialStateFixed() == false)
+//	{
+//		// This is the arrival cost for the next time step!
+//		feedback.addStatement( xAC == x.getRow( 1 ).getTranspose() + DxAC );
+//	}
 
 	////////////////////////////////////////////////////////////////////////////
 	//

@@ -1862,9 +1862,10 @@ returnValue ExportNLPSolver::setupGetLSQObjective() {
 
 	if ( SAC.getDim() > 0 )
 	{
+	    getObjective.addStatement( DxAC == x.getRow( 0 ).getTranspose() - xAC );
 		getObjective.addVariable( tmpDx );
 		getObjective.addStatement( tmpDx == DxAC.getTranspose() * SAC );
-		getObjective.addStatement( objVal +=  tmpDx * DxAC );
+		getObjective.addStatement( objVal += tmpDx * DxAC );
 	}
 	getObjective.addLinebreak( );
 
