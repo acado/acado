@@ -14,10 +14,10 @@ function make_@MODULE_NAME@_solver( name )
 	if ~exist('hpmpc','dir')
 		error('Directory hpmpc not found! Please download hpmpc and build shared library.');
 	end
-	if ~(exist('blasfeo/libblasfeo.so','file') || exist('blasfeo/blasfeo.dll','file'))
+	if ~(exist('blasfeo/libblasfeo.so','file')  || exist('blasfeo/libblasfeo.a','file') || exist('blasfeo/blasfeo.dll','file'))
 		error('Directory blasfeo is found, but the required shared library is not. Please build the shared library of blasfeo.');
 	end
-	if ~(exist('hpmpc/libhpmpc.so','file') || exist('hpmpc/hpmpc.dll','file'))
+	if ~(exist('hpmpc/libhpmpc.so','file') || exist('hpmpc/libhpmpc.a','file') ||exist('hpmpc/hpmpc.dll','file'))
 		error('Directory hpmpc is found, but the required shared library is not. Please build the shared library of hpmpc.');
 	end
 
@@ -44,9 +44,9 @@ function make_@MODULE_NAME@_solver( name )
 	% Adding additional linker flags for Linux
 	ldFlags = '';
 	if (isunix() && ~ismac())
-		ldFlags = '''-lblasfeo -lhpmpc -lrt -Wl,-rpath=PWD/blasfeo,-rpath=PWD/hpmpc''';
+		ldFlags = '''-lhpmpc -lblasfeo -lrt -Wl,-rpath=PWD/blasfeo,-rpath=PWD/hpmpc''';
 	elseif (ispc)
-		ldFlags = '-lblasfeo -lhpmpc -DWIN32';
+		ldFlags = '-lhpmpc -lblasfeo -DWIN32';
 	end;
 
 	% Recipe for compilation
