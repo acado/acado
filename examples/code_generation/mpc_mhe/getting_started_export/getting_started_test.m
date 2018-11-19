@@ -5,9 +5,15 @@ clear all;
 clc;
 
 %% Make the solver
-%  You have to generate first the code from c++!!! The following MATLAB
-%  script will be auto-generated.
+%  Copy code_generation_getting_started(.exe) to this directory
+if isunix()
+    !./code_generation_getting_started
+else
+    !code_generation_getting_started.exe
+end
+cd getting_started_export
 make_acado_solver;
+cd ..
 
 %% Create the structures and set dimensions
 %  Those dimensions must match ones defined in the c++ code generator.
@@ -25,13 +31,13 @@ mpcInput.initialization = 1;
 mpcInput.x = zeros(N + 1, NX);
 mpcInput.u = zeros(N, NU);
 mpcInput.y = zeros(N, NY);
-mpcInput.yN = zeros(NYN, 1);
+mpcInput.yN = zeros(1, NYN);
 
 % In case weighting matrices are not defined, you can use:
 % mpcInput.W = eye( NY );
 % mpcInput.WN = eye( NYN ) * 5;
 
-mpcInput.x0 = [2, 0, 0, 0]';
+mpcInput.x0 = [2, 0, 0, 0];
 
 %% Run the simulation
 
@@ -65,5 +71,5 @@ for kk = 1: nSteps
     % Prepare for the next step
     mpcInput.x = mpcOutput.x;
     mpcInput.u = mpcOutput.u;
-    mpcInput.x0 = mpcOutput.x(2, :)';
+    mpcInput.x0 = mpcOutput.x(2, :);
 end;

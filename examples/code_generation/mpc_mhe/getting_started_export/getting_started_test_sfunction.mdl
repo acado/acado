@@ -1,18 +1,15 @@
 Model {
-  Name			  "getting_started_test_sfunction"
+  Name			  "getting_started_test_sfunction13a"
   Version		  8.1
-  MdlSubVersion		  0
   GraphicalInterface {
     NumRootInports	    0
     NumRootOutports	    0
     ParameterArgumentNames  ""
-    ComputedModelVersion    "1.75"
+    ComputedModelVersion    "1.79"
     NumModelReferences	    0
     NumTestPointedSignals   0
   }
-  SavedCharacterEncoding  "ISO-8859-1"
-  PreLoadFcn		  "make_acado_solver_sfunction"
-  SaveDefaultBlockParams  on
+  SavedCharacterEncoding  "windows-1252"
   ScopeRefreshTime	  0.035000
   OverrideScopeRefreshTime on
   DisableAllScopes	  off
@@ -31,7 +28,7 @@ Model {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [67.0, 22.0, 1175.0, 687.0]
+      Location		      [835.0, 192.0, 1175.0, 687.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -55,7 +52,7 @@ Model {
 	IsActive		[1]
 	ViewObjType		"SimulinkTopLevel"
 	LoadSaveID		"0"
-	Extents			[951.0, 514.0]
+	Extents			[1490.0, 783.0]
 	ZoomFactor		[0.98716577540106953]
 	Offset			[5.8179848320693281, -158.84127843987]
       }
@@ -65,12 +62,12 @@ Model {
   Creator		  "madwolf"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "madwolf"
+  LastModifiedBy	  "torstebo"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Tue Oct 01 15:14:36 2013"
-  RTWModifiedTimeStamp	  302541275
-  ModelVersionFormat	  "1.%<AutoIncrement:75>"
-  ConfigurationManager	  "None"
+  LastModifiedDate	  "Thu May 18 13:47:50 2017"
+  RTWModifiedTimeStamp	  417016070
+  ModelVersionFormat	  "1.%<AutoIncrement:79>"
+  ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
   LibraryLinkDisplay	  "disabled"
@@ -104,14 +101,14 @@ Model {
   TryForcingSFcnDF	  off
   Object {
     $PropName		    "DataLoggingOverride"
-    $ObjectID		    6
+    $ObjectID		    7
     $ClassName		    "Simulink.SimulationData.ModelLoggingInfo"
-    model_		    "getting_started_test_sfunction"
+    model_		    "getting_started_test_sfunction13a"
     overrideMode_	    [0.0]
     Array {
       Type		      "Cell"
       Dimension		      1
-      Cell		      "getting_started_test_sfunction"
+      Cell		      "getting_started_test_sfunction13a"
       PropName		      "logAsSpecifiedByModels_"
     }
     Array {
@@ -156,20 +153,19 @@ Model {
   ExtModeSkipDownloadWhenConnect off
   ExtModeLogAll		  on
   ExtModeAutoUpdateStatusClock on
-  BufferReuse		  on
   ShowModelReferenceBlockVersion off
   ShowModelReferenceBlockIO off
   Array {
     Type		    "Handle"
     Dimension		    1
     Simulink.ConfigSet {
-      $ObjectID		      7
+      $ObjectID		      8
       Version		      "1.13.0"
       Array {
 	Type			"Handle"
 	Dimension		8
 	Simulink.SolverCC {
-	  $ObjectID		  8
+	  $ObjectID		  9
 	  Version		  "1.13.0"
 	  StartTime		  "0.0"
 	  StopTime		  "15"
@@ -204,7 +200,7 @@ Model {
 	  InsertRTBMode		  "Whenever possible"
 	}
 	Simulink.DataIOCC {
-	  $ObjectID		  9
+	  $ObjectID		  10
 	  Version		  "1.13.0"
 	  Decimation		  "1"
 	  ExternalInput		  "[t, u]"
@@ -236,7 +232,7 @@ Model {
 	  Refine		  "1"
 	}
 	Simulink.OptimizationCC {
-	  $ObjectID		  10
+	  $ObjectID		  11
 	  Version		  "1.13.0"
 	  Array {
 	    Type		    "Cell"
@@ -270,13 +266,10 @@ Model {
 	  MemcpyThreshold	  64
 	  PassReuseOutputArgsAs	  "Structure reference"
 	  ExpressionDepthLimit	  128
-	  FoldNonRolledExpr	  on
 	  LocalBlockOutputs	  on
 	  RollThreshold		  5
-	  SystemCodeInlineAuto	  off
 	  StateBitsets		  off
 	  DataBitsets		  off
-	  UseTempVars		  off
 	  ZeroExternalMemoryAtStartup on
 	  ZeroInternalMemoryAtStartup on
 	  InitFltsAndDblsToZero	  off
@@ -289,10 +282,9 @@ Model {
 	  BufferReusableBoundary  on
 	  SimCompilerOptimization "Off"
 	  AccelVerboseBuild	  off
-	  ParallelExecutionInRapidAccelerator on
 	}
 	Simulink.DebuggingCC {
-	  $ObjectID		  11
+	  $ObjectID		  12
 	  Version		  "1.13.0"
 	  RTPrefix		  "error"
 	  ConsistencyChecking	  "none"
@@ -320,7 +312,6 @@ Model {
 	  IgnoredZcDiagnostic	  "warning"
 	  SolverPrmCheckMsg	  "warning"
 	  InheritedTsInSrcMsg	  "warning"
-	  DiscreteInheritContinuousMsg "warning"
 	  MultiTaskDSMMsg	  "error"
 	  MultiTaskCondExecSysMsg "error"
 	  MultiTaskRateTransMsg	  "error"
@@ -348,17 +339,15 @@ Model {
 	  UnconnectedOutputMsg	  "warning"
 	  UnconnectedLineMsg	  "warning"
 	  SFcnCompatibilityMsg	  "none"
-	  FrameProcessingCompatibilityMsg "warning"
+	  FrameProcessingCompatibilityMsg "error"
 	  UniqueDataStoreMsg	  "none"
 	  BusObjectLabelMismatch  "warning"
 	  RootOutportRequireBusObject "warning"
 	  AssertControl		  "UseLocalSettings"
-	  EnableOverflowDetection off
 	  ModelReferenceIOMsg	  "none"
 	  ModelReferenceMultiInstanceNormalModeStructChecksumCheck "error"
 	  ModelReferenceVersionMismatchMessage "none"
 	  ModelReferenceIOMismatchMessage "none"
-	  ModelReferenceCSMismatchMessage "none"
 	  UnknownTsInhSupMsg	  "warning"
 	  ModelReferenceDataLoggingMessage "warning"
 	  ModelReferenceSymbolNameMessage "warning"
@@ -370,7 +359,6 @@ Model {
 	  StrictBusMsg		  "ErrorLevel1"
 	  BusNameAdapt		  "WarnAndRepair"
 	  NonBusSignalsTreatedAsBus "none"
-	  LoggingUnavailableSignals "error"
 	  BlockIODiagnostic	  "none"
 	  SFUnusedDataAndEventsDiag "warning"
 	  SFUnexpectedBacktrackingDiag "warning"
@@ -380,9 +368,10 @@ Model {
 	  SFUnconditionalTransitionShadowingDiag "warning"
 	  SFUndirectedBroadcastEventsDiag "warning"
 	  SFTransitionActionBeforeConditionDiag	"warning"
+	  ModelReferenceCSMismatchMessage "none"
 	}
 	Simulink.HardwareCC {
-	  $ObjectID		  12
+	  $ObjectID		  13
 	  Version		  "1.13.0"
 	  ProdBitPerChar	  8
 	  ProdBitPerShort	  16
@@ -415,7 +404,6 @@ Model {
 	  TargetIntDivRoundTo	  "Undefined"
 	  TargetEndianess	  "Unspecified"
 	  TargetWordSize	  32
-	  TargetTypeEmulationWarnSuppressLevel 0
 	  TargetPreprocMaxBitsSint 32
 	  TargetPreprocMaxBitsUint 32
 	  TargetHWDeviceType	  "Specified"
@@ -423,7 +411,7 @@ Model {
 	  ProdEqTarget		  on
 	}
 	Simulink.ModelReferenceCC {
-	  $ObjectID		  13
+	  $ObjectID		  14
 	  Version		  "1.13.0"
 	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
 	  CheckModelReferenceTargetMessage "error"
@@ -438,14 +426,11 @@ Model {
 	  SupportModelReferenceSimTargetCustomCode off
 	}
 	Simulink.SFSimCC {
-	  $ObjectID		  14
+	  $ObjectID		  15
 	  Version		  "1.13.0"
-	  SFSimEnableDebug	  on
-	  SFSimOverflowDetection  on
+	  SimCustomHeaderCode	  "#include \"acado_solver_sfunction.h\""
 	  SFSimEcho		  on
-	  SimBlas		  on
 	  SimCtrlC		  on
-	  SimExtrinsic		  on
 	  SimIntegrity		  on
 	  SimUseLocalCustomCode	  off
 	  SimParseCustomCode	  on
@@ -453,11 +438,11 @@ Model {
 	}
 	Simulink.RTWCC {
 	  $BackupClass		  "Simulink.RTWCC"
-	  $ObjectID		  15
+	  $ObjectID		  16
 	  Version		  "1.13.0"
 	  Array {
 	    Type		    "Cell"
-	    Dimension		    15
+	    Dimension		    16
 	    Cell		    "IncludeHyperlinkInReport"
 	    Cell		    "GenerateTraceInfo"
 	    Cell		    "GenerateTraceReport"
@@ -473,14 +458,17 @@ Model {
 	    Cell		    "CodeExecutionProfiling"
 	    Cell		    "CodeProfilingSaveOptions"
 	    Cell		    "CodeProfilingInstrumentation"
+	    Cell		    "GenerateMissedCodeReplacementReport"
 	    PropName		    "DisabledProps"
 	  }
 	  SystemTargetFile	  "grt.tlc"
+	  TLCOptions		  ""
 	  GenCodeOnly		  off
 	  MakeCommand		  "make_rtw"
 	  GenerateMakefile	  on
 	  PackageGeneratedCodeAndArtifacts off
 	  TemplateMakefile	  "grt_default_tmf"
+	  PostCodeGenCommand	  ""
 	  GenerateReport	  off
 	  SaveLog		  off
 	  RTWVerbose		  on
@@ -489,9 +477,6 @@ Model {
 	  TLCDebug		  off
 	  TLCCoverage		  off
 	  TLCAssert		  off
-	  ProcessScriptMode	  "Default"
-	  ConfigurationMode	  "Optimized"
-	  ConfigAtBuild		  off
 	  RTWUseLocalCustomCode	  off
 	  RTWUseSimCustomCode	  off
 	  IncludeHyperlinkInReport off
@@ -506,28 +491,26 @@ Model {
 	  SILDebugging		  off
 	  TargetLang		  "C++"
 	  IncludeBusHierarchyInRTWFileBlockHierarchyMap	off
-	  IncludeERTFirstTime	  off
 	  GenerateTraceInfo	  off
 	  GenerateTraceReport	  off
 	  GenerateTraceReportSl	  off
 	  GenerateTraceReportSf	  off
 	  GenerateTraceReportEml  off
-	  GenerateCodeInfo	  off
 	  GenerateWebview	  off
 	  GenerateCodeMetricsReport off
 	  GenerateCodeReplacementReport	off
 	  RTWCompilerOptimization "Off"
+	  RTWCustomCompilerOptimizations ""
 	  CheckMdlBeforeBuild	  "Off"
-	  CustomRebuildMode	  "OnUpdate"
 	  Array {
 	    Type		    "Handle"
 	    Dimension		    2
 	    Simulink.CodeAppCC {
-	      $ObjectID		      16
+	      $ObjectID		      17
 	      Version		      "1.13.0"
 	      Array {
 		Type			"Cell"
-		Dimension		22
+		Dimension		27
 		Cell			"IgnoreCustomStorageClasses"
 		Cell			"IgnoreTestpoints"
 		Cell			"InsertBlockDesc"
@@ -550,6 +533,11 @@ Model {
 		Cell			"CustomSymbolStrTmpVar"
 		Cell			"CustomSymbolStrMacro"
 		Cell			"ReqsInCode"
+		Cell			"CustomSymbolStrModelFcn"
+		Cell			"CustomSymbolStrUtil"
+		Cell			"CustomSymbolStrEmxType"
+		Cell			"CustomSymbolStrEmxFcn"
+		Cell			"CustomUserTokenString"
 		PropName		"DisabledProps"
 	      }
 	      ForceParamTrailComments off
@@ -591,40 +579,41 @@ Model {
 	    }
 	    Simulink.GRTTargetCC {
 	      $BackupClass	      "Simulink.TargetCC"
-	      $ObjectID		      17
+	      $ObjectID		      18
 	      Version		      "1.13.0"
 	      Array {
 		Type			"Cell"
-		Dimension		15
+		Dimension		18
 		Cell			"GeneratePreprocessorConditionals"
 		Cell			"IncludeMdlTerminateFcn"
-		Cell			"CombineOutputUpdateFcns"
+		Cell			"RemoveResetFunc"
 		Cell			"SuppressErrorStatus"
 		Cell			"ERTCustomFileBanners"
 		Cell			"GenerateSampleERTMain"
 		Cell			"GenerateTestInterfaces"
 		Cell			"ModelStepFunctionPrototypeControlCompliant"
-		Cell			"CPPClassGenCompliant"
+		Cell			"RemoveDisableFunc"
 		Cell			"GenerateAllocFcn"
 		Cell			"PurelyIntegerCode"
 		Cell			"SupportComplex"
 		Cell			"SupportAbsoluteTime"
 		Cell			"SupportContinuousTime"
 		Cell			"SupportNonInlinedSFcns"
+		Cell			"ExistingSharedCode"
+		Cell			"CPPClassGenCompliant"
+		Cell			"CombineOutputUpdateFcns"
 		PropName		"DisabledProps"
 	      }
 	      TargetFcnLib	      "ansi_tfl_table_tmw.mat"
 	      TargetLibSuffix	      ""
 	      TargetPreCompLibLocation ""
-	      CodeReplacementLibrary  "ANSI_C"
+	      CodeReplacementLibrary  "C89/C90 (ANSI)"
 	      UtilityFuncGeneration   "Auto"
 	      ERTMultiwordTypeDef     "System defined"
-	      ERTMultiwordLength      256
 	      MultiwordLength	      2048
 	      GenerateFullHeader      on
 	      GenerateSampleERTMain   off
 	      GenerateTestInterfaces  off
-	      IsPILTarget	      off
 	      ModelReferenceCompliant on
 	      ParMdlRefBuildCompliant on
 	      CompOptLevelCompliant   on
@@ -647,7 +636,6 @@ Model {
 	      SupportContinuousTime   on
 	      SupportNonInlinedSFcns  on
 	      SupportVariableSizeSignals off
-	      EnableShiftOperators    on
 	      ParenthesesLevel	      "Nominal"
 	      MATLABClassNameForMDSCustomization "Simulink.SoftwareTarget.GRTCustomization"
 	      ModelStepFunctionPrototypeControlCompliant off
@@ -675,18 +663,18 @@ Model {
 	PropName		"Components"
       }
       Name		      "Configuration"
-      CurrentDlgPage	      "Code Generation"
-      ConfigPrmDlgPosition     [ 34, 22, 995, 796 ] 
+      CurrentDlgPage	      "Solver"
+      ConfigPrmDlgPosition    [ 1457, 483, 2418, 1257 ]
     }
     PropName		    "ConfigurationSets"
   }
   Simulink.ConfigSet {
     $PropName		    "ActiveConfigurationSet"
-    $ObjectID		    7
+    $ObjectID		    8
   }
   Object {
     $PropName		    "DataTransfer"
-    $ObjectID		    18
+    $ObjectID		    20
     $ClassName		    "Simulink.GlobalDataTransfer"
     DefaultTransitionBetweenSyncTasks "Ensure deterministic transfer (maximum delay)"
     DefaultTransitionBetweenAsyncTasks "Ensure data integrity only"
@@ -792,25 +780,10 @@ Model {
       FunctionName	      "system"
       SFunctionModules	      "''"
       PortCounts	      "[]"
-      SFunctionDeploymentMode off
     }
     Block {
       BlockType		      Scope
-      ModelBased	      off
-      TickLabels	      "OneTimeTick"
-      ZoomMode		      "on"
-      Grid		      "on"
-      TimeRange		      "auto"
-      YMin		      "-5"
-      YMax		      "5"
-      SaveToWorkspace	      off
-      SaveName		      "ScopeData"
-      DataFormat	      "Array"
-      LimitDataPoints	      on
-      MaxDataPoints	      "5000"
-      Decimation	      "1"
-      SampleInput	      off
-      SampleTime	      "-1"
+      Floating		      off
     }
     Block {
       BlockType		      SubSystem
@@ -818,7 +791,6 @@ Model {
       Permissions	      "ReadWrite"
       PermitHierarchicalResolution "All"
       TreatAsAtomicUnit	      off
-      CheckFcnCallInpInsideContextMsg off
       SystemSampleTime	      "-1"
       RTWFcnNameOpts	      "Auto"
       RTWFileNameOpts	      "Auto"
@@ -833,8 +805,9 @@ Model {
       DataTypeOverrideAppliesTo	"AllNumericTypes"
       MinMaxOverflowLogging   "UseLocalSettings"
       SFBlockType	      "NONE"
-      Variant		      off
       GeneratePreprocessorConditionals off
+      PropagateVariantConditions off
+      TreatAsGroupedWhenPropagatingVariantConditions on
     }
     Block {
       BlockType		      Terminator
@@ -850,9 +823,9 @@ Model {
     }
   }
   System {
-    Name		    "getting_started_test_sfunction"
-    Location		    [67, 22, 1242, 709]
-    Open		    on
+    Name		    "getting_started_test_sfunction13a"
+    Location		    [835, 192, 2010, 879]
+    Open		    off
     ModelBrowserVisibility  on
     ModelBrowserWidth	    200
     ScreenColor		    "white"
@@ -873,29 +846,38 @@ Model {
       Ports		      [1]
       Position		      [920, 139, 950, 171]
       ZOrder		      9
-      Floating		      off
-      Location		      [188, 390, 512, 629]
-      Open		      off
       NumInputPorts	      "1"
+      Open		      off
+      TimeRange		      auto
+      TickLabels	      OneTimeTick
+      ShowLegends	      off
+      LimitDataPoints	      off
+      MaxDataPoints	      5000
+      SaveToWorkspace	      off
+      SaveName		      ScopeData1
+      YMin		      -1.16201
+      YMax		      0.45812
+      SampleInput	      off
+      SampleTime	      -1
+      ZoomMode		      on
+      Grid		      on
+      DataFormat	      StructureWithTime
+      Decimation	      1
       List {
 	ListType		AxesTitles
 	axes1			"%<SignalLabel>"
       }
       List {
 	ListType		ScopeGraphics
-	FigureColor		"[0.5 0.5 0.5]"
+	FigureColor		"[0.156862745098039 0.156862745098039 0.156862745098039]"
 	AxesColor		"[0 0 0]"
-	AxesTickColor		"[1 1 1]"
+	AxesTickColor		"[0.686274509803922 0.686274509803922 0.686274509803922]"
 	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
 	LineStyles		"-|-|-|-|-|-"
 	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
 	MarkerStyles		"none|none|none|none|none|none"
       }
-      ShowLegends	      off
-      SaveName		      "ScopeData1"
-      DataFormat	      "StructureWithTime"
-      LimitDataPoints	      off
-      SampleTime	      "0"
+      Location		      [188.333333333333 390.333333333333 512.333333333333 629]
     }
     Block {
       BlockType		      Demux
@@ -916,16 +898,11 @@ Model {
       ZOrder		      3
       LibraryVersion	      "1.32"
       ErrorFcn		      "Stateflow.Translate.translate"
-      PermitHierarchicalResolution "ExplicitOnly"
+      PermitHierarchicalResolution "ParametersOnly"
       TreatAsAtomicUnit	      on
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
       SFBlockType	      "MATLAB Function"
+      Variant		      off
       System {
 	Name			"MPC test"
 	Location		[223, 338, 826, 833]
@@ -941,7 +918,7 @@ Model {
 	TiledPageScale		1
 	ShowPageBoundaries	off
 	ZoomFactor		"100"
-	SIDHighWatermark	"24"
+	SIDHighWatermark	"27"
 	Block {
 	  BlockType		  Inport
 	  Name			  "mpcOutput"
@@ -953,36 +930,35 @@ Model {
 	Block {
 	  BlockType		  Demux
 	  Name			  " Demux "
-	  SID			  "2::19"
+	  SID			  "2::26"
 	  Ports			  [1, 1]
 	  Position		  [270, 230, 320, 270]
-	  ZOrder		  5
+	  ZOrder		  11
 	  Outputs		  "1"
 	}
 	Block {
 	  BlockType		  S-Function
 	  Name			  " SFunction "
-	  SID			  "2::18"
-	  Tag			  "Stateflow S-Function getting_started_test_sfunction 2"
+	  SID			  "2::25"
+	  Tag			  "Stateflow S-Function getting_started_test_sfunction13a 2"
 	  Ports			  [1, 2]
 	  Position		  [180, 100, 230, 160]
-	  ZOrder		  4
+	  ZOrder		  10
 	  FunctionName		  "sf_sfun"
 	  PortCounts		  "[1 2]"
+	  SFunctionDeploymentMode off
 	  EnableBusSupport	  on
 	  Port {
 	    PortNumber		    2
 	    Name		    "mpcInput"
-	    RTWStorageClass	    "Auto"
-	    DataLoggingNameMode	    "SignalName"
 	  }
 	}
 	Block {
 	  BlockType		  Terminator
 	  Name			  " Terminator "
-	  SID			  "2::20"
+	  SID			  "2::27"
 	  Position		  [460, 241, 480, 259]
-	  ZOrder		  6
+	  ZOrder		  12
 	}
 	Block {
 	  BlockType		  Outport
@@ -1019,6 +995,12 @@ Model {
 	  DstPort		  1
 	}
       }
+      RTWSystemCode	      "Auto"
+      MinAlgLoopOccurrences   off
+      PropExecContextOutsideSubsystem off
+      FunctionWithSeparateData off
+      Opaque		      off
+      MaskHideContents	      off
     }
     Block {
       BlockType		      SubSystem
@@ -1029,16 +1011,11 @@ Model {
       ZOrder		      7
       LibraryVersion	      "1.32"
       ErrorFcn		      "Stateflow.Translate.translate"
-      PermitHierarchicalResolution "ExplicitOnly"
+      PermitHierarchicalResolution "ParametersOnly"
       TreatAsAtomicUnit	      on
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
       SFBlockType	      "MATLAB Function"
+      Variant		      off
       System {
 	Name			"Post-processing"
 	Location		[223, 338, 826, 833]
@@ -1054,7 +1031,7 @@ Model {
 	TiledPageScale		1
 	ShowPageBoundaries	off
 	ZoomFactor		"100"
-	SIDHighWatermark	"22"
+	SIDHighWatermark	"25"
 	Block {
 	  BlockType		  Inport
 	  Name			  "mpcOutput"
@@ -1066,42 +1043,39 @@ Model {
 	Block {
 	  BlockType		  Demux
 	  Name			  " Demux "
-	  SID			  "6::19"
+	  SID			  "6::24"
 	  Ports			  [1, 1]
 	  Position		  [270, 230, 320, 270]
-	  ZOrder		  5
+	  ZOrder		  10
 	  Outputs		  "1"
 	}
 	Block {
 	  BlockType		  S-Function
 	  Name			  " SFunction "
-	  SID			  "6::18"
-	  Tag			  "Stateflow S-Function getting_started_test_sfunction 1"
+	  SID			  "6::23"
+	  Tag			  "Stateflow S-Function getting_started_test_sfunction13a 1"
 	  Ports			  [1, 3]
 	  Position		  [180, 100, 230, 180]
-	  ZOrder		  4
+	  ZOrder		  9
 	  FunctionName		  "sf_sfun"
 	  PortCounts		  "[1 3]"
+	  SFunctionDeploymentMode off
 	  EnableBusSupport	  on
 	  Port {
 	    PortNumber		    2
 	    Name		    "state"
-	    RTWStorageClass	    "Auto"
-	    DataLoggingNameMode	    "SignalName"
 	  }
 	  Port {
 	    PortNumber		    3
 	    Name		    "control"
-	    RTWStorageClass	    "Auto"
-	    DataLoggingNameMode	    "SignalName"
 	  }
 	}
 	Block {
 	  BlockType		  Terminator
 	  Name			  " Terminator "
-	  SID			  "6::20"
+	  SID			  "6::25"
 	  Position		  [460, 241, 480, 259]
-	  ZOrder		  6
+	  ZOrder		  11
 	}
 	Block {
 	  BlockType		  Outport
@@ -1155,6 +1129,12 @@ Model {
 	  DstPort		  1
 	}
       }
+      RTWSystemCode	      "Auto"
+      MinAlgLoopOccurrences   off
+      PropExecContextOutsideSubsystem off
+      FunctionWithSeparateData off
+      Opaque		      off
+      MaskHideContents	      off
     }
     Block {
       BlockType		      Scope
@@ -1163,10 +1143,23 @@ Model {
       Ports		      [4]
       Position		      [920, 21, 955, 99]
       ZOrder		      8
-      Floating		      off
-      Location		      [243, 111, 940, 704]
-      Open		      off
       NumInputPorts	      "4"
+      Open		      off
+      TimeRange		      auto
+      TickLabels	      OneTimeTick
+      ShowLegends	      off
+      LimitDataPoints	      off
+      MaxDataPoints	      5000
+      SaveToWorkspace	      off
+      SaveName		      ScopeData
+      YMin		      "-5~-5~-5~-5"
+      YMax		      "5~5~5~5"
+      SampleInput	      off
+      SampleTime	      -1
+      ZoomMode		      on
+      Grid		      on
+      DataFormat	      StructureWithTime
+      Decimation	      1
       List {
 	ListType		AxesTitles
 	axes1			"%<SignalLabel>"
@@ -1176,20 +1169,15 @@ Model {
       }
       List {
 	ListType		ScopeGraphics
-	FigureColor		"[0.5 0.5 0.5]"
+	FigureColor		"[0.156862745098039 0.156862745098039 0.156862745098039]"
 	AxesColor		"[0 0 0]"
-	AxesTickColor		"[1 1 1]"
+	AxesTickColor		"[0.686274509803922 0.686274509803922 0.686274509803922]"
 	LineColors		"[1 1 0;1 0 1;0 1 1;1 0 0;0 1 0;0 0 1]"
 	LineStyles		"-|-|-|-|-|-"
 	LineWidths		"[0.5 0.5 0.5 0.5 0.5 0.5]"
 	MarkerStyles		"none|none|none|none|none|none"
       }
-      ShowLegends	      off
-      YMin		      "-5~-5~-5~-5"
-      YMax		      "5~5~5~5"
-      DataFormat	      "StructureWithTime"
-      LimitDataPoints	      off
-      SampleTime	      "0"
+      Location		      [243 111 940.333333333333 704.333333333333]
     }
     Block {
       BlockType		      UnitDelay
@@ -1210,10 +1198,11 @@ Model {
       Position		      [230, 60, 545, 90]
       ZOrder		      2
       FunctionName	      "acado_solver_sfun"
+      SFunctionDeploymentMode off
       EnableBusSupport	      off
       Object {
 	$PropName		"MaskObject"
-	$ObjectID		19
+	$ObjectID		21
 	$ClassName		"Simulink.Mask"
 	Type			"Legacy Function"
 	Description		"This block allows you to call the legacy functions specified by the following Legacy Code Tool definiti"
@@ -1234,7 +1223,7 @@ Model {
 	  Type			  "Simulink.MaskParameter"
 	  Dimension		  2
 	  Object {
-	    $ObjectID		    20
+	    $ObjectID		    22
 	    Type		    "edit"
 	    Name		    "SFunctionSpec"
 	    Prompt		    "SFunctionSpec"
@@ -1244,7 +1233,7 @@ Model {
 	    Visible		    "off"
 	  }
 	  Object {
-	    $ObjectID		    21
+	    $ObjectID		    23
 	    Type		    "checkbox"
 	    Name		    "ShowSpec"
 	    Prompt		    "Display function specification"
@@ -1260,7 +1249,6 @@ Model {
     Line {
       SrcBlock		      "MPC test"
       SrcPort		      1
-      Points		      [0, 0]
       DstBlock		      "acado_solver_sfun"
       DstPort		      1
     }
@@ -1324,44 +1312,40 @@ Model {
     }
   }
 }
-# Finite State Machines
+#Finite State Machines
 #
-#    Stateflow Version 7.6 (R2013a) dated Jan 19 2013, 14:18:25
+#   Stateflow 80000011
 #
 #
-
 Stateflow {
   machine {
     id			    1
-    name		    "getting_started_test_sfunction"
+    name		    "getting_started_test_sfunction13a"
     created		    "29-Sep-2013 16:10:06"
     isLibrary		    0
+    sfVersion		    76014001.0016
     firstTarget		    17
-    sfVersion		    76014001.0015
   }
   chart {
     id			    2
+    machine		    1
     name		    "Post-processing"
     windowPosition	    [357.331 483.407 167 391]
     viewLimits		    [0 156.75 0 153.75]
     screen		    [1 1 1280 1024 1.041050272174191]
     treeNode		    [0 3 0 0]
-    firstTransition	    8
-    firstJunction	    7
     viewObj		    2
-    visible		    1
-    machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    6
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
-    firstData		    4
     chartFileNumber	    1
     disableImplicitCasting  1
     eml {
       name		      "fcn"
     }
+    firstData		    4
+    firstTransition	    8
+    firstJunction	    7
   }
   state {
     id			    3
@@ -1387,7 +1371,6 @@ Stateflow {
     id			    4
     ssIdNumber		    4
     name		    "mpcOutput"
-    linkNode		    [2 0 5]
     scope		    INPUT_DATA
     machine		    1
     props {
@@ -1397,17 +1380,17 @@ Stateflow {
       type {
 	method			SF_SIMULINK_OBJECT_TYPE
 	primitive		SF_DOUBLE_TYPE
-	busObject		"acadooutput"
+	busObject		"ACADOoutput"
       }
       complexity	      SF_COMPLEX_INHERITED
     }
-    dataType		    "Bus: acadooutput"
+    dataType		    "Bus: ACADOoutput"
+    linkNode		    [2 0 5]
   }
   data {
     id			    5
     ssIdNumber		    5
     name		    "state"
-    linkNode		    [2 4 6]
     scope		    OUTPUT_DATA
     machine		    1
     props {
@@ -1422,12 +1405,12 @@ Stateflow {
       frame		      SF_FRAME_NO
     }
     dataType		    "Inherit: Same as Simulink"
+    linkNode		    [2 4 6]
   }
   data {
     id			    6
     ssIdNumber		    6
     name		    "control"
-    linkNode		    [2 5 0]
     scope		    OUTPUT_DATA
     machine		    1
     props {
@@ -1444,20 +1427,21 @@ Stateflow {
       frame		      SF_FRAME_NO
     }
     dataType		    "Inherit: Same as Simulink"
+    linkNode		    [2 5 0]
   }
   junction {
     id			    7
     position		    [23.5747 49.5747 7]
     chart		    2
-    linkNode		    [2 0 0]
     subviewer		    2
     ssIdNumber		    3
     type		    CONNECTIVE_JUNCTION
+    linkNode		    [2 0 0]
   }
   transition {
     id			    8
     labelString		    "{eML_blk_kernel();}"
-    labelPosition	    [32.125 19.875 102.544 14.964]
+    labelPosition	    [28.125 13.875 102.544 14.964]
     fontSize		    12
     src {
       intersection	      [0 0 1 0 23.5747 14.625 0 0]
@@ -1468,7 +1452,6 @@ Stateflow {
     }
     midPoint		    [23.5747 24.9468]
     chart		    2
-    linkNode		    [2 0 0]
     dataLimits		    [21.175 25.975 14.625 42.575]
     subviewer		    2
     drawStyle		    SMART
@@ -1477,36 +1460,34 @@ Stateflow {
     }
     executionOrder	    1
     ssIdNumber		    2
+    linkNode		    [2 0 0]
   }
   instance {
     id			    9
-    name		    "Post-processing"
     machine		    1
+    name		    "Post-processing"
     chart		    2
   }
   chart {
     id			    10
+    machine		    1
     name		    "MPC test"
     windowPosition	    [357.331 483.407 167 391]
     viewLimits		    [0 156.75 0 153.75]
     screen		    [1 1 1280 1024 1.041050272174191]
     treeNode		    [0 11 0 0]
-    firstTransition	    15
-    firstJunction	    14
     viewObj		    10
-    visible		    1
-    machine		    1
-    subviewS {
-    }
     ssIdHighWaterMark	    6
     decomposition	    CLUSTER_CHART
     type		    EML_CHART
-    firstData		    12
     chartFileNumber	    2
     disableImplicitCasting  1
     eml {
       name		      "fcn"
     }
+    firstData		    12
+    firstTransition	    15
+    firstJunction	    14
   }
   state {
     id			    11
@@ -1541,7 +1522,6 @@ Stateflow {
     id			    12
     ssIdNumber		    4
     name		    "mpcInput"
-    linkNode		    [10 0 13]
     scope		    OUTPUT_DATA
     machine		    1
     props {
@@ -1551,18 +1531,18 @@ Stateflow {
       type {
 	method			SF_SIMULINK_OBJECT_TYPE
 	primitive		SF_DOUBLE_TYPE
-	busObject		"acadoinput"
+	busObject		"ACADOinput"
       }
       complexity	      SF_COMPLEX_INHERITED
       frame		      SF_FRAME_NO
     }
-    dataType		    "Bus: acadoinput"
+    dataType		    "Bus: ACADOinput"
+    linkNode		    [10 0 13]
   }
   data {
     id			    13
     ssIdNumber		    5
     name		    "mpcOutput"
-    linkNode		    [10 12 0]
     scope		    INPUT_DATA
     machine		    1
     props {
@@ -1572,26 +1552,27 @@ Stateflow {
       type {
 	method			SF_SIMULINK_OBJECT_TYPE
 	primitive		SF_DOUBLE_TYPE
-	busObject		"acadooutput"
+	busObject		"ACADOoutput"
       }
       complexity	      SF_COMPLEX_INHERITED
       frame		      SF_FRAME_NO
     }
-    dataType		    "Bus: acadooutput"
+    dataType		    "Bus: ACADOoutput"
+    linkNode		    [10 12 0]
   }
   junction {
     id			    14
     position		    [23.5747 49.5747 7]
     chart		    10
-    linkNode		    [10 0 0]
     subviewer		    10
     ssIdNumber		    3
     type		    CONNECTIVE_JUNCTION
+    linkNode		    [10 0 0]
   }
   transition {
     id			    15
     labelString		    "{eML_blk_kernel();}"
-    labelPosition	    [32.125 19.875 102.544 14.964]
+    labelPosition	    [28.125 13.875 102.544 14.964]
     fontSize		    12
     src {
       intersection	      [0 0 1 0 23.5747 14.625 0 0]
@@ -1602,7 +1583,6 @@ Stateflow {
     }
     midPoint		    [23.5747 24.9468]
     chart		    10
-    linkNode		    [10 0 0]
     dataLimits		    [21.175 25.975 14.625 42.575]
     subviewer		    10
     drawStyle		    SMART
@@ -1611,18 +1591,19 @@ Stateflow {
     }
     executionOrder	    1
     ssIdNumber		    2
+    linkNode		    [10 0 0]
   }
   instance {
     id			    16
-    name		    "MPC test"
     machine		    1
+    name		    "MPC test"
     chart		    10
   }
   target {
     id			    17
+    machine		    1
     name		    "sfun"
     description		    "Default Simulink S-Function Target."
-    machine		    1
     linkNode		    [1 0 0]
   }
 }
