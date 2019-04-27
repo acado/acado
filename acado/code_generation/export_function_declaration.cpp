@@ -36,12 +36,12 @@
 
 BEGIN_NAMESPACE_ACADO
 
-
+const ExportFunction& _ff = ExportFunction();
 //
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportFunctionDeclaration::ExportFunctionDeclaration( ) : ExportStatement( ), f( ExportFunction() )
+ExportFunctionDeclaration::ExportFunctionDeclaration( ) : ExportStatement( ), f( _ff )
 {}
 
 
