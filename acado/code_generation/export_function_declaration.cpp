@@ -41,9 +41,6 @@ BEGIN_NAMESPACE_ACADO
 // PUBLIC MEMBER FUNCTIONS:
 //
 
-ExportFunctionDeclaration::ExportFunctionDeclaration( ) : ExportStatement( ), f( ExportFunction() )
-{}
-
 
 ExportFunctionDeclaration::ExportFunctionDeclaration(	const ExportFunction& _f
 														) : ExportStatement( ), f( _f )
