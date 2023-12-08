@@ -55,7 +55,7 @@ SET( LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib )
 #
 # CMake module(s) path
 #
-SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" )
+SET( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake" )
 
 ################################################################################
 #
