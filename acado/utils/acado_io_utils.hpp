@@ -166,7 +166,7 @@ istream& operator>>(	istream& stream,
 		string line;
 		getline(stream, line);
 		// Skip lines beginning with "/" or "#" or empty lines
-		if (line[ 0 ] == '/' || line[ 0 ] == '#' || line.empty())
+		if (line.empty() || line[ 0 ] == '/' || line[ 0 ] == '#')
 			continue;
 
 		stringstream ss( line );
@@ -190,9 +190,11 @@ istream& operator>>(	istream& stream,
 		vector< T > data;
 		getline(stream, line);
 		// Skip lines beginning with "/" or "#" or empty lines
-		if (line[ 0 ] == '/' || line[ 0 ] == '#' || line.empty())
+		if (line.empty() || line[ 0 ] == '/' || line[ 0 ] == '#')
 			continue;
-
+    // Remove brackets from line 
+    line.erase (std::remove(line.begin(), line.end(), '['), line.end());
+    line.erase (std::remove(line.begin(), line.end(), ']'), line.end());
 		stringstream ss( line );
 		copy(istream_iterator< T >( ss ), istream_iterator< T >(), back_inserter( data ));
 		// Skip lines where we could not read anything
