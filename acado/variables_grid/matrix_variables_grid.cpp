@@ -1355,8 +1355,12 @@ returnValue MatrixVariablesGrid::setLowerBounds(	uint pointIdx,
 														const DVector& _lb
 														)
 {
-    if( pointIdx >= nPoints )
+    if( pointIdx >= nPoints ){
+    	char str[200];
+    	getName(0,0,str);
+    	std::cout << str << std::endl;
         return ACADOERROR(RET_INDEX_OUT_OF_BOUNDS);
+    }
 
     return values[pointIdx]->setLowerBounds( _lb );
 }
@@ -1381,8 +1385,12 @@ returnValue MatrixVariablesGrid::setLowerBound(	uint pointIdx,
 	if( pointIdx >= getNumPoints( ) )
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
 
-	if( valueIdx >= values[pointIdx]->getDim( ) )
+	if( valueIdx >= values[pointIdx]->getDim( ) ){
+		std::cout << "requested valueIdx=" << valueIdx <<
+				" but values[pointIdx]->getDim( )=" << values[pointIdx]->getDim( ) << std::endl;
+    	print();
 		return ACADOERROR( RET_INDEX_OUT_OF_BOUNDS );
+	}
 
 	values[pointIdx]->setLowerBound( valueIdx,_lb );
     return SUCCESSFUL_RETURN;

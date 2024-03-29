@@ -71,7 +71,7 @@ class SCPmethod : public NLPsolver
     // PUBLIC MEMBER FUNCTIONS:
     //
     public:
-
+		returnValue getBandedCP(BandedCP & bcp) const {bcp = bandedCP; return SUCCESSFUL_RETURN;};
         /** Default constructor. */
         SCPmethod( );
 
